@@ -9,5 +9,5 @@ export default [
   pluginJs.configs.recommended,
   ...tsEslint.configs.recommended,
   eslintPluginPrettierRecommended,
-  { ignores: ["app-example/*", "node_modules/*"] },
+  { ignores: ["app-example/*", "node_modules/*", "./expo-env.d.ts"] },
 ];
