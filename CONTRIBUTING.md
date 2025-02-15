@@ -5,6 +5,7 @@ Thank you for your interest in contributing to **Life Planner**! This project ai
 ## How to Contribute
 
 ### 1. Fork and Clone the Repository
+
 1. Fork this repository to your GitHub account.
 2. Clone your fork to your local machine:
    ```sh
@@ -20,6 +21,7 @@ Thank you for your interest in contributing to **Life Planner**! This project ai
    ```
 
 ### 2. Set Up the Development Environment
+
 - Ensure you have **Node.js** and **Yarn** installed.
 - Install dependencies:
   ```sh
@@ -33,6 +35,7 @@ Thank you for your interest in contributing to **Life Planner**! This project ai
   ```
 
 ### 3. Follow the Code Standards
+
 - **Frontend:** React Native with Expo
 - Follow the existing **folder structure** and **coding guidelines**.
 - Ensure your code follows the **ESLint and Prettier** formatting rules:
@@ -42,6 +45,7 @@ Thank you for your interest in contributing to **Life Planner**! This project ai
   ```
 
 ### 4. Making Changes and Creating a Pull Request
+
 1. Create a new branch:
    ```sh
    git checkout -b feature/your-feature
@@ -70,12 +74,15 @@ Thank you for your interest in contributing to **Life Planner**! This project ai
 8. Wait for review and address any requested changes.
 
 ### 5. Reporting Issues
+
 If you find a bug, have a feature request, or need support:
+
 - **Check existing issues** to avoid duplicates.
 - Open a new issue with a **clear title** and **detailed description**.
 - If applicable, provide **steps to reproduce** and **expected behavior**.
 
 ## Contribution Guidelines
+
 ✅ **Write clean, readable, and maintainable code**.
 
 ✅ **Document your changes** where necessary.
@@ -87,6 +94,7 @@ If you find a bug, have a feature request, or need support:
 ✅ **Follow semantic commit messages**, e.g., `feat: add new task management feature`.
 
 ## Getting Help
+
 For any questions, feel free to open an issue or reach out to the maintainers.
 
 Happy coding! 🚀
