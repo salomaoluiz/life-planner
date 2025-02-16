@@ -1,7 +1,7 @@
 import { View } from "react-native";
 import { render, screen } from "@tests";
 
-import hooks from "./hooks";
+import * as hooks from "./hooks";
 import { ReactI18NPProvider } from "./provider";
 
 // region Mocks

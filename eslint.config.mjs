@@ -12,7 +12,14 @@ export default [
   eslintPluginPrettierRecommended,
   eslintPluginImportX.flatConfigs.recommended,
   eslintPluginImportX.flatConfigs.typescript,
-  { ignores: ["app-example/*", "node_modules/*", "./expo-env.d.ts"] },
+  {
+    ignores: [
+      "app-example/*",
+      "node_modules/*",
+      "./expo-env.d.ts",
+      "**/*.snap",
+    ],
+  },
   {
     settings: {
       "import-x/parser": {
@@ -23,6 +30,7 @@ export default [
       },
     },
     rules: {
+      "no-console": "error",
       "import-x/no-cycle": [
         "error",
         {

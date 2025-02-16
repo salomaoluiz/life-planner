@@ -1,6 +1,11 @@
-import { Text, View } from "react-native";
+import { Button, Text, View } from "react-native";
+import { useTranslation, useTranslationLocale } from "@presentation/i18n";
 
 function Home() {
+  const { t } = useTranslation();
+  const { availableLanguages, changeLocale, getLocale } =
+    useTranslationLocale();
+
   return (
     <View
       style={{
@@ -9,7 +14,16 @@ function Home() {
         alignItems: "center",
       }}
     >
-      <Text>Edit app/index.tsx to edit this screen.</Text>
+      <Text>{t("home.editLabel")}</Text>
+      {availableLanguages.map((location) => (
+        <Button
+          title={location}
+          onPress={() => {
+            changeLocale(location);
+          }}
+        />
+      ))}
+      <Text>{JSON.stringify(getLocale()).replaceAll(",", "\n,")}</Text>
     </View>
   );
 }

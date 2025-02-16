@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SHOULD render the Providers 1`] = `
+<View
+  testID="i18n-provider"
+>
+  <View
+    testID="presentation-provider-children"
+  />
+</View>
+`;
