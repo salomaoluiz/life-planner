@@ -11,5 +11,20 @@ const customRender = (
   render(component, options);
 };
 
-export { renderHook, screen } from "@testing-library/react-native";
-export { customRender as render };
+const suppressConsoleError = () => {
+  const errorSpy = jest
+    .spyOn(global.console, "error")
+    .mockImplementation(() => {
+      //do nothing
+    });
+
+  return () => errorSpy.mockRestore();
+};
+
+export {
+  renderHook,
+  screen,
+  act,
+  waitFor,
+} from "@testing-library/react-native";
+export { customRender as render, suppressConsoleError };
