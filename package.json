@@ -50,6 +50,8 @@
     "eslint": "^9.20.1",
     "eslint-config-expo": "~8.0.1",
     "eslint-config-prettier": "^10.0.1",
+    "eslint-import-resolver-typescript": "^3.8.0",
+    "eslint-plugin-import-x": "^4.6.1",
     "eslint-plugin-prettier": "^5.2.3",
     "globals": "^15.15.0",
     "husky": "^9.1.7",
