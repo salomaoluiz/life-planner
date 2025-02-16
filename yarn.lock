@@ -1116,7 +1116,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.13.10, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.20.0, @babel/runtime@npm:^7.25.0, @babel/runtime@npm:^7.8.4":
+"@babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.13.10, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.20.0, @babel/runtime@npm:^7.23.2, @babel/runtime@npm:^7.25.0, @babel/runtime@npm:^7.8.4":
   version: 7.26.9
   resolution: "@babel/runtime@npm:7.26.9"
   dependencies:
@@ -2580,6 +2580,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@testing-library/react-native@npm:^13.0.1":
+  version: 13.0.1
+  resolution: "@testing-library/react-native@npm:13.0.1"
+  dependencies:
+    chalk: "npm:^4.1.2"
+    jest-matcher-utils: "npm:^29.7.0"
+    pretty-format: "npm:^29.7.0"
+    redent: "npm:^3.0.0"
+  peerDependencies:
+    jest: ">=29.0.0"
+    react: ">=18.2.0"
+    react-native: ">=0.71"
+    react-test-renderer: ">=18.2.0"
+  peerDependenciesMeta:
+    jest:
+      optional: true
+  checksum: 10c0/c73848832bc1b724ac6ef188f0e4bf77ec1cb0589a5245d449bed3e384048ced818a27340635eabeb6cb5f323225b8d37fca6377925b4be28923a9a23779296f
+  languageName: node
+  linkType: hard
+
 "@tootallnate/once@npm:2":
   version: 2.0.0
   resolution: "@tootallnate/once@npm:2.0.0"
@@ -2632,6 +2652,13 @@ __metadata:
   version: 0.6.0
   resolution: "@types/cookie@npm:0.6.0"
   checksum: 10c0/5b326bd0188120fb32c0be086b141b1481fec9941b76ad537f9110e10d61ee2636beac145463319c71e4be67a17e85b81ca9e13ceb6e3bb63b93d16824d6c149
+  languageName: node
+  linkType: hard
+
+"@types/doctrine@npm:^0.0.9":
+  version: 0.0.9
+  resolution: "@types/doctrine@npm:0.0.9"
+  checksum: 10c0/cdaca493f13c321cf0cacd1973efc0ae74569633145d9e6fc1128f32217a6968c33bea1f858275239fe90c98f3be57ec8f452b416a9ff48b8e8c1098b20fa51c
   languageName: node
   linkType: hard
 
@@ -2829,7 +2856,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/scope-manager@npm:8.24.0":
+"@typescript-eslint/scope-manager@npm:8.24.0, @typescript-eslint/scope-manager@npm:^8.1.0":
   version: 8.24.0
   resolution: "@typescript-eslint/scope-manager@npm:8.24.0"
   dependencies:
@@ -2879,7 +2906,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/utils@npm:8.24.0, @typescript-eslint/utils@npm:^8.9.0":
+"@typescript-eslint/utils@npm:8.24.0, @typescript-eslint/utils@npm:^8.1.0, @typescript-eslint/utils@npm:^8.9.0":
   version: 8.24.0
   resolution: "@typescript-eslint/utils@npm:8.24.0"
   dependencies:
@@ -4648,6 +4675,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"doctrine@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "doctrine@npm:3.0.0"
+  dependencies:
+    esutils: "npm:^2.0.2"
+  checksum: 10c0/c96bdccabe9d62ab6fea9399fdff04a66e6563c1d6fb3a3a063e8d53c3bb136ba63e84250bbf63d00086a769ad53aef92d2bd483f03f837fc97b71cbee6b2520
+  languageName: node
+  linkType: hard
+
 "domexception@npm:^4.0.0":
   version: 4.0.0
   resolution: "domexception@npm:4.0.0"
@@ -4765,7 +4801,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"enhanced-resolve@npm:^5.15.0":
+"enhanced-resolve@npm:^5.15.0, enhanced-resolve@npm:^5.17.1":
   version: 5.18.1
   resolution: "enhanced-resolve@npm:5.18.1"
   dependencies:
@@ -5065,7 +5101,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-import-resolver-typescript@npm:^3.6.3":
+"eslint-import-resolver-typescript@npm:^3.6.3, eslint-import-resolver-typescript@npm:^3.8.0":
   version: 3.8.0
   resolution: "eslint-import-resolver-typescript@npm:3.8.0"
   dependencies:
@@ -5110,6 +5146,29 @@ __metadata:
   peerDependencies:
     eslint: ">=8 <9"
   checksum: 10c0/c494ab237c12aff9c827fb30a46e25e1cc1ed8aac1b792bec0aae00f1081a4d21cd01b151106a5898bbbf1bbbd76a46c983cfeeb55be091cfe367324d4e7537f
+  languageName: node
+  linkType: hard
+
+"eslint-plugin-import-x@npm:^4.6.1":
+  version: 4.6.1
+  resolution: "eslint-plugin-import-x@npm:4.6.1"
+  dependencies:
+    "@types/doctrine": "npm:^0.0.9"
+    "@typescript-eslint/scope-manager": "npm:^8.1.0"
+    "@typescript-eslint/utils": "npm:^8.1.0"
+    debug: "npm:^4.3.4"
+    doctrine: "npm:^3.0.0"
+    enhanced-resolve: "npm:^5.17.1"
+    eslint-import-resolver-node: "npm:^0.3.9"
+    get-tsconfig: "npm:^4.7.3"
+    is-glob: "npm:^4.0.3"
+    minimatch: "npm:^9.0.3"
+    semver: "npm:^7.6.3"
+    stable-hash: "npm:^0.0.4"
+    tslib: "npm:^2.6.3"
+  peerDependencies:
+    eslint: ^8.57.0 || ^9.0.0
+  checksum: 10c0/08ea85d7dc096f3998c05237c93cd14e0cb072c66ee500fa69f5ce37a81ffc8c76cf682ec53156b09f2ed2071308eb93e53bd7741e0cfd8c56e12f09ae24be82
   languageName: node
   linkType: hard
 
@@ -5518,6 +5577,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-localization@npm:^16.0.1":
+  version: 16.0.1
+  resolution: "expo-localization@npm:16.0.1"
+  dependencies:
+    rtl-detect: "npm:^1.0.2"
+  peerDependencies:
+    expo: "*"
+    react: "*"
+  checksum: 10c0/7ea9c9c2b6573afefacdc14e694ecb455aa946e25595b139a5525fd698caf9d00e5653bf4265209064c2b8fe62050f9df54cf96599e7d50f7d24374b4bdd2624
+  languageName: node
+  linkType: hard
+
 "expo-modules-autolinking@npm:2.0.7":
   version: 2.0.7
   resolution: "expo-modules-autolinking@npm:2.0.7"
@@ -5581,7 +5652,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-splash-screen@npm:~0.29.22":
+"expo-splash-screen@npm:^0.29.22":
   version: 0.29.22
   resolution: "expo-splash-screen@npm:0.29.22"
   dependencies:
@@ -6190,7 +6261,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"get-tsconfig@npm:^4.10.0":
+"get-tsconfig@npm:^4.10.0, get-tsconfig@npm:^4.7.3":
   version: 4.10.0
   resolution: "get-tsconfig@npm:4.10.0"
   dependencies:
@@ -6450,6 +6521,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"html-parse-stringify@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "html-parse-stringify@npm:3.0.1"
+  dependencies:
+    void-elements: "npm:3.1.0"
+  checksum: 10c0/159292753d48b84d216d61121054ae5a33466b3db5b446e2ffc093ac077a411a99ce6cbe0d18e55b87cf25fa3c5a86c4d8b130b9719ec9b66623259000c72c15
+  languageName: node
+  linkType: hard
+
 "http-cache-semantics@npm:^4.1.1":
   version: 4.1.1
   resolution: "http-cache-semantics@npm:4.1.1"
@@ -6538,6 +6618,20 @@ __metadata:
   version: 1.1.0
   resolution: "hyphenate-style-name@npm:1.1.0"
   checksum: 10c0/bfe88deac2414a41a0d08811e277c8c098f23993d6a1eb17f14a0f11b54c4d42865a63d3cfe1914668eefb9a188e2de58f38b55a179a238fd1fef606893e194f
+  languageName: node
+  linkType: hard
+
+"i18next@npm:^24.2.2":
+  version: 24.2.2
+  resolution: "i18next@npm:24.2.2"
+  dependencies:
+    "@babel/runtime": "npm:^7.23.2"
+  peerDependencies:
+    typescript: ^5
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 10c0/df2f08f7e7a813d0c38f67e9a9f67f6e86cd105a58b6419cab1118833e0a8ebf8d31e2df9033c12890fc1db18740fc227acc593c0a30887f8f7f94cd0293d051
   languageName: node
   linkType: hard
 
@@ -8019,12 +8113,15 @@ __metadata:
     "@expo/vector-icons": "npm:^14.0.2"
     "@react-navigation/bottom-tabs": "npm:^7.2.0"
     "@react-navigation/native": "npm:^7.0.14"
+    "@testing-library/react-native": "npm:^13.0.1"
     "@types/jest": "npm:^29.5.12"
     "@types/react": "npm:~18.3.12"
     "@types/react-test-renderer": "npm:^18.3.0"
     eslint: "npm:^9.20.1"
     eslint-config-expo: "npm:~8.0.1"
     eslint-config-prettier: "npm:^10.0.1"
+    eslint-import-resolver-typescript: "npm:^3.8.0"
+    eslint-plugin-import-x: "npm:^4.6.1"
     eslint-plugin-prettier: "npm:^5.2.3"
     expo: "npm:~52.0.35"
     expo-blur: "npm:~14.0.3"
@@ -8032,20 +8129,23 @@ __metadata:
     expo-font: "npm:~13.0.3"
     expo-haptics: "npm:~14.0.1"
     expo-linking: "npm:~7.0.5"
+    expo-localization: "npm:^16.0.1"
     expo-router: "npm:~4.0.17"
-    expo-splash-screen: "npm:~0.29.22"
+    expo-splash-screen: "npm:^0.29.22"
     expo-status-bar: "npm:~2.0.1"
     expo-symbols: "npm:~0.2.2"
     expo-system-ui: "npm:~4.0.8"
     expo-web-browser: "npm:~14.0.2"
     globals: "npm:^15.15.0"
     husky: "npm:^9.1.7"
+    i18next: "npm:^24.2.2"
     jest: "npm:^29.2.1"
     jest-expo: "npm:~52.0.4"
     lint-staged: "npm:^15.4.3"
     prettier: "npm:^3.5.1"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
+    react-i18next: "npm:^15.4.0"
     react-native: "npm:0.76.7"
     react-native-gesture-handler: "npm:~2.20.2"
     react-native-reanimated: "npm:~3.16.1"
@@ -8737,6 +8837,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"min-indent@npm:^1.0.0":
+  version: 1.0.1
+  resolution: "min-indent@npm:1.0.1"
+  checksum: 10c0/7e207bd5c20401b292de291f02913230cb1163abca162044f7db1d951fa245b174dc00869d40dd9a9f32a885ad6a5f3e767ee104cf278f399cb4e92d3f582d5c
+  languageName: node
+  linkType: hard
+
 "minimatch@npm:^3.0.2, minimatch@npm:^3.0.4, minimatch@npm:^3.1.1, minimatch@npm:^3.1.2":
   version: 3.1.2
   resolution: "minimatch@npm:3.1.2"
@@ -8746,7 +8853,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:^9.0.4":
+"minimatch@npm:^9.0.3, minimatch@npm:^9.0.4":
   version: 9.0.5
   resolution: "minimatch@npm:9.0.5"
   dependencies:
@@ -9928,6 +10035,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-i18next@npm:^15.4.0":
+  version: 15.4.0
+  resolution: "react-i18next@npm:15.4.0"
+  dependencies:
+    "@babel/runtime": "npm:^7.25.0"
+    html-parse-stringify: "npm:^3.0.1"
+  peerDependencies:
+    i18next: ">= 23.2.3"
+    react: ">= 16.8.0"
+  peerDependenciesMeta:
+    react-dom:
+      optional: true
+    react-native:
+      optional: true
+  checksum: 10c0/dc26e5a0f90f9038156e0908cb4489906d18dd2dedac6ec76d68cf6d545d9e070a3f450880548d0750caee5adf0653d7971fdabc9ef67c750d1c2df60be74d77
+  languageName: node
+  linkType: hard
+
 "react-is@npm:^16.12.0 || ^17.0.0 || ^18.0.0, react-is@npm:^18.0.0, react-is@npm:^18.2.0, react-is@npm:^18.3.1":
   version: 18.3.1
   resolution: "react-is@npm:18.3.1"
@@ -10183,6 +10308,16 @@ __metadata:
     source-map: "npm:~0.6.1"
     tslib: "npm:^2.0.1"
   checksum: 10c0/a45168c82195f24fa2c70293a624fece0069a2e8e8adb637f9963777735f81cb3bb62e55172db677ec3573b08b2daaf1eddd85b74da6fe0bd37c9b15eeaf94b4
+  languageName: node
+  linkType: hard
+
+"redent@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "redent@npm:3.0.0"
+  dependencies:
+    indent-string: "npm:^4.0.0"
+    strip-indent: "npm:^3.0.0"
+  checksum: 10c0/d64a6b5c0b50eb3ddce3ab770f866658a2b9998c678f797919ceb1b586bab9259b311407280bd80b804e2a7c7539b19238ae6a2a20c843f1a7fcff21d48c2eae
   languageName: node
   linkType: hard
 
@@ -10518,6 +10653,13 @@ __metadata:
   bin:
     rimraf: ./bin.js
   checksum: 10c0/f1e646f8c567795f2916aef7aadf685b543da6b9a53e482bb04b07472c7eef2b476045ba1e29f401c301c66b630b22b815ab31fdd60c5e1ae6566ff523debf45
+  languageName: node
+  linkType: hard
+
+"rtl-detect@npm:^1.0.2":
+  version: 1.1.2
+  resolution: "rtl-detect@npm:1.1.2"
+  checksum: 10c0/1b92888aafca1593314f837e83fdf02eb208faae3e713ab87c176804728efd3b1980d53b64f65f1fa593348087e852c5cd729b7b9372950f6e9b7be489afc0ca
   languageName: node
   linkType: hard
 
@@ -11407,6 +11549,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"strip-indent@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "strip-indent@npm:3.0.0"
+  dependencies:
+    min-indent: "npm:^1.0.0"
+  checksum: 10c0/ae0deaf41c8d1001c5d4fbe16cb553865c1863da4fae036683b474fa926af9fc121e155cb3fc57a68262b2ae7d5b8420aa752c97a6428c315d00efe2a3875679
+  languageName: node
+  linkType: hard
+
 "strip-json-comments@npm:^3.1.1":
   version: 3.1.1
   resolution: "strip-json-comments@npm:3.1.1"
@@ -11757,7 +11908,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.0.1, tslib@npm:^2.4.0, tslib@npm:^2.6.2":
+"tslib@npm:^2.0.1, tslib@npm:^2.4.0, tslib@npm:^2.6.2, tslib@npm:^2.6.3":
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
   checksum: 10c0/9c4759110a19c53f992d9aae23aac5ced636e99887b51b9e61def52611732872ff7668757d4e4c61f19691e36f4da981cd9485e869b4a7408d689f6bf1f14e62
@@ -12159,6 +12310,13 @@ __metadata:
   version: 1.0.1
   resolution: "vlq@npm:1.0.1"
   checksum: 10c0/a8ec5c95d747c840198f20b4973327fa317b98397f341e7a2f352bfcf385aeb73c0eea01cc6d406c20169298375397e259efc317aec53c8ffc001ec998204aed
+  languageName: node
+  linkType: hard
+
+"void-elements@npm:3.1.0":
+  version: 3.1.0
+  resolution: "void-elements@npm:3.1.0"
+  checksum: 10c0/0b8686f9f9aa44012e9bd5eabf287ae0cde409b9a2854c5a2335cb83920c957668ac5876e3f0d158dd424744ac411a7270e64128556b451ed3bec875ef18534d
   languageName: node
   linkType: hard
 
