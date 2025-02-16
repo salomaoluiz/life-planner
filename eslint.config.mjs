@@ -18,6 +18,10 @@ export default [
       "node_modules/*",
       "./expo-env.d.ts",
       "**/*.snap",
+      ".env*",
+      ".gitignore",
+      "yarn.lock",
+      "tsconfig.json",
     ],
   },
   {
