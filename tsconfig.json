@@ -8,6 +8,8 @@
       "@assets/*": ["assets/*"],
       "@screens/*": ["src/presentation/screens/*"],
       "@screens": ["src/presentation/screens"],
+      "@components/*": ["src/presentation/components/*"],
+      "@components": ["src/presentation/components"],
       "@presentation/*": ["src/presentation/*"],
       "@domain/*": ["src/domain/*"],
       "@application/*": ["src/application/*"],
