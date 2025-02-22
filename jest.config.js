@@ -6,4 +6,12 @@ module.exports = {
   transformIgnorePatterns: ["jest-runner"],
   testPathIgnorePatterns: ["/node_modules/", "/tests/"],
   moduleDirectories: ["node_modules", "src"],
+  coverageThreshold: {
+    global: {
+      branches: 90,
+      functions: 90,
+      lines: 90,
+      statements: 90,
+    },
+  },
 };
