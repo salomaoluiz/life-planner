@@ -1,12 +1,14 @@
-import { Button, Text, View } from "react-native";
+import { View } from "react-native";
 import { useTranslation, useTranslationLocale } from "@presentation/i18n";
-import { captureException } from "@infrastructure/monitoring";
 import { router } from "expo-router";
+import { Button, Switch, Text } from "@components";
+import { useTheme } from "@presentation/theme";
 
 function Home() {
   const { t } = useTranslation();
   const { availableLanguages, changeLocale, getLocale } =
     useTranslationLocale();
+  const { setIsDark, isDark } = useTheme();
 
   return (
     <View
@@ -16,23 +18,30 @@ function Home() {
         alignItems: "center",
       }}
     >
-      <Text>{t("home.editLabel")}</Text>
-      {availableLanguages.map((location) => (
-        <Button
-          title={location}
+      <Text.Body value={t("home.editLabel")} testID={"edit-label"} />
+      {availableLanguages.map((location, index) => (
+        <Button.Filled
+          testID={`button-${index}`}
+          key={`button-${index}`}
+          label={location}
           onPress={() => {
             changeLocale(location);
-            captureException(new Error(`Test error - ${location}`), {});
           }}
         />
       ))}
-      <Button
-        title={"Go To Login"}
+      <Text.Display testID={"display"} value={`isDark: ${isDark}`} />
+      <Switch testID={"switch"} initialStatus={isDark} onToggle={setIsDark} />
+      <Button.Outlined
+        testID={"go-to-login"}
+        label={"Go To Login"}
         onPress={() => {
           router.navigate("./login");
         }}
       />
-      <Text>{JSON.stringify(getLocale()).replaceAll(",", "\n,")}</Text>
+      <Text.Caption
+        value={JSON.stringify(getLocale()).replaceAll(",", "\n,")}
+        testID={"locale"}
+      />
     </View>
   );
 }

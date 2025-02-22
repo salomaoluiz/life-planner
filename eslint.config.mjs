@@ -31,6 +31,9 @@ export default [
       },
       "import-x/resolver": {
         typescript: true,
+        node: {
+          extensions: [".js", ".jsx", ".ts", ".tsx"],
+        },
       },
     },
     rules: {
@@ -41,6 +44,7 @@ export default [
           maxDepth: 3,
         },
       ],
+      "func-style": ["warn", "declaration"],
     },
   },
 ];
