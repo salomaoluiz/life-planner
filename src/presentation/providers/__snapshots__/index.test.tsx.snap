@@ -2,10 +2,14 @@
 
 exports[`SHOULD render the Providers 1`] = `
 <View
-  testID="i18n-provider"
+  testID="theme-provider"
 >
   <View
-    testID="presentation-provider-children"
-  />
+    testID="i18n-provider"
+  >
+    <View
+      testID="presentation-provider-children"
+    />
+  </View>
 </View>
 `;
