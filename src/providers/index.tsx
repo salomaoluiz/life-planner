@@ -2,6 +2,7 @@ import React from "react";
 import { LoaderProvider } from "./loader";
 
 import PresentationProviders from "@presentation/providers";
+import InfrastructureProvider from "@infrastructure/provider";
 
 interface Props {
   children: React.ReactNode;
@@ -10,7 +11,9 @@ interface Props {
 function GlobalProviders({ children }: Props) {
   return (
     <LoaderProvider>
-      <PresentationProviders>{children}</PresentationProviders>
+      <InfrastructureProvider>
+        <PresentationProviders>{children}</PresentationProviders>
+      </InfrastructureProvider>
     </LoaderProvider>
   );
 }

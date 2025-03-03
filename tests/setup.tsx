@@ -13,3 +13,12 @@ jest.mock("react-native-paper", () => {
     ),
   };
 });
+
+jest.mock("@react-native-google-signin/google-signin", () => ({
+  GoogleSignin: {
+    configure: jest.fn(),
+    signIn: jest.fn(),
+    signOut: jest.fn(),
+    hasPlayServices: jest.fn(),
+  },
+}));
