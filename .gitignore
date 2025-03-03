@@ -39,3 +39,5 @@ app-example
 .yarn
 coverage
 .env
+android
+ios
