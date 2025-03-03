@@ -2,3 +2,6 @@
 yarn.lock
 .prettierignore
 expo-env.d.ts
+
+android
+ios
