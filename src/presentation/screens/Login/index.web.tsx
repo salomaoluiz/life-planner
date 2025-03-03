@@ -4,46 +4,40 @@
 import { View } from "react-native";
 import { router } from "expo-router";
 import { Button, Text } from "@components";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { supabase } from "@infrastructure/supabase";
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 function Login() {
-  GoogleSignin.configure({
-    offlineAccess: true,
-    iosClientId:
-      "1069049260763-tih01kb90dnrd319jpgb6ltas1hgbpn5.apps.googleusercontent.com",
-    webClientId:
-      "1069049260763-o02k1ig1dqvfm4e1vm6fo9rhq3ncmfkq.apps.googleusercontent.com",
-  });
-  const logout = useCallback(async () => {
-    try {
-      await GoogleSignin.signOut();
-      supabase.auth.signOut().then(() => {
-        console.debug("Logout");
-      });
-    } catch (e) {
-      console.debug("error logout", {
-        error: e,
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (!hash) return;
+
+    // Convert hash fragment to URLSearchParams
+    const params = new URLSearchParams(hash.replace("#", "?"));
+    const access_token = params.get("access_token");
+    const refresh_token = params.get("refresh_token");
+
+    if (access_token && refresh_token) {
+      supabase.auth.setSession({ access_token, refresh_token }).then(() => {
+        console.debug("Success Login");
       });
     }
   }, []);
-  const login = useCallback(async () => {
-    try {
-      await GoogleSignin.hasPlayServices();
-      const response = await GoogleSignin.signIn();
-      if (response.data) {
-        await supabase.auth.signInWithIdToken({
-          provider: "google",
-          token: response.data.idToken!,
-        });
-      }
-      console.log(response);
-    } catch (e) {
-      console.debug("error login", {
-        error: e,
+
+  const logout = useCallback(() => {
+    supabase.auth.signOut().then(() => {
+      console.debug("Logout");
+    });
+  }, []);
+  const login = useCallback(() => {
+    supabase.auth
+      .signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: "http://localhost:8081/login" },
+      })
+      .then((response) => {
+        console.debug(response.data);
       });
-    }
   }, []);
 
   return (

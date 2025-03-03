@@ -10,16 +10,18 @@ export default {
     newArchEnabled: true,
     ios: {
       supportsTablet: true,
+      bundleIdentifier: "com.jacobysoftware.lifeplanner",
     },
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/images/adaptive-icon.png",
         backgroundColor: "#ffffff",
       },
+      package: "com.jacobysoftware.lifeplanner",
     },
     web: {
       bundler: "metro",
-      output: "static",
+      output: "single",
       favicon: "./assets/images/favicon.png",
     },
     plugins: [
@@ -39,6 +41,12 @@ export default {
           organization: process.env.EXPO_PUBLIC_SENTRY_ORGANIZATION,
           project: process.env.EXPO_PUBLIC_SENTRY_PROJECT,
           url: process.env.EXPO_PUBLIC_SENTRY_URL,
+        },
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          iosUrlScheme: process.env.EXPO_PUBLIC_IOS_URL_SCHEME,
         },
       ],
     ],
