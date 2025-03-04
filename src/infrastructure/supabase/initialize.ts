@@ -1,24 +1,23 @@
 import { createClient } from "@supabase/supabase-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { sentryAddBreadcrumb } from "@infrastructure/monitoring/sentry";
+import { addBreadcrumb } from "@infrastructure/monitoring";
 
 function initialize() {
-  if (
-    !process.env.EXPO_PUBLIC_SUPABASE_URL ||
-    !process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
-  ) {
+  const envs = process.env;
+
+  if (!envs.EXPO_PUBLIC_SUPABASE_URL || !envs.EXPO_PUBLIC_SUPABASE_ANON_KEY) {
     throw new Error("Missing Supabase configuration");
   }
 
-  sentryAddBreadcrumb({
+  addBreadcrumb({
     category: "supabase",
     message: "Supabase initialized",
     level: "info",
   });
 
   return createClient(
-    process.env.EXPO_PUBLIC_SUPABASE_URL,
-    process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
+    envs.EXPO_PUBLIC_SUPABASE_URL,
+    envs.EXPO_PUBLIC_SUPABASE_ANON_KEY,
     {
       auth: {
         storage: AsyncStorage,
