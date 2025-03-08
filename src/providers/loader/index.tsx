@@ -3,6 +3,7 @@ import React, { createContext, useContext, useMemo, useState } from "react";
 export const loaderContexts = {
   i18n: true,
   theme: true,
+  user: true,
 };
 
 interface LoaderContextData {

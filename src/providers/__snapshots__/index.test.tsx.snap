@@ -1,15 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SHOULD render "PresentationProviders" and "LoaderProvider" 1`] = `
+exports[`SHOULD render "PresentationProviders", "ApplicationProviders" and "LoaderProvider" 1`] = `
 <View
   testID="loader-provider"
 >
   <View
-    testID="presentation-providers"
+    testID="application-providers"
   >
     <View
-      testID="children-element"
-    />
+      testID="presentation-providers"
+    >
+      <View
+        testID="children-element"
+      />
+    </View>
   </View>
 </View>
 `;
