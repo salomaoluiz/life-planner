@@ -5,7 +5,13 @@ import { addBreadcrumb } from "@infrastructure/monitoring";
 function initialize() {
   const envs = process.env;
 
-  if (!envs.EXPO_PUBLIC_SUPABASE_URL || !envs.EXPO_PUBLIC_SUPABASE_ANON_KEY) {
+  const supabaseUrl = (process.env.EXPO_PUBLIC_SUPABASE_URL ||
+    envs.EXPO_PUBLIC_SUPABASE_URL) as string;
+
+  const supabaseAnonKey = (process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||
+    envs.EXPO_PUBLIC_SUPABASE_ANON_KEY) as string;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error("Missing Supabase configuration");
   }
 
@@ -15,19 +21,15 @@ function initialize() {
     level: "info",
   });
 
-  return createClient(
-    envs.EXPO_PUBLIC_SUPABASE_URL,
-    envs.EXPO_PUBLIC_SUPABASE_ANON_KEY,
-    {
-      auth: {
-        storage: AsyncStorage,
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: false,
-        storageKey: "supabase.tokens",
-      },
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      storage: AsyncStorage,
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: false,
+      storageKey: "supabase.tokens",
     },
-  );
+  });
 }
 
 export default initialize;
