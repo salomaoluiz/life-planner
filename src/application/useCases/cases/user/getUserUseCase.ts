@@ -2,9 +2,9 @@ import { IUseCaseFactoryWithoutParamResponse } from "@application/useCases/types
 import { captureException } from "@infrastructure/monitoring";
 import Repositories from "@domain/repositories";
 import { BusinessError } from "@domain/entities/errors";
-import UserEntity from "@domain/entities/user/userEntity";
+import UserProfileEntity from "@domain/entities/user/UserProfileEntity";
 
-type GetUserUseCaseResponse = UserEntity | BusinessError;
+type GetUserUseCaseResponse = UserProfileEntity | BusinessError;
 
 function getUserUseCase(
   repositories: Repositories,
