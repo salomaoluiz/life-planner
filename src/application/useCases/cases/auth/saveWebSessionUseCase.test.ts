@@ -3,24 +3,27 @@ import {
   captureExceptionSpy,
   setup,
 } from "./mocks/saveWebSessionUseCase";
-import { BusinessError } from "@domain/entities/errors";
+import { BusinessError, UserNotLoggedError } from "@domain/entities/errors";
 
 it("SHOULD not save the session if the hash is undefined", async () => {
-  await setup(undefined);
+  const result = await setup(undefined);
 
+  expect(result).toBeInstanceOf(UserNotLoggedError);
   expect(saveSessionSpy).not.toHaveBeenCalled();
 });
 
 it("SHOULD not save the session if the access token is null", async () => {
-  await setup("#refresh_token=refresh");
+  const result = await setup("#refresh_token=refresh");
 
   expect(saveSessionSpy).not.toHaveBeenCalled();
+  expect(result).toBeInstanceOf(UserNotLoggedError);
 });
 
 it("SHOULD not save the session if the refresh token is null", async () => {
-  await setup("#access_token=access");
+  const result = await setup("#access_token=access");
 
   expect(saveSessionSpy).not.toHaveBeenCalled();
+  expect(result).toBeInstanceOf(UserNotLoggedError);
 });
 
 it("SHOULD save the session if the hash is valid", async () => {
@@ -63,7 +66,7 @@ it("SHOULD capture an exception if the repository throws an error", async () => 
 });
 
 it("SHOULD return a BusinessError if the repository throws a BusinessError", async () => {
-  const businessError = new BusinessError("Business Error Related Logout");
+  const businessError = new BusinessError();
   saveSessionSpy.mockRejectedValue(businessError);
 
   const result = await setup("#access_token=access&refresh_token=refresh");

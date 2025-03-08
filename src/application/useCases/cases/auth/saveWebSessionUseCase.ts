@@ -1,11 +1,11 @@
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import Repositories from "@domain/repositories";
 import { captureException } from "@infrastructure/monitoring";
-import { BusinessError } from "@domain/entities/errors";
+import { BusinessError, UserNotLoggedError } from "@domain/entities/errors";
 
 type Hash = string | undefined;
 
-type Response = void | BusinessError;
+type Response = boolean | BusinessError;
 
 function saveWebSessionUseCase(
   repositories: Repositories,
@@ -14,7 +14,7 @@ function saveWebSessionUseCase(
     async execute(hash: Hash): Promise<Response> {
       try {
         if (hash === undefined) {
-          return;
+          return new UserNotLoggedError();
         }
 
         const params = new URLSearchParams(hash.replace("#", "?"));
@@ -22,13 +22,14 @@ function saveWebSessionUseCase(
         const refreshToken = params.get("refresh_token");
 
         if (accessToken === null || refreshToken === null) {
-          return;
+          return new UserNotLoggedError();
         }
 
         await repositories.loginRepository.saveSession({
           accessToken,
           refreshToken,
         });
+        return true;
       } catch (error) {
         if (error instanceof BusinessError) {
           return error;
