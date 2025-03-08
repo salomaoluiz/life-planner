@@ -1,15 +1,18 @@
-import { captureExceptionSpy, getUserSpy, setup } from "./mocks/getUserUseCase";
+import { spies, mocks, setup } from "./mocks/getUserUseCase";
 import { BusinessError } from "@domain/entities/errors";
 
 it("SHOULD call the repository to get user", async () => {
-  await setup().execute();
+  spies.getUser.mockResolvedValue(mocks.getUserSuccessResponse);
 
-  expect(getUserSpy).toHaveBeenCalledTimes(1);
+  const result = await setup().execute();
+
+  expect(spies.getUser).toHaveBeenCalledTimes(1);
+  expect(result).toBe(mocks.getUserSuccessResponse);
 });
 
 it("SHOULD throw an error if the repository throws an error", async () => {
   const error = new Error("Error getting user");
-  getUserSpy.mockRejectedValue(error);
+  spies.getUser.mockRejectedValue(error);
 
   function func() {
     return setup().execute();
@@ -20,12 +23,12 @@ it("SHOULD throw an error if the repository throws an error", async () => {
 
 it("SHOULD capture an exception if the repository throws an error", async () => {
   const error = new Error("Error getting user");
-  getUserSpy.mockRejectedValue(error);
+  spies.getUser.mockRejectedValue(error);
 
   await expect(setup().execute()).rejects.toThrow(error);
 
-  expect(captureExceptionSpy).toHaveBeenCalledTimes(1);
-  expect(captureExceptionSpy).toHaveBeenCalledWith({
+  expect(spies.captureException).toHaveBeenCalledTimes(1);
+  expect(spies.captureException).toHaveBeenCalledWith({
     name: "getUserUseCase",
     cause: error,
     message: "Error getting user",
@@ -33,8 +36,8 @@ it("SHOULD capture an exception if the repository throws an error", async () => 
 });
 
 it("SHOULD return BusinessError if the repository throws a BusinessError", async () => {
-  const businessError = new BusinessError("Business error related to get user");
-  getUserSpy.mockRejectedValue(businessError);
+  const businessError = new BusinessError();
+  spies.getUser.mockRejectedValue(businessError);
 
   const result = await setup().execute();
 
