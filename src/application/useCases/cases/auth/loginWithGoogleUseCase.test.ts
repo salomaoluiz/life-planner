@@ -37,7 +37,7 @@ it("SHOULD capture an exception if the repository throws an error", async () => 
 });
 
 it("SHOULD return a BusinessError if the repository throws a BusinessError", async () => {
-  const businessError = new BusinessError("Business Error Related With Google");
+  const businessError = new BusinessError();
   loginWithGoogleSpy.mockRejectedValue(businessError);
 
   const result = await setup().execute();
