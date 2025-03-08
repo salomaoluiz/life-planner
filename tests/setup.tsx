@@ -1,12 +1,7 @@
 import React from "react";
 
-// Mock Envs
-
-process.env = {
-  NODE_ENV: "test",
-  EXPO_PUBLIC_SUPABASE_URL: "EXPO_PUBLIC_SUPABASE_URL",
-  EXPO_PUBLIC_SUPABASE_ANON_KEY: "EXPO_PUBLIC_SUPABASE_ANON_KEY",
-};
+import { load } from "@expo/env";
+load(process.cwd(), { silent: true });
 
 jest.mock("react-native-paper", () => {
   const View = jest.requireActual("react-native").View;
