@@ -1,16 +1,17 @@
-interface IUserEntity {
+interface IUserProfileEntity {
   id: string;
   name: string;
   email: string;
   photoUrl: string;
 }
-class UserEntity {
+
+class UserProfileEntity {
   id: string;
   name: string;
   email: string;
   photoUrl: string;
 
-  constructor(props: IUserEntity) {
+  constructor(props: IUserProfileEntity) {
     this.id = props.id;
     this.name = props.name;
     this.email = props.email;
@@ -18,4 +19,4 @@ class UserEntity {
   }
 }
 
-export default UserEntity;
+export default UserProfileEntity;
