@@ -1,3 +1,4 @@
+import * as applicationProviders from "@application/providers";
 import * as presentationProviders from "@presentation/providers";
 import * as loaderProvider from "./loader";
 import { View } from "react-native";
@@ -8,6 +9,12 @@ jest
   .spyOn(presentationProviders, "default")
   .mockImplementation(({ children }) => (
     <View testID={"presentation-providers"}>{children}</View>
+  ));
+
+jest
+  .spyOn(applicationProviders, "default")
+  .mockImplementation(({ children }) => (
+    <View testID={"application-providers"}>{children}</View>
   ));
 
 jest
@@ -25,10 +32,11 @@ const setup = () =>
     </GlobalProviders>,
   );
 
-it('SHOULD render "PresentationProviders" and "LoaderProvider"', () => {
+it('SHOULD render "PresentationProviders", "ApplicationProviders" and "LoaderProvider"', () => {
   setup();
 
   expect(screen.getByTestId("presentation-providers")).toBeOnTheScreen();
+  expect(screen.getByTestId("application-providers")).toBeOnTheScreen();
   expect(screen.getByTestId("loader-provider")).toBeOnTheScreen();
   expect(screen.getByTestId("children-element")).toBeOnTheScreen();
   expect(screen.toJSON()).toMatchSnapshot();

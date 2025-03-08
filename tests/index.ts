@@ -2,8 +2,9 @@ import React from "react";
 import { render } from "@testing-library/react-native";
 
 interface RenderOptions {
-  wrapper: React.FunctionComponent;
+  wrapper: React.FunctionComponent<{ children: React.ReactElement }>;
 }
+
 const customRender = (
   component: React.JSX.Element,
   options?: Partial<RenderOptions>,
