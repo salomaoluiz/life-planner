@@ -13,7 +13,7 @@ function loginDatasourceImpl(): LoginDatasource {
       const response = await signIn();
 
       if (response.status === "error") {
-        throw new GenericError(response.error.message);
+        throw new GenericError();
       }
       if (response.status === "canceled") {
         throw new LoginCanceledError();
@@ -35,7 +35,7 @@ function loginDatasourceImpl(): LoginDatasource {
       });
 
       if (response.error) {
-        throw new GenericError(response.error.message);
+        throw new GenericError();
       }
 
       return true;
@@ -48,9 +48,9 @@ function loginDatasourceImpl(): LoginDatasource {
 
       if (response.error) {
         if (response.error.name === "AuthSessionMissingError") {
-          throw new BusinessError("Session is missing");
+          throw new BusinessError();
         }
-        throw new GenericError(response.error.message);
+        throw new GenericError();
       }
 
       return true;
@@ -59,7 +59,7 @@ function loginDatasourceImpl(): LoginDatasource {
       const result = await supabase.auth.signOut();
 
       if (result.error) {
-        throw new GenericError(result.error.message);
+        throw new GenericError();
       }
     },
   };
