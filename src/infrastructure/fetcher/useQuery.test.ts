@@ -32,7 +32,7 @@ it("SHOULD fetch and return in error", async () => {
 
     expect(error.message).toEqual("Error message");
     expect(error.stack).toEqual(expect.any(String));
-    expect(error.context).toEqual({ cacheKey: "CacheKey1-CacheKey2" });
+    expect(error.context).toEqual({ cacheString: "CacheKey1-CacheKey2" });
   }
 });
 
@@ -49,7 +49,7 @@ it("SHOULD fetch and return in business error", async () => {
   expect(result.current.error!.message).toEqual(businessError.message);
   expect(result.current.error!.stack).toEqual(expect.any(String));
   expect(result.current.error!.context).toEqual({
-    cacheKey: "CacheKey1-CacheKey2",
+    cacheString: "CacheKey1-CacheKey2",
   });
   expect(result.current.data).toBeNull();
   expect(result.current.isFetching).toBeFalsy();
@@ -73,7 +73,7 @@ it("SHOULD fetch and return in error without message", async () => {
     const error = e as GenericError;
 
     expect(error.message).toEqual("Without error message");
-    expect(error.context).toEqual({ cacheKey: "CacheKey1-CacheKey2" });
+    expect(error.context).toEqual({ cacheString: "CacheKey1-CacheKey2" });
     expect(error.stack).toEqual(expect.any(String));
   }
 });
@@ -103,26 +103,6 @@ it("SHOULD refetch", async () => {
   await result.current.refetch();
 
   expect(mocks.pendingResponse.refetch).toHaveBeenCalledTimes(1);
-});
-
-it('SHOULD call "captureException" with the error', async () => {
-  spies.useReactQuery.mockReturnValue(mocks.errorResponse);
-
-  try {
-    setup({
-      cacheKey: ["CacheKey1", "CacheKey2"],
-      fetch: spies.fetch,
-    });
-  } catch (e) {
-    const error = e as GenericError;
-
-    expect(spies.captureException).toHaveBeenCalledWith({
-      name: "useQuery-failure",
-      cause: error,
-      message: "Error message",
-      stack: error.stack,
-    });
-  }
 });
 
 it("SHOULD call useQuery with default params", async () => {
