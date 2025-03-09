@@ -20,7 +20,7 @@ it("SHOULD return a user WHEN getUser is called", async () => {
 it("SHOULD throw a GenericError WHEN getUser is called and an error occurs", async () => {
   spies.getUser.mockResolvedValueOnce(mocks.getUserError as never);
 
-  await expect(setup()).rejects.toThrow(new GenericError("Error getting user"));
+  await expect(setup()).rejects.toThrow(new GenericError());
 });
 
 it("SHOULD throw a UserNotLoggedError WHEN getUser is called and the user is not logged", async () => {

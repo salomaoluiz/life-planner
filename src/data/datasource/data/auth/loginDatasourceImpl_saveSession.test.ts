@@ -23,7 +23,7 @@ it("SHOULD throw an BusinessError if session is missing", async () => {
     return setup();
   }
 
-  await expect(func).rejects.toThrow(new BusinessError("Session is missing"));
+  await expect(func).rejects.toThrow(new BusinessError());
 });
 
 it("SHOULD throw an GenericError if setSession fails", async () => {
@@ -33,5 +33,5 @@ it("SHOULD throw an GenericError if setSession fails", async () => {
     return setup();
   }
 
-  await expect(func).rejects.toThrow(new GenericError("Error setting session"));
+  await expect(func).rejects.toThrow(new GenericError());
 });
