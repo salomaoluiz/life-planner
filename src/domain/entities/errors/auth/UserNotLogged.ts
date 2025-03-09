@@ -2,7 +2,7 @@ import { BusinessError } from "@domain/entities/errors/common";
 
 class UserNotLogged extends BusinessError {
   constructor() {
-    super("User not logged");
+    super();
     this.name = "UserNotLogged";
   }
 }

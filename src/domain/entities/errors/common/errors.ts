@@ -3,18 +3,23 @@ export enum ErrorCodes {
   TechnicalError = "TechnicalError",
 }
 
-interface DefaultErrorProps {
-  message: string;
+export interface ErrorProps {
+  context?: Record<string, unknown>;
   code: ErrorCodes;
 }
 
 abstract class DefaultError extends Error {
   code: ErrorCodes;
+  context: Record<string, unknown> = {};
 
-  protected constructor(props: DefaultErrorProps) {
-    super(props.message);
+  protected constructor(props: ErrorProps) {
+    super("Occurred an error");
     this.name = this.constructor.name;
     this.code = props.code;
+  }
+
+  addContext(context: Record<string, unknown>) {
+    this.context = { ...this.context, ...context };
   }
 }
 
