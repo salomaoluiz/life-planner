@@ -21,7 +21,7 @@ function sentryInitialize() {
     dsn: sentryDsn,
     environment: sentryEnvironment,
     tracesSampleRate: parseInt(sentryTracesSampler || "0"),
-    enabled: sentryEnabled === "true",
+    enabled: !__DEV__ && sentryEnabled === "true",
     integrations: [navigationIntegration],
     enableNativeFramesTracking: !isRunningInExpoGo(),
   });

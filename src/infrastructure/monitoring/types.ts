@@ -23,9 +23,14 @@ export type CaptureMessage = (
   extra?: Record<string, unknown>,
 ) => void;
 
+export interface ErrorBoundaryFallBackProps {
+  error: unknown;
+  retry: () => void;
+}
+
 export interface ErrorBoundaryProps {
   children: React.ReactNode;
-  FallbackComponent: (props: { error: unknown }) => React.ReactNode;
+  FallbackComponent: (props: ErrorBoundaryFallBackProps) => React.ReactNode;
 }
 
 export type ErrorBoundaryType = (props: ErrorBoundaryProps) => React.ReactNode;

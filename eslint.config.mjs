@@ -22,6 +22,12 @@ export default [
       ".gitignore",
       "yarn.lock",
       "tsconfig.json",
+      ".lintstagedrc.json",
+      "dist/*",
+      "android/*",
+      "ios/*",
+      "coverage/*",
+      ".expo/*",
     ],
   },
   {
