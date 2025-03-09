@@ -28,9 +28,14 @@ jest.spyOn(Sentry, "ErrorBoundary").mockImplementation(
     ) as never,
 );
 
+const beforeCaptureSpy = jest.fn();
+
 function setup() {
   render(
-    <SentryErrorBoundary FallbackComponent={FallbackComponent}>
+    <SentryErrorBoundary
+      beforeCapture={beforeCaptureSpy}
+      FallbackComponent={FallbackComponent}
+    >
       <Children />
     </SentryErrorBoundary>,
   );
@@ -40,9 +45,12 @@ const mocks = {
   FallbackComponent,
 };
 
+const spies = {
+  beforeCapture: beforeCaptureSpy,
+};
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
-export { mocks, setup };
+export { mocks, setup, spies };
 export { screen } from "@tests";

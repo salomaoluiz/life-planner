@@ -4,3 +4,6 @@ export * from "./capture";
 export { default as SentryWrapper } from "./wrapper";
 export { default as sentryNavigationIntegration } from "./navigationIntegration";
 export { default as SentryErrorBoundary } from "./errorBoundary";
+export { default as sentrySetContext } from "./setContext";
+export { default as sentrySetTag } from "./setTag";
+export { default as sentrySetUser } from "./setUser";
