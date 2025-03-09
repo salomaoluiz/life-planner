@@ -1,7 +1,6 @@
 import { UseMutation } from "@infrastructure/fetcher/types";
 import { useReactMutation } from "@infrastructure/fetcher/reactQuery";
 import { BusinessError, GenericError } from "@domain/entities/errors";
-import { captureException } from "@infrastructure/monitoring";
 
 function useMutation<Params, Response>(
   props: Parameters<UseMutation<Params, Response>>[0],
@@ -24,7 +23,8 @@ function useMutation<Params, Response>(
 
     if (error instanceof BusinessError) {
       error.addContext({
-        cacheKey: props.cacheKey.join("-"),
+        ...error.context,
+        cacheString: props.cacheKey.join("-"),
         variables,
       });
       return error;
@@ -33,15 +33,9 @@ function useMutation<Params, Response>(
     const genericError = new GenericError();
     genericError.message = error?.message || "Without error message";
     genericError.addContext({
-      cacheKey: props.cacheKey.join("-"),
+      ...error.context,
+      cacheString: props.cacheKey.join("-"),
       variables,
-    });
-
-    captureException({
-      name: "useMutation-failure",
-      cause: genericError,
-      message: genericError.message,
-      stack: genericError?.stack,
     });
 
     throw genericError;
