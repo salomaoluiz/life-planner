@@ -1,28 +1,23 @@
 import { IUseCaseFactoryWithoutParamResponse } from "@application/useCases/types";
-import { captureException } from "@infrastructure/monitoring";
 import Repositories from "@domain/repositories";
-import { BusinessError } from "@domain/entities/errors";
+import { DefaultError } from "@domain/entities/errors";
 import UserProfileEntity from "@domain/entities/user/UserProfileEntity";
-
-type GetUserUseCaseResponse = UserProfileEntity | BusinessError;
 
 function getUserUseCase(
   repositories: Repositories,
-): IUseCaseFactoryWithoutParamResponse<GetUserUseCaseResponse> {
+): IUseCaseFactoryWithoutParamResponse<UserProfileEntity> {
   return {
+    uniqueName: "user.get_user_use_case",
     execute: async () => {
       try {
         return await repositories.userRepository.getUser();
       } catch (error) {
-        if (error instanceof BusinessError) {
-          return error;
+        if (error instanceof DefaultError) {
+          error.addContext({
+            useCase: "getUserUseCase",
+          });
+          throw error;
         }
-
-        captureException({
-          name: "getUserUseCase",
-          cause: error,
-          message: "Error getting user",
-        });
 
         throw error;
       }

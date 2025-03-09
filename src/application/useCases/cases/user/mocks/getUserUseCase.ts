@@ -1,4 +1,3 @@
-import * as monitoring from "@infrastructure/monitoring";
 import getUserUseCase from "@application/useCases/cases/user/getUserUseCase";
 import { repositoriesMocks } from "@data/repositories/mocks";
 import UserProfileEntity from "@domain/entities/user/UserProfileEntity";
@@ -12,7 +11,6 @@ const getUserSuccessResponse = new UserProfileEntity({
 });
 
 // endregion mocks
-const captureExceptionSpy = jest.spyOn(monitoring, "captureException");
 
 const getUserSpy = jest.fn();
 
@@ -33,7 +31,6 @@ function setup() {
 }
 
 const spies = {
-  captureException: captureExceptionSpy,
   getUser: getUserSpy,
 };
 
