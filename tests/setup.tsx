@@ -46,6 +46,8 @@ jest.mock("@supabase/supabase-js", () => ({
 
 jest.mock("@tanstack/react-query");
 
+jest.mock("@sentry/react-native");
+
 jest.mock("@presentation/theme", () => ({
   useTheme: jest.fn().mockReturnValue({
     theme: jest.requireActual("@presentation/theme/provider").lightTheme,
