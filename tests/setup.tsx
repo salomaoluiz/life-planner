@@ -1,6 +1,7 @@
 import React from "react";
 
 import { load } from "@expo/env";
+
 load(process.cwd(), { silent: true });
 
 jest.mock("react-native-paper", () => {
@@ -44,3 +45,11 @@ jest.mock("@supabase/supabase-js", () => ({
 }));
 
 jest.mock("@tanstack/react-query");
+
+jest.mock("@presentation/theme", () => ({
+  useTheme: jest.fn().mockReturnValue({
+    theme: jest.requireActual("@presentation/theme/provider").lightTheme,
+    isDark: false,
+    setIsDark: jest.fn(),
+  }),
+}));
