@@ -1,20 +1,10 @@
-import * as Sentry from "@sentry/react-native";
-
-jest.mock("@sentry/react-native");
-
-jest.mock("./navigationIntegration", () =>
-  jest.fn().mockReturnValue("navigationIntegration"),
-);
-
-import sentryInitialize from "./initialize";
-
-const initSpy = jest.spyOn(Sentry, "init");
+import { setup, spies } from "./mocks/initialize.mocks";
 
 it("SHOULD call Sentry.initialize", () => {
-  sentryInitialize();
+  setup();
 
-  expect(initSpy).toHaveBeenCalledTimes(1);
-  expect(initSpy).toHaveBeenCalledWith({
+  expect(spies.init).toHaveBeenCalledTimes(1);
+  expect(spies.init).toHaveBeenCalledWith({
     dsn: "your-sentry-dsn",
     enableNativeFramesTracking: false,
     environment: "development",

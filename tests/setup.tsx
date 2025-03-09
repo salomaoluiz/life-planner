@@ -26,7 +26,10 @@ jest.mock("@react-native-google-signin/google-signin", () => ({
   },
 }));
 
-jest.mock("@react-native-async-storage/async-storage", () => jest.fn());
+jest.mock("@react-native-async-storage/async-storage", () => ({
+  getItem: jest.fn(),
+  setItem: jest.fn(),
+}));
 
 jest.mock("@supabase/supabase-js", () => ({
   createClient: jest.fn().mockReturnValue({

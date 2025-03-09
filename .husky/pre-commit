@@ -1,2 +1,2 @@
 yarn lint-staged
-yarn test --onlyChanged --passWithNoTests
+yarn test --passWithNoTests $(git diff --name-only --cached | xargs)
