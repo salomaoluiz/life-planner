@@ -1,29 +1,25 @@
-import {
-  saveSessionSpy,
-  captureExceptionSpy,
-  setup,
-} from "./mocks/saveWebSessionUseCase";
+import { saveSessionSpy, setup } from "./mocks/saveWebSessionUseCase";
 import { BusinessError, UserNotLoggedError } from "@domain/entities/errors";
 
-it("SHOULD not save the session if the hash is undefined", async () => {
-  const result = await setup(undefined);
+it("SHOULD throw and not save the session if the hash is undefined", async () => {
+  const result = () => setup(undefined);
 
-  expect(result).toBeInstanceOf(UserNotLoggedError);
+  await expect(result).rejects.toThrow(UserNotLoggedError);
   expect(saveSessionSpy).not.toHaveBeenCalled();
 });
 
-it("SHOULD not save the session if the access token is null", async () => {
-  const result = await setup("#refresh_token=refresh");
+it("SHOULD throw and not save the session if the access token is null", async () => {
+  const result = () => setup("#refresh_token=refresh");
 
+  await expect(result).rejects.toThrow(UserNotLoggedError);
   expect(saveSessionSpy).not.toHaveBeenCalled();
-  expect(result).toBeInstanceOf(UserNotLoggedError);
 });
 
-it("SHOULD not save the session if the refresh token is null", async () => {
-  const result = await setup("#access_token=access");
+it("SHOULD throw and not save the session if the refresh token is null", async () => {
+  const result = () => setup("#access_token=access");
 
+  await expect(result).rejects.toThrow(UserNotLoggedError);
   expect(saveSessionSpy).not.toHaveBeenCalled();
-  expect(result).toBeInstanceOf(UserNotLoggedError);
 });
 
 it("SHOULD save the session if the hash is valid", async () => {
@@ -47,29 +43,11 @@ it("SHOULD throw an error if the repository throws an error", async () => {
   await expect(func).rejects.toThrow(error);
 });
 
-it("SHOULD capture an exception if the repository throws an error", async () => {
-  const error = new Error("Error logging out");
-  saveSessionSpy.mockRejectedValue(error);
-
-  function func() {
-    return setup("#access_token=access&refresh_token=refresh");
-  }
-
-  await expect(func).rejects.toThrow(error);
-
-  expect(captureExceptionSpy).toHaveBeenCalledTimes(1);
-  expect(captureExceptionSpy).toHaveBeenCalledWith({
-    cause: error,
-    message: "Error saving web session",
-    name: "saveWebSessionUseCase",
-  });
-});
-
-it("SHOULD return a BusinessError if the repository throws a BusinessError", async () => {
+it("SHOULD throw a BusinessError if the repository throws a BusinessError", async () => {
   const businessError = new BusinessError();
   saveSessionSpy.mockRejectedValue(businessError);
 
-  const result = await setup("#access_token=access&refresh_token=refresh");
+  const result = () => setup("#access_token=access&refresh_token=refresh");
 
-  expect(result).toBe(businessError);
+  await expect(result).rejects.toThrow(businessError);
 });

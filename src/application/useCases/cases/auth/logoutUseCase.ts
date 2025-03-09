@@ -1,24 +1,22 @@
 import { IUseCaseFactoryWithoutParamResponse } from "@application/useCases/types";
 import Repositories from "@domain/repositories";
-import { captureException } from "@infrastructure/monitoring";
-import { BusinessError } from "@domain/entities/errors";
+import { DefaultError } from "@domain/entities/errors";
 
 function logoutUseCase(
   repository: Repositories,
-): IUseCaseFactoryWithoutParamResponse<void | BusinessError> {
+): IUseCaseFactoryWithoutParamResponse<void> {
   return {
+    uniqueName: "auth.logout_use_case",
     async execute() {
       try {
         await repository.loginRepository.logout();
       } catch (error) {
-        if (error instanceof BusinessError) {
-          return error;
+        if (error instanceof DefaultError) {
+          error.addContext({
+            useCase: "logoutUseCase",
+          });
+          throw error;
         }
-        captureException({
-          cause: error,
-          message: "Error logging out",
-          name: "logoutUseCase",
-        });
 
         throw error;
       }

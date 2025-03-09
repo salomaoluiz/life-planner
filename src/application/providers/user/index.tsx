@@ -1,7 +1,8 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect } from "react";
 import UserProfileEntity from "@domain/entities/user/UserProfileEntity";
 import { useProviderLoader } from "@providers/loader";
 import { useCases } from "@application/useCases";
+import { useQuery } from "@infrastructure/fetcher";
 
 interface Props {
   children: React.ReactNode;
@@ -21,34 +22,32 @@ const UserContext = createContext<IUserContext | undefined>(undefined);
 
 function UserProvider(props: Props) {
   const { setIsLoading } = useProviderLoader();
-  const [logged, setLogged] = useState(false);
-  const [data, setData] = useState<UserData | undefined>(undefined);
 
-  async function getUserData() {
-    const user = await useCases.getUserUseCase.execute();
-    if (user instanceof UserProfileEntity) {
-      setLogged(true);
-      setData({ profile: user });
-      setIsLoading(false, "user");
-      return;
+  const { data, status, refetch, isFetching } = useQuery<UserProfileEntity>({
+    cacheKey: [useCases.getUserUseCase.uniqueName],
+    fetch: useCases.getUserUseCase.execute,
+    retry: false,
+  });
+
+  const getUserData = () => {
+    if (status === "success" && data) {
+      return { profile: data };
     }
+  };
 
-    setLogged(false);
-    setData(undefined);
-    setIsLoading(false, "user");
-  }
+  useEffect(() => {
+    setIsLoading(isFetching, "user");
+  }, [isFetching]);
 
   async function update() {
     setIsLoading(true, "user");
-    await getUserData();
+    await refetch();
   }
 
-  useEffect(() => {
-    getUserData();
-  }, []);
-
   return (
-    <UserContext.Provider value={{ logged, data, update }}>
+    <UserContext.Provider
+      value={{ logged: !!data, data: getUserData(), update }}
+    >
       {props.children}
     </UserContext.Provider>
   );

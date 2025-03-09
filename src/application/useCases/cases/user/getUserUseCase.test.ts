@@ -21,25 +21,11 @@ it("SHOULD throw an error if the repository throws an error", async () => {
   await expect(func).rejects.toThrow(error);
 });
 
-it("SHOULD capture an exception if the repository throws an error", async () => {
-  const error = new Error("Error getting user");
-  spies.getUser.mockRejectedValue(error);
-
-  await expect(setup().execute()).rejects.toThrow(error);
-
-  expect(spies.captureException).toHaveBeenCalledTimes(1);
-  expect(spies.captureException).toHaveBeenCalledWith({
-    name: "getUserUseCase",
-    cause: error,
-    message: "Error getting user",
-  });
-});
-
-it("SHOULD return BusinessError if the repository throws a BusinessError", async () => {
+it("SHOULD throw BusinessError if the repository throws a BusinessError", async () => {
   const businessError = new BusinessError();
   spies.getUser.mockRejectedValue(businessError);
 
-  const result = await setup().execute();
+  const result = () => setup().execute();
 
-  expect(result).toBe(businessError);
+  await expect(result).rejects.toThrow(businessError);
 });

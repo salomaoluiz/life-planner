@@ -1,24 +1,33 @@
-import { useCases } from "@application/useCases";
 import UserProfileEntity from "@domain/entities/user/UserProfileEntity";
-import { BusinessError } from "@domain/entities/errors";
 import { View } from "react-native";
 import React from "react";
 import { UserProvider, useUser } from "@application/providers/user";
 import { render } from "@tests";
 import { renderHook } from "@testing-library/react-native";
 import * as loader from "@providers/loader";
+import * as fetcher from "@infrastructure/fetcher";
 
-jest.mock("@application/useCases");
+jest.mock("@infrastructure/fetcher");
 
 // #region Mocks
-const getUserUseCaseSuccessResponse = new UserProfileEntity({
-  id: "e301a3a9-94a0-4e58-ac6f-54aec8c6b248",
-  name: "John Doe",
-  email: "john.doe@gmail.com",
-  photoUrl: "https://example.com/photo.jpg",
-});
+const useQuerySuccessResponse = {
+  data: new UserProfileEntity({
+    id: "e301a3a9-94a0-4e58-ac6f-54aec8c6b248",
+    name: "John Doe",
+    email: "john.doe@gmail.com",
+    photoUrl: "https://example.com/photo.jpg",
+  }),
+  status: "success",
+  refetch: jest.fn(),
+  isFetching: false,
+};
 
-const getUserUseCaseErrorResponse = new BusinessError();
+const useQueryPendingResponse = {
+  data: undefined,
+  status: "pending",
+  refetch: jest.fn(),
+  isFetching: true,
+};
 
 const useProviderLoaderResponse = {
   isLoading: false,
@@ -26,7 +35,10 @@ const useProviderLoaderResponse = {
 };
 // #endregion Mocks
 
-const getUserUseCaseSpy = jest.spyOn(useCases.getUserUseCase, "execute");
+const useQuerySpy = jest
+  .spyOn(fetcher, "useQuery")
+  .mockReturnValue(useQueryPendingResponse as never);
+
 jest
   .spyOn(loader, "useProviderLoader")
   .mockReturnValue(useProviderLoaderResponse);
@@ -44,13 +56,13 @@ function setupHook() {
 }
 
 const spies = {
-  getUserUseCase: getUserUseCaseSpy,
+  useQuery: useQuerySpy,
 };
 
 const mocks = {
-  getUserUseCase: {
-    errorResponse: getUserUseCaseErrorResponse,
-    successResponse: getUserUseCaseSuccessResponse,
+  useQuery: {
+    successResponse: useQuerySuccessResponse,
+    pendingResponse: useQueryPendingResponse,
   },
 };
 
