@@ -42,3 +42,5 @@ jest.mock("@supabase/supabase-js", () => ({
     },
   }),
 }));
+
+jest.mock("@tanstack/react-query");
