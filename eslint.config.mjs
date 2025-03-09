@@ -3,12 +3,14 @@ import pluginJs from "@eslint/js";
 import { configs as tsEslintConfig } from "typescript-eslint";
 import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
 import eslintPluginImportX from "eslint-plugin-import-x";
+import pluginQuery from "@tanstack/eslint-plugin-query";
 
 export default [
   { files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"] },
   { languageOptions: { globals: globals.browser } },
   pluginJs.configs.recommended,
   ...tsEslintConfig.recommended,
+  ...pluginQuery.configs["flat/recommended"],
   eslintPluginPrettierRecommended,
   eslintPluginImportX.flatConfigs.recommended,
   eslintPluginImportX.flatConfigs.typescript,
