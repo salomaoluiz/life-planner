@@ -11,6 +11,7 @@ jest.mock("react-native-paper", () => {
     Button: View,
     Switch: View,
     Text: View,
+    Icon: View,
     useTheme: jest.fn(),
     PaperProvider: ({ children, ...props }: { children: React.ReactNode }) => (
       <View {...props}>{children}</View>
