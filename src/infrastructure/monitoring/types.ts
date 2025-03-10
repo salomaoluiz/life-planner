@@ -1,5 +1,4 @@
 import React from "react";
-import { GenericError } from "@domain/entities/errors";
 
 export interface AddBreadcrumbProps {
   message: string;
@@ -40,7 +39,6 @@ export interface ErrorBoundaryFallBackProps {
 export interface ErrorBoundaryProps {
   children: React.ReactNode;
   FallbackComponent: (props: ErrorBoundaryFallBackProps) => React.ReactNode;
-  beforeCapture: (scope: unknown, error: GenericError) => void;
 }
 
 export type ErrorBoundaryType = (props: ErrorBoundaryProps) => React.ReactNode;
