@@ -5,7 +5,11 @@ import React from "react";
 import { ErrorBoundaryProps } from "@infrastructure/monitoring/types";
 import { GenericError } from "@domain/entities/errors";
 
-function SentryErrorBoundary(props: ErrorBoundaryProps) {
+function SentryErrorBoundary(
+  props: ErrorBoundaryProps & {
+    beforeCapture: (scope: unknown, error: GenericError) => void;
+  },
+) {
   const { children, FallbackComponent, beforeCapture } = props;
 
   function FallbackRender({
@@ -15,11 +19,11 @@ function SentryErrorBoundary(props: ErrorBoundaryProps) {
     return <FallbackComponent retry={resetError} error={error} />;
   }
 
-  const handleBeforeCapture = (scope: unknown, error: unknown) => {
+  function handleBeforeCapture(scope: unknown, error: unknown) {
     if (error instanceof GenericError) {
       beforeCapture(scope, error);
     }
-  };
+  }
 
   return (
     <ErrorBoundary
