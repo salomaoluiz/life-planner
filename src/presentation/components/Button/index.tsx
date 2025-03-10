@@ -1,10 +1,14 @@
 import { styles } from "./styles";
 import { Button as PaperButton } from "react-native-paper";
+import React from "react";
+import getCustomStyles, { CustomStyles } from "./styles/customStyles";
 
 export interface ButtonProps {
   label: string;
   onPress: () => void;
   testID: string;
+  icon?: () => React.ReactNode;
+  customStyles?: CustomStyles;
 }
 
 export enum ButtonMode {
@@ -14,12 +18,16 @@ export enum ButtonMode {
 }
 
 function ButtonBase(props: ButtonProps & { mode: ButtonMode }) {
+  const customStyles = getCustomStyles(props.customStyles);
+
   return (
     <PaperButton
       mode={props.mode}
       onPress={props.onPress}
-      style={styles.buttonBase}
+      style={[styles.buttonBase, customStyles.styles]}
       testID={props.testID}
+      icon={props.icon}
+      {...customStyles.props}
     >
       {props.label}
     </PaperButton>

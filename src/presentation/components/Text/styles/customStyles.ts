@@ -5,11 +5,11 @@ export interface CustomStyles {
   color?: string;
 }
 
-const getCustomStyles = (customStyles?: CustomStyles): TextStyle => {
+function getCustomStyles(customStyles?: CustomStyles): TextStyle {
   return {
     textAlign: customStyles?.textAlign,
     color: customStyles?.color,
   };
-};
+}
 
 export default getCustomStyles;
