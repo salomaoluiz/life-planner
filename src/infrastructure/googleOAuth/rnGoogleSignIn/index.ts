@@ -1,9 +1,3 @@
-import initialize from "./initialize";
-import signIn from "./signIn";
-import signOut from "./signOut";
-
-export default {
-  initialize,
-  signIn,
-  signOut,
-};
+export { default as initialize } from "./initialize";
+export { default as signIn } from "./signIn";
+export { default as signOut } from "./signOut";

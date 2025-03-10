@@ -1,6 +1,6 @@
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
-import RNGoogleSignIn from "@infrastructure/googleOAuth/rnGoogleSignIn";
+import * as RNGoogleSignIn from "@infrastructure/googleOAuth/rnGoogleSignIn";
 import * as monitoring from "@infrastructure/monitoring";
 
 // #region mocks

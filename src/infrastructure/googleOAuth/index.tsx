@@ -1,15 +1,15 @@
-import RNGoogleSignIn from "./rnGoogleSignIn";
+import * as RNGoogleSignIn from "./rnGoogleSignIn";
 import { SignInResult } from "./types";
 import { isWeb } from "@utils/platform";
 
-export function initialize() {
+function initialize() {
   if (isWeb()) {
     return;
   }
   RNGoogleSignIn.initialize();
 }
 
-export async function signIn(): Promise<SignInResult> {
+async function signIn(): Promise<SignInResult> {
   if (isWeb()) {
     throw new Error(
       "This library is not supported on web, use the supabase directly",
@@ -19,7 +19,7 @@ export async function signIn(): Promise<SignInResult> {
   return RNGoogleSignIn.signIn();
 }
 
-export async function signOut(): Promise<void> {
+async function signOut(): Promise<void> {
   if (isWeb()) {
     throw new Error(
       "This library is not supported on web, use the supabase directly",
@@ -28,10 +28,4 @@ export async function signOut(): Promise<void> {
   return RNGoogleSignIn.signOut();
 }
 
-const GoogleOAuth = {
-  initialize,
-  signIn,
-  signOut,
-};
-
-export { GoogleOAuth };
+export { initialize, signIn, signOut };

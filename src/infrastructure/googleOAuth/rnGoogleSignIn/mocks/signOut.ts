@@ -1,4 +1,4 @@
-import RNGoogleSignIn from "@infrastructure/googleOAuth/rnGoogleSignIn";
+import * as RNGoogleSignIn from "@infrastructure/googleOAuth/rnGoogleSignIn";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import * as monitoring from "@infrastructure/monitoring";
 
