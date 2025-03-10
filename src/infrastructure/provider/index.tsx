@@ -1,4 +1,4 @@
-import { GoogleOAuth } from "@infrastructure/googleOAuth";
+import * as GoogleOAuth from "@infrastructure/googleOAuth";
 import React from "react";
 import { FetcherProvider } from "@infrastructure/fetcher";
 
