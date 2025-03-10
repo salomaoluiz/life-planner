@@ -1,6 +1,7 @@
 import { setup, defaultProps } from "./mocks";
 import { screen, act } from "@tests";
 import { ButtonMode } from "@components/Button/index";
+import Icon from "@components/Icon";
 
 it("SHOULD render the button with the correct props", () => {
   setup();
@@ -44,4 +45,30 @@ it("SHOULD throw an error if an invalid mode is passed", () => {
   const func = () => setup({ mode: "invalid" as ButtonMode });
 
   expect(func).toThrow("Invalid mode");
+});
+
+it("SHOULD render the button with the correct icon", () => {
+  setup({
+    icon: () => (
+      <Icon testID={"default-icon"} name={"google"} size={20} color={"black"} />
+    ),
+  });
+
+  const component = screen.getByTestId(defaultProps.testID);
+
+  expect(component.props.icon()).toEqual(
+    <Icon testID={"default-icon"} name={"google"} size={20} color={"black"} />,
+  );
+});
+
+it("SHOULD render the button with custom styles", () => {
+  setup({ customStyles: { textColor: "red", backgroundColor: "blue" } });
+
+  const component = screen.getByTestId(defaultProps.testID);
+
+  expect(component.props).toEqual({
+    ...component.props,
+    textColor: "red",
+    buttonColor: "blue",
+  });
 });
