@@ -3,27 +3,32 @@
 
 import { View } from "react-native";
 import { useTranslation, useTranslationLocale } from "@presentation/i18n";
-import { router } from "expo-router";
 import { Button, Switch, Text } from "@components";
 import { useTheme } from "@presentation/theme";
 import { useEffect } from "react";
-import { supabase } from "@infrastructure/supabase";
+import { useCases } from "@application/useCases";
+import { useUser } from "@application/providers/user";
+import { useMutation } from "@infrastructure/fetcher";
 
 function Home() {
   const { t } = useTranslation();
   const { availableLanguages, changeLocale, getLocale } =
     useTranslationLocale();
-  const { setIsDark, isDark } = useTheme();
+  const { update } = useUser();
+
+  const { mutate, status } = useMutation<void, void>({
+    cacheKey: [useCases.logoutUseCase.uniqueName],
+    fetch: useCases.logoutUseCase.execute,
+  });
 
   useEffect(() => {
-    const checkLogin = async () => {
-      const session = await supabase.auth.getSession();
-      const user = await supabase.auth.getUser();
-      console.debug({ session, user });
-    };
+    if (status === "success") {
+      update();
+    }
+  }, [status]);
 
-    checkLogin();
-  }, []);
+  const { setIsDark, isDark } = useTheme();
+
   return (
     <View
       style={{
@@ -48,8 +53,8 @@ function Home() {
       <Button.Outlined
         testID={"go-to-login"}
         label={"Go To Login"}
-        onPress={() => {
-          router.navigate("./login");
+        onPress={async () => {
+          mutate();
         }}
       />
       <Text.Caption
