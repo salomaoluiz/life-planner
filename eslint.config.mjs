@@ -53,6 +53,46 @@ export default [
         },
       ],
       "func-style": ["warn", "declaration"],
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["../../*", "../../"],
+              message: "Please use absolute imports",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ["**/*.{js,ts,tsx,jsx}"],
+    ignores: ["src/infrastructure/**/*", "src/presentation/i18n/react-18n"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: [
+                "@sentry/react-native",
+                "@tanstack/react-query",
+                "@react-native-google-signin/google-signin",
+                "@react-native-async-storage/async-storage",
+                "@supabase/supabase-js",
+              ],
+              message:
+                "This library is in the infrastructure folder, please import it from there.",
+            },
+            {
+              group: ["react-i18next"],
+              message:
+                "This library is in the presentation folder, please import it from there.",
+            },
+          ],
+        },
+      ],
     },
   },
 ];

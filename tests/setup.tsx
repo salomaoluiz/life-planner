@@ -56,3 +56,14 @@ jest.mock("@presentation/theme", () => ({
     setIsDark: jest.fn(),
   }),
 }));
+
+jest.mock("@presentation/i18n", () => ({
+  useTranslation: jest.fn().mockReturnValue({
+    t: jest.fn().mockImplementation((key, params) => {
+      if (params) {
+        return `${key} ${JSON.stringify(params)}`;
+      }
+      return key;
+    }),
+  }),
+}));
