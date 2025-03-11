@@ -1,4 +1,4 @@
-import RNGoogleSignIn from "./rnGoogleSignIn";
+import * as RNGoogleSignIn from "./rnGoogleSignIn";
 import * as platform from "@utils/platform";
 import { initialize, signIn, signOut } from "./index";
 

@@ -68,7 +68,10 @@ export default [
   },
   {
     files: ["**/*.{js,ts,tsx,jsx}"],
-    ignores: ["src/infrastructure/**/*", "src/presentation/i18n/react-18n"],
+    ignores: [
+      "src/infrastructure/**/*",
+      "src/presentation/i18n/react-i18n/**/*",
+    ],
     rules: {
       "no-restricted-imports": [
         "error",
