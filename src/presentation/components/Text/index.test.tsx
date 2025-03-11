@@ -51,10 +51,17 @@ it.each<{
 
     const component = screen.getByTestId(defaultProps.testID);
 
-    expect(component.props.style).toEqual({
-      fontSize: lightTheme.sizes.fontSizes[fontSize],
-      lineHeight: lightTheme.sizes.lineHeights[lineHeight],
-    });
+    expect(component.props.style).toEqual([
+      {
+        color: lightTheme.colors.onPrimary,
+        fontSize: lightTheme.sizes.fontSizes[fontSize],
+        lineHeight: lightTheme.sizes.lineHeights[lineHeight],
+      },
+      {
+        color: undefined,
+        textAlign: undefined,
+      },
+    ]);
   },
 );
 

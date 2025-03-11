@@ -5,14 +5,18 @@ exports[`SHOULD render "PresentationProviders", "ApplicationProviders" and "Load
   testID="loader-provider"
 >
   <View
-    testID="application-providers"
+    testID="infrastructure-providers"
   >
     <View
-      testID="presentation-providers"
+      testID="application-providers"
     >
       <View
-        testID="children-element"
-      />
+        testID="presentation-providers"
+      >
+        <View
+          testID="children-element"
+        />
+      </View>
     </View>
   </View>
 </View>

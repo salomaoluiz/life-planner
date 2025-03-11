@@ -6,6 +6,7 @@ import { render } from "@tests";
 import { ThemeProvider } from "@presentation/theme";
 
 jest.mock("@presentation/theme/paper");
+jest.unmock("@presentation/theme");
 
 const providerLoaderResult = {
   setIsLoading: jest.fn(),
