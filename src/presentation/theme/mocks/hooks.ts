@@ -5,6 +5,8 @@ import * as paper from "@presentation/theme/paper/hook";
 import { lightTheme } from "@presentation/theme/provider";
 
 jest.mock("@presentation/theme/paper/hook");
+jest.unmock("@presentation/theme");
+
 const providerLoaderResult = {
   setIsLoading: jest.fn(),
   isLoading: false,

@@ -4,6 +4,9 @@ import { View } from "react-native";
 import { render, screen } from "@tests";
 import PresentationProviders from "./";
 
+jest.unmock("@presentation/i18n");
+jest.unmock("@presentation/theme");
+
 jest
   .spyOn(i18n, "I18NProvider")
   .mockImplementation(({ children }) => (
