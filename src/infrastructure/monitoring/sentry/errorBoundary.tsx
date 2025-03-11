@@ -3,9 +3,14 @@ import { FallbackRender } from "@sentry/react";
 
 import React from "react";
 import { ErrorBoundaryProps } from "@infrastructure/monitoring/types";
+import { GenericError } from "@domain/entities/errors";
 
-function SentryErrorBoundary(props: ErrorBoundaryProps) {
-  const { children, FallbackComponent } = props;
+function SentryErrorBoundary(
+  props: ErrorBoundaryProps & {
+    beforeCapture: (scope: unknown, error: GenericError) => void;
+  },
+) {
+  const { children, FallbackComponent, beforeCapture } = props;
 
   function FallbackRender({
     error,
@@ -14,7 +19,20 @@ function SentryErrorBoundary(props: ErrorBoundaryProps) {
     return <FallbackComponent retry={resetError} error={error} />;
   }
 
-  return <ErrorBoundary fallback={FallbackRender}>{children}</ErrorBoundary>;
+  function handleBeforeCapture(scope: unknown, error: unknown) {
+    if (error instanceof GenericError) {
+      beforeCapture(scope, error);
+    }
+  }
+
+  return (
+    <ErrorBoundary
+      fallback={FallbackRender}
+      beforeCapture={handleBeforeCapture}
+    >
+      {children}
+    </ErrorBoundary>
+  );
 }
 
 export default SentryErrorBoundary;

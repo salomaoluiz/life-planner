@@ -9,6 +9,12 @@ import * as loaderProvider from "@providers/loader";
 
 import useInitializeRouter from "./useInitializeRouter";
 
+jest.mock("@sentry/react-native", () => ({
+  reactNavigationIntegration: jest.fn().mockReturnValue({
+    registerNavigationContainer: jest.fn(),
+  }),
+}));
+
 const initializeMonitoringSpy = jest.spyOn(monitoring, "initializeMonitoring");
 jest.spyOn(loaderProvider, "useProviderLoader").mockReturnValue({
   isLoading: true,

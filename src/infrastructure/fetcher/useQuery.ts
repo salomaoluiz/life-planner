@@ -1,7 +1,6 @@
 import { UseQuery } from "@infrastructure/fetcher/types";
 import { useReactQuery } from "@infrastructure/fetcher/reactQuery";
 import { BusinessError, GenericError } from "@domain/entities/errors";
-import { captureException } from "@infrastructure/monitoring";
 
 function useQuery<Response>(
   props: Parameters<UseQuery<Response>>[0],
@@ -24,7 +23,7 @@ function useQuery<Response>(
 
     if (error instanceof BusinessError) {
       error.addContext({
-        cacheKey: props.cacheKey.join("-"),
+        cacheString: props.cacheKey.join("-"),
       });
 
       return error;
@@ -33,14 +32,8 @@ function useQuery<Response>(
     const genericError = new GenericError();
     genericError.message = error?.message || "Without error message";
     genericError.addContext({
-      cacheKey: props.cacheKey.join("-"),
-    });
-
-    captureException({
-      name: "useQuery-failure",
-      cause: genericError,
-      message: genericError.message,
-      stack: genericError?.stack,
+      ...error.context,
+      cacheString: props.cacheKey.join("-"),
     });
 
     throw genericError;

@@ -1,5 +1,5 @@
-import UserEntity from "@domain/entities/user/userEntity";
+import UserProfileEntity from "@domain/entities/user/UserProfileEntity";
 
 export type UserRepository = {
-  getUser(): Promise<UserEntity>;
+  getUser(): Promise<UserProfileEntity>;
 };

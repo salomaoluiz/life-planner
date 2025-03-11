@@ -27,5 +27,6 @@ export {
   screen,
   act,
   waitFor,
+  fireEvent,
 } from "@testing-library/react-native";
 export { customRender as render, suppressConsoleError };

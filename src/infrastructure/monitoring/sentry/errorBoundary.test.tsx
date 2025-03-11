@@ -1,4 +1,5 @@
-import { setup, mocks, screen } from "./mocks/errorBoundary.mock";
+import { setup, mocks, spies, screen } from "./mocks/errorBoundary.mocks";
+import { GenericError } from "@domain/entities/errors";
 
 it("SHOULD render correctly", () => {
   setup();
@@ -24,4 +25,29 @@ it("SHOULD pass the fallback as props correctly", () => {
       retry={fakeFallbackProp.resetError}
     />,
   );
+});
+
+it('SHOULD call "beforeCapture" correctly if the error is an instance of "GenericError"', () => {
+  setup();
+
+  const sentryErrorBoundary = screen.getByTestId("sentry-error-boundary");
+  const fakeScope = {};
+  const fakeError = new GenericError();
+
+  sentryErrorBoundary.props.beforeCapture(fakeScope, fakeError);
+
+  expect(spies.beforeCapture).toHaveBeenCalledTimes(1);
+  expect(spies.beforeCapture).toHaveBeenCalledWith(fakeScope, fakeError);
+});
+
+it('SHOULD NOT call "beforeCapture" if the error is NOT an instance of "GenericError"', () => {
+  setup();
+
+  const sentryErrorBoundary = screen.getByTestId("sentry-error-boundary");
+  const fakeScope = {};
+  const fakeError = new Error("some error");
+
+  sentryErrorBoundary.props.beforeCapture(fakeScope, fakeError);
+
+  expect(spies.beforeCapture).not.toHaveBeenCalled();
 });

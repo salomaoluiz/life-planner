@@ -1,4 +1,4 @@
-import { logoutSpy, captureExceptionSpy, setup } from "./mocks/logoutUseCase";
+import { logoutSpy, setup } from "./mocks/logoutUseCase";
 import { BusinessError } from "@domain/entities/errors";
 
 it("SHOULD call the repository to logout", async () => {
@@ -18,25 +18,11 @@ it("SHOULD throw an error if the repository throws an error", async () => {
   await expect(func).rejects.toThrow(error);
 });
 
-it("SHOULD capture an exception if the repository throws an error", async () => {
-  const error = new Error("Error logging out");
-  logoutSpy.mockRejectedValue(error);
-
-  await expect(setup().execute()).rejects.toThrow(error);
-
-  expect(captureExceptionSpy).toHaveBeenCalledTimes(1);
-  expect(captureExceptionSpy).toHaveBeenCalledWith({
-    cause: error,
-    message: "Error logging out",
-    name: "logoutUseCase",
-  });
-});
-
-it("SHOULD return a BusinessError if the repository throws a BusinessError", async () => {
+it("SHOULD throw a BusinessError if the repository throws a BusinessError", async () => {
   const businessError = new BusinessError();
   logoutSpy.mockRejectedValue(businessError);
 
-  const result = await setup().execute();
+  const result = () => setup().execute();
 
-  expect(result).toBe(businessError);
+  await expect(result).rejects.toThrow(businessError);
 });

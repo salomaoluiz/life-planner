@@ -16,7 +16,5 @@ it("SHOULD throw an GenericError if signOut fails", async () => {
     return setup();
   }
 
-  await expect(func).rejects.toThrow(
-    new GenericError(mocks.signOutError.error.message),
-  );
+  await expect(func).rejects.toThrow(new GenericError());
 });

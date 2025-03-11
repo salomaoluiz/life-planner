@@ -1,12 +1,13 @@
 import { DefaultError, ErrorCodes } from "./errors";
 
 class BusinessError extends DefaultError {
-  constructor(message: string) {
+  constructor() {
     super({
-      message: message,
       code: ErrorCodes.BusinessError,
     });
+
     this.name = "BusinessError";
+    this.message = "Occurred a business error";
   }
 }
 

@@ -1,6 +1,6 @@
 import { Dimensions } from "react-native";
 
-function getScaleFunctions() {
+function getScaleRatio() {
   const screenWidth = Dimensions.get("screen").width;
 
   const isTablet = screenWidth >= 600;
@@ -9,6 +9,12 @@ function getScaleFunctions() {
   const scaleFactor = isDesktop ? 1.6 : isTablet ? 1.3 : 1;
   const spacingFactor = isDesktop ? 1.8 : isTablet ? 1.4 : 1;
   const borderFactor = isDesktop ? 1.5 : isTablet ? 1.2 : 1;
+
+  return { scaleFactor, spacingFactor, borderFactor };
+}
+
+function getScaleFunctions() {
+  const { scaleFactor, spacingFactor, borderFactor } = getScaleRatio();
 
   function scaleFontSize(size: number) {
     return Math.round(size * scaleFactor);
@@ -37,4 +43,4 @@ function rescaleSizes<R>(object: R, scaleFunction: (size: number) => number) {
   return scaledObject as R;
 }
 
-export { getScaleFunctions, rescaleSizes };
+export { getScaleFunctions, rescaleSizes, getScaleRatio };

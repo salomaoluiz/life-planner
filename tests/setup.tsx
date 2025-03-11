@@ -1,6 +1,7 @@
 import React from "react";
 
 import { load } from "@expo/env";
+
 load(process.cwd(), { silent: true });
 
 jest.mock("react-native-paper", () => {
@@ -10,6 +11,7 @@ jest.mock("react-native-paper", () => {
     Button: View,
     Switch: View,
     Text: View,
+    Icon: View,
     useTheme: jest.fn(),
     PaperProvider: ({ children, ...props }: { children: React.ReactNode }) => (
       <View {...props}>{children}</View>
@@ -44,3 +46,24 @@ jest.mock("@supabase/supabase-js", () => ({
 }));
 
 jest.mock("@tanstack/react-query");
+
+jest.mock("@sentry/react-native");
+
+jest.mock("@presentation/theme", () => ({
+  useTheme: jest.fn().mockReturnValue({
+    theme: jest.requireActual("@presentation/theme/provider").lightTheme,
+    isDark: false,
+    setIsDark: jest.fn(),
+  }),
+}));
+
+jest.mock("@presentation/i18n", () => ({
+  useTranslation: jest.fn().mockReturnValue({
+    t: jest.fn().mockImplementation((key, params) => {
+      if (params) {
+        return `${key} ${JSON.stringify(params)}`;
+      }
+      return key;
+    }),
+  }),
+}));

@@ -1,5 +1,5 @@
 const errors = {
-  default: {
+  generic: {
     title: "Something went wrong",
     description: "An unexpected error occurred. Please try again later.",
     button: {
@@ -14,11 +14,6 @@ const errors = {
     },
     default: {
       title: "We're sorry, we didn't expect this to happen",
-    },
-  },
-  generic: {
-    default: {
-      title: "An error occurred",
     },
   },
 };

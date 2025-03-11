@@ -1,9 +1,8 @@
 import { DefaultError, ErrorCodes } from "./errors";
 
 class GenericError extends DefaultError {
-  constructor(message: string) {
+  constructor() {
     super({
-      message: message,
       code: ErrorCodes.TechnicalError,
     });
     this.name = "GenericError";
