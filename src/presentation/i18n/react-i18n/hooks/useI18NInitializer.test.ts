@@ -3,7 +3,7 @@ import useI18NInitializer from "./useI18NInitializer";
 import * as loaderProvider from "@providers/loader";
 import i18next from "i18next";
 import { initReactI18next } from "react-i18next";
-import { enUS, ptBR } from "@presentation/i18n/translations";
+import { translations } from "@presentation/i18n/translations";
 import { waitFor } from "@testing-library/react-native";
 
 jest.mock("i18next");
@@ -40,8 +40,8 @@ it("SHOULD init with correct params", () => {
   expect(initSpy).toHaveBeenCalledTimes(1);
   expect(initSpy).toHaveBeenCalledWith({
     resources: {
-      "en-US": enUS,
-      "pt-BR": ptBR,
+      "en-US": translations["en-US"],
+      "pt-BR": translations["pt-BR"],
     },
     lng: i18next.language,
     fallbackLng: "en-US",

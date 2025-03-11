@@ -1,6 +1,7 @@
 import {
   ReactI18NPProvider,
   reactI18NHooks,
+  reactI18NTranslate,
 } from "@presentation/i18n/react-i18n";
 import React from "react";
 
@@ -18,4 +19,8 @@ export function useTranslation() {
 
 export function useTranslationLocale() {
   return reactI18NHooks.useTranslationLocale();
+}
+
+export function translate(key: string, params?: Record<string, string>) {
+  return reactI18NTranslate(key, params);
 }
