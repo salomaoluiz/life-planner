@@ -38,6 +38,7 @@ export default {
       [
         "@sentry/react-native/expo",
         {
+          note: process.env.EXPO_PUBLIC_SENTRY_AUTH_TOKEN,
           organization: process.env.EXPO_PUBLIC_SENTRY_ORGANIZATION,
           project: process.env.EXPO_PUBLIC_SENTRY_PROJECT,
           url: process.env.EXPO_PUBLIC_SENTRY_URL,

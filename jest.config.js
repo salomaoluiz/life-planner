@@ -6,6 +6,11 @@ module.exports = {
   transformIgnorePatterns: ["jest-runner"],
   testPathIgnorePatterns: ["/node_modules/", "/tests/"],
   moduleDirectories: ["node_modules", "src"],
+  collectCoverageFrom: [
+    "src/**/*.{js,jsx,ts,tsx}", // Specify which files to collect coverage from
+    "!src/**/*.d.ts", // Exclude TypeScript declaration files
+    "!src/**/mocks/**/*.stories.tsx", // Exclude storybook stories
+  ],
   coverageThreshold: {
     global: {
       branches: 90,

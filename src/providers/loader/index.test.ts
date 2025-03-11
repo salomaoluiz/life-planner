@@ -15,6 +15,7 @@ it("SHOULD keep loading as false WHEN no context is loading", () => {
   act(() => {
     result.current.setIsLoading(false, "i18n");
     result.current.setIsLoading(false, "theme");
+    result.current.setIsLoading(false, "user");
   });
 
   expect(result.current.isLoading).toBeFalsy();
@@ -34,6 +35,7 @@ it("SHOULD have defined the loader contexts default values", () => {
   expect(loaderContexts).toEqual({
     i18n: true,
     theme: true,
+    user: true,
   });
 });
 
