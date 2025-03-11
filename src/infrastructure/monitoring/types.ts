@@ -23,6 +23,14 @@ export type CaptureMessage = (
   extra?: Record<string, unknown>,
 ) => void;
 
+export type SetContext = (key: string, value: Record<string, unknown>) => void;
+export type SetTag = (key: string, value: string) => void;
+
+interface SetUserProps {
+  id: string;
+}
+export type SetUser = (props: SetUserProps) => void;
+
 export interface ErrorBoundaryFallBackProps {
   error: unknown;
   retry: () => void;

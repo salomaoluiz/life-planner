@@ -27,7 +27,5 @@ it("SHOULD throw an GenericError if signIn fails", async () => {
     return setup();
   }
 
-  await expect(func).rejects.toThrow(
-    new GenericError(mocks.signInError.error.message),
-  );
+  await expect(func).rejects.toThrow(new GenericError());
 });

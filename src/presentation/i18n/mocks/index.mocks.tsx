@@ -10,6 +10,7 @@ import {
 } from "@presentation/i18n";
 
 jest.mock("@presentation/i18n/react-i18n");
+jest.unmock("@presentation/i18n");
 
 const reactI18NUseTranslationSpy = jest.spyOn(reactI18NHooks, "useTranslation");
 const reactI18NUseTranslationLocaleSpy = jest.spyOn(

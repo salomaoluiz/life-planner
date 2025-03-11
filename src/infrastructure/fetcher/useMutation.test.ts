@@ -33,7 +33,7 @@ it("SHOULD fetch and return in error", async () => {
     expect(error.message).toEqual("Error message");
     expect(error.stack).toEqual(expect.any(String));
     expect(error.context).toEqual({
-      cacheKey: "CacheKey1-CacheKey2",
+      cacheString: "CacheKey1-CacheKey2",
       variables: mocks.errorResponse.variables,
     });
   }
@@ -52,7 +52,7 @@ it("SHOULD fetch and return in business error", async () => {
   expect(result.current.error!.stack).toEqual(expect.any(String));
   expect(result.current.error!.message).toEqual(businessError.message);
   expect(result.current.error!.context).toEqual({
-    cacheKey: "CacheKey1-CacheKey2",
+    cacheString: "CacheKey1-CacheKey2",
     variables: mocks.businessErrorResponse.variables,
   });
   expect(result.current.data).toBeNull();
@@ -80,7 +80,7 @@ it("SHOULD fetch and return in error without message", async () => {
 
     expect(error.message).toEqual("Without error message");
     expect(error.context).toEqual({
-      cacheKey: "CacheKey1-CacheKey2",
+      cacheString: "CacheKey1-CacheKey2",
       variables: mocks.errorWithoutMessageResponse.variables,
     });
     expect(error.stack).toEqual(expect.any(String));
@@ -99,26 +99,6 @@ it("SHOULD return in pending", async () => {
   expect(result.current.error).toBeNull();
   expect(result.current.isFetching).toBeTruthy();
   expect(result.current.status).toBe("pending");
-});
-
-it('SHOULD call "captureException" with the error', async () => {
-  spies.useReactMutation.mockReturnValue(mocks.errorResponse as never);
-
-  try {
-    setup({
-      cacheKey: ["CacheKey1", "CacheKey2"],
-      fetch: spies.fetch,
-    });
-  } catch (e) {
-    const error = e as GenericError;
-
-    expect(spies.captureException).toHaveBeenCalledWith({
-      name: "useMutation-failure",
-      cause: error,
-      message: "Error message",
-      stack: expect.any(String),
-    });
-  }
 });
 
 it("SHOULD call useMutation with default params", async () => {

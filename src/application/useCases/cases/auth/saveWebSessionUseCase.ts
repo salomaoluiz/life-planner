@@ -1,20 +1,18 @@
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import Repositories from "@domain/repositories";
-import { captureException } from "@infrastructure/monitoring";
-import { BusinessError, UserNotLoggedError } from "@domain/entities/errors";
+import { DefaultError, UserNotLoggedError } from "@domain/entities/errors";
 
 type Hash = string | undefined;
 
-type Response = boolean | BusinessError;
-
 function saveWebSessionUseCase(
   repositories: Repositories,
-): IUseCaseFactoryWithParamResponse<Hash, Response> {
+): IUseCaseFactoryWithParamResponse<Hash, void> {
   return {
-    async execute(hash: Hash): Promise<Response> {
+    uniqueName: "auth.save_web_session_use_case",
+    async execute(hash: Hash): Promise<void> {
       try {
         if (hash === undefined) {
-          return new UserNotLoggedError();
+          throw new UserNotLoggedError();
         }
 
         const params = new URLSearchParams(hash.replace("#", "?"));
@@ -22,24 +20,24 @@ function saveWebSessionUseCase(
         const refreshToken = params.get("refresh_token");
 
         if (accessToken === null || refreshToken === null) {
-          return new UserNotLoggedError();
+          throw new UserNotLoggedError();
         }
 
         await repositories.loginRepository.saveSession({
           accessToken,
           refreshToken,
         });
-        return true;
       } catch (error) {
-        if (error instanceof BusinessError) {
-          return error;
-        }
+        if (error instanceof DefaultError) {
+          error.addContext({
+            useCase: "saveWebSessionUseCase",
+            useCaseVariable: {
+              hash,
+            },
+          });
 
-        captureException({
-          name: "saveWebSessionUseCase",
-          cause: error,
-          message: "Error saving web session",
-        });
+          throw error;
+        }
 
         throw error;
       }

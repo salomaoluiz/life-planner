@@ -1,8 +1,5 @@
-import * as monitoring from "@infrastructure/monitoring";
 import loginWithGoogleUseCase from "@application/useCases/cases/auth/loginWithGoogleUseCase";
 import { repositoriesMocks } from "@data/repositories/mocks";
-
-const captureExceptionSpy = jest.spyOn(monitoring, "captureException");
 
 const loginWithGoogleSpy = jest.fn();
 
@@ -22,4 +19,4 @@ function setup() {
   return loginWithGoogleUseCase(repositories);
 }
 
-export { setup, captureExceptionSpy, loginWithGoogleSpy };
+export { setup, loginWithGoogleSpy };

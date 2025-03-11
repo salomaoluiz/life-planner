@@ -11,7 +11,7 @@ function userDatasourceImpl(): UserDatasource {
         if (response.error.name === "AuthSessionMissingError") {
           throw new UserNotLoggedError();
         }
-        throw new GenericError(response.error.message);
+        throw new GenericError();
       }
 
       const user = response.data.user.user_metadata;

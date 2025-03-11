@@ -1,27 +1,22 @@
 import { IUseCaseFactoryWithoutParamResponse } from "@application/useCases/types";
-import { captureException } from "@infrastructure/monitoring";
 import Repositories from "@domain/repositories";
-import { BusinessError } from "@domain/entities/errors";
-
-type LoginWithGoogleUseCaseResponse = void | BusinessError;
+import { DefaultError } from "@domain/entities/errors";
 
 function loginWithGoogleUseCase(
   repositories: Repositories,
-): IUseCaseFactoryWithoutParamResponse<LoginWithGoogleUseCaseResponse> {
+): IUseCaseFactoryWithoutParamResponse<void> {
   return {
+    uniqueName: "auth.login_with_google_use_case",
     execute: async () => {
       try {
         await repositories.loginRepository.loginWithGoogle();
       } catch (error) {
-        if (error instanceof BusinessError) {
-          return error;
+        if (error instanceof DefaultError) {
+          error.addContext({
+            useCase: "loginWithGoogleUseCase",
+          });
+          throw error;
         }
-
-        captureException({
-          name: "loginWithGoogleUseCase",
-          cause: error,
-          message: "Error logging in with Google",
-        });
 
         throw error;
       }
