@@ -26,7 +26,9 @@ const useNavigationContainerRefSpy = jest
   .spyOn(expoRouter, "useNavigationContainerRef")
   .mockReturnValue(ref as never);
 
-const setup = () => renderHook(useInitializeRouter);
+function setup() {
+  return renderHook(useInitializeRouter);
+}
 
 beforeEach(() => {
   jest.clearAllMocks();

@@ -14,14 +14,14 @@ function useLogin() {
 
   const { update } = useUser();
 
-  const onGoogleButtonPress = () => {
+  function onGoogleButtonPress() {
     addBreadcrumb({
       category: "user-action",
       level: "info",
       message: "User pressed the Google button",
     });
     mutate();
-  };
+  }
 
   useEffect(() => {
     if (!isWeb() && status === "success") {

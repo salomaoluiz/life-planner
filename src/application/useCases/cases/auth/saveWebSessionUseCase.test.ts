@@ -3,21 +3,27 @@ import { BusinessError, UserNotLoggedError } from "@domain/entities/errors";
 import { saveSessionSpy, setup } from "./mocks/saveWebSessionUseCase";
 
 it("SHOULD throw and not save the session if the hash is undefined", async () => {
-  const result = () => setup(undefined);
+  function result() {
+    return setup(undefined);
+  }
 
   await expect(result).rejects.toThrow(UserNotLoggedError);
   expect(saveSessionSpy).not.toHaveBeenCalled();
 });
 
 it("SHOULD throw and not save the session if the access token is null", async () => {
-  const result = () => setup("#refresh_token=refresh");
+  function result() {
+    return setup("#refresh_token=refresh");
+  }
 
   await expect(result).rejects.toThrow(UserNotLoggedError);
   expect(saveSessionSpy).not.toHaveBeenCalled();
 });
 
 it("SHOULD throw and not save the session if the refresh token is null", async () => {
-  const result = () => setup("#access_token=access");
+  function result() {
+    return setup("#access_token=access");
+  }
 
   await expect(result).rejects.toThrow(UserNotLoggedError);
   expect(saveSessionSpy).not.toHaveBeenCalled();
@@ -48,7 +54,9 @@ it("SHOULD throw a BusinessError if the repository throws a BusinessError", asyn
   const businessError = new BusinessError();
   saveSessionSpy.mockRejectedValue(businessError);
 
-  const result = () => setup("#access_token=access&refresh_token=refresh");
+  function result() {
+    return setup("#access_token=access&refresh_token=refresh");
+  }
 
   await expect(result).rejects.toThrow(businessError);
 });

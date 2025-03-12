@@ -34,9 +34,9 @@ function Index({ retry }: ErrorBoundaryFallBackProps) {
     getTranslation();
   }, []);
 
-  const onButtonPress = () => {
+  function onButtonPress() {
     retry();
-  };
+  }
 
   return (
     <Suspense>

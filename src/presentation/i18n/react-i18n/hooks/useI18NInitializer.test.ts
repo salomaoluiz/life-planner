@@ -23,7 +23,9 @@ jest
   .spyOn(loaderProvider, "useProviderLoader")
   .mockReturnValue(loaderProviderResponse as never);
 
-const setup = () => renderHook(() => useI18NInitializer());
+function setup() {
+  return renderHook(() => useI18NInitializer());
+}
 
 beforeEach(() => {
   jest.clearAllMocks();

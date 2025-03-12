@@ -12,7 +12,9 @@ jest
   .spyOn(reactI18Next, "useTranslation")
   .mockReturnValue({ t: tSpy } as never);
 
-const setup = () => renderHook(() => useTranslation());
+function setup() {
+  return renderHook(() => useTranslation());
+}
 
 it("SHOULD use the t function from i18next", () => {
   const {

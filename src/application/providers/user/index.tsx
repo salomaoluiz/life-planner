@@ -30,11 +30,11 @@ function UserProvider(props: Props) {
     retry: false,
   });
 
-  const getUserData = () => {
+  function getUserData() {
     if (status === "success" && data) {
       return { profile: data };
     }
-  };
+  }
 
   useEffect(() => {
     setIsLoading(isFetching, "user");

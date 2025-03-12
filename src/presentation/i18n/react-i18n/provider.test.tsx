@@ -10,7 +10,9 @@ jest.mock("./hooks", () => ({
   useI18NInitializer: jest.fn(),
 }));
 
-const Children = () => <View testID={"provider-children"} />;
+function Children() {
+  return <View testID={"provider-children"} />;
+}
 
 const defaultProps = {
   children: <Children />,
@@ -18,8 +20,9 @@ const defaultProps = {
 
 // endregion
 
-const setup = () =>
+function setup() {
   render(<ReactI18NPProvider>{defaultProps.children}</ReactI18NPProvider>);
+}
 
 it("should call initializer hook", () => {
   setup();

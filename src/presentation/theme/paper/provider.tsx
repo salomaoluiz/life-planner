@@ -7,8 +7,8 @@ interface Props {
   theme: ThemeProp;
 }
 
-const PaperThemeProvider = ({ children, theme }: Props) => {
+function PaperThemeProvider({ children, theme }: Props) {
   return <PaperProvider theme={theme}>{children}</PaperProvider>;
-};
+}
 
 export default PaperThemeProvider;
