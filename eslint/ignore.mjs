@@ -14,5 +14,9 @@ export default {
     "ios/*",
     "coverage/*",
     ".expo/*",
+    "metro.config.js",
+    "jest.config.js",
+    "eslint.config.mjs",
+    "eslint/**/*",
   ],
 };

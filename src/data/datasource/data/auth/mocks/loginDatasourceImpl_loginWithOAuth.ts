@@ -19,7 +19,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-function setup() {
+async function setup() {
   return loginDatasourceImpl().loginWithOAuth();
 }
 

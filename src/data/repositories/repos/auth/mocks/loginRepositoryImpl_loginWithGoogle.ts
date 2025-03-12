@@ -6,7 +6,7 @@ const loginWithOAuthSpy = datasourcesMocks.loginDatasource.loginWithOAuth;
 const loginWithIdTokenSpy = datasourcesMocks.loginDatasource.loginWithIdToken;
 const isWebSpy = jest.spyOn(platform, "isWeb");
 
-function setup() {
+async function setup() {
   return loginRepositoryImpl(datasourcesMocks).loginWithGoogle();
 }
 

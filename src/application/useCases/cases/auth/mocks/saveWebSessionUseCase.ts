@@ -16,7 +16,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-function setup(hash?: string) {
+async function setup(hash?: string) {
   return saveWebSessionUseCase(repositories).execute(hash);
 }
 

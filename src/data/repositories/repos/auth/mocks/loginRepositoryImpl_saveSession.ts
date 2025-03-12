@@ -3,7 +3,7 @@ import loginRepositoryImpl from "@data/repositories/repos/auth/loginRepositoryIm
 
 const saveSessionSpy = datasourcesMocks.loginDatasource.saveSession;
 
-function setup() {
+async function setup() {
   return loginRepositoryImpl(datasourcesMocks).saveSession({
     accessToken: "accessToken",
     refreshToken: "refreshToken",

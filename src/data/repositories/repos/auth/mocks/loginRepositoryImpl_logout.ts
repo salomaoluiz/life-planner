@@ -3,7 +3,7 @@ import loginRepositoryImpl from "@data/repositories/repos/auth/loginRepositoryIm
 
 const logoutSpy = datasourcesMocks.loginDatasource.logout;
 
-function setup() {
+async function setup() {
   return loginRepositoryImpl(datasourcesMocks).logout();
 }
 

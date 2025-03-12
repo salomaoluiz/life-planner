@@ -16,6 +16,14 @@ export default [
   { languageOptions: { globals: globals.browser } },
   pluginJs.configs.recommended,
   ...tsEslintConfig.recommended,
+  {
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
   ...pluginQuery.configs["flat/recommended"],
   eslintPluginPrettierRecommended,
   eslintPluginImportX.flatConfigs.recommended,

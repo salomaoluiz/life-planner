@@ -24,7 +24,7 @@ it("SHOULD login with OAuth", async () => {
 it("SHOULD throw an GenericError if signIn fails", async () => {
   spies.signInWithOAuth.mockResolvedValueOnce(mocks.signInError as never);
 
-  function func() {
+  async function func() {
     return setup();
   }
 

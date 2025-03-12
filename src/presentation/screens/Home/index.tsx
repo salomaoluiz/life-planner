@@ -52,7 +52,7 @@ function Home() {
       <Switch initialStatus={isDark} onToggle={setIsDark} testID={"switch"} />
       <Button.Outlined
         label={"Go To Login"}
-        onPress={async () => {
+        onPress={() => {
           mutate();
         }}
         testID={"go-to-login"}
