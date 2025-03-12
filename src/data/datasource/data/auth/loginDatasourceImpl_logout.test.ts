@@ -13,7 +13,7 @@ it("SHOULD logout", async () => {
 it("SHOULD throw an GenericError if signOut fails", async () => {
   spies.signOut.mockResolvedValueOnce(mocks.signOutError as never);
 
-  function func() {
+  async function func() {
     return setup();
   }
 

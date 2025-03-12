@@ -18,7 +18,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-function setup() {
+async function setup() {
   return loginDatasourceImpl().saveSession({
     accessToken: "accessToken",
     refreshToken: "refreshToken",

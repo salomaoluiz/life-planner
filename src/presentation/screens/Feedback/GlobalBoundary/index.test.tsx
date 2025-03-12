@@ -26,7 +26,7 @@ it("SHOULD call retry function when button is pressed", () => {
   expect(spies.retry).toHaveBeenCalledTimes(1);
 });
 
-it("SHOULD call getString function when component is mounted", async () => {
+it("SHOULD call getString function when component is mounted", () => {
   setup();
 
   expect(spies.getString).toHaveBeenCalledTimes(1);

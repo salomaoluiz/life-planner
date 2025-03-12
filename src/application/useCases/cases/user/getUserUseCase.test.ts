@@ -15,7 +15,7 @@ it("SHOULD throw an error if the repository throws an error", async () => {
   const error = new Error("Error getting user");
   spies.getUser.mockRejectedValue(error);
 
-  function func() {
+  async function func() {
     return setup().execute();
   }
 
@@ -26,7 +26,7 @@ it("SHOULD throw BusinessError if the repository throws a BusinessError", async 
   const businessError = new BusinessError();
   spies.getUser.mockRejectedValue(businessError);
 
-  function result() {
+  async function result() {
     return setup().execute();
   }
 
