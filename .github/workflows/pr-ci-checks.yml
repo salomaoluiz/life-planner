@@ -1,0 +1,41 @@
+name: PR Code Quality Checks
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  setup:
+    name: Setup Environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Corepack (for Yarn 4)
+        run: corepack enable && corepack prepare yarn@4.6.0 --activate
+
+      - name: Install Dependencies
+        run: yarn install --immutable
+
+      - name: Run ESLint and Prettier
+        run: yarn lint
+
+      - name: Run Jest Tests
+        run: yarn test --ci --coverage
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
