@@ -1,5 +1,6 @@
-import { loginWithGoogleSpy, setup } from "./mocks/loginWithGoogleUseCase";
 import { BusinessError } from "@domain/entities/errors";
+
+import { loginWithGoogleSpy, setup } from "./mocks/loginWithGoogleUseCase";
 
 it("SHOULD call the repository to login with Google", async () => {
   await setup().execute();

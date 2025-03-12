@@ -1,10 +1,10 @@
 import {
-  spies,
-  setup,
-  screen,
   act,
   fireEvent,
   mocks,
+  screen,
+  setup,
+  spies,
 } from "./mocks/index.mocks";
 
 it("SHOULD render the component", () => {

@@ -2,8 +2,8 @@ import { datasourcesMocks } from "@data/datasource/mocks";
 
 export { repositoriesMocks } from "./listRepositories";
 
-import { listRepositories } from "@data/repositories/repos";
 import { injectionRepository } from "@data/repositories";
+import { listRepositories } from "@data/repositories/repos";
 
 jest.mock("@data/repositories/repos", () => {
   const keys = Object.keys(
@@ -29,4 +29,4 @@ function injectionRepositorySetup() {
 
 const cases = listRepositories;
 
-export { injectionRepositorySetup, cases, datasourcesMocks };
+export { cases, datasourcesMocks, injectionRepositorySetup };

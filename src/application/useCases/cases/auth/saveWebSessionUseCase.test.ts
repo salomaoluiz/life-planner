@@ -1,5 +1,6 @@
-import { saveSessionSpy, setup } from "./mocks/saveWebSessionUseCase";
 import { BusinessError, UserNotLoggedError } from "@domain/entities/errors";
+
+import { saveSessionSpy, setup } from "./mocks/saveWebSessionUseCase";
 
 it("SHOULD throw and not save the session if the hash is undefined", async () => {
   const result = () => setup(undefined);

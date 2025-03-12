@@ -9,8 +9,8 @@ const addBreadcrumbSpy = jest.spyOn(Sentry, "addBreadcrumb");
 it("SHOULD call Sentry.addBreadcrumb", () => {
   const breadcrumb = {
     category: "category",
-    level: "error" as const,
     data: { data: "data" },
+    level: "error" as const,
     message: "message",
   };
 

@@ -1,8 +1,10 @@
-import { renderHook } from "@tests";
-import useTranslationLocale from "./useTranslationLocale";
+import * as expoLocalization from "expo-localization";
 import i18next from "i18next";
 import * as reactI18Next from "react-i18next";
-import * as expoLocalization from "expo-localization";
+
+import { renderHook } from "@tests";
+
+import useTranslationLocale from "./useTranslationLocale";
 
 jest.mock("expo-localization");
 jest.mock("react-i18next");

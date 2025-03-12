@@ -1,6 +1,6 @@
-import Repositories from "@domain/repositories";
-import { listUseCases } from "@application/useCases/cases";
 import { injectionUseCases } from "@application/useCases";
+import { listUseCases } from "@application/useCases/cases";
+import Repositories from "@domain/repositories";
 
 jest.mock("@data/repositories", () => ({
   repositories: jest.requireActual("@data/repositories/mocks")
@@ -36,4 +36,4 @@ function injectionUseCaseSetup() {
 
 const cases = listUseCases;
 
-export { injectionUseCaseSetup, cases, repositories };
+export { cases, injectionUseCaseSetup, repositories };

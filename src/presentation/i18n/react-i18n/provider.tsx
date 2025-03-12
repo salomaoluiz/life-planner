@@ -1,7 +1,7 @@
-import React from "react";
 import i18next from "i18next";
-
+import React from "react";
 import { I18nextProvider } from "react-i18next";
+
 import { useI18NInitializer } from "./hooks";
 
 interface Props {

@@ -1,8 +1,15 @@
 import React, { createContext, useContext, useEffect } from "react";
-import UserProfileEntity from "@domain/entities/user/UserProfileEntity";
-import { useProviderLoader } from "@providers/loader";
+
 import { useCases } from "@application/useCases";
+import UserProfileEntity from "@domain/entities/user/UserProfileEntity";
 import { useQuery } from "@infrastructure/fetcher";
+import { useProviderLoader } from "@providers/loader";
+
+interface IUserContext {
+  data?: UserData;
+  logged: boolean;
+  update: () => Promise<void>;
+}
 
 interface Props {
   children: React.ReactNode;
@@ -12,18 +19,12 @@ interface UserData {
   profile: UserProfileEntity;
 }
 
-interface IUserContext {
-  logged: boolean;
-  data?: UserData;
-  update: () => Promise<void>;
-}
-
 const UserContext = createContext<IUserContext | undefined>(undefined);
 
 function UserProvider(props: Props) {
   const { setIsLoading } = useProviderLoader();
 
-  const { data, status, refetch, isFetching } = useQuery<UserProfileEntity>({
+  const { data, isFetching, refetch, status } = useQuery<UserProfileEntity>({
     cacheKey: [useCases.getUserUseCase.uniqueName],
     fetch: useCases.getUserUseCase.execute,
     retry: false,
@@ -46,7 +47,7 @@ function UserProvider(props: Props) {
 
   return (
     <UserContext.Provider
-      value={{ logged: !!data, data: getUserData(), update }}
+      value={{ data: getUserData(), logged: !!data, update }}
     >
       {props.children}
     </UserContext.Provider>

@@ -1,11 +1,12 @@
-import getScaledSizes, { defaultSizes } from "./sizes";
 import { Dimensions } from "react-native";
 
+import getScaledSizes, { defaultSizes } from "./sizes";
+
 const defaultDimensions = {
-  width: 285,
-  scale: 1,
   fontScale: 1,
   height: 549,
+  scale: 1,
+  width: 285,
 };
 
 const dimensionsGetSpy = jest
@@ -33,27 +34,27 @@ it("SHOULD return the scaled size FOR tablet", () => {
   expect(sizes).toEqual({
     borderRadius: { full: "50%", large: 19, medium: 10, small: 5, xlarge: 38 },
     fontSizes: {
-      xsmall: 16,
-      small: 18,
-      medium: 21,
       large: 31,
+      medium: 21,
+      small: 18,
       xlarge: 42,
+      xsmall: 16,
       xxlarge: 62,
     },
     lineHeights: {
-      xsmall: 21,
-      small: 26,
-      medium: 31,
       large: 42,
+      medium: 31,
+      small: 26,
       xlarge: 62,
+      xsmall: 21,
       xxlarge: 83,
     },
     spacing: {
-      small: 11,
-      xsmall: 6,
-      medium: 22,
       large: 34,
+      medium: 22,
+      small: 11,
       xlarge: 45,
+      xsmall: 6,
       xxlarge: 67,
       xxxlarge: 90,
     },
@@ -70,34 +71,34 @@ it("SHOULD return the scaled size FOR desktop", () => {
 
   expect(sizes).toEqual({
     borderRadius: {
-      small: 6,
-      medium: 12,
-      large: 24,
-      xlarge: 48,
       full: "50%",
+      large: 24,
+      medium: 12,
+      small: 6,
+      xlarge: 48,
     },
     fontSizes: {
-      xsmall: 19,
-      small: 22,
-      medium: 26,
       large: 38,
+      medium: 26,
+      small: 22,
       xlarge: 51,
+      xsmall: 19,
       xxlarge: 77,
     },
     lineHeights: {
-      xsmall: 26,
-      small: 32,
-      medium: 38,
       large: 51,
+      medium: 38,
+      small: 32,
       xlarge: 77,
+      xsmall: 26,
       xxlarge: 102,
     },
     spacing: {
-      xsmall: 7,
-      small: 14,
-      medium: 29,
       large: 43,
+      medium: 29,
+      small: 14,
       xlarge: 58,
+      xsmall: 7,
       xxlarge: 86,
       xxxlarge: 115,
     },

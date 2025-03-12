@@ -1,28 +1,27 @@
 import { Text as PaperText } from "react-native-paper";
+
 import { getStyles } from "./styles";
-import { TextMode } from "./types";
 import getCustomStyles, { CustomStyles } from "./styles/customStyles";
+import { TextMode } from "./types";
 
 export interface TextProps {
-  value: string;
-  testID: string;
   customStyles?: CustomStyles;
+  testID: string;
+  value: string;
 }
 
-function TextBase(props: TextProps & { mode: TextMode }) {
-  const { testID, value, mode, customStyles } = props;
+/*
+    @fontSize - 16
+ */
+function Body(props: TextProps) {
+  return <TextBase mode={TextMode.Body} {...props} />;
+}
 
-  const styles = getStyles();
-  const extraStyles = getCustomStyles(customStyles);
-  return (
-    <PaperText
-      variant={mode}
-      testID={testID}
-      style={[styles[mode], extraStyles]}
-    >
-      {value}
-    </PaperText>
-  );
+/*
+    @fontSize - 12
+ */
+function Caption(props: TextProps) {
+  return <TextBase mode={TextMode.Caption} {...props} />;
 }
 
 /*
@@ -40,40 +39,42 @@ function Headline(props: TextProps) {
 }
 
 /*
-    @fontSize - 20
- */
-function Title(props: TextProps) {
-  return <TextBase mode={TextMode.Title} {...props} />;
-}
-
-/*
-    @fontSize - 16
- */
-function Body(props: TextProps) {
-  return <TextBase mode={TextMode.Body} {...props} />;
-}
-
-/*
     @fontSize - 14
  */
 function Label(props: TextProps) {
   return <TextBase mode={TextMode.Label} {...props} />;
 }
 
+function TextBase(props: TextProps & { mode: TextMode }) {
+  const { customStyles, mode, testID, value } = props;
+
+  const styles = getStyles();
+  const extraStyles = getCustomStyles(customStyles);
+  return (
+    <PaperText
+      style={[styles[mode], extraStyles]}
+      testID={testID}
+      variant={mode}
+    >
+      {value}
+    </PaperText>
+  );
+}
+
 /*
-    @fontSize - 12
+    @fontSize - 20
  */
-function Caption(props: TextProps) {
-  return <TextBase mode={TextMode.Caption} {...props} />;
+function Title(props: TextProps) {
+  return <TextBase mode={TextMode.Title} {...props} />;
 }
 
 const Text = {
+  Body,
+  Caption,
   Display,
   Headline,
-  Title,
-  Body,
   Label,
-  Caption,
+  Title,
 };
 
 export default Text;

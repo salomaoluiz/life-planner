@@ -1,8 +1,8 @@
+import { BusinessError } from "@domain/entities/errors";
+import { useQuery } from "@infrastructure/fetcher";
 import * as reactQuery from "@infrastructure/fetcher/reactQuery";
 import * as monitoring from "@infrastructure/monitoring";
 import { renderHook } from "@tests";
-import { useQuery } from "@infrastructure/fetcher";
-import { BusinessError } from "@domain/entities/errors";
 
 jest.mock("@infrastructure/fetcher/reactQuery");
 
@@ -64,21 +64,21 @@ function setup(props: Parameters<typeof useQuery>[0]) {
 }
 
 const spies = {
-  useReactQuery: useReactQuerySpy,
   captureException: captureExceptionSpy,
   fetch: fetchSpy,
+  useReactQuery: useReactQuerySpy,
 };
 
 const mocks = {
-  successResponse,
-  errorResponse,
   businessErrorResponse,
+  errorResponse,
   errorWithoutMessageResponse,
   pendingResponse,
+  successResponse,
 };
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
-export { setup, spies, mocks };
+export { mocks, setup, spies };

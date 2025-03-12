@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/react-native";
+
 import initialize from "@infrastructure/monitoring/sentry/initialize";
 
 jest.mock("@sentry/react-native");
@@ -21,4 +22,4 @@ const spies = {
   init: initSpy,
 };
 
-export { spies, setup };
+export { setup, spies };

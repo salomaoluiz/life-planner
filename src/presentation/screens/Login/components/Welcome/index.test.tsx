@@ -1,5 +1,6 @@
-import { setup, screen } from "./mocks/index.mocks";
 import { lightTheme } from "@presentation/theme/provider";
+
+import { screen, setup } from "./mocks/index.mocks";
 
 it("SHOULD render correctly", () => {
   setup();

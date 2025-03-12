@@ -1,18 +1,19 @@
 import { repositories } from "@data/repositories";
 import Repositories from "@domain/repositories";
+
 import { listUseCases } from "./cases";
-
-type UseCases = typeof listUseCases;
-
-interface Props {
-  repositories: Repositories;
-}
 
 type InjectedUseCases<T> = {
   [K in keyof T]: T[K] extends (repositories: Repositories) => infer R
     ? R
     : never;
 };
+
+interface Props {
+  repositories: Repositories;
+}
+
+type UseCases = typeof listUseCases;
 
 export function injectionUseCases(props: Props) {
   return Object.entries(listUseCases).reduce((acc, [key, useCase]) => {

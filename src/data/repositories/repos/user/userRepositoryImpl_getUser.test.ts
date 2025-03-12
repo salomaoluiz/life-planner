@@ -1,5 +1,6 @@
-import { setup, mocks, spies } from "./mocks/userRepositoryImpl_getUser";
 import UserProfileEntity from "@domain/entities/user/UserProfileEntity";
+
+import { mocks, setup, spies } from "./mocks/userRepositoryImpl_getUser";
 
 it("SHOULD get user", async () => {
   spies.getUser.mockResolvedValue(mocks.getUserSuccess);
@@ -9,9 +10,9 @@ it("SHOULD get user", async () => {
   expect(spies.getUser).toHaveBeenCalledTimes(1);
   expect(result).toEqual(
     new UserProfileEntity({
+      email: mocks.getUserSuccess.email,
       id: mocks.getUserSuccess.id,
       name: mocks.getUserSuccess.name,
-      email: mocks.getUserSuccess.email,
       photoUrl: mocks.getUserSuccess.photoURL,
     }),
   );

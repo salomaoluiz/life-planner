@@ -1,5 +1,5 @@
-import React from "react";
 import { render } from "@testing-library/react-native";
+import React from "react";
 
 interface RenderOptions {
   wrapper: React.FunctionComponent<{ children: React.ReactElement }>;
@@ -23,10 +23,10 @@ const suppressConsoleError = () => {
 };
 
 export {
+  act,
+  fireEvent,
   renderHook,
   screen,
-  act,
   waitFor,
-  fireEvent,
 } from "@testing-library/react-native";
 export { customRender as render, suppressConsoleError };

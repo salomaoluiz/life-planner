@@ -1,38 +1,32 @@
 export default {
   expo: {
-    name: "life-planner",
-    slug: "life-planner",
-    version: "1.0.0",
-    orientation: "portrait",
-    icon: "./assets/images/icon.png",
-    scheme: "myapp",
-    userInterfaceStyle: "automatic",
-    newArchEnabled: true,
-    ios: {
-      supportsTablet: true,
-      bundleIdentifier: "com.jacobysoftware.lifeplanner",
-    },
     android: {
       adaptiveIcon: {
-        foregroundImage: "./assets/images/adaptive-icon.png",
         backgroundColor: "#ffffff",
+        foregroundImage: "./assets/images/adaptive-icon.png",
       },
       package: "com.jacobysoftware.lifeplanner",
     },
-    web: {
-      bundler: "metro",
-      output: "single",
-      favicon: "./assets/images/favicon.png",
+    experiments: {
+      typedRoutes: true,
     },
+    icon: "./assets/images/icon.png",
+    ios: {
+      bundleIdentifier: "com.jacobysoftware.lifeplanner",
+      supportsTablet: true,
+    },
+    name: "life-planner",
+    newArchEnabled: true,
+    orientation: "portrait",
     plugins: [
       "expo-router",
       [
         "expo-splash-screen",
         {
+          backgroundColor: "#ffffff",
           image: "./assets/images/splash-icon.png",
           imageWidth: 200,
           resizeMode: "contain",
-          backgroundColor: "#ffffff",
         },
       ],
       [
@@ -51,8 +45,14 @@ export default {
         },
       ],
     ],
-    experiments: {
-      typedRoutes: true,
+    scheme: "myapp",
+    slug: "life-planner",
+    userInterfaceStyle: "automatic",
+    version: "1.0.0",
+    web: {
+      bundler: "metro",
+      favicon: "./assets/images/favicon.png",
+      output: "single",
     },
   },
 };

@@ -1,6 +1,6 @@
-import { UseQuery } from "@infrastructure/fetcher/types";
-import { useReactQuery } from "@infrastructure/fetcher/reactQuery";
 import { BusinessError, GenericError } from "@domain/entities/errors";
+import { useReactQuery } from "@infrastructure/fetcher/reactQuery";
+import { UseQuery } from "@infrastructure/fetcher/types";
 
 function useQuery<Response>(
   props: Parameters<UseQuery<Response>>[0],
@@ -9,11 +9,11 @@ function useQuery<Response>(
     Response,
     BusinessError | GenericError
   >({
-    queryKey: props.cacheKey,
+    networkMode: props.networkMode || "offlineFirst",
     queryFn: props.fetch,
+    queryKey: props.cacheKey,
     retry: props.retry,
     retryDelay: props.retryDelay,
-    networkMode: props.networkMode || "offlineFirst",
   });
 
   function getError() {

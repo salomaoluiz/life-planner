@@ -1,12 +1,11 @@
 import { IUseCaseFactoryWithoutParamResponse } from "@application/useCases/types";
-import Repositories from "@domain/repositories";
 import { DefaultError } from "@domain/entities/errors";
+import Repositories from "@domain/repositories";
 
 function logoutUseCase(
   repository: Repositories,
 ): IUseCaseFactoryWithoutParamResponse<void> {
   return {
-    uniqueName: "auth.logout_use_case",
     async execute() {
       try {
         await repository.loginRepository.logout();
@@ -21,6 +20,7 @@ function logoutUseCase(
         throw error;
       }
     },
+    uniqueName: "auth.logout_use_case",
   };
 }
 

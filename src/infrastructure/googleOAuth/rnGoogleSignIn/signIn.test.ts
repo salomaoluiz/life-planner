@@ -8,10 +8,10 @@ it("SHOULD sign in correctly", async () => {
   expect(spies.hasPlayServicesSpy).toHaveBeenCalledTimes(1);
   expect(spies.signInSpy).toHaveBeenCalledTimes(1);
   expect(result).toEqual({
-    status: "success",
     data: {
       token: "google_sign_in_id_token",
     },
+    status: "success",
   });
 });
 
@@ -22,8 +22,8 @@ it("SHOULD add breadcrumb when sign in succeeds", async () => {
   expect(spies.signInSpy).toHaveBeenCalledTimes(1);
   expect(spies.addBreadcrumbSpy).toHaveBeenCalledTimes(1);
   expect(spies.addBreadcrumbSpy).toHaveBeenCalledWith({
-    level: "info",
     category: "react-native-google-signin",
+    level: "info",
     message: "Successfully signed in with Google",
   });
 });
@@ -105,11 +105,11 @@ it("SHOULD add breadcrumb when sign in fails", async () => {
   expect(spies.signInSpy).toHaveBeenCalledTimes(1);
   expect(spies.addBreadcrumbSpy).toHaveBeenCalledTimes(1);
   expect(spies.addBreadcrumbSpy).toHaveBeenCalledWith({
-    level: "error",
     category: "react-native-google-signin",
-    message: "Error signing in with Google",
     data: {
       message: mocks.mappedError.message,
     },
+    level: "error",
+    message: "Error signing in with Google",
   });
 });

@@ -1,36 +1,15 @@
 import { BusinessError, GenericError } from "@domain/entities/errors";
 
-type NetworkMode = "online" | "offlineFirst" | "always";
+export type MutationStatus = "error" | "idle" | "pending" | "success";
 // region Query
-export type QueryStatus = "pending" | "success" | "error";
-type Errors = BusinessError | GenericError | null;
-
-interface QueryProps<R> {
-  cacheKey: string[];
-  fetch: () => Promise<R>;
-  retry?: boolean | number;
-  retryDelay?: number;
-  /*
-  @default "offlineFirst"
-   */
-  networkMode?: NetworkMode;
-}
-
-interface QueryResponse<R = void> {
-  refetch: () => Promise<void>;
-  data?: R;
-  error: Errors;
-  isFetching: boolean;
-  status: QueryStatus;
-}
+export type QueryStatus = "error" | "pending" | "success";
+export type UseMutation<Params, Response> = (
+  props: MutationProps<Params, Response>,
+) => MutationResponse<Params, Response>;
 
 export type UseQuery<R> = (props: QueryProps<R>) => QueryResponse<R>;
 
-// endregion Query
-
-// region Mutation
-
-export type MutationStatus = "idle" | "pending" | "success" | "error";
+type Errors = BusinessError | GenericError | null;
 
 interface MutationProps<P, R> {
   cacheKey: string[];
@@ -42,16 +21,37 @@ interface MutationProps<P, R> {
   retryDelay?: number;
 }
 
+// endregion Query
+
+// region Mutation
+
 interface MutationResponse<P = void, R = void> {
-  mutate: (params: P) => void;
   data?: R;
   error: Errors;
   isFetching: boolean;
+  mutate: (params: P) => void;
   status: MutationStatus;
 }
 
-export type UseMutation<Params, Response> = (
-  props: MutationProps<Params, Response>,
-) => MutationResponse<Params, Response>;
+type NetworkMode = "always" | "offlineFirst" | "online";
+
+interface QueryProps<R> {
+  cacheKey: string[];
+  fetch: () => Promise<R>;
+  /*
+  @default "offlineFirst"
+   */
+  networkMode?: NetworkMode;
+  retry?: boolean | number;
+  retryDelay?: number;
+}
+
+interface QueryResponse<R = void> {
+  data?: R;
+  error: Errors;
+  isFetching: boolean;
+  refetch: () => Promise<void>;
+  status: QueryStatus;
+}
 
 // endregion Mutation

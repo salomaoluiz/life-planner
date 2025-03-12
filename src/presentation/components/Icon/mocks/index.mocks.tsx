@@ -2,10 +2,10 @@ import Icon, { IconProps } from "@components/Icon";
 import { render } from "@tests";
 
 const defaultProps: IconProps = {
-  testID: "default-icon",
+  color: "black",
   name: "google",
   size: 20,
-  color: "black",
+  testID: "default-icon",
 };
 
 function setup(props?: Partial<IconProps>): void {
@@ -20,5 +20,5 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-export { setup, mocks };
+export { mocks, setup };
 export { screen } from "@tests";

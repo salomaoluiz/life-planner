@@ -1,10 +1,10 @@
-import { supabase } from "@infrastructure/supabase";
 import loginDatasourceImpl from "@data/datasource/data/auth/loginDatasourceImpl";
+import { supabase } from "@infrastructure/supabase";
 
 // region mocks
 process.env = {
-  NODE_ENV: "test",
   EXPO_PUBLIC_PROJECT_WEBSITE_URL: "https://project-website-url.com",
+  NODE_ENV: "test",
 };
 
 const signInError = { error: new Error("Error signing in") };
@@ -32,4 +32,4 @@ const mocks = {
   signInSuccess,
 };
 
-export { setup, spies, mocks };
+export { mocks, setup, spies };

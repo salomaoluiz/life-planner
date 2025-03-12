@@ -1,32 +1,33 @@
-import UserProfileEntity from "@domain/entities/user/UserProfileEntity";
-import { View } from "react-native";
-import React from "react";
-import { UserProvider, useUser } from "@application/providers/user";
-import { render } from "@tests";
 import { renderHook } from "@testing-library/react-native";
-import * as loader from "@providers/loader";
+import React from "react";
+import { View } from "react-native";
+
+import { UserProvider, useUser } from "@application/providers/user";
+import UserProfileEntity from "@domain/entities/user/UserProfileEntity";
 import * as fetcher from "@infrastructure/fetcher";
+import * as loader from "@providers/loader";
+import { render } from "@tests";
 
 jest.mock("@infrastructure/fetcher");
 
 // #region Mocks
 const useQuerySuccessResponse = {
   data: new UserProfileEntity({
+    email: "john.doe@gmail.com",
     id: "e301a3a9-94a0-4e58-ac6f-54aec8c6b248",
     name: "John Doe",
-    email: "john.doe@gmail.com",
     photoUrl: "https://example.com/photo.jpg",
   }),
-  status: "success",
-  refetch: jest.fn(),
   isFetching: false,
+  refetch: jest.fn(),
+  status: "success",
 };
 
 const useQueryPendingResponse = {
   data: undefined,
-  status: "pending",
-  refetch: jest.fn(),
   isFetching: true,
+  refetch: jest.fn(),
+  status: "pending",
 };
 
 const useProviderLoaderResponse = {
@@ -61,8 +62,8 @@ const spies = {
 
 const mocks = {
   useQuery: {
-    successResponse: useQuerySuccessResponse,
     pendingResponse: useQueryPendingResponse,
+    successResponse: useQuerySuccessResponse,
   },
 };
 
@@ -70,5 +71,5 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-export { setup, setupHook, spies, mocks };
-export { screen, act } from "@tests";
+export { mocks, setup, setupHook, spies };
+export { act, screen } from "@tests";

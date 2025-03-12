@@ -1,11 +1,4 @@
 const errors = {
-  generic: {
-    title: "Something went wrong",
-    description: "An unexpected error occurred. Please try again later.",
-    button: {
-      label: "Try again",
-    },
-  },
   business: {
     auth: {
       user_not_logged: {
@@ -15,6 +8,13 @@ const errors = {
     default: {
       title: "We're sorry, we didn't expect this to happen",
     },
+  },
+  generic: {
+    button: {
+      label: "Try again",
+    },
+    description: "An unexpected error occurred. Please try again later.",
+    title: "Something went wrong",
   },
 };
 

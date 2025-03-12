@@ -1,4 +1,4 @@
-import { setup, mocks, screen } from "./mocks/index.mocks";
+import { mocks, screen, setup } from "./mocks/index.mocks";
 
 it("SHOULD render the icon with the correct props", () => {
   setup();
@@ -6,10 +6,10 @@ it("SHOULD render the icon with the correct props", () => {
   const component = screen.getByTestId(mocks.defaultProps.testID);
 
   expect(component.props).toEqual({
-    testID: "default-icon",
-    source: "google",
-    size: 20,
-    color: "black",
     children: undefined,
+    color: "black",
+    size: 20,
+    source: "google",
+    testID: "default-icon",
   });
 });

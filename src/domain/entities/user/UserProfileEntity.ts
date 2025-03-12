@@ -1,14 +1,14 @@
 interface IUserProfileEntity {
+  email: string;
   id: string;
   name: string;
-  email: string;
   photoUrl: string;
 }
 
 class UserProfileEntity {
+  email: string;
   id: string;
   name: string;
-  email: string;
   photoUrl: string;
 
   constructor(props: IUserProfileEntity) {

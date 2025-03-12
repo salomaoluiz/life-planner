@@ -1,6 +1,6 @@
 import { screen } from "@tests";
-import { TextInputMode } from "./index";
 
+import { TextInputMode } from "./index";
 import { defaultProps, setup } from "./mocks";
 
 it("SHOULD pass the correct props for an Flat editable input", () => {
@@ -9,28 +9,28 @@ it("SHOULD pass the correct props for an Flat editable input", () => {
   const component = screen.getByTestId("test-text-input");
 
   expect(component.props).toEqual({
+    children: undefined,
     mode: TextInputMode.Flat,
-    testID: "test-text-input",
-    value: "Default Value",
     onChangeText: defaultProps.onChangeText,
     style: expect.any(Object),
-    children: undefined,
+    testID: "test-text-input",
+    value: "Default Value",
   });
 });
 
 it("SHOULD pass the correct props for an Outlined not editable input", () => {
-  setup({ mode: TextInputMode.Outlined, disabled: true });
+  setup({ disabled: true, mode: TextInputMode.Outlined });
 
   const component = screen.getByTestId("test-text-input");
 
   expect(component.props).toEqual({
-    mode: TextInputMode.Outlined,
-    testID: "test-text-input",
-    value: "Default Value",
+    children: undefined,
     disabled: true,
+    mode: TextInputMode.Outlined,
     onChangeText: defaultProps.onChangeText,
     style: expect.any(Object),
-    children: undefined,
+    testID: "test-text-input",
+    value: "Default Value",
   });
 });
 

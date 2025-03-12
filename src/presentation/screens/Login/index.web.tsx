@@ -1,6 +1,7 @@
 import useLogin from "@screens/Login/hooks/useLogin";
-import LoginContainer from "./containers";
 import useSaveSession from "@screens/Login/hooks/useSaveSession";
+
+import LoginContainer from "./containers";
 
 function Login() {
   useSaveSession();

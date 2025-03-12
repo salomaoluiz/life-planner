@@ -1,12 +1,4 @@
 const errors = {
-  generic: {
-    title: "Algo deu errado",
-    description:
-      "Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.",
-    button: {
-      label: "Try again",
-    },
-  },
   business: {
     auth: {
       user_not_logged: {
@@ -16,6 +8,14 @@ const errors = {
     default: {
       title: "Desculpe, não esperávamos que isso acontecesse",
     },
+  },
+  generic: {
+    button: {
+      label: "Try again",
+    },
+    description:
+      "Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.",
+    title: "Algo deu errado",
   },
 };
 

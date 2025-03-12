@@ -1,8 +1,8 @@
+import { BusinessError } from "@domain/entities/errors";
+import { useMutation } from "@infrastructure/fetcher";
 import * as reactQuery from "@infrastructure/fetcher/reactQuery";
 import * as monitoring from "@infrastructure/monitoring";
 import { renderHook } from "@tests";
-import { useMutation } from "@infrastructure/fetcher";
-import { BusinessError } from "@domain/entities/errors";
 
 jest.mock("@infrastructure/fetcher/reactQuery");
 
@@ -14,10 +14,10 @@ const successResponse = {
   },
   error: null,
   mutate: jest.fn(),
+  status: "success",
   variables: {
     var1: "variable1",
   },
-  status: "success",
 };
 
 const error = new Error("Error message");
@@ -27,50 +27,50 @@ const errorResponse = {
   data: null,
   error,
   mutate: jest.fn(),
+  status: "error",
   variables: {
     var1: "variable1",
   },
-  status: "error",
 };
 
 const businessErrorResponse = {
   data: null,
   error: new BusinessError(),
   mutate: jest.fn(),
+  status: "error",
   variables: {
     var1: "variable1",
   },
-  status: "error",
 };
 
 const errorWithoutMessageResponse = {
   data: null,
   error: new Error(),
   mutate: jest.fn(),
+  status: "error",
   variables: {
     var1: "variable1",
   },
-  status: "error",
 };
 
 const pendingResponse = {
   data: null,
   error: null,
   mutate: jest.fn(),
+  status: "pending",
   variables: {
     var1: "variable1",
   },
-  status: "pending",
 };
 
 const idleResponse = {
   data: null,
   error: null,
   mutate: jest.fn(),
+  status: "idle",
   variables: {
     var1: "variable1",
   },
-  status: "idle",
 };
 
 // endregion
@@ -84,22 +84,22 @@ function setup(props: Parameters<typeof useMutation>[0]) {
 }
 
 const spies = {
-  useReactMutation: useReactMutationSpy,
   captureException: captureExceptionSpy,
   fetch: fetchSpy,
+  useReactMutation: useReactMutationSpy,
 };
 
 const mocks = {
-  successResponse,
-  errorResponse,
   businessErrorResponse,
+  errorResponse,
   errorWithoutMessageResponse,
-  pendingResponse,
   idleResponse,
+  pendingResponse,
+  successResponse,
 };
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
-export { setup, spies, mocks };
+export { mocks, setup, spies };

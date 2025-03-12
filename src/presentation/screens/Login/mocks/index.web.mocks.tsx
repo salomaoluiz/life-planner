@@ -1,19 +1,20 @@
-import { render } from "@tests";
-import Login from "../index.web";
 import * as hooks from "@presentation/screens/Login/hooks";
+import { render } from "@tests";
+
+import Login from "../index.web";
 
 jest.mock("@presentation/screens/Login/hooks/useLogin");
 jest.mock("@presentation/screens/Login/hooks/useSaveSession");
 
 // region mocks
 const useLoginMock = {
-  onGoogleButtonPress: jest.fn(),
   isFetching: false,
+  onGoogleButtonPress: jest.fn(),
 };
 
 const useSaveSessionMock = {
-  isFetching: false,
   error: null,
+  isFetching: false,
 };
 
 // endregion mocks
@@ -49,5 +50,5 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-export { setup, spies, mocks };
-export { screen, fireEvent } from "@tests";
+export { mocks, setup, spies };
+export { fireEvent, screen } from "@tests";

@@ -1,4 +1,4 @@
-import { mocks, setup, screen } from "./mocks/index.mocks";
+import { mocks, screen, setup } from "./mocks/index.mocks";
 
 it("SHOULD render correctly", () => {
   setup();

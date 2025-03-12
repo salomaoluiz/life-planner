@@ -1,9 +1,9 @@
 import {
-  mocks,
-  spies,
-  setup,
-  screen,
   fireEvent,
+  mocks,
+  screen,
+  setup,
+  spies,
 } from "./mocks/index.web.mocks";
 
 it("SHOULD render correctly", () => {

@@ -1,9 +1,9 @@
-import ptBR from "./pt-BR";
 import enUS from "./en-US";
+import ptBR from "./pt-BR";
 
 export const translations = {
-  "pt-BR": ptBR,
   "en-US": enUS,
+  "pt-BR": ptBR,
 };
 
 export const availableLanguages = ["en-US", "pt-BR"] as const;

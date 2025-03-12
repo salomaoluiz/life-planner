@@ -1,8 +1,8 @@
 const login = {
-  welcome: "Welcome to Life Planner",
   button: {
     googleLogin: "Sign in with Google",
   },
+  welcome: "Welcome to Life Planner",
 };
 
 export default login;

@@ -1,4 +1,5 @@
 import { render } from "@tests";
+
 import GoogleButton from "../";
 
 const onPressSpy = jest.fn();

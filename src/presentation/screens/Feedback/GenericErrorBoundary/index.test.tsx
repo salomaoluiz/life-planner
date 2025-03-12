@@ -1,4 +1,4 @@
-import { fireEvent, screen, setup, spies, act } from "./mocks/index.mocks";
+import { act, fireEvent, screen, setup, spies } from "./mocks/index.mocks";
 
 it("SHOULD render the component", () => {
   setup();
