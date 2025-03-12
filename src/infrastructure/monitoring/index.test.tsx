@@ -62,7 +62,9 @@ it("SHOULD call sentryCaptureMessage", () => {
 });
 
 it("SHOULD call SentryWrapper", () => {
-  const children = () => null;
+  function children() {
+    return null;
+  }
 
   MonitoringWrapper(children);
 
@@ -105,15 +107,13 @@ it("SHOULD call sentrySetUser", () => {
 
 it("SHOULD call SentryErrorBoundary", () => {
   const Children = <View />;
-  const FallbackComponent = () => null;
 
-  const beforeCapture = jest.fn();
+  function FallbackComponent() {
+    return null;
+  }
 
   render(
-    <ErrorBoundary
-      beforeCapture={beforeCapture}
-      FallbackComponent={FallbackComponent}
-    >
+    <ErrorBoundary FallbackComponent={FallbackComponent}>
       {Children}
     </ErrorBoundary>,
   );
@@ -131,15 +131,13 @@ it("SHOULD call SentryErrorBoundary", () => {
 
 it('SHOULD call setContext in beforeCapture with "error-boundary-context"', () => {
   const Children = <View />;
-  const FallbackComponent = () => null;
 
-  const beforeCapture = jest.fn();
+  function FallbackComponent() {
+    return null;
+  }
 
   render(
-    <ErrorBoundary
-      beforeCapture={beforeCapture}
-      FallbackComponent={FallbackComponent}
-    >
+    <ErrorBoundary FallbackComponent={FallbackComponent}>
       {Children}
     </ErrorBoundary>,
   );

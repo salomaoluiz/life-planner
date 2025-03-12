@@ -43,7 +43,9 @@ it.each([ButtonMode.Outlined, ButtonMode.Text, ButtonMode.Filled])(
 );
 
 it("SHOULD throw an error if an invalid mode is passed", () => {
-  const func = () => setup({ mode: "invalid" as ButtonMode });
+  function func() {
+    setup({ mode: "invalid" as ButtonMode });
+  }
 
   expect(func).toThrow("Invalid mode");
 });

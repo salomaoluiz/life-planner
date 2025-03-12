@@ -12,9 +12,9 @@ function GlobalBoundary({ retry }: ErrorBoundaryFallBackProps) {
   const { t } = useTranslation();
   const styles = useStyles();
 
-  const onButtonPress = () => {
+  function onButtonPress() {
     retry();
-  };
+  }
 
   return (
     <View style={styles.container}>

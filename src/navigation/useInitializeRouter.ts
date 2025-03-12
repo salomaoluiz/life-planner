@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { monitoring } from "@infrastructure";
 import { useProviderLoader } from "@providers/loader";
 
-const useInitializeRouter = () => {
+function useInitializeRouter() {
   monitoring.initializeMonitoring();
   const { isLoading } = useProviderLoader();
   const ref = useNavigationContainerRef();
@@ -18,6 +18,6 @@ const useInitializeRouter = () => {
   return {
     isLoading,
   };
-};
+}
 
 export default useInitializeRouter;

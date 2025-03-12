@@ -9,14 +9,14 @@ export interface SwitchProps {
   testID: string;
 }
 
-const Switch = (props: SwitchProps) => {
+function Switch(props: SwitchProps) {
   const { initialStatus, onToggle, testID } = props;
   const [isEnabled, setIsEnabled] = useState(initialStatus);
 
-  const onValueChange = (value: boolean) => {
+  function onValueChange(value: boolean) {
     setIsEnabled(value);
     onToggle(value);
-  };
+  }
 
   return (
     <SwitchPaper
@@ -26,6 +26,6 @@ const Switch = (props: SwitchProps) => {
       value={isEnabled}
     />
   );
-};
+}
 
 export default Switch;

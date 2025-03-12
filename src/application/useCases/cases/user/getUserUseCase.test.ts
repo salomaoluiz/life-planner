@@ -26,7 +26,9 @@ it("SHOULD throw BusinessError if the repository throws a BusinessError", async 
   const businessError = new BusinessError();
   spies.getUser.mockRejectedValue(businessError);
 
-  const result = () => setup().execute();
+  function result() {
+    return setup().execute();
+  }
 
   await expect(result).rejects.toThrow(businessError);
 });

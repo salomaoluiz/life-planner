@@ -32,9 +32,13 @@ jest
     <View testID={"loader-provider"}>{children}</View>
   ));
 
-const Children = () => <View testID={"children-element"} />;
+function Children() {
+  return <View testID={"children-element"} />;
+}
 
-const setup = () => render(<Children />, { wrapper: GlobalProviders });
+function setup() {
+  render(<Children />, { wrapper: GlobalProviders });
+}
 
 it('SHOULD render "PresentationProviders", "ApplicationProviders" and "LoaderProvider"', () => {
   setup();
