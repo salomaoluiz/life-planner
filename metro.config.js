@@ -18,15 +18,15 @@ const sentryConfig = getSentryExpoConfig(__dirname);
 module.exports = {
   ...defaultConfig,
   ...sentryConfig,
-  transformer: {
-    ...(defaultConfig.transformer || {}),
-    ...(sentryConfig.transformer || {}),
-    babelTransformerPath: require.resolve("react-native-svg-transformer"),
-  },
   resolver: {
     ...(defaultConfig.resolver || {}),
     ...(sentryConfig.resolver || {}),
     assetExts: assetExts.filter((ext) => ext !== "svg"),
     sourceExts: [...sourceExts, "svg"],
+  },
+  transformer: {
+    ...(defaultConfig.transformer || {}),
+    ...(sentryConfig.transformer || {}),
+    babelTransformerPath: require.resolve("react-native-svg-transformer"),
   },
 };

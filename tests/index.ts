@@ -1,32 +1,32 @@
-import React from "react";
 import { render } from "@testing-library/react-native";
+import React from "react";
 
 interface RenderOptions {
   wrapper: React.FunctionComponent<{ children: React.ReactElement }>;
 }
 
-const customRender = (
+function customRender(
   component: React.JSX.Element,
   options?: Partial<RenderOptions>,
-) => {
+) {
   render(component, options);
-};
+}
 
-const suppressConsoleError = () => {
+function suppressConsoleError() {
   const errorSpy = jest
     .spyOn(global.console, "error")
     .mockImplementation(() => {
-      //do nothing
+      // do nothing
     });
 
   return () => errorSpy.mockRestore();
-};
+}
 
 export {
+  act,
+  fireEvent,
   renderHook,
   screen,
-  act,
   waitFor,
-  fireEvent,
 } from "@testing-library/react-native";
 export { customRender as render, suppressConsoleError };

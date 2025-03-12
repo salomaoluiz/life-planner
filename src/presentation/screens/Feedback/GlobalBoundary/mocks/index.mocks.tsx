@@ -1,7 +1,7 @@
-import { render } from "@tests";
-import GlobalBoundary from "@screens/Feedback/GlobalBoundary";
 import * as storage from "@infrastructure/storage";
 import { StorageKeys } from "@infrastructure/storage";
+import GlobalBoundary from "@screens/Feedback/GlobalBoundary";
+import { render } from "@tests";
 
 // #region mocks
 
@@ -13,12 +13,12 @@ const retrySpy = jest.fn();
 const getStringSpy = jest.spyOn(storage.asyncStorage, "getString");
 
 function setup() {
-  render(<GlobalBoundary retry={retrySpy} error={error} />);
+  render(<GlobalBoundary error={error} retry={retrySpy} />);
 }
 
 const spies = {
-  retry: retrySpy,
   getString: getStringSpy,
+  retry: retrySpy,
 };
 
 beforeEach(() => {
@@ -29,5 +29,5 @@ const mocks = {
   fallbackKey: StorageKeys.string.FALLBACK_LANGUAGE,
 };
 
-export { spies, setup, mocks };
-export { screen, act, fireEvent } from "@tests";
+export { mocks, setup, spies };
+export { act, fireEvent, screen } from "@tests";

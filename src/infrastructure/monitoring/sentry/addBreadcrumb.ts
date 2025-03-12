@@ -1,13 +1,14 @@
-import { AddBreadcrumbProps } from "@infrastructure/monitoring/types";
 import * as Sentry from "@sentry/react-native";
+
+import { AddBreadcrumbProps } from "@infrastructure/monitoring/types";
 
 function addSentryBreadcrumb({
   category,
-  level,
   data,
+  level,
   message,
 }: AddBreadcrumbProps) {
-  Sentry.addBreadcrumb({ category, data, message, level });
+  Sentry.addBreadcrumb({ category, data, level, message });
 }
 
 export default addSentryBreadcrumb;

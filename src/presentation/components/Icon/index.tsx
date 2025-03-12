@@ -1,14 +1,14 @@
 import { Icon as PaperIcon } from "react-native-paper";
 
 export interface IconProps {
-  testID: string;
+  color?: string;
   name: string;
   size: number;
-  color?: string;
+  testID: string;
 }
 
-function Icon({ testID, name, size, color }: IconProps) {
-  return <PaperIcon testID={testID} color={color} source={name} size={size} />;
+function Icon({ color, name, size, testID }: IconProps) {
+  return <PaperIcon color={color} size={size} source={name} testID={testID} />;
 }
 
 export default Icon;

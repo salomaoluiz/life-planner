@@ -1,6 +1,8 @@
 import { View } from "react-native";
-import getStyles from "./styles";
+
 import { GoogleButton, Welcome } from "@screens/Login/components";
+
+import getStyles from "./styles";
 
 export interface Props {
   onGoogleButtonPress: () => void;

@@ -1,5 +1,6 @@
+import { act, screen } from "@tests";
+
 import { defaultProps, setup } from "./mocks";
-import { screen, act } from "@tests";
 
 it("SHOULD render the Switch component with the correct props", () => {
   setup();
@@ -7,11 +8,11 @@ it("SHOULD render the Switch component with the correct props", () => {
   const component = screen.getByTestId("default-switch");
 
   expect(component.props).toEqual({
-    testID: "default-switch",
-    onValueChange: expect.any(Function),
-    value: false,
-    style: expect.any(Object),
     children: undefined,
+    onValueChange: expect.any(Function),
+    style: expect.any(Object),
+    testID: "default-switch",
+    value: false,
   });
 });
 

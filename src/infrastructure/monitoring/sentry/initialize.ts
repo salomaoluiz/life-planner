@@ -1,5 +1,6 @@
 import * as Sentry from "@sentry/react-native";
 import { isRunningInExpoGo } from "expo";
+
 import sentryNavigationIntegration from "./navigationIntegration";
 
 function sentryInitialize() {
@@ -19,11 +20,11 @@ function sentryInitialize() {
   const navigationIntegration = sentryNavigationIntegration();
   return Sentry.init({
     dsn: sentryDsn,
-    environment: sentryEnvironment,
-    tracesSampleRate: parseInt(sentryTracesSampler || "0"),
     enabled: !__DEV__ && sentryEnabled === "true",
-    integrations: [navigationIntegration],
     enableNativeFramesTracking: !isRunningInExpoGo(),
+    environment: sentryEnvironment,
+    integrations: [navigationIntegration],
+    tracesSampleRate: parseInt(sentryTracesSampler || "0"),
   });
 }
 

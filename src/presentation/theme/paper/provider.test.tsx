@@ -1,5 +1,7 @@
-import { render, screen } from "@tests";
 import { View } from "react-native";
+
+import { render, screen } from "@tests";
+
 import PaperThemeProvider from "./provider";
 
 const defaultProps = {

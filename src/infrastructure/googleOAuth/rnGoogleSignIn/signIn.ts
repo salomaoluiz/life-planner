@@ -2,8 +2,43 @@ import {
   GoogleSignin,
   SignInResponse,
 } from "@react-native-google-signin/google-signin";
-import { addBreadcrumb } from "@infrastructure/monitoring";
+
 import { SignInResult, SignInStatus } from "@infrastructure/googleOAuth/types";
+import { addBreadcrumb } from "@infrastructure/monitoring";
+
+function handleSignIn(result: SignInResponse): SignInResult {
+  if (result.type === "success") {
+    if (!result.data.idToken) {
+      throw new Error("Google sign in failed: idToken is missing");
+    }
+
+    addBreadcrumb({
+      category: "react-native-google-signin",
+      level: "info",
+      message: "Successfully signed in with Google",
+    });
+
+    return {
+      data: {
+        token: result.data.idToken,
+      },
+      status: SignInStatus.Success,
+    };
+  }
+  if (result.type === "cancelled") {
+    addBreadcrumb({
+      category: "react-native-google-signin",
+      level: "info",
+      message: "Google sign in was cancelled",
+    });
+
+    return {
+      status: SignInStatus.Canceled,
+    };
+  }
+
+  throw new Error(`Google sign in failed: ${JSON.stringify(result)}`);
+}
 
 async function signIn(): Promise<SignInResult> {
   try {
@@ -16,12 +51,12 @@ async function signIn(): Promise<SignInResult> {
       "[react-native-google-signin] - Unknown error";
 
     addBreadcrumb({
-      level: "error",
       category: "react-native-google-signin",
-      message: "Error signing in with Google",
       data: {
         message: errorMessage,
       },
+      level: "error",
+      message: "Error signing in with Google",
     });
 
     return {
@@ -29,40 +64,6 @@ async function signIn(): Promise<SignInResult> {
       status: SignInStatus.Error,
     };
   }
-}
-
-function handleSignIn(result: SignInResponse): SignInResult {
-  if (result.type === "success") {
-    if (!result.data.idToken) {
-      throw new Error("Google sign in failed: idToken is missing");
-    }
-
-    addBreadcrumb({
-      level: "info",
-      category: "react-native-google-signin",
-      message: "Successfully signed in with Google",
-    });
-
-    return {
-      status: SignInStatus.Success,
-      data: {
-        token: result.data.idToken,
-      },
-    };
-  }
-  if (result.type === "cancelled") {
-    addBreadcrumb({
-      level: "info",
-      category: "react-native-google-signin",
-      message: "Google sign in was cancelled",
-    });
-
-    return {
-      status: SignInStatus.Canceled,
-    };
-  }
-
-  throw new Error(`Google sign in failed: ${JSON.stringify(result)}`);
 }
 
 export default signIn;

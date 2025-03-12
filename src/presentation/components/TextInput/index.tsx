@@ -1,29 +1,30 @@
-import { styles } from "./styles";
 import { TextInput as PaperTextInput } from "react-native-paper";
 
-export interface TextInputProps {
-  value: string;
-  onChangeText: (text: string) => void;
-  disabled?: boolean;
-  testID: string;
-}
+import { styles } from "./styles";
 
 export enum TextInputMode {
   Flat = "flat",
   Outlined = "outlined",
 }
 
+export interface TextInputProps {
+  disabled?: boolean;
+  onChangeText: (text: string) => void;
+  testID: string;
+  value: string;
+}
+
 function TextInputBase(props: TextInputProps & { mode: TextInputMode }) {
-  const { onChangeText, testID, value, disabled } = props;
+  const { disabled, onChangeText, testID, value } = props;
 
   return (
     <PaperTextInput
-      mode={props.mode}
-      testID={testID}
       disabled={disabled}
-      value={value}
+      mode={props.mode}
       onChangeText={onChangeText}
       style={styles.textInput}
+      testID={testID}
+      value={value}
     />
   );
 }

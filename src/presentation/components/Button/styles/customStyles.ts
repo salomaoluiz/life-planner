@@ -1,15 +1,15 @@
 export interface CustomStyles {
-  textColor?: string;
   backgroundColor?: string;
+  textColor?: string;
 }
 
 function getCustomStyles(customStyles?: CustomStyles) {
   return {
-    styles: {},
     props: {
-      textColor: customStyles?.textColor,
       buttonColor: customStyles?.backgroundColor,
+      textColor: customStyles?.textColor,
     },
+    styles: {},
   };
 }
 

@@ -1,18 +1,16 @@
 import * as Sentry from "@sentry/react-native";
+
 import {
   CaptureException,
   CaptureMessage,
 } from "@infrastructure/monitoring/types";
 
-const sentryCaptureException: CaptureException = (
-  exception: unknown,
-  extra,
-) => {
-  Sentry.captureException(exception, { extra });
-};
+function sentryCaptureException(...params: Parameters<CaptureException>) {
+  Sentry.captureException(params[0], { extra: params[1] });
+}
 
-const sentryCaptureMessage: CaptureMessage = (message: string, extra) => {
-  Sentry.captureMessage(message, { extra });
-};
+function sentryCaptureMessage(...params: Parameters<CaptureMessage>) {
+  Sentry.captureMessage(params[0], { extra: params[1] });
+}
 
 export { sentryCaptureException, sentryCaptureMessage };

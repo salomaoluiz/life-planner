@@ -1,7 +1,7 @@
-import { listRepositories } from "./repos";
-
-import Repositories from "@domain/repositories";
 import { datasources, Datasources } from "@data/datasource";
+import Repositories from "@domain/repositories";
+
+import { listRepositories } from "./repos";
 
 type InjectedRepositories<T> = {
   [K in keyof T]: T[K] extends () => infer R ? R : never;

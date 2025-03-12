@@ -1,5 +1,6 @@
-import { StorageSetString } from "./types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import { StorageSetString } from "./types";
 
 async function setString(
   ...props: Parameters<StorageSetString>

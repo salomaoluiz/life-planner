@@ -1,5 +1,6 @@
-import { setup, mocks, spies, screen } from "./mocks/errorBoundary.mocks";
 import { GenericError } from "@domain/entities/errors";
+
+import { mocks, screen, setup, spies } from "./mocks/errorBoundary.mocks";
 
 it("SHOULD render correctly", () => {
   setup();

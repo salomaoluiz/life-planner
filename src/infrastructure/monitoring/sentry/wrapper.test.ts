@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/react-native";
+
 import SentryWrapper from "./wrapper";
 
 jest.mock("@sentry/react-native");
@@ -6,7 +7,9 @@ jest.mock("@sentry/react-native");
 const wrapSpy = jest.spyOn(Sentry, "wrap");
 
 it("SHOULD wrap the child with Sentry", () => {
-  const child = () => null;
+  function child() {
+    return null;
+  }
 
   SentryWrapper(child);
 

@@ -4,9 +4,9 @@ import UserProfileEntity from "@domain/entities/user/UserProfileEntity";
 
 // region mocks
 const getUserSuccessResponse = new UserProfileEntity({
+  email: "john.doe@gmail.com",
   id: "1",
   name: "John Doe",
-  email: "john.doe@gmail.com",
   photoUrl: "https://photo.com/john_doe",
 });
 
@@ -37,4 +37,4 @@ const spies = {
 const mocks = {
   getUserSuccessResponse,
 };
-export { setup, spies, mocks };
+export { mocks, setup, spies };

@@ -1,5 +1,5 @@
-import { supabase } from "@infrastructure/supabase";
 import loginDatasourceImpl from "@data/datasource/data/auth/loginDatasourceImpl";
+import { supabase } from "@infrastructure/supabase";
 
 // region mocks
 
@@ -15,7 +15,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-function setup() {
+async function setup() {
   return loginDatasourceImpl().logout();
 }
 
@@ -28,4 +28,4 @@ const mocks = {
   signOutSuccess,
 };
 
-export { setup, spies, mocks };
+export { mocks, setup, spies };

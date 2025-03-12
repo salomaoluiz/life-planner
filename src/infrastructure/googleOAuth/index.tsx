@@ -1,6 +1,7 @@
+import { isWeb } from "@utils/platform";
+
 import * as RNGoogleSignIn from "./rnGoogleSignIn";
 import { SignInResult } from "./types";
-import { isWeb } from "@utils/platform";
 
 function initialize() {
   if (isWeb()) {

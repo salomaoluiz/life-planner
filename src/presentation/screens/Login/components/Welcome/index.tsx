@@ -1,7 +1,9 @@
-import getStyles from "./styles";
 import { View } from "react-native";
+
 import { Text } from "@components";
 import { useTranslation } from "@presentation/i18n";
+
+import getStyles from "./styles";
 
 function Welcome() {
   const styles = getStyles();
@@ -10,9 +12,9 @@ function Welcome() {
   return (
     <View style={styles.container}>
       <Text.Headline
+        customStyles={styles.title}
         testID={"login_welcome"}
         value={t("login.welcome")}
-        customStyles={styles.title}
       />
     </View>
   );

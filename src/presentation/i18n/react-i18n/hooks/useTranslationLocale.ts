@@ -1,17 +1,18 @@
-import { UseTranslationLocale } from "@presentation/i18n/types";
-import { useTranslation as useReactI18NextTranslation } from "react-i18next";
-import { changeLanguage } from "i18next";
 import { getLocales } from "expo-localization";
+import { changeLanguage } from "i18next";
+import { useTranslation as useReactI18NextTranslation } from "react-i18next";
+
 import { availableLanguages } from "@presentation/i18n/translations";
+import { UseTranslationLocale } from "@presentation/i18n/types";
 
 function useTranslationLocale(): ReturnType<UseTranslationLocale> {
   const { i18n } = useReactI18NextTranslation();
 
-  const changeLocale = async (tag: string) => {
+  async function changeLocale(tag: string) {
     await changeLanguage(tag);
-  };
+  }
 
-  const getLocale = () => {
+  function getLocale() {
     const locales = getLocales();
     return (
       locales.find(
@@ -20,7 +21,7 @@ function useTranslationLocale(): ReturnType<UseTranslationLocale> {
           locale.languageTag === i18n.language.split("-")[0],
       ) || locales[0]
     );
-  };
+  }
 
   return {
     availableLanguages,

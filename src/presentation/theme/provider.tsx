@@ -1,8 +1,10 @@
 import React, { createContext, useEffect, useState } from "react";
-import { useProviderLoader } from "@providers/loader";
 import { useColorScheme } from "react-native";
-import { PaperThemeProvider } from "./paper";
+
+import { useProviderLoader } from "@providers/loader";
+
 import { colors, getScaledSizes } from "./constants";
+import { PaperThemeProvider } from "./paper";
 import { ThemeProp } from "./types";
 
 interface Props {
@@ -15,15 +17,15 @@ interface ThemeContextData {
 }
 
 export const lightTheme: ThemeProp = {
-  sizes: getScaledSizes(),
-  dark: false,
   colors: colors.light,
+  dark: false,
+  sizes: getScaledSizes(),
 };
 
 const darkTheme: ThemeProp = {
-  sizes: getScaledSizes(),
-  dark: true,
   colors: colors.dark,
+  dark: true,
+  sizes: getScaledSizes(),
 };
 
 export const ThemeContext = createContext<ThemeContextData>(

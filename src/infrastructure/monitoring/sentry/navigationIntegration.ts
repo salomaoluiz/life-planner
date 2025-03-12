@@ -1,10 +1,11 @@
 import * as Sentry from "@sentry/react-native";
 import { isRunningInExpoGo } from "expo";
+
 import { NavigationIntegration } from "@infrastructure/monitoring/types";
 
 let navigationIntegration: NavigationIntegration;
 
-const getNavigationIntegration = () => {
+function getNavigationIntegration() {
   if (!navigationIntegration) {
     navigationIntegration = Sentry.reactNavigationIntegration({
       enableTimeToInitialDisplay: !isRunningInExpoGo(),
@@ -12,6 +13,6 @@ const getNavigationIntegration = () => {
   }
 
   return navigationIntegration;
-};
+}
 
 export default getNavigationIntegration;

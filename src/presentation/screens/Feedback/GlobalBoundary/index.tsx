@@ -1,16 +1,16 @@
-import { Button, Text, View } from "react-native";
 import { Image } from "expo-image";
-
-import styles from "./styles";
-import {
-  translations,
-  fallbackLanguage,
-} from "@presentation/i18n/translations";
-import { asyncStorage, StorageKeys } from "@infrastructure/storage";
 import { Suspense, useEffect, useState } from "react";
+import { Button, Text, View } from "react-native";
 
 import image from "@assets/images/error_boundary.png";
 import { ErrorBoundaryFallBackProps } from "@infrastructure/monitoring/types";
+import { asyncStorage, StorageKeys } from "@infrastructure/storage";
+import {
+  fallbackLanguage,
+  translations,
+} from "@presentation/i18n/translations";
+
+import styles from "./styles";
 
 type TranslationKeys = keyof typeof translations;
 
@@ -34,18 +34,18 @@ function Index({ retry }: ErrorBoundaryFallBackProps) {
     getTranslation();
   }, []);
 
-  const onButtonPress = () => {
+  function onButtonPress() {
     retry();
-  };
+  }
 
   return (
     <Suspense>
       <View style={styles.container}>
         <Image
-          source={image}
           contentFit={"contain"}
-          transition={1000}
+          source={image}
           style={styles.image}
+          transition={1000}
         />
         <View style={styles.titleContainer}>
           <Text style={styles.title} testID={"globalBoundary_title"}>
@@ -62,9 +62,9 @@ function Index({ retry }: ErrorBoundaryFallBackProps) {
         </View>
         <View style={styles.buttonContainer}>
           <Button
+            onPress={onButtonPress}
             testID={"globalBoundary_button"}
             title={tObject.translation.errors.generic.button.label}
-            onPress={onButtonPress}
           />
         </View>
       </View>

@@ -1,23 +1,23 @@
 export enum SignInStatus {
-  Success = "success",
   Canceled = "canceled",
   Error = "error",
+  Success = "success",
 }
 
-interface SuccessSignIn {
-  status: SignInStatus.Success;
-  data: {
-    token: string;
-  };
-}
-
-interface FailureSignIn {
-  status: SignInStatus.Error;
-  error: Error;
-}
+export type SignInResult = CanceledSignIn | FailureSignIn | SuccessSignIn;
 
 interface CanceledSignIn {
   status: SignInStatus.Canceled;
 }
 
-export type SignInResult = SuccessSignIn | FailureSignIn | CanceledSignIn;
+interface FailureSignIn {
+  error: Error;
+  status: SignInStatus.Error;
+}
+
+interface SuccessSignIn {
+  data: {
+    token: string;
+  };
+  status: SignInStatus.Success;
+}
