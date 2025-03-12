@@ -1,8 +1,9 @@
+import { render } from "@tests";
+
 import { Text, TextProps } from "@components";
 import { TextMode } from "@components/Text/types";
 import * as theme from "@presentation/theme";
 import { lightTheme } from "@presentation/theme/provider";
-import { render } from "@tests";
 
 jest.mock("@presentation/theme");
 

@@ -1,6 +1,7 @@
+import { render } from "@tests";
+
 import * as i18n from "@presentation/i18n";
 import { GenericErrorBoundary } from "@screens/Feedback";
-import { render } from "@tests";
 
 // #region mocks
 

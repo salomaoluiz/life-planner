@@ -2,9 +2,10 @@ import { waitFor } from "@testing-library/react-native";
 import i18next from "i18next";
 import { initReactI18next } from "react-i18next";
 
+import { renderHook } from "@tests";
+
 import { translations } from "@presentation/i18n/translations";
 import * as loaderProvider from "@providers/loader";
-import { renderHook } from "@tests";
 
 import useI18NInitializer from "./useI18NInitializer";
 

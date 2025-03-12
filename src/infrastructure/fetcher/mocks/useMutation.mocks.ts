@@ -1,8 +1,9 @@
+import { renderHook } from "@tests";
+
 import { BusinessError } from "@domain/entities/errors";
 import { useMutation } from "@infrastructure/fetcher";
 import * as reactQuery from "@infrastructure/fetcher/reactQuery";
 import * as monitoring from "@infrastructure/monitoring";
-import { renderHook } from "@tests";
 
 jest.mock("@infrastructure/fetcher/reactQuery");
 
