@@ -1,5 +1,9 @@
 # Welcome to Life Planner 👋
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=salomaoluiz_life-planner&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=salomaoluiz_life-planner)
+
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=salomaoluiz_life-planner&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=salomaoluiz_life-planner) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=salomaoluiz_life-planner&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=salomaoluiz_life-planner) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=salomaoluiz_life-planner&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=salomaoluiz_life-planner) [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=salomaoluiz_life-planner&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=salomaoluiz_life-planner) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=salomaoluiz_life-planner&metric=coverage)](https://sonarcloud.io/summary/new_code?id=salomaoluiz_life-planner)
+
 This project is the Life Planner, a mobile application that helps families organize their lives by managing storage, family schedules, and finances in one place.
 
 ## Get started
