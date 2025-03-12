@@ -2,21 +2,22 @@ import { View } from "react-native";
 
 jest.mock("./sentry");
 
-import * as Sentry from "./sentry";
+import { GenericError } from "@domain/entities/errors";
+import { act, render } from "@tests";
+
 import {
+  addBreadcrumb,
   captureException,
+  captureMessage,
+  ErrorBoundary,
   initializeMonitoring,
   MonitoringWrapper,
-  addBreadcrumb,
-  captureMessage,
   navigationIntegration,
-  ErrorBoundary,
   setContext,
   setTag,
   setUser,
 } from "./";
-import { render, act } from "@tests";
-import { GenericError } from "@domain/entities/errors";
+import * as Sentry from "./sentry";
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -29,9 +30,9 @@ it("SHOULD call sentryInitialize", () => {
 
 it("SHOULD call sentryAddBreadcrumb", () => {
   const breadcrumb = {
-    message: "breadcrumb",
     category: "category",
     level: "error" as const,
+    message: "breadcrumb",
   };
 
   addBreadcrumb(breadcrumb);
@@ -121,8 +122,8 @@ it("SHOULD call SentryErrorBoundary", () => {
   expect(Sentry.SentryErrorBoundary).toHaveBeenCalledWith(
     {
       beforeCapture: expect.any(Function),
-      FallbackComponent,
       children: Children,
+      FallbackComponent,
     },
     {},
   );

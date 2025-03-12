@@ -2,10 +2,10 @@ import { Datasources } from "@data/datasource";
 
 const datasourcesMocks: jest.MockedObjectDeep<Datasources> = {
   loginDatasource: {
-    loginWithOAuth: jest.fn(),
     loginWithIdToken: jest.fn(),
-    saveSession: jest.fn(),
+    loginWithOAuth: jest.fn(),
     logout: jest.fn(),
+    saveSession: jest.fn(),
   },
   userDatasource: {
     getUser: jest.fn(),

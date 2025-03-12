@@ -1,5 +1,6 @@
-import { mocks, setup, spies } from "./mocks/useMutation.mocks";
 import { BusinessError, GenericError } from "@domain/entities/errors";
+
+import { mocks, setup, spies } from "./mocks/useMutation.mocks";
 
 it("SHOULD fetch and return in success", async () => {
   spies.useReactMutation.mockReturnValue(mocks.successResponse as never);
@@ -111,8 +112,8 @@ it("SHOULD call useMutation with default params", async () => {
 
   expect(spies.useReactMutation).toHaveBeenCalledTimes(1);
   expect(spies.useReactMutation).toHaveBeenCalledWith({
-    mutationKey: ["CacheKey1", "CacheKey2"],
     mutationFn: spies.fetch,
+    mutationKey: ["CacheKey1", "CacheKey2"],
     retry: undefined,
     retryDelay: undefined,
   });
@@ -130,8 +131,8 @@ it("SHOULD call useMutation with custom params", async () => {
 
   expect(spies.useReactMutation).toHaveBeenCalledTimes(1);
   expect(spies.useReactMutation).toHaveBeenCalledWith({
-    mutationKey: ["CacheKey1", "CacheKey2"],
     mutationFn: spies.fetch,
+    mutationKey: ["CacheKey1", "CacheKey2"],
     retry: 3,
     retryDelay: 1000,
   });

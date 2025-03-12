@@ -1,4 +1,5 @@
 import { useContext } from "react";
+
 import { usePaperTheme } from "./paper";
 import { ThemeContext } from "./provider";
 import { ThemeProp } from "./types";

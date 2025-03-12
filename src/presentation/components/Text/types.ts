@@ -1,8 +1,8 @@
 export enum TextMode {
+  Body = "bodyMedium",
+  Caption = "labelSmall",
   Display = "displayMedium",
   Headline = "headlineMedium",
-  Title = "titleMedium",
-  Body = "bodyMedium",
   Label = "labelMedium",
-  Caption = "labelSmall",
+  Title = "titleMedium",
 }

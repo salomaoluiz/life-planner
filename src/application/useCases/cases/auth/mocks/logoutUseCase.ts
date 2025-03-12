@@ -1,5 +1,5 @@
-import { repositoriesMocks } from "@data/repositories/mocks";
 import logoutUseCase from "@application/useCases/cases/auth/logoutUseCase";
+import { repositoriesMocks } from "@data/repositories/mocks";
 
 const logoutSpy = jest.fn();
 
@@ -19,4 +19,4 @@ function setup() {
   return logoutUseCase(repositories);
 }
 
-export { setup, logoutSpy };
+export { logoutSpy, setup };

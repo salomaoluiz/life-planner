@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/react-native";
+
 import {
   CaptureException,
   CaptureMessage,

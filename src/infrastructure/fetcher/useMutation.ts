@@ -1,17 +1,17 @@
-import { UseMutation } from "@infrastructure/fetcher/types";
-import { useReactMutation } from "@infrastructure/fetcher/reactQuery";
 import { BusinessError, GenericError } from "@domain/entities/errors";
+import { useReactMutation } from "@infrastructure/fetcher/reactQuery";
+import { UseMutation } from "@infrastructure/fetcher/types";
 
 function useMutation<Params, Response>(
   props: Parameters<UseMutation<Params, Response>>[0],
 ): ReturnType<UseMutation<Params, Response>> {
-  const { data, error, status, mutate, variables } = useReactMutation<
+  const { data, error, mutate, status, variables } = useReactMutation<
     Response,
     BusinessError | GenericError,
     Params
   >({
-    mutationKey: props.cacheKey,
     mutationFn: props.fetch,
+    mutationKey: props.cacheKey,
     retry: props.retry,
     retryDelay: props.retryDelay,
   });
@@ -45,8 +45,8 @@ function useMutation<Params, Response>(
     data,
     error: getError(),
     isFetching: status === "pending",
-    status,
     mutate,
+    status,
   };
 }
 

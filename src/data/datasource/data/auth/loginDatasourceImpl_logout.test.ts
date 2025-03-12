@@ -1,5 +1,6 @@
-import { setup, mocks, spies } from "./mocks/loginDatasourceImpl_logout";
 import { GenericError } from "@domain/entities/errors";
+
+import { mocks, setup, spies } from "./mocks/loginDatasourceImpl_logout";
 
 it("SHOULD logout", async () => {
   spies.signOut.mockResolvedValueOnce(mocks.signOutSuccess as never);

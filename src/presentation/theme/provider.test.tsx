@@ -1,9 +1,9 @@
+import * as reactNative from "react-native";
+
 import { screen } from "@tests";
 
-import * as reactNative from "react-native";
-import { setup, providerLoaderResult } from "./mocks/provider";
-
 import { colors } from "./constants";
+import { providerLoaderResult, setup } from "./mocks/provider";
 
 it("SHOULD render the theme provider", () => {
   setup();

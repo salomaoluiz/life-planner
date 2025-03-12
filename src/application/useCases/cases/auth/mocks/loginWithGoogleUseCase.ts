@@ -19,4 +19,4 @@ function setup() {
   return loginWithGoogleUseCase(repositories);
 }
 
-export { setup, loginWithGoogleSpy };
+export { loginWithGoogleSpy, setup };

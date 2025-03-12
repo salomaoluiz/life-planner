@@ -1,6 +1,6 @@
 import React from "react";
-import { ThemeProp } from "react-native-paper/lib/typescript/types";
 import { PaperProvider } from "react-native-paper";
+import { ThemeProp } from "react-native-paper/lib/typescript/types";
 
 interface Props {
   children: React.ReactNode;

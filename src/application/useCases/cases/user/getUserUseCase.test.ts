@@ -1,5 +1,6 @@
-import { spies, mocks, setup } from "./mocks/getUserUseCase";
 import { BusinessError } from "@domain/entities/errors";
+
+import { mocks, setup, spies } from "./mocks/getUserUseCase";
 
 it("SHOULD call the repository to get user", async () => {
   spies.getUser.mockResolvedValue(mocks.getUserSuccessResponse);

@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/react-native";
+
 import SentryWrapper from "./wrapper";
 
 jest.mock("@sentry/react-native");

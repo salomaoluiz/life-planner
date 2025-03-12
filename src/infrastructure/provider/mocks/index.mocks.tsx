@@ -1,8 +1,9 @@
-import * as googleOAuth from "@infrastructure/googleOAuth";
-import * as Fetcher from "@infrastructure/fetcher";
 import { View } from "react-native";
-import { render } from "@tests";
+
+import * as Fetcher from "@infrastructure/fetcher";
+import * as googleOAuth from "@infrastructure/googleOAuth";
 import InfrastructureProvider from "@infrastructure/provider";
+import { render } from "@tests";
 
 jest.mock("@infrastructure/fetcher");
 jest.mock("@infrastructure/googleOAuth");
@@ -35,5 +36,5 @@ const spies = {
   initializeGoogleOAuth: initializeGoogleOAuthSpy,
 };
 
-export { spies, setup };
+export { setup, spies };
 export { screen } from "@tests";

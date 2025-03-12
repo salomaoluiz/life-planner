@@ -4,8 +4,8 @@ export enum ErrorCodes {
 }
 
 export interface ErrorProps {
-  context?: Record<string, unknown>;
   code: ErrorCodes;
+  context?: Record<string, unknown>;
 }
 
 abstract class DefaultError extends Error {

@@ -6,9 +6,9 @@ import * as monitoring from "@infrastructure/monitoring";
 // #region mocks
 
 process.env = {
-  NODE_ENV: "test",
-  EXPO_PUBLIC_GOOGLE_SIGN_IN_WEB_CLIENT_ID: "google_sign_in_web_client_id",
   EXPO_PUBLIC_GOOGLE_SIGN_IN_IOS_CLIENT_ID: "google_sign_in_ios_client_id",
+  EXPO_PUBLIC_GOOGLE_SIGN_IN_WEB_CLIENT_ID: "google_sign_in_web_client_id",
+  NODE_ENV: "test",
 };
 
 const failError = new Error("Google Sign In Throws");
@@ -27,12 +27,12 @@ beforeEach(() => {
 });
 
 export default {
-  setup,
-  spies: {
-    configureSpy,
-    captureExceptionSpy,
-  },
   mocks: {
     failError,
+  },
+  setup,
+  spies: {
+    captureExceptionSpy,
+    configureSpy,
   },
 };

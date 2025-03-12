@@ -1,6 +1,8 @@
-import { renderHook, act } from "@tests";
-import useTranslation from "./useTranslation";
 import * as reactI18Next from "react-i18next";
+
+import { act, renderHook } from "@tests";
+
+import useTranslation from "./useTranslation";
 
 jest.mock("react-i18next");
 

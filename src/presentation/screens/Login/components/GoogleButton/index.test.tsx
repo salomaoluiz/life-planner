@@ -1,5 +1,6 @@
-import { screen, setup, spies } from "./mocks/index.mocks";
 import GoogleLogo from "@assets/svgs/GoogleLogo.svg";
+
+import { screen, setup, spies } from "./mocks/index.mocks";
 
 it("SHOULD render correctly", () => {
   setup();

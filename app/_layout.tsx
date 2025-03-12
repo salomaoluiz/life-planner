@@ -1,5 +1,6 @@
-import { Stack } from "expo-router";
 import GlobalProviders from "@/src/providers";
+import { Stack } from "expo-router";
+
 import { ErrorBoundary, MonitoringWrapper } from "@infrastructure/monitoring";
 import { useInitializeRouter } from "@navigation";
 import {

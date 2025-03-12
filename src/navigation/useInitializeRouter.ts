@@ -1,7 +1,8 @@
-import { useProviderLoader } from "@providers/loader";
 import { useNavigationContainerRef } from "expo-router";
 import { useEffect } from "react";
+
 import { monitoring } from "@infrastructure";
+import { useProviderLoader } from "@providers/loader";
 
 const useInitializeRouter = () => {
   monitoring.initializeMonitoring();

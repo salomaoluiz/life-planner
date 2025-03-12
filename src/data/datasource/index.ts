@@ -1,10 +1,10 @@
 import { listDatasources } from "@data/datasource/data";
 
+type Datasources = InjectedDatasources<typeof listDatasources>;
+
 type InjectedDatasources<T> = {
   [K in keyof T]: T[K] extends () => infer R ? R : never;
 };
-
-type Datasources = InjectedDatasources<typeof listDatasources>;
 
 export function injectionDatasources() {
   return Object.keys(listDatasources).reduce((acc, key) => {

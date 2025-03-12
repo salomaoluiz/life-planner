@@ -1,7 +1,7 @@
 export { datasourcesMocks } from "./listDatasources";
 
-import { listDatasources } from "@data/datasource/data";
 import { injectionDatasources } from "@data/datasource";
+import { listDatasources } from "@data/datasource/data";
 
 jest.mock("@data/datasource/data", () => {
   const keys = Object.keys(
@@ -27,4 +27,4 @@ function injectionDatasourceSetup() {
 
 const cases = listDatasources;
 
-export { injectionDatasourceSetup, cases };
+export { cases, injectionDatasourceSetup };

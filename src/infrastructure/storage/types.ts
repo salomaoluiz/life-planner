@@ -8,7 +8,7 @@ const StorageKeys = {
 
 export type StorageGetString = (
   key: StorageStringKeys,
-) => Promise<string | null>;
+) => Promise<null | string>;
 
 export type StorageSetString = (
   key: StorageStringKeys,

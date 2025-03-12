@@ -1,7 +1,8 @@
-import { setup, defaultProps } from "./mocks";
-import { screen } from "@tests";
 import { TextMode } from "@components/Text/types";
 import { lightTheme } from "@presentation/theme/provider";
+import { screen } from "@tests";
+
+import { defaultProps, setup } from "./mocks";
 
 it("SHOULD render the Text with the correct props", () => {
   setup();
@@ -10,9 +11,9 @@ it("SHOULD render the Text with the correct props", () => {
 
   expect(component.props).toEqual({
     children: "Text Label",
-    variant: TextMode.Body,
-    testID: "default-text",
     style: expect.any(Object),
+    testID: "default-text",
+    variant: TextMode.Body,
   });
 });
 
@@ -32,19 +33,19 @@ it.each([
 });
 
 it.each<{
-  modeString: keyof typeof TextMode;
   fontSize: keyof (typeof lightTheme)["sizes"]["fontSizes"];
   lineHeight: keyof (typeof lightTheme)["sizes"]["lineHeights"];
+  modeString: keyof typeof TextMode;
 }>([
-  { modeString: "Display", fontSize: "xxlarge", lineHeight: "xxlarge" },
-  { modeString: "Headline", fontSize: "xlarge", lineHeight: "xlarge" },
-  { modeString: "Title", fontSize: "large", lineHeight: "large" },
-  { modeString: "Body", fontSize: "medium", lineHeight: "medium" },
-  { modeString: "Label", fontSize: "small", lineHeight: "small" },
-  { modeString: "Caption", fontSize: "xsmall", lineHeight: "xsmall" },
+  { fontSize: "xxlarge", lineHeight: "xxlarge", modeString: "Display" },
+  { fontSize: "xlarge", lineHeight: "xlarge", modeString: "Headline" },
+  { fontSize: "large", lineHeight: "large", modeString: "Title" },
+  { fontSize: "medium", lineHeight: "medium", modeString: "Body" },
+  { fontSize: "small", lineHeight: "small", modeString: "Label" },
+  { fontSize: "xsmall", lineHeight: "xsmall", modeString: "Caption" },
 ])(
   "SHOULD render the Text.$modeString with the correct styles",
-  ({ modeString, fontSize, lineHeight }) => {
+  ({ fontSize, lineHeight, modeString }) => {
     const mode = TextMode[modeString];
 
     setup({ mode });

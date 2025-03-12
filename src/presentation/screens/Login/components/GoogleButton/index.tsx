@@ -1,6 +1,5 @@
-import { Button } from "@components";
-
 import GoogleLogo from "@assets/svgs/GoogleLogo.svg";
+import { Button } from "@components";
 import { useTranslation } from "@presentation/i18n";
 
 interface Props {
@@ -16,14 +15,14 @@ function GoogleButton({ onPress }: Props) {
 
   return (
     <Button.Outlined
-      testID={"login_googleButton"}
+      customStyles={{
+        backgroundColor: "#FFFFFF",
+        textColor: "#1F1F1F",
+      }}
       icon={GoogleIcon}
       label={t("login.button.googleLogin")}
       onPress={onPress}
-      customStyles={{
-        textColor: "#1F1F1F",
-        backgroundColor: "#FFFFFF",
-      }}
+      testID={"login_googleButton"}
     />
   );
 }

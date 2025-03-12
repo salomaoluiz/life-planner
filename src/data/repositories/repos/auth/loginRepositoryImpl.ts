@@ -1,5 +1,5 @@
-import { LoginRepository } from "@domain/repositories/auth";
 import { Datasources } from "@data/datasource";
+import { LoginRepository } from "@domain/repositories/auth";
 import { isWeb } from "@utils/platform";
 
 function loginRepositoryImpl(datasources: Datasources): LoginRepository {
@@ -13,12 +13,12 @@ function loginRepositoryImpl(datasources: Datasources): LoginRepository {
       await datasources.loginDatasource.loginWithIdToken();
       return true;
     },
+    async logout(): Promise<void> {
+      await datasources.loginDatasource.logout();
+    },
     async saveSession(params): Promise<boolean> {
       await datasources.loginDatasource.saveSession(params);
       return true;
-    },
-    async logout(): Promise<void> {
-      await datasources.loginDatasource.logout();
     },
   };
 }

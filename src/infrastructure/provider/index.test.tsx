@@ -1,4 +1,4 @@
-import { setup, spies, screen } from "./mocks/index.mocks";
+import { screen, setup, spies } from "./mocks/index.mocks";
 
 it("SHOULD render the provider", () => {
   setup();
