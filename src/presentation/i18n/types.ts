@@ -8,7 +8,7 @@ export type UseTranslationLocale = () => UseTranslationLocaleResponse;
 
 interface UseTranslationLocaleResponse {
   availableLanguages: typeof availableLanguages;
-  changeLocale: (localeTag: string) => void;
+  changeLocale: (localeTag: string) => Promise<void>;
   getLocale: () => Locale;
 }
 interface UseTranslationResponse {
