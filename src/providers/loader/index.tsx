@@ -19,17 +19,17 @@ const LoaderContext = createContext<LoaderContextData>({} as LoaderContextData);
 interface Props {
   children: React.ReactNode;
 }
-export const LoaderProvider = ({ children }: Props) => {
+export function LoaderProvider({ children }: Props) {
   const [isContextLoading, setContextIsLoading] = useState(loaderContexts);
 
   const isLoading = useMemo(() => {
     return Object.values(isContextLoading).some((value) => value);
   }, [isContextLoading]);
 
-  const setIsLoading = (
+  function setIsLoading(
     isLoading: boolean,
     context: keyof typeof loaderContexts,
-  ) => {
+  ) {
     if (!loaderContexts[context]) {
       throw new Error(`Context ${context} not found`);
     }
@@ -38,14 +38,14 @@ export const LoaderProvider = ({ children }: Props) => {
       ...prevState,
       [context]: isLoading,
     }));
-  };
+  }
 
   return (
     <LoaderContext.Provider value={{ isLoading, setIsLoading }}>
       {children}
     </LoaderContext.Provider>
   );
-};
+}
 
 export function useProviderLoader() {
   const context = useContext(LoaderContext);

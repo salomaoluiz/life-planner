@@ -1,13 +1,12 @@
 import { IUseCaseFactoryWithoutParamResponse } from "@application/useCases/types";
-import Repositories from "@domain/repositories";
 import { DefaultError } from "@domain/entities/errors";
 import UserProfileEntity from "@domain/entities/user/UserProfileEntity";
+import Repositories from "@domain/repositories";
 
 function getUserUseCase(
   repositories: Repositories,
 ): IUseCaseFactoryWithoutParamResponse<UserProfileEntity> {
   return {
-    uniqueName: "user.get_user_use_case",
     execute: async () => {
       try {
         return await repositories.userRepository.getUser();
@@ -22,6 +21,7 @@ function getUserUseCase(
         throw error;
       }
     },
+    uniqueName: "user.get_user_use_case",
   };
 }
 

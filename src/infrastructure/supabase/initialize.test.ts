@@ -1,4 +1,4 @@
-import { setup, spies, mocks } from "./mocks/initialize.mocks";
+import { mocks, setup, spies } from "./mocks/initialize.mocks";
 
 it("SHOULD initialize supabase", () => {
   const result = setup();
@@ -6,8 +6,8 @@ it("SHOULD initialize supabase", () => {
   expect(spies.addBreadcrumb).toHaveBeenCalledTimes(1);
   expect(spies.addBreadcrumb).toHaveBeenCalledWith({
     category: "supabase",
-    message: "Supabase initialized",
     level: "info",
+    message: "Supabase initialized",
   });
 
   expect(spies.createClient).toHaveBeenCalledTimes(1);

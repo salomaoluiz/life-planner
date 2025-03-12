@@ -8,11 +8,11 @@ type Props = TextInputProps & { mode: TextInputMode };
 
 const defaultProps: TextInputProps = {
   onChangeText: jest.fn(),
-  value: "Default Value",
   testID: "test-text-input",
+  value: "Default Value",
 };
 
-const renderComponent = (props?: Partial<Props>) => {
+function renderComponent(props?: Partial<Props>) {
   switch (props?.mode) {
     case TextInputMode.Flat:
       return <TextInput.Flat {...defaultProps} {...props} />;
@@ -21,9 +21,10 @@ const renderComponent = (props?: Partial<Props>) => {
     default:
       throw new Error("Invalid mode");
   }
-};
+}
 
-const setup = (props?: Partial<Props>) =>
+function setup(props?: Partial<Props>) {
   render(renderComponent({ mode: TextInputMode.Flat, ...props }));
+}
 
-export { setup, defaultProps };
+export { defaultProps, setup };

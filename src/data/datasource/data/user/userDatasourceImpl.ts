@@ -1,7 +1,7 @@
-import { UserDatasource } from "@data/repositories/repos/user/userDatasource";
-import { supabase } from "@infrastructure/supabase";
 import UserModel from "@data/models/user";
+import { UserDatasource } from "@data/repositories/repos/user/userDatasource";
 import { GenericError, UserNotLoggedError } from "@domain/entities/errors";
+import { supabase } from "@infrastructure/supabase";
 
 function userDatasourceImpl(): UserDatasource {
   return {
@@ -17,8 +17,8 @@ function userDatasourceImpl(): UserDatasource {
       const user = response.data.user.user_metadata;
 
       return new UserModel({
-        id: user.id,
         email: user.email,
+        id: user.id,
         name: user.name,
         photoURL: user.avatar_url,
       });

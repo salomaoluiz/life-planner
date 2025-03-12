@@ -1,6 +1,6 @@
 import mocksSignOut from "./mocks/signOut";
 
-const { setup, spies, mocks } = mocksSignOut;
+const { mocks, setup, spies } = mocksSignOut;
 
 it("SHOULD sign out correctly", async () => {
   await setup();
@@ -16,11 +16,11 @@ it("SHOULD add breadcrumb when sign out fails", async () => {
   expect(spies.signOutSpy).toHaveBeenCalledTimes(1);
   expect(spies.addBreadcrumbSpy).toHaveBeenCalledTimes(1);
   expect(spies.addBreadcrumbSpy).toHaveBeenCalledWith({
-    level: "error",
     category: "react-native-google-signin",
-    message: "Error signing out with Google",
     data: {
       message: "Google Sign Out Throws",
     },
+    level: "error",
+    message: "Error signing out with Google",
   });
 });

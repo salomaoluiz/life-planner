@@ -1,49 +1,49 @@
-import { View } from "react-native";
 import { Image } from "expo-image";
-
-import useStyles from "./styles";
+import { View } from "react-native";
 
 import image from "@assets/images/error_boundary.png";
+import { Button, Text } from "@components";
 import { ErrorBoundaryFallBackProps } from "@infrastructure/monitoring/types";
 import { useTranslation } from "@presentation/i18n";
-import { Button, Text } from "@components";
+
+import useStyles from "./styles";
 
 function GlobalBoundary({ retry }: ErrorBoundaryFallBackProps) {
   const { t } = useTranslation();
   const styles = useStyles();
 
-  const onButtonPress = () => {
+  function onButtonPress() {
     retry();
-  };
+  }
 
   return (
     <View style={styles.container}>
       <Image
-        source={image}
         contentFit={"contain"}
-        transition={1000}
+        source={image}
         style={styles.image}
+        transition={1000}
       />
       <View style={styles.titleContainer}>
         <Text.Title
+          customStyles={styles.title}
           testID={"genericErrorBoundary_title"}
           value={t("errors.generic.title")}
-          customStyles={styles.title}
         />
       </View>
       <View style={styles.descriptionContainer}>
         <Text.Body
+          customStyles={styles.description}
           testID={"genericErrorBoundary_description"}
           value={t("errors.generic.description")}
-          customStyles={styles.description}
         />
       </View>
 
       <View style={styles.buttonContainer}>
         <Button.Filled
-          testID={"genericErrorBoundary_button"}
           label={t("errors.generic.button.label")}
           onPress={onButtonPress}
+          testID={"genericErrorBoundary_button"}
         />
       </View>
     </View>

@@ -1,6 +1,6 @@
-import { render } from "@tests";
 import * as i18n from "@presentation/i18n";
 import { GenericErrorBoundary } from "@screens/Feedback";
+import { render } from "@tests";
 
 // #region mocks
 
@@ -14,7 +14,7 @@ jest.spyOn(i18n, "useTranslation").mockReturnValue({
 });
 
 function setup() {
-  render(<GenericErrorBoundary retry={retrySpy} error={error} />);
+  render(<GenericErrorBoundary error={error} retry={retrySpy} />);
 }
 
 const spies = {
@@ -27,5 +27,5 @@ beforeEach(() => {
 
 const mocks = {};
 
-export { spies, setup, mocks };
-export { screen, act, fireEvent } from "@tests";
+export { mocks, setup, spies };
+export { act, fireEvent, screen } from "@tests";

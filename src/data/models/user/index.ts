@@ -1,14 +1,14 @@
 interface IUserModel {
+  email: string;
   id: string;
   name: string;
-  email: string;
   photoURL: string;
 }
 
 class UserModel {
+  public email: string;
   public id: string;
   public name: string;
-  public email: string;
   public photoURL: string;
 
   constructor(props: IUserModel) {
@@ -20,18 +20,18 @@ class UserModel {
 
   static fromJson(data: Record<string, unknown>): UserModel {
     return new UserModel({
+      email: data.email as string,
       id: data.id as string,
       name: data.name as string,
-      email: data.email as string,
       photoURL: data.photoURL as string,
     });
   }
 
   toJson(): string {
     return JSON.stringify({
+      email: this.email,
       id: this.id,
       name: this.name,
-      email: this.email,
       photoURL: this.photoURL,
     });
   }

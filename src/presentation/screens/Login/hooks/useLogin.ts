@@ -1,26 +1,27 @@
-import { useMutation } from "@infrastructure/fetcher";
-import { useCases } from "@application/useCases";
-import { addBreadcrumb } from "@infrastructure/monitoring";
 import { useEffect } from "react";
-import { isWeb } from "@utils/platform";
+
 import { useUser } from "@application/providers/user";
+import { useCases } from "@application/useCases";
+import { useMutation } from "@infrastructure/fetcher";
+import { addBreadcrumb } from "@infrastructure/monitoring";
+import { isWeb } from "@utils/platform";
 
 function useLogin() {
-  const { mutate, isFetching, status } = useMutation<void, void>({
+  const { isFetching, mutate, status } = useMutation<void, void>({
     cacheKey: [useCases.loginWithGoogleUseCase.uniqueName],
     fetch: useCases.loginWithGoogleUseCase.execute,
   });
 
   const { update } = useUser();
 
-  const onGoogleButtonPress = () => {
+  function onGoogleButtonPress() {
     addBreadcrumb({
-      message: "User pressed the Google button",
       category: "user-action",
       level: "info",
+      message: "User pressed the Google button",
     });
     mutate();
-  };
+  }
 
   useEffect(() => {
     if (!isWeb() && status === "success") {
@@ -29,8 +30,8 @@ function useLogin() {
   }, [status]);
 
   return {
-    onGoogleButtonPress,
     isFetching,
+    onGoogleButtonPress,
   };
 }
 

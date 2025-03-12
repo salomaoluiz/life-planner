@@ -1,6 +1,7 @@
-import * as RNGoogleSignIn from "./rnGoogleSignIn";
 import * as platform from "@utils/platform";
+
 import { initialize, signIn, signOut } from "./index";
+import * as RNGoogleSignIn from "./rnGoogleSignIn";
 
 jest.mock("@utils/platform");
 jest.mock("./rnGoogleSignIn");

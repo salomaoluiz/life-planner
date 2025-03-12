@@ -2,7 +2,7 @@ import { BusinessError } from "@domain/entities/errors/common";
 
 class LoginCanceledError extends BusinessError {
   constructor() {
-    super("Login canceled by user");
+    super();
     this.name = "LoginCanceledError";
   }
 }

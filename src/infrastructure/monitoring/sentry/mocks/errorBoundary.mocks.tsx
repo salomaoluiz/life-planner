@@ -1,7 +1,8 @@
 import * as Sentry from "@sentry/react-native";
 import { View } from "react-native";
-import { render } from "@tests";
+
 import { SentryErrorBoundary } from "@infrastructure/monitoring/sentry";
+import { render } from "@tests";
 
 // #region mock
 

@@ -1,9 +1,10 @@
+import { GenericError } from "@domain/entities/errors";
+
 import {
-  setup,
   mocks,
+  setup,
   spies,
 } from "./mocks/loginDatasourceImpl_loginWithOAuth";
-import { GenericError } from "@domain/entities/errors";
 
 it("SHOULD login with OAuth", async () => {
   spies.signInWithOAuth.mockResolvedValueOnce(mocks.signInSuccess as never);
@@ -12,10 +13,10 @@ it("SHOULD login with OAuth", async () => {
 
   expect(spies.signInWithOAuth).toHaveBeenCalledTimes(1);
   expect(spies.signInWithOAuth).toHaveBeenCalledWith({
-    provider: "google",
     options: {
       redirectTo: "https://project-website-url.com/login",
     },
+    provider: "google",
   });
   expect(result).toBeTruthy();
 });
@@ -23,7 +24,7 @@ it("SHOULD login with OAuth", async () => {
 it("SHOULD throw an GenericError if signIn fails", async () => {
   spies.signInWithOAuth.mockResolvedValueOnce(mocks.signInError as never);
 
-  function func() {
+  async function func() {
     return setup();
   }
 

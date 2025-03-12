@@ -1,8 +1,10 @@
-import { renderHook } from "@tests";
-import useTranslationLocale from "./useTranslationLocale";
+import * as expoLocalization from "expo-localization";
 import i18next from "i18next";
 import * as reactI18Next from "react-i18next";
-import * as expoLocalization from "expo-localization";
+
+import { renderHook } from "@tests";
+
+import useTranslationLocale from "./useTranslationLocale";
 
 jest.mock("expo-localization");
 jest.mock("react-i18next");
@@ -20,7 +22,9 @@ const locales = [{ languageTag: "en-US" }, { languageTag: "pt" }];
 const changeLanguageSpy = jest.spyOn(i18next, "changeLanguage");
 jest.spyOn(expoLocalization, "getLocales").mockReturnValue(locales as never);
 
-const setup = () => renderHook(() => useTranslationLocale());
+function setup() {
+  return renderHook(() => useTranslationLocale());
+}
 
 it("SHOULD change the language from i18next", async () => {
   const tag = "pt-BR";

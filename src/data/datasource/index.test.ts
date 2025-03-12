@@ -1,4 +1,4 @@
-import { injectionDatasourceSetup, cases } from "./mocks";
+import { cases, injectionDatasourceSetup } from "./mocks";
 
 it("SHOULD return an object with the datasources", () => {
   const datasources = injectionDatasourceSetup();

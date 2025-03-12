@@ -1,13 +1,14 @@
-import * as reactI18N from "@presentation/i18n/react-i18n";
 import { View } from "react-native";
-import { reactI18NHooks } from "@presentation/i18n/react-i18n";
-import { render, renderHook } from "@tests";
+
 import {
-  useTranslation,
-  useTranslationLocale,
   I18NProvider,
   translate,
+  useTranslation,
+  useTranslationLocale,
 } from "@presentation/i18n";
+import * as reactI18N from "@presentation/i18n/react-i18n";
+import { reactI18NHooks } from "@presentation/i18n/react-i18n";
+import { render, renderHook } from "@tests";
 
 jest.mock("@presentation/i18n/react-i18n");
 jest.unmock("@presentation/i18n");
@@ -25,14 +26,6 @@ jest
     <View testID="react-i18n-provider">{children}</View>
   ));
 
-function setupUseTranslationLocale() {
-  return renderHook(() => useTranslationLocale());
-}
-
-function setupUseTranslation() {
-  return renderHook(() => useTranslation());
-}
-
 function setupProvider() {
   render(I18NProvider({ children: <View testID="i18n-provider-children" /> }));
 }
@@ -41,17 +34,25 @@ function setupTranslate(key: string, params?: Record<string, string>) {
   return translate(key, params);
 }
 
+function setupUseTranslation() {
+  return renderHook(() => useTranslation());
+}
+
+function setupUseTranslationLocale() {
+  return renderHook(() => useTranslationLocale());
+}
+
 const setup = {
-  useTranslationLocale: setupUseTranslationLocale,
-  useTranslation: setupUseTranslation,
   provider: setupProvider,
   translate: setupTranslate,
+  useTranslation: setupUseTranslation,
+  useTranslationLocale: setupUseTranslationLocale,
 };
 
 const spies = {
+  reactI18NTranslate: reactI18NTranslateSpy,
   reactI18NUseTranslation: reactI18NUseTranslationSpy,
   reactI18NUseTranslationLocale: reactI18NUseTranslationLocaleSpy,
-  reactI18NTranslate: reactI18NTranslateSpy,
 };
 
 export { setup, spies };

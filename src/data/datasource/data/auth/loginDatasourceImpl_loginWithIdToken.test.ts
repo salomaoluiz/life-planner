@@ -1,9 +1,10 @@
+import { GenericError, LoginCanceledError } from "@domain/entities/errors";
+
 import {
-  setup,
   mocks,
+  setup,
   spies,
 } from "./mocks/loginDatasourceImpl_loginWithIdToken";
-import { GenericError, LoginCanceledError } from "@domain/entities/errors";
 
 it("SHOULD login with IdToken", async () => {
   spies.signIn.mockResolvedValueOnce(mocks.signInSuccess);
@@ -14,8 +15,8 @@ it("SHOULD login with IdToken", async () => {
   expect(spies.signIn).toHaveBeenCalledWith();
   expect(spies.signInWithIdToken).toHaveBeenCalledTimes(1);
   expect(spies.signInWithIdToken).toHaveBeenCalledWith({
-    token: mocks.signInSuccess.data.token,
     provider: "google",
+    token: mocks.signInSuccess.data.token,
   });
   expect(result).toBeTruthy();
 });
@@ -23,7 +24,7 @@ it("SHOULD login with IdToken", async () => {
 it("SHOULD throw an GenericError if signIn fails", async () => {
   spies.signIn.mockResolvedValueOnce(mocks.signInError);
 
-  function func() {
+  async function func() {
     return setup();
   }
   await expect(func).rejects.toThrow(new GenericError());
@@ -32,7 +33,7 @@ it("SHOULD throw an GenericError if signIn fails", async () => {
 it("SHOULD throw an BusinessError if signIn is canceled", async () => {
   spies.signIn.mockResolvedValueOnce(mocks.signInCanceled);
 
-  function func() {
+  async function func() {
     return setup();
   }
   await expect(func).rejects.toThrow(new LoginCanceledError());

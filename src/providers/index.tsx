@@ -1,9 +1,10 @@
 import React from "react";
-import { LoaderProvider } from "./loader";
 
-import PresentationProviders from "@presentation/providers";
-import InfrastructureProvider from "@infrastructure/provider";
 import ApplicationProviders from "@application/providers";
+import InfrastructureProvider from "@infrastructure/provider";
+import PresentationProviders from "@presentation/providers";
+
+import { LoaderProvider } from "./loader";
 
 interface Props {
   children: React.ReactNode;

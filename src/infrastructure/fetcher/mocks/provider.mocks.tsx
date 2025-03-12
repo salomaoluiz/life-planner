@@ -1,7 +1,8 @@
-import * as reactQuery from "@infrastructure/fetcher/reactQuery";
 import { View } from "react-native";
-import { render } from "@tests";
+
 import { FetcherProvider } from "@infrastructure/fetcher";
+import * as reactQuery from "@infrastructure/fetcher/reactQuery";
+import { render } from "@tests";
 
 jest.mock("@infrastructure/fetcher/reactQuery");
 

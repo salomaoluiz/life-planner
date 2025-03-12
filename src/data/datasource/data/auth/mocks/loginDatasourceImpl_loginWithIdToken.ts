@@ -1,7 +1,7 @@
-import { supabase } from "@infrastructure/supabase";
-import * as googleOAuth from "@infrastructure/googleOAuth";
 import loginDatasourceImpl from "@data/datasource/data/auth/loginDatasourceImpl";
+import * as googleOAuth from "@infrastructure/googleOAuth";
 import { SignInResult, SignInStatus } from "@infrastructure/googleOAuth/types";
+import { supabase } from "@infrastructure/supabase";
 
 // region mocks
 const signInError: SignInResult = {
@@ -24,7 +24,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-function setup() {
+async function setup() {
   return loginDatasourceImpl().loginWithIdToken();
 }
 
@@ -34,9 +34,9 @@ const spies = {
 };
 
 const mocks = {
-  signInError,
   signInCanceled,
+  signInError,
   signInSuccess,
 };
 
-export { setup, spies, mocks };
+export { mocks, setup, spies };

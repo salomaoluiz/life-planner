@@ -1,5 +1,5 @@
-import { supabase } from "@infrastructure/supabase";
 import loginDatasourceImpl from "@data/datasource/data/auth/loginDatasourceImpl";
+import { supabase } from "@infrastructure/supabase";
 
 // region mocks
 const authSessionMissingError = {
@@ -18,7 +18,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-function setup() {
+async function setup() {
   return loginDatasourceImpl().saveSession({
     accessToken: "accessToken",
     refreshToken: "refreshToken",
@@ -30,9 +30,9 @@ const spies = {
 };
 
 const mocks = {
-  signInSuccess,
   authSessionMissingError,
   setSessionError,
+  signInSuccess,
 };
 
-export { setup, spies, mocks };
+export { mocks, setup, spies };

@@ -1,12 +1,13 @@
-import { useCases } from "@application/useCases";
 import { useEffect } from "react";
-import { useMutation } from "@infrastructure/fetcher";
+
 import { useUser } from "@application/providers/user";
+import { useCases } from "@application/useCases";
+import { useMutation } from "@infrastructure/fetcher";
 
 function useLogin() {
   const { update } = useUser();
 
-  const { mutate, status, error, isFetching } = useMutation<string, void>({
+  const { error, isFetching, mutate, status } = useMutation<string, void>({
     cacheKey: [useCases.saveWebSessionUseCase.uniqueName],
     fetch: useCases.saveWebSessionUseCase.execute,
   });
@@ -22,8 +23,8 @@ function useLogin() {
   }, [status]);
 
   return {
-    isFetching,
     error,
+    isFetching,
   };
 }
 

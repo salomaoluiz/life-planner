@@ -1,11 +1,12 @@
-import * as applicationProviders from "@application/providers";
-import * as presentationProviders from "@presentation/providers";
-import * as infrastructureProvider from "@infrastructure/provider";
-
-import * as loaderProvider from "./loader";
 import { View } from "react-native";
+
+import * as applicationProviders from "@application/providers";
+import * as infrastructureProvider from "@infrastructure/provider";
+import * as presentationProviders from "@presentation/providers";
 import { render, screen } from "@tests";
+
 import GlobalProviders from "./";
+import * as loaderProvider from "./loader";
 
 jest
   .spyOn(presentationProviders, "default")
@@ -31,9 +32,13 @@ jest
     <View testID={"loader-provider"}>{children}</View>
   ));
 
-const Children = () => <View testID={"children-element"} />;
+function Children() {
+  return <View testID={"children-element"} />;
+}
 
-const setup = () => render(<Children />, { wrapper: GlobalProviders });
+function setup() {
+  render(<Children />, { wrapper: GlobalProviders });
+}
 
 it('SHOULD render "PresentationProviders", "ApplicationProviders" and "LoaderProvider"', () => {
   setup();

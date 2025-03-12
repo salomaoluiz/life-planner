@@ -1,6 +1,8 @@
-import { renderHook, act } from "@tests";
-import useTranslation from "./useTranslation";
 import * as reactI18Next from "react-i18next";
+
+import { act, renderHook } from "@tests";
+
+import useTranslation from "./useTranslation";
 
 jest.mock("react-i18next");
 
@@ -10,7 +12,9 @@ jest
   .spyOn(reactI18Next, "useTranslation")
   .mockReturnValue({ t: tSpy } as never);
 
-const setup = () => renderHook(() => useTranslation());
+function setup() {
+  return renderHook(() => useTranslation());
+}
 
 it("SHOULD use the t function from i18next", () => {
   const {

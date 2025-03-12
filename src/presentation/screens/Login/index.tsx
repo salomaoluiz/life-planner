@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 import LoginContainer from "@screens/Login/containers";
 import useLogin from "@screens/Login/hooks/useLogin";
 

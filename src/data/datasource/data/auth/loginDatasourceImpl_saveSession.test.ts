@@ -1,5 +1,6 @@
-import { setup, mocks, spies } from "./mocks/loginDatasourceImpl_saveSession";
 import { BusinessError, GenericError } from "@domain/entities/errors";
+
+import { mocks, setup, spies } from "./mocks/loginDatasourceImpl_saveSession";
 
 it("SHOULD save session", async () => {
   spies.setSession.mockResolvedValueOnce(mocks.signInSuccess as never);
@@ -19,7 +20,7 @@ it("SHOULD throw an BusinessError if session is missing", async () => {
     mocks.authSessionMissingError as never,
   );
 
-  function func() {
+  async function func() {
     return setup();
   }
 
@@ -29,7 +30,7 @@ it("SHOULD throw an BusinessError if session is missing", async () => {
 it("SHOULD throw an GenericError if setSession fails", async () => {
   spies.setSession.mockResolvedValueOnce(mocks.setSessionError as never);
 
-  function func() {
+  async function func() {
     return setup();
   }
 

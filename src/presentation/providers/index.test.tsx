@@ -1,7 +1,9 @@
+import { View } from "react-native";
+
 import * as i18n from "@presentation/i18n";
 import * as theme from "@presentation/theme/provider";
-import { View } from "react-native";
 import { render, screen } from "@tests";
+
 import PresentationProviders from "./";
 
 jest.unmock("@presentation/i18n");

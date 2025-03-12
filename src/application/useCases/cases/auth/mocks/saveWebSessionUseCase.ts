@@ -1,6 +1,6 @@
+import saveWebSessionUseCase from "@application/useCases/cases/auth/saveWebSessionUseCase";
 import { repositoriesMocks } from "@data/repositories/mocks";
 import Repositories from "@domain/repositories";
-import saveWebSessionUseCase from "@application/useCases/cases/auth/saveWebSessionUseCase";
 
 const saveSessionSpy = jest.fn();
 
@@ -16,8 +16,8 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-function setup(hash?: string) {
+async function setup(hash?: string) {
   return saveWebSessionUseCase(repositories).execute(hash);
 }
 
-export { setup, saveSessionSpy };
+export { saveSessionSpy, setup };

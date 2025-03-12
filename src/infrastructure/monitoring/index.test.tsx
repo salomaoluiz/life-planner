@@ -2,21 +2,22 @@ import { View } from "react-native";
 
 jest.mock("./sentry");
 
-import * as Sentry from "./sentry";
+import { GenericError } from "@domain/entities/errors";
+import { act, render } from "@tests";
+
 import {
+  addBreadcrumb,
   captureException,
+  captureMessage,
+  ErrorBoundary,
   initializeMonitoring,
   MonitoringWrapper,
-  addBreadcrumb,
-  captureMessage,
   navigationIntegration,
-  ErrorBoundary,
   setContext,
   setTag,
   setUser,
 } from "./";
-import { render, act } from "@tests";
-import { GenericError } from "@domain/entities/errors";
+import * as Sentry from "./sentry";
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -29,9 +30,9 @@ it("SHOULD call sentryInitialize", () => {
 
 it("SHOULD call sentryAddBreadcrumb", () => {
   const breadcrumb = {
-    message: "breadcrumb",
     category: "category",
     level: "error" as const,
+    message: "breadcrumb",
   };
 
   addBreadcrumb(breadcrumb);
@@ -61,7 +62,9 @@ it("SHOULD call sentryCaptureMessage", () => {
 });
 
 it("SHOULD call SentryWrapper", () => {
-  const children = () => null;
+  function children() {
+    return null;
+  }
 
   MonitoringWrapper(children);
 
@@ -104,15 +107,13 @@ it("SHOULD call sentrySetUser", () => {
 
 it("SHOULD call SentryErrorBoundary", () => {
   const Children = <View />;
-  const FallbackComponent = () => null;
 
-  const beforeCapture = jest.fn();
+  function FallbackComponent() {
+    return null;
+  }
 
   render(
-    <ErrorBoundary
-      beforeCapture={beforeCapture}
-      FallbackComponent={FallbackComponent}
-    >
+    <ErrorBoundary FallbackComponent={FallbackComponent}>
       {Children}
     </ErrorBoundary>,
   );
@@ -121,8 +122,8 @@ it("SHOULD call SentryErrorBoundary", () => {
   expect(Sentry.SentryErrorBoundary).toHaveBeenCalledWith(
     {
       beforeCapture: expect.any(Function),
-      FallbackComponent,
       children: Children,
+      FallbackComponent,
     },
     {},
   );
@@ -130,15 +131,13 @@ it("SHOULD call SentryErrorBoundary", () => {
 
 it('SHOULD call setContext in beforeCapture with "error-boundary-context"', () => {
   const Children = <View />;
-  const FallbackComponent = () => null;
 
-  const beforeCapture = jest.fn();
+  function FallbackComponent() {
+    return null;
+  }
 
   render(
-    <ErrorBoundary
-      beforeCapture={beforeCapture}
-      FallbackComponent={FallbackComponent}
-    >
+    <ErrorBoundary FallbackComponent={FallbackComponent}>
       {Children}
     </ErrorBoundary>,
   );

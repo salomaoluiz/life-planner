@@ -1,5 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { createClient } from "@supabase/supabase-js";
+
 import { addBreadcrumb } from "@infrastructure/monitoring";
 
 function initialize() {
@@ -17,16 +18,16 @@ function initialize() {
 
   addBreadcrumb({
     category: "supabase",
-    message: "Supabase initialized",
     level: "info",
+    message: "Supabase initialized",
   });
 
   return createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
-      storage: AsyncStorage,
       autoRefreshToken: true,
-      persistSession: true,
       detectSessionInUrl: false,
+      persistSession: true,
+      storage: AsyncStorage,
       storageKey: "supabase.tokens",
     },
   });

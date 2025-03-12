@@ -1,7 +1,8 @@
-import * as monitoring from "@infrastructure/monitoring";
-import * as supabase from "@supabase/supabase-js";
-import initialize from "@infrastructure/supabase/initialize";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as supabase from "@supabase/supabase-js";
+
+import * as monitoring from "@infrastructure/monitoring";
+import initialize from "@infrastructure/supabase/initialize";
 
 // #region mock
 
@@ -22,8 +23,8 @@ function setup() {
 
 const spies = {
   addBreadcrumb: addBreadcrumbSpy,
-  createClient: createClientSpy,
   AsyncStorage,
+  createClient: createClientSpy,
 };
 
 const mocks = {
@@ -36,4 +37,4 @@ beforeEach(() => {
   process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY = "your-supabase-anon-key";
 });
 
-export { spies, mocks, setup };
+export { mocks, setup, spies };
