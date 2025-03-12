@@ -14,7 +14,7 @@ const getUserSuccess = {
 // endregion mocks
 const getUserSpy = datasourcesMocks.userDatasource.getUser;
 
-function setup() {
+async function setup() {
   return userRepositoryImpl(datasourcesMocks).getUser();
 }
 
