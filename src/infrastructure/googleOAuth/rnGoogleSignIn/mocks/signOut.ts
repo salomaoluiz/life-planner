@@ -1,5 +1,6 @@
-import * as RNGoogleSignIn from "@infrastructure/googleOAuth/rnGoogleSignIn";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
+
+import * as RNGoogleSignIn from "@infrastructure/googleOAuth/rnGoogleSignIn";
 import * as monitoring from "@infrastructure/monitoring";
 
 // #region mocks
@@ -20,12 +21,12 @@ beforeEach(() => {
 });
 
 export default {
-  setup,
-  spies: {
-    signOutSpy,
-    addBreadcrumbSpy,
-  },
   mocks: {
     failError,
+  },
+  setup,
+  spies: {
+    addBreadcrumbSpy,
+    signOutSpy,
   },
 };

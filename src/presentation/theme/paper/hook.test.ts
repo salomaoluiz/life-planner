@@ -1,6 +1,8 @@
-import { renderHook } from "@tests";
-import usePaperTheme from "./hook";
 import * as paper from "react-native-paper";
+
+import { renderHook } from "@tests";
+
+import usePaperTheme from "./hook";
 
 const theme = {
   colors: {

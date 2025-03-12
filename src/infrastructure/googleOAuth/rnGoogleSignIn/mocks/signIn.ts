@@ -2,21 +2,22 @@ import {
   GoogleSignin,
   SignInResponse,
 } from "@react-native-google-signin/google-signin";
-import * as monitoring from "@infrastructure/monitoring";
+
 import { signIn } from "@infrastructure/googleOAuth";
+import * as monitoring from "@infrastructure/monitoring";
 
 // #region mocks
 
 const signInResponse = {
-  type: "success",
   data: {
     idToken: "google_sign_in_id_token",
   },
+  type: "success",
 } as SignInResponse;
 
 const signInResponseWithoutToken = {
-  type: "success",
   data: {},
+  type: "success",
 } as SignInResponse;
 
 const canceledResponse = {
@@ -47,18 +48,18 @@ beforeEach(() => {
 });
 
 export default {
-  setup,
-  spies: {
-    signInSpy,
-    hasPlayServicesSpy,
-    addBreadcrumbSpy,
-  },
   mocks: {
+    canceledResponse,
+    mappedError,
     signInResponse,
     signInResponseWithoutToken,
-    canceledResponse,
-    unknownResponse,
     unknownError,
-    mappedError,
+    unknownResponse,
+  },
+  setup,
+  spies: {
+    addBreadcrumbSpy,
+    hasPlayServicesSpy,
+    signInSpy,
   },
 };

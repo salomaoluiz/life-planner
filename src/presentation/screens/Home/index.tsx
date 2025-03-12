@@ -1,14 +1,14 @@
 // TODO: Remove this console log
-/* eslint-disable no-console */
 
-import { View } from "react-native";
-import { useTranslation, useTranslationLocale } from "@presentation/i18n";
-import { Button, Switch, Text } from "@components";
-import { useTheme } from "@presentation/theme";
 import { useEffect } from "react";
-import { useCases } from "@application/useCases";
+import { View } from "react-native";
+
 import { useUser } from "@application/providers/user";
+import { useCases } from "@application/useCases";
+import { Button, Switch, Text } from "@components";
 import { useMutation } from "@infrastructure/fetcher";
+import { useTranslation, useTranslationLocale } from "@presentation/i18n";
+import { useTheme } from "@presentation/theme";
 
 function Home() {
   const { t } = useTranslation();
@@ -27,39 +27,39 @@ function Home() {
     }
   }, [status]);
 
-  const { setIsDark, isDark } = useTheme();
+  const { isDark, setIsDark } = useTheme();
 
   return (
     <View
       style={{
+        alignItems: "center",
         flex: 1,
         justifyContent: "center",
-        alignItems: "center",
       }}
     >
-      <Text.Body value={t("home.editLabel")} testID={"edit-label"} />
+      <Text.Body testID={"edit-label"} value={t("home.editLabel")} />
       {availableLanguages.map((location, index) => (
         <Button.Filled
-          testID={`button-${index}`}
           key={`button-${index}`}
           label={location}
           onPress={() => {
             changeLocale(location);
           }}
+          testID={`button-${index}`}
         />
       ))}
       <Text.Display testID={"display"} value={`isDark: ${isDark}`} />
-      <Switch testID={"switch"} initialStatus={isDark} onToggle={setIsDark} />
+      <Switch initialStatus={isDark} onToggle={setIsDark} testID={"switch"} />
       <Button.Outlined
-        testID={"go-to-login"}
         label={"Go To Login"}
         onPress={async () => {
           mutate();
         }}
+        testID={"go-to-login"}
       />
       <Text.Caption
-        value={JSON.stringify(getLocale()).replaceAll(",", "\n,")}
         testID={"locale"}
+        value={JSON.stringify(getLocale()).replaceAll(",", "\n,")}
       />
     </View>
   );

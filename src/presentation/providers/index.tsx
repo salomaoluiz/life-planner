@@ -1,6 +1,6 @@
-import { I18NProvider } from "@presentation/i18n";
-
 import React from "react";
+
+import { I18NProvider } from "@presentation/i18n";
 import { ThemeProvider } from "@presentation/theme";
 
 interface Props {

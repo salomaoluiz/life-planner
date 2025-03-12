@@ -1,5 +1,5 @@
-import loginRepositoryImpl from "@data/repositories/repos/auth/loginRepositoryImpl";
 import { datasourcesMocks } from "@data/datasource/mocks";
+import loginRepositoryImpl from "@data/repositories/repos/auth/loginRepositoryImpl";
 import * as platform from "@utils/platform";
 
 const loginWithOAuthSpy = datasourcesMocks.loginDatasource.loginWithOAuth;
@@ -11,11 +11,11 @@ function setup() {
 }
 
 const spies = {
-  loginWithOAuth: loginWithOAuthSpy,
-  loginWithIdToken: loginWithIdTokenSpy,
   isWeb: isWebSpy,
+  loginWithIdToken: loginWithIdTokenSpy,
+  loginWithOAuth: loginWithOAuthSpy,
 };
 
 const mocks = {};
 
-export { setup, spies, mocks };
+export { mocks, setup, spies };

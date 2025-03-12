@@ -1,5 +1,6 @@
-import { mocks, setup, spies } from "./mocks/useQuery.mocks";
 import { BusinessError, GenericError } from "@domain/entities/errors";
+
+import { mocks, setup, spies } from "./mocks/useQuery.mocks";
 
 it("SHOULD fetch and return in success", async () => {
   spies.useReactQuery.mockReturnValue(mocks.successResponse);
@@ -115,11 +116,11 @@ it("SHOULD call useQuery with default params", async () => {
 
   expect(spies.useReactQuery).toHaveBeenCalledTimes(1);
   expect(spies.useReactQuery).toHaveBeenCalledWith({
-    queryKey: ["CacheKey1", "CacheKey2"],
+    networkMode: "offlineFirst",
     queryFn: spies.fetch,
+    queryKey: ["CacheKey1", "CacheKey2"],
     retry: undefined,
     retryDelay: undefined,
-    networkMode: "offlineFirst",
   });
 });
 
@@ -136,10 +137,10 @@ it("SHOULD call useQuery with custom params", async () => {
 
   expect(spies.useReactQuery).toHaveBeenCalledTimes(1);
   expect(spies.useReactQuery).toHaveBeenCalledWith({
-    queryKey: ["CacheKey1", "CacheKey2"],
+    networkMode: "offlineFirst",
     queryFn: spies.fetch,
+    queryKey: ["CacheKey1", "CacheKey2"],
     retry: 3,
     retryDelay: 1000,
-    networkMode: "offlineFirst",
   });
 });

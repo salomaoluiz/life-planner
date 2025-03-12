@@ -1,6 +1,6 @@
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
-import Repositories from "@domain/repositories";
 import { DefaultError, UserNotLoggedError } from "@domain/entities/errors";
+import Repositories from "@domain/repositories";
 
 type Hash = string | undefined;
 
@@ -8,7 +8,6 @@ function saveWebSessionUseCase(
   repositories: Repositories,
 ): IUseCaseFactoryWithParamResponse<Hash, void> {
   return {
-    uniqueName: "auth.save_web_session_use_case",
     async execute(hash: Hash): Promise<void> {
       try {
         if (hash === undefined) {
@@ -42,6 +41,7 @@ function saveWebSessionUseCase(
         throw error;
       }
     },
+    uniqueName: "auth.save_web_session_use_case",
   };
 }
 

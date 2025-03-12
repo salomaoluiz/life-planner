@@ -3,8 +3,9 @@ import { renderHook } from "@tests";
 jest.mock("@infrastructure");
 jest.mock("@providers/loader");
 jest.mock("expo-router");
-import { monitoring } from "@infrastructure";
 import * as expoRouter from "expo-router";
+
+import { monitoring } from "@infrastructure";
 import * as loaderProvider from "@providers/loader";
 
 import useInitializeRouter from "./useInitializeRouter";

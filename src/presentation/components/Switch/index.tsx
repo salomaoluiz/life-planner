@@ -1,5 +1,6 @@
-import { Switch as SwitchPaper } from "react-native-paper";
 import { useState } from "react";
+import { Switch as SwitchPaper } from "react-native-paper";
+
 import { styles } from "./styles";
 
 export interface SwitchProps {
@@ -19,10 +20,10 @@ const Switch = (props: SwitchProps) => {
 
   return (
     <SwitchPaper
-      testID={testID}
-      value={isEnabled}
       onValueChange={onValueChange}
       style={styles.switch}
+      testID={testID}
+      value={isEnabled}
     />
   );
 };

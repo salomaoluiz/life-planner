@@ -1,14 +1,14 @@
 import { TextStyle } from "react-native";
 
 export interface CustomStyles {
-  textAlign?: "center" | "left" | "right";
   color?: string;
+  textAlign?: "center" | "left" | "right";
 }
 
 function getCustomStyles(customStyles?: CustomStyles): TextStyle {
   return {
-    textAlign: customStyles?.textAlign,
     color: customStyles?.color,
+    textAlign: customStyles?.textAlign,
   };
 }
 

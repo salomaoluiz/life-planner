@@ -1,13 +1,13 @@
-import { render } from "@tests";
 import { Switch, SwitchProps } from "@components";
+import { render } from "@tests";
 
 const defaultProps: SwitchProps = {
-  testID: "default-switch",
   initialStatus: false,
   onToggle: jest.fn(),
+  testID: "default-switch",
 };
 
 const setup = (props?: Partial<SwitchProps>) =>
   render(<Switch {...defaultProps} {...props} />);
 
-export { setup, defaultProps };
+export { defaultProps, setup };

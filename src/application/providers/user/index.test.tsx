@@ -1,5 +1,6 @@
-import { mocks, setup, screen, setupHook, spies } from "./mocks/index.mocks";
 import { useCases } from "@application/useCases";
+
+import { mocks, screen, setup, setupHook, spies } from "./mocks/index.mocks";
 
 it("SHOULD render the children component", () => {
   setup();

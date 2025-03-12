@@ -1,9 +1,9 @@
-import { renderHook, act, suppressConsoleError } from "@tests";
 import {
   loaderContexts,
   LoaderProvider,
   useProviderLoader,
 } from "@providers/loader/index";
+import { act, renderHook, suppressConsoleError } from "@tests";
 
 function setup() {
   return renderHook(useProviderLoader, { wrapper: LoaderProvider });

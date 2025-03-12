@@ -8,8 +8,8 @@ type Props = TextInputProps & { mode: TextInputMode };
 
 const defaultProps: TextInputProps = {
   onChangeText: jest.fn(),
-  value: "Default Value",
   testID: "test-text-input",
+  value: "Default Value",
 };
 
 const renderComponent = (props?: Partial<Props>) => {
@@ -26,4 +26,4 @@ const renderComponent = (props?: Partial<Props>) => {
 const setup = (props?: Partial<Props>) =>
   render(renderComponent({ mode: TextInputMode.Flat, ...props }));
 
-export { setup, defaultProps };
+export { defaultProps, setup };

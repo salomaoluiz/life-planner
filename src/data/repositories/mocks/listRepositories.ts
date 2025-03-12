@@ -2,8 +2,8 @@ import Repositories from "@domain/repositories";
 
 const repositoriesMocks = {
   loginRepository: {
-    logout: jest.fn(),
     loginWithGoogle: jest.fn(),
+    logout: jest.fn(),
     saveSession: jest.fn(),
   },
   userRepository: {

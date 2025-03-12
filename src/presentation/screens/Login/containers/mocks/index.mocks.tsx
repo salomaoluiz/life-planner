@@ -1,4 +1,5 @@
 import { render } from "@tests";
+
 import LoginContainer, { Props } from "../";
 
 // region mocks
@@ -26,5 +27,5 @@ const mocks = {
   defaultProps,
 };
 
-export { setup, spies, mocks };
+export { mocks, setup, spies };
 export { screen } from "@tests";

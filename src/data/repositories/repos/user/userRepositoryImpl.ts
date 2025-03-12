@@ -1,6 +1,6 @@
-import { UserRepository } from "@domain/repositories/user";
 import { Datasources } from "@data/datasource";
 import UserProfileEntity from "@domain/entities/user/UserProfileEntity";
+import { UserRepository } from "@domain/repositories/user";
 
 function userRepositoryImpl(datasources: Datasources): UserRepository {
   return {
@@ -8,9 +8,9 @@ function userRepositoryImpl(datasources: Datasources): UserRepository {
       const userModel = await datasources.userDatasource.getUser();
 
       return new UserProfileEntity({
+        email: userModel.email,
         id: userModel.id,
         name: userModel.name,
-        email: userModel.email,
         photoUrl: userModel.photoURL,
       });
     },

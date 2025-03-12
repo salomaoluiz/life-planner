@@ -1,4 +1,5 @@
 import { Redirect, Stack } from "expo-router";
+
 import { useUser } from "@application/providers/user";
 
 export default function AppLayout() {

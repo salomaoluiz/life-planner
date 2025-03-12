@@ -1,13 +1,14 @@
-import { render } from "@tests";
-import Login from "../";
 import * as hooks from "@presentation/screens/Login/hooks";
+import { render } from "@tests";
+
+import Login from "../";
 
 jest.mock("@presentation/screens/Login/hooks/useLogin");
 
 // region mocks
 const useLoginMock = {
-  onGoogleButtonPress: jest.fn(),
   isFetching: false,
+  onGoogleButtonPress: jest.fn(),
 };
 // endregion mocks
 
@@ -33,5 +34,5 @@ const mocks = {
   useLogin: useLoginMock,
 };
 
-export { setup, spies, mocks };
-export { screen, fireEvent } from "@tests";
+export { mocks, setup, spies };
+export { fireEvent, screen } from "@tests";

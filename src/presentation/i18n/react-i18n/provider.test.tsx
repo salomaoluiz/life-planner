@@ -1,4 +1,5 @@
 import { View } from "react-native";
+
 import { render, screen } from "@tests";
 
 import * as hooks from "./hooks";

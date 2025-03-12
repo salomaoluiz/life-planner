@@ -1,6 +1,6 @@
-import { getString } from "@infrastructure/storage/gets";
-
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import { getString } from "@infrastructure/storage/gets";
 
 // region mocks
 
@@ -26,4 +26,4 @@ const mocks = {
   getItemResponse,
 };
 
-export { setup, spies, mocks };
+export { mocks, setup, spies };

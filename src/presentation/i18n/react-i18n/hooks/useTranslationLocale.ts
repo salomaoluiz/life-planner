@@ -1,8 +1,9 @@
-import { UseTranslationLocale } from "@presentation/i18n/types";
-import { useTranslation as useReactI18NextTranslation } from "react-i18next";
-import { changeLanguage } from "i18next";
 import { getLocales } from "expo-localization";
+import { changeLanguage } from "i18next";
+import { useTranslation as useReactI18NextTranslation } from "react-i18next";
+
 import { availableLanguages } from "@presentation/i18n/translations";
+import { UseTranslationLocale } from "@presentation/i18n/types";
 
 function useTranslationLocale(): ReturnType<UseTranslationLocale> {
   const { i18n } = useReactI18NextTranslation();

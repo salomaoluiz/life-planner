@@ -2,8 +2,8 @@ import { getString } from "./gets";
 import { setString } from "./sets";
 
 const asyncStorage = {
-  setString,
   getString,
+  setString,
 };
 
 export { asyncStorage };

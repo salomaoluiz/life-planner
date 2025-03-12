@@ -1,5 +1,6 @@
-import { setup, mocks, spies } from "./mocks/loginDatasourceImpl_saveSession";
 import { BusinessError, GenericError } from "@domain/entities/errors";
+
+import { mocks, setup, spies } from "./mocks/loginDatasourceImpl_saveSession";
 
 it("SHOULD save session", async () => {
   spies.setSession.mockResolvedValueOnce(mocks.signInSuccess as never);

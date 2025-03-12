@@ -1,5 +1,6 @@
-import { useTheme } from "@presentation/theme";
 import { StyleSheet } from "react-native";
+
+import { useTheme } from "@presentation/theme";
 
 function getStyles() {
   const { theme } = useTheme();

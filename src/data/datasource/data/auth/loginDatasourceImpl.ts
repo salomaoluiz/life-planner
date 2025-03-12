@@ -1,11 +1,11 @@
 import { LoginDatasource } from "@data/repositories/repos/auth/loginDatasource";
-import { signIn } from "@infrastructure/googleOAuth";
-import { supabase } from "@infrastructure/supabase";
 import {
   BusinessError,
   GenericError,
   LoginCanceledError,
 } from "@domain/entities/errors";
+import { signIn } from "@infrastructure/googleOAuth";
+import { supabase } from "@infrastructure/supabase";
 
 function loginDatasourceImpl(): LoginDatasource {
   return {
@@ -20,18 +20,18 @@ function loginDatasourceImpl(): LoginDatasource {
       }
 
       await supabase.auth.signInWithIdToken({
-        token: response.data.token,
         provider: "google",
+        token: response.data.token,
       });
       return true;
     },
     async loginWithOAuth(): Promise<boolean> {
       const envs = process.env;
       const response = await supabase.auth.signInWithOAuth({
-        provider: "google",
         options: {
           redirectTo: `${envs.EXPO_PUBLIC_PROJECT_WEBSITE_URL}/login`,
         },
+        provider: "google",
       });
 
       if (response.error) {
@@ -39,6 +39,13 @@ function loginDatasourceImpl(): LoginDatasource {
       }
 
       return true;
+    },
+    async logout(): Promise<void> {
+      const result = await supabase.auth.signOut();
+
+      if (result.error) {
+        throw new GenericError();
+      }
     },
     async saveSession(params): Promise<boolean> {
       const response = await supabase.auth.setSession({
@@ -54,13 +61,6 @@ function loginDatasourceImpl(): LoginDatasource {
       }
 
       return true;
-    },
-    async logout(): Promise<void> {
-      const result = await supabase.auth.signOut();
-
-      if (result.error) {
-        throw new GenericError();
-      }
     },
   };
 }

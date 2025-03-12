@@ -1,4 +1,5 @@
 import { render } from "@tests";
+
 import Welcome from "../";
 
 // region mocks
@@ -21,5 +22,5 @@ const spies = {};
 
 const mocks = {};
 
-export { setup, spies, mocks };
+export { mocks, setup, spies };
 export { screen } from "@tests";

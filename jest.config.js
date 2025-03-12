@@ -1,14 +1,6 @@
 /* eslint-disable no-undef */
 
 module.exports = {
-  preset: "jest-expo",
-  setupFilesAfterEnv: ["<rootDir>/tests/setup.tsx"],
-  transformIgnorePatterns: ["jest-runner"],
-  testPathIgnorePatterns: ["/node_modules/", "/tests/"],
-  moduleDirectories: ["node_modules", "src"],
-  moduleNameMapper: {
-    "\\.svg": "<rootDir>/tests/svgMock.ts",
-  },
   collectCoverageFrom: [
     "src/**/*.{js,jsx,ts,tsx}", // Specify which files to collect coverage from
     "!src/**/*.d.ts", // Exclude TypeScript declaration files
@@ -22,4 +14,12 @@ module.exports = {
       statements: 90,
     },
   },
+  moduleDirectories: ["node_modules", "src"],
+  moduleNameMapper: {
+    "\\.svg": "<rootDir>/tests/svgMock.ts",
+  },
+  preset: "jest-expo",
+  setupFilesAfterEnv: ["<rootDir>/tests/setup.tsx"],
+  testPathIgnorePatterns: ["/node_modules/", "/tests/"],
+  transformIgnorePatterns: ["jest-runner"],
 };

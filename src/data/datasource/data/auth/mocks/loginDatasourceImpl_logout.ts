@@ -1,5 +1,5 @@
-import { supabase } from "@infrastructure/supabase";
 import loginDatasourceImpl from "@data/datasource/data/auth/loginDatasourceImpl";
+import { supabase } from "@infrastructure/supabase";
 
 // region mocks
 
@@ -28,4 +28,4 @@ const mocks = {
   signOutSuccess,
 };
 
-export { setup, spies, mocks };
+export { mocks, setup, spies };

@@ -1,5 +1,6 @@
-import { logoutSpy, setup } from "./mocks/logoutUseCase";
 import { BusinessError } from "@domain/entities/errors";
+
+import { logoutSpy, setup } from "./mocks/logoutUseCase";
 
 it("SHOULD call the repository to logout", async () => {
   await setup().execute();

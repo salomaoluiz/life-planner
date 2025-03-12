@@ -1,5 +1,5 @@
-import loginRepositoryImpl from "@data/repositories/repos/auth/loginRepositoryImpl";
 import { datasourcesMocks } from "@data/datasource/mocks";
+import loginRepositoryImpl from "@data/repositories/repos/auth/loginRepositoryImpl";
 
 const saveSessionSpy = datasourcesMocks.loginDatasource.saveSession;
 
@@ -16,4 +16,4 @@ const spies = {
 
 const mocks = {};
 
-export { setup, spies, mocks };
+export { mocks, setup, spies };

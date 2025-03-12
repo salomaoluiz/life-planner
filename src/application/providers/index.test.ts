@@ -1,4 +1,4 @@
-import { setup, screen } from "./mocks/index.mocks";
+import { screen, setup } from "./mocks/index.mocks";
 
 it('SHOULD render "UserProvider" and "Children"', () => {
   setup();
