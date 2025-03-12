@@ -4,7 +4,7 @@ import { StyleSheet } from "react-native";
 import { useTheme } from "@presentation/theme";
 import { getScaleRatio } from "@presentation/theme/constants/utils/sizes";
 
-const useStyles = () => {
+function useStyles() {
   const { theme } = useTheme();
   return useMemo(
     () =>
@@ -40,6 +40,6 @@ const useStyles = () => {
       }),
     [],
   );
-};
+}
 
 export default useStyles;

@@ -7,7 +7,8 @@ const defaultProps: SwitchProps = {
   testID: "default-switch",
 };
 
-const setup = (props?: Partial<SwitchProps>) =>
+function setup(props?: Partial<SwitchProps>) {
   render(<Switch {...defaultProps} {...props} />);
+}
 
 export { defaultProps, setup };

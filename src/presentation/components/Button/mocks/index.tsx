@@ -8,9 +8,7 @@ const defaultProps: ButtonProps = {
   testID: "default-button",
 };
 
-const renderComponent = (
-  props?: Partial<ButtonProps & { mode: ButtonMode }>,
-) => {
+function renderComponent(props?: Partial<ButtonProps & { mode: ButtonMode }>) {
   switch (props?.mode) {
     case ButtonMode.Filled:
       return <Button.Filled {...defaultProps} {...props} />;
@@ -21,9 +19,10 @@ const renderComponent = (
     default:
       throw new Error("Invalid mode");
   }
-};
+}
 
-const setup = (props?: Partial<ButtonProps & { mode: ButtonMode }>) =>
+function setup(props?: Partial<ButtonProps & { mode: ButtonMode }>) {
   render(renderComponent({ mode: ButtonMode.Filled, ...props }));
+}
 
 export { defaultProps, setup };

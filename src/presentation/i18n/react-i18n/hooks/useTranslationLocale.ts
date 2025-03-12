@@ -8,11 +8,11 @@ import { UseTranslationLocale } from "@presentation/i18n/types";
 function useTranslationLocale(): ReturnType<UseTranslationLocale> {
   const { i18n } = useReactI18NextTranslation();
 
-  const changeLocale = async (tag: string) => {
+  async function changeLocale(tag: string) {
     await changeLanguage(tag);
-  };
+  }
 
-  const getLocale = () => {
+  function getLocale() {
     const locales = getLocales();
     return (
       locales.find(
@@ -21,7 +21,7 @@ function useTranslationLocale(): ReturnType<UseTranslationLocale> {
           locale.languageTag === i18n.language.split("-")[0],
       ) || locales[0]
     );
-  };
+  }
 
   return {
     availableLanguages,

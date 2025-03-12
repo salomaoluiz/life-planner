@@ -23,7 +23,9 @@ it("SHOULD throw a BusinessError if the repository throws a BusinessError", asyn
   const businessError = new BusinessError();
   logoutSpy.mockRejectedValue(businessError);
 
-  const result = () => setup().execute();
+  function result() {
+    return setup().execute();
+  }
 
   await expect(result).rejects.toThrow(businessError);
 });

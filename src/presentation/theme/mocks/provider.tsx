@@ -28,10 +28,14 @@ const defaultProps = {
   children: <View testID={"default-children"} />,
 };
 
-const renderComponent = () => (
-  <ThemeProvider {...defaultProps}>{defaultProps.children}</ThemeProvider>
-);
+function renderComponent() {
+  return (
+    <ThemeProvider {...defaultProps}>{defaultProps.children}</ThemeProvider>
+  );
+}
 
-const setup = () => render(renderComponent());
+function setup() {
+  render(renderComponent());
+}
 
 export { providerLoaderResult, setup };

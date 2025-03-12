@@ -5,22 +5,22 @@ interface RenderOptions {
   wrapper: React.FunctionComponent<{ children: React.ReactElement }>;
 }
 
-const customRender = (
+function customRender(
   component: React.JSX.Element,
   options?: Partial<RenderOptions>,
-) => {
+) {
   render(component, options);
-};
+}
 
-const suppressConsoleError = () => {
+function suppressConsoleError() {
   const errorSpy = jest
     .spyOn(global.console, "error")
     .mockImplementation(() => {
-      //do nothing
+      // do nothing
     });
 
   return () => errorSpy.mockRestore();
-};
+}
 
 export {
   act,

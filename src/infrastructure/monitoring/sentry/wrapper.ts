@@ -1,6 +1,8 @@
 import * as Sentry from "@sentry/react-native";
 import React from "react";
 
-const SentryWrapper = (child: React.ComponentType) => Sentry.wrap(child);
+function SentryWrapper(child: React.ComponentType) {
+  return Sentry.wrap(child);
+}
 
 export default SentryWrapper;
