@@ -1,4 +1,4 @@
-import signInMocks from "@infrastructure/googleOAuth/rnGoogleSignIn/mocks/signIn";
+import signInMocks from "./mocks/signIn";
 
 const { mocks, setup, spies } = signInMocks;
 
@@ -55,8 +55,7 @@ it('SHOULD return "error" status when sign in fails', async () => {
 });
 
 it('SHOULD return "error" with default message when sign in fails', async () => {
-  const error = new Error();
-  spies.signInSpy.mockRejectedValue(error);
+  spies.signInSpy.mockRejectedValue(mocks.unknownError);
 
   const result = await setup();
 

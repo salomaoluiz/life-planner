@@ -31,7 +31,7 @@ function useMutation<Params, Response>(
     }
 
     const genericError = new GenericError();
-    genericError.message = error?.message || "Without error message";
+    genericError.message = error?.message ?? "Without error message";
     genericError.addContext({
       ...error.context,
       cacheString: props.cacheKey.join("-"),

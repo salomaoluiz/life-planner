@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useMemo } from "react";
 
 import { useCases } from "@application/useCases";
 import UserProfileEntity from "@domain/entities/user/UserProfileEntity";
@@ -45,10 +45,13 @@ function UserProvider(props: Props) {
     await refetch();
   }
 
+  const providerValue = useMemo(
+    () => ({ data: getUserData(), logged: !!data, update }),
+    [status],
+  );
+
   return (
-    <UserContext.Provider
-      value={{ data: getUserData(), logged: !!data, update }}
-    >
+    <UserContext.Provider value={providerValue}>
       {props.children}
     </UserContext.Provider>
   );

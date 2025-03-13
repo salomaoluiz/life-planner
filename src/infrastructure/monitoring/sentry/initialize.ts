@@ -7,15 +7,15 @@ function sentryInitialize() {
   const envs = process.env;
 
   const sentryDsn =
-    process.env.EXPO_PUBLIC_SENTRY_DSN || envs.EXPO_PUBLIC_SENTRY_DSN;
+    process.env.EXPO_PUBLIC_SENTRY_DSN ?? envs.EXPO_PUBLIC_SENTRY_DSN;
   const sentryEnvironment =
-    process.env.EXPO_PUBLIC_SENTRY_ENVIRONMENT ||
+    process.env.EXPO_PUBLIC_SENTRY_ENVIRONMENT ??
     envs.EXPO_PUBLIC_SENTRY_ENVIRONMENT;
   const sentryTracesSampler =
-    process.env.EXPO_PUBLIC_SENTRY_TRACES_SAMPLER ||
+    process.env.EXPO_PUBLIC_SENTRY_TRACES_SAMPLER ??
     envs.EXPO_PUBLIC_SENTRY_TRACES_SAMPLER;
   const sentryEnabled =
-    process.env.EXPO_PUBLIC_SENTRY_ENABLED || envs.EXPO_PUBLIC_SENTRY_ENABLED;
+    process.env.EXPO_PUBLIC_SENTRY_ENABLED ?? envs.EXPO_PUBLIC_SENTRY_ENABLED;
 
   const navigationIntegration = sentryNavigationIntegration();
   return Sentry.init({
@@ -24,7 +24,7 @@ function sentryInitialize() {
     enableNativeFramesTracking: !isRunningInExpoGo(),
     environment: sentryEnvironment,
     integrations: [navigationIntegration],
-    tracesSampleRate: parseInt(sentryTracesSampler || "0"),
+    tracesSampleRate: parseInt(sentryTracesSampler ?? "0"),
   });
 }
 

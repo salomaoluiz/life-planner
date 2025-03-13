@@ -1,7 +1,8 @@
+import { render } from "@tests";
+
 import * as storage from "@infrastructure/storage";
 import { StorageKeys } from "@infrastructure/storage";
 import GlobalBoundary from "@screens/Feedback/GlobalBoundary";
-import { render } from "@tests";
 
 // #region mocks
 
