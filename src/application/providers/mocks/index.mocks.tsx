@@ -1,8 +1,9 @@
 import { View } from "react-native";
 
+import { render } from "@tests";
+
 import ApplicationProviders from "@application/providers";
 import * as userProviders from "@application/providers/user";
-import { render } from "@tests";
 
 jest
   .spyOn(userProviders, "UserProvider")

@@ -1,5 +1,6 @@
-import * as hooks from "@presentation/screens/Login/hooks";
 import { render } from "@tests";
+
+import * as hooks from "@presentation/screens/Login/hooks";
 
 import Login from "../index.web";
 

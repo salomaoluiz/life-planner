@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useMemo, useState } from "react";
 import { useColorScheme } from "react-native";
 
 import { useProviderLoader } from "@providers/loader";
@@ -46,8 +46,10 @@ export function ThemeProvider({ children }: Props) {
     setIsLoading(false, "theme");
   }, [isDark]);
 
+  const providerValue = useMemo(() => ({ isDark, setIsDark }), [isDark]);
+
   return (
-    <ThemeContext.Provider value={{ isDark, setIsDark }}>
+    <ThemeContext.Provider value={providerValue}>
       <PaperThemeProvider theme={theme}>{children}</PaperThemeProvider>
     </ThemeContext.Provider>
   );

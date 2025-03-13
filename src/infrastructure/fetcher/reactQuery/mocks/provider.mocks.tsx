@@ -1,8 +1,9 @@
 import * as reactQuery from "@tanstack/react-query";
 import { View } from "react-native";
 
-import { ReactQueryProvider } from "@infrastructure/fetcher/reactQuery";
 import { render } from "@tests";
+
+import { ReactQueryProvider } from "@infrastructure/fetcher/reactQuery";
 
 jest
   .spyOn(reactQuery, "QueryClientProvider")

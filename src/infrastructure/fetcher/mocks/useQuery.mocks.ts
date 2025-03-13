@@ -1,8 +1,9 @@
+import { renderHook } from "@tests";
+
 import { BusinessError } from "@domain/entities/errors";
 import { useQuery } from "@infrastructure/fetcher";
 import * as reactQuery from "@infrastructure/fetcher/reactQuery";
 import * as monitoring from "@infrastructure/monitoring";
-import { renderHook } from "@tests";
 
 jest.mock("@infrastructure/fetcher/reactQuery");
 
@@ -39,7 +40,7 @@ const businessErrorResponse = {
 
 const errorWithoutMessageResponse = {
   data: null,
-  error: new Error(),
+  error: {},
   isFetching: false,
   refetch: jest.fn(),
   status: "error",

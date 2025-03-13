@@ -1,6 +1,7 @@
+import { act, screen } from "@tests";
+
 import { ButtonMode } from "@components/Button/index";
 import Icon from "@components/Icon";
-import { act, screen } from "@tests";
 
 import { defaultProps, setup } from "./mocks";
 

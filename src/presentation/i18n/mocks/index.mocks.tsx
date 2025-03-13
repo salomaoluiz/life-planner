@@ -1,5 +1,7 @@
 import { View } from "react-native";
 
+import { render, renderHook } from "@tests";
+
 import {
   I18NProvider,
   translate,
@@ -8,7 +10,6 @@ import {
 } from "@presentation/i18n";
 import * as reactI18N from "@presentation/i18n/react-i18n";
 import { reactI18NHooks } from "@presentation/i18n/react-i18n";
-import { render, renderHook } from "@tests";
 
 jest.mock("@presentation/i18n/react-i18n");
 jest.unmock("@presentation/i18n");

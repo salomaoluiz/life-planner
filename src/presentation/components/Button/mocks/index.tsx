@@ -1,6 +1,7 @@
+import { render } from "@tests";
+
 import { Button, ButtonProps } from "@components";
 import { ButtonMode } from "@components/Button";
-import { render } from "@tests";
 
 const defaultProps: ButtonProps = {
   label: "Button Label",

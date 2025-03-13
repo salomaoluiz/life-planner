@@ -2,8 +2,9 @@ import { View } from "react-native";
 
 jest.mock("./sentry");
 
-import { GenericError } from "@domain/entities/errors";
 import { act, render } from "@tests";
+
+import { GenericError } from "@domain/entities/errors";
 
 import {
   addBreadcrumb,

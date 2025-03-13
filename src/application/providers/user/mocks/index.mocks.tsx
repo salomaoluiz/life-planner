@@ -2,11 +2,12 @@ import { renderHook } from "@testing-library/react-native";
 import React from "react";
 import { View } from "react-native";
 
+import { render } from "@tests";
+
 import { UserProvider, useUser } from "@application/providers/user";
 import UserProfileEntity from "@domain/entities/user/UserProfileEntity";
 import * as fetcher from "@infrastructure/fetcher";
 import * as loader from "@providers/loader";
-import { render } from "@tests";
 
 jest.mock("@infrastructure/fetcher");
 

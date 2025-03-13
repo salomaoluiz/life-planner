@@ -1,5 +1,6 @@
-import { Switch, SwitchProps } from "@components";
 import { render } from "@tests";
+
+import { Switch, SwitchProps } from "@components";
 
 const defaultProps: SwitchProps = {
   initialStatus: false,

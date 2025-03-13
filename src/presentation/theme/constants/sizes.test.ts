@@ -64,7 +64,7 @@ it("SHOULD return the scaled size FOR tablet", () => {
 it("SHOULD return the scaled size FOR desktop", () => {
   dimensionsGetSpy.mockReturnValue({
     ...defaultDimensions,
-    width: 1024,
+    width: 1025,
   });
 
   const sizes = getScaledSizes();

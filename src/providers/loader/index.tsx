@@ -20,10 +20,13 @@ interface Props {
   children: React.ReactNode;
 }
 export function LoaderProvider({ children }: Props) {
-  const [isContextLoading, setContextIsLoading] = useState(loaderContexts);
+  const [isContextLoading, setIsContextLoading] = useState(loaderContexts);
 
-  const isLoading = useMemo(() => {
-    return Object.values(isContextLoading).some((value) => value);
+  const contextValue = useMemo(() => {
+    return {
+      isLoading: Object.values(isContextLoading).some((value) => value),
+      setIsLoading,
+    };
   }, [isContextLoading]);
 
   function setIsLoading(
@@ -34,14 +37,14 @@ export function LoaderProvider({ children }: Props) {
       throw new Error(`Context ${context} not found`);
     }
 
-    setContextIsLoading((prevState) => ({
+    setIsContextLoading((prevState) => ({
       ...prevState,
       [context]: isLoading,
     }));
   }
 
   return (
-    <LoaderContext.Provider value={{ isLoading, setIsLoading }}>
+    <LoaderContext.Provider value={contextValue}>
       {children}
     </LoaderContext.Provider>
   );
