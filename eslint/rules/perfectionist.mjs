@@ -12,7 +12,6 @@ const internalModules = [
   "@navigation",
   "@utils",
   "@providers",
-  "@tests",
 ];
 
 export default {
@@ -40,12 +39,14 @@ export default {
             internal: internalModules.map((module) => `^${module}`),
           },
           value: {
+            test: "@tests",
             internal: internalModules.map((module) => `^${module}`),
           },
         },
         fallbackSort: { order: "asc", type: "line-length" },
         groups: [
           ["builtin", "external", "builtin-type", "external-type"],
+          ["test"],
           ["internal", "internal-type"],
           [
             "parent",

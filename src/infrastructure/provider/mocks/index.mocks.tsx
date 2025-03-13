@@ -1,9 +1,10 @@
 import { View } from "react-native";
 
+import { render } from "@tests";
+
 import * as Fetcher from "@infrastructure/fetcher";
 import * as googleOAuth from "@infrastructure/googleOAuth";
 import InfrastructureProvider from "@infrastructure/provider";
-import { render } from "@tests";
 
 jest.mock("@infrastructure/fetcher");
 jest.mock("@infrastructure/googleOAuth");

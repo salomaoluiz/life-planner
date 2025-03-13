@@ -1,10 +1,11 @@
 import { View } from "react-native";
 import * as reactNative from "react-native";
 
+import { render } from "@tests";
+
 import { ThemeProvider } from "@presentation/theme";
 import * as paper from "@presentation/theme/paper";
 import * as loader from "@providers/loader";
-import { render } from "@tests";
 
 jest.mock("@presentation/theme/paper");
 jest.unmock("@presentation/theme");

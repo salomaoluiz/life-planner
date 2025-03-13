@@ -1,6 +1,11 @@
 import { load } from "@expo/env";
 import React from "react";
 
+global.console = {
+  ...console,
+  log: jest.fn(), // Mute console.log
+};
+
 load(process.cwd(), { silent: true });
 
 jest.mock("react-native-paper", () => {

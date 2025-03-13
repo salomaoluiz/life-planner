@@ -9,7 +9,7 @@ function useQuery<Response>(
     Response,
     BusinessError | GenericError
   >({
-    networkMode: props.networkMode || "offlineFirst",
+    networkMode: props.networkMode ?? "offlineFirst",
     queryFn: props.fetch,
     queryKey: props.cacheKey,
     retry: props.retry,
@@ -30,7 +30,7 @@ function useQuery<Response>(
     }
 
     const genericError = new GenericError();
-    genericError.message = error?.message || "Without error message";
+    genericError.message = error?.message ?? "Without error message";
     genericError.addContext({
       ...error.context,
       cacheString: props.cacheKey.join("-"),

@@ -1,8 +1,9 @@
+import { render } from "@tests";
+
 import TextInput, {
   TextInputMode,
   TextInputProps,
 } from "@components/TextInput";
-import { render } from "@tests";
 
 type Props = TextInputProps & { mode: TextInputMode };
 

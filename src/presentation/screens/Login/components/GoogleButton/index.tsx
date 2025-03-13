@@ -9,10 +9,6 @@ interface Props {
 function GoogleButton({ onPress }: Props) {
   const { t } = useTranslation();
 
-  function GoogleIcon() {
-    return <GoogleLogo height={20} width={20} />;
-  }
-
   return (
     <Button.Outlined
       customStyles={{
@@ -25,6 +21,10 @@ function GoogleButton({ onPress }: Props) {
       testID={"login_googleButton"}
     />
   );
+}
+
+function GoogleIcon() {
+  return <GoogleLogo height={20} width={20} />;
 }
 
 export default GoogleButton;

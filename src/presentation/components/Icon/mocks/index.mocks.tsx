@@ -1,5 +1,6 @@
-import Icon, { IconProps } from "@components/Icon";
 import { render } from "@tests";
+
+import Icon, { IconProps } from "@components/Icon";
 
 const defaultProps: IconProps = {
   color: "black",

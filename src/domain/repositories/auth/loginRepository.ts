@@ -1,5 +1,5 @@
 export type LoginRepository = {
-  loginWithGoogle(): Promise<boolean>;
+  loginWithGoogle(): Promise<void>;
   logout(): Promise<void>;
   saveSession(params: SaveSessionParams): Promise<boolean>;
 };

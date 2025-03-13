@@ -1,6 +1,7 @@
+import { screen } from "@tests";
+
 import { TextMode } from "@components/Text/types";
 import { lightTheme } from "@presentation/theme/provider";
-import { screen } from "@tests";
 
 import { defaultProps, setup } from "./mocks";
 

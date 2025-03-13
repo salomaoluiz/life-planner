@@ -19,7 +19,7 @@ function useTranslationLocale(): ReturnType<UseTranslationLocale> {
         (locale) =>
           locale.languageTag === i18n.language ||
           locale.languageTag === i18n.language.split("-")[0],
-      ) || locales[0]
+      ) ?? locales[0]
     );
   }
 

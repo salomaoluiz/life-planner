@@ -1,9 +1,10 @@
 import { View } from "react-native";
 
+import { render, screen } from "@tests";
+
 import * as applicationProviders from "@application/providers";
 import * as infrastructureProvider from "@infrastructure/provider";
 import * as presentationProviders from "@presentation/providers";
-import { render, screen } from "@tests";
 
 import GlobalProviders from "./";
 import * as loaderProvider from "./loader";

@@ -47,7 +47,7 @@ async function signIn(): Promise<SignInResult> {
     return handleSignIn(result);
   } catch (error) {
     const errorMessage =
-      (error as Error).message ||
+      (error as Error).message ??
       "[react-native-google-signin] - Unknown error";
 
     addBreadcrumb({

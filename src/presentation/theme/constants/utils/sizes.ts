@@ -22,9 +22,21 @@ function getScaleRatio() {
   const isTablet = screenWidth >= 600;
   const isDesktop = screenWidth >= 1024;
 
-  const scaleFactor = isDesktop ? 1.6 : isTablet ? 1.3 : 1;
-  const spacingFactor = isDesktop ? 1.8 : isTablet ? 1.4 : 1;
-  const borderFactor = isDesktop ? 1.5 : isTablet ? 1.2 : 1;
+  let scaleFactor = 1;
+  let spacingFactor = 1;
+  let borderFactor = 1;
+
+  if (isTablet) {
+    scaleFactor = 1.3;
+    spacingFactor = 1.4;
+    borderFactor = 1.2;
+  }
+
+  if (isDesktop) {
+    scaleFactor = 1.6;
+    spacingFactor = 1.8;
+    borderFactor = 1.5;
+  }
 
   return { borderFactor, scaleFactor, spacingFactor };
 }
