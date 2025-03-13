@@ -40,7 +40,7 @@ const businessErrorResponse = {
 
 const errorWithoutMessageResponse = {
   data: null,
-  error: new Error(),
+  error: {},
   isFetching: false,
   refetch: jest.fn(),
   status: "error",

@@ -26,16 +26,16 @@ function getScaleRatio() {
   let spacingFactor = 1;
   let borderFactor = 1;
 
-  if (isDesktop) {
-    scaleFactor = 1.6;
-    spacingFactor = 1.8;
-    borderFactor = 1.5;
-  }
-
   if (isTablet) {
     scaleFactor = 1.3;
     spacingFactor = 1.4;
     borderFactor = 1.2;
+  }
+
+  if (isDesktop) {
+    scaleFactor = 1.6;
+    spacingFactor = 1.8;
+    borderFactor = 1.5;
   }
 
   return { borderFactor, scaleFactor, spacingFactor };

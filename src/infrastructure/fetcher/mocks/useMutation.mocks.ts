@@ -46,7 +46,7 @@ const businessErrorResponse = {
 
 const errorWithoutMessageResponse = {
   data: null,
-  error: new Error(),
+  error: {},
   mutate: jest.fn(),
   status: "error",
   variables: {

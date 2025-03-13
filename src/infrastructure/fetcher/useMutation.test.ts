@@ -10,8 +10,8 @@ it("SHOULD fetch and return in success", async () => {
     fetch: spies.fetch,
   });
 
-  expect(result.current.data).toEqual({ value: "success" });
   expect(result.current.error).toBeNull();
+  expect(result.current.data).toEqual({ value: "success" });
   expect(result.current.isFetching).toBeFalsy();
   expect(result.current.status).toBe("success");
 });
