@@ -1,7 +1,8 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
 
 import { addBreadcrumb } from "@infrastructure/monitoring";
+import { asyncStorage } from "@infrastructure/storage";
+import { isWeb } from "@utils/platform";
 
 function initialize() {
   const envs = process.env;
@@ -27,7 +28,12 @@ function initialize() {
       autoRefreshToken: true,
       detectSessionInUrl: false,
       persistSession: true,
-      storage: AsyncStorage,
+      storage: {
+        getItem: asyncStorage.getString,
+        isServer: isWeb(),
+        removeItem: asyncStorage.deleteItem,
+        setItem: asyncStorage.setString,
+      },
       storageKey: "supabase.tokens",
     },
   });
