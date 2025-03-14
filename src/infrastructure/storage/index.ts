@@ -1,10 +1,20 @@
-import { getString } from "./gets";
-import { setString } from "./sets";
+import { deleteItem, invalidateAllCache, invalidateCache } from "./delete";
+import { getCacheObject, getString } from "./gets";
+import { setCacheObject, setString } from "./sets";
 
 const asyncStorage = {
+  deleteItem,
   getString,
   setString,
 };
 
-export { asyncStorage };
-export { default as StorageKeys } from "./types";
+const cacheStorage = {
+  getCacheObject,
+  invalidateAllCache,
+  invalidateCache,
+  setCacheObject,
+};
+
+export { asyncStorage, cacheStorage };
+
+export { CacheStringKeys, default as StorageKeys } from "./types";

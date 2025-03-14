@@ -1,7 +1,7 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as supabase from "@supabase/supabase-js";
 
 import * as monitoring from "@infrastructure/monitoring";
+import { asyncStorage } from "@infrastructure/storage";
 import initialize from "@infrastructure/supabase/initialize";
 
 // #region mock
@@ -16,6 +16,9 @@ const addBreadcrumbSpy = jest.spyOn(monitoring, "addBreadcrumb");
 const createClientSpy = jest
   .spyOn(supabase, "createClient")
   .mockReturnValue(createClientResponse);
+const getStringSpy = jest.spyOn(asyncStorage, "getString");
+const deleteItemSpy = jest.spyOn(asyncStorage, "deleteItem");
+const setStringSpy = jest.spyOn(asyncStorage, "setString");
 
 function setup() {
   return initialize();
@@ -23,8 +26,10 @@ function setup() {
 
 const spies = {
   addBreadcrumb: addBreadcrumbSpy,
-  AsyncStorage,
   createClient: createClientSpy,
+  deleteItem: deleteItemSpy,
+  getString: getStringSpy,
+  setString: setStringSpy,
 };
 
 const mocks = {

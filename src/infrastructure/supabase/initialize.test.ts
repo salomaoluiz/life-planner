@@ -19,7 +19,12 @@ it("SHOULD initialize supabase", () => {
         autoRefreshToken: true,
         detectSessionInUrl: false,
         persistSession: true,
-        storage: spies.AsyncStorage,
+        storage: {
+          getItem: spies.getString,
+          isServer: false,
+          removeItem: spies.deleteItem,
+          setItem: spies.setString,
+        },
         storageKey: "supabase.tokens",
       },
     },
