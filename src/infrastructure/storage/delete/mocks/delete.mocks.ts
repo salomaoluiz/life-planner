@@ -1,6 +1,6 @@
 import { cache, storage } from "@infrastructure/storage/init";
 
-import { deleteItem, invalidateAllCache, invalidateCache } from "../delete";
+import { deleteAllCache, deleteCache, deleteItem } from "../delete";
 
 // region mocks
 
@@ -17,9 +17,9 @@ beforeEach(() => {
 });
 
 const setup = {
+  deleteAllCache,
+  deleteCache,
   deleteItem,
-  invalidateAllCache,
-  invalidateCache,
 };
 
 const spies = {

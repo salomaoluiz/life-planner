@@ -1,4 +1,4 @@
-import { CacheStringKeys } from "@infrastructure/storage";
+import { CacheStringKeys } from "@infrastructure/cache/types";
 
 import { setup, spies } from "./mocks/delete.mocks";
 
@@ -9,14 +9,14 @@ it("SHOULD delete item", () => {
   expect(spies.storage.delete).toHaveBeenCalledWith("key");
 });
 
-it("SHOULD invalidate all cache", () => {
-  setup.invalidateAllCache();
+it("SHOULD delete all cache", () => {
+  setup.deleteAllCache();
 
   expect(spies.cache.clearAll).toHaveBeenCalledTimes(1);
 });
 
-it("SHOULD invalidate cache", () => {
-  setup.invalidateCache(CacheStringKeys.CACHE_USER_DATA);
+it("SHOULD delete cache", () => {
+  setup.deleteCache(CacheStringKeys.CACHE_USER_DATA);
 
   expect(spies.cache.delete).toHaveBeenCalledTimes(1);
   expect(spies.cache.delete).toHaveBeenCalledWith(
