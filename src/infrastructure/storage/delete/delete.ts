@@ -1,17 +1,17 @@
 import { cache, storage } from "@infrastructure/storage/init";
 import {
+  StorageDeleteCache,
   StorageDeleteString,
-  StorageInvalidateCache,
 } from "@infrastructure/storage/types";
 
-export function deleteItem(...params: Parameters<StorageDeleteString>) {
-  return storage.delete(params[0]);
-}
-
-export function invalidateAllCache() {
+export function deleteAllCache() {
   return cache.clearAll();
 }
 
-export function invalidateCache(...params: Parameters<StorageInvalidateCache>) {
+export function deleteCache(...params: Parameters<StorageDeleteCache>) {
   return cache.delete(params[0]);
+}
+
+export function deleteItem(...params: Parameters<StorageDeleteString>) {
+  return storage.delete(params[0]);
 }
