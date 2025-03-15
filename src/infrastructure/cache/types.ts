@@ -1,4 +1,6 @@
 export enum CacheStringKeys {
+  CACHE_FAMILIES_DATA = "@cache_families_data",
+  CACHE_FAMILY_MEMBERS_DATA = "@cache_family_members_data",
   CACHE_USER_DATA = "@cache_user_data",
 }
 
