@@ -29,3 +29,9 @@ it("SHOULD throw a UserNotLoggedError WHEN getUser is called and the user is not
 
   await expect(setup()).rejects.toThrow(new UserNotLoggedError());
 });
+
+it("SHOULD throw a UserNotLoggedError WHEN getUser is called and the user is not found", async () => {
+  spies.getUser.mockResolvedValueOnce(mocks.userNotFoundError as never);
+
+  await expect(setup()).rejects.toThrow(new UserNotLoggedError());
+});

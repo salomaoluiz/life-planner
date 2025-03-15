@@ -7,20 +7,26 @@ function userDatasourceImpl(): UserDatasource {
   return {
     async getUser() {
       const response = await supabase.auth.getUser();
+
       if (response.error) {
-        if (response.error.name === "AuthSessionMissingError") {
+        if (
+          response.error.name === "AuthSessionMissingError" ||
+          response.error.code === "user_not_found"
+        ) {
           throw new UserNotLoggedError();
         }
+
         throw new GenericError();
       }
 
-      const user = response.data.user.user_metadata;
+      const user = response.data.user;
+      const userMetadata = user.user_metadata;
 
       return new UserModel({
-        email: user.email,
+        email: userMetadata.email,
         id: user.id,
-        name: user.name,
-        photoURL: user.avatar_url,
+        name: userMetadata.name,
+        photoURL: userMetadata.avatar_url,
       });
     },
   };

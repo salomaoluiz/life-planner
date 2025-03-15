@@ -4259,7 +4259,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"base64-js@npm:^1.2.3, base64-js@npm:^1.3.1, base64-js@npm:^1.5.1":
+"base64-js@npm:^1.2.3, base64-js@npm:^1.3.0, base64-js@npm:^1.3.1, base64-js@npm:^1.5.1":
   version: 1.5.1
   resolution: "base64-js@npm:1.5.1"
   checksum: 10c0/f23823513b63173a001030fae4f2dabe283b99a9d324ade3ad3d148e218134676f1ee8568c877cd79ec1c53158dcf2d2ba527a97c606618928ba99dd930102bf
@@ -6324,6 +6324,17 @@ __metadata:
     expo: "*"
     react-native: "*"
   checksum: 10c0/07a6633b9f02a48c3bc9c07f343d31a0524485d0cdbeaf4c0d72ce5f62d4c2efb6074bdd149586c0b55e969fbc1c88952bd0eb9dbfd1d7092c2580bc1f347a26
+  languageName: node
+  linkType: hard
+
+"expo-crypto@npm:~14.0.2":
+  version: 14.0.2
+  resolution: "expo-crypto@npm:14.0.2"
+  dependencies:
+    base64-js: "npm:^1.3.0"
+  peerDependencies:
+    expo: "*"
+  checksum: 10c0/e8cbfc654fbc6cbbf6a28ac8930fa862262ae586f050c9dcc94f593aefa32b3b6fdf2ab7d1520deeebbbe8ccab2ef549277105e2b08f12de65bb9e38029c7c36
   languageName: node
   linkType: hard
 
@@ -8963,6 +8974,7 @@ __metadata:
     expo: "npm:~52.0.35"
     expo-blur: "npm:~14.0.3"
     expo-constants: "npm:~17.0.6"
+    expo-crypto: "npm:~14.0.2"
     expo-font: "npm:~13.0.3"
     expo-haptics: "npm:~14.0.1"
     expo-image: "npm:^2.0.6"
