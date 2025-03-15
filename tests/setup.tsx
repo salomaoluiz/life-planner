@@ -6,6 +6,8 @@ global.console = {
   log: jest.fn(), // Mute console.log
 };
 
+jest.useFakeTimers({ now: new Date("2025-01-01T00:00:00Z") });
+
 load(process.cwd(), { silent: true });
 
 jest.mock("react-native-paper", () => {
@@ -38,14 +40,27 @@ jest.mock("@react-native-async-storage/async-storage", () => ({
 }));
 
 jest.mock("@supabase/supabase-js", () => ({
-  createClient: jest.fn().mockReturnValue({
-    auth: {
-      getUser: jest.fn(),
-      setSession: jest.fn(),
-      signInWithIdToken: jest.fn(),
-      signInWithOAuth: jest.fn(),
-      signOut: jest.fn(),
-    },
+  createClient: jest.fn().mockImplementation(() => {
+    return {
+      auth: {
+        getUser: jest.fn(),
+        setSession: jest.fn(),
+        signInWithIdToken: jest.fn(),
+        signInWithOAuth: jest.fn(),
+        signOut: jest.fn(),
+      },
+      from: jest.fn().mockImplementation(() => {
+        return {
+          delete: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          insert: jest.fn().mockReturnThis(),
+          select: jest.fn().mockReturnThis(),
+          then: jest.fn().mockResolvedValue({ data: null }),
+          update: jest.fn().mockReturnThis(),
+          upsert: jest.fn().mockReturnThis(),
+        };
+      }),
+    };
   }),
 }));
 
