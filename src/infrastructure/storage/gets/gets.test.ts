@@ -1,4 +1,6 @@
-import StorageKeys, { CacheStringKeys } from "../types";
+import { CacheStringKeys } from "@infrastructure/cache/types";
+
+import StorageKeys from "../types";
 import { mocks, setup, spies } from "./mocks/gets.mocks";
 
 it("SHOULD get string", () => {

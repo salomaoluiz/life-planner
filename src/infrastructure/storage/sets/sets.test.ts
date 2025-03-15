@@ -1,4 +1,6 @@
-import StorageKeys, { CacheStringKeys } from "../types";
+import { CacheStringKeys } from "@infrastructure/cache/types";
+
+import StorageKeys from "../types";
 import { setup, spies } from "./mocks/sets.mocks";
 
 it("SHOULD set string", () => {
