@@ -20,3 +20,5 @@ interface JoinFamilyMemberRepositoryParams {
   joinDate: string;
   userId: string;
 }
+
+export { CreateFamilyMemberRepositoryParams, JoinFamilyMemberRepositoryParams };

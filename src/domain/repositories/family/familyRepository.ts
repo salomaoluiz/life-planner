@@ -14,5 +14,7 @@ interface CreateFamilyRepositoryParams {
 
 interface UpdateFamilyRepositoryParams {
   id: string;
-  name?: string;
+  name: string;
 }
+
+export { CreateFamilyRepositoryParams, UpdateFamilyRepositoryParams };
