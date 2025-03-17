@@ -11,7 +11,7 @@ jest
   .spyOn(theme, "useTheme")
   .mockReturnValue({ isDark: false, setIsDark: jest.fn(), theme: lightTheme });
 
-const defaultProps: TextProps = {
+const defaultProps = {
   testID: "default-text",
   value: "Text Label",
 };
