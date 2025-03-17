@@ -9,7 +9,7 @@ it("SHOULD render Avatar Skeleton correctly", () => {
   expect(loader.props.style).toEqual([
     { backgroundColor: "transparent", borderWidth: 0 },
     { height: 12, position: "absolute", width: 12, zIndex: 1 },
-    { flex: 0, height: 24, width: 24 },
+    { flex: 0, height: 12, width: 12 },
   ]);
   expect(circle.props).toMatchObject({
     cx: 12,

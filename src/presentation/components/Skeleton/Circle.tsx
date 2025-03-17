@@ -12,7 +12,7 @@ function CircleSkeleton(props: Props) {
     <ContentLoader
       backgroundColor={theme.colors.onSurface}
       foregroundColor={theme.colors.onSurfaceVariant}
-      height={props.size * 2}
+      height={props.size}
       speed={1}
       style={{
         height: props.size,
@@ -22,7 +22,7 @@ function CircleSkeleton(props: Props) {
       }}
       testID={"skeleton-loader"}
       viewBox={`0 0 ${props.size * 2} ${props.size * 2}`}
-      width={props.size * 2}
+      width={props.size}
     >
       <Circle
         cx={props.size}
