@@ -1,11 +1,11 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, TextStyle } from "react-native";
 
 import { TextMode } from "@presentation/components/Text/types";
 import { useTheme } from "@presentation/theme";
 
 export function getStyles() {
   const { theme } = useTheme();
-  const defaultStyles = {
+  const defaultStyles: TextStyle = {
     color: theme.colors.onSurface,
   };
 
