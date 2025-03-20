@@ -1,5 +1,5 @@
+import FamilyDTO from "@application/dto/family/FamilyDTO";
 import { repositoriesMocks } from "@data/repositories/mocks";
-import FamilyEntity from "@domain/entities/family/FamilyEntity";
 
 import getFamiliesUseCase from "../getFamiliesUseCase";
 
@@ -10,7 +10,7 @@ const userSuccessMock = {
 };
 
 const familiesSuccessMock = [
-  new FamilyEntity({
+  new FamilyDTO({
     id: "123",
     name: "Family 1",
     ownerId: "123",

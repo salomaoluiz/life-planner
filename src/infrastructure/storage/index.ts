@@ -1,5 +1,5 @@
 import { deleteAllCache, deleteCache, deleteItem } from "./delete";
-import { getCacheObject, getString } from "./gets";
+import { getAllCacheKeys, getCacheObject, getString } from "./gets";
 import { setCacheObject, setString } from "./sets";
 
 const asyncStorage = {
@@ -11,6 +11,7 @@ const asyncStorage = {
 const cacheStorage = {
   deleteAllCache,
   deleteCache,
+  getAllCacheKeys,
   getCacheObject,
   setCacheObject,
 };

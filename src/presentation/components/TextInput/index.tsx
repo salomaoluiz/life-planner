@@ -10,7 +10,7 @@ export enum TextInputMode {
 export interface TextInputProps {
   disabled?: boolean;
   onChangeText: (text: string) => void;
-  testID: string;
+  testID?: string;
   value: string;
 }
 

@@ -10,10 +10,10 @@ it("SHOULD return a user WHEN getUser is called", async () => {
 
   expect(user).toEqual(
     new UserModel({
+      avatarURL: "https://avatar.com",
       email: "user_email@email.com",
       id: "0092abf9-3a76-4063-a3e5-76ce873cb285",
       name: "User Name",
-      photoURL: "https://avatar.com",
     }),
   );
 });

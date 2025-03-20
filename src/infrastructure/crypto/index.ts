@@ -1,6 +1,6 @@
 import { Buffer } from "buffer";
 
-async function decode(encodedData: string): Promise<string> {
+async function decode<T>(encodedData: string): Promise<T> {
   return JSON.parse(Buffer.from(encodedData, "base64").toString("utf-8"));
 }
 

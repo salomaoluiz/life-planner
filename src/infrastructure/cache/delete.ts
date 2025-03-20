@@ -6,6 +6,19 @@ function invalidate(
   cacheKey: CacheStringKeys | CacheStringKeys[],
   options?: { uniqueId?: string },
 ) {
+  if (!options?.uniqueId) {
+    const allKeys = cacheStorage.getAllCacheKeys();
+
+    const keysToInvalidate = allKeys.filter((cachedKey) => {
+      if (Array.isArray(cacheKey)) {
+        return cacheKey.some((key) => cachedKey.includes(key));
+      }
+      return cachedKey.includes(cacheKey);
+    });
+
+    return keysToInvalidate.forEach((key) => cacheStorage.deleteCache(key));
+  }
+
   if (Array.isArray(cacheKey)) {
     return cacheKey.map((key) =>
       cacheStorage.deleteCache(`${key}${options?.uniqueId ?? ""}`),

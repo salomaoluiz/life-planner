@@ -1,16 +1,18 @@
+import FamilyMemberDTO from "@application/dto/familyMember/FamilyMemberDTO";
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import { DefaultError } from "@domain/entities/errors";
-import FamilyMemberEntity from "@domain/entities/familyMember/FamilyMemberEntity";
 import Repositories from "@domain/repositories";
 
 function getFamilyMembersUseCase(
   repositories: Repositories,
-): IUseCaseFactoryWithParamResponse<string, FamilyMemberEntity[]> {
+): IUseCaseFactoryWithParamResponse<string, FamilyMemberDTO[]> {
   return {
     execute: async (familyId: string) => {
       try {
-        return await repositories.familyMemberRepository.getFamilyMembers(
-          familyId,
+        const entity =
+          await repositories.familyMemberRepository.getFamilyMembers(familyId);
+        return entity.map((familyMember) =>
+          FamilyMemberDTO.fromEntity(familyMember),
         );
       } catch (error) {
         if (error instanceof DefaultError) {

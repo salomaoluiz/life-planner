@@ -2,15 +2,15 @@ import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import { DefaultError } from "@domain/entities/errors";
 import Repositories from "@domain/repositories";
 
-export interface DeleteFamilyParams {
+export interface DeleteFamilyUseCaseParams {
   id: string;
 }
 
 function deleteFamilyUseCase(
   repositories: Repositories,
-): IUseCaseFactoryWithParamResponse<DeleteFamilyParams, void> {
+): IUseCaseFactoryWithParamResponse<DeleteFamilyUseCaseParams, void> {
   return {
-    execute: async (params: DeleteFamilyParams) => {
+    execute: async (params: DeleteFamilyUseCaseParams) => {
       try {
         await repositories.familyRepository.deleteFamily(params.id);
       } catch (error) {
