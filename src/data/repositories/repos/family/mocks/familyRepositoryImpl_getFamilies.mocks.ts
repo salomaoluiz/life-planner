@@ -12,6 +12,10 @@ const getFamiliesSuccessMock = [
     ownerId: "123",
   }),
 ];
+
+const getFamiliesSuccessCacheMock = getFamiliesSuccessMock.map((family) =>
+  family.toJSON(),
+);
 // endregion mocks
 
 // region spies
@@ -41,6 +45,7 @@ const spies = {
 };
 
 const mocks = {
+  getFamiliesSuccessCacheMock,
   getFamiliesSuccessMock,
 };
 

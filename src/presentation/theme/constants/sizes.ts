@@ -8,14 +8,16 @@ const spacing = {
   large: 24,
   /** 16dp - General spacing for content and sections */
   medium: 16,
-  /** 8dp - Padding inside buttons, small margins */
-  small: 8,
+  /** 12dp - Padding inside buttons, small margins */
+  small: 12,
   /** 32dp - Large gaps between sections */
   xlarge: 32,
-  /** 4dp - Tiny gaps (icon spacing, small dividers) */
-  xsmall: 4,
+  /** 8dp - Tiny gaps (icon spacing, small dividers) */
+  xsmall: 8,
   /** 48dp - Major section spacing, modal paddings */
   xxlarge: 48,
+  /** 4dp - Tiny gaps (icon spacing, small dividers) */
+  xxsmall: 4,
   /** 64dp+ - Full-screen margins, hero sections */
   xxxlarge: 64,
 };
@@ -33,6 +35,8 @@ const fontSizes = {
   xsmall: 12,
   /** 48px - Page headers, hero sections */
   xxlarge: 48,
+  /** 10px - Captions, secondary info, tooltips */
+  xxsmall: 10,
 };
 
 const lineHeights = {
@@ -48,6 +52,8 @@ const lineHeights = {
   xsmall: 16,
   /** 64px - Large headings */
   xxlarge: 64,
+  /** 14px - Captions, labels */
+  xxsmall: 14,
 };
 
 const borderRadius = {

@@ -32,7 +32,13 @@ it("SHOULD return the scaled size FOR tablet", () => {
   const sizes = getScaledSizes();
 
   expect(sizes).toEqual({
-    borderRadius: { full: "50%", large: 19, medium: 10, small: 5, xlarge: 38 },
+    borderRadius: {
+      full: "50%",
+      large: 19,
+      medium: 10,
+      small: 5,
+      xlarge: 38,
+    },
     fontSizes: {
       large: 31,
       medium: 21,
@@ -40,6 +46,7 @@ it("SHOULD return the scaled size FOR tablet", () => {
       xlarge: 42,
       xsmall: 16,
       xxlarge: 62,
+      xxsmall: 13,
     },
     lineHeights: {
       large: 42,
@@ -48,14 +55,16 @@ it("SHOULD return the scaled size FOR tablet", () => {
       xlarge: 62,
       xsmall: 21,
       xxlarge: 83,
+      xxsmall: 18,
     },
     spacing: {
       large: 34,
       medium: 22,
-      small: 11,
+      small: 17,
       xlarge: 45,
-      xsmall: 6,
+      xsmall: 11,
       xxlarge: 67,
+      xxsmall: 6,
       xxxlarge: 90,
     },
   });
@@ -84,6 +93,7 @@ it("SHOULD return the scaled size FOR desktop", () => {
       xlarge: 51,
       xsmall: 19,
       xxlarge: 77,
+      xxsmall: 16,
     },
     lineHeights: {
       large: 51,
@@ -92,14 +102,16 @@ it("SHOULD return the scaled size FOR desktop", () => {
       xlarge: 77,
       xsmall: 26,
       xxlarge: 102,
+      xxsmall: 22,
     },
     spacing: {
       large: 43,
       medium: 29,
-      small: 14,
+      small: 22,
       xlarge: 58,
-      xsmall: 7,
+      xsmall: 14,
       xxlarge: 86,
+      xxsmall: 7,
       xxxlarge: 115,
     },
   });

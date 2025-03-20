@@ -4,7 +4,7 @@ export default {
     "@typescript-eslint/no-unused-vars": "error",
     "@typescript-eslint/prefer-nullish-coalescing": "error",
     "@typescript-eslint/promise-function-async": "error",
-    "func-style": ["warn", "declaration"],
+    "func-style": ["error", "declaration"],
     "no-console": "error",
     "no-duplicate-imports": "error",
     "no-nested-ternary": "error",

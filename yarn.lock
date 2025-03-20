@@ -2419,6 +2419,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-navigation/drawer@npm:^7.1.2":
+  version: 7.1.2
+  resolution: "@react-navigation/drawer@npm:7.1.2"
+  dependencies:
+    "@react-navigation/elements": "npm:^2.2.6"
+    color: "npm:^4.2.3"
+    react-native-drawer-layout: "npm:^4.1.1"
+    use-latest-callback: "npm:^0.2.1"
+  peerDependencies:
+    "@react-navigation/native": ^7.0.15
+    react: ">= 18.2.0"
+    react-native: "*"
+    react-native-gesture-handler: ">= 2.0.0"
+    react-native-reanimated: ">= 2.0.0"
+    react-native-safe-area-context: ">= 4.0.0"
+    react-native-screens: ">= 4.0.0"
+  checksum: 10c0/2e9eb21d13c009f6f7229c0159378b8f741e80585969775bc513d20efaa0eecea7136bb7789843c8ec2e7e149687775257d46601b6ff07fc030d03e58d0d81f2
+  languageName: node
+  linkType: hard
+
 "@react-navigation/elements@npm:^2.2.5":
   version: 2.2.5
   resolution: "@react-navigation/elements@npm:2.2.5"
@@ -2434,6 +2454,24 @@ __metadata:
     "@react-native-masked-view/masked-view":
       optional: true
   checksum: 10c0/b80f4e29916360489fd5399d9344dfc64a1fdf77796ba189f5b19324766998fd9723d08ac548b935585feb4643465b07bfcd9a3b453e7693d338c552f97c18c4
+  languageName: node
+  linkType: hard
+
+"@react-navigation/elements@npm:^2.2.6":
+  version: 2.2.6
+  resolution: "@react-navigation/elements@npm:2.2.6"
+  dependencies:
+    color: "npm:^4.2.3"
+  peerDependencies:
+    "@react-native-masked-view/masked-view": ">= 0.2.0"
+    "@react-navigation/native": ^7.0.15
+    react: ">= 18.2.0"
+    react-native: "*"
+    react-native-safe-area-context: ">= 4.0.0"
+  peerDependenciesMeta:
+    "@react-native-masked-view/masked-view":
+      optional: true
+  checksum: 10c0/84b4de8aba54ac8a5aa1b80e2c9611eb8da0ba6f6308e8d133e83326970c45d6c07001f9cce5929418ce0a7afc724c4f5099c2ef8e11ad8c21f99326f432d85f
   languageName: node
   linkType: hard
 
@@ -2807,6 +2845,20 @@ __metadata:
   dependencies:
     "@sentry/core": "npm:8.54.0"
   checksum: 10c0/29d00439b9029011ee74d45c48897181bf0fe8d9d3ba7dc380ba2a9225feaf7a9a135c367614160a6813037dd507000574c31ffb7df5a1c26bbccaee0dfa13e7
+  languageName: node
+  linkType: hard
+
+"@shopify/flash-list@npm:1.7.3":
+  version: 1.7.3
+  resolution: "@shopify/flash-list@npm:1.7.3"
+  dependencies:
+    recyclerlistview: "npm:4.2.1"
+    tslib: "npm:2.8.1"
+  peerDependencies:
+    "@babel/runtime": "*"
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/84aa7c87f39114c98374072609ea61eec3aecee3c8dc55220f114949897b25ff6b6bc1edf14161b0feead6e6c7f3845d6b0af0d8f300df319f45e3c5f4be3e15
   languageName: node
   linkType: hard
 
@@ -4259,7 +4311,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"base64-js@npm:^1.2.3, base64-js@npm:^1.3.0, base64-js@npm:^1.3.1, base64-js@npm:^1.5.1":
+"base64-js@npm:^1.2.3, base64-js@npm:^1.3.1, base64-js@npm:^1.5.1":
   version: 1.5.1
   resolution: "base64-js@npm:1.5.1"
   checksum: 10c0/f23823513b63173a001030fae4f2dabe283b99a9d324ade3ad3d148e218134676f1ee8568c877cd79ec1c53158dcf2d2ba527a97c606618928ba99dd930102bf
@@ -6314,6 +6366,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-clipboard@npm:~7.0.1":
+  version: 7.0.1
+  resolution: "expo-clipboard@npm:7.0.1"
+  peerDependencies:
+    expo: "*"
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/6b0727de25e9960a1bf6533b9fbec59933b8e071c1a2a94a38415f09cbed49d69a9275374e3a27e69b8cbf4af39de1a288ac3880b2e627f9fe1fe28c33290387
+  languageName: node
+  linkType: hard
+
 "expo-constants@npm:~17.0.5, expo-constants@npm:~17.0.6":
   version: 17.0.6
   resolution: "expo-constants@npm:17.0.6"
@@ -6324,17 +6387,6 @@ __metadata:
     expo: "*"
     react-native: "*"
   checksum: 10c0/07a6633b9f02a48c3bc9c07f343d31a0524485d0cdbeaf4c0d72ce5f62d4c2efb6074bdd149586c0b55e969fbc1c88952bd0eb9dbfd1d7092c2580bc1f347a26
-  languageName: node
-  linkType: hard
-
-"expo-crypto@npm:~14.0.2":
-  version: 14.0.2
-  resolution: "expo-crypto@npm:14.0.2"
-  dependencies:
-    base64-js: "npm:^1.3.0"
-  peerDependencies:
-    expo: "*"
-  checksum: 10c0/e8cbfc654fbc6cbbf6a28ac8930fa862262ae586f050c9dcc94f593aefa32b3b6fdf2ab7d1520deeebbbe8ccab2ef549277105e2b08f12de65bb9e38029c7c36
   languageName: node
   linkType: hard
 
@@ -8953,9 +9005,11 @@ __metadata:
     "@react-native-async-storage/async-storage": "npm:1.23.1"
     "@react-native-google-signin/google-signin": "npm:^13.2.0"
     "@react-navigation/bottom-tabs": "npm:^7.2.0"
+    "@react-navigation/drawer": "npm:^7.1.2"
     "@react-navigation/native": "npm:^7.0.14"
     "@rneui/themed": "npm:^4.0.0-rc.8"
     "@sentry/react-native": "npm:^6.7.0"
+    "@shopify/flash-list": "npm:1.7.3"
     "@supabase/supabase-js": "npm:^2.48.1"
     "@tanstack/eslint-plugin-query": "npm:^5.67.2"
     "@tanstack/react-query": "npm:^5.67.2"
@@ -8973,8 +9027,8 @@ __metadata:
     eslint-plugin-prettier: "npm:^5.2.3"
     expo: "npm:~52.0.35"
     expo-blur: "npm:~14.0.3"
+    expo-clipboard: "npm:~7.0.1"
     expo-constants: "npm:~17.0.6"
-    expo-crypto: "npm:~14.0.2"
     expo-font: "npm:~13.0.3"
     expo-haptics: "npm:~14.0.1"
     expo-image: "npm:^2.0.6"
@@ -8994,13 +9048,14 @@ __metadata:
     lint-staged: "npm:^15.4.3"
     prettier: "npm:^3.5.1"
     react: "npm:18.3.1"
+    react-content-loader: "npm:^7.0.2"
     react-dom: "npm:18.3.1"
     react-i18next: "npm:^15.4.0"
     react-native: "npm:0.76.7"
     react-native-gesture-handler: "npm:~2.20.2"
     react-native-mmkv: "npm:^3.2.0"
     react-native-paper: "npm:^5.13.1"
-    react-native-reanimated: "npm:~3.16.1"
+    react-native-reanimated: "npm:^3.17.1"
     react-native-safe-area-context: "npm:^5.2.0"
     react-native-screens: "npm:~4.4.0"
     react-native-svg: "npm:15.8.0"
@@ -9210,7 +9265,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash.debounce@npm:^4.0.8":
+"lodash.debounce@npm:4.0.8, lodash.debounce@npm:^4.0.8":
   version: 4.0.8
   resolution: "lodash.debounce@npm:4.0.8"
   checksum: 10c0/762998a63e095412b6099b8290903e0a8ddcb353ac6e2e0f2d7e7d03abd4275fe3c689d88960eb90b0dde4f177554d51a690f22a343932ecbc50a5d111849987
@@ -10799,7 +10854,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
+"prop-types@npm:15.8.1, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -10915,6 +10970,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-content-loader@npm:^7.0.2":
+  version: 7.0.2
+  resolution: "react-content-loader@npm:7.0.2"
+  peerDependencies:
+    react: ">=16.0.0"
+  checksum: 10c0/77e5976dedd91c793d9c4dd529ce81b89afedfc09c373547aac370e786fce0ed7220887b672ec4252a88e53ef1db1130b668b78f833276a53d0c6e1b040bcd1c
+  languageName: node
+  linkType: hard
+
 "react-devtools-core@npm:^5.3.1":
   version: 5.3.2
   resolution: "react-devtools-core@npm:5.3.2"
@@ -11001,6 +11065,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-drawer-layout@npm:^4.1.1":
+  version: 4.1.1
+  resolution: "react-native-drawer-layout@npm:4.1.1"
+  dependencies:
+    use-latest-callback: "npm:^0.2.1"
+  peerDependencies:
+    react: ">= 18.2.0"
+    react-native: "*"
+    react-native-gesture-handler: ">= 2.0.0"
+    react-native-reanimated: ">= 2.0.0"
+  checksum: 10c0/5c3c083cf5a8c6716ed355f96bf605537f7a41592d3264574720f9a3aeb2aefcbdd0e745b7a4a4754b661ac61161cf7f80810630024dfb90473266b88b036378
+  languageName: node
+  linkType: hard
+
 "react-native-gesture-handler@npm:~2.20.2":
   version: 2.20.2
   resolution: "react-native-gesture-handler@npm:2.20.2"
@@ -11029,7 +11107,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-is-edge-to-edge@npm:^1.1.6":
+"react-native-is-edge-to-edge@npm:1.1.6, react-native-is-edge-to-edge@npm:^1.1.6":
   version: 1.1.6
   resolution: "react-native-is-edge-to-edge@npm:1.1.6"
   peerDependencies:
@@ -11065,9 +11143,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-reanimated@npm:~3.16.1":
-  version: 3.16.7
-  resolution: "react-native-reanimated@npm:3.16.7"
+"react-native-reanimated@npm:^3.17.1":
+  version: 3.17.1
+  resolution: "react-native-reanimated@npm:3.17.1"
   dependencies:
     "@babel/plugin-transform-arrow-functions": "npm:^7.0.0-0"
     "@babel/plugin-transform-class-properties": "npm:^7.0.0-0"
@@ -11080,11 +11158,12 @@ __metadata:
     "@babel/preset-typescript": "npm:^7.16.7"
     convert-source-map: "npm:^2.0.0"
     invariant: "npm:^2.2.4"
+    react-native-is-edge-to-edge: "npm:1.1.6"
   peerDependencies:
     "@babel/core": ^7.0.0-0
     react: "*"
     react-native: "*"
-  checksum: 10c0/007cbec677d036e8d2c0744dfff52282ddfb9a89bb3eee82e7eaebcf731b07505e241af04ac87a38da038a18e380b32ec8a55263d1bb8559274d1c077b0b1d25
+  checksum: 10c0/da4f653a675816eb0b3502aa5029c21ec4ec8889bcbbbbc174d567db1c05d9529d638a22c2e4085bf5a97ad2e184988d64cfa9b77774cb32322f29ab4e6c2585
   languageName: node
   linkType: hard
 
@@ -11297,6 +11376,20 @@ __metadata:
     source-map: "npm:~0.6.1"
     tslib: "npm:^2.0.1"
   checksum: 10c0/a45168c82195f24fa2c70293a624fece0069a2e8e8adb637f9963777735f81cb3bb62e55172db677ec3573b08b2daaf1eddd85b74da6fe0bd37c9b15eeaf94b4
+  languageName: node
+  linkType: hard
+
+"recyclerlistview@npm:4.2.1":
+  version: 4.2.1
+  resolution: "recyclerlistview@npm:4.2.1"
+  dependencies:
+    lodash.debounce: "npm:4.0.8"
+    prop-types: "npm:15.8.1"
+    ts-object-utils: "npm:0.0.5"
+  peerDependencies:
+    react: ">= 15.2.1"
+    react-native: ">= 0.30.0"
+  checksum: 10c0/58c2f5fa6372b31f82a1fc976ddbf9c45fa2c1a2fcaab417e39096152c4815463357ff410603db1df7dabab3a383bdef80db04c54a667bc40c5a0ce130e68961
   languageName: node
   linkType: hard
 
@@ -12919,6 +13012,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ts-object-utils@npm:0.0.5":
+  version: 0.0.5
+  resolution: "ts-object-utils@npm:0.0.5"
+  checksum: 10c0/0279f8a7504b3905f2b14769769985f214154f1aedc60077c3baaced078369ae465aecc6acc04c614f40893e559d05697f6f4ef9fc411e3b6d1d15e6269a5e14
+  languageName: node
+  linkType: hard
+
 "tsconfig-paths@npm:^3.15.0":
   version: 3.15.0
   resolution: "tsconfig-paths@npm:3.15.0"
@@ -12931,7 +13031,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.4.0, tslib@npm:^2.6.2, tslib@npm:^2.6.3":
+"tslib@npm:2.8.1, tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.4.0, tslib@npm:^2.6.2, tslib@npm:^2.6.3":
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
   checksum: 10c0/9c4759110a19c53f992d9aae23aac5ced636e99887b51b9e61def52611732872ff7668757d4e4c61f19691e36f4da981cd9485e869b4a7408d689f6bf1f14e62

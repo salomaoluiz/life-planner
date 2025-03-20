@@ -26,15 +26,19 @@ function familyRepositoryImpl(datasources: Datasources): FamilyRepository {
       cache.invalidate(CacheStringKeys.CACHE_FAMILIES_DATA);
     },
     async getFamilies(userId: string): Promise<FamilyEntity[]> {
-      let familiesModel = cache.get<FamilyModel[]>(
+      const cached = cache.get<Array<Record<string, unknown>> | null>(
         CacheStringKeys.CACHE_FAMILIES_DATA,
       );
 
-      if (!familiesModel) {
+      let familiesModel: FamilyModel[] = [];
+
+      if (cached) {
+        familiesModel = cached.map((cache) => FamilyModel.fromJSON(cache));
+      } else {
         familiesModel = await datasources.familyDatasource.getFamilies(userId);
-        cache.set<FamilyModel[]>(
+        cache.set<Record<string, unknown>[]>(
           CacheStringKeys.CACHE_FAMILIES_DATA,
-          familiesModel,
+          familiesModel.map((family) => family.toJSON()),
         );
       }
 

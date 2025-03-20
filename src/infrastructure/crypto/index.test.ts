@@ -1,18 +1,19 @@
-import * as Crypto from "expo-crypto";
-
-import { setup, spies } from "./mocks/index.mocks";
+import { setup } from "./mocks/index.mocks";
 
 it("SHOULD encode the data", async () => {
   const props = {
     id: "123",
   };
 
-  const encoded = await setup(props);
+  const encoded = await setup.encode(props);
 
-  expect(spies.digestStringAsync).toHaveBeenCalledTimes(1);
-  expect(spies.digestStringAsync).toHaveBeenCalledWith(
-    Crypto.CryptoDigestAlgorithm.SHA256,
-    JSON.stringify(props),
-  );
-  expect(encoded).toEqual("encoded-data");
+  expect(encoded).toEqual("eyJpZCI6IjEyMyJ9");
+});
+
+it("SHOULD decode the encoded data", async () => {
+  const encodedData = "eyJpZCI6IjEyMyJ9";
+
+  const decoded = await setup.decode(encodedData);
+
+  expect(decoded).toEqual({ id: "123" });
 });

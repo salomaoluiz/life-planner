@@ -24,6 +24,10 @@ const getFamilyMembersSuccessMock = [
   }),
 ];
 
+const getFamilyMembersSuccessCacheMock = getFamilyMembersSuccessMock.map(
+  (familyMember) => familyMember.toJSON(),
+);
+
 // endregion mocks
 
 // region spies
@@ -53,6 +57,7 @@ const spies = {
 };
 
 const mocks = {
+  getFamilyMembersSuccessCacheMock,
   getFamilyMembersSuccessMock,
 };
 

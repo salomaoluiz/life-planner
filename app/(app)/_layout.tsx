@@ -12,8 +12,21 @@ export default function AppLayout() {
   }
 
   return (
-    <Stack>
-      <Stack.Screen name="(root)" />
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(drawer)" />
+      <Stack.Screen
+        name="family/add_new_family_member"
+        options={{
+          presentation: "transparentModal",
+        }}
+      />
+      <Stack.Screen
+        name="family/add_new_family"
+        options={{
+          presentation: "transparentModal",
+        }}
+      />
+      <Stack.Screen name={"business_feedback"} />
     </Stack>
   );
 }

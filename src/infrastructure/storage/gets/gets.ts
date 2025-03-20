@@ -2,6 +2,10 @@ import { cache, storage } from "@infrastructure/storage/init";
 
 import { StorageGetCacheObject, StorageGetString } from "../types";
 
+function getAllCacheKeys() {
+  return cache.getAllKeys();
+}
+
 function getCacheObject<T>(
   ...props: Parameters<StorageGetCacheObject<T>>
 ): ReturnType<StorageGetCacheObject<T>> {
@@ -17,4 +21,4 @@ function getString(
   return storage.getString(props[0]) ?? null;
 }
 
-export { getCacheObject, getString };
+export { getAllCacheKeys, getCacheObject, getString };

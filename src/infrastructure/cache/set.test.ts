@@ -41,8 +41,8 @@ it("SHOULD handle error", () => {
   expect(spies.setCacheObject).toHaveBeenCalledTimes(1);
   expect(spies.captureException).toHaveBeenCalledTimes(1);
   expect(spies.captureException).toHaveBeenCalledWith(new Error("error"), {
+    cacheKey: CacheStringKeys.CACHE_USER_DATA,
     data: { userId: "1" },
-    key: CacheStringKeys.CACHE_USER_DATA,
     options: { TTL: 1000 },
   });
 });
