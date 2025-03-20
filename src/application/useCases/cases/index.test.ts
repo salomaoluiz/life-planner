@@ -6,6 +6,7 @@ const useCases = {
   deleteFamilyUseCase: expect.any(Function),
   getFamiliesUseCase: expect.any(Function),
   getFamilyMembersUseCase: expect.any(Function),
+  getUserByUserIdUseCase: expect.any(Function),
   getUserUseCase: expect.any(Function),
   inviteFamilyMemberUseCase: expect.any(Function),
   joinFamilyMemberUseCase: expect.any(Function),

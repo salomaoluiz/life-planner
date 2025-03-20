@@ -31,15 +31,23 @@ function familyMemberRepositoryImpl(
       ]);
     },
     async getFamilyMembers(familyId: string): Promise<FamilyMemberEntity[]> {
-      let familyMembersModel = cache.get<FamilyMemberModel[]>(
+      const cachedModel = cache.get<Array<Record<string, unknown>> | null>(
         CacheStringKeys.CACHE_FAMILY_MEMBERS_DATA,
+        { uniqueId: familyId },
       );
-      if (!familyMembersModel) {
+      let familyMembersModel: FamilyMemberModel[] = [];
+
+      if (cachedModel) {
+        familyMembersModel = cachedModel.map((cache) =>
+          FamilyMemberModel.fromJSON(cache),
+        );
+      } else {
         familyMembersModel =
           await datasources.familyMemberDatasource.getFamilyMembers(familyId);
-        cache.set<FamilyMemberModel[]>(
+        cache.set<Record<string, unknown>[]>(
           CacheStringKeys.CACHE_FAMILY_MEMBERS_DATA,
-          familyMembersModel,
+          familyMembersModel.map((familyMember) => familyMember.toJSON()),
+          { uniqueId: familyId },
         );
       }
 

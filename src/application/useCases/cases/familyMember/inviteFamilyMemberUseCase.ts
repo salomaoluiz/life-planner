@@ -8,13 +8,16 @@ export interface InviteFamilyMemberUseCaseParams {
   familyId: string;
 }
 
-interface Response {
+export interface InviteFamilyMemberUseCaseResponse {
   inviteToken: string;
 }
 
 function inviteFamilyMemberUseCase(
   repositories: Repositories,
-): IUseCaseFactoryWithParamResponse<InviteFamilyMemberUseCaseParams, Response> {
+): IUseCaseFactoryWithParamResponse<
+  InviteFamilyMemberUseCaseParams,
+  InviteFamilyMemberUseCaseResponse
+> {
   return {
     execute: async (params: InviteFamilyMemberUseCaseParams) => {
       try {

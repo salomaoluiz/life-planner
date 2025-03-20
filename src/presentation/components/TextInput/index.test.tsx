@@ -39,5 +39,8 @@ it("SHOULD have the correct style", () => {
 
   const component = screen.getByTestId("test-text-input");
 
-  expect(component.props.style).toEqual({});
+  expect(component.props.style).toEqual({
+    flexDirection: "row",
+    width: "100%",
+  });
 });

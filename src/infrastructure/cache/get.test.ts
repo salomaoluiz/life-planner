@@ -26,6 +26,7 @@ it("SHOULD invalidate the cache WHEN the cache is expired", () => {
   expect(spies.invalidate).toHaveBeenCalledTimes(1);
   expect(spies.invalidate).toHaveBeenCalledWith(
     CacheStringKeys.CACHE_USER_DATA,
+    undefined,
   );
   expect(result).toBeNull();
 });
@@ -43,7 +44,8 @@ it("SHOULD return null AND captureException WHEN an error occurs", () => {
   );
   expect(spies.captureException).toHaveBeenCalledTimes(1);
   expect(spies.captureException).toHaveBeenCalledWith(new Error("Test error"), {
-    key: CacheStringKeys.CACHE_USER_DATA,
+    cacheKey: CacheStringKeys.CACHE_USER_DATA,
+    options: undefined,
   });
   expect(result).toBeNull();
 });

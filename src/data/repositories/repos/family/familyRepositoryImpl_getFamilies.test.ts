@@ -8,7 +8,7 @@ import {
 } from "./mocks/familyRepositoryImpl_getFamilies.mocks";
 
 it("SHOULD get families from cache", async () => {
-  spies.cache.get.mockReturnValue(mocks.getFamiliesSuccessMock);
+  spies.cache.get.mockReturnValue(mocks.getFamiliesSuccessCacheMock);
 
   const families = await setup();
 
@@ -45,7 +45,7 @@ it("SHOULD get families from datasource", async () => {
   expect(spies.cache.set).toHaveBeenCalledTimes(1);
   expect(spies.cache.set).toHaveBeenCalledWith(
     CacheStringKeys.CACHE_FAMILIES_DATA,
-    mocks.getFamiliesSuccessMock,
+    mocks.getFamiliesSuccessCacheMock,
   );
 
   expect(families).toEqual(

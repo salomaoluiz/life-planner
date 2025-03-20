@@ -6,10 +6,10 @@ import cache from "@infrastructure/cache";
 // region mocks
 
 const getUserSuccess = {
+  avatarURL: "https://avatar.com",
   email: "email@email.com",
   id: "2b2dd719-19e1-46bc-8500-2b32f6f55041",
   name: "User Name",
-  photoURL: "https://avatar.com",
 } as UserModel;
 
 // endregion mocks

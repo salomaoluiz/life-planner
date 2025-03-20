@@ -39,11 +39,11 @@ it.each<{
   modeString: keyof typeof TextMode;
 }>([
   { fontSize: "xxlarge", lineHeight: "xxlarge", modeString: "Display" },
-  { fontSize: "xlarge", lineHeight: "xlarge", modeString: "Headline" },
-  { fontSize: "large", lineHeight: "large", modeString: "Title" },
-  { fontSize: "medium", lineHeight: "medium", modeString: "Body" },
-  { fontSize: "small", lineHeight: "small", modeString: "Label" },
-  { fontSize: "xsmall", lineHeight: "xsmall", modeString: "Caption" },
+  { fontSize: "large", lineHeight: "large", modeString: "Headline" },
+  { fontSize: "medium", lineHeight: "medium", modeString: "Title" },
+  { fontSize: "small", lineHeight: "small", modeString: "Body" },
+  { fontSize: "xsmall", lineHeight: "xsmall", modeString: "Label" },
+  { fontSize: "xxsmall", lineHeight: "xxsmall", modeString: "Caption" },
 ])(
   "SHOULD render the Text.$modeString with the correct styles",
   ({ fontSize, lineHeight, modeString }) => {
@@ -55,7 +55,7 @@ it.each<{
 
     expect(component.props.style).toEqual([
       {
-        color: lightTheme.colors.onPrimary,
+        color: lightTheme.colors.onSurface,
         fontSize: lightTheme.sizes.fontSizes[fontSize],
         lineHeight: lightTheme.sizes.lineHeights[lineHeight],
       },

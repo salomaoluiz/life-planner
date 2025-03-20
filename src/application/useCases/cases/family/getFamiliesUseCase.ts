@@ -1,3 +1,4 @@
+import FamilyDTO from "@application/dto/family/FamilyDTO";
 import { IUseCaseFactoryWithoutParamResponse } from "@application/useCases/types";
 import { DefaultError } from "@domain/entities/errors";
 import FamilyEntity from "@domain/entities/family/FamilyEntity";
@@ -5,12 +6,18 @@ import Repositories from "@domain/repositories";
 
 function getFamiliesUseCase(
   repositories: Repositories,
-): IUseCaseFactoryWithoutParamResponse<FamilyEntity[]> {
+): IUseCaseFactoryWithoutParamResponse<FamilyDTO[]> {
   return {
     execute: async () => {
       try {
         const user = await repositories.userRepository.getUser();
-        return await repositories.familyRepository.getFamilies(user.id);
+        const entities = await repositories.familyRepository.getFamilies(
+          user.id,
+        );
+
+        return entities.map((entity: FamilyEntity) =>
+          FamilyDTO.fromEntity(entity),
+        );
       } catch (error) {
         if (error instanceof DefaultError) {
           error.addContext({

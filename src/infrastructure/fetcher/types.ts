@@ -37,6 +37,7 @@ type NetworkMode = "always" | "offlineFirst" | "online";
 
 interface QueryProps<R> {
   cacheKey: string[];
+  enabled?: boolean;
   fetch: () => Promise<R>;
   /*
   @default "offlineFirst"

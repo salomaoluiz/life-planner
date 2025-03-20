@@ -1,3 +1,4 @@
+import LoginWithGoogleModel from "@data/models/auth/LoginWithGoogleModel";
 import { LoginDatasource } from "@data/repositories/repos/auth/loginDatasource";
 import {
   BusinessError,
@@ -9,7 +10,7 @@ import { supabase } from "@infrastructure/supabase";
 
 function loginDatasourceImpl(): LoginDatasource {
   return {
-    async loginWithIdToken(): Promise<boolean> {
+    async loginWithIdToken() {
       const response = await signIn();
 
       if (response.status === "error") {
@@ -19,11 +20,20 @@ function loginDatasourceImpl(): LoginDatasource {
         throw new LoginCanceledError();
       }
 
-      await supabase.auth.signInWithIdToken({
+      const supabaseResponse = await supabase.auth.signInWithIdToken({
         provider: "google",
         token: response.data.token,
       });
-      return true;
+
+      const user = supabaseResponse.data.user;
+      const metadata = user?.user_metadata;
+
+      return new LoginWithGoogleModel({
+        avatarURL: metadata?.avatar_url as string,
+        email: user?.email as string,
+        id: user?.id as string,
+        name: metadata?.name as string,
+      });
     },
     async loginWithOAuth(): Promise<boolean> {
       const envs = process.env;
@@ -43,11 +53,15 @@ function loginDatasourceImpl(): LoginDatasource {
     async logout(): Promise<void> {
       const result = await supabase.auth.signOut();
 
+      if (result.error?.name === "AuthSessionMissingError") {
+        return;
+      }
+
       if (result.error) {
         throw new GenericError();
       }
     },
-    async saveSession(params): Promise<boolean> {
+    async saveSession(params) {
       const response = await supabase.auth.setSession({
         access_token: params.accessToken,
         refresh_token: params.refreshToken,
@@ -60,7 +74,15 @@ function loginDatasourceImpl(): LoginDatasource {
         throw new GenericError();
       }
 
-      return true;
+      const user = response.data.user;
+      const metadata = user?.user_metadata;
+
+      return new LoginWithGoogleModel({
+        avatarURL: metadata?.avatar_url as string,
+        email: user?.email as string,
+        id: user?.id as string,
+        name: metadata?.name as string,
+      });
     },
   };
 }

@@ -1,15 +1,10 @@
-import * as Crypto from "expo-crypto";
-
-import { encode } from "../index";
+import { decode, encode } from "../index";
 
 // region mocks
 
 // endregion mocks
 
 // region spies
-const digestStringAsyncSpy = jest
-  .spyOn(Crypto, "digestStringAsync")
-  .mockResolvedValue("encoded-data");
 
 // endregion spies
 
@@ -17,13 +12,12 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-async function setup(props: Record<string, unknown>) {
-  return encode(props);
-}
-
-const spies = {
-  digestStringAsync: digestStringAsyncSpy,
+const setup = {
+  decode: async (encodedData: string) => decode(encodedData),
+  encode: async (props: Record<string, unknown>) => encode(props),
 };
+
+const spies = {};
 
 const mocks = {};
 

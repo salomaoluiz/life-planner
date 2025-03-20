@@ -12,10 +12,11 @@ export enum ButtonMode {
 
 export interface ButtonProps {
   customStyles?: CustomStyles;
+  disabled?: boolean;
   icon?: () => React.ReactNode;
   label: string;
   onPress: () => void;
-  testID: string;
+  testID?: string;
 }
 
 function ButtonBase(props: ButtonProps & { mode: ButtonMode }) {
@@ -23,6 +24,7 @@ function ButtonBase(props: ButtonProps & { mode: ButtonMode }) {
 
   return (
     <PaperButton
+      disabled={props.disabled}
       icon={props.icon}
       mode={props.mode}
       onPress={props.onPress}

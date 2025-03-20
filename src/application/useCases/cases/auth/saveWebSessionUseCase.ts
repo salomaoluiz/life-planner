@@ -22,10 +22,19 @@ function saveWebSessionUseCase(
           throw new UserNotLoggedError();
         }
 
-        await repositories.loginRepository.saveSession({
+        const response = await repositories.loginRepository.saveSession({
           accessToken,
           refreshToken,
         });
+        const user = await repositories.userRepository.getUserById(response.id);
+        if (!user) {
+          await repositories.userRepository.createUser({
+            avatarURL: response.avatarURL,
+            email: response.email,
+            id: response.id,
+            name: response.name,
+          });
+        }
       } catch (error) {
         if (error instanceof DefaultError) {
           error.addContext({

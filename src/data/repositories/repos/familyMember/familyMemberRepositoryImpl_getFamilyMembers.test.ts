@@ -8,13 +8,14 @@ import {
 } from "./mocks/familyMemberRepositoryImpl_getFamilyMembers.mocks";
 
 it("SHOULD get family members from cache WHEN cache is not empty", async () => {
-  spies.cache.get.mockReturnValue(mocks.getFamilyMembersSuccessMock);
+  spies.cache.get.mockReturnValue(mocks.getFamilyMembersSuccessCacheMock);
 
   const familyMembers = await setup();
 
   expect(spies.cache.get).toHaveBeenCalledTimes(1);
   expect(spies.cache.get).toHaveBeenCalledWith(
     CacheStringKeys.CACHE_FAMILY_MEMBERS_DATA,
+    { uniqueId: "1234" },
   );
   expect(spies.getFamilyMembers).not.toHaveBeenCalled();
   expect(spies.cache.set).not.toHaveBeenCalled();
@@ -44,13 +45,15 @@ it("SHOULD get family members from datasource and set cache WHEN cache is empty"
   expect(spies.cache.get).toHaveBeenCalledTimes(1);
   expect(spies.cache.get).toHaveBeenCalledWith(
     CacheStringKeys.CACHE_FAMILY_MEMBERS_DATA,
+    { uniqueId: "1234" },
   );
   expect(spies.getFamilyMembers).toHaveBeenCalledTimes(1);
   expect(spies.getFamilyMembers).toHaveBeenCalledWith("1234");
   expect(spies.cache.set).toHaveBeenCalledTimes(1);
   expect(spies.cache.set).toHaveBeenCalledWith(
     CacheStringKeys.CACHE_FAMILY_MEMBERS_DATA,
-    mocks.getFamilyMembersSuccessMock,
+    mocks.getFamilyMembersSuccessCacheMock,
+    { uniqueId: "1234" },
   );
 
   expect(familyMembers).toEqual(

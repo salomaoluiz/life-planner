@@ -6,10 +6,17 @@ export interface CustomStyles {
 }
 
 function getCustomStyles(customStyles?: CustomStyles): TextStyle {
-  return {
+  const styles = {
     color: customStyles?.color,
     textAlign: customStyles?.textAlign,
   };
+
+  return Object.entries(styles).reduce<TextStyle>((acc, [key, value]) => {
+    if (value) {
+      acc = { ...acc, [key]: value };
+    }
+    return acc;
+  }, {});
 }
 
 export default getCustomStyles;

@@ -15,7 +15,7 @@ it("SHOULD get user from datasource WHEN cache is empty", async () => {
       email: mocks.getUserSuccess.email,
       id: mocks.getUserSuccess.id,
       name: mocks.getUserSuccess.name,
-      photoUrl: mocks.getUserSuccess.photoURL,
+      photoUrl: mocks.getUserSuccess.avatarURL,
     }),
   );
 });
@@ -33,7 +33,7 @@ it("SHOULD get user from cache WHEN cache is not empty", async () => {
       email: mocks.getUserSuccess.email,
       id: mocks.getUserSuccess.id,
       name: mocks.getUserSuccess.name,
-      photoUrl: mocks.getUserSuccess.photoURL,
+      photoUrl: mocks.getUserSuccess.avatarURL,
     }),
   );
 });

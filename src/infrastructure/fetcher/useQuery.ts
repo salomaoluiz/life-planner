@@ -9,6 +9,7 @@ function useQuery<Response>(
     Response,
     BusinessError | GenericError
   >({
+    enabled: props.enabled,
     networkMode: props.networkMode ?? "offlineFirst",
     queryFn: props.fetch,
     queryKey: props.cacheKey,

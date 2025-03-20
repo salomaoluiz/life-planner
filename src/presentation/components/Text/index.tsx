@@ -6,7 +6,7 @@ import { TextMode } from "./types";
 
 export interface TextProps {
   customStyles?: CustomStyles;
-  testID: string;
+  testID?: string;
   value: string;
 }
 
