@@ -27,15 +27,15 @@ function getScaleRatio() {
   let borderFactor = 1;
 
   if (isTablet) {
-    scaleFactor = 1.3;
-    spacingFactor = 1.4;
+    scaleFactor = 1.2;
+    spacingFactor = 1.2;
     borderFactor = 1.2;
   }
 
   if (isDesktop) {
-    scaleFactor = 1.6;
-    spacingFactor = 1.8;
-    borderFactor = 1.5;
+    scaleFactor = 1.3;
+    spacingFactor = 1.3;
+    borderFactor = 1.3;
   }
 
   return { borderFactor, scaleFactor, spacingFactor };

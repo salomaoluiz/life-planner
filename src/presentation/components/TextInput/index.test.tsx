@@ -40,7 +40,7 @@ it("SHOULD have the correct style", () => {
   const component = screen.getByTestId("test-text-input");
 
   expect(component.props.style).toEqual({
-    flexDirection: "row",
+    minHeight: 48,
     width: "100%",
   });
 });

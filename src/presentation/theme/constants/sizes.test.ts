@@ -20,7 +20,7 @@ beforeEach(() => {
 it("SHOULD return the regular size FOR mobile", () => {
   const sizes = getScaledSizes();
 
-  expect(sizes).toEqual(defaultSizes);
+  expect(sizes).toEqual({ ...defaultSizes, noScaled: defaultSizes });
 });
 
 it("SHOULD return the scaled size FOR tablet", () => {
@@ -40,6 +40,54 @@ it("SHOULD return the scaled size FOR tablet", () => {
       xlarge: 38,
     },
     fontSizes: {
+      large: 29,
+      medium: 19,
+      small: 17,
+      xlarge: 38,
+      xsmall: 14,
+      xxlarge: 58,
+      xxsmall: 12,
+    },
+    lineHeights: {
+      large: 38,
+      medium: 29,
+      small: 24,
+      xlarge: 58,
+      xsmall: 19,
+      xxlarge: 77,
+      xxsmall: 17,
+    },
+    noScaled: defaultSizes,
+    spacing: {
+      large: 29,
+      medium: 19,
+      small: 14,
+      xlarge: 38,
+      xsmall: 10,
+      xxlarge: 58,
+      xxsmall: 5,
+      xxxlarge: 77,
+    },
+  });
+});
+
+it("SHOULD return the scaled size FOR desktop", () => {
+  dimensionsGetSpy.mockReturnValue({
+    ...defaultDimensions,
+    width: 1025,
+  });
+
+  const sizes = getScaledSizes();
+
+  expect(sizes).toEqual({
+    borderRadius: {
+      full: "50%",
+      large: 21,
+      medium: 10,
+      small: 5,
+      xlarge: 42,
+    },
+    fontSizes: {
       large: 31,
       medium: 21,
       small: 18,
@@ -57,62 +105,16 @@ it("SHOULD return the scaled size FOR tablet", () => {
       xxlarge: 83,
       xxsmall: 18,
     },
+    noScaled: defaultSizes,
     spacing: {
-      large: 34,
-      medium: 22,
-      small: 17,
-      xlarge: 45,
-      xsmall: 11,
-      xxlarge: 67,
-      xxsmall: 6,
-      xxxlarge: 90,
-    },
-  });
-});
-
-it("SHOULD return the scaled size FOR desktop", () => {
-  dimensionsGetSpy.mockReturnValue({
-    ...defaultDimensions,
-    width: 1025,
-  });
-
-  const sizes = getScaledSizes();
-
-  expect(sizes).toEqual({
-    borderRadius: {
-      full: "50%",
-      large: 24,
-      medium: 12,
-      small: 6,
-      xlarge: 48,
-    },
-    fontSizes: {
-      large: 38,
-      medium: 26,
-      small: 22,
-      xlarge: 51,
-      xsmall: 19,
-      xxlarge: 77,
-      xxsmall: 16,
-    },
-    lineHeights: {
-      large: 51,
-      medium: 38,
-      small: 32,
-      xlarge: 77,
-      xsmall: 26,
-      xxlarge: 102,
-      xxsmall: 22,
-    },
-    spacing: {
-      large: 43,
-      medium: 29,
-      small: 22,
-      xlarge: 58,
-      xsmall: 14,
-      xxlarge: 86,
-      xxsmall: 7,
-      xxxlarge: 115,
+      large: 31,
+      medium: 21,
+      small: 16,
+      xlarge: 42,
+      xsmall: 10,
+      xxlarge: 62,
+      xxsmall: 5,
+      xxxlarge: 83,
     },
   });
 });

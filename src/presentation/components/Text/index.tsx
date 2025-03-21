@@ -1,7 +1,6 @@
 import { Text as PaperText } from "react-native-paper";
 
-import { getStyles } from "./styles";
-import getCustomStyles, { CustomStyles } from "./styles/customStyles";
+import { CustomStyles, getStyles } from "./styles";
 import { TextMode } from "./types";
 
 export interface TextProps {
@@ -48,14 +47,9 @@ function Label(props: TextProps) {
 function TextBase(props: TextProps & { mode: TextMode }) {
   const { customStyles, mode, testID, value } = props;
 
-  const styles = getStyles();
-  const extraStyles = getCustomStyles(customStyles);
+  const styles = getStyles(customStyles);
   return (
-    <PaperText
-      style={[styles[mode], extraStyles]}
-      testID={testID}
-      variant={mode}
-    >
+    <PaperText style={styles[mode]} testID={testID} variant={mode}>
       {value}
     </PaperText>
   );

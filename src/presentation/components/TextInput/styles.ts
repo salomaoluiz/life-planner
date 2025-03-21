@@ -1,8 +1,15 @@
 import { StyleSheet } from "react-native";
 
-export const styles = StyleSheet.create({
-  textInput: {
-    flexDirection: "row",
-    width: "100%",
-  },
-});
+import { useTheme } from "@presentation/theme";
+
+function getStyles() {
+  const { theme } = useTheme();
+  return StyleSheet.create({
+    textInput: {
+      minHeight: theme.sizes.noScaled.spacing.xxlarge,
+      width: "100%",
+    },
+  });
+}
+
+export default getStyles;

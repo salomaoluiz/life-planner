@@ -82,6 +82,7 @@ interface ScaledSizes {
   borderRadius: typeof borderRadius;
   fontSizes: typeof fontSizes;
   lineHeights: typeof lineHeights;
+  noScaled: typeof defaultSizes;
   spacing: typeof spacing;
 }
 
@@ -93,6 +94,12 @@ function getScaledSizes(): ScaledSizes {
     borderRadius: rescaleSizes(defaultSizes.borderRadius, scaleBorder),
     fontSizes: rescaleSizes(defaultSizes.fontSizes, scaleFontSize),
     lineHeights: rescaleSizes(defaultSizes.lineHeights, scaleFontSize),
+    noScaled: {
+      borderRadius: defaultSizes.borderRadius,
+      fontSizes: defaultSizes.fontSizes,
+      lineHeights: defaultSizes.lineHeights,
+      spacing: defaultSizes.spacing,
+    },
     spacing: rescaleSizes(defaultSizes.spacing, scaleSpacing),
   };
 }
