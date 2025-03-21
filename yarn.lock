@@ -2187,6 +2187,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-picker/picker@npm:2.9.0":
+  version: 2.9.0
+  resolution: "@react-native-picker/picker@npm:2.9.0"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/a7b64b1073a2a31f2efdcdd767316312a55516c80f2f6a48f3110875f6029b82cf9067fbea1da3df2ee992233f8aed23928f39ee935ef80c9c20ce06bb836303
+  languageName: node
+  linkType: hard
+
 "@react-native/assets-registry@npm:0.76.7":
   version: 0.76.7
   resolution: "@react-native/assets-registry@npm:0.76.7"
@@ -9004,6 +9014,7 @@ __metadata:
     "@expo/vector-icons": "npm:^14.0.2"
     "@react-native-async-storage/async-storage": "npm:1.23.1"
     "@react-native-google-signin/google-signin": "npm:^13.2.0"
+    "@react-native-picker/picker": "npm:2.9.0"
     "@react-navigation/bottom-tabs": "npm:^7.2.0"
     "@react-navigation/drawer": "npm:^7.1.2"
     "@react-navigation/native": "npm:^7.0.14"
@@ -9055,6 +9066,7 @@ __metadata:
     react-native-gesture-handler: "npm:~2.20.2"
     react-native-mmkv: "npm:^3.2.0"
     react-native-paper: "npm:^5.13.1"
+    react-native-paper-dates: "npm:^0.22.38"
     react-native-reanimated: "npm:^3.17.1"
     react-native-safe-area-context: "npm:^5.2.0"
     react-native-screens: "npm:~4.4.0"
@@ -11124,6 +11136,20 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 10c0/41abc5b46d61de7bf0f6af0ed66fab19a391d3fdc30b011cc49ba4dce65ab7c7b1c53eda768bc71f718543e89c7d46848dab2cd537b2af39afd624a8b4f0fec4
+  languageName: node
+  linkType: hard
+
+"react-native-paper-dates@npm:^0.22.38":
+  version: 0.22.38
+  resolution: "react-native-paper-dates@npm:0.22.38"
+  dependencies:
+    color: "npm:^4.2.3"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+    react-native-paper: "*"
+    react-native-vector-icons: "*"
+  checksum: 10c0/b89c61a8f533804335e1863a3c9d3fb70ee7c1e2ebf22610482f7ac97d432f3e1df0852dbf4bb906710514e5ad6336ba8df4c9aaa0d50bdaa0065fd1ea361d2c
   languageName: node
   linkType: hard
 

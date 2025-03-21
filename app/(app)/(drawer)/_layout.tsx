@@ -15,6 +15,12 @@ export default function AppLayout() {
           title: "Family",
         }}
       />
+      <Drawer.Screen
+        name="stock"
+        options={{
+          title: "Stock",
+        }}
+      />
     </Drawer>
   );
 }

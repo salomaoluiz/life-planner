@@ -1,14 +1,14 @@
 import * as dateFns from "date-fns";
 
-enum Duration {
-  milliseconds = "milliseconds",
-}
+import { Duration } from "./types";
 
 function add(date: Date | number, timeToAdd: number, type: Duration) {
   switch (type) {
+    case Duration.days:
+      return dateFns.addDays(date, timeToAdd);
     case Duration.milliseconds:
       return dateFns.addMilliseconds(date, timeToAdd);
   }
 }
 
-export { add, Duration };
+export { add };

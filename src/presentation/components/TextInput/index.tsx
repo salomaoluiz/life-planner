@@ -1,6 +1,6 @@
 import { TextInput as PaperTextInput } from "react-native-paper";
 
-import { styles } from "./styles";
+import getSyles from "./styles";
 
 export enum TextInputMode {
   Flat = "flat",
@@ -9,6 +9,8 @@ export enum TextInputMode {
 
 export interface TextInputProps {
   disabled?: boolean;
+  label?: string;
+  multiline?: boolean;
   onChangeText: (text: string) => void;
   testID?: string;
   value: string;
@@ -16,11 +18,14 @@ export interface TextInputProps {
 
 function TextInputBase(props: TextInputProps & { mode: TextInputMode }) {
   const { disabled, onChangeText, testID, value } = props;
+  const styles = getSyles();
 
   return (
     <PaperTextInput
       disabled={disabled}
+      label={props.label}
       mode={props.mode}
+      multiline={props.multiline}
       onChangeText={onChangeText}
       style={styles.textInput}
       testID={testID}

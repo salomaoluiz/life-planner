@@ -27,6 +27,12 @@ export default function AppLayout() {
         }}
       />
       <Stack.Screen name={"business_feedback"} />
+      <Stack.Screen
+        name={"stock/add_new_stock_item"}
+        options={{
+          presentation: "transparentModal",
+        }}
+      />
     </Stack>
   );
 }

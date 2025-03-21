@@ -6,6 +6,7 @@ const useCases: Datasources = {
   familyDatasource: expect.any(Function),
   familyMemberDatasource: expect.any(Function),
   loginDatasource: expect.any(Function),
+  stockDatasource: expect.any(Function),
   userDatasource: expect.any(Function),
 };
 

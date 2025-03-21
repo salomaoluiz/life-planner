@@ -1,4 +1,4 @@
-import { Duration } from "@infrastructure/date/add";
+import { Duration } from "@infrastructure/date/types";
 
 import { setup } from "./mocks/add.mocks";
 
