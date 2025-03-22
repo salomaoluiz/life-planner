@@ -33,6 +33,12 @@ export default function AppLayout() {
           presentation: "transparentModal",
         }}
       />
+      <Stack.Screen
+        name={"invite"}
+        options={{
+          presentation: "transparentModal",
+        }}
+      />
     </Stack>
   );
 }

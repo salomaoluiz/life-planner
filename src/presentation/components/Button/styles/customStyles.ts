@@ -3,13 +3,32 @@ export interface CustomStyles {
   textColor?: string;
 }
 
-function getCustomStyles(customStyles?: CustomStyles) {
+interface Props {
+  customStyles?: CustomStyles;
+  disabled?: boolean;
+}
+
+function getBorderColor({ customStyles, disabled }: Props) {
+  const style = {};
+
+  if (disabled) {
+    return style;
+  }
+
+  return {
+    borderColor: customStyles?.textColor,
+  };
+}
+
+function getCustomStyles({ customStyles, disabled }: Props) {
   return {
     props: {
       buttonColor: customStyles?.backgroundColor,
       textColor: customStyles?.textColor,
     },
-    styles: {},
+    styles: {
+      ...getBorderColor({ customStyles, disabled }),
+    },
   };
 }
 

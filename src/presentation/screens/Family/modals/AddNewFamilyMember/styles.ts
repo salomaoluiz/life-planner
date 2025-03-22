@@ -19,7 +19,7 @@ function getStyles() {
       },
       container: {
         backgroundColor: theme.colors.surface,
-        marginHorizontal: "25%",
+        marginHorizontal: "5%",
         marginTop: "10%",
         padding: theme.sizes.spacing.large,
       },

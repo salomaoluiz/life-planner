@@ -7,24 +7,16 @@ function getStyles() {
 
   return {
     styles: StyleSheet.create({
-      buttonsContainer: {
+      buttonContainer: {
         flexDirection: "row",
-      },
-      closeContainer: {
-        position: "absolute",
-        right: theme.sizes.spacing.small,
-        top: theme.sizes.spacing.small,
+        width: "70%",
       },
       container: {
+        alignItems: "center",
         backgroundColor: theme.colors.background,
         flex: 1,
-        justifyContent: "flex-end",
-        padding: theme.sizes.spacing.small,
+        padding: theme.sizes.spacing.xxxlarge,
       },
-      headerContainer: {
-        marginVertical: theme.sizes.spacing.medium,
-      },
-      iconContainer: {},
     }),
     theme,
   };

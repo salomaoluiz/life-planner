@@ -4,6 +4,7 @@ export type FamilyRepository = {
   createFamily(params: CreateFamilyRepositoryParams): Promise<FamilyEntity>;
   deleteFamily(id: string): Promise<void>;
   getFamilies(userId: string): Promise<FamilyEntity[]>;
+  getFamilyById(familyId: string): Promise<FamilyEntity>;
   updateFamily(params: UpdateFamilyRepositoryParams): Promise<void>;
 };
 

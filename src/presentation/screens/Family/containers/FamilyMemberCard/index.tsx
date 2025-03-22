@@ -15,6 +15,7 @@ interface Props {
   ownerId: string;
   refetchFamily: () => void;
 }
+
 function FamilyMemberCard(props: Props) {
   const { styles, theme } = getStyles();
   const [visible, setVisible] = useState(false);
