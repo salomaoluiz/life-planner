@@ -1,12 +1,13 @@
 import React from "react";
 import ContentLoader, { Rect } from "react-content-loader/native";
 
+import { getSize } from "@components/Skeleton/utils";
 import { useTheme } from "@presentation/theme";
 
 export interface Props {
   borderRadius?: number;
-  height: number;
-  width: number;
+  height: number | string;
+  width: number | string;
 }
 
 function BoxSkeleton(props: Props) {
@@ -14,22 +15,25 @@ function BoxSkeleton(props: Props) {
 
   const radius = props.borderRadius ?? theme.sizes.borderRadius.medium;
 
+  const height = getSize(props.height, "height");
+  const width = getSize(props.width, "width");
+
   return (
     <ContentLoader
       backgroundColor={theme.colors.onSurface}
       foregroundColor={theme.colors.onSurfaceVariant}
-      height={props.height}
+      height={height}
       speed={1}
       testID={"skeleton-loader"}
-      viewBox={`0 0 ${props.width} ${props.height}`}
-      width={props.width}
+      viewBox={`0 0 ${width} ${height}`}
+      width={width}
     >
       <Rect
-        height={props.height}
+        height={height}
         rx={radius}
         ry={radius}
         testID={"skeleton-rect"}
-        width={props.width}
+        width={width}
         x="0"
         y="0"
       />

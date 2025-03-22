@@ -49,7 +49,7 @@ function StockCard(props: Props) {
           value={`Status: ${props.item.status}`}
         />
       </View>
-      <View style={styles.row}>
+      <View style={styles.iconContainer}>
         <IconButton
           name={"delete"}
           onPress={onDelete}

@@ -22,6 +22,10 @@ function getStyles(props: Props) {
         flex: 1,
         margin: theme.sizes.spacing.small,
       },
+      iconContainer: {
+        position: "absolute",
+        right: 0,
+      },
       row: {
         flexDirection: "row",
         justifyContent: "space-between",
