@@ -21,10 +21,16 @@ function inviteFamilyMemberUseCase(
   return {
     execute: async (params: InviteFamilyMemberUseCaseParams) => {
       try {
+        const family = await repositories.familyRepository.getFamilyById(
+          params.familyId,
+        );
+
         const inviteToken = await encode({
           email: params.email,
           familyId: params.familyId,
+          familyName: family.name,
           inviteDate: Date.now(),
+          ownerId: family.ownerId,
         });
 
         await repositories.familyMemberRepository.createFamilyMember({

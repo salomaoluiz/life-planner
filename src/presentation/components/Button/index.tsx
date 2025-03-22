@@ -20,7 +20,10 @@ export interface ButtonProps {
 }
 
 function ButtonBase(props: ButtonProps & { mode: ButtonMode }) {
-  const customStyles = getCustomStyles(props.customStyles);
+  const customStyles = getCustomStyles({
+    customStyles: props.customStyles,
+    disabled: props.disabled,
+  });
 
   return (
     <PaperButton

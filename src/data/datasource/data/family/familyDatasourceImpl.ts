@@ -21,12 +21,21 @@ function familyDatasourceImpl(): FamilyDatasource {
           .select()
           .then();
 
-        if (response.error || !response.data) {
-          throw new FamilyNotCreated();
+        if (response.error) {
+          throw response.error;
+        }
+
+        if (!response.data) {
+          const error = new FamilyNotCreated();
+          error.addContext({ params });
+          throw error;
         }
 
         return FamilyModel.fromJSON(response.data[0]);
       } catch (error) {
+        if (error instanceof BusinessError) {
+          throw error;
+        }
         const genericError = new GenericError();
         genericError.addContext({
           error,
@@ -88,6 +97,34 @@ function familyDatasourceImpl(): FamilyDatasource {
         }
         const genericError = new GenericError();
         genericError.addContext({ error, userId });
+        throw genericError;
+      }
+    },
+    async getFamilyById(familyId: string): Promise<FamilyModel> {
+      try {
+        const family = await supabase
+          .from("family")
+          .select()
+          .eq("id", familyId)
+          .then();
+
+        if (!family.data) {
+          const error = new FamilyNotFound();
+          error.addContext({ familyId });
+          throw error;
+        }
+
+        return new FamilyModel({
+          id: family.data[0].id,
+          name: family.data[0].family_name,
+          ownerId: family.data[0].owner_id,
+        });
+      } catch (error) {
+        if (error instanceof BusinessError) {
+          throw error;
+        }
+        const genericError = new GenericError();
+        genericError.addContext({ error, familyId });
         throw genericError;
       }
     },

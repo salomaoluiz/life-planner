@@ -15,7 +15,9 @@ it("SHOULD call the repositories", async () => {
   expect(spies.encode).toHaveBeenCalledWith({
     email: "test@gmail.com",
     familyId: "123",
+    familyName: "Family name",
     inviteDate: Date.now(),
+    ownerId: "owner-id",
   });
   expect(spies.createFamilyMember).toHaveBeenCalledTimes(1);
   expect(spies.createFamilyMember).toHaveBeenCalledWith({

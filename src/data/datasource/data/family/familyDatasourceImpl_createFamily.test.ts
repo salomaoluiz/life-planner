@@ -56,7 +56,7 @@ it("SHOULD throw error in case of error", async () => {
 
   const expectedError = new GenericError();
   expectedError.addContext({
-    error: new FamilyNotCreated(),
+    error: mocks.responseError.error,
     params,
   });
 
@@ -74,9 +74,8 @@ it("SHOULD throw error in case of no data", async () => {
 
   const error = await throwableSetup(params);
 
-  const expectedError = new GenericError();
+  const expectedError = new FamilyNotCreated();
   expectedError.addContext({
-    error: new FamilyNotCreated(),
     params,
   });
 

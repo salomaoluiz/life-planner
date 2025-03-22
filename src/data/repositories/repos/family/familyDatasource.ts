@@ -4,6 +4,7 @@ export interface FamilyDatasource {
   createFamily(params: CreateFamilyDatasourceParams): Promise<FamilyModel>;
   deleteFamily(id: string): Promise<void>;
   getFamilies(userId: string): Promise<FamilyModel[]>;
+  getFamilyById(familyId: string): Promise<FamilyModel>;
   updateFamily(params: UpdateFamilyDatasourceParams): Promise<void>;
 }
 

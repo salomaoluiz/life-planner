@@ -45,7 +45,7 @@ function userDatasourceImpl(): UserDatasource {
       const response = await supabase.from("user").select().eq("id", id);
 
       if (response.error) {
-        throw new GenericError();
+        throw response.error;
       }
 
       const user = response.data[0];

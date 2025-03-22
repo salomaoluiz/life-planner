@@ -51,6 +51,33 @@ function familyRepositoryImpl(datasources: Datasources): FamilyRepository {
           }),
       );
     },
+    async getFamilyById(familyId: string): Promise<FamilyEntity> {
+      const cached = cache.get<null | Record<string, unknown>>(
+        CacheStringKeys.CACHE_FAMILIES_DATA,
+        {
+          uniqueId: familyId,
+        },
+      );
+      let familyModel: FamilyModel | undefined;
+
+      if (cached) {
+        familyModel = FamilyModel.fromJSON(cached);
+      } else {
+        familyModel =
+          await datasources.familyDatasource.getFamilyById(familyId);
+        cache.set<Record<string, unknown>>(
+          CacheStringKeys.CACHE_FAMILIES_DATA,
+          familyModel.toJSON(),
+          { uniqueId: familyId },
+        );
+      }
+
+      return new FamilyEntity({
+        id: familyModel.id,
+        name: familyModel.name,
+        ownerId: familyModel.ownerId,
+      });
+    },
     async updateFamily(params): Promise<void> {
       await datasources.familyDatasource.updateFamily({
         id: params.id,
