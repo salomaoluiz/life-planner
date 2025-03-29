@@ -55,7 +55,7 @@ function transactionDatasourceImpl(): TransactionDatasource {
         const genericError = new GenericError();
         genericError.addContext({
           error,
-          id,
+          params,
         });
         throw genericError;
       }

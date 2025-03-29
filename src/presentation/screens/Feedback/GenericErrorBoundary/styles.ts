@@ -10,6 +10,7 @@ function useStyles() {
     () =>
       StyleSheet.create({
         buttonContainer: {
+          flexDirection: "row",
           marginBottom: theme.sizes.spacing.medium,
         },
         container: {

@@ -13,7 +13,7 @@ export enum ButtonMode {
 export interface ButtonProps {
   customStyles?: CustomStyles;
   disabled?: boolean;
-  icon?: () => React.ReactNode;
+  icon?: (() => React.ReactNode) | string;
   label: string;
   onPress: () => void;
   testID?: string;

@@ -5,14 +5,27 @@ import { lightTheme } from "@presentation/theme/provider";
 
 export interface SpacerProps {
   direction: "both" | "horizontal" | "vertical";
-  size: "full" | keyof typeof lightTheme.sizes.spacing;
+  horizontalLine?: boolean;
+  size: "flex" | "full" | keyof typeof lightTheme.sizes.spacing;
 }
 
-function getStyles(props: SpacerProps) {
-  const { theme } = useTheme();
-  const size = props.size === "full" ? "100%" : theme.sizes.spacing[props.size];
+function getSize(size: SpacerProps["size"], theme: typeof lightTheme) {
+  if (size === "full") {
+    return { size: "100%" };
+  }
 
-  const direction = {};
+  if (size === "flex") {
+    return { flex: 1, size: "auto" };
+  }
+
+  return { size: theme.sizes.spacing[size] };
+}
+function getStyles(props: SpacerProps, theme: typeof lightTheme) {
+  const { flex, size } = getSize(props.size, theme);
+
+  const direction = {
+    flex,
+  };
 
   switch (props.direction) {
     case "both":
@@ -32,8 +45,22 @@ function getStyles(props: SpacerProps) {
 }
 
 function Spacer(props: SpacerProps) {
-  const { direction } = getStyles(props);
-  return <View style={{ ...direction }} />;
+  const { theme } = useTheme();
+  const { direction } = getStyles(props, theme);
+  return (
+    <View style={{ ...direction }}>
+      {props.horizontalLine ? (
+        <View
+          style={{
+            borderBottomWidth: 1,
+            borderColor: theme.colors.onBackground,
+            height: 1,
+            marginHorizontal: theme.sizes.spacing.small,
+          }}
+        />
+      ) : null}
+    </View>
+  );
 }
 
 export default Spacer;

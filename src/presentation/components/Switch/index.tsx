@@ -6,7 +6,7 @@ import { styles } from "./styles";
 export interface SwitchProps {
   initialStatus: boolean;
   onToggle: (status: boolean) => void;
-  testID: string;
+  testID?: string;
 }
 
 function Switch(props: SwitchProps) {
