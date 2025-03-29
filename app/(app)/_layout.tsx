@@ -2,7 +2,7 @@ import { Redirect, Stack } from "expo-router";
 
 import { useUser } from "@application/providers/user";
 
-export default function AppLayout() {
+export default function StackNavigator() {
   const { logged } = useUser();
 
   if (!logged) {
@@ -12,38 +12,11 @@ export default function AppLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(drawer)" />
+    <Stack>
+      <Stack.Screen name={"(tabs)"} options={{ headerShown: false }} />
       <Stack.Screen
-        name="family/add_new_family_member"
-        options={{
-          presentation: "transparentModal",
-        }}
-      />
-      <Stack.Screen
-        name="family/add_new_family"
-        options={{
-          presentation: "transparentModal",
-        }}
-      />
-      <Stack.Screen name={"business_feedback"} />
-      <Stack.Screen
-        name={"stock/add_new_stock_item"}
-        options={{
-          presentation: "transparentModal",
-        }}
-      />
-      <Stack.Screen
-        name={"financial/transaction/add_new_transaction"}
-        options={{
-          presentation: "transparentModal",
-        }}
-      />
-      <Stack.Screen
-        name={"invite"}
-        options={{
-          presentation: "transparentModal",
-        }}
+        name={"(modals)"}
+        options={{ headerShown: false, presentation: "transparentModal" }}
       />
     </Stack>
   );

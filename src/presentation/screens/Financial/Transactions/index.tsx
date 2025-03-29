@@ -17,7 +17,7 @@ function FinancialTransaction() {
   const styles = getStyles();
   const isFocused = useIsFocused();
 
-  const { data, isFetching, refetch } = useQuery<
+  const { data, error, isFetching, refetch } = useQuery<
     FinancialTransactionViewModel[]
   >({
     cacheKey: [useCases.getFinancialTransactionsUseCase.uniqueName],
@@ -63,6 +63,14 @@ function FinancialTransaction() {
     router.push({
       pathname: "/financial/transaction/add_new_transaction",
     });
+  }
+
+  if (error) {
+    return (
+      <View>
+        <Text.Headline value={`Error ${error.message}`} />
+      </View>
+    );
   }
 
   return (
