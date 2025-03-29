@@ -21,6 +21,7 @@ export function injectionUseCases(props: Props) {
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
+
     acc[keyUseCase] = useCase(props.repositories);
 
     return acc;

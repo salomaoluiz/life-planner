@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import StockOwnersDTO from "@application/dto/stock/StockOwnersDTO";
+import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { CreateStockItemUseCaseParams } from "@application/useCases/cases/stock/createStockItemUseCase";
 import { StockOwners, StockUnits } from "@domain/entities/stock/StockEntity";
 
@@ -53,7 +53,7 @@ function useForm() {
   };
 
   function validateForm(
-    owners: StockOwnersDTO[],
+    owners: OwnerDTO[],
   ): CreateStockItemUseCaseParams | undefined {
     const errors: Record<string, string> = {};
 
