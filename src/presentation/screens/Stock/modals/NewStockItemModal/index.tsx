@@ -22,8 +22,8 @@ import getStyles from "./styles";
 function NewStockItemModal() {
   const { styles, theme } = getStyles();
   const owners = useQuery({
-    cacheKey: [useCases.getStockOwnersUseCase.uniqueName],
-    fetch: useCases.getStockOwnersUseCase.execute,
+    cacheKey: [useCases.getOwnersUseCase.uniqueName],
+    fetch: useCases.getOwnersUseCase.execute,
   });
   const { errors, fields, validateForm } = useForm();
 

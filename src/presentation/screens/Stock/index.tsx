@@ -20,7 +20,7 @@ function Stock() {
   const { data, isFetching, refetch } = useQuery<StockViewModel[]>({
     cacheKey: [useCases.getStockItemsUseCase.uniqueName],
     fetch: async () => {
-      const stockOwners = await useCases.getStockOwnersUseCase.execute();
+      const stockOwners = await useCases.getOwnersUseCase.execute();
       const stockOwnersIds = stockOwners.map((owner) => owner.id);
 
       const stockDTOS = await useCases.getStockItemsUseCase.execute({

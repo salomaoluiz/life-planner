@@ -1,15 +1,15 @@
-import { StockOwners } from "@domain/entities/stock/StockEntity";
+import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 interface IStockOwnersDTO {
   id: string;
   name: string;
-  type: StockOwners;
+  type: OwnerType;
 }
 
-class StockOwnersDTO {
+class OwnerDTO {
   id: string;
   name: string;
-  type: StockOwners;
+  type: OwnerType;
 
   constructor(params: IStockOwnersDTO) {
     this.id = params.id;
@@ -18,4 +18,4 @@ class StockOwnersDTO {
   }
 }
 
-export default StockOwnersDTO;
+export default OwnerDTO;

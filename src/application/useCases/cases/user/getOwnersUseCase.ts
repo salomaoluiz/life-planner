@@ -1,12 +1,12 @@
-import StockOwnersDTO from "@application/dto/stock/StockOwnersDTO";
+import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { IUseCaseFactoryWithoutParamResponse } from "@application/useCases/types";
 import { DefaultError } from "@domain/entities/errors";
-import { StockOwners } from "@domain/entities/stock/StockEntity";
+import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import Repositories from "@domain/repositories";
 
-function getStockOwnersUseCase(
+function getOwnersUseCase(
   repositories: Repositories,
-): IUseCaseFactoryWithoutParamResponse<StockOwnersDTO[]> {
+): IUseCaseFactoryWithoutParamResponse<OwnerDTO[]> {
   return {
     execute: async () => {
       try {
@@ -18,16 +18,16 @@ function getStockOwnersUseCase(
         const ownerIds = families.map((family) => ({
           id: family.id,
           name: family.name,
-          type: StockOwners.FAMILY,
+          type: OwnerType.FAMILY,
         }));
 
-        ownerIds.push({ id: user.id, name: user.name, type: StockOwners.USER });
+        ownerIds.push({ id: user.id, name: user.name, type: OwnerType.USER });
 
-        return ownerIds.map((owner) => new StockOwnersDTO(owner));
+        return ownerIds.map((owner) => new OwnerDTO(owner));
       } catch (error) {
         if (error instanceof DefaultError) {
           error.addContext({
-            useCase: "getStockOwnersUseCase",
+            useCase: "user.getOwnersUseCase",
           });
           throw error;
         }
@@ -35,8 +35,8 @@ function getStockOwnersUseCase(
         throw error;
       }
     },
-    uniqueName: "stock.get_stock_owners_use_case",
+    uniqueName: "user.get_owners_use_case",
   };
 }
 
-export default getStockOwnersUseCase;
+export default getOwnersUseCase;
