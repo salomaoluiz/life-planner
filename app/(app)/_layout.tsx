@@ -34,6 +34,12 @@ export default function AppLayout() {
         }}
       />
       <Stack.Screen
+        name={"financial/transaction/add_new_transaction"}
+        options={{
+          presentation: "transparentModal",
+        }}
+      />
+      <Stack.Screen
         name={"invite"}
         options={{
           presentation: "transparentModal",

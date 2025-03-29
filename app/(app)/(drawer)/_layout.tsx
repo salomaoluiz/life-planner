@@ -21,6 +21,12 @@ export default function AppLayout() {
           title: "Stock",
         }}
       />
+      <Drawer.Screen
+        name="financial"
+        options={{
+          title: "Financial",
+        }}
+      />
     </Drawer>
   );
 }
