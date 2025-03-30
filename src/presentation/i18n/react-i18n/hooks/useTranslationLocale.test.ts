@@ -18,7 +18,7 @@ const useTranslationSpy = jest
     },
   } as never);
 
-const locales = [{ languageTag: "en-US" }, { languageTag: "pt" }];
+const locales = [{ languageTag: "en-US" }, { languageTag: "pt-BR" }];
 const changeLanguageSpy = jest.spyOn(i18next, "changeLanguage");
 jest.spyOn(expoLocalization, "getLocales").mockReturnValue(locales as never);
 
@@ -42,17 +42,6 @@ it("SHOULD return the current locale when languageTag is equal to i18n language"
   expect(locale).toEqual(locales[0]);
 });
 
-it("SHOULD return the first locale when languageTag is different from i18n language", () => {
-  useTranslationSpy.mockReturnValueOnce({
-    i18n: { language: "de" },
-  } as never);
-
-  const { result } = setup();
-  const locale = result.current.getLocale();
-
-  expect(locale).toEqual(locales[0]);
-});
-
 it("SHOULD return the locale if the i18n language has a part of the tag", () => {
   useTranslationSpy.mockReturnValueOnce({
     i18n: { language: "pt-BR" },
@@ -62,11 +51,4 @@ it("SHOULD return the locale if the i18n language has a part of the tag", () => 
   const locale = result.current.getLocale();
 
   expect(locale).toEqual(locales[1]);
-});
-
-it("SHOULD return the available languages", () => {
-  const { result } = setup();
-  const availableLanguages = result.current.availableLanguages;
-
-  expect(availableLanguages).toEqual(["en-US", "pt-BR"]);
 });

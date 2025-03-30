@@ -1,6 +1,9 @@
 import React, { createContext, useEffect, useMemo, useState } from "react";
 import { useColorScheme } from "react-native";
 
+import { useCases } from "@application/useCases";
+import { SaveUserConfigsUseCaseParams } from "@application/useCases/cases/configs/saveUserConfigsUseCase";
+import { useMutation, useQuery } from "@infrastructure/fetcher";
 import { useProviderLoader } from "@providers/loader";
 
 import { colors, getScaledSizes } from "./constants";
@@ -34,6 +37,15 @@ export const ThemeContext = createContext<ThemeContextData>(
 
 export function ThemeProvider({ children }: Props) {
   const { setIsLoading } = useProviderLoader();
+  const { mutate } = useMutation<SaveUserConfigsUseCaseParams, void>({
+    cacheKey: [],
+    fetch: useCases.saveUserConfigsUseCase.execute,
+  });
+  const { data, status } = useQuery({
+    cacheKey: [],
+    fetch: useCases.getUserConfigsUseCase.execute,
+  });
+
   const colorSchema = useColorScheme();
 
   const [isDark, setIsDark] = useState(colorSchema === "dark");
@@ -43,10 +55,26 @@ export function ThemeProvider({ children }: Props) {
 
   useEffect(() => {
     setTheme(isDark ? darkTheme : lightTheme);
-    setIsLoading(false, "theme");
   }, [isDark]);
 
-  const providerValue = useMemo(() => ({ isDark, setIsDark }), [isDark]);
+  useEffect(() => {
+    if (data && status === "success") {
+      setIsDark(data.darkMode);
+      setIsLoading(false, "theme");
+    } else {
+      setIsDark(colorSchema === "dark");
+    }
+  }, [status]);
+
+  function setDarkMode(isDark: boolean) {
+    mutate({ darkMode: isDark });
+    setIsDark(isDark);
+  }
+
+  const providerValue = useMemo(
+    () => ({ isDark, setIsDark: setDarkMode }),
+    [isDark],
+  );
 
   return (
     <ThemeContext.Provider value={providerValue}>

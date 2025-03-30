@@ -2,9 +2,11 @@ import { Redirect, Tabs } from "expo-router";
 
 import { useUser } from "@application/providers/user";
 import Icon from "@components/Icon";
+import { useTranslation } from "@presentation/i18n";
 
 export default function TabNavigator() {
   const { logged } = useUser();
+  const { t } = useTranslation();
 
   if (!logged) {
     return <Redirect href="/login" />;
@@ -27,7 +29,7 @@ export default function TabNavigator() {
           tabBarIcon: ({ color, size }) => (
             <Icon color={color} name={"wardrobe"} size={size} />
           ),
-          title: "Stock",
+          title: t("stock.list.headerTitle"),
         }}
       />
       <Tabs.Screen

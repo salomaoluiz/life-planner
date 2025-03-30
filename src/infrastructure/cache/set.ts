@@ -10,7 +10,11 @@ function set<T>(cacheKey: CacheStringKeys, data: T, options?: CacheParams) {
     const key = `${cacheKey}${options?.uniqueId ?? ""}`;
     const ttlInMs = (options?.TTL ?? DEFAULT_TTL) * 1000;
 
-    const timestamp = add(Date.now(), ttlInMs, Duration.milliseconds).getTime();
+    const isEternal = ttlInMs === 0;
+
+    const timestamp = isEternal
+      ? add(Date.now(), 100, Duration.years).getTime()
+      : add(Date.now(), ttlInMs, Duration.milliseconds).getTime();
 
     const cachedData: CachedData<T> = {
       data,
