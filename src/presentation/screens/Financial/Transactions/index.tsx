@@ -7,9 +7,9 @@ import { View } from "react-native";
 import { useCases } from "@application/useCases";
 import { Fab, Text } from "@components";
 import { useQuery } from "@infrastructure/fetcher";
-import { isWeb } from "@utils/platform";
 
-import Card from "./containers/Card";
+import ItemSeparator from "./containers/ItemSeparator";
+import ListItem from "./containers/ListItem";
 import FinancialTransactionViewModel from "./models/FinancialTransactionViewModel";
 import getStyles from "./styles";
 
@@ -56,7 +56,7 @@ function FinancialTransaction() {
     index: number;
     item: FinancialTransactionViewModel;
   }) {
-    return <Card item={item} refetch={refetch} />;
+    return <ListItem item={item} refetch={refetch} />;
   }
 
   function onAddTransactionItemPress() {
@@ -75,12 +75,14 @@ function FinancialTransaction() {
 
   return (
     <View style={styles.container}>
-      <FlashList
-        data={data}
-        numColumns={isWeb() ? 2 : 1}
-        renderItem={renderItem}
-        style={{ flex: 1 }}
-      />
+      <View style={styles.listContainer}>
+        <FlashList
+          contentContainerStyle={styles.listContentContainer}
+          data={data}
+          ItemSeparatorComponent={ItemSeparator}
+          renderItem={renderItem}
+        />
+      </View>
       <View style={styles.fabContainer}>
         <Fab icon={"plus"} onPress={onAddTransactionItemPress} />
       </View>

@@ -11,6 +11,10 @@ const light = {
   },
   error: "rgb(186, 26, 26)",
   errorContainer: "rgb(255, 218, 214)",
+  financial: {
+    expense: "rgb(255, 26, 26)",
+    income: "rgb(50, 155, 0)",
+  },
   inverseOnSurface: "rgb(241, 240, 244)",
   inversePrimary: "rgb(165, 200, 255)",
   inverseSurface: "rgb(47, 48, 51)",
@@ -53,6 +57,10 @@ const dark = {
   },
   error: "rgb(186, 26, 26)",
   errorContainer: "rgb(120, 0, 10)",
+  financial: {
+    expense: "rgb(255, 26, 26)",
+    income: "rgb(50, 155, 0)",
+  },
   inverseOnSurface: "rgb(47, 48, 51)",
   inversePrimary: "rgb(0, 95, 175)",
   inverseSurface: "rgb(227, 226, 230)",

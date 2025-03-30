@@ -5,6 +5,7 @@ import { useTheme } from "@presentation/theme";
 import { ThemeProp } from "@presentation/theme/types";
 
 export interface CustomStyles {
+  bold?: boolean;
   color?: string;
   noScale?: boolean;
   textAlign?: "center" | "left" | "right";
@@ -63,6 +64,7 @@ export function getStyles(customProps?: CustomStyles) {
 function getCustomStyles(theme: ThemeProp, customStyles?: CustomStyles) {
   const styles = {
     color: customStyles?.color,
+    fontWeight: customStyles?.bold ? "bold" : "normal",
     textAlign: customStyles?.textAlign,
   };
 
