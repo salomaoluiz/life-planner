@@ -3,6 +3,10 @@ import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { captureMessage } from "@infrastructure/monitoring";
 
 class FinancialTransactionViewModel {
+  get category() {
+    return this.dto.category;
+  }
+
   get description() {
     return this.dto.description;
   }
@@ -47,7 +51,7 @@ class FinancialTransactionViewModel {
   }
 
   get value() {
-    return `${this.dto.value}`;
+    return `R$ ${this.dto.value}`;
   }
 
   private readonly dto: TransactionDTO;

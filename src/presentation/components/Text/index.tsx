@@ -5,6 +5,7 @@ import { TextMode } from "./types";
 
 export interface TextProps {
   customStyles?: CustomStyles;
+  numberOfLines?: number;
   testID?: string;
   value: string;
 }
@@ -49,7 +50,12 @@ function TextBase(props: TextProps & { mode: TextMode }) {
 
   const styles = getStyles(customStyles);
   return (
-    <PaperText style={styles[mode]} testID={testID} variant={mode}>
+    <PaperText
+      numberOfLines={props.numberOfLines}
+      style={styles[mode]}
+      testID={testID}
+      variant={mode}
+    >
       {value}
     </PaperText>
   );
