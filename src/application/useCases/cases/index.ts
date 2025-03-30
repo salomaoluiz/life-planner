@@ -1,4 +1,5 @@
 import * as authUseCases from "./auth";
+import * as configsUseCases from "./configs";
 import * as familyUseCases from "./family";
 import * as familyMemberUseCases from "./familyMember";
 import * as financialUseCases from "./financial";
@@ -9,6 +10,7 @@ import * as userUseCases from "./user";
 const listUseCases = {
   ...authUseCases,
   ...homeUseCases,
+  ...configsUseCases,
   ...userUseCases,
   ...familyUseCases,
   ...familyMemberUseCases,

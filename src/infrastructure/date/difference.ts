@@ -12,6 +12,8 @@ function difference(
       return dateFns.differenceInDays(currentDate, dateToCompare);
     case Duration.milliseconds:
       return dateFns.differenceInMilliseconds(currentDate, dateToCompare);
+    case Duration.years:
+      return dateFns.differenceInYears(currentDate, dateToCompare);
   }
 }
 

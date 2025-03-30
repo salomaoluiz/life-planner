@@ -11,6 +11,7 @@ interface UseTranslationLocaleResponse {
   changeLocale: (localeTag: string) => Promise<void>;
   getLocale: () => Locale;
 }
+
 interface UseTranslationResponse {
   t: (key: string, params?: Record<string, unknown>) => string;
 }
