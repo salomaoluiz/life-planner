@@ -14,15 +14,6 @@ export default function DrawerNavigator() {
           title: "Transactions",
         }}
       />
-      <Drawer.Screen
-        name={"categories"}
-        options={{
-          drawerIcon: ({ color, size }) => (
-            <Icon color={color} name={"shape"} size={size} />
-          ),
-          title: "Categories",
-        }}
-      />
     </Drawer>
   );
 }
