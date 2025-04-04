@@ -12,7 +12,7 @@ function getStyles() {
       alignItems: "center",
       backgroundColor: theme.colors.background,
       flex: 1,
-      paddingTop: theme.sizes.spacing.xxlarge,
+      paddingTop: isWeb() ? theme.sizes.spacing.xxlarge : undefined,
     },
     fabContainer: {
       alignItems: "flex-end",
@@ -25,17 +25,15 @@ function getStyles() {
     listContainer: {
       alignSelf: "stretch",
       backgroundColor: theme.colors.surfaceVariant,
-      borderRadius: theme.sizes.borderRadius.large,
+      borderRadius: isWeb() ? theme.sizes.borderRadius.large : undefined,
       flexDirection: "row",
-      marginHorizontal: isWeb()
-        ? getScreenSizes().width / 10
-        : theme.sizes.spacing.large,
+      marginHorizontal: isWeb() ? getScreenSizes().width * 0.05 : undefined,
       minWidth: isWeb() ? getScreenSizes().width / 3 : getWindowsSizes().width,
     },
     listContentContainer: {
       flex: 1,
-      paddingHorizontal: theme.sizes.spacing.large,
-      paddingVertical: theme.sizes.spacing.large,
+      paddingHorizontal: isWeb() ? theme.sizes.spacing.large : undefined,
+      paddingVertical: isWeb() ? theme.sizes.spacing.large : undefined,
     },
   });
 }
