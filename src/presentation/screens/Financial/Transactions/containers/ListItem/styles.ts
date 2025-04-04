@@ -8,8 +8,41 @@ function getStyles() {
   return {
     styles: StyleSheet.create({
       container: {
+        alignItems: "center",
+        flexDirection: "row",
+        paddingHorizontal: theme.sizes.spacing.medium,
+        paddingVertical: theme.sizes.spacing.xsmall,
+      },
+      deleteColumn: {
+        marginRight: "2%",
+        width: "8%",
+      },
+      detailsColumn: {
+        marginRight: "2%",
+        width: "48%",
+      },
+      iconColumn: {
+        marginRight: "2%",
+        width: "8%",
+      },
+      priceColumn: {
+        marginRight: "2%",
+        width: "23%",
+      },
+    }),
+    theme,
+  };
+}
+
+function getWebStyles() {
+  const { theme } = useTheme();
+
+  return {
+    styles: StyleSheet.create({
+      container: {
         flex: 1,
         padding: theme.sizes.spacing.medium,
+        width: "100%",
       },
 
       iconsContainer: {
@@ -25,9 +58,9 @@ function getStyles() {
         marginRight: "2%",
         width: "3%",
       },
-      width10: {
+      width20: {
         marginRight: "2%",
-        width: "8%",
+        width: "18%",
       },
       width25: {
         marginRight: "2%",
@@ -38,4 +71,4 @@ function getStyles() {
   };
 }
 
-export default getStyles;
+export { getStyles, getWebStyles };
