@@ -80,6 +80,12 @@ function transactionRepositoryImpl(
           }),
       );
     },
+    async invalidateTransactions(): Promise<void> {
+      return new Promise((resolve) => {
+        cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA);
+        resolve();
+      });
+    },
     async updateTransaction(params): Promise<void> {
       await datasources.financialTransactionDatasource.updateTransaction({
         category: params.category,

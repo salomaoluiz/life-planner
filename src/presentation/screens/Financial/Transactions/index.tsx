@@ -1,12 +1,13 @@
 import { useIsFocused } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import { useEffect } from "react";
 import { View } from "react-native";
 
 import { useCases } from "@application/useCases";
 import { Fab, Text } from "@components";
 import { useQuery } from "@infrastructure/fetcher";
+import RefetchCache from "@screens/Financial/Transactions/containers/RefetchCache";
 
 import ItemSeparator from "./containers/ItemSeparator";
 import ListItem from "./containers/ListItem";
@@ -14,8 +15,9 @@ import FinancialTransactionViewModel from "./models/FinancialTransactionViewMode
 import getStyles from "./styles";
 
 function FinancialTransaction() {
-  const styles = getStyles();
+  const { styles } = getStyles();
   const isFocused = useIsFocused();
+  const navigation = useNavigation();
 
   const { data, error, isFetching, refetch } = useQuery<
     FinancialTransactionViewModel[]
@@ -35,6 +37,14 @@ function FinancialTransaction() {
       );
     },
   });
+
+  useEffect(() => {
+    if (!isFetching) {
+      navigation.setOptions({
+        headerRight: () => <RefetchCache refetchQuery={refetch} />,
+      });
+    }
+  }, [navigation, isFetching]);
 
   useEffect(() => {
     if (isFocused) {
