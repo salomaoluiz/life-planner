@@ -24,7 +24,6 @@ function ListItem(props: Props) {
           size={theme.sizes.spacing.large}
         />
       </View>
-
       <View style={styles.detailsColumn}>
         <Text.Body value={props.item.transactionDate} />
         <Text.Title numberOfLines={1} value={props.item.description} />

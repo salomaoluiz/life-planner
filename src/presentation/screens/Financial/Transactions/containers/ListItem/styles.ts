@@ -40,31 +40,23 @@ function getWebStyles() {
   return {
     styles: StyleSheet.create({
       container: {
-        flex: 1,
-        padding: theme.sizes.spacing.medium,
-        width: "100%",
-      },
-
-      iconsContainer: {
-        flex: 1,
         flexDirection: "row",
-        justifyContent: "flex-end",
+        justifyContent: "space-around",
+        padding: theme.sizes.spacing.medium,
+      },
+      iconsContainer: {
+        alignSelf: "center",
+        position: "absolute",
+        right: 0,
       },
       row: {
         alignItems: "center",
+        flex: 1,
         flexDirection: "row",
-      },
-      width5: {
-        marginRight: "2%",
-        width: "3%",
-      },
-      width20: {
-        marginRight: "2%",
-        width: "18%",
+        justifyContent: "center",
       },
       width25: {
-        marginRight: "2%",
-        width: "23%",
+        maxWidth: "25%",
       },
     }),
     theme,

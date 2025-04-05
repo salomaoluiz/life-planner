@@ -30,7 +30,7 @@ function getStyles() {
         flexDirection: "row",
         marginHorizontal: isWeb() ? getScreenSizes().width * 0.05 : undefined,
         minWidth: isWeb()
-          ? getScreenSizes().width / 3
+          ? getScreenSizes().width / 2
           : getWindowsSizes().width,
       },
       listContentContainer: {

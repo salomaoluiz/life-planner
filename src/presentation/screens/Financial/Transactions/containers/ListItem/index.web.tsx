@@ -1,6 +1,6 @@
 import { View } from "react-native";
 
-import { Text } from "@components";
+import { Spacer, Text } from "@components";
 import Icon, { IconButton } from "@components/Icon";
 
 import useListItem, { Props } from "./hooks";
@@ -11,8 +11,8 @@ function ListItem(props: Props) {
 
   const { onDelete } = useListItem(props);
   return (
-    <View style={[styles.container, styles.row]}>
-      <View style={[styles.row, styles.width5]}>
+    <View style={[styles.container]}>
+      <View style={[styles.row, styles.width25]}>
         <Icon
           color={
             props.item.isExpense
@@ -22,17 +22,16 @@ function ListItem(props: Props) {
           name={props.item.isExpense ? "arrow-down-bold" : "arrow-up-bold"}
           size={theme.sizes.spacing.large}
         />
-      </View>
-      <View style={[styles.row, styles.width25]}>
+        <Spacer direction={"horizontal"} size={"medium"} />
         <Text.Body value={props.item.transactionDate} />
       </View>
       <View style={[styles.row, styles.width25]}>
         <Text.Title numberOfLines={1} value={props.item.description} />
       </View>
-      <View style={[styles.row, styles.width20]}>
+      <View style={[styles.row, styles.width25]}>
         <Text.Body numberOfLines={1} value={props.item.category} />
       </View>
-      <View style={[styles.row, styles.width20]}>
+      <View style={[styles.row, styles.width25]}>
         <Text.Body
           customStyles={{
             bold: true,

@@ -19,6 +19,7 @@ function getStyles() {
         width: "100%",
       },
       buttonContainer: {
+        marginTop: theme.sizes.spacing.large,
         padding: theme.sizes.spacing.small,
       },
       container: {
