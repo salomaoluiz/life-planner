@@ -74,10 +74,7 @@ function NewTransactionItemModal() {
     <>
       <Pressable onPress={onCancel} style={styles.backdrop} />
       <Card customStyles={styles.container}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          style={styles.formContainer}
-        >
+        <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.titleContainer}>
             <Text.Headline value={"Add new Transaction"} />
           </View>

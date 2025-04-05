@@ -2,6 +2,9 @@ import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { captureMessage } from "@infrastructure/monitoring";
 
+export enum SortRule {
+  DATE_ASC = "DATE_ASC",
+}
 class FinancialTransactionViewModel {
   get category() {
     return this.dto.category;
@@ -61,6 +64,19 @@ class FinancialTransactionViewModel {
   constructor(dto: TransactionDTO, ownerDTOs: OwnerDTO[]) {
     this.dto = dto;
     this.ownerDTOs = ownerDTOs;
+  }
+
+  static sort(transactions: FinancialTransactionViewModel[], rule: SortRule) {
+    switch (rule) {
+      case SortRule.DATE_ASC:
+        return transactions.sort((a, b) => {
+          const dateA = new Date(a.dto.date);
+          const dateB = new Date(b.dto.date);
+          return dateA.getTime() - dateB.getTime();
+        });
+      default:
+        throw new Error("Invalid sort rule");
+    }
   }
 }
 

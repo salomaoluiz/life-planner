@@ -7,11 +7,14 @@ import { View } from "react-native";
 import { useCases } from "@application/useCases";
 import { Fab, Text } from "@components";
 import { useQuery } from "@infrastructure/fetcher";
+import ListHeader from "@screens/Financial/Transactions/containers/ListHeader";
 import RefetchCache from "@screens/Financial/Transactions/containers/RefetchCache";
 
 import ItemSeparator from "./containers/ItemSeparator";
 import ListItem from "./containers/ListItem";
-import FinancialTransactionViewModel from "./models/FinancialTransactionViewModel";
+import FinancialTransactionViewModel, {
+  SortRule,
+} from "./models/FinancialTransactionViewModel";
 import getStyles from "./styles";
 
 function FinancialTransaction() {
@@ -32,8 +35,13 @@ function FinancialTransaction() {
           ownerIds,
         });
 
-      return transactionDTOs.map(
+      const transactions = transactionDTOs.map(
         (stockDTO) => new FinancialTransactionViewModel(stockDTO, owner),
+      );
+
+      return FinancialTransactionViewModel.sort(
+        transactions,
+        SortRule.DATE_ASC,
       );
     },
   });
@@ -90,6 +98,7 @@ function FinancialTransaction() {
           contentContainerStyle={styles.listContentContainer}
           data={data}
           ItemSeparatorComponent={ItemSeparator}
+          ListHeaderComponent={ListHeader}
           renderItem={renderItem}
         />
       </View>
