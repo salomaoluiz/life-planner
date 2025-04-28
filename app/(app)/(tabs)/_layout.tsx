@@ -20,7 +20,7 @@ export default function TabNavigator() {
           tabBarIcon: ({ color, size }) => (
             <Icon color={color} name={"view-dashboard"} size={size} />
           ),
-          title: "Dashboard",
+          title: t("dashboard.routeTitle"),
         }}
       />
       <Tabs.Screen
@@ -38,7 +38,7 @@ export default function TabNavigator() {
           tabBarIcon: ({ color, size }) => (
             <Icon color={color} name={"human-male-female-child"} size={size} />
           ),
-          title: "Family",
+          title: t("family.routeTitle"),
         }}
       />
       <Tabs.Screen
@@ -48,7 +48,7 @@ export default function TabNavigator() {
           tabBarIcon: ({ color, size }) => (
             <Icon color={color} name={"cash-register"} size={size} />
           ),
-          title: "Financial",
+          title: t("financial.routeTitle"),
         }}
       />
       <Tabs.Screen
@@ -58,7 +58,7 @@ export default function TabNavigator() {
           tabBarIcon: ({ color, size }) => (
             <Icon color={color} name={"cog"} size={size} />
           ),
-          title: "Configurations",
+          title: t("configurations.routeTitle"),
         }}
       />
     </Tabs>

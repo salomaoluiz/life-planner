@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useCases } from "@application/useCases";
 import { Button } from "@components";
 import { useMutation } from "@infrastructure/fetcher";
+import { useTranslation } from "@presentation/i18n";
 import { useTheme } from "@presentation/theme";
 
 function Logout() {
@@ -12,6 +13,7 @@ function Logout() {
     cacheKey: [],
     fetch: useCases.logoutUseCase.execute,
   });
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (status === "success") {
@@ -28,7 +30,7 @@ function Logout() {
       customStyles={{ textColor: theme.colors.error }}
       disabled={isFetching}
       icon={"logout"}
-      label={"Logout"}
+      label={t("configurations.logout")}
       onPress={onPress}
     />
   );
