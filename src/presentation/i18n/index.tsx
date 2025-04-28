@@ -10,7 +10,7 @@ import {
 } from "@presentation/i18n/react-i18n";
 
 import { availableLanguages } from "./translations";
-import { UseTranslation, UseTranslationLocale } from "./types";
+import { TranslationKeys, UseTranslation, UseTranslationLocale } from "./types";
 
 interface Props {
   children: React.ReactNode;
@@ -20,7 +20,10 @@ export function I18NProvider({ children }: Props) {
   return <ReactI18NPProvider>{children}</ReactI18NPProvider>;
 }
 
-export function translate(key: string, params?: Record<string, string>) {
+export function translate(
+  key: TranslationKeys,
+  params?: Record<string, string>,
+) {
   return reactI18NTranslate(key, params);
 }
 

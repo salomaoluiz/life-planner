@@ -1,12 +1,18 @@
+import configurations from "./configurations";
+import dashboard from "./dashboard";
 import errors from "./errors";
-import home from "./home";
+import family from "./family";
+import financial from "./financial";
 import login from "./login";
 import stock from "./stock";
 
 const enUS = {
   translation: {
+    configurations,
+    dashboard,
     errors,
-    home,
+    family,
+    financial,
     login,
     stock,
   },
