@@ -1,4 +1,4 @@
-import StockOwnersDTO from "@application/dto/stock/StockOwnersDTO";
+import OwnersDTO from "@application/dto/user/OwnerDTO";
 import { StockUnits } from "@domain/entities/stock/StockEntity";
 
 const StockUnitLabels: Record<StockUnits, string> = {
@@ -10,7 +10,7 @@ const StockUnitLabels: Record<StockUnits, string> = {
 };
 
 interface INewStockItemViewModel {
-  stockOwnersDTO: StockOwnersDTO[];
+  stockOwnersDTO: OwnersDTO[];
 }
 
 class NewStockItemViewModel {
@@ -34,7 +34,7 @@ class NewStockItemViewModel {
     return stockUnits;
   }
 
-  private _stockOwnersDTO: StockOwnersDTO[];
+  private _stockOwnersDTO: OwnersDTO[];
 
   constructor(props: INewStockItemViewModel) {
     this._stockOwnersDTO = props.stockOwnersDTO;

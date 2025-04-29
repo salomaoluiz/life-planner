@@ -1,5 +1,5 @@
 import React, { createContext, useEffect, useMemo, useState } from "react";
-import { useColorScheme } from "react-native";
+import { StatusBar, useColorScheme } from "react-native";
 
 import { useCases } from "@application/useCases";
 import { SaveUserConfigsUseCaseParams } from "@application/useCases/cases/configs/saveUserConfigsUseCase";
@@ -49,17 +49,23 @@ export function ThemeProvider({ children }: Props) {
   const colorSchema = useColorScheme();
 
   const [isDark, setIsDark] = useState(colorSchema === "dark");
+
   const [theme, setTheme] = useState<ThemeProp>(
     isDark ? darkTheme : lightTheme,
   );
 
   useEffect(() => {
     setTheme(isDark ? darkTheme : lightTheme);
+    StatusBar.setBarStyle(isDark ? "light-content" : "dark-content");
+    StatusBar.setBackgroundColor(
+      isDark ? darkTheme.colors.background : lightTheme.colors.background,
+    );
   }, [isDark]);
 
   useEffect(() => {
     if (data && status === "success") {
       setIsDark(data.darkMode);
+      StatusBar.setBarStyle(data.darkMode ? "light-content" : "dark-content");
       setIsLoading(false, "theme");
     } else {
       setIsDark(colorSchema === "dark");

@@ -1,6 +1,6 @@
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
-interface IStockOwnersDTO {
+interface IOwnersDTO {
   id: string;
   name: string;
   type: OwnerType;
@@ -11,7 +11,7 @@ class OwnerDTO {
   name: string;
   type: OwnerType;
 
-  constructor(params: IStockOwnersDTO) {
+  constructor(params: IOwnersDTO) {
     this.id = params.id;
     this.name = params.name;
     this.type = params.type;

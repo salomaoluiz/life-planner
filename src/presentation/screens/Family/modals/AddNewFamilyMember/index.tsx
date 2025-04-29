@@ -41,7 +41,7 @@ function AddNewFamilyMemberModal() {
       message: `The user ${userEmail} has been invited to the family`,
       primaryButton: {
         action: FeedbackActions.COPY_TO_CLIPBOARD,
-        label: "Copy token",
+        label: "Copy Url",
         value: `${process.env.EXPO_PUBLIC_PROJECT_WEBSITE_URL}/invite?token=${invite.data!.inviteToken}`,
       },
       title: "Invite sent",
