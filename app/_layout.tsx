@@ -1,5 +1,6 @@
 import GlobalProviders from "@/src/providers";
 import { Stack } from "expo-router";
+import { LogBox } from "react-native";
 
 import { ErrorBoundary, MonitoringWrapper } from "@infrastructure/monitoring";
 import { useInitializeRouter } from "@navigation";
@@ -11,7 +12,7 @@ import {
 function RenderStack() {
   const { isLoading } = useInitializeRouter();
   if (isLoading) return null;
-
+  LogBox.ignoreAllLogs(true);
   return <Stack screenOptions={{ headerShown: false }} />;
 }
 

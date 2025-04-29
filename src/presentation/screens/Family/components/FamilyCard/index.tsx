@@ -19,7 +19,7 @@ export interface Props {
 function FamilyCard(props: Props) {
   const { styles } = getStyles();
 
-  const FakeContent = useMemo(() => {
+  const Content = useMemo(() => {
     return (
       <View style={styles.contentContainer}>
         {props.family?.familyMembers.map((member) => {
@@ -41,7 +41,7 @@ function FamilyCard(props: Props) {
 
   return (
     <Accordion.Container
-      content={FakeContent}
+      content={Content}
       header={<Text.Title value={props.family.familyName} />}
       left={
         <Avatar.Regular

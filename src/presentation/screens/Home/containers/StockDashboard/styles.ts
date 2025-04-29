@@ -11,6 +11,7 @@ function getStyles() {
       backgroundColor: theme.colors.surfaceVariant,
       borderRadius: theme.sizes.borderRadius.small,
       maxWidth: isWeb() ? "50%" : "100%",
+
       padding: theme.sizes.spacing.small,
     },
     containerLoading: {

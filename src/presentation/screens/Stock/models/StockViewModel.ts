@@ -1,5 +1,5 @@
 import StockDTO from "@application/dto/stock/StockDTO";
-import StockOwnersDTO from "@application/dto/stock/StockOwnersDTO";
+import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { StockOwners } from "@domain/entities/stock/StockEntity";
 import { difference, Duration } from "@infrastructure/date";
 
@@ -77,9 +77,9 @@ class StockViewModel {
   }
 
   private dto: StockDTO;
-  private ownersDTO: StockOwnersDTO[];
+  private ownersDTO: OwnerDTO[];
 
-  constructor(dto: StockDTO, owners: StockOwnersDTO[]) {
+  constructor(dto: StockDTO, owners: OwnerDTO[]) {
     this.dto = dto;
     this.ownersDTO = owners;
   }
