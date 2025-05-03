@@ -67,9 +67,7 @@ it("SHOULD render the Text with bold weight", () => {
 
   const component = screen.getByTestId(defaultProps.testID);
 
-  expect(component.props.style.fontWeight).toEqual({
-    fontWeight: "bold",
-  });
+  expect(component.props.style.fontWeight).toEqual("bold");
 });
 
 it("SHOULD throw an error if an invalid mode is passed", () => {

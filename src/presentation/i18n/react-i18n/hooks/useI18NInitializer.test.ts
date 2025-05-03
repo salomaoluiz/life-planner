@@ -1,66 +1,63 @@
-import { waitFor } from "@testing-library/react-native";
-import i18next from "i18next";
-import { initReactI18next } from "react-i18next";
+import { mocks, setup, spies, waitFor } from "./mocks/useI18NInitializer.mocks";
 
-import { renderHook } from "@tests";
-
-import { translations } from "@presentation/i18n/translations";
-import * as loaderProvider from "@providers/loader";
-
-import useI18NInitializer from "./useI18NInitializer";
-
-jest.mock("i18next");
-
-const loaderProviderResponse = {
-  setIsLoading: jest.fn(),
-};
-
-const initSpy = jest.fn().mockResolvedValue({});
-const useSpy = jest.spyOn(i18next, "use").mockReturnValue({
-  init: initSpy,
-} as never);
-
-jest
-  .spyOn(loaderProvider, "useProviderLoader")
-  .mockReturnValue(loaderProviderResponse as never);
-
-function setup() {
-  return renderHook(() => useI18NInitializer());
-}
-
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
-it("SHOULD use the react-i18next", () => {
+it("SHOULD not initialize if the query is pending", () => {
   setup();
 
-  expect(useSpy).toHaveBeenCalledTimes(1);
-  expect(useSpy).toHaveBeenCalledWith(initReactI18next);
+  expect(spies.init).not.toHaveBeenCalled();
+  expect(spies.use).not.toHaveBeenCalled();
 });
 
-it("SHOULD init with correct params", () => {
+it("SHOULD use the react-i18next in success of query", () => {
+  spies.useQuery.mockReturnValueOnce(mocks.useQuery.success.empty);
+
   setup();
 
-  expect(initSpy).toHaveBeenCalledTimes(1);
-  expect(initSpy).toHaveBeenCalledWith({
+  expect(spies.use).toHaveBeenCalledTimes(1);
+  expect(spies.use).toHaveBeenCalledWith(spies.initReactI18next);
+});
+
+it("SHOULD init with correct params IN success of query empty", () => {
+  spies.useQuery.mockReturnValueOnce(mocks.useQuery.success.empty);
+
+  setup();
+
+  expect(spies.init).toHaveBeenCalledTimes(1);
+  expect(spies.init).toHaveBeenCalledWith({
     fallbackLng: "en-US",
-    lng: i18next.language,
+    lng: mocks.i18next.language,
     resources: {
-      "en-US": translations["en-US"],
-      "pt-BR": translations["pt-BR"],
+      "en-US": mocks.translations["en-US"],
+      "pt-BR": mocks.translations["pt-BR"],
+    },
+  });
+});
+
+it("SHOULD init with correct params IN success of query with saved language", () => {
+  spies.useQuery.mockReturnValueOnce(mocks.useQuery.success.withData);
+
+  setup();
+
+  expect(spies.init).toHaveBeenCalledTimes(1);
+  expect(spies.init).toHaveBeenCalledWith({
+    fallbackLng: "en-US",
+    lng: mocks.useQuery.success.withData.data?.language,
+    resources: {
+      "en-US": mocks.translations["en-US"],
+      "pt-BR": mocks.translations["pt-BR"],
     },
   });
 });
 
 it("SHOULD set i18n loading as false in provider loader hook", async () => {
+  spies.useQuery.mockReturnValueOnce(mocks.useQuery.success.empty);
+
   setup();
 
   await waitFor(() => {
-    expect(loaderProviderResponse.setIsLoading).toHaveBeenCalledTimes(1);
-    expect(loaderProviderResponse.setIsLoading).toHaveBeenCalledWith(
-      false,
-      "i18n",
-    );
+    expect(mocks.loaderProviderResponse.setIsLoading).toHaveBeenCalledTimes(1);
   });
+  expect(mocks.loaderProviderResponse.setIsLoading).toHaveBeenCalledWith(
+    false,
+    "i18n",
+  );
 });
