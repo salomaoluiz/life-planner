@@ -9,16 +9,16 @@ function ListHeader() {
   return (
     <View style={styles.container}>
       <View style={[styles.row, styles.date]}>
-        <Text.Title customStyles={{ bold: true }} value={"Date"} />
+        <Text.Title bold value={"Date"} />
       </View>
       <View style={[styles.row, styles.description]}>
-        <Text.Title customStyles={{ bold: true }} value={"Description"} />
+        <Text.Title bold value={"Description"} />
       </View>
       <View style={[styles.row, styles.category]}>
-        <Text.Title customStyles={{ bold: true }} value={"Category"} />
+        <Text.Title bold value={"Category"} />
       </View>
       <View style={[styles.row, styles.value]}>
-        <Text.Title customStyles={{ bold: true }} value={"Value"} />
+        <Text.Title bold value={"Value"} />
       </View>
     </View>
   );

@@ -1,5 +1,5 @@
 import OwnersDTO from "@application/dto/user/OwnerDTO";
-import { StockUnits } from "@domain/entities/stock/StockEntity";
+import { StockOwners, StockUnits } from "@domain/entities/stock/StockEntity";
 
 const StockUnitLabels: Record<StockUnits, string> = {
   [StockUnits.GRAM]: "Gram",
@@ -41,7 +41,11 @@ class NewStockItemViewModel {
   }
 
   stockOwnerType(ownerId: string) {
-    return this._stockOwnersDTO.find((owner) => owner.id === ownerId)!.type;
+    const ownerType = this._stockOwnersDTO.find(
+      (owner) => owner.id === ownerId,
+    )!.type;
+
+    return StockOwners[ownerType as keyof typeof StockOwners];
   }
 }
 

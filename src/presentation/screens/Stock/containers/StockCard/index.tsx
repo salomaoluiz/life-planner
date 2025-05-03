@@ -43,9 +43,7 @@ function StockCard(props: Props) {
         <Text.Label value={`Quantity: ${props.item.quantity}`} />
         <Text.Label value={`Owner: ${props.item.owner}`} />
         <Text.Label
-          customStyles={{
-            color: props.item.isExpired ? theme.colors.error : undefined,
-          }}
+          color={props.item.isExpired ? theme.colors.error : undefined}
           value={`Status: ${props.item.status}`}
         />
       </View>

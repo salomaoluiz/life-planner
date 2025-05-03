@@ -21,7 +21,7 @@ function getStyles(props: Props) {
         borderRadius: theme.sizes.borderRadius.small,
         borderWidth: 1,
         flexDirection: "row",
-        height: theme.sizes.noScaled.spacing.xxlarge,
+        height: theme.sizes.spacing.xxlarge,
         justifyContent: "space-between",
         paddingLeft: theme.sizes.spacing.xsmall,
         width: "100%",
@@ -29,7 +29,7 @@ function getStyles(props: Props) {
       dateContainer: {
         backgroundColor: theme.colors.background,
         justifyContent: "center",
-        top: -theme.sizes.noScaled.spacing.xsmall,
+        top: -theme.sizes.spacing.xsmall,
         zIndex: 0,
       },
       labelContainer: {
@@ -37,7 +37,7 @@ function getStyles(props: Props) {
         justifyContent: "center",
         left: props.hasDate ? -theme.sizes.spacing.xxsmall : 0,
         paddingHorizontal: props.hasDate ? theme.sizes.spacing.xxsmall : 0,
-        top: props.hasDate ? -theme.sizes.noScaled.spacing.small : 0,
+        top: props.hasDate ? -theme.sizes.spacing.small : 0,
         zIndex: 1,
       },
       pressable: {

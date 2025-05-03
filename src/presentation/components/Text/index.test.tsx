@@ -56,10 +56,21 @@ it.each<{
     expect(component.props.style).toEqual({
       color: lightTheme.colors.onSurface,
       fontSize: lightTheme.sizes.fontSizes[fontSize],
+      fontWeight: "normal",
       lineHeight: lightTheme.sizes.lineHeights[lineHeight],
     });
   },
 );
+
+it("SHOULD render the Text with bold weight", () => {
+  setup({ bold: true, mode: TextMode.Body });
+
+  const component = screen.getByTestId(defaultProps.testID);
+
+  expect(component.props.style.fontWeight).toEqual({
+    fontWeight: "bold",
+  });
+});
 
 it("SHOULD throw an error if an invalid mode is passed", () => {
   function func() {

@@ -5,14 +5,14 @@ import { useTheme } from "@presentation/theme";
 function getStyles() {
   const { theme } = useTheme();
 
-  return StyleSheet.create({
-    container: {
-      marginVertical: theme.sizes.spacing.xxxlarge,
-    },
-    title: {
-      color: theme.colors.onBackground,
-    },
-  });
+  return {
+    styles: StyleSheet.create({
+      container: {
+        marginVertical: theme.sizes.spacing.xxxlarge,
+      },
+    }),
+    theme,
+  };
 }
 
 export default getStyles;

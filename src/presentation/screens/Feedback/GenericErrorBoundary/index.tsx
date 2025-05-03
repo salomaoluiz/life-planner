@@ -10,7 +10,7 @@ import useStyles from "./styles";
 
 function GlobalBoundary({ retry }: ErrorBoundaryFallBackProps) {
   const { t } = useTranslation();
-  const styles = useStyles();
+  const { styles, theme } = useStyles();
 
   function onButtonPress() {
     retry();
@@ -26,15 +26,17 @@ function GlobalBoundary({ retry }: ErrorBoundaryFallBackProps) {
       />
       <View style={styles.titleContainer}>
         <Text.Title
-          customStyles={styles.title}
+          color={theme.colors.onBackground}
           testID={"genericErrorBoundary_title"}
+          textAlign={"center"}
           value={t("errors.generic.title")}
         />
       </View>
       <View style={styles.descriptionContainer}>
         <Text.Body
-          customStyles={styles.description}
+          color={theme.colors.onBackground}
           testID={"genericErrorBoundary_description"}
+          textAlign={"center"}
           value={t("errors.generic.description")}
         />
       </View>

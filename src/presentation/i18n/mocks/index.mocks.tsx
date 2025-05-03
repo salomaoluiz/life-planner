@@ -10,6 +10,7 @@ import {
 } from "@presentation/i18n";
 import * as reactI18N from "@presentation/i18n/react-i18n";
 import { reactI18NHooks } from "@presentation/i18n/react-i18n";
+import { TranslationKeys } from "@presentation/i18n/types";
 
 jest.mock("@presentation/i18n/react-i18n");
 jest.unmock("@presentation/i18n");
@@ -31,7 +32,7 @@ function setupProvider() {
   render(I18NProvider({ children: <View testID="i18n-provider-children" /> }));
 }
 
-function setupTranslate(key: string, params?: Record<string, string>) {
+function setupTranslate(key: TranslationKeys, params?: Record<string, string>) {
   return translate(key, params);
 }
 

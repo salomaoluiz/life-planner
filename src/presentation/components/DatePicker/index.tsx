@@ -44,14 +44,11 @@ function DatePicker(props: DatePickerProps) {
       <View style={styles.container}>
         <View>
           <View style={styles.labelContainer}>
-            <Text.Body customStyles={{ noScale: true }} value={props.label} />
+            <Text.Body value={props.label} />
           </View>
           {props.date ? (
             <View style={styles.dateContainer}>
-              <Text.Body
-                customStyles={{ noScale: true }}
-                value={props.date?.toLocaleDateString()}
-              />
+              <Text.Body value={props.date?.toLocaleDateString()} />
             </View>
           ) : null}
 
@@ -71,7 +68,7 @@ function DatePicker(props: DatePickerProps) {
             <IconButton
               name={"close"}
               onPress={clearDate}
-              size={theme.sizes.noScaled.spacing.large}
+              size={theme.sizes.spacing.large}
             />
           </View>
         ) : null}

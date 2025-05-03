@@ -17,7 +17,7 @@ function getScaleFunctions() {
 }
 
 function getScaleRatio() {
-  const screenWidth = Dimensions.get("screen").width;
+  const screenWidth = Dimensions.get("window").width;
 
   const isTablet = screenWidth >= 600;
   const isDesktop = screenWidth >= 1024;
@@ -27,9 +27,9 @@ function getScaleRatio() {
   let borderFactor = 1;
 
   if (isTablet) {
-    scaleFactor = 1.2;
-    spacingFactor = 1.2;
-    borderFactor = 1.2;
+    scaleFactor = 1.15;
+    spacingFactor = 1.15;
+    borderFactor = 1.15;
   }
 
   if (isDesktop) {

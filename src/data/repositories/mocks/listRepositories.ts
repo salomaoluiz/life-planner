@@ -1,6 +1,10 @@
 import Repositories from "@domain/repositories";
 
-const repositoriesMocks = {
+const repositoriesMocks: Repositories = {
+  configsRepository: {
+    getConfigs: jest.fn(),
+    saveConfigs: jest.fn(),
+  },
   familyMemberRepository: {
     createFamilyMember: jest.fn(),
     deleteFamilyMember: jest.fn(),
@@ -13,6 +17,15 @@ const repositoriesMocks = {
     getFamilies: jest.fn(),
     getFamilyById: jest.fn(),
     updateFamily: jest.fn(),
+  },
+  financialRepository: {
+    transaction: {
+      createTransaction: jest.fn(),
+      deleteTransaction: jest.fn(),
+      getTransactions: jest.fn(),
+      invalidateTransactions: jest.fn(),
+      updateTransaction: jest.fn(),
+    },
   },
   loginRepository: {
     loginWithGoogle: jest.fn(),
@@ -30,6 +43,6 @@ const repositoriesMocks = {
     getUser: jest.fn(),
     getUserById: jest.fn(),
   },
-} as Repositories;
+};
 
 export { repositoriesMocks };

@@ -3,7 +3,7 @@ import { render } from "@tests";
 import { Button, ButtonProps } from "@components";
 import { ButtonMode } from "@components/Button";
 
-const defaultProps: ButtonProps = {
+const defaultProps = {
   label: "Button Label",
   onPress: jest.fn(),
   testID: "default-button",
