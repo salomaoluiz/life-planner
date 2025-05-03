@@ -33,12 +33,12 @@ function ListItem(props: Props) {
       </View>
       <View style={[styles.row, styles.width25]}>
         <Text.Body
-          customStyles={{
-            bold: true,
-            color: props.item.isExpense
+          bold
+          color={
+            props.item.isExpense
               ? theme.colors.financial.expense
-              : theme.colors.financial.income,
-          }}
+              : theme.colors.financial.income
+          }
           numberOfLines={1}
           value={props.item.value}
         />

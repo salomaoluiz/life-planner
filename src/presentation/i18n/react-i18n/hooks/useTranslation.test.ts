@@ -22,7 +22,9 @@ it("SHOULD use the t function from i18next", () => {
   } = setup();
 
   act(() => {
-    current.t("some-key", { variable: "some-variable" });
+    current.t("configurations.configs.darkMode.title", {
+      variable: "some-variable",
+    });
   });
 
   expect(tSpy).toHaveBeenCalledTimes(1);

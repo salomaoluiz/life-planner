@@ -40,7 +40,6 @@ function updateStockItemUseCase(
           ownerId: params.ownerId,
           purchaseDate: params.purchaseDate,
           quantity: params.quantity,
-          status: params.status,
           unit: params.unit,
         });
       } catch (error) {

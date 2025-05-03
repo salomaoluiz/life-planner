@@ -6,7 +6,7 @@ import { getScaleRatio } from "@presentation/theme/constants/utils/sizes";
 
 function useStyles() {
   const { theme } = useTheme();
-  return useMemo(
+  const memoizedStyle = useMemo(
     () =>
       StyleSheet.create({
         buttonContainer: {
@@ -20,10 +20,7 @@ function useStyles() {
           justifyContent: "center",
           paddingHorizontal: theme.sizes.spacing.medium,
         },
-        description: {
-          color: theme.colors.onBackground,
-          textAlign: "center",
-        },
+
         descriptionContainer: {
           marginBottom: theme.sizes.spacing.medium,
         },
@@ -31,16 +28,18 @@ function useStyles() {
           height: 300 * getScaleRatio().scaleFactor,
           width: 300 * getScaleRatio().scaleFactor,
         },
-        title: {
-          color: theme.colors.onBackground,
-          textAlign: "center",
-        },
+
         titleContainer: {
           marginBottom: theme.sizes.spacing.medium,
         },
       }),
     [],
   );
+
+  return {
+    styles: memoizedStyle,
+    theme,
+  };
 }
 
 export default useStyles;

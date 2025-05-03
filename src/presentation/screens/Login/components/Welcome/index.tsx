@@ -6,13 +6,13 @@ import { useTranslation } from "@presentation/i18n";
 import getStyles from "./styles";
 
 function Welcome() {
-  const styles = getStyles();
+  const { styles, theme } = getStyles();
   const { t } = useTranslation();
 
   return (
     <View style={styles.container}>
       <Text.Headline
-        customStyles={styles.title}
+        color={theme.colors.onBackground}
         testID={"login_welcome"}
         value={t("login.welcome")}
       />

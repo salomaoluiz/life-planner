@@ -1,3 +1,5 @@
+import { TranslationKeys } from "@presentation/i18n/types";
+
 import { screen, setup, spies } from "./mocks/index.mocks";
 
 it("SHOULD use the react-i18n hooks in useTranslation", () => {
@@ -21,7 +23,7 @@ it("SHOULD render the react-i18n provider", () => {
 });
 
 it("SHOULD translate the key", () => {
-  const key = "key";
+  const key: TranslationKeys = "configurations.configs.language.title";
   const params = { key: "value" };
 
   setup.translate(key, params);

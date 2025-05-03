@@ -15,7 +15,7 @@ function getStyles() {
         margin: 0,
       },
       itemStyle: {
-        fontSize: theme.sizes.noScaled.fontSizes.small,
+        fontSize: theme.sizes.fontSizes.small,
       },
       picker: {
         backgroundColor: theme.colors.background,

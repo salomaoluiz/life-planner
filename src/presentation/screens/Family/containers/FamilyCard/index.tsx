@@ -27,7 +27,7 @@ function FamilyCard(props: Props) {
   function onAddNewFamilyMember() {
     router.push({
       params: { familyId: props.family.familyId },
-      pathname: "/(app)/family/add_new_family_member",
+      pathname: "/(app)/(modals)/family/add_new_family_member",
     });
   }
 

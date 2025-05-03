@@ -6,7 +6,7 @@ function getStyles() {
   const { theme } = useTheme();
   return StyleSheet.create({
     textInput: {
-      minHeight: theme.sizes.noScaled.spacing.xxlarge,
+      minHeight: theme.sizes.spacing.xxlarge,
       width: "100%",
     },
   });

@@ -2,7 +2,7 @@ import { render } from "@tests";
 
 import Icon, { IconProps } from "@components/Icon";
 
-const defaultProps: IconProps = {
+const defaultProps = {
   color: "black",
   name: "google",
   size: 20,

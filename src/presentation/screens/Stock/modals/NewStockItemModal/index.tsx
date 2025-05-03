@@ -123,7 +123,7 @@ function NewStockItemModal() {
             label={fields.owner.label}
             onValueChange={(value) => {
               fields.ownerId.onChange(value);
-              fields.owner.onChange(newStockItemModel.stockOwnerType(value!));
+              fields.owner.onChange(newStockItemModel?.stockOwnerType(value!));
             }}
             selectedValue={fields.ownerId.value}
           />

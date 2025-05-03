@@ -35,7 +35,7 @@ function Invite() {
 
   useEffect(() => {
     if (joinFamily.status === "success") {
-      router.replace("/");
+      router.replace("/(app)/(tabs)/index");
     }
   }, [joinFamily.status]);
 
@@ -52,7 +52,7 @@ function Invite() {
   }
 
   function onDecline() {
-    router.replace("/");
+    router.replace("/(app)/(tabs)/index");
   }
 
   return (

@@ -60,7 +60,7 @@ function NewTransactionItemModal() {
     if (router.canGoBack()) {
       return router.back();
     }
-    return router.replace("/");
+    return router.replace("/financial");
   }
 
   function onAdd() {
