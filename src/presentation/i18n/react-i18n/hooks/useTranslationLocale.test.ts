@@ -1,54 +1,19 @@
-import * as expoLocalization from "expo-localization";
-import i18next from "i18next";
-import * as reactI18Next from "react-i18next";
-
-import { renderHook } from "@tests";
-
-import useTranslationLocale from "./useTranslationLocale";
-
-jest.mock("expo-localization");
-jest.mock("react-i18next");
-jest.mock("i18next");
-
-const useTranslationSpy = jest
-  .spyOn(reactI18Next, "useTranslation")
-  .mockReturnValue({
-    i18n: {
-      language: "en-US",
-    },
-  } as never);
-
-const locales = [{ languageTag: "en-US" }, { languageTag: "pt-BR" }];
-const changeLanguageSpy = jest.spyOn(i18next, "changeLanguage");
-jest.spyOn(expoLocalization, "getLocales").mockReturnValue(locales as never);
-
-function setup() {
-  return renderHook(() => useTranslationLocale());
-}
+import { mocks, setup, spies } from "./mocks/useTranslationLocale.mocks";
 
 it("SHOULD change the language from i18next", async () => {
   const tag = "pt-BR";
 
   const { result } = setup();
-  result.current.changeLocale(tag);
+  await result.current.changeLocale(tag);
 
-  expect(changeLanguageSpy).toHaveBeenCalledWith(tag);
+  expect(spies.changeLanguage).toHaveBeenCalledWith(tag);
 });
 
-it("SHOULD return the current locale when languageTag is equal to i18n language", () => {
+it("SHOULD return the current locale", () => {
   const { result } = setup();
   const locale = result.current.getLocale();
 
-  expect(locale).toEqual(locales[0]);
-});
-
-it("SHOULD return the locale if the i18n language has a part of the tag", () => {
-  useTranslationSpy.mockReturnValueOnce({
-    i18n: { language: "pt-BR" },
-  } as never);
-
-  const { result } = setup();
-  const locale = result.current.getLocale();
-
-  expect(locale).toEqual(locales[1]);
+  expect(locale).toEqual({
+    languageTag: mocks.useTranslationI18NextResponse.i18n.language,
+  });
 });

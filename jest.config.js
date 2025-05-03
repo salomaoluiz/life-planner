@@ -2,9 +2,13 @@
 
 module.exports = {
   collectCoverageFrom: [
-    "src/**/*.{js,jsx,ts,tsx}", // Specify which files to collect coverage from
-    "!src/**/*.d.ts", // Exclude TypeScript declaration files
-    "!src/**/mocks/**/*.stories.tsx", // Exclude storybook stories
+    "src/**/*.{js,jsx,ts,tsx}",
+    "!src/**/*.d.ts",
+    "!src/**/mocks/**/*.stories.tsx",
+    "!**/*.fixture.ts",
+    "!**/*.fixture.tsx",
+    "!**/*.mocks.tsx",
+    "!**/*.mocks.ts",
   ],
   coverageThreshold: {
     global: {

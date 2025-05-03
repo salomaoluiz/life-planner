@@ -1,20 +1,4 @@
-import * as reactI18Next from "react-i18next";
-
-import { act, renderHook } from "@tests";
-
-import useTranslation from "./useTranslation";
-
-jest.mock("react-i18next");
-
-const tSpy = jest.fn();
-
-jest
-  .spyOn(reactI18Next, "useTranslation")
-  .mockReturnValue({ t: tSpy } as never);
-
-function setup() {
-  return renderHook(() => useTranslation());
-}
+import { act, setup, spies } from "./mocks/useTranslation.mocks";
 
 it("SHOULD use the t function from i18next", () => {
   const {
@@ -27,6 +11,11 @@ it("SHOULD use the t function from i18next", () => {
     });
   });
 
-  expect(tSpy).toHaveBeenCalledTimes(1);
-  expect(tSpy).toHaveBeenCalledWith("some-key", { variable: "some-variable" });
+  expect(spies.t).toHaveBeenCalledTimes(1);
+  expect(spies.t).toHaveBeenCalledWith(
+    "configurations.configs.darkMode.title",
+    {
+      variable: "some-variable",
+    },
+  );
 });
