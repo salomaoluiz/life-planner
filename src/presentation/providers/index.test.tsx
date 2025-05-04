@@ -8,6 +8,7 @@ import * as theme from "@presentation/theme/provider";
 import PresentationProviders from "./";
 
 jest.unmock("@presentation/i18n");
+jest.mock("@presentation/i18n/Provider");
 jest.unmock("@presentation/theme");
 
 jest
