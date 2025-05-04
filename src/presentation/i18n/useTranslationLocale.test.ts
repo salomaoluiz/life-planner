@@ -1,4 +1,4 @@
-import { act, mocks, setup, spies } from "./mocks/useTranslationLocale.mocks";
+import { mocks, setup, spies } from "./mocks/useTranslationLocale.mocks";
 
 it("SHOULD render the hooks correctly", () => {
   setup();

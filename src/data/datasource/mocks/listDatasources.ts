@@ -1,7 +1,4 @@
 import { Datasources } from "@data/datasource";
-import FamilyModel from "@data/models/family/FamilyModel";
-import TransactionModel from "@data/models/financial/TransactionModel";
-import { CreateTransactionDatasourceParams } from "@data/repositories/repos/financial/transactionDatasource";
 
 const datasourcesMocks: jest.MockedObjectDeep<Datasources> = {
   familyDatasource: {
