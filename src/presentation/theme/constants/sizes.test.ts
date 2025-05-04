@@ -20,7 +20,7 @@ beforeEach(() => {
 it("SHOULD return the regular size FOR mobile", () => {
   const sizes = getScaledSizes();
 
-  expect(sizes).toEqual({ ...defaultSizes, noScaled: defaultSizes });
+  expect(sizes).toEqual(defaultSizes);
 });
 
 it("SHOULD return the scaled size FOR tablet", () => {
@@ -34,39 +34,38 @@ it("SHOULD return the scaled size FOR tablet", () => {
   expect(sizes).toEqual({
     borderRadius: {
       full: "50%",
-      large: 19,
-      medium: 10,
+      large: 18,
+      medium: 9,
       small: 5,
-      xlarge: 38,
+      xlarge: 37,
     },
     fontSizes: {
-      large: 29,
-      medium: 19,
-      small: 17,
-      xlarge: 38,
+      large: 28,
+      medium: 18,
+      small: 16,
+      xlarge: 37,
       xsmall: 14,
-      xxlarge: 58,
+      xxlarge: 55,
       xxsmall: 12,
     },
     lineHeights: {
-      large: 38,
-      medium: 29,
-      small: 24,
-      xlarge: 58,
-      xsmall: 19,
-      xxlarge: 77,
-      xxsmall: 17,
+      large: 37,
+      medium: 28,
+      small: 23,
+      xlarge: 55,
+      xsmall: 18,
+      xxlarge: 74,
+      xxsmall: 16,
     },
-    noScaled: defaultSizes,
     spacing: {
-      large: 29,
-      medium: 19,
+      large: 28,
+      medium: 18,
       small: 14,
-      xlarge: 38,
-      xsmall: 10,
-      xxlarge: 58,
+      xlarge: 37,
+      xsmall: 9,
+      xxlarge: 55,
       xxsmall: 5,
-      xxxlarge: 77,
+      xxxlarge: 74,
     },
   });
 });
@@ -105,7 +104,6 @@ it("SHOULD return the scaled size FOR desktop", () => {
       xxlarge: 83,
       xxsmall: 18,
     },
-    noScaled: defaultSizes,
     spacing: {
       large: 31,
       medium: 21,

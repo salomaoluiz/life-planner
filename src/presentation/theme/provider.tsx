@@ -4,6 +4,7 @@ import { StatusBar, useColorScheme } from "react-native";
 import { useCases } from "@application/useCases";
 import { SaveUserConfigsUseCaseParams } from "@application/useCases/cases/configs/saveUserConfigsUseCase";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
+import { captureMessage } from "@infrastructure/monitoring";
 import { useProviderLoader } from "@providers/loader";
 
 import { colors, getScaledSizes } from "./constants";
@@ -38,14 +39,13 @@ export const ThemeContext = createContext<ThemeContextData>(
 export function ThemeProvider({ children }: Props) {
   const { setIsLoading } = useProviderLoader();
   const { mutate } = useMutation<SaveUserConfigsUseCaseParams, void>({
-    cacheKey: [],
+    cacheKey: [useCases.saveUserConfigsUseCase.uniqueName],
     fetch: useCases.saveUserConfigsUseCase.execute,
   });
   const { data, status } = useQuery({
-    cacheKey: [],
+    cacheKey: [useCases.getUserConfigsUseCase.uniqueName],
     fetch: useCases.getUserConfigsUseCase.execute,
   });
-
   const colorSchema = useColorScheme();
 
   const [isDark, setIsDark] = useState(colorSchema === "dark");
@@ -54,27 +54,62 @@ export function ThemeProvider({ children }: Props) {
     isDark ? darkTheme : lightTheme,
   );
 
-  useEffect(() => {
-    setTheme(isDark ? darkTheme : lightTheme);
-    StatusBar.setBarStyle(isDark ? "light-content" : "dark-content");
+  function updateBarStyle(darkMode: boolean) {
+    StatusBar.setHidden(false);
+    StatusBar.setBarStyle(darkMode ? "light-content" : "dark-content");
     StatusBar.setBackgroundColor(
-      isDark ? darkTheme.colors.background : lightTheme.colors.background,
+      darkMode ? darkTheme.colors.background : lightTheme.colors.background,
     );
-  }, [isDark]);
+  }
 
   useEffect(() => {
-    if (data && status === "success") {
-      setIsDark(data.darkMode);
-      StatusBar.setBarStyle(data.darkMode ? "light-content" : "dark-content");
-      setIsLoading(false, "theme");
-    } else {
-      setIsDark(colorSchema === "dark");
+    StatusBar.setHidden(true);
+  }, []);
+
+  function updateDefaultTheme() {
+    const darkMode = colorSchema === "dark";
+
+    setIsDark(darkMode);
+    updateBarStyle(darkMode);
+    setTheme(darkMode ? darkTheme : lightTheme);
+  }
+
+  function setUserTheme() {
+    const darkMode = data!.darkMode;
+
+    setIsDark(darkMode);
+    updateBarStyle(darkMode);
+    setTheme(darkMode ? darkTheme : lightTheme);
+  }
+
+  useEffect(() => {
+    switch (status) {
+      case "error":
+        updateDefaultTheme();
+        setIsLoading(false, "theme");
+        break;
+      case "pending":
+        setIsLoading(true, "theme");
+        break;
+      case "success":
+        setIsLoading(false, "theme");
+        setUserTheme();
+        break;
+      default:
+        updateDefaultTheme();
+        setIsLoading(false, "theme");
+        captureMessage("Invalid useQuery status on ThemeProvider", {
+          action: "Using the default theme",
+          status,
+        });
+        break;
     }
   }, [status]);
 
   function setDarkMode(isDark: boolean) {
     mutate({ darkMode: isDark });
     setIsDark(isDark);
+    setTheme(isDark ? darkTheme : lightTheme);
   }
 
   const providerValue = useMemo(
