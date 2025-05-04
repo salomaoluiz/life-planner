@@ -1,4 +1,4 @@
-import { setup } from "./mocks/hooks";
+import { setup } from "./mocks/hooks.mocks";
 import { lightTheme } from "./provider";
 
 it("SHOULD return correctly", () => {
