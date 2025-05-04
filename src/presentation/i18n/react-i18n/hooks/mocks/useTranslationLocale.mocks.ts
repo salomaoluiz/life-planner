@@ -44,4 +44,4 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-export { setup, spies, mocks };
+export { mocks, setup, spies };
