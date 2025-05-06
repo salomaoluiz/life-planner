@@ -1,6 +1,6 @@
 import ConfigsEntity from "@domain/entities/configs/ConfigsEntity";
 
-interface IConfigsDTO {
+export interface IConfigsDTO {
   darkMode: boolean;
   language: string;
 }

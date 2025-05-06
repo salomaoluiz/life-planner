@@ -1,6 +1,6 @@
 import FamilyMemberEntity from "@domain/entities/familyMember/FamilyMemberEntity";
 
-interface IFamilyMemberDTO {
+export interface IFamilyMemberDTO {
   email: string;
   familyId: string;
   id: string;

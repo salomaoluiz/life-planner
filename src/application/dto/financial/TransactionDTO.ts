@@ -1,6 +1,6 @@
 import TransactionEntity from "@domain/entities/financial/TransactionEntity";
 
-interface ITransactionDTO {
+export interface ITransactionDTO {
   category: string;
   date: string;
   description: string;

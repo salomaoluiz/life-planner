@@ -1,7 +1,7 @@
 import StockDTO from "@application/dto/stock/StockDTO";
 import StockEntity from "@domain/entities/stock/StockEntity";
 
-interface IStockDashboardDTO {
+export interface IStockDashboardDTO {
   stockDTOs: StockDTO[];
 }
 

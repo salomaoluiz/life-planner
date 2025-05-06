@@ -1,6 +1,6 @@
 import UserProfileEntity from "@domain/entities/user/UserProfileEntity";
 
-interface IUserDTO {
+export interface IUserDTO {
   email: string;
   id: string;
   name: string;
