@@ -3,7 +3,7 @@ import StockEntity, {
   StockUnits,
 } from "@domain/entities/stock/StockEntity";
 
-interface IStockDTO {
+export interface IStockDTO {
   barcode?: string;
   brand?: string;
   description: string;

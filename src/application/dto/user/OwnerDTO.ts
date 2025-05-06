@@ -1,6 +1,6 @@
-import { OwnerType } from "@domain/entities/user/OwnerEntity";
+import OwnerEntity, { OwnerType } from "@domain/entities/user/OwnerEntity";
 
-interface IOwnersDTO {
+export interface IOwnerDTO {
   id: string;
   name: string;
   type: OwnerType;
@@ -11,10 +11,18 @@ class OwnerDTO {
   name: string;
   type: OwnerType;
 
-  constructor(params: IOwnersDTO) {
+  constructor(params: IOwnerDTO) {
     this.id = params.id;
     this.name = params.name;
     this.type = params.type;
+  }
+
+  static fromEntity(entity: OwnerEntity): IOwnerDTO {
+    return new OwnerDTO({
+      id: entity.ownerId,
+      name: entity.name,
+      type: entity.type,
+    });
   }
 }
 
