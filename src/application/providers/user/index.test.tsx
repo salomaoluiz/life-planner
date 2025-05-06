@@ -1,6 +1,13 @@
 import { useCases } from "@application/useCases";
 
-import { mocks, screen, setup, setupHook, spies } from "./mocks/index.mocks";
+import {
+  mocks,
+  screen,
+  setup,
+  setupHook,
+  spies,
+  throwableSetupWithoutProvider,
+} from "./mocks/index.mocks";
 
 it("SHOULD render the children component", () => {
   setup();
@@ -36,4 +43,12 @@ it("SHOULD return the user data", () => {
     profile: mocks.useQuery.successResponse.data,
   });
   expect(result.current.logged).toBeTruthy();
+});
+
+it("SHOULD throw in case of call hook outside the provider", () => {
+  const error = throwableSetupWithoutProvider();
+
+  expect(error).toEqual(
+    new Error("useUser must be used within an UserProvider"),
+  );
 });
