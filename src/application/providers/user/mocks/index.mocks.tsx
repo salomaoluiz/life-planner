@@ -57,6 +57,14 @@ function setupHook() {
   return renderHook(() => useUser(), { wrapper: UserProvider });
 }
 
+function throwableSetupWithoutProvider() {
+  try {
+    renderHook(() => useUser());
+  } catch (error) {
+    return error;
+  }
+}
+
 const spies = {
   useQuery: useQuerySpy,
 };
@@ -72,5 +80,5 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-export { mocks, setup, setupHook, spies };
+export { mocks, setup, setupHook, spies, throwableSetupWithoutProvider };
 export { act, screen } from "@tests";
