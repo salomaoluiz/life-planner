@@ -14,7 +14,6 @@ export interface UpdateStockItemUseCaseParams {
   ownerId?: string;
   purchaseDate?: Date;
   quantity?: number;
-  status?: string;
   unit?: string;
 }
 

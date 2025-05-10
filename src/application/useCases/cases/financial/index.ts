@@ -2,6 +2,6 @@ export {
   createTransactionUseCase as createFinancialTransactionUseCase,
   deleteTransactionUseCase as deleteFinancialTransactionUseCase,
   getTransactionsUseCase as getFinancialTransactionsUseCase,
-  invalidateCacheTransactionsUseCase as invalidateCacheFinancialTransactionsUseCase,
+  refreshTransactionsUseCase as refreshFinancialTransactionsUseCase,
   updateTransactionUseCase as updateFinancialTransactionUseCase,
 } from "./transactions";

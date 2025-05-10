@@ -1,4 +1,5 @@
-import { DefaultError, GenericError } from "@domain/entities/errors";
+import FamilyDTO from "@application/dto/family/FamilyDTO";
+import { BusinessError, DefaultError } from "@domain/entities/errors";
 
 import {
   mocks,
@@ -7,46 +8,42 @@ import {
   throwableSetup,
 } from "./mocks/getFamiliesUseCase.mocks";
 
-it("SHOULD call the repositories", async () => {
-  spies.getUser.mockResolvedValueOnce(mocks.userSuccess as never);
-  spies.getFamilies.mockResolvedValueOnce(mocks.familiesSuccess as never);
+it("SHOULD get all user families", async () => {
+  spies.userRepository.getUser.mockResolvedValueOnce(mocks.userEntity);
+  spies.familyRepository.getFamilies.mockResolvedValueOnce(
+    mocks.familyEntities,
+  );
 
-  await setup();
+  const result = await setup();
 
-  expect(spies.getUser).toHaveBeenCalledTimes(1);
-  expect(spies.getUser).toHaveBeenCalledWith();
-  expect(spies.getFamilies).toHaveBeenCalledTimes(1);
-  expect(spies.getFamilies).toHaveBeenCalledWith(mocks.userSuccess.id);
-});
-
-it("SHOULD return the families if everything goes well", async () => {
-  spies.getUser.mockResolvedValueOnce(mocks.userSuccess as never);
-  spies.getFamilies.mockResolvedValueOnce(mocks.familiesSuccess as never);
-
-  const families = await setup();
-
-  expect(families).toEqual(mocks.familiesSuccess);
+  expect(spies.userRepository.getUser).toHaveBeenCalledTimes(1);
+  expect(spies.userRepository.getUser).toHaveBeenCalledWith();
+  expect(spies.familyRepository.getFamilies).toHaveBeenCalledTimes(1);
+  expect(spies.familyRepository.getFamilies).toHaveBeenCalledWith(
+    mocks.userEntity.id,
+  );
+  expect(result).toEqual(
+    mocks.familyEntities.map((entity) => FamilyDTO.fromEntity(entity)),
+  );
 });
 
 it("SHOULD throw an unknown error if anything throws", async () => {
-  const errorMock = new Error("User repository failed");
-  spies.getUser.mockRejectedValueOnce(errorMock);
+  spies.userRepository.getUser.mockRejectedValueOnce(mocks.errors.unknown);
 
   const error = await throwableSetup();
 
   expect(error).toBeInstanceOf(Error);
-  expect((error as Error).message).toBe(errorMock.message);
+  expect((error as Error).message).toBe(mocks.errors.unknown.message);
 });
 
 it("SHOULD throw the error if it is a DefaultError", async () => {
-  spies.getUser.mockRejectedValueOnce(new GenericError());
+  spies.userRepository.getUser.mockRejectedValueOnce(mocks.errors.business);
 
   const error = await throwableSetup();
 
-  const expectedError = new GenericError();
-  expectedError.addContext({
+  expect(error).toBeInstanceOf(BusinessError);
+  expect((error as DefaultError).context).toEqual({
+    ...mocks.errors.business.context,
     useCase: "getFamiliesUseCase",
   });
-  expect(error).toBeInstanceOf(GenericError);
-  expect((error as DefaultError).context).toEqual(expectedError.context);
 });

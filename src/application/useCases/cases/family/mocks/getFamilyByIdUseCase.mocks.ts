@@ -1,21 +1,23 @@
 import { repositoriesMocks } from "@data/repositories/mocks";
 import { BusinessError } from "@domain/entities/errors";
+import FamilyEntityFixture from "@domain/entities/family/mocks/FamilyEntity.fixture";
 
-import updateFamilyUseCase, {
-  UpdateFamilyUseCaseParams,
-} from "../updateFamilyUseCase";
+import getFamilyByIdUseCase, {
+  GetFamilyByIdUseCaseParams,
+} from "../getFamilyByIdUseCase";
 
 // region mocks
-const defaultParams = {
-  id: "552ad817-ecd8-4c2e-bb74-00a20bc786ec",
-  name: "New Family",
-};
+const familyEntity = new FamilyEntityFixture().withDefault().build();
 
 const unknownError = new Error("Unknown error");
 const businessError = new BusinessError();
 businessError.addContext({
-  any_context: "any context",
+  any_context: "any_context",
 });
+
+const defaultParams: GetFamilyByIdUseCaseParams = {
+  familyId: familyEntity.id,
+};
 
 // endregion mocks
 
@@ -27,20 +29,21 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-async function setup(params?: Partial<UpdateFamilyUseCaseParams>) {
-  return updateFamilyUseCase(repositoriesMocks).execute({
+async function setup(params?: Partial<GetFamilyByIdUseCaseParams>) {
+  return getFamilyByIdUseCase(repositoriesMocks).execute({
     ...defaultParams,
     ...params,
   });
 }
 
-async function throwableSetup(params?: Partial<UpdateFamilyUseCaseParams>) {
+async function throwableSetup() {
   try {
-    await setup(params);
+    await setup();
   } catch (error) {
     return error;
   }
 }
+
 const spies = {
   familyRepository: jest.mocked(repositoriesMocks.familyRepository),
 };
@@ -51,6 +54,7 @@ const mocks = {
     business: businessError,
     unknown: unknownError,
   },
+  familyEntity,
 };
 
 beforeEach(() => {

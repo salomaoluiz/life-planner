@@ -1,34 +1,37 @@
+import UserDTO from "@application/dto/user/UserDTO";
 import { BusinessError } from "@domain/entities/errors";
 
-import { mocks, setup, spies } from "./mocks/getUserUseCase";
+import {
+  mocks,
+  setup,
+  setupThrowable,
+  spies,
+} from "./mocks/getUserUseCase.mocks";
 
 it("SHOULD call the repository to get user", async () => {
-  spies.getUser.mockResolvedValue(mocks.getUserSuccessResponse);
+  const result = await setup();
 
-  const result = await setup().execute();
-
-  expect(spies.getUser).toHaveBeenCalledTimes(1);
-  expect(result).toBe(mocks.getUserSuccessResponse);
+  expect(spies.userRepository.getUser).toHaveBeenCalledTimes(1);
+  expect(result).toEqual(UserDTO.fromEntity(mocks.userEntity));
 });
 
 it("SHOULD throw an error if the repository throws an error", async () => {
-  const error = new Error("Error getting user");
-  spies.getUser.mockRejectedValue(error);
+  spies.userRepository.getUser.mockRejectedValueOnce(mocks.errors.unknown);
 
-  async function func() {
-    return setup().execute();
-  }
+  const result = await setupThrowable();
 
-  await expect(func).rejects.toThrow(error);
+  expect(result).toEqual(mocks.errors.unknown);
 });
 
 it("SHOULD throw BusinessError if the repository throws a BusinessError", async () => {
-  const businessError = new BusinessError();
-  spies.getUser.mockRejectedValue(businessError);
+  spies.userRepository.getUser.mockRejectedValueOnce(mocks.errors.business);
 
-  async function result() {
-    return setup().execute();
-  }
+  const result = await setupThrowable();
 
-  await expect(result).rejects.toThrow(businessError);
+  expect(result).toEqual(mocks.errors.business);
+  expect(result).toBeInstanceOf(BusinessError);
+  expect(result).toHaveProperty("context", {
+    any_context: "any context",
+    useCase: "getUserUseCase",
+  });
 });

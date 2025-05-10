@@ -1,5 +1,5 @@
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
-import { DefaultError, FieldRequired } from "@domain/entities/errors";
+import { DefaultError, FieldInvalid } from "@domain/entities/errors";
 import {
   TransactionOwners,
   TransactionType,
@@ -26,15 +26,11 @@ function updateTransactionUseCase(
     const type = TransactionType[params.type as keyof typeof TransactionType];
 
     if (params.owner && !owner) {
-      throw new FieldRequired({ owner: params.owner });
+      throw new FieldInvalid({ owner: params.owner });
     }
 
     if (params.type && !type) {
-      throw new FieldRequired({ type: params });
-    }
-
-    if (!params.id) {
-      throw new FieldRequired({ id: params.id });
+      throw new FieldInvalid({ type: params });
     }
 
     return { owner, type };

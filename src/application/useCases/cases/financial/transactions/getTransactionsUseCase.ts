@@ -3,7 +3,7 @@ import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import { DefaultError } from "@domain/entities/errors";
 import Repositories from "@domain/repositories";
 
-interface GetTransactionsUseCaseParams {
+export interface GetTransactionsUseCaseParams {
   ownerIds: string[];
 }
 

@@ -8,16 +8,22 @@ import {
 } from "./mocks/getFamilyMembersUseCase.mocks";
 
 it("SHOULD call the repositories", async () => {
-  spies.getFamilyMembers.mockResolvedValueOnce([]);
+  spies.familyMemberRepository.getFamilyMembers.mockResolvedValueOnce([]);
 
   await setup();
 
-  expect(spies.getFamilyMembers).toHaveBeenCalledTimes(1);
-  expect(spies.getFamilyMembers).toHaveBeenCalledWith("123");
+  expect(spies.familyMemberRepository.getFamilyMembers).toHaveBeenCalledTimes(
+    1,
+  );
+  expect(spies.familyMemberRepository.getFamilyMembers).toHaveBeenCalledWith(
+    "123",
+  );
 });
 
 it("SHOULD return the family members", async () => {
-  spies.getFamilyMembers.mockResolvedValueOnce(mocks.familyMembersSuccess);
+  spies.familyMemberRepository.getFamilyMembers.mockResolvedValueOnce(
+    mocks.familyMembersSuccess,
+  );
 
   const result = await setup();
 
@@ -26,7 +32,9 @@ it("SHOULD return the family members", async () => {
 
 it("SHOULD throw an unknown error if anything throws", async () => {
   const errorMock = new Error("User repository failed");
-  spies.getFamilyMembers.mockRejectedValueOnce(errorMock);
+  spies.familyMemberRepository.getFamilyMembers.mockRejectedValueOnce(
+    errorMock,
+  );
 
   const error = await throwableSetup();
 
@@ -35,7 +43,9 @@ it("SHOULD throw an unknown error if anything throws", async () => {
 });
 
 it("SHOULD throw the error if it is a DefaultError", async () => {
-  spies.getFamilyMembers.mockRejectedValueOnce(new GenericError());
+  spies.familyMemberRepository.getFamilyMembers.mockRejectedValueOnce(
+    new GenericError(),
+  );
 
   const error = await throwableSetup();
 

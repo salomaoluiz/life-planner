@@ -7,33 +7,40 @@ import {
   throwableSetup,
 } from "./mocks/createFamilyUseCase.mocks";
 
-it("SHOULD call the repositories", async () => {
-  spies.getUser.mockResolvedValueOnce(mocks.userSuccess as never);
-  spies.createFamily.mockResolvedValueOnce(mocks.familySuccess as never);
-  spies.encode.mockResolvedValueOnce("encodedToken");
+it("SHOULD create a family AND add the current user as a family member", async () => {
+  spies.userRepository.getUser.mockResolvedValueOnce(mocks.userEntity);
+  spies.familyRepository.createFamily.mockResolvedValueOnce(mocks.familyEntity);
+  spies.encode.mockResolvedValueOnce(mocks.encodeResult);
 
   await setup();
 
-  expect(spies.getUser).toHaveBeenCalledTimes(1);
-  expect(spies.getUser).toHaveBeenCalledWith();
-  expect(spies.createFamily).toHaveBeenCalledTimes(1);
-  expect(spies.createFamily).toHaveBeenCalledWith({
-    name: "New Family",
-    ownerId: mocks.userSuccess.id,
+  expect(spies.userRepository.getUser).toHaveBeenCalledTimes(1);
+  expect(spies.familyRepository.createFamily).toHaveBeenCalledTimes(1);
+  expect(spies.familyRepository.createFamily).toHaveBeenCalledWith({
+    name: mocks.defaultParams.name,
+    ownerId: mocks.userEntity.id,
   });
-  expect(spies.createFamilyMember).toHaveBeenCalledTimes(1);
-  expect(spies.createFamilyMember).toHaveBeenCalledWith({
-    email: mocks.userSuccess.email,
-    familyId: mocks.familySuccess.id,
-    inviteToken: "encodedToken",
-    joinDate: new Date().toISOString(),
-    userId: mocks.userSuccess.id,
+  expect(spies.encode).toHaveBeenCalledTimes(1);
+  expect(spies.encode).toHaveBeenCalledWith({
+    email: mocks.userEntity.email,
+    familyId: mocks.familyEntity.id,
+    joinDate: "2025-01-01T00:00:00.000Z",
+  });
+  expect(spies.familyMemberRepository.createFamilyMember).toHaveBeenCalledTimes(
+    1,
+  );
+  expect(spies.familyMemberRepository.createFamilyMember).toHaveBeenCalledWith({
+    email: mocks.userEntity.email,
+    familyId: mocks.familyEntity.id,
+    inviteToken: mocks.encodeResult,
+    joinDate: "2025-01-01T00:00:00.000Z",
+    userId: mocks.userEntity.id,
   });
 });
 
 it("SHOULD throw an unknown error if anything throws", async () => {
   const errorMock = new Error("User repository failed");
-  spies.getUser.mockRejectedValueOnce(errorMock);
+  spies.userRepository.getUser.mockRejectedValueOnce(errorMock);
 
   const error = await throwableSetup();
 
@@ -42,7 +49,7 @@ it("SHOULD throw an unknown error if anything throws", async () => {
 });
 
 it("SHOULD throw the error if it is a DefaultError", async () => {
-  spies.getUser.mockRejectedValueOnce(new GenericError());
+  spies.userRepository.getUser.mockRejectedValueOnce(new GenericError());
 
   const error = await throwableSetup();
 

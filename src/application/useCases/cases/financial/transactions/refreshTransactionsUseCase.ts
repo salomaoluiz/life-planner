@@ -1,18 +1,21 @@
 import { IUseCaseFactoryWithoutParamResponse } from "@application/useCases/types";
+import { CacheStringKeys } from "@domain/entities/cache/keys";
 import { DefaultError } from "@domain/entities/errors";
 import Repositories from "@domain/repositories";
 
-function invalidateCacheTransactionsUseCase(
+function refreshTransactionsUseCase(
   repositories: Repositories,
 ): IUseCaseFactoryWithoutParamResponse<void> {
   return {
     execute: async () => {
       try {
-        await repositories.financialRepository.transaction.invalidateTransactions();
+        await repositories.cacheRepository.invalidate({
+          keys: [CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA],
+        });
       } catch (error) {
         if (error instanceof DefaultError) {
           error.addContext({
-            useCase: "financial.invalidateCacheTransactionsUseCase",
+            useCase: "financial.refreshTransactionsUseCase",
           });
           throw error;
         }
@@ -20,8 +23,8 @@ function invalidateCacheTransactionsUseCase(
         throw error;
       }
     },
-    uniqueName: "financial.invalidate_cache_transactions_use_case",
+    uniqueName: "financial.refresh_transactions_use_case",
   };
 }
 
-export default invalidateCacheTransactionsUseCase;
+export default refreshTransactionsUseCase;
