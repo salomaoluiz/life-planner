@@ -16,10 +16,7 @@ const familyMembersSuccessMock = [
 // endregion mocks
 
 // region spies
-const getFamilyMembersSpy = jest.spyOn(
-  repositoriesMocks.familyMemberRepository,
-  "getFamilyMembers",
-);
+
 // endregion spies
 
 beforeEach(() => {
@@ -39,7 +36,7 @@ async function throwableSetup() {
 }
 
 const spies = {
-  getFamilyMembers: getFamilyMembersSpy,
+  familyMemberRepository: jest.mocked(repositoriesMocks.familyMemberRepository),
 };
 
 const mocks = {

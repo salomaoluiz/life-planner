@@ -1,7 +1,7 @@
 import {
+  BusinessError,
   DefaultError,
   FieldRequired,
-  GenericError,
 } from "@domain/entities/errors";
 
 import {
@@ -12,14 +12,14 @@ import {
 } from "./mocks/updateFamilyUseCase.mocks";
 
 it("SHOULD call the repositories", async () => {
-  spies.updateFamily.mockResolvedValueOnce();
+  spies.familyRepository.updateFamily.mockResolvedValueOnce();
 
   await setup();
 
-  expect(spies.updateFamily).toHaveBeenCalledTimes(1);
-  expect(spies.updateFamily).toHaveBeenCalledWith({
-    id: "123",
-    name: "New Family",
+  expect(spies.familyRepository.updateFamily).toHaveBeenCalledTimes(1);
+  expect(spies.familyRepository.updateFamily).toHaveBeenCalledWith({
+    id: mocks.defaultParams.id,
+    name: mocks.defaultParams.name,
   });
 });
 
@@ -36,7 +36,7 @@ it.each(["id", "name", "id,name"])(
     const error = await throwableSetup(fieldsToObj);
 
     const expectedError = new FieldRequired({
-      ...mocks.defaultProps,
+      ...mocks.defaultParams,
       ...fieldsToObj,
     });
     expectedError.addContext({
@@ -52,24 +52,26 @@ it.each(["id", "name", "id,name"])(
 );
 
 it("SHOULD throw an unknown error if anything throws", async () => {
-  const errorMock = new Error("User repository failed");
-  spies.updateFamily.mockRejectedValueOnce(errorMock);
+  spies.familyRepository.updateFamily.mockRejectedValueOnce(
+    mocks.errors.unknown,
+  );
 
   const error = await throwableSetup();
 
   expect(error).toBeInstanceOf(Error);
-  expect((error as Error).message).toBe(errorMock.message);
+  expect((error as Error).message).toBe(mocks.errors.unknown.message);
 });
 
 it("SHOULD throw the error if it is a DefaultError", async () => {
-  spies.updateFamily.mockRejectedValueOnce(new GenericError());
+  spies.familyRepository.updateFamily.mockRejectedValueOnce(
+    mocks.errors.business,
+  );
 
   const error = await throwableSetup();
 
-  const expectedError = new GenericError();
-  expectedError.addContext({
+  expect(error).toBeInstanceOf(BusinessError);
+  expect((error as DefaultError).context).toEqual({
+    ...mocks.errors.business.context,
     useCase: "updateFamilyUseCase",
   });
-  expect(error).toBeInstanceOf(GenericError);
-  expect((error as DefaultError).context).toEqual(expectedError.context);
 });

@@ -4,6 +4,7 @@ import { DefaultError } from "@domain/entities/errors";
 import Repositories from "@domain/repositories";
 
 type Response = undefined | UserDTO;
+
 function getUserByUserIdUseCase(
   repositories: Repositories,
 ): IUseCaseFactoryWithParamResponse<string, Response> {

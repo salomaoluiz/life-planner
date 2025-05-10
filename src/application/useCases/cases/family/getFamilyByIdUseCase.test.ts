@@ -1,3 +1,4 @@
+import FamilyDTO from "@application/dto/family/FamilyDTO";
 import { BusinessError, DefaultError } from "@domain/entities/errors";
 
 import {
@@ -5,19 +6,24 @@ import {
   setup,
   spies,
   throwableSetup,
-} from "./mocks/deleteFamilyUseCase.mocks";
+} from "./mocks/getFamilyByIdUseCase.mocks";
 
-it("SHOULD delete a family", async () => {
-  await setup();
-
-  expect(spies.familyRepository.deleteFamily).toHaveBeenCalledTimes(1);
-  expect(spies.familyRepository.deleteFamily).toHaveBeenCalledWith(
-    mocks.defaultParams.id,
+it("SHOULD get a family by its ID", async () => {
+  spies.familyRepository.getFamilyById.mockResolvedValueOnce(
+    mocks.familyEntity,
   );
+
+  const result = await setup();
+
+  expect(spies.familyRepository.getFamilyById).toHaveBeenCalledTimes(1);
+  expect(spies.familyRepository.getFamilyById).toHaveBeenCalledWith(
+    mocks.defaultParams.familyId,
+  );
+  expect(result).toEqual(FamilyDTO.fromEntity(mocks.familyEntity));
 });
 
 it("SHOULD throw an unknown error if anything throws", async () => {
-  spies.familyRepository.deleteFamily.mockRejectedValueOnce(
+  spies.familyRepository.getFamilyById.mockRejectedValueOnce(
     mocks.errors.unknown,
   );
 
@@ -28,7 +34,7 @@ it("SHOULD throw an unknown error if anything throws", async () => {
 });
 
 it("SHOULD throw the error if it is a DefaultError", async () => {
-  spies.familyRepository.deleteFamily.mockRejectedValueOnce(
+  spies.familyRepository.getFamilyById.mockRejectedValueOnce(
     mocks.errors.business,
   );
 
@@ -37,6 +43,6 @@ it("SHOULD throw the error if it is a DefaultError", async () => {
   expect(error).toBeInstanceOf(BusinessError);
   expect((error as DefaultError).context).toEqual({
     ...mocks.errors.business.context,
-    useCase: "deleteFamilyUseCase",
+    useCase: "getFamilyByIdUseCase",
   });
 });

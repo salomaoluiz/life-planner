@@ -1,24 +1,33 @@
 import { repositoriesMocks } from "@data/repositories/mocks";
+import { BusinessError } from "@domain/entities/errors";
 
-import deleteFamilyUseCase from "../deleteFamilyUseCase";
+import deleteFamilyUseCase, {
+  DeleteFamilyUseCaseParams,
+} from "../deleteFamilyUseCase";
 
 // region mocks
+
+const defaultParams: DeleteFamilyUseCaseParams = {
+  id: "b55b41b2-0da5-48d9-bd12-fceda8ad1b22",
+};
+const unknownError = new Error("Unknown Error");
+const businessError = new BusinessError();
 
 // endregion mocks
 
 // region spies
-const deleteFamilySpy = jest.spyOn(
-  repositoriesMocks.familyRepository,
-  "deleteFamily",
-);
+
 // endregion spies
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
-async function setup() {
-  return deleteFamilyUseCase(repositoriesMocks).execute({ id: "123" });
+async function setup(params?: Partial<DeleteFamilyUseCaseParams>) {
+  return deleteFamilyUseCase(repositoriesMocks).execute({
+    ...defaultParams,
+    ...params,
+  });
 }
 
 async function throwableSetup() {
@@ -29,10 +38,16 @@ async function throwableSetup() {
   }
 }
 const spies = {
-  deleteFamily: deleteFamilySpy,
+  familyRepository: jest.mocked(repositoriesMocks.familyRepository),
 };
 
-const mocks = {};
+const mocks = {
+  defaultParams,
+  errors: {
+    business: businessError,
+    unknown: unknownError,
+  },
+};
 
 beforeEach(() => {
   jest.clearAllMocks();

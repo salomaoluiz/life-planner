@@ -1,3 +1,4 @@
+import UserDTO from "@application/dto/user/UserDTO";
 import { IUseCaseFactoryWithoutParamResponse } from "@application/useCases/types";
 import { DefaultError } from "@domain/entities/errors";
 import UserProfileEntity from "@domain/entities/user/UserProfileEntity";
@@ -9,7 +10,9 @@ function getUserUseCase(
   return {
     execute: async () => {
       try {
-        return await repositories.userRepository.getUser();
+        const user = await repositories.userRepository.getUser();
+
+        return UserDTO.fromEntity(user);
       } catch (error) {
         if (error instanceof DefaultError) {
           error.addContext({

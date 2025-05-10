@@ -1,30 +1,27 @@
-import FamilyDTO from "@application/dto/family/FamilyDTO";
 import { repositoriesMocks } from "@data/repositories/mocks";
+import { BusinessError } from "@domain/entities/errors";
+import FamilyEntityFixture from "@domain/entities/family/mocks/FamilyEntity.fixture";
+import UserEntityFixture from "@domain/entities/user/mocks/UserEntity.fixture";
 
 import getFamiliesUseCase from "../getFamiliesUseCase";
 
 // region mocks
-const userSuccessMock = {
-  email: "test@gmail.com",
-  id: "123",
-};
+const userEntity = new UserEntityFixture().withDefault().build();
 
-const familiesSuccessMock = [
-  new FamilyDTO({
-    id: "123",
-    name: "Family 1",
-    ownerId: "123",
-  }),
+const familyEntityFixture = new FamilyEntityFixture();
+const familyEntities = [
+  familyEntityFixture.withDefault().build(),
+  familyEntityFixture.withId("52333496-8b2a-4142-b733-0990ea599c8c").build(),
 ];
 
+const unknownError = new Error("Unknown error");
+const businessError = new BusinessError();
+businessError.addContext({
+  any_context: "any_context",
+});
 // endregion mocks
 
 // region spies
-const getUserSpy = jest.spyOn(repositoriesMocks.userRepository, "getUser");
-const getFamiliesSpy = jest.spyOn(
-  repositoriesMocks.familyRepository,
-  "getFamilies",
-);
 
 // endregion spies
 
@@ -45,13 +42,17 @@ async function throwableSetup() {
 }
 
 const spies = {
-  getFamilies: getFamiliesSpy,
-  getUser: getUserSpy,
+  familyRepository: jest.mocked(repositoriesMocks.familyRepository),
+  userRepository: jest.mocked(repositoriesMocks.userRepository),
 };
 
 const mocks = {
-  familiesSuccess: familiesSuccessMock,
-  userSuccess: userSuccessMock,
+  errors: {
+    business: businessError,
+    unknown: unknownError,
+  },
+  familyEntities,
+  userEntity,
 };
 
 beforeEach(() => {

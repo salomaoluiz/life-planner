@@ -63,14 +63,14 @@ function validateRequiredFields(params: CreateStockItemUseCaseParams) {
     "unit",
   ];
 
-  const missingFields = Object.entries(params)
-    .filter(([key, value]) => {
-      return (
-        requiredFields.includes(key as (typeof requiredFields)[number]) &&
-        !value
-      );
-    })
-    .reduce(
+  const missingFields = Object.entries(params).filter(([key, value]) => {
+    return (
+      requiredFields.includes(key as (typeof requiredFields)[number]) && !value
+    );
+  });
+
+  if (missingFields.length) {
+    const fieldsObject = missingFields.reduce(
       (acc, [key, value]) => {
         acc[key] = value;
         return acc;
@@ -78,8 +78,7 @@ function validateRequiredFields(params: CreateStockItemUseCaseParams) {
       {} as Record<string, undefined>,
     );
 
-  if (missingFields.length) {
-    throw new FieldRequired(missingFields);
+    throw new FieldRequired(fieldsObject);
   }
 }
 
