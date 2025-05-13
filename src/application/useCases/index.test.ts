@@ -1,4 +1,8 @@
-import { cases, injectionUseCaseSetup, repositories } from "./mocks";
+import {
+  cases,
+  injectionUseCaseSetup,
+  repositories,
+} from "./mocks/index.mocks";
 
 it("SHOULD return an object with the use cases", () => {
   const useCases = injectionUseCaseSetup();

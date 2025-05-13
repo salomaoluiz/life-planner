@@ -28,13 +28,21 @@ const useMutationMockPending = {
   status: "pending",
 };
 
+const useMutationMockIdle = {
+  isFetching: false,
+  mutate: jest.fn(),
+  status: "idle",
+};
+
 const useUserMock = {
   update: jest.fn(),
 };
 // endregion mocks
 
 // region spies
-const useMutationSpy = jest.spyOn(fetcher, "useMutation");
+const useMutationSpy = jest
+  .spyOn(fetcher, "useMutation")
+  .mockReturnValue(useMutationMockIdle as never);
 const addBreadcrumbSpy = jest.spyOn(monitoring, "addBreadcrumb");
 const isWebSpy = jest.spyOn(platform, "isWeb");
 jest.spyOn(user, "useUser").mockReturnValue(useUserMock as never);
@@ -57,6 +65,7 @@ const spies = {
 
 const mocks = {
   useCases,
+  useMutationMockIdle,
   useMutationMockPending,
   useMutationMockSuccess,
   useUserMock,

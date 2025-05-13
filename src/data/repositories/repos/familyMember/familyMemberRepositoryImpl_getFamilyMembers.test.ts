@@ -8,7 +8,7 @@ import {
 } from "./mocks/familyMemberRepositoryImpl_getFamilyMembers.mocks";
 
 it("SHOULD get family members from cache WHEN cache is not empty", async () => {
-  spies.cache.get.mockReturnValue(mocks.getFamilyMembersSuccessCacheMock);
+  spies.cache.get.mockReturnValueOnce(mocks.getFamilyMembersSuccessCacheMock);
 
   const familyMembers = await setup();
 
@@ -37,8 +37,8 @@ it("SHOULD get family members from cache WHEN cache is not empty", async () => {
 });
 
 it("SHOULD get family members from datasource and set cache WHEN cache is empty", async () => {
-  spies.cache.get.mockReturnValue(null);
-  spies.getFamilyMembers.mockReturnValue(mocks.getFamilyMembersSuccessMock);
+  spies.cache.get.mockReturnValueOnce(null);
+  spies.getFamilyMembers.mockReturnValueOnce(mocks.getFamilyMembersSuccessMock);
 
   const familyMembers = await setup();
 

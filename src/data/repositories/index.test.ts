@@ -1,4 +1,8 @@
-import { cases, datasourcesMocks, injectionRepositorySetup } from "./mocks";
+import {
+  cases,
+  datasourcesMocks,
+  injectionRepositorySetup,
+} from "./mocks/index.mocks";
 
 it("SHOULD return an object with the repository", () => {
   const repositories = injectionRepositorySetup();

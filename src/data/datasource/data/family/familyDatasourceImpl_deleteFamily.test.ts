@@ -8,23 +8,25 @@ import {
 } from "./mocks/familyDatasourceImpl_deleteFamily.mocks";
 
 it("SHOULD call supabase WITH correct params", async () => {
+  spies.supabase.then.mockResolvedValueOnce(null);
+
   await setup("56acd563-dfc9-4804-b066-ef35bd123826");
 
-  expect(spies.supabaseFrom).toHaveBeenCalledTimes(1);
-  expect(spies.supabaseFrom).toHaveBeenCalledWith("family");
-  expect(spies.supabaseDelete).toHaveBeenCalledTimes(1);
-  expect(spies.supabaseDelete).toHaveBeenCalledWith();
-  expect(spies.supabaseEq).toHaveBeenCalledTimes(1);
-  expect(spies.supabaseEq).toHaveBeenCalledWith(
+  expect(spies.supabase.from).toHaveBeenCalledTimes(1);
+  expect(spies.supabase.from).toHaveBeenCalledWith("family");
+  expect(spies.supabase.delete).toHaveBeenCalledTimes(1);
+  expect(spies.supabase.delete).toHaveBeenCalledWith();
+  expect(spies.supabase.eq).toHaveBeenCalledTimes(1);
+  expect(spies.supabase.eq).toHaveBeenCalledWith(
     "id",
     "56acd563-dfc9-4804-b066-ef35bd123826",
   );
-  expect(spies.supabaseThen).toHaveBeenCalledTimes(1);
-  expect(spies.supabaseThen).toHaveBeenCalledWith();
+  expect(spies.supabase.then).toHaveBeenCalledTimes(1);
+  expect(spies.supabase.then).toHaveBeenCalledWith();
 });
 
 it("SHOULD return nothing in case of success", async () => {
-  spies.supabaseThen.mockResolvedValueOnce(null);
+  spies.supabase.then.mockResolvedValueOnce(null);
 
   const result = await setup("56acd563-dfc9-4804-b066-ef35bd123826");
 
@@ -32,7 +34,7 @@ it("SHOULD return nothing in case of success", async () => {
 });
 
 it("SHOULD throw error in case of error", async () => {
-  spies.supabaseThen.mockRejectedValueOnce(mocks.responseError.error);
+  spies.supabase.then.mockRejectedValueOnce(mocks.responseError.error);
 
   const id = "56acd563-dfc9-4804-b066-ef35bd123826";
 

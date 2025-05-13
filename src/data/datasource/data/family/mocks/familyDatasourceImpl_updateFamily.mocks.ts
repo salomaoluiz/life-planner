@@ -1,5 +1,5 @@
 import { UpdateFamilyDatasourceParams } from "@data/repositories/repos/family/familyDatasource";
-import { supabase } from "@infrastructure/supabase";
+import * as supabase from "@infrastructure/supabase/mocks/index.mocks";
 
 import familyDatasourceImpl from "../familyDatasourceImpl";
 
@@ -12,18 +12,6 @@ const responseErrorMock = {
 // endregion mocks
 
 // region spies
-
-const supabaseUpdateSpy = jest.fn();
-const supabaseEqSpy = jest.fn();
-const supabaseThenSpy = jest.fn();
-
-const supabaseFromSpy = jest.spyOn(supabase, "from").mockImplementation(() => {
-  return {
-    eq: supabaseEqSpy.mockReturnThis(),
-    then: supabaseThenSpy,
-    update: supabaseUpdateSpy.mockReturnThis(),
-  } as never;
-});
 
 // endregion spies
 
@@ -44,10 +32,7 @@ async function throwableSetup(props: UpdateFamilyDatasourceParams) {
 }
 
 const spies = {
-  supabaseEq: supabaseEqSpy,
-  supabaseFrom: supabaseFromSpy,
-  supabaseThen: supabaseThenSpy,
-  supabaseUpdate: supabaseUpdateSpy,
+  ...supabase.spies,
 };
 
 const mocks = {

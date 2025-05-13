@@ -11,7 +11,7 @@ const defaultDimensions = {
 
 const dimensionsGetSpy = jest
   .spyOn(Dimensions, "get")
-  .mockReturnValue(defaultDimensions);
+  .mockReturnValueOnce(defaultDimensions);
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -24,7 +24,7 @@ it("SHOULD return the regular size FOR mobile", () => {
 });
 
 it("SHOULD return the scaled size FOR tablet", () => {
-  dimensionsGetSpy.mockReturnValue({
+  dimensionsGetSpy.mockReturnValueOnce({
     ...defaultDimensions,
     width: 600,
   });
@@ -71,7 +71,7 @@ it("SHOULD return the scaled size FOR tablet", () => {
 });
 
 it("SHOULD return the scaled size FOR desktop", () => {
-  dimensionsGetSpy.mockReturnValue({
+  dimensionsGetSpy.mockReturnValueOnce({
     ...defaultDimensions,
     width: 1025,
   });

@@ -29,7 +29,7 @@ it("SHOULD add breadcrumb when sign in succeeds", async () => {
 });
 
 it('SHOULD return "canceled" status when sign in is canceled', async () => {
-  spies.signInSpy.mockResolvedValue(mocks.canceledResponse);
+  spies.signInSpy.mockResolvedValueOnce(mocks.canceledResponse);
 
   const result = await setup();
 
@@ -42,7 +42,7 @@ it('SHOULD return "canceled" status when sign in is canceled', async () => {
 
 it('SHOULD return "error" status when sign in fails', async () => {
   const error = new Error("Google Sign In Throws");
-  spies.signInSpy.mockRejectedValue(error);
+  spies.signInSpy.mockRejectedValueOnce(error);
 
   const result = await setup();
 
@@ -55,7 +55,7 @@ it('SHOULD return "error" status when sign in fails', async () => {
 });
 
 it('SHOULD return "error" with default message when sign in fails', async () => {
-  spies.signInSpy.mockRejectedValue(mocks.unknownError);
+  spies.signInSpy.mockRejectedValueOnce(mocks.unknownError);
 
   const result = await setup();
 
@@ -68,7 +68,7 @@ it('SHOULD return "error" with default message when sign in fails', async () => 
 });
 
 it('SHOULD return "error" if sign in response is unknown', async () => {
-  spies.signInSpy.mockResolvedValue(mocks.unknownResponse);
+  spies.signInSpy.mockResolvedValueOnce(mocks.unknownResponse);
 
   const result = await setup();
 
@@ -83,7 +83,7 @@ it('SHOULD return "error" if sign in response is unknown', async () => {
 });
 
 it("SHOULD throw an error if sign in response is missing idToken", async () => {
-  spies.signInSpy.mockResolvedValue(mocks.signInResponseWithoutToken);
+  spies.signInSpy.mockResolvedValueOnce(mocks.signInResponseWithoutToken);
 
   const result = await setup();
 
@@ -96,7 +96,7 @@ it("SHOULD throw an error if sign in response is missing idToken", async () => {
 });
 
 it("SHOULD add breadcrumb when sign in fails", async () => {
-  spies.signInSpy.mockRejectedValue(mocks.mappedError);
+  spies.signInSpy.mockRejectedValueOnce(mocks.mappedError);
 
   await setup();
 

@@ -4,7 +4,7 @@ import StorageKeys from "../types";
 import { mocks, setup, spies } from "./mocks/gets.mocks";
 
 it("SHOULD get string", () => {
-  spies.getItem.mockReturnValue(mocks.getItemResponse as never);
+  spies.getItem.mockReturnValueOnce(mocks.getItemResponse as never);
 
   const result = setup.getString(StorageKeys.string.FALLBACK_LANGUAGE);
 
@@ -16,7 +16,9 @@ it("SHOULD get string", () => {
 });
 
 it("SHOULD get cache object", () => {
-  spies.getItem.mockReturnValue(JSON.stringify(mocks.cacheObjectMock) as never);
+  spies.getItem.mockReturnValueOnce(
+    JSON.stringify(mocks.cacheObjectMock) as never,
+  );
 
   const result = setup.getCacheObject(CacheStringKeys.CACHE_USER_DATA);
 
@@ -26,7 +28,7 @@ it("SHOULD get cache object", () => {
 });
 
 it("SHOULD get undefined WHEN cache object is not found", () => {
-  spies.getItem.mockReturnValue(undefined as never);
+  spies.getItem.mockReturnValueOnce(undefined as never);
 
   const result = setup.getCacheObject(CacheStringKeys.CACHE_USER_DATA);
 

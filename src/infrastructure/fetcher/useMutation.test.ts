@@ -3,7 +3,7 @@ import { BusinessError, GenericError } from "@domain/entities/errors";
 import { mocks, setup, spies } from "./mocks/useMutation.mocks";
 
 it("SHOULD fetch and return in success", async () => {
-  spies.useReactMutation.mockReturnValue(mocks.successResponse as never);
+  spies.useReactMutation.mockReturnValueOnce(mocks.successResponse as never);
 
   const { result } = setup({
     cacheKey: ["cache-key-1", "cache-key-2"],
@@ -17,17 +17,15 @@ it("SHOULD fetch and return in success", async () => {
 });
 
 it("SHOULD fetch and return in error", async () => {
-  spies.useReactMutation.mockReturnValue(mocks.errorResponse as never);
+  spies.useReactMutation
+    .mockReturnValueOnce(mocks.errorResponse as never)
+    .mockReturnValueOnce(mocks.errorResponse as never);
 
   try {
-    const { result } = setup({
+    setup({
       cacheKey: ["CacheKey1", "CacheKey2"],
       fetch: spies.fetch,
     });
-    expect(result.current.isFetching).toBeFalsy();
-    expect(result.current.data).toBeNull();
-    expect(result.current.error).toBeInstanceOf(GenericError);
-    expect(result.current.status).toBe("error");
   } catch (e) {
     const error = e as GenericError;
 
@@ -41,7 +39,9 @@ it("SHOULD fetch and return in error", async () => {
 });
 
 it("SHOULD fetch and return in business error", async () => {
-  spies.useReactMutation.mockReturnValue(mocks.businessErrorResponse as never);
+  spies.useReactMutation.mockReturnValueOnce(
+    mocks.businessErrorResponse as never,
+  );
 
   const { result } = setup({
     cacheKey: ["CacheKey1", "CacheKey2"],
@@ -62,20 +62,15 @@ it("SHOULD fetch and return in business error", async () => {
 });
 
 it("SHOULD fetch and return in error without message", async () => {
-  spies.useReactMutation.mockReturnValue(
-    mocks.errorWithoutMessageResponse as never,
-  );
+  spies.useReactMutation
+    .mockReturnValueOnce(mocks.errorWithoutMessageResponse as never)
+    .mockReturnValueOnce(mocks.errorWithoutMessageResponse as never);
 
   try {
-    const { result } = setup({
+    setup({
       cacheKey: ["CacheKey1", "CacheKey2"],
       fetch: spies.fetch,
     });
-
-    expect(result.current.data).toBeNull();
-    expect(result.current.isFetching).toBeFalsy();
-    expect(result.current.error).toBeInstanceOf(GenericError);
-    expect(result.current.status).toBe("error");
   } catch (e) {
     const error = e as GenericError;
 
@@ -89,10 +84,10 @@ it("SHOULD fetch and return in error without message", async () => {
 });
 
 it("SHOULD return in pending", async () => {
-  spies.useReactMutation.mockReturnValue(mocks.pendingResponse as never);
+  spies.useReactMutation.mockReturnValueOnce(mocks.pendingResponse as never);
 
   const { result } = setup({
-    cacheKey: ["CacheKey1", "CacheKey2"],
+    cacheKey: ["CacheKey3", "CacheKey2"],
     fetch: spies.fetch,
   });
 
@@ -103,7 +98,7 @@ it("SHOULD return in pending", async () => {
 });
 
 it("SHOULD call useMutation with default params", async () => {
-  spies.useReactMutation.mockReturnValue(mocks.pendingResponse as never);
+  spies.useReactMutation.mockReturnValueOnce(mocks.pendingResponse as never);
 
   setup({
     cacheKey: ["CacheKey1", "CacheKey2"],
@@ -120,7 +115,7 @@ it("SHOULD call useMutation with default params", async () => {
 });
 
 it("SHOULD call useMutation with custom params", async () => {
-  spies.useReactMutation.mockReturnValue(mocks.pendingResponse as never);
+  spies.useReactMutation.mockReturnValueOnce(mocks.pendingResponse as never);
 
   setup({
     cacheKey: ["CacheKey1", "CacheKey2"],

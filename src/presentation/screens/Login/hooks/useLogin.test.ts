@@ -1,7 +1,7 @@
 import { mocks, setup, spies } from "./mocks/useLogin.mocks";
 
 it("SHOULD call useMutation with the correct parameters WHEN the hook is called", () => {
-  spies.useMutation.mockReturnValue(mocks.useMutationMockSuccess as never);
+  spies.useMutation.mockReturnValueOnce(mocks.useMutationMockSuccess as never);
 
   setup();
 
@@ -29,11 +29,12 @@ it("SHOULD call mutate WHEN onGoogleButtonPress is called", () => {
 
   result.current.onGoogleButtonPress();
 
-  expect(mocks.useMutationMockSuccess.mutate).toHaveBeenCalledTimes(1);
+  expect(mocks.useMutationMockIdle.mutate).toHaveBeenCalledTimes(1);
 });
 
 it("SHOULD call update WHEN status is success and is not web", () => {
-  spies.isWeb.mockReturnValue(false);
+  spies.isWeb.mockReturnValueOnce(false);
+  spies.useMutation.mockReturnValueOnce(mocks.useMutationMockSuccess as never);
 
   const { result } = setup();
   result.current.onGoogleButtonPress();
@@ -42,7 +43,7 @@ it("SHOULD call update WHEN status is success and is not web", () => {
 });
 
 it("SHOULD NOT call update WHEN status is not success", () => {
-  spies.useMutation.mockReturnValue(mocks.useMutationMockPending as never);
+  spies.useMutation.mockReturnValueOnce(mocks.useMutationMockPending as never);
 
   const { result } = setup();
   result.current.onGoogleButtonPress();
@@ -51,7 +52,7 @@ it("SHOULD NOT call update WHEN status is not success", () => {
 });
 
 it("SHOULD NOT call update WHEN is web", () => {
-  spies.isWeb.mockReturnValue(true);
+  spies.isWeb.mockReturnValueOnce(true);
 
   const { result } = setup();
   result.current.onGoogleButtonPress();

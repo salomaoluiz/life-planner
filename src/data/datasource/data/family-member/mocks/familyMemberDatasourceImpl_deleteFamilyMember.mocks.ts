@@ -1,4 +1,4 @@
-import { supabase } from "@infrastructure/supabase";
+import * as supabase from "@infrastructure/supabase/mocks/index.mocks";
 
 import datasource from "../familyMemberDatasourceImpl";
 
@@ -10,17 +10,7 @@ const responseError = {
 // endregion mocks
 
 // region spies
-const supabaseDeleteSpy = jest.fn();
-const supabaseEqSpy = jest.fn();
-const supabaseThenSpy = jest.fn();
 
-const supabaseFromSpy = jest.spyOn(supabase, "from").mockImplementation(() => {
-  return {
-    delete: supabaseDeleteSpy.mockReturnThis(),
-    eq: supabaseEqSpy.mockReturnThis(),
-    then: supabaseThenSpy,
-  } as never;
-});
 // endregion spies
 
 beforeEach(() => {
@@ -39,10 +29,7 @@ async function throwableSetup(id: string) {
   }
 }
 const spies = {
-  supabaseDelete: supabaseDeleteSpy,
-  supabaseEq: supabaseEqSpy,
-  supabaseFrom: supabaseFromSpy,
-  supabaseThen: supabaseThenSpy,
+  ...supabase.spies,
 };
 
 const mocks = {

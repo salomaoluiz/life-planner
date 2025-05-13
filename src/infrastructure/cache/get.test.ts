@@ -3,7 +3,7 @@ import { CacheStringKeys } from "@infrastructure/cache/types";
 import { mocks, setup, spies } from "./mocks/get.mocks";
 
 it("SHOULD get the cached data", () => {
-  spies.getCacheObject.mockReturnValue(mocks.successCacheObject);
+  spies.getCacheObject.mockReturnValueOnce(mocks.successCacheObject);
 
   const result = setup(CacheStringKeys.CACHE_USER_DATA);
 
@@ -15,7 +15,7 @@ it("SHOULD get the cached data", () => {
 });
 
 it("SHOULD invalidate the cache WHEN the cache is expired", () => {
-  spies.getCacheObject.mockReturnValue(mocks.expiredCacheObject);
+  spies.getCacheObject.mockReturnValueOnce(mocks.expiredCacheObject);
 
   const result = setup(CacheStringKeys.CACHE_USER_DATA);
 
@@ -51,7 +51,7 @@ it("SHOULD return null AND captureException WHEN an error occurs", () => {
 });
 
 it("SHOULD return null WHEN the cache is empty", () => {
-  spies.getCacheObject.mockReturnValue(null);
+  spies.getCacheObject.mockReturnValueOnce(null);
 
   const result = setup(CacheStringKeys.CACHE_USER_DATA);
 

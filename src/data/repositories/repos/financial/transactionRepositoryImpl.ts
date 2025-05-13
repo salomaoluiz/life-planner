@@ -1,104 +1,27 @@
 import { Datasources } from "@data/datasource";
-import TransactionModel from "@data/models/financial/TransactionModel";
-import TransactionEntity, {
-  TransactionOwners,
-  TransactionType,
-} from "@domain/entities/financial/TransactionEntity";
+import TransactionEntity from "@domain/entities/financial/TransactionEntity";
 import { FinancialTransactionRepository } from "@domain/repositories/financial";
-import cache, { CacheStringKeys } from "@infrastructure/cache";
+
+import createTransaction from "./createTransaction";
+import deleteTransaction from "./deleteTransaction";
+import getTransactions from "./getTransactions";
+import updateTransaction from "./updateTransaction";
 
 function transactionRepositoryImpl(
   datasources: Datasources,
 ): FinancialTransactionRepository {
   return {
     async createTransaction(params): Promise<TransactionEntity> {
-      const transaction =
-        await datasources.financialTransactionDatasource.createTransaction({
-          category: params.category,
-          date: params.date,
-          description: params.description,
-          owner: params.owner,
-          ownerId: params.ownerId,
-          type: params.type,
-          value: params.value,
-        });
-
-      cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA);
-
-      return new TransactionEntity({
-        category: transaction.category,
-        date: transaction.date,
-        description: transaction.description,
-        id: transaction.id,
-        owner: TransactionOwners[transaction.owner],
-        ownerId: transaction.ownerId,
-        type: TransactionType[transaction.type],
-        value: transaction.value,
-      });
+      return createTransaction(params, datasources);
     },
     async deleteTransaction(params): Promise<void> {
-      await datasources.financialTransactionDatasource.deleteTransaction({
-        id: params.id,
-        ownerId: params.ownerId,
-      });
-
-      cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA);
+      return deleteTransaction(params, datasources);
     },
     async getTransactions(ownerIds): Promise<TransactionEntity[]> {
-      const cached = cache.get<Array<Record<string, unknown>> | null>(
-        CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA,
-      );
-
-      let transactionsModel: TransactionModel[] = [];
-
-      if (cached) {
-        transactionsModel = cached.map((cache) =>
-          TransactionModel.fromJSON(cache),
-        );
-      } else {
-        transactionsModel =
-          await datasources.financialTransactionDatasource.getTransactions(
-            ownerIds,
-          );
-        cache.set<Record<string, unknown>[]>(
-          CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA,
-          transactionsModel.map((financial) => financial.toJSON()),
-        );
-      }
-
-      return transactionsModel.map(
-        (transaction) =>
-          new TransactionEntity({
-            category: transaction.category,
-            date: transaction.date,
-            description: transaction.description,
-            id: transaction.id,
-            owner: TransactionOwners[transaction.owner],
-            ownerId: transaction.ownerId,
-            type: TransactionType[transaction.type],
-            value: transaction.value,
-          }),
-      );
-    },
-    async invalidateTransactions(): Promise<void> {
-      return new Promise((resolve) => {
-        cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA);
-        resolve();
-      });
+      return getTransactions(ownerIds, datasources);
     },
     async updateTransaction(params): Promise<void> {
-      await datasources.financialTransactionDatasource.updateTransaction({
-        category: params.category,
-        date: params.date,
-        description: params.description,
-        id: params.id,
-        owner: params.owner,
-        ownerId: params.ownerId,
-        type: params.type,
-        value: params.value,
-      });
-
-      cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA);
+      return updateTransaction(params, datasources);
     },
   };
 }

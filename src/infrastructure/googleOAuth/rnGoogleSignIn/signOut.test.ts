@@ -9,7 +9,7 @@ it("SHOULD sign out correctly", async () => {
 });
 
 it("SHOULD add breadcrumb when sign out fails", async () => {
-  spies.signOutSpy.mockRejectedValue(mocks.failError);
+  spies.signOutSpy.mockRejectedValueOnce(mocks.failError);
 
   await setup();
 

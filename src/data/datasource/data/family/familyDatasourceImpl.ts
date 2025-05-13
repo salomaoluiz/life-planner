@@ -110,7 +110,10 @@ function familyDatasourceImpl(): FamilyDatasource {
 
         if (!family.data) {
           const error = new FamilyNotFound();
-          error.addContext({ familyId });
+          error.addContext({
+            datasource: "FamilyDatasource - getFamilyById",
+            familyId,
+          });
           throw error;
         }
 

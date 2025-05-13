@@ -2,7 +2,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { router, useNavigation } from "expo-router";
 import { useEffect } from "react";
-import { View } from "react-native";
+import { ScrollView, View } from "react-native";
 
 import { useCases } from "@application/useCases";
 import { Fab, Text } from "@components";
@@ -92,20 +92,22 @@ function FinancialTransaction() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.listContainer}>
-        <FlashList
-          contentContainerStyle={styles.listContentContainer}
-          data={data}
-          ItemSeparatorComponent={ItemSeparator}
-          ListHeaderComponent={ListHeader}
-          renderItem={renderItem}
-        />
+    <ScrollView>
+      <View style={styles.container}>
+        <View style={styles.listContainer}>
+          <FlashList
+            contentContainerStyle={styles.listContentContainer}
+            data={data}
+            ItemSeparatorComponent={ItemSeparator}
+            ListHeaderComponent={ListHeader}
+            renderItem={renderItem}
+          />
+        </View>
+        <View style={styles.fabContainer}>
+          <Fab icon={"plus"} onPress={onAddTransactionItemPress} />
+        </View>
       </View>
-      <View style={styles.fabContainer}>
-        <Fab icon={"plus"} onPress={onAddTransactionItemPress} />
-      </View>
-    </View>
+    </ScrollView>
   );
 }
 

@@ -14,6 +14,8 @@ interface IStockModel {
   unit: string;
 }
 
+// TODO: Refactor to remove the status and take account the Owner and Unit enums
+
 class StockModel implements IStockModel {
   barcode?: string;
   brand?: string;

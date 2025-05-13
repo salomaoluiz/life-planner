@@ -1,9 +1,14 @@
 import { GenericError } from "@domain/entities/errors";
 
-import { mocks, setup, spies } from "./mocks/loginDatasourceImpl_logout";
+import {
+  mocks,
+  setup,
+  setupThrowable,
+  spies,
+} from "./mocks/loginDatasourceImpl_logout.mocks";
 
 it("SHOULD logout", async () => {
-  spies.signOut.mockResolvedValueOnce(mocks.signOutSuccess as never);
+  spies.signOut.mockResolvedValueOnce(mocks.success);
 
   await setup();
 
@@ -11,11 +16,22 @@ it("SHOULD logout", async () => {
 });
 
 it("SHOULD throw an GenericError if signOut fails", async () => {
-  spies.signOut.mockResolvedValueOnce(mocks.signOutError as never);
+  spies.signOut.mockResolvedValueOnce(mocks.errors.unknown);
 
-  async function func() {
-    return setup();
-  }
+  const result = await setupThrowable();
 
-  await expect(func).rejects.toThrow(new GenericError());
+  expect(result).toBeInstanceOf(GenericError);
+  expect(result).toHaveProperty("context", {
+    datasource: "LoginDatasource - logout",
+    result: mocks.errors.unknown,
+  });
+});
+
+it("SHOULD return undefined if the error is AuthSessionMissingError", async () => {
+  spies.signOut.mockResolvedValueOnce(mocks.errors.authSessionMissing);
+
+  const result = await setup();
+
+  expect(spies.signOut).toHaveBeenCalledTimes(1);
+  expect(result).toBeUndefined();
 });

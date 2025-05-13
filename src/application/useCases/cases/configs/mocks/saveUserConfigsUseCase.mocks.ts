@@ -1,4 +1,4 @@
-import { repositoriesMocks } from "@data/repositories/mocks";
+import { repositoriesMocks } from "@data/repositories/mocks/index.mocks";
 import ConfigsEntityFixture from "@domain/entities/configs/mocks/ConfigsEntity.fixture";
 import { BusinessError } from "@domain/entities/errors";
 

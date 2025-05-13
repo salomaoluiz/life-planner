@@ -1,5 +1,5 @@
 import { CreateFamilyDatasourceParams } from "@data/repositories/repos/family/familyDatasource";
-import { supabase } from "@infrastructure/supabase";
+import * as supabase from "@infrastructure/supabase/mocks/index.mocks";
 
 import familyDatasourceImpl from "../familyDatasourceImpl";
 
@@ -21,18 +21,6 @@ const responseSuccessMock = {
 
 // region spies
 
-const supabaseUpsertSpy = jest.fn();
-const supabaseSelectSpy = jest.fn();
-const supabaseThenSpy = jest.fn();
-
-const supabaseFromSpy = jest.spyOn(supabase, "from").mockImplementation(() => {
-  return {
-    select: supabaseSelectSpy.mockReturnThis(),
-    then: supabaseThenSpy.mockReturnValue(responseSuccessMock),
-    upsert: supabaseUpsertSpy.mockReturnThis(),
-  } as never;
-});
-
 // endregion spies
 
 beforeEach(() => {
@@ -52,10 +40,7 @@ async function throwableSetup(props: CreateFamilyDatasourceParams) {
 }
 
 const spies = {
-  supabaseFrom: supabaseFromSpy,
-  supabaseSelect: supabaseSelectSpy,
-  supabaseThen: supabaseThenSpy,
-  supabaseUpsert: supabaseUpsertSpy,
+  ...supabase.spies,
 };
 
 const mocks = {
