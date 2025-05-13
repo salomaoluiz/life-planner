@@ -1,11 +1,13 @@
+import { availableLanguages } from "@presentation/i18n/translations";
+
 interface IConfigsEntity {
   darkMode: boolean;
-  language: string;
+  language: (typeof availableLanguages)[number];
 }
 
 class ConfigsEntity {
   darkMode: boolean;
-  language: string;
+  language: (typeof availableLanguages)[number];
 
   constructor(params: IConfigsEntity) {
     this.darkMode = params.darkMode;
@@ -15,7 +17,7 @@ class ConfigsEntity {
   static defaultConfigs(): ConfigsEntity {
     return new ConfigsEntity({
       darkMode: false,
-      language: "en",
+      language: "en-US",
     });
   }
 }

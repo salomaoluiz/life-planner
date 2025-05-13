@@ -13,8 +13,8 @@ function RefetchCache(props: Props) {
   const { theme } = useTheme();
 
   const { mutate, status } = useMutation<void, void>({
-    cacheKey: [useCases.invalidateCacheFinancialTransactionsUseCase.uniqueName],
-    fetch: useCases.invalidateCacheFinancialTransactionsUseCase.execute,
+    cacheKey: [useCases.refreshFinancialTransactionsUseCase.uniqueName],
+    fetch: useCases.refreshFinancialTransactionsUseCase.execute,
   });
 
   useEffect(() => {

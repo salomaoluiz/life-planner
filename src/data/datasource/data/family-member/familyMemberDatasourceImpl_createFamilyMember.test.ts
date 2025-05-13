@@ -10,22 +10,22 @@ import {
 it("SHOULD call supabase.from with 'family-member' WHEN called", async () => {
   await setup();
 
-  expect(spies.supabaseFrom).toHaveBeenCalledTimes(1);
-  expect(spies.supabaseFrom).toHaveBeenCalledWith("family-member");
-  expect(spies.supabaseInsert).toHaveBeenCalledTimes(1);
-  expect(spies.supabaseInsert).toHaveBeenCalledWith({
+  expect(spies.supabase.from).toHaveBeenCalledTimes(1);
+  expect(spies.supabase.from).toHaveBeenCalledWith("family-member");
+  expect(spies.supabase.insert).toHaveBeenCalledTimes(1);
+  expect(spies.supabase.insert).toHaveBeenCalledWith({
     email: mocks.defaultProps.email,
     family_id: mocks.defaultProps.familyId,
     invite_token: mocks.defaultProps.inviteToken,
     join_date: mocks.defaultProps.joinDate,
     user_id: mocks.defaultProps.userId,
   });
-  expect(spies.supabaseThen).toHaveBeenCalledTimes(1);
-  expect(spies.supabaseThen).toHaveBeenCalledWith();
+  expect(spies.supabase.then).toHaveBeenCalledTimes(1);
+  expect(spies.supabase.then).toHaveBeenCalledWith();
 });
 
 it("SHOULD throw an error WHEN supabase.from throws an error", async () => {
-  spies.supabaseThen.mockRejectedValueOnce(mocks.responseError.error);
+  spies.supabase.then.mockRejectedValueOnce(mocks.responseError.error);
 
   const error = await throwableSetup(mocks.defaultProps);
 

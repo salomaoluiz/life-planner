@@ -1,5 +1,5 @@
 import logoutUseCase from "@application/useCases/cases/auth/logoutUseCase";
-import { repositoriesMocks } from "@data/repositories/mocks";
+import { repositoriesMocks } from "@data/repositories/mocks/index.mocks";
 
 beforeEach(() => {
   jest.clearAllMocks();

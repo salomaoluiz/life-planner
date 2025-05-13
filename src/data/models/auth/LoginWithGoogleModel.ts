@@ -18,7 +18,7 @@ class LoginWithGoogleModel {
     this.avatarURL = props.avatarURL;
   }
 
-  static fromJson(data: Record<string, unknown>): LoginWithGoogleModel {
+  static fromJSON(data: Record<string, unknown>): LoginWithGoogleModel {
     return new LoginWithGoogleModel({
       avatarURL: data.avatar_url as string,
       email: data.email as string,
@@ -27,7 +27,7 @@ class LoginWithGoogleModel {
     });
   }
 
-  toJson(): Record<string, unknown> {
+  toJSON(): Record<string, unknown> {
     return {
       avatar_url: this.avatarURL,
       email: this.email,

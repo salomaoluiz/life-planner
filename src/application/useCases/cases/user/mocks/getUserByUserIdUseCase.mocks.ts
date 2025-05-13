@@ -1,5 +1,5 @@
 import getUserByUserIdUseCase from "@application/useCases/cases/user/getUserByUserIdUseCase";
-import { repositoriesMocks } from "@data/repositories/mocks";
+import { repositoriesMocks } from "@data/repositories/mocks/index.mocks";
 import { BusinessError } from "@domain/entities/errors";
 import UserEntityFixture from "@domain/entities/user/mocks/UserEntity.fixture";
 

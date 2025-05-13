@@ -1,4 +1,4 @@
-import { repositoriesMocks } from "@data/repositories/mocks";
+import { repositoriesMocks } from "@data/repositories/mocks/index.mocks";
 
 import deleteFamilyMemberUseCase from "../deleteFamilyMemberUseCase";
 

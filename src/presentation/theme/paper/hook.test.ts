@@ -9,7 +9,7 @@ const theme = {
     primary: "blue",
   },
 };
-const useThemeSpy = jest.spyOn(paper, "useTheme").mockReturnValue(theme);
+const useThemeSpy = jest.spyOn(paper, "useTheme").mockReturnValueOnce(theme);
 
 beforeEach(() => {
   jest.clearAllMocks();

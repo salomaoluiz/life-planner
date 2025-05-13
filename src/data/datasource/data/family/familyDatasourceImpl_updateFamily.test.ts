@@ -13,23 +13,23 @@ it("SHOULD call supabase WITH correct params", async () => {
     name: "New Name",
   });
 
-  expect(spies.supabaseFrom).toHaveBeenCalledTimes(1);
-  expect(spies.supabaseFrom).toHaveBeenCalledWith("family");
-  expect(spies.supabaseUpdate).toHaveBeenCalledTimes(1);
-  expect(spies.supabaseUpdate).toHaveBeenCalledWith({
+  expect(spies.supabase.from).toHaveBeenCalledTimes(1);
+  expect(spies.supabase.from).toHaveBeenCalledWith("family");
+  expect(spies.supabase.update).toHaveBeenCalledTimes(1);
+  expect(spies.supabase.update).toHaveBeenCalledWith({
     family_name: "New Name",
   });
-  expect(spies.supabaseEq).toHaveBeenCalledTimes(1);
-  expect(spies.supabaseEq).toHaveBeenCalledWith(
+  expect(spies.supabase.eq).toHaveBeenCalledTimes(1);
+  expect(spies.supabase.eq).toHaveBeenCalledWith(
     "id",
     "f7c7c6dc-fbf1-4f72-a490-08150a4cd3e8",
   );
-  expect(spies.supabaseThen).toHaveBeenCalledTimes(1);
-  expect(spies.supabaseThen).toHaveBeenCalledWith();
+  expect(spies.supabase.then).toHaveBeenCalledTimes(1);
+  expect(spies.supabase.then).toHaveBeenCalledWith();
 });
 
 it("SHOULD throw error in case of error", async () => {
-  spies.supabaseThen.mockRejectedValueOnce(mocks.responseError.error);
+  spies.supabase.then.mockRejectedValueOnce(mocks.responseError.error);
 
   const params = {
     id: "f7c7c6dc-fbf1-4f72-a490-08150a4cd3e8",

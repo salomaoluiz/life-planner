@@ -28,11 +28,11 @@ function loginDatasourceImpl(): LoginDatasource {
       const user = supabaseResponse.data.user;
       const metadata = user?.user_metadata;
 
-      return new LoginWithGoogleModel({
-        avatarURL: metadata?.avatar_url as string,
-        email: user?.email as string,
-        id: user?.id as string,
-        name: metadata?.name as string,
+      return LoginWithGoogleModel.fromJSON({
+        avatar_url: metadata?.avatar_url,
+        email: user?.email,
+        id: user?.id,
+        name: metadata?.name,
       });
     },
     async loginWithOAuth(): Promise<boolean> {
@@ -58,7 +58,12 @@ function loginDatasourceImpl(): LoginDatasource {
       }
 
       if (result.error) {
-        throw new GenericError();
+        const error = new GenericError();
+        error.addContext({
+          datasource: "LoginDatasource - logout",
+          result,
+        });
+        throw error;
       }
     },
     async saveSession(params) {
@@ -71,17 +76,22 @@ function loginDatasourceImpl(): LoginDatasource {
         if (response.error.name === "AuthSessionMissingError") {
           throw new BusinessError();
         }
-        throw new GenericError();
+        const error = new GenericError();
+        error.addContext({
+          datasource: "LoginDatasource - saveSession",
+          result: response,
+        });
+        throw error;
       }
 
       const user = response.data.user;
       const metadata = user?.user_metadata;
 
-      return new LoginWithGoogleModel({
-        avatarURL: metadata?.avatar_url as string,
-        email: user?.email as string,
-        id: user?.id as string,
-        name: metadata?.name as string,
+      return LoginWithGoogleModel.fromJSON({
+        avatar_url: metadata?.avatar_url,
+        email: user?.email,
+        id: user?.id,
+        name: metadata?.name,
       });
     },
   };

@@ -1,4 +1,4 @@
-import UserModel from "@data/models/user";
+import UserModel from "@data/models/user/UserModel";
 
 export interface UserDatasource {
   createUser: (params: CreateUserDatasourceParams) => Promise<void>;

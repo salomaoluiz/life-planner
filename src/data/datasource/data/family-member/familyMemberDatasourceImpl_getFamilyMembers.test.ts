@@ -9,22 +9,22 @@ import {
 } from "./mocks/familyMemberDatasourceImpl_getFamilyMembers.mocks";
 
 it("SHOULD call supabase with correct params", async () => {
-  spies.supabaseThen.mockResolvedValue(mocks.successResponse);
+  spies.supabase.then.mockResolvedValueOnce(mocks.successResponse);
 
   await setup("123");
 
-  expect(spies.supabaseFrom).toHaveBeenCalledTimes(1);
-  expect(spies.supabaseFrom).toHaveBeenCalledWith("family-member");
-  expect(spies.supabaseSelect).toHaveBeenCalledTimes(1);
-  expect(spies.supabaseSelect).toHaveBeenCalledWith();
-  expect(spies.supabaseEq).toHaveBeenCalledTimes(1);
-  expect(spies.supabaseEq).toHaveBeenCalledWith("family_id", "123");
-  expect(spies.supabaseThen).toHaveBeenCalledTimes(1);
-  expect(spies.supabaseThen).toHaveBeenCalledWith();
+  expect(spies.supabase.from).toHaveBeenCalledTimes(1);
+  expect(spies.supabase.from).toHaveBeenCalledWith("family-member");
+  expect(spies.supabase.select).toHaveBeenCalledTimes(1);
+  expect(spies.supabase.select).toHaveBeenCalledWith();
+  expect(spies.supabase.eq).toHaveBeenCalledTimes(1);
+  expect(spies.supabase.eq).toHaveBeenCalledWith("family_id", "123");
+  expect(spies.supabase.then).toHaveBeenCalledTimes(1);
+  expect(spies.supabase.then).toHaveBeenCalledWith();
 });
 
 it("SHOULD return an empty array", async () => {
-  spies.supabaseThen.mockResolvedValue(mocks.emptyResponse);
+  spies.supabase.then.mockResolvedValueOnce(mocks.emptyResponse);
 
   const response = await setup("123");
 
@@ -32,7 +32,7 @@ it("SHOULD return an empty array", async () => {
 });
 
 it("SHOULD return a list of family members", async () => {
-  spies.supabaseThen.mockResolvedValue(mocks.successResponse);
+  spies.supabase.then.mockResolvedValueOnce(mocks.successResponse);
 
   const response = await setup("123");
 
@@ -49,7 +49,7 @@ it("SHOULD return a list of family members", async () => {
 });
 
 it("SHOULD throw an error", async () => {
-  spies.supabaseThen.mockRejectedValue(mocks.responseError.error);
+  spies.supabase.then.mockRejectedValueOnce(mocks.responseError.error);
 
   const error = await throwableSetup("123");
 

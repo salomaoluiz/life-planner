@@ -1,5 +1,5 @@
 import loginWithGoogleUseCase from "@application/useCases/cases/auth/loginWithGoogleUseCase";
-import { repositoriesMocks } from "@data/repositories/mocks";
+import { repositoriesMocks } from "@data/repositories/mocks/index.mocks";
 import LoginWithGoogleEntityFixture from "@domain/entities/auth/mocks/LoginWithGoogleEntity.fixture";
 import UserEntityFixture from "@domain/entities/user/mocks/UserEntity.fixture";
 

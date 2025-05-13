@@ -4,7 +4,7 @@ import {
   mocks,
   setup,
   spies,
-} from "./mocks/loginDatasourceImpl_loginWithOAuth";
+} from "./mocks/loginDatasourceImpl_loginWithOAuth.mocks";
 
 it("SHOULD login with OAuth", async () => {
   spies.signInWithOAuth.mockResolvedValueOnce(mocks.signInSuccess as never);

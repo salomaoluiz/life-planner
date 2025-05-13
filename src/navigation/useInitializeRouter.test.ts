@@ -1,12 +1,13 @@
+import * as expoRouter from "expo-router";
+
 import { renderHook } from "@tests";
+
+import { monitoring } from "@infrastructure";
+import * as loaderProvider from "@providers/loader";
 
 jest.mock("@infrastructure");
 jest.mock("@providers/loader");
 jest.mock("expo-router");
-import * as expoRouter from "expo-router";
-
-import { monitoring } from "@infrastructure";
-import * as loaderProvider from "@providers/loader";
 
 import useInitializeRouter from "./useInitializeRouter";
 

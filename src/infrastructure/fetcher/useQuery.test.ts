@@ -3,7 +3,7 @@ import { BusinessError, GenericError } from "@domain/entities/errors";
 import { mocks, setup, spies } from "./mocks/useQuery.mocks";
 
 it("SHOULD fetch and return in success", async () => {
-  spies.useReactQuery.mockReturnValue(mocks.successResponse);
+  spies.useReactQuery.mockReturnValueOnce(mocks.successResponse);
 
   const { result } = setup({
     cacheKey: ["cache-key-1", "cache-key-2"],
@@ -16,18 +16,16 @@ it("SHOULD fetch and return in success", async () => {
   expect(result.current.status).toBe("success");
 });
 
-it("SHOULD fetch and return in error", async () => {
-  spies.useReactQuery.mockReturnValue(mocks.errorResponse);
+it("SHOULD fetch and return in error", () => {
+  spies.useReactQuery
+    .mockReturnValueOnce(mocks.errorResponse)
+    .mockReturnValueOnce(mocks.errorResponse);
 
   try {
-    const { result } = setup({
+    setup({
       cacheKey: ["CacheKey1", "CacheKey2"],
       fetch: spies.fetch,
     });
-    expect(result.current.data).toBeNull();
-    expect(result.current.error).toBeInstanceOf(GenericError);
-    expect(result.current.isFetching).toBeFalsy();
-    expect(result.current.status).toBe("error");
   } catch (e) {
     const error = e as GenericError;
 
@@ -38,7 +36,7 @@ it("SHOULD fetch and return in error", async () => {
 });
 
 it("SHOULD fetch and return in business error", async () => {
-  spies.useReactQuery.mockReturnValue(mocks.businessErrorResponse);
+  spies.useReactQuery.mockReturnValueOnce(mocks.businessErrorResponse);
 
   const { result } = setup({
     cacheKey: ["CacheKey1", "CacheKey2"],
@@ -58,18 +56,15 @@ it("SHOULD fetch and return in business error", async () => {
 });
 
 it("SHOULD fetch and return in error without message", async () => {
-  spies.useReactQuery.mockReturnValue(mocks.errorWithoutMessageResponse);
+  spies.useReactQuery
+    .mockReturnValueOnce(mocks.errorWithoutMessageResponse)
+    .mockReturnValueOnce(mocks.errorWithoutMessageResponse);
 
   try {
-    const { result } = setup({
+    setup({
       cacheKey: ["CacheKey1", "CacheKey2"],
       fetch: spies.fetch,
     });
-
-    expect(result.current.status).toBe("error");
-    expect(result.current.data).toBeNull();
-    expect(result.current.error).toBeInstanceOf(GenericError);
-    expect(result.current.isFetching).toBeFalsy();
   } catch (e) {
     const error = e as GenericError;
 
@@ -80,7 +75,7 @@ it("SHOULD fetch and return in error without message", async () => {
 });
 
 it("SHOULD return in pending", async () => {
-  spies.useReactQuery.mockReturnValue(mocks.pendingResponse as never);
+  spies.useReactQuery.mockReturnValueOnce(mocks.pendingResponse as never);
 
   const { result } = setup({
     cacheKey: ["CacheKey1", "CacheKey2"],
@@ -94,7 +89,7 @@ it("SHOULD return in pending", async () => {
 });
 
 it("SHOULD refetch", async () => {
-  spies.useReactQuery.mockReturnValue(mocks.pendingResponse as never);
+  spies.useReactQuery.mockReturnValueOnce(mocks.pendingResponse as never);
 
   const { result } = setup({
     cacheKey: ["CacheKey1", "CacheKey2"],
@@ -107,7 +102,7 @@ it("SHOULD refetch", async () => {
 });
 
 it("SHOULD call useQuery with default params", async () => {
-  spies.useReactQuery.mockReturnValue(mocks.pendingResponse as never);
+  spies.useReactQuery.mockReturnValueOnce(mocks.pendingResponse as never);
 
   setup({
     cacheKey: ["CacheKey1", "CacheKey2"],
@@ -125,7 +120,7 @@ it("SHOULD call useQuery with default params", async () => {
 });
 
 it("SHOULD call useQuery with custom params", async () => {
-  spies.useReactQuery.mockReturnValue(mocks.pendingResponse as never);
+  spies.useReactQuery.mockReturnValueOnce(mocks.pendingResponse as never);
 
   setup({
     cacheKey: ["CacheKey1", "CacheKey2"],

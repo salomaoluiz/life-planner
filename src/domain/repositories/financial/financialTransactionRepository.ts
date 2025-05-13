@@ -9,7 +9,6 @@ export type FinancialTransactionRepository = {
   ): Promise<TransactionEntity>;
   deleteTransaction(params: DeleteTransactionRepositoryParams): Promise<void>;
   getTransactions(ownerIds: string[]): Promise<TransactionEntity[]>;
-  invalidateTransactions(): Promise<void>;
   updateTransaction(params: UpdateTransactionRepositoryParams): Promise<void>;
 };
 

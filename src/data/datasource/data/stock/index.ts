@@ -1,1 +1,1 @@
-export { default as stockDatasource } from "./stockDatasourceImpl";
+export { default as stockDatasource } from "./items";

@@ -1,1 +1,1 @@
-export { default as financialTransactionDatasource } from "./transactionDatasourceImpl";
+export { default as financialTransactionDatasource } from "./transactions";

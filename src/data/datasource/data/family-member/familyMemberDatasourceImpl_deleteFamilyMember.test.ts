@@ -8,22 +8,22 @@ import {
 } from "./mocks/familyMemberDatasourceImpl_deleteFamilyMember.mocks";
 
 it("SHOULD delete family member", async () => {
-  spies.supabaseThen.mockResolvedValue(null);
+  spies.supabase.then.mockResolvedValueOnce(null);
 
   await setup("123");
 
-  expect(spies.supabaseFrom).toHaveBeenCalledTimes(1);
-  expect(spies.supabaseFrom).toHaveBeenCalledWith("family-member");
-  expect(spies.supabaseDelete).toHaveBeenCalledTimes(1);
-  expect(spies.supabaseDelete).toHaveBeenCalledWith();
-  expect(spies.supabaseEq).toHaveBeenCalledTimes(1);
-  expect(spies.supabaseEq).toHaveBeenCalledWith("id", "123");
-  expect(spies.supabaseThen).toHaveBeenCalledTimes(1);
-  expect(spies.supabaseThen).toHaveBeenCalledWith();
+  expect(spies.supabase.from).toHaveBeenCalledTimes(1);
+  expect(spies.supabase.from).toHaveBeenCalledWith("family-member");
+  expect(spies.supabase.delete).toHaveBeenCalledTimes(1);
+  expect(spies.supabase.delete).toHaveBeenCalledWith();
+  expect(spies.supabase.eq).toHaveBeenCalledTimes(1);
+  expect(spies.supabase.eq).toHaveBeenCalledWith("id", "123");
+  expect(spies.supabase.then).toHaveBeenCalledTimes(1);
+  expect(spies.supabase.then).toHaveBeenCalledWith();
 });
 
 it("SHOULD throw an error", async () => {
-  spies.supabaseThen.mockRejectedValue(mocks.responseError.error);
+  spies.supabase.then.mockRejectedValueOnce(mocks.responseError.error);
 
   const error = await throwableSetup("123");
 

@@ -1,4 +1,4 @@
-import { datasourcesMocks } from "@data/datasource/mocks";
+import { datasourcesMocks } from "@data/datasource/mocks/index.mocks";
 import cache from "@infrastructure/cache";
 
 import familyMemberRepositoryImpl from "../familyMemberRepositoryImpl";

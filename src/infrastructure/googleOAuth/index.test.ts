@@ -5,7 +5,7 @@ import * as RNGoogleSignIn from "./rnGoogleSignIn";
 
 jest.mock("@utils/platform");
 jest.mock("./rnGoogleSignIn");
-const isWebSpy = jest.spyOn(platform, "isWeb").mockReturnValue(false);
+const isWebSpy = jest.spyOn(platform, "isWeb").mockReturnValueOnce(false);
 
 beforeEach(() => {
   jest.clearAllMocks();

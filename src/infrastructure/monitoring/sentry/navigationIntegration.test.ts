@@ -11,7 +11,7 @@ const navigationIntegrationResponse = {
 
 const reactNavigationIntegrationSpy = jest
   .spyOn(Sentry, "reactNavigationIntegration")
-  .mockReturnValue(navigationIntegrationResponse);
+  .mockReturnValueOnce(navigationIntegrationResponse);
 
 it("SHOULD call Sentry.reactNavigationIntegration", () => {
   const result = navigationIntegration();
