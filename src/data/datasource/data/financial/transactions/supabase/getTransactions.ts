@@ -1,5 +1,5 @@
 import TransactionModel from "@data/models/financial/TransactionModel";
-import { TransactionDatasource } from "@data/repositories/repos/financial/transactionDatasource";
+import { TransactionDatasource } from "@data/repositories/repos/financial/transactions/transactionDatasource";
 import { BusinessError, GenericError } from "@domain/entities/errors";
 import { supabase } from "@infrastructure/supabase";
 

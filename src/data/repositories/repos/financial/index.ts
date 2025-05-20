@@ -1,6 +1,6 @@
 import { Datasources } from "@data/datasource";
 
-import transactionRepository from "./transactionRepositoryImpl";
+import transactionRepository from "./transactions/transactionRepositoryImpl";
 
 export function financialRepository(datasources: Datasources) {
   return {
