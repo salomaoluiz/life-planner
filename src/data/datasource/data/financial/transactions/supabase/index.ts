@@ -1,4 +1,4 @@
-import { TransactionDatasource } from "@data/repositories/repos/financial/transactionDatasource";
+import { TransactionDatasource } from "@data/repositories/repos/financial/transactions/transactionDatasource";
 
 import createTransaction from "./createTransaction";
 import deleteTransaction from "./deleteTransaction";
