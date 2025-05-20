@@ -1,7 +1,7 @@
 import TransactionEntity, {
-  TransactionOwners,
   TransactionType,
 } from "@domain/entities/financial/TransactionEntity";
+import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 class TransactionEntityFixture {
   value = {} as TransactionEntity;
@@ -34,7 +34,7 @@ class TransactionEntityFixture {
       date: new Date(2025, 5, 5).toISOString(),
       description: "Shopping at the mall",
       id: "d9b513b5-6a02-45b0-9144-397c97a8917f",
-      owner: TransactionOwners.FAMILY,
+      owner: OwnerType.FAMILY,
       ownerId: "b11923e6-bfbb-4965-b3f6-a075249d1e63",
       type: TransactionType.EXPENSE,
       value: "100.00",
@@ -55,7 +55,7 @@ class TransactionEntityFixture {
     return this;
   }
 
-  withOwner(owner: TransactionOwners) {
+  withOwner(owner: OwnerType) {
     this.value.owner = owner;
 
     return this;

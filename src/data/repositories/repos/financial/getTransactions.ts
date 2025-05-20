@@ -1,9 +1,9 @@
 import { Datasources } from "@data/datasource";
 import TransactionModel from "@data/models/financial/TransactionModel";
 import TransactionEntity, {
-  TransactionOwners,
   TransactionType,
 } from "@domain/entities/financial/TransactionEntity";
+import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { FinancialTransactionRepository } from "@domain/repositories/financial";
 import cache, { CacheStringKeys } from "@infrastructure/cache";
 
@@ -38,7 +38,7 @@ async function getTransactions(ownerIds: Params, datasources: Datasources) {
         date: transaction.date,
         description: transaction.description,
         id: transaction.id,
-        owner: TransactionOwners[transaction.owner],
+        owner: OwnerType[transaction.owner],
         ownerId: transaction.ownerId,
         type: TransactionType[transaction.type],
         value: transaction.value,

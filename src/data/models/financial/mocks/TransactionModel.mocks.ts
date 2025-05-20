@@ -1,5 +1,5 @@
 import TransactionModel, {
-  TransactionOwners,
+  OwnerType,
   TransactionType,
 } from "../TransactionModel";
 
@@ -32,7 +32,7 @@ function setup() {
     date: jsonMock.date,
     description: jsonMock.description,
     id: jsonMock.id,
-    owner: jsonMock.owner as TransactionOwners,
+    owner: jsonMock.owner as OwnerType,
     ownerId: jsonMock.owner_id,
     type: jsonMock.type as TransactionType,
     value: jsonMock.value,

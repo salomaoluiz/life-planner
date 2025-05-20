@@ -1,7 +1,7 @@
 import TransactionEntity, {
-  TransactionOwners,
   TransactionType,
 } from "@domain/entities/financial/TransactionEntity";
+import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 export type FinancialTransactionRepository = {
   createTransaction(
@@ -16,7 +16,7 @@ interface CreateTransactionRepositoryParams {
   category: string;
   date: string;
   description: string;
-  owner: TransactionOwners;
+  owner: OwnerType;
   ownerId: string;
   type: TransactionType;
   value: string;
@@ -31,7 +31,7 @@ interface UpdateTransactionRepositoryParams {
   date?: string;
   description?: string;
   id: string;
-  owner?: TransactionOwners;
+  owner?: OwnerType;
   ownerId?: string;
   type?: TransactionType;
   value?: string;

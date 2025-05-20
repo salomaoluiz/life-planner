@@ -1,5 +1,5 @@
 import TransactionModel, {
-  TransactionOwners,
+  OwnerType,
   TransactionType,
 } from "@data/models/financial/TransactionModel";
 
@@ -16,7 +16,7 @@ interface CreateTransactionDatasourceParams {
   category: string;
   date: string;
   description: string;
-  owner: TransactionOwners;
+  owner: OwnerType;
   ownerId: string;
   type: TransactionType;
   value: string;
@@ -32,7 +32,7 @@ interface UpdateTransactionDatasourceParams {
   date?: string;
   description?: string;
   id: string;
-  owner?: TransactionOwners;
+  owner?: OwnerType;
   ownerId?: string;
   type?: TransactionType;
   value?: string;

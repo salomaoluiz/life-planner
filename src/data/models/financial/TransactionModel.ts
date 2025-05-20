@@ -1,4 +1,4 @@
-export type TransactionOwners = "FAMILY" | "USER";
+export type OwnerType = "FAMILY" | "USER";
 
 export type TransactionType = "EXPENSE" | "INCOME";
 
@@ -7,7 +7,7 @@ interface ITransactionModel {
   date: string;
   description: string;
   id: string;
-  owner: TransactionOwners;
+  owner: OwnerType;
   ownerId: string;
   type: TransactionType;
   value: string;
@@ -18,7 +18,7 @@ class TransactionModel implements ITransactionModel {
   date: string;
   description: string;
   id: string;
-  owner: TransactionOwners;
+  owner: OwnerType;
   ownerId: string;
   type: TransactionType;
   value: string;
@@ -40,7 +40,7 @@ class TransactionModel implements ITransactionModel {
       date: data.date as string,
       description: data.description as string,
       id: data.id as string,
-      owner: data.owner as TransactionOwners,
+      owner: data.owner as OwnerType,
       ownerId: data.owner_id as string,
       type: data.type as TransactionType,
       value: data.value as string,

@@ -1,7 +1,5 @@
-import {
-  TransactionOwners,
-  TransactionType,
-} from "@domain/entities/financial/TransactionEntity";
+import { TransactionType } from "@domain/entities/financial/TransactionEntity";
+import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import { mocks, setup, spies } from "./mocks/transactionRepositoryImpl.mocks";
 
@@ -12,7 +10,7 @@ it("SHOULD call createTransaction correctly", async () => {
     category: "Some Category",
     date: new Date().toISOString(),
     description: "Some Description",
-    owner: TransactionOwners.FAMILY,
+    owner: OwnerType.FAMILY,
     ownerId: "1dcc732e-8886-4a68-b669-ded3f3809c20",
     type: TransactionType.EXPENSE,
     value: "100.0",
