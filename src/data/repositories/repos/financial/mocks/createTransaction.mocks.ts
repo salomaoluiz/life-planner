@@ -1,9 +1,7 @@
 import { datasourcesMocks } from "@data/datasource/mocks/index.mocks";
 import TransactionModel from "@data/models/financial/TransactionModel";
-import {
-  TransactionOwners,
-  TransactionType,
-} from "@domain/entities/financial/TransactionEntity";
+import { TransactionType } from "@domain/entities/financial/TransactionEntity";
+import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import cache from "@infrastructure/cache";
 
 import createTransaction, { Params } from "../createTransaction";
@@ -13,7 +11,7 @@ const defaultParams: Params = {
   category: "Some Category",
   date: new Date().toISOString(),
   description: "Some Description",
-  owner: TransactionOwners.FAMILY,
+  owner: OwnerType.FAMILY,
   ownerId: "1dcc732e-8886-4a68-b669-ded3f3809c20",
   type: TransactionType.EXPENSE,
   value: "100.0",
@@ -24,7 +22,7 @@ const transactionModelMock = new TransactionModel({
   date: new Date().toISOString(),
   description: "Some Description",
   id: "1dcc732e-8886-4a68-b669-ded3f3809c20",
-  owner: TransactionOwners.FAMILY,
+  owner: OwnerType.FAMILY,
   ownerId: "1dcc732e-8886-4a68-b669-ded3f3809c20",
   type: TransactionType.EXPENSE,
   value: "100.0",

@@ -1,7 +1,4 @@
-export enum TransactionOwners {
-  FAMILY = "FAMILY",
-  USER = "USER",
-}
+import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 export enum TransactionType {
   EXPENSE = "EXPENSE",
@@ -13,7 +10,7 @@ interface ITransactionEntity {
   date: string;
   description: string;
   id: string;
-  owner: TransactionOwners;
+  owner: OwnerType;
   ownerId: string;
   type: TransactionType;
   value: string;
@@ -24,7 +21,7 @@ class TransactionEntity {
   date: string;
   description: string;
   id: string;
-  owner: TransactionOwners;
+  owner: OwnerType;
   ownerId: string;
   type: TransactionType;
   value: string;

@@ -1,7 +1,7 @@
 import TransactionEntity, {
-  TransactionOwners,
   TransactionType,
 } from "@domain/entities/financial/TransactionEntity";
+import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { CacheStringKeys } from "@infrastructure/cache";
 
 import { mocks, setup, spies } from "./mocks/createTransaction.mocks";
@@ -31,7 +31,7 @@ it("SHOULD return a transaction created", async () => {
       date: mocks.transactionModel.date,
       description: mocks.transactionModel.description,
       id: mocks.transactionModel.id,
-      owner: TransactionOwners[mocks.transactionModel.owner],
+      owner: OwnerType[mocks.transactionModel.owner],
       ownerId: mocks.transactionModel.ownerId,
       type: TransactionType[mocks.transactionModel.type],
       value: mocks.transactionModel.value,

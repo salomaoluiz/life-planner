@@ -1,7 +1,7 @@
 import TransactionEntity, {
-  TransactionOwners,
   TransactionType,
 } from "@domain/entities/financial/TransactionEntity";
+import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { CacheStringKeys } from "@infrastructure/cache";
 
 import { mocks, setup, spies } from "./mocks/getTransactions.mocks";
@@ -32,7 +32,7 @@ it("SHOULD return transactions from cache", async () => {
       date: mocks.firstTransaction.date,
       description: mocks.firstTransaction.description,
       id: mocks.firstTransaction.id,
-      owner: TransactionOwners[mocks.firstTransaction.owner],
+      owner: OwnerType[mocks.firstTransaction.owner],
       ownerId: mocks.firstTransaction.ownerId,
       type: TransactionType[mocks.firstTransaction.type],
       value: mocks.firstTransaction.value,
@@ -76,7 +76,7 @@ it("SHOULD return transactions from datasource", async () => {
       date: mocks.secondTransaction.date,
       description: mocks.secondTransaction.description,
       id: mocks.secondTransaction.id,
-      owner: TransactionOwners[mocks.secondTransaction.owner],
+      owner: OwnerType[mocks.secondTransaction.owner],
       ownerId: mocks.secondTransaction.ownerId,
       type: TransactionType[mocks.secondTransaction.type],
       value: mocks.secondTransaction.value,
