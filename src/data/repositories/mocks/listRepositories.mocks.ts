@@ -22,6 +22,12 @@ const repositoriesMocks: Repositories = {
     updateFamily: jest.fn(),
   },
   financialRepository: {
+    categories: {
+      createCategory: jest.fn(),
+      deleteCategory: jest.fn(),
+      getCategories: jest.fn(),
+      updateCategory: jest.fn(),
+    },
     transaction: {
       createTransaction: jest.fn(),
       deleteTransaction: jest.fn(),

@@ -19,14 +19,14 @@ class CategoryModel implements ICategoryModel {
   ownerId: string;
   parentId?: string;
 
-  constructor(params: ICategoryModel) {
-    this.depthLevel = params.depthLevel;
-    this.icon = params.icon;
-    this.id = params.id;
-    this.name = params.name;
-    this.owner = params.owner;
-    this.ownerId = params.ownerId;
-    this.parentId = params.parentId;
+  constructor(modelParams: ICategoryModel) {
+    this.depthLevel = modelParams.depthLevel;
+    this.icon = modelParams.icon;
+    this.id = modelParams.id;
+    this.name = modelParams.name;
+    this.owner = modelParams.owner;
+    this.ownerId = modelParams.ownerId;
+    this.parentId = modelParams.parentId;
   }
 
   static fromJSON(data: Record<string, unknown>): CategoryModel {
