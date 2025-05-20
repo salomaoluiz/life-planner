@@ -1,1 +1,1 @@
-export { default as userDatasource } from "./userDatasourceImpl";
+export * from "./supabase";

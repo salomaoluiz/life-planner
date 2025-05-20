@@ -1,6 +1,6 @@
 export enum StockOwners {
-  FAMILY = "family",
-  USER = "user",
+  FAMILY = "FAMILY",
+  USER = "USER",
 }
 
 export enum StockUnits {
