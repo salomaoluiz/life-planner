@@ -14,6 +14,12 @@ const datasourcesMocks: jest.MockedObjectDeep<Datasources> = {
     getFamilyMembers: jest.fn(),
     joinFamilyMember: jest.fn(),
   },
+  financialCategoryDatasource: {
+    createCategory: jest.fn(),
+    deleteCategory: jest.fn(),
+    getCategories: jest.fn(),
+    updateCategory: jest.fn(),
+  },
   financialTransactionDatasource: {
     createTransaction: jest.fn(),
     deleteTransaction: jest.fn(),
