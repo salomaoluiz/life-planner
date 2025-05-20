@@ -1,2 +1,3 @@
 yarn lint-staged
+yarn tsc
 yarn test --passWithNoTests $(git diff --name-only --cached | xargs)
