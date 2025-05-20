@@ -10,7 +10,7 @@ function saveWebSessionUseCase(
   return {
     async execute(hash: Hash): Promise<void> {
       try {
-        if (hash === undefined) {
+        if (!hash) {
           throw new UserNotLoggedError();
         }
 
