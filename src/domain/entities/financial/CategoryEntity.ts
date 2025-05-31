@@ -1,7 +1,7 @@
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 interface ICategoryEntity {
-  depthLevel?: number;
+  depthLevel: number;
   icon: string;
   id: string;
   name: string;
@@ -11,7 +11,7 @@ interface ICategoryEntity {
 }
 
 class CategoryEntity {
-  depthLevel?: number;
+  depthLevel: number;
   icon: string;
   id: string;
   name: string;

@@ -2,12 +2,10 @@ const light = {
   backdrop: "rgba(45, 49, 56, 0.4)",
   background: "rgb(253, 252, 255)",
   elevation: {
-    level0: "transparent",
-    level1: "rgb(240, 244, 251)",
-    level2: "rgb(233, 239, 249)",
-    level3: "rgb(225, 235, 246)",
-    level4: "rgb(223, 233, 245)",
-    level5: "rgb(218, 230, 244)",
+    large: "0px 4px 8px rgb(218, 230, 244)",
+    medium: "0px 2px 4px rgb(225, 235, 246)",
+    small: "0px 1px 2px rgb(240, 244, 251)",
+    zero: undefined,
   },
   error: "rgb(186, 26, 26)",
   errorContainer: "rgb(255, 218, 214)",
@@ -43,17 +41,16 @@ const light = {
   surfaceVariant: "rgb(224, 226, 236)",
   tertiary: "rgb(56, 107, 1)",
   tertiaryContainer: "rgb(183, 244, 129)",
-};
+} as const;
+
 const dark = {
   backdrop: "rgba(45, 49, 56, 0.4)",
   background: "rgb(26, 28, 30)",
   elevation: {
-    level0: "transparent",
-    level1: "rgb(33, 37, 41)",
-    level2: "rgb(37, 42, 48)",
-    level3: "rgb(41, 47, 55)",
-    level4: "rgb(43, 49, 57)",
-    level5: "rgb(46, 52, 62)",
+    large: "0px 4px 8px rgb(46, 52, 62)",
+    medium: "0px 2px 4px rgb(41, 47, 55)",
+    small: "0px 1px 2px rgb(33, 37, 41)",
+    zero: undefined,
   },
   error: "rgb(186, 26, 26)",
   errorContainer: "rgb(120, 0, 10)",
@@ -89,9 +86,9 @@ const dark = {
   surfaceVariant: "rgb(67, 71, 78)",
   tertiary: "rgb(156, 215, 105)",
   tertiaryContainer: "rgb(40, 80, 0)",
-};
+} as const;
 
-export type Colors = typeof light;
+export type Colors = typeof dark | typeof light;
 
 const colors: { dark: Colors; light: Colors } = {
   dark,

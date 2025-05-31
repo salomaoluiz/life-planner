@@ -23,7 +23,10 @@ module.exports = {
     "\\.svg": "<rootDir>/tests/svgMock.ts",
   },
   preset: "jest-expo",
-  setupFilesAfterEnv: ["<rootDir>/tests/setup.tsx"],
+  setupFilesAfterEnv: [
+    "<rootDir>/tests/setup.tsx",
+    "<rootDir>/tests/mockReactNativePaper.tsx",
+  ],
   testPathIgnorePatterns: ["/node_modules/", "/tests/"],
   transformIgnorePatterns: ["jest-runner"],
 };

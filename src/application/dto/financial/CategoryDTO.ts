@@ -2,7 +2,7 @@ import CategoryEntity from "@domain/entities/financial/CategoryEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 export interface ICategoryDTO {
-  depthLevel?: number;
+  depthLevel: number;
   icon: string;
   id: string;
   name: string;
@@ -11,7 +11,7 @@ export interface ICategoryDTO {
   parentId?: string;
 }
 class CategoryDTO {
-  depthLevel?: number;
+  depthLevel: number;
   icon: string;
   id: string;
   name: string;

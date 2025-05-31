@@ -5,7 +5,9 @@ import { getSize } from "@components/Skeleton/utils";
 import { useTheme } from "@presentation/theme";
 
 export interface Props {
+  backgroundColor?: string;
   borderRadius?: number;
+  foregroundColor?: string;
   height: number | string;
   width: number | string;
 }
@@ -20,8 +22,8 @@ function BoxSkeleton(props: Props) {
 
   return (
     <ContentLoader
-      backgroundColor={theme.colors.onSurface}
-      foregroundColor={theme.colors.onSurfaceVariant}
+      backgroundColor={props.backgroundColor ?? theme.colors.onSurface}
+      foregroundColor={props.foregroundColor ?? theme.colors.onSurfaceVariant}
       height={height}
       speed={1}
       testID={"skeleton-loader"}

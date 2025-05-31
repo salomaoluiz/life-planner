@@ -2,15 +2,18 @@ import { listUseCases } from "./index";
 
 const useCases = {
   createFamilyUseCase: expect.any(Function),
+  createFinancialCategoryUseCase: expect.any(Function),
   createFinancialTransactionUseCase: expect.any(Function),
   createStockItemUseCase: expect.any(Function),
   deleteFamilyMemberUseCase: expect.any(Function),
   deleteFamilyUseCase: expect.any(Function),
+  deleteFinancialCategoryUseCase: expect.any(Function),
   deleteFinancialTransactionUseCase: expect.any(Function),
   deleteStockItemUseCase: expect.any(Function),
   getFamiliesUseCase: expect.any(Function),
   getFamilyByIdUseCase: expect.any(Function),
   getFamilyMembersUseCase: expect.any(Function),
+  getFinancialCategoriesUseCase: expect.any(Function),
   getFinancialTransactionsUseCase: expect.any(Function),
   getOwnersUseCase: expect.any(Function),
   getStockDashboardUseCase: expect.any(Function),
@@ -26,6 +29,7 @@ const useCases = {
   saveUserConfigsUseCase: expect.any(Function),
   saveWebSessionUseCase: expect.any(Function),
   updateFamilyUseCase: expect.any(Function),
+  updateFinancialCategoryUseCase: expect.any(Function),
   updateFinancialTransactionUseCase: expect.any(Function),
   updateStockItemUseCase: expect.any(Function),
 };

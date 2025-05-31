@@ -1678,6 +1678,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@faker-js/faker@npm:^9.8.0":
+  version: 9.8.0
+  resolution: "@faker-js/faker@npm:9.8.0"
+  checksum: 10c0/f5db1125c1ea0115b9142fb4d4cb37cac2da4cd12ed02afb1cabf3b9600bd365bf480386250975a4fb200d77c00e8364dc8f61ac273a9dcdd2f2f42c3b29b0ec
+  languageName: node
+  linkType: hard
+
 "@humanfs/core@npm:^0.19.1":
   version: 0.19.1
   resolution: "@humanfs/core@npm:0.19.1"
@@ -9012,6 +9019,7 @@ __metadata:
     "@babel/core": "npm:^7.25.2"
     "@eslint/js": "npm:^9.20.0"
     "@expo/vector-icons": "npm:^14.0.2"
+    "@faker-js/faker": "npm:^9.8.0"
     "@react-native-async-storage/async-storage": "npm:1.23.1"
     "@react-native-google-signin/google-signin": "npm:^13.2.0"
     "@react-native-picker/picker": "npm:2.9.0"

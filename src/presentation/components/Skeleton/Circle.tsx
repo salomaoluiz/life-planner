@@ -3,6 +3,8 @@ import ContentLoader, { Circle } from "react-content-loader/native";
 import { useTheme } from "@presentation/theme";
 
 interface Props {
+  backgroundColor?: string;
+  foregroundColor?: string;
   size: number;
 }
 
@@ -10,13 +12,12 @@ function CircleSkeleton(props: Props) {
   const { theme } = useTheme();
   return (
     <ContentLoader
-      backgroundColor={theme.colors.onSurface}
-      foregroundColor={theme.colors.onSurfaceVariant}
+      backgroundColor={props.backgroundColor ?? theme.colors.onSurface}
+      foregroundColor={props.foregroundColor ?? theme.colors.onSurfaceVariant}
       height={props.size}
       speed={1}
       style={{
         height: props.size,
-        position: "absolute",
         width: props.size,
         zIndex: 1,
       }}

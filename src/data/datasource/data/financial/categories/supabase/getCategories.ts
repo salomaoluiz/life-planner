@@ -7,20 +7,25 @@ export type Params = Parameters<CategoryDatasource["getCategories"]>[0];
 
 async function getCategories(ownerIds: Params) {
   try {
-    const transactions = await supabase
+    const categories = await supabase
       .from("financial_categories")
       .select()
       .in("owner_id", ownerIds)
       .then();
 
-    if (!transactions.data) {
+    if (!categories.data) {
       throw new Error("Category without data");
     }
 
-    return transactions.data.map<CategoryModel>((transaction) =>
+    return categories.data.map<CategoryModel>((transaction) =>
       CategoryModel.fromJSON(transaction),
     );
   } catch (error) {
+    console.error({
+      error,
+      ownerIds,
+      place: "datasource - getCategories",
+    });
     if (error instanceof BusinessError) {
       throw error;
     }

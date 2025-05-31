@@ -17,12 +17,12 @@ class CategoryEntityFixture {
   withDefault() {
     this.value = {
       depthLevel: 0,
-      icon: "icon",
-      id: "id",
-      name: "name",
+      icon: "trash",
+      id: "115d1dfe-af17-4f5c-995d-0605498452f5",
+      name: "Category Name",
       owner: OwnerType.FAMILY,
-      ownerId: "ownerId",
-      parentId: "parentId",
+      ownerId: "7ce7e370-4acf-4b39-ab62-628d0d62f678",
+      parentId: undefined,
     } as CategoryEntity;
 
     return this;

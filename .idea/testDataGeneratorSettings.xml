@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="TestDataGeneratorSettingsState">
+    <option name="userDefinedGenerators">
+      <list>
+        <CustomGeneratorSettings>
+          <option name="data">
+            <map>
+              <entry key="regex_key" value="\d{15}" />
+            </map>
+          </option>
+          <option name="name" value="Random Seed" />
+          <option name="type" value="Regex" />
+        </CustomGeneratorSettings>
+      </list>
+    </option>
+  </component>
+</project>

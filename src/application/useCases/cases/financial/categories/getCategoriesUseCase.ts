@@ -17,7 +17,6 @@ function getCategoriesUseCase(
           await repositories.financialRepository.categories.getCategories(
             params.ownerIds,
           );
-
         return categories.map((category) => CategoryDTO.fromEntity(category));
       } catch (error) {
         if (error instanceof DefaultError) {

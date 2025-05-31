@@ -18,6 +18,18 @@ class OwnerEntityFixture {
       ownerId: "c6d76166-e7f3-4823-bd5b-f8bbd33912ac",
       type: OwnerType.USER,
     };
+
+    return this;
+  }
+
+  withFamilyDefault() {
+    this.value = {
+      name: "Family Name",
+      ownerId: "c6d76166-e7f3-4823-bd5b-f8bbd33912ac",
+      type: OwnerType.FAMILY,
+    };
+
+    return this;
   }
 
   withName(name: string) {
@@ -32,6 +44,16 @@ class OwnerEntityFixture {
 
   withType(type: OwnerType) {
     this.value.type = type;
+    return this;
+  }
+
+  withUserDefault() {
+    this.value = {
+      name: "User Name",
+      ownerId: "c6d76166-e7f3-4823-bd5b-f8bbd33912ac",
+      type: OwnerType.USER,
+    };
+
     return this;
   }
 }

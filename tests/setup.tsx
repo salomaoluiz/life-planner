@@ -10,20 +10,6 @@ jest.useFakeTimers({ now: new Date("2025-01-01T00:00:00Z") });
 
 load(process.cwd(), { silent: true });
 
-jest.mock("react-native-paper", () => {
-  const View = jest.requireActual("react-native").View;
-  return {
-    Button: View,
-    Icon: View,
-    PaperProvider: ({ children, ...props }: { children: React.ReactNode }) => (
-      <View {...props}>{children}</View>
-    ),
-    Switch: View,
-    Text: View,
-    TextInput: View,
-    useTheme: jest.fn(),
-  };
-});
 
 jest.mock("@react-native-google-signin/google-signin", () => ({
   GoogleSignin: {
