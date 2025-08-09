@@ -4,17 +4,6 @@ import Avatar from "../index";
 import { AvatarProps } from "../types";
 
 // region mocks
-
-// endregion mocks
-
-// region spies
-
-// endregion spies
-
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
 const defaultProps = {
   icon: {
     mode: "icon" as const,
@@ -29,6 +18,15 @@ const defaultProps = {
     source: "John Doe",
   },
 };
+// endregion mocks
+
+// region spies
+
+// endregion spies
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 const setup = {
   large: {
