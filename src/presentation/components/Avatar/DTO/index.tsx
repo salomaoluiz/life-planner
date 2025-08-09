@@ -10,7 +10,9 @@ interface AvatarDTOProps {
 }
 
 function AvatarIcon(props: AvatarDTOProps) {
-  return <Avatar.Icon icon={props.source} size={props.size} />;
+  return (
+    <Avatar.Icon icon={props.source} size={props.size} testID="avatar-icon" />
+  );
 }
 
 function AvatarImage(props: AvatarDTOProps) {
@@ -22,6 +24,7 @@ function AvatarImage(props: AvatarDTOProps) {
         onLoad={() => setLoading(false)}
         size={props.size}
         source={{ uri: props.source }}
+        testID="avatar-image"
       />
     </View>
   );
@@ -35,7 +38,9 @@ function AvatarText(props: AvatarDTOProps) {
       .join("");
   }
 
-  return <Avatar.Text label={getLabel()} size={props.size} />;
+  return (
+    <Avatar.Text label={getLabel()} size={props.size} testID="avatar-text" />
+  );
 }
 
 export { AvatarIcon, AvatarImage, AvatarText };

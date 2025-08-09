@@ -13,6 +13,11 @@ load(process.cwd(), { silent: true });
 jest.mock("react-native-paper", () => {
   const View = jest.requireActual("react-native").View;
   return {
+    Avatar: {
+      Icon: View,
+      Image: View,
+      Text: View,
+    },
     Button: View,
     Icon: View,
     PaperProvider: ({ children, ...props }: { children: React.ReactNode }) => (
