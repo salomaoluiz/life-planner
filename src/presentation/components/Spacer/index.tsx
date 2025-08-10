@@ -7,6 +7,7 @@ export interface SpacerProps {
   direction: "both" | "horizontal" | "vertical";
   horizontalLine?: boolean;
   size: "flex" | "full" | keyof typeof lightTheme.sizes.spacing;
+  testID?: string;
 }
 
 function getSize(size: SpacerProps["size"], theme: typeof lightTheme) {
@@ -48,7 +49,7 @@ function Spacer(props: SpacerProps) {
   const { theme } = useTheme();
   const { direction } = getStyles(props, theme);
   return (
-    <View style={{ ...direction }}>
+    <View style={{ ...direction }} testID={props.testID}>
       {props.horizontalLine ? (
         <View
           style={{
