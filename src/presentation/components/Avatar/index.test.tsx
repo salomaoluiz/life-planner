@@ -1,4 +1,6 @@
-import { screen, setup } from "./mocks/index.mocks";
+import { act, screen } from "@tests";
+
+import { setup } from "./mocks/index.mocks";
 
 describe("Avatar Component", () => {
   describe("Large Size", () => {
@@ -154,6 +156,32 @@ describe("Avatar Component", () => {
 
       const avatar = screen.getByTestId("avatar-text");
       expect(avatar.props.label).toBe("JD");
+    });
+  });
+
+  describe("AvatarImage onLoad functionality", () => {
+    it("SHOULD call onLoad and hide skeleton when image loads", () => {
+      setup.large.image();
+
+      const avatarImage = screen.getByTestId("avatar-image");
+      
+      // Initially the skeleton should be rendered (loading state)
+      expect(screen.queryByTestId("skeleton-loader")).toBeTruthy();
+
+      // Simulate image load
+      act(() => {
+        avatarImage.props.onLoad();
+      });
+
+      // After loading, skeleton should be hidden
+      expect(screen.queryByTestId("skeleton-loader")).toBeNull();
+    });
+
+    it("SHOULD have onLoad function in AvatarImage props", () => {
+      setup.regular.image();
+
+      const avatar = screen.getByTestId("avatar-image");
+      expect(avatar.props.onLoad).toEqual(expect.any(Function));
     });
   });
 });

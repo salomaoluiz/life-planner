@@ -1,4 +1,4 @@
-import { act, screen } from "@tests";
+import { act, fireEvent, screen } from "@tests";
 
 import { defaultProps, setup } from "./mocks";
 
@@ -169,5 +169,21 @@ describe("DatePicker", () => {
     const modal = screen.getByTestId(`${defaultProps.testID}-modal`);
 
     expect(modal.props.locale).toBe("en-US");
+  });
+
+  it("SHOULD open modal when DatePicker is pressed", () => {
+    setup();
+
+    const component = screen.getByTestId(defaultProps.testID!);
+    const modal = screen.getByTestId(`${defaultProps.testID}-modal`);
+
+    // Initially modal should be closed
+    expect(modal.props.visible).toBe(false);
+
+    // Press the main component
+    fireEvent.press(component);
+
+    // Modal should now be visible
+    expect(modal.props.visible).toBe(true);
   });
 });
