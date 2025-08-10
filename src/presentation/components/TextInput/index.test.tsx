@@ -1,7 +1,7 @@
 import { screen } from "@tests";
 
 import { TextInputMode } from "./index";
-import { defaultProps, setup } from "./mocks";
+import { defaultProps, setup } from "./mocks/index.mocks";
 
 it("SHOULD pass the correct props for an Flat editable input", () => {
   setup();

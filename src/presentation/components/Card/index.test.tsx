@@ -3,7 +3,7 @@ import { View } from "react-native";
 
 import { screen } from "@tests";
 
-import { defaultProps, setup } from "./mocks";
+import { defaultProps, setup } from "./mocks/index.mocks";
 
 it("SHOULD render the card with the correct props", () => {
   setup();

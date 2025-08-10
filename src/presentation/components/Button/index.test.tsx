@@ -3,7 +3,7 @@ import { act, screen } from "@tests";
 import { ButtonMode } from "@components/Button/index";
 import Icon from "@components/Icon";
 
-import { defaultProps, setup } from "./mocks";
+import { defaultProps, setup } from "./mocks/index.mocks";
 
 it("SHOULD render the button with the correct props", () => {
   setup();

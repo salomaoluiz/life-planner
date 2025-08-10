@@ -5,7 +5,7 @@ import {
   defaultFabProps,
   setupFab,
   setupFabGroup,
-} from "./mocks";
+} from "./mocks/index.mocks";
 
 describe("Fab", () => {
   beforeEach(() => {

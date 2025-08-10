@@ -1,6 +1,6 @@
 import { screen } from "@tests";
 
-import { defaultProps, setup } from "./mocks";
+import { defaultProps, setup } from "./mocks/index.mocks";
 
 it("SHOULD render the helper text with the correct props when visible", () => {
   setup();
