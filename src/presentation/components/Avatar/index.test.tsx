@@ -164,7 +164,7 @@ describe("Avatar Component", () => {
       setup.large.image();
 
       const avatarImage = screen.getByTestId("avatar-image");
-      
+
       // Initially the skeleton should be rendered (loading state)
       expect(screen.queryByTestId("skeleton-loader")).toBeTruthy();
 

@@ -1,3 +1,5 @@
+import { ReactTestInstance } from "react-test-renderer";
+
 import { act, screen } from "@tests";
 
 import { defaultProps, setup } from "./mocks/index.mocks";
@@ -18,7 +20,7 @@ describe("Picker Component", () => {
     setup();
 
     const container = screen.getByTestId(defaultProps.testID!);
-    
+
     // The RNPicker should be the first child of the container
     const picker = container.props.children;
     expect(picker.props.selectedValue).toBe(defaultProps.selectedValue);
@@ -29,7 +31,7 @@ describe("Picker Component", () => {
 
     const container = screen.getByTestId(defaultProps.testID!);
     const picker = container.props.children;
-    
+
     // The items should be rendered as children of the picker
     const items = picker.props.children;
     expect(items).toHaveLength(defaultProps.items.length);
@@ -55,13 +57,13 @@ describe("Picker Component", () => {
       { label: "Two", value: 2 },
       { label: "Three", value: 3 },
     ];
-    
+
     const mockOnValueChange = jest.fn();
 
     setup({
       items: numberItems,
-      selectedValue: 2,
       onValueChange: mockOnValueChange,
+      selectedValue: 2,
     });
 
     const container = screen.getByTestId(defaultProps.testID!);
@@ -80,7 +82,7 @@ describe("Picker Component", () => {
 
     const container = screen.getByTestId(defaultProps.testID!);
     const picker = container.props.children;
-    
+
     expect(picker.props.style).toBeDefined();
     expect(picker.props.dropdownIconColor).toBeDefined();
   });
@@ -92,7 +94,7 @@ describe("Picker Component", () => {
     const picker = container.props.children;
     const items = picker.props.children;
 
-    items.forEach((item: any, index: number) => {
+    items.forEach((item: ReactTestInstance, index: number) => {
       expect(item.props.label).toBe(defaultProps.items[index].label);
       expect(item.props.value).toBe(defaultProps.items[index].value);
       expect(item.props.style).toBeDefined();
@@ -111,9 +113,9 @@ describe("Picker Component", () => {
 
   it("SHOULD handle single item", () => {
     const singleItem = [{ label: "Only Option", value: "only" }];
-    setup({ 
+    setup({
       items: singleItem,
-      selectedValue: "only"
+      selectedValue: "only",
     });
 
     const container = screen.getByTestId(defaultProps.testID!);
@@ -138,7 +140,7 @@ describe("Picker Component", () => {
 
     const container = screen.getByTestId(defaultProps.testID!);
     const picker = container.props.children;
-    
+
     expect(picker.props.onValueChange).toEqual(expect.any(Function));
   });
 
@@ -147,7 +149,7 @@ describe("Picker Component", () => {
 
     const container = screen.getByTestId(defaultProps.testID!);
     const picker = container.props.children;
-    
+
     expect(picker.props.dropdownIconColor).toBeDefined();
   });
 });

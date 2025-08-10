@@ -102,7 +102,7 @@ describe("Spacer Component", () => {
 
       const spacer = screen.getByTestId(defaultProps.testID!);
       const line = spacer.props.children;
-      
+
       expect(line.props.style.borderBottomWidth).toBe(1);
       expect(line.props.style.borderColor).toBeDefined();
       expect(line.props.style.height).toBe(1);
@@ -129,7 +129,7 @@ describe("Spacer Component", () => {
     });
 
     it("SHOULD handle both direction with flex and horizontal line", () => {
-      setup({ direction: "both", size: "flex", horizontalLine: true });
+      setup({ direction: "both", horizontalLine: true, size: "flex" });
 
       const spacer = screen.getByTestId(defaultProps.testID!);
       expect(spacer.props.style.flex).toBe(1);
@@ -138,8 +138,8 @@ describe("Spacer Component", () => {
 
     it("SHOULD handle different spacing sizes correctly", () => {
       const sizes = ["small", "medium", "large", "xlarge", "xxlarge"] as const;
-      
-      sizes.forEach(size => {
+
+      sizes.forEach((size) => {
         setup({ direction: "both", size });
 
         const spacer = screen.getByTestId(defaultProps.testID!);
