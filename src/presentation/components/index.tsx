@@ -2,7 +2,7 @@ export { default as Accordion, AccordionProps } from "./Accordion";
 export { default as Avatar, AvatarProps } from "./Avatar";
 export { default as Button, ButtonProps } from "./Button";
 export { default as Card, CardProps } from "./Card";
-export { default as DatePicker } from "./DatePicker";
+export { default as DatePicker, DatePickerProps } from "./DatePicker";
 export { Fab, FabGroup } from "./Fab";
 export { default as HelperText, HelperTextProps } from "./HelperText";
 export { default as Picker } from "./Picker";

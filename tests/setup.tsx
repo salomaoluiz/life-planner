@@ -12,6 +12,9 @@ load(process.cwd(), { silent: true });
 
 jest.mock("react-native-paper", () => {
   const View = jest.requireActual("react-native").View;
+  const FAB = Object.assign(View, {
+    Group: View,
+  });
   return {
     Avatar: {
       Icon: View,
@@ -19,7 +22,11 @@ jest.mock("react-native-paper", () => {
       Text: View,
     },
     Button: View,
+    Card: View,
+    FAB,
+    HelperText: View,
     Icon: View,
+    IconButton: View,
     PaperProvider: ({ children, ...props }: { children: React.ReactNode }) => (
       <View {...props}>{children}</View>
     ),
@@ -43,6 +50,13 @@ jest.mock("@react-native-async-storage/async-storage", () => ({
   getItem: jest.fn(),
   setItem: jest.fn(),
 }));
+
+jest.mock("react-native-paper-dates", () => {
+  const View = jest.requireActual("react-native").View;
+  return {
+    DatePickerModal: View,
+  };
+});
 
 jest.mock("@supabase/supabase-js", () => ({
   createClient: jest.fn().mockImplementation(() => {
@@ -88,6 +102,11 @@ jest.mock("@presentation/i18n", () => ({
         return `${key} ${JSON.stringify(params)}`;
       }
       return key;
+    }),
+  }),
+  useTranslationLocale: jest.fn().mockReturnValue({
+    getLocale: jest.fn().mockReturnValue({
+      languageTag: "en-US",
     }),
   }),
 }));
