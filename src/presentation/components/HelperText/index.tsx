@@ -2,9 +2,9 @@ import * as Paper from "react-native-paper";
 
 export interface HelperTextProps {
   label: string;
+  testID?: string;
   type: "error" | "info";
   visible?: boolean;
-  testID?: string;
 }
 
 function HelperText(props: HelperTextProps) {
@@ -13,7 +13,7 @@ function HelperText(props: HelperTextProps) {
   }
 
   return (
-    <Paper.HelperText type={props.type} testID={props.testID}>
+    <Paper.HelperText testID={props.testID} type={props.type}>
       {props.label}
     </Paper.HelperText>
   );

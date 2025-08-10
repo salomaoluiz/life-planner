@@ -9,7 +9,14 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "test": "jest",
-    "lint": "eslint . && prettier . --check",
+    "type-check": "tsc --noEmit",
+    "test:watch": "yarn test --watch",
+    "test:cov": "yarn test --coverage",
+    "lint": "eslint .",
+    "lint:fix": "yarn lint --fix",
+    "prettier": "prettier . --check",
+    "prettier:fix": "yarn prettier --write",
+    "format": "yarn prettier:fix && yarn lint:fix",
     "prepare": "husky"
   },
   "dependencies": {

@@ -1,8 +1,9 @@
 import React from "react";
 import { View } from "react-native";
+
 import { render } from "@tests";
 
-import { Fab, FabProps, FabGroup, FabGroupProps } from "@components";
+import { Fab, FabGroup, FabGroupProps, FabProps } from "@components";
 
 const defaultFabProps: FabProps = {
   icon: "plus",
@@ -30,4 +31,4 @@ function setupFabGroup(props?: Partial<FabGroupProps>) {
   render(<FabGroup {...defaultFabGroupProps} {...props} />);
 }
 
-export { defaultFabProps, defaultFabGroupProps, setupFab, setupFabGroup };
+export { defaultFabGroupProps, defaultFabProps, setupFab, setupFabGroup };
