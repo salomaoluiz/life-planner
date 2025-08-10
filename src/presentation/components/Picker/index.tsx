@@ -3,13 +3,13 @@ import { View } from "react-native";
 
 import getStyles from "./styles";
 
-interface PickerItems<T> {
+export interface PickerItem<T> {
   label: string;
   value: T;
 }
 
-interface PickerProps<T> {
-  items: PickerItems<T>[];
+export interface PickerProps<T> {
+  items: PickerItem<T>[];
   label?: string;
   onValueChange: (newValue: T) => void;
   selectedValue: T;

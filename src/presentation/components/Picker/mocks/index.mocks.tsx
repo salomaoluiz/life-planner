@@ -1,19 +1,6 @@
 import { render } from "@tests";
 
-import Picker from "../index";
-
-interface PickerItem<T> {
-  label: string;
-  value: T;
-}
-
-interface PickerProps<T> {
-  items: PickerItem<T>[];
-  label?: string;
-  onValueChange: (newValue: T) => void;
-  selectedValue: T;
-  testID?: string;
-}
+import Picker, { PickerProps } from "../index";
 
 const defaultProps: PickerProps<string> = {
   items: [
