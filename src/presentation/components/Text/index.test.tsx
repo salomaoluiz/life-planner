@@ -3,7 +3,7 @@ import { screen } from "@tests";
 import { TextMode } from "@components/Text/types";
 import { lightTheme } from "@presentation/theme/provider";
 
-import { defaultProps, setup } from "./mocks";
+import { defaultProps, setup } from "./mocks/index.mocks";
 
 it("SHOULD render the Text with the correct props", () => {
   setup();

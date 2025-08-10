@@ -1,6 +1,6 @@
 import { act, fireEvent, screen } from "@tests";
 
-import { defaultProps, setup } from "./mocks";
+import { defaultProps, setup } from "./mocks/index.mocks";
 
 describe("DatePicker", () => {
   beforeEach(() => {

@@ -1,6 +1,6 @@
 import { act, screen } from "@tests";
 
-import { defaultProps, setup } from "./mocks";
+import { defaultProps, setup } from "./mocks/index.mocks";
 
 it("SHOULD render the Switch component with the correct props", () => {
   setup();
