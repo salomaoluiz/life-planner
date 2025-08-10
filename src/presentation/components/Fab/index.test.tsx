@@ -1,6 +1,11 @@
 import { act, screen } from "@tests";
 
-import { defaultFabProps, defaultFabGroupProps, setupFab, setupFabGroup } from "./mocks";
+import {
+  defaultFabGroupProps,
+  defaultFabProps,
+  setupFab,
+  setupFabGroup,
+} from "./mocks";
 
 describe("Fab", () => {
   beforeEach(() => {
@@ -66,8 +71,8 @@ describe("FabGroup", () => {
       icon: defaultFabGroupProps.icon,
       onStateChange: expect.any(Function),
       open: defaultFabGroupProps.isOpen,
-      visible: true,
       testID: defaultFabGroupProps.testID,
+      visible: true,
     });
   });
 
@@ -80,7 +85,9 @@ describe("FabGroup", () => {
       component.props.onStateChange({ open: true });
     });
 
-    expect(defaultFabGroupProps.onStateChange).toHaveBeenCalledWith({ open: true });
+    expect(defaultFabGroupProps.onStateChange).toHaveBeenCalledWith({
+      open: true,
+    });
     expect(defaultFabGroupProps.onStateChange).toHaveBeenCalledTimes(1);
   });
 

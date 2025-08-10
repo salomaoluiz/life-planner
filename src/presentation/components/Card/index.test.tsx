@@ -1,5 +1,6 @@
 import React from "react";
 import { View } from "react-native";
+
 import { screen } from "@tests";
 
 import { defaultProps, setup } from "./mocks";

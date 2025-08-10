@@ -4,9 +4,9 @@ import { HelperText, HelperTextProps } from "@components";
 
 const defaultProps: HelperTextProps = {
   label: "Helper text message",
+  testID: "default-helper-text",
   type: "info",
   visible: true,
-  testID: "default-helper-text",
 };
 
 function setup(props?: Partial<HelperTextProps>) {

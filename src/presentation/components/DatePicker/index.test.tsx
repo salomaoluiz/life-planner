@@ -1,4 +1,4 @@
-import { act, fireEvent, screen } from "@tests";
+import { act, screen } from "@tests";
 
 import { defaultProps, setup } from "./mocks";
 
@@ -28,10 +28,12 @@ describe("DatePicker", () => {
   it("SHOULD render without date initially", () => {
     setup();
 
-    const component = screen.getByTestId(defaultProps.testID!);
+    screen.getByTestId(defaultProps.testID!);
 
     // When no date is provided, the clear button should not be present
-    const clearButton = screen.queryByTestId(`${defaultProps.testID}-clear-button`);
+    const clearButton = screen.queryByTestId(
+      `${defaultProps.testID}-clear-button`,
+    );
     expect(clearButton).toBeNull();
   });
 
@@ -39,10 +41,12 @@ describe("DatePicker", () => {
     const testDate = new Date("2023-12-25");
     setup({ date: testDate });
 
-    const component = screen.getByTestId(defaultProps.testID!);
+    screen.getByTestId(defaultProps.testID!);
 
     // When date is provided, the clear button should be present
-    const clearButton = screen.getByTestId(`${defaultProps.testID}-clear-button`);
+    const clearButton = screen.getByTestId(
+      `${defaultProps.testID}-clear-button`,
+    );
     expect(clearButton).toBeTruthy();
   });
 
@@ -76,7 +80,9 @@ describe("DatePicker", () => {
     const testDate = new Date("2023-12-25");
     setup({ date: testDate });
 
-    const clearButton = screen.getByTestId(`${defaultProps.testID}-clear-button`);
+    const clearButton = screen.getByTestId(
+      `${defaultProps.testID}-clear-button`,
+    );
 
     expect(clearButton).toBeTruthy();
   });
@@ -84,7 +90,9 @@ describe("DatePicker", () => {
   it("SHOULD not show clear button when no date is present", () => {
     setup();
 
-    const clearButton = screen.queryByTestId(`${defaultProps.testID}-clear-button`);
+    const clearButton = screen.queryByTestId(
+      `${defaultProps.testID}-clear-button`,
+    );
 
     expect(clearButton).toBeNull();
   });
@@ -93,7 +101,9 @@ describe("DatePicker", () => {
     const testDate = new Date("2023-12-25");
     setup({ date: testDate });
 
-    const clearButton = screen.getByTestId(`${defaultProps.testID}-clear-button`);
+    const clearButton = screen.getByTestId(
+      `${defaultProps.testID}-clear-button`,
+    );
 
     act(() => {
       clearButton.props.onPress();
@@ -127,8 +137,8 @@ describe("DatePicker", () => {
       onConfirm: expect.any(Function),
       onDismiss: expect.any(Function),
       saveLabel: "Save",
-      visible: false, // Initially false in component state
       testID: `${defaultProps.testID}-modal`,
+      visible: false, // Initially false in component state
     });
   });
 

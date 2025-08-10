@@ -9,8 +9,8 @@ it("SHOULD render the helper text with the correct props when visible", () => {
 
   expect(component.props).toEqual({
     children: defaultProps.label,
-    type: defaultProps.type,
     testID: defaultProps.testID,
+    type: defaultProps.type,
   });
 });
 

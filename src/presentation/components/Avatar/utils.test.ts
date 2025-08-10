@@ -1,4 +1,5 @@
 import { useTheme } from "@presentation/theme";
+import { lightTheme } from "@presentation/theme/provider";
 
 import { getAvatarComponent, getAvatarSize } from "./utils";
 
@@ -13,13 +14,7 @@ describe("Avatar Utils", () => {
       isDark: false,
       setIsDark: jest.fn(),
       theme: {
-        sizes: {
-          spacing: {
-            large: 24,
-            xlarge: 32,
-            xxlarge: 48,
-          },
-        },
+        ...lightTheme,
       },
     } as const);
   });
@@ -27,17 +22,17 @@ describe("Avatar Utils", () => {
   describe("getAvatarSize", () => {
     it("SHOULD return correct size for large", () => {
       const size = getAvatarSize("large");
-      expect(size).toBe(48);
+      expect(size).toBe(lightTheme.sizes.spacing.xxlarge);
     });
 
     it("SHOULD return correct size for regular", () => {
       const size = getAvatarSize("regular");
-      expect(size).toBe(32);
+      expect(size).toBe(lightTheme.sizes.spacing.xlarge);
     });
 
     it("SHOULD return correct size for small", () => {
       const size = getAvatarSize("small");
-      expect(size).toBe(24);
+      expect(size).toBe(lightTheme.sizes.spacing.large);
     });
   });
 

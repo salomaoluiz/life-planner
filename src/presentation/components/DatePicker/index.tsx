@@ -61,8 +61,10 @@ function DatePicker(props: DatePickerProps) {
             onConfirm={onConfirm}
             onDismiss={onDismiss}
             saveLabel={"Save"}
-            visible={visible}
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
             testID={`${props.testID}-modal`}
+            visible={visible}
           />
         </View>
         {props.date ? (
@@ -71,7 +73,9 @@ function DatePicker(props: DatePickerProps) {
               name={"close"}
               onPress={clearDate}
               size={theme.sizes.spacing.large}
-              testID={props.testID ? `${props.testID}-clear-button` : "clear-button"}
+              testID={
+                props.testID ? `${props.testID}-clear-button` : "clear-button"
+              }
             />
           </View>
         ) : null}
