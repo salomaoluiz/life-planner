@@ -8,12 +8,13 @@ import { useTranslationLocale } from "@presentation/i18n";
 
 import getStyles from "./styles";
 
-interface DatePickerProps {
+export interface DatePickerProps {
   date?: Date;
   label: string;
   mode: "single";
   onConfirm: (params: { date?: Date }) => void;
   onDismiss?: () => void;
+  testID?: string;
 }
 
 function DatePicker(props: DatePickerProps) {
@@ -40,7 +41,7 @@ function DatePicker(props: DatePickerProps) {
   }
 
   return (
-    <Pressable onPress={onPress} style={styles.pressable}>
+    <Pressable onPress={onPress} style={styles.pressable} testID={props.testID}>
       <View style={styles.container}>
         <View>
           <View style={styles.labelContainer}>
@@ -61,6 +62,7 @@ function DatePicker(props: DatePickerProps) {
             onDismiss={onDismiss}
             saveLabel={"Save"}
             visible={visible}
+            testID={`${props.testID}-modal`}
           />
         </View>
         {props.date ? (
@@ -69,6 +71,7 @@ function DatePicker(props: DatePickerProps) {
               name={"close"}
               onPress={clearDate}
               size={theme.sizes.spacing.large}
+              testID={props.testID ? `${props.testID}-clear-button` : "clear-button"}
             />
           </View>
         ) : null}

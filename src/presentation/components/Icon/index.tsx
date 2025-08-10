@@ -25,6 +25,7 @@ function IconButton(props: IconButtonProps) {
       iconColor={props.color}
       onPress={props.onPress}
       size={props.size}
+      testID={props.testID}
     />
   );
 }

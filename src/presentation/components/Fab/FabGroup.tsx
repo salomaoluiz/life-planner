@@ -10,6 +10,7 @@ export interface FabGroupProps {
   isOpen: boolean;
   onStateChange: (state: { open: boolean }) => void;
   visible?: boolean;
+  testID?: string;
 }
 
 function FabGroup(props: FabGroupProps) {
@@ -20,6 +21,7 @@ function FabGroup(props: FabGroupProps) {
       onStateChange={props.onStateChange}
       open={props.isOpen}
       visible={props.visible ?? true}
+      testID={props.testID}
     />
   );
 }
