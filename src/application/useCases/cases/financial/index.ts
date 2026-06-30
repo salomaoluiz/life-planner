@@ -1,4 +1,12 @@
 export {
+  createAccountUseCase as createFinancialAccountUseCase,
+  deleteAccountUseCase as deleteFinancialAccountUseCase,
+  getAccountsUseCase as getFinancialAccountsUseCase,
+  refreshAccountsUseCase as refreshFinancialAccountsUseCase,
+  updateAccountUseCase as updateFinancialAccountUseCase,
+} from "./accounts";
+
+export {
   createCategoryUseCase as createFinancialCategoryUseCase,
   deleteCategoryUseCase as deleteFinancialCategoryUseCase,
   getCategoriesUseCase as getFinancialCategoriesUseCase,

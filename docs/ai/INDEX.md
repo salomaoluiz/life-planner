@@ -175,3 +175,9 @@ use_cases:
 **DO:** Reuse dummy components from the `src/presentation/components` every time that this component will need to be reused or you need a component from an external library.
 
 **DON'T:** Duplicate a component with a similar behavior across multiple screens or use a component from a library direct on the screen.
+
+### Translations
+
+**DO:** Always create the translations keys and values on the folder `presentation/i18n`, and use it with the `presentation/i18n/useTranslation`.
+
+**DON'T:** Use hardcoded translations direct on the screens and components.

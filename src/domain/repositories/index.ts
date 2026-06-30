@@ -5,6 +5,7 @@ import { ConfigsRepository } from "./configs";
 import { FamilyRepository } from "./family";
 import { FamilyMemberRepository } from "./familyMember";
 import {
+  FinancialAccountRepository,
   FinancialCategoryRepository,
   FinancialTransactionRepository,
 } from "./financial";
@@ -17,6 +18,7 @@ interface Repositories {
   familyMemberRepository: FamilyMemberRepository;
   familyRepository: FamilyRepository;
   financialRepository: {
+    account: FinancialAccountRepository;
     category: FinancialCategoryRepository;
     transaction: FinancialTransactionRepository;
   };

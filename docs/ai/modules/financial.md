@@ -4,6 +4,16 @@
 
 ```yaml
 entities:
+  AccountEntity:
+    path: src/domain/entities/financial/AccountEntity.ts
+    properties:
+      - id
+      - balance
+      - icon
+      - name
+      - owner
+      - ownerId
+      - status
   CategoryEntity:
     path: src/domain/entities/financial/CategoryEntity.ts
     properties:
@@ -14,6 +24,13 @@ entities:
       - (Properties define the financial transaction structure)
 
 interfaces:
+  AccountRepository:
+    path: src/domain/repositories/financial/financialAccountRepository.ts
+    methods:
+      - createAccount
+      - deleteAccount
+      - getAccounts
+      - updateAccount
   CategoryRepository:
     path: src/domain/repositories/financial/financialCategoryRepository.ts
     methods:
@@ -34,6 +51,26 @@ interfaces:
 
 ```yaml
 use_cases:
+  createAccountUseCase:
+    path: src/application/useCases/cases/financial/accounts/createAccountUseCase.ts
+    behavior: Creates a new financial account.
+
+  deleteAccountUseCase:
+    path: src/application/useCases/cases/financial/accounts/deleteAccountUseCase.ts
+    behavior: Deletes a financial account by ID.
+
+  getAccountsUseCase:
+    path: src/application/useCases/cases/financial/accounts/getAccountsUseCase.ts
+    behavior: Retrieves list of financial accounts.
+
+  refreshAccountsUseCase:
+    path: src/application/useCases/cases/financial/accounts/refreshAccountsUseCase.ts
+    behavior: Invalidates the cache of financial accounts.
+
+  updateAccountUseCase:
+    path: src/application/useCases/cases/financial/accounts/updateAccountUseCase.ts
+    behavior: Updates an existing financial account.
+
   createCategoryUseCase:
     path: src/application/useCases/cases/financial/categories/createCategoryUseCase.ts
     behavior: Creates a new financial category.
@@ -75,6 +112,8 @@ use_cases:
     behavior: Updates an existing transaction.
 
 dtos:
+  - name: AccountDTO
+    path: src/application/dto/financial/AccountDTO.ts
   - name: CategoryDTO
     path: src/application/dto/financial/CategoryDTO.ts
   - name: TransactionDTO
@@ -85,6 +124,9 @@ dtos:
 
 ```yaml
 repositories:
+  accountRepositoryImpl:
+    path: src/data/repositories/repos/financial/accounts/accountRepositoryImpl.ts
+    implements: AccountRepository
   categoryRepositoryImpl:
     path: src/data/repositories/repos/financial/categories/categoryRepositoryImpl.ts
     implements: CategoryRepository
@@ -93,6 +135,13 @@ repositories:
     implements: TransactionRepository
 
 datasources:
+  accountsDatasource (Supabase):
+    path: src/data/datasource/data/financial/accounts/supabase/
+    methods:
+      - createAccount: src/data/datasource/data/financial/accounts/supabase/createAccount.ts
+      - deleteAccount: src/data/datasource/data/financial/accounts/supabase/deleteAccount.ts
+      - getAccounts: src/data/datasource/data/financial/accounts/supabase/getAccounts.ts
+      - updateAccount: src/data/datasource/data/financial/accounts/supabase/updateAccount.ts
   categoriesDatasource (Supabase):
     path: src/data/datasource/data/financial/categories/supabase/
     methods:
