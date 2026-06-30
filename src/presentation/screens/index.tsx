@@ -1,5 +1,6 @@
 export { default as Config } from "./Config";
 export { default as Family } from "./Family";
+export { default as FinancialAccounts } from "./Financial/Accounts";
 export { default as FinancialCategories } from "./Financial/Categories";
 export { default as FinancialTransaction } from "./Financial/Transactions";
 export { default as Home } from "./Home";

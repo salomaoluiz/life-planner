@@ -164,6 +164,10 @@ datasources:
 screens:
   Transactions:
     path: src/presentation/screens/Financial/Transactions/index.tsx
+  Categories:
+    path: src/presentation/screens/Financial/Categories/index.tsx
+  Accounts:
+    path: src/presentation/screens/Financial/Accounts/index.tsx
 
 containers:
   - name: ListHeader
@@ -174,14 +178,28 @@ containers:
     path: src/presentation/screens/Financial/Transactions/containers/RefetchCache/index.tsx
   - name: ItemSeparator
     path: src/presentation/screens/Financial/Transactions/containers/ItemSeparator/index.tsx
+  - name: ListItem (Accounts)
+    path: src/presentation/screens/Financial/Accounts/containers/ListItem/index.tsx
 
 modals:
   - name: NewTransactionModal
     path: src/presentation/screens/Financial/Transactions/modals/NewTransactionModal/index.tsx
+  - name: NewCategoryModal
+    path: src/presentation/screens/Financial/Categories/modals/NewCategoryModal/index.tsx
+  - name: NewAccountModal
+    path: src/presentation/screens/Financial/Accounts/modals/NewAccountModal/index.tsx
 
 view_models:
   - name: FinancialTransactionViewModel
     path: src/presentation/screens/Financial/Transactions/models/FinancialTransactionViewModel.ts
   - name: NewTransactionViewModel
     path: src/presentation/screens/Financial/Transactions/modals/NewTransactionModal/models/NewTransactionViewModel.ts
+  - name: FinancialCategoryViewModel
+    path: src/presentation/screens/Financial/Categories/models/FinancialCategoryViewModel.ts
+  - name: NewCategoryViewModel
+    path: src/presentation/screens/Financial/Categories/modals/NewCategoryModal/models/NewCategoryViewModel.ts
+  - name: FinancialAccountViewModel
+    path: src/presentation/screens/Financial/Accounts/models/FinancialAccountViewModel.ts
+  - name: NewAccountViewModel
+    path: src/presentation/screens/Financial/Accounts/modals/NewAccountModal/models/NewAccountViewModel.ts
 ```

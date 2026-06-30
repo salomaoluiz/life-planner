@@ -1,3 +1,4 @@
+import { KeyboardTypeOptions } from "react-native";
 import { TextInput as PaperTextInput } from "react-native-paper";
 
 import getSyles from "./styles";
@@ -9,6 +10,7 @@ export enum TextInputMode {
 
 export interface TextInputProps {
   disabled?: boolean;
+  keyboardType?: KeyboardTypeOptions;
   label?: string;
   multiline?: boolean;
   onChangeText: (text: string) => void;
@@ -23,6 +25,7 @@ function TextInputBase(props: TextInputProps & { mode: TextInputMode }) {
   return (
     <PaperTextInput
       disabled={disabled}
+      keyboardType={props.keyboardType}
       label={props.label}
       mode={props.mode}
       multiline={props.multiline}
