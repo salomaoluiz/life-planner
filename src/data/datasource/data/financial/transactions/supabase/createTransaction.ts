@@ -10,7 +10,9 @@ async function createTransaction(params: Params): Promise<TransactionModel> {
     const response = await supabase
       .from("financial_transactions")
       .upsert({
+        account_id: params.accountId,
         category: params.category,
+        category_id: params.categoryId,
         date: params.date,
         description: params.description,
         owner: params.owner,

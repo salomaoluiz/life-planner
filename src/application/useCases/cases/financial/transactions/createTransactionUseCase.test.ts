@@ -15,7 +15,9 @@ it("SHOULD create a transaction", () => {
 
   expect(createTransactionSpy).toHaveBeenCalledTimes(1);
   expect(createTransactionSpy).toHaveBeenCalledWith({
+    accountId: mocks.defaultParams.accountId,
     category: mocks.defaultParams.category,
+    categoryId: mocks.defaultParams.categoryId,
     date: mocks.defaultParams.date,
     description: mocks.defaultParams.description,
     owner: mocks.defaultParams.owner,

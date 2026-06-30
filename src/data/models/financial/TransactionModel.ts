@@ -3,7 +3,9 @@ export type OwnerType = "FAMILY" | "USER";
 export type TransactionType = "EXPENSE" | "INCOME";
 
 interface ITransactionModel {
+  accountId: string;
   category: string;
+  categoryId: string;
   date: string;
   description: string;
   id: string;
@@ -14,7 +16,9 @@ interface ITransactionModel {
 }
 
 class TransactionModel implements ITransactionModel {
+  accountId: string;
   category: string;
+  categoryId: string;
   date: string;
   description: string;
   id: string;
@@ -24,8 +28,10 @@ class TransactionModel implements ITransactionModel {
   value: string;
 
   constructor(params: ITransactionModel) {
+    this.accountId = params.accountId;
     this.date = params.date;
     this.category = params.category;
+    this.categoryId = params.categoryId;
     this.description = params.description;
     this.owner = params.owner;
     this.id = params.id;
@@ -36,7 +42,9 @@ class TransactionModel implements ITransactionModel {
 
   static fromJSON(data: Record<string, unknown>): TransactionModel {
     return new TransactionModel({
+      accountId: data.account_id as string,
       category: data.category as string,
+      categoryId: data.category_id as string,
       date: data.date as string,
       description: data.description as string,
       id: data.id as string,
@@ -49,7 +57,9 @@ class TransactionModel implements ITransactionModel {
 
   toJSON() {
     return {
+      account_id: this.accountId,
       category: this.category,
+      category_id: this.categoryId,
       date: this.date,
       description: this.description,
       id: this.id,

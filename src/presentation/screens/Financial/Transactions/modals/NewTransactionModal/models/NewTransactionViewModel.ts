@@ -1,3 +1,5 @@
+import AccountDTO from "@application/dto/financial/AccountDTO";
+import CategoryDTO from "@application/dto/financial/CategoryDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 
@@ -7,6 +9,8 @@ const TransactionTypeLabels: Record<TransactionType, string> = {
 };
 
 interface INewTransactionViewModel {
+  accountsDTO: AccountDTO[];
+  categoriesDTO: CategoryDTO[];
   ownersDTO: OwnerDTO[];
 }
 
@@ -31,10 +35,32 @@ class NewTransactionViewModel {
     return types;
   }
 
-  private ownerDTOs: OwnerDTO[];
+  private accountsDTOs: AccountDTO[];
 
+  private categoriesDTOs: CategoryDTO[];
+
+  private ownerDTOs: OwnerDTO[];
   constructor(props: INewTransactionViewModel) {
     this.ownerDTOs = props.ownersDTO;
+    this.categoriesDTOs = props.categoriesDTO;
+    this.accountsDTOs = props.accountsDTO;
+  }
+  accountsForOwner(ownerId: string) {
+    return this.accountsDTOs
+      .filter((account) => account.ownerId === ownerId)
+      .map((account) => ({
+        label: account.name,
+        value: account.id,
+      }));
+  }
+
+  categoriesForOwner(ownerId: string) {
+    return this.categoriesDTOs
+      .filter((category) => category.ownerId === ownerId)
+      .map((category) => ({
+        label: category.name,
+        value: category.id,
+      }));
   }
 
   ownerType(ownerId: string) {

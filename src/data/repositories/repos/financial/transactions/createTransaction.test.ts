@@ -12,7 +12,9 @@ it("SHOULD create a transaction", async () => {
   expect(
     spies.financialTransactionDatasource.createTransaction,
   ).toHaveBeenCalledWith({
+    accountId: mocks.defaultParams.accountId,
     category: mocks.defaultParams.category,
+    categoryId: mocks.defaultParams.categoryId,
     date: mocks.defaultParams.date,
     description: mocks.defaultParams.description,
     owner: mocks.defaultParams.owner,
@@ -27,7 +29,9 @@ it("SHOULD return a transaction created", async () => {
 
   expect(result).toEqual(
     new TransactionEntity({
+      accountId: mocks.transactionModel.accountId,
       category: mocks.transactionModel.category,
+      categoryId: mocks.transactionModel.categoryId,
       date: mocks.transactionModel.date,
       description: mocks.transactionModel.description,
       id: mocks.transactionModel.id,

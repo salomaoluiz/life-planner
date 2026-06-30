@@ -5,7 +5,9 @@ import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import Repositories from "@domain/repositories";
 
 export interface CreateTransactionUseCaseParams {
+  accountId: string;
   category: string;
+  categoryId: string;
   date: string;
   description: string;
   owner: string;
@@ -32,7 +34,9 @@ function createTransactionUseCase(
 
       try {
         await repositories.financialRepository.transaction.createTransaction({
+          accountId: params.accountId,
           category: params.category,
+          categoryId: params.categoryId,
           date: params.date,
           description: params.description,
           owner,

@@ -25,6 +25,23 @@ function NewTransactionItemModal() {
     cacheKey: [useCases.getOwnersUseCase.uniqueName],
     fetch: useCases.getOwnersUseCase.execute,
   });
+  const categories = useQuery({
+    cacheKey: [useCases.getFinancialCategoriesUseCase.uniqueName],
+    fetch: async () => {
+      const owner = await useCases.getOwnersUseCase.execute();
+      const ownerIds = owner.map((o) => o.id);
+      return useCases.getFinancialCategoriesUseCase.execute(ownerIds);
+    },
+  });
+  const accounts = useQuery({
+    cacheKey: [useCases.getFinancialAccountsUseCase.uniqueName],
+    fetch: async () => {
+      const owner = await useCases.getOwnersUseCase.execute();
+      const ownerIds = owner.map((o) => o.id);
+      return useCases.getFinancialAccountsUseCase.execute(ownerIds);
+    },
+  });
+
   const { errors, fields, validateForm } = useForm();
 
   const addTransaction = useMutation({
@@ -34,13 +51,48 @@ function NewTransactionItemModal() {
 
   const newTransactionItemModel = useMemo(
     () =>
-      owners.data
+      owners.data && categories.data && accounts.data
         ? new NewTransactionItemViewModel({
+            accountsDTO: accounts.data,
+            categoriesDTO: categories.data,
             ownersDTO: owners.data,
           })
         : null,
-    [owners.data],
+    [owners.data, categories.data, accounts.data],
   );
+
+  const activeOwnerId =
+    fields.ownerId.value ?? (owners.data ? owners.data[0].id : undefined);
+
+  useEffect(() => {
+    if (newTransactionItemModel && activeOwnerId) {
+      const ownerCategories =
+        newTransactionItemModel.categoriesForOwner(activeOwnerId);
+      const ownerAccounts =
+        newTransactionItemModel.accountsForOwner(activeOwnerId);
+
+      const currentCategoryIsValid = ownerCategories.some(
+        (c) => c.value === fields.categoryId.value,
+      );
+      if (
+        ownerCategories.length > 0 &&
+        (!fields.categoryId.value || !currentCategoryIsValid)
+      ) {
+        fields.categoryId.onChange(ownerCategories[0].value);
+        fields.category.onChange(ownerCategories[0].label);
+      }
+
+      const currentAccountIsValid = ownerAccounts.some(
+        (a) => a.value === fields.accountId.value,
+      );
+      if (
+        ownerAccounts.length > 0 &&
+        (!fields.accountId.value || !currentAccountIsValid)
+      ) {
+        fields.accountId.onChange(ownerAccounts[0].value);
+      }
+    }
+  }, [newTransactionItemModel, activeOwnerId]);
 
   useEffect(() => {
     if (addTransaction.status === "success") {
@@ -48,7 +100,12 @@ function NewTransactionItemModal() {
     }
   }, [addTransaction.status]);
 
-  if (owners.isFetching || !newTransactionItemModel) {
+  if (
+    owners.isFetching ||
+    categories.isFetching ||
+    accounts.isFetching ||
+    !newTransactionItemModel
+  ) {
     return (
       <View>
         <Text.Headline value={"Loading"} />
@@ -156,20 +213,41 @@ function NewTransactionItemModal() {
             </View>
           </View>
           <Spacer direction={"vertical"} size={"medium"} />
-          <View style={styles.lineContainer}>
-            <View style={styles.helperTextContainer}>
-              <TextInput.Outlined
-                label={fields.category.label}
-                onChangeText={fields.category.onChange}
-                value={fields.category.value ?? ""}
-              />
-              <HelperText
-                label={errors["category"]}
-                type={"error"}
-                visible={!!errors["category"]}
-              />
-            </View>
-          </View>
+          <Picker
+            items={newTransactionItemModel.accountsForOwner(
+              activeOwnerId ?? "",
+            )}
+            label={"Account"}
+            onValueChange={(value) => {
+              fields.accountId.onChange(value);
+            }}
+            selectedValue={fields.accountId.value}
+          />
+          <HelperText
+            label={errors["accountId"]}
+            type={"error"}
+            visible={!!errors["accountId"]}
+          />
+          <Spacer direction={"vertical"} size={"medium"} />
+          <Picker
+            items={newTransactionItemModel.categoriesForOwner(
+              activeOwnerId ?? "",
+            )}
+            label={"Category"}
+            onValueChange={(value) => {
+              fields.categoryId.onChange(value);
+              const name = newTransactionItemModel
+                .categoriesForOwner(activeOwnerId ?? "")
+                .find((c) => c.value === value)?.label;
+              fields.category.onChange(name);
+            }}
+            selectedValue={fields.categoryId.value}
+          />
+          <HelperText
+            label={errors["categoryId"]}
+            type={"error"}
+            visible={!!errors["categoryId"]}
+          />
         </ScrollView>
         <Card customStyles={styles.buttonContainer}>
           <View style={styles.button}>

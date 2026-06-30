@@ -6,6 +6,8 @@ it("SHOULD the TransactionModel has all params", () => {
 
   expect(result).toHaveProperty("id", mocks.json.id);
   expect(result).toHaveProperty("category", mocks.json.category);
+  expect(result).toHaveProperty("categoryId", mocks.json.category_id);
+  expect(result).toHaveProperty("accountId", mocks.json.account_id);
   expect(result).toHaveProperty("date", mocks.json.date);
   expect(result).toHaveProperty("description", mocks.json.description);
   expect(result).toHaveProperty("owner", mocks.json.owner);
@@ -16,7 +18,9 @@ it("SHOULD the TransactionModel has all params", () => {
 
 it("SHOULD the TransactionModel fromJson create a new TransactionModel", () => {
   const modelFromJson = TransactionModel.fromJSON({
+    account_id: mocks.json.account_id,
     category: mocks.json.category,
+    category_id: mocks.json.category_id,
     date: mocks.json.date,
     description: mocks.json.description,
     id: mocks.json.id,
