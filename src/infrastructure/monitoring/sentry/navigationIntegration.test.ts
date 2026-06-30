@@ -7,7 +7,7 @@ import navigationIntegration from "./navigationIntegration";
 const navigationIntegrationResponse = {
   name: "NavigationIntegration",
   registerNavigationContainer: jest.fn(),
-};
+} as never;
 
 const reactNavigationIntegrationSpy = jest
   .spyOn(Sentry, "reactNavigationIntegration")

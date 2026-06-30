@@ -1,7 +1,7 @@
-import GlobalProviders from "@/src/providers";
 import { Stack } from "expo-router";
 import { LogBox } from "react-native";
 
+import GlobalProviders from "@/src/providers";
 import { ErrorBoundary, MonitoringWrapper } from "@infrastructure/monitoring";
 import { useInitializeRouter } from "@navigation";
 import {

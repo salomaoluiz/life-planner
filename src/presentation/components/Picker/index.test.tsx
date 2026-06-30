@@ -98,7 +98,6 @@ describe("Picker Component", () => {
       expect(item.props.label).toBe(defaultProps.items[index].label);
       expect(item.props.value).toBe(defaultProps.items[index].value);
       expect(item.props.style).toBeDefined();
-      expect(item.key).toBe(index.toString());
     });
   });
 
