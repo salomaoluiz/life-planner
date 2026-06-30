@@ -92,22 +92,24 @@ function FinancialTransaction() {
   }
 
   return (
-    <ScrollView>
-      <View style={styles.container}>
-        <View style={styles.listContainer}>
-          <FlashList
-            contentContainerStyle={styles.listContentContainer}
-            data={data}
-            ItemSeparatorComponent={ItemSeparator}
-            ListHeaderComponent={ListHeader}
-            renderItem={renderItem}
-          />
+    <>
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.container}>
+          <View style={styles.listContainer}>
+            <FlashList
+              contentContainerStyle={styles.listContentContainer}
+              data={data}
+              ItemSeparatorComponent={ItemSeparator}
+              ListHeaderComponent={ListHeader}
+              renderItem={renderItem}
+            />
+          </View>
         </View>
-        <View style={styles.fabContainer}>
-          <Fab icon={"plus"} onPress={onAddTransactionItemPress} />
-        </View>
+      </ScrollView>
+      <View style={styles.fabContainer}>
+        <Fab icon={"plus"} onPress={onAddTransactionItemPress} />
       </View>
-    </ScrollView>
+    </>
   );
 }
 

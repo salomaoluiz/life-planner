@@ -13,6 +13,7 @@ function getStyles() {
         alignItems: "center",
         backgroundColor: theme.colors.background,
         flex: 1,
+        paddingBottom: isWeb() ? theme.sizes.spacing.xxlarge : undefined,
         paddingTop: isWeb() ? theme.sizes.spacing.xxlarge : undefined,
       },
       fabContainer: {
@@ -37,6 +38,9 @@ function getStyles() {
         flex: 1,
         paddingHorizontal: isWeb() ? theme.sizes.spacing.large : undefined,
         paddingVertical: isWeb() ? theme.sizes.spacing.large : undefined,
+      },
+      scrollView: {
+        flex: 1,
       },
     }),
     theme,
