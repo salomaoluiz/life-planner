@@ -47,7 +47,7 @@ To maintain the architectural integrity of the Life Planner application, all AI-
 - **Domain Purity**: The domain layer must be written in 100% pure TypeScript. It cannot contain imports from React, React Native, Expo, or any external dependency listed in the `package.json`.
 - **Coupling Direction**: The architecture follows a strict outside-in dependency rule. The presentation layer imports application. The application layer imports domain. The domain layer does not import anything outside of itself.
 - **Business Logic Orchestration**: All business rules must be orchestrated exclusively by Use Cases within the application layer.
-- **Continuous Documentation**: Every time code is modified, refactored, or generated, its corresponding AI-context documentation must be updated in tandem to reflect the new state.
+- **Continuous Documentation**: Every time code is modified, refactored, or generated, its corresponding AI-context documentation on `docs/ai` must be updated in tandem to reflect the new state. You should not commit the plan, but enhance or create a new documentation following the already existent ones.
 
 ## DOs and DON'Ts Cheat Sheet
 

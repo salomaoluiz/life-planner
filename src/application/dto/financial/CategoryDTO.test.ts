@@ -1,0 +1,26 @@
+import CategoryEntity from "@domain/entities/financial/CategoryEntity";
+import { OwnerType } from "@domain/entities/user/OwnerEntity";
+
+import CategoryDTO from "./CategoryDTO";
+
+it("SHOULD map entity to CategoryDTO correctly", () => {
+  const entity = new CategoryEntity({
+    depthLevel: 1,
+    icon: "icon",
+    id: "id",
+    name: "name",
+    owner: OwnerType.USER,
+    ownerId: "ownerId",
+    parentId: "parentId",
+  });
+
+  const dto = CategoryDTO.fromEntity(entity);
+
+  expect(dto.depthLevel).toBe(1);
+  expect(dto.icon).toBe("icon");
+  expect(dto.id).toBe("id");
+  expect(dto.name).toBe("name");
+  expect(dto.owner).toBe("USER");
+  expect(dto.ownerId).toBe("ownerId");
+  expect(dto.parentId).toBe("parentId");
+});
