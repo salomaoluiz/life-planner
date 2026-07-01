@@ -6,6 +6,7 @@ import Repositories from "@domain/repositories";
 export interface CreateCategoryUseCaseParams {
   depthLevel?: number;
   icon: string;
+  iconColor?: string;
   name: string;
   owner: string;
   ownerId: string;
@@ -27,6 +28,7 @@ function createCategoryUseCase(
         await repositories.financialRepository.category.createCategory({
           depthLevel: params.depthLevel,
           icon: params.icon,
+          iconColor: params.iconColor,
           name: params.name,
           owner,
           ownerId: params.ownerId,

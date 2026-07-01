@@ -21,6 +21,18 @@ const financial = {
     status: "Status",
     title: "Accounts",
   },
+  categories: {
+    add: "Add",
+    addNewCategory: "Add New Category",
+    cancel: "Cancel",
+    chooseIcon: "Choose Icon",
+    color: "Category Color",
+    name: "Name",
+    nameRequired: "Name is required",
+    others: "Others",
+    owner: "Family Context",
+    parent: "Parent Category",
+  },
   routeTitle: "Financial",
 };
 

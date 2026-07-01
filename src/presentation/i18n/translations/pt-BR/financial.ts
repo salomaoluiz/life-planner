@@ -21,6 +21,18 @@ const financial = {
     status: "Status",
     title: "Contas",
   },
+  categories: {
+    add: "Adicionar",
+    addNewCategory: "Adicionar Nova Categoria",
+    cancel: "Cancelar",
+    chooseIcon: "Escolher Ícone",
+    color: "Cor da Categoria",
+    name: "Nome",
+    nameRequired: "Nome é obrigatório",
+    others: "Outros",
+    owner: "Proprietário",
+    parent: "Categoria Pai",
+  },
   routeTitle: "Financeiro",
 };
 

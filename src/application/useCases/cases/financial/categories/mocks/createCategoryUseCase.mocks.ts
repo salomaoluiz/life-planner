@@ -8,6 +8,7 @@ import createCategoryUseCase, {
 const defaultParams: CreateCategoryUseCaseParams = {
   depthLevel: 0,
   icon: "icon",
+  iconColor: "black",
   name: "Category",
   owner: "FAMILY",
   ownerId: "user-id",

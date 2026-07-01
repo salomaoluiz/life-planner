@@ -17,6 +17,7 @@ it("SHOULD call repository createCategory correctly", async () => {
     {
       depthLevel: mocks.defaultParams.depthLevel,
       icon: mocks.defaultParams.icon,
+      iconColor: mocks.defaultParams.iconColor,
       name: mocks.defaultParams.name,
       owner: OwnerType.FAMILY,
       ownerId: mocks.defaultParams.ownerId,
