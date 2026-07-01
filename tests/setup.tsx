@@ -27,6 +27,19 @@ jest.mock("react-native-paper", () => {
     HelperText: View,
     Icon: View,
     IconButton: View,
+    Menu: ({
+      anchor,
+      children,
+      ...props
+    }: {
+      anchor?: React.ReactNode;
+      children?: React.ReactNode;
+    }) => (
+      <View {...props}>
+        {anchor}
+        {children}
+      </View>
+    ),
     PaperProvider: ({ children, ...props }: { children: React.ReactNode }) => (
       <View {...props}>{children}</View>
     ),
