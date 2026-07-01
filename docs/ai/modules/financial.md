@@ -17,7 +17,14 @@ entities:
   CategoryEntity:
     path: src/domain/entities/financial/CategoryEntity.ts
     properties:
-      - (Properties define the financial category structure)
+      - depthLevel
+      - icon
+      - iconColor
+      - id
+      - name
+      - owner
+      - ownerId
+      - parentId
   TransactionEntity:
     path: src/domain/entities/financial/TransactionEntity.ts
     properties:
