@@ -10,6 +10,7 @@ async function updateCategory(params: Params, datasources: Datasources) {
   await datasources.financialCategoryDatasource.updateCategory({
     depthLevel: params.depthLevel,
     icon: params.icon,
+    iconColor: params.iconColor,
     id: params.id,
     name: params.name,
     owner: params.owner,

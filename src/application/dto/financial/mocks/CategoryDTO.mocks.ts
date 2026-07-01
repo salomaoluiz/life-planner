@@ -7,6 +7,7 @@ import CategoryDTO, { ICategoryDTO } from "../CategoryDTO";
 const defaultProps: ICategoryDTO = {
   depthLevel: 0,
   icon: "icon",
+  iconColor: "black",
   id: "4be16cb6-b9e4-47bb-99cb-eb62ff6576c3",
   name: "Category",
   owner: OwnerType.FAMILY,

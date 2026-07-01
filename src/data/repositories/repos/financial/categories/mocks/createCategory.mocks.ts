@@ -8,6 +8,7 @@ import createCategory, { Params } from "../createCategory";
 const defaultParams: Params = {
   depthLevel: 0,
   icon: "icon",
+  iconColor: "black",
   name: "Category",
   owner: OwnerType.USER,
   ownerId: "user-id",
@@ -17,6 +18,7 @@ const defaultParams: Params = {
 const categoryModelMock = new CategoryModel({
   depthLevel: 0,
   icon: "icon",
+  iconColor: "black",
   id: "cat-uuid",
   name: "Category",
   owner: "USER",

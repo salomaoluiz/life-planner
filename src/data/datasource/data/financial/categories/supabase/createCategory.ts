@@ -12,6 +12,7 @@ async function createCategory(params: Params): Promise<CategoryModel> {
       .upsert({
         depth_level: params.depthLevel,
         icon: params.icon,
+        icon_color: params.iconColor,
         name: params.name,
         owner: params.owner,
         owner_id: params.ownerId,

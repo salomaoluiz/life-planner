@@ -13,6 +13,7 @@ export interface CategoryDatasource {
 interface CreateCategoryDatasourceParams {
   depthLevel?: number;
   icon: string;
+  iconColor?: string;
   name: string;
   owner: OwnerType;
   ownerId: string;
@@ -27,6 +28,7 @@ interface DeleteCategoryDatasourceParams {
 interface UpdateCategoryDatasourceParams {
   depthLevel?: number;
   icon?: string;
+  iconColor?: string;
   id: string;
   name?: string;
   owner?: OwnerType;

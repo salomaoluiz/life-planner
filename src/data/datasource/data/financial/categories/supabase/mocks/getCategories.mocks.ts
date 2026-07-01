@@ -9,6 +9,7 @@ const responseMock = {
     {
       depth_level: 0,
       icon: "icon",
+      icon_color: "black",
       id: "cat-uuid",
       name: "Category",
       owner: "USER",

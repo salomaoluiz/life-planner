@@ -11,6 +11,7 @@ async function updateCategory(params: Params): Promise<void> {
       .update({
         depth_level: params.depthLevel,
         icon: params.icon,
+        icon_color: params.iconColor,
         name: params.name,
         owner: params.owner,
         owner_id: params.ownerId,

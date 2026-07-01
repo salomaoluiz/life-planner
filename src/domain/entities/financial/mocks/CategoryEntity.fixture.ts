@@ -18,6 +18,7 @@ class CategoryEntityFixture {
     this.value = {
       depthLevel: 0,
       icon: "icon",
+      iconColor: "#000",
       id: "id",
       name: "name",
       owner: OwnerType.FAMILY,
@@ -36,6 +37,12 @@ class CategoryEntityFixture {
 
   withIcon(icon: string) {
     this.value.icon = icon;
+
+    return this;
+  }
+
+  withIconColor(iconColor: string) {
+    this.value.iconColor = iconColor;
 
     return this;
   }

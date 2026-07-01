@@ -5,6 +5,7 @@ import createCategory, { Params } from "../createCategory";
 const defaultParams: Params = {
   depthLevel: 0,
   icon: "icon",
+  iconColor: "black",
   name: "Category",
   owner: "USER",
   ownerId: "user-uuid",
@@ -16,6 +17,7 @@ const responseMock = {
     {
       depth_level: 0,
       icon: "icon",
+      icon_color: "black",
       id: "cat-uuid",
       name: "Category",
       owner: "USER",

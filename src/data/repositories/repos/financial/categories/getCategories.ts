@@ -32,6 +32,7 @@ async function getCategories(ownerIds: Params, datasources: Datasources) {
       new CategoryEntity({
         depthLevel: category.depthLevel,
         icon: category.icon,
+        iconColor: category.iconColor,
         id: category.id,
         name: category.name,
         owner: OwnerType[category.owner],

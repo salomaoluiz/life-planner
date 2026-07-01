@@ -7,6 +7,7 @@ it("SHOULD the CategoryModel has all params", () => {
   expect(result).toHaveProperty("id", mocks.json.id);
   expect(result).toHaveProperty("depthLevel", mocks.json.depth_level);
   expect(result).toHaveProperty("icon", mocks.json.icon);
+  expect(result).toHaveProperty("iconColor", mocks.json.icon_color);
   expect(result).toHaveProperty("name", mocks.json.name);
   expect(result).toHaveProperty("owner", mocks.json.owner);
   expect(result).toHaveProperty("ownerId", mocks.json.owner_id);
@@ -17,6 +18,7 @@ it("SHOULD the CategoryModel fromJson create a new CategoryModel", () => {
   const modelFromJson = CategoryModel.fromJSON({
     depth_level: mocks.json.depth_level,
     icon: mocks.json.icon,
+    icon_color: mocks.json.icon_color,
     id: mocks.json.id,
     name: mocks.json.name,
     owner: mocks.json.owner,

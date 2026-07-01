@@ -3,6 +3,7 @@ import { OwnerType } from "./TransactionModel";
 interface ICategoryModel {
   depthLevel?: number;
   icon: string;
+  iconColor?: string;
   id: string;
   name: string;
   owner: OwnerType;
@@ -13,6 +14,7 @@ interface ICategoryModel {
 class CategoryModel implements ICategoryModel {
   depthLevel?: number;
   icon: string;
+  iconColor: string;
   id: string;
   name: string;
   owner: OwnerType;
@@ -25,6 +27,7 @@ class CategoryModel implements ICategoryModel {
     this.ownerId = params.ownerId;
     this.name = params.name;
     this.icon = params.icon;
+    this.iconColor = params.iconColor ?? "black";
     this.parentId = params.parentId;
     this.depthLevel = params.depthLevel;
   }
@@ -36,6 +39,7 @@ class CategoryModel implements ICategoryModel {
           ? Number(data.depth_level)
           : undefined,
       icon: data.icon as string,
+      iconColor: (data.icon_color as string) ?? "black",
       id: data.id as string,
       name: data.name as string,
       owner: data.owner as OwnerType,
@@ -51,6 +55,7 @@ class CategoryModel implements ICategoryModel {
     return {
       depth_level: this.depthLevel,
       icon: this.icon,
+      icon_color: this.iconColor,
       id: this.id,
       name: this.name,
       owner: this.owner,

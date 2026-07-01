@@ -7,6 +7,7 @@ it("SHOULD map entity to CategoryDTO correctly", () => {
   const entity = new CategoryEntity({
     depthLevel: 1,
     icon: "icon",
+    iconColor: "black",
     id: "id",
     name: "name",
     owner: OwnerType.USER,
@@ -18,6 +19,7 @@ it("SHOULD map entity to CategoryDTO correctly", () => {
 
   expect(dto.depthLevel).toBe(1);
   expect(dto.icon).toBe("icon");
+  expect(dto.iconColor).toBe("black");
   expect(dto.id).toBe("id");
   expect(dto.name).toBe("name");
   expect(dto.owner).toBe("USER");

@@ -8,6 +8,7 @@ it("SHOULD update a category", async () => {
     {
       depthLevel: mocks.defaultParams.depthLevel,
       icon: mocks.defaultParams.icon,
+      iconColor: mocks.defaultParams.iconColor,
       id: mocks.defaultParams.id,
       name: mocks.defaultParams.name,
       owner: mocks.defaultParams.owner,

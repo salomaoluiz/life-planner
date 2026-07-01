@@ -10,6 +10,7 @@ it("SHOULD create a category", async () => {
     {
       depthLevel: mocks.defaultParams.depthLevel,
       icon: mocks.defaultParams.icon,
+      iconColor: mocks.defaultParams.iconColor,
       name: mocks.defaultParams.name,
       owner: mocks.defaultParams.owner,
       ownerId: mocks.defaultParams.ownerId,

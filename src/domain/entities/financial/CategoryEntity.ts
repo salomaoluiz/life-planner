@@ -3,6 +3,7 @@ import { OwnerType } from "@domain/entities/user/OwnerEntity";
 interface ICategoryEntity {
   depthLevel?: number;
   icon: string;
+  iconColor?: string;
   id: string;
   name: string;
   owner: OwnerType;
@@ -13,6 +14,7 @@ interface ICategoryEntity {
 class CategoryEntity {
   depthLevel?: number;
   icon: string;
+  iconColor: string;
   id: string;
   name: string;
   owner: OwnerType;
@@ -25,6 +27,7 @@ class CategoryEntity {
     this.ownerId = params.ownerId;
     this.name = params.name;
     this.icon = params.icon;
+    this.iconColor = params.iconColor ?? "black";
     this.parentId = params.parentId;
     this.depthLevel = params.depthLevel;
   }

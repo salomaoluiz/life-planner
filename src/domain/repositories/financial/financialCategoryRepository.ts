@@ -13,6 +13,7 @@ export type FinancialCategoryRepository = {
 interface CreateCategoryRepositoryParams {
   depthLevel?: number;
   icon: string;
+  iconColor?: string;
   name: string;
   owner: OwnerType;
   ownerId: string;
@@ -27,6 +28,7 @@ interface DeleteCategoryRepositoryParams {
 interface UpdateCategoryRepositoryParams {
   depthLevel?: number;
   icon?: string;
+  iconColor?: string;
   id: string;
   name?: string;
   owner?: OwnerType;

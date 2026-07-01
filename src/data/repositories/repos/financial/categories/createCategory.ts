@@ -13,6 +13,7 @@ async function createCategory(params: Params, datasources: Datasources) {
     {
       depthLevel: params.depthLevel,
       icon: params.icon,
+      iconColor: params.iconColor,
       name: params.name,
       owner: params.owner,
       ownerId: params.ownerId,
@@ -25,6 +26,7 @@ async function createCategory(params: Params, datasources: Datasources) {
   return new CategoryEntity({
     depthLevel: category.depthLevel,
     icon: category.icon,
+    iconColor: category.iconColor,
     id: category.id,
     name: category.name,
     owner: OwnerType[category.owner],

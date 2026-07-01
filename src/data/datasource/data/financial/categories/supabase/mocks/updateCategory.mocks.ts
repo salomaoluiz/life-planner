@@ -5,6 +5,7 @@ import updateCategory, { Params } from "../updateCategory";
 const defaultParams: Params = {
   depthLevel: 1,
   icon: "new-icon",
+  iconColor: "black",
   id: "cat-uuid",
   name: "New Category",
   owner: "USER",

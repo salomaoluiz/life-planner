@@ -9,6 +9,7 @@ const defaultParams: Params = ["user-id"];
 const categoryModelMock = new CategoryModel({
   depthLevel: 0,
   icon: "icon",
+  iconColor: "black",
   id: "cat-uuid",
   name: "Category",
   owner: "USER",

@@ -3,6 +3,7 @@ import CategoryEntity from "@domain/entities/financial/CategoryEntity";
 export interface ICategoryDTO {
   depthLevel?: number;
   icon: string;
+  iconColor?: string;
   id: string;
   name: string;
   owner: string;
@@ -13,6 +14,7 @@ export interface ICategoryDTO {
 class CategoryDTO {
   depthLevel?: number;
   icon: string;
+  iconColor: string;
   id: string;
   name: string;
   owner: string;
@@ -22,6 +24,7 @@ class CategoryDTO {
   constructor(params: ICategoryDTO) {
     this.depthLevel = params.depthLevel;
     this.icon = params.icon;
+    this.iconColor = params.iconColor ?? "black";
     this.id = params.id;
     this.name = params.name;
     this.owner = params.owner;
@@ -33,6 +36,7 @@ class CategoryDTO {
     return new CategoryDTO({
       depthLevel: entity.depthLevel,
       icon: entity.icon,
+      iconColor: entity.iconColor,
       id: entity.id,
       name: entity.name,
       owner: entity.owner,
