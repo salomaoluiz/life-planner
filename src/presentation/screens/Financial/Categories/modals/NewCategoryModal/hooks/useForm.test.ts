@@ -38,6 +38,7 @@ describe("useForm", () => {
       result.current.fields.name.onChange("Bonus");
       result.current.fields.parentId.onChange("cat-1");
       result.current.fields.icon.onChange("star");
+      result.current.fields.iconColor.onChange("#ff9f43");
     });
     let params;
     act(() => {
@@ -46,6 +47,7 @@ describe("useForm", () => {
     expect(params).toEqual({
       depthLevel: 1,
       icon: "star",
+      iconColor: "#ff9f43",
       name: "Bonus",
       owner: "USER",
       ownerId: "owner-1",
@@ -64,5 +66,6 @@ describe("useForm", () => {
       params = result.current.validateForm(owners, categories);
     });
     expect(params?.parentId).toBeUndefined();
+    expect(params?.iconColor).toBe("black");
   });
 });

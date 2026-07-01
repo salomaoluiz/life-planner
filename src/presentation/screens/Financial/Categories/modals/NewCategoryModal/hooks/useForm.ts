@@ -10,10 +10,16 @@ function useForm() {
   const [ownerId, setOwnerId] = useState<string | undefined>(undefined);
   const [parentId, setParentId] = useState<string | undefined>(undefined);
   const [icon, setIcon] = useState("folder");
+  const [iconColor, setIconColor] = useState("black");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const fields = {
     icon: { label: "Icon", onChange: setIcon, value: icon },
+    iconColor: {
+      label: "Icon Color",
+      onChange: setIconColor,
+      value: iconColor,
+    },
     name: { label: "Name", onChange: setName, value: name },
     ownerId: { label: "Owner ID", onChange: setOwnerId, value: ownerId },
     parentId: {
@@ -55,6 +61,7 @@ function useForm() {
     return {
       depthLevel,
       icon,
+      iconColor,
       name,
       owner: ownerType,
       ownerId: selectedOwnerId,
