@@ -3,7 +3,7 @@ import colors from "./colors";
 it("SHOULD return the light theme colors", () => {
   expect(colors.light).toEqual({
     backdrop: "rgba(45, 49, 56, 0.4)",
-    background: "rgb(253, 252, 255)",
+    background: "rgb(241, 245, 249)",
     elevation: {
       level0: "transparent",
       level1: "rgb(240, 244, 251)",
@@ -18,6 +18,16 @@ it("SHOULD return the light theme colors", () => {
       expense: "rgb(255, 26, 26)",
       income: "rgb(50, 155, 0)",
     },
+    glassBackground: "rgba(255, 255, 255, 0.4)",
+    glassBackgroundFocused: "rgba(255, 255, 255, 0.6)",
+    glassBorder: "rgba(255, 255, 255, 0.6)",
+    glassBorderFocused: "rgba(0, 95, 175, 0.8)",
+    glassButtonPrimaryBg: "rgba(0, 95, 175, 0.85)",
+    glassButtonPrimaryBorder: "rgba(0, 95, 175, 0.95)",
+    glassButtonSecondaryBg: "rgba(255, 255, 255, 0.3)",
+    glassButtonSecondaryBorder: "rgba(0, 95, 175, 0.2)",
+    glassTextPlaceholder: "rgba(0, 0, 0, 0.5)",
+    glassTextSecondary: "rgba(0, 0, 0, 0.7)",
     inverseOnSurface: "rgb(241, 240, 244)",
     inversePrimary: "rgb(165, 200, 255)",
     inverseSurface: "rgb(47, 48, 51)",
@@ -52,7 +62,7 @@ it("SHOULD return the light theme colors", () => {
 it("SHOULD return the dark theme colors", () => {
   expect(colors.dark).toEqual({
     backdrop: "rgba(45, 49, 56, 0.4)",
-    background: "rgb(26, 28, 30)",
+    background: "rgb(15, 23, 42)",
     elevation: {
       level0: "transparent",
       level1: "rgb(33, 37, 41)",
@@ -67,6 +77,16 @@ it("SHOULD return the dark theme colors", () => {
       expense: "rgb(255, 26, 26)",
       income: "rgb(50, 155, 0)",
     },
+    glassBackground: "rgba(255, 255, 255, 0.08)",
+    glassBackgroundFocused: "rgba(255, 255, 255, 0.12)",
+    glassBorder: "rgba(255, 255, 255, 0.15)",
+    glassBorderFocused: "rgba(255, 255, 255, 0.45)",
+    glassButtonPrimaryBg: "rgba(165, 200, 255, 0.25)",
+    glassButtonPrimaryBorder: "rgba(165, 200, 255, 0.45)",
+    glassButtonSecondaryBg: "rgba(0, 0, 0, 0.2)",
+    glassButtonSecondaryBorder: "rgba(255, 255, 255, 0.1)",
+    glassTextPlaceholder: "rgba(255, 255, 255, 0.5)",
+    glassTextSecondary: "rgba(255, 255, 255, 0.7)",
     inverseOnSurface: "rgb(47, 48, 51)",
     inversePrimary: "rgb(0, 95, 175)",
     inverseSurface: "rgb(227, 226, 230)",
