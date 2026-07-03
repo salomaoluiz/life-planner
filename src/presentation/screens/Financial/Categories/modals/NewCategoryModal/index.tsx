@@ -136,6 +136,20 @@ function NewCategoryModal() {
           <Spacer direction={"vertical"} size={"medium"} />
 
           <Picker
+            items={[
+              { label: t("financial.categories.expense"), value: "EXPENSE" },
+              { label: t("financial.categories.income"), value: "INCOME" },
+            ]}
+            label={t("financial.categories.type")}
+            onValueChange={(val) => {
+              fields.type.onChange(val);
+              fields.parentId.onChange("");
+            }}
+            selectedValue={fields.type.value}
+          />
+          <Spacer direction={"vertical"} size={"medium"} />
+
+          <Picker
             items={viewModel.stockOwners}
             label={t("financial.categories.owner")}
             onValueChange={(val) => {
@@ -147,7 +161,10 @@ function NewCategoryModal() {
           <Spacer direction={"vertical"} size={"medium"} />
 
           <Picker
-            items={viewModel.getParentCategories(fields.ownerId.value)}
+            items={viewModel.getParentCategories(
+              fields.ownerId.value,
+              fields.type.value,
+            )}
             label={t("financial.categories.parent")}
             onValueChange={fields.parentId.onChange}
             selectedValue={fields.parentId.value ?? ""}

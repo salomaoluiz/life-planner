@@ -16,6 +16,7 @@ describe("NewCategoryViewModel", () => {
       name: "Food",
       owner: "USER",
       ownerId: "1",
+      type: "EXPENSE",
     }),
     new CategoryDTO({
       icon: "cart",
@@ -23,6 +24,7 @@ describe("NewCategoryViewModel", () => {
       name: "Groceries",
       owner: "FAMILY",
       ownerId: "2",
+      type: "EXPENSE",
     }),
   ];
 
@@ -36,7 +38,7 @@ describe("NewCategoryViewModel", () => {
 
   it("should get parent categories filtered by owner", () => {
     const vm = new NewCategoryViewModel(owners, categories);
-    const parentOpts = vm.getParentCategories("1");
+    const parentOpts = vm.getParentCategories("1", "EXPENSE");
     expect(parentOpts).toEqual([
       { label: "None (Root Category)", value: "" },
       { label: "Food", value: "cat-1" },

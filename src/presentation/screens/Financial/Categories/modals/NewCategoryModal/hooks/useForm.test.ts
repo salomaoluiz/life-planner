@@ -19,6 +19,7 @@ describe("useForm", () => {
       name: "Salary",
       owner: "USER",
       ownerId: "owner-1",
+      type: "EXPENSE",
     }),
   ];
 
@@ -52,6 +53,7 @@ describe("useForm", () => {
       owner: "USER",
       ownerId: "owner-1",
       parentId: "cat-1",
+      type: "EXPENSE",
     });
   });
 

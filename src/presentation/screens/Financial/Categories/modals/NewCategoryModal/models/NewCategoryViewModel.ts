@@ -14,9 +14,11 @@ class NewCategoryViewModel {
     private readonly categories: CategoryDTO[],
   ) {}
 
-  getParentCategories(ownerId: string | undefined) {
+  getParentCategories(ownerId: string | undefined, type: string) {
     const targetOwnerId = ownerId ?? this.owners[0]?.id;
-    const filtered = this.categories.filter((c) => c.ownerId === targetOwnerId);
+    const filtered = this.categories.filter(
+      (c) => c.ownerId === targetOwnerId && c.type === type,
+    );
 
     return [
       { label: "None (Root Category)", value: "" },

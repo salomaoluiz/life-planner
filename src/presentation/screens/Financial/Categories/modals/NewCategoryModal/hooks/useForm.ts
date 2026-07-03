@@ -11,6 +11,7 @@ function useForm() {
   const [parentId, setParentId] = useState<string | undefined>(undefined);
   const [icon, setIcon] = useState("folder");
   const [iconColor, setIconColor] = useState("black");
+  const [type, setType] = useState("EXPENSE");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const fields = {
@@ -27,6 +28,7 @@ function useForm() {
       onChange: setParentId,
       value: parentId,
     },
+    type: { label: "Type", onChange: setType, value: type },
   };
 
   function validateForm(
@@ -66,6 +68,7 @@ function useForm() {
       owner: ownerType,
       ownerId: selectedOwnerId,
       parentId: parentId && parentId !== "" ? parentId : undefined,
+      type,
     };
   }
 
