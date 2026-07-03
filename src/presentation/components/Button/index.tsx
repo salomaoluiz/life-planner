@@ -1,14 +1,17 @@
+import { BlurView } from "expo-blur";
 import React from "react";
+import { View } from "react-native";
 import { Button as PaperButton } from "react-native-paper";
 
-import { styles } from "./styles";
-import getCustomStyles, { CustomStyles } from "./styles/customStyles";
+import { useTheme } from "@presentation/theme";
 
-export enum ButtonMode {
-  Filled = "contained",
-  Outlined = "outlined",
-  Text = "text",
-}
+import { styles } from "./styles";
+import getCustomStyles, {
+  ButtonMode,
+  CustomStyles,
+} from "./styles/customStyles";
+
+export { ButtonMode };
 
 export interface ButtonProps {
   customStyles?: CustomStyles;
@@ -20,23 +23,54 @@ export interface ButtonProps {
 }
 
 function ButtonBase(props: ButtonProps & { mode: ButtonMode }) {
+  const { theme } = useTheme();
+
   const customStyles = getCustomStyles({
     customStyles: props.customStyles,
     disabled: props.disabled,
+    mode: props.mode,
+    theme,
   });
 
+  const isTextMode = props.mode === ButtonMode.Text;
+
+  if (isTextMode) {
+    return (
+      <PaperButton
+        disabled={props.disabled}
+        icon={props.icon}
+        mode="text"
+        onPress={props.onPress}
+        style={[styles.buttonBase, customStyles.styles]}
+        testID={props.testID}
+        {...customStyles.props}
+      >
+        {props.label}
+      </PaperButton>
+    );
+  }
+
   return (
-    <PaperButton
-      disabled={props.disabled}
-      icon={props.icon}
-      mode={props.mode}
-      onPress={props.onPress}
-      style={[styles.buttonBase, customStyles.styles]}
-      testID={props.testID}
-      {...customStyles.props}
-    >
-      {props.label}
-    </PaperButton>
+    <View style={[styles.buttonWrapper, props.disabled && styles.disabled]}>
+      <BlurView
+        intensity={props.mode === ButtonMode.Filled ? 40 : 15}
+        style={styles.blurView}
+        tint={theme.dark ? "dark" : "light"}
+      >
+        <PaperButton
+          contentStyle={styles.buttonContent}
+          disabled={props.disabled}
+          icon={props.icon}
+          mode="text"
+          onPress={props.onPress}
+          style={[styles.buttonBase, customStyles.styles]}
+          testID={props.testID}
+          {...customStyles.props}
+        >
+          {props.label}
+        </PaperButton>
+      </BlurView>
+    </View>
   );
 }
 

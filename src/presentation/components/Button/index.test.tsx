@@ -12,10 +12,12 @@ it("SHOULD render the button with the correct props", () => {
 
   expect(component.props).toEqual({
     children: "Button Label",
-    mode: ButtonMode.Filled,
+    contentStyle: { height: 48 },
+    mode: "text",
     onPress: expect.any(Function),
     style: expect.any(Object),
     testID: "default-button",
+    textColor: "rgb(255, 255, 255)",
   });
 });
 
@@ -32,16 +34,17 @@ it("SHOULD call the onPress function when the button is pressed", () => {
   expect(defaultProps.onPress).toHaveBeenCalledWith();
 });
 
-it.each([ButtonMode.Outlined, ButtonMode.Text, ButtonMode.Filled])(
-  "SHOULD render the button in %s mode",
-  (mode) => {
-    setup({ mode });
+it.each([
+  { expectedMode: "text", mode: ButtonMode.Outlined },
+  { expectedMode: "text", mode: ButtonMode.Text },
+  { expectedMode: "text", mode: ButtonMode.Filled },
+])("SHOULD render the button in %s mode", ({ expectedMode, mode }) => {
+  setup({ mode });
 
-    const component = screen.getByTestId(defaultProps.testID);
+  const component = screen.getByTestId(defaultProps.testID);
 
-    expect(component.props.mode).toBe(mode);
-  },
-);
+  expect(component.props.mode).toBe(expectedMode);
+});
 
 it("SHOULD throw an error if an invalid mode is passed", () => {
   function func() {
@@ -70,9 +73,8 @@ it("SHOULD render the button with custom styles", () => {
 
   const component = screen.getByTestId(defaultProps.testID);
 
-  expect(component.props).toEqual({
-    ...component.props,
-    buttonColor: "blue",
-    textColor: "red",
-  });
+  expect(component.props.textColor).toBe("red");
+  expect(component.props.style).toContainEqual(
+    expect.objectContaining({ backgroundColor: "blue" }),
+  );
 });
