@@ -1,4 +1,6 @@
-import CategoryEntity from "@domain/entities/financial/CategoryEntity";
+import CategoryEntity, {
+  CategoryType,
+} from "@domain/entities/financial/CategoryEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 class CategoryEntityFixture {
@@ -24,6 +26,7 @@ class CategoryEntityFixture {
       owner: OwnerType.FAMILY,
       ownerId: "ownerId",
       parentId: "parentId",
+      type: CategoryType.EXPENSE,
     } as CategoryEntity;
 
     return this;
@@ -73,6 +76,12 @@ class CategoryEntityFixture {
 
   withParentId(parentId: string) {
     this.value.parentId = parentId;
+
+    return this;
+  }
+
+  withType(type: CategoryType) {
+    this.value.type = type;
 
     return this;
   }
