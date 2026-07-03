@@ -8,17 +8,19 @@ function getStyles() {
   return {
     styles: StyleSheet.create({
       container: {
-        borderBottomWidth: 2,
-        borderColor: theme.colors.onBackground,
-        borderRadius: theme.sizes.borderRadius.small,
+        backgroundColor: theme.colors.glassBackground,
+        borderColor: theme.colors.glassBorder,
+        borderRadius: theme.sizes.borderRadius.large,
+        borderWidth: 1,
         flexGrow: 1,
         margin: 0,
+        overflow: "hidden",
       },
       itemStyle: {
         fontSize: theme.sizes.fontSizes.small,
       },
       picker: {
-        backgroundColor: theme.colors.background,
+        backgroundColor: "transparent",
         borderWidth: 0,
         color: theme.colors.onBackground,
         height: 50,

@@ -1,3 +1,4 @@
+import { BlurView } from "expo-blur";
 import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
@@ -6,7 +7,6 @@ import Svg, { Circle, Defs, LinearGradient, Stop } from "react-native-svg";
 import { useCases } from "@application/useCases";
 import {
   Button,
-  Card,
   HelperText,
   Menu,
   Picker,
@@ -116,191 +116,201 @@ function NewCategoryModal() {
   return (
     <View style={styles.backdropContainer}>
       <Pressable onPress={onCancel} style={styles.backdrop} />
-      <Card customStyles={styles.container}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={styles.titleContainer}>
-            <Text.Headline value={t("financial.categories.addNewCategory")} />
-          </View>
-          <Spacer direction={"vertical"} size={"medium"} />
+      <View style={styles.container}>
+        <BlurView
+          intensity={theme.dark ? 30 : 60}
+          style={styles.blurView}
+          tint={theme.dark ? "dark" : "light"}
+        >
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <View style={styles.titleContainer}>
+              <Text.Headline value={t("financial.categories.addNewCategory")} />
+            </View>
+            <Spacer direction={"vertical"} size={"medium"} />
 
-          <TextInput.Outlined
-            label={t("financial.categories.name")}
-            onChangeText={fields.name.onChange}
-            value={fields.name.value}
-          />
-          <HelperText
-            label={errors.name}
-            type={"error"}
-            visible={!!errors.name}
-          />
-          <Spacer direction={"vertical"} size={"medium"} />
+            <TextInput.Outlined
+              label={t("financial.categories.name")}
+              onChangeText={fields.name.onChange}
+              value={fields.name.value}
+            />
+            <HelperText
+              label={errors.name}
+              type={"error"}
+              visible={!!errors.name}
+            />
+            <Spacer direction={"vertical"} size={"medium"} />
 
-          <Picker
-            items={[
-              { label: t("financial.categories.expense"), value: "EXPENSE" },
-              { label: t("financial.categories.income"), value: "INCOME" },
-            ]}
-            label={t("financial.categories.type")}
-            onValueChange={(val) => {
-              fields.type.onChange(val);
-              fields.parentId.onChange("");
-            }}
-            selectedValue={fields.type.value}
-          />
-          <Spacer direction={"vertical"} size={"medium"} />
+            <Picker
+              items={[
+                { label: t("financial.categories.expense"), value: "EXPENSE" },
+                { label: t("financial.categories.income"), value: "INCOME" },
+              ]}
+              label={t("financial.categories.type")}
+              onValueChange={(val) => {
+                fields.type.onChange(val);
+                fields.parentId.onChange("");
+              }}
+              selectedValue={fields.type.value}
+            />
+            <Spacer direction={"vertical"} size={"medium"} />
 
-          <Picker
-            items={viewModel.stockOwners}
-            label={t("financial.categories.owner")}
-            onValueChange={(val) => {
-              fields.ownerId.onChange(val);
-              fields.parentId.onChange("");
-            }}
-            selectedValue={fields.ownerId.value ?? owners.data![0]?.id}
-          />
-          <Spacer direction={"vertical"} size={"medium"} />
+            <Picker
+              items={viewModel.stockOwners}
+              label={t("financial.categories.owner")}
+              onValueChange={(val) => {
+                fields.ownerId.onChange(val);
+                fields.parentId.onChange("");
+              }}
+              selectedValue={fields.ownerId.value ?? owners.data![0]?.id}
+            />
+            <Spacer direction={"vertical"} size={"medium"} />
 
-          <Picker
-            items={viewModel.getParentCategories(
-              fields.ownerId.value,
-              fields.type.value,
-            )}
-            label={t("financial.categories.parent")}
-            onValueChange={fields.parentId.onChange}
-            selectedValue={fields.parentId.value ?? ""}
-          />
-          <Spacer direction={"vertical"} size={"medium"} />
+            <Picker
+              items={viewModel.getParentCategories(
+                fields.ownerId.value,
+                fields.type.value,
+              )}
+              label={t("financial.categories.parent")}
+              onValueChange={fields.parentId.onChange}
+              selectedValue={fields.parentId.value ?? ""}
+            />
+            <Spacer direction={"vertical"} size={"medium"} />
 
-          <View style={styles.rowSelector}>
-            {/* Color Selector */}
-            <View style={styles.selectorItem}>
-              <Text.Body bold value={t("financial.categories.color")} />
-              <View style={styles.selectorTriggerWrapper}>
-                <Menu
-                  anchor={
-                    <Pressable
-                      onPress={() => setColorMenuVisible(true)}
-                      style={[
-                        styles.colorPreviewButton,
-                        fields.iconColor.value !== "black" && {
-                          backgroundColor: fields.iconColor.value,
-                        },
-                      ]}
-                    >
-                      {fields.iconColor.value === "black" && <RainbowCircle />}
-                    </Pressable>
-                  }
-                  onDismiss={() => setColorMenuVisible(false)}
-                  visible={colorMenuVisible}
-                >
-                  <View style={styles.colorMenuContent}>
-                    {AVAILABLE_COLORS.map((color) => (
+            <View style={styles.rowSelector}>
+              {/* Color Selector */}
+              <View style={styles.selectorItem}>
+                <Text.Body bold value={t("financial.categories.color")} />
+                <View style={styles.selectorTriggerWrapper}>
+                  <Menu
+                    anchor={
                       <Pressable
-                        key={color}
-                        onPress={() => {
-                          fields.iconColor.onChange(color);
-                          setColorMenuVisible(false);
-                        }}
+                        onPress={() => setColorMenuVisible(true)}
                         style={[
-                          styles.colorOptionCircle,
-                          {
-                            backgroundColor: color === "black" ? "#333" : color,
+                          styles.colorPreviewButton,
+                          fields.iconColor.value !== "black" && {
+                            backgroundColor: fields.iconColor.value,
                           },
                         ]}
                       >
-                        {fields.iconColor.value === color && (
-                          <Icon color="white" name="check" size={16} />
+                        {fields.iconColor.value === "black" && (
+                          <RainbowCircle />
                         )}
                       </Pressable>
-                    ))}
-                  </View>
-                </Menu>
-                <Text.Body
-                  bold
-                  color={theme.colors.onSurfaceVariant}
-                  value=">"
-                />
-              </View>
-            </View>
-
-            {/* Icon Selector */}
-            <View style={styles.selectorItem}>
-              <Text.Body bold value={t("financial.categories.chooseIcon")} />
-              <View style={styles.selectorTriggerWrapper}>
-                <Menu
-                  anchor={
-                    <Pressable
-                      onPress={() => setIconMenuVisible(true)}
-                      style={styles.iconPreviewButton}
-                    >
-                      <Icon
-                        color={fields.iconColor.value}
-                        name={fields.icon.value}
-                        size={28}
-                      />
-                    </Pressable>
-                  }
-                  onDismiss={() => setIconMenuVisible(false)}
-                  visible={iconMenuVisible}
-                >
-                  <ScrollView style={styles.iconMenuContent}>
-                    <View style={styles.iconGridMenu}>
-                      {AVAILABLE_ICONS.map((iconName) => {
-                        const isSelected = fields.icon.value === iconName;
-                        return (
-                          <View
-                            key={iconName}
-                            style={[
-                              styles.iconBoxMenu,
-                              isSelected && {
-                                backgroundColor: theme.colors.primaryContainer,
-                              },
-                            ]}
-                          >
-                            <IconButton
-                              color={
-                                isSelected
-                                  ? theme.colors.primary
-                                  : theme.colors.onSurface
-                              }
-                              name={iconName}
-                              onPress={() => {
-                                fields.icon.onChange(iconName);
-                                setIconMenuVisible(false);
-                              }}
-                              size={theme.sizes.spacing.large}
-                            />
-                          </View>
-                        );
-                      })}
+                    }
+                    onDismiss={() => setColorMenuVisible(false)}
+                    visible={colorMenuVisible}
+                  >
+                    <View style={styles.colorMenuContent}>
+                      {AVAILABLE_COLORS.map((color) => (
+                        <Pressable
+                          key={color}
+                          onPress={() => {
+                            fields.iconColor.onChange(color);
+                            setColorMenuVisible(false);
+                          }}
+                          style={[
+                            styles.colorOptionCircle,
+                            {
+                              backgroundColor:
+                                color === "black" ? "#333" : color,
+                            },
+                          ]}
+                        >
+                          {fields.iconColor.value === color && (
+                            <Icon color="white" name="check" size={16} />
+                          )}
+                        </Pressable>
+                      ))}
                     </View>
-                  </ScrollView>
-                </Menu>
-                <Text.Body
-                  bold
-                  color={theme.colors.onSurfaceVariant}
-                  value=">"
-                />
+                  </Menu>
+                  <Text.Body
+                    bold
+                    color={theme.colors.onSurfaceVariant}
+                    value=">"
+                  />
+                </View>
+              </View>
+
+              {/* Icon Selector */}
+              <View style={styles.selectorItem}>
+                <Text.Body bold value={t("financial.categories.chooseIcon")} />
+                <View style={styles.selectorTriggerWrapper}>
+                  <Menu
+                    anchor={
+                      <Pressable
+                        onPress={() => setIconMenuVisible(true)}
+                        style={styles.iconPreviewButton}
+                      >
+                        <Icon
+                          color={fields.iconColor.value}
+                          name={fields.icon.value}
+                          size={28}
+                        />
+                      </Pressable>
+                    }
+                    onDismiss={() => setIconMenuVisible(false)}
+                    visible={iconMenuVisible}
+                  >
+                    <ScrollView style={styles.iconMenuContent}>
+                      <View style={styles.iconGridMenu}>
+                        {AVAILABLE_ICONS.map((iconName) => {
+                          const isSelected = fields.icon.value === iconName;
+                          return (
+                            <View
+                              key={iconName}
+                              style={[
+                                styles.iconBoxMenu,
+                                isSelected && {
+                                  backgroundColor:
+                                    theme.colors.primaryContainer,
+                                },
+                              ]}
+                            >
+                              <IconButton
+                                color={
+                                  isSelected
+                                    ? theme.colors.primary
+                                    : theme.colors.onSurface
+                                }
+                                name={iconName}
+                                onPress={() => {
+                                  fields.icon.onChange(iconName);
+                                  setIconMenuVisible(false);
+                                }}
+                                size={theme.sizes.spacing.large}
+                              />
+                            </View>
+                          );
+                        })}
+                      </View>
+                    </ScrollView>
+                  </Menu>
+                  <Text.Body
+                    bold
+                    color={theme.colors.onSurfaceVariant}
+                    value=">"
+                  />
+                </View>
               </View>
             </View>
-          </View>
-        </ScrollView>
+          </ScrollView>
 
-        <Card customStyles={styles.buttonContainer}>
-          <View style={styles.button}>
-            <Button.Text
-              customStyles={{ textColor: theme.colors.error }}
-              label={t("financial.categories.cancel")}
-              onPress={onCancel}
-            />
-            <Spacer direction={"horizontal"} size={"large"} />
-            <Button.Filled
-              label={t("financial.categories.add")}
-              onPress={onAdd}
-            />
+          <View style={styles.buttonContainer}>
+            <View style={styles.button}>
+              <Button.Text
+                customStyles={{ textColor: theme.colors.error }}
+                label={t("financial.categories.cancel")}
+                onPress={onCancel}
+              />
+              <Spacer direction={"horizontal"} size={"large"} />
+              <Button.Filled
+                label={t("financial.categories.add")}
+                onPress={onAdd}
+              />
+            </View>
           </View>
-        </Card>
-      </Card>
+        </BlurView>
+      </View>
     </View>
   );
 }
