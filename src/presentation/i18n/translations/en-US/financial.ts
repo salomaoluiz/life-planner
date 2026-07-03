@@ -32,6 +32,11 @@ const financial = {
     others: "Others",
     owner: "Family Context",
     parent: "Parent Category",
+    type: "Category Type",
+    expense: "Expense",
+    income: "Income",
+    filterByType: "Filter by type",
+    all: "All",
   },
   routeTitle: "Financial",
 };

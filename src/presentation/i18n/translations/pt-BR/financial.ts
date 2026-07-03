@@ -32,6 +32,11 @@ const financial = {
     others: "Outros",
     owner: "Proprietário",
     parent: "Categoria Pai",
+    type: "Tipo da Categoria",
+    expense: "Despesa",
+    income: "Receita",
+    filterByType: "Filtrar por tipo",
+    all: "Todas",
   },
   routeTitle: "Financeiro",
 };
