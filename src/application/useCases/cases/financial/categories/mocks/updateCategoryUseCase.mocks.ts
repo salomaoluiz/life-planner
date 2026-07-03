@@ -13,6 +13,7 @@ const defaultParams: UpdateCategoryUseCaseParams = {
   owner: "FAMILY",
   ownerId: "user-id",
   parentId: "parent-uuid",
+  type: "EXPENSE",
 };
 
 const unknownError = new Error("Some error");

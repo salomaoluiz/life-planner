@@ -13,6 +13,7 @@ const defaultParams: CreateCategoryUseCaseParams = {
   owner: "FAMILY",
   ownerId: "user-id",
   parentId: undefined,
+  type: "EXPENSE",
 };
 
 const unknownError = new Error("Some error");

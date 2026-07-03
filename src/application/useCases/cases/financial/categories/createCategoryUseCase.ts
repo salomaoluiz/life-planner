@@ -1,5 +1,6 @@
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import { DefaultError, FieldInvalid } from "@domain/entities/errors";
+import { CategoryType } from "@domain/entities/financial/CategoryEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import Repositories from "@domain/repositories";
 
@@ -11,6 +12,7 @@ export interface CreateCategoryUseCaseParams {
   owner: string;
   ownerId: string;
   parentId?: string;
+  type: string;
 }
 
 function createCategoryUseCase(
@@ -24,6 +26,10 @@ function createCategoryUseCase(
         throw new FieldInvalid({ owner });
       }
 
+      const type =
+        CategoryType[params.type as keyof typeof CategoryType] ??
+        CategoryType.EXPENSE;
+
       try {
         await repositories.financialRepository.category.createCategory({
           depthLevel: params.depthLevel,
@@ -33,6 +39,7 @@ function createCategoryUseCase(
           owner,
           ownerId: params.ownerId,
           parentId: params.parentId,
+          type,
         });
       } catch (error) {
         if (error instanceof DefaultError) {

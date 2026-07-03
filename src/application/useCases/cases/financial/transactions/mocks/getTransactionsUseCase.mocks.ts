@@ -3,7 +3,9 @@ import { BusinessError } from "@domain/entities/errors";
 import AccountEntity, {
   AccountStatus,
 } from "@domain/entities/financial/AccountEntity";
-import CategoryEntity from "@domain/entities/financial/CategoryEntity";
+import CategoryEntity, {
+  CategoryType,
+} from "@domain/entities/financial/CategoryEntity";
 import TransactionEntityFixture from "@domain/entities/financial/mocks/TransactionEntity.fixture";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
@@ -37,6 +39,7 @@ const categoriesMock = [
     name: "Shopping",
     owner: OwnerType.FAMILY,
     ownerId: "b11923e6-bfbb-4965-b3f6-a075249d1e63",
+    type: CategoryType.EXPENSE,
   }),
 ];
 

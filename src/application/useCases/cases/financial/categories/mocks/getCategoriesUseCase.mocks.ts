@@ -1,5 +1,7 @@
 import { repositoriesMocks } from "@data/repositories/mocks/index.mocks";
-import CategoryEntity from "@domain/entities/financial/CategoryEntity";
+import CategoryEntity, {
+  CategoryType,
+} from "@domain/entities/financial/CategoryEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import getCategoriesUseCase, {
@@ -16,6 +18,7 @@ const categoryEntityMock = new CategoryEntity({
   owner: OwnerType.USER,
   ownerId: "user-id",
   parentId: undefined,
+  type: CategoryType.EXPENSE,
 });
 
 const repositorySpy = jest.mocked(

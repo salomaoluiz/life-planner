@@ -1,3 +1,4 @@
+import { CategoryType } from "@domain/entities/financial/CategoryEntity";
 import { FieldInvalid } from "@domain/entities/errors";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
@@ -22,6 +23,7 @@ it("SHOULD call repository updateCategory correctly", async () => {
       owner: OwnerType.FAMILY,
       ownerId: mocks.defaultParams.ownerId,
       parentId: mocks.defaultParams.parentId,
+      type: CategoryType.EXPENSE,
     },
   );
 });
