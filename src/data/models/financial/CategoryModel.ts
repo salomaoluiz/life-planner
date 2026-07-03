@@ -9,6 +9,7 @@ interface ICategoryModel {
   owner: OwnerType;
   ownerId: string;
   parentId?: string;
+  type: string;
 }
 
 class CategoryModel implements ICategoryModel {
@@ -20,6 +21,7 @@ class CategoryModel implements ICategoryModel {
   owner: OwnerType;
   ownerId: string;
   parentId?: string;
+  type: string;
 
   constructor(params: ICategoryModel) {
     this.id = params.id;
@@ -30,6 +32,7 @@ class CategoryModel implements ICategoryModel {
     this.iconColor = params.iconColor ?? "black";
     this.parentId = params.parentId;
     this.depthLevel = params.depthLevel;
+    this.type = params.type;
   }
 
   static fromJSON(data: Record<string, unknown>): CategoryModel {
@@ -48,6 +51,7 @@ class CategoryModel implements ICategoryModel {
         data.parent_id !== undefined && data.parent_id !== null
           ? String(data.parent_id)
           : undefined,
+      type: (data.type as string) ?? "EXPENSE",
     });
   }
 
@@ -61,6 +65,7 @@ class CategoryModel implements ICategoryModel {
       owner: this.owner,
       owner_id: this.ownerId,
       parent_id: this.parentId,
+      type: this.type,
     };
   }
 }

@@ -1,4 +1,6 @@
-import CategoryEntity from "@domain/entities/financial/CategoryEntity";
+import CategoryEntity, {
+  CategoryType,
+} from "@domain/entities/financial/CategoryEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import CategoryDTO, { ICategoryDTO } from "../CategoryDTO";
@@ -13,6 +15,7 @@ const defaultProps: ICategoryDTO = {
   owner: OwnerType.FAMILY,
   ownerId: "4be16cb6-b9e4-47bb-99cb-eb62ff6576c3",
   parentId: undefined,
+  type: "EXPENSE",
 };
 
 const defaultCategoryEntity = new CategoryEntity({
@@ -23,6 +26,7 @@ const defaultCategoryEntity = new CategoryEntity({
   owner: defaultProps.owner as OwnerType,
   ownerId: defaultProps.ownerId,
   parentId: defaultProps.parentId,
+  type: CategoryType.EXPENSE,
 });
 // endregion mocks
 

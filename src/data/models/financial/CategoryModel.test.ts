@@ -12,6 +12,7 @@ it("SHOULD the CategoryModel has all params", () => {
   expect(result).toHaveProperty("owner", mocks.json.owner);
   expect(result).toHaveProperty("ownerId", mocks.json.owner_id);
   expect(result).toHaveProperty("parentId", mocks.json.parent_id);
+  expect(result).toHaveProperty("type", mocks.json.type);
 });
 
 it("SHOULD the CategoryModel fromJson create a new CategoryModel", () => {
@@ -24,6 +25,7 @@ it("SHOULD the CategoryModel fromJson create a new CategoryModel", () => {
     owner: mocks.json.owner,
     owner_id: mocks.json.owner_id,
     parent_id: mocks.json.parent_id,
+    type: mocks.json.type,
   });
 
   const expected = setup();

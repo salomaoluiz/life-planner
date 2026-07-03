@@ -9,6 +9,7 @@ export interface ICategoryDTO {
   owner: string;
   ownerId: string;
   parentId?: string;
+  type: string;
 }
 
 class CategoryDTO {
@@ -20,6 +21,7 @@ class CategoryDTO {
   owner: string;
   ownerId: string;
   parentId?: string;
+  type: string;
 
   constructor(params: ICategoryDTO) {
     this.depthLevel = params.depthLevel;
@@ -30,6 +32,7 @@ class CategoryDTO {
     this.owner = params.owner;
     this.ownerId = params.ownerId;
     this.parentId = params.parentId;
+    this.type = params.type;
   }
 
   static fromEntity(entity: CategoryEntity) {
@@ -42,6 +45,7 @@ class CategoryDTO {
       owner: entity.owner,
       ownerId: entity.ownerId,
       parentId: entity.parentId,
+      type: entity.type,
     });
   }
 }

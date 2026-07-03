@@ -1,4 +1,6 @@
-import CategoryEntity from "@domain/entities/financial/CategoryEntity";
+import CategoryEntity, {
+  CategoryType,
+} from "@domain/entities/financial/CategoryEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import CategoryDTO from "./CategoryDTO";
@@ -13,6 +15,7 @@ it("SHOULD map entity to CategoryDTO correctly", () => {
     owner: OwnerType.USER,
     ownerId: "ownerId",
     parentId: "parentId",
+    type: CategoryType.EXPENSE,
   });
 
   const dto = CategoryDTO.fromEntity(entity);
@@ -25,4 +28,5 @@ it("SHOULD map entity to CategoryDTO correctly", () => {
   expect(dto.owner).toBe("USER");
   expect(dto.ownerId).toBe("ownerId");
   expect(dto.parentId).toBe("parentId");
+  expect(dto.type).toBe("EXPENSE");
 });
