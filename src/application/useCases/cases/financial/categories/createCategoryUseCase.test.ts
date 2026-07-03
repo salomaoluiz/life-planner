@@ -1,5 +1,5 @@
-import { CategoryType } from "@domain/entities/financial/CategoryEntity";
 import { FieldInvalid } from "@domain/entities/errors";
+import { CategoryType } from "@domain/entities/financial/CategoryEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import {

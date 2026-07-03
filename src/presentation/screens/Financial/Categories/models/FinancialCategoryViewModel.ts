@@ -32,6 +32,10 @@ class FinancialCategoryViewModel {
     return this.dto.parentId;
   }
 
+  get type() {
+    return this.dto.type;
+  }
+
   constructor(
     private readonly dto: CategoryDTO,
     private readonly owners: OwnerDTO[],

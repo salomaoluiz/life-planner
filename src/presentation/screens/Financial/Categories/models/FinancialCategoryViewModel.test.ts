@@ -17,6 +17,7 @@ describe("FinancialCategoryViewModel", () => {
       name: "Food",
       owner: "USER",
       ownerId: "1",
+      type: "EXPENSE",
     });
     const vm = new FinancialCategoryViewModel(dto, owners);
     expect(vm.ownerName).toBe("Luiz (Personal)");
@@ -30,6 +31,7 @@ describe("FinancialCategoryViewModel", () => {
       name: "Transport",
       owner: "USER",
       ownerId: "1",
+      type: "EXPENSE",
     });
     const childDto = new CategoryDTO({
       depthLevel: 1,
@@ -39,6 +41,7 @@ describe("FinancialCategoryViewModel", () => {
       owner: "USER",
       ownerId: "1",
       parentId: "parent",
+      type: "EXPENSE",
     });
     const unrelatedDto = new CategoryDTO({
       depthLevel: 0,
@@ -47,6 +50,7 @@ describe("FinancialCategoryViewModel", () => {
       name: "Food",
       owner: "USER",
       ownerId: "1",
+      type: "EXPENSE",
     });
 
     const vms = [

@@ -24,6 +24,14 @@ function getStyles() {
         position: "absolute",
         right: theme.sizes.spacing.large,
       },
+      filterContainer: {
+        alignSelf: "stretch",
+        marginBottom: theme.sizes.spacing.small,
+        marginHorizontal: isWeb()
+          ? getScreenSizes().width * 0.05
+          : theme.sizes.spacing.medium,
+        marginTop: theme.sizes.spacing.medium,
+      },
       listContainer: {
         alignSelf: "stretch",
         backgroundColor: theme.colors.surfaceVariant,

@@ -1,12 +1,13 @@
 import { useIsFocused } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { router, useNavigation } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
 
 import { useCases } from "@application/useCases";
-import { Fab, Text } from "@components";
+import { Fab, Picker, Spacer, Text } from "@components";
 import { useQuery } from "@infrastructure/fetcher";
+import useTranslation from "@presentation/i18n/useTranslation";
 import RefetchCache from "@screens/Financial/Transactions/containers/RefetchCache";
 
 import ListItem from "./containers/ListItem";
@@ -17,10 +18,15 @@ function FinancialCategories() {
   const { styles } = getStyles();
   const isFocused = useIsFocused();
   const navigation = useNavigation();
+  const { t } = useTranslation();
+  const [filterType, setFilterType] = useState<string>("ALL");
 
-  const { data, error, isFetching, refetch } = useQuery<
-    FinancialCategoryViewModel[]
-  >({
+  const {
+    data: flatViewModels,
+    error,
+    isFetching,
+    refetch,
+  } = useQuery<FinancialCategoryViewModel[]>({
     cacheKey: [useCases.getFinancialCategoriesUseCase.uniqueName],
     fetch: async () => {
       const owners = await useCases.getOwnersUseCase.execute();
@@ -29,13 +35,20 @@ function FinancialCategories() {
       const categoryDTOs =
         await useCases.getFinancialCategoriesUseCase.execute(ownerIds);
 
-      const viewModels = categoryDTOs.map(
+      return categoryDTOs.map(
         (dto) => new FinancialCategoryViewModel(dto, owners),
       );
-
-      return FinancialCategoryViewModel.buildHierarchy(viewModels);
     },
   });
+
+  const displayedCategories = useMemo(() => {
+    if (!flatViewModels) return [];
+    const filtered =
+      filterType === "ALL"
+        ? flatViewModels
+        : flatViewModels.filter((vm) => vm.type === filterType);
+    return FinancialCategoryViewModel.buildHierarchy(filtered);
+  }, [flatViewModels, filterType]);
 
   useEffect(() => {
     if (!isFetching) {
@@ -80,10 +93,23 @@ function FinancialCategories() {
     <>
       <ScrollView style={styles.scrollView}>
         <View style={styles.container}>
+          <View style={styles.filterContainer}>
+            <Picker
+              items={[
+                { label: t("financial.categories.all"), value: "ALL" },
+                { label: t("financial.categories.expense"), value: "EXPENSE" },
+                { label: t("financial.categories.income"), value: "INCOME" },
+              ]}
+              label={t("financial.categories.filterByType")}
+              onValueChange={setFilterType}
+              selectedValue={filterType}
+            />
+          </View>
+          <Spacer direction={"vertical"} size={"medium"} />
           <View style={styles.listContainer}>
             <FlashList
               contentContainerStyle={styles.listContentContainer}
-              data={data}
+              data={displayedCategories}
               estimatedItemSize={60}
               renderItem={renderItem}
             />
