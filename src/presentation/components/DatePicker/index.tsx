@@ -1,3 +1,4 @@
+import { BlurView } from "expo-blur";
 import { useState } from "react";
 import { Pressable, View } from "react-native";
 import * as Paper from "react-native-paper-dates";
@@ -20,7 +21,7 @@ export interface DatePickerProps {
 function DatePicker(props: DatePickerProps) {
   const [visible, setVisible] = useState(false);
   const { getLocale } = useTranslationLocale();
-  const { styles, theme } = getStyles({ hasDate: !!props.date });
+  const { styles, theme } = getStyles();
 
   function onConfirm({ date }: { date?: Date }) {
     props.onConfirm({ date });
@@ -41,46 +42,63 @@ function DatePicker(props: DatePickerProps) {
   }
 
   return (
-    <Pressable onPress={onPress} style={styles.pressable} testID={props.testID}>
-      <View style={styles.container}>
-        <View>
-          <View style={styles.labelContainer}>
-            <Text.Body value={props.label} />
-          </View>
-          {props.date ? (
-            <View style={styles.dateContainer}>
-              <Text.Body value={props.date?.toLocaleDateString()} />
-            </View>
-          ) : null}
-
-          <Paper.DatePickerModal
-            date={props.date}
-            label={props.label}
-            locale={getLocale().languageTag}
-            mode={props.mode}
-            onConfirm={onConfirm}
-            onDismiss={onDismiss}
-            saveLabel={"Save"}
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
-            testID={`${props.testID}-modal`}
-            visible={visible}
-          />
-        </View>
-        {props.date ? (
-          <View style={styles.clearIconContainer}>
-            <IconButton
-              name={"close"}
-              onPress={clearDate}
-              size={theme.sizes.spacing.large}
+    <View style={styles.mainWrapper}>
+      <Text.Body color={theme.colors.onBackground} value={props.label} />
+      <Pressable
+        accessible={true}
+        onPress={onPress}
+        style={styles.pressable}
+        testID={props.testID}
+      >
+        <BlurView
+          intensity={theme.dark ? 20 : 40}
+          style={styles.container}
+          tint={theme.dark ? "dark" : "light"}
+        >
+          <View style={styles.innerContainer}>
+            <Text.Body
+              color={
+                props.date
+                  ? theme.colors.onBackground
+                  : theme.colors.glassTextPlaceholder
+              }
               testID={
-                props.testID ? `${props.testID}-clear-button` : "clear-button"
+                props.testID ? `${props.testID}-value` : "date-picker-value"
+              }
+              value={
+                props.date ? props.date.toLocaleDateString() : "Select a date"
               }
             />
+
+            <Paper.DatePickerModal
+              date={props.date}
+              label={props.label}
+              locale={getLocale().languageTag}
+              mode={props.mode}
+              onConfirm={onConfirm}
+              onDismiss={onDismiss}
+              saveLabel={"Save"}
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-expect-error
+              testID={`${props.testID}-modal`}
+              visible={visible}
+            />
           </View>
-        ) : null}
-      </View>
-    </Pressable>
+          {props.date ? (
+            <View style={styles.clearIconContainer}>
+              <IconButton
+                name={"close"}
+                onPress={clearDate}
+                size={theme.sizes.spacing.large}
+                testID={
+                  props.testID ? `${props.testID}-clear-button` : "clear-button"
+                }
+              />
+            </View>
+          ) : null}
+        </BlurView>
+      </Pressable>
+    </View>
   );
 }
 

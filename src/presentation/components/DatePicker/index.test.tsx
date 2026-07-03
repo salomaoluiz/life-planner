@@ -30,6 +30,10 @@ describe("DatePicker", () => {
 
     screen.getByTestId(defaultProps.testID!);
 
+    // Verify placeholder text is shown when date is not provided
+    const valueComponent = screen.getByTestId(`${defaultProps.testID}-value`);
+    expect(valueComponent.props.children).toBe("Select a date");
+
     // When no date is provided, the clear button should not be present
     const clearButton = screen.queryByTestId(
       `${defaultProps.testID}-clear-button`,
@@ -42,6 +46,10 @@ describe("DatePicker", () => {
     setup({ date: testDate });
 
     screen.getByTestId(defaultProps.testID!);
+
+    // Verify rendered date value
+    const valueComponent = screen.getByTestId(`${defaultProps.testID}-value`);
+    expect(valueComponent.props.children).toBe(testDate.toLocaleDateString());
 
     // When date is provided, the clear button should be present
     const clearButton = screen.getByTestId(
