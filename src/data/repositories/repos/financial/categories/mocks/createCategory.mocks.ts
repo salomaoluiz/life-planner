@@ -1,5 +1,6 @@
 import { datasourcesMocks } from "@data/datasource/mocks/index.mocks";
 import CategoryModel from "@data/models/financial/CategoryModel";
+import { CategoryType } from "@domain/entities/financial/CategoryEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import cache from "@infrastructure/cache";
 
@@ -13,6 +14,7 @@ const defaultParams: Params = {
   owner: OwnerType.USER,
   ownerId: "user-id",
   parentId: undefined,
+  type: CategoryType.EXPENSE,
 };
 
 const categoryModelMock = new CategoryModel({
@@ -24,6 +26,7 @@ const categoryModelMock = new CategoryModel({
   owner: "USER",
   ownerId: "user-id",
   parentId: undefined,
+  type: "EXPENSE",
 });
 
 const datasourceSpy = jest.mocked(datasourcesMocks.financialCategoryDatasource);

@@ -16,6 +16,7 @@ async function updateCategory(params: Params, datasources: Datasources) {
     owner: params.owner,
     ownerId: params.ownerId,
     parentId: params.parentId,
+    type: params.type,
   });
 
   cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_CATEGORY_DATA);

@@ -17,6 +17,7 @@ async function createCategory(params: Params): Promise<CategoryModel> {
         owner: params.owner,
         owner_id: params.ownerId,
         parent_id: params.parentId,
+        type: params.type,
       })
       .select()
       .then();

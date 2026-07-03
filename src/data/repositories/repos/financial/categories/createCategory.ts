@@ -1,5 +1,7 @@
 import { Datasources } from "@data/datasource";
-import CategoryEntity from "@domain/entities/financial/CategoryEntity";
+import CategoryEntity, {
+  CategoryType,
+} from "@domain/entities/financial/CategoryEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { FinancialCategoryRepository } from "@domain/repositories/financial";
 import cache, { CacheStringKeys } from "@infrastructure/cache";
@@ -18,6 +20,7 @@ async function createCategory(params: Params, datasources: Datasources) {
       owner: params.owner,
       ownerId: params.ownerId,
       parentId: params.parentId,
+      type: params.type,
     },
   );
 
@@ -32,6 +35,7 @@ async function createCategory(params: Params, datasources: Datasources) {
     owner: OwnerType[category.owner],
     ownerId: category.ownerId,
     parentId: category.parentId,
+    type: CategoryType[category.type as keyof typeof CategoryType],
   });
 }
 

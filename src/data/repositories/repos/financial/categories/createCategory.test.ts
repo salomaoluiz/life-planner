@@ -1,4 +1,6 @@
-import CategoryEntity from "@domain/entities/financial/CategoryEntity";
+import CategoryEntity, {
+  CategoryType,
+} from "@domain/entities/financial/CategoryEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { CacheStringKeys } from "@infrastructure/cache";
 
@@ -15,6 +17,7 @@ it("SHOULD create a category", async () => {
       owner: mocks.defaultParams.owner,
       ownerId: mocks.defaultParams.ownerId,
       parentId: mocks.defaultParams.parentId,
+      type: mocks.defaultParams.type,
     },
   );
 });
@@ -30,6 +33,7 @@ it("SHOULD return a category created", async () => {
       owner: OwnerType[mocks.categoryModel.owner],
       ownerId: mocks.categoryModel.ownerId,
       parentId: mocks.categoryModel.parentId,
+      type: CategoryType[mocks.categoryModel.type as keyof typeof CategoryType],
     }),
   );
 });

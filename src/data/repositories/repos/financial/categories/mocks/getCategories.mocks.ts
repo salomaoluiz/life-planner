@@ -15,6 +15,7 @@ const categoryModelMock = new CategoryModel({
   owner: "USER",
   ownerId: "user-id",
   parentId: undefined,
+  type: "EXPENSE",
 });
 
 const datasourceSpy = jest.mocked(datasourcesMocks.financialCategoryDatasource);

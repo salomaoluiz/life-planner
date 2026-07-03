@@ -10,6 +10,7 @@ const defaultParams: Params = {
   owner: "USER",
   ownerId: "user-uuid",
   parentId: undefined,
+  type: "EXPENSE",
 };
 
 const responseMock = {
@@ -23,6 +24,7 @@ const responseMock = {
       owner: "USER",
       owner_id: "user-uuid",
       parent_id: null,
+      type: "EXPENSE",
     },
   ],
   error: null,

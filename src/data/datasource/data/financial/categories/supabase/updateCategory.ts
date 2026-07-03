@@ -16,6 +16,7 @@ async function updateCategory(params: Params): Promise<void> {
         owner: params.owner,
         owner_id: params.ownerId,
         parent_id: params.parentId,
+        type: params.type,
       })
       .eq("id", params.id)
       .then();

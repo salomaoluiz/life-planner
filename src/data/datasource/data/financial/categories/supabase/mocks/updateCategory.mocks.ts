@@ -11,6 +11,7 @@ const defaultParams: Params = {
   owner: "USER",
   ownerId: "user-uuid",
   parentId: "parent-uuid",
+  type: "EXPENSE",
 };
 
 const responseMock = {

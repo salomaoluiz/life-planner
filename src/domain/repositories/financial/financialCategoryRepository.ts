@@ -1,4 +1,6 @@
-import CategoryEntity from "@domain/entities/financial/CategoryEntity";
+import CategoryEntity, {
+  CategoryType,
+} from "@domain/entities/financial/CategoryEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 export type FinancialCategoryRepository = {
@@ -18,6 +20,7 @@ interface CreateCategoryRepositoryParams {
   owner: OwnerType;
   ownerId: string;
   parentId?: string;
+  type: CategoryType;
 }
 
 interface DeleteCategoryRepositoryParams {
@@ -34,6 +37,7 @@ interface UpdateCategoryRepositoryParams {
   owner?: OwnerType;
   ownerId?: string;
   parentId?: string;
+  type?: CategoryType;
 }
 
 export { CreateCategoryRepositoryParams, UpdateCategoryRepositoryParams };

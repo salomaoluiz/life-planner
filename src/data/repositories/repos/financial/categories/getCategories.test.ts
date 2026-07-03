@@ -1,4 +1,6 @@
-import CategoryEntity from "@domain/entities/financial/CategoryEntity";
+import CategoryEntity, {
+  CategoryType,
+} from "@domain/entities/financial/CategoryEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import { mocks, setup, spies } from "./mocks/getCategories.mocks";
@@ -18,6 +20,9 @@ it("SHOULD get categories from datasource when cache is empty", async () => {
       owner: OwnerType[mocks.categoriesList[0].owner],
       ownerId: mocks.categoriesList[0].ownerId,
       parentId: mocks.categoriesList[0].parentId,
+      type: CategoryType[
+        mocks.categoriesList[0].type as keyof typeof CategoryType
+      ],
     }),
   );
 });

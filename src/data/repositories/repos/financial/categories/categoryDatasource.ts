@@ -18,6 +18,7 @@ interface CreateCategoryDatasourceParams {
   owner: OwnerType;
   ownerId: string;
   parentId?: string;
+  type: string;
 }
 
 interface DeleteCategoryDatasourceParams {
@@ -34,6 +35,7 @@ interface UpdateCategoryDatasourceParams {
   owner?: OwnerType;
   ownerId?: string;
   parentId?: string;
+  type?: string;
 }
 
 export { CreateCategoryDatasourceParams, UpdateCategoryDatasourceParams };

@@ -1,3 +1,4 @@
+import { CategoryType } from "@domain/entities/financial/CategoryEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import { mocks, setup, spies } from "./mocks/categoryRepositoryImpl.mocks";
@@ -12,6 +13,7 @@ it("SHOULD call createCategory correctly", async () => {
     owner: OwnerType.USER,
     ownerId: "user-id",
     parentId: undefined,
+    type: CategoryType.EXPENSE,
   };
 
   const category = await createCategory(params);
