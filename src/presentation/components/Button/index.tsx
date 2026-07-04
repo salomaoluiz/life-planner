@@ -5,7 +5,7 @@ import { Button as PaperButton } from "react-native-paper";
 
 import { useTheme } from "@presentation/theme";
 
-import { styles } from "./styles";
+import getStyles from "./styles";
 import getCustomStyles, {
   ButtonMode,
   CustomStyles,
@@ -24,6 +24,7 @@ export interface ButtonProps {
 
 function ButtonBase(props: ButtonProps & { mode: ButtonMode }) {
   const { theme } = useTheme();
+  const styles = getStyles();
 
   const customStyles = getCustomStyles({
     customStyles: props.customStyles,

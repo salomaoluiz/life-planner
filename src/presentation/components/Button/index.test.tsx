@@ -12,7 +12,7 @@ it("SHOULD render the button with the correct props", () => {
 
   expect(component.props).toEqual({
     children: "Button Label",
-    contentStyle: { height: 48 },
+    contentStyle: { height: 55 },
     mode: "text",
     onPress: expect.any(Function),
     style: expect.any(Object),

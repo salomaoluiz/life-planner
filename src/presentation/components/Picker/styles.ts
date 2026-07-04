@@ -23,7 +23,7 @@ function getStyles() {
         backgroundColor: "transparent",
         borderWidth: 0,
         color: theme.colors.onBackground,
-        height: 50,
+        height: theme.sizes.spacing.xxlarge,
       },
     }),
     theme,
