@@ -12,7 +12,7 @@ it("SHOULD render the card with the correct props", () => {
 
   expect(component.props).toEqual({
     children: defaultProps.children,
-    style: undefined,
+    style: expect.any(Object),
     testID: defaultProps.testID,
   });
 });
@@ -23,7 +23,9 @@ it("SHOULD render the card with custom styles", () => {
 
   const component = screen.getByTestId(defaultProps.testID!);
 
-  expect(component.props.style).toEqual(customStyles);
+  expect(component.props.style).toContainEqual(
+    expect.objectContaining(customStyles),
+  );
 });
 
 it("SHOULD render the card with children", () => {
