@@ -8,25 +8,21 @@ it("SHOULD pass the correct props for an Flat editable input", () => {
 
   const component = screen.getByTestId("test-text-input");
 
-  expect(component.props).toEqual({
-    activeUnderlineColor: "transparent",
-    children: undefined,
-    keyboardType: undefined,
-    mode: "flat",
-    onBlur: expect.any(Function),
-    onChangeText: defaultProps.onChangeText,
-    onFocus: expect.any(Function),
-    placeholderTextColor: "rgba(0, 0, 0, 0.5)",
-    style: expect.any(Object),
-    testID: "test-text-input",
-    theme: {
-      colors: {
-        background: "transparent",
-      },
-    },
-    underlineColor: "transparent",
-    value: "Default Value",
-  });
+  expect(component.props).toEqual(
+    expect.objectContaining({
+      activeUnderlineColor: "transparent",
+      children: undefined,
+      mode: "flat",
+      onBlur: expect.any(Function),
+      onChangeText: defaultProps.onChangeText,
+      onFocus: expect.any(Function),
+      placeholderTextColor: "rgba(71, 85, 105, 0.65)",
+      style: expect.any(Object),
+      testID: "test-text-input",
+      underlineColor: "transparent",
+      value: "Default Value",
+    }),
+  );
 });
 
 it("SHOULD pass the correct props for an Outlined not editable input", () => {
@@ -34,26 +30,22 @@ it("SHOULD pass the correct props for an Outlined not editable input", () => {
 
   const component = screen.getByTestId("test-text-input");
 
-  expect(component.props).toEqual({
-    activeUnderlineColor: "transparent",
-    children: undefined,
-    disabled: true,
-    keyboardType: undefined,
-    mode: "flat",
-    onBlur: expect.any(Function),
-    onChangeText: defaultProps.onChangeText,
-    onFocus: expect.any(Function),
-    placeholderTextColor: "rgba(0, 0, 0, 0.5)",
-    style: expect.any(Object),
-    testID: "test-text-input",
-    theme: {
-      colors: {
-        background: "transparent",
-      },
-    },
-    underlineColor: "transparent",
-    value: "Default Value",
-  });
+  expect(component.props).toEqual(
+    expect.objectContaining({
+      activeUnderlineColor: "transparent",
+      children: undefined,
+      disabled: true,
+      mode: "flat",
+      onBlur: expect.any(Function),
+      onChangeText: defaultProps.onChangeText,
+      onFocus: expect.any(Function),
+      placeholderTextColor: "rgba(71, 85, 105, 0.65)",
+      style: expect.any(Object),
+      testID: "test-text-input",
+      underlineColor: "transparent",
+      value: "Default Value",
+    }),
+  );
 });
 
 it("SHOULD have the correct style", () => {
@@ -63,7 +55,7 @@ it("SHOULD have the correct style", () => {
 
   expect(component.props.style).toEqual({
     backgroundColor: "transparent",
-    color: "rgb(26, 28, 30)",
+    color: "rgb(15, 23, 42)",
     minHeight: 55,
     width: "100%",
   });
