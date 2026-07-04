@@ -40,20 +40,20 @@ const fontSizes = {
 };
 
 const lineHeights = {
-  /** 32px - Subtitles */
-  large: 32,
-  /** 24px - Default body text */
+  /** 34px - Subtitles (was 32, now 1.42× of 24px font) */
+  large: 34,
+  /** 24px - Default body text (1.5× of 16px) */
   medium: 24,
-  /** 20px - Small body text */
+  /** 20px - Small body text (1.43× of 14px) */
   small: 20,
   /** 48px - Section titles */
   xlarge: 48,
-  /** 16px - Captions, labels */
-  xsmall: 16,
+  /** 18px - Labels (was 16, now 1.5× of 12px) */
+  xsmall: 18,
   /** 64px - Large headings */
   xxlarge: 64,
-  /** 14px - Captions, labels */
-  xxsmall: 14,
+  /** 16px - Captions (was 14, now 1.6× of 10px) */
+  xxsmall: 16,
 };
 
 const borderRadius = {

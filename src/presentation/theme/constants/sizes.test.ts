@@ -49,13 +49,13 @@ it("SHOULD return the scaled size FOR tablet", () => {
       xxsmall: 12,
     },
     lineHeights: {
-      large: 37,
+      large: 39,
       medium: 28,
       small: 23,
       xlarge: 55,
-      xsmall: 18,
+      xsmall: 21,
       xxlarge: 74,
-      xxsmall: 16,
+      xxsmall: 18,
     },
     spacing: {
       large: 28,
@@ -96,13 +96,13 @@ it("SHOULD return the scaled size FOR desktop", () => {
       xxsmall: 13,
     },
     lineHeights: {
-      large: 42,
+      large: 44,
       medium: 31,
       small: 26,
       xlarge: 62,
-      xsmall: 21,
+      xsmall: 23,
       xxlarge: 83,
-      xxsmall: 18,
+      xxsmall: 21,
     },
     spacing: {
       large: 31,
