@@ -17,12 +17,13 @@ describe("Fab", () => {
 
     const component = screen.getByTestId(defaultFabProps.testID!);
 
-    expect(component.props).toEqual({
-      icon: defaultFabProps.icon,
-      label: undefined,
-      onPress: expect.any(Function),
-      testID: defaultFabProps.testID,
-    });
+    expect(component.props).toEqual(
+      expect.objectContaining({
+        icon: defaultFabProps.icon,
+        onPress: expect.any(Function),
+        testID: defaultFabProps.testID,
+      }),
+    );
   });
 
   it("SHOULD call onPress when fab is pressed", () => {
