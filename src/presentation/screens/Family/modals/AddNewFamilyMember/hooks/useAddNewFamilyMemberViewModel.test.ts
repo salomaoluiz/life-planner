@@ -77,12 +77,26 @@ function setup(props?: {
   };
 }
 
-it("SHOULD configure the invite mutation with the use case", () => {
+it("SHOULD configure the invite mutation WITHOUT the email in its variables or key", () => {
   setup();
 
-  expect(jest.mocked(useMutation)).toHaveBeenCalledWith({
-    cacheKey: ["invite_member"],
-    fetch: useCases.inviteFamilyMemberUseCase.execute,
+  const options = jest.mocked(useMutation).mock.calls[0][0];
+  expect(options.cacheKey).toEqual(["invite_member"]);
+});
+
+it("SHOULD run the use case with the submitted email AND family from the route", async () => {
+  const { result } = setup();
+  act(() => result.current.onChangeEmail("  Bob@Example.test "));
+  act(() => result.current.onSubmit());
+
+  await jest
+    .mocked(useMutation)
+    .mock.calls.at(-1)![0]
+    .fetch(undefined as never);
+
+  expect(useCases.inviteFamilyMemberUseCase.execute).toHaveBeenCalledWith({
+    email: "Bob@Example.test",
+    familyId: "family-1",
   });
 });
 
@@ -117,10 +131,7 @@ it("SHOULD invite the TRIMMED email into the family from the route", () => {
 
   act(() => result.current.onSubmit());
 
-  expect(mutate).toHaveBeenCalledWith({
-    email: "Bob@Example.test",
-    familyId: "family-1",
-  });
+  expect(mutate).toHaveBeenCalledWith();
 });
 
 it("SHOULD expose the loading state", () => {
