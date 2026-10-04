@@ -20,7 +20,7 @@ src/
     useCases/cases/<module>/       use case factories
     providers/                     app-level contexts (UserProvider/useUser)
   infrastructure/                  wrappers over external libs
-    supabase/ fetcher/ cache/ storage/ monitoring/ googleOAuth/ date/ crypto/
+    api/ token/ supabase/ fetcher/ cache/ storage/ monitoring/ date/ crypto/
   presentation/
     components/                    shared dumb UI (@components)
     screens/<Screen>/              MVVM: index.tsx (View), hooks/use*ViewModel.ts, models/*UIModel.ts

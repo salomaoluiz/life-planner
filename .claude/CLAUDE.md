@@ -34,7 +34,7 @@ Reference implementation for any new CRUD work: **financial accounts** (smallest
 ## Golden rules (non-negotiable)
 
 1. **Domain is pure TS** — no React/RN/Expo/npm imports in `src/domain`.
-2. **Dependency direction** — presentation → application → domain; data implements domain interfaces; only `src/infrastructure` may import wrapped libs (supabase, react-query, sentry, async-storage, google-signin). `react-i18next` only inside `src/presentation/i18n/react-i18n`.
+2. **Dependency direction** — presentation → application → domain; data implements domain interfaces; only `src/infrastructure` may import wrapped libs (supabase, react-query, sentry, async-storage, expo-secure-store; HTTP goes through `@infrastructure/api`). `react-i18next` only inside `src/presentation/i18n/react-i18n`.
 3. **Business rules live in use cases** (`src/application/useCases/cases/**`). Components are dumb; screens orchestrate through `useCases.*` + `@infrastructure/fetcher`.
 4. **Errors**: never swallow. Datasources wrap unknown errors in `GenericError` + `addContext`, re-throw `BusinessError`s; use cases `addContext({ useCase })` and re-throw.
 5. **No `any`, `@ts-ignore`, or lint-disable** to bypass rules (existing DI `@ts-expect-error` and `as any` on `router.push` paths are the known exceptions).

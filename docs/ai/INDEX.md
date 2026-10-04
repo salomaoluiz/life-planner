@@ -9,7 +9,7 @@ stack:
   navigation: React Navigation, Expo Router
   state_management: React Query, React Context
   ui: React Native Paper, React Native Elements (RNEUI)
-  auth: Supabase, Google Sign-In
+  auth: Email/password on the NestJS API (JWT)
   backend_as_a_service: Supabase
   testing: Jest, React Native Testing Library
 ```
@@ -22,7 +22,7 @@ layers:
   - domain: Entities, Error Definitions, Repository Interfaces
   - application: Use Cases (business rules execution)
   - data: Models, Datasources, Repository Implementations
-  - infrastructure: External services configuration (Supabase, Google OAuth)
+  - infrastructure: External services configuration (Supabase, API client, token storage)
   - presentation: Screens, Components, Hooks, Containers
   - navigation: App Routing
   - providers: Context Providers
@@ -88,7 +88,7 @@ export const CustomButton = ({ title, onPress }: Props) => (
 // DON'T: Business logic in component
 export const LoginButton = () => {
   const handlePress = async () => {
-    await supabase.auth.signIn();
+    await api.post("/v1/auth/login/email", params);
   };
   return <Button title="Login" onPress={handlePress} />;
 };
