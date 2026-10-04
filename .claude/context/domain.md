@@ -62,7 +62,7 @@ Then:
 ```
 DefaultError (abstract, has code + context + addContext())
  ├─ BusinessError  (code BusinessError)  -> expected/user-facing failures
- │    ├─ FamilyNotFound, FamilyNotCreated, FieldRequired(fields), FieldInvalid(fields), LoginCanceled, UserNotLogged
+ │    ├─ FamilyNotFound, FamilyNotCreated, FamilyHasRecords, FieldRequired(fields), FieldInvalid(fields), LoginCanceled, UserNotLogged
  └─ GenericError   (code TechnicalError) -> unexpected/technical failures
 ```
 

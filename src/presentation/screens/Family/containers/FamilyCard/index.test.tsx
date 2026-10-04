@@ -1,3 +1,12 @@
+import { waitFor } from "@tests";
+
+import { FamilyHasRecords, GenericError } from "@domain/entities/errors";
+import {
+  FeedbackActions,
+  FeedbackNavigationTypes,
+} from "@screens/Feedback/BusinessFeedback/actions/types";
+import { FeedbackType } from "@screens/Feedback/BusinessFeedback/types";
+
 import { mocks, setup, spies } from "./mocks/index.mocks";
 
 it("SHOULD render the family card with the family and refetch callback", () => {
@@ -49,3 +58,47 @@ it.each(["idle", "error"] as const)(
     expect(mocks.refetchFamilies).not.toHaveBeenCalled();
   },
 );
+
+it("SHOULD open the localized error feedback WHEN the delete is blocked (409)", async () => {
+  setup("error", new FamilyHasRecords());
+
+  await waitFor(() => expect(spies.push).toHaveBeenCalledTimes(1));
+
+  const dismiss = {
+    action: FeedbackActions.NAVIGATION,
+    route: "/family",
+    type: FeedbackNavigationTypes.DISMISS_TO,
+  };
+  expect(spies.encode).toHaveBeenCalledWith({
+    closeButton: dismiss,
+    message: "family.deleteBlocked.message",
+    primaryButton: { ...dismiss, label: "family.deleteBlocked.close" },
+    title: "family.deleteBlocked.title",
+    type: FeedbackType.Error,
+  });
+  expect(spies.push).toHaveBeenCalledWith({
+    params: { feedback: "encoded-feedback" },
+    pathname: "/business_feedback",
+  });
+});
+
+it("SHOULD keep the family in the list (no refetch) WHEN the delete is blocked", async () => {
+  setup("error", new FamilyHasRecords());
+
+  await waitFor(() => expect(spies.push).toHaveBeenCalled());
+
+  expect(mocks.refetchFamilies).not.toHaveBeenCalled();
+});
+
+it("SHOULD NOT open the feedback WHEN the delete fails with another error", () => {
+  setup("error", new GenericError());
+
+  expect(spies.push).not.toHaveBeenCalled();
+  expect(spies.encode).not.toHaveBeenCalled();
+});
+
+it("SHOULD NOT open the feedback WHEN there is no error", () => {
+  setup();
+
+  expect(spies.push).not.toHaveBeenCalled();
+});
