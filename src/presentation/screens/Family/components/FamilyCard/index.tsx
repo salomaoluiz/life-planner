@@ -10,6 +10,7 @@ import FamilyViewModel from "@screens/Family/models/FamilyViewModel";
 import getStyles from "./styles";
 
 export interface Props {
+  addMemberLabel: string;
   family: FamilyViewModel;
   onAddNewFamilyMember: () => void;
   onDeleteFamily: () => void;
@@ -22,17 +23,18 @@ function FamilyCard(props: Props) {
   const Content = useMemo(() => {
     return (
       <View style={styles.contentContainer}>
-        {props.family?.familyMembers.map((member) => {
-          return (
-            <FamilyMemberCard
-              member={member}
-              ownerId={props.family.owner?.memberDto.id}
-              refetchFamily={props.refetchFamilies}
-            />
-          );
-        })}
+        {props.family?.familyMembers.map((member) => (
+          <FamilyMemberCard
+            key={member.id}
+            member={member}
+            refetchFamily={props.refetchFamilies}
+          />
+        ))}
         <Spacer direction={"vertical"} size={"large"} />
-        <AddNewFamilyMember onPress={props.onAddNewFamilyMember} />
+        <AddNewFamilyMember
+          label={props.addMemberLabel}
+          onPress={props.onAddNewFamilyMember}
+        />
         <Spacer direction={"vertical"} size={"small"} />
         <DeleteFamily onPress={props.onDeleteFamily} />
       </View>
