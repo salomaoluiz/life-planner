@@ -101,6 +101,20 @@ it("SHOULD refetch", async () => {
   expect(mocks.pendingResponse.refetch).toHaveBeenCalledTimes(1);
 });
 
+it("SHOULD make refetch reject WHEN throwOnError is requested and the refetch fails", async () => {
+  const failing = {
+    ...mocks.pendingResponse,
+    refetch: jest.fn().mockRejectedValue(new Error("offline")),
+  };
+  spies.useReactQuery.mockReturnValueOnce(failing as never);
+  const { result } = setup({ cacheKey: ["CacheKey1"], fetch: spies.fetch });
+
+  await expect(result.current.refetch({ throwOnError: true })).rejects.toThrow(
+    "offline",
+  );
+  expect(failing.refetch).toHaveBeenCalledWith({ throwOnError: true });
+});
+
 it("SHOULD call useQuery with default params", async () => {
   spies.useReactQuery.mockReturnValueOnce(mocks.pendingResponse as never);
 

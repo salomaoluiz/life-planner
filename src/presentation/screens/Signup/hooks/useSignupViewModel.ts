@@ -73,7 +73,7 @@ function useSignupViewModel() {
       if (result.autoLoginFailed) {
         // The account exists: let the person sign in manually with the email prefilled.
         router.replace({
-          params: { email: submitParams.email },
+          params: { autoLoginFailed: "1", email: submitParams.email },
           pathname: "/login",
         } as Href);
         return result;
@@ -87,9 +87,12 @@ function useSignupViewModel() {
       try {
         await update();
       } catch (error) {
-        captureException(error as Error);
-        setApiErrorKey("auth.errors.generic");
-        return { errorKey: "auth.errors.generic" };
+        const errorKey = mapAuthError(error);
+        if (errorKey === "auth.errors.generic") {
+          captureException(error as Error);
+        }
+        setApiErrorKey(errorKey);
+        return { errorKey };
       }
 
       return result;

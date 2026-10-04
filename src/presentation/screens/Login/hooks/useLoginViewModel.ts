@@ -41,7 +41,10 @@ async function submitLogin(params: SubmitParams): Promise<SubmitResult> {
 function useLoginViewModel() {
   const { t } = useTranslation();
   const { logged, update } = useUser();
-  const params = useLocalSearchParams<{ email?: string }>();
+  const params = useLocalSearchParams<{
+    autoLoginFailed?: string;
+    email?: string;
+  }>();
   const passwordRef = useRef<RNTextInput>(null);
 
   const [email, setEmail] = useState(params.email ?? "");
@@ -49,7 +52,9 @@ function useLoginViewModel() {
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState<string>();
   const [passwordError, setPasswordError] = useState<string>();
-  const [apiErrorKey, setApiErrorKey] = useState<AuthErrorKey>();
+  const [apiErrorKey, setApiErrorKey] = useState<AuthErrorKey | undefined>(
+    params.autoLoginFailed ? "auth.errors.generic" : undefined,
+  );
   const [sessionExpired, setSessionExpired] = useState(hasSessionExpiredNotice);
 
   // The fetch function never rejects: failures become form messages, not error boundaries.
@@ -66,9 +71,12 @@ function useLoginViewModel() {
       try {
         await update();
       } catch (error) {
-        captureException(error as Error);
-        setApiErrorKey("auth.errors.generic");
-        return { errorKey: "auth.errors.generic" };
+        const errorKey = mapAuthError(error);
+        if (errorKey === "auth.errors.generic") {
+          captureException(error as Error);
+        }
+        setApiErrorKey(errorKey);
+        return { errorKey };
       }
 
       return result;

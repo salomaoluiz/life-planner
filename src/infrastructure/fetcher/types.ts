@@ -51,7 +51,7 @@ interface QueryResponse<R = void> {
   data?: R;
   error: Errors;
   isFetching: boolean;
-  refetch: () => Promise<void>;
+  refetch: (options?: { throwOnError?: boolean }) => Promise<void>;
   status: QueryStatus;
 }
 

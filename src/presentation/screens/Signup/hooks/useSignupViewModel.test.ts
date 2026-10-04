@@ -106,7 +106,7 @@ it("SHOULD send the user to login with the email prefilled WHEN the automatic lo
   await runFetch();
 
   expect(spies.replace).toHaveBeenCalledWith({
-    params: { email: "test@example.com" },
+    params: { autoLoginFailed: "1", email: "test@example.com" },
     pathname: "/login",
   });
   expect(result.current.formError).toBeUndefined();
@@ -130,6 +130,15 @@ it("SHOULD show the generic error WHEN the user refetch fails after sign up", as
   await runFetch();
 
   expect(result.current.formError).toBe("auth.errors.generic");
+});
+
+it("SHOULD show the network error WHEN the user refetch fails because the device is offline", async () => {
+  spies.update.mockRejectedValueOnce(new ConnectivityError());
+  const { result } = setup();
+
+  await runFetch();
+
+  expect(result.current.formError).toBe("auth.errors.network");
 });
 
 it("SHOULD clear each field error and the form error WHEN editing", async () => {

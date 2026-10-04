@@ -40,8 +40,8 @@ function useQuery<Response>(
     throw genericError;
   }
 
-  async function refetchQuery() {
-    await refetch();
+  async function refetchQuery(options?: { throwOnError?: boolean }) {
+    await (options ? refetch(options) : refetch());
   }
 
   return {

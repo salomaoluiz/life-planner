@@ -127,6 +127,31 @@ it("SHOULD show the generic error WHEN the user refetch fails after login", asyn
   expect(result.current.formError?.message).toBe("auth.errors.generic");
 });
 
+it("SHOULD show the network error WHEN the user refetch fails because the device is offline", async () => {
+  spies.update.mockRejectedValueOnce(new ConnectivityError());
+  const { result } = setup();
+
+  await runFetch(mocks.params);
+
+  expect(result.current.formError?.message).toBe("auth.errors.network");
+  expect(spies.captureException).not.toHaveBeenCalled();
+});
+
+it("SHOULD show the generic error WHEN arriving from a signup whose automatic login failed", () => {
+  spies.localSearchParams.mockReturnValue({
+    autoLoginFailed: "1",
+    email: "test@example.com",
+  });
+
+  const { result } = setup();
+
+  expect(result.current.formError).toEqual({
+    message: "auth.errors.generic",
+    type: "error",
+  });
+  expect(result.current.email).toBe("test@example.com");
+});
+
 it("SHOULD clear field errors, the form error and the session notice WHEN the user edits a field", async () => {
   spies.execute.mockRejectedValueOnce(new InvalidCredentialsError());
   const { result } = setup();

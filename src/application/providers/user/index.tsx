@@ -47,7 +47,8 @@ function UserProvider(props: Props) {
 
   async function update() {
     setIsLoading(true, "user");
-    await refetch();
+    // Callers (login/signup) need to know when loading the profile failed.
+    await refetch({ throwOnError: true });
   }
 
   const providerValue = useMemo(

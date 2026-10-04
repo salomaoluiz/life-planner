@@ -161,3 +161,19 @@ it("SHOULD expose get/post/patch/put/delete helpers using the right verbs", asyn
     spies.fetch.mock.calls.map((call) => (call[1] as RequestInit).method),
   ).toEqual(["GET", "POST", "PATCH", "PUT", "DELETE"]);
 });
+
+it("SHOULD NOT send the stored token to auth endpoints and treat their 401 as wrong credentials", async () => {
+  spies.tokenStorage.getToken.mockResolvedValue("stale-jwt");
+  spies.fetch.mockResolvedValueOnce(
+    mocks.json(401, { message: "Invalid Credentials", statusCode: 401 }),
+  );
+
+  const error = await setupThrowable("POST", "/v1/auth/login/email", {});
+
+  expect(
+    (spies.fetch.mock.calls[0][1] as RequestInit).headers,
+  ).not.toHaveProperty("Authorization");
+  expect(error).toBeInstanceOf(ApiBusinessError);
+  expect(error).toMatchObject({ statusCode: 401 });
+  expect(spies.handleSessionExpired).not.toHaveBeenCalled();
+});

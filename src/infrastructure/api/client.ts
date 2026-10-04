@@ -41,7 +41,10 @@ async function request<T>(
   body?: unknown,
 ): Promise<T> {
   const baseUrl = getBaseUrl();
-  const token = await tokenStorage.getToken();
+  // Auth endpoints are public: never send a (possibly stale) token to them.
+  const token = path.startsWith("/v1/auth/")
+    ? null
+    : await tokenStorage.getToken();
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 

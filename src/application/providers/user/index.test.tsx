@@ -32,6 +32,9 @@ it("SHOULD request the user data on update", () => {
   result.current.update();
 
   expect(mocks.useQuery.pendingResponse.refetch).toHaveBeenCalledTimes(1);
+  expect(mocks.useQuery.pendingResponse.refetch).toHaveBeenCalledWith({
+    throwOnError: true,
+  });
 });
 
 it("SHOULD return the user data", () => {

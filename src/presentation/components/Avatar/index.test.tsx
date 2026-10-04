@@ -185,3 +185,17 @@ describe("Avatar Component", () => {
     });
   });
 });
+
+describe("Avatar text label", () => {
+  it.each([
+    ["Ana  Silva", "AS"],
+    ["  Ana Silva ", "AS"],
+    ["Ana", "A"],
+    ["", ""],
+    ["   ", ""],
+  ])("SHOULD build the initials for %j without crashing", (source, label) => {
+    setup.regular.text({ source });
+
+    expect(screen.getByTestId("avatar-text").props.label).toBe(label);
+  });
+});
