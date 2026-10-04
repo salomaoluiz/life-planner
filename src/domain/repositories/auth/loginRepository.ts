@@ -1,12 +1,16 @@
-import LoginWithGoogleEntity from "@domain/entities/auth/LoginWithGoogleEntity";
-
 export type LoginRepository = {
-  loginWithGoogle(): Promise<LoginWithGoogleEntity | undefined>;
+  loginWithEmail(params: LoginWithEmailParams): Promise<void>;
   logout(): Promise<void>;
-  saveSession(params: SaveSessionParams): Promise<LoginWithGoogleEntity>;
+  signUpWithEmail(params: SignUpWithEmailParams): Promise<void>;
 };
 
-interface SaveSessionParams {
-  accessToken: string;
-  refreshToken: string;
-}
+export type LoginWithEmailParams = {
+  email: string;
+  password: string;
+};
+
+export type SignUpWithEmailParams = {
+  email: string;
+  name: string;
+  password: string;
+};

@@ -1,39 +1,53 @@
 import { render } from "@tests";
 
-import * as hooks from "@presentation/screens/Login/hooks";
+import useLoginViewModel from "../hooks/useLoginViewModel";
+import Login from "../index";
 
-import Login from "../";
-
-jest.mock("@presentation/screens/Login/hooks/useLogin");
+jest.mock("expo-router", () => ({ Redirect: "Redirect" }));
+jest.mock("../hooks/useLoginViewModel");
 
 // region mocks
-const useLoginMock = {
-  isFetching: false,
-  onGoogleButtonPress: jest.fn(),
+const viewModel = {
+  email: "test@example.com",
+  emailError: undefined as string | undefined,
+  formError: undefined as
+    | undefined
+    | { message: string; type: "error" | "info" },
+  isSubmitting: false,
+  logged: false,
+  onChangeEmail: jest.fn(),
+  onChangePassword: jest.fn(),
+  onEmailSubmit: jest.fn(),
+  onGoToSignUp: jest.fn(),
+  onSubmit: jest.fn(),
+  onTogglePassword: jest.fn(),
+  password: "password123",
+  passwordError: undefined as string | undefined,
+  passwordRef: { current: null },
+  showPassword: false,
 };
 // endregion mocks
 
 // region spies
-
-const useLoginSpy = jest.spyOn(hooks, "useLogin").mockReturnValue(useLoginMock);
-
+const spies = { useLoginViewModel: jest.mocked(useLoginViewModel) };
 // endregion spies
 
 beforeEach(() => {
   jest.clearAllMocks();
+  Object.assign(viewModel, {
+    emailError: undefined,
+    formError: undefined,
+    isSubmitting: false,
+    logged: false,
+    showPassword: false,
+  });
+  spies.useLoginViewModel.mockReturnValue(viewModel as never);
 });
 
-function setup() {
+function setup(overrides: Partial<typeof viewModel> = {}) {
+  Object.assign(viewModel, overrides);
   render(<Login />);
 }
 
-const spies = {
-  useLogin: useLoginSpy,
-};
-
-const mocks = {
-  useLogin: useLoginMock,
-};
-
 export { mocks, setup, spies };
-export { fireEvent, screen } from "@tests";
+const mocks = { viewModel };

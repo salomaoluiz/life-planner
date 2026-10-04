@@ -42,9 +42,9 @@ const repositoriesMocks: Repositories = {
     },
   },
   loginRepository: {
-    loginWithGoogle: jest.fn(),
+    loginWithEmail: jest.fn(),
     logout: jest.fn(),
-    saveSession: jest.fn(),
+    signUpWithEmail: jest.fn(),
   },
   stockRepository: {
     createStockItem: jest.fn(),
@@ -53,7 +53,6 @@ const repositoriesMocks: Repositories = {
     updateStockItem: jest.fn(),
   },
   userRepository: {
-    createUser: jest.fn(),
     getUser: jest.fn(),
     getUserById: jest.fn(),
   },

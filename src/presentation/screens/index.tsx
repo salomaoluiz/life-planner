@@ -6,4 +6,5 @@ export { default as FinancialTransaction } from "./Financial/Transactions";
 export { default as Home } from "./Home";
 export { default as Invite } from "./Invite";
 export { default as Login } from "./Login";
+export { default as Signup } from "./Signup";
 export { default as Stock } from "./Stock";

@@ -2264,23 +2264,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-google-signin/google-signin@npm:^13.2.0":
-  version: 13.3.1
-  resolution: "@react-native-google-signin/google-signin@npm:13.3.1"
-  peerDependencies:
-    expo: ">=50.0.0"
-    react: "*"
-    react-dom: "*"
-    react-native: "*"
-  peerDependenciesMeta:
-    expo:
-      optional: true
-    react-dom:
-      optional: true
-  checksum: 10c0/39be6c3bb52be30a8b6c49376ea90c325c07f63c01938df9ba4b3d8966f69c7e1e8fe8ab000227939b899fce06efd3725f3fba56848cf9d25eb9507f8f994f8c
-  languageName: node
-  linkType: hard
-
 "@react-native-picker/picker@npm:2.9.0":
   version: 2.9.0
   resolution: "@react-native-picker/picker@npm:2.9.0"
@@ -6677,6 +6660,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-secure-store@npm:~14.0.1":
+  version: 14.0.1
+  resolution: "expo-secure-store@npm:14.0.1"
+  peerDependencies:
+    expo: "*"
+  checksum: 10c0/c2ad36f7ae8aea5b95ebc117f302974de6ad403f0b98b259f9dfcadc441f5c40c2170472e4e95832ad6cf8bcd37614dfb3757a4de1f7631ea9493c61cb7b2ab3
+  languageName: node
+  linkType: hard
+
 "expo-splash-screen@npm:^0.29.22":
   version: 0.29.24
   resolution: "expo-splash-screen@npm:0.29.24"
@@ -9174,7 +9166,6 @@ __metadata:
     "@eslint/js": "npm:^9.20.0"
     "@expo/vector-icons": "npm:^14.0.2"
     "@react-native-async-storage/async-storage": "npm:1.23.1"
-    "@react-native-google-signin/google-signin": "npm:^13.2.0"
     "@react-native-picker/picker": "npm:2.9.0"
     "@react-navigation/bottom-tabs": "npm:^7.2.0"
     "@react-navigation/drawer": "npm:^7.1.2"
@@ -9207,6 +9198,7 @@ __metadata:
     expo-linking: "npm:~7.0.5"
     expo-localization: "npm:^16.0.1"
     expo-router: "npm:~4.0.17"
+    expo-secure-store: "npm:~14.0.1"
     expo-splash-screen: "npm:^0.29.22"
     expo-status-bar: "npm:~2.0.1"
     expo-symbols: "npm:~0.2.2"

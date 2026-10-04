@@ -81,6 +81,18 @@ it("SHOULD render the button with custom styles", () => {
   );
 });
 
+it("SHOULD forward the loading prop to the underlying button", () => {
+  setup({ loading: true });
+
+  expect(screen.getByTestId(defaultProps.testID).props.loading).toBe(true);
+});
+
+it("SHOULD forward the loading prop in every mode", () => {
+  setup({ loading: true, mode: ButtonMode.Text });
+
+  expect(screen.getByTestId(defaultProps.testID).props.loading).toBe(true);
+});
+
 describe("theme fallbacks", () => {
   function withColors(overrides: Record<string, unknown>) {
     const { useTheme } = jest.requireMock("@presentation/theme");

@@ -1,25 +1,21 @@
 import { datasourcesMocks } from "@data/datasource/mocks/index.mocks";
 
 import loginRepositoryImpl from "../loginRepositoryImpl";
-import * as loginWithGoogle from "../loginWithGoogle";
+import * as loginWithEmail from "../loginWithEmail";
 import * as logout from "../logout";
-import * as saveSession from "../saveSession";
-
-// region mocks
-
-// endregion mocks
+import * as signUpWithEmail from "../signUpWithEmail";
 
 // region spies
 
-const loginWithGoogleSpy = jest
-  .spyOn(loginWithGoogle, "default")
-  .mockResolvedValue("loginWithGoogle response" as never);
+const loginWithEmailSpy = jest
+  .spyOn(loginWithEmail, "default")
+  .mockResolvedValue("loginWithEmail response" as never);
 const logoutSpy = jest
   .spyOn(logout, "default")
   .mockResolvedValue("logout response" as never);
-const saveSessionSpy = jest
-  .spyOn(saveSession, "default")
-  .mockResolvedValue("saveSession response" as never);
+const signUpWithEmailSpy = jest
+  .spyOn(signUpWithEmail, "default")
+  .mockResolvedValue("signUpWithEmail response" as never);
 
 // endregion spies
 
@@ -32,17 +28,13 @@ function setup() {
 }
 
 const spies = {
-  loginWithGoogle: loginWithGoogleSpy,
+  loginWithEmail: loginWithEmailSpy,
   logout: logoutSpy,
-  saveSession: saveSessionSpy,
+  signUpWithEmail: signUpWithEmailSpy,
 };
 
 const mocks = {
   datasourcesMocks,
 };
-
-beforeEach(() => {
-  jest.clearAllMocks();
-});
 
 export { mocks, setup, spies };

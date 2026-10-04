@@ -34,6 +34,7 @@ function AvatarText(props: AvatarDTOProps) {
   function getLabel() {
     return props.source
       .split(" ")
+      .filter(Boolean)
       .map((word) => word[0].toUpperCase())
       .join("");
   }

@@ -3,13 +3,9 @@ import { View } from "react-native";
 import { render } from "@tests";
 
 import * as Fetcher from "@infrastructure/fetcher";
-import * as googleOAuth from "@infrastructure/googleOAuth";
 import InfrastructureProvider from "@infrastructure/provider";
 
 jest.mock("@infrastructure/fetcher");
-jest.mock("@infrastructure/googleOAuth");
-
-const initializeGoogleOAuthSpy = jest.spyOn(googleOAuth, "initialize");
 
 jest
   .spyOn(Fetcher, "FetcherProvider")
@@ -33,9 +29,5 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-const spies = {
-  initializeGoogleOAuth: initializeGoogleOAuthSpy,
-};
-
-export { setup, spies };
+export { setup };
 export { screen } from "@tests";

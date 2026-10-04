@@ -1,107 +1,88 @@
 # Auth Module Context
 
+Email + password against the NestJS API (`../life-planner-back`). Google Sign-In and `supabase.auth.*` were removed (spec 002). There is no refresh token: when the JWT expires the API answers 401 and the app sends the user back to `/login`.
+
 ## Domain
 
 ```yaml
-entities:
-  LoginWithGoogleEntity:
-    path: src/domain/entities/auth/LoginWithGoogleEntity.ts
-    properties:
-      - id: string
-      - name: string
-      - email: string
-      - avatarURL: string
-
 interfaces:
   LoginRepository:
     path: src/domain/repositories/auth/loginRepository.ts
     methods:
-      - loginWithGoogle(): Promise<LoginWithGoogleEntity | undefined>
-      - logout(): Promise<void>
-      - saveSession(params: SaveSessionParams): Promise<LoginWithGoogleEntity>
+      - loginWithEmail(params: { email, password }): Promise<void> # stores the token
+      - signUpWithEmail(params: { email, name, password }): Promise<void>
+      - logout(): Promise<void> # local only, never fails because of the network
 
 errors:
-  - name: LoginCanceled
-    path: src/domain/entities/errors/auth/LoginCanceled.ts
-  - name: UserNotLogged
-    path: src/domain/entities/errors/auth/UserNotLogged.ts
+  - UserNotLoggedError (src/domain/entities/errors/auth/UserNotLogged.ts)
+  - InvalidCredentialsError, EmailAlreadyInUseError, AutoLoginFailedError (errors/auth)
+  - ApiBusinessError(message, statusCode), ConnectivityError (errors/api)
 ```
 
 ## Application
 
 ```yaml
 use_cases:
-  loginWithGoogleUseCase:
-    path: src/application/useCases/cases/auth/loginWithGoogleUseCase.ts
-    receives: void
-    returns: Promise<void>
-    behavior: Executes login, checks if user exists in userRepository, creates if missing.
-
+  loginWithEmailUseCase:
+    path: src/application/useCases/cases/auth/loginWithEmailUseCase.ts
+    receives: { email, password }
+    behavior: normalizes the email (trim + lowercase) and logs in.
+  signUpWithEmailUseCase:
+    path: src/application/useCases/cases/auth/signUpWithEmailUseCase.ts
+    receives: { email, name, password }
+    behavior: signs up, then logs in with the same credentials; a failing second step throws AutoLoginFailedError (the account exists).
   logoutUseCase:
     path: src/application/useCases/cases/auth/logoutUseCase.ts
-    receives: void
-    returns: Promise<void>
-    behavior: Executes logout via loginRepository.
+    behavior: clears the token and all cache. No API call.
 
-  saveWebSessionUseCase:
-    path: src/application/useCases/cases/auth/saveWebSessionUseCase.ts
-    receives: { accessToken: string, refreshToken: string }
-    returns: Promise<void>
-    behavior: Saves session after web OAuth redirect.
+providers:
+  UserProvider (src/application/providers/user/index.tsx):
+    behavior: loads the profile via getUserUseCase (GET /v1/user/me). Subscribes to `onSessionExpired` and calls `resetFetcherData()` so `logged` becomes false and (app)/_layout redirects to /login.
 ```
+
+## Data
+
+```yaml
+datasources:
+  loginDatasource (src/data/datasource/data/auth/api):
+    loginWithEmail: POST /v1/auth/login/email -> stores { token } with tokenStorage; 401 -> InvalidCredentialsError
+    signUpWithEmail: POST /v1/auth/signup/email; 422 -> EmailAlreadyInUseError
+    logout: tokenStorage.clearToken()
+  userDatasource (src/data/datasource/data/user/api):
+    getUser: GET /v1/user/me (no stored token -> UserNotLoggedError without calling the API)
+    getUserById: GET /v1/user/:id (404 -> undefined)
+
+models:
+  UserModel: fromJSON/toJSON use the API shape (photoUrl optional -> avatarURL?)
+```
+
+`UserProfileEntity.photoUrl` / `UserDTO.photoUrl` are optional; the Family avatar falls back to a text avatar.
 
 ## Infrastructure
 
 ```yaml
-repositories:
-  loginRepositoryImpl:
-    path: src/data/repositories/repos/auth/loginRepositoryImpl.ts
-    implements: LoginRepository
-    dependencies: [LoginDatasource]
-
-datasources:
-  loginDatasourceImpl:
-    path: src/data/datasource/data/auth/supabase/loginDatasourceImpl.ts
-    connection: Supabase Auth
-    methods:
-      - loginWithIdToken: Uses native Google Sign-In token
-      - loginWithOAuth: Redirects to web OAuth
-      - logout: Calls supabase.auth.signOut()
-      - saveSession: Calls supabase.auth.setSession()
-
-external_connections:
-  - name: Google OAuth
-    path: src/infrastructure/googleOAuth/rnGoogleSignIn/index.ts
-  - name: Supabase
-    path: src/infrastructure/supabase/index.ts
+wrappers:
+  "@infrastructure/token":
+    api: tokenStorage.{getToken,setToken,clearToken}
+    storage: expo-secure-store on native, the storage wrapper (localStorage) on web. Only the raw JWT is stored.
+  "@infrastructure/api":
+    api: api.{get,post,patch,put,delete}("/v1/...")
+    config: EXPO_PUBLIC_API_URL (includes /api), 15 s timeout, Bearer token auto-attached
+    errors: network/timeout -> ConnectivityError; 400/422/other 4xx -> ApiBusinessError; 5xx/non-JSON -> GenericError (context has no body); 401 with token -> session expiry + UserNotLoggedError; 401 without token -> ApiBusinessError
+    session: onSessionExpired(listener), hasSessionExpiredNotice(), clearSessionExpiredNotice(). Parallel 401s are handled once.
+  "@infrastructure/fetcher":
+    resetFetcherData(): queryClient.resetQueries()
 ```
 
 ## Presentation
 
 ```yaml
+routes: /login (app/login.tsx), /signup (app/signup.tsx) — both public; a logged user is redirected to "/"
 screens:
-  Login:
-    path: src/presentation/screens/Login/index.tsx
-    variants: [mobile, web]
-
-components:
-  - name: GoogleButton
-    path: src/presentation/screens/Login/components/GoogleButton/index.tsx
-    triggers: OAuth or Native sign in
-  - name: Welcome
-    path: src/presentation/screens/Login/components/Welcome/index.tsx
-    description: greeting UI
-
-hooks:
-  - name: useLogin
-    path: src/presentation/screens/Login/hooks/useLogin.ts
-    orchestrates: loginWithGoogleUseCase
-  - name: useSaveSession
-    path: src/presentation/screens/Login/hooks/useSaveSession.ts
-    orchestrates: saveWebSessionUseCase
-
-containers:
-  - name: LoginContainer
-    path: src/presentation/screens/Login/containers/index.tsx
-    description: wraps components with layout and logic
+  Login: src/presentation/screens/Login (index.tsx View, hooks/useLoginViewModel.ts, utils/mapAuthError.ts)
+  Signup: src/presentation/screens/Signup (index.tsx View, hooks/useSignupViewModel.ts)
+validation: src/utils/authValidation.ts (returns i18n keys)
+copy: i18n keys auth.*, login.*, signup.* (en-US + pt-BR)
 ```
+
+Security notes: passwords are only sent in the request body, never stored, logged, put in breadcrumbs or in error context.

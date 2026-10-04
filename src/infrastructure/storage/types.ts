@@ -1,5 +1,6 @@
 enum StorageStringKeys {
   FALLBACK_LANGUAGE = "@fallback_language",
+  SESSION_TOKEN = "@session_token",
 }
 
 const StorageKeys = {

@@ -1,13 +1,10 @@
-import LoginWithGoogleModel from "@data/models/auth/LoginWithGoogleModel";
+import {
+  LoginWithEmailParams,
+  SignUpWithEmailParams,
+} from "@domain/repositories/auth";
 
 export type LoginDatasource = {
-  loginWithIdToken(): Promise<LoginWithGoogleModel>;
-  loginWithOAuth(): Promise<boolean>;
+  loginWithEmail(params: LoginWithEmailParams): Promise<void>;
   logout(): Promise<void>;
-  saveSession(params: SaveSessionParams): Promise<LoginWithGoogleModel>;
+  signUpWithEmail(params: SignUpWithEmailParams): Promise<void>;
 };
-
-interface SaveSessionParams {
-  accessToken: string;
-  refreshToken: string;
-}
