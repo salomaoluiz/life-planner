@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react-native";
+import { render, screen } from "@testing-library/react-native";
 import React from "react";
 
 interface RenderOptions {
@@ -10,6 +10,12 @@ function customRender(
   options?: Partial<RenderOptions>,
 ) {
   render(component, options);
+}
+
+// react-native-paper components are mocked as <View>, so RNTL's getByText
+// cannot see their string children; match on the children prop instead.
+function hasText(text: string) {
+  return screen.UNSAFE_queryAllByProps({ children: text }).length > 0;
 }
 
 function suppressConsoleError() {
@@ -29,4 +35,4 @@ export {
   screen,
   waitFor,
 } from "@testing-library/react-native";
-export { customRender as render, suppressConsoleError };
+export { hasText, customRender as render, suppressConsoleError };
