@@ -2,7 +2,8 @@ import React, { createContext, useContext, useEffect, useMemo } from "react";
 
 import { useCases } from "@application/useCases";
 import UserProfileEntity from "@domain/entities/user/UserProfileEntity";
-import { useQuery } from "@infrastructure/fetcher";
+import { onSessionExpired } from "@infrastructure/api";
+import { resetFetcherData, useQuery } from "@infrastructure/fetcher";
 import { useProviderLoader } from "@providers/loader";
 
 interface IUserContext {
@@ -39,6 +40,10 @@ function UserProvider(props: Props) {
   useEffect(() => {
     setIsLoading(isFetching, "user");
   }, [isFetching]);
+
+  // The API client clears the token/cache on a 401; resetting the queries makes the user
+  // query fail (no token) so `logged` becomes false and the router sends the user to /login.
+  useEffect(() => onSessionExpired(() => void resetFetcherData()), []);
 
   async function update() {
     setIsLoading(true, "user");

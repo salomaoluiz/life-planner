@@ -3,13 +3,15 @@ import { router } from "expo-router";
 import { fireEvent, render, screen } from "@tests";
 
 import { useCases } from "@application/useCases";
-import { useMutation } from "@infrastructure/fetcher";
+import { clearSessionExpiredNotice } from "@infrastructure/api";
+import { resetFetcherData, useMutation } from "@infrastructure/fetcher";
 import UseMutationFixture from "@infrastructure/fetcher/mocks/useMutation.fixture";
 
 import Logout from "./";
 
 jest.mock("expo-router", () => ({ router: { replace: jest.fn() } }));
 jest.mock("@infrastructure/fetcher");
+jest.mock("@infrastructure/api");
 jest.mock("@application/useCases", () => ({
   useCases: { logoutUseCase: { execute: jest.fn() } },
 }));
@@ -70,10 +72,21 @@ it("SHOULD log out WHEN the button is pressed", () => {
   expect(mutate).toHaveBeenCalledTimes(1);
 });
 
-it("SHOULD go to the login screen WHEN the logout succeeded", () => {
+it("SHOULD go to the login screen, reset cached queries and drop any session notice WHEN the logout succeeded", () => {
+  const order: string[] = [];
+  jest.mocked(router.replace).mockImplementation(() => {
+    order.push("replace");
+  });
+  jest.mocked(resetFetcherData).mockImplementation(async () => {
+    order.push("reset");
+  });
+
   setup({ status: "success" });
 
   expect(router.replace).toHaveBeenCalledWith("/login");
+  expect(resetFetcherData).toHaveBeenCalledTimes(1);
+  expect(clearSessionExpiredNotice).toHaveBeenCalledTimes(1);
+  expect(order).toEqual(["replace", "reset"]);
 });
 
 it.each(["idle", "error"] as const)(
@@ -82,5 +95,6 @@ it.each(["idle", "error"] as const)(
     setup({ status });
 
     expect(router.replace).not.toHaveBeenCalled();
+    expect(resetFetcherData).not.toHaveBeenCalled();
   },
 );

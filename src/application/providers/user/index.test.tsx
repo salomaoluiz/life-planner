@@ -52,3 +52,32 @@ it("SHOULD throw in case of call hook outside the provider", () => {
     new Error("useUser must be used within an UserProvider"),
   );
 });
+
+it("SHOULD subscribe to session expiry on mount and unsubscribe on unmount", () => {
+  const { unmount } = setupHook();
+
+  expect(spies.onSessionExpired).toHaveBeenCalledTimes(1);
+  expect(spies.unsubscribe).not.toHaveBeenCalled();
+
+  unmount();
+
+  expect(spies.unsubscribe).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD reset the fetcher data WHEN the session expires", () => {
+  setup();
+  const listener = spies.onSessionExpired.mock.calls[0][0];
+
+  listener();
+
+  expect(spies.resetFetcherData).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD expose logged=false and no data WHEN the user query failed (not logged in)", () => {
+  spies.useQuery.mockReturnValue(mocks.useQuery.errorResponse as never);
+
+  const { result } = setupHook();
+
+  expect(result.current.logged).toBe(false);
+  expect(result.current.data).toBeUndefined();
+});

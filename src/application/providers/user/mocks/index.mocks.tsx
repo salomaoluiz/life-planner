@@ -6,10 +6,12 @@ import { render } from "@tests";
 
 import { UserProvider, useUser } from "@application/providers/user";
 import UserProfileEntity from "@domain/entities/user/UserProfileEntity";
+import * as api from "@infrastructure/api";
 import * as fetcher from "@infrastructure/fetcher";
 import * as loader from "@providers/loader";
 
 jest.mock("@infrastructure/fetcher");
+jest.mock("@infrastructure/api");
 
 // #region Mocks
 const useQuerySuccessResponse = {
@@ -31,6 +33,15 @@ const useQueryPendingResponse = {
   status: "pending",
 };
 
+const useQueryErrorResponse = {
+  data: undefined,
+  isFetching: false,
+  refetch: jest.fn(),
+  status: "error",
+};
+
+const unsubscribe = jest.fn();
+
 const useProviderLoaderResponse = {
   isLoading: false,
   setIsLoading: jest.fn(),
@@ -40,6 +51,10 @@ const useProviderLoaderResponse = {
 const useQuerySpy = jest
   .spyOn(fetcher, "useQuery")
   .mockReturnValue(useQueryPendingResponse as never);
+
+const onSessionExpiredSpy = jest
+  .spyOn(api, "onSessionExpired")
+  .mockReturnValue(unsubscribe);
 
 jest
   .spyOn(loader, "useProviderLoader")
@@ -66,11 +81,15 @@ function throwableSetupWithoutProvider() {
 }
 
 const spies = {
+  onSessionExpired: onSessionExpiredSpy,
+  resetFetcherData: jest.mocked(fetcher.resetFetcherData),
+  unsubscribe,
   useQuery: useQuerySpy,
 };
 
 const mocks = {
   useQuery: {
+    errorResponse: useQueryErrorResponse,
     pendingResponse: useQueryPendingResponse,
     successResponse: useQuerySuccessResponse,
   },
