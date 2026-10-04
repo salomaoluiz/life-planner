@@ -1,3 +1,4 @@
+export { default as invalidateFetcherData } from "./invalidate";
 export { default as FetcherProvider } from "./provider";
 export { default as resetFetcherData } from "./reset";
 export { default as useMutation } from "./useMutation";

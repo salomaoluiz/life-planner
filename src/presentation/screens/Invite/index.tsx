@@ -1,82 +1,79 @@
-import { router, useLocalSearchParams } from "expo-router";
-import { useEffect } from "react";
 import { View } from "react-native";
 
-import { useCases } from "@application/useCases";
-import { JoinFamilyMemberUseCaseParams } from "@application/useCases/cases/familyMember/joinFamilyMemberUseCase";
 import { Button, Spacer, Text } from "@components";
-import { useMutation, useQuery } from "@infrastructure/fetcher";
+import Skeleton from "@components/Skeleton";
+import { useTranslation } from "@presentation/i18n";
 
-import FamilyViewModel from "./models/FamilyViewModel";
+import useInviteViewModel from "./hooks/useInviteViewModel";
 import getStyles from "./styles";
-import { decodeRouteParams } from "./utils";
 
 function Invite() {
-  const routeParams = useLocalSearchParams<{ token: string }>();
   const { styles, theme } = getStyles();
+  const { t } = useTranslation();
+  const vm = useInviteViewModel();
 
-  const { data } = useQuery<FamilyViewModel | undefined>({
-    cacheKey: [useCases.getFamilyByIdUseCase.uniqueName],
-    fetch: async () => {
-      const decoded = await decodeRouteParams(routeParams);
-      const userDTO = await useCases.getUserUseCase.execute();
-
-      const familyDTO = await useCases.getFamilyByIdUseCase.execute({
-        familyId: decoded.familyId,
-      });
-      return new FamilyViewModel(familyDTO, userDTO, decoded);
-    },
-  });
-
-  const joinFamily = useMutation<JoinFamilyMemberUseCaseParams, void>({
-    cacheKey: [useCases.joinFamilyMemberUseCase.uniqueName],
-    fetch: useCases.joinFamilyMemberUseCase.execute,
-  });
-
-  useEffect(() => {
-    if (joinFamily.status === "success") {
-      router.replace("/(app)/(tabs)/index");
-    }
-  }, [joinFamily.status]);
-
-  if (!data) {
+  if (vm.status === "loading") {
     return (
-      <View>
-        <Text.Title value={"Loading"} />
+      <View style={styles.container}>
+        <Skeleton.Box height={48} width={"80%"} />
+        <Spacer direction={"vertical"} size={"large"} />
+        <Skeleton.Box height={32} width={"60%"} />
       </View>
     );
   }
 
-  function onAccept() {
-    joinFamily.mutate({ inviteToken: routeParams.token });
+  if (vm.status === "notFound") {
+    return (
+      <View style={styles.container}>
+        <Text.Headline value={t("invite.notFound")} />
+      </View>
+    );
   }
 
-  function onDecline() {
-    router.replace("/(app)/(tabs)/index");
+  if (vm.status === "expired") {
+    return (
+      <View style={styles.container}>
+        <Text.Headline value={t("invite.expired")} />
+      </View>
+    );
+  }
+
+  if (vm.status === "error" || !vm.invite) {
+    return (
+      <View style={styles.container}>
+        <Text.Headline value={t("errors.generic.description")} />
+      </View>
+    );
   }
 
   return (
     <View style={styles.container}>
-      <Text.Display value={`You have been invited to join the family`} />
-      <Text.Headline value={data.familyName} />
+      <Text.Display value={t("invite.title")} />
+      <Text.Headline value={vm.invite.familyName} />
       <Spacer direction={"vertical"} size={"large"} />
-      {!data.isSamePerson ? (
-        <Text.Headline value={"Looks like this is invite is not for you"} />
+      {!vm.invite.canAccept ? (
+        <Text.Headline
+          value={t("invite.notForYou", { email: vm.invite.email })}
+        />
+      ) : null}
+      {vm.acceptErrorKey ? (
+        <Text.Headline
+          value={t(vm.acceptErrorKey, { email: vm.invite.email })}
+        />
       ) : null}
       <Spacer direction={"vertical"} size={"large"} />
       <View style={styles.buttonContainer}>
         <Button.Filled
-          disabled={!data.isSamePerson}
-          label={"Accept"}
-          onPress={onAccept}
+          disabled={!vm.invite.canAccept || vm.isAccepting}
+          label={t("invite.accept")}
+          loading={vm.isAccepting}
+          onPress={vm.onAccept}
         />
         <Spacer direction={"horizontal"} size={"large"} />
         <Button.Outlined
-          customStyles={{
-            textColor: theme.colors.error,
-          }}
-          label={"Decline"}
-          onPress={onDecline}
+          customStyles={{ textColor: theme.colors.error }}
+          label={t("invite.decline")}
+          onPress={vm.onDecline}
         />
       </View>
     </View>

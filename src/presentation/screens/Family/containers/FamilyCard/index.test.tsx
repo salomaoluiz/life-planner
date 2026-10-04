@@ -102,3 +102,9 @@ it("SHOULD NOT open the feedback WHEN there is no error", () => {
 
   expect(spies.push).not.toHaveBeenCalled();
 });
+
+it("SHOULD pass the translated add-member label to the card", () => {
+  const { props } = setup();
+
+  expect(props.addMemberLabel).toBe("family.member.addButton");
+});

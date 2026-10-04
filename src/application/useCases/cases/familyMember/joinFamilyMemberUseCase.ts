@@ -1,5 +1,6 @@
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
-import { DefaultError } from "@domain/entities/errors";
+import { DefaultError, InviteNotFound } from "@domain/entities/errors";
+import { isValidInviteToken } from "@domain/entities/familyMember/inviteToken";
 import Repositories from "@domain/repositories";
 
 export interface JoinFamilyMemberUseCaseParams {
@@ -12,13 +13,13 @@ function joinFamilyMemberUserCase(
   return {
     execute: async (params: JoinFamilyMemberUseCaseParams) => {
       try {
-        const joinDate = new Date().toISOString();
+        // A malformed token can never be valid: fail locally (no request, no path tricks).
+        if (!isValidInviteToken(params.inviteToken)) {
+          throw new InviteNotFound();
+        }
 
-        const user = await repositories.userRepository.getUser();
         await repositories.familyMemberRepository.joinFamilyMember({
           inviteToken: params.inviteToken,
-          joinDate,
-          userId: user.id,
         });
       } catch (error) {
         if (error instanceof DefaultError) {

@@ -1,11 +1,3 @@
-import { waitFor } from "@tests";
-
-import {
-  FeedbackActions,
-  FeedbackNavigationTypes,
-} from "@screens/Feedback/BusinessFeedback/actions/types";
-import { FeedbackType } from "@screens/Feedback/BusinessFeedback/types";
-
 import {
   fireEvent,
   hasText,
@@ -13,90 +5,78 @@ import {
   press,
   screen,
   setup,
-  spies,
 } from "./mocks/index.mocks";
 
-it("SHOULD render the title and actions", () => {
+it("SHOULD render the title, input label and actions as i18n keys", () => {
   setup();
 
-  expect(hasText("Add the user email")).toBe(true);
+  expect(hasText("family.member.invite.title")).toBe(true);
   expect(
-    screen.UNSAFE_getAllByProps({ label: "Invite" }).length,
+    screen.UNSAFE_getAllByProps({ label: "family.member.invite.emailLabel" })
+      .length,
   ).toBeGreaterThan(0);
   expect(
-    screen.UNSAFE_getAllByProps({ label: "Cancel" }).length,
+    screen.UNSAFE_getAllByProps({ label: "family.member.invite.submit" })
+      .length,
+  ).toBeGreaterThan(0);
+  expect(
+    screen.UNSAFE_getAllByProps({ label: "family.member.invite.cancel" })
+      .length,
   ).toBeGreaterThan(0);
 });
 
-it("SHOULD configure the invite mutation with the use case", () => {
-  setup();
-
-  expect(spies.useMutation).toHaveBeenCalledWith({
-    cacheKey: ["invite_member"],
-    fetch: mocks.useCases.inviteFamilyMemberUseCase.execute,
-  });
-});
-
-it("SHOULD invite the typed email to the family from the route WHEN Invite is pressed", () => {
-  const { mutate } = setup();
+it("SHOULD forward typing to onChangeEmail", () => {
+  const vm = setup();
 
   fireEvent.changeText(
     screen.UNSAFE_getAllByProps({ value: "" })[0],
     "bob@example.test",
   );
-  press("Invite");
 
-  expect(mutate).toHaveBeenCalledWith({
-    email: "bob@example.test",
-    familyId: "family-1",
-  });
+  expect(vm.onChangeEmail).toHaveBeenCalledWith("bob@example.test");
 });
 
-it("SHOULD go back WHEN Cancel is pressed", () => {
-  setup();
+it("SHOULD call onSubmit WHEN submit is pressed", () => {
+  const vm = setup();
 
-  press("Cancel");
+  press("family.member.invite.submit");
 
-  expect(spies.back).toHaveBeenCalledTimes(1);
+  expect(vm.onSubmit).toHaveBeenCalledTimes(1);
 });
 
-it("SHOULD go back WHEN the backdrop is pressed", () => {
-  setup();
+it("SHOULD call onCancel WHEN Cancel or the backdrop is pressed", () => {
+  const vm = setup();
 
+  press("family.member.invite.cancel");
   fireEvent.press(screen.UNSAFE_getAllByType(mocks.Pressable)[0]);
 
-  expect(spies.back).toHaveBeenCalledTimes(1);
+  expect(vm.onCancel).toHaveBeenCalledTimes(2);
 });
 
-it("SHOULD NOT show feedback WHEN there is no invite data", () => {
+it("SHOULD show the validation message key WHEN there is an email error", () => {
+  setup({ emailErrorKey: "auth.validation.emailInvalid" });
+
+  expect(hasText("auth.validation.emailInvalid")).toBe(true);
+});
+
+it("SHOULD NOT show any error text by default", () => {
   setup();
 
-  expect(spies.encode).not.toHaveBeenCalled();
-  expect(spies.push).not.toHaveBeenCalled();
+  expect(hasText("auth.validation.emailInvalid")).toBe(false);
+  expect(hasText("family.member.invite.alreadyExists")).toBe(false);
 });
 
-it("SHOULD navigate to the success feedback with the invite url WHEN the invite was created", async () => {
-  setup({ inviteToken: "token-123" });
+it("SHOULD show the 'already exists' message WHEN flagged", () => {
+  setup({ alreadyExistsVisible: true });
 
-  await waitFor(() => expect(spies.push).toHaveBeenCalledTimes(1));
+  expect(hasText("family.member.invite.alreadyExists")).toBe(true);
+});
 
-  expect(spies.encode).toHaveBeenCalledWith({
-    closeButton: {
-      action: FeedbackActions.NAVIGATION,
-      route: "/family",
-      type: FeedbackNavigationTypes.DISMISS_TO,
-    },
-    message: "The user  has been invited to the family",
-    primaryButton: {
-      action: FeedbackActions.COPY_TO_CLIPBOARD,
-      label: "Copy Url",
-      value: expect.stringMatching(/\/invite\?token=token-123$/),
-    },
-    title: "Invite sent",
-    type: FeedbackType.Success,
-  });
-  expect(spies.push).toHaveBeenCalledWith({
-    params: { feedback: "encoded-feedback" },
-    pathname: "/business_feedback",
-  });
+it("SHOULD disable the submit button WHILE submitting", () => {
+  setup({ isSubmitting: true });
+
+  expect(
+    screen.UNSAFE_getAllByProps({ label: "family.member.invite.submit" })[0]
+      .props.disabled,
+  ).toBe(true);
 });

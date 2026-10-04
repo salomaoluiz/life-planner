@@ -20,34 +20,18 @@ it("SHOULD hide the members and actions WHEN collapsed", () => {
   expect(screen.queryAllByTestId("memberCard")).toHaveLength(0);
 });
 
-it("SHOULD render a card per member with the owner member id WHEN expanded", () => {
+it("SHOULD render a card per member WHEN expanded", () => {
   const { family } = setup({ expanded: true });
 
   const cards = screen.getAllByTestId("memberCard");
   expect(cards).toHaveLength(2);
   expect(cards[0].props.member).toBe(family.familyMembers[0]);
-  expect(cards[0].props.ownerId).toBe("member-1");
-});
-
-it("SHOULD render members without an owner id WHEN the family has no owner member", () => {
-  const base = setup().family;
-  screen.unmount();
-  const noOwner = new FamilyViewModel(
-    new FamilyDTO({ ...familyDTO, ownerId: "someone-else" }),
-    base.familyMembers,
-  );
-
-  setup({ expanded: true, family: noOwner });
-
-  expect(screen.getAllByTestId("memberCard")[0].props.ownerId).toBeUndefined();
 });
 
 it("SHOULD call onAddNewFamilyMember WHEN the add button is pressed", () => {
   setup({ expanded: true });
 
-  fireEvent.press(
-    screen.UNSAFE_getAllByProps({ label: "Add new Family Member" })[0],
-  );
+  fireEvent.press(screen.UNSAFE_getAllByProps({ label: "Add member" })[0]);
 
   expect(mocks.callbacks.onAddNewFamilyMember).toHaveBeenCalledTimes(1);
 });

@@ -1,55 +1,38 @@
 import { repositoriesMocks } from "@data/repositories/mocks/index.mocks";
-import * as crypto from "@infrastructure/crypto";
 
 import joinFamilyMemberUseCase from "../joinFamilyMemberUseCase";
 
 // region mocks
-const userSuccessMock = {
-  id: "123",
-};
+const validToken = "q3Jx0b9S2v1mA8kQ7rT4yU6pL5nW0zE3cF2hD1gB9aI";
 // endregion mocks
 
 // region spies
-const getUserSpy = jest.spyOn(repositoriesMocks.userRepository, "getUser");
 const joinFamilyMemberSpy = jest.spyOn(
   repositoriesMocks.familyMemberRepository,
   "joinFamilyMember",
 );
-const encodeSpy = jest
-  .spyOn(crypto, "encode")
-  .mockResolvedValue("encoded-token");
-
+const getUserSpy = jest.spyOn(repositoriesMocks.userRepository, "getUser");
 // endregion spies
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
-async function setup() {
+async function setup(inviteToken: unknown = validToken) {
   return joinFamilyMemberUseCase(repositoriesMocks).execute({
-    inviteToken: "encoded-token",
+    inviteToken: inviteToken as string,
   });
 }
 
-async function throwableSetup() {
+async function throwableSetup(inviteToken?: unknown) {
   try {
-    await setup();
+    await setup(inviteToken);
   } catch (error) {
     return error;
   }
 }
-const spies = {
-  encode: encodeSpy,
-  getUser: getUserSpy,
-  joinFamilyMember: joinFamilyMemberSpy,
-};
 
-const mocks = {
-  userSuccess: userSuccessMock,
-};
-
-beforeEach(() => {
-  jest.clearAllMocks();
-});
+const spies = { getUser: getUserSpy, joinFamilyMember: joinFamilyMemberSpy };
+const mocks = { validToken };
 
 export { mocks, setup, spies, throwableSetup };

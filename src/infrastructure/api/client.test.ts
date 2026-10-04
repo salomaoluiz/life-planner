@@ -177,3 +177,33 @@ it("SHOULD NOT send the stored token to auth endpoints and treat their 401 as wr
   expect(error).toMatchObject({ statusCode: 401 });
   expect(spies.handleSessionExpired).not.toHaveBeenCalled();
 });
+
+it("SHOULD redact the invite token from the GenericError context path on a 5xx", async () => {
+  const token = "q3Jx0b9S2v1mA8kQ7rT4yU6pL5nW0zE3cF2hD1gB9aI";
+  spies.fetch.mockResolvedValueOnce(mocks.json(500, { message: "boom" }));
+
+  const error = await setupThrowable(
+    "POST",
+    `/v1/family-invites/${token}/accept`,
+  );
+
+  expect(error).toBeInstanceOf(GenericError);
+  expect(error).toHaveProperty("context", {
+    method: "POST",
+    path: "/v1/family-invites/:token/accept",
+    statusCode: 500,
+  });
+  expect(JSON.stringify((error as GenericError).context)).not.toContain(token);
+});
+
+it("SHOULD keep other paths untouched in the GenericError context", async () => {
+  spies.fetch.mockResolvedValueOnce(mocks.json(500, {}));
+
+  const error = await setupThrowable("GET", "/v1/families/1/members");
+
+  expect(error).toHaveProperty("context", {
+    method: "GET",
+    path: "/v1/families/1/members",
+    statusCode: 500,
+  });
+});

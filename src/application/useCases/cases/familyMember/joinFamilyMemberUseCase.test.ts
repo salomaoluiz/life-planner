@@ -1,4 +1,8 @@
-import { DefaultError, GenericError } from "@domain/entities/errors";
+import {
+  DefaultError,
+  GenericError,
+  InviteNotFound,
+} from "@domain/entities/errors";
 
 import {
   mocks,
@@ -7,39 +11,53 @@ import {
   throwableSetup,
 } from "./mocks/joinFamilyMemberUseCase.mocks";
 
-it("SHOULD call the repositories", async () => {
-  spies.getUser.mockResolvedValueOnce(mocks.userSuccess as never);
-  spies.joinFamilyMember.mockResolvedValueOnce(null as never);
+it("SHOULD send ONLY the token (the API takes user and joinedAt from the JWT and server time)", async () => {
+  spies.joinFamilyMember.mockResolvedValueOnce(undefined);
 
   await setup();
 
   expect(spies.joinFamilyMember).toHaveBeenCalledTimes(1);
   expect(spies.joinFamilyMember).toHaveBeenCalledWith({
-    inviteToken: "encoded-token",
-    joinDate: new Date().toISOString(),
-    userId: mocks.userSuccess.id,
+    inviteToken: mocks.validToken,
   });
+  expect(spies.getUser).not.toHaveBeenCalled();
 });
 
-it("SHOULD throw an unknown error if anything throws", async () => {
-  const errorMock = new Error("User repository failed");
-  spies.getUser.mockRejectedValueOnce(errorMock);
+it.each([
+  ["empty", ""],
+  ["too short", "abc"],
+  ["too long", "a".repeat(44)],
+  ["legacy base64 JSON", btoa('{"familyId":"1","email":"a@b.c"}')],
+  ["path trick", "../../user/me"],
+  ["not a string", null],
+  ["array param", ["a", "b"]],
+])(
+  "SHOULD throw InviteNotFound WITHOUT calling the API WHEN the token is %s",
+  async (_label, token) => {
+    const error = await throwableSetup(token);
 
-  const error = await throwableSetup();
+    expect(error).toBeInstanceOf(InviteNotFound);
+    expect(spies.joinFamilyMember).not.toHaveBeenCalled();
+  },
+);
+
+it("SHOULD throw an unknown error if anything throws", async () => {
+  const errorMock = new Error("Repository failed");
+  spies.joinFamilyMember.mockRejectedValueOnce(errorMock);
+
+  const error = await throwableSetup(mocks.validToken);
 
   expect(error).toBeInstanceOf(Error);
   expect((error as Error).message).toBe(errorMock.message);
 });
 
-it("SHOULD throw the error if it is a DefaultError", async () => {
-  spies.getUser.mockRejectedValueOnce(new GenericError());
+it("SHOULD add the use case to the context of a DefaultError", async () => {
+  spies.joinFamilyMember.mockRejectedValueOnce(new GenericError());
 
-  const error = await throwableSetup();
+  const error = await throwableSetup(mocks.validToken);
 
   const expectedError = new GenericError();
-  expectedError.addContext({
-    useCase: "joinFamilyMemberUserCase",
-  });
+  expectedError.addContext({ useCase: "joinFamilyMemberUserCase" });
   expect(error).toBeInstanceOf(GenericError);
   expect((error as DefaultError).context).toEqual(expectedError.context);
 });

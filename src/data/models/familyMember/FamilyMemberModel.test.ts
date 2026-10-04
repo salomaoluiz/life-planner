@@ -1,34 +1,35 @@
 import FamilyMemberModel from "./FamilyMemberModel";
 import { mocks, setup } from "./mocks/FamilyMemberModel.mocks";
 
-it("SHOULD the FamilyMemberModel has all params", () => {
-  const result = setup();
-
-  expect(result).toHaveProperty("id", mocks.json.id);
-  expect(result).toHaveProperty("email", mocks.json.email);
-  expect(result).toHaveProperty("familyId", mocks.json.family_id);
-  expect(result).toHaveProperty("inviteToken", mocks.json.invite_token);
-  expect(result).toHaveProperty("joinDate", mocks.json.join_date);
-  expect(result).toHaveProperty("userId", mocks.json.user_id);
+it("SHOULD map the API JSON (camelCase) in fromJSON", () => {
+  expect(FamilyMemberModel.fromJSON(mocks.json)).toStrictEqual(setup());
 });
 
-it("SHOULD the FamilyMemberModel fromJson create a new FamilyMemberModel", () => {
-  const modelFromJson = FamilyMemberModel.fromJSON({
-    email: mocks.json.email,
-    family_id: mocks.json.family_id,
-    id: mocks.json.id,
-    invite_token: mocks.json.invite_token,
-    join_date: mocks.json.join_date,
-    user_id: mocks.json.user_id,
+it("SHOULD turn null columns into undefined (pending row)", () => {
+  const model = FamilyMemberModel.fromJSON(mocks.pendingJson);
+
+  expect(model.joinedAt).toBeUndefined();
+  expect(model.user).toBeUndefined();
+  expect(model.userId).toBeUndefined();
+  expect(model.inviteExpired).toBe(true);
+});
+
+it("SHOULD map a null photoUrl to undefined", () => {
+  expect(FamilyMemberModel.fromJSON(mocks.json).user).toEqual({
+    name: "Test Owner",
+    photoUrl: undefined,
   });
-
-  const expected = setup();
-
-  expect(modelFromJson).toStrictEqual(expected);
 });
 
-it("SHOULD the FamilyMemberModel toJson return a json", () => {
-  const result = setup().toJSON();
+it("SHOULD round-trip toJSON → fromJSON (the cache stores toJSON)", () => {
+  const model = setup();
 
-  expect(result).toStrictEqual(mocks.json);
+  expect(FamilyMemberModel.fromJSON(model.toJSON())).toStrictEqual(model);
+
+  const pending = FamilyMemberModel.fromJSON(mocks.pendingJson);
+  expect(FamilyMemberModel.fromJSON(pending.toJSON())).toStrictEqual(pending);
+});
+
+it("SHOULD NEVER carry a token field", () => {
+  expect(Object.keys(setup().toJSON()).join()).not.toMatch(/token/i);
 });
