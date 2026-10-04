@@ -19,7 +19,7 @@ class FamilyModel implements IFamilyModel {
     return new FamilyModel({
       id: data.id as string,
       name: data.name as string,
-      ownerId: data.owner_id as string,
+      ownerId: data.ownerId as string,
     });
   }
 
@@ -27,7 +27,7 @@ class FamilyModel implements IFamilyModel {
     return {
       id: this.id,
       name: this.name,
-      owner_id: this.ownerId,
+      ownerId: this.ownerId,
     };
   }
 }
