@@ -2,7 +2,6 @@ import { repositoriesMocks } from "@data/repositories/mocks/index.mocks";
 import { BusinessError } from "@domain/entities/errors";
 import FamilyEntityFixture from "@domain/entities/family/mocks/FamilyEntity.fixture";
 import UserEntityFixture from "@domain/entities/user/mocks/UserEntity.fixture";
-import * as crypto from "@infrastructure/crypto";
 
 import createFamilyUseCase, {
   CreateFamilyUseCaseParams,
@@ -20,13 +19,9 @@ const defaultParams: CreateFamilyUseCaseParams = {
   name: "New Family",
 };
 
-const encodeResult = "encodedToken";
-
 // endregion mocks
 
 // region spies
-
-const encodeSpy = jest.spyOn(crypto, "encode");
 
 // endregion spies
 
@@ -49,7 +44,6 @@ async function throwableSetup() {
   }
 }
 const spies = {
-  encode: encodeSpy,
   familyMemberRepository: jest.mocked(repositoriesMocks.familyMemberRepository),
   familyRepository: jest.mocked(repositoriesMocks.familyRepository),
   userRepository: jest.mocked(repositoriesMocks.userRepository),
@@ -57,7 +51,6 @@ const spies = {
 
 const mocks = {
   defaultParams,
-  encodeResult,
   error: {
     business: businessError,
     unknown: unknownError,

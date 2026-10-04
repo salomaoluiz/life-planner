@@ -7,10 +7,9 @@ import {
   throwableSetup,
 } from "./mocks/createFamilyUseCase.mocks";
 
-it("SHOULD create a family AND add the current user as a family member", async () => {
+it("SHOULD create a family for the current user AND NOT create the owner member (the API does)", async () => {
   spies.userRepository.getUser.mockResolvedValueOnce(mocks.userEntity);
   spies.familyRepository.createFamily.mockResolvedValueOnce(mocks.familyEntity);
-  spies.encode.mockResolvedValueOnce(mocks.encodeResult);
 
   await setup();
 
@@ -20,22 +19,9 @@ it("SHOULD create a family AND add the current user as a family member", async (
     name: mocks.defaultParams.name,
     ownerId: mocks.userEntity.id,
   });
-  expect(spies.encode).toHaveBeenCalledTimes(1);
-  expect(spies.encode).toHaveBeenCalledWith({
-    email: mocks.userEntity.email,
-    familyId: mocks.familyEntity.id,
-    joinDate: "2025-01-01T00:00:00.000Z",
-  });
-  expect(spies.familyMemberRepository.createFamilyMember).toHaveBeenCalledTimes(
-    1,
-  );
-  expect(spies.familyMemberRepository.createFamilyMember).toHaveBeenCalledWith({
-    email: mocks.userEntity.email,
-    familyId: mocks.familyEntity.id,
-    inviteToken: mocks.encodeResult,
-    joinDate: "2025-01-01T00:00:00.000Z",
-    userId: mocks.userEntity.id,
-  });
+  expect(
+    spies.familyMemberRepository.createFamilyMember,
+  ).not.toHaveBeenCalled();
 });
 
 it("SHOULD throw an unknown error if anything throws", async () => {
