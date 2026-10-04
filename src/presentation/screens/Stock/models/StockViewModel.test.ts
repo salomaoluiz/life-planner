@@ -83,7 +83,9 @@ it.each([
 
 it.each([
   ["2025-01-02T00:00:00Z", true],
+  ["2025-01-01T00:00:00Z", true],
   ["2025-01-08T00:00:00Z", true],
+  ["2026-06-01T00:00:00Z", true],
   ["2024-12-20T00:00:00Z", false],
 ])("SHOULD report isCloseToExpiration for %s as %s", (date, expected) => {
   // Review Focus 3: difference(today, expiration) is negative for future

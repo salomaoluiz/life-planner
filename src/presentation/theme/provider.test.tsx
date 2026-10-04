@@ -132,9 +132,7 @@ it('SHOULD set the theme to "dark" WHEN the device color schema is "dark"', () =
 });
 
 it("SHOULD use the light theme WHEN the user saved light mode", () => {
-  spies.useQuery
-    .mockReturnValueOnce(mocks.useQuery.lightMode)
-    .mockReturnValueOnce(mocks.useQuery.lightMode);
+  spies.useQuery.mockReturnValueOnce(mocks.useQuery.lightMode);
 
   setup();
 
