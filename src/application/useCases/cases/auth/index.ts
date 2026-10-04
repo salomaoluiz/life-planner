@@ -1,3 +1,3 @@
-export { default as loginWithGoogleUseCase } from "./loginWithGoogleUseCase";
+export { default as loginWithEmailUseCase } from "./loginWithEmailUseCase";
 export { default as logoutUseCase } from "./logoutUseCase";
-export { default as saveWebSessionUseCase } from "./saveWebSessionUseCase";
+export { default as signUpWithEmailUseCase } from "./signUpWithEmailUseCase";
