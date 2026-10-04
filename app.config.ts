@@ -38,12 +38,6 @@ export default {
           url: process.env.EXPO_PUBLIC_SENTRY_URL,
         },
       ],
-      [
-        "@react-native-google-signin/google-signin",
-        {
-          iosUrlScheme: process.env.EXPO_PUBLIC_IOS_URL_SCHEME,
-        },
-      ],
     ],
     scheme: "myapp",
     slug: "life-planner",
