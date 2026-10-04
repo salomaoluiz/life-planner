@@ -33,10 +33,9 @@ const datasourcesMocks: jest.MockedObjectDeep<Datasources> = {
     updateTransaction: jest.fn(),
   },
   loginDatasource: {
-    loginWithIdToken: jest.fn(),
-    loginWithOAuth: jest.fn(),
+    loginWithEmail: jest.fn(),
     logout: jest.fn(),
-    saveSession: jest.fn(),
+    signUpWithEmail: jest.fn(),
   },
   stockDatasource: {
     createStockItem: jest.fn(),
@@ -45,7 +44,6 @@ const datasourcesMocks: jest.MockedObjectDeep<Datasources> = {
     updateStockItem: jest.fn(),
   },
   userDatasource: {
-    createUser: jest.fn(),
     getUser: jest.fn(),
     getUserById: jest.fn(),
   },

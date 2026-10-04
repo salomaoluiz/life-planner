@@ -1,12 +1,12 @@
 interface IUserModel {
-  avatarURL: string;
+  avatarURL?: string;
   email: string;
   id: string;
   name: string;
 }
 
 class UserModel {
-  public avatarURL: string;
+  public avatarURL?: string;
   public email: string;
   public id: string;
   public name: string;
@@ -20,7 +20,10 @@ class UserModel {
 
   static fromJSON(data: Record<string, unknown>): UserModel {
     return new UserModel({
-      avatarURL: data.avatar_url as string,
+      avatarURL:
+        typeof data.photoUrl === "string" && data.photoUrl
+          ? data.photoUrl
+          : undefined,
       email: data.email as string,
       id: data.id as string,
       name: data.name as string,
@@ -29,10 +32,10 @@ class UserModel {
 
   toJSON(): Record<string, unknown> {
     return {
-      avatar_url: this.avatarURL,
       email: this.email,
       id: this.id,
       name: this.name,
+      photoUrl: this.avatarURL,
     };
   }
 }

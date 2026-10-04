@@ -1,39 +1,37 @@
 import { mocks, setup, spies } from "./mocks/loginRepositoryImpl.mocks";
 
-it("SHOULD call loginWithGoogle correctly", async () => {
-  const repository = setup();
+it("SHOULD call loginWithEmail correctly", async () => {
+  const params = { email: "test@example.com", password: "password123" };
 
-  const result = await repository.loginWithGoogle();
+  const result = await setup().loginWithEmail(params);
 
-  expect(spies.loginWithGoogle).toHaveBeenCalledTimes(1);
-  expect(spies.loginWithGoogle).toHaveBeenCalledWith(mocks.datasourcesMocks);
-  expect(result).toEqual("loginWithGoogle response");
+  expect(spies.loginWithEmail).toHaveBeenCalledWith(
+    params,
+    mocks.datasourcesMocks,
+  );
+  expect(result).toEqual("loginWithEmail response");
 });
 
 it("SHOULD call logout correctly", async () => {
-  const repository = setup();
-
-  const result = await repository.logout();
+  const result = await setup().logout();
 
   expect(spies.logout).toHaveBeenCalledTimes(1);
   expect(spies.logout).toHaveBeenCalledWith(mocks.datasourcesMocks);
   expect(result).toEqual("logout response");
 });
 
-it("SHOULD call saveSession correctly", async () => {
-  const repository = setup();
-
+it("SHOULD call signUpWithEmail correctly", async () => {
   const params = {
-    accessToken: "accessToken",
-    refreshToken: "refreshToken",
+    email: "test@example.com",
+    name: "Test User",
+    password: "password123",
   };
 
-  const result = await repository.saveSession(params);
+  const result = await setup().signUpWithEmail(params);
 
-  expect(spies.saveSession).toHaveBeenCalledTimes(1);
-  expect(spies.saveSession).toHaveBeenCalledWith(
+  expect(spies.signUpWithEmail).toHaveBeenCalledWith(
     params,
     mocks.datasourcesMocks,
   );
-  expect(result).toEqual("saveSession response");
+  expect(result).toEqual("signUpWithEmail response");
 });

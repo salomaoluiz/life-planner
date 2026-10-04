@@ -4,7 +4,7 @@ export interface IUserDTO {
   email: string;
   id: string;
   name: string;
-  photoUrl: string;
+  photoUrl?: string;
 }
 
 class UserDTO {
@@ -14,7 +14,7 @@ class UserDTO {
   id: string;
   name: string;
 
-  photoUrl: string;
+  photoUrl?: string;
 
   constructor(props: IUserDTO) {
     this.id = props.id;

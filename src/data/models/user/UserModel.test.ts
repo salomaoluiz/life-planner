@@ -7,24 +7,33 @@ it("SHOULD the UserModel has all params", () => {
   expect(result).toHaveProperty("id", mocks.json.id);
   expect(result).toHaveProperty("name", mocks.json.name);
   expect(result).toHaveProperty("email", mocks.json.email);
-  expect(result).toHaveProperty("avatarURL", mocks.json.avatar_url);
+  expect(result).toHaveProperty("avatarURL", mocks.json.photoUrl);
 });
 
-it("SHOULD the UserModel fromJson create a new UserModel", () => {
-  const modelFromJson = UserModel.fromJSON({
-    avatar_url: mocks.json.avatar_url,
-    email: mocks.json.email,
-    id: mocks.json.id,
-    name: mocks.json.name,
-  });
+it("SHOULD the UserModel fromJson create a new UserModel from the API json", () => {
+  const modelFromJson = UserModel.fromJSON({ ...mocks.json });
 
-  const expected = setup();
+  expect(modelFromJson).toStrictEqual(setup());
+});
 
-  expect(modelFromJson).toStrictEqual(expected);
+it.each([
+  ["missing", undefined],
+  ["null", null],
+  ["empty", ""],
+])("SHOULD map a %s photoUrl to no avatar", (_label, photoUrl) => {
+  const model = UserModel.fromJSON({ ...mocks.json, photoUrl });
+
+  expect(model.avatarURL).toBeUndefined();
 });
 
 it("SHOULD the UserModel toJson return a json", () => {
   const result = setup().toJSON();
 
   expect(result).toStrictEqual(mocks.json);
+});
+
+it("SHOULD round-trip through the cache json", () => {
+  const model = setup();
+
+  expect(UserModel.fromJSON(model.toJSON())).toStrictEqual(model);
 });

@@ -2,14 +2,14 @@ interface IUserProfileEntity {
   email: string;
   id: string;
   name: string;
-  photoUrl: string;
+  photoUrl?: string;
 }
 
 class UserProfileEntity {
   email: string;
   id: string;
   name: string;
-  photoUrl: string;
+  photoUrl?: string;
 
   constructor(props: IUserProfileEntity) {
     this.id = props.id;

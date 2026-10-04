@@ -1,20 +1,20 @@
 import { Datasources } from "@data/datasource";
 import { LoginRepository } from "@domain/repositories/auth";
 
-import loginWithGoogle from "./loginWithGoogle";
+import loginWithEmail from "./loginWithEmail";
 import logout from "./logout";
-import saveSession from "./saveSession";
+import signUpWithEmail from "./signUpWithEmail";
 
 function loginRepositoryImpl(datasources: Datasources): LoginRepository {
   return {
-    async loginWithGoogle() {
-      return loginWithGoogle(datasources);
+    async loginWithEmail(params) {
+      return loginWithEmail(params, datasources);
     },
     async logout(): Promise<void> {
       return logout(datasources);
     },
-    async saveSession(params) {
-      return saveSession(params, datasources);
+    async signUpWithEmail(params) {
+      return signUpWithEmail(params, datasources);
     },
   };
 }

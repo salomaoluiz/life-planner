@@ -1,22 +1,5 @@
 import { mocks, setup, spies } from "./mocks/userRepositoryImpl.mocks";
 
-it("SHOULD call createUser correctly", async () => {
-  const { createUser } = setup();
-
-  const params = {
-    avatarURL: "https://example.com/avatar.jpg",
-    email: "test@gmail.com",
-    id: "34f046ca-b784-4e31-8444-e1ad1591a1d2",
-    name: "Test User",
-  };
-
-  const user = await createUser(params);
-
-  expect(spies.createUser).toHaveBeenCalledTimes(1);
-  expect(spies.createUser).toHaveBeenCalledWith(params, mocks.datasources);
-  expect(user).toEqual("createUser response");
-});
-
 it("SHOULD call getUser correctly", async () => {
   const { getUser } = setup();
 
