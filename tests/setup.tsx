@@ -104,7 +104,14 @@ jest.mock("react-native-paper", () => {
     ),
     Switch: View,
     Text: View,
-    TextInput: View,
+    TextInput: Object.assign(
+      jest
+        .requireActual("react")
+        .forwardRef((props: object, ref: React.Ref<unknown>) => (
+          <View ref={ref as never} {...props} />
+        )),
+      { Icon: View },
+    ),
     useTheme: jest.fn(),
   };
 });

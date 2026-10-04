@@ -110,3 +110,51 @@ it.each([
   });
   restore();
 });
+
+it("SHOULD forward the form and keyboard props to the underlying input", () => {
+  const onSubmitEditing = jest.fn();
+
+  setup({
+    autoCapitalize: "none",
+    autoComplete: "email",
+    error: true,
+    label: "Email",
+    onSubmitEditing,
+    returnKeyType: "next",
+    secureTextEntry: true,
+    textContentType: "emailAddress",
+  });
+
+  expect(screen.getByTestId("test-text-input").props).toMatchObject({
+    accessibilityLabel: "Email",
+    autoCapitalize: "none",
+    autoComplete: "email",
+    error: true,
+    onSubmitEditing,
+    returnKeyType: "next",
+    secureTextEntry: true,
+    textContentType: "emailAddress",
+  });
+});
+
+it("SHOULD pass a right icon button that calls onPress", () => {
+  const onPress = jest.fn();
+
+  setup({
+    rightIcon: { accessibilityLabel: "Show password", name: "eye", onPress },
+  });
+
+  const right = screen.getByTestId("test-text-input").props.right;
+  expect(right.props).toMatchObject({
+    accessibilityLabel: "Show password",
+    icon: "eye",
+  });
+  right.props.onPress();
+  expect(onPress).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD NOT pass a right icon WHEN none is provided", () => {
+  setup();
+
+  expect(screen.getByTestId("test-text-input").props.right).toBeUndefined();
+});

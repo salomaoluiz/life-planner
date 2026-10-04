@@ -18,6 +18,7 @@ export interface ButtonProps {
   disabled?: boolean;
   icon?: (() => React.ReactNode) | string;
   label: string;
+  loading?: boolean;
   onPress: () => void;
   testID?: string;
 }
@@ -40,6 +41,7 @@ function ButtonBase(props: ButtonProps & { mode: ButtonMode }) {
       <PaperButton
         disabled={props.disabled}
         icon={props.icon}
+        loading={props.loading}
         mode="text"
         onPress={props.onPress}
         style={[styles.buttonBase, customStyles.styles]}
@@ -62,6 +64,7 @@ function ButtonBase(props: ButtonProps & { mode: ButtonMode }) {
           contentStyle={styles.buttonContent}
           disabled={props.disabled}
           icon={props.icon}
+          loading={props.loading}
           mode="text"
           onPress={props.onPress}
           style={[styles.buttonBase, customStyles.styles]}
