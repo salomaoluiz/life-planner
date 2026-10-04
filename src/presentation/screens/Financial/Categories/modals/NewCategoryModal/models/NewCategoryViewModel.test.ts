@@ -44,4 +44,29 @@ describe("NewCategoryViewModel", () => {
       { label: "Food", value: "cat-1" },
     ]);
   });
+
+  it("SHOULD use the first owner WHEN no owner id is given", () => {
+    const vm = new NewCategoryViewModel(owners, categories);
+
+    expect(vm.getParentCategories(undefined, "EXPENSE")).toEqual([
+      { label: "None (Root Category)", value: "" },
+      { label: "Food", value: "cat-1" },
+    ]);
+  });
+
+  it("SHOULD only offer the root option WHEN no category matches the owner and type", () => {
+    const vm = new NewCategoryViewModel(owners, categories);
+
+    expect(vm.getParentCategories("1", "INCOME")).toEqual([
+      { label: "None (Root Category)", value: "" },
+    ]);
+  });
+
+  it("SHOULD only offer the root option WHEN there are no owners", () => {
+    const vm = new NewCategoryViewModel([], categories);
+
+    expect(vm.getParentCategories(undefined, "EXPENSE")).toEqual([
+      { label: "None (Root Category)", value: "" },
+    ]);
+  });
 });

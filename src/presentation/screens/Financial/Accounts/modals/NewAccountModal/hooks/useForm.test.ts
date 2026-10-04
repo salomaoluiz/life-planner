@@ -75,4 +75,85 @@ describe("useForm for Financial Accounts", () => {
     expect(result.current.fields.icon.value).toBe("cash");
     expect(result.current.fields.status.value).toBe("ARCHIVED");
   });
+
+  it("SHOULD fail validation WHEN the balance is blank", () => {
+    const { result } = renderHook(() => useForm());
+    act(() => {
+      result.current.fields.name.onChange("Checking");
+      result.current.fields.balance.onChange("   ");
+    });
+    let params;
+    act(() => {
+      params = result.current.validateForm(owners);
+    });
+
+    expect(params).toBeUndefined();
+    expect(result.current.errors.balance).toBe("Balance is required");
+  });
+
+  it("SHOULD report both the name and balance errors at once", () => {
+    const { result } = renderHook(() => useForm());
+    act(() => {
+      result.current.fields.balance.onChange("");
+    });
+    act(() => {
+      result.current.validateForm(owners);
+    });
+
+    expect(result.current.errors).toEqual({
+      balance: "Balance is required",
+      name: "Name is required",
+    });
+  });
+
+  it.each([
+    ["owner-1", OwnerType.USER],
+    ["owner-2", OwnerType.FAMILY],
+  ])("SHOULD submit the type of the selected owner %s", (ownerId, type) => {
+    const familyOwners = [
+      ...owners,
+      new OwnerDTO({
+        id: "owner-2",
+        name: "Test Family",
+        type: OwnerType.FAMILY,
+      }),
+    ];
+    const { result } = renderHook(() => useForm());
+    act(() => {
+      result.current.fields.name.onChange("Checking");
+      result.current.fields.ownerId.onChange(ownerId);
+    });
+    let params: ReturnType<typeof result.current.validateForm>;
+    act(() => {
+      params = result.current.validateForm(familyOwners);
+    });
+
+    expect(params).toMatchObject({ owner: type, ownerId });
+  });
+
+  it("SHOULD default to the USER type WHEN the selected owner is unknown", () => {
+    const { result } = renderHook(() => useForm());
+    act(() => {
+      result.current.fields.name.onChange("Checking");
+      result.current.fields.ownerId.onChange("missing");
+    });
+    let params: ReturnType<typeof result.current.validateForm>;
+    act(() => {
+      params = result.current.validateForm(owners);
+    });
+
+    expect(params).toMatchObject({ owner: OwnerType.USER, ownerId: "missing" });
+  });
+
+  it("SHOULD keep the id of the edited account in the submitted values", () => {
+    const { result } = renderHook(() =>
+      useForm({ initialValues: { id: "acc-9", name: "Savings" } }),
+    );
+    let params: ReturnType<typeof result.current.validateForm>;
+    act(() => {
+      params = result.current.validateForm(owners);
+    });
+
+    expect(params).toMatchObject({ id: "acc-9", name: "Savings" });
+  });
 });

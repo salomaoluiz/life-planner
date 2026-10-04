@@ -30,4 +30,51 @@ describe("FinancialAccountViewModel", () => {
     expect(vm.status).toBe("ACTIVE");
     expect(vm.formattedBalance).toBe("$1,500.50");
   });
+
+  it("SHOULD label the owner as Family WHEN the account belongs to a family", () => {
+    const dto = new AccountDTO({
+      balance: 0,
+      icon: "bank",
+      id: "acc-2",
+      name: "Joint",
+      owner: "FAMILY",
+      ownerId: "owner-2",
+      status: "ARCHIVED",
+    });
+    const familyOwners = [
+      ...owners,
+      new OwnerDTO({
+        id: "owner-2",
+        name: "Test Family",
+        type: OwnerType.FAMILY,
+      }),
+    ];
+
+    const vm = new FinancialAccountViewModel(dto, familyOwners);
+
+    expect(vm.ownerName).toBe("Test Family (Family)");
+    expect(vm.owner).toBe("FAMILY");
+    expect(vm.status).toBe("ARCHIVED");
+    expect(vm.formattedBalance).toBe("$0.00");
+  });
+
+  it.each([
+    ["USER", "Personal"],
+    ["FAMILY", "Family"],
+  ])(
+    "SHOULD only show the type WHEN the %s owner is unknown",
+    (owner, label) => {
+      const dto = new AccountDTO({
+        balance: 1,
+        icon: "bank",
+        id: "acc-3",
+        name: "Orphan",
+        owner,
+        ownerId: "missing",
+        status: "ACTIVE",
+      });
+
+      expect(new FinancialAccountViewModel(dto, owners).ownerName).toBe(label);
+    },
+  );
 });
