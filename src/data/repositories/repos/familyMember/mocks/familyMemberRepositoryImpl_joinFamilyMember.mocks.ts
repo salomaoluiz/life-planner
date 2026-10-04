@@ -5,11 +5,9 @@ import cache from "@infrastructure/cache";
 import familyMemberRepositoryImpl from "../familyMemberRepositoryImpl";
 
 // region mocks
-const defaultProps = {
-  inviteToken: "encoded-token",
-  joinDate: new Date().toISOString(),
-  userId: "1234",
-} as JoinFamilyMemberRepositoryParams;
+const defaultProps: JoinFamilyMemberRepositoryParams = {
+  inviteToken: "q3Jx0b9S2v1mA8kQ7rT4yU6pL5nW0zE3cF2hD1gB9aI",
+};
 
 // endregion mocks
 
@@ -26,11 +24,10 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-async function setup(props?: Partial<JoinFamilyMemberRepositoryParams>) {
-  return familyMemberRepositoryImpl(datasourcesMocks).joinFamilyMember({
-    ...defaultProps,
-    ...props,
-  });
+async function setup() {
+  return familyMemberRepositoryImpl(datasourcesMocks).joinFamilyMember(
+    defaultProps,
+  );
 }
 
 const spies = {
@@ -43,9 +40,5 @@ const spies = {
 const mocks = {
   defaultProps,
 };
-
-beforeEach(() => {
-  jest.clearAllMocks();
-});
 
 export { mocks, setup, spies };

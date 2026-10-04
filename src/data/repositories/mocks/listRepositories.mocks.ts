@@ -9,9 +9,10 @@ const repositoriesMocks: Repositories = {
     saveConfigs: jest.fn(),
   },
   familyMemberRepository: {
-    createFamilyMember: jest.fn(),
     deleteFamilyMember: jest.fn(),
     getFamilyMembers: jest.fn(),
+    getInvite: jest.fn(),
+    inviteFamilyMember: jest.fn(),
     joinFamilyMember: jest.fn(),
   },
   familyRepository: {
