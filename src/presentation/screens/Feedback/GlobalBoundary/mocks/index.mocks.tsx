@@ -2,6 +2,7 @@ import { render } from "@tests";
 
 import * as storage from "@infrastructure/storage";
 import { StorageKeys } from "@infrastructure/storage";
+import { translations } from "@presentation/i18n/translations";
 import GlobalBoundary from "@screens/Feedback/GlobalBoundary";
 
 // #region mocks
@@ -28,6 +29,7 @@ beforeEach(() => {
 
 const mocks = {
   fallbackKey: StorageKeys.string.FALLBACK_LANGUAGE,
+  translations,
 };
 
 export { mocks, setup, spies };
