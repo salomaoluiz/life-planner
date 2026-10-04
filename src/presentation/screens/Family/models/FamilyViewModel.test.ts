@@ -32,3 +32,9 @@ it("SHOULD have no owner WHEN no member belongs to the owner user", () => {
     new FamilyViewModel(dto, makeFamilyViewModel().familyMembers).owner,
   ).toBeUndefined();
 });
+
+it("SHOULD have no owner WHEN the family has no members at all", () => {
+  const dto = new FamilyDTO({ ...familyDTO });
+
+  expect(new FamilyViewModel(dto, []).owner).toBeUndefined();
+});

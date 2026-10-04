@@ -59,3 +59,10 @@ it("SHOULD call onDeleteFamily WHEN the delete button is pressed", () => {
 
   expect(mocks.callbacks.onDeleteFamily).toHaveBeenCalledTimes(1);
 });
+
+it("SHOULD render without crashing WHEN the family has no members (no owner badge)", () => {
+  const family = new FamilyViewModel(new FamilyDTO({ ...familyDTO }), []);
+
+  expect(() => setup({ expanded: true, family })).not.toThrow();
+  expect(screen.queryAllByTestId("memberCard")).toHaveLength(0);
+});
