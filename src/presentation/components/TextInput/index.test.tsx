@@ -1,4 +1,7 @@
-import { screen } from "@tests";
+import { BlurView } from "expo-blur";
+import { StyleSheet } from "react-native";
+
+import { fireEvent, hasText, mockDarkTheme, screen } from "@tests";
 
 import { TextInputMode } from "./index";
 import { defaultProps, setup } from "./mocks/index.mocks";
@@ -59,4 +62,51 @@ it("SHOULD have the correct style", () => {
     minHeight: 55,
     width: "100%",
   });
+});
+
+it("SHOULD use the focused glass colors WHEN the input is focused and the default ones WHEN blurred", () => {
+  setup();
+  const input = screen.getByTestId("test-text-input");
+  const blur = screen.UNSAFE_getByType(BlurView);
+  const idle = StyleSheet.flatten(blur.props.style);
+
+  fireEvent(input, "focus");
+  const focused = StyleSheet.flatten(
+    screen.UNSAFE_getByType(BlurView).props.style,
+  );
+  fireEvent(input, "blur");
+  const blurred = StyleSheet.flatten(
+    screen.UNSAFE_getByType(BlurView).props.style,
+  );
+
+  expect(focused.borderColor).not.toBe(idle.borderColor);
+  expect(focused.backgroundColor).not.toBe(idle.backgroundColor);
+  expect(blurred).toEqual(idle);
+});
+
+it("SHOULD render the label WHEN provided", () => {
+  setup({ label: "Name" });
+
+  expect(hasText("Name")).toBe(true);
+});
+
+it("SHOULD NOT render a label WHEN none is provided", () => {
+  setup();
+
+  expect(hasText("Name")).toBe(false);
+});
+
+it.each([
+  [false, 40, "light"],
+  [true, 20, "dark"],
+])("SHOULD use the blur settings for isDark=%s", (dark, intensity, tint) => {
+  const restore = dark ? mockDarkTheme() : () => undefined;
+
+  setup();
+
+  expect(screen.UNSAFE_getByType(BlurView).props).toMatchObject({
+    intensity,
+    tint,
+  });
+  restore();
 });

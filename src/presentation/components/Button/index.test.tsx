@@ -1,4 +1,6 @@
-import { act, screen } from "@tests";
+import { BlurView } from "expo-blur";
+
+import { act, mockDarkTheme, screen } from "@tests";
 
 import { ButtonMode } from "@components/Button/index";
 import Icon from "@components/Icon";
@@ -77,4 +79,60 @@ it("SHOULD render the button with custom styles", () => {
   expect(component.props.style).toContainEqual(
     expect.objectContaining({ backgroundColor: "blue" }),
   );
+});
+
+describe("theme fallbacks", () => {
+  function withColors(overrides: Record<string, unknown>) {
+    const { useTheme } = jest.requireMock("@presentation/theme");
+    const current = useTheme();
+    useTheme.mockReturnValue({
+      ...current,
+      theme: {
+        ...current.theme,
+        colors: { ...current.theme.colors, ...overrides },
+      },
+    });
+
+    return () => useTheme.mockReturnValue(current);
+  }
+
+  it("SHOULD fall back to white text WHEN the filled button theme has no onPrimary", () => {
+    const restore = withColors({ onPrimary: undefined });
+
+    setup({ mode: ButtonMode.Filled });
+
+    expect(screen.getByTestId(defaultProps.testID).props.textColor).toBe(
+      "#ffffff",
+    );
+    restore();
+  });
+
+  it("SHOULD fall back to translucent white text WHEN the outlined button theme has no glassTextSecondary", () => {
+    const restore = withColors({ glassTextSecondary: undefined });
+
+    setup({ mode: ButtonMode.Outlined });
+
+    expect(screen.getByTestId(defaultProps.testID).props.textColor).toBe(
+      "rgba(255, 255, 255, 0.8)",
+    );
+    restore();
+  });
+
+  it.each([
+    [false, "light"],
+    [true, "dark"],
+  ])("SHOULD use the blur tint for isDark=%s", (dark, tint) => {
+    const restore = dark ? mockDarkTheme() : () => undefined;
+
+    setup();
+
+    expect(screen.UNSAFE_getByType(BlurView).props.tint).toBe(tint);
+    restore();
+  });
+
+  it("SHOULD apply the disabled style WHEN disabled", () => {
+    setup({ disabled: true });
+
+    expect(screen.getByTestId(defaultProps.testID).props.disabled).toBe(true);
+  });
 });

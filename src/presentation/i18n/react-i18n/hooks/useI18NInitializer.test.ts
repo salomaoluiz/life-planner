@@ -61,3 +61,16 @@ it("SHOULD set i18n loading as false in provider loader hook", async () => {
     "i18n",
   );
 });
+
+it("SHOULD init with the current i18next language WHEN the query has no data", () => {
+  spies.useQuery.mockReturnValueOnce({
+    ...mocks.useQuery.success.empty,
+    data: undefined,
+  });
+
+  setup();
+
+  expect(spies.init).toHaveBeenCalledWith(
+    expect.objectContaining({ lng: mocks.i18next.language }),
+  );
+});

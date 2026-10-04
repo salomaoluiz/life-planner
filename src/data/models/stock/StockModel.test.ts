@@ -55,3 +55,24 @@ it("SHOULD the StockModel toJson return a json", () => {
 
   expect(result).toStrictEqual(mocks.json);
 });
+
+it("SHOULD serialize missing dates as null", () => {
+  const model = setup();
+  model.expirationDate = undefined;
+  model.openingDate = undefined;
+  model.purchaseDate = undefined;
+
+  expect(model.toJSON()).toMatchObject({
+    expiration_date: null,
+    opening_date: null,
+    purchase_date: null,
+  });
+});
+
+it("SHOULD serialize the dates as ISO strings WHEN present", () => {
+  expect(setup().toJSON()).toMatchObject({
+    expiration_date: mocks.json.expiration_date,
+    opening_date: mocks.json.opening_date,
+    purchase_date: mocks.json.purchase_date,
+  });
+});

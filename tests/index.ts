@@ -18,6 +18,23 @@ function hasText(text: string) {
   return screen.UNSAFE_queryAllByProps({ children: text }).length > 0;
 }
 
+// Switches the globally mocked `useTheme` to the dark theme. Returns a
+// function that restores the light theme (call it in `afterEach`).
+function mockDarkTheme() {
+  const { useTheme } = jest.requireMock("@presentation/theme");
+  const { lightTheme } = jest.requireActual("@presentation/theme/provider");
+  const { colors } = jest.requireActual("@presentation/theme/constants");
+  const light = useTheme();
+
+  useTheme.mockReturnValue({
+    isDark: true,
+    setIsDark: jest.fn(),
+    theme: { ...lightTheme, colors: colors.dark, dark: true },
+  });
+
+  return () => useTheme.mockReturnValue(light);
+}
+
 function suppressConsoleError() {
   const errorSpy = jest
     .spyOn(global.console, "error")
@@ -35,4 +52,4 @@ export {
   screen,
   waitFor,
 } from "@testing-library/react-native";
-export { hasText, customRender as render, suppressConsoleError };
+export { hasText, mockDarkTheme, customRender as render, suppressConsoleError };

@@ -22,3 +22,11 @@ it("SHOULD call Sentry.reactNavigationIntegration", () => {
   });
   expect(result).toEqual(navigationIntegrationResponse);
 });
+
+it("SHOULD reuse the same integration on later calls", () => {
+  const first = navigationIntegration();
+  const second = navigationIntegration();
+
+  expect(second).toBe(first);
+  expect(reactNavigationIntegrationSpy).toHaveBeenCalledTimes(1);
+});

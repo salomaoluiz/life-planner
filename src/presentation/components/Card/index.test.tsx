@@ -1,7 +1,8 @@
+import { BlurView } from "expo-blur";
 import React from "react";
 import { View } from "react-native";
 
-import { screen } from "@tests";
+import { mockDarkTheme, screen } from "@tests";
 
 import { defaultProps, setup } from "./mocks/index.mocks";
 
@@ -35,4 +36,27 @@ it("SHOULD render the card with children", () => {
   const component = screen.getByTestId(defaultProps.testID!);
 
   expect(component.props.children).toEqual(customChildren);
+});
+
+describe("theme", () => {
+  it("SHOULD use the light blur settings WHEN the theme is light", () => {
+    setup();
+
+    expect(screen.UNSAFE_getByType(BlurView).props).toMatchObject({
+      intensity: 40,
+      tint: "light",
+    });
+  });
+
+  it("SHOULD use the dark blur settings WHEN the theme is dark", () => {
+    const restore = mockDarkTheme();
+
+    setup();
+
+    expect(screen.UNSAFE_getByType(BlurView).props).toMatchObject({
+      intensity: 20,
+      tint: "dark",
+    });
+    restore();
+  });
 });

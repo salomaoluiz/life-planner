@@ -112,3 +112,20 @@ it("SHOULD add breadcrumb when sign in fails", async () => {
     message: "Error signing in with Google",
   });
 });
+
+it("SHOULD use the default error message WHEN the thrown error has no message", async () => {
+  spies.signInSpy.mockRejectedValueOnce({});
+
+  const result = await setup();
+
+  expect(result).toEqual({
+    error: new Error("[react-native-google-signin] - Unknown error"),
+    status: "error",
+  });
+  expect(spies.addBreadcrumbSpy).toHaveBeenCalledWith(
+    expect.objectContaining({
+      data: { message: "[react-native-google-signin] - Unknown error" },
+      level: "error",
+    }),
+  );
+});
