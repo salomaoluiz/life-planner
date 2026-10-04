@@ -14,9 +14,12 @@ function familyMemberRepositoryImpl(
 ): FamilyMemberRepository {
   return {
     async deleteFamilyMember(id: string): Promise<void> {
-      await datasources.familyMemberDatasource.deleteFamilyMember(id);
-
-      invalidateFamilyCache();
+      try {
+        await datasources.familyMemberDatasource.deleteFamilyMember(id);
+      } finally {
+        // Also on failure: a 404 means the cached list still shows a removed member.
+        invalidateFamilyCache();
+      }
     },
     async getFamilyMembers(familyId: string): Promise<FamilyMemberEntity[]> {
       const cachedModel = cache.get<Array<Record<string, unknown>> | null>(
