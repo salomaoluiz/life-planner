@@ -35,6 +35,13 @@ function parseBody(text: string): Record<string, unknown> | undefined {
   }
 }
 
+const INVITE_TOKEN_SEGMENT = /(\/family-invites\/)[^/?#]+/;
+
+// The invite token is a secret that travels in the URL path: keep it out of error contexts.
+function redactPath(path: string) {
+  return path.replace(INVITE_TOKEN_SEGMENT, "$1:token");
+}
+
 async function request<T>(
   method: Method,
   path: string,
@@ -82,7 +89,7 @@ async function request<T>(
   if (status >= 500 || status < 400) {
     const error = new GenericError();
     // Never include the request/response body: it can hold credentials or personal data.
-    error.addContext({ method, path, statusCode: status });
+    error.addContext({ method, path: redactPath(path), statusCode: status });
     throw error;
   }
 
