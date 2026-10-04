@@ -1,11 +1,15 @@
 import FamilyDTO from "@application/dto/family/FamilyDTO";
-import FamilyMemberDTO from "@application/dto/familyMember/FamilyMemberDTO";
+import FamilyMemberDTO, {
+  IFamilyMemberDTO,
+} from "@application/dto/familyMember/FamilyMemberDTO";
 import UserDTO from "@application/dto/user/UserDTO";
 import {
   FamilyMemberRole,
   FamilyMemberStatus,
 } from "@domain/entities/familyMember/FamilyMemberEnums";
-import FamilyMemberViewModel from "@screens/Family/models/FamilyMembersViewModel";
+import FamilyMemberUIModel, {
+  FamilyMemberViewer,
+} from "@screens/Family/models/FamilyMemberUIModel";
 import FamilyViewModel from "@screens/Family/models/FamilyViewModel";
 
 const ownerUser = new UserDTO({
@@ -21,31 +25,41 @@ const familyDTO = new FamilyDTO({
   ownerId: "user-1",
 });
 
-const ownerMemberDTO = new FamilyMemberDTO({
-  email: "alice@example.test",
-  familyId: "family-1",
-  id: "member-1",
-  inviteExpired: false,
-  name: "Alice Test",
-  photoUrl: "https://example.test/alice.png",
-  role: FamilyMemberRole.OWNER,
-  status: FamilyMemberStatus.JOINED,
-  userId: "user-1",
-});
+function memberDTO(overrides: Partial<IFamilyMemberDTO> = {}) {
+  return new FamilyMemberDTO({
+    email: "alice@example.test",
+    familyId: "family-1",
+    id: "member-1",
+    inviteExpired: false,
+    name: "Alice Test",
+    photoUrl: "https://example.test/alice.png",
+    role: FamilyMemberRole.OWNER,
+    status: FamilyMemberStatus.JOINED,
+    userId: "user-1",
+    ...overrides,
+  });
+}
 
-const invitedMemberDTO = new FamilyMemberDTO({
+const ownerMemberDTO = memberDTO();
+const invitedMemberDTO = memberDTO({
   email: "bob@example.test",
-  familyId: "family-1",
   id: "member-2",
-  inviteExpired: false,
+  name: undefined,
+  photoUrl: undefined,
   role: FamilyMemberRole.MEMBER,
   status: FamilyMemberStatus.PENDING,
+  userId: undefined,
 });
 
-function makeFamilyViewModel() {
+const ownerViewer: FamilyMemberViewer = {
+  isFamilyOwner: true,
+  userId: "user-1",
+};
+
+function makeFamilyViewModel(viewer: FamilyMemberViewer = ownerViewer) {
   return new FamilyViewModel(familyDTO, [
-    new FamilyMemberViewModel(ownerMemberDTO, ownerUser),
-    new FamilyMemberViewModel(invitedMemberDTO),
+    new FamilyMemberUIModel(ownerMemberDTO, viewer),
+    new FamilyMemberUIModel(invitedMemberDTO, viewer),
   ]);
 }
 
@@ -53,6 +67,8 @@ export {
   familyDTO,
   invitedMemberDTO,
   makeFamilyViewModel,
+  memberDTO,
   ownerMemberDTO,
   ownerUser,
+  ownerViewer,
 };
