@@ -9,17 +9,34 @@ import {
 } from "./mocks/getTransactionsUseCase.mocks";
 
 const getTransactionsSpy = spies.financialRepositoryTransaction.getTransactions;
+const getCategoriesSpy = spies.financialRepositoryCategory.getCategories;
+const getAccountsSpy = spies.financialRepositoryAccount.getAccounts;
 
 it("SHOULD get all transactions and return the TransactionDTO", async () => {
   getTransactionsSpy.mockResolvedValueOnce(mocks.transactionEntities);
+  getCategoriesSpy.mockResolvedValueOnce(mocks.categories);
+  getAccountsSpy.mockResolvedValueOnce(mocks.accounts);
 
   const result = await setup();
 
   expect(getTransactionsSpy).toHaveBeenCalledTimes(1);
   expect(getTransactionsSpy).toHaveBeenCalledWith(mocks.defaultParams.ownerIds);
-  const expected = mocks.transactionEntities.map((transaction) =>
-    TransactionDTO.fromEntity(transaction),
-  );
+  expect(getCategoriesSpy).toHaveBeenCalledTimes(1);
+  expect(getCategoriesSpy).toHaveBeenCalledWith(mocks.defaultParams.ownerIds);
+  expect(getAccountsSpy).toHaveBeenCalledTimes(1);
+  expect(getAccountsSpy).toHaveBeenCalledWith(mocks.defaultParams.ownerIds);
+
+  const expected = mocks.transactionEntities.map((transaction) => {
+    const category = mocks.categories.find(
+      (c) => c.id === transaction.categoryId,
+    );
+    const account = mocks.accounts.find((a) => a.id === transaction.accountId);
+    return TransactionDTO.fromEntity(
+      transaction,
+      category?.name,
+      account?.name,
+    );
+  });
   expect(result).toEqual(expected);
 });
 

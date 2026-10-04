@@ -14,6 +14,24 @@ export default function DrawerNavigator() {
           title: "Transactions",
         }}
       />
+      <Drawer.Screen
+        name={"categories"}
+        options={{
+          drawerIcon: ({ color, size }) => (
+            <Icon color={color} name={"folder"} size={size} />
+          ),
+          title: "Categories",
+        }}
+      />
+      <Drawer.Screen
+        name={"accounts"}
+        options={{
+          drawerIcon: ({ color, size }) => (
+            <Icon color={color} name={"bank"} size={size} />
+          ),
+          title: "Accounts",
+        }}
+      />
     </Drawer>
   );
 }

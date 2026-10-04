@@ -9,10 +9,12 @@ it("SHOULD render correctly", () => {
 
   expect(button).toBeOnTheScreen();
   expect(button).toHaveTextContent("login.button.googleLogin");
-  expect(button.props.buttonColor).toEqual("#FFFFFF");
   expect(button.props.textColor).toEqual("#1F1F1F");
+  expect(button.props.style).toContainEqual(
+    expect.objectContaining({ backgroundColor: "#FFFFFF" }),
+  );
   expect(button.props.icon()).toEqual(<GoogleLogo height={20} width={20} />);
-  expect(button.props.mode).toEqual("outlined");
+  expect(button.props.mode).toEqual("text");
 });
 
 it("SHOULD call onPress when button is pressed", () => {

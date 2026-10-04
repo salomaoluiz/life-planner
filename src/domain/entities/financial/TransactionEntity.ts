@@ -6,7 +6,9 @@ export enum TransactionType {
 }
 
 interface ITransactionEntity {
+  accountId: string;
   category: string;
+  categoryId: string;
   date: string;
   description: string;
   id: string;
@@ -17,7 +19,9 @@ interface ITransactionEntity {
 }
 
 class TransactionEntity {
+  accountId: string;
   category: string;
+  categoryId: string;
   date: string;
   description: string;
   id: string;
@@ -27,7 +31,9 @@ class TransactionEntity {
   value: string;
 
   constructor(params: ITransactionEntity) {
+    this.accountId = params.accountId;
     this.category = params.category;
+    this.categoryId = params.categoryId;
     this.date = params.date;
     this.id = params.id;
     this.owner = params.owner;

@@ -15,7 +15,9 @@ it("SHOULD update all fields of transaction", () => {
 
   expect(updateTransactionSpy).toHaveBeenCalledTimes(1);
   expect(updateTransactionSpy).toHaveBeenCalledWith({
+    accountId: mocks.defaultParams.accountId,
     category: mocks.defaultParams.category,
+    categoryId: mocks.defaultParams.categoryId,
     date: mocks.defaultParams.date,
     description: mocks.defaultParams.description,
     id: mocks.defaultParams.id,

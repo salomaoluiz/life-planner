@@ -10,7 +10,9 @@ it("SHOULD update transaction AND invalidate cache WHEN called", async () => {
 
   expect(updateTransaction).toHaveBeenCalledTimes(1);
   expect(updateTransaction).toHaveBeenCalledWith({
+    accountId: mocks.defaultParams.accountId,
     category: mocks.defaultParams.category,
+    categoryId: mocks.defaultParams.categoryId,
     date: mocks.defaultParams.date,
     description: mocks.defaultParams.description,
     id: mocks.defaultParams.id,

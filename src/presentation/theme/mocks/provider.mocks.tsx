@@ -76,6 +76,11 @@ const setHiddenSpy = jest.spyOn(reactNative.StatusBar, "setHidden");
 const captureMessageSpy = jest.spyOn(monitoring, "captureMessage");
 // endregion Spies
 
+const useQueryLightModeResponse = useQueryFixture
+  .withData({ darkMode: false })
+  .withStatus("success")
+  .build();
+
 function renderComponent() {
   return (
     <ThemeProvider {...defaultProps}>{defaultProps.children}</ThemeProvider>
@@ -93,6 +98,7 @@ const mocks = {
   useQuery: {
     darkMode: useQueryDarkModeResponse,
     fixture: useQueryFixture,
+    lightMode: useQueryLightModeResponse,
     pending: useQueryPendingResponse,
   },
 };

@@ -5,6 +5,7 @@ export { default as Card, CardProps } from "./Card";
 export { default as DatePicker, DatePickerProps } from "./DatePicker";
 export { Fab, FabGroup, FabGroupProps, FabProps } from "./Fab";
 export { default as HelperText, HelperTextProps } from "./HelperText";
+export { default as Menu, MenuProps } from "./Menu";
 export { default as Picker } from "./Picker";
 export { default as Spacer, SpacerProps } from "./Spacer";
 export { default as Switch, SwitchProps } from "./Switch";

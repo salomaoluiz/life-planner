@@ -8,7 +8,9 @@ import createTransaction, { Params } from "../createTransaction";
 
 // region mocks
 const defaultParams: Params = {
+  accountId: "c5598687-dfeb-485e-990a-a035d8e7d23d",
   category: "Some Category",
+  categoryId: "7820cfbb-f1aa-4254-8e42-7a0fe1ee981f",
   date: new Date().toISOString(),
   description: "Some Description",
   owner: OwnerType.FAMILY,
@@ -18,7 +20,9 @@ const defaultParams: Params = {
 };
 
 const transactionModelMock = new TransactionModel({
+  accountId: "c5598687-dfeb-485e-990a-a035d8e7d23d",
   category: "Some Category",
+  categoryId: "7820cfbb-f1aa-4254-8e42-7a0fe1ee981f",
   date: new Date().toISOString(),
   description: "Some Description",
   id: "1dcc732e-8886-4a68-b669-ded3f3809c20",

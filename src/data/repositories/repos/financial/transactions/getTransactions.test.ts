@@ -28,7 +28,9 @@ it("SHOULD return transactions from cache", async () => {
   );
   expect(result).toEqual([
     new TransactionEntity({
+      accountId: mocks.firstTransaction.accountId,
       category: mocks.firstTransaction.category,
+      categoryId: mocks.firstTransaction.categoryId,
       date: mocks.firstTransaction.date,
       description: mocks.firstTransaction.description,
       id: mocks.firstTransaction.id,
@@ -72,7 +74,9 @@ it("SHOULD return transactions from datasource", async () => {
 
   expect(result).toEqual([
     new TransactionEntity({
+      accountId: mocks.secondTransaction.accountId,
       category: mocks.secondTransaction.category,
+      categoryId: mocks.secondTransaction.categoryId,
       date: mocks.secondTransaction.date,
       description: mocks.secondTransaction.description,
       id: mocks.secondTransaction.id,

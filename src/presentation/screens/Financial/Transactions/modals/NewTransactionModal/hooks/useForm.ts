@@ -12,6 +12,8 @@ function useForm() {
   );
   const [value, setValue] = useState<string | undefined>(undefined);
   const [category, setCategory] = useState<string | undefined>(undefined);
+  const [categoryId, setCategoryId] = useState<string | undefined>(undefined);
+  const [accountId, setAccountId] = useState<string | undefined>(undefined);
   const [owner, setOwner] = useState<OwnerType | undefined>(undefined);
   const [ownerId, setOwnerId] = useState<string | undefined>(undefined);
   const [type, setType] = useState<TransactionType | undefined>(undefined);
@@ -19,7 +21,17 @@ function useForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const fields = {
+    accountId: {
+      label: "Account ID",
+      onChange: setAccountId,
+      value: accountId,
+    },
     category: { label: "Category", onChange: setCategory, value: category },
+    categoryId: {
+      label: "Category ID",
+      onChange: setCategoryId,
+      value: categoryId,
+    },
     description: {
       label: "Description",
       onChange: setDescription,
@@ -42,7 +54,8 @@ function useForm() {
     const errors: Record<string, string> = {};
 
     const fieldsToValidate = {
-      category,
+      accountId,
+      categoryId,
       description,
       transactionDate,
       value,
@@ -62,7 +75,9 @@ function useForm() {
     setErrors({});
 
     return {
-      category: category!,
+      accountId: accountId!,
+      category: category ?? "",
+      categoryId: categoryId!,
       date: transactionDate!.toISOString(),
       description,
       owner: owner ?? owners[0].type,

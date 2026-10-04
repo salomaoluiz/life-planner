@@ -6,8 +6,12 @@ export enum SortRule {
   DATE_ASC = "DATE_ASC",
 }
 class FinancialTransactionViewModel {
+  get accountName() {
+    return this.dto.accountName ?? "";
+  }
+
   get category() {
-    return this.dto.category;
+    return this.dto.categoryName ?? this.dto.category;
   }
 
   get description() {

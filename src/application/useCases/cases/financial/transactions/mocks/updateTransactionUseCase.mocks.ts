@@ -7,7 +7,9 @@ import updateTransactionUseCase, {
 
 // region mocks
 const defaultParams: UpdateTransactionUseCaseParams = {
+  accountId: "c5598687-dfeb-485e-990a-a035d8e7d23d",
   category: "Some category",
+  categoryId: "7820cfbb-f1aa-4254-8e42-7a0fe1ee981f",
   date: new Date().toISOString(),
   description: "Some description",
   id: "ae229059-6b7d-450f-a113-835d21370322",

@@ -7,7 +7,11 @@ it("SHOULD render correctly from entity", () => {
 
   expect(result).toEqual(
     new TransactionDTO({
+      accountId: mocks.defaultProps.accountId,
+      accountName: undefined,
       category: mocks.defaultProps.category,
+      categoryId: mocks.defaultProps.categoryId,
+      categoryName: undefined,
       date: mocks.defaultProps.date,
       description: mocks.defaultProps.description,
       id: mocks.defaultProps.id,

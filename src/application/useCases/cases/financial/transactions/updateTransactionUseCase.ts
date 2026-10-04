@@ -5,7 +5,9 @@ import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import Repositories from "@domain/repositories";
 
 export interface UpdateTransactionUseCaseParams {
+  accountId?: string;
   category?: string;
+  categoryId?: string;
   date?: string;
   description?: string;
   id: string;
@@ -39,7 +41,9 @@ function updateTransactionUseCase(
         const { owner, type } = validate(params);
 
         await repositories.financialRepository.transaction.updateTransaction({
+          accountId: params.accountId,
           category: params.category,
+          categoryId: params.categoryId,
           date: params.date,
           description: params.description,
           id: params.id,

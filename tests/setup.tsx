@@ -15,18 +15,90 @@ jest.mock("react-native-paper", () => {
   const FAB = Object.assign(View, {
     Group: View,
   });
+  function Banner({
+    children,
+    visible,
+  }: {
+    children?: React.ReactNode;
+    visible: boolean;
+  }) {
+    return visible ? <View>{children}</View> : null;
+  }
+  function renderSlot(
+    slot: ((props: object) => React.ReactNode) | undefined,
+    props: object = {},
+  ) {
+    return slot ? slot(props) : null;
+  }
+  const List = {
+    Accordion: ({
+      children,
+      expanded,
+      left,
+      right,
+      title,
+      ...props
+    }: {
+      children?: React.ReactNode;
+      expanded?: boolean;
+      left?: (props: object) => React.ReactNode;
+      right?: (props: object) => React.ReactNode;
+      title?: React.ReactNode;
+    }) => (
+      <View {...props}>
+        {renderSlot(left)}
+        {title}
+        {renderSlot(right, { isExpanded: expanded })}
+        {expanded ? children : null}
+      </View>
+    ),
+    Item: ({
+      left,
+      right,
+      title,
+      ...props
+    }: {
+      left?: (props: object) => React.ReactNode;
+      right?: (props: object) => React.ReactNode;
+      title?: React.ComponentType | React.ReactNode;
+    }) => {
+      const Title = title as React.ComponentType;
+      return (
+        <View {...props}>
+          {renderSlot(left)}
+          {typeof title === "function" ? <Title /> : title}
+          {renderSlot(right)}
+        </View>
+      );
+    },
+  };
   return {
     Avatar: {
       Icon: View,
       Image: View,
       Text: View,
     },
+    Banner,
     Button: View,
     Card: View,
     FAB,
     HelperText: View,
     Icon: View,
     IconButton: View,
+    List,
+    Menu: ({
+      anchor,
+      children,
+      ...props
+    }: {
+      anchor?: React.ReactNode;
+      children?: React.ReactNode;
+    }) => (
+      <View {...props}>
+        {anchor}
+        {children}
+      </View>
+    ),
     PaperProvider: ({ children, ...props }: { children: React.ReactNode }) => (
       <View {...props}>{children}</View>
     ),

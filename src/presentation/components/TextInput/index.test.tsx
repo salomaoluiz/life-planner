@@ -1,4 +1,7 @@
-import { screen } from "@tests";
+import { BlurView } from "expo-blur";
+import { StyleSheet } from "react-native";
+
+import { fireEvent, hasText, mockDarkTheme, screen } from "@tests";
 
 import { TextInputMode } from "./index";
 import { defaultProps, setup } from "./mocks/index.mocks";
@@ -8,14 +11,21 @@ it("SHOULD pass the correct props for an Flat editable input", () => {
 
   const component = screen.getByTestId("test-text-input");
 
-  expect(component.props).toEqual({
-    children: undefined,
-    mode: TextInputMode.Flat,
-    onChangeText: defaultProps.onChangeText,
-    style: expect.any(Object),
-    testID: "test-text-input",
-    value: "Default Value",
-  });
+  expect(component.props).toEqual(
+    expect.objectContaining({
+      activeUnderlineColor: "transparent",
+      children: undefined,
+      mode: "flat",
+      onBlur: expect.any(Function),
+      onChangeText: defaultProps.onChangeText,
+      onFocus: expect.any(Function),
+      placeholderTextColor: "rgba(71, 85, 105, 0.65)",
+      style: expect.any(Object),
+      testID: "test-text-input",
+      underlineColor: "transparent",
+      value: "Default Value",
+    }),
+  );
 });
 
 it("SHOULD pass the correct props for an Outlined not editable input", () => {
@@ -23,15 +33,22 @@ it("SHOULD pass the correct props for an Outlined not editable input", () => {
 
   const component = screen.getByTestId("test-text-input");
 
-  expect(component.props).toEqual({
-    children: undefined,
-    disabled: true,
-    mode: TextInputMode.Outlined,
-    onChangeText: defaultProps.onChangeText,
-    style: expect.any(Object),
-    testID: "test-text-input",
-    value: "Default Value",
-  });
+  expect(component.props).toEqual(
+    expect.objectContaining({
+      activeUnderlineColor: "transparent",
+      children: undefined,
+      disabled: true,
+      mode: "flat",
+      onBlur: expect.any(Function),
+      onChangeText: defaultProps.onChangeText,
+      onFocus: expect.any(Function),
+      placeholderTextColor: "rgba(71, 85, 105, 0.65)",
+      style: expect.any(Object),
+      testID: "test-text-input",
+      underlineColor: "transparent",
+      value: "Default Value",
+    }),
+  );
 });
 
 it("SHOULD have the correct style", () => {
@@ -40,7 +57,56 @@ it("SHOULD have the correct style", () => {
   const component = screen.getByTestId("test-text-input");
 
   expect(component.props.style).toEqual({
+    backgroundColor: "transparent",
+    color: "rgb(15, 23, 42)",
     minHeight: 55,
     width: "100%",
   });
+});
+
+it("SHOULD use the focused glass colors WHEN the input is focused and the default ones WHEN blurred", () => {
+  setup();
+  const input = screen.getByTestId("test-text-input");
+  const blur = screen.UNSAFE_getByType(BlurView);
+  const idle = StyleSheet.flatten(blur.props.style);
+
+  fireEvent(input, "focus");
+  const focused = StyleSheet.flatten(
+    screen.UNSAFE_getByType(BlurView).props.style,
+  );
+  fireEvent(input, "blur");
+  const blurred = StyleSheet.flatten(
+    screen.UNSAFE_getByType(BlurView).props.style,
+  );
+
+  expect(focused.borderColor).not.toBe(idle.borderColor);
+  expect(focused.backgroundColor).not.toBe(idle.backgroundColor);
+  expect(blurred).toEqual(idle);
+});
+
+it("SHOULD render the label WHEN provided", () => {
+  setup({ label: "Name" });
+
+  expect(hasText("Name")).toBe(true);
+});
+
+it("SHOULD NOT render a label WHEN none is provided", () => {
+  setup();
+
+  expect(hasText("Name")).toBe(false);
+});
+
+it.each([
+  [false, 40, "light"],
+  [true, 20, "dark"],
+])("SHOULD use the blur settings for isDark=%s", (dark, intensity, tint) => {
+  const restore = dark ? mockDarkTheme() : () => undefined;
+
+  setup();
+
+  expect(screen.UNSAFE_getByType(BlurView).props).toMatchObject({
+    intensity,
+    tint,
+  });
+  restore();
 });

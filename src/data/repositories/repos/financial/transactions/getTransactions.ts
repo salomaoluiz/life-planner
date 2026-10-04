@@ -34,7 +34,9 @@ async function getTransactions(ownerIds: Params, datasources: Datasources) {
   return transactionsModel.map(
     (transaction) =>
       new TransactionEntity({
+        accountId: transaction.accountId,
         category: transaction.category,
+        categoryId: transaction.categoryId,
         date: transaction.date,
         description: transaction.description,
         id: transaction.id,

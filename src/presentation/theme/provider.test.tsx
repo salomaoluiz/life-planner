@@ -1,8 +1,13 @@
+import { useContext } from "react";
+import { View } from "react-native";
 import * as reactNative from "react-native";
+
+import { act, render } from "@tests";
 
 import { QueryStatus } from "@infrastructure/fetcher/types";
 
 import { mocks, screen, setup, spies } from "./mocks/provider.mocks";
+import { ThemeContext, ThemeProvider } from "./provider";
 
 it("SHOULD render the theme provider", () => {
   setup();
@@ -124,4 +129,68 @@ it('SHOULD set the theme to "dark" WHEN the device color schema is "dark"', () =
   const theme = screen.getByTestId("paper-theme-provider").props.theme.colors;
 
   expect(theme).toEqual(mocks.colors.dark);
+});
+
+it("SHOULD use the light theme WHEN the user saved light mode", () => {
+  spies.useQuery.mockReturnValueOnce(mocks.useQuery.lightMode);
+
+  setup();
+
+  expect(screen.getByTestId("paper-theme-provider").props.theme.colors).toEqual(
+    mocks.colors.light,
+  );
+  expect(spies.setBarStyle).toHaveBeenCalledWith("dark-content");
+});
+
+describe("setIsDark", () => {
+  function renderWithConsumer() {
+    let context: React.ContextType<typeof ThemeContext>;
+
+    function Consumer() {
+      context = useContext(ThemeContext);
+      return <View testID="consumer" />;
+    }
+
+    render(
+      <ThemeProvider>
+        <Consumer />
+      </ThemeProvider>,
+    );
+
+    return () => context;
+  }
+
+  it("SHOULD save the preference and switch to the dark theme", () => {
+    const getContext = renderWithConsumer();
+
+    act(() => {
+      getContext().setIsDark(true);
+    });
+
+    expect(spies.useMutation.mock.results[0].value.mutate).toHaveBeenCalledWith(
+      {
+        darkMode: true,
+      },
+    );
+    expect(getContext().isDark).toBe(true);
+    expect(
+      screen.getByTestId("paper-theme-provider").props.theme.colors,
+    ).toEqual(mocks.colors.dark);
+  });
+
+  it("SHOULD save the preference and switch back to the light theme", () => {
+    const getContext = renderWithConsumer();
+
+    act(() => {
+      getContext().setIsDark(true);
+    });
+    act(() => {
+      getContext().setIsDark(false);
+    });
+
+    expect(getContext().isDark).toBe(false);
+    expect(
+      screen.getByTestId("paper-theme-provider").props.theme.colors,
+    ).toEqual(mocks.colors.light);
+  });
 });

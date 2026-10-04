@@ -2,48 +2,49 @@ import { StyleSheet } from "react-native";
 
 import { useTheme } from "@presentation/theme";
 
-interface Props {
-  hasDate: boolean;
-}
-function getStyles(props: Props) {
+function getStyles() {
   const { theme } = useTheme();
 
   return {
     styles: StyleSheet.create({
       clearIconContainer: {
         alignItems: "flex-end",
-        flex: 1,
         justifyContent: "center",
+        paddingRight: theme.sizes.spacing.xsmall,
       },
       container: {
         alignItems: "center",
-        borderColor: theme.colors.onBackground,
-        borderRadius: theme.sizes.borderRadius.small,
+        backgroundColor: theme.colors.glassBackground,
+        borderColor: theme.colors.glassBorder,
+        borderRadius: theme.sizes.borderRadius.large,
         borderWidth: 1,
         flexDirection: "row",
         height: theme.sizes.spacing.xxlarge,
         justifyContent: "space-between",
-        paddingLeft: theme.sizes.spacing.xsmall,
+        overflow: "hidden",
+        paddingLeft: theme.sizes.spacing.medium,
         width: "100%",
       },
-      dateContainer: {
-        backgroundColor: theme.colors.background,
-        justifyContent: "center",
-        top: -theme.sizes.spacing.xsmall,
-        zIndex: 0,
+      dateText: {
+        color: theme.colors.onBackground,
       },
-      labelContainer: {
-        backgroundColor: theme.colors.background,
+      innerContainer: {
+        flex: 1,
         justifyContent: "center",
-        left: props.hasDate ? -theme.sizes.spacing.xxsmall : 0,
-        paddingHorizontal: props.hasDate ? theme.sizes.spacing.xxsmall : 0,
-        top: props.hasDate ? -theme.sizes.spacing.small : 0,
-        zIndex: 1,
+      },
+      label: {
+        color: theme.colors.onBackground,
+        marginBottom: theme.sizes.spacing.xsmall,
+      },
+      mainWrapper: {
+        marginBottom: theme.sizes.spacing.medium,
+        width: "100%",
+      },
+      placeholderText: {
+        color: theme.colors.glassTextPlaceholder,
       },
       pressable: {
-        backgroundColor: theme.colors.background,
-        flex: 1,
-        flexDirection: "row",
+        width: "100%",
       },
     }),
     theme,

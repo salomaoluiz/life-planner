@@ -8,7 +8,9 @@ export type Params = Parameters<
 
 async function updateTransaction(params: Params, datasources: Datasources) {
   await datasources.financialTransactionDatasource.updateTransaction({
+    accountId: params.accountId,
     category: params.category,
+    categoryId: params.categoryId,
     date: params.date,
     description: params.description,
     id: params.id,

@@ -1,7 +1,11 @@
 import TransactionEntity from "@domain/entities/financial/TransactionEntity";
 
 export interface ITransactionDTO {
+  accountId: string;
+  accountName?: string;
   category: string;
+  categoryId: string;
+  categoryName?: string;
   date: string;
   description: string;
   id: string;
@@ -12,7 +16,11 @@ export interface ITransactionDTO {
 }
 
 class TransactionDTO {
+  accountId: string;
+  accountName?: string;
   category: string;
+  categoryId: string;
+  categoryName?: string;
   date: string;
   description: string;
   id: string;
@@ -22,8 +30,12 @@ class TransactionDTO {
   value: string;
 
   constructor(params: ITransactionDTO) {
+    this.accountId = params.accountId;
     this.date = params.date;
     this.category = params.category;
+    this.categoryId = params.categoryId;
+    this.categoryName = params.categoryName;
+    this.accountName = params.accountName;
     this.description = params.description;
     this.id = params.id;
     this.owner = params.owner;
@@ -32,9 +44,17 @@ class TransactionDTO {
     this.value = params.value;
   }
 
-  static fromEntity(entity: TransactionEntity) {
+  static fromEntity(
+    entity: TransactionEntity,
+    categoryName?: string,
+    accountName?: string,
+  ) {
     return new TransactionDTO({
+      accountId: entity.accountId,
+      accountName: accountName,
       category: entity.category,
+      categoryId: entity.categoryId,
+      categoryName: categoryName,
       date: entity.date,
       description: entity.description,
       id: entity.id,

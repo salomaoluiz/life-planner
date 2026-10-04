@@ -4,7 +4,11 @@ import { LoginRepository } from "./auth";
 import { ConfigsRepository } from "./configs";
 import { FamilyRepository } from "./family";
 import { FamilyMemberRepository } from "./familyMember";
-import { FinancialTransactionRepository } from "./financial";
+import {
+  FinancialAccountRepository,
+  FinancialCategoryRepository,
+  FinancialTransactionRepository,
+} from "./financial";
 import { StockRepository } from "./stock";
 import { UserRepository } from "./user";
 
@@ -14,6 +18,8 @@ interface Repositories {
   familyMemberRepository: FamilyMemberRepository;
   familyRepository: FamilyRepository;
   financialRepository: {
+    account: FinancialAccountRepository;
+    category: FinancialCategoryRepository;
     transaction: FinancialTransactionRepository;
   };
   loginRepository: LoginRepository;

@@ -16,14 +16,27 @@ function getTransactionsUseCase(
   return {
     execute: async (params) => {
       try {
-        const transactions =
-          await repositories.financialRepository.transaction.getTransactions(
+        const [transactions, categories, accounts] = await Promise.all([
+          repositories.financialRepository.transaction.getTransactions(
             params.ownerIds,
-          );
+          ),
+          repositories.financialRepository.category.getCategories(
+            params.ownerIds,
+          ),
+          repositories.financialRepository.account.getAccounts(params.ownerIds),
+        ]);
 
-        return transactions.map((transaction) =>
-          TransactionDTO.fromEntity(transaction),
-        );
+        return transactions.map((transaction) => {
+          const category = categories.find(
+            (c) => c.id === transaction.categoryId,
+          );
+          const account = accounts.find((a) => a.id === transaction.accountId);
+          return TransactionDTO.fromEntity(
+            transaction,
+            category?.name,
+            account?.name,
+          );
+        });
       } catch (error) {
         if (error instanceof DefaultError) {
           error.addContext({

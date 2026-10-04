@@ -1,4 +1,6 @@
-import CategoryEntity from "@domain/entities/financial/CategoryEntity";
+import CategoryEntity, {
+  CategoryType,
+} from "@domain/entities/financial/CategoryEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 class CategoryEntityFixture {
@@ -18,11 +20,13 @@ class CategoryEntityFixture {
     this.value = {
       depthLevel: 0,
       icon: "icon",
+      iconColor: "#000",
       id: "id",
       name: "name",
       owner: OwnerType.FAMILY,
       ownerId: "ownerId",
       parentId: "parentId",
+      type: CategoryType.EXPENSE,
     } as CategoryEntity;
 
     return this;
@@ -36,6 +40,12 @@ class CategoryEntityFixture {
 
   withIcon(icon: string) {
     this.value.icon = icon;
+
+    return this;
+  }
+
+  withIconColor(iconColor: string) {
+    this.value.iconColor = iconColor;
 
     return this;
   }
@@ -66,6 +76,12 @@ class CategoryEntityFixture {
 
   withParentId(parentId: string) {
     this.value.parentId = parentId;
+
+    return this;
+  }
+
+  withType(type: CategoryType) {
+    this.value.type = type;
 
     return this;
   }

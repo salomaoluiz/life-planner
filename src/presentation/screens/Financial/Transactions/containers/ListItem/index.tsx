@@ -27,7 +27,14 @@ function ListItem(props: Props) {
       <View style={styles.detailsColumn}>
         <Text.Body value={props.item.transactionDate} />
         <Text.Title numberOfLines={1} value={props.item.description} />
-        <Text.Body numberOfLines={1} value={props.item.category} />
+        <Text.Body
+          numberOfLines={1}
+          value={
+            props.item.accountName
+              ? `${props.item.category} • ${props.item.accountName}`
+              : props.item.category
+          }
+        />
       </View>
       <View style={styles.priceColumn}>
         <Text.Body

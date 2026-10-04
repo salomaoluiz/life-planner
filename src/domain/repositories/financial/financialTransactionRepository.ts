@@ -13,7 +13,9 @@ export type FinancialTransactionRepository = {
 };
 
 interface CreateTransactionRepositoryParams {
+  accountId: string;
   category: string;
+  categoryId: string;
   date: string;
   description: string;
   owner: OwnerType;
@@ -27,7 +29,9 @@ interface DeleteTransactionRepositoryParams {
 }
 
 interface UpdateTransactionRepositoryParams {
+  accountId?: string;
   category?: string;
+  categoryId?: string;
   date?: string;
   description?: string;
   id: string;

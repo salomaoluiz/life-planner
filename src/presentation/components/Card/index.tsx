@@ -1,6 +1,8 @@
+import { BlurView } from "expo-blur";
 import React from "react";
-import { ViewStyle } from "react-native";
-import * as Paper from "react-native-paper";
+import { View, ViewStyle } from "react-native";
+
+import getStyles from "./styles";
 
 export interface CardProps {
   children: React.ReactNode;
@@ -9,10 +11,23 @@ export interface CardProps {
 }
 
 function Card(props: CardProps) {
+  const { styles, theme } = getStyles();
+
   return (
-    <Paper.Card style={props.customStyles} testID={props.testID}>
-      {props.children}
-    </Paper.Card>
+    <View style={styles.wrapper}>
+      <BlurView
+        intensity={theme.dark ? 20 : 40}
+        style={styles.blurView}
+        tint={theme.dark ? "dark" : "light"}
+      >
+        <View
+          style={[styles.content, props.customStyles]}
+          testID={props.testID}
+        >
+          {props.children}
+        </View>
+      </BlurView>
+    </View>
   );
 }
 

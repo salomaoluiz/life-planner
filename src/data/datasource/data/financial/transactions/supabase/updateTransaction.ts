@@ -9,7 +9,9 @@ async function updateTransaction(params: Params) {
     await supabase
       .from("financial_transactions")
       .update({
+        account_id: params.accountId,
         category: params.category,
+        category_id: params.categoryId,
         date: params.date,
         description: params.description,
         owner: params.owner,

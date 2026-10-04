@@ -7,14 +7,20 @@ function getStyles() {
 
   return StyleSheet.create({
     container: {
-      backgroundColor: theme.colors.surfaceVariant,
-      borderRadius: theme.sizes.borderRadius.medium,
+      backgroundColor: theme.colors.glassBackground,
+      borderColor: theme.colors.glassBorder,
+      borderRadius: theme.sizes.borderRadius.large,
+      borderWidth: 1,
       flex: 1,
+      marginBottom: theme.sizes.spacing.small,
+      overflow: "hidden",
       paddingHorizontal: theme.sizes.spacing.small,
       paddingVertical: 0,
     },
     contentContainer: {
-      backgroundColor: theme.colors.backdrop,
+      backgroundColor: theme.dark
+        ? theme.colors.surfaceVariant
+        : theme.colors.surfaceVariant,
       borderBottomEndRadius: theme.sizes.borderRadius.large,
       borderBottomStartRadius: theme.sizes.borderRadius.large,
       marginHorizontal: theme.sizes.spacing.small,

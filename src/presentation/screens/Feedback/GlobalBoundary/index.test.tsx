@@ -32,3 +32,27 @@ it("SHOULD call getString function when component is mounted", () => {
   expect(spies.getString).toHaveBeenCalledTimes(1);
   expect(spies.getString).toHaveBeenCalledWith(mocks.fallbackKey);
 });
+
+it("SHOULD render the default language texts WHEN no language was stored", () => {
+  setup();
+
+  expect(screen.getByTestId("globalBoundary_title").props.children).toBe(
+    mocks.translations["en-US"].translation.errors.generic.title,
+  );
+});
+
+it("SHOULD render the stored fallback language texts WHEN one was stored", async () => {
+  spies.getString.mockResolvedValueOnce("pt-BR" as never);
+
+  setup();
+  await act(async () => undefined);
+
+  expect(screen.getByTestId("globalBoundary_title").props.children).toBe(
+    mocks.translations["pt-BR"].translation.errors.generic.title,
+  );
+  expect(
+    screen.getByText(
+      mocks.translations["pt-BR"].translation.errors.generic.button.label,
+    ),
+  ).toBeOnTheScreen();
+});

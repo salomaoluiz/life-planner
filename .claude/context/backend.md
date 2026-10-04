@@ -1,0 +1,20 @@
+# Backend (`../life-planner-back`)
+
+Sibling repo: NestJS 10 + Prisma/Postgres REST API (Clean Architecture/DDD) that is meant to take over what Supabase provides today. Router: `../life-planner-back/.claude/CLAUDE.md`; full contract notes: `../life-planner-back/.claude/context/integration.md`. Read backend files only when the task needs them.
+
+**Remote:** `git@github.com:salomaoluiz/life-planner-back.git` (https://github.com/salomaoluiz/life-planner-back). If `../life-planner-back` doesn't exist (or isn't the right repo — check `git -C ../life-planner-back remote -v`), ask the user before cloning it as a sibling (`git clone git@github.com:salomaoluiz/life-planner-back.git ../life-planner-back`), or read the files from GitHub instead.
+
+## Status
+
+- **Supabase is the legacy backend and is being migrated to this new local backend** (`../life-planner-back`). Existing Supabase code (datasources, `@infrastructure/supabase`, `docs/database/`) stays working until each module is migrated; new work should target the new API, and for anything that needs a new Supabase table/column/policy, ask the user first whether it should go to the new backend instead.
+- Migration is done module by module, swapping only the **datasource** layer (Supabase datasource → API datasource via `@infrastructure/fetcher`) while domain, use cases and presentation stay unchanged. Remove the Supabase datasource and its docs once a module is fully migrated.
+- Today the app still uses **Supabase** (auth + data) for everything. The backend currently exposes only: `GET /api/health`, `POST /api/v1/auth/login/email`, `POST /api/v1/auth/signup/email`, `GET /api/v1/user/me`, `GET|PATCH /api/v1/user/:id`. Authenticated calls need `Authorization: Bearer <jwt>`.
+- Finance, family and stock exist in the backend as domain entities only (no endpoints yet).
+- Swagger (when the backend runs): `/swagger`; base path `/api/v1`.
+
+## Rules when touching the API contract
+
+- New data/behavior needed by the app → check the backend endpoint table (`../life-planner-back/.claude/context/api.md`) first; if it's missing, tell the user the backend needs it (don't invent endpoints).
+- Keep enum values (`USER`/`FAMILY`, …) and UUID ids identical to the backend. API JSON is camelCase.
+- When integrating, follow the existing layering: a new datasource under `src/data/datasource` using `@infrastructure/fetcher` (never call `fetch`/axios from presentation), Model `fromJSON/toJSON`, repository impl, use case. The base URL comes from an `EXPO_PUBLIC_*` env var (placeholder in `.env.example`; never a real URL/secret in tracked files).
+- Don't edit the backend repo unless asked; report what must change there.

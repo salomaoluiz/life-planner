@@ -1,4 +1,6 @@
-import { act, fireEvent, screen } from "@tests";
+import { BlurView } from "expo-blur";
+
+import { act, fireEvent, mockDarkTheme, screen } from "@tests";
 
 import { defaultProps, setup } from "./mocks/index.mocks";
 
@@ -30,6 +32,10 @@ describe("DatePicker", () => {
 
     screen.getByTestId(defaultProps.testID!);
 
+    // Verify placeholder text is shown when date is not provided
+    const valueComponent = screen.getByTestId(`${defaultProps.testID}-value`);
+    expect(valueComponent.props.children).toBe("Select a date");
+
     // When no date is provided, the clear button should not be present
     const clearButton = screen.queryByTestId(
       `${defaultProps.testID}-clear-button`,
@@ -42,6 +48,10 @@ describe("DatePicker", () => {
     setup({ date: testDate });
 
     screen.getByTestId(defaultProps.testID!);
+
+    // Verify rendered date value
+    const valueComponent = screen.getByTestId(`${defaultProps.testID}-value`);
+    expect(valueComponent.props.children).toBe(testDate.toLocaleDateString());
 
     // When date is provided, the clear button should be present
     const clearButton = screen.getByTestId(
@@ -185,5 +195,27 @@ describe("DatePicker", () => {
 
     // Modal should now be visible
     expect(modal.props.visible).toBe(true);
+  });
+
+  it("SHOULD use the generic clear button test id WHEN no testID is given", () => {
+    setup({ date: new Date("2023-12-25"), testID: undefined });
+
+    expect(screen.getByTestId("clear-button")).toBeTruthy();
+    expect(screen.getByTestId("date-picker-value")).toBeTruthy();
+  });
+
+  it.each([
+    [false, 40, "light"],
+    [true, 20, "dark"],
+  ])("SHOULD use the blur settings for isDark=%s", (dark, intensity, tint) => {
+    const restore = dark ? mockDarkTheme() : () => undefined;
+
+    setup();
+
+    expect(screen.UNSAFE_getByType(BlurView).props).toMatchObject({
+      intensity,
+      tint,
+    });
+    restore();
   });
 });

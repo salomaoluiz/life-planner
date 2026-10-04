@@ -13,7 +13,9 @@ export type Params = Parameters<
 async function createTransaction(params: Params, datasources: Datasources) {
   const transaction =
     await datasources.financialTransactionDatasource.createTransaction({
+      accountId: params.accountId,
       category: params.category,
+      categoryId: params.categoryId,
       date: params.date,
       description: params.description,
       owner: params.owner,
@@ -25,7 +27,9 @@ async function createTransaction(params: Params, datasources: Datasources) {
   cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA);
 
   return new TransactionEntity({
+    accountId: transaction.accountId,
     category: transaction.category,
+    categoryId: transaction.categoryId,
     date: transaction.date,
     description: transaction.description,
     id: transaction.id,

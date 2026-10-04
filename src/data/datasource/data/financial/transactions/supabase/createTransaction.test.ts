@@ -17,7 +17,9 @@ it("SHOULD call the supabase to create a new transaction", async () => {
   expect(spies.supabase.from).toHaveBeenCalledWith("financial_transactions");
   expect(spies.supabase.upsert).toHaveBeenCalledTimes(1);
   expect(spies.supabase.upsert).toHaveBeenCalledWith({
+    account_id: mocks.defaultParams.accountId,
     category: mocks.defaultParams.category,
+    category_id: mocks.defaultParams.categoryId,
     date: mocks.defaultParams.date,
     description: mocks.defaultParams.description,
     owner: mocks.defaultParams.owner,
