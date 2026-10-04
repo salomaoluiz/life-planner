@@ -26,6 +26,9 @@ errors:
     path: src/domain/entities/errors/family/FamilyNotFound.ts
   - name: FamilyNotCreated
     path: src/domain/entities/errors/family/FamilyNotCreated.ts
+  - name: FamilyHasRecords
+    path: src/domain/entities/errors/family/FamilyHasRecords.ts
+    description: delete blocked, the family still owns stock/financial records (API 409)
 ```
 
 ## Application
@@ -36,7 +39,7 @@ use_cases:
     path: src/application/useCases/cases/family/createFamilyUseCase.ts
     receives: CreateFamilyUseCaseParams
     returns: Promise<void>
-    behavior: Creates a new family for the given owner.
+    behavior: Creates a new family for the current user. The API creates the owner's membership atomically; the use case no longer calls familyMemberRepository.
 
   deleteFamilyUseCase:
     path: src/application/useCases/cases/family/deleteFamilyUseCase.ts
@@ -80,6 +83,8 @@ repositories:
 datasources:
   FamilyDatasource:
     path: src/data/repositories/repos/family/familyDatasource.ts
+    implementation: src/data/datasource/data/families/api/ (API datasource over @infrastructure/api; createFamily, deleteFamily, getFamilies, getFamilyById, updateFamily, familyApiError)
+    error_mapping: 404 -> FamilyNotFound, 400 -> FieldInvalid, create without body -> FamilyNotCreated, delete 409 -> FamilyHasRecords, other -> GenericError
     methods:
       - createFamily(params: CreateFamilyDatasourceParams): Promise<FamilyModel>
       - deleteFamily(id: string): Promise<void>
@@ -108,6 +113,7 @@ components:
 containers:
   - name: FamilyCard
     path: src/presentation/screens/Family/containers/FamilyCard/index.tsx
+    note: opens /business_feedback (type Error, copy family.deleteBlocked.*) when delete raises FamilyHasRecords
   - name: NewFamilyButton
     path: src/presentation/screens/Family/containers/NewFamilyButton/index.tsx
   - name: FamilyMemberCard
