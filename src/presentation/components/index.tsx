@@ -1,4 +1,6 @@
 export { default as Accordion, AccordionProps } from "./Accordion";
+export { default as AmountInput, AmountInputProps } from "./AmountInput";
+export { default as AmountText, AmountTextProps } from "./AmountText";
 export { default as Avatar, AvatarProps } from "./Avatar";
 export { default as Button, ButtonProps } from "./Button";
 export { default as Card, CardProps } from "./Card";
