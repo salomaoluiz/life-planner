@@ -54,7 +54,7 @@ const financial = {
       customColor: "Personalizada",
       customColorApply: "Usar cor",
       customColorHex: "Código hexadecimal",
-      customColorInvalid: "Use uma cor como #6366F1.",
+      customColorInvalid: "Use uma cor hexadecimal no formato #RRGGBB.",
       customColorTitle: "Cor personalizada",
       errors: { nameTooLong: "O nome pode ter no máximo 60 caracteres." },
       icon: "Ícone",
