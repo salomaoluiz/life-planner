@@ -1,7 +1,7 @@
 # Life Planner — Claude Context Router
 
 Expo 52 / React Native 0.76 / TypeScript (strict) app for families: finances, stock (home storage), family members, configs.
-Backend: Supabase is the **legacy** backend, being migrated to the new local NestJS API (`../life-planner-back`) — don't add new Supabase-only features without asking; see `.claude/context/backend.md`. Server state: React Query (wrapped). UI: React Native Paper + glass (expo-blur) components. i18n: en-US + pt-BR.
+Backend: Supabase is the **legacy** backend, being migrated to the new local NestJS API (`../life-planner-back`) — don't add new Supabase-only features without asking; see `.claude/context/backend.md`. Server state: React Query (wrapped). UI: Grafite component kit (`@components`) over React Native Paper. i18n: en-US + pt-BR.
 Clean Architecture: `app/` (expo-router routes) → `src/presentation` → `src/application` → `src/domain` ← `src/data` (← `src/infrastructure`).
 
 **Backend repo:** `../life-planner-back` (NestJS + Prisma API, sibling folder; router at `../life-planner-back/.claude/CLAUDE.md`; if that folder is missing, clone `git@github.com:salomaoluiz/life-planner-back.git` (https://github.com/salomaoluiz/life-planner-back) next to this repo or read it on GitHub). Read `.claude/context/backend.md` when a task involves the API contract or auth.
