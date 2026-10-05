@@ -44,13 +44,13 @@ function AddNewFamilyModal() {
         <View style={styles.inputContainer}>
           <TextInput.Outlined onChangeText={setFamilyName} value={familyName} />
         </View>
-        <Spacer direction={"vertical"} size={"medium"} />
+        <Spacer direction={"vertical"} size={"md"} />
         <View style={styles.buttonsContainer}>
           <Button.Filled label={"Create"} onPress={createNewFamily} />
-          <Spacer direction={"horizontal"} size={"xxxlarge"} />
+          <Spacer direction={"horizontal"} size={"xxxl"} />
           <Button.Text
             customStyles={{
-              textColor: theme.colors.error,
+              textColor: theme.colors.expense,
             }}
             label={"Cancel"}
             onPress={cancelCreateFamily}

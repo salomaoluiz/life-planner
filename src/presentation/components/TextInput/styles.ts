@@ -13,28 +13,26 @@ function getStyles({ disabled, isFocused }: StyleProps) {
     styles: StyleSheet.create({
       blurView: {
         backgroundColor: isFocused
-          ? theme.colors.glassBackgroundFocused
-          : theme.colors.glassBackground,
-        borderColor: isFocused
-          ? theme.colors.glassBorderFocused
-          : theme.colors.glassBorder,
-        borderRadius: theme.sizes.borderRadius.large,
+          ? theme.colors.surface
+          : theme.colors.surface,
+        borderColor: isFocused ? theme.colors.accent : theme.colors.border,
+        borderRadius: theme.sizes.borderRadius.lg,
         borderWidth: 1,
         opacity: disabled ? 0.5 : 1,
         overflow: "hidden",
       },
       container: {
-        marginBottom: theme.sizes.spacing.medium,
+        marginBottom: theme.sizes.spacing.md,
         width: "100%",
       },
       labelContainer: {
-        color: theme.colors.onBackground,
-        marginBottom: theme.sizes.spacing.xsmall,
+        color: theme.colors.textPrimary,
+        marginBottom: theme.sizes.spacing.xs,
       },
       textInput: {
         backgroundColor: "transparent",
-        color: theme.colors.onBackground,
-        minHeight: theme.sizes.spacing.xxlarge,
+        color: theme.colors.textPrimary,
+        minHeight: theme.sizes.spacing.xxxl,
         width: "100%",
       },
     }),

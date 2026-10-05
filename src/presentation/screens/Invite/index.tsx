@@ -16,7 +16,7 @@ function Invite() {
     return (
       <View style={styles.container}>
         <Skeleton.Box height={48} width={"80%"} />
-        <Spacer direction={"vertical"} size={"large"} />
+        <Spacer direction={"vertical"} size={"xl"} />
         <Skeleton.Box height={32} width={"60%"} />
       </View>
     );
@@ -50,7 +50,7 @@ function Invite() {
     <View style={styles.container}>
       <Text.Display value={t("invite.title")} />
       <Text.Headline value={vm.invite.familyName} />
-      <Spacer direction={"vertical"} size={"large"} />
+      <Spacer direction={"vertical"} size={"xl"} />
       {!vm.invite.canAccept ? (
         <Text.Headline
           value={t("invite.notForYou", { email: vm.invite.email })}
@@ -61,7 +61,7 @@ function Invite() {
           value={t(vm.acceptErrorKey, { email: vm.invite.email })}
         />
       ) : null}
-      <Spacer direction={"vertical"} size={"large"} />
+      <Spacer direction={"vertical"} size={"xl"} />
       <View style={styles.buttonContainer}>
         <Button.Filled
           disabled={!vm.invite.canAccept || vm.isAccepting}
@@ -69,9 +69,9 @@ function Invite() {
           loading={vm.isAccepting}
           onPress={vm.onAccept}
         />
-        <Spacer direction={"horizontal"} size={"large"} />
+        <Spacer direction={"horizontal"} size={"xl"} />
         <Button.Outlined
-          customStyles={{ textColor: theme.colors.error }}
+          customStyles={{ textColor: theme.colors.expense }}
           label={t("invite.decline")}
           onPress={vm.onDecline}
         />

@@ -1,4 +1,6 @@
-import ConfigsEntity from "@domain/entities/configs/ConfigsEntity";
+import ConfigsEntity, {
+  ThemeMode,
+} from "@domain/entities/configs/ConfigsEntity";
 
 import { mocks, setup, spies } from "./mocks/getConfigs.mocks";
 
@@ -15,8 +17,16 @@ it("should return cached configs when cache is not empty", async () => {
 
   expect(result).toEqual(
     new ConfigsEntity({
-      darkMode: mocks.configsModel.dark_mode,
       language: mocks.configsModel.language,
+      themeMode: ThemeMode.SYSTEM,
     }),
   );
+});
+
+it("should migrate a legacy cached dark_mode to a theme mode", async () => {
+  spies.getCache.mockReturnValue({ dark_mode: true, language: "en-US" });
+
+  const result = await setup();
+
+  expect(result.themeMode).toBe(ThemeMode.DARK);
 });

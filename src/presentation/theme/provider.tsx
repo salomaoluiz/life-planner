@@ -3,12 +3,15 @@ import { StatusBar, useColorScheme } from "react-native";
 
 import { useCases } from "@application/useCases";
 import { SaveUserConfigsUseCaseParams } from "@application/useCases/cases/configs/saveUserConfigsUseCase";
+import { ThemeMode } from "@domain/entities/configs/ConfigsEntity";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
+import { useAppFonts } from "@infrastructure/fonts";
 import { captureMessage } from "@infrastructure/monitoring";
 import { useProviderLoader } from "@providers/loader";
 
-import { colors, getScaledSizes } from "./constants";
-import { PaperThemeProvider } from "./paper";
+import { buildTheme } from "./buildTheme";
+import { buildPaperTheme, PaperThemeProvider } from "./paper";
+import { resolveIsDark } from "./resolveThemeMode";
 import { ThemeProp } from "./types";
 
 interface Props {
@@ -17,20 +20,12 @@ interface Props {
 
 interface ThemeContextData {
   isDark: boolean;
-  setIsDark: (isDark: boolean) => void;
+  setThemeMode: (themeMode: ThemeMode) => void;
+  themeMode: ThemeMode;
 }
 
-export const lightTheme: ThemeProp = {
-  colors: colors.light,
-  dark: false,
-  sizes: getScaledSizes(),
-};
-
-const darkTheme: ThemeProp = {
-  colors: colors.dark,
-  dark: true,
-  sizes: getScaledSizes(),
-};
+export const lightTheme: ThemeProp = buildTheme(false, false);
+export const darkTheme: ThemeProp = buildTheme(true, false);
 
 export const ThemeContext = createContext<ThemeContextData>(
   {} as ThemeContextData,
@@ -46,80 +41,60 @@ export function ThemeProvider({ children }: Props) {
     cacheKey: [useCases.getUserConfigsUseCase.uniqueName],
     fetch: useCases.getUserConfigsUseCase.execute,
   });
-  const colorSchema = useColorScheme();
+  const { failed, ready } = useAppFonts();
+  const fontsLoaded = ready && !failed;
+  const systemScheme = useColorScheme();
 
-  const [isDark, setIsDark] = useState(colorSchema === "dark");
+  const [themeMode, setThemeModeState] = useState<ThemeMode>(ThemeMode.SYSTEM);
 
-  const [theme, setTheme] = useState<ThemeProp>(
-    isDark ? darkTheme : lightTheme,
+  const isDark = resolveIsDark(themeMode, systemScheme);
+  const theme = useMemo(
+    () => buildTheme(isDark, fontsLoaded),
+    [isDark, fontsLoaded],
   );
-
-  function updateBarStyle(darkMode: boolean) {
-    StatusBar.setHidden(false);
-    StatusBar.setBarStyle(darkMode ? "light-content" : "dark-content");
-    StatusBar.setBackgroundColor(
-      darkMode ? darkTheme.colors.background : lightTheme.colors.background,
-    );
-  }
+  const paperTheme = useMemo(() => buildPaperTheme(theme), [theme]);
 
   useEffect(() => {
-    StatusBar.setHidden(true);
-  }, []);
+    StatusBar.setBarStyle(isDark ? "light-content" : "dark-content");
+    StatusBar.setBackgroundColor(theme.colors.background);
+  }, [isDark]);
 
-  function updateDefaultTheme() {
-    const darkMode = colorSchema === "dark";
+  const queryDone = status !== "pending";
 
-    setIsDark(darkMode);
-    updateBarStyle(darkMode);
-    setTheme(darkMode ? darkTheme : lightTheme);
-  }
-
-  function setUserTheme() {
-    const darkMode = data!.darkMode;
-
-    setIsDark(darkMode);
-    updateBarStyle(darkMode);
-    setTheme(darkMode ? darkTheme : lightTheme);
-  }
+  useEffect(() => {
+    setIsLoading(!(queryDone && ready), "theme");
+  }, [queryDone, ready]);
 
   useEffect(() => {
     switch (status) {
       case "error":
-        updateDefaultTheme();
-        setIsLoading(false, "theme");
-        break;
       case "pending":
-        setIsLoading(true, "theme");
         break;
       case "success":
-        setIsLoading(false, "theme");
-        setUserTheme();
+        setThemeModeState(data!.themeMode);
         break;
       default:
-        updateDefaultTheme();
-        setIsLoading(false, "theme");
         captureMessage("Invalid useQuery status on ThemeProvider", {
-          action: "Using the default theme",
+          action: "Using the system theme",
           status,
         });
         break;
     }
   }, [status]);
 
-  function setDarkMode(isDark: boolean) {
-    mutate({ darkMode: isDark });
-    setIsDark(isDark);
-    setTheme(isDark ? darkTheme : lightTheme);
+  function setThemeMode(newMode: ThemeMode) {
+    mutate({ themeMode: newMode });
+    setThemeModeState(newMode);
   }
 
   const providerValue = useMemo(
-    () => ({ isDark, setIsDark: setDarkMode }),
-    [isDark],
+    () => ({ isDark, setThemeMode, themeMode }),
+    [isDark, themeMode],
   );
 
   return (
     <ThemeContext.Provider value={providerValue}>
-      <PaperThemeProvider theme={theme}>{children}</PaperThemeProvider>
+      <PaperThemeProvider theme={paperTheme}>{children}</PaperThemeProvider>
     </ThemeContext.Provider>
   );
 }

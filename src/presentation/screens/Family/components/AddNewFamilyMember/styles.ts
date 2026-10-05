@@ -6,7 +6,7 @@ function getStyles() {
   const { theme } = useTheme();
 
   return StyleSheet.create({
-    container: { flex: 1, marginTop: theme.sizes.spacing.xxsmall },
+    container: { flex: 1, marginTop: theme.sizes.spacing.xxs },
   });
 }
 

@@ -1,4 +1,6 @@
-import ConfigsEntity from "@domain/entities/configs/ConfigsEntity";
+import ConfigsEntity, {
+  ThemeMode,
+} from "@domain/entities/configs/ConfigsEntity";
 import { availableLanguages } from "@presentation/i18n/translations";
 
 class ConfigsEntityFixture {
@@ -12,21 +14,22 @@ class ConfigsEntityFixture {
     this.value = {} as ConfigsEntity;
   }
 
-  withDarkMode(darkMode: boolean) {
-    this.value.darkMode = darkMode;
-    return this;
-  }
-
   withDefault() {
     this.value = {
-      darkMode: false,
       language: "en-US",
+      themeMode: ThemeMode.SYSTEM,
     };
     return this;
   }
 
   withLanguage(language: (typeof availableLanguages)[number]) {
     this.value.language = language;
+
+    return this;
+  }
+
+  withThemeMode(themeMode: ThemeMode) {
+    this.value.themeMode = themeMode;
 
     return this;
   }

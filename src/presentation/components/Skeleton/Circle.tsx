@@ -10,8 +10,8 @@ function CircleSkeleton(props: Props) {
   const { theme } = useTheme();
   return (
     <ContentLoader
-      backgroundColor={theme.colors.onSurface}
-      foregroundColor={theme.colors.onSurfaceVariant}
+      backgroundColor={theme.colors.textPrimary}
+      foregroundColor={theme.colors.textSecondary}
       height={props.size}
       speed={1}
       style={{

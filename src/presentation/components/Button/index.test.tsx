@@ -4,6 +4,7 @@ import { act, mockDarkTheme, screen } from "@tests";
 
 import { ButtonMode } from "@components/Button/index";
 import Icon from "@components/Icon";
+import { lightTheme } from "@presentation/theme/provider";
 
 import { defaultProps, setup } from "./mocks/index.mocks";
 
@@ -14,12 +15,12 @@ it("SHOULD render the button with the correct props", () => {
 
   expect(component.props).toEqual({
     children: "Button Label",
-    contentStyle: { height: 55 },
+    contentStyle: { height: 48 },
     mode: "text",
     onPress: expect.any(Function),
     style: expect.any(Object),
     testID: "default-button",
-    textColor: "rgb(255, 255, 255)",
+    textColor: lightTheme.colors.onAccent,
   });
 });
 
@@ -93,41 +94,21 @@ it("SHOULD forward the loading prop in every mode", () => {
   expect(screen.getByTestId(defaultProps.testID).props.loading).toBe(true);
 });
 
-describe("theme fallbacks", () => {
-  function withColors(overrides: Record<string, unknown>) {
-    const { useTheme } = jest.requireMock("@presentation/theme");
-    const current = useTheme();
-    useTheme.mockReturnValue({
-      ...current,
-      theme: {
-        ...current.theme,
-        colors: { ...current.theme.colors, ...overrides },
-      },
-    });
-
-    return () => useTheme.mockReturnValue(current);
-  }
-
-  it("SHOULD fall back to white text WHEN the filled button theme has no onPrimary", () => {
-    const restore = withColors({ onPrimary: undefined });
-
+describe("theme tokens", () => {
+  it("SHOULD use the onAccent text color WHEN the button is filled", () => {
     setup({ mode: ButtonMode.Filled });
 
     expect(screen.getByTestId(defaultProps.testID).props.textColor).toBe(
-      "#ffffff",
+      lightTheme.colors.onAccent,
     );
-    restore();
   });
 
-  it("SHOULD fall back to translucent white text WHEN the outlined button theme has no glassTextSecondary", () => {
-    const restore = withColors({ glassTextSecondary: undefined });
-
+  it("SHOULD use the textSecondary text color WHEN the button is outlined", () => {
     setup({ mode: ButtonMode.Outlined });
 
     expect(screen.getByTestId(defaultProps.testID).props.textColor).toBe(
-      "rgba(255, 255, 255, 0.8)",
+      lightTheme.colors.textSecondary,
     );
-    restore();
   });
 
   it.each([

@@ -1,4 +1,6 @@
-import ConfigsEntity from "@domain/entities/configs/ConfigsEntity";
+import ConfigsEntity, {
+  ThemeMode,
+} from "@domain/entities/configs/ConfigsEntity";
 
 export type ConfigsRepository = {
   getConfigs(): Promise<ConfigsEntity>;
@@ -6,8 +8,8 @@ export type ConfigsRepository = {
 };
 
 interface SaveConfigsRepositoryParams {
-  darkMode: boolean;
   language: string;
+  themeMode: ThemeMode;
 }
 
 export { SaveConfigsRepositoryParams };

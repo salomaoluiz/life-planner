@@ -9,12 +9,12 @@ export function getStyles(depthLevel: number = 0) {
     styles: StyleSheet.create({
       container: {
         alignItems: "center",
-        borderBottomColor: theme.colors.outlineVariant,
+        borderBottomColor: theme.colors.border,
         borderBottomWidth: 1,
         flexDirection: "row",
-        paddingHorizontal: theme.sizes.spacing.medium,
-        paddingLeft: theme.sizes.spacing.medium + depthLevel * 20,
-        paddingVertical: theme.sizes.spacing.small,
+        paddingHorizontal: theme.sizes.spacing.md,
+        paddingLeft: theme.sizes.spacing.md + depthLevel * 20,
+        paddingVertical: theme.sizes.spacing.sm,
       },
       deleteColumn: {
         justifyContent: "center",
@@ -24,7 +24,7 @@ export function getStyles(depthLevel: number = 0) {
         justifyContent: "center",
       },
       iconColumn: {
-        marginRight: theme.sizes.spacing.medium,
+        marginRight: theme.sizes.spacing.md,
       },
     }),
     theme,

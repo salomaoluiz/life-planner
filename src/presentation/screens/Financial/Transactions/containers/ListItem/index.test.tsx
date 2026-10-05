@@ -48,7 +48,7 @@ it("SHOULD use the expense icon and color WHEN the transaction is an expense", (
   expect(
     screen.UNSAFE_getAllByProps({ source: "arrow-down-bold" }),
   ).toBeTruthy();
-  expect(colorOf("R$ 50.00")).toBe(theme.colors.financial.expense);
+  expect(colorOf("R$ 50.00")).toBe(theme.colors.expense);
 });
 
 it("SHOULD use the income icon and color WHEN the transaction is an income", () => {
@@ -56,7 +56,7 @@ it("SHOULD use the income icon and color WHEN the transaction is an income", () 
   const { theme } = useTheme();
 
   expect(screen.UNSAFE_getAllByProps({ source: "arrow-up-bold" })).toBeTruthy();
-  expect(colorOf("R$ 50.00")).toBe(theme.colors.financial.income);
+  expect(colorOf("R$ 50.00")).toBe(theme.colors.income);
 });
 
 it("SHOULD call onDelete WHEN the delete button is pressed", () => {

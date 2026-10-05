@@ -1,4 +1,5 @@
 import { SaveUserConfigsUseCaseParams } from "@application/useCases/cases/configs/saveUserConfigsUseCase";
+import { ThemeMode } from "@domain/entities/configs/ConfigsEntity";
 import { DefaultError } from "@domain/entities/errors";
 import { DeepRequired } from "@utils/types";
 
@@ -17,8 +18,8 @@ it("SHOULD save the default Configs", async () => {
   expect(spies.configsRepository.getConfigs).toHaveBeenCalledTimes(1);
   expect(spies.configsRepository.saveConfigs).toHaveBeenCalledTimes(1);
   expect(spies.configsRepository.saveConfigs).toHaveBeenCalledWith({
-    darkMode: mocks.configsEntity.darkMode,
     language: mocks.configsEntity.language,
+    themeMode: mocks.configsEntity.themeMode,
   });
 });
 
@@ -26,16 +27,16 @@ it("SHOULD save the Configs provided", async () => {
   spies.configsRepository.getConfigs.mockResolvedValueOnce(mocks.configsEntity);
 
   const allParams: DeepRequired<SaveUserConfigsUseCaseParams> = {
-    darkMode: true,
     language: "pt-BR",
+    themeMode: ThemeMode.DARK,
   };
 
   await setup(allParams);
 
   expect(spies.configsRepository.saveConfigs).toHaveBeenCalledTimes(1);
   expect(spies.configsRepository.saveConfigs).toHaveBeenCalledWith({
-    darkMode: allParams.darkMode,
     language: allParams.language,
+    themeMode: allParams.themeMode,
   });
 });
 

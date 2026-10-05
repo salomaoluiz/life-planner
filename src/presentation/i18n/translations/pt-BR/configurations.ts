@@ -1,10 +1,13 @@
 const configurations = {
   configs: {
-    darkMode: {
-      title: "Modo Escuro",
-    },
     language: {
       title: "Idioma",
+    },
+    theme: {
+      dark: "Escuro",
+      light: "Claro",
+      system: "Sistema",
+      title: "Tema",
     },
   },
   logout: "Sair",

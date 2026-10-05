@@ -1,81 +1,45 @@
 import { StyleSheet, TextStyle } from "react-native";
 
 import { useTheme } from "@presentation/theme";
+import { getFontStyle, tabularNums } from "@presentation/theme/constants";
 
 import { TextMode, TextProps } from "./types";
 
 export function getStyles(textProps: TextProps) {
   const { theme } = useTheme();
+  const { typography } = theme;
 
-  const defaultStyles: TextStyle = {
-    color: theme.colors.onSurface,
-  };
+  const base: TextStyle = { color: theme.colors.textPrimary };
+  const custom = getCustomStyles(textProps, theme.fontsLoaded);
 
-  const customStyles = getCustomStyles(textProps);
+  function variant(style: TextStyle, color?: string): TextStyle {
+    return { ...base, ...style, ...(color ? { color } : {}), ...custom };
+  }
 
   return StyleSheet.create({
-    [TextMode.Body]: {
-      ...defaultStyles,
-      ...customStyles,
-      fontSize: theme.sizes.fontSizes.small,
-      letterSpacing: 0.15,
-      lineHeight: theme.sizes.lineHeights.small,
-    },
-    [TextMode.Caption]: {
-      ...defaultStyles,
-      ...customStyles,
-      color: textProps?.color ?? theme.colors.onSurfaceVariant,
-      fontSize: theme.sizes.fontSizes.xxsmall,
-      letterSpacing: 0.4,
-      lineHeight: theme.sizes.lineHeights.xxsmall,
-    },
-    [TextMode.Display]: {
-      ...defaultStyles,
-      ...customStyles,
-      fontSize: theme.sizes.fontSizes.xxlarge,
-      fontWeight: "300",
-      letterSpacing: -0.5,
-      lineHeight: theme.sizes.lineHeights.xxlarge,
-    },
-    [TextMode.Headline]: {
-      ...defaultStyles,
-      ...customStyles,
-      fontSize: theme.sizes.fontSizes.large,
-      fontWeight: "600",
-      letterSpacing: 0,
-      lineHeight: theme.sizes.lineHeights.large,
-    },
-    [TextMode.Label]: {
-      ...defaultStyles,
-      ...customStyles,
-      color: textProps?.color ?? theme.colors.onSurfaceVariant,
-      fontSize: theme.sizes.fontSizes.xsmall,
-      fontWeight: "500",
-      letterSpacing: 0.5,
-      lineHeight: theme.sizes.lineHeights.xsmall,
-    },
-    [TextMode.Title]: {
-      ...defaultStyles,
-      ...customStyles,
-      fontSize: theme.sizes.fontSizes.medium,
-      fontWeight: "600",
-      letterSpacing: 0.1,
-      lineHeight: theme.sizes.lineHeights.medium,
-    },
+    [TextMode.Body]: variant(typography.body),
+    [TextMode.Caption]: variant(
+      typography.caption,
+      textProps?.color ?? theme.colors.textSecondary,
+    ),
+    [TextMode.Display]: variant(typography.display),
+    [TextMode.Headline]: variant(typography.title),
+    [TextMode.Label]: variant(
+      typography.caption,
+      textProps?.color ?? theme.colors.textSecondary,
+    ),
+    [TextMode.Title]: variant(typography.heading),
   });
 }
 
-function getCustomStyles(textProps: TextProps) {
-  const styles = {
-    color: textProps?.color,
-    fontWeight: textProps?.bold ? "bold" : undefined,
-    textAlign: textProps?.textAlign,
+function getCustomStyles(
+  textProps: TextProps,
+  fontsLoaded: boolean,
+): TextStyle {
+  return {
+    ...(textProps?.color ? { color: textProps.color } : {}),
+    ...(textProps?.bold ? getFontStyle("700", fontsLoaded) : {}),
+    ...(textProps?.tabular ? tabularNums : {}),
+    ...(textProps?.textAlign ? { textAlign: textProps.textAlign } : {}),
   };
-
-  return Object.entries(styles).reduce<TextStyle>((acc, [key, value]) => {
-    if (value) {
-      acc = { ...acc, [key]: value };
-    }
-    return acc;
-  }, {});
 }

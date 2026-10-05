@@ -5,9 +5,9 @@ import { ThemeContext } from "./provider";
 import { ThemeProp } from "./types";
 
 export function useTheme() {
-  const { isDark, setIsDark } = useContext(ThemeContext);
+  const { isDark, setThemeMode, themeMode } = useContext(ThemeContext);
 
   const theme = usePaperTheme() as ThemeProp;
 
-  return { isDark, setIsDark, theme };
+  return { isDark, setThemeMode, theme, themeMode };
 }

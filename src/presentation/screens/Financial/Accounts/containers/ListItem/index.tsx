@@ -13,15 +13,15 @@ function ListItem(props: Props) {
   const { onDelete, onEdit } = useListItem(props);
 
   const isArchived = props.item.status === "ARCHIVED";
-  const textColor = isArchived ? theme.colors.outline : undefined;
+  const textColor = isArchived ? theme.colors.border : undefined;
 
   return (
     <View style={[styles.container, isArchived && styles.archivedContainer]}>
       <View style={styles.iconColumn}>
         <Icon
-          color={isArchived ? theme.colors.outline : theme.colors.primary}
+          color={isArchived ? theme.colors.border : theme.colors.accent}
           name={props.item.icon}
-          size={theme.sizes.spacing.large}
+          size={theme.sizes.spacing.xl}
         />
       </View>
       <View style={styles.detailsColumn}>
@@ -43,19 +43,19 @@ function ListItem(props: Props) {
           value={props.item.formattedBalance}
         />
         {isArchived && (
-          <Text.Caption bold color={theme.colors.error} value={"Archived"} />
+          <Text.Caption bold color={theme.colors.expense} value={"Archived"} />
         )}
       </View>
       <View style={styles.actionColumn}>
         <IconButton
           name={"pencil"}
           onPress={onEdit}
-          size={theme.sizes.spacing.large}
+          size={theme.sizes.spacing.xl}
         />
         <IconButton
           name={"delete"}
           onPress={onDelete}
-          size={theme.sizes.spacing.large}
+          size={theme.sizes.spacing.xl}
         />
       </View>
     </View>

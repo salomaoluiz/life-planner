@@ -1,6 +1,6 @@
 # Theme & styling (`src/presentation/theme`)
 
-`const { theme, isDark, setIsDark } = useTheme()` from `@presentation/theme`. `theme = { colors, sizes, dark }` (Paper MD3 theme extended).
+`const { theme, isDark, themeMode, setThemeMode } = useTheme()` from `@presentation/theme`. `themeMode` is `ThemeMode.SYSTEM | LIGHT | DARK` (default SYSTEM, follows the OS live); `isDark` is the resolved value. `theme = { breakpoints, colors, dark, fontsLoaded, sizes, typography }` (Paper MD3 theme extended). `useBreakpoint()` returns `compact | medium | expanded`; content width comes from `theme.sizes.size.contentMaxWidth`/`formMaxWidth`.
 
 ## Styles pattern (every screen/component has `styles.ts`)
 
@@ -16,8 +16,8 @@ function useStyles() {
       container: {
         backgroundColor: theme.colors.background,
         flex: 1,
-        padding: theme.sizes.spacing.medium,
-        paddingTop: isWeb() ? theme.sizes.spacing.xxlarge : undefined,
+        padding: theme.sizes.spacing.md,
+        paddingTop: isWeb() ? theme.sizes.spacing.xxxl : undefined,
       },
     }),
     theme,
@@ -32,20 +32,39 @@ If styles depend on state, pass it as a parameter: `useStyles({ disabled, isFocu
 
 > **Legacy:** about 80 existing `styles.ts` files still export `getStyles` (default or named). When you touch one, rename it to `useStyles` (default export) and update its callers.
 
-## Sizes (`theme.sizes`, auto-scaled per device)
+## Sizes and typography (`theme.sizes`, `theme.typography`; NOT scaled per breakpoint)
 
-- `spacing`: xxsmall 4 · xsmall 8 · small 12 · medium 16 · large 24 · xlarge 32 · xxlarge 48 · xxxlarge 64
-- `fontSizes`: xxsmall 10 · xsmall 12 · small 14 · medium 16 · large 24 · xlarge 32 · xxlarge 48
-- `lineHeights`: same keys
-- `borderRadius`: small 4 · medium 8 · large 16 · xlarge 32 · full "50%"
-- Icon sizes typically `theme.sizes.spacing.large`.
+- `spacing`: xxs 4 · xs 8 · sm 12 · md 16 · lg 20 · xl 24 · xxl 32 · xxxl 48
+- `borderRadius`: sm 10 · md 14 · lg 20 · sheet 28 · full 999
+- `size`: buttonHeight 48 · buttonHeightSheet 54 · inputHeight 50 · tabBarHeight 84 · touchTarget 44 · iconSm 16 · iconMd 20 · iconLg 24 · formMaxWidth 480 · contentMaxWidth 720
+- `typography` (Manrope, system fallback until `fontsLoaded`): display 34 · title 22 · heading 16 · body 15 · bodyStrong 15 · input 16 · caption 13 · overline 12 · tab 11. Use `getFontStyle(weight, theme.fontsLoaded)` for a custom weight (never set `fontWeight` with a Manrope family) and `tabularNums` / `<Text tabular>` for money and quantities.
+- `buildTheme(isDark, fontsLoaded)` builds the theme; `getScaleFunctions`/`rescaleSizes` remain for one-off scaling.
+- Fonts load through `useAppFonts()` from `@infrastructure/fonts` (bundled Manrope 500-800; `{ failed, ready }`). `ThemeProvider` calls it, keeps the loader on until fonts are ready, and passes `fontsLoaded = ready && !failed` to `buildTheme`. Screens never call `useFonts`.
+
+## Breakpoints (`theme.breakpoints`, `useBreakpoint()`)
+
+`breakpoints = { compact: 0, medium: 768, expanded: 1024 }` (min widths, `constants/breakpoints.ts`). `useBreakpoint()` from `@presentation/theme` returns `"compact" | "medium" | "expanded"` (uses `useWindowDimensions`, so it reacts to resize/rotation). Globally mocked to `"compact"` in `tests/setup.tsx`; override with `(useBreakpoint as jest.Mock).mockReturnValue("expanded")`.
 
 ## Colors (`theme.colors`, light & dark in `constants/colors.ts`)
 
-MD3 keys: `primary, onPrimary, primaryContainer, onPrimaryContainer, secondary*, tertiary*, error, onError, errorContainer, background, onBackground, surface, onSurface, surfaceVariant, onSurfaceVariant, outline, outlineVariant, inverse*, shadow, scrim, backdrop, surfaceDisabled, onSurfaceDisabled, elevation.level0-5`.
-App-specific: `financial.expense`, `financial.income`, `glassBackground(Focused)`, `glassBorder(Focused)`, `glassButtonPrimaryBg/Border`, `glassButtonSecondaryBg/Border`, `glassTextPlaceholder`, `glassTextSecondary`.
-Adding a color: add to BOTH light and dark objects.
+Grafite tokens (exactly these 18 in both themes, typed `Colors`/`ColorToken`):
 
-Glass surfaces: `<BlurView intensity={theme.dark ? 20 : 40} tint={theme.dark ? "dark" : "light"} />` inside a wrapper with `overflow: "hidden"`, `borderRadius`, `borderColor: theme.colors.glassBorder`.
+| Token                           | Role                                         |
+| ------------------------------- | -------------------------------------------- |
+| `background`                    | screen background                            |
+| `surface` / `surfaceRaised`     | cards, sheets / elevated or selected surface |
+| `border`                        | 1 px outlines and dividers                   |
+| `textPrimary` / `textSecondary` | main / supporting text                       |
+| `accent` / `onAccent`           | primary action / content on accent           |
+| `accentSoft` / `accentText`     | accent tint / accent-colored text            |
+| `income` / `incomeSoft`         | positive amounts / tint                      |
+| `expense` / `expenseSoft`       | negative amounts / tint                      |
+| `warning` / `warningSoft`       | warnings / tint                              |
+| `focusRing`                     | keyboard/input focus outline                 |
+| `scrim`                         | modal overlay                                |
+
+Paper MD3 keys (`primary`, `onSurface`, ...) are derived from the tokens by `buildPaperTheme` (`theme/paper`); never read them in components. Category picker colors live in `constants/categoryColors.ts`. No color literals outside `theme/constants` (guarded by `noColorLiterals.test.ts`). Adding a color: add it to BOTH `dark` and `light` in `constants/colors.ts` and keep `contrast.test.ts` (>= 4.5:1) green.
+
+Flat surfaces: `surface` + 1 px `border`; no shadows except the quick-add button (spec 009); glass/blur is removed by spec 008.
 
 Layout helpers: `@utils/device` (`getScreenSizes()`, `getWindowsSizes()`), `@utils/platform` (`isWeb()`, …).

@@ -1,9 +1,14 @@
-import ConfigsEntity from "@domain/entities/configs/ConfigsEntity";
+import ConfigsEntity, {
+  ThemeMode,
+} from "@domain/entities/configs/ConfigsEntity";
 
 import ConfigsDTO, { IConfigsDTO } from "../ConfigsDTO";
 
 // region mocks
-const defaultProps = { darkMode: false, language: "en-US" } as IConfigsDTO;
+const defaultProps = {
+  language: "en-US",
+  themeMode: ThemeMode.SYSTEM,
+} as IConfigsDTO;
 
 // endregion mocks
 

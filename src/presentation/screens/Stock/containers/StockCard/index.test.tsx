@@ -63,6 +63,6 @@ it("SHOULD use the error color on the status WHEN the item is expired", () => {
 
   setup({ isExpired: false });
 
-  expect(expiredColor).toBe(useTheme().theme.colors.error);
+  expect(expiredColor).toBe(useTheme().theme.colors.expense);
   expect(getStatusColor()).not.toBe(expiredColor);
 });

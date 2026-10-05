@@ -10,8 +10,8 @@ function getStyles() {
       container: {
         alignItems: "center",
         flexDirection: "row",
-        paddingHorizontal: theme.sizes.spacing.medium,
-        paddingVertical: theme.sizes.spacing.xsmall,
+        paddingHorizontal: theme.sizes.spacing.md,
+        paddingVertical: theme.sizes.spacing.xs,
       },
       deleteColumn: {
         marginRight: "2%",
@@ -42,7 +42,7 @@ function getWebStyles() {
       container: {
         flexDirection: "row",
         justifyContent: "space-around",
-        padding: theme.sizes.spacing.medium,
+        padding: theme.sizes.spacing.md,
       },
       iconsContainer: {
         alignSelf: "center",

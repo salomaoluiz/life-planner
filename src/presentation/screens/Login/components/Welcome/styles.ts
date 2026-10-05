@@ -8,7 +8,7 @@ function getStyles() {
   return {
     styles: StyleSheet.create({
       container: {
-        marginVertical: theme.sizes.spacing.xxxlarge,
+        marginVertical: theme.sizes.spacing.xxxl,
       },
     }),
     theme,

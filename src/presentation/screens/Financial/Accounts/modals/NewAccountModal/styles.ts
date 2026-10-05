@@ -8,7 +8,7 @@ function getStyles() {
   return {
     styles: StyleSheet.create({
       backdrop: {
-        backgroundColor: theme.colors.backdrop,
+        backgroundColor: theme.colors.scrim,
         height: "100%",
         position: "absolute",
         width: "100%",
@@ -19,16 +19,16 @@ function getStyles() {
         width: "100%",
       },
       buttonContainer: {
-        marginTop: theme.sizes.spacing.large,
-        padding: theme.sizes.spacing.small,
+        marginTop: theme.sizes.spacing.xl,
+        padding: theme.sizes.spacing.sm,
       },
       container: {
         backgroundColor: theme.colors.background,
         flex: 1,
         height: "100%",
         justifyContent: "center",
-        margin: theme.sizes.spacing.large,
-        padding: theme.sizes.spacing.large,
+        margin: theme.sizes.spacing.xl,
+        padding: theme.sizes.spacing.xl,
       },
       iconBox: {
         borderRadius: 8,

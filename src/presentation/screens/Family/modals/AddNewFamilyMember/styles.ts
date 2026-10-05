@@ -8,7 +8,7 @@ function getStyles() {
   return {
     styles: StyleSheet.create({
       backdrop: {
-        backgroundColor: theme.colors.backdrop,
+        backgroundColor: theme.colors.scrim,
         height: "100%",
         position: "absolute",
         width: "100%",
@@ -21,10 +21,10 @@ function getStyles() {
         backgroundColor: theme.colors.surface,
         marginHorizontal: "5%",
         marginTop: "10%",
-        padding: theme.sizes.spacing.large,
+        padding: theme.sizes.spacing.xl,
       },
       inputContainer: {
-        marginTop: theme.sizes.spacing.medium,
+        marginTop: theme.sizes.spacing.md,
       },
       titleContainer: {
         alignItems: "center",

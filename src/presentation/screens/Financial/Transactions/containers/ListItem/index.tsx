@@ -16,12 +16,10 @@ function ListItem(props: Props) {
       <View style={styles.iconColumn}>
         <Icon
           color={
-            props.item.isExpense
-              ? theme.colors.financial.expense
-              : theme.colors.financial.income
+            props.item.isExpense ? theme.colors.expense : theme.colors.income
           }
           name={props.item.isExpense ? "arrow-down-bold" : "arrow-up-bold"}
-          size={theme.sizes.spacing.large}
+          size={theme.sizes.spacing.xl}
         />
       </View>
       <View style={styles.detailsColumn}>
@@ -40,11 +38,10 @@ function ListItem(props: Props) {
         <Text.Body
           bold
           color={
-            props.item.isExpense
-              ? theme.colors.financial.expense
-              : theme.colors.financial.income
+            props.item.isExpense ? theme.colors.expense : theme.colors.income
           }
           numberOfLines={1}
+          tabular
           value={props.item.value}
         />
       </View>
@@ -52,7 +49,7 @@ function ListItem(props: Props) {
         <IconButton
           name={"delete"}
           onPress={onDelete}
-          size={theme.sizes.spacing.large}
+          size={theme.sizes.spacing.xl}
         />
       </View>
     </View>

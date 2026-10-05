@@ -9,7 +9,7 @@ function getStyles() {
     container: {
       backgroundColor: theme.colors.background,
       flex: 1,
-      padding: theme.sizes.spacing.large,
+      padding: theme.sizes.spacing.xl,
     },
   });
 }

@@ -7,7 +7,7 @@ function getStyles() {
 
   return StyleSheet.create({
     container: {
-      height: theme.sizes.spacing.small,
+      height: theme.sizes.spacing.sm,
     },
   });
 }

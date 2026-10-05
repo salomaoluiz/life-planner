@@ -1,3 +1,5 @@
+import { ThemeMode } from "@domain/entities/configs/ConfigsEntity";
+
 import { setup, spies } from "./mocks/configsRepositoryImpl.mocks";
 
 it("SHOULD call getConfigs correctly", async () => {
@@ -12,14 +14,14 @@ it("SHOULD call getConfigs correctly", async () => {
 it("SHOULD call saveConfigs correctly", async () => {
   const repository = setup();
   const result = await repository.saveConfigs({
-    darkMode: true,
     language: "en-US",
+    themeMode: ThemeMode.DARK,
   });
 
   expect(result).toEqual("saveConfigs response");
   expect(spies.saveConfigs).toHaveBeenCalledTimes(1);
   expect(spies.saveConfigs).toHaveBeenCalledWith({
-    darkMode: true,
     language: "en-US",
+    themeMode: ThemeMode.DARK,
   });
 });

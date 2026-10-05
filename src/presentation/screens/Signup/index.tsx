@@ -29,7 +29,7 @@ function Signup() {
   return (
     <View style={styles.container}>
       <Text.Headline
-        color={theme.colors.onBackground}
+        color={theme.colors.textPrimary}
         testID="signup-title"
         value={t("signup.title")}
       />
@@ -122,7 +122,7 @@ function Signup() {
           type="error"
           visible={!!vm.formError}
         />
-        <Spacer direction="vertical" size="medium" />
+        <Spacer direction="vertical" size="md" />
         <Button.Filled
           disabled={vm.isSubmitting}
           label={t("signup.button.submit")}
