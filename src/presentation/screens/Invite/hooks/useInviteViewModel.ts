@@ -108,12 +108,22 @@ function useInviteViewModel() {
     router.replace(HOME);
   }
 
+  function onGoHome() {
+    router.replace(HOME);
+  }
+
+  function onRetry() {
+    invite.refetch();
+  }
+
   return {
     acceptErrorKey: getAcceptErrorKey(),
     invite: invite.data,
     isAccepting: join.isFetching,
     onAccept,
     onDecline,
+    onGoHome,
+    onRetry,
     status: getStatus(),
   };
 }

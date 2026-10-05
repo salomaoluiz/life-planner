@@ -1,75 +1,100 @@
-import { fireEvent, hasText, screen, setup } from "./mocks/index.mocks";
+import { StyleSheet } from "react-native";
 
-function button(label: string) {
-  return screen.UNSAFE_getAllByProps({ label })[0];
-}
+import { fireEvent, hasText, screen, setup } from "./mocks/index.mocks";
 
 it("SHOULD render only the skeleton WHEN loading", () => {
   setup({ status: "loading" });
 
-  expect(screen.getAllByTestId("skeleton-loader").length).toBeGreaterThan(0);
-  expect(
-    screen.UNSAFE_queryAllByProps({ label: "invite.accept" }),
-  ).toHaveLength(0);
+  expect(screen.getByTestId("invite-skeleton")).toBeTruthy();
+  expect(screen.queryByTestId("invite-accept")).toBeNull();
+  expect(screen.queryByTestId("invite-decline")).toBeNull();
 });
 
-it("SHOULD render the not-found message and no buttons", () => {
-  setup({ status: "notFound" });
-
-  expect(hasText("invite.notFound")).toBe(true);
-  expect(
-    screen.UNSAFE_queryAllByProps({ label: "invite.accept" }),
-  ).toHaveLength(0);
-});
-
-it("SHOULD render the expired message", () => {
-  setup({ status: "expired" });
-
-  expect(hasText("invite.expired")).toBe(true);
-});
-
-it("SHOULD render the generic message on other errors", () => {
-  setup({ status: "error" });
-
-  expect(hasText("errors.generic.description")).toBe(true);
-});
-
-it("SHOULD render the invitation with an enabled Accept WHEN the email matches", () => {
-  setup();
-
-  expect(hasText("invite.title")).toBe(true);
-  expect(hasText("Test Family")).toBe(true);
-  expect(hasText('invite.notForYou {"email":"bob@example.test"}')).toBe(false);
-  expect(button("invite.accept").props.disabled).toBe(false);
-});
-
-it("SHOULD warn and disable Accept WHEN the invite is for someone else", () => {
-  setup({ matches: false });
-
-  expect(hasText('invite.notForYou {"email":"bob@example.test"}')).toBe(true);
-  expect(button("invite.accept").props.disabled).toBe(true);
-});
-
-it("SHOULD disable Accept while accepting (blocks double taps)", () => {
-  setup({ isAccepting: true });
-
-  expect(button("invite.accept").props.disabled).toBe(true);
-});
-
-it("SHOULD show the accept error message", () => {
-  setup({ acceptErrorKey: "invite.alreadyMember" });
-
-  expect(hasText('invite.alreadyMember {"email":"bob@example.test"}')).toBe(
-    true,
-  );
-});
-
-it("SHOULD call onAccept and onDecline from the buttons", () => {
+it("SHOULD render the invitation WHEN ready and the email matches", () => {
   const vm = setup();
 
-  fireEvent.press(button("invite.accept"));
-  fireEvent.press(button("invite.decline"));
+  expect(screen.getByTestId("invite-tile")).toBeTruthy();
+  expect(hasText("invite.title")).toBe(true);
+  expect(screen.getByTestId("invite-family-name")).toHaveTextContent(
+    "Test Family",
+  );
+  expect(hasText('invite.sentTo {"email":"bob@example.test"}')).toBe(true);
+  expect(screen.queryByTestId("invite-mismatch")).toBeNull();
+  expect(screen.getByTestId("invite-accept").props.accessibilityState).toEqual(
+    expect.objectContaining({ busy: false, disabled: false }),
+  );
+
+  fireEvent.press(screen.getByTestId("invite-accept"));
+  fireEvent.press(screen.getByTestId("invite-decline"));
 
   expect(vm.onAccept).toHaveBeenCalledTimes(1);
   expect(vm.onDecline).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD set Accept loading WHEN accepting and not call onAccept again", () => {
+  const vm = setup({ isAccepting: true });
+
+  const accept = screen.getByTestId("invite-accept");
+  expect(accept.props.accessibilityState).toEqual(
+    expect.objectContaining({ busy: true, disabled: true }),
+  );
+  fireEvent.press(accept);
+
+  expect(vm.onAccept).not.toHaveBeenCalled();
+});
+
+it("SHOULD show the mismatch message and disable Accept WHEN the invite is for someone else", () => {
+  const vm = setup({ matches: false });
+
+  expect(screen.getByTestId("invite-mismatch")).toBeTruthy();
+  expect(hasText('invite.notForYou {"email":"bob@example.test"}')).toBe(true);
+  expect(screen.getByTestId("invite-accept").props.accessibilityState).toEqual(
+    expect.objectContaining({ disabled: true }),
+  );
+
+  fireEvent.press(screen.getByTestId("invite-decline"));
+  expect(vm.onDecline).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD show the accept error above the buttons", () => {
+  setup({ acceptErrorKey: "invite.alreadyMember" });
+
+  expect(screen.getByTestId("invite-accept-error")).toHaveTextContent(
+    'invite.alreadyMember {"email":"bob@example.test"}',
+  );
+});
+
+it.each([
+  ["notFound", "invite.notFound"],
+  ["expired", "invite.expired"],
+] as const)(
+  "SHOULD render the unavailable state WHEN %s",
+  (status, message) => {
+    const vm = setup({ status });
+
+    expect(screen.getByTestId("invite-unavailable")).toBeTruthy();
+    expect(hasText("invite.unavailableTitle")).toBe(true);
+    expect(hasText(message)).toBe(true);
+    expect(screen.queryByTestId("invite-accept")).toBeNull();
+
+    fireEvent.press(screen.getByText("invite.goHome"));
+    expect(vm.onGoHome).toHaveBeenCalledTimes(1);
+  },
+);
+
+it("SHOULD render the error state and retry WHEN the load failed", () => {
+  const vm = setup({ status: "error" });
+
+  expect(screen.getByTestId("invite-error")).toBeTruthy();
+
+  fireEvent.press(screen.getByText("common.actions.tryAgain"));
+  expect(vm.onRetry).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD cap the content column at 480", () => {
+  setup();
+
+  expect(
+    StyleSheet.flatten(screen.getByTestId("invite-column").props.style),
+  ).toEqual(expect.objectContaining({ maxWidth: 480 }));
 });
