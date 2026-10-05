@@ -18,7 +18,6 @@ export const migrationAllowList = [
   "src/presentation/screens/Invite/**",
   "src/presentation/screens/Login/**",
   "src/presentation/screens/Signup/**",
-  "src/presentation/screens/Stock/**",
   "src/presentation/screens/index.tsx",
 ];
 
