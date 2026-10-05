@@ -73,10 +73,10 @@ it("SHOULD NOT refetch WHEN the screen is not focused", () => {
   expect(refetch).not.toHaveBeenCalled();
 });
 
-it("SHOULD navigate to the new account modal WHEN the FAB is pressed", () => {
+it("SHOULD open the add-account modal WHEN the add button is pressed", () => {
   setup();
 
-  fireEvent.press(screen.UNSAFE_getAllByProps({ icon: "plus" })[0]);
+  fireEvent.press(screen.getByTestId("accounts-add-button"));
 
   expect(spies.push).toHaveBeenCalledWith("/financial/account/add_new_account");
 });

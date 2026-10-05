@@ -1,11 +1,11 @@
 import { useIsFocused } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
-import { router, useNavigation } from "expo-router";
+import { useNavigation } from "expo-router";
 import { useEffect } from "react";
 import { ScrollView, View } from "react-native";
 
 import { useCases } from "@application/useCases";
-import { Fab, Text } from "@components";
+import { Text } from "@components";
 import { useQuery } from "@infrastructure/fetcher";
 import ListHeader from "@screens/Financial/Transactions/containers/ListHeader";
 import RefetchCache from "@screens/Financial/Transactions/containers/RefetchCache";
@@ -77,12 +77,6 @@ function FinancialTransaction() {
     return <ListItem item={item} refetch={refetch} />;
   }
 
-  function onAddTransactionItemPress() {
-    router.push({
-      pathname: "/financial/transaction/add_new_transaction",
-    });
-  }
-
   if (error) {
     return (
       <View>
@@ -106,9 +100,6 @@ function FinancialTransaction() {
           </View>
         </View>
       </ScrollView>
-      <View style={styles.fabContainer}>
-        <Fab icon={"plus"} onPress={onAddTransactionItemPress} />
-      </View>
     </>
   );
 }

@@ -15,7 +15,6 @@ export { default as DatePicker, DatePickerProps } from "./DatePicker";
 export { default as Divider, DividerProps } from "./Divider";
 export { default as EmptyState, EmptyStateProps } from "./EmptyState";
 export { default as ErrorState, ErrorStateProps } from "./ErrorState";
-export { Fab, FabGroup, FabGroupProps, FabProps } from "./Fab";
 export { default as FieldShell, FieldShellProps } from "./FieldShell";
 export { default as HelperText, HelperTextProps } from "./HelperText";
 export {
