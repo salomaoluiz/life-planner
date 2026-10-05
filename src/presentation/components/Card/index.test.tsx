@@ -1,62 +1,78 @@
-import { BlurView } from "expo-blur";
-import React from "react";
-import { View } from "react-native";
+import { StyleSheet, Text } from "react-native";
 
-import { mockDarkTheme, screen } from "@tests";
+import { fireEvent, render, screen } from "@tests";
 
-import { defaultProps, setup } from "./mocks/index.mocks";
+import { Card } from "@components";
+import { lightTheme } from "@presentation/theme/provider";
 
-it("SHOULD render the card with the correct props", () => {
-  setup();
-
-  const component = screen.getByTestId(defaultProps.testID!);
-
-  expect(component.props).toEqual({
-    children: defaultProps.children,
-    style: expect.any(Object),
-    testID: defaultProps.testID,
-  });
-});
-
-it("SHOULD render the card with custom styles", () => {
-  const customStyles = { backgroundColor: "red", padding: 10 };
-  setup({ customStyles });
-
-  const component = screen.getByTestId(defaultProps.testID!);
-
-  expect(component.props.style).toContainEqual(
-    expect.objectContaining(customStyles),
+it("SHOULD render children on a bordered surface with radius lg and no shadow", () => {
+  render(
+    <Card testID="card">
+      <Text>child</Text>
+    </Card>,
   );
+  const style = StyleSheet.flatten(screen.getByTestId("card").props.style);
+
+  expect(screen.getByText("child")).toBeTruthy();
+  expect(style).toEqual(
+    expect.objectContaining({
+      backgroundColor: lightTheme.colors.surface,
+      borderColor: lightTheme.colors.border,
+      borderRadius: lightTheme.sizes.borderRadius.lg,
+      borderWidth: 1,
+      padding: lightTheme.sizes.spacing.md,
+    }),
+  );
+  expect(style.shadowColor).toBeUndefined();
+  expect(style.elevation).toBeUndefined();
 });
 
-it("SHOULD render the card with children", () => {
-  const customChildren = <View testID="custom-child" />;
-  setup({ children: customChildren });
-
-  const component = screen.getByTestId(defaultProps.testID!);
-
-  expect(component.props.children).toEqual(customChildren);
+it.each([
+  ["sm", "sm"],
+  ["md", "md"],
+  ["lg", "lg"],
+] as const)("SHOULD pad %s", (padding, token) => {
+  render(
+    <Card padding={padding} testID="card">
+      <Text>x</Text>
+    </Card>,
+  );
+  expect(
+    StyleSheet.flatten(screen.getByTestId("card").props.style).padding,
+  ).toBe(lightTheme.sizes.spacing[token]);
 });
 
-describe("theme", () => {
-  it("SHOULD use the light blur settings WHEN the theme is light", () => {
-    setup();
+it("SHOULD dash the border WHEN variant is dashed", () => {
+  render(
+    <Card testID="card" variant="dashed">
+      <Text>x</Text>
+    </Card>,
+  );
+  expect(
+    StyleSheet.flatten(screen.getByTestId("card").props.style).borderStyle,
+  ).toBe("dashed");
+});
 
-    expect(screen.UNSAFE_getByType(BlurView).props).toMatchObject({
-      intensity: 40,
-      tint: "light",
-    });
-  });
+it("SHOULD become a button WHEN onPress is given", () => {
+  const onPress = jest.fn();
 
-  it("SHOULD use the dark blur settings WHEN the theme is dark", () => {
-    const restore = mockDarkTheme();
+  render(
+    <Card accessibilityLabel="Open" onPress={onPress} testID="card">
+      <Text>x</Text>
+    </Card>,
+  );
+  fireEvent.press(screen.getByTestId("card"));
+  expect(onPress).toHaveBeenCalledTimes(1);
+  expect(screen.getByTestId("card").props.accessibilityRole).toBe("button");
+});
 
-    setup();
-
-    expect(screen.UNSAFE_getByType(BlurView).props).toMatchObject({
-      intensity: 20,
-      tint: "dark",
-    });
-    restore();
-  });
+it("SHOULD still accept the legacy customStyles", () => {
+  render(
+    <Card customStyles={{ marginTop: 7 }} testID="card">
+      <Text>x</Text>
+    </Card>,
+  );
+  expect(
+    StyleSheet.flatten(screen.getByTestId("card").props.style).marginTop,
+  ).toBe(7);
 });
