@@ -1,3 +1,5 @@
+import { FinancialNotFound } from "@domain/entities/errors";
+
 import { mocks, setup, spies } from "./mocks/index.mocks";
 
 it("SHOULD configure the delete mutation with the use case", () => {
@@ -31,3 +33,12 @@ it.each(["idle", "error"] as const)(
     expect(mocks.refetch).not.toHaveBeenCalled();
   },
 );
+
+it("SHOULD hand the delete mutation error to the financial error feedback AND not refetch", () => {
+  const error = new FinancialNotFound();
+
+  setup("error", error);
+
+  expect(spies.feedback).toHaveBeenCalledWith(error);
+  expect(mocks.refetch).not.toHaveBeenCalled();
+});
