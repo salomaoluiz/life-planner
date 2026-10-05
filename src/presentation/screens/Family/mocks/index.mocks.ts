@@ -41,9 +41,18 @@ function memberDTO(overrides: Partial<IFamilyMemberDTO> = {}) {
 }
 
 const ownerMemberDTO = memberDTO();
-const invitedMemberDTO = memberDTO({
+const joinedMemberDTO = memberDTO({
   email: "bob@example.test",
   id: "member-2",
+  name: "Bob Test",
+  photoUrl: undefined,
+  role: FamilyMemberRole.MEMBER,
+  status: FamilyMemberStatus.JOINED,
+  userId: "user-2",
+});
+const invitedMemberDTO = memberDTO({
+  email: "carol@example.test",
+  id: "member-3",
   name: undefined,
   photoUrl: undefined,
   role: FamilyMemberRole.MEMBER,
@@ -69,6 +78,7 @@ function makeFamilyViewModel(viewer: FamilyMemberViewer = ownerViewer) {
     familyDTO,
     [
       new FamilyMemberUIModel(ownerMemberDTO, viewer),
+      new FamilyMemberUIModel(joinedMemberDTO, viewer),
       new FamilyMemberUIModel(invitedMemberDTO, viewer),
     ],
     viewer,
@@ -79,6 +89,7 @@ export {
   familyDTO,
   familyNamed,
   invitedMemberDTO,
+  joinedMemberDTO,
   makeFamilyViewModel,
   memberDTO,
   ownerMemberDTO,

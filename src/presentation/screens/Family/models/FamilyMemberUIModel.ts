@@ -61,13 +61,6 @@ class FamilyMemberUIModel {
     return this.dto.status === FamilyMemberStatus.PENDING;
   }
 
-  // Legacy, kept until Task 3 replaces FamilyMemberCard.
-  get legacyAvatar() {
-    return this.photoUrl
-      ? { mode: "image" as const, source: this.photoUrl }
-      : { mode: "text" as const, source: this.displayName };
-  }
-
   get photoUrl() {
     const { photoUrl } = this.dto;
 

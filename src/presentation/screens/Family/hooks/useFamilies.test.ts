@@ -31,7 +31,7 @@ it("SHOULD build one view model per family with a UI model per member", async ()
   expect(result[0].familyName).toBe("Test Family");
   expect(result[0].familyMembers.map((member) => member.id)).toEqual([
     "member-1",
-    "member-2",
+    "member-3",
   ]);
 });
 

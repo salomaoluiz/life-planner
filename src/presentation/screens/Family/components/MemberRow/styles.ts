@@ -2,16 +2,19 @@ import { StyleSheet } from "react-native";
 
 import { useTheme } from "@presentation/theme";
 
-function getStyles() {
+function useStyles() {
   const { theme } = useTheme();
+
   return {
     styles: StyleSheet.create({
-      contentContainer: {
-        flex: 1,
+      trailing: {
+        alignItems: "center",
+        flexDirection: "row",
+        gap: theme.sizes.spacing.xs,
       },
     }),
     theme,
   };
 }
 
-export default getStyles;
+export default useStyles;

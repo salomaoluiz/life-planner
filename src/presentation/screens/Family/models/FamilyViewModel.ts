@@ -6,18 +6,6 @@ import FamilyMemberUIModel, { FamilyMemberViewer } from "./FamilyMemberUIModel";
 export type FamilyMenuAction = "DELETE" | "LEAVE";
 
 class FamilyViewModel {
-  // Legacy, kept until Task 3 replaces FamilyCard.
-  get avatar() {
-    return {
-      mode: "text" as const,
-      source: this.dto.name
-        .split(" ")
-        .map((name) => name[0])
-        .join("")
-        .toUpperCase(),
-    };
-  }
-
   get currentMember() {
     return this.familyMembers.find((member) => member.isCurrentUser);
   }
