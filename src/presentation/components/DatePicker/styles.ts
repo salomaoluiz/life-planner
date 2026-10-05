@@ -14,8 +14,8 @@ function getStyles() {
       },
       container: {
         alignItems: "center",
-        backgroundColor: theme.colors.glassBackground,
-        borderColor: theme.colors.glassBorder,
+        backgroundColor: theme.colors.surface,
+        borderColor: theme.colors.border,
         borderRadius: theme.sizes.borderRadius.large,
         borderWidth: 1,
         flexDirection: "row",
@@ -26,14 +26,14 @@ function getStyles() {
         width: "100%",
       },
       dateText: {
-        color: theme.colors.onBackground,
+        color: theme.colors.textPrimary,
       },
       innerContainer: {
         flex: 1,
         justifyContent: "center",
       },
       label: {
-        color: theme.colors.onBackground,
+        color: theme.colors.textPrimary,
         marginBottom: theme.sizes.spacing.xsmall,
       },
       mainWrapper: {
@@ -41,7 +41,7 @@ function getStyles() {
         width: "100%",
       },
       placeholderText: {
-        color: theme.colors.glassTextPlaceholder,
+        color: theme.colors.textSecondary,
       },
       pressable: {
         width: "100%",

@@ -8,7 +8,7 @@ function getStyles() {
   return StyleSheet.create({
     container: {
       borderBottomWidth: 1,
-      borderColor: theme.colors.outline,
+      borderColor: theme.colors.border,
     },
   });
 }

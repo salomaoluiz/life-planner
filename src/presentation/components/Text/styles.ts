@@ -8,7 +8,7 @@ export function getStyles(textProps: TextProps) {
   const { theme } = useTheme();
 
   const defaultStyles: TextStyle = {
-    color: theme.colors.onSurface,
+    color: theme.colors.textPrimary,
   };
 
   const customStyles = getCustomStyles(textProps);
@@ -24,7 +24,7 @@ export function getStyles(textProps: TextProps) {
     [TextMode.Caption]: {
       ...defaultStyles,
       ...customStyles,
-      color: textProps?.color ?? theme.colors.onSurfaceVariant,
+      color: textProps?.color ?? theme.colors.textSecondary,
       fontSize: theme.sizes.fontSizes.xxsmall,
       letterSpacing: 0.4,
       lineHeight: theme.sizes.lineHeights.xxsmall,
@@ -48,7 +48,7 @@ export function getStyles(textProps: TextProps) {
     [TextMode.Label]: {
       ...defaultStyles,
       ...customStyles,
-      color: textProps?.color ?? theme.colors.onSurfaceVariant,
+      color: textProps?.color ?? theme.colors.textSecondary,
       fontSize: theme.sizes.fontSizes.xsmall,
       fontWeight: "500",
       letterSpacing: 0.5,

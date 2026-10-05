@@ -71,7 +71,7 @@ function Invite() {
         />
         <Spacer direction={"horizontal"} size={"large"} />
         <Button.Outlined
-          customStyles={{ textColor: theme.colors.error }}
+          customStyles={{ textColor: theme.colors.expense }}
           label={t("invite.decline")}
           onPress={vm.onDecline}
         />

@@ -17,6 +17,11 @@ import {
 import Icon, { IconButton } from "@components/Icon";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
 import useTranslation from "@presentation/i18n/useTranslation";
+import {
+  categoryColors,
+  categoryDefaultSwatch,
+  categoryRainbow,
+} from "@presentation/theme/constants";
 import useFinancialErrorFeedback from "@screens/Financial/hooks/useFinancialErrorFeedback";
 
 import useForm from "./hooks/useForm";
@@ -42,16 +47,6 @@ const AVAILABLE_ICONS = [
   "controller",
   "dumbbell",
   "heart",
-];
-
-const AVAILABLE_COLORS = [
-  "#007bff", // Blue
-  "#8a2be2", // Purple
-  "#4cd137", // Green
-  "#ff9f43", // Orange
-  "#ff4d4d", // Red
-  "#00d2d3", // Teal
-  "black", // Default
 ];
 
 function NewCategoryModal() {
@@ -204,7 +199,7 @@ function NewCategoryModal() {
                     visible={colorMenuVisible}
                   >
                     <View style={styles.colorMenuContent}>
-                      {AVAILABLE_COLORS.map((color) => (
+                      {categoryColors.map((color) => (
                         <Pressable
                           key={color}
                           onPress={() => {
@@ -215,7 +210,9 @@ function NewCategoryModal() {
                             styles.colorOptionCircle,
                             {
                               backgroundColor:
-                                color === "black" ? "#333" : color,
+                                color === "black"
+                                  ? categoryDefaultSwatch
+                                  : color,
                             },
                           ]}
                         >
@@ -228,7 +225,7 @@ function NewCategoryModal() {
                   </Menu>
                   <Text.Body
                     bold
-                    color={theme.colors.onSurfaceVariant}
+                    color={theme.colors.textSecondary}
                     value=">"
                   />
                 </View>
@@ -264,16 +261,15 @@ function NewCategoryModal() {
                               style={[
                                 styles.iconBoxMenu,
                                 isSelected && {
-                                  backgroundColor:
-                                    theme.colors.primaryContainer,
+                                  backgroundColor: theme.colors.accentSoft,
                                 },
                               ]}
                             >
                               <IconButton
                                 color={
                                   isSelected
-                                    ? theme.colors.primary
-                                    : theme.colors.onSurface
+                                    ? theme.colors.accent
+                                    : theme.colors.textPrimary
                                 }
                                 name={iconName}
                                 onPress={() => {
@@ -290,7 +286,7 @@ function NewCategoryModal() {
                   </Menu>
                   <Text.Body
                     bold
-                    color={theme.colors.onSurfaceVariant}
+                    color={theme.colors.textSecondary}
                     value=">"
                   />
                 </View>
@@ -301,7 +297,7 @@ function NewCategoryModal() {
           <View style={styles.buttonContainer}>
             <View style={styles.button}>
               <Button.Text
-                customStyles={{ textColor: theme.colors.error }}
+                customStyles={{ textColor: theme.colors.expense }}
                 label={t("financial.categories.cancel")}
                 onPress={onCancel}
               />
@@ -323,11 +319,13 @@ function RainbowCircle() {
     <Svg height="48" viewBox="0 0 48 48" width="48">
       <Defs>
         <LinearGradient id="rainbow" x1="0%" x2="100%" y1="0%" y2="100%">
-          <Stop offset="0%" stopColor="#ff4d4d" />
-          <Stop offset="25%" stopColor="#ff9f43" />
-          <Stop offset="50%" stopColor="#4cd137" />
-          <Stop offset="75%" stopColor="#007bff" />
-          <Stop offset="100%" stopColor="#8a2be2" />
+          {categoryRainbow.map((stopColor, index) => (
+            <Stop
+              key={stopColor}
+              offset={`${(index * 100) / (categoryRainbow.length - 1)}%`}
+              stopColor={stopColor}
+            />
+          ))}
         </LinearGradient>
       </Defs>
       <Circle cx="24" cy="24" fill="url(#rainbow)" r="22" />

@@ -8,12 +8,12 @@ function getStyles() {
   return {
     styles: StyleSheet.create({
       arrowIndicator: {
-        color: theme.colors.onSurfaceVariant,
+        color: theme.colors.textSecondary,
         fontSize: 16,
         fontWeight: "bold",
       },
       backdrop: {
-        backgroundColor: theme.colors.backdrop,
+        backgroundColor: theme.colors.scrim,
         bottom: 0,
         left: 0,
         position: "absolute",
@@ -30,7 +30,7 @@ function getStyles() {
         top: 0,
       },
       blurView: {
-        borderColor: theme.colors.glassBorder,
+        borderColor: theme.colors.border,
         borderRadius: 24,
         borderWidth: 1,
         overflow: "hidden",
@@ -63,7 +63,7 @@ function getStyles() {
       },
       colorPreviewButton: {
         alignItems: "center",
-        borderColor: theme.colors.glassBorder,
+        borderColor: theme.colors.border,
         borderRadius: 28,
         borderWidth: 1,
         height: 56,
@@ -94,8 +94,8 @@ function getStyles() {
       },
       iconPreviewButton: {
         alignItems: "center",
-        backgroundColor: theme.colors.glassBackground,
-        borderColor: theme.colors.glassBorder,
+        backgroundColor: theme.colors.surface,
+        borderColor: theme.colors.border,
         borderRadius: 12,
         borderWidth: 1,
         height: 56,
@@ -118,7 +118,7 @@ function getStyles() {
         gap: 8,
       },
       selectorLabel: {
-        color: theme.colors.onSurface,
+        color: theme.colors.textPrimary,
         fontSize: 14,
         fontWeight: "500",
       },

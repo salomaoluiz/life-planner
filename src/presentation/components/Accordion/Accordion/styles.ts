@@ -7,8 +7,8 @@ function getStyles() {
 
   return StyleSheet.create({
     container: {
-      backgroundColor: theme.colors.glassBackground,
-      borderColor: theme.colors.glassBorder,
+      backgroundColor: theme.colors.surface,
+      borderColor: theme.colors.border,
       borderRadius: theme.sizes.borderRadius.large,
       borderWidth: 1,
       flex: 1,
@@ -19,8 +19,8 @@ function getStyles() {
     },
     contentContainer: {
       backgroundColor: theme.dark
-        ? theme.colors.surfaceVariant
-        : theme.colors.surfaceVariant,
+        ? theme.colors.surfaceRaised
+        : theme.colors.surfaceRaised,
       borderBottomEndRadius: theme.sizes.borderRadius.large,
       borderBottomStartRadius: theme.sizes.borderRadius.large,
       marginHorizontal: theme.sizes.spacing.small,

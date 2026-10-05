@@ -33,14 +33,14 @@ it("SHOULD render the name, owner and formatted balance", () => {
 it("SHOULD use the primary color and no archived badge WHEN the account is active", () => {
   setup();
 
-  expect(iconColor("bank")).toBe(useTheme().theme.colors.primary);
+  expect(iconColor("bank")).toBe(useTheme().theme.colors.accent);
   expect(hasText("Archived")).toBe(false);
 });
 
 it("SHOULD use the muted color and show the archived badge WHEN the account is archived", () => {
   setup({ status: "ARCHIVED" });
 
-  expect(iconColor("bank")).toBe(useTheme().theme.colors.outline);
+  expect(iconColor("bank")).toBe(useTheme().theme.colors.border);
   expect(hasText("Archived")).toBe(true);
 });
 

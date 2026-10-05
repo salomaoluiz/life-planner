@@ -1,7 +1,7 @@
 # Shared components (`src/presentation/components`, alias `@components`)
 
 Import from the barrel: `import { Button, Card, Text } from "@components";` (Icon/IconButton/Skeleton/Picker types come from their subpaths).
-All are dumb, theme-aware, and most use a glass look (`BlurView` + `theme.colors.glass*`). Every component accepts `testID`.
+All are dumb, theme-aware, and most use a glass look (`BlurView` + `theme.colors.border/surface`). Every component accepts `testID`.
 If you need a new 3rd-party UI element, **wrap it here first** (folder `Name/index.tsx` + `styles.ts` + `index.test.tsx` + `mocks/index.mocks.tsx`), export from `components/index.tsx`, and mock the lib in `tests/setup.tsx` if needed.
 
 | Component                                               | Usage                             | Key props                                                                                                 |

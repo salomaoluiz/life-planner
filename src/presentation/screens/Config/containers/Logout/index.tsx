@@ -32,7 +32,7 @@ function Logout() {
 
   return (
     <Button.Text
-      customStyles={{ textColor: theme.colors.error }}
+      customStyles={{ textColor: theme.colors.expense }}
       disabled={isFetching}
       icon={"logout"}
       label={t("configurations.logout")}

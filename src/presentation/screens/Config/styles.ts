@@ -14,7 +14,7 @@ function getStyles() {
       padding: theme.sizes.spacing.small,
     },
     container: {
-      backgroundColor: theme.colors.surfaceVariant,
+      backgroundColor: theme.colors.surfaceRaised,
       borderRadius: theme.sizes.borderRadius.large,
       flex: 1,
       justifyContent: "space-between",

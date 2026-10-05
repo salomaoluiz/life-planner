@@ -185,13 +185,15 @@ function NewAccountModal() {
                   style={[
                     styles.iconBox,
                     isSelected && {
-                      backgroundColor: theme.colors.primaryContainer,
+                      backgroundColor: theme.colors.accentSoft,
                     },
                   ]}
                 >
                   <IconButton
                     color={
-                      isSelected ? theme.colors.primary : theme.colors.onSurface
+                      isSelected
+                        ? theme.colors.accent
+                        : theme.colors.textPrimary
                     }
                     name={iconName}
                     onPress={() => fields.icon.onChange(iconName)}
@@ -206,7 +208,7 @@ function NewAccountModal() {
         <Card customStyles={styles.buttonContainer}>
           <View style={styles.button}>
             <Button.Text
-              customStyles={{ textColor: theme.colors.error }}
+              customStyles={{ textColor: theme.colors.expense }}
               label={t("financial.accounts.cancel")}
               onPress={onCancel}
             />

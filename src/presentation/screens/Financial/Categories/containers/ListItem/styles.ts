@@ -9,7 +9,7 @@ export function getStyles(depthLevel: number = 0) {
     styles: StyleSheet.create({
       container: {
         alignItems: "center",
-        borderBottomColor: theme.colors.outlineVariant,
+        borderBottomColor: theme.colors.border,
         borderBottomWidth: 1,
         flexDirection: "row",
         paddingHorizontal: theme.sizes.spacing.medium,

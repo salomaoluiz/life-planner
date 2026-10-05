@@ -9,5 +9,5 @@ it("SHOULD render correctly", () => {
 
   expect(welcome).toBeOnTheScreen();
   expect(welcome).toHaveTextContent("login.welcome");
-  expect(welcome).toHaveStyle({ color: lightTheme.colors.onBackground });
+  expect(welcome).toHaveStyle({ color: lightTheme.colors.textPrimary });
 });

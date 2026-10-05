@@ -46,7 +46,7 @@ function AddNewFamilyMemberModal() {
           />
           <Spacer direction={"horizontal"} size={"xxxlarge"} />
           <Button.Text
-            customStyles={{ textColor: theme.colors.error }}
+            customStyles={{ textColor: theme.colors.expense }}
             label={t("family.member.invite.cancel")}
             onPress={vm.onCancel}
           />

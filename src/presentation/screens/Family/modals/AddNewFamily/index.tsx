@@ -50,7 +50,7 @@ function AddNewFamilyModal() {
           <Spacer direction={"horizontal"} size={"xxxlarge"} />
           <Button.Text
             customStyles={{
-              textColor: theme.colors.error,
+              textColor: theme.colors.expense,
             }}
             label={"Cancel"}
             onPress={cancelCreateFamily}

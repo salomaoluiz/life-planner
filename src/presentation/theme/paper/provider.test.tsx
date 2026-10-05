@@ -2,15 +2,13 @@ import { View } from "react-native";
 
 import { render, screen } from "@tests";
 
+import { lightTheme } from "../provider";
+import { buildPaperTheme } from "./buildPaperTheme";
 import PaperThemeProvider from "./provider";
 
 const defaultProps = {
   children: <View testID="default-children" />,
-  theme: {
-    colors: {
-      primary: "blue",
-    },
-  },
+  theme: buildPaperTheme(lightTheme),
 };
 
 function setup() {

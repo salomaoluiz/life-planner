@@ -19,7 +19,7 @@ it("SHOULD pass the correct props for an Flat editable input", () => {
       onBlur: expect.any(Function),
       onChangeText: defaultProps.onChangeText,
       onFocus: expect.any(Function),
-      placeholderTextColor: "rgba(71, 85, 105, 0.65)",
+      placeholderTextColor: "#5A6273",
       style: expect.any(Object),
       testID: "test-text-input",
       underlineColor: "transparent",
@@ -42,7 +42,7 @@ it("SHOULD pass the correct props for an Outlined not editable input", () => {
       onBlur: expect.any(Function),
       onChangeText: defaultProps.onChangeText,
       onFocus: expect.any(Function),
-      placeholderTextColor: "rgba(71, 85, 105, 0.65)",
+      placeholderTextColor: "#5A6273",
       style: expect.any(Object),
       testID: "test-text-input",
       underlineColor: "transparent",
@@ -58,13 +58,13 @@ it("SHOULD have the correct style", () => {
 
   expect(component.props.style).toEqual({
     backgroundColor: "transparent",
-    color: "rgb(15, 23, 42)",
+    color: "#151922",
     minHeight: 55,
     width: "100%",
   });
 });
 
-it("SHOULD use the focused glass colors WHEN the input is focused and the default ones WHEN blurred", () => {
+it("SHOULD use the focused border color WHEN the input is focused and the default one WHEN blurred", () => {
   setup();
   const input = screen.getByTestId("test-text-input");
   const blur = screen.UNSAFE_getByType(BlurView);
@@ -80,7 +80,6 @@ it("SHOULD use the focused glass colors WHEN the input is focused and the defaul
   );
 
   expect(focused.borderColor).not.toBe(idle.borderColor);
-  expect(focused.backgroundColor).not.toBe(idle.backgroundColor);
   expect(blurred).toEqual(idle);
 });
 

@@ -29,7 +29,7 @@ function Signup() {
   return (
     <View style={styles.container}>
       <Text.Headline
-        color={theme.colors.onBackground}
+        color={theme.colors.textPrimary}
         testID="signup-title"
         value={t("signup.title")}
       />

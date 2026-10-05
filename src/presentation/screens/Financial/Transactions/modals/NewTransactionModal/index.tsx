@@ -265,7 +265,7 @@ function NewTransactionItemModal() {
         <Card customStyles={styles.buttonContainer}>
           <View style={styles.button}>
             <Button.Text
-              customStyles={{ textColor: theme.colors.error }}
+              customStyles={{ textColor: theme.colors.expense }}
               label={"Cancel"}
               onPress={onCancel}
             />

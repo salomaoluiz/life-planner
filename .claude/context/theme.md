@@ -42,10 +42,10 @@ If styles depend on state, pass it as a parameter: `useStyles({ disabled, isFocu
 
 ## Colors (`theme.colors`, light & dark in `constants/colors.ts`)
 
-MD3 keys: `primary, onPrimary, primaryContainer, onPrimaryContainer, secondary*, tertiary*, error, onError, errorContainer, background, onBackground, surface, onSurface, surfaceVariant, onSurfaceVariant, outline, outlineVariant, inverse*, shadow, scrim, backdrop, surfaceDisabled, onSurfaceDisabled, elevation.level0-5`.
-App-specific: `financial.expense`, `financial.income`, `glassBackground(Focused)`, `glassBorder(Focused)`, `glassButtonPrimaryBg/Border`, `glassButtonSecondaryBg/Border`, `glassTextPlaceholder`, `glassTextSecondary`.
+Grafite tokens (exactly these 18 in both themes, typed `Colors`/`ColorToken`): `accent, accentSoft, accentText, background, border, expense, expenseSoft, focusRing, income, incomeSoft, onAccent, scrim, surface, surfaceRaised, textPrimary, textSecondary, warning, warningSoft`.
+Paper MD3 keys are derived from the tokens by `buildPaperTheme` (`theme/paper`) and never typed on `theme.colors`. Category picker colors live in `constants/categoryColors.ts`. No color literals outside `theme/constants` (guarded by `noColorLiterals.test.ts`); contrast >= 4.5:1 is guarded by `contrast.test.ts`.
 Adding a color: add to BOTH light and dark objects.
 
-Glass surfaces: `<BlurView intensity={theme.dark ? 20 : 40} tint={theme.dark ? "dark" : "light"} />` inside a wrapper with `overflow: "hidden"`, `borderRadius`, `borderColor: theme.colors.glassBorder`.
+Glass surfaces: `<BlurView intensity={theme.dark ? 20 : 40} tint={theme.dark ? "dark" : "light"} />` inside a wrapper with `overflow: "hidden"`, `borderRadius`, `borderColor: theme.colors.border`.
 
 Layout helpers: `@utils/device` (`getScreenSizes()`, `getWindowsSizes()`), `@utils/platform` (`isWeb()`, …).

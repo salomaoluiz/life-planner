@@ -12,11 +12,11 @@ export function getStyles() {
         flexDirection: "row",
       },
       archivedContainer: {
-        backgroundColor: theme.colors.surfaceVariant,
+        backgroundColor: theme.colors.surfaceRaised,
         opacity: 0.6,
       },
       badge: {
-        color: theme.colors.error,
+        color: theme.colors.expense,
         fontSize: 10,
         fontWeight: "bold",
       },
@@ -26,7 +26,7 @@ export function getStyles() {
       },
       container: {
         alignItems: "center",
-        borderBottomColor: theme.colors.outlineVariant,
+        borderBottomColor: theme.colors.border,
         borderBottomWidth: 1,
         flexDirection: "row",
         paddingHorizontal: theme.sizes.spacing.medium,

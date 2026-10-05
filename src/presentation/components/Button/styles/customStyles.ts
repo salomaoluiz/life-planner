@@ -26,12 +26,12 @@ function getBackgroundColor({ customStyles, mode, theme }: Props) {
   }
   if (mode === ButtonMode.Filled) {
     return {
-      backgroundColor: theme.colors.glassButtonPrimaryBg,
+      backgroundColor: theme.colors.accent,
     };
   }
   if (mode === ButtonMode.Outlined) {
     return {
-      backgroundColor: theme.colors.glassButtonSecondaryBg,
+      backgroundColor: theme.colors.surface,
     };
   }
   return {};
@@ -44,15 +44,14 @@ function getBorderColor({ customStyles, disabled, mode, theme }: Props) {
 
   if (mode === ButtonMode.Outlined) {
     return {
-      borderColor:
-        customStyles?.textColor ?? theme.colors.glassButtonSecondaryBorder,
+      borderColor: customStyles?.textColor ?? theme.colors.border,
       borderWidth: 1,
     };
   }
 
   if (mode === ButtonMode.Filled) {
     return {
-      borderColor: theme.colors.glassButtonPrimaryBorder,
+      borderColor: theme.colors.accent,
       borderWidth: 1,
     };
   }
@@ -78,12 +77,12 @@ function getTextColor(props: Props) {
     return customStyles.textColor;
   }
   if (mode === ButtonMode.Text) {
-    return theme.colors.primary;
+    return theme.colors.accent;
   }
   if (mode === ButtonMode.Filled) {
-    return theme.colors.onPrimary ?? "#ffffff";
+    return theme.colors.onAccent;
   }
-  return theme.colors.glassTextSecondary ?? "rgba(255, 255, 255, 0.8)";
+  return theme.colors.textSecondary;
 }
 
 export default getCustomStyles;
