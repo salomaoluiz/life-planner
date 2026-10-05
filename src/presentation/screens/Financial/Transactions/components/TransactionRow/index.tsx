@@ -1,6 +1,5 @@
 import { AmountText, IconTile, ListItem } from "@components";
-
-import TransactionUIModel from "../../models/TransactionUIModel";
+import TransactionUIModel from "@screens/Financial/Transactions/models/TransactionUIModel";
 
 interface Props {
   item: TransactionUIModel;

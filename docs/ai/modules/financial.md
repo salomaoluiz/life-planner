@@ -107,6 +107,10 @@ use_cases:
     path: src/application/useCases/cases/financial/categories/updateCategoryUseCase.ts
     behavior: Updates an existing category.
 
+  getMostUsedFinancialCategoriesUseCase:
+    path: src/application/useCases/cases/financial/categories/getMostUsedCategoriesUseCase.ts
+    behavior: 5 most used categories of a type and owner in the last 90 days, fallback by name.
+
   createTransactionUseCase:
     path: src/application/useCases/cases/financial/transactions/createTransactionUseCase.ts
     behavior: Creates a new financial transaction.
@@ -196,15 +200,22 @@ add_transaction: quick-add tab button (`/quick_add`).
 layout: Finances sections are switched by `FinancialLayout` (`screens/Financial/Layout`), no drawer. Categories/Accounts have a temporary `Button.Primary` add until spec 013.
 navigation_files: `screens/Navigation/*` (AppTabBar, navigationItems), `screens/QuickAdd`, `screens/Financial/Layout`, `screens/Home/containers/ProfileButton`.
 
+components (Transactions):
+  - name: MonthSwitcher, MonthSummary, MonthPickerSheet, TransactionRow
+    path: src/presentation/screens/Financial/Transactions/components/<Name>/index.tsx
+hooks (Transactions):
+  - name: useTransactionsViewModel
+    path: src/presentation/screens/Financial/Transactions/hooks/useTransactionsViewModel.ts
+shared (Financial):
+  - src/presentation/screens/Financial/models/ownerOptions.ts
+  - src/presentation/screens/Financial/models/categoryTree.ts
+  - src/presentation/screens/Financial/utils/financialErrorMessage.ts
+  - src/presentation/constants/categoryColors.ts
+  - "@utils/money (cents <-> decimal helpers)"
+
 containers:
-  - name: ListHeader
-    path: src/presentation/screens/Financial/Transactions/containers/ListHeader/index.tsx
-  - name: ListItem
-    path: src/presentation/screens/Financial/Transactions/containers/ListItem/index.tsx
   - name: RefetchCache
     path: src/presentation/screens/Financial/Transactions/containers/RefetchCache/index.tsx
-  - name: ItemSeparator
-    path: src/presentation/screens/Financial/Transactions/containers/ItemSeparator/index.tsx
   - name: ListItem (Accounts)
     path: src/presentation/screens/Financial/Accounts/containers/ListItem/index.tsx
 
@@ -217,10 +228,18 @@ modals:
     path: src/presentation/screens/Financial/Accounts/modals/NewAccountModal/index.tsx
 
 view_models:
-  - name: FinancialTransactionViewModel
-    path: src/presentation/screens/Financial/Transactions/models/FinancialTransactionViewModel.ts
-  - name: NewTransactionViewModel
-    path: src/presentation/screens/Financial/Transactions/modals/NewTransactionModal/models/NewTransactionViewModel.ts
+  - name: TransactionUIModel
+    path: src/presentation/screens/Financial/Transactions/models/TransactionUIModel.ts
+  - name: transactionList (pure month/day-group/filter helpers)
+    path: src/presentation/screens/Financial/Transactions/models/transactionList.ts
+  - name: useNewTransactionViewModel
+    path: src/presentation/screens/Financial/Transactions/modals/NewTransactionModal/hooks/useNewTransactionViewModel.ts
+  - name: transactionFormState (pure form state, validation, params)
+    path: src/presentation/screens/Financial/Transactions/modals/NewTransactionModal/models/transactionFormState.ts
+  - name: NewTransactionUIModel
+    path: src/presentation/screens/Financial/Transactions/modals/NewTransactionModal/models/NewTransactionUIModel.ts
+  - name: "NewTransactionModal components: CategoryChips, CategoryPickerSheet, MissingRecordHint"
+    path: src/presentation/screens/Financial/Transactions/modals/NewTransactionModal/components/
   - name: FinancialCategoryViewModel
     path: src/presentation/screens/Financial/Categories/models/FinancialCategoryViewModel.ts
   - name: NewCategoryViewModel
@@ -236,4 +255,10 @@ view_models:
 - `Financial/hooks/useFinancialErrorFeedback` opens `/business_feedback` (type Error) for `AccountHasTransactions`, `FinancialNotFound` and `FinancialOwnerNotAllowed`; the account delete hook passes its mutation error to it.
 - The Categories delete asks for confirmation only when the category has subcategories (they are deleted too) and shows `financial.categories.errors.hasTransactions` on 409 (`CategoryHasTransactions`).
 - Error mapping (all three resources, `financialApiError.ts`): 400 -> `FieldInvalid`, 403 -> `FinancialOwnerNotAllowed`, 404 -> `FinancialNotFound`, 409 on account/category delete -> `AccountHasTransactions` / `CategoryHasTransactions`, other -> `GenericError`. Contexts hold ids only.
-- The transaction modal lists only the categories whose type equals the selected transaction type (the API rejects a mismatch); transaction deletes use `useFinancialErrorFeedback`.
+- The transaction modal lists only the categories whose type equals the selected transaction type (the API rejects a mismatch).
+
+## Presentation notes (transactions)
+
+- Month filtering and day grouping are client-side (`transactionList`); the month summary comes from `getMonthSummaryUseCase` (spec 010) for the selected month and owner filter.
+- The form is a `BottomSheet` (create, or edit through `?id=`): changing the type or the owner clears the category (and swaps the account), the category chips show the top-5 most used categories plus a "More" picker, and a missing account or category is created inline (the new record is selected when the stacked sheet returns). Closing a dirty form asks to discard; delete asks for confirmation.
+- Errors (save and delete) are shown as form-level copy through `getFinancialErrorMessageKey` (006 keys); `useFinancialErrorFeedback` is no longer used by transactions.
