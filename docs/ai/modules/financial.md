@@ -187,95 +187,63 @@ datasources:
 
 ## Presentation
 
+All paths below are under `src/presentation/screens/Financial/` unless noted. Financial passes the presentation lint guardrails (the `migrationAllowList` has no Financial entry).
+
 ```yaml
-screens:
-  Transactions:
-    path: src/presentation/screens/Financial/Transactions/index.tsx
-  Categories:
-    path: src/presentation/screens/Financial/Categories/index.tsx # type SegmentedControl, owner ChipGroup, FlashList of TreeItem rows; add pushes the form, row press pushes it with {id}
-  Accounts:
-    path: src/presentation/screens/Financial/Accounts/index.tsx # total, owner chips, active list + archived section; form sheet in modals/NewAccountModal (accountFormState, NewAccountUIModel, useNewAccountViewModel): signed balance, archive switch, owner locked on edit or when ownerId param is passed
+layout:
+  Layout: Layout/index.tsx # FinancialLayout: Screen, header, section segments, 720 column; sections render plain Views
+  files: [Layout/hooks/useFinancialLayoutViewModel.ts, Layout/models/financialSections.ts, Layout/styles.ts]
 
-add_transaction: quick-add tab button (`/quick_add`).
-layout: Finances sections are switched by `FinancialLayout` (`screens/Financial/Layout`), no drawer.
-navigation_files: `screens/Navigation/*` (AppTabBar, navigationItems), `screens/QuickAdd`, `screens/Financial/Layout`, `screens/Home/containers/ProfileButton`.
+Transactions:
+  view: Transactions/index.tsx (+ styles.ts) # month switcher, summary, owner/type chips, FlashList of day groups
+  hooks: Transactions/hooks/useTransactionsViewModel.ts (+ index.ts, fetchTransactions, fetchSummary)
+  models: [Transactions/models/TransactionUIModel.ts, Transactions/models/transactionList.ts]
+  components: Transactions/components/{MonthSwitcher,MonthSummary,MonthPickerSheet,TransactionRow}/index.tsx
+  form: Transactions/modals/NewTransactionModal/
+    - index.tsx, styles.ts
+    - hooks/useNewTransactionViewModel.ts
+    - models/{transactionFormState.ts,NewTransactionUIModel.ts}
+    - components/{CategoryChips,CategoryPickerSheet,MissingRecordHint}/index.tsx
 
-components (Transactions):
-  - name: MonthSwitcher, MonthSummary, MonthPickerSheet, TransactionRow
-    path: src/presentation/screens/Financial/Transactions/components/<Name>/index.tsx
-hooks (Transactions):
-  - name: useTransactionsViewModel
-    path: src/presentation/screens/Financial/Transactions/hooks/useTransactionsViewModel.ts
-shared (Financial):
-  - src/presentation/screens/Financial/models/ownerOptions.ts
-  - src/presentation/screens/Financial/models/categoryTree.ts
-  - src/presentation/screens/Financial/utils/financialErrorMessage.ts
+Categories:
+  view: Categories/index.tsx (+ styles.ts) # type SegmentedControl, owner ChipGroup, FlashList of TreeItem rows
+  hooks: Categories/hooks/useCategoriesViewModel.ts (+ index.ts, fetchCategories)
+  models: Categories/models/CategoryRowUIModel.ts
+  form: Categories/modals/NewCategoryModal/
+    - index.tsx, styles.ts
+    - hooks/useNewCategoryViewModel.ts
+    - models/{categoryFormState.ts,NewCategoryUIModel.ts}
+    - components/{CustomColorSheet,IconPickerSheet}/index.tsx
+
+Accounts:
+  view: Accounts/index.tsx (+ styles.ts) # total, owner chips, active list, collapsible archived section
+  hooks: Accounts/hooks/useAccountsViewModel.ts (+ index.ts, fetchAccounts)
+  models: [Accounts/models/AccountUIModel.ts, Accounts/models/accountList.ts]
+  form: Accounts/modals/NewAccountModal/
+    - index.tsx, styles.ts
+    - hooks/useNewAccountViewModel.ts
+    - models/{accountFormState.ts,NewAccountUIModel.ts}
+
+shared:
+  - models/ownerOptions.ts # ALL_OWNERS, buildOwnerChoices, buildOwnerFilterChoices, personalOwnerId, translateChoices
+  - models/categoryTree.ts # buildCategoryRows, descendantIds, categoriesOf, filterRowsByQuery
+  - utils/financialErrorMessage.ts # getFinancialErrorMessageKey (006 error -> i18n key)
   - src/presentation/constants/categoryColors.ts # 12-color palette (stored data, excluded from the color lint rule), isHexColor, normalizeCategoryColor
   - src/presentation/constants/categoryIcons.ts # 18 icons (12 common), filterIcons, iconLabel
   - src/presentation/constants/accountIcons.ts
   - "@utils/money (cents <-> decimal helpers)"
+  - "kit: GroupHeader, TreeItem, ColorSwatchGroup, IconChoiceGroup, SegmentedControl, ChipGroup, BottomSheet, ConfirmDialog, AmountInput/AmountText"
 
-containers:
-  - name: RefetchCache
-    path: src/presentation/screens/Financial/Transactions/containers/RefetchCache/index.tsx
-  - name: ListItem (Accounts)
-    path: src/presentation/screens/Financial/Accounts/containers/ListItem/index.tsx
-
-modals:
-  - name: NewTransactionModal
-    path: src/presentation/screens/Financial/Transactions/modals/NewTransactionModal/index.tsx
-  - name: NewCategoryModal
-    path: src/presentation/screens/Financial/Categories/modals/NewCategoryModal/index.tsx
-  - name: NewAccountModal
-    path: src/presentation/screens/Financial/Accounts/modals/NewAccountModal/index.tsx
-
-view_models:
-  - name: TransactionUIModel
-    path: src/presentation/screens/Financial/Transactions/models/TransactionUIModel.ts
-  - name: transactionList (pure month/day-group/filter helpers)
-    path: src/presentation/screens/Financial/Transactions/models/transactionList.ts
-  - name: useNewTransactionViewModel
-    path: src/presentation/screens/Financial/Transactions/modals/NewTransactionModal/hooks/useNewTransactionViewModel.ts
-  - name: transactionFormState (pure form state, validation, params)
-    path: src/presentation/screens/Financial/Transactions/modals/NewTransactionModal/models/transactionFormState.ts
-  - name: NewTransactionUIModel
-    path: src/presentation/screens/Financial/Transactions/modals/NewTransactionModal/models/NewTransactionUIModel.ts
-  - name: "NewTransactionModal components: CategoryChips, CategoryPickerSheet, MissingRecordHint"
-    path: src/presentation/screens/Financial/Transactions/modals/NewTransactionModal/components/
-  - name: useCategoriesViewModel (+ fetchCategories)
-    path: src/presentation/screens/Financial/Categories/hooks/useCategoriesViewModel.ts
-  - name: CategoryRowUIModel
-    path: src/presentation/screens/Financial/Categories/models/CategoryRowUIModel.ts
-  - name: useNewCategoryViewModel
-    path: src/presentation/screens/Financial/Categories/modals/NewCategoryModal/hooks/useNewCategoryViewModel.ts
-  - name: categoryFormState (pure form state, validation, create/update params)
-    path: src/presentation/screens/Financial/Categories/modals/NewCategoryModal/models/categoryFormState.ts
-  - name: NewCategoryUIModel (parent/color/icon options, hasChildren/hasParent/hasTransactions)
-    path: src/presentation/screens/Financial/Categories/modals/NewCategoryModal/models/NewCategoryUIModel.ts
-  - name: "NewCategoryModal components: CustomColorSheet, IconPickerSheet"
-    path: src/presentation/screens/Financial/Categories/modals/NewCategoryModal/components/
-  - name: FinancialAccountViewModel
-    path: src/presentation/screens/Financial/Accounts/models/FinancialAccountViewModel.ts
-  - name: NewAccountViewModel
-    path: src/presentation/screens/Financial/Accounts/modals/NewAccountModal/models/NewAccountViewModel.ts
+add_transaction: quick-add tab button (`/quick_add`).
+navigation_files: `screens/Navigation/*` (AppTabBar, navigationItems), `screens/QuickAdd`, `screens/Financial/Layout`, `screens/Home/containers/ProfileButton`.
 ```
 
-## Presentation notes (accounts)
+## Presentation notes
 
-- `Financial/hooks/useFinancialErrorFeedback` opens `/business_feedback` (type Error) for `AccountHasTransactions`, `FinancialNotFound` and `FinancialOwnerNotAllowed`; the account delete hook passes its mutation error to it.
-- The category delete is always confirmed (extra warning `financial.categories.deleteConfirm.withSubcategories` when it has subcategories, which are deleted too) and shows `financial.categories.errors.hasTransactions` on 409 (`CategoryHasTransactions`).
+- Forms are `BottomSheet`s (centered dialogs on wide web); create has no params, edit uses route param `id`. Delete always goes through `ConfirmDialog`. Save and delete errors are form-level copy through `getFinancialErrorMessageKey` (006 keys); the old `useFinancialErrorFeedback` hook and `/business_feedback` route are no longer used by Finances. Closing a dirty form asks to discard (`common.form.discardMessage`). `isSaving`/`isDeleting` come from `useMutation().isFetching`.
+- Owner is immutable in edit for accounts and categories (the API answers 400 when PATCH carries `owner`/`ownerId`); the "Belongs to" chips are locked in edit and also when `ownerId` arrives as a route param on create (pushed by the transaction form's inline create). Transactions may change owner (the form clears the stale account/category).
+- Money: `@utils/money`. The transaction value (decimal string from the API) and the account balance (decimal number) are converted to cents in the form state modules (`transactionFormState`, `accountFormState`); the UI works in cents (`AmountInput`/`AmountText`). The account balance has a Positive/Negative sign control and is not updated by transactions.
+- Transactions: month filtering and day grouping are client-side (`transactionList`); the month summary comes from `getMonthSummaryUseCase` (spec 010) for the selected month and owner (it ignores the type filter). Most-used rule: the category chips show the 5 most used categories of the type and owner (`getMostUsedFinancialCategoriesUseCase`) plus a "More" tree picker with search; changing type or owner clears the category and swaps the account; a missing account or category is created inline (the new record is selected when the stacked sheet returns).
+- Categories: tree rows via `categoryTree`; palette (`categoryColors`) plus a custom `#RRGGBB` sheet ("Custom" shows as selected for a stored color outside the palette, never rewritten unless the user picks another); 12 inline icons plus a searchable sheet of 18. PATCH sends only changed fields among name, icon, iconColor, type, parentId (`null` removes the parent). Type is locked in edit when it has a parent, subcategories or transactions; changing type or owner clears the parent. Delete warns with `financial.categories.deleteConfirm.withSubcategories` for parents and shows `financial.categories.errors.hasTransactions` on 409. The form state field is `iconColor` because the guardrail forbids a `color` property key in screens.
+- Accounts: total (`accounts-total`), owner chips, active list and a collapsible archived section; delete with transactions shows `financial.accounts.errors.hasTransactions` in the sheet.
 - Error mapping (all three resources, `financialApiError.ts`): 400 -> `FieldInvalid`, 403 -> `FinancialOwnerNotAllowed`, 404 -> `FinancialNotFound`, 409 on account/category delete -> `AccountHasTransactions` / `CategoryHasTransactions`, other -> `GenericError`. Contexts hold ids only.
-- The transaction modal lists only the categories whose type equals the selected transaction type (the API rejects a mismatch).
-
-## Presentation notes (transactions)
-
-- Month filtering and day grouping are client-side (`transactionList`); the month summary comes from `getMonthSummaryUseCase` (spec 010) for the selected month and owner filter.
-- The form is a `BottomSheet` (create, or edit through `?id=`): changing the type or the owner clears the category (and swaps the account), the category chips show the top-5 most used categories plus a "More" picker, and a missing account or category is created inline (the new record is selected when the stacked sheet returns). Closing a dirty form asks to discard; delete asks for confirmation.
-- Errors (save and delete) are shown as form-level copy through `getFinancialErrorMessageKey` (006 keys); `useFinancialErrorFeedback` is no longer used by transactions.
-
-## Presentation notes (categories)
-
-- The form is a `BottomSheet` (create, or edit through route param `id`); other route params `ownerId` and `type` (pushed by the transaction form's inline create) are initial values and lock the owner chip. Closing a dirty form asks to discard.
-- Color: 12-color palette (`categoryColors`, stored user data, excluded from the color lint rule) plus a custom `#RRGGBB` sheet; "Custom" shows as selected for a stored color outside the palette, which is never rewritten unless the user picks another. Icon: 12 inline icons plus a searchable sheet of 18 (`categoryIcons`).
-- `owner`/`ownerId` are immutable on the API, so the "Belongs to" chip is locked in edit and the PATCH sends only changed fields among name, icon, iconColor, type, parentId (`null` removes the parent). The type is locked in edit when the category has a parent, subcategories or transactions. Changing type or owner clears the parent; parent options are the same owner and type in tree order without the category and its descendants.
-- Categories passes the presentation lint guardrails (removed from `migrationAllowList`); the form state field is `iconColor` because the guardrail forbids a `color` property key in screens.
