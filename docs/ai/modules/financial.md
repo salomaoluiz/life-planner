@@ -154,13 +154,14 @@ datasources:
       - financialApiError: src/data/datasource/data/financial/financialApiError.ts   # 400 -> FieldInvalid, 403 -> FinancialOwnerNotAllowed, 404 -> FinancialNotFound, 409 on delete -> AccountHasTransactions, other -> GenericError
       - ownerQuery: src/data/datasource/data/financial/ownerQuery.ts                 # ?ownerId=a&ownerId=b (empty ownerIds -> no request)
       - money: src/data/models/financial/money.ts                                    # cents <-> decimal number / decimal string
-  categoriesDatasource (Supabase):
-    path: src/data/datasource/data/financial/categories/supabase/
+  categoriesDatasource (API):
+    path: src/data/datasource/data/financial/categories/api/
+    uses: "@infrastructure/api (/v1/finance/categories); never sends depthLevel, owner or ownerId on update, drops depthLevel on create; CategoryModel JSON = API shape ('black' <-> #000000 via models/financial/iconColor.ts, parentId null <-> undefined)"
     methods:
-      - createCategory: src/data/datasource/data/financial/categories/supabase/createCategory.ts
-      - deleteCategory: src/data/datasource/data/financial/categories/supabase/deleteCategory.ts
-      - getCategories: src/data/datasource/data/financial/categories/supabase/getCategories.ts
-      - updateCategory: src/data/datasource/data/financial/categories/supabase/updateCategory.ts
+      - createCategory: src/data/datasource/data/financial/categories/api/createCategory.ts
+      - deleteCategory: src/data/datasource/data/financial/categories/api/deleteCategory.ts   # 409 -> CategoryHasTransactions
+      - getCategories: src/data/datasource/data/financial/categories/api/getCategories.ts
+      - updateCategory: src/data/datasource/data/financial/categories/api/updateCategory.ts
   transactionsDatasource (Supabase):
     path: src/data/datasource/data/financial/transactions/supabase/
     methods:
@@ -219,3 +220,4 @@ view_models:
 ## Presentation notes (accounts)
 
 - `Financial/hooks/useFinancialErrorFeedback` opens `/business_feedback` (type Error) for `AccountHasTransactions`, `FinancialNotFound` and `FinancialOwnerNotAllowed`; the account delete hook passes its mutation error to it.
+- The Categories delete asks for confirmation only when the category has subcategories (they are deleted too) and shows `financial.categories.errors.hasTransactions` on 409 (`CategoryHasTransactions`).
