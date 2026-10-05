@@ -1,4 +1,5 @@
 import { datasourcesMocks } from "@data/datasource/mocks/listDatasources.mocks";
+import { calendarDateToIso } from "@data/models/financial/calendarDate";
 import TransactionModel from "@data/models/financial/TransactionModel";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
@@ -16,26 +17,26 @@ const firstTransaction = new TransactionModel({
   accountId: "c5598687-dfeb-485e-990a-a035d8e7d23d",
   category: "Food",
   categoryId: "7820cfbb-f1aa-4254-8e42-7a0fe1ee981f",
-  date: new Date().toISOString(),
+  date: calendarDateToIso("2026-10-03"),
   description: "Groceries",
   id: "fab7eed4-8b42-44c5-ad57-c2152e35d8cf",
   owner: OwnerType.FAMILY,
   ownerId: "88bdbf72-3558-4bd3-864e-c5e72786f5c3",
   type: TransactionType.EXPENSE,
-  value: "100.0",
+  value: "100.00",
 });
 
 const secondTransaction = new TransactionModel({
   accountId: "c5598687-dfeb-485e-990a-a035d8e7d23d",
   category: "Food",
   categoryId: "7820cfbb-f1aa-4254-8e42-7a0fe1ee981f",
-  date: new Date().toISOString(),
+  date: calendarDateToIso("2026-10-03"),
   description: "Groceries",
   id: "a396f583-b8a5-4542-bd1a-81aa45c6fca4",
   owner: OwnerType.FAMILY,
   ownerId: "6bad0c6f-9329-4e64-b9be-ed15044badcf",
   type: TransactionType.EXPENSE,
-  value: "150.0",
+  value: "150.00",
 });
 
 // endregion mocks

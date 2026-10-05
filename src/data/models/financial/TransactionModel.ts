@@ -1,3 +1,6 @@
+import { calendarDateToIso, isoToCalendarDate } from "./calendarDate";
+import { centsToDecimalString, decimalStringToCents } from "./money";
+
 export type OwnerType = "FAMILY" | "USER";
 
 export type TransactionType = "EXPENSE" | "INCOME";
@@ -41,32 +44,35 @@ class TransactionModel implements ITransactionModel {
   }
 
   static fromJSON(data: Record<string, unknown>): TransactionModel {
+    const category = data.category as undefined | { name?: string };
+
     return new TransactionModel({
-      accountId: data.account_id as string,
-      category: data.category as string,
-      categoryId: data.category_id as string,
-      date: data.date as string,
+      accountId: data.accountId as string,
+      category: category?.name ?? "",
+      categoryId: data.categoryId as string,
+      date: calendarDateToIso(data.date as string),
       description: data.description as string,
       id: data.id as string,
       owner: data.owner as OwnerType,
-      ownerId: data.owner_id as string,
+      ownerId: data.ownerId as string,
       type: data.type as TransactionType,
-      value: data.value as string,
+      value: centsToDecimalString(Number(data.value)),
     });
   }
 
+  // Same shape as the API: also what the repository cache stores.
   toJSON() {
     return {
-      account_id: this.accountId,
-      category: this.category,
-      category_id: this.categoryId,
-      date: this.date,
+      accountId: this.accountId,
+      category: { name: this.category },
+      categoryId: this.categoryId,
+      date: isoToCalendarDate(this.date),
       description: this.description,
       id: this.id,
       owner: this.owner,
-      owner_id: this.ownerId,
+      ownerId: this.ownerId,
       type: this.type,
-      value: this.value,
+      value: decimalStringToCents(this.value),
     };
   }
 }
