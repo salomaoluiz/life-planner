@@ -71,6 +71,8 @@ function useStockViewModel() {
   useEffect(() => {
     if (params.filter && FILTER_PARAMS.includes(params.filter)) {
       setFilter(params.filter);
+      // Consume the param: otherwise a repeated "See all" (same value) never re-applies.
+      router.setParams({ filter: undefined });
     }
   }, [params.filter]);
 
