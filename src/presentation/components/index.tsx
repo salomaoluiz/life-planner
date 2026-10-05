@@ -11,3 +11,4 @@ export { default as Spacer, SpacerProps } from "./Spacer";
 export { default as Switch, SwitchProps } from "./Switch";
 export { default as Text, TextProps } from "./Text";
 export { default as TextInput, TextInputProps } from "./TextInput";
+export { default as Touchable, TouchableProps } from "./Touchable";

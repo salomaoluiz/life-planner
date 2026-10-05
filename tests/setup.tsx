@@ -174,6 +174,7 @@ jest.mock("@presentation/theme", () => ({
 }));
 
 jest.mock("@presentation/i18n", () => ({
+  useLocaleTag: jest.fn().mockReturnValue("en-US"),
   useTranslation: jest.fn().mockReturnValue({
     t: jest.fn().mockImplementation((key, params) => {
       if (params) {
@@ -188,3 +189,14 @@ jest.mock("@presentation/i18n", () => ({
     }),
   }),
 }));
+
+jest.mock("react-native-reanimated", () => {
+  const { View } = jest.requireActual("react-native");
+  return {
+    __esModule: true,
+    default: { View },
+    useAnimatedStyle: (factory: () => object) => factory(),
+    useSharedValue: (initial: number) => ({ value: initial }),
+    withTiming: (toValue: number) => toValue,
+  };
+});
