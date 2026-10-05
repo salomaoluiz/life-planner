@@ -2,10 +2,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 
 import { useCases } from "@application/useCases";
-import {
-  InviteFamilyMemberUseCaseParams,
-  InviteFamilyMemberUseCaseResponse,
-} from "@application/useCases/cases/familyMember/inviteFamilyMemberUseCase";
+import { InviteFamilyMemberUseCaseResponse } from "@application/useCases/cases/familyMember/inviteFamilyMemberUseCase";
 import { FamilyMemberAlreadyExists } from "@domain/entities/errors";
 import { copyText } from "@infrastructure/clipboard";
 import { invalidateFetcherData, useMutation } from "@infrastructure/fetcher";
@@ -27,12 +24,17 @@ function useAddNewFamilyMemberViewModel() {
   const [copied, setCopied] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  const invite = useMutation<
-    InviteFamilyMemberUseCaseParams,
-    InviteFamilyMemberUseCaseResponse
-  >({
+  // The email is personal data: it is kept out of the mutation variables, which
+  // useMutation copies into error contexts (sent to monitoring). Only ids allowed.
+  const pendingEmail = useRef("");
+
+  const invite = useMutation<void, InviteFamilyMemberUseCaseResponse>({
     cacheKey: [useCases.inviteFamilyMemberUseCase.uniqueName],
-    fetch: useCases.inviteFamilyMemberUseCase.execute,
+    fetch: async () =>
+      useCases.inviteFamilyMemberUseCase.execute({
+        email: pendingEmail.current,
+        familyId,
+      }),
   });
 
   useEffect(
@@ -72,7 +74,8 @@ function useAddNewFamilyMemberViewModel() {
     }
 
     setSubmittedEmail(trimmed);
-    invite.mutate({ email: trimmed, familyId });
+    pendingEmail.current = trimmed;
+    invite.mutate();
   }
 
   function onDone() {

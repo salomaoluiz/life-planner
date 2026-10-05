@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from "expo-router";
 
 import { act, renderHook } from "@tests";
 
+import { useCases } from "@application/useCases";
 import {
   FamilyMemberAlreadyExists,
   GenericError,
@@ -35,10 +36,7 @@ jest.mock("@application/useCases", () => ({
 
 type Invite = { inviteExpiresAt: Date; inviteToken: string };
 
-const mutation = new UseMutationFixture<
-  { email: string; familyId: string },
-  Invite
->();
+const mutation = new UseMutationFixture<void, Invite>();
 const token = "tok_123";
 // EXPO_PUBLIC_* is inlined at build time, so the expected link uses the same expression.
 const link = buildInviteLink(
@@ -101,13 +99,27 @@ function setupCreated() {
   return rendered;
 }
 
-it("SHOULD trim AND lower nothing but send the trimmed email with the family id", () => {
+it("SHOULD NOT put the email or token in the mutation variables (only ids reach the fetcher)", () => {
   const { mutate, result } = setup();
 
   act(() => result.current.onChangeEmail("  Invitee@Example.com  "));
   act(() => result.current.onSubmit());
 
-  expect(mutate).toHaveBeenCalledWith({
+  expect(mutate).toHaveBeenCalledTimes(1);
+  expect(mutate).toHaveBeenCalledWith();
+  const calls = JSON.stringify(jest.mocked(mutate).mock.calls);
+  expect(calls).not.toContain("Invitee");
+  expect(calls).not.toContain(token);
+});
+
+it("SHOULD run the use case with the trimmed email and the family id", async () => {
+  const { result } = setup();
+
+  act(() => result.current.onChangeEmail("  Invitee@Example.com  "));
+  act(() => result.current.onSubmit());
+  await spies.useMutation.mock.calls.at(-1)![0].fetch(undefined as never);
+
+  expect(useCases.inviteFamilyMemberUseCase.execute).toHaveBeenCalledWith({
     email: "Invitee@Example.com",
     familyId: "family-1",
   });
