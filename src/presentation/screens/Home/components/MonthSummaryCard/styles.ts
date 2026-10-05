@@ -7,13 +7,8 @@ function useStyles() {
 
   return {
     styles: StyleSheet.create({
-      column: { flex: 1 },
-      split: {
-        alignItems: "flex-start",
-        flexDirection: "row",
-        gap: theme.sizes.spacing.lg,
-      },
-      stack: { gap: theme.sizes.spacing.lg },
+      metric: { flex: 1 },
+      metrics: { flexDirection: "row", gap: theme.sizes.spacing.sm },
     }),
     theme,
   };
