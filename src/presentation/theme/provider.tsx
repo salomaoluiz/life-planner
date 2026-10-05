@@ -5,6 +5,7 @@ import { useCases } from "@application/useCases";
 import { SaveUserConfigsUseCaseParams } from "@application/useCases/cases/configs/saveUserConfigsUseCase";
 import { ThemeMode } from "@domain/entities/configs/ConfigsEntity";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
+import { useAppFonts } from "@infrastructure/fonts";
 import { captureMessage } from "@infrastructure/monitoring";
 import { useProviderLoader } from "@providers/loader";
 
@@ -40,12 +41,17 @@ export function ThemeProvider({ children }: Props) {
     cacheKey: [useCases.getUserConfigsUseCase.uniqueName],
     fetch: useCases.getUserConfigsUseCase.execute,
   });
+  const { failed, ready } = useAppFonts();
+  const fontsLoaded = ready && !failed;
   const systemScheme = useColorScheme();
 
   const [themeMode, setThemeModeState] = useState<ThemeMode>(ThemeMode.SYSTEM);
 
   const isDark = resolveIsDark(themeMode, systemScheme);
-  const theme = useMemo(() => buildTheme(isDark, false), [isDark]);
+  const theme = useMemo(
+    () => buildTheme(isDark, fontsLoaded),
+    [isDark, fontsLoaded],
+  );
   const paperTheme = useMemo(() => buildPaperTheme(theme), [theme]);
 
   useEffect(() => {
@@ -53,20 +59,21 @@ export function ThemeProvider({ children }: Props) {
     StatusBar.setBackgroundColor(theme.colors.background);
   }, [isDark]);
 
+  const queryDone = status !== "pending";
+
+  useEffect(() => {
+    setIsLoading(!(queryDone && ready), "theme");
+  }, [queryDone, ready]);
+
   useEffect(() => {
     switch (status) {
       case "error":
-        setIsLoading(false, "theme");
-        break;
       case "pending":
-        setIsLoading(true, "theme");
         break;
       case "success":
         setThemeModeState(data!.themeMode);
-        setIsLoading(false, "theme");
         break;
       default:
-        setIsLoading(false, "theme");
         captureMessage("Invalid useQuery status on ThemeProvider", {
           action: "Using the system theme",
           status,
