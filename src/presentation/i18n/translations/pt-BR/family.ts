@@ -29,7 +29,6 @@ const family = {
       pending: "Pendente",
     },
   },
-  routeTitle: "Família",
 };
 
 export default family;
