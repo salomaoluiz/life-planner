@@ -65,6 +65,8 @@ Grafite tokens (exactly these 18 in both themes, typed `Colors`/`ColorToken`):
 
 Paper MD3 keys (`primary`, `onSurface`, ...) are derived from the tokens by `buildPaperTheme` (`theme/paper`); never read them in components. Category picker colors live in `constants/categoryColors.ts`. No color literals outside `theme/constants` (guarded by `noColorLiterals.test.ts`). Adding a color: add it to BOTH `dark` and `light` in `constants/colors.ts` and keep `contrast.test.ts` (>= 4.5:1) green.
 
+Kit components read `useKitTheme()` (`@components/utils/useKitTheme`: colors, spacing, radius, sizes, typography) and never `useTheme` colors or literals. Lint forbids color literals in all of `src/presentation` except `theme/constants/**` (see `components.md` Guardrails); derive tints with `toRgba`.
+
 Flat surfaces: `surface` + 1 px `border`; no shadows except the quick-add button (spec 009); glass/blur is removed by spec 008.
 
 Layout helpers: `@utils/device` (`getScreenSizes()`, `getWindowsSizes()`), `@utils/platform` (`isWeb()`, …).

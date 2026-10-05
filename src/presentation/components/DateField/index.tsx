@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { ComponentProps, ComponentType, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { DatePickerModal } from "react-native-paper-dates";
 
@@ -11,6 +11,11 @@ import { useKitTheme } from "@components/utils/useKitTheme";
 import { useLocaleTag } from "@presentation/i18n";
 
 import { getRelativeDay } from "./getRelativeDay";
+
+// react-native-paper-dates types omit testID, which the modal forwards to its root.
+const TestableDatePickerModal = DatePickerModal as ComponentType<
+  ComponentProps<typeof DatePickerModal> & { testID?: string }
+>;
 
 export interface DateFieldProps {
   clearable?: boolean;
@@ -108,7 +113,7 @@ function DateField(props: DateFieldProps) {
           size={theme.sizes.iconMd}
         />
       </View>
-      <DatePickerModal
+      <TestableDatePickerModal
         date={valid}
         locale={localeTag}
         mode="single"
@@ -118,7 +123,6 @@ function DateField(props: DateFieldProps) {
         }}
         onDismiss={() => setOpen(false)}
         saveLabel={props.saveLabel}
-        // @ts-expect-error DatePickerModal types omit testID (jest mock is a View)
         testID={testID && `${testID}-picker`}
         validRange={
           props.minDate || props.maxDate
