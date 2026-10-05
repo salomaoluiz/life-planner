@@ -16,8 +16,8 @@ function useStyles() {
       container: {
         backgroundColor: theme.colors.background,
         flex: 1,
-        padding: theme.sizes.spacing.medium,
-        paddingTop: isWeb() ? theme.sizes.spacing.xxlarge : undefined,
+        padding: theme.sizes.spacing.md,
+        paddingTop: isWeb() ? theme.sizes.spacing.xxxl : undefined,
       },
     }),
     theme,
@@ -32,13 +32,13 @@ If styles depend on state, pass it as a parameter: `useStyles({ disabled, isFocu
 
 > **Legacy:** about 80 existing `styles.ts` files still export `getStyles` (default or named). When you touch one, rename it to `useStyles` (default export) and update its callers.
 
-## Sizes (`theme.sizes`, auto-scaled per device)
+## Sizes and typography (`theme.sizes`, `theme.typography`; NOT scaled per breakpoint)
 
-- `spacing`: xxsmall 4 · xsmall 8 · small 12 · medium 16 · large 24 · xlarge 32 · xxlarge 48 · xxxlarge 64
-- `fontSizes`: xxsmall 10 · xsmall 12 · small 14 · medium 16 · large 24 · xlarge 32 · xxlarge 48
-- `lineHeights`: same keys
-- `borderRadius`: small 4 · medium 8 · large 16 · xlarge 32 · full "50%"
-- Icon sizes typically `theme.sizes.spacing.large`.
+- `spacing`: xxs 4 · xs 8 · sm 12 · md 16 · lg 20 · xl 24 · xxl 32 · xxxl 48
+- `borderRadius`: sm 10 · md 14 · lg 20 · sheet 28 · full 999
+- `size`: buttonHeight 48 · buttonHeightSheet 54 · inputHeight 50 · tabBarHeight 84 · touchTarget 44 · iconSm 16 · iconMd 20 · iconLg 24 · formMaxWidth 480 · contentMaxWidth 720
+- `typography` (Manrope, system fallback until `fontsLoaded`): display 34 · title 22 · heading 16 · body 15 · bodyStrong 15 · input 16 · caption 13 · overline 12 · tab 11. Use `getFontStyle(weight, theme.fontsLoaded)` for a custom weight (never set `fontWeight` with a Manrope family) and `tabularNums` / `<Text tabular>` for money and quantities.
+- `buildTheme(isDark, fontsLoaded)` builds the theme; `getScaleFunctions`/`rescaleSizes` remain for one-off scaling.
 
 ## Colors (`theme.colors`, light & dark in `constants/colors.ts`)
 

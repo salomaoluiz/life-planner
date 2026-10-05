@@ -10,19 +10,19 @@ function getStyles() {
       clearIconContainer: {
         alignItems: "flex-end",
         justifyContent: "center",
-        paddingRight: theme.sizes.spacing.xsmall,
+        paddingRight: theme.sizes.spacing.xs,
       },
       container: {
         alignItems: "center",
         backgroundColor: theme.colors.surface,
         borderColor: theme.colors.border,
-        borderRadius: theme.sizes.borderRadius.large,
+        borderRadius: theme.sizes.borderRadius.lg,
         borderWidth: 1,
         flexDirection: "row",
-        height: theme.sizes.spacing.xxlarge,
+        height: theme.sizes.spacing.xxxl,
         justifyContent: "space-between",
         overflow: "hidden",
-        paddingLeft: theme.sizes.spacing.medium,
+        paddingLeft: theme.sizes.spacing.md,
         width: "100%",
       },
       dateText: {
@@ -34,10 +34,10 @@ function getStyles() {
       },
       label: {
         color: theme.colors.textPrimary,
-        marginBottom: theme.sizes.spacing.xsmall,
+        marginBottom: theme.sizes.spacing.xs,
       },
       mainWrapper: {
-        marginBottom: theme.sizes.spacing.medium,
+        marginBottom: theme.sizes.spacing.md,
         width: "100%",
       },
       placeholderText: {

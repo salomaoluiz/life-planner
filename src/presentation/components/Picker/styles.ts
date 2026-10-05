@@ -10,20 +10,20 @@ function getStyles() {
       container: {
         backgroundColor: theme.colors.surface,
         borderColor: theme.colors.border,
-        borderRadius: theme.sizes.borderRadius.large,
+        borderRadius: theme.sizes.borderRadius.md,
         borderWidth: 1,
         flexGrow: 1,
         margin: 0,
         overflow: "hidden",
       },
       itemStyle: {
-        fontSize: theme.sizes.fontSizes.small,
+        fontSize: theme.typography.input.fontSize,
       },
       picker: {
         backgroundColor: "transparent",
         borderWidth: 0,
         color: theme.colors.textPrimary,
-        height: theme.sizes.spacing.xxlarge,
+        height: theme.sizes.size.inputHeight,
       },
     }),
     theme,

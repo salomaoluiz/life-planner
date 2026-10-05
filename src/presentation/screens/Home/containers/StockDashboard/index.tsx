@@ -48,9 +48,9 @@ function StockDashboard() {
       <View style={styles.titleContainer}>
         <Text.Title value={"Stock Dashboard"} />
       </View>
-      <Spacer direction={"vertical"} size={"small"} />
+      <Spacer direction={"vertical"} size={"sm"} />
       <Text.Body value={`Total items: ${dashboard.data.itemQuantity}`} />
-      <Spacer direction={"vertical"} size={"xxsmall"} />
+      <Spacer direction={"vertical"} size={"xxs"} />
       <Text.Body value={`Expired items: ${dashboard.data.expiredItems}`} />
     </View>
   );

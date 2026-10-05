@@ -8,7 +8,7 @@ import { useMutation, useQuery } from "@infrastructure/fetcher";
 import { captureMessage } from "@infrastructure/monitoring";
 import { useProviderLoader } from "@providers/loader";
 
-import { colors, getScaledSizes } from "./constants";
+import { buildTheme } from "./buildTheme";
 import { buildPaperTheme, PaperThemeProvider } from "./paper";
 import { resolveIsDark } from "./resolveThemeMode";
 import { ThemeProp } from "./types";
@@ -23,17 +23,8 @@ interface ThemeContextData {
   themeMode: ThemeMode;
 }
 
-export const lightTheme: ThemeProp = {
-  colors: colors.light,
-  dark: false,
-  sizes: getScaledSizes(),
-};
-
-export const darkTheme: ThemeProp = {
-  colors: colors.dark,
-  dark: true,
-  sizes: getScaledSizes(),
-};
+export const lightTheme: ThemeProp = buildTheme(false, false);
+export const darkTheme: ThemeProp = buildTheme(true, false);
 
 export const ThemeContext = createContext<ThemeContextData>(
   {} as ThemeContextData,
@@ -54,7 +45,7 @@ export function ThemeProvider({ children }: Props) {
   const [themeMode, setThemeModeState] = useState<ThemeMode>(ThemeMode.SYSTEM);
 
   const isDark = resolveIsDark(themeMode, systemScheme);
-  const theme = isDark ? darkTheme : lightTheme;
+  const theme = useMemo(() => buildTheme(isDark, false), [isDark]);
   const paperTheme = useMemo(() => buildPaperTheme(theme), [theme]);
 
   useEffect(() => {

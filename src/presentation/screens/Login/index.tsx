@@ -75,7 +75,7 @@ function Login() {
           type={vm.formError?.type ?? "error"}
           visible={!!vm.formError}
         />
-        <Spacer direction="vertical" size="medium" />
+        <Spacer direction="vertical" size="md" />
         <Button.Filled
           disabled={vm.isSubmitting}
           label={t("login.button.signIn")}

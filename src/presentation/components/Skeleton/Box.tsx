@@ -13,7 +13,7 @@ export interface Props {
 function BoxSkeleton(props: Props) {
   const { theme } = useTheme();
 
-  const radius = props.borderRadius ?? theme.sizes.borderRadius.medium;
+  const radius = props.borderRadius ?? theme.sizes.borderRadius.md;
 
   const height = getSize(props.height, "height");
   const width = getSize(props.width, "width");

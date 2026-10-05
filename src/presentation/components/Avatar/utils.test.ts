@@ -24,17 +24,17 @@ describe("Avatar Utils", () => {
   describe("getAvatarSize", () => {
     it("SHOULD return correct size for large", () => {
       const size = getAvatarSize("large");
-      expect(size).toBe(lightTheme.sizes.spacing.xxlarge);
+      expect(size).toBe(lightTheme.sizes.spacing.xxxl);
     });
 
     it("SHOULD return correct size for regular", () => {
       const size = getAvatarSize("regular");
-      expect(size).toBe(lightTheme.sizes.spacing.xlarge);
+      expect(size).toBe(lightTheme.sizes.spacing.xxl);
     });
 
     it("SHOULD return correct size for small", () => {
       const size = getAvatarSize("small");
-      expect(size).toBe(lightTheme.sizes.spacing.large);
+      expect(size).toBe(lightTheme.sizes.spacing.xl);
     });
   });
 

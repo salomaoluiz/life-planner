@@ -55,6 +55,8 @@ export function buildPaperTheme(theme: ThemeProp): PaperAppTheme {
       ...t, // app tokens last: background, scrim and surface stay identical
     },
     dark: theme.dark,
+    fontsLoaded: theme.fontsLoaded,
     sizes: theme.sizes,
+    typography: theme.typography,
   };
 }

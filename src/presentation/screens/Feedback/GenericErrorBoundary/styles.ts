@@ -11,18 +11,18 @@ function useStyles() {
       StyleSheet.create({
         buttonContainer: {
           flexDirection: "row",
-          marginBottom: theme.sizes.spacing.medium,
+          marginBottom: theme.sizes.spacing.md,
         },
         container: {
           alignItems: "center",
           backgroundColor: theme.colors.background,
           flex: 1,
           justifyContent: "center",
-          paddingHorizontal: theme.sizes.spacing.medium,
+          paddingHorizontal: theme.sizes.spacing.md,
         },
 
         descriptionContainer: {
-          marginBottom: theme.sizes.spacing.medium,
+          marginBottom: theme.sizes.spacing.md,
         },
         image: {
           height: 300 * getScaleRatio().scaleFactor,
@@ -30,7 +30,7 @@ function useStyles() {
         },
 
         titleContainer: {
-          marginBottom: theme.sizes.spacing.medium,
+          marginBottom: theme.sizes.spacing.md,
         },
       }),
     [],

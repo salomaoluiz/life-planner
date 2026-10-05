@@ -36,7 +36,7 @@ function AddNewFamilyMemberModal() {
             visible={vm.alreadyExistsVisible}
           />
         </View>
-        <Spacer direction={"vertical"} size={"medium"} />
+        <Spacer direction={"vertical"} size={"md"} />
         <View style={styles.buttonsContainer}>
           <Button.Filled
             disabled={vm.isSubmitting}
@@ -44,7 +44,7 @@ function AddNewFamilyMemberModal() {
             loading={vm.isSubmitting}
             onPress={vm.onSubmit}
           />
-          <Spacer direction={"horizontal"} size={"xxxlarge"} />
+          <Spacer direction={"horizontal"} size={"xxxl"} />
           <Button.Text
             customStyles={{ textColor: theme.colors.expense }}
             label={t("family.member.invite.cancel")}

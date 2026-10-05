@@ -40,7 +40,7 @@ function StockCard(props: Props) {
     <View style={[styles.container, styles.row]}>
       <View style={styles.subContainer}>
         <Text.Title value={props.item.description} />
-        <Text.Label value={`Quantity: ${props.item.quantity}`} />
+        <Text.Label tabular value={`Quantity: ${props.item.quantity}`} />
         <Text.Label value={`Owner: ${props.item.owner}`} />
         <Text.Label
           color={props.item.isExpired ? theme.colors.expense : undefined}
@@ -51,7 +51,7 @@ function StockCard(props: Props) {
         <IconButton
           name={"delete"}
           onPress={onDelete}
-          size={theme.sizes.spacing.large}
+          size={theme.sizes.spacing.xl}
         />
       </View>
     </View>

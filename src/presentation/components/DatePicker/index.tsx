@@ -89,7 +89,7 @@ function DatePicker(props: DatePickerProps) {
               <IconButton
                 name={"close"}
                 onPress={clearDate}
-                size={theme.sizes.spacing.large}
+                size={theme.sizes.spacing.xl}
                 testID={
                   props.testID ? `${props.testID}-clear-button` : "clear-button"
                 }

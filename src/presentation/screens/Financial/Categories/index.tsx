@@ -110,7 +110,7 @@ function FinancialCategories() {
               selectedValue={filterType}
             />
           </View>
-          <Spacer direction={"vertical"} size={"medium"} />
+          <Spacer direction={"vertical"} size={"md"} />
           <View style={styles.listContainer}>
             <FlashList
               contentContainerStyle={styles.listContentContainer}

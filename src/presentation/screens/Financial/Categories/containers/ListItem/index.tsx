@@ -18,7 +18,7 @@ function ListItem(props: Props) {
         <Icon
           color={theme.colors.accent}
           name={props.item.icon}
-          size={theme.sizes.spacing.large}
+          size={theme.sizes.spacing.xl}
         />
       </View>
       <View style={styles.detailsColumn}>
@@ -32,7 +32,7 @@ function ListItem(props: Props) {
         <IconButton
           name={"delete"}
           onPress={onDelete}
-          size={theme.sizes.spacing.large}
+          size={theme.sizes.spacing.xl}
         />
       </View>
     </View>

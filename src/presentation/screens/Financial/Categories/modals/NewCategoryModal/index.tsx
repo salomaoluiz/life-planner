@@ -124,7 +124,7 @@ function NewCategoryModal() {
             <View style={styles.titleContainer}>
               <Text.Headline value={t("financial.categories.addNewCategory")} />
             </View>
-            <Spacer direction={"vertical"} size={"medium"} />
+            <Spacer direction={"vertical"} size={"md"} />
 
             <TextInput.Outlined
               label={t("financial.categories.name")}
@@ -136,7 +136,7 @@ function NewCategoryModal() {
               type={"error"}
               visible={!!errors.name}
             />
-            <Spacer direction={"vertical"} size={"medium"} />
+            <Spacer direction={"vertical"} size={"md"} />
 
             <Picker
               items={[
@@ -150,7 +150,7 @@ function NewCategoryModal() {
               }}
               selectedValue={fields.type.value}
             />
-            <Spacer direction={"vertical"} size={"medium"} />
+            <Spacer direction={"vertical"} size={"md"} />
 
             <Picker
               items={viewModel.stockOwners}
@@ -161,7 +161,7 @@ function NewCategoryModal() {
               }}
               selectedValue={fields.ownerId.value ?? owners.data![0]?.id}
             />
-            <Spacer direction={"vertical"} size={"medium"} />
+            <Spacer direction={"vertical"} size={"md"} />
 
             <Picker
               items={viewModel.getParentCategories(
@@ -172,7 +172,7 @@ function NewCategoryModal() {
               onValueChange={fields.parentId.onChange}
               selectedValue={fields.parentId.value ?? ""}
             />
-            <Spacer direction={"vertical"} size={"medium"} />
+            <Spacer direction={"vertical"} size={"md"} />
 
             <View style={styles.rowSelector}>
               {/* Color Selector */}
@@ -276,7 +276,7 @@ function NewCategoryModal() {
                                   fields.icon.onChange(iconName);
                                   setIconMenuVisible(false);
                                 }}
-                                size={theme.sizes.spacing.large}
+                                size={theme.sizes.spacing.xl}
                               />
                             </View>
                           );
@@ -301,7 +301,7 @@ function NewCategoryModal() {
                 label={t("financial.categories.cancel")}
                 onPress={onCancel}
               />
-              <Spacer direction={"horizontal"} size={"large"} />
+              <Spacer direction={"horizontal"} size={"xl"} />
               <Button.Filled
                 label={t("financial.categories.add")}
                 onPress={onAdd}

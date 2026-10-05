@@ -59,7 +59,7 @@ it("SHOULD have the correct style", () => {
   expect(component.props.style).toEqual({
     backgroundColor: "transparent",
     color: "#151922",
-    minHeight: 55,
+    minHeight: 48,
     width: "100%",
   });
 });

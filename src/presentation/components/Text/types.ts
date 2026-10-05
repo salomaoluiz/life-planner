@@ -11,6 +11,7 @@ export interface TextProps {
   bold?: boolean;
   color?: string;
   numberOfLines?: number;
+  tabular?: boolean;
   testID?: string;
   textAlign?: "center" | "left" | "right";
   value: string;

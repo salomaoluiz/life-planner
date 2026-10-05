@@ -34,7 +34,7 @@ function getStyles() {
         borderRadius: 24,
         borderWidth: 1,
         overflow: "hidden",
-        padding: theme.sizes.spacing.large,
+        padding: theme.sizes.spacing.xl,
         width: "100%",
       },
       button: {
@@ -44,8 +44,8 @@ function getStyles() {
       },
       buttonContainer: {
         backgroundColor: "transparent",
-        marginTop: theme.sizes.spacing.large,
-        padding: theme.sizes.spacing.small,
+        marginTop: theme.sizes.spacing.xl,
+        padding: theme.sizes.spacing.sm,
       },
       colorMenuContent: {
         flexDirection: "row",
@@ -111,7 +111,7 @@ function getStyles() {
         alignItems: "center",
         flexDirection: "row",
         gap: 20,
-        marginVertical: theme.sizes.spacing.medium,
+        marginVertical: theme.sizes.spacing.md,
       },
       selectorItem: {
         flexDirection: "column",
@@ -129,7 +129,7 @@ function getStyles() {
       },
       titleContainer: {
         alignItems: "center",
-        marginBottom: theme.sizes.spacing.medium,
+        marginBottom: theme.sizes.spacing.md,
       },
     }),
     theme,

@@ -21,7 +21,7 @@ function ListItem(props: Props) {
         <Icon
           color={isArchived ? theme.colors.border : theme.colors.accent}
           name={props.item.icon}
-          size={theme.sizes.spacing.large}
+          size={theme.sizes.spacing.xl}
         />
       </View>
       <View style={styles.detailsColumn}>
@@ -50,12 +50,12 @@ function ListItem(props: Props) {
         <IconButton
           name={"pencil"}
           onPress={onEdit}
-          size={theme.sizes.spacing.large}
+          size={theme.sizes.spacing.xl}
         />
         <IconButton
           name={"delete"}
           onPress={onDelete}
-          size={theme.sizes.spacing.large}
+          size={theme.sizes.spacing.xl}
         />
       </View>
     </View>

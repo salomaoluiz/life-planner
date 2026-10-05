@@ -76,7 +76,7 @@ function NewStockItemModal() {
           <View style={styles.titleContainer}>
             <Text.Headline value={"Add a new item to stock"} />
           </View>
-          <Spacer direction={"vertical"} size={"medium"} />
+          <Spacer direction={"vertical"} size={"md"} />
           <View style={styles.lineContainer}>
             <TextInput.Outlined
               label={fields.description.label}
@@ -89,7 +89,7 @@ function NewStockItemModal() {
             type={"error"}
             visible={!!errors["description"]}
           />
-          <Spacer direction={"vertical"} size={"medium"} />
+          <Spacer direction={"vertical"} size={"md"} />
           <View style={styles.lineContainer}>
             <View style={styles.helperTextContainer}>
               <TextInput.Outlined
@@ -103,7 +103,7 @@ function NewStockItemModal() {
                 visible={!!errors["quantity"]}
               />
             </View>
-            <Spacer direction={"horizontal"} size={"medium"} />
+            <Spacer direction={"horizontal"} size={"md"} />
             <View style={styles.helperTextContainer}>
               <Picker
                 items={newStockItemModel.stockUnits}
@@ -117,7 +117,7 @@ function NewStockItemModal() {
               />
             </View>
           </View>
-          <Spacer direction={"vertical"} size={"medium"} />
+          <Spacer direction={"vertical"} size={"md"} />
           <Picker
             items={newStockItemModel.stockOwners}
             label={fields.owner.label}
@@ -132,9 +132,9 @@ function NewStockItemModal() {
             type={"error"}
             visible={!!errors["owner"]}
           />
-          <Spacer direction={"vertical"} size={"medium"} />
+          <Spacer direction={"vertical"} size={"md"} />
           <View style={styles.lineContainer}>
-            <Spacer direction={"horizontal"} size={"medium"} />
+            <Spacer direction={"horizontal"} size={"md"} />
             <View style={styles.helperTextContainer}>
               <DatePicker
                 date={fields.openingDate.value}
@@ -151,7 +151,7 @@ function NewStockItemModal() {
               />
             </View>
           </View>
-          <Spacer direction={"vertical"} size={"medium"} />
+          <Spacer direction={"vertical"} size={"md"} />
           <View style={styles.lineContainer}>
             <View style={styles.helperTextContainer}>
               <DatePicker
@@ -168,7 +168,7 @@ function NewStockItemModal() {
                 visible={!!errors["expirationDate"]}
               />
             </View>
-            <Spacer direction={"horizontal"} size={"medium"} />
+            <Spacer direction={"horizontal"} size={"md"} />
             <View style={styles.helperTextContainer}>
               <DatePicker
                 date={fields.purchaseDate.value}
@@ -185,7 +185,7 @@ function NewStockItemModal() {
               />
             </View>
           </View>
-          <Spacer direction={"vertical"} size={"medium"} />
+          <Spacer direction={"vertical"} size={"md"} />
           <View style={styles.lineContainer}>
             <View style={styles.helperTextContainer}>
               <TextInput.Outlined
@@ -199,7 +199,7 @@ function NewStockItemModal() {
                 visible={!!errors["barcode"]}
               />
             </View>
-            <Spacer direction={"horizontal"} size={"medium"} />
+            <Spacer direction={"horizontal"} size={"md"} />
             <View style={styles.helperTextContainer}>
               <TextInput.Outlined
                 label={fields.brand.label}
@@ -213,7 +213,7 @@ function NewStockItemModal() {
               />
             </View>
           </View>
-          <Spacer direction={"vertical"} size={"medium"} />
+          <Spacer direction={"vertical"} size={"md"} />
           <View style={styles.fullLineContainer}>
             <View style={styles.helperTextContainer}>
               <TextInput.Outlined
@@ -237,7 +237,7 @@ function NewStockItemModal() {
               label={"Cancel"}
               onPress={onCancel}
             />
-            <Spacer direction={"horizontal"} size={"large"} />
+            <Spacer direction={"horizontal"} size={"xl"} />
             <Button.Filled label={"Add"} onPress={onAdd} />
           </View>
         </Card>

@@ -15,10 +15,10 @@ function getStyles() {
       flex: 1,
     },
     buttonContent: {
-      height: theme.sizes.spacing.xxlarge,
+      height: theme.sizes.spacing.xxxl,
     },
     buttonWrapper: {
-      borderRadius: theme.sizes.borderRadius.large,
+      borderRadius: theme.sizes.borderRadius.lg,
       flex: 1,
       overflow: "hidden",
     },
