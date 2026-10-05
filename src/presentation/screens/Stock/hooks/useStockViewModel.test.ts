@@ -13,7 +13,7 @@ import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
 import useStockViewModel, { fetchStock } from "./useStockViewModel";
 
 jest.mock("expo-router", () => ({
-  router: { push: jest.fn() },
+  router: { push: jest.fn(), setParams: jest.fn() },
   useLocalSearchParams: jest.fn(),
 }));
 jest.mock("@react-navigation/native", () => ({ useIsFocused: jest.fn() }));
@@ -243,6 +243,38 @@ describe("route param", () => {
     rerender({});
 
     expect(result.current.activeFilter).toBe("EXPIRED");
+  });
+});
+
+describe("route param consumption", () => {
+  it("SHOULD clear the param once applied so a repeated See all re-applies it", () => {
+    spies.params.mockReturnValue({ filter: "EXPIRING" });
+    const { rerender, result } = setup();
+
+    expect(result.current.activeFilter).toBe("EXPIRING");
+    expect(jest.mocked(router.setParams)).toHaveBeenCalledWith({
+      filter: undefined,
+    });
+
+    act(() => {
+      result.current.onFilterChange("ALL");
+    });
+    // the router now reports the cleared param
+    spies.params.mockReturnValue({});
+    rerender({});
+    expect(result.current.activeFilter).toBe("ALL");
+
+    // Home "See all" pushes the same value again
+    spies.params.mockReturnValue({ filter: "EXPIRING" });
+    rerender({});
+    expect(result.current.activeFilter).toBe("EXPIRING");
+  });
+
+  it("SHOULD NOT clear anything WHEN the filter param is absent or unknown", () => {
+    spies.params.mockReturnValue({ filter: "bogus" });
+    setup();
+
+    expect(jest.mocked(router.setParams)).not.toHaveBeenCalled();
   });
 });
 
