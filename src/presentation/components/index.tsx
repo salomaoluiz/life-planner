@@ -9,6 +9,10 @@ export { default as Button, ButtonProps } from "./Button";
 export { default as Card, CardProps } from "./Card";
 export { default as Chip, ChipProps } from "./Chip";
 export { default as ChipGroup, ChipGroupProps, ChipOption } from "./ChipGroup";
+export {
+  default as ColorSwatchGroup,
+  ColorSwatchGroupProps,
+} from "./ColorSwatchGroup";
 export { default as ConfirmDialog, ConfirmDialogProps } from "./ConfirmDialog";
 export { default as DateField, DateFieldProps } from "./DateField";
 export { default as DatePicker, DatePickerProps } from "./DatePicker";
@@ -24,6 +28,10 @@ export {
   IconButtonProps,
   IconProps,
 } from "./Icon";
+export {
+  default as IconChoiceGroup,
+  IconChoiceGroupProps,
+} from "./IconChoiceGroup";
 export { default as IconTile, IconTileProps } from "./IconTile";
 export { default as ListItem, ListItemProps } from "./ListItem";
 export { default as Menu, MenuProps } from "./Menu";
