@@ -1,6 +1,6 @@
 # Theme & styling (`src/presentation/theme`)
 
-`const { theme, isDark, themeMode, setThemeMode } = useTheme()` from `@presentation/theme`. `themeMode` is `ThemeMode.SYSTEM | LIGHT | DARK` (default SYSTEM, follows the OS live); `isDark` is the resolved value. `theme = { colors, sizes, dark }` (Paper MD3 theme extended).
+`const { theme, isDark, themeMode, setThemeMode } = useTheme()` from `@presentation/theme`. `themeMode` is `ThemeMode.SYSTEM | LIGHT | DARK` (default SYSTEM, follows the OS live); `isDark` is the resolved value. `theme = { breakpoints, colors, dark, fontsLoaded, sizes, typography }` (Paper MD3 theme extended). `useBreakpoint()` returns `compact | medium | expanded`; content width comes from `theme.sizes.size.contentMaxWidth`/`formMaxWidth`.
 
 ## Styles pattern (every screen/component has `styles.ts`)
 
@@ -47,10 +47,24 @@ If styles depend on state, pass it as a parameter: `useStyles({ disabled, isFocu
 
 ## Colors (`theme.colors`, light & dark in `constants/colors.ts`)
 
-Grafite tokens (exactly these 18 in both themes, typed `Colors`/`ColorToken`): `accent, accentSoft, accentText, background, border, expense, expenseSoft, focusRing, income, incomeSoft, onAccent, scrim, surface, surfaceRaised, textPrimary, textSecondary, warning, warningSoft`.
-Paper MD3 keys are derived from the tokens by `buildPaperTheme` (`theme/paper`) and never typed on `theme.colors`. Category picker colors live in `constants/categoryColors.ts`. No color literals outside `theme/constants` (guarded by `noColorLiterals.test.ts`); contrast >= 4.5:1 is guarded by `contrast.test.ts`.
-Adding a color: add to BOTH light and dark objects.
+Grafite tokens (exactly these 18 in both themes, typed `Colors`/`ColorToken`):
 
-Glass surfaces: `<BlurView intensity={theme.dark ? 20 : 40} tint={theme.dark ? "dark" : "light"} />` inside a wrapper with `overflow: "hidden"`, `borderRadius`, `borderColor: theme.colors.border`.
+| Token                           | Role                                         |
+| ------------------------------- | -------------------------------------------- |
+| `background`                    | screen background                            |
+| `surface` / `surfaceRaised`     | cards, sheets / elevated or selected surface |
+| `border`                        | 1 px outlines and dividers                   |
+| `textPrimary` / `textSecondary` | main / supporting text                       |
+| `accent` / `onAccent`           | primary action / content on accent           |
+| `accentSoft` / `accentText`     | accent tint / accent-colored text            |
+| `income` / `incomeSoft`         | positive amounts / tint                      |
+| `expense` / `expenseSoft`       | negative amounts / tint                      |
+| `warning` / `warningSoft`       | warnings / tint                              |
+| `focusRing`                     | keyboard/input focus outline                 |
+| `scrim`                         | modal overlay                                |
+
+Paper MD3 keys (`primary`, `onSurface`, ...) are derived from the tokens by `buildPaperTheme` (`theme/paper`); never read them in components. Category picker colors live in `constants/categoryColors.ts`. No color literals outside `theme/constants` (guarded by `noColorLiterals.test.ts`). Adding a color: add it to BOTH `dark` and `light` in `constants/colors.ts` and keep `contrast.test.ts` (>= 4.5:1) green.
+
+Flat surfaces: `surface` + 1 px `border`; no shadows except the quick-add button (spec 009); glass/blur is removed by spec 008.
 
 Layout helpers: `@utils/device` (`getScreenSizes()`, `getWindowsSizes()`), `@utils/platform` (`isWeb()`, …).
