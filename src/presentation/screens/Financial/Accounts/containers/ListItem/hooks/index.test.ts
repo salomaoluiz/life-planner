@@ -1,6 +1,5 @@
 import { AccountHasTransactions } from "@domain/entities/errors";
 
-
 import { act, mocks, setup, spies } from "./mocks/index.mocks";
 
 const deleteParams = { id: "acc-1", ownerId: "owner-1" };

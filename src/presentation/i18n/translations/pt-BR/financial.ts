@@ -14,8 +14,7 @@ const financial = {
     deleteBtn: "Excluir",
     editAccount: "Editar Conta",
     errors: {
-      hasTransactions:
-        "Esta conta tem transações. Exclua ou mova-as primeiro.",
+      hasTransactions: "Esta conta tem transações. Exclua ou mova-as primeiro.",
     },
     loading: "Carregando...",
     name: "Nome",

@@ -29,9 +29,9 @@ it("SHOULD map 403 to FinancialOwnerNotAllowed AND 404 to FinancialNotFound", ()
   expect(setupThrowable(new ApiBusinessError("Forbidden", 403))).toBeInstanceOf(
     FinancialOwnerNotAllowed,
   );
-  expect(
-    setupThrowable(new ApiBusinessError("Not Found", 404)),
-  ).toBeInstanceOf(FinancialNotFound);
+  expect(setupThrowable(new ApiBusinessError("Not Found", 404))).toBeInstanceOf(
+    FinancialNotFound,
+  );
 });
 
 it("SHOULD map 409 with the conflict factory of the call", () => {
