@@ -10,6 +10,7 @@ export {
   createCategoryUseCase as createFinancialCategoryUseCase,
   deleteCategoryUseCase as deleteFinancialCategoryUseCase,
   getCategoriesUseCase as getFinancialCategoriesUseCase,
+  getMostUsedCategoriesUseCase as getMostUsedFinancialCategoriesUseCase,
   refreshCategoriesUseCase as refreshFinancialCategoriesUseCase,
   updateCategoryUseCase as updateFinancialCategoryUseCase,
 } from "./categories";
