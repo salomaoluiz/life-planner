@@ -62,8 +62,8 @@ it("SHOULD render Box Skeleton with default border radius", () => {
   ]);
   expect(rect.props).toMatchObject({
     height: 12,
-    rx: 9,
-    ry: 9,
+    rx: 14,
+    ry: 14,
     width: 12,
     x: "0",
     y: "0",
