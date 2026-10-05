@@ -24,7 +24,7 @@ layers:
   - data: Models, Datasources, Repository Implementations
   - infrastructure: External services configuration (Supabase, API client, token storage)
   - presentation: Screens, Components, Hooks, Containers
-  - navigation: App Routing
+  - navigation: App Routing (4 tabs + quick-add button, /settings route pushed from Home, segmented Finances layout; no drawer or FAB)
   - providers: Context Providers
   - utils: Helper functions
 ```
