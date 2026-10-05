@@ -8,6 +8,14 @@ entities:
     path: src/domain/entities/stock/StockEntity.ts
     properties:
       - (Properties define the stock/inventory item structure)
+  stockExpiration:
+    path: src/domain/entities/stock/stockExpiration.ts
+    description: Single source of truth for the 7-day expiration rule (calendar-day based, local time)
+    exports:
+      - CLOSE_TO_EXPIRATION_DAYS (7)
+      - StockExpirationStatus (EXPIRED | EXPIRING | OK)
+      - daysUntilExpiration(expirationDate, now)
+      - getStockExpirationStatus(expirationDate, now)
 
 interfaces:
   StockRepository:
