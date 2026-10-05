@@ -10,7 +10,7 @@ Sibling repo: NestJS 10 + Prisma/Postgres REST API (Clean Architecture/DDD) that
 - Migration is done module by module, swapping only the **datasource** layer (Supabase datasource → API datasource via `@infrastructure/fetcher`) while domain, use cases and presentation stay unchanged. Remove the Supabase datasource and its docs once a module is fully migrated.
 - **Families are migrated** (spec 003): the family datasource uses `GET|POST /api/v1/families` and `GET|PATCH|DELETE /api/v1/families/:familyId`; the API creates the owner's membership. Members, stock and financial still use Supabase.
 - **Auth and user are migrated** (spec 002): the app signs in with email/password through `@infrastructure/api` (`EXPO_PUBLIC_API_URL`, token in `@infrastructure/token`). Other modules still use **Supabase** data and will fail their queries until their datasources are migrated (RLS denies anonymous access). The backend currently exposes only: `GET /api/health`, `POST /api/v1/auth/login/email`, `POST /api/v1/auth/signup/email`, `GET /api/v1/user/me`, `GET|PATCH /api/v1/user/:id`. Authenticated calls need `Authorization: Bearer <jwt>`.
-- Finance, family and stock exist in the backend as domain entities only (no endpoints yet).
+- **Financial accounts are migrated** (spec 006): `GET|POST /api/v1/finance/accounts`, `PATCH|DELETE /api/v1/finance/accounts/:id`; money travels as integer cents (the models convert). Categories and transactions still use Supabase until the next PRs.
 - Swagger (when the backend runs): `/swagger`; base path `/api/v1`.
 
 ## Rules when touching the API contract

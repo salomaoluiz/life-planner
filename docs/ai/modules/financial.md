@@ -142,13 +142,18 @@ repositories:
     implements: TransactionRepository
 
 datasources:
-  accountsDatasource (Supabase):
-    path: src/data/datasource/data/financial/accounts/supabase/
+  accountsDatasource (API):
+    path: src/data/datasource/data/financial/accounts/api/
+    uses: "@infrastructure/api (/v1/finance/accounts); AccountModel JSON = API shape (balance in cents <-> decimal number), also the repository cache shape"
     methods:
-      - createAccount: src/data/datasource/data/financial/accounts/supabase/createAccount.ts
-      - deleteAccount: src/data/datasource/data/financial/accounts/supabase/deleteAccount.ts
-      - getAccounts: src/data/datasource/data/financial/accounts/supabase/getAccounts.ts
-      - updateAccount: src/data/datasource/data/financial/accounts/supabase/updateAccount.ts
+      - createAccount: src/data/datasource/data/financial/accounts/api/createAccount.ts
+      - deleteAccount: src/data/datasource/data/financial/accounts/api/deleteAccount.ts
+      - getAccounts: src/data/datasource/data/financial/accounts/api/getAccounts.ts
+      - updateAccount: src/data/datasource/data/financial/accounts/api/updateAccount.ts
+    helpers:
+      - financialApiError: src/data/datasource/data/financial/financialApiError.ts   # 400 -> FieldInvalid, 403 -> FinancialOwnerNotAllowed, 404 -> FinancialNotFound, 409 on delete -> AccountHasTransactions, other -> GenericError
+      - ownerQuery: src/data/datasource/data/financial/ownerQuery.ts                 # ?ownerId=a&ownerId=b (empty ownerIds -> no request)
+      - money: src/data/models/financial/money.ts                                    # cents <-> decimal number / decimal string
   categoriesDatasource (Supabase):
     path: src/data/datasource/data/financial/categories/supabase/
     methods:
@@ -210,3 +215,7 @@ view_models:
   - name: NewAccountViewModel
     path: src/presentation/screens/Financial/Accounts/modals/NewAccountModal/models/NewAccountViewModel.ts
 ```
+
+## Presentation notes (accounts)
+
+- `Financial/hooks/useFinancialErrorFeedback` opens `/business_feedback` (type Error) for `AccountHasTransactions`, `FinancialNotFound` and `FinancialOwnerNotAllowed`; the account delete hook passes its mutation error to it.
