@@ -8,5 +8,6 @@ export { default as Invite } from "./Invite";
 export { default as Login } from "./Login";
 export { default as AppTabBar } from "./Navigation/containers/AppTabBar";
 export { default as LegacyConfigRedirect } from "./Navigation/containers/LegacyConfigRedirect";
+export { default as QuickAdd } from "./QuickAdd";
 export { default as Signup } from "./Signup";
 export { default as Stock } from "./Stock";
