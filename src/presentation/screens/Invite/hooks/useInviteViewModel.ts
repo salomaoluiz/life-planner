@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useCases } from "@application/useCases";
 import {
@@ -39,6 +39,24 @@ function useInviteViewModel() {
     retry: false,
   });
 
+  // The key is constant, so a 2nd deep link that changes the token on this mounted route
+  // must refetch by hand. loadedToken is the token the shown data belongs to: while it
+  // differs from the route token the UI reports "loading" (never the old invite).
+  const [loadedToken, setLoadedToken] = useState(token);
+  const isStale = loadedToken !== token;
+
+  const requestedToken = useRef(token);
+  const { refetch } = invite;
+
+  useEffect(() => {
+    if (requestedToken.current === token) {
+      return;
+    }
+
+    requestedToken.current = token;
+    refetch().finally(() => setLoadedToken(token));
+  }, [refetch, token]);
+
   const join = useMutation<void, void>({
     cacheKey: [useCases.joinFamilyMemberUseCase.uniqueName],
     fetch: async () =>
@@ -55,7 +73,7 @@ function useInviteViewModel() {
   }, [join.status]);
 
   function getStatus() {
-    if (invite.isFetching) {
+    if (isStale || invite.isFetching) {
       return "loading" as const;
     }
 
