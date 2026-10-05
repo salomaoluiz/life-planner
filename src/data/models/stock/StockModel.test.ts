@@ -40,7 +40,6 @@ it("SHOULD the StockModel has all params AND no status", () => {
 it("SHOULD fromJSON create a StockModel from the API shape (extra API fields are ignored)", () => {
   const model = StockModel.fromJSON({
     ...mocks.json,
-    createdAt: "2026-09-30T12:01:00.000Z",
     updatedAt: "2026-09-30T12:01:00.000Z",
   });
 
@@ -72,4 +71,24 @@ it("SHOULD survive a toJSON -> fromJSON cache round trip", () => {
   const original = setup();
 
   expect(StockModel.fromJSON(original.toJSON())).toStrictEqual(original);
+});
+
+it("SHOULD fromJSON read createdAt as a Date", () => {
+  expect(StockModel.fromJSON(mocks.json).createdAt).toStrictEqual(
+    new Date(mocks.json.createdAt),
+  );
+});
+
+it("SHOULD fromJSON leave createdAt undefined WHEN the cache entry has none", () => {
+  const withoutCreatedAt: Record<string, unknown> = { ...mocks.json };
+  delete withoutCreatedAt.createdAt;
+
+  expect(StockModel.fromJSON(withoutCreatedAt).createdAt).toBeUndefined();
+});
+
+it("SHOULD toJSON write createdAt as ISO or null", () => {
+  expect(setup().toJSON().createdAt).toBe(mocks.json.createdAt);
+  expect(
+    StockModel.fromJSON({ ...mocks.json, createdAt: null }).toJSON().createdAt,
+  ).toBeNull();
 });

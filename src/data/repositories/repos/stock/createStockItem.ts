@@ -30,6 +30,7 @@ async function createStockItem(params: Params, datasources: Datasources) {
   return new StockEntity({
     barcode: stock.barcode,
     brand: stock.brand,
+    createdAt: stock.createdAt,
     description: stock.description,
     expirationDate: stock.expirationDate,
     id: stock.id,

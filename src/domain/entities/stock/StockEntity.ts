@@ -14,6 +14,7 @@ export enum StockUnits {
 interface IStockEntity {
   barcode?: string;
   brand?: string;
+  createdAt?: Date;
   description: string;
   expirationDate?: Date;
   id: string;
@@ -29,6 +30,7 @@ interface IStockEntity {
 class StockEntity {
   barcode?: string;
   brand?: string;
+  createdAt?: Date;
   description: string;
   expirationDate?: Date;
   id: string;
@@ -43,6 +45,7 @@ class StockEntity {
   constructor(params: IStockEntity) {
     this.barcode = params.barcode;
     this.brand = params.brand;
+    this.createdAt = params.createdAt;
     this.description = params.description;
     this.expirationDate = params.expirationDate;
     this.id = params.id;
