@@ -12,11 +12,16 @@ function walk(dir: string): string[] {
   });
 }
 
-it("SHOULD NOT hard-code colors in src/presentation (only theme/constants may)", () => {
+it("SHOULD NOT hard-code colors in src/presentation (only theme/constants and the category palette may)", () => {
   const offenders = walk(root)
     .filter(
       (file) =>
         !file.includes(`${path.sep}theme${path.sep}constants${path.sep}`),
+    )
+    // User-facing category palette (spec 013), also in colorLiteralIgnores.
+    .filter(
+      (file) =>
+        !file.endsWith(`${path.sep}constants${path.sep}categoryColors.ts`),
     )
     .filter(
       (file) => !/\.test\.tsx?$|\.mocks\.tsx?$|\.fixture\.tsx?$/.test(file),
