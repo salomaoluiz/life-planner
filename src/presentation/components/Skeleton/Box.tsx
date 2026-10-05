@@ -2,7 +2,7 @@ import React from "react";
 import ContentLoader, { Rect } from "react-content-loader/native";
 
 import { getSize } from "@components/Skeleton/utils";
-import { useTheme } from "@presentation/theme";
+import { useKitTheme } from "@components/utils/useKitTheme";
 
 export interface Props {
   borderRadius?: number;
@@ -11,17 +11,17 @@ export interface Props {
 }
 
 function BoxSkeleton(props: Props) {
-  const { theme } = useTheme();
+  const { colors, radius: kitRadius } = useKitTheme();
 
-  const radius = props.borderRadius ?? theme.sizes.borderRadius.md;
+  const radius = props.borderRadius ?? kitRadius.md;
 
   const height = getSize(props.height, "height");
   const width = getSize(props.width, "width");
 
   return (
     <ContentLoader
-      backgroundColor={theme.colors.textPrimary}
-      foregroundColor={theme.colors.textSecondary}
+      backgroundColor={colors.surfaceRaised}
+      foregroundColor={colors.border}
       height={height}
       speed={1}
       testID={"skeleton-loader"}

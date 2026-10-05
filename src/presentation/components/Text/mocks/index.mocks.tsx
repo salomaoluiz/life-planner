@@ -2,46 +2,23 @@ import { render } from "@tests";
 
 import { Text, TextProps } from "@components";
 import { TextMode } from "@components/Text/types";
-import { ThemeMode } from "@domain/entities/configs/ConfigsEntity";
-import * as theme from "@presentation/theme";
-import { lightTheme } from "@presentation/theme/provider";
 
-jest.mock("@presentation/theme");
+const defaultProps = { testID: "default-text", value: "Text Label" };
 
-jest.spyOn(theme, "useTheme").mockReturnValue({
-  isDark: false,
-  setThemeMode: jest.fn(),
-  theme: lightTheme,
-  themeMode: ThemeMode.SYSTEM,
-});
-
-const defaultProps = {
-  testID: "default-text",
-  value: "Text Label",
+const components = {
+  [TextMode.Body]: Text.Body,
+  [TextMode.BodyStrong]: Text.BodyStrong,
+  [TextMode.Caption]: Text.Caption,
+  [TextMode.Display]: Text.Display,
+  [TextMode.Heading]: Text.Heading,
+  [TextMode.Overline]: Text.Overline,
+  [TextMode.Tab]: Text.Tab,
+  [TextMode.Title]: Text.Title,
 };
 
-function renderComponent(props?: Partial<TextProps & { mode: TextMode }>) {
-  switch (props?.mode) {
-    case TextMode.Body:
-      return <Text.Body {...defaultProps} {...props} />;
-    case TextMode.Caption:
-      return <Text.Caption {...defaultProps} {...props} />;
-    case TextMode.Display:
-      return <Text.Display {...defaultProps} {...props} />;
-    case TextMode.Headline:
-      return <Text.Headline {...defaultProps} {...props} />;
-    case TextMode.Label:
-      return <Text.Label {...defaultProps} {...props} />;
-    case TextMode.Title:
-      return <Text.Title {...defaultProps} {...props} />;
-
-    default:
-      throw new Error("Invalid mode");
-  }
-}
-
-function setup(props?: Partial<TextProps & { mode: TextMode }>) {
-  return render(renderComponent({ mode: TextMode.Body, ...props }));
+function setup(props?: Partial<TextProps> & { mode?: TextMode }) {
+  const Component = components[props?.mode ?? TextMode.Body];
+  render(<Component {...defaultProps} {...props} />);
 }
 
 export { defaultProps, setup };

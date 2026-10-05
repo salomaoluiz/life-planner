@@ -196,21 +196,19 @@ describe("form", () => {
   it("SHOULD render all the icons and forward the chosen icon", () => {
     const { fields } = setup();
 
-    expect(
-      screen.UNSAFE_getAllByProps({ icon: "wallet" }).length,
-    ).toBeGreaterThan(0);
+    expect(screen.getAllByLabelText("wallet").length).toBeGreaterThan(0);
 
-    fireEvent.press(screen.UNSAFE_getAllByProps({ icon: "wallet" })[0]);
+    fireEvent.press(screen.getAllByLabelText("wallet")[0]);
 
     expect(fields.icon.onChange).toHaveBeenCalledWith("wallet");
   });
 
   it("SHOULD highlight only the selected icon", () => {
     setup({ fieldValues: { icon: "cash" } });
-    const selected = screen.UNSAFE_getAllByProps({ icon: "cash" })[0];
-    const other = screen.UNSAFE_getAllByProps({ icon: "bank" })[0];
+    const selected = screen.UNSAFE_getAllByProps({ source: "cash" })[0];
+    const other = screen.UNSAFE_getAllByProps({ source: "bank" })[0];
 
-    expect(selected.props.iconColor).not.toBe(other.props.iconColor);
+    expect(selected.props.color).not.toBe(other.props.color);
   });
 });
 

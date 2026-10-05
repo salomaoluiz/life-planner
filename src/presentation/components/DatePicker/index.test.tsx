@@ -116,7 +116,7 @@ describe("DatePicker", () => {
     );
 
     act(() => {
-      clearButton.props.onPress();
+      fireEvent.press(clearButton);
     });
 
     expect(defaultProps.onConfirm).toHaveBeenCalledWith({ date: undefined });

@@ -2,11 +2,13 @@ import { View } from "react-native";
 
 import { Spacer, Text } from "@components";
 import Icon, { IconButton } from "@components/Icon";
+import { useTranslation } from "@presentation/i18n";
 
 import useListItem, { Props } from "./hooks";
 import { getWebStyles } from "./styles";
 
 function ListItem(props: Props) {
+  const { t } = useTranslation();
   const { styles, theme } = getWebStyles();
 
   const { onDelete } = useListItem(props);
@@ -42,6 +44,7 @@ function ListItem(props: Props) {
       </View>
       <View style={[styles.row, styles.iconsContainer]}>
         <IconButton
+          accessibilityLabel={t("common.actions.delete")}
           name={"delete"}
           onPress={onDelete}
           size={theme.sizes.spacing.xl}

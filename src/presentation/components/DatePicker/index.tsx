@@ -5,7 +5,7 @@ import * as Paper from "react-native-paper-dates";
 
 import { IconButton } from "@components/Icon";
 import Text from "@components/Text";
-import { useTranslationLocale } from "@presentation/i18n";
+import { useTranslation, useTranslationLocale } from "@presentation/i18n";
 
 import getStyles from "./styles";
 
@@ -19,6 +19,7 @@ export interface DatePickerProps {
 }
 
 function DatePicker(props: DatePickerProps) {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const { getLocale } = useTranslationLocale();
   const { styles, theme } = getStyles();
@@ -87,6 +88,7 @@ function DatePicker(props: DatePickerProps) {
           {props.date ? (
             <View style={styles.clearIconContainer}>
               <IconButton
+                accessibilityLabel={t("common.actions.clear")}
                 name={"close"}
                 onPress={clearDate}
                 size={theme.sizes.spacing.xl}

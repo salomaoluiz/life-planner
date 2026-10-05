@@ -4,6 +4,7 @@ import { View } from "react-native";
 
 import { Button, Text } from "@components";
 import Icon, { IconButton } from "@components/Icon";
+import { useTranslation } from "@presentation/i18n";
 import handleAction from "@screens/Feedback/BusinessFeedback/actions";
 
 import getStyles from "./styles";
@@ -11,6 +12,7 @@ import { FeedbackType, RouteDecryptedProps } from "./types";
 import { decodeRouteParams } from "./utils";
 
 function BusinessFeedback() {
+  const { t } = useTranslation();
   const [params, setParams] = useState<null | RouteDecryptedProps>(null);
   const { styles, theme } = getStyles();
   const routeParams = useLocalSearchParams<{ feedback: string }>();
@@ -74,6 +76,7 @@ function BusinessFeedback() {
     <View style={styles.container}>
       <View style={styles.closeContainer}>
         <IconButton
+          accessibilityLabel={t("common.actions.close")}
           color={theme.colors.textPrimary}
           name={"close-circle"}
           onPress={onCloseButtonPress}
