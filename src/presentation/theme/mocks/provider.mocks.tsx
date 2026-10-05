@@ -10,6 +10,7 @@ import { ThemeMode } from "@domain/entities/configs/ConfigsEntity";
 import * as fetcher from "@infrastructure/fetcher";
 import UseMutationFixture from "@infrastructure/fetcher/mocks/useMutation.fixture";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
+import * as fonts from "@infrastructure/fonts";
 import * as monitoring from "@infrastructure/monitoring";
 import { ThemeProvider } from "@presentation/theme";
 import { colors } from "@presentation/theme/constants";
@@ -21,6 +22,7 @@ import * as loader from "@providers/loader";
 jest.mock("@presentation/theme/paper");
 jest.unmock("@presentation/theme");
 jest.mock("@infrastructure/fetcher");
+jest.mock("@infrastructure/fonts");
 
 const providerLoaderResponse = {
   isLoading: false,
@@ -74,6 +76,10 @@ const useProviderLoaderSpy = jest
 const useQuerySpy = jest
   .spyOn(fetcher, "useQuery")
   .mockReturnValue(useQueryPendingResponse);
+
+const useAppFontsSpy = jest
+  .spyOn(fonts, "useAppFonts")
+  .mockReturnValue({ failed: false, ready: true });
 
 const useMutationSpy = jest
   .spyOn(fetcher, "useMutation")
@@ -142,6 +148,7 @@ const spies = {
   captureMessage: captureMessageSpy,
   setBackgroundColor: setBackgroundColorSpy,
   setBarStyle: setBarStyleSpy,
+  useAppFonts: useAppFontsSpy,
   useColorScheme: useColorSchemeSpy,
   useMutation: useMutationSpy,
   useProviderLoader: useProviderLoaderSpy,

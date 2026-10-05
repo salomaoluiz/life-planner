@@ -136,3 +136,30 @@ it.each([
     mocks.colors[scheme as "dark" | "light"].background,
   );
 });
+
+it("SHOULD keep the loader on WHILE the fonts are not ready", () => {
+  spies.useAppFonts.mockReturnValue({ failed: false, ready: false });
+  spies.useQuery.mockReturnValue(mocks.useQuery.system);
+  setup();
+
+  expect(mocks.providerLoaderResponse.setIsLoading).not.toHaveBeenCalledWith(
+    false,
+    "theme",
+  );
+  expect(mocks.providerLoaderResponse.setIsLoading).toHaveBeenCalledWith(
+    true,
+    "theme",
+  );
+});
+
+it("SHOULD release the loader AND render with the system font WHEN font loading failed", () => {
+  spies.useAppFonts.mockReturnValue({ failed: true, ready: true });
+  spies.useQuery.mockReturnValue(mocks.useQuery.system);
+  setup();
+
+  expect(mocks.providerLoaderResponse.setIsLoading).toHaveBeenCalledWith(
+    false,
+    "theme",
+  );
+  expect(screen.getByTestId("default-children")).toBeOnTheScreen();
+});

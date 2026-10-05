@@ -39,6 +39,7 @@ If styles depend on state, pass it as a parameter: `useStyles({ disabled, isFocu
 - `size`: buttonHeight 48 · buttonHeightSheet 54 · inputHeight 50 · tabBarHeight 84 · touchTarget 44 · iconSm 16 · iconMd 20 · iconLg 24 · formMaxWidth 480 · contentMaxWidth 720
 - `typography` (Manrope, system fallback until `fontsLoaded`): display 34 · title 22 · heading 16 · body 15 · bodyStrong 15 · input 16 · caption 13 · overline 12 · tab 11. Use `getFontStyle(weight, theme.fontsLoaded)` for a custom weight (never set `fontWeight` with a Manrope family) and `tabularNums` / `<Text tabular>` for money and quantities.
 - `buildTheme(isDark, fontsLoaded)` builds the theme; `getScaleFunctions`/`rescaleSizes` remain for one-off scaling.
+- Fonts load through `useAppFonts()` from `@infrastructure/fonts` (bundled Manrope 500-800; `{ failed, ready }`). `ThemeProvider` calls it, keeps the loader on until fonts are ready, and passes `fontsLoaded = ready && !failed` to `buildTheme`. Screens never call `useFonts`.
 
 ## Breakpoints (`theme.breakpoints`, `useBreakpoint()`)
 
