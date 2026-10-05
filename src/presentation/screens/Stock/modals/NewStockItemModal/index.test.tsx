@@ -1,187 +1,138 @@
-import { StockOwners, StockUnits } from "@domain/entities/stock/StockEntity";
+import { act } from "@testing-library/react-native";
 
-import {
-  fireEvent,
-  hasText,
-  mocks,
-  screen,
-  setup,
-  spies,
-} from "./mocks/index.mocks";
+import { fireEvent, screen, setup } from "./mocks/index.mocks";
 
-function press(label: string) {
-  fireEvent.press(screen.UNSAFE_getAllByProps({ label })[0]);
-}
-
-it.each([
-  ["owners are fetching", { isFetching: true }],
-  ["owners are not loaded", { noOwners: true }],
-])("SHOULD render only the loading state WHEN %s", (_, props) => {
-  setup(props);
-
-  expect(hasText("Loading")).toBe(true);
-  expect(hasText("Add a new item to stock")).toBe(false);
-});
-
-it("SHOULD render the form WHEN owners are loaded", () => {
+it("SHOULD render the sheet title and the main fields", () => {
   setup();
 
-  expect(hasText("Add a new item to stock")).toBe(true);
-  expect(screen.UNSAFE_getAllByProps({ label: "Add" }).length).toBeGreaterThan(
-    0,
-  );
-  expect(
-    screen.UNSAFE_getAllByProps({ label: "Cancel" }).length,
-  ).toBeGreaterThan(0);
+  expect(screen.getByText("stock.form.title")).toBeOnTheScreen();
+  expect(screen.getByText("stock.form.description")).toBeOnTheScreen();
+  expect(screen.getByText("stock.form.quantity")).toBeOnTheScreen();
+  expect(screen.getByText("stock.form.unit")).toBeOnTheScreen();
+  expect(screen.getByText("stock.form.owner")).toBeOnTheScreen();
+  expect(screen.getByText("stock.form.expiration")).toBeOnTheScreen();
+  expect(screen.getByText("stock.form.moreDetails")).toBeOnTheScreen();
 });
 
-it("SHOULD go back WHEN Cancel is pressed", () => {
+it("SHOULD hide the extra fields until more details is open", () => {
   setup();
 
-  press("Cancel");
-
-  expect(spies.back).toHaveBeenCalledTimes(1);
+  expect(screen.queryByText("stock.form.purchase")).toBeNull();
+  expect(screen.queryByText("stock.form.brand")).toBeNull();
 });
 
-it("SHOULD go back WHEN the backdrop is pressed", () => {
-  setup();
+it("SHOULD show the extra fields WHEN more details is open", () => {
+  setup({ isMoreOpen: true });
 
-  fireEvent.press(screen.UNSAFE_getAllByType(mocks.Pressable)[0]);
-
-  expect(spies.back).toHaveBeenCalledTimes(1);
+  ["purchase", "opening", "brand", "barcode", "notes"].forEach((key) => {
+    expect(screen.getByText(`stock.form.${key}`)).toBeOnTheScreen();
+  });
 });
 
-it("SHOULD NOT create the item WHEN the form is invalid", () => {
-  const { mutate } = setup();
-  mocks.validateForm.mockReturnValueOnce(undefined);
+it("SHOULD toggle more details", () => {
+  const { vm } = setup();
 
-  press("Add");
+  fireEvent.press(screen.getByText("stock.form.moreDetails"));
 
-  expect(mocks.validateForm).toHaveBeenCalledWith(mocks.owners);
-  expect(mutate).not.toHaveBeenCalled();
+  expect(vm.onToggleMore).toHaveBeenCalled();
 });
 
-it("SHOULD create the item with the validated params WHEN the form is valid", () => {
-  const { mutate } = setup();
-  const params = { description: "Rice", quantity: 2 };
-  mocks.validateForm.mockReturnValueOnce(params);
-
-  press("Add");
-
-  expect(mutate).toHaveBeenCalledWith(params);
-});
-
-it("SHOULD go back WHEN the item was created", () => {
-  setup({ status: "success" });
-
-  expect(spies.back).toHaveBeenCalledTimes(1);
-});
-
-it("SHOULD NOT go back on mount WHEN the mutation is idle", () => {
-  setup();
-
-  expect(spies.back).not.toHaveBeenCalled();
-});
-
-it("SHOULD show an error message for each field with an error", () => {
+it("SHOULD show the translated field errors", () => {
   setup({
     errors: {
-      description: "Description is required",
-      quantity: "Quantity is required",
-      unit: "Unit is required",
+      description: "stock.form.descriptionRequired",
+      quantity: "stock.form.quantityRequired",
     },
   });
 
-  expect(hasText("Description is required")).toBe(true);
-  expect(hasText("Quantity is required")).toBe(true);
-  expect(hasText("Unit is required")).toBe(true);
+  expect(screen.getByText("stock.form.descriptionRequired")).toBeOnTheScreen();
+  expect(screen.getByText("stock.form.quantityRequired")).toBeOnTheScreen();
 });
 
-it("SHOULD NOT show error messages WHEN there are no errors", () => {
-  setup();
-
-  expect(screen.UNSAFE_queryAllByProps({ visible: true })).toHaveLength(0);
-});
-
-it("SHOULD forward text input changes to the form fields", () => {
-  setup();
+it("SHOULD set the description", () => {
+  const { vm } = setup();
 
   fireEvent.changeText(
-    screen.UNSAFE_getAllByProps({ label: "Description" })[0],
-    "Rice",
+    screen.getByLabelText("stock.form.description"),
+    "Leite",
   );
-  fireEvent.changeText(
-    screen.UNSAFE_getAllByProps({ label: "Quantity" })[0],
-    "3",
-  );
-  fireEvent.changeText(
-    screen.UNSAFE_getAllByProps({ label: "Barcode" })[0],
-    "123",
-  );
-  fireEvent.changeText(
-    screen.UNSAFE_getAllByProps({ label: "Brand" })[0],
-    "Acme",
-  );
-  fireEvent.changeText(screen.UNSAFE_getAllByProps({ label: "Notes" })[0], "n");
 
-  expect(mocks.fields.description.onChange).toHaveBeenCalledWith("Rice");
-  expect(mocks.fields.quantity.onChange).toHaveBeenCalledWith("3");
-  expect(mocks.fields.barcode.onChange).toHaveBeenCalledWith("123");
-  expect(mocks.fields.brand.onChange).toHaveBeenCalledWith("Acme");
-  expect(mocks.fields.notes.onChange).toHaveBeenCalledWith("n");
+  expect(vm.setField).toHaveBeenCalledWith("description", "Leite");
 });
 
-it("SHOULD show empty text for undefined optional fields", () => {
-  setup();
+it("SHOULD accept digits and reject other characters in the quantity", () => {
+  const { vm } = setup();
+  const input = screen.getByLabelText("stock.form.quantity");
 
-  expect(screen.UNSAFE_getAllByProps({ label: "Barcode" })[0].props.value).toBe(
-    "",
-  );
-  expect(screen.UNSAFE_getAllByProps({ label: "Brand" })[0].props.value).toBe(
-    "",
-  );
-  expect(screen.UNSAFE_getAllByProps({ label: "Notes" })[0].props.value).toBe(
-    "",
-  );
+  fireEvent.changeText(input, "12");
+  expect(vm.setField).toHaveBeenCalledWith("quantity", "12");
+
+  vm.setField.mockClear();
+  fireEvent.changeText(input, "1.5");
+  fireEvent.changeText(input, "a");
+  expect(vm.setField).not.toHaveBeenCalled();
 });
 
-it("SHOULD forward the unit selection to the form", () => {
-  setup();
-  const [unitPicker] = screen.UNSAFE_getAllByType(mocks.Picker);
+it("SHOULD select the owner chip and change it", () => {
+  const { vm } = setup();
 
-  unitPicker.props.onValueChange(StockUnits.LITER);
+  fireEvent.press(screen.getByText("Silva"));
 
-  expect(mocks.fields.unit.onChange).toHaveBeenCalledWith(StockUnits.LITER);
+  expect(screen.getByText("stock.list.filter.personal")).toBeOnTheScreen();
+  expect(vm.setField).toHaveBeenCalledWith("ownerId", "family-id");
 });
 
-it.each([
-  ["owner-1", StockOwners.USER],
-  ["owner-2", StockOwners.FAMILY],
-])(
-  "SHOULD set ownerId and owner type WHEN owner %s is selected",
-  (ownerId, ownerType) => {
-    setup();
-    const [, ownerPicker] = screen.UNSAFE_getAllByType(mocks.Picker);
+it("SHOULD save and show loading state without a Cancel button", () => {
+  const { vm } = setup();
 
-    ownerPicker.props.onValueChange(ownerId);
+  fireEvent.press(screen.getByText("stock.form.save"));
 
-    expect(mocks.fields.ownerId.onChange).toHaveBeenCalledWith(ownerId);
-    expect(mocks.fields.owner.onChange).toHaveBeenCalledWith(ownerType);
-  },
-);
+  expect(vm.onSave).toHaveBeenCalled();
+  expect(screen.queryByText("Cancel")).toBeNull();
+  expect(screen.queryByText("common.actions.cancel")).toBeNull();
+});
 
-it("SHOULD forward date selections to the matching fields", () => {
-  setup();
-  const [opening, expiration, purchase] = screen.UNSAFE_getAllByType(
-    mocks.DatePicker,
-  );
-  const date = new Date("2025-02-01T00:00:00Z");
+it("SHOULD mark the save button busy WHEN saving", () => {
+  setup({ isSaving: true });
 
-  opening.props.onConfirm({ date });
-  expiration.props.onConfirm({ date });
-  purchase.props.onConfirm({ date });
+  expect(
+    screen.getByRole("button", { busy: true, name: "stock.form.save" }),
+  ).toBeOnTheScreen();
+});
 
-  expect(mocks.fields.openingDate.onChange).toHaveBeenCalledWith(date);
-  expect(mocks.fields.expirationDate.onChange).toHaveBeenCalledWith(date);
-  expect(mocks.fields.purchaseDate.onChange).toHaveBeenCalledWith(date);
+it("SHOULD render the form error", () => {
+  setup({ formErrorKey: "common.errors.generic" });
+
+  expect(screen.getByText("common.errors.generic")).toBeOnTheScreen();
+});
+
+it("SHOULD render the discard dialog wired to the view model", () => {
+  const { vm } = setup({ isDiscardOpen: true });
+
+  expect(screen.getByText("common.form.discardTitle")).toBeOnTheScreen();
+
+  act(() => {
+    fireEvent.press(screen.getByText("common.form.discard"));
+  });
+  expect(vm.onDiscard).toHaveBeenCalled();
+
+  act(() => {
+    fireEvent.press(screen.getByText("common.form.keepEditing"));
+  });
+  expect(vm.onKeepEditing).toHaveBeenCalled();
+});
+
+it("SHOULD close the sheet through the view model", () => {
+  const { vm } = setup();
+
+  fireEvent.press(screen.getAllByLabelText("common.actions.close")[0]);
+
+  expect(vm.onClose).toHaveBeenCalled();
+});
+
+it("SHOULD render a skeleton and no fields WHEN loading", () => {
+  setup({ isLoading: true, model: undefined });
+
+  expect(screen.getByText("stock.form.title")).toBeOnTheScreen();
+  expect(screen.queryByText("stock.form.description")).toBeNull();
 });

@@ -1,54 +1,23 @@
 import { StyleSheet } from "react-native";
 
-import { useTheme } from "@presentation/theme";
+import { useBreakpoint, useTheme } from "@presentation/theme";
 
-function getStyles() {
+function useStyles() {
   const { theme } = useTheme();
+  const isCompact = useBreakpoint() === "compact";
 
   return {
     styles: StyleSheet.create({
-      backdrop: {
-        backgroundColor: theme.colors.scrim,
-        height: "100%",
-        position: "absolute",
-        width: "100%",
+      fields: { gap: theme.sizes.spacing.md },
+      moreRow: {
+        flexDirection: isCompact ? "column" : "row",
+        gap: theme.sizes.spacing.md,
       },
-      button: {
-        flexDirection: "row",
-        justifyContent: "center",
-        width: "100%",
-      },
-      buttonContainer: {
-        marginTop: theme.sizes.spacing.xl,
-        padding: theme.sizes.spacing.sm,
-      },
-      container: {
-        backgroundColor: theme.colors.background,
-        flex: 1,
-        height: "100%",
-        justifyContent: "center",
-        margin: theme.sizes.spacing.xl,
-        padding: theme.sizes.spacing.xl,
-      },
-      contentContainer: {},
-      formContainer: {
-        flex: 1,
-      },
-      fullLineContainer: {
-        height: "30%",
-      },
-      helperTextContainer: {
-        flex: 1,
-      },
-      lineContainer: {
-        flexDirection: "row",
-      },
-      titleContainer: {
-        alignItems: "center",
-      },
+      pair: { flexDirection: "row", gap: theme.sizes.spacing.md },
+      pairItem: { flex: 1 },
     }),
     theme,
   };
 }
 
-export default getStyles;
+export default useStyles;
