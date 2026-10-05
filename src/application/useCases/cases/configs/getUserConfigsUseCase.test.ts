@@ -15,8 +15,8 @@ it("SHOULD return the ConfigDTO", async () => {
 
   expect(result).toEqual(
     new ConfigsDTO({
-      darkMode: mocks.configsEntity.darkMode,
       language: mocks.configsEntity.language,
+      themeMode: mocks.configsEntity.themeMode,
     }),
   );
 });

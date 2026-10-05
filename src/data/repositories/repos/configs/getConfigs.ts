@@ -11,8 +11,8 @@ async function getConfigs() {
     const model = ConfigsModel.fromJSON(cachedConfigs);
 
     return new ConfigsEntity({
-      darkMode: model.darkMode,
       language: model.language,
+      themeMode: model.themeMode,
     });
   }
 

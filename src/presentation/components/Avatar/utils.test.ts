@@ -1,3 +1,4 @@
+import { ThemeMode } from "@domain/entities/configs/ConfigsEntity";
 import { useTheme } from "@presentation/theme";
 import { lightTheme } from "@presentation/theme/provider";
 
@@ -12,10 +13,11 @@ describe("Avatar Utils", () => {
   beforeEach(() => {
     mockUseTheme.mockReturnValue({
       isDark: false,
-      setIsDark: jest.fn(),
+      setThemeMode: jest.fn(),
       theme: {
         ...lightTheme,
       },
+      themeMode: ThemeMode.SYSTEM,
     } as const);
   });
 
