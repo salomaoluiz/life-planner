@@ -1,95 +1,85 @@
-import { GenericError } from "@domain/entities/errors";
-import FinancialTransactionViewModel from "@screens/Financial/Transactions/models/FinancialTransactionViewModel";
+import { fireEvent, screen } from "@testing-library/react-native";
 
-import {
-  fireEvent,
-  hasText,
-  mocks,
-  screen,
-  setup,
-  spies,
-} from "./mocks/screen.mocks";
+import { hasText } from "@tests";
 
-it("SHOULD render the loading title WHEN fetching", () => {
-  setup({ isFetching: true });
+import { makeEntries, setup } from "./mocks/screen.mocks";
 
-  expect(hasText("Loading...")).toBe(true);
-  expect(screen.queryByTestId("flashList")).not.toBeOnTheScreen();
+it("SHOULD render skeletons WHEN loading", () => {
+  setup({ isLoading: true });
+
+  expect(screen.getAllByTestId("transactions-skeleton")).toHaveLength(6);
 });
 
-it("SHOULD render the error message WHEN the query failed", () => {
-  setup({ error: true });
+it("SHOULD render ErrorState with a retry that calls onRetry", () => {
+  const onRetry = jest.fn();
+  setup({ errorMessage: "boom", onRetry });
 
-  expect(hasText(`Error ${new GenericError().message}`)).toBe(true);
-  expect(screen.queryByTestId("flashList")).not.toBeOnTheScreen();
+  expect(hasText("boom")).toBe(true);
+  fireEvent.press(screen.getByText("common.actions.tryAgain"));
+  expect(onRetry).toHaveBeenCalledTimes(1);
 });
 
-it("SHOULD render one list item per transaction", () => {
-  setup({ items: mocks.items });
-
-  const rows = screen.getAllByTestId("listItem");
-  expect(rows).toHaveLength(2);
-  expect(rows[0].props.title).toBe("Later");
-});
-
-it("SHOULD render an empty list WHEN there is no data", () => {
-  setup();
-
-  expect(screen.getByTestId("flashList")).toBeOnTheScreen();
-  expect(screen.queryAllByTestId("listItem")).toHaveLength(0);
-});
-
-it("SHOULD pass refetch to every list item", () => {
-  const { refetch } = setup({ items: mocks.items });
-
-  fireEvent.press(screen.getAllByTestId("listItem")[0]);
-
-  expect(refetch).toHaveBeenCalled();
-});
-
-it("SHOULD set the refresh button as header WHEN not fetching", () => {
-  const { refetch } = setup();
-
-  expect(mocks.setOptions).toHaveBeenCalledTimes(1);
-  const { headerRight } = mocks.setOptions.mock.calls[0][0];
-  expect(headerRight().props.refetchQuery).toBe(refetch);
-});
-
-it("SHOULD NOT set the header WHEN fetching", () => {
-  setup({ isFetching: true });
-
-  expect(mocks.setOptions).not.toHaveBeenCalled();
-});
-
-it("SHOULD refetch WHEN the screen is focused", () => {
-  const { refetch } = setup({ focused: true });
-
-  expect(refetch).toHaveBeenCalledTimes(1);
-});
-
-it("SHOULD NOT refetch WHEN the screen is not focused", () => {
-  const { refetch } = setup({ focused: false });
-
-  expect(refetch).not.toHaveBeenCalled();
-});
-
-it("SHOULD NOT render an add button (adding lives in the quick-add tab button)", () => {
-  setup();
-
-  expect(screen.UNSAFE_queryAllByProps({ icon: "plus" })).toHaveLength(0);
-});
-
-it("SHOULD build view models sorted by date ascending WHEN fetching", async () => {
-  setup();
-  const { cacheKey, fetch } = spies.useQuery.mock.calls[0][0];
-  spies.getOwners.mockResolvedValue(mocks.owners);
-  spies.getTransactions.mockResolvedValue(mocks.dtos);
-
-  const result = (await fetch()) as FinancialTransactionViewModel[];
-
-  expect(cacheKey).toEqual(["get_transactions"]);
-  expect(spies.getTransactions).toHaveBeenCalledWith({
-    ownerIds: ["owner-1", "owner-2"],
+it("SHOULD render the empty month state with the month in the title and an add button", () => {
+  const onAddPress = jest.fn();
+  setup({
+    entries: [],
+    isEmptyMonth: true,
+    monthLabel: "October 2026",
+    onAddPress,
   });
-  expect(result.map((vm) => vm.description)).toEqual(["Earlier", "Later"]);
+
+  expect(
+    hasText('financial.transactions.emptyTitle {"month":"October 2026"}'),
+  ).toBe(true);
+  fireEvent.press(screen.getByText("financial.transactions.add"));
+  expect(onAddPress).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD render the filtered empty state and clear filters", () => {
+  const onClearFilters = jest.fn();
+  setup({ entries: [], isFilteredEmpty: true, onClearFilters });
+
+  expect(hasText("financial.transactions.noMatch")).toBe(true);
+  fireEvent.press(screen.getByText("financial.common.clearFilters"));
+  expect(onClearFilters).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD render the day header with Today and the rows", () => {
+  setup({ entries: makeEntries(), stickyIndices: [0] });
+
+  expect(hasText("financial.transactions.today")).toBe(true);
+  expect(screen.getAllByTestId(/^transaction-row-tx-\d$/)).toHaveLength(2);
+});
+
+it("SHOULD pass the day header indices to the list as sticky", () => {
+  setup({ entries: makeEntries(), stickyIndices: [0] });
+
+  expect(screen.getByTestId("flashList").props.stickyHeaderIndices).toEqual([
+    0,
+  ]);
+});
+
+it("SHOULD call onRowPress with the transaction id", () => {
+  const onRowPress = jest.fn();
+  setup({ entries: makeEntries(), onRowPress, stickyIndices: [0] });
+
+  fireEvent.press(screen.getAllByTestId(/^transaction-row-tx-\d$/)[0]);
+
+  expect(onRowPress).toHaveBeenCalledWith("tx-1");
+});
+
+it("SHOULD show the month picker only when open", () => {
+  setup({ isMonthPickerOpen: false });
+  expect(hasText("financial.transactions.monthPicker.title")).toBe(false);
+
+  setup({ isMonthPickerOpen: true });
+  expect(hasText("financial.transactions.monthPicker.title")).toBe(true);
+});
+
+it("SHOULD show a summary retry WHEN the summary failed", () => {
+  const onSummaryRetry = jest.fn();
+  setup({ onSummaryRetry, summary: undefined, summaryError: true });
+
+  fireEvent.press(screen.getByText("common.actions.tryAgain"));
+  expect(onSummaryRetry).toHaveBeenCalledTimes(1);
 });

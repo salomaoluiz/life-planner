@@ -5,7 +5,6 @@ import TransactionDTO, {
 } from "@application/dto/financial/TransactionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
-import FinancialTransactionViewModel from "@screens/Financial/Transactions/models/FinancialTransactionViewModel";
 
 const owners = [
   new OwnerDTO({ id: "owner-1", name: "Alice Test", type: OwnerType.USER }),
@@ -70,17 +69,4 @@ function makeTransactionDTO(overrides: Partial<ITransactionDTO> = {}) {
   });
 }
 
-function makeTransactionViewModel(overrides: Partial<ITransactionDTO> = {}) {
-  return new FinancialTransactionViewModel(
-    makeTransactionDTO(overrides),
-    owners,
-  );
-}
-
-export {
-  accounts,
-  categories,
-  makeTransactionDTO,
-  makeTransactionViewModel,
-  owners,
-};
+export { accounts, categories, makeTransactionDTO, owners };
