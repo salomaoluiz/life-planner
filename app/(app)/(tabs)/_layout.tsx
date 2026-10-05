@@ -68,16 +68,6 @@ export default function TabNavigator() {
           title: t("financial.routeTitle"),
         }}
       />
-      <Tabs.Screen
-        name={"config/index"}
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <Icon color={color} name={"cog"} size={size} />
-          ),
-          title: t("configurations.routeTitle"),
-        }}
-      />
     </Tabs>
   );
 }
