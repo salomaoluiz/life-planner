@@ -1,3 +1,4 @@
+export { Breakpoint, breakpoints, getBreakpoint } from "./breakpoints";
 export {
   categoryColors,
   categoryDefaultSwatch,

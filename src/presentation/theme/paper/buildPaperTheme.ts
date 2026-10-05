@@ -13,6 +13,7 @@ export function buildPaperTheme(theme: ThemeProp): PaperAppTheme {
 
   return {
     ...base,
+    breakpoints: theme.breakpoints,
     colors: {
       ...base.colors,
       backdrop: t.scrim,

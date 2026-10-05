@@ -163,6 +163,7 @@ jest.mock("@tanstack/react-query");
 jest.mock("@sentry/react-native");
 
 jest.mock("@presentation/theme", () => ({
+  useBreakpoint: jest.fn().mockReturnValue("compact"),
   useTheme: jest.fn().mockReturnValue({
     isDark: false,
     setThemeMode: jest.fn(),

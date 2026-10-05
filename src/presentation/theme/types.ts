@@ -1,6 +1,13 @@
-import { Colors, Sizes, TypographyStyle, TypographyToken } from "./constants";
+import {
+  breakpoints,
+  Colors,
+  Sizes,
+  TypographyStyle,
+  TypographyToken,
+} from "./constants";
 
 export type ThemeProp = {
+  breakpoints: typeof breakpoints;
   colors: Colors;
   dark: boolean;
   fontsLoaded: boolean;
