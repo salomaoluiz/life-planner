@@ -7,8 +7,8 @@ it("SHOULD render correctly from entity", () => {
 
   expect(result).toEqual(
     new ConfigsDTO({
-      darkMode: mocks.defaultProps.darkMode,
       language: mocks.defaultProps.language,
+      themeMode: mocks.defaultProps.themeMode,
     }),
   );
 });

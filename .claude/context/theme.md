@@ -1,6 +1,6 @@
 # Theme & styling (`src/presentation/theme`)
 
-`const { theme, isDark, setIsDark } = useTheme()` from `@presentation/theme`. `theme = { colors, sizes, dark }` (Paper MD3 theme extended).
+`const { theme, isDark, themeMode, setThemeMode } = useTheme()` from `@presentation/theme`. `themeMode` is `ThemeMode.SYSTEM | LIGHT | DARK` (default SYSTEM, follows the OS live); `isDark` is the resolved value. `theme = { colors, sizes, dark }` (Paper MD3 theme extended).
 
 ## Styles pattern (every screen/component has `styles.ts`)
 

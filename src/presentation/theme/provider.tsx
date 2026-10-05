@@ -3,12 +3,14 @@ import { StatusBar, useColorScheme } from "react-native";
 
 import { useCases } from "@application/useCases";
 import { SaveUserConfigsUseCaseParams } from "@application/useCases/cases/configs/saveUserConfigsUseCase";
+import { ThemeMode } from "@domain/entities/configs/ConfigsEntity";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
 import { captureMessage } from "@infrastructure/monitoring";
 import { useProviderLoader } from "@providers/loader";
 
 import { colors, getScaledSizes } from "./constants";
 import { PaperThemeProvider } from "./paper";
+import { resolveIsDark } from "./resolveThemeMode";
 import { ThemeProp } from "./types";
 
 interface Props {
@@ -17,7 +19,8 @@ interface Props {
 
 interface ThemeContextData {
   isDark: boolean;
-  setIsDark: (isDark: boolean) => void;
+  setThemeMode: (themeMode: ThemeMode) => void;
+  themeMode: ThemeMode;
 }
 
 export const lightTheme: ThemeProp = {
@@ -26,7 +29,7 @@ export const lightTheme: ThemeProp = {
   sizes: getScaledSizes(),
 };
 
-const darkTheme: ThemeProp = {
+export const darkTheme: ThemeProp = {
   colors: colors.dark,
   dark: true,
   sizes: getScaledSizes(),
@@ -46,75 +49,48 @@ export function ThemeProvider({ children }: Props) {
     cacheKey: [useCases.getUserConfigsUseCase.uniqueName],
     fetch: useCases.getUserConfigsUseCase.execute,
   });
-  const colorSchema = useColorScheme();
+  const systemScheme = useColorScheme();
 
-  const [isDark, setIsDark] = useState(colorSchema === "dark");
+  const [themeMode, setThemeModeState] = useState<ThemeMode>(ThemeMode.SYSTEM);
 
-  const [theme, setTheme] = useState<ThemeProp>(
-    isDark ? darkTheme : lightTheme,
-  );
-
-  function updateBarStyle(darkMode: boolean) {
-    StatusBar.setHidden(false);
-    StatusBar.setBarStyle(darkMode ? "light-content" : "dark-content");
-    StatusBar.setBackgroundColor(
-      darkMode ? darkTheme.colors.background : lightTheme.colors.background,
-    );
-  }
+  const isDark = resolveIsDark(themeMode, systemScheme);
+  const theme = isDark ? darkTheme : lightTheme;
 
   useEffect(() => {
-    StatusBar.setHidden(true);
-  }, []);
-
-  function updateDefaultTheme() {
-    const darkMode = colorSchema === "dark";
-
-    setIsDark(darkMode);
-    updateBarStyle(darkMode);
-    setTheme(darkMode ? darkTheme : lightTheme);
-  }
-
-  function setUserTheme() {
-    const darkMode = data!.darkMode;
-
-    setIsDark(darkMode);
-    updateBarStyle(darkMode);
-    setTheme(darkMode ? darkTheme : lightTheme);
-  }
+    StatusBar.setBarStyle(isDark ? "light-content" : "dark-content");
+    StatusBar.setBackgroundColor(theme.colors.background);
+  }, [isDark]);
 
   useEffect(() => {
     switch (status) {
       case "error":
-        updateDefaultTheme();
         setIsLoading(false, "theme");
         break;
       case "pending":
         setIsLoading(true, "theme");
         break;
       case "success":
+        setThemeModeState(data!.themeMode);
         setIsLoading(false, "theme");
-        setUserTheme();
         break;
       default:
-        updateDefaultTheme();
         setIsLoading(false, "theme");
         captureMessage("Invalid useQuery status on ThemeProvider", {
-          action: "Using the default theme",
+          action: "Using the system theme",
           status,
         });
         break;
     }
   }, [status]);
 
-  function setDarkMode(isDark: boolean) {
-    mutate({ darkMode: isDark });
-    setIsDark(isDark);
-    setTheme(isDark ? darkTheme : lightTheme);
+  function setThemeMode(newMode: ThemeMode) {
+    mutate({ themeMode: newMode });
+    setThemeModeState(newMode);
   }
 
   const providerValue = useMemo(
-    () => ({ isDark, setIsDark: setDarkMode }),
-    [isDark],
+    () => ({ isDark, setThemeMode, themeMode }),
+    [isDark, themeMode],
   );
 
   return (

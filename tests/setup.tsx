@@ -160,8 +160,10 @@ jest.mock("@sentry/react-native");
 jest.mock("@presentation/theme", () => ({
   useTheme: jest.fn().mockReturnValue({
     isDark: false,
-    setIsDark: jest.fn(),
+    setThemeMode: jest.fn(),
     theme: jest.requireActual("@presentation/theme/provider").lightTheme,
+    themeMode: jest.requireActual("@domain/entities/configs/ConfigsEntity")
+      .ThemeMode.SYSTEM,
   }),
 }));
 

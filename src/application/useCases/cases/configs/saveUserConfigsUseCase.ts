@@ -1,10 +1,11 @@
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
+import { ThemeMode } from "@domain/entities/configs/ConfigsEntity";
 import { DefaultError } from "@domain/entities/errors";
 import Repositories from "@domain/repositories";
 
 export interface SaveUserConfigsUseCaseParams {
-  darkMode?: boolean;
   language?: string;
+  themeMode?: ThemeMode;
 }
 
 function saveUserConfigsUseCase(
@@ -16,8 +17,8 @@ function saveUserConfigsUseCase(
         const configs = await repositories.configsRepository.getConfigs();
 
         await repositories.configsRepository.saveConfigs({
-          darkMode: params.darkMode ?? configs.darkMode,
           language: params.language ?? configs.language,
+          themeMode: params.themeMode ?? configs.themeMode,
         });
       } catch (error) {
         if (error instanceof DefaultError) {

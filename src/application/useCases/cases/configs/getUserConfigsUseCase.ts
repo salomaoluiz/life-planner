@@ -12,8 +12,8 @@ function getUserConfigsUseCase(
         const configs = await repositories.configsRepository.getConfigs();
 
         return new ConfigsDTO({
-          darkMode: configs.darkMode,
           language: configs.language,
+          themeMode: configs.themeMode,
         });
       } catch (error) {
         if (error instanceof DefaultError) {

@@ -1,13 +1,14 @@
-import { useContext } from "react";
-import { View } from "react-native";
-import * as reactNative from "react-native";
+import { fireEvent, render } from "@tests";
 
-import { act, render } from "@tests";
+import { ThemeMode } from "@domain/entities/configs/ConfigsEntity";
 
-import { QueryStatus } from "@infrastructure/fetcher/types";
-
-import { mocks, screen, setup, spies } from "./mocks/provider.mocks";
-import { ThemeContext, ThemeProvider } from "./provider";
+import {
+  mocks,
+  renderComponent,
+  screen,
+  setup,
+  spies,
+} from "./mocks/provider.mocks";
 
 it("SHOULD render the theme provider", () => {
   setup();
@@ -30,167 +31,108 @@ it("SHOULD call all hooks correctly", () => {
     cacheKey: [mocks.useCases.saveUserConfigsUseCase.uniqueName],
     fetch: mocks.useCases.saveUserConfigsUseCase.execute,
   });
-  expect(spies.useColorScheme).toHaveBeenCalledTimes(1);
+  expect(spies.useColorScheme).toHaveBeenCalled();
 });
 
-it("SHOULD NOT keep the provider loading the theme while the query not respond", () => {
+it("SHOULD resolve SYSTEM with the OS scheme (dark)", () => {
+  spies.useColorScheme.mockReturnValue("dark");
+  spies.useQuery.mockReturnValue(mocks.useQuery.system);
   setup();
+  expect(screen.getByTestId("probe").props.accessibilityLabel).toBe(
+    "SYSTEM|true",
+  );
+});
 
-  expect(spies.setBarStyle).not.toHaveBeenCalled();
-  expect(spies.setBackgroundColor).not.toHaveBeenCalled();
-  expect(spies.setHidden).toHaveBeenCalledTimes(1);
-  expect(spies.setHidden).toHaveBeenCalledWith(true);
-  expect(mocks.providerLoaderResponse.setIsLoading).toHaveBeenCalledTimes(1);
+it("SHOULD follow a live OS change WHEN the mode is SYSTEM", () => {
+  spies.useColorScheme.mockReturnValue("light");
+  spies.useQuery.mockReturnValue(mocks.useQuery.system);
+  const { rerender } = render(renderComponent());
+  expect(screen.getByTestId("probe").props.accessibilityLabel).toBe(
+    "SYSTEM|false",
+  );
+
+  spies.useColorScheme.mockReturnValue("dark");
+  rerender(renderComponent());
+
+  expect(screen.getByTestId("probe").props.accessibilityLabel).toBe(
+    "SYSTEM|true",
+  );
+});
+
+it.each([
+  [mocks.useQuery.light, "dark", "LIGHT|false"],
+  [mocks.useQuery.dark, "light", "DARK|true"],
+])("SHOULD keep the stored mode over the OS scheme", (query, scheme, label) => {
+  spies.useColorScheme.mockReturnValue(scheme as "dark" | "light");
+  spies.useQuery.mockReturnValue(query);
+  setup();
+  expect(screen.getByTestId("probe").props.accessibilityLabel).toBe(label);
+});
+
+it("SHOULD use the system theme AND release the loader WHEN the config query fails", () => {
+  spies.useColorScheme.mockReturnValue("dark");
+  spies.useQuery.mockReturnValue(mocks.useQuery.error);
+  setup();
+  expect(screen.getByTestId("probe").props.accessibilityLabel).toBe(
+    "SYSTEM|true",
+  );
+  expect(mocks.providerLoaderResponse.setIsLoading).toHaveBeenCalledWith(
+    false,
+    "theme",
+  );
+});
+
+it("SHOULD keep the loader on while the query is pending", () => {
+  spies.useQuery.mockReturnValue(mocks.useQuery.pending);
+  setup();
   expect(mocks.providerLoaderResponse.setIsLoading).toHaveBeenCalledWith(
     true,
     "theme",
   );
 });
 
-it.each(["error", "not_mapped" as never] as QueryStatus[])(
-  'SHOULD use the default theme on query "%s" status',
-  (status) => {
-    spies.useQuery.mockReturnValueOnce({
-      ...mocks.useQuery.fixture.build(),
-      status,
-    });
-
-    setup();
-
-    expect(spies.setBarStyle).toHaveBeenCalledTimes(1);
-    expect(spies.setBarStyle).toHaveBeenCalledWith("dark-content");
-    expect(spies.setBackgroundColor).toHaveBeenCalledTimes(1);
-    expect(spies.setBackgroundColor).toHaveBeenCalledWith(
-      mocks.colors.light.background,
-    );
-    expect(spies.setHidden).toHaveBeenCalledTimes(2);
-    expect(spies.setHidden).toHaveBeenLastCalledWith(false);
-    expect(mocks.providerLoaderResponse.setIsLoading).toHaveBeenCalledTimes(1);
-    expect(mocks.providerLoaderResponse.setIsLoading).toHaveBeenCalledWith(
-      false,
-      "theme",
-    );
-  },
-);
-
 it("SHOULD capture a message in case of a unknown status", () => {
-  spies.useQuery.mockReturnValueOnce({
+  spies.useQuery.mockReturnValue({
     ...mocks.useQuery.fixture.build(),
     status: "not_mapped" as never,
   });
 
   setup();
 
-  expect(spies.captureMessage).toHaveBeenCalledTimes(1);
   expect(spies.captureMessage).toHaveBeenCalledWith(
     "Invalid useQuery status on ThemeProvider",
     {
-      action: "Using the default theme",
+      action: "Using the system theme",
       status: "not_mapped",
     },
   );
 });
 
-it("SHOULD update the StatusBar to the user theme ", () => {
-  spies.useQuery
-    .mockReturnValueOnce(mocks.useQuery.darkMode)
-    .mockReturnValueOnce(mocks.useQuery.darkMode);
-
+it("SHOULD persist only themeMode AND not remount children WHEN the user changes the mode", () => {
+  spies.useQuery.mockReturnValue(mocks.useQuery.system);
+  const mutate = jest.fn();
+  spies.useMutation.mockReturnValue({ ...mocks.useMutation, mutate });
   setup();
+  expect(mocks.mountCounter).toHaveBeenCalledTimes(1);
 
-  expect(spies.setBarStyle).toHaveBeenCalledTimes(1);
-  expect(spies.setBarStyle).toHaveBeenCalledWith("light-content");
-  expect(spies.setBackgroundColor).toHaveBeenCalledTimes(1);
+  fireEvent(screen.getByTestId("probe"), "touchEnd");
+
+  expect(mutate).toHaveBeenCalledWith({ themeMode: ThemeMode.LIGHT });
+  expect(screen.getByTestId("probe").props.accessibilityLabel).toBe(
+    "LIGHT|false",
+  );
+  expect(mocks.mountCounter).toHaveBeenCalledTimes(1);
+});
+
+it.each([
+  ["dark", "light-content"],
+  ["light", "dark-content"],
+])("SHOULD style the status bar for %s", (scheme, barStyle) => {
+  spies.useColorScheme.mockReturnValue(scheme as "dark" | "light");
+  spies.useQuery.mockReturnValue(mocks.useQuery.system);
+  setup();
+  expect(spies.setBarStyle).toHaveBeenCalledWith(barStyle);
   expect(spies.setBackgroundColor).toHaveBeenCalledWith(
-    mocks.colors.dark.background,
+    mocks.colors[scheme as "dark" | "light"].background,
   );
-  expect(spies.setHidden).toHaveBeenCalledTimes(2);
-  expect(spies.setHidden).toHaveBeenLastCalledWith(false);
-  expect(mocks.providerLoaderResponse.setIsLoading).toHaveBeenCalledTimes(1);
-  expect(mocks.providerLoaderResponse.setIsLoading).toHaveBeenLastCalledWith(
-    false,
-    "theme",
-  );
-});
-
-it('SHOULD set the theme to "light" WHEN the device color schema is "light"', () => {
-  setup();
-
-  const theme = screen.getByTestId("paper-theme-provider").props.theme.colors;
-
-  expect(theme).toEqual(mocks.colors.light);
-});
-
-it('SHOULD set the theme to "dark" WHEN the device color schema is "dark"', () => {
-  jest.spyOn(reactNative, "useColorScheme").mockReturnValueOnce("dark");
-
-  setup();
-
-  const theme = screen.getByTestId("paper-theme-provider").props.theme.colors;
-
-  expect(theme).toEqual(mocks.colors.dark);
-});
-
-it("SHOULD use the light theme WHEN the user saved light mode", () => {
-  spies.useQuery.mockReturnValueOnce(mocks.useQuery.lightMode);
-
-  setup();
-
-  expect(screen.getByTestId("paper-theme-provider").props.theme.colors).toEqual(
-    mocks.colors.light,
-  );
-  expect(spies.setBarStyle).toHaveBeenCalledWith("dark-content");
-});
-
-describe("setIsDark", () => {
-  function renderWithConsumer() {
-    let context: React.ContextType<typeof ThemeContext>;
-
-    function Consumer() {
-      context = useContext(ThemeContext);
-      return <View testID="consumer" />;
-    }
-
-    render(
-      <ThemeProvider>
-        <Consumer />
-      </ThemeProvider>,
-    );
-
-    return () => context;
-  }
-
-  it("SHOULD save the preference and switch to the dark theme", () => {
-    const getContext = renderWithConsumer();
-
-    act(() => {
-      getContext().setIsDark(true);
-    });
-
-    expect(spies.useMutation.mock.results[0].value.mutate).toHaveBeenCalledWith(
-      {
-        darkMode: true,
-      },
-    );
-    expect(getContext().isDark).toBe(true);
-    expect(
-      screen.getByTestId("paper-theme-provider").props.theme.colors,
-    ).toEqual(mocks.colors.dark);
-  });
-
-  it("SHOULD save the preference and switch back to the light theme", () => {
-    const getContext = renderWithConsumer();
-
-    act(() => {
-      getContext().setIsDark(true);
-    });
-    act(() => {
-      getContext().setIsDark(false);
-    });
-
-    expect(getContext().isDark).toBe(false);
-    expect(
-      screen.getByTestId("paper-theme-provider").props.theme.colors,
-    ).toEqual(mocks.colors.light);
-  });
 });

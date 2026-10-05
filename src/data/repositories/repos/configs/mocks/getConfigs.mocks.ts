@@ -1,12 +1,13 @@
 import ConfigsModel from "@data/models/configs/ConfigsModel";
+import { ThemeMode } from "@domain/entities/configs/ConfigsEntity";
 import cache from "@infrastructure/cache";
 
 import getConfigs from "../getConfigs";
 
 // region mocks
 const configModelMock = new ConfigsModel({
-  darkMode: false,
   language: "en-US",
+  themeMode: ThemeMode.SYSTEM,
 }).toJSON();
 
 // endregion mocks

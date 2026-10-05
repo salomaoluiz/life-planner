@@ -1,23 +1,29 @@
 import { availableLanguages } from "@presentation/i18n/translations";
 
+export enum ThemeMode {
+  DARK = "DARK",
+  LIGHT = "LIGHT",
+  SYSTEM = "SYSTEM",
+}
+
 interface IConfigsEntity {
-  darkMode: boolean;
   language: (typeof availableLanguages)[number];
+  themeMode: ThemeMode;
 }
 
 class ConfigsEntity {
-  darkMode: boolean;
   language: (typeof availableLanguages)[number];
+  themeMode: ThemeMode;
 
   constructor(params: IConfigsEntity) {
-    this.darkMode = params.darkMode;
     this.language = params.language;
+    this.themeMode = params.themeMode;
   }
 
   static defaultConfigs(): ConfigsEntity {
     return new ConfigsEntity({
-      darkMode: false,
       language: "en-US",
+      themeMode: ThemeMode.SYSTEM,
     });
   }
 }
