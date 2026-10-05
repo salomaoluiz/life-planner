@@ -1,96 +1,75 @@
-import {
-  fireEvent,
-  hasText,
-  mocks,
-  screen,
-  setup,
-  spies,
-} from "./mocks/index.mocks";
+import { fireEvent, hasText, screen, setup } from "./mocks/index.mocks";
 
 function button(label: string) {
   return screen.UNSAFE_getAllByProps({ label })[0];
 }
 
-it("SHOULD render only the loading state WHEN the invite has not loaded", () => {
-  setup({ loaded: false });
+it("SHOULD render only the skeleton WHEN loading", () => {
+  setup({ status: "loading" });
 
-  expect(hasText("Loading")).toBe(true);
-  expect(screen.UNSAFE_queryAllByProps({ label: "Accept" })).toHaveLength(0);
+  expect(screen.getAllByTestId("skeleton-loader").length).toBeGreaterThan(0);
+  expect(
+    screen.UNSAFE_queryAllByProps({ label: "invite.accept" }),
+  ).toHaveLength(0);
 });
 
-it("SHOULD render the invitation with the family name", () => {
+it("SHOULD render the not-found message and no buttons", () => {
+  setup({ status: "notFound" });
+
+  expect(hasText("invite.notFound")).toBe(true);
+  expect(
+    screen.UNSAFE_queryAllByProps({ label: "invite.accept" }),
+  ).toHaveLength(0);
+});
+
+it("SHOULD render the expired message", () => {
+  setup({ status: "expired" });
+
+  expect(hasText("invite.expired")).toBe(true);
+});
+
+it("SHOULD render the generic message on other errors", () => {
+  setup({ status: "error" });
+
+  expect(hasText("errors.generic.description")).toBe(true);
+});
+
+it("SHOULD render the invitation with an enabled Accept WHEN the email matches", () => {
   setup();
 
-  expect(hasText("You have been invited to join the family")).toBe(true);
+  expect(hasText("invite.title")).toBe(true);
   expect(hasText("Test Family")).toBe(true);
-  expect(hasText("Looks like this is invite is not for you")).toBe(false);
-});
-
-it("SHOULD enable Accept WHEN the invite email matches the signed-in user", () => {
-  setup();
-
-  expect(button("Accept").props.disabled).toBe(false);
+  expect(hasText('invite.notForYou {"email":"bob@example.test"}')).toBe(false);
+  expect(button("invite.accept").props.disabled).toBe(false);
 });
 
 it("SHOULD warn and disable Accept WHEN the invite is for someone else", () => {
-  setup({ email: "someone-else@example.test" });
+  setup({ matches: false });
 
-  expect(hasText("Looks like this is invite is not for you")).toBe(true);
-  expect(button("Accept").props.disabled).toBe(true);
+  expect(hasText('invite.notForYou {"email":"bob@example.test"}')).toBe(true);
+  expect(button("invite.accept").props.disabled).toBe(true);
 });
 
-it("SHOULD join the family with the route token WHEN Accept is pressed", () => {
-  const { mutate } = setup();
+it("SHOULD disable Accept while accepting (blocks double taps)", () => {
+  setup({ isAccepting: true });
 
-  fireEvent.press(button("Accept"));
-
-  expect(mutate).toHaveBeenCalledWith({ inviteToken: "invite-token" });
+  expect(button("invite.accept").props.disabled).toBe(true);
 });
 
-it("SHOULD go home WHEN Decline is pressed", () => {
-  const { mutate } = setup();
+it("SHOULD show the accept error message", () => {
+  setup({ acceptErrorKey: "invite.alreadyMember" });
 
-  fireEvent.press(button("Decline"));
-
-  expect(spies.replace).toHaveBeenCalledWith("/(app)/(tabs)/index");
-  expect(mutate).not.toHaveBeenCalled();
+  expect(hasText('invite.alreadyMember {"email":"bob@example.test"}')).toBe(
+    true,
+  );
 });
 
-it("SHOULD go home WHEN the family was joined", () => {
-  setup({ status: "success" });
+it("SHOULD call onAccept and onDecline from the buttons", () => {
+  const vm = setup();
 
-  expect(spies.replace).toHaveBeenCalledWith("/(app)/(tabs)/index");
-});
+  fireEvent.press(button("invite.accept"));
+  fireEvent.press(button("invite.decline"));
 
-it("SHOULD NOT navigate on mount WHEN the join is idle", () => {
-  setup();
-
-  expect(spies.replace).not.toHaveBeenCalled();
-});
-
-it("SHOULD configure the join mutation with the use case", () => {
-  setup();
-
-  expect(spies.useMutation).toHaveBeenCalledWith({
-    cacheKey: ["join_family"],
-    fetch: mocks.useCases.joinFamilyMemberUseCase.execute,
-  });
-});
-
-it("SHOULD build the invite view model from the token, user and family WHEN fetching", async () => {
-  setup();
-  const { cacheKey, fetch } = spies.useQuery.mock.calls[0][0];
-  spies.decode.mockResolvedValue(mocks.routeProps);
-  spies.getUser.mockResolvedValue(mocks.userDTO);
-  spies.getFamily.mockResolvedValue(mocks.familyDTO);
-
-  const result = await fetch();
-
-  expect(cacheKey).toEqual(["get_family"]);
-  expect(spies.decode).toHaveBeenCalledWith({ token: "invite-token" });
-  expect(spies.getFamily).toHaveBeenCalledWith({ familyId: "family-1" });
-  expect(result).toMatchObject({
-    email: "bob@example.test",
-    familyName: "Test Family",
-  });
+  expect(vm.onAccept).toHaveBeenCalledTimes(1);
+  expect(vm.onDecline).toHaveBeenCalledTimes(1);
 });
