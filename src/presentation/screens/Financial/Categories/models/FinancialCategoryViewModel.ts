@@ -39,6 +39,8 @@ class FinancialCategoryViewModel {
   constructor(
     private readonly dto: CategoryDTO,
     private readonly owners: OwnerDTO[],
+    // True when at least one other category has this one as its parent.
+    readonly hasSubcategories: boolean = false,
   ) {}
 
   static buildHierarchy(

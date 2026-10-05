@@ -35,8 +35,13 @@ function FinancialCategories() {
       const categoryDTOs =
         await useCases.getFinancialCategoriesUseCase.execute(ownerIds);
 
+      const parentIds = new Set(
+        categoryDTOs.flatMap((dto) => (dto.parentId ? [dto.parentId] : [])),
+      );
+
       return categoryDTOs.map(
-        (dto) => new FinancialCategoryViewModel(dto, owners),
+        (dto) =>
+          new FinancialCategoryViewModel(dto, owners, parentIds.has(dto.id)),
       );
     },
   });

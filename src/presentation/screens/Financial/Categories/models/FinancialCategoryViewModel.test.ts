@@ -2,6 +2,7 @@ import CategoryDTO from "@application/dto/financial/CategoryDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
+import { makeCategoryViewModel } from "../mocks/index.mocks";
 import FinancialCategoryViewModel from "./FinancialCategoryViewModel";
 
 describe("FinancialCategoryViewModel", () => {
@@ -174,4 +175,9 @@ describe("FinancialCategoryViewModel", () => {
   it("SHOULD return an empty hierarchy WHEN there are no categories", () => {
     expect(FinancialCategoryViewModel.buildHierarchy([])).toEqual([]);
   });
+});
+
+it("SHOULD default hasSubcategories to false AND expose the value it receives", () => {
+  expect(makeCategoryViewModel().hasSubcategories).toBe(false);
+  expect(makeCategoryViewModel({}, true).hasSubcategories).toBe(true);
 });

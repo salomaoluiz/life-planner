@@ -2,6 +2,7 @@ import { waitFor } from "@tests";
 
 import {
   AccountHasTransactions,
+  CategoryHasTransactions,
   FieldInvalid,
   FinancialNotFound,
   FinancialOwnerNotAllowed,
@@ -22,6 +23,10 @@ const goBack = {
 
 it.each([
   [new AccountHasTransactions(), "financial.accounts.errors.hasTransactions"],
+  [
+    new CategoryHasTransactions(),
+    "financial.categories.errors.hasTransactions",
+  ],
   [new FinancialNotFound(), "financial.errors.notFound"],
   [new FinancialOwnerNotAllowed(), "financial.errors.ownerNotAllowed"],
 ])(

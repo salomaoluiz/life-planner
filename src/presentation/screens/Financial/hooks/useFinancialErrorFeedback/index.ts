@@ -3,6 +3,7 @@ import { useEffect } from "react";
 
 import {
   AccountHasTransactions,
+  CategoryHasTransactions,
   FinancialNotFound,
   FinancialOwnerNotAllowed,
 } from "@domain/entities/errors";
@@ -17,6 +18,10 @@ import { createFeedbackRouteEncoded } from "@screens/Feedback/BusinessFeedback/u
 function getMessageKey(error: unknown): string | undefined {
   if (error instanceof AccountHasTransactions) {
     return "financial.accounts.errors.hasTransactions";
+  }
+
+  if (error instanceof CategoryHasTransactions) {
+    return "financial.categories.errors.hasTransactions";
   }
 
   if (error instanceof FinancialNotFound) {
