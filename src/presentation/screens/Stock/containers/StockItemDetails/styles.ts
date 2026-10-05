@@ -7,12 +7,7 @@ function useStyles() {
 
   return {
     styles: StyleSheet.create({
-      header: { gap: theme.sizes.spacing.md },
-      noResults: {
-        alignItems: "center",
-        gap: theme.sizes.spacing.md,
-        paddingVertical: theme.sizes.spacing.xl,
-      },
+      row: { gap: theme.sizes.spacing.xxs },
     }),
     theme,
   };

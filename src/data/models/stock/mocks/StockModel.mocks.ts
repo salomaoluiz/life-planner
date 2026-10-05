@@ -5,6 +5,7 @@ import StockModel from "../StockModel";
 const jsonMock = {
   barcode: "1234567890123",
   brand: "BrandName",
+  createdAt: new Date("2023-01-02").toISOString(),
   description: "Product Description",
   expirationDate: new Date("2025-05-11").toISOString(),
   id: "074782ac-9605-4632-8459-3a82bb9e8d83",
@@ -31,6 +32,7 @@ function setup() {
   return new StockModel({
     barcode: jsonMock.barcode,
     brand: jsonMock.brand,
+    createdAt: new Date(jsonMock.createdAt),
     description: jsonMock.description,
     expirationDate: new Date(jsonMock.expirationDate),
     id: jsonMock.id,
