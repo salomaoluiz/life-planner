@@ -3,7 +3,6 @@ import { useEffect, useMemo } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 
 import { useCases } from "@application/useCases";
-import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import {
   Button,
   Card,
@@ -14,7 +13,9 @@ import {
   Text,
   TextInput,
 } from "@components";
+import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
+import useFinancialErrorFeedback from "@screens/Financial/hooks/useFinancialErrorFeedback";
 
 import useForm from "./hooks/useForm";
 import NewTransactionItemViewModel from "./models/NewTransactionViewModel";
@@ -49,6 +50,8 @@ function NewTransactionItemModal() {
     cacheKey: [useCases.createFinancialTransactionUseCase.uniqueName],
     fetch: useCases.createFinancialTransactionUseCase.execute,
   });
+
+  useFinancialErrorFeedback(addTransaction.error);
 
   const newTransactionItemModel = useMemo(
     () =>

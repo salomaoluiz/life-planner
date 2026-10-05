@@ -71,7 +71,10 @@ describe("decimalStringToCents", () => {
     );
   });
 
-  it("SHOULD convert zero to 0 cents (the API rejects it with 400, mapped to FieldInvalid)", () => {
-    expect(decimalStringToCents("0")).toBe(0);
-  });
+  it.each(["0", "0,00", "0.0"])(
+    "SHOULD throw FieldInvalid for %j (values must be > 0, no network round trip)",
+    (text) => {
+      expect(() => decimalStringToCents(text)).toThrow(FieldInvalid);
+    },
+  );
 });

@@ -17,6 +17,7 @@ import {
 import { IconButton } from "@components/Icon";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
 import useTranslation from "@presentation/i18n/useTranslation";
+import useFinancialErrorFeedback from "@screens/Financial/hooks/useFinancialErrorFeedback";
 
 import useForm from "./hooks/useForm";
 import NewAccountViewModel from "./models/NewAccountViewModel";
@@ -81,6 +82,8 @@ function NewAccountModal() {
       }
     },
   });
+
+  useFinancialErrorFeedback(saveMutation.error);
 
   const viewModel = useMemo(() => {
     return owners.data ? new NewAccountViewModel(owners.data) : null;

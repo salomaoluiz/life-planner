@@ -52,8 +52,8 @@ it.each([
 
 describe("categoriesForOwner with a type", () => {
   function setupWithTypes() {
-    const category = (id: string, name: string, type: string) =>
-      new CategoryDTO({
+    function category(id: string, name: string, type: string) {
+      return new CategoryDTO({
         icon: "icon",
         id,
         name,
@@ -61,6 +61,7 @@ describe("categoriesForOwner with a type", () => {
         ownerId: "owner-1",
         type,
       });
+    }
 
     return new NewTransactionViewModel({
       accountsDTO: accounts,

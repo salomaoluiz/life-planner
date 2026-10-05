@@ -12,24 +12,6 @@ interface Options {
   fields?: Record<string, unknown>;
 }
 
-function mapStatus(
-  statusCode: number,
-  options: Options,
-): BusinessError | undefined {
-  switch (statusCode) {
-    case 400:
-      return new FieldInvalid(options.fields ?? {});
-    case 403:
-      return new FinancialOwnerNotAllowed();
-    case 404:
-      return new FinancialNotFound();
-    case 409:
-      return options.conflict?.();
-    default:
-      return undefined;
-  }
-}
-
 function handleFinancialApiError(
   error: unknown,
   context: Record<string, unknown>,
@@ -48,6 +30,24 @@ function handleFinancialApiError(
   const genericError = new GenericError();
   genericError.addContext({ ...context, error });
   throw genericError;
+}
+
+function mapStatus(
+  statusCode: number,
+  options: Options,
+): BusinessError | undefined {
+  switch (statusCode) {
+    case 400:
+      return new FieldInvalid(options.fields ?? {});
+    case 403:
+      return new FinancialOwnerNotAllowed();
+    case 404:
+      return new FinancialNotFound();
+    case 409:
+      return options.conflict?.();
+    default:
+      return undefined;
+  }
 }
 
 export default handleFinancialApiError;

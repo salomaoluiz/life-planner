@@ -19,7 +19,14 @@ function decimalStringToCents(value: string): number {
     throw new FieldInvalid({ value });
   }
 
-  return Math.round(Number(normalized) * CENTS);
+  const cents = Math.round(Number(normalized) * CENTS);
+
+  // Transaction values are strictly positive: "0" never needs a round trip to be rejected.
+  if (cents <= 0) {
+    throw new FieldInvalid({ value });
+  }
+
+  return cents;
 }
 
 function decimalToCents(value: number): number {

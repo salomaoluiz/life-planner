@@ -1,13 +1,11 @@
 import { CacheStringKeys } from "./keys";
 
-it("SHOULD have CACHE_FINANCIAL_CATEGORY_DATA key in CacheStringKeys", () => {
-  expect(CacheStringKeys.CACHE_FINANCIAL_CATEGORY_DATA).toBe(
-    "@cache_financial_category_data",
-  );
-});
-
-it("SHOULD have CACHE_FINANCIAL_ACCOUNT_DATA key in CacheStringKeys", () => {
-  expect(CacheStringKeys.CACHE_FINANCIAL_ACCOUNT_DATA).toBe(
-    "@cache_financial_account_data",
-  );
+// The financial cache stores the API JSON shape (cents, camelCase): the keys are versioned so
+// entries written by the Supabase-era build are never parsed by the new models.
+it.each([
+  ["CACHE_FINANCIAL_ACCOUNT_DATA", "@cache_financial_account_data_v2"],
+  ["CACHE_FINANCIAL_CATEGORY_DATA", "@cache_financial_category_data_v2"],
+  ["CACHE_FINANCIAL_TRANSACTION_DATA", "@cache_financial_transaction_data_v2"],
+] as const)("SHOULD have the versioned key %s", (name, value) => {
+  expect(CacheStringKeys[name]).toBe(value);
 });
