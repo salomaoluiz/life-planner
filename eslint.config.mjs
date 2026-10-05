@@ -10,6 +10,7 @@ import eslintBaseRule from "./eslint/rules/eslint-base.mjs";
 import importXRule from "./eslint/rules/import-x.mjs";
 import noRestrictedImportsRule from "./eslint/rules/no-restricted-imports.mjs";
 import perfectionistRule from "./eslint/rules/perfectionist.mjs";
+import presentationGuardrails from "./eslint/rules/presentation-guardrails.mjs";
 
 export default [
   { files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"] },
@@ -32,5 +33,6 @@ export default [
   importXRule,
   eslintBaseRule,
   ...noRestrictedImportsRule,
+  ...presentationGuardrails,
   perfectionistRule,
 ];
