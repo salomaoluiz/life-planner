@@ -1,336 +1,228 @@
-import { BlurView } from "expo-blur";
-import { router } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
-import { Pressable, ScrollView, View } from "react-native";
-import Svg, { Circle, Defs, LinearGradient, Stop } from "react-native-svg";
+import { View } from "react-native";
 
-import { useCases } from "@application/useCases";
 import {
+  BottomSheet,
   Button,
-  HelperText,
-  Menu,
-  Picker,
-  Spacer,
+  ChipGroup,
+  ColorSwatchGroup,
+  ConfirmDialog,
+  ErrorState,
+  IconChoiceGroup,
+  IconTile,
+  SegmentedControl,
+  SelectField,
   Text,
-  TextInput,
+  TextField,
 } from "@components";
-import Icon, { IconButton } from "@components/Icon";
-import { useMutation, useQuery } from "@infrastructure/fetcher";
-import useTranslation from "@presentation/i18n/useTranslation";
-import {
-  categoryColors,
-  categoryDefaultSwatch,
-  categoryRainbow,
-} from "@presentation/theme/constants";
-import useFinancialErrorFeedback from "@screens/Financial/hooks/useFinancialErrorFeedback";
+import Skeleton from "@components/Skeleton";
+import { useTranslation } from "@presentation/i18n";
+import { TranslationKeys } from "@presentation/i18n/types";
+import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
-import useForm from "./hooks/useForm";
-import NewCategoryViewModel from "./models/NewCategoryViewModel";
-import getStyles from "./styles";
+import CustomColorSheet from "./components/CustomColorSheet";
+import IconPickerSheet from "./components/IconPickerSheet";
+import { useNewCategoryViewModel } from "./hooks";
+import useStyles from "./styles";
 
-const AVAILABLE_ICONS = [
-  "folder",
-  "food",
-  "car",
-  "home",
-  "medical-bag",
-  "school",
-  "airplane",
-  "gift",
-  "cart",
-  "bank",
-  "cash",
-  "credit-card",
-  "water",
-  "lightning-bolt",
-  "wifi",
-  "controller",
-  "dumbbell",
-  "heart",
-];
+const SKELETON_ROWS = [0, 1, 2];
 
 function NewCategoryModal() {
-  const { styles, theme } = getStyles();
+  const { styles } = useStyles();
   const { t } = useTranslation();
+  const vm = useNewCategoryViewModel();
 
-  const [iconMenuVisible, setIconMenuVisible] = useState(false);
-  const [colorMenuVisible, setColorMenuVisible] = useState(false);
+  function err(key?: TranslationKeys) {
+    return key ? t(key) : undefined;
+  }
 
-  const owners = useQuery({
-    cacheKey: [useCases.getOwnersUseCase.uniqueName],
-    fetch: useCases.getOwnersUseCase.execute,
-  });
-
-  const categories = useQuery({
-    cacheKey: [useCases.getFinancialCategoriesUseCase.uniqueName],
-    enabled: !!owners.data,
-    fetch: async () => {
-      if (!owners.data) return [];
-      const ownerIds = owners.data.map((o) => o.id);
-      return useCases.getFinancialCategoriesUseCase.execute(ownerIds);
-    },
-  });
-
-  const { errors, fields, validateForm } = useForm();
-
-  const addCategory = useMutation({
-    cacheKey: [useCases.createFinancialCategoryUseCase.uniqueName],
-    fetch: useCases.createFinancialCategoryUseCase.execute,
-  });
-
-  useFinancialErrorFeedback(addCategory.error);
-
-  const viewModel = useMemo(() => {
-    return owners.data && categories.data
-      ? new NewCategoryViewModel(owners.data, categories.data)
-      : null;
-  }, [owners.data, categories.data]);
-
-  useEffect(() => {
-    if (addCategory.status === "success") {
-      router.back();
+  function renderBody() {
+    if (vm.isNotFound) {
+      return (
+        <ErrorState
+          message={t("financial.errors.notFound")}
+          onRetry={vm.onClose}
+          retryLabel={t("common.actions.close")}
+        />
+      );
     }
-  }, [addCategory.status]);
 
-  if (owners.isFetching || categories.isFetching || !viewModel) {
+    if (vm.isLoading) {
+      return (
+        <View>
+          {SKELETON_ROWS.map((row) => (
+            <Skeleton.ListItem key={row} testID={"category-form-skeleton"} />
+          ))}
+        </View>
+      );
+    }
+
     return (
-      <View style={styles.loadingContainer}>
-        <Text.Headline value={"Loading..."} />
+      <View style={styles.form}>
+        <View style={styles.preview}>
+          <IconTile color={vm.iconColor} name={vm.icon} size={"lg"} />
+          <Text.Heading
+            tone={vm.name ? "primary" : "secondary"}
+            value={vm.name || t("financial.categories.form.namePlaceholder")}
+          />
+        </View>
+        <TextField
+          error={err(vm.nameError)}
+          label={t("financial.categories.form.name")}
+          maxLength={80}
+          onChangeText={vm.onNameChange}
+          placeholder={t("financial.categories.form.namePlaceholder")}
+          value={vm.name}
+        />
+        <View style={styles.helper}>
+          <SegmentedControl
+            accessibilityLabel={t("financial.categories.form.type")}
+            disabled={vm.isTypeLocked}
+            onChange={vm.onTypeChange}
+            options={vm.typeOptions.map((option) => ({
+              label: t(option.labelKey),
+              tone: option.value === "EXPENSE" ? "expense" : "income",
+              value: option.value,
+            }))}
+            value={vm.type}
+          />
+          {vm.typeHelperKey && (
+            <Text.Caption tone={"secondary"} value={t(vm.typeHelperKey)} />
+          )}
+        </View>
+        <SelectField
+          closeLabel={t("common.actions.close")}
+          label={t("financial.categories.form.parent")}
+          onChange={vm.onParentChange}
+          options={[
+            { label: t("financial.categories.form.noParent"), value: "" },
+            ...vm.parentOptions.map((option) => ({
+              label: `${"– ".repeat(option.depth)}${option.label}`,
+              value: option.value,
+            })),
+          ]}
+          sheetTitle={t("financial.categories.form.parent")}
+          value={vm.parentId}
+        />
+        <ColorSwatchGroup
+          customLabel={t("financial.categories.form.customColor")}
+          label={t("financial.categories.form.color")}
+          onChange={vm.onColorChange}
+          onCustomPress={vm.onCustomColorOpen}
+          options={vm.colorOptions.map((option) => ({
+            label: t(option.labelKey),
+            value: option.value,
+          }))}
+          testID={"category-color"}
+          value={vm.iconColor}
+        />
+        <IconChoiceGroup
+          color={vm.iconColor}
+          label={t("financial.categories.form.icon")}
+          moreLabel={t("financial.categories.form.moreIcons")}
+          onChange={vm.onIconChange}
+          onMorePress={vm.onIconPickerOpen}
+          options={vm.inlineIcons}
+          testID={"category-icon"}
+          value={vm.icon}
+        />
+        <View style={styles.helper}>
+          <ChipGroup
+            disabled={vm.isOwnerLocked}
+            label={t("financial.common.belongsTo")}
+            layout={"wrap"}
+            mode={"single"}
+            onChange={vm.onOwnerChange}
+            options={translateChoices(vm.ownerChoices, t)}
+            value={vm.ownerId}
+          />
+          {vm.ownerHelperKey && (
+            <Text.Caption tone={"secondary"} value={t(vm.ownerHelperKey)} />
+          )}
+        </View>
+        {vm.formErrorKey && (
+          <Text.Body tone={"expense"} value={t(vm.formErrorKey)} />
+        )}
+        {vm.isEditing && (
+          <Button.Ghost
+            label={t("financial.categories.delete")}
+            onPress={vm.onDeletePress}
+            tone={"expense"}
+          />
+        )}
       </View>
     );
   }
 
-  function onCancel() {
-    router.back();
-  }
-
-  function onAdd() {
-    const params = validateForm(owners.data!, categories.data ?? []);
-    if (params) {
-      addCategory.mutate(params);
-    }
-  }
-
   return (
-    <View style={styles.backdropContainer}>
-      <Pressable onPress={onCancel} style={styles.backdrop} />
-      <View style={styles.container}>
-        <BlurView
-          intensity={theme.dark ? 30 : 60}
-          style={styles.blurView}
-          tint={theme.dark ? "dark" : "light"}
-        >
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <View style={styles.titleContainer}>
-              <Text.Headline value={t("financial.categories.addNewCategory")} />
-            </View>
-            <Spacer direction={"vertical"} size={"md"} />
-
-            <TextInput.Outlined
-              label={t("financial.categories.name")}
-              onChangeText={fields.name.onChange}
-              value={fields.name.value}
-            />
-            <HelperText
-              label={errors.name}
-              type={"error"}
-              visible={!!errors.name}
-            />
-            <Spacer direction={"vertical"} size={"md"} />
-
-            <Picker
-              items={[
-                { label: t("financial.categories.expense"), value: "EXPENSE" },
-                { label: t("financial.categories.income"), value: "INCOME" },
-              ]}
-              label={t("financial.categories.type")}
-              onValueChange={(val) => {
-                fields.type.onChange(val);
-                fields.parentId.onChange("");
-              }}
-              selectedValue={fields.type.value}
-            />
-            <Spacer direction={"vertical"} size={"md"} />
-
-            <Picker
-              items={viewModel.stockOwners}
-              label={t("financial.categories.owner")}
-              onValueChange={(val) => {
-                fields.ownerId.onChange(val);
-                fields.parentId.onChange("");
-              }}
-              selectedValue={fields.ownerId.value ?? owners.data![0]?.id}
-            />
-            <Spacer direction={"vertical"} size={"md"} />
-
-            <Picker
-              items={viewModel.getParentCategories(
-                fields.ownerId.value,
-                fields.type.value,
-              )}
-              label={t("financial.categories.parent")}
-              onValueChange={fields.parentId.onChange}
-              selectedValue={fields.parentId.value ?? ""}
-            />
-            <Spacer direction={"vertical"} size={"md"} />
-
-            <View style={styles.rowSelector}>
-              {/* Color Selector */}
-              <View style={styles.selectorItem}>
-                <Text.Body bold value={t("financial.categories.color")} />
-                <View style={styles.selectorTriggerWrapper}>
-                  <Menu
-                    anchor={
-                      <Pressable
-                        onPress={() => setColorMenuVisible(true)}
-                        style={[
-                          styles.colorPreviewButton,
-                          fields.iconColor.value !== "black" && {
-                            backgroundColor: fields.iconColor.value,
-                          },
-                        ]}
-                      >
-                        {fields.iconColor.value === "black" && (
-                          <RainbowCircle />
-                        )}
-                      </Pressable>
-                    }
-                    onDismiss={() => setColorMenuVisible(false)}
-                    visible={colorMenuVisible}
-                  >
-                    <View style={styles.colorMenuContent}>
-                      {categoryColors.map((color) => (
-                        <Pressable
-                          key={color}
-                          onPress={() => {
-                            fields.iconColor.onChange(color);
-                            setColorMenuVisible(false);
-                          }}
-                          style={[
-                            styles.colorOptionCircle,
-                            {
-                              backgroundColor:
-                                color === "black"
-                                  ? categoryDefaultSwatch
-                                  : color,
-                            },
-                          ]}
-                        >
-                          {fields.iconColor.value === color && (
-                            <Icon color="white" name="check" size={16} />
-                          )}
-                        </Pressable>
-                      ))}
-                    </View>
-                  </Menu>
-                  <Text.Body
-                    bold
-                    color={theme.colors.textSecondary}
-                    value=">"
-                  />
-                </View>
-              </View>
-
-              {/* Icon Selector */}
-              <View style={styles.selectorItem}>
-                <Text.Body bold value={t("financial.categories.chooseIcon")} />
-                <View style={styles.selectorTriggerWrapper}>
-                  <Menu
-                    anchor={
-                      <Pressable
-                        onPress={() => setIconMenuVisible(true)}
-                        style={styles.iconPreviewButton}
-                      >
-                        <Icon
-                          color={fields.iconColor.value}
-                          name={fields.icon.value}
-                          size={28}
-                        />
-                      </Pressable>
-                    }
-                    onDismiss={() => setIconMenuVisible(false)}
-                    visible={iconMenuVisible}
-                  >
-                    <ScrollView style={styles.iconMenuContent}>
-                      <View style={styles.iconGridMenu}>
-                        {AVAILABLE_ICONS.map((iconName) => {
-                          const isSelected = fields.icon.value === iconName;
-                          return (
-                            <View
-                              key={iconName}
-                              style={[
-                                styles.iconBoxMenu,
-                                isSelected && {
-                                  backgroundColor: theme.colors.accentSoft,
-                                },
-                              ]}
-                            >
-                              <IconButton
-                                accessibilityLabel={iconName}
-                                color={
-                                  isSelected
-                                    ? theme.colors.accent
-                                    : theme.colors.textPrimary
-                                }
-                                name={iconName}
-                                onPress={() => {
-                                  fields.icon.onChange(iconName);
-                                  setIconMenuVisible(false);
-                                }}
-                                size={theme.sizes.spacing.xl}
-                              />
-                            </View>
-                          );
-                        })}
-                      </View>
-                    </ScrollView>
-                  </Menu>
-                  <Text.Body
-                    bold
-                    color={theme.colors.textSecondary}
-                    value=">"
-                  />
-                </View>
-              </View>
-            </View>
-          </ScrollView>
-
-          <View style={styles.buttonContainer}>
-            <View style={styles.button}>
-              <Button.Text
-                customStyles={{ textColor: theme.colors.expense }}
-                label={t("financial.categories.cancel")}
-                onPress={onCancel}
-              />
-              <Spacer direction={"horizontal"} size={"xl"} />
-              <Button.Filled
-                label={t("financial.categories.add")}
-                onPress={onAdd}
-              />
-            </View>
-          </View>
-        </BlurView>
-      </View>
-    </View>
-  );
-}
-
-function RainbowCircle() {
-  return (
-    <Svg height="48" viewBox="0 0 48 48" width="48">
-      <Defs>
-        <LinearGradient id="rainbow" x1="0%" x2="100%" y1="0%" y2="100%">
-          {categoryRainbow.map((stopColor, index) => (
-            <Stop
-              key={stopColor}
-              offset={`${(index * 100) / (categoryRainbow.length - 1)}%`}
-              stopColor={stopColor}
-            />
-          ))}
-        </LinearGradient>
-      </Defs>
-      <Circle cx="24" cy="24" fill="url(#rainbow)" r="22" />
-    </Svg>
+    <>
+      <BottomSheet
+        closeLabel={t("common.actions.close")}
+        footer={
+          <Button.Primary
+            fullWidth
+            label={t(vm.saveLabelKey)}
+            loading={vm.isSaving}
+            onPress={vm.onSave}
+            size={"lg"}
+          />
+        }
+        onClose={vm.onClose}
+        presentation={"inline"}
+        title={t(vm.titleKey)}
+        visible
+      >
+        {renderBody()}
+      </BottomSheet>
+      {vm.isCustomColorOpen && (
+        <CustomColorSheet
+          applyLabel={t("financial.categories.form.customColorApply")}
+          closeLabel={t("common.actions.close")}
+          color={vm.iconColor}
+          error={err(vm.customColorError)}
+          hexLabel={t("financial.categories.form.customColorHex")}
+          onApply={vm.onCustomColorApply}
+          onChange={vm.onCustomColorChange}
+          onClose={vm.onCustomColorClose}
+          title={t("financial.categories.form.customColorTitle")}
+          value={vm.customColorDraft}
+        />
+      )}
+      {vm.isIconPickerOpen && (
+        <IconPickerSheet
+          closeLabel={t("common.actions.close")}
+          color={vm.iconColor}
+          icons={vm.pickerIcons}
+          onClose={vm.onIconPickerClose}
+          onQueryChange={vm.onIconQueryChange}
+          onSelect={vm.onIconChange}
+          query={vm.iconQuery}
+          searchPlaceholder={t("common.search.placeholder")}
+          selected={vm.icon}
+          title={t("financial.categories.form.iconsTitle")}
+        />
+      )}
+      <ConfirmDialog
+        cancelLabel={t("common.form.keepEditing")}
+        closeLabel={t("common.actions.close")}
+        confirmLabel={t("common.form.discard")}
+        message={t("common.form.discardMessage")}
+        onCancel={vm.onDiscardCancel}
+        onConfirm={vm.onDiscardConfirm}
+        title={t("common.form.discardTitle")}
+        visible={vm.isDiscardDialogOpen}
+      />
+      <ConfirmDialog
+        cancelLabel={t("common.actions.cancel")}
+        closeLabel={t("common.actions.close")}
+        confirmLabel={t("common.actions.delete")}
+        loading={vm.isDeleting}
+        message={vm.deleteMessageKeys.map((key) => t(key)).join(" ")}
+        onCancel={vm.onDeleteCancel}
+        onConfirm={vm.onDeleteConfirm}
+        title={t("financial.categories.deleteTitle", vm.deleteTitleParams)}
+        visible={vm.isDeleteDialogOpen}
+      />
+    </>
   );
 }
 
