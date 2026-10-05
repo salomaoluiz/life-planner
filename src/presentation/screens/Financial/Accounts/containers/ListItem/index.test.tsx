@@ -47,7 +47,9 @@ it("SHOULD use the muted color and show the archived badge WHEN the account is a
 it("SHOULD call onEdit WHEN the edit button is pressed", () => {
   setup();
 
-  fireEvent.press(screen.UNSAFE_getAllByProps({ icon: "pencil" })[0]);
+  fireEvent.press(
+    screen.getAllByLabelText("financial.accounts.editAccount")[0],
+  );
 
   expect(mocks.onEdit).toHaveBeenCalledTimes(1);
   expect(mocks.onDelete).not.toHaveBeenCalled();
@@ -56,7 +58,7 @@ it("SHOULD call onEdit WHEN the edit button is pressed", () => {
 it("SHOULD call onDelete WHEN the delete button is pressed", () => {
   setup();
 
-  fireEvent.press(screen.UNSAFE_getAllByProps({ icon: "delete" })[0]);
+  fireEvent.press(screen.getAllByLabelText("common.actions.delete")[0]);
 
   expect(mocks.onDelete).toHaveBeenCalledTimes(1);
 });

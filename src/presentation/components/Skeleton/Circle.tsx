@@ -1,17 +1,17 @@
 import ContentLoader, { Circle } from "react-content-loader/native";
 
-import { useTheme } from "@presentation/theme";
+import { useKitTheme } from "@components/utils/useKitTheme";
 
 interface Props {
   size: number;
 }
 
 function CircleSkeleton(props: Props) {
-  const { theme } = useTheme();
+  const { colors } = useKitTheme();
   return (
     <ContentLoader
-      backgroundColor={theme.colors.textPrimary}
-      foregroundColor={theme.colors.textSecondary}
+      backgroundColor={colors.surfaceRaised}
+      foregroundColor={colors.border}
       height={props.size}
       speed={1}
       style={{

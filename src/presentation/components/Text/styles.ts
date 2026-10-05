@@ -1,45 +1,29 @@
-import { StyleSheet, TextStyle } from "react-native";
+import { TextStyle } from "react-native";
 
-import { useTheme } from "@presentation/theme";
-import { getFontStyle, tabularNums } from "@presentation/theme/constants";
+import { useKitTheme } from "@components/utils/useKitTheme";
 
-import { TextMode, TextProps } from "./types";
+import { TextMode, TextProps, TextTone } from "./types";
 
-export function getStyles(textProps: TextProps) {
-  const { theme } = useTheme();
-  const { typography } = theme;
+export function useTextStyle(mode: TextMode, props: TextProps): TextStyle {
+  const { colors, typography } = useKitTheme();
 
-  const base: TextStyle = { color: theme.colors.textPrimary };
-  const custom = getCustomStyles(textProps, theme.fontsLoaded);
+  const toneColors: Record<TextTone, string> = {
+    accent: colors.accentText,
+    expense: colors.expense,
+    income: colors.income,
+    primary: colors.textPrimary,
+    secondary: colors.textSecondary,
+    warning: colors.warning,
+  };
+  const defaultTone: TextTone =
+    mode === TextMode.Caption ? "secondary" : "primary";
 
-  function variant(style: TextStyle, color?: string): TextStyle {
-    return { ...base, ...style, ...(color ? { color } : {}), ...custom };
-  }
-
-  return StyleSheet.create({
-    [TextMode.Body]: variant(typography.body),
-    [TextMode.Caption]: variant(
-      typography.caption,
-      textProps?.color ?? theme.colors.textSecondary,
-    ),
-    [TextMode.Display]: variant(typography.display),
-    [TextMode.Headline]: variant(typography.title),
-    [TextMode.Label]: variant(
-      typography.caption,
-      textProps?.color ?? theme.colors.textSecondary,
-    ),
-    [TextMode.Title]: variant(typography.heading),
-  });
-}
-
-function getCustomStyles(
-  textProps: TextProps,
-  fontsLoaded: boolean,
-): TextStyle {
   return {
-    ...(textProps?.color ? { color: textProps.color } : {}),
-    ...(textProps?.bold ? getFontStyle("700", fontsLoaded) : {}),
-    ...(textProps?.tabular ? tabularNums : {}),
-    ...(textProps?.textAlign ? { textAlign: textProps.textAlign } : {}),
+    ...typography[mode],
+    color: props.color ?? toneColors[props.tone ?? defaultTone],
+    ...(props.bold ? { fontWeight: "bold" } : {}),
+    ...(props.tabular ? { fontVariant: ["tabular-nums"] } : {}),
+    ...(mode === TextMode.Overline ? { textTransform: "uppercase" } : {}),
+    textAlign: props.align ?? props.textAlign,
   };
 }
