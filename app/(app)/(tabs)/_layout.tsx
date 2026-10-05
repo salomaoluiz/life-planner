@@ -1,14 +1,12 @@
 import { Redirect, Tabs } from "expo-router";
 
 import { useUser } from "@application/providers/user";
-import Icon from "@components/Icon";
-import { useTranslation } from "@presentation/i18n";
-import { useTheme } from "@presentation/theme";
+import { useBreakpoint } from "@presentation/theme";
+import { AppTabBar } from "@screens";
 
 export default function TabNavigator() {
   const { logged } = useUser();
-  const { t } = useTranslation();
-  const { theme } = useTheme();
+  const breakpoint = useBreakpoint();
 
   if (!logged) {
     return <Redirect href="/login" />;
@@ -16,58 +14,17 @@ export default function TabNavigator() {
 
   return (
     <Tabs
+      backBehavior={"initialRoute"}
       screenOptions={{
-        headerStyle: { backgroundColor: theme.colors.surface },
-        headerTintColor: theme.colors.textPrimary,
-        tabBarActiveTintColor: theme.colors.accentText,
-        tabBarInactiveTintColor: theme.colors.textSecondary,
-        tabBarLabelStyle: {
-          fontSize: theme.typography.tab.fontSize,
-          lineHeight: theme.typography.tab.lineHeight,
-        },
-        tabBarStyle: {
-          backgroundColor: theme.colors.surface,
-          borderTopColor: theme.colors.border,
-        },
+        headerShown: false,
+        tabBarPosition: breakpoint === "expanded" ? "left" : "bottom",
       }}
+      tabBar={(props) => <AppTabBar {...props} />}
     >
-      <Tabs.Screen
-        name={"index/index"}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <Icon color={color} name={"view-dashboard"} size={size} />
-          ),
-          title: t("dashboard.routeTitle"),
-        }}
-      />
-      <Tabs.Screen
-        name={"stock/index"}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <Icon color={color} name={"wardrobe"} size={size} />
-          ),
-          title: t("stock.list.headerTitle"),
-        }}
-      />
-      <Tabs.Screen
-        name={"family/index"}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <Icon color={color} name={"human-male-female-child"} size={size} />
-          ),
-          title: t("family.routeTitle"),
-        }}
-      />
-      <Tabs.Screen
-        name={"financial"}
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <Icon color={color} name={"cash-register"} size={size} />
-          ),
-          title: t("financial.routeTitle"),
-        }}
-      />
+      <Tabs.Screen name={"index/index"} />
+      <Tabs.Screen name={"financial"} />
+      <Tabs.Screen name={"stock/index"} />
+      <Tabs.Screen name={"family/index"} />
     </Tabs>
   );
 }
