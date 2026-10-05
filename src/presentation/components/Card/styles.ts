@@ -8,7 +8,7 @@ function getStyles() {
   return {
     styles: StyleSheet.create({
       blurView: {
-        borderColor: theme.colors.glassBorder,
+        borderColor: theme.colors.border,
         borderRadius: theme.sizes.borderRadius.large,
         borderWidth: 1,
         overflow: "hidden",
@@ -19,7 +19,7 @@ function getStyles() {
       wrapper: {
         borderRadius: theme.sizes.borderRadius.large,
         marginBottom: theme.sizes.spacing.small,
-        shadowColor: theme.colors.shadow,
+        shadowColor: theme.colors.scrim,
         shadowOffset: { height: 2, width: 0 },
         shadowOpacity: theme.dark ? 0.3 : 0.08,
         shadowRadius: theme.sizes.spacing.xsmall,

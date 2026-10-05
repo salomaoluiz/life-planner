@@ -11,12 +11,12 @@ function getStyles(props: Props) {
   return {
     styles: StyleSheet.create({
       container: {
-        backgroundColor: theme.colors.surfaceVariant,
-        borderColor: theme.colors.surfaceVariant,
+        backgroundColor: theme.colors.surfaceRaised,
+        borderColor: theme.colors.surfaceRaised,
         borderRadius: theme.sizes.borderRadius.small,
         borderWidth: 1,
         boxShadow: props.isExpired
-          ? `inset 0px 0px 20px ${theme.colors.error}`
+          ? `inset 0px 0px 20px ${theme.colors.expense}`
           : undefined,
         elevation: 10,
         flex: 1,

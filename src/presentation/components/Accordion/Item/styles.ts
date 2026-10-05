@@ -7,7 +7,7 @@ function getStyles() {
 
   return StyleSheet.create({
     container: {
-      borderBottomColor: theme.colors.outlineVariant,
+      borderBottomColor: theme.colors.border,
       borderBottomWidth: 1,
       paddingVertical: theme.sizes.spacing.xsmall,
     },

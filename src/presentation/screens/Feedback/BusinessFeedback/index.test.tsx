@@ -44,10 +44,10 @@ it("SHOULD render the title, message and primary button WHEN decoded", async () 
 });
 
 it.each([
-  [FeedbackType.Error, "close-circle", "error"],
-  [FeedbackType.Information, "information", "primary"],
-  [FeedbackType.Success, "check-circle", "tertiary"],
-  [FeedbackType.Warning, "alert", "secondary"],
+  [FeedbackType.Error, "close-circle", "expense"],
+  [FeedbackType.Information, "information", "accent"],
+  [FeedbackType.Success, "check-circle", "income"],
+  [FeedbackType.Warning, "alert", "warning"],
 ] as const)(
   "SHOULD show the %s icon %s with the %s color",
   async (type, icon, color) => {
@@ -75,10 +75,10 @@ it("SHOULD run the close action WHEN the close button is pressed", async () => {
   expect(spies.handleAction).toHaveBeenCalledWith(mocks.closeButton);
 });
 
-it("SHOULD use the on-background color for the close button", async () => {
+it("SHOULD use the primary text color for the close button", async () => {
   await setup();
 
   const close = screen.UNSAFE_getAllByProps({ icon: "close-circle" })[0];
 
-  expect(close.props.iconColor).toBe(mocks.theme().colors.onBackground);
+  expect(close.props.iconColor).toBe(mocks.theme().colors.textPrimary);
 });

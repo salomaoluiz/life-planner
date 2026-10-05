@@ -15,9 +15,7 @@ function ListItem(props: Props) {
       <View style={[styles.row, styles.width25]}>
         <Icon
           color={
-            props.item.isExpense
-              ? theme.colors.financial.expense
-              : theme.colors.financial.income
+            props.item.isExpense ? theme.colors.expense : theme.colors.income
           }
           name={props.item.isExpense ? "arrow-down-bold" : "arrow-up-bold"}
           size={theme.sizes.spacing.large}
@@ -35,9 +33,7 @@ function ListItem(props: Props) {
         <Text.Body
           bold
           color={
-            props.item.isExpense
-              ? theme.colors.financial.expense
-              : theme.colors.financial.income
+            props.item.isExpense ? theme.colors.expense : theme.colors.income
           }
           numberOfLines={1}
           value={props.item.value}

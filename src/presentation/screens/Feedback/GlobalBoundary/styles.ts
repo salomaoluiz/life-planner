@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: lightTheme.sizes.spacing.medium,
   },
   description: {
-    color: lightTheme.colors.onBackground,
+    color: lightTheme.colors.textPrimary,
     fontSize: lightTheme.sizes.fontSizes.medium,
     lineHeight: lightTheme.sizes.lineHeights.medium,
     textAlign: "center",
@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
     width: 300 * getScaleRatio().scaleFactor,
   },
   title: {
-    color: lightTheme.colors.onBackground,
+    color: lightTheme.colors.textPrimary,
     fontSize: lightTheme.sizes.fontSizes.large,
     lineHeight: lightTheme.sizes.lineHeights.large,
     textAlign: "center",

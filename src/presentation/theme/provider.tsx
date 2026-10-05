@@ -9,7 +9,7 @@ import { captureMessage } from "@infrastructure/monitoring";
 import { useProviderLoader } from "@providers/loader";
 
 import { colors, getScaledSizes } from "./constants";
-import { PaperThemeProvider } from "./paper";
+import { buildPaperTheme, PaperThemeProvider } from "./paper";
 import { resolveIsDark } from "./resolveThemeMode";
 import { ThemeProp } from "./types";
 
@@ -55,6 +55,7 @@ export function ThemeProvider({ children }: Props) {
 
   const isDark = resolveIsDark(themeMode, systemScheme);
   const theme = isDark ? darkTheme : lightTheme;
+  const paperTheme = useMemo(() => buildPaperTheme(theme), [theme]);
 
   useEffect(() => {
     StatusBar.setBarStyle(isDark ? "light-content" : "dark-content");
@@ -95,7 +96,7 @@ export function ThemeProvider({ children }: Props) {
 
   return (
     <ThemeContext.Provider value={providerValue}>
-      <PaperThemeProvider theme={theme}>{children}</PaperThemeProvider>
+      <PaperThemeProvider theme={paperTheme}>{children}</PaperThemeProvider>
     </ThemeContext.Provider>
   );
 }

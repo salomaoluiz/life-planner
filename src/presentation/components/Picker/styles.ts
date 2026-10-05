@@ -8,8 +8,8 @@ function getStyles() {
   return {
     styles: StyleSheet.create({
       container: {
-        backgroundColor: theme.colors.glassBackground,
-        borderColor: theme.colors.glassBorder,
+        backgroundColor: theme.colors.surface,
+        borderColor: theme.colors.border,
         borderRadius: theme.sizes.borderRadius.large,
         borderWidth: 1,
         flexGrow: 1,
@@ -22,7 +22,7 @@ function getStyles() {
       picker: {
         backgroundColor: "transparent",
         borderWidth: 0,
-        color: theme.colors.onBackground,
+        color: theme.colors.textPrimary,
         height: theme.sizes.spacing.xxlarge,
       },
     }),

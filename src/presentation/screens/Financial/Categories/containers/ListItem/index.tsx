@@ -16,7 +16,7 @@ function ListItem(props: Props) {
     <View style={styles.container}>
       <View style={styles.iconColumn}>
         <Icon
-          color={theme.colors.primary}
+          color={theme.colors.accent}
           name={props.item.icon}
           size={theme.sizes.spacing.large}
         />

@@ -34,7 +34,7 @@ function getStyles() {
       },
       listContainer: {
         alignSelf: "stretch",
-        backgroundColor: theme.colors.surfaceVariant,
+        backgroundColor: theme.colors.surfaceRaised,
         borderRadius: isWeb() ? theme.sizes.borderRadius.large : undefined,
         flexDirection: "row",
         marginHorizontal: isWeb() ? getScreenSizes().width * 0.05 : undefined,

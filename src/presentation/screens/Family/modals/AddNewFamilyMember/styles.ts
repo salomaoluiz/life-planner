@@ -8,7 +8,7 @@ function getStyles() {
   return {
     styles: StyleSheet.create({
       backdrop: {
-        backgroundColor: theme.colors.backdrop,
+        backgroundColor: theme.colors.scrim,
         height: "100%",
         position: "absolute",
         width: "100%",

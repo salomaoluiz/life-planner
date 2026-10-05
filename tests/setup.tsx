@@ -12,6 +12,9 @@ load(process.cwd(), { silent: true });
 
 jest.mock("react-native-paper", () => {
   const View = jest.requireActual("react-native").View;
+  const { MD3DarkTheme, MD3LightTheme } = jest.requireActual(
+    "react-native-paper/src/styles/themes",
+  );
   const FAB = Object.assign(View, {
     Group: View,
   });
@@ -86,6 +89,8 @@ jest.mock("react-native-paper", () => {
     Icon: View,
     IconButton: View,
     List,
+    MD3DarkTheme,
+    MD3LightTheme,
     Menu: ({
       anchor,
       children,
