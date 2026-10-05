@@ -1,3 +1,6 @@
+import { AccountHasTransactions } from "@domain/entities/errors";
+
+
 import { act, mocks, setup, spies } from "./mocks/index.mocks";
 
 const deleteParams = { id: "acc-1", ownerId: "owner-1" };
@@ -109,4 +112,18 @@ it("SHOULD open the edit modal with the account values as strings WHEN onEdit is
     },
     pathname: "/financial/account/add_new_account",
   });
+});
+
+it("SHOULD hand the delete mutation error to the financial error feedback", () => {
+  const error = new AccountHasTransactions();
+
+  setup({ error, status: "error" });
+
+  expect(spies.feedback).toHaveBeenCalledWith(error);
+});
+
+it("SHOULD NOT refetch WHEN the delete failed (the account stays in the list)", () => {
+  setup({ error: new AccountHasTransactions(), status: "error" });
+
+  expect(mocks.refetch).not.toHaveBeenCalled();
 });
