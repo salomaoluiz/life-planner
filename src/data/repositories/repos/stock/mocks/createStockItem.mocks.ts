@@ -32,7 +32,6 @@ const transactionModelMock = new StockModel({
   ownerId: "1dcc732e-8886-4a68-b669-ded3f3809c20",
   purchaseDate: new Date(),
   quantity: 10,
-  status: "active",
   unit: StockUnits.GRAM,
 });
 

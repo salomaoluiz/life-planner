@@ -1,30 +1,20 @@
 import { StockDatasource } from "@data/repositories/repos/stock/stockDatasource";
-import { GenericError } from "@domain/entities/errors";
-import { supabase } from "@infrastructure/supabase";
+import { api } from "@infrastructure/api";
+
+import handleStockApiError from "./stockApiError";
 
 export type Params = Parameters<StockDatasource["deleteStockItem"]>[0];
 export type Response = ReturnType<StockDatasource["deleteStockItem"]>;
 
 async function deleteStockItem(id: Params): Response {
   try {
-    const response = await supabase
-      .from("storage_items")
-      .delete()
-      .eq("id", id)
-      .then();
-
-    if (response.error) {
-      throw response.error;
-    }
+    // The API authorizes through the JWT: only the item id travels.
+    await api.delete(`/v1/stock/items/${encodeURIComponent(id)}`);
   } catch (error) {
-    const genericError = new GenericError();
-    genericError.addContext({
+    return handleStockApiError(error, {
       datasource: "StockDatasource - deleteStockItem",
-      error,
       id,
     });
-
-    throw genericError;
   }
 }
 

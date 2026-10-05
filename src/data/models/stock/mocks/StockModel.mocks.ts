@@ -6,16 +6,15 @@ const jsonMock = {
   barcode: "1234567890123",
   brand: "BrandName",
   description: "Product Description",
-  expiration_date: new Date("2025-05-11").toISOString(),
+  expirationDate: new Date("2025-05-11").toISOString(),
   id: "074782ac-9605-4632-8459-3a82bb9e8d83",
   notes: "Some notes about the product",
-  opening_date: new Date("2023-01-01").toISOString(),
+  openingDate: new Date("2023-01-01").toISOString(),
   owner: "FAMILY",
-  owner_id: "7591aa82-a220-4a79-8802-15257b05ceb0",
-  purchase_date: new Date("2023-01-01").toISOString(),
+  ownerId: "7591aa82-a220-4a79-8802-15257b05ceb0",
+  purchaseDate: new Date("2023-01-01").toISOString(),
   quantity: 10,
-  status: "ACTIVE",
-  unit: "KG",
+  unit: "kilogram",
 };
 
 // endregion mocks
@@ -33,15 +32,14 @@ function setup() {
     barcode: jsonMock.barcode,
     brand: jsonMock.brand,
     description: jsonMock.description,
-    expirationDate: new Date(jsonMock.expiration_date),
+    expirationDate: new Date(jsonMock.expirationDate),
     id: jsonMock.id,
     notes: jsonMock.notes,
-    openingDate: new Date(jsonMock.opening_date),
+    openingDate: new Date(jsonMock.openingDate),
     owner: jsonMock.owner,
-    ownerId: jsonMock.owner_id,
-    purchaseDate: new Date(jsonMock.purchase_date),
+    ownerId: jsonMock.ownerId,
+    purchaseDate: new Date(jsonMock.purchaseDate),
     quantity: jsonMock.quantity,
-    status: jsonMock.status,
     unit: jsonMock.unit,
   });
 }
@@ -51,9 +49,5 @@ const spies = {};
 const mocks = {
   json: jsonMock,
 };
-
-beforeEach(() => {
-  jest.clearAllMocks();
-});
 
 export { mocks, setup, spies };

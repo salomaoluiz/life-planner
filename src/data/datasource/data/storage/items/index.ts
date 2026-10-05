@@ -1,3 +1,5 @@
-import supabase from "./supabase";
+import api from "./api";
 
-export default supabase;
+export default function stockDatasource() {
+  return api;
+}

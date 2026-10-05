@@ -20,7 +20,6 @@ const firstStockItem = new StockModel({
   ownerId: "88bdbf72-3558-4bd3-864e-c5e72786f5c3",
   purchaseDate: new Date(),
   quantity: 10,
-  status: "active",
   unit: StockUnits.GRAM,
 });
 
@@ -36,7 +35,6 @@ const secondStockItem = new StockModel({
   ownerId: "6bad0c6f-9329-4e64-b9be-ed15044badcf",
   purchaseDate: new Date(),
   quantity: 20,
-  status: "active",
   unit: StockUnits.GRAM,
 });
 

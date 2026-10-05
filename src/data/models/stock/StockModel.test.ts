@@ -1,7 +1,16 @@
 import { mocks, setup } from "./mocks/StockModel.mocks";
 import StockModel from "./StockModel";
 
-it("SHOULD the StockModel has all params", () => {
+const nullOptionals = {
+  barcode: null,
+  brand: null,
+  expirationDate: null,
+  notes: null,
+  openingDate: null,
+  purchaseDate: null,
+};
+
+it("SHOULD the StockModel has all params AND no status", () => {
   const result = setup();
 
   expect(result).toHaveProperty("id", mocks.json.id);
@@ -10,69 +19,57 @@ it("SHOULD the StockModel has all params", () => {
   expect(result).toHaveProperty("description", mocks.json.description);
   expect(result).toHaveProperty(
     "expirationDate",
-    new Date(mocks.json.expiration_date),
+    new Date(mocks.json.expirationDate),
   );
   expect(result).toHaveProperty("notes", mocks.json.notes);
   expect(result).toHaveProperty(
     "openingDate",
-    new Date(mocks.json.opening_date),
+    new Date(mocks.json.openingDate),
   );
   expect(result).toHaveProperty("owner", mocks.json.owner);
-  expect(result).toHaveProperty("ownerId", mocks.json.owner_id);
+  expect(result).toHaveProperty("ownerId", mocks.json.ownerId);
   expect(result).toHaveProperty(
     "purchaseDate",
-    new Date(mocks.json.purchase_date),
+    new Date(mocks.json.purchaseDate),
   );
   expect(result).toHaveProperty("quantity", mocks.json.quantity);
-  expect(result).toHaveProperty("status", mocks.json.status);
   expect(result).toHaveProperty("unit", mocks.json.unit);
+  expect(result).not.toHaveProperty("status");
 });
 
-it("SHOULD the StockModel fromJson create a new StockModel", () => {
-  const modelFromJson = StockModel.fromJSON({
-    barcode: mocks.json.barcode,
-    brand: mocks.json.brand,
-    description: mocks.json.description,
-    expiration_date: mocks.json.expiration_date,
-    id: mocks.json.id,
-    notes: mocks.json.notes,
-    opening_date: mocks.json.opening_date,
-    owner: mocks.json.owner,
-    owner_id: mocks.json.owner_id,
-    purchase_date: mocks.json.purchase_date,
-    quantity: mocks.json.quantity,
-    status: mocks.json.status,
-    unit: mocks.json.unit,
+it("SHOULD fromJSON create a StockModel from the API shape (extra API fields are ignored)", () => {
+  const model = StockModel.fromJSON({
+    ...mocks.json,
+    createdAt: "2026-09-30T12:01:00.000Z",
+    updatedAt: "2026-09-30T12:01:00.000Z",
   });
 
-  const expected = setup();
-
-  expect(modelFromJson).toStrictEqual(expected);
+  expect(model).toStrictEqual(setup());
 });
 
-it("SHOULD the StockModel toJson return a json", () => {
-  const result = setup().toJSON();
+it("SHOULD fromJSON turn API null optionals into undefined", () => {
+  const model = StockModel.fromJSON({ ...mocks.json, ...nullOptionals });
 
-  expect(result).toStrictEqual(mocks.json);
+  expect(model.barcode).toBeUndefined();
+  expect(model.brand).toBeUndefined();
+  expect(model.expirationDate).toBeUndefined();
+  expect(model.notes).toBeUndefined();
+  expect(model.openingDate).toBeUndefined();
+  expect(model.purchaseDate).toBeUndefined();
 });
 
-it("SHOULD serialize missing dates as null", () => {
-  const model = setup();
-  model.expirationDate = undefined;
-  model.openingDate = undefined;
-  model.purchaseDate = undefined;
-
-  expect(model.toJSON()).toMatchObject({
-    expiration_date: null,
-    opening_date: null,
-    purchase_date: null,
-  });
+it("SHOULD toJSON return the camelCase API shape with ISO dates", () => {
+  expect(setup().toJSON()).toStrictEqual(mocks.json);
 });
 
-it("SHOULD serialize the dates as ISO strings WHEN present", () => {
-  expect(setup().toJSON()).toMatchObject({
-    expiration_date: mocks.json.expiration_date,
-    opening_date: mocks.json.opening_date,
-    purchase_date: mocks.json.purchase_date,
-  });
+it("SHOULD toJSON serialize absent optionals as null", () => {
+  const model = StockModel.fromJSON({ ...mocks.json, ...nullOptionals });
+
+  expect(model.toJSON()).toMatchObject(nullOptionals);
+});
+
+it("SHOULD survive a toJSON -> fromJSON cache round trip", () => {
+  const original = setup();
+
+  expect(StockModel.fromJSON(original.toJSON())).toStrictEqual(original);
 });

@@ -5,13 +5,11 @@ import deleteStockItem from "./deleteStockItem";
 import getStockItems from "./getStockItems";
 import updateStockItem from "./updateStockItem";
 
-function stockDatasourceImpl(): StockDatasource {
-  return {
-    createStockItem,
-    deleteStockItem,
-    getStockItems,
-    updateStockItem,
-  };
-}
+const stockApiDatasource: StockDatasource = {
+  createStockItem,
+  deleteStockItem,
+  getStockItems,
+  updateStockItem,
+};
 
-export default stockDatasourceImpl;
+export default stockApiDatasource;
