@@ -1,44 +1,30 @@
-import { useIsFocused } from "@react-navigation/native";
-import { router, useNavigation } from "expo-router";
-
 import { render } from "@tests";
 
-import { useCases } from "@application/useCases";
-import { GenericError } from "@domain/entities/errors";
-import { useQuery } from "@infrastructure/fetcher";
-import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
+import FinancialTransactions from "../";
+import { useTransactionsViewModel } from "../hooks";
+import { ListEntry } from "../models/transactionList";
+import TransactionUIModel from "../models/TransactionUIModel";
+import { categories, makeTransactionDTO } from "./index.mocks";
 
-import FinancialTransaction from "../";
-import FinancialTransactionViewModel from "../models/FinancialTransactionViewModel";
-import { makeTransactionDTO, owners } from "./index.mocks";
-
-jest.mock("expo-router", () => ({
-  router: { push: jest.fn() },
-  useNavigation: jest.fn(),
-}));
-jest.mock("@react-navigation/native", () => ({ useIsFocused: jest.fn() }));
-jest.mock("@infrastructure/fetcher");
-jest.mock("@application/useCases", () => ({
-  useCases: {
-    getFinancialTransactionsUseCase: {
-      execute: jest.fn(),
-      uniqueName: "get_transactions",
-    },
-    getOwnersUseCase: { execute: jest.fn(), uniqueName: "get_owners" },
-  },
-}));
+jest.mock("../hooks");
 jest.mock("@shopify/flash-list", () => {
   const { View: MockView } = jest.requireActual("react-native");
   return {
     FlashList: ({
       data,
+      ListEmptyComponent,
+      ListHeaderComponent,
       renderItem,
       ...props
     }: {
       data?: unknown[];
+      ListEmptyComponent?: React.ReactNode;
+      ListHeaderComponent?: React.ReactNode;
       renderItem: (info: { item: unknown }) => React.ReactNode;
     }) => (
       <MockView testID="flashList" {...props}>
+        {ListHeaderComponent}
+        {data?.length === 0 && ListEmptyComponent}
         {data?.map((item, index) => (
           <MockView key={index}>{renderItem({ item })}</MockView>
         ))}
@@ -46,90 +32,76 @@ jest.mock("@shopify/flash-list", () => {
     ),
   };
 });
-jest.mock("../containers/ListItem", () => {
-  const { View: MockView } = jest.requireActual("react-native");
-  return {
-    __esModule: true,
-    default: ({
-      item,
-      refetch,
-    }: {
-      item: { description: string };
-      refetch: () => void;
-    }) => (
-      <MockView onPress={refetch} testID="listItem" title={item.description} />
-    ),
-  };
-});
-jest.mock("../containers/RefetchCache", () => ({
-  __esModule: true,
-  default: () => null,
-}));
 
-// region mocks
-const query = new UseQueryFixture<FinancialTransactionViewModel[]>();
-const setOptions = jest.fn();
-
-const dtos = [
-  makeTransactionDTO({
-    date: "2025-03-01T00:00:00Z",
-    description: "Later",
-    id: "tx-late",
-  }),
-  makeTransactionDTO({
-    date: "2025-01-01T00:00:00Z",
-    description: "Earlier",
-    id: "tx-early",
-  }),
-];
-// endregion mocks
-
-// region spies
-const spies = {
-  getOwners: jest.mocked(useCases.getOwnersUseCase.execute),
-  getTransactions: jest.mocked(
-    useCases.getFinancialTransactionsUseCase.execute,
-  ),
-  isFocused: jest.mocked(useIsFocused),
-  push: jest.mocked(router.push),
-  useNavigation: jest.mocked(useNavigation),
-  useQuery: jest.mocked(useQuery),
+const defaultViewModel: ReturnType<typeof useTransactionsViewModel> = {
+  entries: [],
+  errorMessage: undefined,
+  filter: "ALL",
+  filterChoices: [],
+  isEmptyMonth: false,
+  isFilteredEmpty: false,
+  isLoading: false,
+  isMonthPickerOpen: false,
+  isRefreshing: false,
+  languageTag: "en-US",
+  monthChoices: [{ label: "January", value: "0" }],
+  monthLabel: "October 2026",
+  onAddPress: jest.fn(),
+  onClearFilters: jest.fn(),
+  onFilterChange: jest.fn(),
+  onMonthPickerClose: jest.fn(),
+  onMonthPickerOpen: jest.fn(),
+  onMonthSelect: jest.fn(),
+  onNextMonth: jest.fn(),
+  onPickerYearChange: jest.fn(),
+  onPreviousMonth: jest.fn(),
+  onRefresh: jest.fn(),
+  onRetry: jest.fn(),
+  onRowPress: jest.fn(),
+  onSummaryRetry: jest.fn(),
+  pickerYear: 2026,
+  selectedMonthIndex: undefined,
+  stickyIndices: [],
+  summary: { balanceCents: 1000, expenseCents: 2000, incomeCents: 3000 },
+  summaryError: false,
 };
-// endregion spies
 
-beforeEach(() => {
-  jest.clearAllMocks();
-  spies.useNavigation.mockReturnValue({ setOptions } as never);
-});
+function makeEntries(): ListEntry[] {
+  const day = new Date(2026, 9, 5);
 
-function setup(props?: {
-  error?: boolean;
-  focused?: boolean;
-  isFetching?: boolean;
-  items?: FinancialTransactionViewModel[];
-}) {
-  spies.isFocused.mockReturnValue(!!props?.focused);
-  query.reset().withIsFetching(!!props?.isFetching);
-  if (props?.items) {
-    query.withData(props.items);
-  }
-  if (props?.error) {
-    query.withError(new GenericError());
-  }
-  const built = query.build();
-  spies.useQuery.mockReturnValue(built as never);
-
-  render(<FinancialTransaction />);
-
-  return { refetch: built.refetch };
+  return [
+    {
+      day,
+      key: "header-2026-10-05",
+      kind: "header",
+      label: { kind: "today" },
+      netCents: -1250,
+    },
+    {
+      item: new TransactionUIModel(
+        makeTransactionDTO({ id: "tx-1" }),
+        categories[0],
+      ),
+      key: "item-tx-1",
+      kind: "item",
+    },
+    {
+      item: new TransactionUIModel(
+        makeTransactionDTO({ id: "tx-2" }),
+        categories[0],
+      ),
+      key: "item-tx-2",
+      kind: "item",
+    },
+  ];
 }
 
-const mocks = {
-  dtos,
-  items: dtos.map((dto) => new FinancialTransactionViewModel(dto, owners)),
-  owners,
-  setOptions,
-};
+function setup(overrides: Partial<typeof defaultViewModel> = {}) {
+  jest
+    .mocked(useTransactionsViewModel)
+    .mockReturnValue({ ...defaultViewModel, ...overrides });
 
-export { mocks, setup, spies };
-export { fireEvent, hasText, screen } from "@tests";
+  return render(<FinancialTransactions />);
+}
+
+export { defaultViewModel, makeEntries, setup };
