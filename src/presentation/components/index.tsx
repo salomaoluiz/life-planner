@@ -10,6 +10,7 @@ export { default as Card, CardProps } from "./Card";
 export { default as Chip, ChipProps } from "./Chip";
 export { default as ChipGroup, ChipGroupProps, ChipOption } from "./ChipGroup";
 export { default as ConfirmDialog, ConfirmDialogProps } from "./ConfirmDialog";
+export { default as DateField, DateFieldProps } from "./DateField";
 export { default as DatePicker, DatePickerProps } from "./DatePicker";
 export { default as Divider, DividerProps } from "./Divider";
 export { default as EmptyState, EmptyStateProps } from "./EmptyState";
@@ -36,6 +37,7 @@ export {
   default as SegmentedControl,
   SegmentedControlProps,
 } from "./SegmentedControl";
+export { default as SelectField, SelectFieldProps } from "./SelectField";
 export { default as Spacer, SpacerProps } from "./Spacer";
 export { default as Switch, SwitchProps } from "./Switch";
 export { default as Text, TextProps } from "./Text";
