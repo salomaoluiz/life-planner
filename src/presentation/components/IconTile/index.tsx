@@ -4,6 +4,7 @@ import Icon from "@components/Icon";
 import Text from "@components/Text";
 import { getToneColors, Tone } from "@components/utils/tones";
 import { useKitTheme } from "@components/utils/useKitTheme";
+import toRgba from "@presentation/theme/constants/utils/rgba";
 
 import { ensureContrast, parseColor } from "./contrast";
 
@@ -27,9 +28,7 @@ function IconTile(props: IconTileProps) {
     rgb && props.color
       ? ensureContrast(props.color, colors.surface, colors.textPrimary)
       : tone.foreground;
-  const background = rgb
-    ? `rgba(${rgb.r},${rgb.g},${rgb.b},${CATEGORY_TINT})`
-    : tone.background;
+  const background = rgb ? toRgba(rgb, CATEGORY_TINT) : tone.background;
   const size = TILE[props.size ?? "md"];
   const styles = StyleSheet.create({
     root: {
