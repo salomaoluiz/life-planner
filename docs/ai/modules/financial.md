@@ -194,10 +194,10 @@ screens:
   Categories:
     path: src/presentation/screens/Financial/Categories/index.tsx # type SegmentedControl, owner ChipGroup, FlashList of TreeItem rows; add pushes the form, row press pushes it with {id}
   Accounts:
-    path: src/presentation/screens/Financial/Accounts/index.tsx
+    path: src/presentation/screens/Financial/Accounts/index.tsx # total, owner chips, active list + archived section; form sheet in modals/NewAccountModal (accountFormState, NewAccountUIModel, useNewAccountViewModel): signed balance, archive switch, owner locked on edit or when ownerId param is passed
 
 add_transaction: quick-add tab button (`/quick_add`).
-layout: Finances sections are switched by `FinancialLayout` (`screens/Financial/Layout`), no drawer. Accounts has a temporary `Button.Primary` add until spec 013 (PR C).
+layout: Finances sections are switched by `FinancialLayout` (`screens/Financial/Layout`), no drawer.
 navigation_files: `screens/Navigation/*` (AppTabBar, navigationItems), `screens/QuickAdd`, `screens/Financial/Layout`, `screens/Home/containers/ProfileButton`.
 
 components (Transactions):
