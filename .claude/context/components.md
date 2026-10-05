@@ -43,7 +43,7 @@ If you need a new 3rd-party UI element, **wrap it here first** (folder `Name/ind
 
 `TabBar`, `QuickAddButton` and `NavigationRail` are presentational; the container `AppTabBar` in `screens/Navigation` binds them to React Navigation.
 
-Screen-local reusable pieces already exist, check before creating: `@screens/Financial/Transactions/containers/RefetchCache` (header refresh), `ItemSeparator` (Transactions, Family).
+Screen-local reusable pieces already exist, check before creating: `@screens/Financial/Transactions/containers/RefetchCache` (header refresh), `ItemSeparator` (Transactions); Family screen-local pieces: `@screens/Family/components/{MemberRow,ActionSheet,NoticeSheet}` and `containers/FamilyCard`.
 
 ## Rules
 

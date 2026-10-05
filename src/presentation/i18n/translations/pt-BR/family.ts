@@ -51,11 +51,9 @@ const family = {
     title: "Família",
   },
   member: {
-    addButton: "Adicionar membro",
     cancelInvite: "Cancelar convite",
     invite: {
       alreadyExists: "Este e-mail já está na família ou já foi convidado",
-      cancel: "Cancelar",
       copied: "Copiado",
       copyLink: "Copiar link",
       done: "Concluir",
@@ -67,7 +65,6 @@ const family = {
       successMessage:
         "Compartilhe este link com {{email}}. Ele expira em 7 dias.",
       successTitle: "Convite criado",
-      title: "Convidar por e-mail",
     },
     leave: "Sair da família",
     remove: "Remover membro",
