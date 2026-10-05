@@ -33,6 +33,7 @@ async function getStockItems(ownerId: Params, datasources: Datasources) {
       new StockEntity({
         barcode: stock.barcode,
         brand: stock.brand,
+        createdAt: stock.createdAt,
         description: stock.description,
         expirationDate: stock.expirationDate,
         id: stock.id,
