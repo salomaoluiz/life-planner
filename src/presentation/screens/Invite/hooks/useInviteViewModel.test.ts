@@ -228,3 +228,21 @@ it("SHOULD go home WITHOUT any request WHEN declined", () => {
   expect(mutate).not.toHaveBeenCalled();
   expect(spies.invalidate).not.toHaveBeenCalled();
 });
+
+it("SHOULD go Home on onGoHome without calling the API", () => {
+  const { mutate, result } = setup();
+
+  result.current.onGoHome();
+
+  expect(spies.replace).toHaveBeenCalledWith("/(app)/(tabs)/index");
+  expect(mutate).not.toHaveBeenCalled();
+  expect(spies.getInvite).not.toHaveBeenCalled();
+});
+
+it("SHOULD refetch the invite on onRetry", () => {
+  const { result } = setup();
+
+  result.current.onRetry();
+
+  expect(query.value.refetch).toHaveBeenCalledTimes(1);
+});

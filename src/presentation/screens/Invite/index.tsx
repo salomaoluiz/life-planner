@@ -1,82 +1,131 @@
 import { View } from "react-native";
 
-import { Button, Spacer, Text } from "@components";
+import {
+  Button,
+  Card,
+  EmptyState,
+  ErrorState,
+  IconTile,
+  Screen,
+  Text,
+} from "@components";
 import Skeleton from "@components/Skeleton";
 import { useTranslation } from "@presentation/i18n";
 
 import useInviteViewModel from "./hooks/useInviteViewModel";
-import getStyles from "./styles";
+import useStyles from "./styles";
 
 function Invite() {
-  const { styles, theme } = getStyles();
   const { t } = useTranslation();
+  const { styles } = useStyles();
   const vm = useInviteViewModel();
 
   if (vm.status === "loading") {
     return (
-      <View style={styles.container}>
-        <Skeleton.Box height={48} width={"80%"} />
-        <Spacer direction={"vertical"} size={"xl"} />
-        <Skeleton.Box height={32} width={"60%"} />
-      </View>
+      <Screen testID="invite-screen">
+        <View style={styles.column} testID="invite-column">
+          <Skeleton.Card testID="invite-skeleton" />
+        </View>
+      </Screen>
     );
   }
 
-  if (vm.status === "notFound") {
+  if (vm.status === "notFound" || vm.status === "expired") {
     return (
-      <View style={styles.container}>
-        <Text.Headline value={t("invite.notFound")} />
-      </View>
-    );
-  }
-
-  if (vm.status === "expired") {
-    return (
-      <View style={styles.container}>
-        <Text.Headline value={t("invite.expired")} />
-      </View>
+      <Screen testID="invite-screen">
+        <View style={styles.column} testID="invite-column">
+          <EmptyState
+            actionLabel={t("invite.goHome")}
+            icon="email-alert-outline"
+            message={t(
+              vm.status === "expired" ? "invite.expired" : "invite.notFound",
+            )}
+            onAction={vm.onGoHome}
+            testID="invite-unavailable"
+            title={t("invite.unavailableTitle")}
+            tone="expense"
+          />
+        </View>
+      </Screen>
     );
   }
 
   if (vm.status === "error" || !vm.invite) {
     return (
-      <View style={styles.container}>
-        <Text.Headline value={t("errors.generic.description")} />
-      </View>
+      <Screen testID="invite-screen">
+        <View style={styles.column} testID="invite-column">
+          <ErrorState
+            message={t("common.errors.generic")}
+            onRetry={vm.onRetry}
+            retryLabel={t("common.actions.tryAgain")}
+            testID="invite-error"
+          />
+        </View>
+      </Screen>
     );
   }
 
+  const { invite } = vm;
+
   return (
-    <View style={styles.container}>
-      <Text.Display value={t("invite.title")} />
-      <Text.Headline value={vm.invite.familyName} />
-      <Spacer direction={"vertical"} size={"xl"} />
-      {!vm.invite.canAccept ? (
-        <Text.Headline
-          value={t("invite.notForYou", { email: vm.invite.email })}
+    <Screen testID="invite-screen">
+      <View style={styles.column} testID="invite-column">
+        <IconTile
+          label={invite.initial}
+          size="lg"
+          testID="invite-tile"
+          tone={invite.tone}
         />
-      ) : null}
-      {vm.acceptErrorKey ? (
-        <Text.Headline
-          value={t(vm.acceptErrorKey, { email: vm.invite.email })}
+        <Text.Caption align="center" value={t("invite.title")} />
+        <Text.Title
+          align="center"
+          testID="invite-family-name"
+          value={invite.familyName}
         />
-      ) : null}
-      <Spacer direction={"vertical"} size={"xl"} />
-      <View style={styles.buttonContainer}>
-        <Button.Filled
-          disabled={!vm.invite.canAccept || vm.isAccepting}
-          label={t("invite.accept")}
-          loading={vm.isAccepting}
-          onPress={vm.onAccept}
+        <Text.Body
+          align="center"
+          tone="secondary"
+          value={t("invite.sentTo", { email: invite.email })}
         />
-        <Spacer direction={"horizontal"} size={"xl"} />
-        <Button.Outlined
-          customStyles={{ textColor: theme.colors.expense }}
-          label={t("invite.decline")}
-          onPress={vm.onDecline}
-        />
+
+        {invite.canAccept ? null : (
+          <Card padding="sm" testID="invite-mismatch">
+            <Text.Body
+              tone="expense"
+              value={t("invite.notForYou", { email: invite.email })}
+            />
+          </Card>
+        )}
+
+        {vm.acceptErrorKey ? (
+          <Text.Body
+            align="center"
+            testID="invite-accept-error"
+            tone="expense"
+            value={t(vm.acceptErrorKey, { email: invite.email })}
+          />
+        ) : null}
+
+        <View style={styles.actions}>
+          <Button.Primary
+            disabled={!invite.canAccept}
+            fullWidth
+            label={t("invite.accept")}
+            loading={vm.isAccepting}
+            onPress={vm.onAccept}
+            size="lg"
+            testID="invite-accept"
+          />
+          <Button.Secondary
+            fullWidth
+            label={t("invite.decline")}
+            onPress={vm.onDecline}
+            size="lg"
+            testID="invite-decline"
+          />
+        </View>
       </View>
-    </View>
+    </Screen>
   );
 }
 
