@@ -9,6 +9,12 @@ import {
 } from "@screens/Financial/models/categoryTree";
 import { buildOwnerChoices } from "@screens/Financial/models/ownerOptions";
 
+interface AccountOption {
+  descriptionKey?: TranslationKeys;
+  label: string;
+  value: string;
+}
+
 interface Props {
   accounts: AccountDTO[];
   categories: CategoryDTO[];
@@ -33,7 +39,7 @@ class NewTransactionUIModel {
     return this.accountsOf(ownerId).map((account) => account.id);
   }
 
-  accountOptions(ownerId: string) {
+  accountOptions(ownerId: string): AccountOption[] {
     const accounts = this.accountsOf(ownerId);
     const active = accounts
       .filter((account) => account.status !== "ARCHIVED")

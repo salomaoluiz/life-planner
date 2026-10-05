@@ -2,8 +2,7 @@ import { View } from "react-native";
 
 import { BottomSheet, ChipGroup, Text } from "@components";
 import { IconButton } from "@components/Icon";
-
-import useStyles from "../../styles";
+import useStyles from "@screens/Financial/Transactions/styles";
 
 interface Props {
   closeLabel: string;

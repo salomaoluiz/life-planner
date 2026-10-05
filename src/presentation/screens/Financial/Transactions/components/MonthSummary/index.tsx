@@ -2,8 +2,7 @@ import { View } from "react-native";
 
 import { AmountText, Button, Card, MetricBlock, Text } from "@components";
 import Skeleton from "@components/Skeleton";
-
-import useStyles from "../../styles";
+import useStyles from "@screens/Financial/Transactions/styles";
 
 interface Props {
   balanceCents: number;
