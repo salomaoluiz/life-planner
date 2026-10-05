@@ -13,6 +13,10 @@ const financial = {
     deleteAlertTitle: "Excluir Conta",
     deleteBtn: "Excluir",
     editAccount: "Editar Conta",
+    errors: {
+      hasTransactions:
+        "Esta conta tem transações. Exclua ou mova-as primeiro.",
+    },
     loading: "Carregando...",
     name: "Nome",
     nameRequired: "Nome é obrigatório",
@@ -37,6 +41,12 @@ const financial = {
     owner: "Proprietário",
     parent: "Categoria Pai",
     type: "Tipo da Categoria",
+  },
+  errors: {
+    close: "OK",
+    notFound: "Este item não existe mais ou você não tem acesso a ele.",
+    ownerNotAllowed: "Você não tem acesso a este proprietário.",
+    title: "Não foi possível concluir a ação",
   },
   routeTitle: "Financeiro",
 };
