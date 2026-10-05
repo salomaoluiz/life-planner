@@ -91,6 +91,8 @@ screens:
   Home (Dashboard Overview):
     path: src/presentation/screens/Home/index.tsx
 
+add_stock_item: quick-add tab button (`/quick_add`); the Stock screen has no add button.
+
 containers:
   - name: StockCard
     path: src/presentation/screens/Stock/containers/StockCard/index.tsx

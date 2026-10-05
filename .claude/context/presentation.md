@@ -114,8 +114,7 @@ Rules:
 function FinancialAccounts() {
   const { styles } = useStyles();
   const { t } = useTranslation();
-  const { accounts, errorMessage, isLoading, onAddPress, refetch } =
-    useAccountsViewModel();
+  const { accounts, errorMessage, isLoading, refetch } = useAccountsViewModel();
 
   function renderItem({ item }: { item: AccountUIModel }) {
     return <ListItem item={item} refetch={refetch} />;
@@ -128,23 +127,14 @@ function FinancialAccounts() {
     return <Text.Headline value={errorMessage} />;
   }
   return (
-    <>
-      <FlashList
-        data={accounts}
-        estimatedItemSize={60}
-        renderItem={renderItem}
-      />
-      <View style={styles.fabContainer}>
-        <Fab icon={"plus"} onPress={onAddPress} />
-      </View>
-    </>
+    <FlashList data={accounts} estimatedItemSize={60} renderItem={renderItem} />
   );
 }
 ```
 
 - Only `useStyles()`, `useTranslation()`, `useTheme()` and its own ViewModel hook. Local render helpers like `renderItem` are fine.
 - Branch order: loading → error → content.
-- Lists use `FlashList` with `estimatedItemSize`. The add button is `<Fab icon="plus" />` in an absolutely positioned container.
+- Lists use `FlashList` with `estimatedItemSize`. There is no FAB: add actions live in quick add (`/quick_add`) or in the screen.
 - Shared UI comes only from `@components` (see `components.md`).
 
 ## UI Model (`models/<Name>UIModel.ts`)
