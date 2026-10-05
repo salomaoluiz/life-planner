@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
 
 import { useCases } from "@application/useCases";
-import { Fab, Picker, Spacer, Text } from "@components";
+import { Button, Picker, Spacer, Text } from "@components";
 import { useQuery } from "@infrastructure/fetcher";
 import useTranslation from "@presentation/i18n/useTranslation";
 import RefetchCache from "@screens/Financial/Transactions/containers/RefetchCache";
@@ -98,6 +98,11 @@ function FinancialCategories() {
     <>
       <ScrollView style={styles.scrollView}>
         <View style={styles.container}>
+          <Button.Primary
+            label={t("financial.categories.addNewCategory")}
+            onPress={onAddCategoryPress}
+            testID={"categories-add-button"}
+          />
           <View style={styles.filterContainer}>
             <Picker
               items={[
@@ -121,9 +126,6 @@ function FinancialCategories() {
           </View>
         </View>
       </ScrollView>
-      <View style={styles.fabContainer}>
-        <Fab icon={"plus"} onPress={onAddCategoryPress} />
-      </View>
     </>
   );
 }

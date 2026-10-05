@@ -73,14 +73,10 @@ it("SHOULD NOT refetch WHEN the screen is not focused", () => {
   expect(refetch).not.toHaveBeenCalled();
 });
 
-it("SHOULD navigate to the new transaction modal WHEN the FAB is pressed", () => {
+it("SHOULD NOT render an add button (adding lives in the quick-add tab button)", () => {
   setup();
 
-  fireEvent.press(screen.UNSAFE_getAllByProps({ icon: "plus" })[0]);
-
-  expect(spies.push).toHaveBeenCalledWith({
-    pathname: "/financial/transaction/add_new_transaction",
-  });
+  expect(screen.UNSAFE_queryAllByProps({ icon: "plus" })).toHaveLength(0);
 });
 
 it("SHOULD build view models sorted by date ascending WHEN fetching", async () => {

@@ -57,7 +57,11 @@ const financial = {
     ownerNotAllowed: "Você não tem acesso a este proprietário.",
     title: "Não foi possível concluir a ação",
   },
-  routeTitle: "Financeiro",
+  sections: {
+    accounts: "Contas",
+    categories: "Categorias",
+    transactions: "Transações",
+  },
 };
 
 export default financial;

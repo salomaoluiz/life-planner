@@ -192,6 +192,10 @@ screens:
   Accounts:
     path: src/presentation/screens/Financial/Accounts/index.tsx
 
+add_transaction: quick-add tab button (`/quick_add`).
+layout: Finances sections are switched by `FinancialLayout` (`screens/Financial/Layout`), no drawer. Categories/Accounts have a temporary `Button.Primary` add until spec 013.
+navigation_files: `screens/Navigation/*` (AppTabBar, navigationItems), `screens/QuickAdd`, `screens/Financial/Layout`, `screens/Home/containers/ProfileButton`.
+
 containers:
   - name: ListHeader
     path: src/presentation/screens/Financial/Transactions/containers/ListHeader/index.tsx
