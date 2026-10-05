@@ -59,6 +59,11 @@ const financial = {
     title: "We couldn't complete this action",
   },
   routeTitle: "Financial",
+  sections: {
+    accounts: "Accounts",
+    categories: "Categories",
+    transactions: "Transactions",
+  },
 };
 
 export default financial;

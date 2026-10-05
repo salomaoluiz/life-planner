@@ -11,7 +11,7 @@ const configurations = {
     },
   },
   logout: "Logout",
-  routeTitle: "Configurations",
+  routeTitle: "Settings",
   title: "Configurations",
 };
 

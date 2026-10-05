@@ -7,6 +7,7 @@ import family from "./family";
 import financial from "./financial";
 import invite from "./invite";
 import login from "./login";
+import navigation from "./navigation";
 import signup from "./signup";
 import stock from "./stock";
 
@@ -21,6 +22,7 @@ const enUS = {
     financial,
     invite,
     login,
+    navigation,
     signup,
     stock,
   },
