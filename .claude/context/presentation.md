@@ -41,7 +41,7 @@ screens/<Area>/<Screen>/
 `index.web.tsx` variants (Metro picks them automatically) reuse the same ViewModel hook; only the rendering differs.
 Register the screen in `screens/index.tsx`.
 
-> **Legacy code:** many screens still have logic in `index.tsx`, `containers/*/hooks/index.tsx` (`useListItem`) and classes named `*ViewModel` (`FinancialAccountViewModel`). Closest to the target: `Family` (`useFamilies` + `index.tsx`). Write new code with this pattern. When you touch a legacy screen, migrate it: move the logic into `use<Name>ViewModel` and rename the classes to `*UIModel`.
+> **Legacy code:** many screens still have logic in `index.tsx`, `containers/*/hooks/index.tsx` (`useListItem`) and classes named `*ViewModel` (`FamilyViewModel`). Closest to the target: `Family` (`useFamilies` + `index.tsx`). Write new code with this pattern. When you touch a legacy screen, migrate it: move the logic into `use<Name>ViewModel` and rename the classes to `*UIModel`.
 
 ## ViewModel hook
 
