@@ -28,7 +28,16 @@ entities:
   TransactionEntity:
     path: src/domain/entities/financial/TransactionEntity.ts
     properties:
-      - (Properties define the financial transaction structure)
+      - accountId
+      - category
+      - categoryId
+      - date
+      - description
+      - id
+      - owner
+      - ownerId
+      - type
+      - value
 
 interfaces:
   AccountRepository:
@@ -162,13 +171,14 @@ datasources:
       - deleteCategory: src/data/datasource/data/financial/categories/api/deleteCategory.ts   # 409 -> CategoryHasTransactions
       - getCategories: src/data/datasource/data/financial/categories/api/getCategories.ts
       - updateCategory: src/data/datasource/data/financial/categories/api/updateCategory.ts
-  transactionsDatasource (Supabase):
-    path: src/data/datasource/data/financial/transactions/supabase/
+  transactionsDatasource (API):
+    path: src/data/datasource/data/financial/transactions/api/
+    uses: "@infrastructure/api (/v1/finance/transactions); TransactionModel JSON = API shape (value cents <-> '234.90', date YYYY-MM-DD <-> local-midnight ISO via models/financial/calendarDate.ts, category name from the embedded category.name — the name is no longer stored or sent)"
     methods:
-      - createTransaction: src/data/datasource/data/financial/transactions/supabase/createTransaction.ts
-      - deleteTransaction: src/data/datasource/data/financial/transactions/supabase/deleteTransaction.ts
-      - getTransactions: src/data/datasource/data/financial/transactions/supabase/getTransactions.ts
-      - updateTransaction: src/data/datasource/data/financial/transactions/supabase/updateTransaction.ts
+      - createTransaction: src/data/datasource/data/financial/transactions/api/createTransaction.ts
+      - deleteTransaction: src/data/datasource/data/financial/transactions/api/deleteTransaction.ts
+      - getTransactions: src/data/datasource/data/financial/transactions/api/getTransactions.ts
+      - updateTransaction: src/data/datasource/data/financial/transactions/api/updateTransaction.ts
 ```
 
 ## Presentation
@@ -221,3 +231,5 @@ view_models:
 
 - `Financial/hooks/useFinancialErrorFeedback` opens `/business_feedback` (type Error) for `AccountHasTransactions`, `FinancialNotFound` and `FinancialOwnerNotAllowed`; the account delete hook passes its mutation error to it.
 - The Categories delete asks for confirmation only when the category has subcategories (they are deleted too) and shows `financial.categories.errors.hasTransactions` on 409 (`CategoryHasTransactions`).
+- Error mapping (all three resources, `financialApiError.ts`): 400 -> `FieldInvalid`, 403 -> `FinancialOwnerNotAllowed`, 404 -> `FinancialNotFound`, 409 on account/category delete -> `AccountHasTransactions` / `CategoryHasTransactions`, other -> `GenericError`. Contexts hold ids only.
+- The transaction modal lists only the categories whose type equals the selected transaction type (the API rejects a mismatch); transaction deletes use `useFinancialErrorFeedback`.
