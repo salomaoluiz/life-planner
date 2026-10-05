@@ -1,4 +1,3 @@
-import { BlurView } from "expo-blur";
 import React, { useState } from "react";
 import {
   KeyboardTypeOptions,
@@ -52,10 +51,9 @@ function TextInputBase(props: TextInputProps & { mode: TextInputMode }) {
           <Text.Body color={theme.colors.textPrimary} value={label} />
         </View>
       )}
-      <BlurView
-        intensity={theme.dark ? 20 : 40}
-        style={styles.blurView}
-        tint={theme.dark ? "dark" : "light"}
+      <View
+        style={styles.frame}
+        testID={testID ? `${testID}-frame` : undefined}
       >
         <PaperTextInput
           accessibilityLabel={label}
@@ -95,7 +93,7 @@ function TextInputBase(props: TextInputProps & { mode: TextInputMode }) {
           underlineColor="transparent"
           value={value}
         />
-      </BlurView>
+      </View>
     </View>
   );
 }

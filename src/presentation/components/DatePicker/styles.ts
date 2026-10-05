@@ -12,11 +12,14 @@ function getStyles() {
         justifyContent: "center",
         paddingRight: theme.sizes.spacing.xs,
       },
-      container: {
+      dateText: {
+        color: theme.colors.textPrimary,
+      },
+      frame: {
         alignItems: "center",
         backgroundColor: theme.colors.surface,
         borderColor: theme.colors.border,
-        borderRadius: theme.sizes.borderRadius.lg,
+        borderRadius: theme.sizes.borderRadius.md,
         borderWidth: 1,
         flexDirection: "row",
         height: theme.sizes.spacing.xxxl,
@@ -24,9 +27,6 @@ function getStyles() {
         overflow: "hidden",
         paddingLeft: theme.sizes.spacing.md,
         width: "100%",
-      },
-      dateText: {
-        color: theme.colors.textPrimary,
       },
       innerContainer: {
         flex: 1,
