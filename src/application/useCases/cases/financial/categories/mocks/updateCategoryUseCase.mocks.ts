@@ -8,6 +8,7 @@ import updateCategoryUseCase, {
 const defaultParams: UpdateCategoryUseCaseParams = {
   depthLevel: 1,
   icon: "icon-new",
+  iconColor: "#EF4444",
   id: "cat-uuid",
   name: "Category New",
   owner: "FAMILY",

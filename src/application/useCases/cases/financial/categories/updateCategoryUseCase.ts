@@ -7,11 +7,12 @@ import Repositories from "@domain/repositories";
 export interface UpdateCategoryUseCaseParams {
   depthLevel?: number;
   icon?: string;
+  iconColor?: string;
   id: string;
   name?: string;
   owner?: string;
   ownerId?: string;
-  parentId?: string;
+  parentId?: null | string;
   type?: string;
 }
 
@@ -36,6 +37,7 @@ function updateCategoryUseCase(
         await repositories.financialRepository.category.updateCategory({
           depthLevel: params.depthLevel,
           icon: params.icon,
+          iconColor: params.iconColor,
           id: params.id,
           name: params.name,
           owner,
