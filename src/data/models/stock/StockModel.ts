@@ -10,11 +10,8 @@ interface IStockModel {
   ownerId: string;
   purchaseDate?: Date;
   quantity: number;
-  status: string;
   unit: string;
 }
-
-// TODO: Refactor to remove the status and take account the Owner and Unit enums
 
 class StockModel implements IStockModel {
   barcode?: string;
@@ -28,7 +25,6 @@ class StockModel implements IStockModel {
   ownerId: string;
   purchaseDate?: Date;
   quantity: number;
-  status: string;
   unit: string;
 
   constructor(params: IStockModel) {
@@ -44,52 +40,50 @@ class StockModel implements IStockModel {
     this.purchaseDate = params.purchaseDate;
     this.quantity = params.quantity;
     this.unit = params.unit;
-    this.status = params.status;
   }
 
+  // API shape (camelCase, ISO strings, `null` for absent optionals). Also what the repository cache stores.
   static fromJSON(data: Record<string, unknown>): StockModel {
     return new StockModel({
-      barcode: data.barcode as string,
-      brand: data.brand as string,
+      barcode: optionalString(data.barcode),
+      brand: optionalString(data.brand),
       description: data.description as string,
-      expirationDate: data.expiration_date
-        ? new Date(data.expiration_date as string)
-        : undefined,
+      expirationDate: optionalDate(data.expirationDate),
       id: data.id as string,
-      notes: data.notes as string,
-      openingDate: data.opening_date
-        ? new Date(data.opening_date as string)
-        : undefined,
+      notes: optionalString(data.notes),
+      openingDate: optionalDate(data.openingDate),
       owner: data.owner as string,
-      ownerId: data.owner_id as string,
-      purchaseDate: data.purchase_date
-        ? new Date(data.purchase_date as string)
-        : undefined,
+      ownerId: data.ownerId as string,
+      purchaseDate: optionalDate(data.purchaseDate),
       quantity: data.quantity as number,
-      status: data.status as string,
       unit: data.unit as string,
     });
   }
 
   toJSON() {
     return {
-      barcode: this.barcode,
-      brand: this.brand,
+      barcode: this.barcode ?? null,
+      brand: this.brand ?? null,
       description: this.description,
-      expiration_date: this.expirationDate
-        ? this.expirationDate.toISOString()
-        : null,
+      expirationDate: this.expirationDate?.toISOString() ?? null,
       id: this.id,
-      notes: this.notes,
-      opening_date: this.openingDate ? this.openingDate.toISOString() : null,
+      notes: this.notes ?? null,
+      openingDate: this.openingDate?.toISOString() ?? null,
       owner: this.owner,
-      owner_id: this.ownerId,
-      purchase_date: this.purchaseDate ? this.purchaseDate.toISOString() : null,
+      ownerId: this.ownerId,
+      purchaseDate: this.purchaseDate?.toISOString() ?? null,
       quantity: this.quantity,
-      status: this.status,
       unit: this.unit,
     };
   }
+}
+
+function optionalDate(value: unknown): Date | undefined {
+  return typeof value === "string" ? new Date(value) : undefined;
+}
+
+function optionalString(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
 }
 
 export default StockModel;

@@ -160,15 +160,15 @@ datasources:
       - getAccounts: src/data/datasource/data/financial/accounts/api/getAccounts.ts
       - updateAccount: src/data/datasource/data/financial/accounts/api/updateAccount.ts
     helpers:
-      - financialApiError: src/data/datasource/data/financial/financialApiError.ts   # 400 -> FieldInvalid, 403 -> FinancialOwnerNotAllowed, 404 -> FinancialNotFound, 409 on delete -> AccountHasTransactions, other -> GenericError
-      - ownerQuery: src/data/datasource/data/financial/ownerQuery.ts                 # ?ownerId=a&ownerId=b (empty ownerIds -> no request)
-      - money: src/data/models/financial/money.ts                                    # cents <-> decimal number / decimal string
+      - financialApiError: src/data/datasource/data/financial/financialApiError.ts # 400 -> FieldInvalid, 403 -> FinancialOwnerNotAllowed, 404 -> FinancialNotFound, 409 on delete -> AccountHasTransactions, other -> GenericError
+      - ownerQuery: src/data/datasource/data/financial/ownerQuery.ts # ?ownerId=a&ownerId=b (empty ownerIds -> no request)
+      - money: src/data/models/financial/money.ts # cents <-> decimal number / decimal string
   categoriesDatasource (API):
     path: src/data/datasource/data/financial/categories/api/
     uses: "@infrastructure/api (/v1/finance/categories); never sends depthLevel, owner or ownerId on update, drops depthLevel on create; CategoryModel JSON = API shape ('black' <-> #000000 via models/financial/iconColor.ts, parentId null <-> undefined)"
     methods:
       - createCategory: src/data/datasource/data/financial/categories/api/createCategory.ts
-      - deleteCategory: src/data/datasource/data/financial/categories/api/deleteCategory.ts   # 409 -> CategoryHasTransactions
+      - deleteCategory: src/data/datasource/data/financial/categories/api/deleteCategory.ts # 409 -> CategoryHasTransactions
       - getCategories: src/data/datasource/data/financial/categories/api/getCategories.ts
       - updateCategory: src/data/datasource/data/financial/categories/api/updateCategory.ts
   transactionsDatasource (API):
