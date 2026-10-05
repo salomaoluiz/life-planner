@@ -14,7 +14,6 @@ export const migrationAllowList = [
   "src/presentation/screens/Financial/Accounts/**",
   "src/presentation/screens/Financial/Categories/**",
   "src/presentation/screens/Financial/hooks/**",
-  "src/presentation/screens/Financial/Transactions/**",
   "src/presentation/screens/Invite/**",
   "src/presentation/screens/Login/**",
   "src/presentation/screens/Signup/**",
@@ -23,7 +22,11 @@ export const migrationAllowList = [
 
 // Files allowed to contain color literals (stored user data). Plan 013 appends
 // "src/presentation/constants/categoryColors.ts" with the comment "stored category colors are user data (spec 013)".
-export const colorLiteralIgnores = ["src/presentation/theme/constants/**"];
+export const colorLiteralIgnores = [
+  "src/presentation/theme/constants/**",
+  // stored category colors are user data (spec 013)
+  "src/presentation/constants/categoryColors.ts",
+];
 
 const testsAndMocks = [
   "**/*.test.{ts,tsx}",
