@@ -3,17 +3,34 @@ import { Redirect, Tabs } from "expo-router";
 import { useUser } from "@application/providers/user";
 import Icon from "@components/Icon";
 import { useTranslation } from "@presentation/i18n";
+import { useTheme } from "@presentation/theme";
 
 export default function TabNavigator() {
   const { logged } = useUser();
   const { t } = useTranslation();
+  const { theme } = useTheme();
 
   if (!logged) {
     return <Redirect href="/login" />;
   }
 
   return (
-    <Tabs>
+    <Tabs
+      screenOptions={{
+        headerStyle: { backgroundColor: theme.colors.surface },
+        headerTintColor: theme.colors.textPrimary,
+        tabBarActiveTintColor: theme.colors.accentText,
+        tabBarInactiveTintColor: theme.colors.textSecondary,
+        tabBarLabelStyle: {
+          fontSize: theme.typography.tab.fontSize,
+          lineHeight: theme.typography.tab.lineHeight,
+        },
+        tabBarStyle: {
+          backgroundColor: theme.colors.surface,
+          borderTopColor: theme.colors.border,
+        },
+      }}
+    >
       <Tabs.Screen
         name={"index/index"}
         options={{
