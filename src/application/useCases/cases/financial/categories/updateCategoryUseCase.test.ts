@@ -20,6 +20,7 @@ it("SHOULD call repository updateCategory correctly", async () => {
     {
       depthLevel: mocks.defaultParams.depthLevel,
       icon: mocks.defaultParams.icon,
+      iconColor: mocks.defaultParams.iconColor,
       id: mocks.defaultParams.id,
       name: mocks.defaultParams.name,
       owner: OwnerType.FAMILY,
@@ -33,6 +34,22 @@ it("SHOULD call repository updateCategory correctly", async () => {
 it("SHOULD throw FieldInvalid when owner is invalid", async () => {
   const error = await setupThrowable({ owner: "INVALID" });
   expect(error).toBeInstanceOf(FieldInvalid);
+});
+
+it("SHOULD forward iconColor to the repository", async () => {
+  await setup({ iconColor: "#3B82F6" });
+
+  expect(spies.financialRepositoryCategory.updateCategory).toHaveBeenCalledWith(
+    expect.objectContaining({ iconColor: "#3B82F6" }),
+  );
+});
+
+it("SHOULD forward parentId null (make a main category) untouched", async () => {
+  await setup({ parentId: null });
+
+  expect(spies.financialRepositoryCategory.updateCategory).toHaveBeenCalledWith(
+    expect.objectContaining({ parentId: null }),
+  );
 });
 
 describe("type fallback and error handling", () => {

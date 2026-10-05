@@ -24,8 +24,8 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-async function setup() {
-  return updateCategory(defaultParams, datasourcesMocks);
+async function setup(override: Partial<Params> = {}) {
+  return updateCategory({ ...defaultParams, ...override }, datasourcesMocks);
 }
 
 const spies = {

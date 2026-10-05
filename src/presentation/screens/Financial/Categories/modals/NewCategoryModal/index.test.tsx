@@ -1,305 +1,167 @@
-import {
-  act,
-  fireEvent,
-  hasText,
-  mocks,
-  screen,
-  setup,
-  spies,
-} from "./mocks/index.mocks";
+import { fireEvent, screen, setup } from "./mocks/index.mocks";
 
-function menus() {
-  const [color, icon] = screen.UNSAFE_getAllByType(mocks.Menu);
-  return { color, icon };
-}
+it("SHOULD show the create title, the save footer and no delete or cancel", () => {
+  setup();
 
-function pickers() {
-  const [type, owner, parent] = screen.UNSAFE_getAllByType(mocks.Picker);
-  return { owner, parent, type };
-}
-
-function press(label: string) {
-  fireEvent.press(screen.UNSAFE_getAllByProps({ label })[0]);
-}
-
-describe("loading", () => {
-  it.each([
-    ["owners are fetching", { fetching: "owners" as const }],
-    ["categories are fetching", { fetching: "categories" as const }],
-    ["owners are not loaded", { owners: undefined }],
-    ["categories are not loaded", { categories: undefined }],
-  ])("SHOULD render only the loading state WHEN %s", (_, props) => {
-    setup(props);
-
-    expect(hasText("Loading...")).toBe(true);
-    expect(hasText("financial.categories.addNewCategory")).toBe(false);
-  });
+  expect(screen.getByText("financial.categories.new")).toBeOnTheScreen();
+  expect(screen.getByText("financial.categories.form.save")).toBeOnTheScreen();
+  expect(screen.queryByText("financial.categories.delete")).toBeNull();
+  expect(screen.queryByText("common.actions.cancel")).toBeNull();
 });
 
-describe("data fetching", () => {
-  it("SHOULD fetch the categories of every owner", async () => {
-    setup();
-    const call = spies.useQuery.mock.calls.find(
-      ([options]) => options.cacheKey[0] === "get_categories",
-    )!;
-    spies.getCategories.mockResolvedValue(mocks.categories);
-
-    const result = await call[0].fetch();
-
-    expect(call[0].enabled).toBe(true);
-    expect(spies.getCategories).toHaveBeenCalledWith(["owner-1", "owner-2"]);
-    expect(result).toBe(mocks.categories);
+it("SHOULD show the edit title, save changes and the delete button", () => {
+  const vm = setup({
+    isEditing: true,
+    saveLabelKey: "financial.common.saveChanges",
+    titleKey: "financial.categories.edit",
   });
 
-  it("SHOULD be disabled and return no categories WHEN the owners are not loaded", async () => {
-    setup({ owners: undefined });
-    const call = spies.useQuery.mock.calls.find(
-      ([options]) => options.cacheKey[0] === "get_categories",
-    )!;
+  expect(screen.getByText("financial.categories.edit")).toBeOnTheScreen();
+  expect(screen.getByText("financial.common.saveChanges")).toBeOnTheScreen();
+  fireEvent.press(screen.getByText("financial.categories.delete"));
 
-    const result = await call[0].fetch();
-
-    expect(call[0].enabled).toBe(false);
-    expect(result).toEqual([]);
-    expect(spies.getCategories).not.toHaveBeenCalled();
-  });
+  expect(vm.onDeletePress).toHaveBeenCalledTimes(1);
 });
 
-describe("form", () => {
-  it("SHOULD render the title and the actions", () => {
-    setup();
+it("SHOULD call onSave from the footer", () => {
+  const vm = setup();
 
-    expect(hasText("financial.categories.addNewCategory")).toBe(true);
-    expect(
-      screen.UNSAFE_getAllByProps({ label: "financial.categories.add" }).length,
-    ).toBeGreaterThan(0);
-  });
+  fireEvent.press(screen.getByText("financial.categories.form.save"));
 
-  it("SHOULD show the name error", () => {
-    setup({ errors: { name: "Name is required" } });
+  expect(vm.onSave).toHaveBeenCalledTimes(1);
+});
 
-    expect(hasText("Name is required")).toBe(true);
-  });
+it("SHOULD preview the placeholder or the typed name", () => {
+  setup();
+  expect(
+    screen.getAllByText("financial.categories.form.namePlaceholder").length,
+  ).toBeGreaterThan(0);
+});
 
-  it("SHOULD NOT show an error WHEN there are none", () => {
-    setup();
+it("SHOULD preview the typed name", () => {
+  setup({ name: "Food" });
 
-    expect(screen.UNSAFE_queryAllByProps({ visible: true })).toHaveLength(0);
-  });
+  expect(screen.getAllByText("Food").length).toBeGreaterThan(0);
+});
 
-  it("SHOULD forward the name input", () => {
-    const { fields } = setup();
+it("SHOULD report name and type changes", () => {
+  const vm = setup();
 
-    fireEvent.changeText(
-      screen.UNSAFE_getAllByProps({ label: "financial.categories.name" })[0],
-      "Bonus",
-    );
-
-    expect(fields.name.onChange).toHaveBeenCalledWith("Bonus");
-  });
-
-  it("SHOULD set the type and reset the parent WHEN the type changes", () => {
-    const { fields } = setup();
-
-    pickers().type.props.onValueChange("INCOME");
-
-    expect(fields.type.onChange).toHaveBeenCalledWith("INCOME");
-    expect(fields.parentId.onChange).toHaveBeenCalledWith("");
-  });
-
-  it("SHOULD list the owners and preselect the first one", () => {
-    setup();
-    const { owner } = pickers();
-
-    expect(owner.props.items).toEqual([
-      { label: "USER - Alice Test", value: "owner-1" },
-      { label: "FAMILY - Test Family", value: "owner-2" },
-    ]);
-    expect(owner.props.selectedValue).toBe("owner-1");
-  });
-
-  it("SHOULD preselect the chosen owner", () => {
-    setup({ fieldValues: { ownerId: "owner-2" } });
-
-    expect(pickers().owner.props.selectedValue).toBe("owner-2");
-  });
-
-  it.each(["owner-1", "owner-2"])(
-    "SHOULD set the owner %s and reset the parent WHEN it is selected",
-    (id) => {
-      const { fields } = setup();
-
-      pickers().owner.props.onValueChange(id);
-
-      expect(fields.ownerId.onChange).toHaveBeenCalledWith(id);
-      expect(fields.parentId.onChange).toHaveBeenCalledWith("");
-    },
+  fireEvent.changeText(
+    screen.getByLabelText("financial.categories.form.name"),
+    "Food",
   );
+  fireEvent.press(screen.getByText("financial.common.income"));
 
-  it("SHOULD offer the root option and the parents of the chosen owner and type", () => {
-    setup();
-
-    expect(pickers().parent.props.items).toEqual([
-      { label: "None (Root Category)", value: "" },
-      { label: "Food", value: "cat-1" },
-    ]);
-  });
-
-  it("SHOULD offer the parents of the selected owner and type", () => {
-    setup({ fieldValues: { ownerId: "owner-2" } });
-
-    expect(pickers().parent.props.items).toEqual([
-      { label: "None (Root Category)", value: "" },
-      { label: "Rent", value: "cat-3" },
-    ]);
-  });
-
-  it("SHOULD select the root option WHEN no parent is chosen and forward parent changes", () => {
-    const { fields } = setup();
-
-    expect(pickers().parent.props.selectedValue).toBe("");
-
-    pickers().parent.props.onValueChange("cat-1");
-
-    expect(fields.parentId.onChange).toHaveBeenCalledWith("cat-1");
-  });
-
-  it("SHOULD select the chosen parent", () => {
-    setup({ fieldValues: { parentId: "cat-1" } });
-
-    expect(pickers().parent.props.selectedValue).toBe("cat-1");
-  });
+  expect(vm.onNameChange).toHaveBeenCalledWith("Food");
+  expect(vm.onTypeChange).toHaveBeenCalledWith("INCOME");
 });
 
-describe("color selector", () => {
-  it("SHOULD show the rainbow preview WHEN the color is black", () => {
-    setup();
-
-    expect(screen.UNSAFE_queryAllByType(mocks.Svg).length).toBeGreaterThan(0);
+it("SHOULD show the type and owner helpers WHEN locked", () => {
+  setup({
+    isOwnerLocked: true,
+    isTypeLocked: true,
+    ownerHelperKey: "financial.common.ownerLocked",
+    typeHelperKey: "financial.categories.form.typeLocked",
   });
 
-  it("SHOULD show a solid preview WHEN a color was chosen", () => {
-    setup({ fieldValues: { iconColor: "#007bff" } });
-
-    expect(screen.UNSAFE_queryAllByType(mocks.Svg)).toHaveLength(0);
-  });
-
-  it("SHOULD open and dismiss the color menu", () => {
-    setup();
-
-    expect(menus().color.props.visible).toBe(false);
-    act(() => menus().color.props.anchor.props.onPress());
-    expect(menus().color.props.visible).toBe(true);
-
-    act(() => menus().color.props.onDismiss());
-    expect(menus().color.props.visible).toBe(false);
-  });
-
-  it("SHOULD choose a color and close the menu", () => {
-    const { fields } = setup();
-    act(() => menus().color.props.anchor.props.onPress());
-
-    const options = menus().color.props.children.props.children;
-    act(() => options[1].props.onPress());
-
-    expect(fields.iconColor.onChange).toHaveBeenCalledWith("#8a2be2");
-    expect(menus().color.props.visible).toBe(false);
-  });
-
-  it("SHOULD mark only the selected color with a check", () => {
-    setup({ fieldValues: { iconColor: "#4cd137" } });
-
-    expect(screen.UNSAFE_getAllByProps({ name: "check" })).toHaveLength(1);
-  });
+  expect(
+    screen.getByText("financial.categories.form.typeLocked"),
+  ).toBeOnTheScreen();
+  expect(screen.getByText("financial.common.ownerLocked")).toBeOnTheScreen();
 });
 
-describe("icon selector", () => {
-  it("SHOULD show the current icon with the chosen color", () => {
-    setup({ fieldValues: { icon: "cash", iconColor: "#ff4d4d" } });
+it("SHOULD offer the no-parent option first and report the parent", () => {
+  const vm = setup();
 
-    const preview = screen.UNSAFE_getAllByProps({ source: "cash" })[0];
-    expect(preview.props.color).toBe("#ff4d4d");
-  });
+  fireEvent.press(screen.getByText("financial.categories.form.noParent"));
+  fireEvent.press(screen.getByText("Housing"));
 
-  it("SHOULD open and dismiss the icon menu", () => {
-    setup();
-
-    expect(menus().icon.props.visible).toBe(false);
-    act(() => menus().icon.props.anchor.props.onPress());
-    expect(menus().icon.props.visible).toBe(true);
-
-    act(() => menus().icon.props.onDismiss());
-    expect(menus().icon.props.visible).toBe(false);
-  });
-
-  it("SHOULD choose an icon and close the menu", () => {
-    const { fields } = setup();
-    act(() => menus().icon.props.anchor.props.onPress());
-
-    fireEvent.press(screen.getAllByLabelText("wifi")[0]);
-
-    expect(fields.icon.onChange).toHaveBeenCalledWith("wifi");
-    expect(menus().icon.props.visible).toBe(false);
-  });
-
-  it("SHOULD highlight only the selected icon", () => {
-    setup({ fieldValues: { icon: "car" } });
-    const selected = screen.UNSAFE_getAllByProps({ source: "car" })[0];
-    const other = screen.UNSAFE_getAllByProps({ source: "home" })[0];
-
-    expect(selected.props.color).not.toBe(other.props.color);
-  });
+  expect(vm.onParentChange).toHaveBeenCalledWith("housing");
 });
 
-describe("actions", () => {
-  it("SHOULD go back WHEN Cancel is pressed", () => {
-    setup();
+it("SHOULD render swatches and the icon group and open the custom color and icon sheets", () => {
+  const vm = setup();
 
-    press("financial.categories.cancel");
+  expect(screen.getByTestId("category-color-swatch-#F59E0B")).toBeOnTheScreen();
+  expect(screen.getByTestId("category-icon-icon-car")).toBeOnTheScreen();
+  fireEvent.press(screen.getByTestId("category-color-custom"));
+  fireEvent.press(screen.getByTestId("category-icon-more"));
+  fireEvent.press(screen.getByTestId("category-color-swatch-#F59E0B"));
 
-    expect(spies.back).toHaveBeenCalledTimes(1);
+  expect(vm.onCustomColorOpen).toHaveBeenCalledTimes(1);
+  expect(vm.onIconPickerOpen).toHaveBeenCalledTimes(1);
+  expect(vm.onColorChange).toHaveBeenCalledWith("#F59E0B");
+});
+
+it("SHOULD render the custom color sheet and the icon sheet only WHEN open", () => {
+  setup();
+  expect(
+    screen.queryByText("financial.categories.form.customColorTitle"),
+  ).toBeNull();
+
+  setup({ isCustomColorOpen: true, isIconPickerOpen: true });
+
+  expect(
+    screen.getByText("financial.categories.form.customColorTitle"),
+  ).toBeOnTheScreen();
+  expect(
+    screen.getAllByText("financial.categories.form.iconsTitle").length,
+  ).toBeGreaterThan(0);
+});
+
+it("SHOULD render the name error and the form-level error", () => {
+  setup({
+    formErrorKey: "financial.errors.notFound",
+    nameError: "financial.categories.nameRequired",
   });
 
-  it("SHOULD go back WHEN the backdrop is pressed", () => {
-    setup();
+  expect(
+    screen.getByText("financial.categories.nameRequired"),
+  ).toBeOnTheScreen();
+  expect(screen.getByText("financial.errors.notFound")).toBeOnTheScreen();
+});
 
-    fireEvent.press(screen.UNSAFE_getAllByType(mocks.Pressable)[0]);
+it("SHOULD show skeletons WHEN loading and the not found copy WHEN missing", () => {
+  setup({ isLoading: true });
+  expect(screen.getAllByTestId("category-form-skeleton")).toHaveLength(3);
+});
 
-    expect(spies.back).toHaveBeenCalledTimes(1);
+it("SHOULD show not found and close from it", () => {
+  const vm = setup({ isNotFound: true });
+
+  fireEvent.press(screen.getAllByText("common.actions.close")[0]);
+
+  expect(screen.getByText("financial.errors.notFound")).toBeOnTheScreen();
+  expect(vm.onClose).toHaveBeenCalled();
+});
+
+it("SHOULD render the delete dialog with its message and confirm", () => {
+  const vm = setup({
+    deleteMessageKeys: [
+      "financial.categories.deleteAlertMsg",
+      "financial.categories.deleteConfirm.withSubcategories",
+    ],
+    isDeleteDialogOpen: true,
+    isEditing: true,
   });
 
-  it("SHOULD NOT create the category WHEN the form is invalid", () => {
-    const { mutate } = setup();
-    mocks.validateForm.mockReturnValueOnce(undefined);
+  expect(
+    screen.getByText(
+      "financial.categories.deleteAlertMsg financial.categories.deleteConfirm.withSubcategories",
+    ),
+  ).toBeOnTheScreen();
+  fireEvent.press(screen.getByText("common.actions.delete"));
 
-    press("financial.categories.add");
+  expect(vm.onDeleteConfirm).toHaveBeenCalledTimes(1);
+});
 
-    expect(mocks.validateForm).toHaveBeenCalledWith(
-      mocks.owners,
-      mocks.categories,
-    );
-    expect(mutate).not.toHaveBeenCalled();
-  });
+it("SHOULD render the discard dialog with its actions", () => {
+  const vm = setup({ isDiscardDialogOpen: true });
 
-  it("SHOULD create the category with the validated params WHEN the form is valid", () => {
-    const { mutate } = setup();
-    const params = { name: "Bonus" };
-    mocks.validateForm.mockReturnValueOnce(params);
+  fireEvent.press(screen.getByText("common.form.discard"));
+  fireEvent.press(screen.getByText("common.form.keepEditing"));
 
-    press("financial.categories.add");
-
-    expect(mutate).toHaveBeenCalledWith(params);
-  });
-
-  it("SHOULD go back WHEN the category was created", () => {
-    setup({ status: "success" });
-
-    expect(spies.back).toHaveBeenCalledTimes(1);
-  });
-
-  it("SHOULD NOT go back on mount WHEN the mutation is idle", () => {
-    setup();
-
-    expect(spies.back).not.toHaveBeenCalled();
-  });
+  expect(vm.onDiscardConfirm).toHaveBeenCalledTimes(1);
+  expect(vm.onDiscardCancel).toHaveBeenCalledTimes(1);
 });
