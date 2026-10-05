@@ -4,6 +4,7 @@ import configurations from "./configurations";
 import errors from "./errors";
 import family from "./family";
 import financial from "./financial";
+import home from "./home";
 import invite from "./invite";
 import login from "./login";
 import navigation from "./navigation";
@@ -17,6 +18,7 @@ const ptBR = {
     errors,
     family,
     financial,
+    home,
     invite,
     login,
     navigation,
