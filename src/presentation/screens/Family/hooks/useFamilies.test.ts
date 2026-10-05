@@ -49,13 +49,14 @@ it("SHOULD give the owner Cancel actions on other rows and none on their own", a
 
   const [family] = await runFetch();
 
+  expect(family.isOwner).toBe(true);
   expect(family.familyMembers.map((member) => member.action)).toEqual([
     undefined,
     "CANCEL_INVITE",
   ]);
 });
 
-it("SHOULD give a non-owner Leave on their own row only", async () => {
+it("SHOULD pass the viewer to the view model AND give a non-owner no row actions", async () => {
   givenData();
   spies.getUser.mockResolvedValue({ ...ownerUser, id: "user-2" });
   spies.getMembers.mockResolvedValue([
@@ -66,19 +67,14 @@ it("SHOULD give a non-owner Leave on their own row only", async () => {
       status: FamilyMemberStatus.JOINED,
       userId: "user-2",
     }),
-    memberDTO({
-      id: "member-4",
-      role: FamilyMemberRole.MEMBER,
-      status: FamilyMemberStatus.JOINED,
-      userId: "user-4",
-    }),
   ]);
 
   const [family] = await runFetch();
 
+  expect(family.isOwner).toBe(false);
+  expect(family.menuAction).toBe("LEAVE");
   expect(family.familyMembers.map((member) => member.action)).toEqual([
     undefined,
-    "LEAVE",
     undefined,
   ]);
 });

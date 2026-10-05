@@ -1,7 +1,7 @@
 import FamilyDTO from "@application/dto/family/FamilyDTO";
 import FamilyViewModel from "@screens/Family/models/FamilyViewModel";
 
-import { familyDTO } from "../../mocks/index.mocks";
+import { familyDTO, ownerViewer } from "../../mocks/index.mocks";
 import { fireEvent, hasText, mocks, screen, setup } from "./mocks/index.mocks";
 
 it("SHOULD render the family name and initials avatar", () => {
@@ -45,7 +45,11 @@ it("SHOULD call onDeleteFamily WHEN the delete button is pressed", () => {
 });
 
 it("SHOULD render without crashing WHEN the family has no members (no owner badge)", () => {
-  const family = new FamilyViewModel(new FamilyDTO({ ...familyDTO }), []);
+  const family = new FamilyViewModel(
+    new FamilyDTO({ ...familyDTO }),
+    [],
+    ownerViewer,
+  );
 
   expect(() => setup({ expanded: true, family })).not.toThrow();
   expect(screen.queryAllByTestId("memberCard")).toHaveLength(0);

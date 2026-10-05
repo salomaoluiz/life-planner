@@ -56,15 +56,28 @@ const ownerViewer: FamilyMemberViewer = {
   userId: "user-1",
 };
 
+function familyNamed(id: string, name: string) {
+  return new FamilyViewModel(
+    new FamilyDTO({ id, name, ownerId: "user-1" }),
+    [],
+    ownerViewer,
+  );
+}
+
 function makeFamilyViewModel(viewer: FamilyMemberViewer = ownerViewer) {
-  return new FamilyViewModel(familyDTO, [
-    new FamilyMemberUIModel(ownerMemberDTO, viewer),
-    new FamilyMemberUIModel(invitedMemberDTO, viewer),
-  ]);
+  return new FamilyViewModel(
+    familyDTO,
+    [
+      new FamilyMemberUIModel(ownerMemberDTO, viewer),
+      new FamilyMemberUIModel(invitedMemberDTO, viewer),
+    ],
+    viewer,
+  );
 }
 
 export {
   familyDTO,
+  familyNamed,
   invitedMemberDTO,
   makeFamilyViewModel,
   memberDTO,

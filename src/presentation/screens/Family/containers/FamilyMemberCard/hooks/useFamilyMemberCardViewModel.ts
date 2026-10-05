@@ -43,7 +43,7 @@ function useFamilyMemberCardViewModel(props: Props) {
 
   return {
     actionLabelKey: props.member.actionLabelKey,
-    avatar: props.member.avatar,
+    avatar: props.member.legacyAvatar,
     canExpand,
     displayName: props.member.displayName,
     id: props.member.id,
