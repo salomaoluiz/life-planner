@@ -32,6 +32,16 @@ const financial = {
     cancel: "Cancel",
     chooseIcon: "Choose Icon",
     color: "Category Color",
+    deleteAlertMsg: "Are you sure you want to delete this category?",
+    deleteAlertTitle: "Delete Category",
+    deleteBtn: "Delete",
+    deleteConfirm: {
+      withSubcategories: "Its subcategories will also be deleted.",
+    },
+    errors: {
+      hasTransactions:
+        "This category or one of its subcategories has transactions. Delete or move them first.",
+    },
     expense: "Expense",
     filterByType: "Filter by type",
     income: "Income",

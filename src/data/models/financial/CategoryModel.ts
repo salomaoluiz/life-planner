@@ -1,3 +1,4 @@
+import { fromApiColor, toApiColor } from "./iconColor";
 import { OwnerType } from "./TransactionModel";
 
 interface ICategoryModel {
@@ -38,33 +39,34 @@ class CategoryModel implements ICategoryModel {
   static fromJSON(data: Record<string, unknown>): CategoryModel {
     return new CategoryModel({
       depthLevel:
-        data.depth_level !== undefined && data.depth_level !== null
-          ? Number(data.depth_level)
+        data.depthLevel !== undefined && data.depthLevel !== null
+          ? Number(data.depthLevel)
           : undefined,
       icon: data.icon as string,
-      iconColor: (data.icon_color as string) ?? "black",
+      iconColor: fromApiColor(data.iconColor),
       id: data.id as string,
       name: data.name as string,
       owner: data.owner as OwnerType,
-      ownerId: data.owner_id as string,
+      ownerId: data.ownerId as string,
       parentId:
-        data.parent_id !== undefined && data.parent_id !== null
-          ? String(data.parent_id)
+        data.parentId !== undefined && data.parentId !== null
+          ? String(data.parentId)
           : undefined,
       type: (data.type as string) ?? "EXPENSE",
     });
   }
 
+  // Same shape as the API: also what the repository cache stores.
   toJSON() {
     return {
-      depth_level: this.depthLevel,
+      depthLevel: this.depthLevel,
       icon: this.icon,
-      icon_color: this.iconColor,
+      iconColor: toApiColor(this.iconColor),
       id: this.id,
       name: this.name,
       owner: this.owner,
-      owner_id: this.ownerId,
-      parent_id: this.parentId,
+      ownerId: this.ownerId,
+      parentId: this.parentId ?? null,
       type: this.type,
     };
   }

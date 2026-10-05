@@ -5,38 +5,46 @@ it("SHOULD the CategoryModel has all params", () => {
   const result = setup();
 
   expect(result).toHaveProperty("id", mocks.json.id);
-  expect(result).toHaveProperty("depthLevel", mocks.json.depth_level);
+  expect(result).toHaveProperty("depthLevel", mocks.json.depthLevel);
   expect(result).toHaveProperty("icon", mocks.json.icon);
-  expect(result).toHaveProperty("iconColor", mocks.json.icon_color);
+  expect(result).toHaveProperty("iconColor", mocks.json.iconColor);
   expect(result).toHaveProperty("name", mocks.json.name);
   expect(result).toHaveProperty("owner", mocks.json.owner);
-  expect(result).toHaveProperty("ownerId", mocks.json.owner_id);
-  expect(result).toHaveProperty("parentId", mocks.json.parent_id);
+  expect(result).toHaveProperty("ownerId", mocks.json.ownerId);
+  expect(result).toHaveProperty("parentId", mocks.json.parentId);
   expect(result).toHaveProperty("type", mocks.json.type);
 });
 
-it("SHOULD the CategoryModel fromJson create a new CategoryModel", () => {
+it("SHOULD fromJSON read the API camelCase JSON", () => {
   const modelFromJson = CategoryModel.fromJSON({
-    depth_level: mocks.json.depth_level,
-    icon: mocks.json.icon,
-    icon_color: mocks.json.icon_color,
-    id: mocks.json.id,
-    name: mocks.json.name,
-    owner: mocks.json.owner,
-    owner_id: mocks.json.owner_id,
-    parent_id: mocks.json.parent_id,
-    type: mocks.json.type,
+    ...mocks.json,
+    createdAt: "2026-10-04T12:00:00.000Z",
+    updatedAt: "2026-10-04T12:00:00.000Z",
   });
 
-  const expected = setup();
-
-  expect(modelFromJson).toStrictEqual(expected);
+  expect(modelFromJson).toStrictEqual(setup());
 });
 
-it("SHOULD the CategoryModel toJson return a json", () => {
-  const result = setup().toJSON();
+it("SHOULD toJSON return the API shape", () => {
+  expect(setup().toJSON()).toStrictEqual(mocks.json);
+});
 
-  expect(result).toStrictEqual(mocks.json);
+it("SHOULD map the API default color #000000 to the black token AND back", () => {
+  const model = CategoryModel.fromJSON({ ...mocks.json, iconColor: "#000000" });
+
+  expect(model.iconColor).toBe("black");
+  expect(model.toJSON().iconColor).toBe("#000000");
+});
+
+it("SHOULD treat a null parentId (root) as undefined AND write it back as null", () => {
+  const model = CategoryModel.fromJSON({
+    ...mocks.json,
+    depthLevel: 0,
+    parentId: null,
+  });
+
+  expect(model.parentId).toBeUndefined();
+  expect(model.toJSON().parentId).toBeNull();
 });
 
 it("SHOULD apply defaults WHEN the optional JSON fields are missing", () => {
@@ -45,7 +53,7 @@ it("SHOULD apply defaults WHEN the optional JSON fields are missing", () => {
     id: mocks.json.id,
     name: mocks.json.name,
     owner: mocks.json.owner,
-    owner_id: mocks.json.owner_id,
+    ownerId: mocks.json.ownerId,
   });
 
   expect(model.iconColor).toBe("black");
@@ -54,34 +62,13 @@ it("SHOULD apply defaults WHEN the optional JSON fields are missing", () => {
   expect(model.parentId).toBeUndefined();
 });
 
-it("SHOULD treat null depth level and parent id as undefined", () => {
-  const model = CategoryModel.fromJSON({
-    depth_level: null,
-    icon: mocks.json.icon,
-    id: mocks.json.id,
-    name: mocks.json.name,
-    owner: mocks.json.owner,
-    owner_id: mocks.json.owner_id,
-    parent_id: null,
-  });
-
-  expect(model.depthLevel).toBeUndefined();
-  expect(model.parentId).toBeUndefined();
-});
-
-it("SHOULD convert a numeric depth level and a parent id from JSON", () => {
-  const model = CategoryModel.fromJSON({
-    depth_level: "2",
-    icon: mocks.json.icon,
-    id: mocks.json.id,
-    name: mocks.json.name,
-    owner: mocks.json.owner,
-    owner_id: mocks.json.owner_id,
-    parent_id: 7,
-  });
-
-  expect(model.depthLevel).toBe(2);
-  expect(model.parentId).toBe("7");
+it("SHOULD treat a null depth level as undefined AND convert a numeric one", () => {
+  expect(
+    CategoryModel.fromJSON({ ...mocks.json, depthLevel: null }).depthLevel,
+  ).toBeUndefined();
+  expect(
+    CategoryModel.fromJSON({ ...mocks.json, depthLevel: "2" }).depthLevel,
+  ).toBe(2);
 });
 
 it("SHOULD default the icon color to black WHEN the constructor receives none", () => {
@@ -95,4 +82,10 @@ it("SHOULD default the icon color to black WHEN the constructor receives none", 
   } as ConstructorParameters<typeof CategoryModel>[0]);
 
   expect(model.iconColor).toBe("black");
+});
+
+it("SHOULD round-trip toJSON and fromJSON (repository cache)", () => {
+  const model = setup();
+
+  expect(CategoryModel.fromJSON(model.toJSON())).toStrictEqual(model);
 });
