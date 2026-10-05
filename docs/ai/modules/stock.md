@@ -47,16 +47,12 @@ use_cases:
     path: src/application/useCases/cases/stock/updateStockItemUseCase.ts
     behavior: Updates an existing stock item.
 
-  getStockDashboardUseCase:
-    path: src/application/useCases/cases/home/getStockDashboardUseCase.ts
-    behavior: Retrieves dashboard overview for stocks.
-
 dtos:
   - name: StockDTO
     path: src/application/dto/stock/StockDTO.ts
-  - name: StockDashboardDTO
-    path: src/application/dto/home/StockDashboardDTO.ts
 ```
+
+Home attention rule: `getStockAttentionUseCase` (see `home.md`); the Stock tab's own rule is spec 011.
 
 ## Infrastructure
 
@@ -88,16 +84,13 @@ models:
 screens:
   Stock:
     path: src/presentation/screens/Stock/index.tsx
-  Home (Dashboard Overview):
-    path: src/presentation/screens/Home/index.tsx
+  Home: see home.md
 
 add_stock_item: quick-add tab button (`/quick_add`); the Stock screen has no add button.
 
 containers:
   - name: StockCard
     path: src/presentation/screens/Stock/containers/StockCard/index.tsx
-  - name: StockDashboard
-    path: src/presentation/screens/Home/containers/StockDashboard/index.tsx
 
 modals:
   - name: NewStockItemModal
@@ -108,6 +101,4 @@ view_models:
     path: src/presentation/screens/Stock/models/StockViewModel.ts
   - name: NewStockItemViewModel
     path: src/presentation/screens/Stock/modals/NewStockItemModal/models/NewStockItemViewModel.ts
-  - name: StockDashboardViewModel
-    path: src/presentation/screens/Home/models/StockDashboardViewModel.ts
 ```
