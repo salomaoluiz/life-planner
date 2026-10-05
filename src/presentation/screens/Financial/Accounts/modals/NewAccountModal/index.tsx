@@ -1,230 +1,188 @@
-import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useMemo } from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { View } from "react-native";
 
-import { useCases } from "@application/useCases";
-import { CreateAccountUseCaseParams } from "@application/useCases/cases/financial/accounts/createAccountUseCase";
-import { UpdateAccountUseCaseParams } from "@application/useCases/cases/financial/accounts/updateAccountUseCase";
 import {
+  AmountInput,
+  BottomSheet,
   Button,
-  Card,
-  HelperText,
-  Picker,
-  Spacer,
+  ChipGroup,
+  ConfirmDialog,
+  ErrorState,
+  IconChoiceGroup,
+  IconTile,
+  SegmentedControl,
+  Switch,
   Text,
-  TextInput,
+  TextField,
 } from "@components";
-import { IconButton } from "@components/Icon";
-import { useMutation, useQuery } from "@infrastructure/fetcher";
-import useTranslation from "@presentation/i18n/useTranslation";
-import useFinancialErrorFeedback from "@screens/Financial/hooks/useFinancialErrorFeedback";
+import Skeleton from "@components/Skeleton";
+import { useTranslation } from "@presentation/i18n";
+import { TranslationKeys } from "@presentation/i18n/types";
+import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
-import useForm from "./hooks/useForm";
-import NewAccountViewModel from "./models/NewAccountViewModel";
-import getStyles from "./styles";
+import { useNewAccountViewModel } from "./hooks";
+import useStyles from "./styles";
 
-const AVAILABLE_ICONS = [
-  "bank",
-  "cash",
-  "credit-card",
-  "wallet",
-  "folder",
-  "food",
-  "car",
-  "home",
-  "gift",
-  "cart",
-];
+const SKELETON_ROWS = [0, 1, 2];
 
 function NewAccountModal() {
-  const { styles, theme } = getStyles();
+  const { styles } = useStyles();
   const { t } = useTranslation();
-  const params = useLocalSearchParams<{
-    balance?: string;
-    icon?: string;
-    id?: string;
-    name?: string;
-    ownerId?: string;
-    status?: string;
-  }>();
+  const vm = useNewAccountViewModel();
 
-  const isEditing = !!params.id;
+  function err(key?: TranslationKeys) {
+    return key ? t(key) : undefined;
+  }
 
-  const owners = useQuery({
-    cacheKey: [useCases.getOwnersUseCase.uniqueName],
-    fetch: useCases.getOwnersUseCase.execute,
-  });
-
-  const { errors, fields, validateForm } = useForm({
-    initialValues: {
-      balance: params.balance,
-      icon: params.icon,
-      id: params.id,
-      name: params.name,
-      ownerId: params.ownerId,
-      status: params.status,
-    },
-  });
-
-  const saveMutation = useMutation({
-    cacheKey: [
-      isEditing
-        ? useCases.updateFinancialAccountUseCase.uniqueName
-        : useCases.createFinancialAccountUseCase.uniqueName,
-    ],
-    fetch: async (
-      payload: CreateAccountUseCaseParams & UpdateAccountUseCaseParams,
-    ) => {
-      if (isEditing) {
-        await useCases.updateFinancialAccountUseCase.execute(payload);
-      } else {
-        await useCases.createFinancialAccountUseCase.execute(payload);
-      }
-    },
-  });
-
-  useFinancialErrorFeedback(saveMutation.error);
-
-  const viewModel = useMemo(() => {
-    return owners.data ? new NewAccountViewModel(owners.data) : null;
-  }, [owners.data]);
-
-  useEffect(() => {
-    if (saveMutation.status === "success") {
-      router.back();
+  function renderBody() {
+    if (vm.isNotFound) {
+      return (
+        <ErrorState
+          message={t("financial.errors.notFound")}
+          onRetry={vm.onClose}
+          retryLabel={t("common.actions.close")}
+        />
+      );
     }
-  }, [saveMutation.status]);
 
-  if (owners.isFetching || !viewModel) {
+    if (vm.isLoading) {
+      return (
+        <View>
+          {SKELETON_ROWS.map((row) => (
+            <Skeleton.ListItem key={row} testID={"account-form-skeleton"} />
+          ))}
+        </View>
+      );
+    }
+
     return (
-      <View style={styles.loadingContainer}>
-        <Text.Headline value={t("financial.accounts.loading")} />
+      <View style={styles.form}>
+        <View style={styles.preview}>
+          <IconTile name={vm.icon} size={"lg"} tone={"accent"} />
+          <Text.Heading
+            tone={vm.name ? "primary" : "secondary"}
+            value={vm.name || t("financial.accounts.form.name")}
+          />
+        </View>
+        <TextField
+          error={err(vm.nameError)}
+          label={t("financial.accounts.form.name")}
+          maxLength={80}
+          onChangeText={vm.onNameChange}
+          value={vm.name}
+        />
+        <IconChoiceGroup
+          label={t("financial.accounts.form.icon")}
+          onChange={vm.onIconChange}
+          options={vm.iconOptions}
+          testID={"account-icon"}
+          value={vm.icon}
+        />
+        <View style={styles.helper}>
+          <AmountInput
+            error={err(vm.amountError)}
+            label={t("financial.accounts.form.balance")}
+            onChange={vm.onAmountChange}
+            testID={"account-balance"}
+            tone={vm.sign === "NEGATIVE" ? "expense" : "neutral"}
+            value={vm.amountCents}
+          />
+          <SegmentedControl
+            accessibilityLabel={t("financial.accounts.form.balance")}
+            onChange={vm.onSignChange}
+            options={vm.signOptions.map((option) => ({
+              label: t(option.labelKey),
+              tone: option.value === "NEGATIVE" ? "expense" : "income",
+              value: option.value,
+            }))}
+            value={vm.sign}
+          />
+          <Text.Caption tone={"secondary"} value={t(vm.balanceHelperKey)} />
+        </View>
+        {vm.isEditing && (
+          <View style={styles.helper}>
+            <View style={styles.preview}>
+              <Text.Body value={t("financial.accounts.form.archived")} />
+              <Switch
+                initialStatus={vm.isArchived}
+                onToggle={vm.onArchivedChange}
+                testID={"account-archived-switch"}
+              />
+            </View>
+            <Text.Caption
+              tone={"secondary"}
+              value={t("financial.accounts.form.archivedHelper")}
+            />
+          </View>
+        )}
+        <View style={styles.helper}>
+          <ChipGroup
+            disabled={vm.isOwnerLocked}
+            label={t("financial.common.belongsTo")}
+            layout={"wrap"}
+            mode={"single"}
+            onChange={vm.onOwnerChange}
+            options={translateChoices(vm.ownerChoices, t)}
+            value={vm.ownerId}
+          />
+          {vm.ownerHelperKey && (
+            <Text.Caption tone={"secondary"} value={t(vm.ownerHelperKey)} />
+          )}
+        </View>
+        {vm.formErrorKey && (
+          <Text.Body tone={"expense"} value={t(vm.formErrorKey)} />
+        )}
+        {vm.isEditing && (
+          <Button.Ghost
+            label={t("financial.accounts.delete")}
+            onPress={vm.onDeletePress}
+            tone={"expense"}
+          />
+        )}
       </View>
     );
   }
 
-  function onCancel() {
-    router.back();
-  }
-
-  function onSave() {
-    const validated = validateForm(owners.data!);
-    if (validated) {
-      // Cast the validated values to match both Create and Update params
-      saveMutation.mutate(
-        validated as CreateAccountUseCaseParams & UpdateAccountUseCaseParams,
-      );
-    }
-  }
-
   return (
     <>
-      <Pressable onPress={onCancel} style={styles.backdrop} />
-      <Card customStyles={styles.container}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={styles.titleContainer}>
-            <Text.Headline
-              value={
-                isEditing
-                  ? t("financial.accounts.editAccount")
-                  : t("financial.accounts.addNewAccount")
-              }
-            />
-          </View>
-          <Spacer direction={"vertical"} size={"md"} />
-
-          <TextInput.Outlined
-            label={t("financial.accounts.name")}
-            onChangeText={fields.name.onChange}
-            value={fields.name.value}
+      <BottomSheet
+        closeLabel={t("common.actions.close")}
+        footer={
+          <Button.Primary
+            fullWidth
+            label={t(vm.saveLabelKey)}
+            loading={vm.isSaving}
+            onPress={vm.onSave}
+            size={"lg"}
           />
-          <HelperText
-            label={errors.name}
-            type={"error"}
-            visible={!!errors.name}
-          />
-          <Spacer direction={"vertical"} size={"md"} />
-
-          <TextInput.Outlined
-            keyboardType={"numeric"}
-            label={t("financial.accounts.balance")}
-            onChangeText={fields.balance.onChange}
-            value={fields.balance.value}
-          />
-          <HelperText
-            label={errors.balance}
-            type={"error"}
-            visible={!!errors.balance}
-          />
-          <Spacer direction={"vertical"} size={"md"} />
-
-          <Picker
-            items={viewModel.accountOwners}
-            label={t("financial.accounts.owner")}
-            onValueChange={fields.ownerId.onChange}
-            selectedValue={fields.ownerId.value ?? owners.data![0]?.id}
-          />
-          <Spacer direction={"vertical"} size={"md"} />
-
-          <Picker
-            items={viewModel.accountStatuses}
-            label={t("financial.accounts.status")}
-            onValueChange={fields.status.onChange}
-            selectedValue={fields.status.value}
-          />
-          <Spacer direction={"vertical"} size={"md"} />
-
-          <Text.Body bold value={t("financial.accounts.chooseIcon")} />
-          <Spacer direction={"vertical"} size={"sm"} />
-          <View style={styles.iconGrid}>
-            {AVAILABLE_ICONS.map((iconName) => {
-              const isSelected = fields.icon.value === iconName;
-              return (
-                <View
-                  key={iconName}
-                  style={[
-                    styles.iconBox,
-                    isSelected && {
-                      backgroundColor: theme.colors.accentSoft,
-                    },
-                  ]}
-                >
-                  <IconButton
-                    accessibilityLabel={iconName}
-                    color={
-                      isSelected
-                        ? theme.colors.accent
-                        : theme.colors.textPrimary
-                    }
-                    name={iconName}
-                    onPress={() => fields.icon.onChange(iconName)}
-                    size={theme.sizes.spacing.xl}
-                  />
-                </View>
-              );
-            })}
-          </View>
-        </ScrollView>
-
-        <Card customStyles={styles.buttonContainer}>
-          <View style={styles.button}>
-            <Button.Text
-              customStyles={{ textColor: theme.colors.expense }}
-              label={t("financial.accounts.cancel")}
-              onPress={onCancel}
-            />
-            <Spacer direction={"horizontal"} size={"xl"} />
-            <Button.Filled
-              label={
-                isEditing
-                  ? t("financial.accounts.save")
-                  : t("financial.accounts.add")
-              }
-              onPress={onSave}
-            />
-          </View>
-        </Card>
-      </Card>
+        }
+        onClose={vm.onClose}
+        presentation={"inline"}
+        title={t(vm.titleKey)}
+        visible
+      >
+        {renderBody()}
+      </BottomSheet>
+      <ConfirmDialog
+        cancelLabel={t("common.form.keepEditing")}
+        closeLabel={t("common.actions.close")}
+        confirmLabel={t("common.form.discard")}
+        message={t("common.form.discardMessage")}
+        onCancel={vm.onDiscardCancel}
+        onConfirm={vm.onDiscardConfirm}
+        title={t("common.form.discardTitle")}
+        visible={vm.isDiscardDialogOpen}
+      />
+      <ConfirmDialog
+        cancelLabel={t("common.actions.cancel")}
+        closeLabel={t("common.actions.close")}
+        confirmLabel={t("common.actions.delete")}
+        loading={vm.isDeleting}
+        message={t("financial.accounts.deleteAlertMsg")}
+        onCancel={vm.onDeleteCancel}
+        onConfirm={vm.onDeleteConfirm}
+        title={t("financial.accounts.deleteTitle", vm.deleteTitleParams)}
+        visible={vm.isDeleteDialogOpen}
+      />
     </>
   );
 }

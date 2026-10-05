@@ -1,263 +1,133 @@
-import {
-  fireEvent,
-  hasText,
-  mocks,
-  screen,
-  setup,
-  spies,
-} from "./mocks/index.mocks";
+import { fireEvent, screen, setup } from "./mocks/index.mocks";
 
-function pickers() {
-  const [owner, status] = screen.UNSAFE_getAllByType(mocks.Picker);
-  return { owner, status };
-}
+it("SHOULD show the create title, the save footer and no delete, archive or cancel", () => {
+  setup();
 
-function press(label: string) {
-  fireEvent.press(screen.UNSAFE_getAllByProps({ label })[0]);
-}
-
-const editParams = {
-  balance: "50",
-  icon: "cash",
-  id: "acc-1",
-  name: "Savings",
-  ownerId: "owner-2",
-  status: "ARCHIVED",
-};
-
-describe("loading", () => {
-  it.each([
-    ["owners are fetching", { isFetching: true }],
-    ["owners are not loaded", { noOwners: true }],
-  ])("SHOULD render only the loading state WHEN %s", (_, props) => {
-    setup(props);
-
-    expect(hasText("financial.accounts.loading")).toBe(true);
-    expect(hasText("financial.accounts.addNewAccount")).toBe(false);
-  });
+  expect(screen.getByText("financial.accounts.new")).toBeOnTheScreen();
+  expect(screen.getByText("financial.accounts.form.save")).toBeOnTheScreen();
+  expect(screen.queryByText("financial.accounts.delete")).toBeNull();
+  expect(screen.queryByText("financial.accounts.form.archived")).toBeNull();
+  expect(screen.queryByText("common.actions.cancel")).toBeNull();
 });
 
-describe("create mode", () => {
-  it("SHOULD render the add title and button", () => {
-    setup();
-
-    expect(hasText("financial.accounts.addNewAccount")).toBe(true);
-    expect(
-      screen.UNSAFE_getAllByProps({ label: "financial.accounts.add" }).length,
-    ).toBeGreaterThan(0);
+it("SHOULD show the edit title, save changes, the archive switch and the delete button", () => {
+  const vm = setup({
+    isEditing: true,
+    saveLabelKey: "financial.common.saveChanges",
+    titleKey: "financial.accounts.edit",
   });
 
-  it("SHOULD configure the mutation with the create use case name", () => {
-    setup();
+  expect(screen.getByText("financial.accounts.edit")).toBeOnTheScreen();
+  expect(screen.getByText("financial.common.saveChanges")).toBeOnTheScreen();
+  expect(
+    screen.getByText("financial.accounts.form.archived"),
+  ).toBeOnTheScreen();
+  expect(
+    screen.getByText("financial.accounts.form.archivedHelper"),
+  ).toBeOnTheScreen();
+  fireEvent.press(screen.getByText("financial.accounts.delete"));
 
-    expect(spies.useMutation.mock.calls[0][0].cacheKey).toEqual([
-      "create_account",
-    ]);
-  });
-
-  it("SHOULD create the account WHEN the mutation fetch runs", async () => {
-    setup();
-    const payload = { name: "Checking" };
-
-    await spies.useMutation.mock.calls[0][0].fetch(payload as never);
-
-    expect(spies.createAccount).toHaveBeenCalledWith(payload);
-    expect(spies.updateAccount).not.toHaveBeenCalled();
-  });
-
-  it("SHOULD start the form without initial values", () => {
-    setup();
-
-    expect(spies.useForm).toHaveBeenCalledWith({
-      initialValues: {
-        balance: undefined,
-        icon: undefined,
-        id: undefined,
-        name: undefined,
-        ownerId: undefined,
-        status: undefined,
-      },
-    });
-  });
+  expect(vm.onDeletePress).toHaveBeenCalledTimes(1);
 });
 
-describe("edit mode", () => {
-  it("SHOULD render the edit title and the save button", () => {
-    setup({ params: editParams });
+it("SHOULD call onSave from the footer", () => {
+  const vm = setup();
 
-    expect(hasText("financial.accounts.editAccount")).toBe(true);
-    expect(
-      screen.UNSAFE_getAllByProps({ label: "financial.accounts.save" }).length,
-    ).toBeGreaterThan(0);
-  });
+  fireEvent.press(screen.getByText("financial.accounts.form.save"));
 
-  it("SHOULD configure the mutation with the update use case name", () => {
-    setup({ params: editParams });
-
-    expect(spies.useMutation.mock.calls[0][0].cacheKey).toEqual([
-      "update_account",
-    ]);
-  });
-
-  it("SHOULD update the account WHEN the mutation fetch runs", async () => {
-    setup({ params: editParams });
-    const payload = { id: "acc-1", name: "Savings" };
-
-    await spies.useMutation.mock.calls[0][0].fetch(payload as never);
-
-    expect(spies.updateAccount).toHaveBeenCalledWith(payload);
-    expect(spies.createAccount).not.toHaveBeenCalled();
-  });
-
-  it("SHOULD start the form with the route params", () => {
-    setup({ params: editParams });
-
-    expect(spies.useForm).toHaveBeenCalledWith({ initialValues: editParams });
-  });
+  expect(vm.onSave).toHaveBeenCalledTimes(1);
 });
 
-describe("form", () => {
-  it("SHOULD show an error message for each field with an error", () => {
-    setup({
-      errors: { balance: "Balance is required", name: "Name is required" },
-    });
+it("SHOULD preview the placeholder or the typed name", () => {
+  setup();
+  expect(
+    screen.getAllByText("financial.accounts.form.name").length,
+  ).toBeGreaterThan(0);
 
-    expect(hasText("Name is required")).toBe(true);
-    expect(hasText("Balance is required")).toBe(true);
-  });
+  setup({ name: "Main" });
+  expect(screen.getAllByText("Main").length).toBeGreaterThan(0);
+});
 
-  it("SHOULD NOT show error messages WHEN there are no errors", () => {
-    setup();
+it("SHOULD report name, icon and sign changes", () => {
+  const vm = setup();
 
-    expect(screen.UNSAFE_queryAllByProps({ visible: true })).toHaveLength(0);
-  });
-
-  it("SHOULD forward text input changes", () => {
-    const { fields } = setup();
-
-    fireEvent.changeText(
-      screen.UNSAFE_getAllByProps({ label: "financial.accounts.name" })[0],
-      "Checking",
-    );
-    fireEvent.changeText(
-      screen.UNSAFE_getAllByProps({ label: "financial.accounts.balance" })[0],
-      "10",
-    );
-
-    expect(fields.name.onChange).toHaveBeenCalledWith("Checking");
-    expect(fields.balance.onChange).toHaveBeenCalledWith("10");
-  });
-
-  it("SHOULD list the owners and statuses in the pickers", () => {
-    setup();
-    const { owner, status } = pickers();
-
-    expect(owner.props.items).toEqual([
-      { label: "Personal - Alice Test", value: "owner-1" },
-      { label: "Family - Test Family", value: "owner-2" },
-    ]);
-    expect(status.props.items.map((i: { value: string }) => i.value)).toEqual([
-      "ACTIVE",
-      "ARCHIVED",
-    ]);
-  });
-
-  it("SHOULD preselect the first owner WHEN none is selected", () => {
-    setup();
-
-    expect(pickers().owner.props.selectedValue).toBe("owner-1");
-  });
-
-  it("SHOULD preselect the chosen owner WHEN one is selected", () => {
-    setup({ fieldValues: { ownerId: "owner-2" } });
-
-    expect(pickers().owner.props.selectedValue).toBe("owner-2");
-  });
-
-  it.each(["owner-1", "owner-2"])(
-    "SHOULD forward the selection of owner %s",
-    (id) => {
-      const { fields } = setup();
-
-      pickers().owner.props.onValueChange(id);
-
-      expect(fields.ownerId.onChange).toHaveBeenCalledWith(id);
-    },
+  fireEvent.changeText(
+    screen.getByLabelText("financial.accounts.form.name"),
+    "Main",
   );
+  fireEvent.press(screen.getByTestId("account-icon-icon-wallet"));
+  fireEvent.press(screen.getByText("financial.accounts.form.negative"));
 
-  it("SHOULD forward the status selection", () => {
-    const { fields } = setup();
-
-    pickers().status.props.onValueChange("ARCHIVED");
-
-    expect(fields.status.onChange).toHaveBeenCalledWith("ARCHIVED");
-  });
-
-  it("SHOULD render all the icons and forward the chosen icon", () => {
-    const { fields } = setup();
-
-    expect(screen.getAllByLabelText("wallet").length).toBeGreaterThan(0);
-
-    fireEvent.press(screen.getAllByLabelText("wallet")[0]);
-
-    expect(fields.icon.onChange).toHaveBeenCalledWith("wallet");
-  });
-
-  it("SHOULD highlight only the selected icon", () => {
-    setup({ fieldValues: { icon: "cash" } });
-    const selected = screen.UNSAFE_getAllByProps({ source: "cash" })[0];
-    const other = screen.UNSAFE_getAllByProps({ source: "bank" })[0];
-
-    expect(selected.props.color).not.toBe(other.props.color);
-  });
+  expect(vm.onNameChange).toHaveBeenCalledWith("Main");
+  expect(vm.onIconChange).toHaveBeenCalledWith("wallet");
+  expect(vm.onSignChange).toHaveBeenCalledWith("NEGATIVE");
 });
 
-describe("actions", () => {
-  it("SHOULD go back WHEN Cancel is pressed", () => {
-    setup();
+it("SHOULD show the balance input, its helper and the amount error", () => {
+  setup({ amountError: "financial.accounts.form.errors.balanceTooLarge" });
 
-    press("financial.accounts.cancel");
+  expect(screen.getByTestId("account-balance")).toBeOnTheScreen();
+  expect(
+    screen.getByText("financial.accounts.form.balanceHelper"),
+  ).toBeOnTheScreen();
+  expect(
+    screen.getByText("financial.accounts.form.errors.balanceTooLarge"),
+  ).toBeOnTheScreen();
+});
 
-    expect(spies.back).toHaveBeenCalledTimes(1);
+it("SHOULD show the owner helper WHEN locked", () => {
+  setup({
+    isOwnerLocked: true,
+    ownerHelperKey: "financial.common.ownerLocked",
   });
 
-  it("SHOULD go back WHEN the backdrop is pressed", () => {
-    setup();
+  expect(screen.getByText("financial.common.ownerLocked")).toBeOnTheScreen();
+});
 
-    fireEvent.press(screen.UNSAFE_getAllByType(mocks.Pressable)[0]);
-
-    expect(spies.back).toHaveBeenCalledTimes(1);
+it("SHOULD render the name error and the form-level error", () => {
+  setup({
+    formErrorKey: "financial.accounts.errors.hasTransactions",
+    nameError: "financial.accounts.nameRequired",
   });
 
-  it("SHOULD NOT save WHEN the form is invalid", () => {
-    const { mutate } = setup();
-    mocks.validateForm.mockReturnValueOnce(undefined);
+  expect(screen.getByText("financial.accounts.nameRequired")).toBeOnTheScreen();
+  expect(
+    screen.getByText("financial.accounts.errors.hasTransactions"),
+  ).toBeOnTheScreen();
+});
 
-    press("financial.accounts.add");
+it("SHOULD show skeletons WHEN loading", () => {
+  setup({ isLoading: true });
 
-    expect(mocks.validateForm).toHaveBeenCalledWith(mocks.owners);
-    expect(mutate).not.toHaveBeenCalled();
-  });
+  expect(screen.getAllByTestId("account-form-skeleton")).toHaveLength(3);
+});
 
-  it("SHOULD save the validated values WHEN the form is valid", () => {
-    const { mutate } = setup();
-    const validated = { name: "Checking", owner: "USER", ownerId: "owner-1" };
-    mocks.validateForm.mockReturnValueOnce(validated);
+it("SHOULD show not found and close from it", () => {
+  const vm = setup({ isNotFound: true });
 
-    press("financial.accounts.add");
+  fireEvent.press(screen.getAllByText("common.actions.close")[0]);
 
-    expect(mutate).toHaveBeenCalledWith(validated);
-  });
+  expect(screen.getByText("financial.errors.notFound")).toBeOnTheScreen();
+  expect(vm.onClose).toHaveBeenCalled();
+});
 
-  it("SHOULD go back WHEN the account was saved", () => {
-    setup({ status: "success" });
+it("SHOULD render the delete dialog and confirm", () => {
+  const vm = setup({ isDeleteDialogOpen: true, isEditing: true });
 
-    expect(spies.back).toHaveBeenCalledTimes(1);
-  });
+  expect(
+    screen.getByText("financial.accounts.deleteAlertMsg"),
+  ).toBeOnTheScreen();
+  fireEvent.press(screen.getByText("common.actions.delete"));
 
-  it("SHOULD NOT go back on mount WHEN the mutation is idle", () => {
-    setup();
+  expect(vm.onDeleteConfirm).toHaveBeenCalledTimes(1);
+});
 
-    expect(spies.back).not.toHaveBeenCalled();
-  });
+it("SHOULD render the discard dialog with its actions", () => {
+  const vm = setup({ isDiscardDialogOpen: true });
+
+  fireEvent.press(screen.getByText("common.form.discard"));
+  fireEvent.press(screen.getByText("common.form.keepEditing"));
+
+  expect(vm.onDiscardConfirm).toHaveBeenCalledTimes(1);
+  expect(vm.onDiscardCancel).toHaveBeenCalledTimes(1);
 });
