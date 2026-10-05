@@ -63,3 +63,10 @@ export default [
   preventInfrastructureLibsImports,
   preventPresentationLibsImports,
 ];
+
+export const restrictedPatterns =
+  preventAbsoluteImports.rules["no-restricted-imports"][1].patterns;
+export const restrictedPaths = [
+  ...preventInfrastructureLibsImports.rules["no-restricted-imports"].slice(1),
+  ...preventPresentationLibsImports.rules["no-restricted-imports"].slice(1),
+];
