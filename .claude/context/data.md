@@ -35,7 +35,7 @@ toJSON() {
 
 `export interface AccountDatasource { createAccount(params: CreateAccountDatasourceParams): Promise<AccountModel>; ... }` + param interfaces exported at the bottom.
 
-## Datasource method (`datasource/data/<module>/<sub>/supabase/<method>.ts`)
+## Datasource method — legacy Supabase style, stock only (`datasource/data/<module>/<sub>/supabase/<method>.ts`)
 
 ```ts
 import AccountModel from "@data/models/financial/AccountModel";
@@ -126,3 +126,7 @@ export default accountRepositoryImpl;
 ```
 
 Wiring: `repos/<module>/index.ts` exports a factory named exactly like the `Repositories` key (e.g. `export function financialRepository(datasources) { return { account: accountRepository(datasources), ... } }` or `export { default as stockRepository } from "./stockRepositoryImpl"`); spread into `repos/index.ts` `listRepositories` for a new module; add mocks to `repositories/mocks/listRepositories.mocks.ts`.
+
+## API datasource method (`datasource/data/<module>/<sub>/api/<method>.ts`)
+
+Reference: `financial/accounts/api/getAccounts.ts` — guard an empty owner list (no request), `api.get<...>(path + toOwnerQuery(ownerIds))` from `@infrastructure/api`, map with `Model.fromJSON`, and in `catch` return `handleFinancialApiError(error, { datasource, ...ids })` (ids only in the context). `<sub>/index.ts`: `import api from "./api"; export default function financialAccountDatasource() { return api; }`.

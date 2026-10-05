@@ -1,5 +1,6 @@
 import { suppressConsoleError } from "@tests";
 
+import CategoryDTO from "@application/dto/financial/CategoryDTO";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
@@ -329,5 +330,39 @@ describe("owners edge cases", () => {
     expect(() => setup({ owners: [] })).toThrow();
 
     restore();
+  });
+});
+
+describe("categories filtered by the selected type", () => {
+  const incomeCategory = new CategoryDTO({
+    icon: "cash",
+    id: "cat-income",
+    name: "Salary",
+    owner: "USER",
+    ownerId: "owner-1",
+    type: "INCOME",
+  });
+
+  it("SHOULD list and select only the categories of the selected type", () => {
+    const { fields } = setup({
+      categories: [...mocks.categories, incomeCategory],
+      fieldValues: { type: TransactionType.INCOME },
+    });
+
+    expect(pickers().category.props.items).toEqual([
+      { label: "Salary", value: "cat-income" },
+    ]);
+    expect(fields.categoryId.onChange).toHaveBeenCalledWith("cat-income");
+    expect(fields.category.onChange).toHaveBeenCalledWith("Salary");
+  });
+
+  it("SHOULD clear a stale category WHEN the owner has none of the selected type", () => {
+    const { fields } = setup({
+      fieldValues: { categoryId: "cat-1", type: TransactionType.INCOME },
+    });
+
+    expect(pickers().category.props.items).toEqual([]);
+    expect(fields.categoryId.onChange).toHaveBeenCalledWith(undefined);
+    expect(fields.category.onChange).toHaveBeenCalledWith(undefined);
   });
 });

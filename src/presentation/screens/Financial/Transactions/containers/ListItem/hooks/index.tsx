@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 import { useCases } from "@application/useCases";
 import { useMutation } from "@infrastructure/fetcher";
+import useFinancialErrorFeedback from "@screens/Financial/hooks/useFinancialErrorFeedback";
 import FinancialTransactionViewModel from "@screens/Financial/Transactions/models/FinancialTransactionViewModel";
 
 export interface Props {
@@ -14,6 +15,8 @@ function useListItem(props: Props) {
     cacheKey: [useCases.deleteFinancialTransactionUseCase.uniqueName],
     fetch: useCases.deleteFinancialTransactionUseCase.execute,
   });
+
+  useFinancialErrorFeedback(deleteItem.error);
 
   useEffect(() => {
     if (deleteItem.status === "success") {

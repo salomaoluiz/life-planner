@@ -13,6 +13,9 @@ const financial = {
     deleteAlertTitle: "Excluir Conta",
     deleteBtn: "Excluir",
     editAccount: "Editar Conta",
+    errors: {
+      hasTransactions: "Esta conta tem transações. Exclua ou mova-as primeiro.",
+    },
     loading: "Carregando...",
     name: "Nome",
     nameRequired: "Nome é obrigatório",
@@ -28,6 +31,16 @@ const financial = {
     cancel: "Cancelar",
     chooseIcon: "Escolher Ícone",
     color: "Cor da Categoria",
+    deleteAlertMsg: "Tem certeza de que deseja excluir esta categoria?",
+    deleteAlertTitle: "Excluir categoria",
+    deleteBtn: "Excluir",
+    deleteConfirm: {
+      withSubcategories: "As subcategorias dela também serão excluídas.",
+    },
+    errors: {
+      hasTransactions:
+        "Esta categoria ou uma de suas subcategorias tem transações. Exclua ou mova-as primeiro.",
+    },
     expense: "Despesa",
     filterByType: "Filtrar por tipo",
     income: "Receita",
@@ -37,6 +50,12 @@ const financial = {
     owner: "Proprietário",
     parent: "Categoria Pai",
     type: "Tipo da Categoria",
+  },
+  errors: {
+    close: "OK",
+    notFound: "Este item não existe mais ou você não tem acesso a ele.",
+    ownerNotAllowed: "Você não tem acesso a este proprietário.",
+    title: "Não foi possível concluir a ação",
   },
   routeTitle: "Financeiro",
 };

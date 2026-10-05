@@ -24,8 +24,15 @@ function makeCategoryDTO(overrides: Partial<ICategoryDTO> = {}) {
   });
 }
 
-function makeCategoryViewModel(overrides: Partial<ICategoryDTO> = {}) {
-  return new FinancialCategoryViewModel(makeCategoryDTO(overrides), owners);
+function makeCategoryViewModel(
+  overrides: Partial<ICategoryDTO> = {},
+  hasSubcategories = false,
+) {
+  return new FinancialCategoryViewModel(
+    makeCategoryDTO(overrides),
+    owners,
+    hasSubcategories,
+  );
 }
 
 export { makeCategoryDTO, makeCategoryViewModel, owners };

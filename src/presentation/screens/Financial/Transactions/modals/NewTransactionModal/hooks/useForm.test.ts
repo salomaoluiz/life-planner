@@ -113,3 +113,28 @@ it("SHOULD clear errors WHEN a later submit is valid", () => {
 
   expect(result.current.errors).toEqual({});
 });
+
+it.each(["abc", "0", "1.234,56", "-5"])(
+  "SHOULD report an invalid amount in the form (and return no params) WHEN the value is %j",
+  (value) => {
+    const { result } = setup();
+    fillRequired(result);
+    act(() => {
+      result.current.fields.value.onChange(value);
+    });
+
+    expect(validate(result)).toBeUndefined();
+    expect(result.current.errors.value).toBe("Value must be a valid amount");
+  },
+);
+
+it.each(["234,90", "234.9"])("SHOULD accept the amount %j", (value) => {
+  const { result } = setup();
+  fillRequired(result);
+  act(() => {
+    result.current.fields.value.onChange(value);
+  });
+
+  expect(validate(result)).toBeDefined();
+  expect(result.current.errors).toEqual({});
+});

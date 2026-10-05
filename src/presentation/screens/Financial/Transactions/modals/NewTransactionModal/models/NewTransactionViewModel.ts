@@ -54,9 +54,12 @@ class NewTransactionViewModel {
       }));
   }
 
-  categoriesForOwner(ownerId: string) {
+  categoriesForOwner(ownerId: string, type?: string) {
     return this.categoriesDTOs
-      .filter((category) => category.ownerId === ownerId)
+      .filter(
+        (category) =>
+          category.ownerId === ownerId && (!type || category.type === type),
+      )
       .map((category) => ({
         label: category.name,
         value: category.id,

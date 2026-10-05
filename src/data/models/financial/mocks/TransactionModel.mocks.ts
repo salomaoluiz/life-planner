@@ -1,3 +1,4 @@
+import { calendarDateToIso } from "../calendarDate";
 import TransactionModel, {
   OwnerType,
   TransactionType,
@@ -5,17 +6,18 @@ import TransactionModel, {
 
 // region mocks
 
+// API / cache shape: camelCase, value in cents, date-only, category as an object.
 const jsonMock = {
-  account_id: "c5598687-dfeb-485e-990a-a035d8e7d23d",
-  category: "Some Category",
-  category_id: "7820cfbb-f1aa-4254-8e42-7a0fe1ee981f",
-  date: "2023-10-01T00:00:00Z",
+  accountId: "c5598687-dfeb-485e-990a-a035d8e7d23d",
+  category: { name: "Some Category" },
+  categoryId: "7820cfbb-f1aa-4254-8e42-7a0fe1ee981f",
+  date: "2023-10-01",
   description: "Some Description",
   id: "9e6cd00a-f854-48c0-be6d-c2e904bfd9b7",
   owner: "FAMILY",
-  owner_id: "9e6cd00a-f854-48c0-be6d-c2e904bfd9b7",
+  ownerId: "9e6cd00a-f854-48c0-be6d-c2e904bfd9b7",
   type: "EXPENSE",
-  value: "100.00",
+  value: 10000,
 };
 
 // endregion mocks
@@ -30,16 +32,16 @@ beforeEach(() => {
 
 function setup() {
   return new TransactionModel({
-    accountId: jsonMock.account_id,
-    category: jsonMock.category,
-    categoryId: jsonMock.category_id,
-    date: jsonMock.date,
+    accountId: jsonMock.accountId,
+    category: jsonMock.category.name,
+    categoryId: jsonMock.categoryId,
+    date: calendarDateToIso(jsonMock.date),
     description: jsonMock.description,
     id: jsonMock.id,
     owner: jsonMock.owner as OwnerType,
-    ownerId: jsonMock.owner_id,
+    ownerId: jsonMock.ownerId,
     type: jsonMock.type as TransactionType,
-    value: jsonMock.value,
+    value: "100.00",
   });
 }
 
@@ -48,9 +50,5 @@ const spies = {};
 const mocks = {
   json: jsonMock,
 };
-
-beforeEach(() => {
-  jest.clearAllMocks();
-});
 
 export { mocks, setup, spies };

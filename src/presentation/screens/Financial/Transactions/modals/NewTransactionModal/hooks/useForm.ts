@@ -2,8 +2,19 @@ import { useState } from "react";
 
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { CreateTransactionUseCaseParams } from "@application/useCases/cases/financial/transactions/createTransactionUseCase";
+import { decimalStringToCents } from "@data/models/financial/money";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
+
+// Mirrors the datasource conversion so a typo is reported in the form, not swallowed.
+function isValidAmount(text: string) {
+  try {
+    decimalStringToCents(text);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 function useForm() {
   const [description, setDescription] = useState("");
@@ -66,6 +77,10 @@ function useForm() {
         errors[key] = `${fields[key as keyof typeof fields].label} is required`;
       }
     });
+
+    if (!errors.value && !isValidAmount(value!)) {
+      errors.value = `${fields.value.label} must be a valid amount`;
+    }
 
     if (Object.keys(errors).length) {
       setErrors(errors);

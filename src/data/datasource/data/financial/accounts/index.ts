@@ -1,5 +1,5 @@
-import supabase from "./supabase";
+import api from "./api";
 
 export default function financialAccountDatasource() {
-  return supabase;
+  return api;
 }

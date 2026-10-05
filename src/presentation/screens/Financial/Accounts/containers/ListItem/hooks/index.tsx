@@ -6,6 +6,7 @@ import { useCases } from "@application/useCases";
 import { useMutation } from "@infrastructure/fetcher";
 import useTranslation from "@presentation/i18n/useTranslation";
 import FinancialAccountViewModel from "@presentation/screens/Financial/Accounts/models/FinancialAccountViewModel";
+import useFinancialErrorFeedback from "@screens/Financial/hooks/useFinancialErrorFeedback";
 import { isWeb } from "@utils/platform";
 
 export interface Props {
@@ -19,6 +20,8 @@ function useListItem(props: Props) {
     cacheKey: [useCases.deleteFinancialAccountUseCase.uniqueName],
     fetch: useCases.deleteFinancialAccountUseCase.execute,
   });
+
+  useFinancialErrorFeedback(deleteItem.error);
 
   useEffect(() => {
     if (deleteItem.status === "success") {

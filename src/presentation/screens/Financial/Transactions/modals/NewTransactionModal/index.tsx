@@ -13,7 +13,9 @@ import {
   Text,
   TextInput,
 } from "@components";
+import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
+import useFinancialErrorFeedback from "@screens/Financial/hooks/useFinancialErrorFeedback";
 
 import useForm from "./hooks/useForm";
 import NewTransactionItemViewModel from "./models/NewTransactionViewModel";
@@ -49,6 +51,8 @@ function NewTransactionItemModal() {
     fetch: useCases.createFinancialTransactionUseCase.execute,
   });
 
+  useFinancialErrorFeedback(addTransaction.error);
+
   const newTransactionItemModel = useMemo(
     () =>
       owners.data && categories.data && accounts.data
@@ -64,20 +68,28 @@ function NewTransactionItemModal() {
   const activeOwnerId =
     fields.ownerId.value ?? (owners.data ? owners.data[0].id : undefined);
 
+  // The API rejects a category whose type differs from the transaction type.
+  const activeType = fields.type.value ?? TransactionType.EXPENSE;
+
   useEffect(() => {
     if (newTransactionItemModel && activeOwnerId) {
-      const ownerCategories =
-        newTransactionItemModel.categoriesForOwner(activeOwnerId);
+      const ownerCategories = newTransactionItemModel.categoriesForOwner(
+        activeOwnerId,
+        activeType,
+      );
       const ownerAccounts =
         newTransactionItemModel.accountsForOwner(activeOwnerId);
 
       const currentCategoryIsValid = ownerCategories.some(
         (c) => c.value === fields.categoryId.value,
       );
-      if (
-        ownerCategories.length > 0 &&
-        (!fields.categoryId.value || !currentCategoryIsValid)
-      ) {
+      if (ownerCategories.length === 0) {
+        // No category of this type for the owner: drop a stale choice so the form asks for one.
+        if (fields.categoryId.value) {
+          fields.categoryId.onChange(undefined);
+          fields.category.onChange(undefined);
+        }
+      } else if (!fields.categoryId.value || !currentCategoryIsValid) {
         fields.categoryId.onChange(ownerCategories[0].value);
         fields.category.onChange(ownerCategories[0].label);
       }
@@ -92,7 +104,7 @@ function NewTransactionItemModal() {
         fields.accountId.onChange(ownerAccounts[0].value);
       }
     }
-  }, [newTransactionItemModel, activeOwnerId]);
+  }, [newTransactionItemModel, activeOwnerId, activeType]);
 
   useEffect(() => {
     if (addTransaction.status === "success") {
@@ -232,12 +244,13 @@ function NewTransactionItemModal() {
           <Picker
             items={newTransactionItemModel.categoriesForOwner(
               activeOwnerId ?? "",
+              activeType,
             )}
             label={"Category"}
             onValueChange={(value) => {
               fields.categoryId.onChange(value);
               const name = newTransactionItemModel
-                .categoriesForOwner(activeOwnerId ?? "")
+                .categoriesForOwner(activeOwnerId ?? "", activeType)
                 .find((c) => c.value === value)?.label;
               fields.category.onChange(name);
             }}

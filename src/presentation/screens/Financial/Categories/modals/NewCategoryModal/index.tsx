@@ -17,6 +17,7 @@ import {
 import Icon, { IconButton } from "@components/Icon";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
 import useTranslation from "@presentation/i18n/useTranslation";
+import useFinancialErrorFeedback from "@screens/Financial/hooks/useFinancialErrorFeedback";
 
 import useForm from "./hooks/useForm";
 import NewCategoryViewModel from "./models/NewCategoryViewModel";
@@ -81,6 +82,8 @@ function NewCategoryModal() {
     cacheKey: [useCases.createFinancialCategoryUseCase.uniqueName],
     fetch: useCases.createFinancialCategoryUseCase.execute,
   });
+
+  useFinancialErrorFeedback(addCategory.error);
 
   const viewModel = useMemo(() => {
     return owners.data && categories.data
