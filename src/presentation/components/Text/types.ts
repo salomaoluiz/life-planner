@@ -14,7 +14,7 @@ export interface TextProps {
   align?: "center" | "left" | "right";
   /** Legacy, kept until spec 014: use Text.BodyStrong */
   bold?: boolean;
-  /** Legacy, kept until spec 014: use `tone` */
+  /** Legacy for screens, kept until spec 014: use `tone`. Kit internals may pass token colors. */
   color?: string;
   numberOfLines?: number;
   tabular?: boolean;

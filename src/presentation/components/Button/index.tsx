@@ -1,99 +1,107 @@
-import { BlurView } from "expo-blur";
-import React from "react";
-import { View } from "react-native";
-import { Button as PaperButton } from "react-native-paper";
+import { ActivityIndicator } from "react-native";
 
-import { useTheme } from "@presentation/theme";
+import Icon from "@components/Icon";
+import Text from "@components/Text";
+import Touchable from "@components/Touchable";
+import { useKitTheme } from "@components/utils/useKitTheme";
 
-import getStyles from "./styles";
-import getCustomStyles, {
-  ButtonMode,
-  CustomStyles,
-} from "./styles/customStyles";
-
-export { ButtonMode };
+import useStyles, { ButtonVariant } from "./styles";
 
 export interface ButtonProps {
-  customStyles?: CustomStyles;
+  accessibilityLabel?: string;
+  /** Legacy, kept until spec 014: ignored, use Button.Destructive / Button.Secondary */
+  customStyles?: { backgroundColor?: string; textColor?: string };
   disabled?: boolean;
-  icon?: (() => React.ReactNode) | string;
+  fullWidth?: boolean;
+  icon?: string;
   label: string;
   loading?: boolean;
   onPress: () => void;
+  size?: "lg" | "md";
   testID?: string;
+  /** Ghost only ("Delete ..." in edit forms); ignored by the other variants */
+  tone?: "expense";
 }
 
-function ButtonBase(props: ButtonProps & { mode: ButtonMode }) {
-  const { theme } = useTheme();
-  const styles = getStyles();
+function ButtonBase(props: ButtonProps & { variant: ButtonVariant }) {
+  const { radius, sizes } = useKitTheme();
+  const { iconColor, labelColor, styles } = useStyles(
+    props.variant,
+    props.size ?? "md",
+    !!props.fullWidth,
+    props.tone,
+  );
+  const { testID } = props;
 
-  const customStyles = getCustomStyles({
-    customStyles: props.customStyles,
-    disabled: props.disabled,
-    mode: props.mode,
-    theme,
-  });
-
-  const isTextMode = props.mode === ButtonMode.Text;
-
-  if (isTextMode) {
-    return (
-      <PaperButton
-        disabled={props.disabled}
-        icon={props.icon}
-        loading={props.loading}
-        mode="text"
-        onPress={props.onPress}
-        style={[styles.buttonBase, customStyles.styles]}
-        testID={props.testID}
-        {...customStyles.props}
-      >
-        {props.label}
-      </PaperButton>
+  let leading = null;
+  if (props.loading) {
+    leading = (
+      <ActivityIndicator
+        color={iconColor}
+        size="small"
+        testID={testID && `${testID}-spinner`}
+      />
+    );
+  } else if (props.icon) {
+    leading = (
+      <Icon
+        color={iconColor}
+        name={props.icon}
+        size={sizes.iconMd}
+        testID={testID && `${testID}-icon`}
+      />
     );
   }
 
   return (
-    <View style={[styles.buttonWrapper, props.disabled && styles.disabled]}>
-      <BlurView
-        intensity={props.mode === ButtonMode.Filled ? 40 : 15}
-        style={styles.blurView}
-        tint={theme.dark ? "dark" : "light"}
-      >
-        <PaperButton
-          contentStyle={styles.buttonContent}
-          disabled={props.disabled}
-          icon={props.icon}
-          loading={props.loading}
-          mode="text"
-          onPress={props.onPress}
-          style={[styles.buttonBase, customStyles.styles]}
-          testID={props.testID}
-          {...customStyles.props}
-        >
-          {props.label}
-        </PaperButton>
-      </BlurView>
-    </View>
+    <Touchable
+      accessibilityLabel={props.accessibilityLabel ?? props.label}
+      accessibilityRole="button"
+      busy={props.loading}
+      disabled={props.disabled}
+      focusRadius={radius.md}
+      onPress={props.onPress}
+      style={styles.root}
+      testID={testID}
+    >
+      {leading}
+      <Text.BodyStrong
+        color={labelColor}
+        testID={testID && `${testID}-label`}
+        value={props.label}
+      />
+    </Touchable>
   );
 }
 
-function ButtonFilled(props: ButtonProps) {
-  return <ButtonBase mode={ButtonMode.Filled} {...props} />;
+function Destructive(props: ButtonProps) {
+  return <ButtonBase {...props} variant="destructive" />;
+}
+function Ghost(props: ButtonProps) {
+  return <ButtonBase {...props} variant="ghost" />;
+}
+function Primary(props: ButtonProps) {
+  return <ButtonBase {...props} variant="primary" />;
+}
+function Secondary(props: ButtonProps) {
+  return <ButtonBase {...props} variant="secondary" />;
 }
 
-function ButtonOutlined(props: ButtonProps) {
-  return <ButtonBase mode={ButtonMode.Outlined} {...props} />;
-}
-
-function ButtonText(props: ButtonProps) {
-  return <ButtonBase mode={ButtonMode.Text} {...props} />;
-}
-
+/**
+ * One Primary per screen or sheet. Cancel is never red (use Secondary or the
+ * sheet's close button). Destructive only for delete/leave/remove.
+ */
 const Button = {
-  Filled: ButtonFilled,
-  Outlined: ButtonOutlined,
-  Text: ButtonText,
+  Destructive,
+  /** Legacy, kept until spec 014: use Button.Primary */
+  Filled: Primary,
+  Ghost,
+  /** Legacy, kept until spec 014: use Button.Secondary */
+  Outlined: Secondary,
+  Primary,
+  Secondary,
+  /** Legacy, kept until spec 014: use Button.Ghost */
+  Text: Ghost,
 };
 
 export default Button;
