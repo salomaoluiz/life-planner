@@ -12,6 +12,7 @@ export interface ListItemProps {
   leading?: React.ReactNode;
   onLongPress?: () => void;
   onPress?: () => void;
+  selected?: boolean;
   subtitle?: string;
   testID?: string;
   title: string;
@@ -65,6 +66,7 @@ function ListItem(props: ListItemProps) {
           accessibilityRole="button"
           onLongPress={props.onLongPress}
           onPress={props.onPress}
+          selected={props.selected}
           style={styles.row}
           testID={testID}
         >

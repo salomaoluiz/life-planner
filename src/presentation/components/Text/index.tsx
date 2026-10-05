@@ -31,6 +31,7 @@ function TextBase(props: TextProps & { mode: TextMode }) {
   return (
     <RNText
       accessibilityLiveRegion={props.accessibilityLiveRegion}
+      accessibilityRole={props.accessibilityRole}
       numberOfLines={props.numberOfLines}
       style={style}
       testID={props.testID}

@@ -11,6 +11,7 @@ export enum TextMode {
 
 export interface TextProps {
   accessibilityLiveRegion?: "assertive" | "none" | "polite";
+  accessibilityRole?: "header";
   align?: "center" | "left" | "right";
   /** Legacy, kept until spec 014: use Text.BodyStrong */
   bold?: boolean;

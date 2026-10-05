@@ -17,6 +17,7 @@ const common = {
   },
   form: {
     discard: "Discard",
+    discardMessage: "Your changes will be lost.",
     discardTitle: "Discard changes?",
     keepEditing: "Keep editing",
   },
