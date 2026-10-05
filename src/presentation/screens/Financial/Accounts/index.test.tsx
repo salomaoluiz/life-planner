@@ -1,96 +1,72 @@
-import { GenericError } from "@domain/entities/errors";
-import FinancialAccountViewModel from "@screens/Financial/Accounts/models/FinancialAccountViewModel";
+import { fireEvent, screen } from "@testing-library/react-native";
 
-import {
-  fireEvent,
-  hasText,
-  mocks,
-  screen,
-  setup,
-  spies,
-} from "./mocks/screen.mocks";
+import { hasText } from "@tests";
 
-it("SHOULD render the loading text WHEN fetching", () => {
-  setup({ isFetching: true });
+import { makeEntries, setup } from "./mocks/screen.mocks";
 
-  expect(hasText("financial.accounts.loading")).toBe(true);
-  expect(screen.queryByTestId("flashList")).not.toBeOnTheScreen();
+it("SHOULD render skeletons WHEN loading", () => {
+  setup({ isLoading: true });
+
+  expect(screen.getAllByTestId("accounts-skeleton")).toHaveLength(6);
 });
 
-it("SHOULD render the error message WHEN the query failed", () => {
-  setup({ error: true });
+it("SHOULD render ErrorState with a retry that calls onRetry", () => {
+  const onRetry = jest.fn();
+  setup({ errorMessage: "boom", onRetry });
 
-  expect(hasText(`Error ${new GenericError().message}`)).toBe(true);
-  expect(screen.queryByTestId("flashList")).not.toBeOnTheScreen();
+  expect(hasText("boom")).toBe(true);
+  fireEvent.press(screen.getByText("common.actions.tryAgain"));
+  expect(onRetry).toHaveBeenCalledTimes(1);
 });
 
-it("SHOULD render one list item per account", () => {
-  setup({ items: mocks.items });
+it("SHOULD render the empty state with a new account action", () => {
+  const onAddPress = jest.fn();
+  setup({ isEmpty: true, onAddPress });
 
-  const rows = screen.getAllByTestId("listItem");
-  expect(rows).toHaveLength(2);
-  expect(rows[1].props.title).toBe("Savings");
+  expect(hasText("financial.accounts.emptyTitle")).toBe(true);
+  fireEvent.press(screen.getAllByText("financial.accounts.new")[0]);
+  expect(onAddPress).toHaveBeenCalledTimes(1);
 });
 
-it("SHOULD render an empty list WHEN there is no data", () => {
-  setup();
+it("SHOULD show the total label and amount and call onAddPress from the plus button", () => {
+  const onAddPress = jest.fn();
+  setup({ entries: makeEntries(), onAddPress, totalAmount: { value: 12345 } });
 
-  expect(screen.getByTestId("flashList")).toBeOnTheScreen();
-  expect(screen.queryAllByTestId("listItem")).toHaveLength(0);
+  expect(hasText("financial.accounts.total")).toBe(true);
+  expect(screen.getByTestId("accounts-total")).toBeTruthy();
+  fireEvent.press(screen.getByLabelText("financial.accounts.new"));
+  expect(onAddPress).toHaveBeenCalledTimes(1);
 });
 
-it("SHOULD pass refetch to every list item", () => {
-  const { refetch } = setup({ items: mocks.items });
+it("SHOULD render the section, rows with owner and balance", () => {
+  setup({ entries: makeEntries() });
 
-  fireEvent.press(screen.getAllByTestId("listItem")[0]);
-
-  expect(refetch).toHaveBeenCalled();
+  expect(hasText("financial.accounts.active")).toBe(true);
+  expect(hasText("Checking")).toBe(true);
+  expect(hasText("Card")).toBe(true);
+  expect(screen.getAllByText("Alice Test")).toHaveLength(2);
 });
 
-it("SHOULD set the refresh button as header WHEN not fetching", () => {
-  const { refetch } = setup();
+it("SHOULD show the archived toggle with count and call onArchivedToggle", () => {
+  const onArchivedToggle = jest.fn();
+  setup({ entries: makeEntries(), onArchivedToggle });
 
-  expect(mocks.setOptions).toHaveBeenCalledTimes(1);
-  const { headerRight } = mocks.setOptions.mock.calls[0][0];
-  expect(headerRight().props.refetchQuery).toBe(refetch);
+  expect(hasText('financial.accounts.archived {"count":2}')).toBe(true);
+  expect(screen.queryByText("Old")).toBeNull();
+  fireEvent.press(screen.getByTestId("archived-toggle"));
+  expect(onArchivedToggle).toHaveBeenCalledTimes(1);
 });
 
-it("SHOULD NOT set the header WHEN fetching", () => {
-  setup({ isFetching: true });
+it("SHOULD show archived rows WHEN expanded", () => {
+  setup({ entries: makeEntries(true) });
 
-  expect(mocks.setOptions).not.toHaveBeenCalled();
+  expect(hasText("Old")).toBe(true);
 });
 
-it("SHOULD refetch WHEN the screen is focused", () => {
-  const { refetch } = setup({ focused: true });
+it("SHOULD call onRowPress with the id WHEN a row is tapped", () => {
+  const onRowPress = jest.fn();
+  setup({ entries: makeEntries(), onRowPress });
 
-  expect(refetch).toHaveBeenCalledTimes(1);
-});
-
-it("SHOULD NOT refetch WHEN the screen is not focused", () => {
-  const { refetch } = setup({ focused: false });
-
-  expect(refetch).not.toHaveBeenCalled();
-});
-
-it("SHOULD open the add-account modal WHEN the add button is pressed", () => {
-  setup();
-
-  fireEvent.press(screen.getByTestId("accounts-add-button"));
-
-  expect(spies.push).toHaveBeenCalledWith("/financial/account/add_new_account");
-});
-
-it("SHOULD build view models with their owners WHEN fetching", async () => {
-  setup();
-  const { cacheKey, fetch } = spies.useQuery.mock.calls[0][0];
-  spies.getOwners.mockResolvedValue(mocks.owners);
-  spies.getAccounts.mockResolvedValue(mocks.dtos);
-
-  const result = (await fetch()) as FinancialAccountViewModel[];
-
-  expect(cacheKey).toEqual(["get_accounts"]);
-  expect(spies.getAccounts).toHaveBeenCalledWith(["owner-1", "owner-2"]);
-  expect(result.map((vm) => vm.name)).toEqual(["Checking", "Savings"]);
-  expect(result[0].ownerName).toBe("Alice Test (Personal)");
+  fireEvent.press(screen.getByText("Checking"));
+  expect(onRowPress).toHaveBeenCalledWith("acc-1");
 });
