@@ -12,7 +12,6 @@ export const migrationAllowList = [
   // Split per section so plan 013 can remove them one PR at a time (Transactions, Categories, Accounts); plan 009's
   // new `Financial/Layout` and plan 013's new shared `Financial/{models,utils}` are NOT listed: they must pass the rules.
   "src/presentation/screens/Financial/Accounts/**",
-  "src/presentation/screens/Financial/Categories/**",
   "src/presentation/screens/Financial/hooks/**",
   "src/presentation/screens/Invite/**",
   "src/presentation/screens/Login/**",
