@@ -15,8 +15,10 @@ export {
 } from "./Icon";
 export { default as Menu, MenuProps } from "./Menu";
 export { default as Picker } from "./Picker";
+export { default as SearchField, SearchFieldProps } from "./SearchField";
 export { default as Spacer, SpacerProps } from "./Spacer";
 export { default as Switch, SwitchProps } from "./Switch";
 export { default as Text, TextProps } from "./Text";
+export { default as TextField, TextFieldProps } from "./TextField";
 export { default as TextInput, TextInputProps } from "./TextInput";
 export { default as Touchable, TouchableProps } from "./Touchable";
