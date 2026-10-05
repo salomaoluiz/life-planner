@@ -40,6 +40,10 @@ If styles depend on state, pass it as a parameter: `useStyles({ disabled, isFocu
 - `typography` (Manrope, system fallback until `fontsLoaded`): display 34 · title 22 · heading 16 · body 15 · bodyStrong 15 · input 16 · caption 13 · overline 12 · tab 11. Use `getFontStyle(weight, theme.fontsLoaded)` for a custom weight (never set `fontWeight` with a Manrope family) and `tabularNums` / `<Text tabular>` for money and quantities.
 - `buildTheme(isDark, fontsLoaded)` builds the theme; `getScaleFunctions`/`rescaleSizes` remain for one-off scaling.
 
+## Breakpoints (`theme.breakpoints`, `useBreakpoint()`)
+
+`breakpoints = { compact: 0, medium: 768, expanded: 1024 }` (min widths, `constants/breakpoints.ts`). `useBreakpoint()` from `@presentation/theme` returns `"compact" | "medium" | "expanded"` (uses `useWindowDimensions`, so it reacts to resize/rotation). Globally mocked to `"compact"` in `tests/setup.tsx`; override with `(useBreakpoint as jest.Mock).mockReturnValue("expanded")`.
+
 ## Colors (`theme.colors`, light & dark in `constants/colors.ts`)
 
 Grafite tokens (exactly these 18 in both themes, typed `Colors`/`ColorToken`): `accent, accentSoft, accentText, background, border, expense, expenseSoft, focusRing, income, incomeSoft, onAccent, scrim, surface, surfaceRaised, textPrimary, textSecondary, warning, warningSoft`.
