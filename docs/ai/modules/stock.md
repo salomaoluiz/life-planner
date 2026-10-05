@@ -59,13 +59,19 @@ repositories:
     implements: StockRepository
 
 datasources:
-  storageItemsDatasource (Supabase):
-    path: src/data/datasource/data/storage/items/supabase/
+  stockDatasource (NestJS API, `@infrastructure/api`):
+    path: src/data/datasource/data/storage/items/api/
+    errors: src/data/datasource/data/storage/items/api/stockApiError.ts (session/connectivity re-thrown, everything else GenericError with ids-only context)
     methods:
-      - createStockItem: src/data/datasource/data/storage/items/supabase/createStockItem.ts
-      - deleteStockItem: src/data/datasource/data/storage/items/supabase/deleteStockItem.ts
-      - getStockItems: src/data/datasource/data/storage/items/supabase/getStockItems.ts
-      - updateStockItem: src/data/datasource/data/storage/items/supabase/updateStockItem.ts
+      - createStockItem: POST /v1/stock/items
+      - deleteStockItem: DELETE /v1/stock/items/:id
+      - getStockItems: GET /v1/stock/items?ownerId=<id>
+      - updateStockItem: PATCH /v1/stock/items/:id (only defined fields; owner and ownerId together)
+
+models:
+  StockModel:
+    path: src/data/models/stock/StockModel.ts
+    notes: API camelCase shape, also the cache shape (cache key CACHE_STOCK_DATA is versioned `_v2`); no status field
 ```
 
 ## Presentation

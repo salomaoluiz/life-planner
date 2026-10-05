@@ -8,13 +8,12 @@ SQL lives as ordered markdown docs in `docs/database/` — read only the file yo
 | --------------------------------------------------------- | ------------------------------------------------------- |
 | `1. create_tables.md`                                     | `CREATE TABLE` for all tables                           |
 | `2. create_polices.md`                                    | RLS policies (owner/family-member based) — largest file |
-| `3. storage_triggers.md`                                  | storage_items triggers                                  |
 | `4. family_members_trigger.md` / `5. families_trigger.md` | family membership triggers                              |
 | `7. validate_owner_trigger.md`                            | `validate_owner()` trigger attached per owned table     |
 
 ## Tables
 
-`users`, `families`, `family_members`, `storage_items`.
+`users`, `families`, `family_members`.
 
 ## Conventions
 
