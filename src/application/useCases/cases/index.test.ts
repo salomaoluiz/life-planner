@@ -23,7 +23,6 @@ const useCases = {
   getOwnersUseCase: expect.any(Function),
   getRecentTransactionsUseCase: expect.any(Function),
   getStockAttentionUseCase: expect.any(Function),
-  getStockDashboardUseCase: expect.any(Function),
   getStockItemsUseCase: expect.any(Function),
   getUserByUserIdUseCase: expect.any(Function),
   getUserConfigsUseCase: expect.any(Function),

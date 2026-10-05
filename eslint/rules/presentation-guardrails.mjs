@@ -15,7 +15,6 @@ export const migrationAllowList = [
   "src/presentation/screens/Financial/Categories/**",
   "src/presentation/screens/Financial/hooks/**",
   "src/presentation/screens/Financial/Transactions/**",
-  "src/presentation/screens/Home/**",
   "src/presentation/screens/Invite/**",
   "src/presentation/screens/Login/**",
   "src/presentation/screens/Signup/**",
