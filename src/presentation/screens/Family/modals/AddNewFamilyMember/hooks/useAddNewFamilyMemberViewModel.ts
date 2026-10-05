@@ -2,100 +2,121 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 
 import { useCases } from "@application/useCases";
-import { InviteFamilyMemberUseCaseResponse } from "@application/useCases/cases/familyMember/inviteFamilyMemberUseCase";
-import { FamilyMemberAlreadyExists } from "@domain/entities/errors";
-import { useMutation } from "@infrastructure/fetcher";
-import { useTranslation } from "@presentation/i18n";
 import {
-  FeedbackActions,
-  FeedbackNavigationTypes,
-} from "@screens/Feedback/BusinessFeedback/actions/types";
-import { FeedbackType } from "@screens/Feedback/BusinessFeedback/types";
-import { createFeedbackRouteEncoded } from "@screens/Feedback/BusinessFeedback/utils";
+  InviteFamilyMemberUseCaseParams,
+  InviteFamilyMemberUseCaseResponse,
+} from "@application/useCases/cases/familyMember/inviteFamilyMemberUseCase";
+import { FamilyMemberAlreadyExists } from "@domain/entities/errors";
+import { copyText } from "@infrastructure/clipboard";
+import { invalidateFetcherData, useMutation } from "@infrastructure/fetcher";
+import { isShareAvailable, shareText } from "@infrastructure/share";
+import { TranslationKeys } from "@presentation/i18n/types";
+import { buildInviteLink } from "@screens/Family/utils/inviteLink";
 import { validateEmail } from "@utils/authValidation";
 
+const COPIED_MS = 2000;
+
 function useAddNewFamilyMemberViewModel() {
-  const { familyId } = useLocalSearchParams<{ familyId: string }>();
-  const { t } = useTranslation();
+  const { familyId, familyName } = useLocalSearchParams<{
+    familyId: string;
+    familyName?: string;
+  }>();
   const [email, setEmail] = useState("");
-  const [submittedEmail, setSubmittedEmail] = useState<string>();
   const [showValidation, setShowValidation] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState("");
+  const [copied, setCopied] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  // The email is personal data: it is kept out of the mutation variables, which
-  // useMutation copies into error contexts (sent to monitoring).
-  const pendingEmail = useRef("");
-
-  const invite = useMutation<void, InviteFamilyMemberUseCaseResponse>({
+  const invite = useMutation<
+    InviteFamilyMemberUseCaseParams,
+    InviteFamilyMemberUseCaseResponse
+  >({
     cacheKey: [useCases.inviteFamilyMemberUseCase.uniqueName],
-    fetch: async () =>
-      useCases.inviteFamilyMemberUseCase.execute({
-        email: pendingEmail.current,
-        familyId,
-      }),
+    fetch: useCases.inviteFamilyMemberUseCase.execute,
   });
 
-  // Imperative navigation text: the only place this hook translates.
-  async function showSuccessFeedback(inviteToken: string) {
-    const encodedRoute = await createFeedbackRouteEncoded({
-      closeButton: {
-        action: FeedbackActions.NAVIGATION,
-        route: "/family",
-        type: FeedbackNavigationTypes.DISMISS_TO,
-      },
-      message: t("family.member.invite.successMessage", {
-        email: submittedEmail,
-      }),
-      primaryButton: {
-        action: FeedbackActions.COPY_TO_CLIPBOARD,
-        label: t("family.member.invite.copyLink"),
-        value: `${process.env.EXPO_PUBLIC_PROJECT_WEBSITE_URL}/invite?token=${inviteToken}`,
-      },
-      title: t("family.member.invite.successTitle"),
-      type: FeedbackType.Success,
-    });
+  useEffect(
+    () => () => {
+      clearTimeout(timer.current);
+    },
+    [],
+  );
 
-    router.push({ params: encodedRoute, pathname: "/business_feedback" });
-  }
+  // The token exists only in the mutation result: it is shown once, in this sheet.
+  const link = invite.data
+    ? buildInviteLink(
+        process.env.EXPO_PUBLIC_PROJECT_WEBSITE_URL,
+        invite.data.inviteToken,
+      )
+    : undefined;
 
-  useEffect(() => {
-    if (invite.data) {
-      showSuccessFeedback(invite.data.inviteToken);
-    }
-  }, [invite.data]);
-
-  const trimmedEmail = email.trim();
+  const trimmed = email.trim();
   const validationKey = validateEmail(email);
+  const alreadyExists =
+    invite.error instanceof FamilyMemberAlreadyExists &&
+    submittedEmail === trimmed;
 
-  function onChangeEmail(value: string) {
-    setEmail(value);
+  function getEmailErrorKey(): TranslationKeys | undefined {
+    if (showValidation && validationKey) {
+      return validationKey;
+    }
+
+    return alreadyExists ? "family.member.invite.alreadyExists" : undefined;
   }
 
   function onSubmit() {
     setShowValidation(true);
 
-    if (validationKey) {
+    if (validationKey || invite.isFetching) {
       return;
     }
 
-    setSubmittedEmail(trimmedEmail);
-    pendingEmail.current = trimmedEmail;
-    invite.mutate();
+    setSubmittedEmail(trimmed);
+    invite.mutate({ email: trimmed, familyId });
   }
 
-  function onCancel() {
+  function onDone() {
+    if (link) {
+      invalidateFetcherData();
+    }
+
     router.back();
   }
 
+  async function onCopy() {
+    if (!link) {
+      return;
+    }
+
+    await copyText(link);
+    setCopied(true);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setCopied(false), COPIED_MS);
+  }
+
+  async function onShare() {
+    if (link) {
+      await shareText(link);
+    }
+  }
+
   return {
-    alreadyExistsVisible:
-      invite.error instanceof FamilyMemberAlreadyExists &&
-      trimmedEmail === submittedEmail,
+    copied,
     email,
-    emailErrorKey: showValidation ? validationKey : undefined,
+    emailErrorKey: getEmailErrorKey(),
+    familyName,
+    hasGenericError:
+      !!invite.error && !(invite.error instanceof FamilyMemberAlreadyExists),
     isSubmitting: invite.isFetching,
-    onCancel,
-    onChangeEmail,
+    link,
+    onChangeEmail: setEmail,
+    onClose: onDone,
+    onCopy,
+    onDone,
+    onShare,
     onSubmit,
+    resultEmail: submittedEmail,
+    shareAvailable: isShareAvailable(),
   };
 }
 

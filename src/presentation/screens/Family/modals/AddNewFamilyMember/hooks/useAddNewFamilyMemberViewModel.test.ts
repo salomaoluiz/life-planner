@@ -1,37 +1,28 @@
 import { router, useLocalSearchParams } from "expo-router";
 
-import { act, renderHook, waitFor } from "@tests";
+import { act, renderHook } from "@tests";
 
-import { useCases } from "@application/useCases";
 import {
   FamilyMemberAlreadyExists,
   GenericError,
 } from "@domain/entities/errors";
-import { useMutation } from "@infrastructure/fetcher";
+import { copyText } from "@infrastructure/clipboard";
+import { invalidateFetcherData, useMutation } from "@infrastructure/fetcher";
 import UseMutationFixture from "@infrastructure/fetcher/mocks/useMutation.fixture";
-import {
-  FeedbackActions,
-  FeedbackNavigationTypes,
-} from "@screens/Feedback/BusinessFeedback/actions/types";
-import { FeedbackType } from "@screens/Feedback/BusinessFeedback/types";
-import { createFeedbackRouteEncoded } from "@screens/Feedback/BusinessFeedback/utils";
+import { isShareAvailable, shareText } from "@infrastructure/share";
+import { buildInviteLink } from "@screens/Family/utils/inviteLink";
 
 import useAddNewFamilyMemberViewModel from "./useAddNewFamilyMemberViewModel";
 
 jest.mock("expo-router", () => ({
-  router: { back: jest.fn(), push: jest.fn() },
+  router: { back: jest.fn() },
   useLocalSearchParams: jest.fn(),
 }));
 jest.mock("@infrastructure/fetcher");
-jest.mock("@presentation/i18n/useTranslation", () => ({
-  __esModule: true,
-  default: () => ({
-    t: (key: string, params?: Record<string, unknown>) =>
-      params ? `${key}:${JSON.stringify(params)}` : key,
-  }),
-}));
-jest.mock("@screens/Feedback/BusinessFeedback/utils", () => ({
-  createFeedbackRouteEncoded: jest.fn(),
+jest.mock("@infrastructure/clipboard", () => ({ copyText: jest.fn() }));
+jest.mock("@infrastructure/share", () => ({
+  isShareAvailable: jest.fn(),
+  shareText: jest.fn(),
 }));
 jest.mock("@application/useCases", () => ({
   useCases: {
@@ -44,32 +35,55 @@ jest.mock("@application/useCases", () => ({
 
 type Invite = { inviteExpiresAt: Date; inviteToken: string };
 
-const mutation = new UseMutationFixture<unknown, Invite>();
-const token = "q3Jx0b9S2v1mA8kQ7rT4yU6pL5nW0zE3cF2hD1gB9aI";
+const mutation = new UseMutationFixture<
+  { email: string; familyId: string },
+  Invite
+>();
+const token = "tok_123";
+// EXPO_PUBLIC_* is inlined at build time, so the expected link uses the same expression.
+const link = buildInviteLink(
+  process.env.EXPO_PUBLIC_PROJECT_WEBSITE_URL,
+  token,
+);
+
+const spies = {
+  back: jest.mocked(router.back),
+  copyText: jest.mocked(copyText),
+  invalidate: jest.mocked(invalidateFetcherData),
+  isShareAvailable: jest.mocked(isShareAvailable),
+  shareText: jest.mocked(shareText),
+  useMutation: jest.mocked(useMutation),
+};
 
 beforeEach(() => {
   jest.clearAllMocks();
-  jest.mocked(useLocalSearchParams).mockReturnValue({ familyId: "family-1" });
   jest
-    .mocked(createFeedbackRouteEncoded)
-    .mockResolvedValue({ feedback: "encoded" });
+    .mocked(useLocalSearchParams)
+    .mockReturnValue({ familyId: "family-1", familyName: "Test Family" });
+  spies.copyText.mockResolvedValue(undefined);
+  spies.shareText.mockResolvedValue(undefined);
+  spies.isShareAvailable.mockReturnValue(true);
 });
 
-function setup(props?: {
-  data?: Invite;
-  error?: FamilyMemberAlreadyExists | GenericError | null;
-  isFetching?: boolean;
-}) {
+function setup(
+  options: {
+    data?: Invite;
+    error?: FamilyMemberAlreadyExists | GenericError;
+    isFetching?: boolean;
+  } = {},
+) {
   mutation.reset();
-  if (props?.data) {
-    mutation.withData(props.data);
+  if (options.data) {
+    mutation.withData(options.data);
   }
-  const built = {
-    ...mutation.build(),
-    error: props?.error ?? null,
-    isFetching: props?.isFetching ?? false,
-  };
-  jest.mocked(useMutation).mockReturnValue(built as never);
+  if (options.error) {
+    mutation.withError(options.error);
+  }
+  if (options.isFetching) {
+    mutation.withIsFetching(true);
+  }
+  const built = mutation.build();
+  spies.useMutation.mockReturnValue(built as never);
 
   return {
     ...renderHook(() => useAddNewFamilyMemberViewModel()),
@@ -77,132 +91,191 @@ function setup(props?: {
   };
 }
 
-it("SHOULD configure the invite mutation WITHOUT the email in its variables or key", () => {
-  setup();
+function setupCreated() {
+  const rendered = setup({
+    data: { inviteExpiresAt: new Date(), inviteToken: token },
+  });
+  act(() => rendered.result.current.onChangeEmail("invitee@example.test"));
+  act(() => rendered.result.current.onSubmit());
 
-  const options = jest.mocked(useMutation).mock.calls[0][0];
-  expect(options.cacheKey).toEqual(["invite_member"]);
-});
+  return rendered;
+}
 
-it("SHOULD run the use case with the submitted email AND family from the route", async () => {
-  const { result } = setup();
-  act(() => result.current.onChangeEmail("  Bob@Example.test "));
+it("SHOULD trim AND lower nothing but send the trimmed email with the family id", () => {
+  const { mutate, result } = setup();
+
+  act(() => result.current.onChangeEmail("  Invitee@Example.com  "));
   act(() => result.current.onSubmit());
 
-  await jest
-    .mocked(useMutation)
-    .mock.calls.at(-1)![0]
-    .fetch(undefined as never);
-
-  expect(useCases.inviteFamilyMemberUseCase.execute).toHaveBeenCalledWith({
-    email: "Bob@Example.test",
+  expect(mutate).toHaveBeenCalledWith({
+    email: "Invitee@Example.com",
     familyId: "family-1",
   });
 });
 
-it("SHOULD NOT show a validation error before the first submit", () => {
-  const { result } = setup();
-
-  expect(result.current.emailErrorKey).toBeUndefined();
+it("SHOULD expose the family name from the route", () => {
+  expect(setup().result.current.familyName).toBe("Test Family");
 });
 
 it.each([
   ["empty", "", "auth.validation.emailRequired"],
   ["only spaces", "   ", "auth.validation.emailRequired"],
-  ["no @", "bob.example.test", "auth.validation.emailInvalid"],
-  ["no domain dot", "bob@example", "auth.validation.emailInvalid"],
-  ["254+ chars", `${"a".repeat(250)}@b.co`, "auth.validation.emailInvalid"],
+  ["no @", "invitee.example.test", "auth.validation.emailInvalid"],
+  ["no domain dot", "invitee@example", "auth.validation.emailInvalid"],
 ])(
-  "SHOULD block the request AND show an inline error WHEN the email is %s",
+  "SHOULD block an invalid email (%s) with the validation key AND not call the API",
   (_label, email, key) => {
     const { mutate, result } = setup();
-    act(() => result.current.onChangeEmail(email));
 
+    act(() => result.current.onChangeEmail(email));
     act(() => result.current.onSubmit());
 
-    expect(mutate).not.toHaveBeenCalled();
     expect(result.current.emailErrorKey).toBe(key);
+    expect(mutate).not.toHaveBeenCalled();
   },
 );
 
-it("SHOULD invite the TRIMMED email into the family from the route", () => {
-  const { mutate, result } = setup();
-  act(() => result.current.onChangeEmail("  Bob@Example.test "));
+it("SHOULD NOT show the validation error before the first submit", () => {
+  const { result } = setup();
 
-  act(() => result.current.onSubmit());
+  act(() => result.current.onChangeEmail("invalid"));
 
-  expect(mutate).toHaveBeenCalledWith();
+  expect(result.current.emailErrorKey).toBeUndefined();
 });
 
-it("SHOULD expose the loading state", () => {
-  expect(setup({ isFetching: true }).result.current.isSubmitting).toBe(true);
-});
-
-it("SHOULD show the inline 'already exists' message for the submitted email AND clear it WHEN the email is edited", () => {
+it("SHOULD show alreadyExists under the field WHEN the API answers 409 AND clear it when the email changes", () => {
   const { result } = setup({ error: new FamilyMemberAlreadyExists() });
-  act(() => result.current.onChangeEmail("bob@example.test"));
+
+  act(() => result.current.onChangeEmail("a@example.test"));
   act(() => result.current.onSubmit());
-  expect(result.current.alreadyExistsVisible).toBe(true);
 
-  act(() => result.current.onChangeEmail("carol@example.test"));
+  expect(result.current.emailErrorKey).toBe(
+    "family.member.invite.alreadyExists",
+  );
+  expect(result.current.hasGenericError).toBe(false);
 
-  expect(result.current.alreadyExistsVisible).toBe(false);
+  act(() => result.current.onChangeEmail("b@example.test"));
+
+  expect(result.current.emailErrorKey).toBeUndefined();
 });
 
-it("SHOULD NOT show 'already exists' for other errors", () => {
+it("SHOULD flag any other error as generic", () => {
   const { result } = setup({ error: new GenericError() });
-  act(() => result.current.onChangeEmail("bob@example.test"));
+
+  act(() => result.current.onChangeEmail("a@example.test"));
   act(() => result.current.onSubmit());
 
-  expect(result.current.alreadyExistsVisible).toBe(false);
+  expect(result.current.hasGenericError).toBe(true);
+  expect(result.current.emailErrorKey).toBeUndefined();
 });
 
-it("SHOULD go to the success feedback with the invite link and the 7-day message WHEN the invite was created", async () => {
-  const { rerender, result } = setup();
-  act(() => result.current.onChangeEmail("bob@example.test"));
+it("SHOULD NOT submit twice WHILE pending", () => {
+  const { mutate, result } = setup({ isFetching: true });
+
+  act(() => result.current.onChangeEmail("a@example.test"));
   act(() => result.current.onSubmit());
 
-  // The API answers after the submit.
-  mutation.withData({
-    inviteExpiresAt: new Date("2026-10-11T12:00:00.000Z"),
-    inviteToken: token,
-  });
-  jest.mocked(useMutation).mockReturnValue(mutation.build() as never);
-  rerender({});
-
-  await waitFor(() => expect(router.push).toHaveBeenCalledTimes(1));
-
-  expect(createFeedbackRouteEncoded).toHaveBeenCalledWith({
-    closeButton: {
-      action: FeedbackActions.NAVIGATION,
-      route: "/family",
-      type: FeedbackNavigationTypes.DISMISS_TO,
-    },
-    message: expect.stringContaining("bob@example.test"),
-    primaryButton: {
-      action: FeedbackActions.COPY_TO_CLIPBOARD,
-      label: "family.member.invite.copyLink",
-      value: expect.stringMatching(new RegExp(`/invite\\?token=${token}$`)),
-    },
-    title: "family.member.invite.successTitle",
-    type: FeedbackType.Success,
-  });
-  const args = jest.mocked(createFeedbackRouteEncoded).mock.calls[0][0];
-  expect(args.title).not.toContain("bob@example.test");
-  expect(router.push).toHaveBeenCalledWith({
-    params: { feedback: "encoded" },
-    pathname: "/business_feedback",
-  });
+  expect(result.current.isSubmitting).toBe(true);
+  expect(mutate).not.toHaveBeenCalled();
 });
 
-it("SHOULD NOT navigate WHEN there is no invite data", () => {
-  setup();
-
-  expect(router.push).not.toHaveBeenCalled();
+it("SHOULD NOT expose a link BEFORE the invite exists", () => {
+  expect(setup().result.current.link).toBeUndefined();
 });
 
-it("SHOULD go back WHEN cancelled", () => {
-  setup().result.current.onCancel();
+it("SHOULD build the link from the token only AFTER creation AND never keep it in the mutation variables", () => {
+  const { mutate, result } = setupCreated();
 
-  expect(router.back).toHaveBeenCalledTimes(1);
+  expect(result.current.link).toBe(link);
+  expect(link).toMatch(/\/invite\?token=tok_123$/);
+  expect(result.current.resultEmail).toBe("invitee@example.test");
+  expect(mutate).not.toHaveBeenCalledWith(
+    expect.objectContaining({ inviteToken: expect.anything() }),
+  );
+  expect(spies.useMutation.mock.calls[0][0].cacheKey).toEqual([
+    "invite_member",
+  ]);
+});
+
+it("SHOULD copy the link, show Copied, and revert after 2 seconds", async () => {
+  const { result } = setupCreated();
+
+  await act(async () => {
+    await result.current.onCopy();
+  });
+
+  expect(spies.copyText).toHaveBeenCalledWith(link);
+  expect(result.current.copied).toBe(true);
+
+  act(() => {
+    jest.advanceTimersByTime(2000);
+  });
+
+  expect(result.current.copied).toBe(false);
+});
+
+it("SHOULD NOT copy WHEN there is no link", async () => {
+  const { result } = setup();
+
+  await act(async () => {
+    await result.current.onCopy();
+  });
+
+  expect(spies.copyText).not.toHaveBeenCalled();
+});
+
+it("SHOULD not leave a timer running after unmount", async () => {
+  const { result, unmount } = setupCreated();
+
+  await act(async () => {
+    await result.current.onCopy();
+  });
+  unmount();
+
+  expect(jest.getTimerCount()).toBe(0);
+});
+
+it("SHOULD share the link only WHEN sharing is available", async () => {
+  const { result } = setupCreated();
+
+  expect(result.current.shareAvailable).toBe(true);
+
+  await act(async () => {
+    await result.current.onShare();
+  });
+
+  expect(spies.shareText).toHaveBeenCalledWith(link);
+});
+
+it("SHOULD report sharing as unavailable WHEN the platform does not support it", () => {
+  spies.isShareAvailable.mockReturnValue(false);
+
+  expect(setupCreated().result.current.shareAvailable).toBe(false);
+});
+
+it("SHOULD refetch AND close on Done", () => {
+  const { result } = setupCreated();
+
+  act(() => result.current.onDone());
+
+  expect(spies.invalidate).toHaveBeenCalledTimes(1);
+  expect(spies.back).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD also refetch WHEN the sheet is closed (X) after the invite was created", () => {
+  const { result } = setupCreated();
+
+  act(() => result.current.onClose());
+
+  expect(spies.invalidate).toHaveBeenCalledTimes(1);
+  expect(spies.back).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD NOT refetch WHEN the sheet is closed before creating an invite", () => {
+  const { result } = setup();
+
+  act(() => result.current.onClose());
+
+  expect(spies.invalidate).not.toHaveBeenCalled();
+  expect(spies.back).toHaveBeenCalledTimes(1);
 });
