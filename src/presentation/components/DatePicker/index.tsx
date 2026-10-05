@@ -1,11 +1,10 @@
-import { BlurView } from "expo-blur";
 import { useState } from "react";
 import { Pressable, View } from "react-native";
 import * as Paper from "react-native-paper-dates";
 
 import { IconButton } from "@components/Icon";
 import Text from "@components/Text";
-import { useTranslation, useTranslationLocale } from "@presentation/i18n";
+import { useTranslationLocale } from "@presentation/i18n";
 
 import getStyles from "./styles";
 
@@ -19,7 +18,6 @@ export interface DatePickerProps {
 }
 
 function DatePicker(props: DatePickerProps) {
-  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const { getLocale } = useTranslationLocale();
   const { styles, theme } = getStyles();
@@ -51,11 +49,7 @@ function DatePicker(props: DatePickerProps) {
         style={styles.pressable}
         testID={props.testID}
       >
-        <BlurView
-          intensity={theme.dark ? 20 : 40}
-          style={styles.container}
-          tint={theme.dark ? "dark" : "light"}
-        >
+        <View style={styles.frame}>
           <View style={styles.innerContainer}>
             <Text.Body
               color={
@@ -88,7 +82,7 @@ function DatePicker(props: DatePickerProps) {
           {props.date ? (
             <View style={styles.clearIconContainer}>
               <IconButton
-                accessibilityLabel={t("common.actions.clear")}
+                accessibilityLabel={props.label}
                 name={"close"}
                 onPress={clearDate}
                 size={theme.sizes.spacing.xl}
@@ -98,7 +92,7 @@ function DatePicker(props: DatePickerProps) {
               />
             </View>
           ) : null}
-        </BlurView>
+        </View>
       </Pressable>
     </View>
   );

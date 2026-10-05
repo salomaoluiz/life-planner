@@ -1,6 +1,6 @@
 import { BlurView } from "expo-blur";
 
-import { act, fireEvent, mockDarkTheme, screen } from "@tests";
+import { act, fireEvent, screen } from "@tests";
 
 import { defaultProps, setup } from "./mocks/index.mocks";
 
@@ -204,18 +204,9 @@ describe("DatePicker", () => {
     expect(screen.getByTestId("date-picker-value")).toBeTruthy();
   });
 
-  it.each([
-    [false, 40, "light"],
-    [true, 20, "dark"],
-  ])("SHOULD use the blur settings for isDark=%s", (dark, intensity, tint) => {
-    const restore = dark ? mockDarkTheme() : () => undefined;
-
+  it("SHOULD not render a blur view", () => {
     setup();
 
-    expect(screen.UNSAFE_getByType(BlurView).props).toMatchObject({
-      intensity,
-      tint,
-    });
-    restore();
+    expect(screen.UNSAFE_queryAllByType(BlurView)).toHaveLength(0);
   });
 });
