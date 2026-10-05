@@ -30,6 +30,7 @@ function ListItem(props: Props) {
       </View>
       <View style={styles.deleteColumn}>
         <IconButton
+          accessibilityLabel={t("common.actions.delete")}
           name={"delete"}
           onPress={onDelete}
           size={theme.sizes.spacing.xl}

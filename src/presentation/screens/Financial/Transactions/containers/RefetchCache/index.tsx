@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useCases } from "@application/useCases";
 import { IconButton } from "@components/Icon";
 import { useMutation } from "@infrastructure/fetcher";
+import { useTranslation } from "@presentation/i18n";
 import { useTheme } from "@presentation/theme";
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
 }
 
 function RefetchCache(props: Props) {
+  const { t } = useTranslation();
   const { theme } = useTheme();
 
   const { mutate, status } = useMutation<void, void>({
@@ -29,6 +31,7 @@ function RefetchCache(props: Props) {
 
   return (
     <IconButton
+      accessibilityLabel={t("common.actions.tryAgain")}
       name={"refresh"}
       onPress={onRefresh}
       size={theme.sizes.spacing.xl}

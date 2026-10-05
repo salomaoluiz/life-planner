@@ -65,7 +65,7 @@ it("SHOULD use the income icon and color WHEN the transaction is an income", () 
 it("SHOULD call onDelete WHEN the delete button is pressed", () => {
   setupWeb();
 
-  fireEvent.press(screen.UNSAFE_getAllByProps({ icon: "delete" })[0]);
+  fireEvent.press(screen.getAllByLabelText("common.actions.delete")[0]);
 
   expect(mocks.onDelete).toHaveBeenCalledTimes(1);
 });

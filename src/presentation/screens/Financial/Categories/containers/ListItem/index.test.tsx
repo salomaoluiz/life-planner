@@ -56,7 +56,7 @@ it("SHOULD increase the left padding as the depth level grows", () => {
 it("SHOULD call onDelete WHEN the delete button is pressed", () => {
   setup();
 
-  fireEvent.press(screen.UNSAFE_getAllByProps({ icon: "delete" })[0]);
+  fireEvent.press(screen.getAllByLabelText("common.actions.delete")[0]);
 
   expect(mocks.onDelete).toHaveBeenCalledTimes(1);
 });
