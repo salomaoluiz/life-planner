@@ -18,6 +18,14 @@ it("SHOULD update a category", async () => {
   );
 });
 
+it("SHOULD forward parentId null to the datasource", async () => {
+  await setup({ parentId: null });
+
+  expect(spies.financialCategoryDatasource.updateCategory).toHaveBeenCalledWith(
+    expect.objectContaining({ parentId: null }),
+  );
+});
+
 it("SHOULD invalidate cache after category updated", async () => {
   await setup();
   expect(spies.cache.invalidate).toHaveBeenCalledWith(
