@@ -195,8 +195,18 @@ jest.mock("react-native-reanimated", () => {
   return {
     __esModule: true,
     default: { View },
+    ReduceMotion: { Always: "always", Never: "never", System: "system" },
     useAnimatedStyle: (factory: () => object) => factory(),
-    useSharedValue: (initial: number) => ({ value: initial }),
+    useSharedValue: (initial: number) => {
+      const shared = {
+        set: (next: number) => {
+          shared.value = next;
+        },
+        value: initial,
+      };
+      return shared;
+    },
+    withSpring: (toValue: number | string) => toValue,
     withTiming: (toValue: number) => toValue,
   };
 });
