@@ -131,7 +131,7 @@ function NewAccountModal() {
               }
             />
           </View>
-          <Spacer direction={"vertical"} size={"medium"} />
+          <Spacer direction={"vertical"} size={"md"} />
 
           <TextInput.Outlined
             label={t("financial.accounts.name")}
@@ -143,7 +143,7 @@ function NewAccountModal() {
             type={"error"}
             visible={!!errors.name}
           />
-          <Spacer direction={"vertical"} size={"medium"} />
+          <Spacer direction={"vertical"} size={"md"} />
 
           <TextInput.Outlined
             keyboardType={"numeric"}
@@ -156,7 +156,7 @@ function NewAccountModal() {
             type={"error"}
             visible={!!errors.balance}
           />
-          <Spacer direction={"vertical"} size={"medium"} />
+          <Spacer direction={"vertical"} size={"md"} />
 
           <Picker
             items={viewModel.accountOwners}
@@ -164,7 +164,7 @@ function NewAccountModal() {
             onValueChange={fields.ownerId.onChange}
             selectedValue={fields.ownerId.value ?? owners.data![0]?.id}
           />
-          <Spacer direction={"vertical"} size={"medium"} />
+          <Spacer direction={"vertical"} size={"md"} />
 
           <Picker
             items={viewModel.accountStatuses}
@@ -172,10 +172,10 @@ function NewAccountModal() {
             onValueChange={fields.status.onChange}
             selectedValue={fields.status.value}
           />
-          <Spacer direction={"vertical"} size={"medium"} />
+          <Spacer direction={"vertical"} size={"md"} />
 
           <Text.Body bold value={t("financial.accounts.chooseIcon")} />
-          <Spacer direction={"vertical"} size={"small"} />
+          <Spacer direction={"vertical"} size={"sm"} />
           <View style={styles.iconGrid}>
             {AVAILABLE_ICONS.map((iconName) => {
               const isSelected = fields.icon.value === iconName;
@@ -197,7 +197,7 @@ function NewAccountModal() {
                     }
                     name={iconName}
                     onPress={() => fields.icon.onChange(iconName)}
-                    size={theme.sizes.spacing.large}
+                    size={theme.sizes.spacing.xl}
                   />
                 </View>
               );
@@ -212,7 +212,7 @@ function NewAccountModal() {
               label={t("financial.accounts.cancel")}
               onPress={onCancel}
             />
-            <Spacer direction={"horizontal"} size={"large"} />
+            <Spacer direction={"horizontal"} size={"xl"} />
             <Button.Filled
               label={
                 isEditing

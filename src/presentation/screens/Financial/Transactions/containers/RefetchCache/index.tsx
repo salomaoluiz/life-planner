@@ -31,7 +31,7 @@ function RefetchCache(props: Props) {
     <IconButton
       name={"refresh"}
       onPress={onRefresh}
-      size={theme.sizes.spacing.large}
+      size={theme.sizes.spacing.xl}
     />
   );
 }

@@ -13,14 +13,14 @@ function getStyles(props: Props) {
       container: {
         backgroundColor: theme.colors.surfaceRaised,
         borderColor: theme.colors.surfaceRaised,
-        borderRadius: theme.sizes.borderRadius.small,
+        borderRadius: theme.sizes.borderRadius.sm,
         borderWidth: 1,
         boxShadow: props.isExpired
           ? `inset 0px 0px 20px ${theme.colors.expense}`
           : undefined,
         elevation: 10,
         flex: 1,
-        margin: theme.sizes.spacing.small,
+        margin: theme.sizes.spacing.sm,
       },
       iconContainer: {
         position: "absolute",
@@ -31,7 +31,7 @@ function getStyles(props: Props) {
         justifyContent: "space-between",
       },
       subContainer: {
-        padding: theme.sizes.spacing.small,
+        padding: theme.sizes.spacing.sm,
       },
     }),
     theme,

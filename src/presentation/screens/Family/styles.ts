@@ -10,7 +10,7 @@ function getStyles() {
       backgroundColor: theme.colors.background,
       flex: 1,
       justifyContent: "space-between",
-      padding: theme.sizes.spacing.small,
+      padding: theme.sizes.spacing.sm,
     },
   });
 }

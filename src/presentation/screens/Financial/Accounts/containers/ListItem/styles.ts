@@ -22,22 +22,22 @@ export function getStyles() {
       },
       balanceColumn: {
         alignItems: "flex-end",
-        marginRight: theme.sizes.spacing.medium,
+        marginRight: theme.sizes.spacing.md,
       },
       container: {
         alignItems: "center",
         borderBottomColor: theme.colors.border,
         borderBottomWidth: 1,
         flexDirection: "row",
-        paddingHorizontal: theme.sizes.spacing.medium,
-        paddingVertical: theme.sizes.spacing.small,
+        paddingHorizontal: theme.sizes.spacing.md,
+        paddingVertical: theme.sizes.spacing.sm,
       },
       detailsColumn: {
         flex: 1,
         justifyContent: "center",
       },
       iconColumn: {
-        marginRight: theme.sizes.spacing.medium,
+        marginRight: theme.sizes.spacing.md,
       },
     }),
     theme,

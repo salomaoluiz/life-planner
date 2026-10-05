@@ -16,23 +16,23 @@ function getStyles({ disabled, isFocused }: StyleProps) {
           ? theme.colors.surface
           : theme.colors.surface,
         borderColor: isFocused ? theme.colors.accent : theme.colors.border,
-        borderRadius: theme.sizes.borderRadius.large,
+        borderRadius: theme.sizes.borderRadius.lg,
         borderWidth: 1,
         opacity: disabled ? 0.5 : 1,
         overflow: "hidden",
       },
       container: {
-        marginBottom: theme.sizes.spacing.medium,
+        marginBottom: theme.sizes.spacing.md,
         width: "100%",
       },
       labelContainer: {
         color: theme.colors.textPrimary,
-        marginBottom: theme.sizes.spacing.xsmall,
+        marginBottom: theme.sizes.spacing.xs,
       },
       textInput: {
         backgroundColor: "transparent",
         color: theme.colors.textPrimary,
-        minHeight: theme.sizes.spacing.xxlarge,
+        minHeight: theme.sizes.spacing.xxxl,
         width: "100%",
       },
     }),

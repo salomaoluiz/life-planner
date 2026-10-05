@@ -9,22 +9,22 @@ function getStyles() {
     container: {
       backgroundColor: theme.colors.surface,
       borderColor: theme.colors.border,
-      borderRadius: theme.sizes.borderRadius.large,
+      borderRadius: theme.sizes.borderRadius.lg,
       borderWidth: 1,
       flex: 1,
-      marginBottom: theme.sizes.spacing.small,
+      marginBottom: theme.sizes.spacing.sm,
       overflow: "hidden",
-      paddingHorizontal: theme.sizes.spacing.small,
+      paddingHorizontal: theme.sizes.spacing.sm,
       paddingVertical: 0,
     },
     contentContainer: {
       backgroundColor: theme.dark
         ? theme.colors.surfaceRaised
         : theme.colors.surfaceRaised,
-      borderBottomEndRadius: theme.sizes.borderRadius.large,
-      borderBottomStartRadius: theme.sizes.borderRadius.large,
-      marginHorizontal: theme.sizes.spacing.small,
-      padding: theme.sizes.spacing.small,
+      borderBottomEndRadius: theme.sizes.borderRadius.lg,
+      borderBottomStartRadius: theme.sizes.borderRadius.lg,
+      marginHorizontal: theme.sizes.spacing.sm,
+      padding: theme.sizes.spacing.sm,
     },
     headerContainer: {
       flex: 1,

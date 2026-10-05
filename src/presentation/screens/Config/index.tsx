@@ -20,7 +20,7 @@ function Config() {
             <View style={styles.listItem}>
               <Theme />
             </View>
-            <Spacer direction={"vertical"} size={"xlarge"} />
+            <Spacer direction={"vertical"} size={"xxl"} />
             <View style={styles.listItem}>
               <Language />
             </View>

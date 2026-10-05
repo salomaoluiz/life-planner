@@ -12,17 +12,17 @@ function getStyles() {
       },
       closeContainer: {
         position: "absolute",
-        right: theme.sizes.spacing.small,
-        top: theme.sizes.spacing.small,
+        right: theme.sizes.spacing.sm,
+        top: theme.sizes.spacing.sm,
       },
       container: {
         backgroundColor: theme.colors.background,
         flex: 1,
         justifyContent: "flex-end",
-        padding: theme.sizes.spacing.small,
+        padding: theme.sizes.spacing.sm,
       },
       headerContainer: {
-        marginVertical: theme.sizes.spacing.medium,
+        marginVertical: theme.sizes.spacing.md,
       },
       iconContainer: {},
     }),

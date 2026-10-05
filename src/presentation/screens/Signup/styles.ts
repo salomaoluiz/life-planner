@@ -11,7 +11,7 @@ function getStyles() {
       backgroundColor: theme.colors.background,
       flex: 1,
       justifyContent: "center",
-      padding: theme.sizes.spacing.medium,
+      padding: theme.sizes.spacing.md,
     },
     form: {
       alignSelf: "stretch",

@@ -30,12 +30,12 @@ function FamilyCard(props: Props) {
             refetchFamily={props.refetchFamilies}
           />
         ))}
-        <Spacer direction={"vertical"} size={"large"} />
+        <Spacer direction={"vertical"} size={"xl"} />
         <AddNewFamilyMember
           label={props.addMemberLabel}
           onPress={props.onAddNewFamilyMember}
         />
-        <Spacer direction={"vertical"} size={"small"} />
+        <Spacer direction={"vertical"} size={"sm"} />
         <DeleteFamily onPress={props.onDeleteFamily} />
       </View>
     );

@@ -4,7 +4,7 @@ import Spacer, { SpacerProps } from "../index";
 
 const defaultProps: SpacerProps = {
   direction: "both",
-  size: "medium",
+  size: "md",
   testID: "test-spacer",
 };
 

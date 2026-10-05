@@ -56,7 +56,7 @@ function Spacer(props: SpacerProps) {
             borderBottomWidth: 1,
             borderColor: theme.colors.textPrimary,
             height: 1,
-            marginHorizontal: theme.sizes.spacing.small,
+            marginHorizontal: theme.sizes.spacing.sm,
           }}
         />
       ) : null}

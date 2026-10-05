@@ -77,14 +77,14 @@ function BusinessFeedback() {
           color={theme.colors.textPrimary}
           name={"close-circle"}
           onPress={onCloseButtonPress}
-          size={theme.sizes.spacing.large}
+          size={theme.sizes.spacing.xl}
         />
       </View>
       <View style={styles.iconContainer}>
         <Icon
           color={getIconColor()}
           name={getIconName()}
-          size={theme.sizes.spacing.xxlarge}
+          size={theme.sizes.spacing.xxxl}
         />
       </View>
       <View style={styles.headerContainer}>

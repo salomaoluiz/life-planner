@@ -13,29 +13,29 @@ function getStyles() {
         alignItems: "center",
         backgroundColor: theme.colors.background,
         flex: 1,
-        paddingBottom: isWeb() ? theme.sizes.spacing.xxlarge : undefined,
-        paddingTop: isWeb() ? theme.sizes.spacing.xxlarge : undefined,
+        paddingBottom: isWeb() ? theme.sizes.spacing.xxxl : undefined,
+        paddingTop: isWeb() ? theme.sizes.spacing.xxxl : undefined,
       },
       fabContainer: {
         alignItems: "flex-end",
-        bottom: theme.sizes.spacing.large,
+        bottom: theme.sizes.spacing.xl,
         flexDirection: "row",
         justifyContent: "flex-end",
         position: "absolute",
-        right: theme.sizes.spacing.large,
+        right: theme.sizes.spacing.xl,
       },
       filterContainer: {
         alignSelf: "stretch",
-        marginBottom: theme.sizes.spacing.small,
+        marginBottom: theme.sizes.spacing.sm,
         marginHorizontal: isWeb()
           ? getScreenSizes().width * 0.05
-          : theme.sizes.spacing.medium,
-        marginTop: theme.sizes.spacing.medium,
+          : theme.sizes.spacing.md,
+        marginTop: theme.sizes.spacing.md,
       },
       listContainer: {
         alignSelf: "stretch",
         backgroundColor: theme.colors.surfaceRaised,
-        borderRadius: isWeb() ? theme.sizes.borderRadius.large : undefined,
+        borderRadius: isWeb() ? theme.sizes.borderRadius.lg : undefined,
         flexDirection: "row",
         marginHorizontal: isWeb() ? getScreenSizes().width * 0.05 : undefined,
         minWidth: isWeb()
@@ -44,8 +44,8 @@ function getStyles() {
       },
       listContentContainer: {
         flex: 1,
-        paddingHorizontal: isWeb() ? theme.sizes.spacing.large : undefined,
-        paddingVertical: isWeb() ? theme.sizes.spacing.large : undefined,
+        paddingHorizontal: isWeb() ? theme.sizes.spacing.xl : undefined,
+        paddingVertical: isWeb() ? theme.sizes.spacing.xl : undefined,
       },
       scrollView: {
         flex: 1,
