@@ -1,3 +1,4 @@
+import { act } from "@testing-library/react-native";
 import { router, useLocalSearchParams } from "expo-router";
 
 import { renderHook } from "@tests";
@@ -60,6 +61,10 @@ const spies = {
   useQuery: jest.mocked(useQuery),
 };
 
+function noop() {
+  return undefined;
+}
+
 beforeEach(() => {
   jest.clearAllMocks();
   spies.params.mockReturnValue({ token: TOKEN });
@@ -94,6 +99,7 @@ function setup(props?: {
   return {
     ...renderHook(() => useInviteViewModel()),
     mutate: builtJoin.mutate,
+    refetch: builtQuery.refetch,
   };
 }
 
@@ -245,4 +251,33 @@ it("SHOULD refetch the invite on onRetry", () => {
   result.current.onRetry();
 
   expect(query.value.refetch).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD refetch with the NEW token and report loading WHEN a 2nd deep link changes the token", async () => {
+  const tokenB = "tokenB-0123456789";
+  const { refetch, rerender, result } = setup({ data: ui });
+  expect(refetch).not.toHaveBeenCalled();
+  expect(result.current.status).toBe("ready");
+
+  let resolveRefetch: () => void = noop;
+  jest.mocked(refetch).mockImplementation(async () => {
+    await new Promise<void>((resolve) => {
+      resolveRefetch = resolve;
+    });
+  });
+  spies.params.mockReturnValue({ token: tokenB });
+  rerender({});
+
+  expect(refetch).toHaveBeenCalledTimes(1);
+  expect(result.current.status).toBe("loading");
+
+  spies.getInvite.mockResolvedValue(dto);
+  await spies.useQuery.mock.lastCall?.[0].fetch();
+  expect(spies.getInvite).toHaveBeenLastCalledWith(tokenB);
+
+  await act(async () => {
+    resolveRefetch();
+  });
+
+  expect(result.current.status).toBe("ready");
 });
