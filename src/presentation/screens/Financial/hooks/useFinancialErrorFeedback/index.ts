@@ -8,6 +8,7 @@ import {
   FinancialOwnerNotAllowed,
 } from "@domain/entities/errors";
 import { useTranslation } from "@presentation/i18n";
+import { TranslationKeys } from "@presentation/i18n/types";
 import {
   FeedbackActions,
   FeedbackNavigationTypes,
@@ -15,7 +16,7 @@ import {
 import { FeedbackType } from "@screens/Feedback/BusinessFeedback/types";
 import { createFeedbackRouteEncoded } from "@screens/Feedback/BusinessFeedback/utils";
 
-function getMessageKey(error: unknown): string | undefined {
+function getMessageKey(error: unknown): TranslationKeys | undefined {
   if (error instanceof AccountHasTransactions) {
     return "financial.accounts.errors.hasTransactions";
   }
@@ -46,7 +47,7 @@ function useFinancialErrorFeedback(error: unknown) {
       return;
     }
 
-    async function showFeedback(key: string) {
+    async function showFeedback(key: TranslationKeys) {
       const goBack = {
         action: FeedbackActions.NAVIGATION,
         type: FeedbackNavigationTypes.GO_BACK,
