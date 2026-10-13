@@ -1,132 +1,132 @@
-import { useIsFocused } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
-import { router, useNavigation } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { View } from "react-native";
 
-import { useCases } from "@application/useCases";
-import { Button, Picker, Spacer, Text } from "@components";
-import { useQuery } from "@infrastructure/fetcher";
-import useTranslation from "@presentation/i18n/useTranslation";
-import RefetchCache from "@screens/Financial/Transactions/containers/RefetchCache";
+import {
+  ChipGroup,
+  EmptyState,
+  ErrorState,
+  Icon,
+  IconButton,
+  IconTile,
+  SegmentedControl,
+  TreeItem,
+} from "@components";
+import Skeleton from "@components/Skeleton";
+import { useKitTheme } from "@components/utils/useKitTheme";
+import { useTranslation } from "@presentation/i18n";
+import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
-import ListItem from "./containers/ListItem";
-import FinancialCategoryViewModel from "./models/FinancialCategoryViewModel";
-import getStyles from "./styles";
+import { useCategoriesViewModel } from "./hooks";
+import CategoryRowUIModel from "./models/CategoryRowUIModel";
+import useStyles from "./styles";
+
+const SKELETON_ROWS = [0, 1, 2, 3, 4, 5];
 
 function FinancialCategories() {
-  const { styles } = getStyles();
-  const isFocused = useIsFocused();
-  const navigation = useNavigation();
+  const { styles } = useStyles();
   const { t } = useTranslation();
-  const [filterType, setFilterType] = useState<string>("ALL");
+  const { sizes } = useKitTheme();
+  const vm = useCategoriesViewModel();
 
-  const {
-    data: flatViewModels,
-    error,
-    isFetching,
-    refetch,
-  } = useQuery<FinancialCategoryViewModel[]>({
-    cacheKey: [useCases.getFinancialCategoriesUseCase.uniqueName],
-    fetch: async () => {
-      const owners = await useCases.getOwnersUseCase.execute();
-      const ownerIds = owners.map((o) => o.id);
-
-      const categoryDTOs =
-        await useCases.getFinancialCategoriesUseCase.execute(ownerIds);
-
-      const parentIds = new Set(
-        categoryDTOs.flatMap((dto) => (dto.parentId ? [dto.parentId] : [])),
-      );
-
-      return categoryDTOs.map(
-        (dto) =>
-          new FinancialCategoryViewModel(dto, owners, parentIds.has(dto.id)),
-      );
-    },
-  });
-
-  const displayedCategories = useMemo(() => {
-    if (!flatViewModels) return [];
-    const filtered =
-      filterType === "ALL"
-        ? flatViewModels
-        : flatViewModels.filter((vm) => vm.type === filterType);
-    return FinancialCategoryViewModel.buildHierarchy(filtered);
-  }, [flatViewModels, filterType]);
-
-  useEffect(() => {
-    if (!isFetching) {
-      navigation.setOptions({
-        headerRight: () => <RefetchCache refetchQuery={refetch} />,
-      });
-    }
-  }, [navigation, isFetching, refetch]);
-
-  useEffect(() => {
-    if (isFocused) {
-      refetch();
-    }
-  }, [isFocused, refetch]);
-
-  if (isFetching) {
-    return (
-      <View style={styles.container}>
-        <Text.Title value={"Loading..."} />
+  const toolbar = (
+    <View style={styles.toolbar}>
+      <View style={styles.typeRow}>
+        <View style={styles.typeControl}>
+          <SegmentedControl
+            accessibilityLabel={t("financial.categories.form.type")}
+            onChange={vm.onTypeChange}
+            options={vm.typeOptions.map((option) => ({
+              label: t(option.labelKey),
+              tone: option.value === "EXPENSE" ? "expense" : "income",
+              value: option.value,
+            }))}
+            value={vm.type}
+          />
+        </View>
+        <IconButton
+          accessibilityLabel={t("financial.categories.new")}
+          name={"plus"}
+          onPress={vm.onAddPress}
+        />
       </View>
+      <ChipGroup
+        layout={"scroll"}
+        mode={"single"}
+        onChange={vm.onOwnerFilterChange}
+        options={translateChoices(vm.ownerChoices, t)}
+        value={vm.ownerFilter}
+      />
+    </View>
+  );
+
+  function renderItem({ item }: { item: CategoryRowUIModel }) {
+    let subtitle: string | undefined;
+    if (item.subcount > 0) {
+      subtitle = t("financial.categories.subcount", { count: item.subcount });
+    }
+
+    return (
+      <TreeItem
+        depth={item.depth}
+        leading={<IconTile color={item.color} name={item.icon} />}
+        onPress={() => vm.onRowPress(item.id)}
+        subtitle={subtitle}
+        testID={`category-row-${item.id}`}
+        title={item.name}
+        trailing={
+          item.hasChildren ? (
+            <Icon
+              name={"chevron-down"}
+              size={sizes.iconMd}
+              testID={"category-row-chevron"}
+            />
+          ) : undefined
+        }
+      />
     );
   }
 
-  function renderItem({ item }: { item: FinancialCategoryViewModel }) {
-    return <ListItem item={item} refetch={refetch} />;
-  }
-
-  function onAddCategoryPress() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    router.push("/financial/category/add_new_category" as any);
-  }
-
-  if (error) {
+  if (vm.errorMessage) {
     return (
-      <View style={styles.container}>
-        <Text.Headline value={`Error ${error.message}`} />
+      <ErrorState
+        message={vm.errorMessage}
+        onRetry={vm.onRetry}
+        retryLabel={t("common.actions.tryAgain")}
+      />
+    );
+  }
+
+  if (vm.isLoading) {
+    return (
+      <View style={styles.root}>
+        {toolbar}
+        {SKELETON_ROWS.map((row) => (
+          <Skeleton.ListItem key={row} testID={"categories-skeleton"} />
+        ))}
       </View>
     );
   }
 
   return (
-    <>
-      <ScrollView style={styles.scrollView}>
-        <View style={styles.container}>
-          <Button.Primary
-            label={t("financial.categories.addNewCategory")}
-            onPress={onAddCategoryPress}
-            testID={"categories-add-button"}
+    <View style={styles.root}>
+      <FlashList
+        data={vm.rows}
+        estimatedItemSize={64}
+        keyExtractor={(row) => row.id}
+        ListEmptyComponent={
+          <EmptyState
+            actionLabel={t("financial.categories.new")}
+            message={t("financial.categories.emptyMessage")}
+            onAction={vm.onAddPress}
+            title={t(vm.emptyTitleKey)}
           />
-          <View style={styles.filterContainer}>
-            <Picker
-              items={[
-                { label: t("financial.categories.all"), value: "ALL" },
-                { label: t("financial.categories.expense"), value: "EXPENSE" },
-                { label: t("financial.categories.income"), value: "INCOME" },
-              ]}
-              label={t("financial.categories.filterByType")}
-              onValueChange={setFilterType}
-              selectedValue={filterType}
-            />
-          </View>
-          <Spacer direction={"vertical"} size={"md"} />
-          <View style={styles.listContainer}>
-            <FlashList
-              contentContainerStyle={styles.listContentContainer}
-              data={displayedCategories}
-              estimatedItemSize={60}
-              renderItem={renderItem}
-            />
-          </View>
-        </View>
-      </ScrollView>
-    </>
+        }
+        ListHeaderComponent={toolbar}
+        onRefresh={vm.onRefresh}
+        refreshing={vm.isRefreshing}
+        renderItem={renderItem}
+      />
+    </View>
   );
 }
 

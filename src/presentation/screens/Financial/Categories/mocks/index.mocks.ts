@@ -4,8 +4,6 @@ import CategoryDTO, {
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
-import FinancialCategoryViewModel from "../models/FinancialCategoryViewModel";
-
 const owners = [
   new OwnerDTO({ id: "owner-1", name: "Alice Test", type: OwnerType.USER }),
   new OwnerDTO({ id: "owner-2", name: "Test Family", type: OwnerType.FAMILY }),
@@ -13,8 +11,8 @@ const owners = [
 
 function makeCategoryDTO(overrides: Partial<ICategoryDTO> = {}) {
   return new CategoryDTO({
-    depthLevel: 0,
     icon: "food",
+    iconColor: "#F59E0B",
     id: "cat-1",
     name: "Food",
     owner: "USER",
@@ -24,15 +22,4 @@ function makeCategoryDTO(overrides: Partial<ICategoryDTO> = {}) {
   });
 }
 
-function makeCategoryViewModel(
-  overrides: Partial<ICategoryDTO> = {},
-  hasSubcategories = false,
-) {
-  return new FinancialCategoryViewModel(
-    makeCategoryDTO(overrides),
-    owners,
-    hasSubcategories,
-  );
-}
-
-export { makeCategoryDTO, makeCategoryViewModel, owners };
+export { makeCategoryDTO, owners };
