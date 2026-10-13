@@ -3,7 +3,7 @@ import { ScrollView, View } from "react-native";
 import { Spacer, Text } from "@components";
 import { useTranslation } from "@presentation/i18n";
 
-import { DarkMode, Language, Logout } from "./containers";
+import { Language, Logout, Theme } from "./containers";
 import getStyles from "./styles";
 
 function Config() {
@@ -18,9 +18,9 @@ function Config() {
         <View style={styles.container}>
           <View style={styles.list}>
             <View style={styles.listItem}>
-              <DarkMode />
+              <Theme />
             </View>
-            <Spacer direction={"vertical"} size={"xlarge"} />
+            <Spacer direction={"vertical"} size={"xxl"} />
             <View style={styles.listItem}>
               <Language />
             </View>

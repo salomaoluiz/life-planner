@@ -6,6 +6,7 @@ import StockEntity, {
 export interface IStockDTO {
   barcode?: string;
   brand?: string;
+  createdAt?: Date;
   description: string;
   expirationDate?: Date;
   id: string;
@@ -21,6 +22,7 @@ export interface IStockDTO {
 class StockDTO {
   barcode?: string;
   brand?: string;
+  createdAt?: Date;
   description: string;
   expirationDate?: Date;
   id: string;
@@ -34,6 +36,7 @@ class StockDTO {
 
   constructor(params: IStockDTO) {
     this.brand = params.brand;
+    this.createdAt = params.createdAt;
     this.barcode = params.barcode;
     this.expirationDate = params.expirationDate;
     this.description = params.description;
@@ -51,6 +54,7 @@ class StockDTO {
     return new StockDTO({
       barcode: entity.barcode,
       brand: entity.brand,
+      createdAt: entity.createdAt,
       description: entity.description,
       expirationDate: entity.expirationDate,
       id: entity.id,

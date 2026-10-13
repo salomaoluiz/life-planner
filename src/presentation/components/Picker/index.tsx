@@ -22,7 +22,7 @@ function Picker<T>(props: PickerProps<T>) {
   return (
     <View style={styles.container} testID={props.testID}>
       <RNPicker
-        dropdownIconColor={theme.colors.onBackground}
+        dropdownIconColor={theme.colors.textPrimary}
         onValueChange={props.onValueChange}
         selectedValue={props.selectedValue}
         style={styles.picker}

@@ -1,23 +1,25 @@
-import ConfigsEntity from "@domain/entities/configs/ConfigsEntity";
+import ConfigsEntity, {
+  ThemeMode,
+} from "@domain/entities/configs/ConfigsEntity";
 
 export interface IConfigsDTO {
-  darkMode: boolean;
   language: string;
+  themeMode: ThemeMode;
 }
 
 class ConfigsDTO {
-  darkMode: boolean;
   language: string;
+  themeMode: ThemeMode;
 
   constructor(params: IConfigsDTO) {
-    this.darkMode = params.darkMode;
     this.language = params.language;
+    this.themeMode = params.themeMode;
   }
 
   static fromEntity(entity: ConfigsEntity) {
     return new ConfigsDTO({
-      darkMode: entity.darkMode,
       language: entity.language,
+      themeMode: entity.themeMode,
     });
   }
 }

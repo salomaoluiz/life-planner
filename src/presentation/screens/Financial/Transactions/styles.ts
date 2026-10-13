@@ -1,50 +1,26 @@
 import { StyleSheet } from "react-native";
 
 import { useTheme } from "@presentation/theme";
-import { getScreenSizes, getWindowsSizes } from "@utils/device";
-import { isWeb } from "@utils/platform";
 
-function getStyles() {
+function useStyles() {
   const { theme } = useTheme();
 
   return {
     styles: StyleSheet.create({
-      container: {
+      filters: { paddingBottom: theme.sizes.spacing.xs },
+      monthSwitcher: {
         alignItems: "center",
-        backgroundColor: theme.colors.background,
-        flex: 1,
-        paddingBottom: isWeb() ? theme.sizes.spacing.xxlarge : undefined,
-        paddingTop: isWeb() ? theme.sizes.spacing.xxlarge : undefined,
-      },
-      fabContainer: {
-        alignItems: "flex-end",
-        bottom: theme.sizes.spacing.large,
         flexDirection: "row",
-        justifyContent: "flex-end",
-        position: "absolute",
-        right: theme.sizes.spacing.large,
+        justifyContent: "space-between",
       },
-      listContainer: {
-        alignSelf: "stretch",
-        backgroundColor: theme.colors.surfaceVariant,
-        borderRadius: isWeb() ? theme.sizes.borderRadius.large : undefined,
-        flexDirection: "row",
-        marginHorizontal: isWeb() ? getScreenSizes().width * 0.05 : undefined,
-        minWidth: isWeb()
-          ? getScreenSizes().width / 2
-          : getWindowsSizes().width,
-      },
-      listContentContainer: {
-        flex: 1,
-        paddingHorizontal: isWeb() ? theme.sizes.spacing.large : undefined,
-        paddingVertical: isWeb() ? theme.sizes.spacing.large : undefined,
-      },
-      scrollView: {
-        flex: 1,
+      root: { flex: 1 },
+      summaryRow: { flexDirection: "row", gap: theme.sizes.spacing.sm },
+      toolbar: {
+        gap: theme.sizes.spacing.sm,
+        paddingBottom: theme.sizes.spacing.sm,
       },
     }),
-    theme,
   };
 }
 
-export default getStyles;
+export default useStyles;

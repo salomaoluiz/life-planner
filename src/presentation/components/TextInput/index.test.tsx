@@ -1,7 +1,7 @@
 import { BlurView } from "expo-blur";
 import { StyleSheet } from "react-native";
 
-import { fireEvent, hasText, mockDarkTheme, screen } from "@tests";
+import { fireEvent, hasText, screen } from "@tests";
 
 import { TextInputMode } from "./index";
 import { defaultProps, setup } from "./mocks/index.mocks";
@@ -19,7 +19,7 @@ it("SHOULD pass the correct props for an Flat editable input", () => {
       onBlur: expect.any(Function),
       onChangeText: defaultProps.onChangeText,
       onFocus: expect.any(Function),
-      placeholderTextColor: "rgba(71, 85, 105, 0.65)",
+      placeholderTextColor: "#5A6273",
       style: expect.any(Object),
       testID: "test-text-input",
       underlineColor: "transparent",
@@ -42,7 +42,7 @@ it("SHOULD pass the correct props for an Outlined not editable input", () => {
       onBlur: expect.any(Function),
       onChangeText: defaultProps.onChangeText,
       onFocus: expect.any(Function),
-      placeholderTextColor: "rgba(71, 85, 105, 0.65)",
+      placeholderTextColor: "#5A6273",
       style: expect.any(Object),
       testID: "test-text-input",
       underlineColor: "transparent",
@@ -58,29 +58,29 @@ it("SHOULD have the correct style", () => {
 
   expect(component.props.style).toEqual({
     backgroundColor: "transparent",
-    color: "rgb(15, 23, 42)",
-    minHeight: 55,
+    color: "#151922",
+    minHeight: 48,
     width: "100%",
   });
 });
 
-it("SHOULD use the focused glass colors WHEN the input is focused and the default ones WHEN blurred", () => {
+it("SHOULD use the focused border color WHEN the input is focused and the default one WHEN blurred", () => {
   setup();
   const input = screen.getByTestId("test-text-input");
-  const blur = screen.UNSAFE_getByType(BlurView);
-  const idle = StyleSheet.flatten(blur.props.style);
+  const idle = StyleSheet.flatten(
+    screen.getByTestId("test-text-input-frame").props.style,
+  );
 
   fireEvent(input, "focus");
   const focused = StyleSheet.flatten(
-    screen.UNSAFE_getByType(BlurView).props.style,
+    screen.getByTestId("test-text-input-frame").props.style,
   );
   fireEvent(input, "blur");
   const blurred = StyleSheet.flatten(
-    screen.UNSAFE_getByType(BlurView).props.style,
+    screen.getByTestId("test-text-input-frame").props.style,
   );
 
   expect(focused.borderColor).not.toBe(idle.borderColor);
-  expect(focused.backgroundColor).not.toBe(idle.backgroundColor);
   expect(blurred).toEqual(idle);
 });
 
@@ -96,19 +96,10 @@ it("SHOULD NOT render a label WHEN none is provided", () => {
   expect(hasText("Name")).toBe(false);
 });
 
-it.each([
-  [false, 40, "light"],
-  [true, 20, "dark"],
-])("SHOULD use the blur settings for isDark=%s", (dark, intensity, tint) => {
-  const restore = dark ? mockDarkTheme() : () => undefined;
-
+it("SHOULD not render a blur view", () => {
   setup();
 
-  expect(screen.UNSAFE_getByType(BlurView).props).toMatchObject({
-    intensity,
-    tint,
-  });
-  restore();
+  expect(screen.UNSAFE_queryAllByType(BlurView)).toHaveLength(0);
 });
 
 it("SHOULD forward the form and keyboard props to the underlying input", () => {

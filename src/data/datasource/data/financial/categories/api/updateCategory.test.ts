@@ -37,6 +37,16 @@ it("SHOULD send only the fields that are defined", async () => {
   expect(JSON.parse(JSON.stringify(body))).toEqual({ name: "Renamed" });
 });
 
+it("SHOULD send parentId null to make the category a root", async () => {
+  spies.patch.mockResolvedValueOnce({});
+
+  await setup({ ...mocks.onlyId, parentId: null });
+
+  const [, body] = spies.patch.mock.calls[0];
+  expect(body).toEqual(expect.objectContaining({ parentId: null }));
+  expect(JSON.parse(JSON.stringify(body))).toEqual({ parentId: null });
+});
+
 it("SHOULD skip the request WHEN there is nothing editable to update", async () => {
   await setup({ ...mocks.onlyId, depthLevel: 4 });
 

@@ -8,6 +8,15 @@ entities:
     path: src/domain/entities/stock/StockEntity.ts
     properties:
       - (Properties define the stock/inventory item structure)
+      - createdAt (optional; also optional on StockDTO and StockModel)
+  stockExpiration:
+    path: src/domain/entities/stock/stockExpiration.ts
+    description: Single source of truth for the 7-day expiration rule (calendar-day based, local time)
+    exports:
+      - CLOSE_TO_EXPIRATION_DAYS (7)
+      - StockExpirationStatus (EXPIRED | EXPIRING | OK)
+      - daysUntilExpiration(expirationDate, now)
+      - getStockExpirationStatus(expirationDate, now)
 
 interfaces:
   StockRepository:
@@ -39,16 +48,12 @@ use_cases:
     path: src/application/useCases/cases/stock/updateStockItemUseCase.ts
     behavior: Updates an existing stock item.
 
-  getStockDashboardUseCase:
-    path: src/application/useCases/cases/home/getStockDashboardUseCase.ts
-    behavior: Retrieves dashboard overview for stocks.
-
 dtos:
   - name: StockDTO
     path: src/application/dto/stock/StockDTO.ts
-  - name: StockDashboardDTO
-    path: src/application/dto/home/StockDashboardDTO.ts
 ```
+
+Home attention rule: `getStockAttentionUseCase` (see `home.md`); the Stock tab's own rule is spec 011.
 
 ## Infrastructure
 
@@ -78,26 +83,30 @@ models:
 
 ```yaml
 screens:
-  Stock:
+  Stock (list):
     path: src/presentation/screens/Stock/index.tsx
-  Home (Dashboard Overview):
-    path: src/presentation/screens/Home/index.tsx
+    composition: Screen + FlashList (ScreenHeader, SearchField, ChipGroup filters, grouped rows with ListItem/IconTile/Badge); sort sheet; states Skeleton/ErrorState/EmptyState/no-results; route param `/stock?filter=EXPIRING|EXPIRED|ALL` preselects the filter; toolbar add button (testID stock-add)
+  Home: see home.md
 
 containers:
-  - name: StockCard
-    path: src/presentation/screens/Stock/containers/StockCard/index.tsx
-  - name: StockDashboard
-    path: src/presentation/screens/Home/containers/StockDashboard/index.tsx
+  - name: StockItemDetails
+    path: src/presentation/screens/Stock/containers/StockItemDetails/index.tsx
+    behavior: BottomSheet with the filled fields of one item; delete via ConfirmDialog (deleteStockItemUseCase)
 
 modals:
   - name: NewStockItemModal
     path: src/presentation/screens/Stock/modals/NewStockItemModal/index.tsx
+    behavior: BottomSheet route `/stock/add_new_stock_item` (optional `ownerId` param preselects the owner); "More details" collapsed; quantity is digits-only (number-pad, >= 1); discard confirm when dirty
 
 view_models:
-  - name: StockViewModel
-    path: src/presentation/screens/Stock/models/StockViewModel.ts
-  - name: NewStockItemViewModel
-    path: src/presentation/screens/Stock/modals/NewStockItemModal/models/NewStockItemViewModel.ts
-  - name: StockDashboardViewModel
-    path: src/presentation/screens/Home/models/StockDashboardViewModel.ts
+  - useStockViewModel: src/presentation/screens/Stock/hooks/useStockViewModel.ts (query, 200 ms search debounce, filter/sort state, route param, sheets)
+  - useStockItemDetailsViewModel: src/presentation/screens/Stock/containers/StockItemDetails/hooks/useStockItemDetailsViewModel.ts
+  - useNewStockItemViewModel: src/presentation/screens/Stock/modals/NewStockItemModal/hooks/useNewStockItemViewModel.ts (+ useForm.ts: validateStockForm, buildStockParams)
+
+ui_models:
+  - StockItemUIModel: src/presentation/screens/Stock/models/StockItemUIModel.ts (status, badge, icon tile, date info, detail rows)
+  - StockListUIModel: src/presentation/screens/Stock/models/StockListUIModel.ts (search, filter, sort, grouping "Needs attention"/"OK", counts; Expiring filter includes expired items)
+  - NewStockItemUIModel: src/presentation/screens/Stock/modals/NewStockItemModal/models/NewStockItemUIModel.ts
+
+notes: no edit flow (spec 011 out of scope); i18n namespace `stock` (units shown via common.units.*)
 ```

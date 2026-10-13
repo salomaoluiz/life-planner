@@ -19,11 +19,11 @@ function getAvatarSize(size: AvatarBaseProps["size"]) {
 
   switch (size) {
     case "large":
-      return theme.sizes.spacing.xxlarge;
+      return theme.sizes.spacing.xxxl;
     case "regular":
-      return theme.sizes.spacing.xlarge;
+      return theme.sizes.spacing.xxl;
     case "small":
-      return theme.sizes.spacing.large;
+      return theme.sizes.spacing.xl;
   }
 }
 export { getAvatarComponent, getAvatarSize };

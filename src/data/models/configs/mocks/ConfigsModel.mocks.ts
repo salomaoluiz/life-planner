@@ -1,10 +1,12 @@
+import { ThemeMode } from "@domain/entities/configs/ConfigsEntity";
+
 import ConfigsModel from "../ConfigsModel";
 
 // region mocks
 
 const jsonMock = {
-  dark_mode: false,
   language: "en-US",
+  theme_mode: "DARK",
 };
 
 // endregion mocks
@@ -19,8 +21,8 @@ beforeEach(() => {
 
 function setup() {
   return new ConfigsModel({
-    darkMode: jsonMock.dark_mode,
     language: jsonMock.language,
+    themeMode: ThemeMode.DARK,
   });
 }
 
@@ -29,9 +31,5 @@ const spies = {};
 const mocks = {
   json: jsonMock,
 };
-
-beforeEach(() => {
-  jest.clearAllMocks();
-});
 
 export { mocks, setup, spies };

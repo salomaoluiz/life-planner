@@ -78,13 +78,15 @@ repository: src/data/repositories/repos/familyMember # CACHE_FAMILY_MEMBERS_DATA
 ```yaml
 family_screen:
   - hooks/useFamilies.ts: families + members + current user (getUserUseCase)
-  - models/FamilyMemberUIModel.ts: action matrix (REMOVE / CANCEL_INVITE / LEAVE / none), status label keys
-  - containers/FamilyMemberCard (+ hooks/useFamilyMemberCardViewModel)
+  - models/FamilyMemberUIModel.ts: action matrix (REMOVE / CANCEL_INVITE / none), status label keys, isCurrentUser / isOwner
+  - components/MemberRow: member row with owner/pending badges and row actions
 add_member_modal:
-  - modals/AddNewFamilyMember (+ hooks/useAddNewFamilyMemberViewModel): email validation, loading, inline 409, success feedback with the link
+  - modals/AddNewFamilyMember (View + hooks/useAddNewFamilyMemberViewModel): email validation, inline 409 under the field, result state in the same sheet (link built from the token; `Copy link` -> `Copied` for 2 s via @infrastructure/clipboard; `Share...` via @infrastructure/share where available; `Done` refetches)
 invite_screen:
-  - screens/Invite (+ hooks/useInviteViewModel, models/InviteUIModel): loading / ready / mismatch / notFound / expired / accept errors
+  - screens/Invite (+ hooks/useInviteViewModel, models/InviteUIModel): centered 480 layout; loading / ready / mismatch / notFound / expired / accept errors
 ```
+
+Infrastructure: `@infrastructure/clipboard` (`copyText`), `@infrastructure/share` (`isShareAvailable`, `shareText`).
 
 ## Security notes
 

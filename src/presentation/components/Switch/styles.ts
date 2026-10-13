@@ -13,13 +13,11 @@ function getStyles() {
     }),
     switchColors: {
       thumbColorFalse: theme.dark
-        ? theme.colors.onSurfaceVariant
+        ? theme.colors.textSecondary
         : theme.colors.surface,
-      thumbColorTrue: theme.colors.onPrimary,
-      trackColorFalse: theme.dark
-        ? theme.colors.outlineVariant
-        : theme.colors.outline,
-      trackColorTrue: theme.colors.primary,
+      thumbColorTrue: theme.colors.onAccent,
+      trackColorFalse: theme.dark ? theme.colors.border : theme.colors.border,
+      trackColorTrue: theme.colors.accent,
     },
     theme,
   };

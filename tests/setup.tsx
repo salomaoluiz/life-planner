@@ -12,6 +12,9 @@ load(process.cwd(), { silent: true });
 
 jest.mock("react-native-paper", () => {
   const View = jest.requireActual("react-native").View;
+  const { MD3DarkTheme, MD3LightTheme } = jest.requireActual(
+    "react-native-paper/src/styles/themes",
+  );
   const FAB = Object.assign(View, {
     Group: View,
   });
@@ -86,6 +89,8 @@ jest.mock("react-native-paper", () => {
     Icon: View,
     IconButton: View,
     List,
+    MD3DarkTheme,
+    MD3LightTheme,
     Menu: ({
       anchor,
       children,
@@ -158,14 +163,18 @@ jest.mock("@tanstack/react-query");
 jest.mock("@sentry/react-native");
 
 jest.mock("@presentation/theme", () => ({
+  useBreakpoint: jest.fn().mockReturnValue("compact"),
   useTheme: jest.fn().mockReturnValue({
     isDark: false,
-    setIsDark: jest.fn(),
+    setThemeMode: jest.fn(),
     theme: jest.requireActual("@presentation/theme/provider").lightTheme,
+    themeMode: jest.requireActual("@domain/entities/configs/ConfigsEntity")
+      .ThemeMode.SYSTEM,
   }),
 }));
 
 jest.mock("@presentation/i18n", () => ({
+  useLocaleTag: jest.fn().mockReturnValue("en-US"),
   useTranslation: jest.fn().mockReturnValue({
     t: jest.fn().mockImplementation((key, params) => {
       if (params) {
@@ -180,3 +189,24 @@ jest.mock("@presentation/i18n", () => ({
     }),
   }),
 }));
+
+jest.mock("react-native-reanimated", () => {
+  const { View } = jest.requireActual("react-native");
+  return {
+    __esModule: true,
+    default: { View },
+    ReduceMotion: { Always: "always", Never: "never", System: "system" },
+    useAnimatedStyle: (factory: () => object) => factory(),
+    useSharedValue: (initial: number) => {
+      const shared = {
+        set: (next: number) => {
+          shared.value = next;
+        },
+        value: initial,
+      };
+      return shared;
+    },
+    withSpring: (toValue: number | string) => toValue,
+    withTiming: (toValue: number) => toValue,
+  };
+});

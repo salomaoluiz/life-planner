@@ -1,3 +1,6 @@
+import { render } from "@tests";
+
+import Skeleton from "./";
 import { screen, setup } from "./mocks/index.mocks";
 
 it("SHOULD render Avatar Skeleton correctly", () => {
@@ -62,10 +65,22 @@ it("SHOULD render Box Skeleton with default border radius", () => {
   ]);
   expect(rect.props).toMatchObject({
     height: 12,
-    rx: 9,
-    ry: 9,
+    rx: 14,
+    ry: 14,
     width: 12,
     x: "0",
     y: "0",
   });
+});
+
+it("SHOULD render the ListItem preset with a tile and two lines", () => {
+  render(<Skeleton.ListItem testID="skeleton-item" />);
+  expect(screen.getByTestId("skeleton-item")).toBeTruthy();
+  expect(screen.getAllByTestId("skeleton-rect")).toHaveLength(3);
+});
+
+it("SHOULD render the Card preset", () => {
+  render(<Skeleton.Card testID="skeleton-card" />);
+  expect(screen.getByTestId("skeleton-card")).toBeTruthy();
+  expect(screen.getAllByTestId("skeleton-rect")).toHaveLength(1);
 });

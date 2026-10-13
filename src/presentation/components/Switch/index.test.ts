@@ -42,13 +42,13 @@ it("SHOULD have the correct style", () => {
   });
 });
 
-it("SHOULD use the primary color of the active theme", () => {
+it("SHOULD use the accent color of the active theme", () => {
   const restore = mockDarkTheme();
 
   setup();
 
   expect(screen.getByTestId("default-switch").props.color).toBe(
-    jest.requireMock("@presentation/theme").useTheme().theme.colors.primary,
+    jest.requireMock("@presentation/theme").useTheme().theme.colors.accent,
   );
   restore();
 });

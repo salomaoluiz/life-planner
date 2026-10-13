@@ -36,7 +36,7 @@ interface UpdateCategoryRepositoryParams {
   name?: string;
   owner?: OwnerType;
   ownerId?: string;
-  parentId?: string;
+  parentId?: null | string;
   type?: CategoryType;
 }
 

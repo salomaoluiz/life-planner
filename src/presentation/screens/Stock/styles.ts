@@ -2,20 +2,20 @@ import { StyleSheet } from "react-native";
 
 import { useTheme } from "@presentation/theme";
 
-function getStyles() {
+function useStyles() {
   const { theme } = useTheme();
 
-  return StyleSheet.create({
-    container: { backgroundColor: theme.colors.background, flex: 1 },
-    fabContainer: {
-      alignItems: "flex-end",
-      bottom: theme.sizes.spacing.large,
-      flexDirection: "row",
-      justifyContent: "flex-end",
-      position: "absolute",
-      right: theme.sizes.spacing.large,
-    },
-  });
+  return {
+    styles: StyleSheet.create({
+      header: { gap: theme.sizes.spacing.md },
+      noResults: {
+        alignItems: "center",
+        gap: theme.sizes.spacing.md,
+        paddingVertical: theme.sizes.spacing.xl,
+      },
+    }),
+    theme,
+  };
 }
 
-export default getStyles;
+export default useStyles;

@@ -1,110 +1,161 @@
-import { waitFor } from "@tests";
+import { fireEvent, render, screen } from "@tests";
 
-import { FamilyHasRecords, GenericError } from "@domain/entities/errors";
 import {
-  FeedbackActions,
-  FeedbackNavigationTypes,
-} from "@screens/Feedback/BusinessFeedback/actions/types";
-import { FeedbackType } from "@screens/Feedback/BusinessFeedback/types";
+  makeFamilyViewModel,
+  ownerViewer,
+} from "@screens/Family/mocks/index.mocks";
 
-import { mocks, setup, spies } from "./mocks/index.mocks";
+import useFamilyCardViewModel from "./hooks/useFamilyCardViewModel";
+import FamilyCard from "./index";
 
-it("SHOULD render the family card with the family and refetch callback", () => {
-  const { family, props } = setup();
+jest.mock("./hooks/useFamilyCardViewModel");
 
-  expect(props.family).toBe(family);
-  expect(props.refetchFamilies).toBe(mocks.refetchFamilies);
+const memberViewer = { isFamilyOwner: false, userId: "user-2" };
+
+const spies = { useViewModel: jest.mocked(useFamilyCardViewModel) };
+
+function makeVm(
+  overrides: Partial<ReturnType<typeof useFamilyCardViewModel>> = {},
+) {
+  return {
+    confirm: undefined,
+    confirmCopy: undefined,
+    isBusy: false,
+    menu: undefined,
+    notice: undefined,
+    onCancelConfirm: jest.fn(),
+    onCloseMenu: jest.fn(),
+    onCloseNotice: jest.fn(),
+    onConfirm: jest.fn(),
+    onFamilyOptions: jest.fn(),
+    onInviteMember: jest.fn(),
+    onMemberOptions: jest.fn(),
+    onMenuAction: jest.fn(),
+    ...overrides,
+  } as ReturnType<typeof useFamilyCardViewModel>;
+}
+
+function setup(options?: {
+  expanded?: boolean;
+  family?: ReturnType<typeof makeFamilyViewModel>;
+  vm?: Partial<ReturnType<typeof useFamilyCardViewModel>>;
+}) {
+  const vm = makeVm(options?.vm);
+  const onToggle = jest.fn();
+  spies.useViewModel.mockReturnValue(vm);
+
+  render(
+    <FamilyCard
+      expanded={options?.expanded ?? true}
+      family={options?.family ?? makeFamilyViewModel(ownerViewer)}
+      onToggle={onToggle}
+    />,
+  );
+
+  return { onToggle, vm };
+}
+
+it("SHOULD show only the header WHEN collapsed", () => {
+  setup({ expanded: false });
+
+  expect(screen.getByTestId("family-card-toggle-family-1")).toBeOnTheScreen();
+  expect(screen.queryByTestId("member-row-member-2")).toBeNull();
+  expect(screen.queryByTestId("invite-member-family-1")).toBeNull();
 });
 
-it("SHOULD configure the delete mutation with the use case", () => {
-  setup();
+it("SHOULD show rows, badges, options and invite WHEN expanded as owner", () => {
+  const { vm } = setup();
 
-  expect(spies.useMutation).toHaveBeenCalledWith({
-    cacheKey: ["delete_family"],
-    fetch: mocks.useCases.deleteFamilyUseCase.execute,
+  expect(screen.getByTestId("member-row-member-1")).toBeOnTheScreen();
+  expect(screen.getByTestId("member-row-member-2")).toBeOnTheScreen();
+  expect(screen.getByTestId("member-row-member-3")).toBeOnTheScreen();
+  expect(screen.getByTestId("member-row-member-1-badge")).toBeOnTheScreen();
+  expect(screen.queryByTestId("member-row-member-1-options")).toBeNull();
+  expect(screen.getByTestId("member-row-member-2-options")).toBeOnTheScreen();
+  expect(screen.getByTestId("member-row-member-3-options")).toBeOnTheScreen();
+
+  fireEvent.press(screen.getByTestId("invite-member-family-1"));
+
+  expect(vm.onInviteMember).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD hide row options and invite BUT keep the header options FOR a member", () => {
+  const { vm } = setup({ family: makeFamilyViewModel(memberViewer) });
+
+  expect(screen.queryByTestId("member-row-member-2-options")).toBeNull();
+  expect(screen.queryByTestId("member-row-member-3-options")).toBeNull();
+  expect(screen.queryByTestId("invite-member-family-1")).toBeNull();
+
+  fireEvent.press(screen.getByTestId("family-card-options-family-1"));
+
+  expect(vm.onFamilyOptions).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD hide the header options FOR a member without own row", () => {
+  setup({
+    family: makeFamilyViewModel({ isFamilyOwner: false, userId: "user-9" }),
   });
+
+  expect(screen.queryByTestId("family-card-options-family-1")).toBeNull();
 });
 
-it("SHOULD open the add member modal with the family id", () => {
-  const { props } = setup();
+it("SHOULD call onToggle WHEN the header is pressed", () => {
+  const { onToggle } = setup();
 
-  props.onAddNewFamilyMember();
+  fireEvent.press(screen.getByTestId("family-card-toggle-family-1"));
 
-  expect(spies.push).toHaveBeenCalledWith({
-    params: { familyId: "family-1" },
-    pathname: "/(app)/(modals)/family/add_new_family_member",
+  expect(onToggle).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD run the menu action FROM the action sheet", () => {
+  const { vm } = setup({
+    vm: {
+      menu: {
+        actionLabelKey: "family.delete.confirm",
+        kind: "FAMILY",
+        subtitle: "Test Family",
+        titleKey: "family.card.options",
+      },
+    },
   });
+
+  fireEvent.press(screen.getByTestId("family-menu-family-1-action"));
+
+  expect(vm.onMenuAction).toHaveBeenCalledTimes(1);
 });
 
-it("SHOULD delete the family WHEN onDeleteFamily is called", async () => {
-  const { mutate, props } = setup();
-
-  await props.onDeleteFamily();
-
-  expect(mutate).toHaveBeenCalledWith({ id: "family-1" });
-});
-
-it("SHOULD refetch families WHEN the delete succeeded", () => {
-  setup("success");
-
-  expect(mocks.refetchFamilies).toHaveBeenCalledTimes(1);
-});
-
-it.each(["idle", "error"] as const)(
-  "SHOULD NOT refetch families WHEN the delete status is %s",
-  (status) => {
-    setup(status);
-
-    expect(mocks.refetchFamilies).not.toHaveBeenCalled();
-  },
-);
-
-it("SHOULD open the localized error feedback WHEN the delete is blocked (409)", async () => {
-  setup("error", new FamilyHasRecords());
-
-  await waitFor(() => expect(spies.push).toHaveBeenCalledTimes(1));
-
-  const dismiss = {
-    action: FeedbackActions.NAVIGATION,
-    route: "/family",
-    type: FeedbackNavigationTypes.DISMISS_TO,
-  };
-  expect(spies.encode).toHaveBeenCalledWith({
-    closeButton: dismiss,
-    message: "family.deleteBlocked.message",
-    primaryButton: { ...dismiss, label: "family.deleteBlocked.close" },
-    title: "family.deleteBlocked.title",
-    type: FeedbackType.Error,
+it("SHOULD confirm through the dialog", () => {
+  const { vm } = setup({
+    vm: {
+      confirm: { kind: "DELETE_FAMILY" },
+      confirmCopy: {
+        confirmLabelKey: "family.delete.confirm",
+        messageKey: "family.delete.message",
+        params: { name: "Test Family" },
+        titleKey: "family.delete.title",
+      },
+    },
   });
-  expect(spies.push).toHaveBeenCalledWith({
-    params: { feedback: "encoded-feedback" },
-    pathname: "/business_feedback",
-  });
+
+  fireEvent.press(screen.getByTestId("family-confirm-family-1-confirm"));
+
+  expect(vm.onConfirm).toHaveBeenCalledTimes(1);
 });
 
-it("SHOULD keep the family in the list (no refetch) WHEN the delete is blocked", async () => {
-  setup("error", new FamilyHasRecords());
+it("SHOULD show the blocked notice AND close it with OK", () => {
+  const { vm } = setup({ vm: { notice: "DELETE_BLOCKED" } });
 
-  await waitFor(() => expect(spies.push).toHaveBeenCalled());
+  expect(screen.getByText("family.deleteBlocked.title")).toBeOnTheScreen();
 
-  expect(mocks.refetchFamilies).not.toHaveBeenCalled();
+  fireEvent.press(screen.getByTestId("family-notice-family-1-ok"));
+
+  expect(vm.onCloseNotice).toHaveBeenCalledTimes(1);
 });
 
-it("SHOULD NOT open the feedback WHEN the delete fails with another error", () => {
-  setup("error", new GenericError());
+it("SHOULD title the current user row with the You key", () => {
+  setup({ family: makeFamilyViewModel(memberViewer) });
 
-  expect(spies.push).not.toHaveBeenCalled();
-  expect(spies.encode).not.toHaveBeenCalled();
-});
-
-it("SHOULD NOT open the feedback WHEN there is no error", () => {
-  setup();
-
-  expect(spies.push).not.toHaveBeenCalled();
-});
-
-it("SHOULD pass the translated add-member label to the card", () => {
-  const { props } = setup();
-
-  expect(props.addMemberLabel).toBe("family.member.addButton");
+  expect(
+    screen.UNSAFE_getByProps({ testID: "member-row-member-2" }).props.title,
+  ).toBe("family.card.you");
 });

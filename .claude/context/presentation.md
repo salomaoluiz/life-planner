@@ -41,7 +41,7 @@ screens/<Area>/<Screen>/
 `index.web.tsx` variants (Metro picks them automatically) reuse the same ViewModel hook; only the rendering differs.
 Register the screen in `screens/index.tsx`.
 
-> **Legacy code:** many screens still have logic in `index.tsx`, `containers/*/hooks/index.tsx` (`useListItem`) and classes named `*ViewModel` (`FinancialAccountViewModel`). Closest to the target: `Family` (`useFamilies` + `index.tsx`). Write new code with this pattern. When you touch a legacy screen, migrate it: move the logic into `use<Name>ViewModel` and rename the classes to `*UIModel`.
+> **Legacy code:** many screens still have logic in `index.tsx`, `containers/*/hooks/index.tsx` (`useListItem`) and classes named `*ViewModel` (`FamilyViewModel`). Closest to the target: `Family` (`useFamilies` + `index.tsx`). Write new code with this pattern. When you touch a legacy screen, migrate it: move the logic into `use<Name>ViewModel` and rename the classes to `*UIModel`.
 
 ## ViewModel hook
 
@@ -114,8 +114,7 @@ Rules:
 function FinancialAccounts() {
   const { styles } = useStyles();
   const { t } = useTranslation();
-  const { accounts, errorMessage, isLoading, onAddPress, refetch } =
-    useAccountsViewModel();
+  const { accounts, errorMessage, isLoading, refetch } = useAccountsViewModel();
 
   function renderItem({ item }: { item: AccountUIModel }) {
     return <ListItem item={item} refetch={refetch} />;
@@ -128,23 +127,14 @@ function FinancialAccounts() {
     return <Text.Headline value={errorMessage} />;
   }
   return (
-    <>
-      <FlashList
-        data={accounts}
-        estimatedItemSize={60}
-        renderItem={renderItem}
-      />
-      <View style={styles.fabContainer}>
-        <Fab icon={"plus"} onPress={onAddPress} />
-      </View>
-    </>
+    <FlashList data={accounts} estimatedItemSize={60} renderItem={renderItem} />
   );
 }
 ```
 
 - Only `useStyles()`, `useTranslation()`, `useTheme()` and its own ViewModel hook. Local render helpers like `renderItem` are fine.
 - Branch order: loading → error → content.
-- Lists use `FlashList` with `estimatedItemSize`. The add button is `<Fab icon="plus" />` in an absolutely positioned container.
+- Lists use `FlashList` with `estimatedItemSize`. There is no FAB: add actions live in quick add (`/quick_add`) or in the screen.
 - Shared UI comes only from `@components` (see `components.md`).
 
 ## UI Model (`models/<Name>UIModel.ts`)
@@ -212,6 +202,10 @@ The View renders the following and calls `t()` on every key:
 - A footer `Card` with `Button.Text` (cancel, in the error color) and `Button.Filled` (save/add).
 
 A modal also needs a route file and a `Stack.Screen` entry (see `routing.md`).
+
+## Composition with the kit
+
+Screens compose kit components (`components.md`) and never style visual details themselves (no color literals, no Paper imports; lint-enforced outside the temporary migration allow-list). Forms and selects open in a `BottomSheet`. Legacy snippets above that mention `Button.Text`/`Button.Filled`/`Card customStyles` describe unmigrated screens; new code uses `Button.Secondary`/`Button.Primary` and `BottomSheet`.
 
 ## Testing (see `testing.md`)
 

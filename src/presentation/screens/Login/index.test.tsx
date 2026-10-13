@@ -77,11 +77,12 @@ it("SHOULD submit and navigate through the buttons", () => {
 it("SHOULD show loading and disable everything WHEN submitting", () => {
   setup({ isSubmitting: true });
 
-  expect(screen.getByTestId("login-submit").props).toMatchObject({
-    disabled: true,
-    loading: true,
-  });
-  expect(screen.getByTestId("login-go-to-signup").props.disabled).toBe(true);
+  expect(screen.getByTestId("login-submit").props.accessibilityState).toEqual(
+    expect.objectContaining({ busy: true, disabled: true }),
+  );
+  expect(
+    screen.getByTestId("login-go-to-signup").props.accessibilityState.disabled,
+  ).toBe(true);
   expect(screen.getByTestId("login-email").props.disabled).toBe(true);
   expect(screen.getByTestId("login-password").props.disabled).toBe(true);
 });

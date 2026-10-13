@@ -1,72 +1,61 @@
-import { Text as PaperText } from "react-native-paper";
+import { Text as RNText } from "react-native";
 
-import { getStyles } from "./styles";
+import { useTextStyle } from "./styles";
 import { TextMode, TextProps } from "./types";
 
-/*
-    @fontSize - 16
- */
 function Body(props: TextProps) {
   return <TextBase mode={TextMode.Body} {...props} />;
 }
 
-/*
-    @fontSize - 12
- */
+function BodyStrong(props: TextProps) {
+  return <TextBase mode={TextMode.BodyStrong} {...props} />;
+}
 function Caption(props: TextProps) {
   return <TextBase mode={TextMode.Caption} {...props} />;
 }
-
-/*
-    @fontSize - 48
- */
 function Display(props: TextProps) {
   return <TextBase mode={TextMode.Display} {...props} />;
 }
-
-/*
-    @fontSize - 24
- */
-function Headline(props: TextProps) {
-  return <TextBase mode={TextMode.Headline} {...props} />;
+function Heading(props: TextProps) {
+  return <TextBase mode={TextMode.Heading} {...props} />;
 }
-
-/*
-    @fontSize - 14
- */
-function Label(props: TextProps) {
-  return <TextBase mode={TextMode.Label} {...props} />;
+function Overline(props: TextProps) {
+  return <TextBase mode={TextMode.Overline} {...props} />;
 }
-
+function Tab(props: TextProps) {
+  return <TextBase mode={TextMode.Tab} {...props} />;
+}
 function TextBase(props: TextProps & { mode: TextMode }) {
-  const { mode, testID, value } = props;
+  const style = useTextStyle(props.mode, props);
 
-  const styles = getStyles(props);
   return (
-    <PaperText
+    <RNText
+      accessibilityLiveRegion={props.accessibilityLiveRegion}
+      accessibilityRole={props.accessibilityRole}
       numberOfLines={props.numberOfLines}
-      style={styles[mode]}
-      testID={testID}
-      variant={mode}
+      style={style}
+      testID={props.testID}
     >
-      {value}
-    </PaperText>
+      {props.value}
+    </RNText>
   );
 }
-
-/*
-    @fontSize - 20
- */
 function Title(props: TextProps) {
   return <TextBase mode={TextMode.Title} {...props} />;
 }
 
 const Text = {
   Body,
+  BodyStrong,
   Caption,
   Display,
-  Headline,
-  Label,
+  Heading,
+  /** Legacy, kept until spec 014: use Text.Heading (removed in spec 014) */
+  Headline: Heading,
+  /** Legacy, kept until spec 014: use Text.Caption (removed in spec 014) */
+  Label: Caption,
+  Overline,
+  Tab,
   Title,
 };
 

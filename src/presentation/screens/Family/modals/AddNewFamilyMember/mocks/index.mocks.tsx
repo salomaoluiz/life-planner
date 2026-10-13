@@ -1,47 +1,44 @@
-import { Pressable } from "react-native";
-
 import { fireEvent, render, screen } from "@tests";
 
 import AddNewFamilyMemberModal from "../";
 import useAddNewFamilyMemberViewModel from "../hooks/useAddNewFamilyMemberViewModel";
 
 jest.mock("../hooks/useAddNewFamilyMemberViewModel");
-jest.mock("@presentation/i18n/useTranslation", () => ({
-  __esModule: true,
-  default: () => ({ t: (key: string) => key }),
-}));
 
-// region mocks
-const viewModel = {
-  alreadyExistsVisible: false,
-  email: "",
-  emailErrorKey: undefined as string | undefined,
-  isSubmitting: false,
-  onCancel: jest.fn(),
+const spies = {
   onChangeEmail: jest.fn(),
+  onClose: jest.fn(),
+  onCopy: jest.fn(),
+  onDone: jest.fn(),
+  onShare: jest.fn(),
   onSubmit: jest.fn(),
+  useViewModel: jest.mocked(useAddNewFamilyMemberViewModel),
 };
-// endregion mocks
 
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
-function press(label: string) {
-  fireEvent.press(screen.UNSAFE_getAllByProps({ label })[0]);
-}
-
-function setup(overrides?: Partial<typeof viewModel>) {
-  const vm = { ...viewModel, ...overrides };
-  jest.mocked(useAddNewFamilyMemberViewModel).mockReturnValue(vm as never);
+function setup(
+  overrides: Partial<ReturnType<typeof useAddNewFamilyMemberViewModel>> = {},
+) {
+  spies.useViewModel.mockReturnValue({
+    copied: false,
+    email: "",
+    emailErrorKey: undefined,
+    familyName: "Test Family",
+    hasGenericError: false,
+    isSubmitting: false,
+    link: undefined,
+    onChangeEmail: spies.onChangeEmail,
+    onClose: spies.onClose,
+    onCopy: spies.onCopy,
+    onDone: spies.onDone,
+    onShare: spies.onShare,
+    onSubmit: spies.onSubmit,
+    resultEmail: "",
+    shareAvailable: true,
+    ...overrides,
+  });
 
   render(<AddNewFamilyMemberModal />);
-
-  return vm;
 }
 
-const mocks = { Pressable };
-
-export { mocks, press, setup };
 export { hasText } from "@tests";
-export { fireEvent, screen };
+export { fireEvent, screen, setup, spies };

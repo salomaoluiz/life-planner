@@ -1,7 +1,6 @@
 import { render } from "@tests";
 
 import { Button, ButtonProps } from "@components";
-import { ButtonMode } from "@components/Button";
 
 const defaultProps = {
   label: "Button Label",
@@ -9,21 +8,15 @@ const defaultProps = {
   testID: "default-button",
 };
 
-function renderComponent(props?: Partial<ButtonProps & { mode: ButtonMode }>) {
-  switch (props?.mode) {
-    case ButtonMode.Filled:
-      return <Button.Filled {...defaultProps} {...props} />;
-    case ButtonMode.Outlined:
-      return <Button.Outlined {...defaultProps} {...props} />;
-    case ButtonMode.Text:
-      return <Button.Text {...defaultProps} {...props} />;
-    default:
-      throw new Error("Invalid mode");
-  }
+type Variant = "Destructive" | "Ghost" | "Primary" | "Secondary";
+
+function setup(props?: Partial<ButtonProps> & { variant?: Variant }) {
+  const Component = Button[props?.variant ?? "Primary"];
+  render(<Component {...defaultProps} {...props} />);
 }
 
-function setup(props?: Partial<ButtonProps & { mode: ButtonMode }>) {
-  render(renderComponent({ mode: ButtonMode.Filled, ...props }));
-}
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 export { defaultProps, setup };

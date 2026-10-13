@@ -99,39 +99,47 @@ datasources:
 screens:
   Family:
     path: src/presentation/screens/Family/index.tsx
-
-components:
-  - name: FamilyCard
-    path: src/presentation/screens/Family/components/FamilyCard/index.tsx
-  - name: DeleteFamily
-    path: src/presentation/screens/Family/components/DeleteFamily/index.tsx
-  - name: ItemSeparator
-    path: src/presentation/screens/Family/components/ItemSeparator/index.tsx
-  - name: AddNewFamilyMember
-    path: src/presentation/screens/Family/components/AddNewFamilyMember/index.tsx
-
+    note: View; own ScreenHeader (new-family IconButton), list of cards, loading / error / empty states
+hooks:
+  - name: useFamilyViewModel
+    path: src/presentation/screens/Family/hooks/useFamilyViewModel.ts
+    note: expansion state (first family expanded, a newly created family expanded) and screen state
+  - name: useFamilies
+    path: src/presentation/screens/Family/hooks/useFamilies.ts
+    note: families + members + current user (viewer)
 containers:
   - name: FamilyCard
     path: src/presentation/screens/Family/containers/FamilyCard/index.tsx
-    note: opens /business_feedback (type Error, copy family.deleteBlocked.*) when delete raises FamilyHasRecords
-  - name: NewFamilyButton
-    path: src/presentation/screens/Family/containers/NewFamilyButton/index.tsx
-  - name: FamilyMemberCard
-    path: src/presentation/screens/Family/containers/FamilyMemberCard/index.tsx
-
+    note: View + hooks/useFamilyCardViewModel (menu / confirm / notice state, delete family, leave, FamilyHasRecords notice)
+components:
+  - name: MemberRow
+    path: src/presentation/screens/Family/components/MemberRow/index.tsx
+  - name: ActionSheet
+    path: src/presentation/screens/Family/components/ActionSheet/index.tsx
+  - name: NoticeSheet
+    path: src/presentation/screens/Family/components/NoticeSheet/index.tsx
 modals:
   - name: AddNewFamily
     path: src/presentation/screens/Family/modals/AddNewFamily/index.tsx
+    note: useAddNewFamilyViewModel, name 1-50 chars, counter from 40
   - name: AddNewFamilyMember
     path: src/presentation/screens/Family/modals/AddNewFamilyMember/index.tsx
-
-hooks:
-  - name: useFamilies
-    path: src/presentation/screens/Family/hooks/useFamilies.ts
-
-view_models:
+    note: see familyMember.md
+models:
   - name: FamilyViewModel
     path: src/presentation/screens/Family/models/FamilyViewModel.ts
-  - name: FamilyMembersViewModel
-    path: src/presentation/screens/Family/models/FamilyMembersViewModel.ts
+  - name: FamilyMemberUIModel
+    path: src/presentation/screens/Family/models/FamilyMemberUIModel.ts
+  - name: FamilyConfirm
+    path: src/presentation/screens/Family/models/FamilyConfirm.ts
+utils:
+  - src/presentation/screens/Family/utils/expansion.ts
+  - src/presentation/screens/Family/utils/sortFamilies.ts
+  - src/presentation/screens/Family/utils/inviteLink.ts
 ```
+
+Notes:
+
+- Expansion state lives in `useFamilyViewModel`; the owner/member action matrix lives in the UI models.
+- After any destructive success (delete family, leave, remove member, cancel invite) `invalidateFetcherData()` refetches families, members and owners.
+- The Family screen folder is out of the lint migration allow-list (spec 012): kit components only, no style typography/color keys.

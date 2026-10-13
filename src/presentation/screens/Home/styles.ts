@@ -2,16 +2,21 @@ import { StyleSheet } from "react-native";
 
 import { useTheme } from "@presentation/theme";
 
-function getStyles() {
+function useStyles() {
   const { theme } = useTheme();
 
-  return StyleSheet.create({
-    container: {
-      backgroundColor: theme.colors.background,
-      flex: 1,
-      padding: theme.sizes.spacing.large,
-    },
-  });
+  return {
+    styles: StyleSheet.create({
+      column: { flex: 1 },
+      split: {
+        alignItems: "flex-start",
+        flexDirection: "row",
+        gap: theme.sizes.spacing.lg,
+      },
+      stack: { gap: theme.sizes.spacing.lg },
+    }),
+    theme,
+  };
 }
 
-export default getStyles;
+export default useStyles;

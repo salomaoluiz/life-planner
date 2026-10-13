@@ -1,6 +1,7 @@
 interface IStockModel {
   barcode?: string;
   brand?: string;
+  createdAt?: Date;
   description: string;
   expirationDate?: Date;
   id: string;
@@ -16,6 +17,7 @@ interface IStockModel {
 class StockModel implements IStockModel {
   barcode?: string;
   brand?: string;
+  createdAt?: Date;
   description: string;
   expirationDate?: Date;
   id: string;
@@ -30,6 +32,7 @@ class StockModel implements IStockModel {
   constructor(params: IStockModel) {
     this.barcode = params.barcode;
     this.brand = params.brand;
+    this.createdAt = params.createdAt;
     this.expirationDate = params.expirationDate;
     this.description = params.description;
     this.id = params.id;
@@ -47,6 +50,7 @@ class StockModel implements IStockModel {
     return new StockModel({
       barcode: optionalString(data.barcode),
       brand: optionalString(data.brand),
+      createdAt: optionalDate(data.createdAt),
       description: data.description as string,
       expirationDate: optionalDate(data.expirationDate),
       id: data.id as string,
@@ -64,6 +68,7 @@ class StockModel implements IStockModel {
     return {
       barcode: this.barcode ?? null,
       brand: this.brand ?? null,
+      createdAt: this.createdAt?.toISOString() ?? null,
       description: this.description,
       expirationDate: this.expirationDate?.toISOString() ?? null,
       id: this.id,

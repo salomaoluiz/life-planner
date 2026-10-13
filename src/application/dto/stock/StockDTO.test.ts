@@ -1,4 +1,5 @@
 import StockDTO from "@application/dto/stock/StockDTO";
+import StockEntity from "@domain/entities/stock/StockEntity";
 
 import { mocks, setupFromEntity } from "./mocks/StockDTO.mocks";
 
@@ -21,4 +22,14 @@ it("SHOULD render correctly from entity", () => {
       unit: mocks.defaultProps.unit,
     }),
   );
+});
+
+it("SHOULD fromEntity copy createdAt", () => {
+  const createdAt = new Date("2023-01-02");
+  const entity = new StockEntity({
+    ...mocks.defaultProps,
+    createdAt,
+  });
+
+  expect(setupFromEntity(entity).createdAt).toBe(createdAt);
 });

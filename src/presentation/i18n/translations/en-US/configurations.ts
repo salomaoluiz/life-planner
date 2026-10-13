@@ -1,14 +1,17 @@
 const configurations = {
   configs: {
-    darkMode: {
-      title: "Dark mode",
-    },
     language: {
       title: "Language",
     },
+    theme: {
+      dark: "Dark",
+      light: "Light",
+      system: "System",
+      title: "Theme",
+    },
   },
   logout: "Logout",
-  routeTitle: "Configurations",
+  routeTitle: "Settings",
   title: "Configurations",
 };
 
