@@ -1,101 +1,146 @@
-import { useIsFocused } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
-import { router, useNavigation } from "expo-router";
-import { useEffect } from "react";
-import { ScrollView, View } from "react-native";
+import { View } from "react-native";
 
-import { useCases } from "@application/useCases";
-import { Button, Text } from "@components";
-import { useQuery } from "@infrastructure/fetcher";
-import useTranslation from "@presentation/i18n/useTranslation";
-import RefetchCache from "@screens/Financial/Transactions/containers/RefetchCache";
+import {
+  AmountText,
+  ChipGroup,
+  EmptyState,
+  ErrorState,
+  GroupHeader,
+  Icon,
+  IconButton,
+  IconTile,
+  ListItem,
+  Text,
+} from "@components";
+import Skeleton from "@components/Skeleton";
+import { useKitTheme } from "@components/utils/useKitTheme";
+import { useTranslation } from "@presentation/i18n";
+import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
-import ListItem from "./containers/ListItem";
-import FinancialAccountViewModel from "./models/FinancialAccountViewModel";
-import getStyles from "./styles";
+import { useAccountsViewModel } from "./hooks";
+import { AccountEntry } from "./models/accountList";
+import useStyles from "./styles";
+
+const SKELETON_ROWS = [0, 1, 2, 3, 4, 5];
 
 function FinancialAccounts() {
-  const { styles } = getStyles();
-  const isFocused = useIsFocused();
-  const navigation = useNavigation();
+  const { styles } = useStyles();
   const { t } = useTranslation();
+  const { sizes } = useKitTheme();
+  const vm = useAccountsViewModel();
 
-  const { data, error, isFetching, refetch } = useQuery<
-    FinancialAccountViewModel[]
-  >({
-    cacheKey: [useCases.getFinancialAccountsUseCase.uniqueName],
-    fetch: async () => {
-      const owners = await useCases.getOwnersUseCase.execute();
-      const ownerIds = owners.map((o) => o.id);
-
-      const accountDTOs =
-        await useCases.getFinancialAccountsUseCase.execute(ownerIds);
-
-      return accountDTOs.map(
-        (dto) => new FinancialAccountViewModel(dto, owners),
-      );
-    },
-  });
-
-  useEffect(() => {
-    if (!isFetching) {
-      navigation.setOptions({
-        headerRight: () => <RefetchCache refetchQuery={refetch} />,
-      });
-    }
-  }, [navigation, isFetching, refetch]);
-
-  useEffect(() => {
-    if (isFocused) {
-      refetch();
-    }
-  }, [isFocused, refetch]);
-
-  if (isFetching) {
-    return (
-      <View style={styles.container}>
-        <Text.Title value={t("financial.accounts.loading")} />
+  const toolbar = (
+    <View style={styles.toolbar}>
+      <View style={styles.totalRow}>
+        <View style={styles.totalColumn}>
+          <Text.Caption
+            tone={"secondary"}
+            value={t("financial.accounts.total")}
+          />
+          <AmountText
+            size={"heading"}
+            testID={"accounts-total"}
+            {...vm.totalAmount}
+          />
+        </View>
+        <IconButton
+          accessibilityLabel={t("financial.accounts.new")}
+          name={"plus"}
+          onPress={vm.onAddPress}
+        />
       </View>
+      <ChipGroup
+        layout={"scroll"}
+        mode={"single"}
+        onChange={vm.onOwnerFilterChange}
+        options={translateChoices(vm.ownerChoices, t)}
+        value={vm.ownerFilter}
+      />
+    </View>
+  );
+
+  function renderItem({ item }: { item: AccountEntry }) {
+    if (item.kind === "section") {
+      return <GroupHeader title={t(item.titleKey)} />;
+    }
+
+    if (item.kind === "archivedToggle") {
+      return (
+        <ListItem
+          onPress={vm.onArchivedToggle}
+          testID={"archived-toggle"}
+          title={t("financial.accounts.archived", { count: item.count })}
+          trailing={
+            <Icon
+              name={item.expanded ? "chevron-up" : "chevron-down"}
+              size={sizes.iconMd}
+            />
+          }
+        />
+      );
+    }
+
+    const { account } = item;
+    let tone: "accent" | "neutral" = "accent";
+    if (account.isArchived) {
+      tone = "neutral";
+    }
+
+    return (
+      <ListItem
+        leading={<IconTile name={account.icon} tone={tone} />}
+        onPress={() => vm.onRowPress(account.id)}
+        subtitle={account.ownerName}
+        testID={`account-row-${account.id}`}
+        title={account.name}
+        trailing={<AmountText {...account.balanceAmount} />}
+      />
     );
   }
 
-  function renderItem({ item }: { item: FinancialAccountViewModel }) {
-    return <ListItem item={item} refetch={refetch} />;
-  }
-
-  function onAddAccountPress() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    router.push("/financial/account/add_new_account" as any);
-  }
-
-  if (error) {
+  if (vm.errorMessage) {
     return (
-      <View style={styles.container}>
-        <Text.Headline value={`Error ${error.message}`} />
+      <ErrorState
+        message={vm.errorMessage}
+        onRetry={vm.onRetry}
+        retryLabel={t("common.actions.tryAgain")}
+      />
+    );
+  }
+
+  if (vm.isLoading) {
+    return (
+      <View style={styles.root}>
+        {toolbar}
+        {SKELETON_ROWS.map((row) => (
+          <Skeleton.ListItem key={row} testID={"accounts-skeleton"} />
+        ))}
       </View>
     );
   }
 
   return (
-    <>
-      <ScrollView style={styles.scrollView}>
-        <View style={styles.container}>
-          <Button.Primary
-            label={t("financial.accounts.addNewAccount")}
-            onPress={onAddAccountPress}
-            testID={"accounts-add-button"}
+    <View style={styles.root}>
+      <FlashList
+        data={vm.entries}
+        estimatedItemSize={64}
+        getItemType={(entry) => entry.kind}
+        keyExtractor={(entry) => entry.key}
+        ListEmptyComponent={
+          <EmptyState
+            actionLabel={t("financial.accounts.new")}
+            message={t("financial.accounts.emptyMessage")}
+            onAction={vm.onAddPress}
+            title={t("financial.accounts.emptyTitle")}
           />
-          <View style={styles.listContainer}>
-            <FlashList
-              contentContainerStyle={styles.listContentContainer}
-              data={data}
-              estimatedItemSize={60}
-              renderItem={renderItem}
-            />
-          </View>
-        </View>
-      </ScrollView>
-    </>
+        }
+        ListHeaderComponent={toolbar}
+        onRefresh={vm.onRefresh}
+        refreshing={vm.isRefreshing}
+        renderItem={renderItem}
+      />
+    </View>
   );
 }
 
