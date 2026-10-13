@@ -3,8 +3,11 @@ import { StyleSheet } from "react-native";
 import { fireEvent, screen } from "@tests";
 
 import { lightTheme } from "@presentation/theme/provider";
+import { isWeb } from "@utils/platform";
 
 import { defaultProps, setup } from "./mocks/index.mocks";
+
+jest.mock("@utils/platform", () => ({ isWeb: jest.fn() }));
 
 function frame() {
   return screen.getByTestId("field-frame");
@@ -105,4 +108,18 @@ it("SHOULD forward keyboard and submit props", () => {
   expect(input().props.keyboardType).toBe("email-address");
   expect(input().props.maxLength).toBe(5);
   expect(onSubmitEditing).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD hide the browser outline on web so only the frame border shows", () => {
+  jest.mocked(isWeb).mockReturnValue(true);
+  setup();
+  expect(StyleSheet.flatten(input().props.style)).toEqual(
+    expect.objectContaining({ outlineStyle: "none", outlineWidth: 0 }),
+  );
+});
+
+it("SHOULD NOT add outline styles on native", () => {
+  jest.mocked(isWeb).mockReturnValue(false);
+  setup();
+  expect(StyleSheet.flatten(input().props.style).outlineStyle).toBeUndefined();
 });
