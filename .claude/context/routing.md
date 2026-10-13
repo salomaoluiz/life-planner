@@ -6,8 +6,8 @@ Route files are **one-line re-exports** of screens; no logic in `app/`.
 app/
   _layout.tsx                    root Stack + ErrorBoundaries + GlobalProviders
   login.tsx, signup.tsx
-  (app)/_layout.tsx              redirects to /login when !useUser().logged; Stack of (tabs), (modals) and settings
-  (app)/settings.tsx             Config screen, pushed from the Home profile button (outside the tabs)
+  (app)/_layout.tsx              redirects to /login when !useUser().logged; Stack of (tabs) and (modals)
+  (app)/(tabs)/settings.tsx      Config screen, a hidden tab (`href: null`) so the rail/tab bar stay visible; opened from the profile button
   (app)/config.tsx               redirect to /settings (old URL)
   (app)/(tabs)/_layout.tsx       Tabs with custom tabBar (AppTabBar): index/index, financial, stock/index, family/index; backBehavior "initialRoute"; tabBarPosition "left" + rail on expanded (>= 1024 px)
   (app)/(tabs)/index/index.tsx   Home
