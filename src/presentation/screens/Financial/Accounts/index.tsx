@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { ScrollView, View } from "react-native";
 
 import { useCases } from "@application/useCases";
-import { Fab, Text } from "@components";
+import { Button, Text } from "@components";
 import { useQuery } from "@infrastructure/fetcher";
 import useTranslation from "@presentation/i18n/useTranslation";
 import RefetchCache from "@screens/Financial/Transactions/containers/RefetchCache";
@@ -80,6 +80,11 @@ function FinancialAccounts() {
     <>
       <ScrollView style={styles.scrollView}>
         <View style={styles.container}>
+          <Button.Primary
+            label={t("financial.accounts.addNewAccount")}
+            onPress={onAddAccountPress}
+            testID={"accounts-add-button"}
+          />
           <View style={styles.listContainer}>
             <FlashList
               contentContainerStyle={styles.listContentContainer}
@@ -90,9 +95,6 @@ function FinancialAccounts() {
           </View>
         </View>
       </ScrollView>
-      <View style={styles.fabContainer}>
-        <Fab icon={"plus"} onPress={onAddAccountPress} />
-      </View>
     </>
   );
 }

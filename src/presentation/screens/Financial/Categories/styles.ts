@@ -16,14 +16,6 @@ function getStyles() {
         paddingBottom: isWeb() ? theme.sizes.spacing.xxxl : undefined,
         paddingTop: isWeb() ? theme.sizes.spacing.xxxl : undefined,
       },
-      fabContainer: {
-        alignItems: "flex-end",
-        bottom: theme.sizes.spacing.xl,
-        flexDirection: "row",
-        justifyContent: "flex-end",
-        position: "absolute",
-        right: theme.sizes.spacing.xl,
-      },
       filterContainer: {
         alignSelf: "stretch",
         marginBottom: theme.sizes.spacing.sm,

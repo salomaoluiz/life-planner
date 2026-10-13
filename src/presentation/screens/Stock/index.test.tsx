@@ -51,14 +51,10 @@ it("SHOULD NOT refetch WHEN the screen is not focused", () => {
   expect(refetch).not.toHaveBeenCalled();
 });
 
-it("SHOULD navigate to the add item modal WHEN the FAB is pressed", () => {
+it("SHOULD NOT render an add button (adding lives in the quick-add tab button)", () => {
   setup();
 
-  fireEvent.press(screen.UNSAFE_getAllByProps({ icon: "plus" })[0]);
-
-  expect(spies.push).toHaveBeenCalledWith({
-    pathname: "/stock/add_new_stock_item",
-  });
+  expect(screen.UNSAFE_queryAllByProps({ icon: "plus" })).toHaveLength(0);
 });
 
 it.each([

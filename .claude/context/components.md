@@ -32,7 +32,12 @@ If you need a new 3rd-party UI element, **wrap it here first** (folder `Name/ind
 | `ScreenHeader`                                                      | page title row                                               | `title`, `subtitle?`, `overline?`, `actions?`                                                                                                                                    |
 | `BottomSheet`                                                       | form/select container (centered dialog on wide screens)      | `visible`, `onClose`, `title`, `closeLabel`, `subtitle?`, `footer?`, `presentation?: "inline"                                                                                    | "modal"`                                                                                                    |
 | `ConfirmDialog`                                                     | confirm/destructive prompt                                   | `visible`, `title`, `message`, `confirmLabel`, `cancelLabel`, `closeLabel`, `onConfirm`, `onCancel`, `loading?`                                                                  |
-| `Accordion.{Container,Item}, Menu, Fab, FabGroup`                   | unchanged (Fab is restyled by 009)                           | see their folders                                                                                                                                                                |
+| `Accordion.{Container,Item}, Menu`                                  | unchanged                                                    | see their folders                                                                                                                                                                |
+| `TabBar`                                                            | bottom tab bar with the centered quick-add button            | `activeRouteName`, `items: TabBarItem[]`, `onTabPress`, `onQuickAddPress`, `quickAddLabel`                                                                                       |
+| `QuickAddButton`                                                    | round add button                                             | `label`, `onPress`                                                                                                                                                               |
+| `NavigationRail`                                                    | side rail for expanded widths                                | `activeRouteName`, `items`, `appName`, `addLabel`, `onAddPress`, `profileLabel`, `onProfilePress`, `onTabPress`                                                                  |
+
+`TabBar`, `QuickAddButton` and `NavigationRail` are presentational; the container `AppTabBar` in `screens/Navigation` binds them to React Navigation.
 
 Screen-local reusable pieces already exist, check before creating: `@screens/Financial/Transactions/containers/RefetchCache` (header refresh), `ItemSeparator` (Transactions, Family).
 
@@ -50,7 +55,7 @@ Two lint rules apply to `src/presentation` (`eslint/rules/presentation-guardrail
 
 ## Deprecated adapters (FR 42)
 
-Kept only so unmigrated screens compile, marked with a "Legacy, kept until spec 014" comment (no `@deprecated`: it fails `no-deprecated` lint on every touching commit): `Text.Headline/Label`, `Text` props `bold/color/textAlign`, `Button.Filled/Outlined/Text` and `customStyles`, `TextInput`, `Picker`, `DatePicker`, `Avatar.Large/Regular/Small`, `Card customStyles`, `IconButton size/color`. `Fab`/`FabGroup` are restyled by 009. Do not use them in new code; 009-014 remove them as screens migrate.
+Kept only so unmigrated screens compile, marked with a "Legacy, kept until spec 014" comment (no `@deprecated`: it fails `no-deprecated` lint on every touching commit): `Text.Headline/Label`, `Text` props `bold/color/textAlign`, `Button.Filled/Outlined/Text` and `customStyles`, `TextInput`, `Picker`, `DatePicker`, `Avatar.Large/Regular/Small`, `Card customStyles`, `IconButton size/color`. `Fab`/`FabGroup` were removed by 009. 010-014 remove them as screens migrate.
 
 ## Gallery
 

@@ -119,10 +119,10 @@ it("SHOULD NOT refetch WHEN the screen is not focused", () => {
   expect(refetch).not.toHaveBeenCalled();
 });
 
-it("SHOULD navigate to the new category modal WHEN the FAB is pressed", () => {
+it("SHOULD open the add-category modal WHEN the add button is pressed", () => {
   setup();
 
-  fireEvent.press(screen.UNSAFE_getAllByProps({ icon: "plus" })[0]);
+  fireEvent.press(screen.getByTestId("categories-add-button"));
 
   expect(spies.push).toHaveBeenCalledWith(
     "/financial/category/add_new_category",
