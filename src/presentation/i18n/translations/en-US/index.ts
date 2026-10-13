@@ -9,6 +9,7 @@ import invite from "./invite";
 import login from "./login";
 import navigation from "./navigation";
 import signup from "./signup";
+import stock from "./stock";
 
 const enUS = {
   translation: {
@@ -23,6 +24,7 @@ const enUS = {
     login,
     navigation,
     signup,
+    stock,
   },
 };
 

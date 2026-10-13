@@ -1,248 +1,182 @@
-import { router } from "expo-router";
-import { useEffect, useMemo } from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { View } from "react-native";
 
-import { useCases } from "@application/useCases";
 import {
+  BottomSheet,
   Button,
-  Card,
-  DatePicker,
-  HelperText,
-  Picker,
-  Spacer,
+  ChipGroup,
+  ConfirmDialog,
+  DateField,
+  SelectField,
   Text,
-  TextInput,
+  TextField,
 } from "@components";
-import { useMutation, useQuery } from "@infrastructure/fetcher";
-import NewStockItemViewModel from "@screens/Stock/modals/NewStockItemModal/models/NewStockItemViewModel";
+import Skeleton from "@components/Skeleton";
+import { useTranslation } from "@presentation/i18n";
 
-import useForm from "./hooks/useForm";
-import getStyles from "./styles";
+import { useNewStockItemViewModel } from "./hooks";
+import useStyles from "./styles";
 
 function NewStockItemModal() {
-  const { styles, theme } = getStyles();
-  const owners = useQuery({
-    cacheKey: [useCases.getOwnersUseCase.uniqueName],
-    fetch: useCases.getOwnersUseCase.execute,
-  });
-  const { errors, fields, validateForm } = useForm();
+  const { styles } = useStyles();
+  const { t } = useTranslation();
+  const vm = useNewStockItemViewModel();
+  const { errors, model, values } = vm;
 
-  const addStock = useMutation({
-    cacheKey: [useCases.createStockItemUseCase.uniqueName],
-    fetch: useCases.createStockItemUseCase.execute,
-  });
+  const dateLabels = {
+    clearLabel: t("common.actions.clear"),
+    saveLabel: t("common.actions.save"),
+    todayLabel: t("common.date.today"),
+    yesterdayLabel: t("common.date.yesterday"),
+  };
 
-  const newStockItemModel = useMemo(
-    () =>
-      owners.data
-        ? new NewStockItemViewModel({
-            stockOwnersDTO: owners.data,
-          })
-        : null,
-    [owners.data],
-  );
-
-  useEffect(() => {
-    if (addStock.status === "success") {
-      router.back();
+  function onQuantityChange(value: string) {
+    if (/^\d*$/.test(value)) {
+      vm.setField("quantity", value);
     }
-  }, [addStock.status]);
-
-  if (owners.isFetching || !newStockItemModel) {
-    return (
-      <View>
-        <Text.Headline value={"Loading"} />
-      </View>
-    );
   }
 
-  function onCancel() {
-    router.back();
-  }
-
-  function onAdd() {
-    const params = validateForm(owners.data!);
-
-    if (params) {
-      addStock.mutate(params);
+  function onUnitChange(value: string) {
+    if (model?.isUnit(value)) {
+      vm.setField("unit", value);
     }
   }
 
   return (
-    <>
-      <Pressable onPress={onCancel} style={styles.backdrop} />
-      <Card customStyles={styles.container}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={styles.titleContainer}>
-            <Text.Headline value={"Add a new item to stock"} />
-          </View>
-          <Spacer direction={"vertical"} size={"md"} />
-          <View style={styles.lineContainer}>
-            <TextInput.Outlined
-              label={fields.description.label}
-              onChangeText={fields.description.onChange}
-              value={fields.description.value}
-            />
-          </View>
-          <HelperText
-            label={errors["description"]}
-            type={"error"}
-            visible={!!errors["description"]}
+    <BottomSheet
+      closeLabel={t("common.actions.close")}
+      footer={
+        <Button.Primary
+          fullWidth
+          label={t("stock.form.save")}
+          loading={vm.isSaving}
+          onPress={vm.onSave}
+          size="lg"
+        />
+      }
+      onClose={vm.onClose}
+      presentation="inline"
+      title={t("stock.form.title")}
+      visible
+    >
+      {vm.isLoading || !model ? (
+        <Skeleton.ListItem />
+      ) : (
+        <View style={styles.fields}>
+          <TextField
+            error={errors.description ? t(errors.description) : undefined}
+            label={t("stock.form.description")}
+            onChangeText={(value) => vm.setField("description", value)}
+            placeholder={t("stock.form.descriptionPlaceholder")}
+            value={values.description}
           />
-          <Spacer direction={"vertical"} size={"md"} />
-          <View style={styles.lineContainer}>
-            <View style={styles.helperTextContainer}>
-              <TextInput.Outlined
-                label={fields.quantity.label}
-                onChangeText={fields.quantity.onChange}
-                value={fields.quantity.value}
-              />
-              <HelperText
-                label={errors["quantity"]}
-                type={"error"}
-                visible={!!errors["quantity"]}
+          <View style={styles.pair}>
+            <View style={styles.pairItem}>
+              <TextField
+                error={errors.quantity ? t(errors.quantity) : undefined}
+                keyboardType="number-pad"
+                label={t("stock.form.quantity")}
+                onChangeText={onQuantityChange}
+                value={values.quantity}
               />
             </View>
-            <Spacer direction={"horizontal"} size={"md"} />
-            <View style={styles.helperTextContainer}>
-              <Picker
-                items={newStockItemModel.stockUnits}
-                onValueChange={fields.unit.onChange}
-                selectedValue={fields.unit.value}
-              />
-              <HelperText
-                label={errors["unit"]}
-                type={"error"}
-                visible={!!errors["unit"]}
+            <View style={styles.pairItem}>
+              <SelectField
+                closeLabel={t("common.actions.close")}
+                label={t("stock.form.unit")}
+                onChange={onUnitChange}
+                options={model.unitOptions.map((option) => ({
+                  label: t(option.labelKey),
+                  value: option.value,
+                }))}
+                sheetTitle={t("stock.form.unit")}
+                value={values.unit}
               />
             </View>
           </View>
-          <Spacer direction={"vertical"} size={"md"} />
-          <Picker
-            items={newStockItemModel.stockOwners}
-            label={fields.owner.label}
-            onValueChange={(value) => {
-              fields.ownerId.onChange(value);
-              fields.owner.onChange(newStockItemModel?.stockOwnerType(value!));
-            }}
-            selectedValue={fields.ownerId.value}
+          <ChipGroup
+            label={t("stock.form.owner")}
+            mode="single"
+            onChange={(value) => vm.setField("ownerId", value)}
+            options={model.ownerOptions.map((option) => ({
+              label: option.labelKey ? t(option.labelKey) : option.label,
+              value: option.value,
+            }))}
+            value={values.ownerId ?? model.defaultOwnerId}
           />
-          <HelperText
-            label={errors["owner"]}
-            type={"error"}
-            visible={!!errors["owner"]}
+          <DateField
+            clearable
+            {...dateLabels}
+            label={t("stock.form.expiration")}
+            onChange={(date) => vm.setField("expirationDate", date)}
+            value={values.expirationDate}
           />
-          <Spacer direction={"vertical"} size={"md"} />
-          <View style={styles.lineContainer}>
-            <Spacer direction={"horizontal"} size={"md"} />
-            <View style={styles.helperTextContainer}>
-              <DatePicker
-                date={fields.openingDate.value}
-                label={fields.openingDate.label}
-                mode={"single"}
-                onConfirm={({ date }) => {
-                  fields.openingDate.onChange(date);
-                }}
-              />
-              <HelperText
-                label={errors["openingDate"]}
-                type={"error"}
-                visible={!!errors["openingDate"]}
-              />
-            </View>
-          </View>
-          <Spacer direction={"vertical"} size={"md"} />
-          <View style={styles.lineContainer}>
-            <View style={styles.helperTextContainer}>
-              <DatePicker
-                date={fields.expirationDate.value}
-                label={fields.expirationDate.label}
-                mode={"single"}
-                onConfirm={({ date }) => {
-                  fields.expirationDate.onChange(date);
-                }}
-              />
-              <HelperText
-                label={errors["expirationDate"]}
-                type={"error"}
-                visible={!!errors["expirationDate"]}
-              />
-            </View>
-            <Spacer direction={"horizontal"} size={"md"} />
-            <View style={styles.helperTextContainer}>
-              <DatePicker
-                date={fields.purchaseDate.value}
-                label={fields.purchaseDate.label}
-                mode={"single"}
-                onConfirm={({ date }) => {
-                  fields.purchaseDate.onChange(date);
-                }}
-              />
-              <HelperText
-                label={errors["purchaseDate"]}
-                type={"error"}
-                visible={!!errors["purchaseDate"]}
-              />
-            </View>
-          </View>
-          <Spacer direction={"vertical"} size={"md"} />
-          <View style={styles.lineContainer}>
-            <View style={styles.helperTextContainer}>
-              <TextInput.Outlined
-                label={fields.barcode.label}
-                onChangeText={fields.barcode.onChange}
-                value={fields.barcode.value ?? ""}
-              />
-              <HelperText
-                label={errors["barcode"]}
-                type={"error"}
-                visible={!!errors["barcode"]}
-              />
-            </View>
-            <Spacer direction={"horizontal"} size={"md"} />
-            <View style={styles.helperTextContainer}>
-              <TextInput.Outlined
-                label={fields.brand.label}
-                onChangeText={fields.brand.onChange}
-                value={fields.brand.value ?? ""}
-              />
-              <HelperText
-                label={errors["brand"]}
-                type={"error"}
-                visible={!!errors["brand"]}
-              />
-            </View>
-          </View>
-          <Spacer direction={"vertical"} size={"md"} />
-          <View style={styles.fullLineContainer}>
-            <View style={styles.helperTextContainer}>
-              <TextInput.Outlined
-                label={fields.notes.label}
+          <Button.Ghost
+            icon={vm.isMoreOpen ? "chevron-up" : "chevron-down"}
+            label={t("stock.form.moreDetails")}
+            onPress={vm.onToggleMore}
+          />
+          {vm.isMoreOpen ? (
+            <>
+              <View style={styles.moreRow}>
+                <View style={styles.pairItem}>
+                  <DateField
+                    clearable
+                    {...dateLabels}
+                    label={t("stock.form.purchase")}
+                    onChange={(date) => vm.setField("purchaseDate", date)}
+                    value={values.purchaseDate}
+                  />
+                </View>
+                <View style={styles.pairItem}>
+                  <DateField
+                    clearable
+                    {...dateLabels}
+                    label={t("stock.form.opening")}
+                    onChange={(date) => vm.setField("openingDate", date)}
+                    value={values.openingDate}
+                  />
+                </View>
+              </View>
+              <View style={styles.moreRow}>
+                <View style={styles.pairItem}>
+                  <TextField
+                    label={t("stock.form.brand")}
+                    onChangeText={(value) => vm.setField("brand", value)}
+                    value={values.brand}
+                  />
+                </View>
+                <View style={styles.pairItem}>
+                  <TextField
+                    label={t("stock.form.barcode")}
+                    onChangeText={(value) => vm.setField("barcode", value)}
+                    value={values.barcode}
+                  />
+                </View>
+              </View>
+              <TextField
+                label={t("stock.form.notes")}
                 multiline
-                onChangeText={fields.notes.onChange}
-                value={fields.notes.value ?? ""}
+                onChangeText={(value) => vm.setField("notes", value)}
+                value={values.notes}
               />
-              <HelperText
-                label={errors["notes"]}
-                type={"error"}
-                visible={!!errors["notes"]}
-              />
-            </View>
-          </View>
-        </ScrollView>
-        <Card customStyles={styles.buttonContainer}>
-          <View style={styles.button}>
-            <Button.Text
-              customStyles={{ textColor: theme.colors.expense }}
-              label={"Cancel"}
-              onPress={onCancel}
-            />
-            <Spacer direction={"horizontal"} size={"xl"} />
-            <Button.Filled label={"Add"} onPress={onAdd} />
-          </View>
-        </Card>
-      </Card>
-    </>
+            </>
+          ) : null}
+          {vm.formErrorKey ? (
+            <Text.Caption tone="expense" value={t(vm.formErrorKey)} />
+          ) : null}
+        </View>
+      )}
+      <ConfirmDialog
+        cancelLabel={t("common.form.keepEditing")}
+        closeLabel={t("common.actions.close")}
+        confirmLabel={t("common.form.discard")}
+        message={t("common.form.discardMessage")}
+        onCancel={vm.onKeepEditing}
+        onConfirm={vm.onDiscard}
+        title={t("common.form.discardTitle")}
+        visible={vm.isDiscardOpen}
+      />
+    </BottomSheet>
   );
 }
 
