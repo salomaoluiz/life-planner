@@ -8,6 +8,8 @@ export interface CardProps {
   children: React.ReactNode;
   /** Legacy, kept until spec 014: compose with Section/ListItem instead */
   customStyles?: ViewStyle;
+  /** Stretches the card to its parent's height (equal-height columns) */
+  fill?: boolean;
   onPress?: () => void;
   padding?: "lg" | "md" | "sm";
   testID?: string;
@@ -23,6 +25,7 @@ function Card(props: CardProps) {
       borderRadius: radius.lg,
       borderStyle: props.variant === "dashed" ? "dashed" : "solid",
       borderWidth: 1,
+      ...(props.fill ? { flex: 1 } : {}),
       padding: spacing[props.padding ?? "md"],
     },
   });

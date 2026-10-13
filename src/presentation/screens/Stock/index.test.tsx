@@ -49,7 +49,7 @@ describe("content", () => {
     expect(screen.getByText("stock.list.title")).toBeOnTheScreen();
     expect(
       screen.getByText(
-        'stock.list.subtitleAttention {"attention":1,"total":2}',
+        'stock.list.subtitleAttention_other {"attention":1,"count":2}',
       ),
     ).toBeOnTheScreen();
   });
@@ -58,7 +58,7 @@ describe("content", () => {
     setup({ subtitle: { attention: 0, total: 2 } });
 
     expect(
-      screen.getByText('stock.list.subtitle {"total":2}'),
+      screen.getByText('stock.list.subtitle_other {"count":2}'),
     ).toBeOnTheScreen();
   });
 
@@ -135,6 +135,12 @@ describe("toolbar", () => {
 
     expect(vm.onSortChange).toHaveBeenCalledWith("NAME");
   });
+});
+
+it("SHOULD give the list an estimated item size so the first paint has no hole", () => {
+  setup();
+
+  expect(screen.getByTestId("flashList").props.estimatedItemSize).toBe(64);
 });
 
 it("SHOULD wire pull-to-refresh on the list", () => {

@@ -1,3 +1,5 @@
+import { StyleSheet } from "react-native";
+
 import { act, fireEvent, screen } from "@tests";
 
 import { onChange, setup } from "./mocks/index.mocks";
@@ -11,17 +13,36 @@ it("SHOULD show label and placeholder WHEN there is no value", () => {
   expect(screen.queryByTestId("date-clear")).toBeNull();
 });
 
-it("SHOULD format the date for the active locale with a Today label", () => {
+it("SHOULD show only Today on one line WHEN the date is today", () => {
   setup({ value: today });
-  expect(screen.getByTestId("date-value").props.children).toContain(
+  expect(screen.getByTestId("date-value").props.children).toBe("Today");
+  expect(screen.getByTestId("date-value").props.numberOfLines).toBe(1);
+  expect(screen.queryByTestId("date-relative")).toBeNull();
+  expect(screen.getByTestId("date").props.accessibilityLabel).toContain(
     String(today.getFullYear()),
   );
-  expect(screen.getByTestId("date-relative").props.children).toBe("Today");
+});
+
+it("SHOULD format the date for the active locale WHEN it is another day", () => {
+  setup({ value: new Date(2020, 5, 1) });
+  expect(screen.getByTestId("date-value").props.children).toContain("2020");
+  expect(screen.getByTestId("date-value").props.numberOfLines).toBe(1);
+});
+
+it("SHOULD center the value vertically and keep the hover inside the field radius", () => {
+  setup({ value: today });
+  expect(StyleSheet.flatten(screen.getByTestId("date").props.style)).toEqual(
+    expect.objectContaining({
+      borderRadius: 14,
+      justifyContent: "center",
+      overflow: "hidden",
+    }),
+  );
 });
 
 it("SHOULD label yesterday", () => {
   setup({ value: new Date(today.getTime() - 24 * 60 * 60 * 1000) });
-  expect(screen.getByTestId("date-relative").props.children).toBe("Yesterday");
+  expect(screen.getByTestId("date-value").props.children).toBe("Yesterday");
 });
 
 it("SHOULD show no relative label for other days", () => {

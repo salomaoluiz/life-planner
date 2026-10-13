@@ -49,7 +49,6 @@ function useLoginViewModel() {
 
   const [email, setEmail] = useState(params.email ?? "");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState<string>();
   const [passwordError, setPasswordError] = useState<string>();
   const [apiErrorKey, setApiErrorKey] = useState<AuthErrorKey | undefined>(
@@ -143,11 +142,9 @@ function useLoginViewModel() {
     onEmailSubmit: () => passwordRef.current?.focus(),
     onGoToSignUp: () => router.push("/signup" as Href),
     onSubmit,
-    onTogglePassword: () => setShowPassword((current) => !current),
     password,
     passwordError,
     passwordRef,
-    showPassword,
   };
 }
 

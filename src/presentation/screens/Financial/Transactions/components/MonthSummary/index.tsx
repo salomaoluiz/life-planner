@@ -29,7 +29,7 @@ function MonthSummary(props: Props) {
     return (
       <Card>
         <Text.Body tone={"expense"} value={props.errorMessage} />
-        <Button.Ghost label={props.retryLabel} onPress={props.onRetry} />
+        <Button.Ghost inline label={props.retryLabel} onPress={props.onRetry} />
       </Card>
     );
   }

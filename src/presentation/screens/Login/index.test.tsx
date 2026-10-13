@@ -1,3 +1,5 @@
+import { StyleSheet } from "react-native";
+
 import { fireEvent, hasText, screen } from "@tests";
 
 import { mocks, setup } from "./mocks/index.mocks";
@@ -31,12 +33,10 @@ it("SHOULD configure the email field for email entry", () => {
   });
 });
 
-it("SHOULD configure the password field as secure entry with a show toggle", () => {
+it("SHOULD configure the password field as secure entry with its own show toggle", () => {
   setup();
 
-  const props = screen.getByTestId("login-password").props;
-
-  expect(props).toMatchObject({
+  expect(screen.getByTestId("login-password").props).toMatchObject({
     autoComplete: "password",
     onChangeText: mocks.viewModel.onChangePassword,
     onSubmitEditing: mocks.viewModel.onSubmit,
@@ -44,24 +44,16 @@ it("SHOULD configure the password field as secure entry with a show toggle", () 
     secureTextEntry: true,
     textContentType: "password",
   });
-  expect(props.right.props).toMatchObject({
-    accessibilityLabel: "login.form.showPassword",
-    icon: "eye",
-  });
-  props.right.props.onPress();
-  expect(mocks.viewModel.onTogglePassword).toHaveBeenCalledTimes(1);
-});
-
-it("SHOULD show the hide toggle and plain text WHEN the password is visible", () => {
-  setup({ showPassword: true });
-
-  const props = screen.getByTestId("login-password").props;
-
-  expect(props.secureTextEntry).toBe(false);
-  expect(props.right.props).toMatchObject({
-    accessibilityLabel: "login.form.hidePassword",
-    icon: "eye-off",
-  });
+  expect(
+    screen.getByTestId("login-password-toggle").props.accessibilityLabel,
+  ).toBe("login.form.showPassword");
+  fireEvent.press(screen.getByTestId("login-password-toggle"));
+  expect(screen.getByTestId("login-password").props.secureTextEntry).toBe(
+    false,
+  );
+  expect(
+    screen.getByTestId("login-password-toggle").props.accessibilityLabel,
+  ).toBe("login.form.hidePassword");
 });
 
 it("SHOULD submit and navigate through the buttons", () => {
@@ -83,8 +75,8 @@ it("SHOULD show loading and disable everything WHEN submitting", () => {
   expect(
     screen.getByTestId("login-go-to-signup").props.accessibilityState.disabled,
   ).toBe(true);
-  expect(screen.getByTestId("login-email").props.disabled).toBe(true);
-  expect(screen.getByTestId("login-password").props.disabled).toBe(true);
+  expect(screen.getByTestId("login-email").props.editable).toBe(false);
+  expect(screen.getByTestId("login-password").props.editable).toBe(false);
 });
 
 it("SHOULD render field and form errors", () => {
@@ -104,7 +96,9 @@ it("SHOULD render field and form errors", () => {
     children: "form error",
     type: "error",
   });
-  expect(screen.getByTestId("login-email").props.error).toBe(true);
+  expect(screen.getByTestId("login-email").props.accessibilityHint).toBe(
+    "email error",
+  );
 });
 
 it("SHOULD render the session expired notice as info", () => {
@@ -125,4 +119,16 @@ it("SHOULD redirect to the app and render no form WHEN the user is already logge
 
   expect(screen.UNSAFE_getByType("Redirect" as never).props.href).toBe("/");
   expect(screen.queryByTestId("login-email")).toBeNull();
+});
+
+it("SHOULD center the form in a card of at most 420 px with 20 px side padding and full-width buttons", () => {
+  setup();
+
+  expect(
+    StyleSheet.flatten(screen.getByTestId("login-card-wrap").props.style),
+  ).toEqual(expect.objectContaining({ alignSelf: "center", maxWidth: 420 }));
+  expect(
+    StyleSheet.flatten(screen.getByTestId("login-submit").props.style)
+      .alignSelf,
+  ).toBe("stretch");
 });

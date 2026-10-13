@@ -1,10 +1,122 @@
 import { AccessibilityInfo, Modal, StyleSheet, Text } from "react-native";
 
-import { act, fireEvent, screen, waitFor } from "@tests";
+import { act, fireEvent, render, screen, waitFor } from "@tests";
 
+import { BottomSheet } from "@components";
 import { lightTheme } from "@presentation/theme/provider";
+import { isWeb } from "@utils/platform";
 
 import { onClose, setup } from "./mocks/index.mocks";
+
+jest.mock("@utils/platform", () => ({ isWeb: jest.fn() }));
+
+function stubDocument() {
+  const handlers: Record<string, (event: { key: string }) => void> = {};
+  const documentStub = {
+    addEventListener: jest.fn((type: string, handler: never) => {
+      handlers[type] = handler;
+    }),
+    removeEventListener: jest.fn(),
+  };
+  Object.defineProperty(globalThis, "document", {
+    configurable: true,
+    value: documentStub,
+  });
+
+  return { documentStub, handlers };
+}
+
+afterEach(() => {
+  jest.mocked(isWeb).mockReset();
+  Reflect.deleteProperty(globalThis, "document");
+});
+
+it("SHOULD use 20 px padding in header, body and footer", () => {
+  setup({ footer: <Text>footer</Text> });
+  expect(
+    StyleSheet.flatten(
+      screen.getByTestId("sheet-body").props.contentContainerStyle,
+    ).padding,
+  ).toBe(20);
+  expect(
+    StyleSheet.flatten(screen.getByTestId("sheet-footer").props.style).padding,
+  ).toBe(20);
+});
+
+it("SHOULD theme the scrollbar on web", () => {
+  jest.mocked(isWeb).mockReturnValue(true);
+  stubDocument();
+  setup();
+  expect(
+    StyleSheet.flatten(screen.getByTestId("sheet-body").props.style),
+  ).toEqual(
+    expect.objectContaining({
+      scrollbarColor: `${lightTheme.colors.border} transparent`,
+    }),
+  );
+});
+
+it("SHOULD call onClose WHEN Escape is pressed on web", () => {
+  jest.mocked(isWeb).mockReturnValue(true);
+  const { handlers } = stubDocument();
+  setup();
+  handlers.keydown({ key: "Escape" });
+  expect(onClose).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD close only the top-most sheet WHEN Escape is pressed with stacked sheets", () => {
+  jest.mocked(isWeb).mockReturnValue(true);
+  const { documentStub } = stubDocument();
+  const handlers: ((event: { key: string }) => void)[] = [];
+  documentStub.addEventListener.mockImplementation((_type, handler) => {
+    handlers.push(handler as never);
+  });
+  const parentClose = jest.fn();
+  const childClose = jest.fn();
+  render(
+    <>
+      <BottomSheet closeLabel="Close" onClose={parentClose} title="A" visible>
+        <Text>a</Text>
+      </BottomSheet>
+      <BottomSheet closeLabel="Close" onClose={childClose} title="B" visible>
+        <Text>b</Text>
+      </BottomSheet>
+    </>,
+  );
+
+  handlers.forEach((handler) => handler({ key: "Escape" }));
+
+  expect(childClose).toHaveBeenCalledTimes(1);
+  expect(parentClose).not.toHaveBeenCalled();
+});
+
+it("SHOULD ignore other keys on web", () => {
+  jest.mocked(isWeb).mockReturnValue(true);
+  const { handlers } = stubDocument();
+  setup();
+  handlers.keydown({ key: "Enter" });
+  expect(onClose).not.toHaveBeenCalled();
+});
+
+it("SHOULD NOT listen WHEN not visible or on native, and SHOULD remove the listener on unmount", () => {
+  jest.mocked(isWeb).mockReturnValue(true);
+  const { documentStub } = stubDocument();
+  setup({ visible: false });
+  expect(documentStub.addEventListener).not.toHaveBeenCalled();
+
+  jest.mocked(isWeb).mockReturnValue(false);
+  setup();
+  expect(documentStub.addEventListener).not.toHaveBeenCalled();
+
+  jest.mocked(isWeb).mockReturnValue(true);
+  screen.unmount();
+  setup();
+  screen.unmount();
+  expect(documentStub.removeEventListener).toHaveBeenCalledWith(
+    "keydown",
+    expect.any(Function),
+  );
+});
 
 it("SHOULD render nothing WHEN not visible", () => {
   setup({ visible: false });

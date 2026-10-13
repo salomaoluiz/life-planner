@@ -18,6 +18,7 @@ import Animated, {
 import { IconButton } from "@components/Icon";
 import Text from "@components/Text";
 import { useKitTheme } from "@components/utils/useKitTheme";
+import { isWeb } from "@utils/platform";
 
 import useStyles from "./styles";
 
@@ -33,6 +34,8 @@ export interface BottomSheetProps {
   visible: boolean;
 }
 
+// Visible sheets on web, oldest first; Esc closes the last one only.
+const openSheets: symbol[] = [];
 const SLIDE_MS = 250;
 const SLIDE_OFFSET = 600;
 const SWIPE_CLOSE_DISTANCE = 80;
@@ -58,6 +61,29 @@ function BottomSheet(props: BottomSheetProps) {
       offset.value = withTiming(0, { duration: reduce ? 0 : SLIDE_MS });
     });
   }, [props.visible, wide, offset]);
+
+  useEffect(() => {
+    if (!props.visible || !isWeb() || typeof document === "undefined") {
+      return;
+    }
+    const token = Symbol("sheet");
+    openSheets.push(token);
+    function onKeyDown(event: KeyboardEvent) {
+      // Only the top-most sheet reacts, so Esc on a nested picker leaves the form open.
+      if (
+        event.key === "Escape" &&
+        openSheets[openSheets.length - 1] === token
+      ) {
+        onCloseRef.current();
+      }
+    }
+    document.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      openSheets.splice(openSheets.indexOf(token), 1);
+    };
+  }, [props.visible]);
 
   const pan = useRef(
     PanResponder.create({
@@ -126,6 +152,7 @@ function BottomSheet(props: BottomSheetProps) {
         <ScrollView
           contentContainerStyle={styles.body}
           keyboardShouldPersistTaps="handled"
+          style={styles.scroll}
           testID={testID && `${testID}-body`}
         >
           {props.children}

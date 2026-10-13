@@ -79,3 +79,20 @@ it("SHOULD mark the focused route as the selected tab", () => {
     screen.getByTestId("tab-finances").props.accessibilityState,
   ).toMatchObject({ selected: true });
 });
+
+it.each(["compact", "expanded"] as const)(
+  "SHOULD render the bar with no active item WHEN the hidden settings route is focused on %s",
+  (breakpoint) => {
+    setBreakpoint(breakpoint);
+    setup(4);
+
+    expect(
+      screen.getByTestId(
+        breakpoint === "expanded" ? "navigation-rail" : "tab-bar",
+      ),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId("tab-home").props.accessibilityState.selected,
+    ).toBe(false);
+  },
+);

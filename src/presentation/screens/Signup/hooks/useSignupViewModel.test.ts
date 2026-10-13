@@ -158,14 +158,6 @@ it("SHOULD clear each field error and the form error WHEN editing", async () => 
   expect(result.current.confirmPasswordError).toBeUndefined();
 });
 
-it("SHOULD toggle the password visibility", () => {
-  const { result } = setup();
-
-  act(() => result.current.onTogglePassword());
-
-  expect(result.current.showPassword).toBe(true);
-});
-
 it.each([
   ["onNameSubmit", "email"],
   ["onEmailSubmit", "password"],

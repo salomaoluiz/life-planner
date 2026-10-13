@@ -1,8 +1,9 @@
 import { StyleSheet } from "react-native";
 
-import { fireEvent, screen } from "@tests";
+import { fireEvent, mockDarkTheme, screen } from "@tests";
 
 import { Button } from "@components";
+import colors from "@presentation/theme/constants/colors";
 import { lightTheme } from "@presentation/theme/provider";
 
 import { defaultProps, setup } from "./mocks/index.mocks";
@@ -105,4 +106,52 @@ it("SHOULD keep the legacy names mapped", () => {
   expect(Button.Filled).toBe(Button.Primary);
   expect(Button.Outlined).toBe(Button.Secondary);
   expect(Button.Text).toBe(Button.Ghost);
+});
+
+it("SHOULD inherit the parent alignment WHEN not fullWidth", () => {
+  setup();
+  expect(rootStyle().alignSelf).toBeUndefined();
+});
+
+it("SHOULD keep 16 px side padding on Ghost by default", () => {
+  setup({ variant: "Ghost" });
+  expect(rootStyle().paddingHorizontal).toBe(16);
+});
+
+it("SHOULD drop side padding and widen the hit area WHEN Ghost is inline", () => {
+  setup({ inline: true, variant: "Ghost" });
+  expect(rootStyle().paddingHorizontal).toBe(0);
+  expect(root().props.hitSlop).toEqual({ left: 8, right: 8 });
+});
+
+it("SHOULD ignore inline on non-Ghost variants", () => {
+  setup({ inline: true });
+  expect(rootStyle().paddingHorizontal).toBe(16);
+  expect(root().props.hitSlop).toBeUndefined();
+});
+
+it("SHOULD paint a disabled Primary raised with a secondary label and no dimming", () => {
+  setup({ disabled: true });
+  expect(rootStyle().backgroundColor).toBe(lightTheme.colors.surfaceRaised);
+  expect(StyleSheet.flatten(label().props.style).color).toBe(
+    lightTheme.colors.textSecondary,
+  );
+  expect(rootStyle().opacity).toBeUndefined();
+});
+
+it("SHOULD paint a disabled Primary raised WHEN dark", () => {
+  const restore = mockDarkTheme();
+  setup({ disabled: true });
+  expect(rootStyle().backgroundColor).toBe(colors.dark.surfaceRaised);
+  restore();
+});
+
+it("SHOULD still dim a disabled Secondary", () => {
+  setup({ disabled: true, variant: "Secondary" });
+  expect(rootStyle().opacity).toBe(0.5);
+});
+
+it("SHOULD align an inline Ghost to the start of a column parent", () => {
+  setup({ inline: true, variant: "Ghost" });
+  expect(rootStyle().alignSelf).toBe("flex-start");
 });

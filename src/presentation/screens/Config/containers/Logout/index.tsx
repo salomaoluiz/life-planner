@@ -6,10 +6,8 @@ import { Button } from "@components";
 import { clearSessionExpiredNotice } from "@infrastructure/api";
 import { resetFetcherData, useMutation } from "@infrastructure/fetcher";
 import { useTranslation } from "@presentation/i18n";
-import { useTheme } from "@presentation/theme";
 
 function Logout() {
-  const { theme } = useTheme();
   const { isFetching, mutate, status } = useMutation<void, void>({
     cacheKey: [],
     fetch: useCases.logoutUseCase.execute,
@@ -31,12 +29,13 @@ function Logout() {
   }
 
   return (
-    <Button.Text
-      customStyles={{ textColor: theme.colors.expense }}
+    <Button.Ghost
       disabled={isFetching}
       icon={"logout"}
+      inline
       label={t("configurations.logout")}
       onPress={onPress}
+      tone={"expense"}
     />
   );
 }

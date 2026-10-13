@@ -8,6 +8,7 @@ function useStyles() {
   return {
     styles: StyleSheet.create({
       actions: { alignSelf: "stretch", gap: theme.sizes.spacing.sm },
+      center: { flex: 1, justifyContent: "center" },
       column: {
         alignItems: "center",
         alignSelf: "center",
@@ -16,6 +17,7 @@ function useStyles() {
         paddingVertical: theme.sizes.spacing.xl,
         width: "100%",
       },
+      stretch: { alignSelf: "stretch" },
     }),
     theme,
   };

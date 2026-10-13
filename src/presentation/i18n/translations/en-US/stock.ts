@@ -60,8 +60,10 @@ const stock = {
       recent: "Recently added",
       title: "Sort by",
     },
-    subtitle: "{{total}} items",
-    subtitleAttention: "{{total}} items · {{attention}} need attention",
+    subtitle_one: "1 item",
+    subtitle_other: "{{count}} items",
+    subtitleAttention_one: "1 item · {{attention}} need attention",
+    subtitleAttention_other: "{{count}} items · {{attention}} need attention",
     title: "Stock",
   },
   status: {

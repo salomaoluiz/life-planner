@@ -4,10 +4,14 @@ import RecentTransactionUIModel from "./RecentTransactionUIModel";
 
 const now = new Date(2026, 9, 5, 14, 0);
 
-function build(date: Date, type = "EXPENSE") {
+function build(
+  date: Date,
+  type = "EXPENSE",
+  categoryColor: null | string = "#112233",
+) {
   return new RecentTransactionUIModel(
     new RecentTransactionDTO({
-      categoryColor: "#112233",
+      categoryColor: categoryColor ?? undefined,
       categoryIcon: "cart",
       categoryName: "Groceries",
       date: date.toISOString(),
@@ -68,4 +72,9 @@ it("SHOULD pass the other fields through", () => {
   expect(model.categoryName).toBe("Groceries");
   expect(model.categoryIcon).toBe("cart");
   expect(model.categoryColor).toBe("#112233");
+});
+
+it("SHOULD map the legacy black token to a hex and keep a missing color undefined", () => {
+  expect(build(now, "EXPENSE", "black").categoryColor).toBe("#000000");
+  expect(build(now, "EXPENSE", null).categoryColor).toBeUndefined();
 });

@@ -19,7 +19,10 @@ class TransactionUIModel {
   }
 
   get categoryColor() {
-    return normalizeCategoryColor(this.category?.iconColor ?? "black");
+    const color = this.category?.iconColor;
+
+    // No category: undefined, so the tile renders neutral like on Home (spec 015 FR 10).
+    return color ? normalizeCategoryColor(color) : undefined;
   }
 
   get categoryIcon() {

@@ -55,7 +55,7 @@ function FinancialTransactions() {
   }
 
   const toolbar = (
-    <View style={styles.toolbar}>
+    <View style={styles.toolbar} testID="transactions-toolbar">
       <MonthSwitcher
         monthLabel={vm.monthLabel}
         nextLabel={t("financial.transactions.nextMonth")}
@@ -131,13 +131,13 @@ function FinancialTransactions() {
 
   return (
     <View style={styles.root}>
+      {toolbar}
       <FlashList
         data={vm.entries}
         estimatedItemSize={64}
         getItemType={(entry) => entry.kind}
         keyExtractor={(entry) => entry.key}
         ListEmptyComponent={empty}
-        ListHeaderComponent={toolbar}
         onRefresh={vm.onRefresh}
         refreshing={vm.isRefreshing}
         renderItem={renderItem}

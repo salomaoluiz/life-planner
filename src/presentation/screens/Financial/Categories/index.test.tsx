@@ -1,4 +1,5 @@
 import { fireEvent, screen } from "@testing-library/react-native";
+import { StyleSheet } from "react-native";
 
 import { hasText } from "@tests";
 
@@ -31,7 +32,7 @@ it("SHOULD render the empty state per type with a new category action", () => {
 it("SHOULD show the sub count only on roots and a chevron only with children", () => {
   setup({ rows: makeRows() });
 
-  expect(hasText('financial.categories.subcount {"count":2}')).toBe(true);
+  expect(hasText('financial.categories.subcount_other {"count":2}')).toBe(true);
   expect(screen.getAllByText(/financial.categories.subcount/)).toHaveLength(1);
   expect(screen.getByTestId("category-row-root-container")).toBeTruthy();
   expect(screen.getByTestId("category-row-leaf-container")).toBeTruthy();
@@ -52,4 +53,25 @@ it("SHOULD call onRowPress with the id WHEN a row is tapped", () => {
 
   fireEvent.press(screen.getByText("Snacks"));
   expect(onRowPress).toHaveBeenCalledWith("leaf");
+});
+
+it("SHOULD space the toolbar blocks and the list by 20 px", () => {
+  setup({ rows: makeRows() });
+
+  const style = StyleSheet.flatten(
+    screen.getByTestId("categories-toolbar").props.style,
+  );
+  expect(style.gap).toBe(20);
+  expect(style.paddingBottom).toBe(20);
+});
+
+it("SHOULD draw a divider between rows but not after the last one", () => {
+  setup({ rows: makeRows() });
+
+  const rows = makeRows();
+  const dividers = rows.map((row) =>
+    screen.queryByTestId(`category-row-${row.id}-divider`),
+  );
+  expect(dividers.slice(0, -1).every(Boolean)).toBe(true);
+  expect(dividers[dividers.length - 1]).toBeNull();
 });

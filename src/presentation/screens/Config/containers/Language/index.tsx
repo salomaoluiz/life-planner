@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Picker, Spacer, Text } from "@components";
+import { SelectField } from "@components";
 import { useTranslation, useTranslationLocale } from "@presentation/i18n";
 
 function Language() {
@@ -8,22 +8,25 @@ function Language() {
     useTranslationLocale();
   const { t } = useTranslation();
   const [localLanguage, setLocalLanguage] = useState(getLocale().languageTag);
+
+  function onChange(value: string) {
+    setLocalLanguage(value);
+    changeLocale(value);
+  }
+
   return (
-    <>
-      <Text.Title value={t("configurations.configs.language.title")} />
-      <Spacer direction={"horizontal"} horizontalLine size={"flex"} />
-      <Picker
-        items={availableLanguages.map((locale) => ({
-          label: locale,
-          value: locale,
-        }))}
-        onValueChange={(newValue) => {
-          setLocalLanguage(newValue);
-          changeLocale(newValue);
-        }}
-        selectedValue={localLanguage}
-      />
-    </>
+    <SelectField
+      closeLabel={t("common.actions.close")}
+      label={t("configurations.configs.language.title")}
+      onChange={onChange}
+      options={availableLanguages.map((locale) => ({
+        label: locale,
+        value: locale,
+      }))}
+      sheetTitle={t("configurations.configs.language.title")}
+      testID="language-picker"
+      value={localLanguage}
+    />
   );
 }
 

@@ -14,6 +14,7 @@ import {
 import Skeleton from "@components/Skeleton";
 import { useKitTheme } from "@components/utils/useKitTheme";
 import { useTranslation } from "@presentation/i18n";
+import pluralKey from "@presentation/i18n/pluralKey";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
 import { useCategoriesViewModel } from "./hooks";
@@ -29,7 +30,7 @@ function FinancialCategories() {
   const vm = useCategoriesViewModel();
 
   const toolbar = (
-    <View style={styles.toolbar}>
+    <View style={styles.toolbar} testID="categories-toolbar">
       <View style={styles.typeRow}>
         <View style={styles.typeControl}>
           <SegmentedControl
@@ -59,15 +60,24 @@ function FinancialCategories() {
     </View>
   );
 
-  function renderItem({ item }: { item: CategoryRowUIModel }) {
+  function renderItem({
+    index,
+    item,
+  }: {
+    index: number;
+    item: CategoryRowUIModel;
+  }) {
     let subtitle: string | undefined;
     if (item.subcount > 0) {
-      subtitle = t("financial.categories.subcount", { count: item.subcount });
+      subtitle = t(pluralKey("financial.categories.subcount", item.subcount), {
+        count: item.subcount,
+      });
     }
 
     return (
       <TreeItem
         depth={item.depth}
+        divider={index < vm.rows.length - 1}
         leading={<IconTile color={item.color} name={item.icon} />}
         onPress={() => vm.onRowPress(item.id)}
         subtitle={subtitle}

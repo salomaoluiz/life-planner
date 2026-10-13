@@ -1,42 +1,16 @@
 import { StyleSheet } from "react-native";
 
 import { useTheme } from "@presentation/theme";
-import { isWeb } from "@utils/platform";
 
-function getStyles() {
+function useStyles() {
   const { theme } = useTheme();
 
-  return StyleSheet.create({
-    background: {
-      alignItems: "center",
-      backgroundColor: theme.colors.background,
-      flex: 1,
-      padding: theme.sizes.spacing.sm,
-    },
-    container: {
-      backgroundColor: theme.colors.surfaceRaised,
-      borderRadius: theme.sizes.borderRadius.lg,
-      flex: 1,
-      justifyContent: "space-between",
-      marginHorizontal: theme.sizes.spacing.xxxl,
-      marginTop: theme.sizes.spacing.xxxl,
-      padding: theme.sizes.spacing.xl,
-      width: isWeb() ? "50%" : "100%",
-    },
-    list: {
-      marginBottom: theme.sizes.spacing.xxl,
-    },
-    listItem: {
-      alignItems: "center",
-      flexDirection: "row",
-      justifyContent: "space-between",
-    },
-    logoutContainer: {
-      bottom: 0,
-      flexDirection: "row",
-    },
-    titleContainer: {},
-  });
+  return {
+    styles: StyleSheet.create({
+      fields: { gap: theme.sizes.spacing.lg },
+      logout: { alignItems: "flex-start" },
+    }),
+  };
 }
 
-export default getStyles;
+export default useStyles;

@@ -3,6 +3,7 @@ import { View } from "react-native";
 
 import {
   AmountText,
+  Card,
   ChipGroup,
   EmptyState,
   ErrorState,
@@ -31,18 +32,20 @@ function FinancialAccounts() {
   const vm = useAccountsViewModel();
 
   const toolbar = (
-    <View style={styles.toolbar}>
+    <View style={styles.toolbar} testID="accounts-toolbar">
       <View style={styles.totalRow}>
         <View style={styles.totalColumn}>
-          <Text.Caption
-            tone={"secondary"}
-            value={t("financial.accounts.total")}
-          />
-          <AmountText
-            size={"heading"}
-            testID={"accounts-total"}
-            {...vm.totalAmount}
-          />
+          <Card testID={"accounts-total-card"}>
+            <Text.Overline
+              tone={"secondary"}
+              value={t("financial.accounts.total")}
+            />
+            <AmountText
+              size={"heading"}
+              testID={"accounts-total"}
+              {...vm.totalAmount}
+            />
+          </Card>
         </View>
         <IconButton
           accessibilityLabel={t("financial.accounts.new")}

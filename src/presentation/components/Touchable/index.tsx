@@ -12,6 +12,7 @@ import FocusRing from "@components/FocusRing";
 import { useKitTheme } from "@components/utils/useKitTheme";
 import { isWeb } from "@utils/platform";
 
+import { isKeyboardFocus } from "./focusVisible";
 import useStyles from "./styles";
 
 export interface TouchableProps {
@@ -20,8 +21,12 @@ export interface TouchableProps {
   accessibilityRole: AccessibilityRole;
   busy?: boolean;
   children: React.ReactNode;
+  /** Set false when the caller paints its own disabled look (default: dim to 50%) */
+  dimWhenDisabled?: boolean;
   disabled?: boolean;
   focusRadius?: number;
+  /** Ring color; pass a contrasting one on accent-filled controls (default: accent) */
+  focusRingColor?: string;
   hitSlop?: Insets;
   minTouchTarget?: boolean;
   onLongPress?: () => void;
@@ -55,7 +60,7 @@ function Touchable(props: TouchableProps) {
       disabled={disabled}
       hitSlop={props.hitSlop}
       onBlur={() => setFocused(false)}
-      onFocus={() => setFocused(true)}
+      onFocus={(event) => setFocused(isKeyboardFocus(event))}
       onHoverIn={() => setHovered(true)}
       onHoverOut={() => setHovered(false)}
       onLongPress={props.onLongPress}
@@ -63,7 +68,7 @@ function Touchable(props: TouchableProps) {
       style={({ pressed }) => [
         styles.root,
         props.style,
-        !!props.disabled && styles.disabled,
+        !!props.disabled && props.dimWhenDisabled !== false && styles.disabled,
         pressed && !disabled && styles.pressed,
       ]}
       testID={props.testID}
@@ -73,6 +78,7 @@ function Touchable(props: TouchableProps) {
       )}
       {props.children}
       <FocusRing
+        color={props.focusRingColor}
         radius={props.focusRadius ?? radius.md}
         visible={onWeb && focused}
       />

@@ -197,6 +197,7 @@ layout:
 Transactions:
   view: Transactions/index.tsx (+ styles.ts) # month switcher, summary, owner/type chips, FlashList of day groups
   hooks: Transactions/hooks/useTransactionsViewModel.ts (+ index.ts, fetchTransactions, fetchSummary)
+  cacheKeys: models/queryKeys.ts (listQueryKey: list screens cache a composed shape under [uniqueName, "list"]; forms cache the raw use-case output under [uniqueName])
   models: [Transactions/models/TransactionUIModel.ts, Transactions/models/transactionList.ts]
   components: Transactions/components/{MonthSwitcher,MonthSummary,MonthPickerSheet,TransactionRow}/index.tsx
   form: Transactions/modals/NewTransactionModal/

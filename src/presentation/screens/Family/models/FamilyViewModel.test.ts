@@ -69,7 +69,7 @@ it("SHOULD build the owner subtitle FOR the owner viewer", () => {
   expect(
     new FamilyViewModel(family(), members(ownerViewer), ownerViewer).subtitle,
   ).toEqual({
-    key: "family.card.membersOwnerYou",
+    key: "family.card.membersOwnerYou_other",
     params: { count: 2, name: "Alice Test" },
   });
 });
@@ -77,7 +77,7 @@ it("SHOULD build the owner subtitle FOR the owner viewer", () => {
 it("SHOULD name the owner FOR a member viewer", () => {
   const vm = new FamilyViewModel(family(), members(memberViewer), memberViewer);
 
-  expect(vm.subtitle.key).toBe("family.card.membersOwner");
+  expect(vm.subtitle.key).toBe("family.card.membersOwner_other");
   expect(vm.subtitle.params.name).toBe("Alice Test");
   expect(vm.ownerName).toBe("Alice Test");
 });

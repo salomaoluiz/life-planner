@@ -5,7 +5,6 @@ import IconPickerSheet from "./";
 function setup(query = "") {
   const props = {
     closeLabel: "Close",
-    color: "#123456",
     icons: [
       { label: "Car", value: "car" },
       { label: "Heart", value: "heart" },

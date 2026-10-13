@@ -1,6 +1,7 @@
-import { StyleSheet, ViewStyle } from "react-native";
+import { StyleSheet, TextStyle, ViewStyle } from "react-native";
 
 import { KitTheme, useKitTheme } from "@components/utils/useKitTheme";
+import { isWeb } from "@utils/platform";
 
 export function getFrameStyle(args: {
   disabled?: boolean;
@@ -43,6 +44,10 @@ function useStyles(multiline: boolean) {
       icon: { paddingLeft: spacing.sm },
       input: {
         ...typography.input,
+        // The frame already draws the focus border/ring; hide the browser's own outline (web only, not typed by RN).
+        ...(isWeb()
+          ? ({ outlineStyle: "none", outlineWidth: 0 } as TextStyle)
+          : {}),
         color: colors.textPrimary,
         flex: 1,
         paddingHorizontal: spacing.sm,

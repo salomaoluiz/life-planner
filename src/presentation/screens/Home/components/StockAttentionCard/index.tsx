@@ -10,16 +10,23 @@ import {
 } from "@components";
 import Skeleton from "@components/Skeleton";
 import { useTranslation } from "@presentation/i18n";
+import pluralKey from "@presentation/i18n/pluralKey";
 import { BlockState } from "@screens/Home/hooks/useHomeViewModel";
 import StockAttentionUIModel from "@screens/Home/models/StockAttentionUIModel";
 
 interface Props {
+  fill?: boolean;
   onAddItemPress: () => void;
   onSeeAllPress: () => void;
   state: BlockState<StockAttentionUIModel>;
 }
 
-function StockAttentionCard({ onAddItemPress, onSeeAllPress, state }: Props) {
+function StockAttentionCard({
+  fill,
+  onAddItemPress,
+  onSeeAllPress,
+  state,
+}: Props) {
   const { t } = useTranslation();
 
   if (state.isLoading) {
@@ -40,7 +47,7 @@ function StockAttentionCard({ onAddItemPress, onSeeAllPress, state }: Props) {
   const { data } = state;
 
   return (
-    <Card testID="home-stock">
+    <Card fill={fill} testID="home-stock">
       <Section
         actionLabel={t("common.actions.seeAll")}
         onActionPress={onSeeAllPress}
@@ -48,7 +55,10 @@ function StockAttentionCard({ onAddItemPress, onSeeAllPress, state }: Props) {
       >
         <Text.Caption
           testID="home-stock-count"
-          value={t("home.stock.count", data.countLabelParams)}
+          value={t(
+            pluralKey("home.stock.count", data.countLabelParams.count),
+            data.countLabelParams,
+          )}
         />
         {data.isEmpty && (
           <ListItem
@@ -57,6 +67,7 @@ function StockAttentionCard({ onAddItemPress, onSeeAllPress, state }: Props) {
             title={t("home.stock.empty")}
             trailing={
               <Button.Ghost
+                inline
                 label={t("home.stock.addItem")}
                 onPress={onAddItemPress}
               />

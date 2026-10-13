@@ -5,7 +5,6 @@ import { useKitTheme } from "@components/utils/useKitTheme";
 
 interface Props {
   closeLabel: string;
-  color: string;
   icons: { label: string; value: string }[];
   onClose: () => void;
   onQueryChange: (text: string) => void;
@@ -34,7 +33,6 @@ function IconPickerSheet(props: Props) {
           value={props.query}
         />
         <IconChoiceGroup
-          color={props.color}
           label={props.title}
           onChange={props.onSelect}
           options={props.icons}

@@ -17,6 +17,7 @@ function QuickAddButton(props: QuickAddButtonProps) {
       accessibilityLabel={props.label}
       accessibilityRole={"button"}
       focusRadius={RADIUS}
+      focusRingColor={theme.colors.onAccent}
       onPress={props.onPress}
       style={styles.button}
       testID={props.testID ?? "quick-add-button"}

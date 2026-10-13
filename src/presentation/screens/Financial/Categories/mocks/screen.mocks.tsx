@@ -19,13 +19,13 @@ jest.mock("@shopify/flash-list", () => {
       data?: unknown[];
       ListEmptyComponent?: React.ReactNode;
       ListHeaderComponent?: React.ReactNode;
-      renderItem: (info: { item: unknown }) => React.ReactNode;
+      renderItem: (info: { index: number; item: unknown }) => React.ReactNode;
     }) => (
       <MockView testID="flashList" {...props}>
         {ListHeaderComponent}
         {data?.length === 0 && ListEmptyComponent}
         {data?.map((item, index) => (
-          <MockView key={index}>{renderItem({ item })}</MockView>
+          <MockView key={index}>{renderItem({ index, item })}</MockView>
         ))}
       </MockView>
     ),

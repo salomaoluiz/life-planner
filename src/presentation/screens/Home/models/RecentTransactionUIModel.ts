@@ -1,4 +1,5 @@
 import RecentTransactionDTO from "@application/dto/home/RecentTransactionDTO";
+import { normalizeCategoryColor } from "@presentation/constants/categoryColors";
 import { TranslationKeys } from "@presentation/i18n/types";
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -14,7 +15,9 @@ class RecentTransactionUIModel {
   }
 
   get categoryColor() {
-    return this.dto.categoryColor;
+    const color = this.dto.categoryColor;
+
+    return color ? normalizeCategoryColor(color) : undefined;
   }
 
   get categoryIcon() {

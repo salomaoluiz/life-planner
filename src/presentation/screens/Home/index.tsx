@@ -48,10 +48,15 @@ function Home() {
       />
       <View style={vm.isSplitLayout ? styles.split : styles.stack}>
         <View style={vm.isSplitLayout ? styles.column : undefined}>
-          <MonthSummaryCard onPress={vm.onSummaryPress} state={vm.summary} />
+          <MonthSummaryCard
+            fill={vm.isSplitLayout}
+            onPress={vm.onSummaryPress}
+            state={vm.summary}
+          />
         </View>
         <View style={vm.isSplitLayout ? styles.column : undefined}>
           <StockAttentionCard
+            fill={vm.isSplitLayout}
             onAddItemPress={vm.onAddStockItemPress}
             onSeeAllPress={vm.onStockSeeAllPress}
             state={vm.stock}

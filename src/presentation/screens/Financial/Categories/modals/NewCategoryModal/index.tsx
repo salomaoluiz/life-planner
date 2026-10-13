@@ -116,7 +116,6 @@ function NewCategoryModal() {
           value={vm.iconColor}
         />
         <IconChoiceGroup
-          color={vm.iconColor}
           label={t("financial.categories.form.icon")}
           moreLabel={t("financial.categories.form.moreIcons")}
           onChange={vm.onIconChange}
@@ -190,7 +189,6 @@ function NewCategoryModal() {
       {vm.isIconPickerOpen && (
         <IconPickerSheet
           closeLabel={t("common.actions.close")}
-          color={vm.iconColor}
           icons={vm.pickerIcons}
           onClose={vm.onIconPickerClose}
           onQueryChange={vm.onIconQueryChange}

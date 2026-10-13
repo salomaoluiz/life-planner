@@ -20,6 +20,7 @@ function buildProps(activeIndex = 0): BottomTabBarProps {
     { key: "financial-key", name: "financial" },
     { key: "stock-key", name: "stock/index" },
     { key: "family-key", name: "family/index" },
+    { key: "settings-key", name: "settings" },
   ];
 
   return {

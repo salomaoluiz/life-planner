@@ -14,6 +14,8 @@ export interface ButtonProps {
   disabled?: boolean;
   fullWidth?: boolean;
   icon?: string;
+  /** Ghost only: zero horizontal padding so the label lines up with the content edge; use for section actions */
+  inline?: boolean;
   label: string;
   loading?: boolean;
   onPress: () => void;
@@ -24,12 +26,14 @@ export interface ButtonProps {
 }
 
 function ButtonBase(props: ButtonProps & { variant: ButtonVariant }) {
-  const { radius, sizes } = useKitTheme();
+  const { colors, radius, sizes, spacing } = useKitTheme();
   const { iconColor, labelColor, styles } = useStyles(
     props.variant,
     props.size ?? "md",
     !!props.fullWidth,
     props.tone,
+    props.inline,
+    props.disabled,
   );
   const { testID } = props;
 
@@ -58,8 +62,15 @@ function ButtonBase(props: ButtonProps & { variant: ButtonVariant }) {
       accessibilityLabel={props.accessibilityLabel ?? props.label}
       accessibilityRole="button"
       busy={props.loading}
+      dimWhenDisabled={props.variant !== "primary"}
       disabled={props.disabled}
       focusRadius={radius.md}
+      focusRingColor={props.variant === "primary" ? colors.onAccent : undefined}
+      hitSlop={
+        props.variant === "ghost" && props.inline
+          ? { left: spacing.xs, right: spacing.xs }
+          : undefined
+      }
       onPress={props.onPress}
       style={styles.root}
       testID={testID}

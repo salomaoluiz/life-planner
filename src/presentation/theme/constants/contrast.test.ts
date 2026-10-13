@@ -88,3 +88,9 @@ describe.each(themes)("%s theme contrast", (_name, theme) => {
     },
   );
 });
+
+it("SHOULD keep the dark border >= 1.5:1 against surface so field and chip edges are visible", () => {
+  expect(
+    contrast(opaque(colors.dark.border), opaque(colors.dark.surface)),
+  ).toBeGreaterThanOrEqual(1.5);
+});

@@ -1,6 +1,6 @@
 import { render, screen } from "@tests";
 
-import { Picker } from "@components";
+import { SelectField } from "@components";
 import { ThemeMode } from "@domain/entities/configs/ConfigsEntity";
 import { useTheme } from "@presentation/theme";
 
@@ -13,10 +13,10 @@ it("SHOULD show the stored mode AND offer System, Light and Dark", () => {
   });
   render(<Theme />);
 
-  const picker = screen.UNSAFE_getByType(Picker);
-  expect(picker.props.selectedValue).toBe(ThemeMode.DARK);
+  const field = screen.UNSAFE_getByType(SelectField);
+  expect(field.props.value).toBe(ThemeMode.DARK);
   expect(
-    picker.props.items.map((item: { value: ThemeMode }) => item.value),
+    field.props.options.map((item: { value: ThemeMode }) => item.value),
   ).toEqual([ThemeMode.SYSTEM, ThemeMode.LIGHT, ThemeMode.DARK]);
 });
 
@@ -25,7 +25,17 @@ it("SHOULD call setThemeMode WHEN the user picks a mode", () => {
   jest.mocked(useTheme).mockReturnValueOnce({ ...useTheme(), setThemeMode });
   render(<Theme />);
 
-  screen.UNSAFE_getByType(Picker).props.onValueChange(ThemeMode.LIGHT);
+  screen.UNSAFE_getByType(SelectField).props.onChange(ThemeMode.LIGHT);
 
   expect(setThemeMode).toHaveBeenCalledWith(ThemeMode.LIGHT);
+});
+
+it("SHOULD ignore a value that is not a theme mode", () => {
+  const setThemeMode = jest.fn();
+  jest.mocked(useTheme).mockReturnValueOnce({ ...useTheme(), setThemeMode });
+  render(<Theme />);
+
+  screen.UNSAFE_getByType(SelectField).props.onChange("PURPLE");
+
+  expect(setThemeMode).not.toHaveBeenCalled();
 });

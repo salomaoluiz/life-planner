@@ -11,6 +11,7 @@ import {
   buildOwnerChoices,
   ChoiceOption,
 } from "@screens/Financial/models/ownerOptions";
+import { listQueryKey } from "@screens/Financial/models/queryKeys";
 
 import {
   ALL_FILTER,
@@ -84,7 +85,7 @@ function useTransactionsViewModel() {
   const [pickerYear, setPickerYear] = useState(month.getFullYear());
 
   const transactions = useQuery<TransactionsData>({
-    cacheKey: [useCases.getFinancialTransactionsUseCase.uniqueName],
+    cacheKey: listQueryKey(useCases.getFinancialTransactionsUseCase.uniqueName),
     fetch: fetchTransactions,
   });
 

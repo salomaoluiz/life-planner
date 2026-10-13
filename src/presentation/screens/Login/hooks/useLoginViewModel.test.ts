@@ -190,15 +190,6 @@ it("SHOULD prefill the email from the route params", () => {
   expect(setup().result.current.email).toBe("test@example.com");
 });
 
-it("SHOULD toggle the password visibility", () => {
-  const { result } = setup();
-  expect(result.current.showPassword).toBe(false);
-
-  act(() => result.current.onTogglePassword());
-
-  expect(result.current.showPassword).toBe(true);
-});
-
 it("SHOULD focus the password field WHEN submitting the email field", () => {
   const { result } = setup();
   const focus = jest.fn();

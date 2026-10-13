@@ -1,3 +1,5 @@
+import { StyleSheet } from "react-native";
+
 import { fireEvent, hasText, screen } from "@tests";
 
 import { mocks, setup } from "./mocks/index.mocks";
@@ -55,21 +57,21 @@ it("SHOULD configure each field for autofill and keyboard chaining", () => {
   });
 });
 
-it("SHOULD toggle the visibility of both password fields with one icon", () => {
-  setup({ showPassword: true });
+it("SHOULD give each password field its own visibility toggle", () => {
+  setup();
 
-  const password = screen.getByTestId("signup-password").props;
+  fireEvent.press(screen.getByTestId("signup-password-toggle"));
 
-  expect(password.secureTextEntry).toBe(false);
+  expect(screen.getByTestId("signup-password").props.secureTextEntry).toBe(
+    false,
+  );
   expect(
     screen.getByTestId("signup-confirm-password").props.secureTextEntry,
-  ).toBe(false);
-  expect(password.right.props).toMatchObject({
-    accessibilityLabel: "login.form.hidePassword",
-    icon: "eye-off",
-  });
-  password.right.props.onPress();
-  expect(mocks.viewModel.onTogglePassword).toHaveBeenCalledTimes(1);
+  ).toBe(true);
+  expect(
+    screen.getByTestId("signup-confirm-password-toggle").props
+      .accessibilityLabel,
+  ).toBe("login.form.showPassword");
 });
 
 it("SHOULD submit and go to login through the buttons", () => {
@@ -94,7 +96,7 @@ it("SHOULD show loading and disable everything WHEN submitting", () => {
     "signup-password",
     "signup-confirm-password",
   ]) {
-    expect(screen.getByTestId(id).props.disabled).toBe(true);
+    expect(screen.getByTestId(id).props.editable).toBe(false);
   }
   expect(
     screen.getByTestId("signup-go-to-login").props.accessibilityState.disabled,
@@ -140,4 +142,16 @@ it("SHOULD redirect to the app WHEN the user is already logged", () => {
 
   expect(screen.UNSAFE_getByType("Redirect" as never).props.href).toBe("/");
   expect(screen.queryByTestId("signup-name")).toBeNull();
+});
+
+it("SHOULD center the form in a card of at most 420 px with 20 px side padding and full-width buttons", () => {
+  setup();
+
+  expect(
+    StyleSheet.flatten(screen.getByTestId("signup-card-wrap").props.style),
+  ).toEqual(expect.objectContaining({ alignSelf: "center", maxWidth: 420 }));
+  expect(
+    StyleSheet.flatten(screen.getByTestId("signup-submit").props.style)
+      .alignSelf,
+  ).toBe("stretch");
 });

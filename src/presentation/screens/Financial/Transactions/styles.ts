@@ -16,8 +16,8 @@ function useStyles() {
       root: { flex: 1 },
       summaryRow: { flexDirection: "row", gap: theme.sizes.spacing.sm },
       toolbar: {
-        gap: theme.sizes.spacing.sm,
-        paddingBottom: theme.sizes.spacing.sm,
+        gap: theme.sizes.spacing.lg,
+        paddingBottom: theme.sizes.spacing.lg,
       },
     }),
   };

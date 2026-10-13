@@ -9,9 +9,12 @@ function useStyles(
   size: "lg" | "md",
   fullWidth: boolean,
   tone?: "expense",
+  inline?: boolean,
+  disabled?: boolean,
 ) {
   const { colors, radius, sizes, spacing } = useKitTheme();
 
+  const paintedDisabled = variant === "primary" && !!disabled;
   const variants = {
     destructive: {
       background: colors.expenseSoft,
@@ -34,23 +37,28 @@ function useStyles(
       label: colors.textPrimary,
     },
   }[variant];
+  const background = paintedDisabled
+    ? colors.surfaceRaised
+    : variants.background;
+  const label = paintedDisabled ? colors.textSecondary : variants.label;
 
   return {
-    iconColor: variants.label,
-    labelColor: variants.label,
+    iconColor: label,
+    labelColor: label,
     styles: StyleSheet.create({
       root: {
         alignItems: "center",
-        alignSelf: fullWidth ? "stretch" : "flex-start",
+        ...(fullWidth ? { alignSelf: "stretch" as const } : {}),
+        ...(!fullWidth && variant === "ghost" && inline
+          ? { alignSelf: "flex-start" as const }
+          : {}),
         borderRadius: radius.md,
         flexDirection: "row",
         gap: spacing.xs,
         height: size === "lg" ? sizes.buttonHeight + 6 : sizes.buttonHeight,
         justifyContent: "center",
-        paddingHorizontal: spacing.md,
-        ...(variants.background
-          ? { backgroundColor: variants.background }
-          : {}),
+        paddingHorizontal: variant === "ghost" && inline ? 0 : spacing.md,
+        ...(background ? { backgroundColor: background } : {}),
         ...(variants.border
           ? { borderColor: variants.border, borderWidth: 1 }
           : {}),

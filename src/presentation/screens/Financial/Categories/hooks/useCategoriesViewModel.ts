@@ -12,6 +12,7 @@ import {
   ALL_OWNERS,
   buildOwnerFilterChoices,
 } from "@screens/Financial/models/ownerOptions";
+import { listQueryKey } from "@screens/Financial/models/queryKeys";
 
 import CategoryRowUIModel from "../models/CategoryRowUIModel";
 
@@ -40,7 +41,7 @@ function useCategoriesViewModel() {
   const [ownerFilter, setOwnerFilter] = useState(ALL_OWNERS);
 
   const query = useQuery<CategoriesData>({
-    cacheKey: [useCases.getFinancialCategoriesUseCase.uniqueName],
+    cacheKey: listQueryKey(useCases.getFinancialCategoriesUseCase.uniqueName),
     fetch: fetchCategories,
   });
 

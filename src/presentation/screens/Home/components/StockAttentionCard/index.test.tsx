@@ -1,3 +1,5 @@
+import { StyleSheet } from "react-native";
+
 import { fireEvent, render, screen } from "@tests";
 
 import StockAttentionDTO, {
@@ -106,7 +108,7 @@ it("SHOULD show the item count under the title", () => {
   renderLoaded(model(5));
 
   expect(screen.getByTestId("home-stock-count")).toHaveTextContent(
-    'home.stock.count {"count":5}',
+    'home.stock.count_other {"count":5}',
   );
 });
 
@@ -140,4 +142,31 @@ it("SHOULD offer to add an item WHEN the stock is empty", () => {
 
   expect(screen.getByText("home.stock.empty")).toBeOnTheScreen();
   expect(handlers.onAddItemPress).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD use the singular count key WHEN there is one item", () => {
+  renderLoaded(model(1));
+
+  expect(screen.getByTestId("home-stock-count")).toHaveTextContent(
+    'home.stock.count_one {"count":1}',
+  );
+});
+
+it("SHOULD fill its column WHEN fill is set", () => {
+  render(
+    <StockAttentionCard
+      {...handlers}
+      fill
+      state={{
+        data: model(5),
+        isError: false,
+        isLoading: false,
+        onRetry: jest.fn(),
+      }}
+    />,
+  );
+
+  expect(
+    StyleSheet.flatten(screen.getByTestId("home-stock").props.style).flex,
+  ).toBe(1);
 });

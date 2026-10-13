@@ -66,7 +66,7 @@ it("SHOULD use the category icon and color, with safe fallbacks", () => {
   expect(withCategory.categoryIcon).toBe("cart");
   expect(withCategory.categoryColor).toBe("#3B82F6");
   expect(without.categoryIcon).toBe("help-circle-outline");
-  expect(without.categoryColor).toBe("#000000");
+  expect(without.categoryColor).toBeUndefined();
 });
 
 it("SHOULD map the legacy black color token to a hex", () => {
