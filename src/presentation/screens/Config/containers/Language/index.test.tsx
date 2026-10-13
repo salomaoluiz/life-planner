@@ -1,6 +1,6 @@
-import { act, hasText, render, screen } from "@tests";
+import { act, render, screen } from "@tests";
 
-import { Picker } from "@components";
+import { SelectField } from "@components";
 import { useTranslationLocale } from "@presentation/i18n";
 
 import Language from "./";
@@ -19,8 +19,10 @@ beforeEach(() => {
 it("SHOULD render the title and one option per available language", () => {
   render(<Language />);
 
-  expect(hasText("configurations.configs.language.title")).toBe(true);
-  expect(screen.UNSAFE_getByType(Picker).props.items).toEqual([
+  expect(screen.UNSAFE_getByType(SelectField).props.label).toBe(
+    "configurations.configs.language.title",
+  );
+  expect(screen.UNSAFE_getByType(SelectField).props.options).toEqual([
     { label: "en-US", value: "en-US" },
     { label: "pt-BR", value: "pt-BR" },
   ]);
@@ -29,16 +31,16 @@ it("SHOULD render the title and one option per available language", () => {
 it("SHOULD select the current locale", () => {
   render(<Language />);
 
-  expect(screen.UNSAFE_getByType(Picker).props.selectedValue).toBe("en-US");
+  expect(screen.UNSAFE_getByType(SelectField).props.value).toBe("en-US");
 });
 
 it("SHOULD change the locale and the selection WHEN another language is picked", () => {
   render(<Language />);
 
   act(() => {
-    screen.UNSAFE_getByType(Picker).props.onValueChange("pt-BR");
+    screen.UNSAFE_getByType(SelectField).props.onChange("pt-BR");
   });
 
   expect(changeLocale).toHaveBeenCalledWith("pt-BR");
-  expect(screen.UNSAFE_getByType(Picker).props.selectedValue).toBe("pt-BR");
+  expect(screen.UNSAFE_getByType(SelectField).props.value).toBe("pt-BR");
 });
