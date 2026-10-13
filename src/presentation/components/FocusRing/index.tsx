@@ -9,7 +9,7 @@ export interface FocusRingProps {
   width?: number;
 }
 
-const DEFAULT_WIDTH = 4;
+const DEFAULT_WIDTH = 2;
 
 function FocusRing(props: FocusRingProps) {
   const { colors } = useKitTheme();
@@ -23,14 +23,15 @@ function FocusRing(props: FocusRingProps) {
     <View
       pointerEvents="none"
       style={{
-        borderColor: props.color ?? colors.focusRing,
-        borderRadius: props.radius + width,
+        // Inset, so no ancestor with overflow hidden (chip scroll rows) can clip it.
+        borderColor: props.color ?? colors.accent,
+        borderRadius: props.radius,
         borderWidth: width,
-        bottom: -width,
-        left: -width,
+        bottom: 0,
+        left: 0,
         position: "absolute",
-        right: -width,
-        top: -width,
+        right: 0,
+        top: 0,
       }}
       testID="focus-ring"
     />

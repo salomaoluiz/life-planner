@@ -15,6 +15,13 @@ it("SHOULD render a non-interactive ring with the given radius WHEN visible", ()
 
   expect(ring.props.pointerEvents).toBe("none");
   expect(ring.props.style).toEqual(
-    expect.objectContaining({ borderRadius: 18, borderWidth: 4 }),
+    expect.objectContaining({
+      borderRadius: 14,
+      borderWidth: 2,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      top: 0,
+    }),
   );
 });

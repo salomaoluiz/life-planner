@@ -1,6 +1,12 @@
-import { fireEvent } from "@tests";
+import { Pressable } from "react-native";
+
+import { act, fireEvent, screen } from "@tests";
+
+import { isWeb } from "@utils/platform";
 
 import { defaultProps, flatStyle, setup } from "./mocks/index.mocks";
+
+jest.mock("@utils/platform", () => ({ isWeb: jest.fn() }));
 
 it("SHOULD call onPress and onLongPress", () => {
   const onLongPress = jest.fn();
@@ -57,4 +63,31 @@ it("SHOULD skip the min size and use hitSlop WHEN minTouchTarget is false", () =
 
   expect(flatStyle(element).minHeight).toBeUndefined();
   expect(element.props.hitSlop).toEqual({ bottom: 4, top: 4 });
+});
+
+// RN's Pressable does not forward onFocus to the host view under jest (react-native-web does).
+function pressable() {
+  return screen.UNSAFE_getByType(Pressable);
+}
+
+describe("focus ring on web", () => {
+  beforeEach(() => {
+    jest.mocked(isWeb).mockReturnValue(true);
+  });
+
+  it("SHOULD show the ring WHEN focus is keyboard-initiated and hide it on blur", () => {
+    setup();
+
+    act(() => pressable().props.onFocus({ target: { matches: () => true } }));
+    expect(screen.getByTestId("focus-ring")).toBeTruthy();
+    act(() => pressable().props.onBlur());
+    expect(screen.queryByTestId("focus-ring")).toBeNull();
+  });
+
+  it("SHOULD NOT show the ring WHEN focus comes from a mouse click", () => {
+    setup();
+
+    act(() => pressable().props.onFocus({ target: { matches: () => false } }));
+    expect(screen.queryByTestId("focus-ring")).toBeNull();
+  });
 });

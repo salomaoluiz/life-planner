@@ -12,6 +12,7 @@ import FocusRing from "@components/FocusRing";
 import { useKitTheme } from "@components/utils/useKitTheme";
 import { isWeb } from "@utils/platform";
 
+import { isKeyboardFocus } from "./focusVisible";
 import useStyles from "./styles";
 
 export interface TouchableProps {
@@ -55,7 +56,7 @@ function Touchable(props: TouchableProps) {
       disabled={disabled}
       hitSlop={props.hitSlop}
       onBlur={() => setFocused(false)}
-      onFocus={() => setFocused(true)}
+      onFocus={(event) => setFocused(isKeyboardFocus(event))}
       onHoverIn={() => setHovered(true)}
       onHoverOut={() => setHovered(false)}
       onLongPress={props.onLongPress}
