@@ -26,7 +26,6 @@ const viewModel = {
   onNameSubmit: jest.fn(),
   onPasswordSubmit: jest.fn(),
   onSubmit: jest.fn(),
-  onTogglePassword: jest.fn(),
   password: "password123",
   passwordError: undefined as string | undefined,
   refs: {
@@ -34,7 +33,6 @@ const viewModel = {
     email: { current: null },
     password: { current: null },
   },
-  showPassword: false,
 };
 // endregion mocks
 
@@ -52,7 +50,6 @@ beforeEach(() => {
     logged: false,
     nameError: undefined,
     passwordError: undefined,
-    showPassword: false,
   });
   spies.useSignupViewModel.mockReturnValue(viewModel as never);
 });

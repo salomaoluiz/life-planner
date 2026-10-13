@@ -57,7 +57,6 @@ function useSignupViewModel() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [nameError, setNameError] = useState<string>();
   const [emailError, setEmailError] = useState<string>();
   const [passwordError, setPasswordError] = useState<string>();
@@ -164,11 +163,9 @@ function useSignupViewModel() {
     onNameSubmit: () => refs.email.current?.focus(),
     onPasswordSubmit: () => refs.confirmPassword.current?.focus(),
     onSubmit,
-    onTogglePassword: () => setShowPassword((current) => !current),
     password,
     passwordError,
     refs,
-    showPassword,
   };
 }
 
