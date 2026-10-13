@@ -6,7 +6,7 @@ import {
   spies,
 } from "./mocks/familyMemberRepositoryImpl_joinFamilyMember.mocks";
 
-it("SHOULD join family member", async () => {
+it("SHOULD join with the token only", async () => {
   await setup();
 
   expect(spies.joinFamilyMember).toHaveBeenCalledTimes(1);
@@ -21,4 +21,11 @@ it("SHOULD invalidate cache", async () => {
     CacheStringKeys.CACHE_FAMILIES_DATA,
     CacheStringKeys.CACHE_FAMILY_MEMBERS_DATA,
   ]);
+});
+
+it("SHOULD NOT invalidate cache WHEN the datasource rejects", async () => {
+  spies.joinFamilyMember.mockRejectedValueOnce(new Error("boom"));
+
+  await expect(setup()).rejects.toThrow("boom");
+  expect(spies.cache.invalidate).not.toHaveBeenCalled();
 });

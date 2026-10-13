@@ -1,5 +1,9 @@
 import { repositoriesMocks } from "@data/repositories/mocks/index.mocks";
 import FamilyMemberEntity from "@domain/entities/familyMember/FamilyMemberEntity";
+import {
+  FamilyMemberRole,
+  FamilyMemberStatus,
+} from "@domain/entities/familyMember/FamilyMemberEnums";
 
 import getFamilyMembersUseCase from "../getFamilyMembersUseCase";
 
@@ -9,7 +13,10 @@ const familyMembersSuccessMock = [
     email: "test@gmail.com",
     familyId: "123",
     id: "222",
+    inviteExpired: false,
     joinedAt: new Date(),
+    role: FamilyMemberRole.OWNER,
+    status: FamilyMemberStatus.JOINED,
     userId: "111",
   }),
 ];

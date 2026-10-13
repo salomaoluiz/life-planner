@@ -1,101 +1,75 @@
-import {
-  fireEvent,
-  hasText,
-  mocks,
-  screen,
-  setup,
-  spies,
-} from "./mocks/index.mocks";
+import { fireEvent, hasText, mocks, screen, setup } from "./mocks/index.mocks";
 
-function deleteButton() {
-  return screen.UNSAFE_getAllByProps({ label: "Delete Family Member" })[0];
+function actionButton(label: string) {
+  return screen.UNSAFE_getAllByProps({ label })[0];
 }
 
 function expand() {
   fireEvent.press(screen.UNSAFE_getByType(mocks.Accordion.Item));
 }
 
-it("SHOULD render the member name and avatar", () => {
-  setup();
+it("SHOULD render the member name, avatar and the Owner label", () => {
+  setup({ row: "owner", viewer: mocks.owner });
 
   expect(hasText("Alice Test")).toBe(true);
+  expect(hasText("family.member.role.owner")).toBe(true);
   expect(screen.UNSAFE_getByType(mocks.Avatar.Small).props).toMatchObject({
     mode: "image",
     source: "https://example.test/alice.png",
   });
 });
 
-it("SHOULD show the member email WHEN the member has no user", () => {
-  setup({ member: mocks.invitedMember });
+it("SHOULD show the email AND the Pending label for a pending invite", () => {
+  setup({ row: "pending", viewer: mocks.owner });
 
   expect(hasText("bob@example.test")).toBe(true);
+  expect(hasText("family.member.status.pending")).toBe(true);
 });
 
-it("SHOULD configure the delete mutation with the use case", () => {
-  setup();
+it("SHOULD show no status label for a plain joined member", () => {
+  setup({ row: "joined", viewer: mocks.owner });
 
-  expect(spies.useMutation).toHaveBeenCalledWith({
-    cacheKey: ["delete_member"],
-    fetch: mocks.useCases.deleteFamilyMemberUseCase.execute,
-  });
+  expect(hasText("Carol Test")).toBe(true);
+  expect(hasText("family.member.status.pending")).toBe(false);
+  expect(hasText("family.member.role.owner")).toBe(false);
 });
 
-it("SHOULD hide the delete button WHEN collapsed and show it WHEN pressed", () => {
-  setup();
-  expect(
-    screen.UNSAFE_queryAllByProps({ label: "Delete Family Member" }),
-  ).toHaveLength(0);
+it("SHOULD NOT be expandable (no action) for the owner row", () => {
+  setup({ row: "owner", viewer: mocks.owner });
 
-  expand();
-
-  expect(deleteButton()).toBeTruthy();
+  expect(screen.UNSAFE_getByType(mocks.Accordion.Item).props.onPress).toBe(
+    undefined,
+  );
 });
 
-it("SHOULD hide the delete button again WHEN pressed twice", () => {
-  setup();
+it.each([
+  ["pending", mocks.owner, "family.member.cancelInvite"],
+  ["joined", mocks.owner, "family.member.remove"],
+  ["joined", mocks.member, "family.member.leave"],
+] as const)(
+  "SHOULD show the %s row action %s only after expanding",
+  (row, viewer, label) => {
+    setup({ row, viewer });
+    expect(screen.UNSAFE_queryAllByProps({ label })).toHaveLength(0);
 
-  expand();
-  expand();
+    expand();
 
-  expect(
-    screen.UNSAFE_queryAllByProps({ label: "Delete Family Member" }),
-  ).toHaveLength(0);
-});
+    expect(actionButton(label)).toBeTruthy();
+  },
+);
 
-it("SHOULD disable the delete button WHEN the member is the family owner", () => {
-  setup({ ownerId: "member-1" });
-  expand();
-
-  expect(deleteButton().props.disabled).toBe(true);
-});
-
-it("SHOULD enable the delete button WHEN the member is not the family owner", () => {
-  setup({ member: mocks.invitedMember, ownerId: "member-1" });
+it("SHOULD delete the member WHEN the action is pressed", () => {
+  const { mutate } = setup({ row: "pending", viewer: mocks.owner });
   expand();
 
-  expect(deleteButton().props.disabled).toBe(false);
-});
-
-it("SHOULD delete the member WHEN the delete button is pressed", () => {
-  const { mutate } = setup({ member: mocks.invitedMember });
-  expand();
-
-  fireEvent.press(deleteButton());
+  fireEvent.press(actionButton("family.member.cancelInvite"));
 
   expect(mutate).toHaveBeenCalledWith({ id: "member-2" });
 });
 
-it("SHOULD refetch the family WHEN the delete succeeded", () => {
-  setup({ status: "success" });
+it("SHOULD disable the action while deleting", () => {
+  setup({ isFetching: true, row: "joined", viewer: mocks.owner });
+  expand();
 
-  expect(mocks.refetchFamily).toHaveBeenCalledTimes(1);
+  expect(actionButton("family.member.remove").props.disabled).toBe(true);
 });
-
-it.each(["idle", "error"] as const)(
-  "SHOULD NOT refetch the family WHEN the delete status is %s",
-  (status) => {
-    setup({ status });
-
-    expect(mocks.refetchFamily).not.toHaveBeenCalled();
-  },
-);

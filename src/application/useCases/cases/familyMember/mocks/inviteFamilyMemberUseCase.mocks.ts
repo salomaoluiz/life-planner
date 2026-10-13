@@ -1,39 +1,28 @@
 import { repositoriesMocks } from "@data/repositories/mocks/index.mocks";
-import * as crypto from "@infrastructure/crypto";
 
 import inviteFamilyMemberUseCase from "../inviteFamilyMemberUseCase";
 
 // region mocks
-
-const familyByIdMock = {
-  id: "123",
-  name: "Family name",
-  ownerId: "owner-id",
+const inviteResponseMock = {
+  inviteExpiresAt: new Date("2026-10-11T12:00:00.000Z"),
+  inviteToken: "q3Jx0b9S2v1mA8kQ7rT4yU6pL5nW0zE3cF2hD1gB9aI",
 };
 // endregion mocks
 
 // region spies
-const createFamilyMemberSpy = jest.spyOn(
+const inviteFamilyMemberSpy = jest.spyOn(
   repositoriesMocks.familyMemberRepository,
-  "createFamilyMember",
+  "inviteFamilyMember",
 );
-const getFamilyByIdSpy = jest
-  .spyOn(repositoriesMocks.familyRepository, "getFamilyById")
-  .mockResolvedValue(familyByIdMock);
-
-const encodeSpy = jest
-  .spyOn(crypto, "encode")
-  .mockResolvedValue("encoded-token");
-
 // endregion spies
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
-async function setup() {
+async function setup(email = "test@example.com") {
   return inviteFamilyMemberUseCase(repositoriesMocks).execute({
-    email: "test@gmail.com",
+    email,
     familyId: "123",
   });
 }
@@ -45,16 +34,8 @@ async function throwableSetup() {
     return error;
   }
 }
-const spies = {
-  createFamilyMember: createFamilyMemberSpy,
-  encode: encodeSpy,
-  getFamilyById: getFamilyByIdSpy,
-};
 
-const mocks = {};
-
-beforeEach(() => {
-  jest.clearAllMocks();
-});
+const spies = { inviteFamilyMember: inviteFamilyMemberSpy };
+const mocks = { inviteResponse: inviteResponseMock };
 
 export { mocks, setup, spies, throwableSetup };

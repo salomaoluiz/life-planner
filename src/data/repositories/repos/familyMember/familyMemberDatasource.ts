@@ -1,24 +1,32 @@
+import FamilyInviteModel from "@data/models/familyMember/FamilyInviteModel";
 import FamilyMemberModel from "@data/models/familyMember/FamilyMemberModel";
 
 export interface FamilyMemberDatasource {
-  createFamilyMember(params: CreateFamilyMemberDatasourceParams): Promise<void>;
   deleteFamilyMember(id: string): Promise<void>;
   getFamilyMembers(familyId: string): Promise<FamilyMemberModel[]>;
+  getInvite(inviteToken: string): Promise<FamilyInviteModel>;
+  inviteFamilyMember(
+    params: InviteFamilyMemberDatasourceParams,
+  ): Promise<InviteFamilyMemberDatasourceResponse>;
   joinFamilyMember(params: JoinFamilyMemberDatasourceParams): Promise<void>;
 }
 
-interface CreateFamilyMemberDatasourceParams {
+interface InviteFamilyMemberDatasourceParams {
   email: string;
   familyId: string;
-  inviteToken?: string;
-  joinDate?: string;
-  userId?: string;
+}
+
+interface InviteFamilyMemberDatasourceResponse {
+  inviteExpiresAt: string;
+  inviteToken: string;
 }
 
 interface JoinFamilyMemberDatasourceParams {
   inviteToken: string;
-  joinDate: string;
-  userId: string;
 }
 
-export { CreateFamilyMemberDatasourceParams, JoinFamilyMemberDatasourceParams };
+export {
+  InviteFamilyMemberDatasourceParams,
+  InviteFamilyMemberDatasourceResponse,
+  JoinFamilyMemberDatasourceParams,
+};

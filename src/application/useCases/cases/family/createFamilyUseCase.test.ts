@@ -20,7 +20,7 @@ it("SHOULD create a family for the current user AND NOT create the owner member 
     ownerId: mocks.userEntity.id,
   });
   expect(
-    spies.familyMemberRepository.createFamilyMember,
+    spies.familyMemberRepository.inviteFamilyMember,
   ).not.toHaveBeenCalled();
 });
 

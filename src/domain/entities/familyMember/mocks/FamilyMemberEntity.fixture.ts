@@ -1,4 +1,8 @@
 import FamilyMemberEntity from "@domain/entities/familyMember/FamilyMemberEntity";
+import {
+  FamilyMemberRole,
+  FamilyMemberStatus,
+} from "@domain/entities/familyMember/FamilyMemberEnums";
 
 class FamilyMemberEntityFixture {
   value = {} as FamilyMemberEntity;
@@ -16,7 +20,12 @@ class FamilyMemberEntityFixture {
       email: "teste@gmail.com",
       familyId: "c6d76166-e7f3-4823-bd5b-f8bbd33912ac",
       id: "c6d76166-e7f3-4823-bd5b-f8bbd33912ac",
+      inviteExpired: false,
       joinedAt: undefined,
+      name: undefined,
+      photoUrl: undefined,
+      role: FamilyMemberRole.MEMBER,
+      status: FamilyMemberStatus.PENDING,
       userId: undefined,
     };
   }
@@ -36,8 +45,33 @@ class FamilyMemberEntityFixture {
     return this;
   }
 
+  withInviteExpired(inviteExpired: boolean) {
+    this.value.inviteExpired = inviteExpired;
+    return this;
+  }
+
   withJoinedAt(joinedAt: Date) {
     this.value.joinedAt = joinedAt;
+    return this;
+  }
+
+  withName(name: string) {
+    this.value.name = name;
+    return this;
+  }
+
+  withPhotoUrl(photoUrl: string) {
+    this.value.photoUrl = photoUrl;
+    return this;
+  }
+
+  withRole(role: FamilyMemberRole) {
+    this.value.role = role;
+    return this;
+  }
+
+  withStatus(status: FamilyMemberStatus) {
+    this.value.status = status;
     return this;
   }
 

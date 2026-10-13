@@ -1,64 +1,42 @@
-import { useEffect, useState } from "react";
 import { View } from "react-native";
 import { Banner } from "react-native-paper";
 
-import { useCases } from "@application/useCases";
-import { DeleteFamilyMemberUseCaseParams } from "@application/useCases/cases/familyMember/deleteFamilyMemberUseCase";
-import { Accordion, Avatar, Button } from "@components";
-import { useMutation } from "@infrastructure/fetcher";
-import FamilyMemberViewModel from "@screens/Family/models/FamilyMembersViewModel";
+import { Accordion, Avatar, Button, Text } from "@components";
+import { useTranslation } from "@presentation/i18n";
 
+import useFamilyMemberCardViewModel, {
+  Props,
+} from "./hooks/useFamilyMemberCardViewModel";
 import getStyles from "./styles";
-
-interface Props {
-  member: FamilyMemberViewModel;
-  ownerId: string;
-  refetchFamily: () => void;
-}
 
 function FamilyMemberCard(props: Props) {
   const { styles, theme } = getStyles();
-  const [visible, setVisible] = useState(false);
-  const deleteFM = useMutation<DeleteFamilyMemberUseCaseParams, void>({
-    cacheKey: [useCases.deleteFamilyMemberUseCase.uniqueName],
-    fetch: useCases.deleteFamilyMemberUseCase.execute,
-  });
-
-  useEffect(() => {
-    if (deleteFM.status === "success") {
-      props.refetchFamily();
-    }
-  }, [deleteFM.status]);
-
-  function onDeleteFamilyMember() {
-    deleteFM.mutate({
-      id: props.member.memberDto.id,
-    });
-  }
+  const { t } = useTranslation();
+  const vm = useFamilyMemberCardViewModel(props);
 
   return (
     <View style={styles.container}>
       <Accordion.Item
-        id={props.member.memberDto.id}
-        left={
-          <Avatar.Small
-            mode={props.member.avatar.mode}
-            source={props.member.avatar.source}
-          />
+        id={vm.id}
+        left={<Avatar.Small mode={vm.avatar.mode} source={vm.avatar.source} />}
+        onPress={vm.canExpand ? vm.onToggle : undefined}
+        right={
+          vm.statusLabelKey ? (
+            <Text.Caption value={t(vm.statusLabelKey)} />
+          ) : undefined
         }
-        onPress={() => {
-          setVisible(!visible);
-        }}
-        title={props.member.familyMemberName}
+        title={vm.displayName}
       />
-      <Banner visible={visible}>
+      <Banner visible={vm.isExpanded}>
         <View style={styles.buttonsContainer}>
-          <Button.Outlined
-            customStyles={{ textColor: theme.colors.error }}
-            disabled={props.ownerId === props.member.memberDto.id}
-            label={"Delete Family Member"}
-            onPress={onDeleteFamilyMember}
-          />
+          {vm.actionLabelKey ? (
+            <Button.Outlined
+              customStyles={{ textColor: theme.colors.error }}
+              disabled={vm.isDeleting}
+              label={t(vm.actionLabelKey)}
+              onPress={vm.onActionPress}
+            />
+          ) : null}
         </View>
       </Banner>
     </View>

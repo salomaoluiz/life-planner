@@ -14,6 +14,7 @@ const useCases = {
   deleteStockItemUseCase: expect.any(Function),
   getFamiliesUseCase: expect.any(Function),
   getFamilyByIdUseCase: expect.any(Function),
+  getFamilyInviteUseCase: expect.any(Function),
   getFamilyMembersUseCase: expect.any(Function),
   getFinancialAccountsUseCase: expect.any(Function),
   getFinancialCategoriesUseCase: expect.any(Function),

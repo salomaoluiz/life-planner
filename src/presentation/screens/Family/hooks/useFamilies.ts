@@ -3,40 +3,32 @@ import { useEffect } from "react";
 
 import { useCases } from "@application/useCases";
 import { useQuery } from "@infrastructure/fetcher";
-import FamilyMemberViewModel from "@screens/Family/models/FamilyMembersViewModel";
+import FamilyMemberUIModel from "@screens/Family/models/FamilyMemberUIModel";
 import FamilyViewModel from "@screens/Family/models/FamilyViewModel";
 
 async function queryFamilies() {
+  const user = await useCases.getUserUseCase.execute();
   const families = await useCases.getFamiliesUseCase.execute();
 
-  const familyMembersPromises = families.map(async (family) => {
-    return useCases.getFamilyMembersUseCase.execute(family.id);
-  });
+  const familyMembers = await Promise.all(
+    families.map(async (family) =>
+      useCases.getFamilyMembersUseCase.execute(family.id),
+    ),
+  );
 
-  const familyMembers = await Promise.all(familyMembersPromises);
+  return families.map((family, index) => {
+    const viewer = {
+      isFamilyOwner: family.ownerId === user.id,
+      userId: user.id,
+    };
 
-  const usersPromises = familyMembers.flat().map(async (member) => {
-    if (member.userId) {
-      return useCases.getUserByUserIdUseCase.execute(member.userId);
-    }
-    return undefined;
-  });
-
-  const users = await Promise.all(usersPromises);
-
-  return families.reduce((acc, family, index) => {
-    const familyMembersViewModels = familyMembers[index].map((familyMember) => {
-      const user = users.find((u) => u?.id === familyMember.userId);
-      return new FamilyMemberViewModel(familyMember, user);
-    });
-
-    const familyViewModel = new FamilyViewModel(
+    return new FamilyViewModel(
       family,
-      familyMembersViewModels,
+      familyMembers[index].map(
+        (member) => new FamilyMemberUIModel(member, viewer),
+      ),
     );
-
-    return [...acc, familyViewModel];
-  }, [] as FamilyViewModel[]);
+  });
 }
 
 function useFamilies() {
@@ -44,7 +36,7 @@ function useFamilies() {
     cacheKey: [
       useCases.getFamiliesUseCase.uniqueName,
       useCases.getFamilyMembersUseCase.uniqueName,
-      useCases.getUserByUserIdUseCase.uniqueName,
+      useCases.getUserUseCase.uniqueName,
     ],
     fetch: queryFamilies,
   });

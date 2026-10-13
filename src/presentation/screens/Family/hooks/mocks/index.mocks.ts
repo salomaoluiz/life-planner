@@ -22,7 +22,7 @@ jest.mock("@application/useCases", () => ({
   useCases: {
     getFamiliesUseCase: { execute: jest.fn(), uniqueName: "families" },
     getFamilyMembersUseCase: { execute: jest.fn(), uniqueName: "members" },
-    getUserByUserIdUseCase: { execute: jest.fn(), uniqueName: "user" },
+    getUserUseCase: { execute: jest.fn(), uniqueName: "user" },
   },
 }));
 
@@ -34,7 +34,7 @@ const query = new UseQueryFixture<FamilyViewModel[]>();
 const spies = {
   getFamilies: jest.mocked(useCases.getFamiliesUseCase.execute),
   getMembers: jest.mocked(useCases.getFamilyMembersUseCase.execute),
-  getUser: jest.mocked(useCases.getUserByUserIdUseCase.execute),
+  getUser: jest.mocked(useCases.getUserUseCase.execute),
   isFocused: jest.mocked(useIsFocused),
   useQuery: jest.mocked(useQuery),
 };
@@ -45,9 +45,9 @@ beforeEach(() => {
 });
 
 function givenData() {
+  spies.getUser.mockResolvedValue(ownerUser as UserDTO);
   spies.getFamilies.mockResolvedValue([familyDTO]);
   spies.getMembers.mockResolvedValue([ownerMemberDTO, invitedMemberDTO]);
-  spies.getUser.mockResolvedValue(ownerUser as UserDTO);
 }
 
 function setup(props?: { focused?: boolean }) {

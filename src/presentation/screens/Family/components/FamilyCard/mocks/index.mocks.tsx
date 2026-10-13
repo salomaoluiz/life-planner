@@ -1,6 +1,6 @@
 import { List } from "react-native-paper";
 
-import { fireEvent, render, screen, suppressConsoleError } from "@tests";
+import { fireEvent, render, screen } from "@tests";
 
 import { Avatar } from "@components";
 import FamilyViewModel from "@screens/Family/models/FamilyViewModel";
@@ -12,7 +12,7 @@ jest.mock("@screens/Family/containers/FamilyMemberCard", () => {
   const { View: MockView } = jest.requireActual("react-native");
   return {
     __esModule: true,
-    default: (props: { member: unknown; ownerId?: string }) => (
+    default: (props: { member: unknown }) => (
       <MockView testID="memberCard" {...props} />
     ),
   };
@@ -26,22 +26,15 @@ const callbacks = {
 };
 // endregion mocks
 
-let restoreConsoleError: () => void;
-
 beforeEach(() => {
   jest.clearAllMocks();
-  // FamilyCard renders members without a `key`; React logs a warning. Fixing
-  // it is a production change, flagged in the PR instead.
-  restoreConsoleError = suppressConsoleError();
-});
-
-afterEach(() => {
-  restoreConsoleError();
 });
 
 function setup(props?: { expanded?: boolean; family?: FamilyViewModel }) {
   const family = props?.family ?? makeFamilyViewModel();
-  render(<FamilyCard family={family} {...callbacks} />);
+  render(
+    <FamilyCard addMemberLabel="Add member" family={family} {...callbacks} />,
+  );
 
   if (props?.expanded) {
     fireEvent.press(screen.UNSAFE_getByType(List.Accordion));

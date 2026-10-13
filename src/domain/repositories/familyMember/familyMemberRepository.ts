@@ -1,24 +1,32 @@
+import FamilyInviteEntity from "@domain/entities/familyMember/FamilyInviteEntity";
 import FamilyMemberEntity from "@domain/entities/familyMember/FamilyMemberEntity";
 
 export type FamilyMemberRepository = {
-  createFamilyMember(params: CreateFamilyMemberRepositoryParams): Promise<void>;
   deleteFamilyMember(id: string): Promise<void>;
   getFamilyMembers(familyId: string): Promise<FamilyMemberEntity[]>;
+  getInvite(inviteToken: string): Promise<FamilyInviteEntity>;
+  inviteFamilyMember(
+    params: InviteFamilyMemberRepositoryParams,
+  ): Promise<InviteFamilyMemberRepositoryResponse>;
   joinFamilyMember(params: JoinFamilyMemberRepositoryParams): Promise<void>;
 };
 
-interface CreateFamilyMemberRepositoryParams {
+interface InviteFamilyMemberRepositoryParams {
   email: string;
   familyId: string;
-  inviteToken?: string;
-  joinDate?: string;
-  userId?: string;
+}
+
+interface InviteFamilyMemberRepositoryResponse {
+  inviteExpiresAt: Date;
+  inviteToken: string;
 }
 
 interface JoinFamilyMemberRepositoryParams {
   inviteToken: string;
-  joinDate: string;
-  userId: string;
 }
 
-export { CreateFamilyMemberRepositoryParams, JoinFamilyMemberRepositoryParams };
+export {
+  InviteFamilyMemberRepositoryParams,
+  InviteFamilyMemberRepositoryResponse,
+  JoinFamilyMemberRepositoryParams,
+};

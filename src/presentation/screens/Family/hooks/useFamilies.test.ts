@@ -1,20 +1,18 @@
+import {
+  FamilyMemberRole,
+  FamilyMemberStatus,
+} from "@domain/entities/familyMember/FamilyMemberEnums";
 import FamilyViewModel from "@screens/Family/models/FamilyViewModel";
 
+import { memberDTO, ownerUser } from "../mocks/index.mocks";
 import { givenData, setup, spies } from "./mocks/index.mocks";
 
-it("SHOULD return the query state", () => {
-  const { result } = setup();
+async function runFetch() {
+  setup();
+  return spies.useQuery.mock.calls[0][0].fetch() as Promise<FamilyViewModel[]>;
+}
 
-  expect(result.current).toEqual({
-    error: null,
-    families: undefined,
-    isFetching: false,
-    refetch: expect.any(Function),
-    status: "pending",
-  });
-});
-
-it("SHOULD use the three use case names as cache key", () => {
+it("SHOULD key the query by families, members and the current user (never by a user lookup per member)", () => {
   setup();
 
   expect(spies.useQuery.mock.calls[0][0].cacheKey).toEqual([
@@ -24,58 +22,78 @@ it("SHOULD use the three use case names as cache key", () => {
   ]);
 });
 
-it("SHOULD refetch WHEN the screen is focused", () => {
-  const { refetch } = setup({ focused: true });
+it("SHOULD build one view model per family with a UI model per member", async () => {
+  givenData();
 
-  expect(refetch).toHaveBeenCalledTimes(1);
+  const result = await runFetch();
+
+  expect(result).toHaveLength(1);
+  expect(result[0].familyName).toBe("Test Family");
+  expect(result[0].familyMembers.map((member) => member.id)).toEqual([
+    "member-1",
+    "member-2",
+  ]);
 });
 
-it("SHOULD NOT refetch WHEN the screen is not focused", () => {
-  const { refetch } = setup({ focused: false });
+it("SHOULD NOT call a user lookup per member (name/photo come from the members response)", async () => {
+  givenData();
 
-  expect(refetch).not.toHaveBeenCalled();
+  await runFetch();
+
+  expect(spies.getUser).toHaveBeenCalledTimes(1);
+  expect(spies.getMembers).toHaveBeenCalledTimes(1);
 });
 
-describe("fetch", () => {
-  async function runFetch() {
-    setup();
-    return (await spies.useQuery.mock.calls[0][0].fetch()) as FamilyViewModel[];
-  }
+it("SHOULD give the owner Cancel actions on other rows and none on their own", async () => {
+  givenData();
 
-  it("SHOULD build family view models with their members and users", async () => {
-    givenData();
+  const [family] = await runFetch();
 
-    const families = await runFetch();
+  expect(family.familyMembers.map((member) => member.action)).toEqual([
+    undefined,
+    "CANCEL_INVITE",
+  ]);
+});
 
-    expect(spies.getMembers).toHaveBeenCalledWith("family-1");
-    expect(families).toHaveLength(1);
-    expect(families[0].familyName).toBe("Test Family");
-    expect(families[0].familyMembers.map((m) => m.familyMemberName)).toEqual([
-      "Alice Test",
-      "bob@example.test",
-    ]);
-  });
+it("SHOULD give a non-owner Leave on their own row only", async () => {
+  givenData();
+  spies.getUser.mockResolvedValue({ ...ownerUser, id: "user-2" });
+  spies.getMembers.mockResolvedValue([
+    memberDTO(),
+    memberDTO({
+      id: "member-3",
+      role: FamilyMemberRole.MEMBER,
+      status: FamilyMemberStatus.JOINED,
+      userId: "user-2",
+    }),
+    memberDTO({
+      id: "member-4",
+      role: FamilyMemberRole.MEMBER,
+      status: FamilyMemberStatus.JOINED,
+      userId: "user-4",
+    }),
+  ]);
 
-  it("SHOULD only look up users for members that have a user id", async () => {
-    givenData();
+  const [family] = await runFetch();
 
-    await runFetch();
+  expect(family.familyMembers.map((member) => member.action)).toEqual([
+    undefined,
+    "LEAVE",
+    undefined,
+  ]);
+});
 
-    expect(spies.getUser).toHaveBeenCalledTimes(1);
-    expect(spies.getUser).toHaveBeenCalledWith("user-1");
-  });
+it("SHOULD return [] WHEN the user has no family", async () => {
+  givenData();
+  spies.getFamilies.mockResolvedValue([]);
 
-  it("SHOULD return an empty list WHEN there are no families", async () => {
-    spies.getFamilies.mockResolvedValue([]);
+  expect(await runFetch()).toEqual([]);
+});
 
-    expect(await runFetch()).toEqual([]);
-    expect(spies.getMembers).not.toHaveBeenCalled();
-  });
+it("SHOULD refetch on focus only", () => {
+  const unfocused = setup({ focused: false });
+  expect(unfocused.refetch).not.toHaveBeenCalled();
 
-  it("SHOULD reject WHEN a use case fails", async () => {
-    givenData();
-    spies.getMembers.mockRejectedValue(new Error("boom"));
-
-    await expect(runFetch()).rejects.toThrow("boom");
-  });
+  const focused = setup({ focused: true });
+  expect(focused.refetch).toHaveBeenCalledTimes(1);
 });

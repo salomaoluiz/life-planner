@@ -1,7 +1,6 @@
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import { DefaultError } from "@domain/entities/errors";
 import Repositories from "@domain/repositories";
-import { encode } from "@infrastructure/crypto";
 
 export interface InviteFamilyMemberUseCaseParams {
   email: string;
@@ -9,6 +8,7 @@ export interface InviteFamilyMemberUseCaseParams {
 }
 
 export interface InviteFamilyMemberUseCaseResponse {
+  inviteExpiresAt: Date;
   inviteToken: string;
 }
 
@@ -21,25 +21,11 @@ function inviteFamilyMemberUseCase(
   return {
     execute: async (params: InviteFamilyMemberUseCaseParams) => {
       try {
-        const family = await repositories.familyRepository.getFamilyById(
-          params.familyId,
-        );
-
-        const inviteToken = await encode({
-          email: params.email,
+        // The API generates the token; nothing is encoded on the device any more.
+        return await repositories.familyMemberRepository.inviteFamilyMember({
+          email: params.email.trim(),
           familyId: params.familyId,
-          familyName: family.name,
-          inviteDate: Date.now(),
-          ownerId: family.ownerId,
         });
-
-        await repositories.familyMemberRepository.createFamilyMember({
-          email: params.email,
-          familyId: params.familyId,
-          inviteToken,
-        });
-
-        return { inviteToken };
       } catch (error) {
         if (error instanceof DefaultError) {
           error.addContext({

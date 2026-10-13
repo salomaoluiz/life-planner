@@ -9,9 +9,10 @@ const datasourcesMocks: jest.MockedObjectDeep<Datasources> = {
     updateFamily: jest.fn(),
   },
   familyMemberDatasource: {
-    createFamilyMember: jest.fn(),
     deleteFamilyMember: jest.fn(),
     getFamilyMembers: jest.fn(),
+    getInvite: jest.fn(),
+    inviteFamilyMember: jest.fn(),
     joinFamilyMember: jest.fn(),
   },
   financialAccountDatasource: {

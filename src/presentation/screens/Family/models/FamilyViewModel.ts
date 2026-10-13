@@ -1,9 +1,9 @@
 import FamilyDTO from "@application/dto/family/FamilyDTO";
-import FamilyMemberViewModel from "@screens/Family/models/FamilyMembersViewModel";
+import FamilyMemberUIModel from "@screens/Family/models/FamilyMemberUIModel";
 
 class FamilyViewModel {
   dto: FamilyDTO;
-  familyMembers: FamilyMemberViewModel[];
+  familyMembers: FamilyMemberUIModel[];
 
   get avatar() {
     return {
@@ -24,13 +24,7 @@ class FamilyViewModel {
     return this.dto.name;
   }
 
-  get owner() {
-    return this.familyMembers.find(
-      (member) => member.memberDto.userId === this.dto.ownerId,
-    )!;
-  }
-
-  constructor(dto: FamilyDTO, familyMembers: FamilyMemberViewModel[]) {
+  constructor(dto: FamilyDTO, familyMembers: FamilyMemberUIModel[]) {
     this.dto = dto;
     this.familyMembers = familyMembers;
   }

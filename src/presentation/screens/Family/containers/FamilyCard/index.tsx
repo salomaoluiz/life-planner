@@ -74,6 +74,7 @@ function FamilyCard(props: Props) {
   return (
     <>
       <Components.FamilyCard
+        addMemberLabel={t("family.member.addButton")}
         family={props.family}
         onAddNewFamilyMember={onAddNewFamilyMember}
         onDeleteFamily={onDeleteFamily}
