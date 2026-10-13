@@ -1,8 +1,9 @@
 import { StyleSheet } from "react-native";
 
-import { fireEvent, screen } from "@tests";
+import { fireEvent, mockDarkTheme, screen } from "@tests";
 
 import { Button } from "@components";
+import colors from "@presentation/theme/constants/colors";
 import { lightTheme } from "@presentation/theme/provider";
 
 import { defaultProps, setup } from "./mocks/index.mocks";
@@ -127,4 +128,25 @@ it("SHOULD ignore inline on non-Ghost variants", () => {
   setup({ inline: true });
   expect(rootStyle().paddingHorizontal).toBe(16);
   expect(root().props.hitSlop).toBeUndefined();
+});
+
+it("SHOULD paint a disabled Primary raised with a secondary label and no dimming", () => {
+  setup({ disabled: true });
+  expect(rootStyle().backgroundColor).toBe(lightTheme.colors.surfaceRaised);
+  expect(StyleSheet.flatten(label().props.style).color).toBe(
+    lightTheme.colors.textSecondary,
+  );
+  expect(rootStyle().opacity).toBeUndefined();
+});
+
+it("SHOULD paint a disabled Primary raised WHEN dark", () => {
+  const restore = mockDarkTheme();
+  setup({ disabled: true });
+  expect(rootStyle().backgroundColor).toBe(colors.dark.surfaceRaised);
+  restore();
+});
+
+it("SHOULD still dim a disabled Secondary", () => {
+  setup({ disabled: true, variant: "Secondary" });
+  expect(rootStyle().opacity).toBe(0.5);
 });

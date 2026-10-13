@@ -141,6 +141,7 @@ function BottomSheet(props: BottomSheetProps) {
         <ScrollView
           contentContainerStyle={styles.body}
           keyboardShouldPersistTaps="handled"
+          style={styles.scroll}
           testID={testID && `${testID}-body`}
         >
           {props.children}

@@ -1,6 +1,7 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, ViewStyle } from "react-native";
 
 import { useKitTheme } from "@components/utils/useKitTheme";
+import { isWeb } from "@utils/platform";
 
 const GRABBER = { height: 4, width: 40 };
 const DIALOG_MAX_WIDTH = 480;
@@ -31,6 +32,10 @@ function useStyles(wide: boolean) {
       paddingHorizontal: spacing.lg,
     },
     overlay: { flex: 1, justifyContent: wide ? "center" : "flex-end" },
+    // react-native-web passes scrollbarColor through; RN's ViewStyle does not declare it.
+    scroll: isWeb()
+      ? ({ scrollbarColor: `${colors.border} transparent` } as ViewStyle)
+      : {},
     sheet: wide
       ? {
           alignSelf: "center",

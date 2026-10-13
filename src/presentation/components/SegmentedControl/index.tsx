@@ -16,13 +16,16 @@ export interface SegmentedControlProps {
 type SegmentTone = "accent" | "expense" | "income";
 
 function SegmentedControl(props: SegmentedControlProps) {
-  const { colors, radius, sizes, spacing } = useKitTheme();
+  const { colors, isDark, radius, sizes, spacing } = useKitTheme();
   const { testID } = props;
   const toneColors: Record<SegmentTone, string> = {
     accent: colors.accentText,
     expense: colors.expense,
     income: colors.income,
   };
+  function selectedColor(tone: SegmentTone = "accent") {
+    return isDark && tone === "accent" ? colors.textPrimary : toneColors[tone];
+  }
   const styles = StyleSheet.create({
     segment: {
       alignItems: "center",
@@ -32,14 +35,16 @@ function SegmentedControl(props: SegmentedControlProps) {
       minHeight: sizes.touchTarget - spacing.xs,
     },
     selected: {
-      backgroundColor: colors.surface,
+      backgroundColor: isDark ? colors.surfaceRaised : colors.surface,
+      // Dark: the raised fill alone barely differs from the track, so the segment gets an edge.
+      ...(isDark ? { borderColor: colors.border, borderWidth: 1 } : {}),
       shadowColor: colors.scrim,
       shadowOffset: { height: 1, width: 0 },
       shadowOpacity: 0.2,
       shadowRadius: 2,
     },
     track: {
-      backgroundColor: colors.surfaceRaised,
+      backgroundColor: isDark ? colors.surface : colors.surfaceRaised,
       borderRadius: radius.md,
       flexDirection: "row",
       gap: spacing.xxs,
@@ -71,9 +76,7 @@ function SegmentedControl(props: SegmentedControlProps) {
           >
             <Text.BodyStrong
               color={
-                selected
-                  ? toneColors[option.tone ?? "accent"]
-                  : colors.textSecondary
+                selected ? selectedColor(option.tone) : colors.textSecondary
               }
               numberOfLines={1}
               testID={testID && `${testID}-${option.value}-label`}

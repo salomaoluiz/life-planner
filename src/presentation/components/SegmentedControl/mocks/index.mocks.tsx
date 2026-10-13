@@ -21,8 +21,23 @@ function setup(value = "expense", disabled = false) {
   );
 }
 
+function setupAccent() {
+  render(
+    <SegmentedControl
+      accessibilityLabel="Kind"
+      onChange={onChange}
+      options={[
+        { label: "A", value: "a" },
+        { label: "B", value: "b" },
+      ]}
+      testID="seg"
+      value="a"
+    />,
+  );
+}
+
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
-export { onChange, setup };
+export { onChange, setup, setupAccent };

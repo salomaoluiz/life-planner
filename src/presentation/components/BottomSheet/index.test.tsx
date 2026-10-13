@@ -42,6 +42,19 @@ it("SHOULD use 20 px padding in header, body and footer", () => {
   ).toBe(20);
 });
 
+it("SHOULD theme the scrollbar on web", () => {
+  jest.mocked(isWeb).mockReturnValue(true);
+  stubDocument();
+  setup();
+  expect(
+    StyleSheet.flatten(screen.getByTestId("sheet-body").props.style),
+  ).toEqual(
+    expect.objectContaining({
+      scrollbarColor: `${lightTheme.colors.border} transparent`,
+    }),
+  );
+});
+
 it("SHOULD call onClose WHEN Escape is pressed on web", () => {
   jest.mocked(isWeb).mockReturnValue(true);
   const { handlers } = stubDocument();

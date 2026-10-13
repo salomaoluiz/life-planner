@@ -33,6 +33,7 @@ function ButtonBase(props: ButtonProps & { variant: ButtonVariant }) {
     !!props.fullWidth,
     props.tone,
     props.inline,
+    props.disabled,
   );
   const { testID } = props;
 
@@ -61,6 +62,7 @@ function ButtonBase(props: ButtonProps & { variant: ButtonVariant }) {
       accessibilityLabel={props.accessibilityLabel ?? props.label}
       accessibilityRole="button"
       busy={props.loading}
+      dimWhenDisabled={props.variant !== "primary"}
       disabled={props.disabled}
       focusRadius={radius.md}
       hitSlop={

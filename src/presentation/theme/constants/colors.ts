@@ -25,7 +25,7 @@ const dark: Colors = {
   accentSoft: "rgba(124,140,255,0.16)",
   accentText: "#AEB8FF",
   background: "#0E1116",
-  border: "#2A303B",
+  border: "#353C49",
   expense: "#FF8080",
   expenseSoft: "rgba(255,128,128,0.14)",
   focusRing: "rgba(124,140,255,0.35)",

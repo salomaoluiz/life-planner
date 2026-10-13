@@ -21,6 +21,8 @@ export interface TouchableProps {
   accessibilityRole: AccessibilityRole;
   busy?: boolean;
   children: React.ReactNode;
+  /** Set false when the caller paints its own disabled look (default: dim to 50%) */
+  dimWhenDisabled?: boolean;
   disabled?: boolean;
   focusRadius?: number;
   hitSlop?: Insets;
@@ -64,7 +66,7 @@ function Touchable(props: TouchableProps) {
       style={({ pressed }) => [
         styles.root,
         props.style,
-        !!props.disabled && styles.disabled,
+        !!props.disabled && props.dimWhenDisabled !== false && styles.disabled,
         pressed && !disabled && styles.pressed,
       ]}
       testID={props.testID}
