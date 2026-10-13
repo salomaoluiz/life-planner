@@ -55,6 +55,9 @@ function DateField(props: DateFieldProps) {
     ? new Intl.DateTimeFormat(localeTag, { dateStyle: "medium" }).format(valid)
     : (props.placeholder ?? "");
 
+  // "Today" / "Yesterday" replace the date (the full date stays in the accessibility label), so the value fits one line.
+  const displayed = relativeLabel ?? formatted;
+
   const styles = StyleSheet.create({
     frame: {
       ...getFrameStyle({
@@ -65,7 +68,13 @@ function DateField(props: DateFieldProps) {
       gap: spacing.xs,
       paddingHorizontal: spacing.sm,
     },
-    text: { flex: 1 },
+    text: {
+      alignSelf: "stretch",
+      borderRadius: theme.radius.md,
+      flex: 1,
+      justifyContent: "center",
+      overflow: "hidden",
+    },
   });
 
   return (
@@ -86,18 +95,13 @@ function DateField(props: DateFieldProps) {
         >
           <View>
             <Text.Body
+              numberOfLines={1}
               testID={testID && `${testID}-value`}
               tone={valid ? "primary" : "secondary"}
-              value={formatted}
+              value={displayed}
             />
           </View>
         </Touchable>
-        {relativeLabel ? (
-          <Text.Caption
-            testID={testID && `${testID}-relative`}
-            value={relativeLabel}
-          />
-        ) : null}
         {props.clearable && valid && props.clearLabel ? (
           <IconButton
             accessibilityLabel={props.clearLabel}
