@@ -6,8 +6,8 @@ export type Params = Parameters<ConfigsRepository["saveConfigs"]>[0];
 
 async function saveConfigs(params: Params) {
   const model = new ConfigsModel({
-    darkMode: params.darkMode,
     language: params.language,
+    themeMode: params.themeMode,
   });
 
   cache.set(CacheStringKeys.CACHE_CONFIGS_DATA, model.toJSON(), {

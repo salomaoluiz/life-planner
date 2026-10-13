@@ -9,7 +9,7 @@ function customRender(
   component: React.JSX.Element,
   options?: Partial<RenderOptions>,
 ) {
-  render(component, options);
+  return render(component, options);
 }
 
 // react-native-paper components are mocked as <View>, so RNTL's getByText
@@ -22,14 +22,18 @@ function hasText(text: string) {
 // function that restores the light theme (call it in `afterEach`).
 function mockDarkTheme() {
   const { useTheme } = jest.requireMock("@presentation/theme");
+  const { ThemeMode } = jest.requireActual(
+    "@domain/entities/configs/ConfigsEntity",
+  );
   const { lightTheme } = jest.requireActual("@presentation/theme/provider");
   const { colors } = jest.requireActual("@presentation/theme/constants");
   const light = useTheme();
 
   useTheme.mockReturnValue({
     isDark: true,
-    setIsDark: jest.fn(),
+    setThemeMode: jest.fn(),
     theme: { ...lightTheme, colors: colors.dark, dark: true },
+    themeMode: ThemeMode.DARK,
   });
 
   return () => useTheme.mockReturnValue(light);

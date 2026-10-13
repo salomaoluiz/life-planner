@@ -2,14 +2,18 @@ import { render } from "@tests";
 
 import { Text, TextProps } from "@components";
 import { TextMode } from "@components/Text/types";
+import { ThemeMode } from "@domain/entities/configs/ConfigsEntity";
 import * as theme from "@presentation/theme";
 import { lightTheme } from "@presentation/theme/provider";
 
 jest.mock("@presentation/theme");
 
-jest
-  .spyOn(theme, "useTheme")
-  .mockReturnValue({ isDark: false, setIsDark: jest.fn(), theme: lightTheme });
+jest.spyOn(theme, "useTheme").mockReturnValue({
+  isDark: false,
+  setThemeMode: jest.fn(),
+  theme: lightTheme,
+  themeMode: ThemeMode.SYSTEM,
+});
 
 const defaultProps = {
   testID: "default-text",

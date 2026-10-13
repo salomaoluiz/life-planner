@@ -4,6 +4,7 @@ import ConfigsDTO from "@application/dto/configs/ConfigsDTO";
 import * as fetcher from "@infrastructure/fetcher";
 import UseMutationFixture from "@infrastructure/fetcher/mocks/useMutation.fixture";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
+import * as fonts from "@infrastructure/fonts";
 import * as loader from "@providers/loader";
 
 import { ThemeProvider, useTheme } from "../";
@@ -14,6 +15,7 @@ import * as Provider from "../provider";
 jest.mock("@presentation/theme/paper/hook");
 jest.unmock("@presentation/theme");
 jest.mock("@infrastructure/fetcher");
+jest.mock("@infrastructure/fonts");
 
 const providerLoaderResponse = {
   isLoading: false,
@@ -30,6 +32,9 @@ const useMutationResponse = useMutationFixture.build();
 jest.spyOn(fetcher, "useQuery").mockReturnValue(useQueryPendingResponse);
 jest.spyOn(fetcher, "useMutation").mockReturnValue(useMutationResponse);
 jest.spyOn(loader, "useProviderLoader").mockReturnValue(providerLoaderResponse);
+jest
+  .spyOn(fonts, "useAppFonts")
+  .mockReturnValue({ failed: false, ready: true });
 jest.spyOn(paper, "default").mockReturnValue(Provider.lightTheme);
 
 // endregion Spies

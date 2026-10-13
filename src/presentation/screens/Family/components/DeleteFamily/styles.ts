@@ -7,7 +7,7 @@ function getStyles() {
 
   return {
     styles: StyleSheet.create({
-      container: { flex: 1, marginTop: theme.sizes.spacing.xxsmall },
+      container: { flex: 1, marginTop: theme.sizes.spacing.xxs },
     }),
     theme,
   };

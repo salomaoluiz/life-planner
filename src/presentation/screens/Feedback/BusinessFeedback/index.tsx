@@ -56,13 +56,13 @@ function BusinessFeedback() {
   function getIconColor() {
     switch (params!.type) {
       case FeedbackType.Error:
-        return theme.colors.error;
+        return theme.colors.expense;
       case FeedbackType.Information:
-        return theme.colors.primary;
+        return theme.colors.accent;
       case FeedbackType.Success:
-        return theme.colors.tertiary;
+        return theme.colors.income;
       case FeedbackType.Warning:
-        return theme.colors.secondary;
+        return theme.colors.warning;
     }
   }
 
@@ -74,17 +74,17 @@ function BusinessFeedback() {
     <View style={styles.container}>
       <View style={styles.closeContainer}>
         <IconButton
-          color={theme.colors.onBackground}
+          color={theme.colors.textPrimary}
           name={"close-circle"}
           onPress={onCloseButtonPress}
-          size={theme.sizes.spacing.large}
+          size={theme.sizes.spacing.xl}
         />
       </View>
       <View style={styles.iconContainer}>
         <Icon
           color={getIconColor()}
           name={getIconName()}
-          size={theme.sizes.spacing.xxlarge}
+          size={theme.sizes.spacing.xxxl}
         />
       </View>
       <View style={styles.headerContainer}>

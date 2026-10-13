@@ -49,7 +49,7 @@ function TextInputBase(props: TextInputProps & { mode: TextInputMode }) {
     <View style={styles.container}>
       {label && (
         <View style={styles.labelContainer}>
-          <Text.Body color={theme.colors.onBackground} value={label} />
+          <Text.Body color={theme.colors.textPrimary} value={label} />
         </View>
       )}
       <BlurView
@@ -71,7 +71,7 @@ function TextInputBase(props: TextInputProps & { mode: TextInputMode }) {
           onChangeText={onChangeText}
           onFocus={() => setIsFocused(true)}
           onSubmitEditing={props.onSubmitEditing}
-          placeholderTextColor={theme.colors.glassTextPlaceholder}
+          placeholderTextColor={theme.colors.textSecondary}
           ref={props.inputRef}
           returnKeyType={props.returnKeyType}
           right={

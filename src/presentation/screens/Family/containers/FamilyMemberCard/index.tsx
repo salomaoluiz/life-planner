@@ -31,7 +31,7 @@ function FamilyMemberCard(props: Props) {
         <View style={styles.buttonsContainer}>
           {vm.actionLabelKey ? (
             <Button.Outlined
-              customStyles={{ textColor: theme.colors.error }}
+              customStyles={{ textColor: theme.colors.expense }}
               disabled={vm.isDeleting}
               label={t(vm.actionLabelKey)}
               onPress={vm.onActionPress}

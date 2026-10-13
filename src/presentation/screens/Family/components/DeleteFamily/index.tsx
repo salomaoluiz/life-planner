@@ -15,7 +15,7 @@ function AddNewFamilyMember(props: Props) {
     <View style={styles.container}>
       <Button.Text
         customStyles={{
-          textColor: theme.colors.error,
+          textColor: theme.colors.expense,
         }}
         label={"Delete Family"}
         onPress={props.onPress}

@@ -48,7 +48,7 @@ it("SHOULD use the primary color of the active theme", () => {
   setup();
 
   expect(screen.getByTestId("default-switch").props.color).toBe(
-    jest.requireMock("@presentation/theme").useTheme().theme.colors.primary,
+    jest.requireMock("@presentation/theme").useTheme().theme.colors.accent,
   );
   restore();
 });

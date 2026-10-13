@@ -5,36 +5,36 @@ import { lightTheme } from "@presentation/theme/provider";
 
 const styles = StyleSheet.create({
   buttonContainer: {
-    marginBottom: lightTheme.sizes.spacing.medium,
+    marginBottom: lightTheme.sizes.spacing.md,
   },
   container: {
     alignItems: "center",
     backgroundColor: lightTheme.colors.background,
     flex: 1,
     justifyContent: "center",
-    paddingHorizontal: lightTheme.sizes.spacing.medium,
+    paddingHorizontal: lightTheme.sizes.spacing.md,
   },
   description: {
-    color: lightTheme.colors.onBackground,
-    fontSize: lightTheme.sizes.fontSizes.medium,
-    lineHeight: lightTheme.sizes.lineHeights.medium,
+    color: lightTheme.colors.textPrimary,
+    fontSize: lightTheme.typography.heading.fontSize,
+    lineHeight: lightTheme.typography.heading.lineHeight,
     textAlign: "center",
   },
   descriptionContainer: {
-    marginBottom: lightTheme.sizes.spacing.medium,
+    marginBottom: lightTheme.sizes.spacing.md,
   },
   image: {
     height: 300 * getScaleRatio().scaleFactor,
     width: 300 * getScaleRatio().scaleFactor,
   },
   title: {
-    color: lightTheme.colors.onBackground,
-    fontSize: lightTheme.sizes.fontSizes.large,
-    lineHeight: lightTheme.sizes.lineHeights.large,
+    color: lightTheme.colors.textPrimary,
+    fontSize: lightTheme.typography.title.fontSize,
+    lineHeight: lightTheme.typography.title.lineHeight,
     textAlign: "center",
   },
   titleContainer: {
-    marginBottom: lightTheme.sizes.spacing.medium,
+    marginBottom: lightTheme.sizes.spacing.md,
   },
 });
 

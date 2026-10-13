@@ -43,7 +43,7 @@ function DatePicker(props: DatePickerProps) {
 
   return (
     <View style={styles.mainWrapper}>
-      <Text.Body color={theme.colors.onBackground} value={props.label} />
+      <Text.Body color={theme.colors.textPrimary} value={props.label} />
       <Pressable
         accessible={true}
         onPress={onPress}
@@ -59,8 +59,8 @@ function DatePicker(props: DatePickerProps) {
             <Text.Body
               color={
                 props.date
-                  ? theme.colors.onBackground
-                  : theme.colors.glassTextPlaceholder
+                  ? theme.colors.textPrimary
+                  : theme.colors.textSecondary
               }
               testID={
                 props.testID ? `${props.testID}-value` : "date-picker-value"
@@ -89,7 +89,7 @@ function DatePicker(props: DatePickerProps) {
               <IconButton
                 name={"close"}
                 onPress={clearDate}
-                size={theme.sizes.spacing.large}
+                size={theme.sizes.spacing.xl}
                 testID={
                   props.testID ? `${props.testID}-clear-button` : "clear-button"
                 }

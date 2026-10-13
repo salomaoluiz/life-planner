@@ -8,15 +8,15 @@ function getStyles() {
 
   return StyleSheet.create({
     container: {
-      backgroundColor: theme.colors.surfaceVariant,
-      borderRadius: theme.sizes.borderRadius.small,
+      backgroundColor: theme.colors.surfaceRaised,
+      borderRadius: theme.sizes.borderRadius.sm,
       maxWidth: isWeb() ? "50%" : "100%",
 
-      padding: theme.sizes.spacing.small,
+      padding: theme.sizes.spacing.sm,
     },
     containerLoading: {
-      backgroundColor: theme.colors.surfaceVariant,
-      borderRadius: theme.sizes.borderRadius.small,
+      backgroundColor: theme.colors.surfaceRaised,
+      borderRadius: theme.sizes.borderRadius.sm,
       maxWidth: isWeb() ? "50%" : "100%",
     },
     titleContainer: {

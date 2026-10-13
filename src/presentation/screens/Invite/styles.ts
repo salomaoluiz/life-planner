@@ -15,7 +15,7 @@ function getStyles() {
         alignItems: "center",
         backgroundColor: theme.colors.background,
         flex: 1,
-        padding: theme.sizes.spacing.xxxlarge,
+        padding: theme.sizes.spacing.xxxl,
       },
     }),
     theme,

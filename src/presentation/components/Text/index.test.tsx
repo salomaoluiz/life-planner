@@ -1,6 +1,7 @@
 import { screen } from "@tests";
 
 import { TextMode } from "@components/Text/types";
+import { TypographyToken } from "@presentation/theme/constants";
 import { lightTheme } from "@presentation/theme/provider";
 
 import { defaultProps, setup } from "./mocks/index.mocks";
@@ -33,30 +34,22 @@ it.each([
   expect(component.props.variant).toBe(mode);
 });
 
-it.each<{
-  fontSize: keyof (typeof lightTheme)["sizes"]["fontSizes"];
-  lineHeight: keyof (typeof lightTheme)["sizes"]["lineHeights"];
-  modeString: keyof typeof TextMode;
-}>([
-  { fontSize: "xxlarge", lineHeight: "xxlarge", modeString: "Display" },
-  { fontSize: "large", lineHeight: "large", modeString: "Headline" },
-  { fontSize: "medium", lineHeight: "medium", modeString: "Title" },
-  { fontSize: "small", lineHeight: "small", modeString: "Body" },
-  { fontSize: "xsmall", lineHeight: "xsmall", modeString: "Label" },
-  { fontSize: "xxsmall", lineHeight: "xxsmall", modeString: "Caption" },
+it.each<{ modeString: keyof typeof TextMode; token: TypographyToken }>([
+  { modeString: "Display", token: "display" },
+  { modeString: "Headline", token: "title" },
+  { modeString: "Title", token: "heading" },
+  { modeString: "Body", token: "body" },
+  { modeString: "Label", token: "caption" },
+  { modeString: "Caption", token: "caption" },
 ])(
-  "SHOULD render the Text.$modeString with the correct styles",
-  ({ fontSize, lineHeight, modeString }) => {
-    const mode = TextMode[modeString];
+  "SHOULD render the Text.$modeString with the $token style",
+  ({ modeString, token }) => {
+    setup({ mode: TextMode[modeString] });
 
-    setup({ mode });
-
-    const component = screen.getByTestId(defaultProps.testID);
-
-    expect(component.props.style).toEqual(
+    expect(screen.getByTestId(defaultProps.testID).props.style).toEqual(
       expect.objectContaining({
-        fontSize: lightTheme.sizes.fontSizes[fontSize],
-        lineHeight: lightTheme.sizes.lineHeights[lineHeight],
+        fontSize: lightTheme.typography[token].fontSize,
+        lineHeight: lightTheme.typography[token].lineHeight,
       }),
     );
   },
@@ -65,9 +58,17 @@ it.each<{
 it("SHOULD render the Text with bold weight", () => {
   setup({ bold: true, mode: TextMode.Body });
 
-  const component = screen.getByTestId(defaultProps.testID);
+  expect(
+    screen.getByTestId(defaultProps.testID).props.style.fontWeight,
+  ).toEqual("700");
+});
 
-  expect(component.props.style.fontWeight).toEqual("bold");
+it("SHOULD apply tabular numerals WHEN tabular is set", () => {
+  setup({ mode: TextMode.Body, tabular: true });
+
+  expect(
+    screen.getByTestId(defaultProps.testID).props.style.fontVariant,
+  ).toEqual(["tabular-nums"]);
 });
 
 it("SHOULD throw an error if an invalid mode is passed", () => {

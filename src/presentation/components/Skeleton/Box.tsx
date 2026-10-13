@@ -13,15 +13,15 @@ export interface Props {
 function BoxSkeleton(props: Props) {
   const { theme } = useTheme();
 
-  const radius = props.borderRadius ?? theme.sizes.borderRadius.medium;
+  const radius = props.borderRadius ?? theme.sizes.borderRadius.md;
 
   const height = getSize(props.height, "height");
   const width = getSize(props.width, "width");
 
   return (
     <ContentLoader
-      backgroundColor={theme.colors.onSurface}
-      foregroundColor={theme.colors.onSurfaceVariant}
+      backgroundColor={theme.colors.textPrimary}
+      foregroundColor={theme.colors.textSecondary}
       height={height}
       speed={1}
       testID={"skeleton-loader"}

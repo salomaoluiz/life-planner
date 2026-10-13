@@ -12,7 +12,7 @@ function Welcome() {
   return (
     <View style={styles.container}>
       <Text.Headline
-        color={theme.colors.onBackground}
+        color={theme.colors.textPrimary}
         testID={"login_welcome"}
         value={t("login.welcome")}
       />

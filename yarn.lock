@@ -1302,6 +1302,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@expo-google-fonts/manrope@npm:^0.4.2":
+  version: 0.4.2
+  resolution: "@expo-google-fonts/manrope@npm:0.4.2"
+  checksum: 10c0/84985ce8a64c584147a702e3e6f0dd11eb3d53180192e50669a814de9d555e778d37f974ca434a7785c3580df8fb594ff6985f82537a8d6934f528feb5aeddc8
+  languageName: node
+  linkType: hard
+
 "@expo/bunyan@npm:^4.0.0":
   version: 4.0.1
   resolution: "@expo/bunyan@npm:4.0.1"
@@ -9164,6 +9171,7 @@ __metadata:
   dependencies:
     "@babel/core": "npm:^7.25.2"
     "@eslint/js": "npm:^9.20.0"
+    "@expo-google-fonts/manrope": "npm:^0.4.2"
     "@expo/vector-icons": "npm:^14.0.2"
     "@react-native-async-storage/async-storage": "npm:1.23.1"
     "@react-native-picker/picker": "npm:2.9.0"

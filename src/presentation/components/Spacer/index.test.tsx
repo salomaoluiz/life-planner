@@ -9,7 +9,7 @@ describe("Spacer Component", () => {
 
   describe("Direction prop", () => {
     it("SHOULD render with both direction and size", () => {
-      setup({ direction: "both", size: "medium" });
+      setup({ direction: "both", size: "md" });
 
       const spacer = screen.getByTestId(defaultProps.testID!);
       expect(spacer).toBeTruthy();
@@ -18,7 +18,7 @@ describe("Spacer Component", () => {
     });
 
     it("SHOULD render with horizontal direction only", () => {
-      setup({ direction: "horizontal", size: "large" });
+      setup({ direction: "horizontal", size: "xl" });
 
       const spacer = screen.getByTestId(defaultProps.testID!);
       expect(spacer).toBeTruthy();
@@ -27,7 +27,7 @@ describe("Spacer Component", () => {
     });
 
     it("SHOULD render with vertical direction only", () => {
-      setup({ direction: "vertical", size: "small" });
+      setup({ direction: "vertical", size: "sm" });
 
       const spacer = screen.getByTestId(defaultProps.testID!);
       expect(spacer).toBeTruthy();
@@ -53,7 +53,7 @@ describe("Spacer Component", () => {
     });
 
     it("SHOULD render with small spacing size", () => {
-      setup({ direction: "both", size: "small" });
+      setup({ direction: "both", size: "sm" });
 
       const spacer = screen.getByTestId(defaultProps.testID!);
       // The exact value depends on the theme, but it should be defined
@@ -62,7 +62,7 @@ describe("Spacer Component", () => {
     });
 
     it("SHOULD render with medium spacing size", () => {
-      setup({ direction: "both", size: "medium" });
+      setup({ direction: "both", size: "md" });
 
       const spacer = screen.getByTestId(defaultProps.testID!);
       expect(spacer.props.style.height).toBeDefined();
@@ -70,7 +70,7 @@ describe("Spacer Component", () => {
     });
 
     it("SHOULD render with large spacing size", () => {
-      setup({ direction: "both", size: "large" });
+      setup({ direction: "both", size: "xl" });
 
       const spacer = screen.getByTestId(defaultProps.testID!);
       expect(spacer.props.style.height).toBeDefined();
@@ -137,7 +137,7 @@ describe("Spacer Component", () => {
     });
 
     it("SHOULD handle different spacing sizes correctly", () => {
-      const sizes = ["small", "medium", "large", "xlarge", "xxlarge"] as const;
+      const sizes = ["sm", "md", "xl", "xxl", "xxxl"] as const;
 
       sizes.forEach((size) => {
         setup({ direction: "both", size });

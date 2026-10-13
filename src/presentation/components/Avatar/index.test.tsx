@@ -12,7 +12,7 @@ describe("Avatar Component", () => {
       expect(avatar.props).toEqual({
         children: undefined,
         icon: "account",
-        size: 55, // 48 * 1.15 (tablet scaling)
+        size: 48,
         testID: "avatar-icon",
       });
     });
@@ -25,7 +25,7 @@ describe("Avatar Component", () => {
       expect(avatar.props).toEqual({
         children: undefined,
         onLoad: expect.any(Function),
-        size: 55, // 48 * 1.15 (tablet scaling)
+        size: 48,
         source: { uri: "https://example.com/avatar.jpg" },
         testID: "avatar-image",
       });
@@ -39,7 +39,7 @@ describe("Avatar Component", () => {
       expect(avatar.props).toEqual({
         children: undefined,
         label: "JD",
-        size: 55, // 48 * 1.15 (tablet scaling)
+        size: 48,
         testID: "avatar-text",
       });
     });
@@ -54,7 +54,7 @@ describe("Avatar Component", () => {
       expect(avatar.props).toEqual({
         children: undefined,
         icon: "account",
-        size: 37, // 32 * 1.15 (tablet scaling)
+        size: 32,
         testID: "avatar-icon",
       });
     });
@@ -67,7 +67,7 @@ describe("Avatar Component", () => {
       expect(avatar.props).toEqual({
         children: undefined,
         onLoad: expect.any(Function),
-        size: 37, // 32 * 1.15 (tablet scaling)
+        size: 32,
         source: { uri: "https://example.com/avatar.jpg" },
         testID: "avatar-image",
       });
@@ -81,7 +81,7 @@ describe("Avatar Component", () => {
       expect(avatar.props).toEqual({
         children: undefined,
         label: "JD",
-        size: 37, // 32 * 1.15 (tablet scaling)
+        size: 32,
         testID: "avatar-text",
       });
     });
@@ -96,7 +96,7 @@ describe("Avatar Component", () => {
       expect(avatar.props).toEqual({
         children: undefined,
         icon: "account",
-        size: 28, // 24 * 1.15 (tablet scaling)
+        size: 24,
         testID: "avatar-icon",
       });
     });
@@ -109,7 +109,7 @@ describe("Avatar Component", () => {
       expect(avatar.props).toEqual({
         children: undefined,
         onLoad: expect.any(Function),
-        size: 28, // 24 * 1.15 (tablet scaling)
+        size: 24,
         source: { uri: "https://example.com/avatar.jpg" },
         testID: "avatar-image",
       });
@@ -123,7 +123,7 @@ describe("Avatar Component", () => {
       expect(avatar.props).toEqual({
         children: undefined,
         label: "JD",
-        size: 28, // 24 * 1.15 (tablet scaling)
+        size: 24,
         testID: "avatar-text",
       });
     });

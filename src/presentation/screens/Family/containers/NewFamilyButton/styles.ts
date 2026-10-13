@@ -8,7 +8,7 @@ function getStyles() {
   return StyleSheet.create({
     container: {
       flexDirection: "row",
-      marginTop: theme.sizes.spacing.medium,
+      marginTop: theme.sizes.spacing.md,
     },
   });
 }

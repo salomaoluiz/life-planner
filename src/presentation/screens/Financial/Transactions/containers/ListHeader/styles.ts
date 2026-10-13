@@ -13,7 +13,7 @@ function getStyles() {
       flex: 1,
       flexDirection: "row",
       justifyContent: "space-between",
-      padding: theme.sizes.spacing.medium,
+      padding: theme.sizes.spacing.md,
       width: "100%",
     },
     date: {

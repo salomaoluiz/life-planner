@@ -26,7 +26,7 @@ function GlobalBoundary({ retry }: ErrorBoundaryFallBackProps) {
       />
       <View style={styles.titleContainer}>
         <Text.Title
-          color={theme.colors.onBackground}
+          color={theme.colors.textPrimary}
           testID={"genericErrorBoundary_title"}
           textAlign={"center"}
           value={t("errors.generic.title")}
@@ -34,7 +34,7 @@ function GlobalBoundary({ retry }: ErrorBoundaryFallBackProps) {
       </View>
       <View style={styles.descriptionContainer}>
         <Text.Body
-          color={theme.colors.onBackground}
+          color={theme.colors.textPrimary}
           testID={"genericErrorBoundary_description"}
           textAlign={"center"}
           value={t("errors.generic.description")}
