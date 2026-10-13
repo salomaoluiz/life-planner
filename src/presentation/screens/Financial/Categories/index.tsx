@@ -14,6 +14,7 @@ import {
 import Skeleton from "@components/Skeleton";
 import { useKitTheme } from "@components/utils/useKitTheme";
 import { useTranslation } from "@presentation/i18n";
+import pluralKey from "@presentation/i18n/pluralKey";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
 import { useCategoriesViewModel } from "./hooks";
@@ -62,7 +63,9 @@ function FinancialCategories() {
   function renderItem({ item }: { item: CategoryRowUIModel }) {
     let subtitle: string | undefined;
     if (item.subcount > 0) {
-      subtitle = t("financial.categories.subcount", { count: item.subcount });
+      subtitle = t(pluralKey("financial.categories.subcount", item.subcount), {
+        count: item.subcount,
+      });
     }
 
     return (

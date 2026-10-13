@@ -10,6 +10,7 @@ import {
 } from "@components";
 import Skeleton from "@components/Skeleton";
 import { useTranslation } from "@presentation/i18n";
+import pluralKey from "@presentation/i18n/pluralKey";
 import { BlockState } from "@screens/Home/hooks/useHomeViewModel";
 import StockAttentionUIModel from "@screens/Home/models/StockAttentionUIModel";
 
@@ -48,7 +49,10 @@ function StockAttentionCard({ onAddItemPress, onSeeAllPress, state }: Props) {
       >
         <Text.Caption
           testID="home-stock-count"
-          value={t("home.stock.count", data.countLabelParams)}
+          value={t(
+            pluralKey("home.stock.count", data.countLabelParams.count),
+            data.countLabelParams,
+          )}
         />
         {data.isEmpty && (
           <ListItem

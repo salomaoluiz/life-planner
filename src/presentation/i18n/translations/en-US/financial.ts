@@ -73,7 +73,8 @@ const financial = {
     },
     nameRequired: "Name is required",
     new: "New category",
-    subcount: "{{count}} subcategories",
+    subcount_one: "1 subcategory",
+    subcount_other: "{{count}} subcategories",
     type: "Category Type",
   },
   colors: {

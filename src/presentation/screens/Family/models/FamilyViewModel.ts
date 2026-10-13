@@ -1,4 +1,5 @@
 import FamilyDTO from "@application/dto/family/FamilyDTO";
+import pluralKey from "@presentation/i18n/pluralKey";
 import { TranslationKeys } from "@presentation/i18n/types";
 
 import FamilyMemberUIModel, { FamilyMemberViewer } from "./FamilyMemberUIModel";
@@ -63,8 +64,8 @@ class FamilyViewModel {
   } {
     return {
       key: this.isOwner
-        ? "family.card.membersOwnerYou"
-        : "family.card.membersOwner",
+        ? pluralKey("family.card.membersOwnerYou", this.joinedCount)
+        : pluralKey("family.card.membersOwner", this.joinedCount),
       params: { count: this.joinedCount, name: this.ownerName },
     };
   }

@@ -32,7 +32,7 @@ it("SHOULD render the empty state per type with a new category action", () => {
 it("SHOULD show the sub count only on roots and a chevron only with children", () => {
   setup({ rows: makeRows() });
 
-  expect(hasText('financial.categories.subcount {"count":2}')).toBe(true);
+  expect(hasText('financial.categories.subcount_other {"count":2}')).toBe(true);
   expect(screen.getAllByText(/financial.categories.subcount/)).toHaveLength(1);
   expect(screen.getByTestId("category-row-root-container")).toBeTruthy();
   expect(screen.getByTestId("category-row-leaf-container")).toBeTruthy();

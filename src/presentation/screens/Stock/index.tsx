@@ -18,6 +18,7 @@ import {
 } from "@components";
 import Skeleton from "@components/Skeleton";
 import { useTranslation } from "@presentation/i18n";
+import pluralKey from "@presentation/i18n/pluralKey";
 import StockItemDetails from "@screens/Stock/containers/StockItemDetails";
 import { StockListRow } from "@screens/Stock/models/StockListUIModel";
 
@@ -35,8 +36,13 @@ function Stock() {
   let subtitle: string | undefined;
   if (hasContent) {
     subtitle = vm.subtitle.attention
-      ? t("stock.list.subtitleAttention", vm.subtitle)
-      : t("stock.list.subtitle", { total: vm.subtitle.total });
+      ? t(pluralKey("stock.list.subtitleAttention", vm.subtitle.total), {
+          attention: vm.subtitle.attention,
+          count: vm.subtitle.total,
+        })
+      : t(pluralKey("stock.list.subtitle", vm.subtitle.total), {
+          count: vm.subtitle.total,
+        });
   }
 
   function renderRow({ item: row }: { item: StockListRow }) {

@@ -13,7 +13,8 @@ const home = {
   },
   stock: {
     addItem: "Adicionar item",
-    count: "{{count}} itens",
+    count_one: "1 item",
+    count_other: "{{count}} itens",
     empty: "Seu estoque está vazio",
     expired: "Vencido",
     expiresIn: "Vence em {{count}} dias",
