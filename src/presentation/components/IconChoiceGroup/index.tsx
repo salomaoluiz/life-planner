@@ -7,7 +7,6 @@ import { useKitTheme } from "@components/utils/useKitTheme";
 import { iconLabel } from "@presentation/constants/categoryIcons";
 
 export interface IconChoiceGroupProps {
-  color?: string;
   label: string;
   moreLabel?: string;
   onChange: (value: string) => void;
@@ -66,10 +65,7 @@ function IconChoiceGroup(props: IconChoiceGroupProps) {
               testID={`${props.testID}-icon-${option.value}`}
             >
               <Icon
-                color={
-                  props.color ??
-                  (selected ? colors.accentText : colors.textPrimary)
-                }
+                color={selected ? colors.accentText : colors.textPrimary}
                 name={option.value}
                 size={24}
               />

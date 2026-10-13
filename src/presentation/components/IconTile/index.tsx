@@ -28,7 +28,12 @@ function IconTile(props: IconTileProps) {
     rgb && props.color
       ? ensureContrast(props.color, colors.surface, colors.textPrimary)
       : tone.foreground;
-  const background = rgb ? toRgba(rgb, CATEGORY_TINT) : tone.background;
+  // Tint with the icon color that is actually shown, not the stored one: a stored black
+  // would otherwise paint a near-black tile on the dark surface.
+  const shownRgb = rgb ? parseColor(iconColor) : undefined;
+  const background = shownRgb
+    ? toRgba(shownRgb, CATEGORY_TINT)
+    : tone.background;
   const size = TILE[props.size ?? "md"];
   const styles = StyleSheet.create({
     root: {

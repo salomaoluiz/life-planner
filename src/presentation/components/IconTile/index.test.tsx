@@ -1,7 +1,8 @@
 import { StyleSheet } from "react-native";
 
-import { screen } from "@tests";
+import { mockDarkTheme, screen } from "@tests";
 
+import colors from "@presentation/theme/constants/colors";
 import { lightTheme } from "@presentation/theme/provider";
 
 import { contrastRatio } from "./contrast";
@@ -67,4 +68,25 @@ it("SHOULD not crash WHEN the stored color is not hex", () => {
   setup({ color: "red" });
   expect(screen.getByTestId("tile")).toBeTruthy();
   expect(style().backgroundColor).toBe(lightTheme.colors.surfaceRaised);
+});
+
+it("SHOULD keep a stored #000000 icon at 3:1 against the tile background WHEN dark", () => {
+  const restore = mockDarkTheme();
+  setup({ color: "#000000" });
+  const icon = screen.getByTestId("tile-icon");
+
+  expect(
+    contrastRatio(icon.props.color, colors.dark.surface),
+  ).toBeGreaterThanOrEqual(3);
+  expect(style().backgroundColor).not.toBe("rgba(0,0,0,0.16)");
+  restore();
+});
+
+it("SHOULD keep a stored #FFFFFF icon at 3:1 against the tile background WHEN light", () => {
+  setup({ color: "#FFFFFF" });
+  const icon = screen.getByTestId("tile-icon");
+
+  expect(
+    contrastRatio(icon.props.color, colors.light.surface),
+  ).toBeGreaterThanOrEqual(3);
 });
