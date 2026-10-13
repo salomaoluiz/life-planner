@@ -137,6 +137,12 @@ describe("toolbar", () => {
   });
 });
 
+it("SHOULD give the list an estimated item size so the first paint has no hole", () => {
+  setup();
+
+  expect(screen.getByTestId("flashList").props.estimatedItemSize).toBe(64);
+});
+
 it("SHOULD wire pull-to-refresh on the list", () => {
   const vm = setup({ isRefreshing: true });
   const props = screen.getByTestId("flashList").props;

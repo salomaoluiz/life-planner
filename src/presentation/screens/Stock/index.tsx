@@ -125,6 +125,7 @@ function Stock() {
       list={
         <FlashList
           data={vm.rows}
+          estimatedItemSize={64}
           getItemType={(row: StockListRow) => row.kind}
           keyExtractor={(row: StockListRow) => row.id}
           ListEmptyComponent={renderEmpty()}

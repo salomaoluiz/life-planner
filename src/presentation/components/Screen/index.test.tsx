@@ -66,3 +66,12 @@ it("SHOULD not add top spacing WHEN the top edge is not requested", () => {
   setup({ edges: ["bottom"] });
   expect(root().paddingTop).toBe(0);
 });
+
+it("SHOULD keep a lg gap between the header block and the list rows WHEN list", () => {
+  setup({ list: listElement() });
+  const header = screen.getByTestId("list").props.ListHeaderComponent;
+
+  expect(StyleSheet.flatten(header.props.style)).toEqual(
+    expect.objectContaining({ gap: 20, paddingBottom: 20 }),
+  );
+});

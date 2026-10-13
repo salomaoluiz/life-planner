@@ -44,6 +44,8 @@ function Screen(props: ScreenProps) {
 
   const styles = StyleSheet.create({
     content: { gap: spacing.lg },
+    // Keeps the header block from touching the first row of the list (spec 015 FR 3).
+    listHeader: { gap: spacing.lg, paddingBottom: spacing.lg },
     root: {
       backgroundColor: colors.background,
       flex: 1,
@@ -69,7 +71,7 @@ function Screen(props: ScreenProps) {
       <View onLayout={onLayout} style={styles.root} testID={testID}>
         {cloneElement(props.list, {
           ListHeaderComponent: (
-            <View style={styles.content}>{props.children}</View>
+            <View style={styles.listHeader}>{props.children}</View>
           ),
           onRefresh: props.onRefresh,
           refreshing: !!props.refreshing,
