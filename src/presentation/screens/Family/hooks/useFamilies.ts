@@ -27,6 +27,7 @@ async function queryFamilies() {
       familyMembers[index].map(
         (member) => new FamilyMemberUIModel(member, viewer),
       ),
+      viewer,
     );
   });
 }

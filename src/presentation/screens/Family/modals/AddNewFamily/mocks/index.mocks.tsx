@@ -1,52 +1,38 @@
-import { router } from "expo-router";
-import { Pressable } from "react-native";
-
 import { fireEvent, render, screen } from "@tests";
 
-import { useCases } from "@application/useCases";
-import { useMutation } from "@infrastructure/fetcher";
-import UseMutationFixture from "@infrastructure/fetcher/mocks/useMutation.fixture";
-
 import AddNewFamilyModal from "../";
+import useAddNewFamilyViewModel from "../hooks/useAddNewFamilyViewModel";
 
-jest.mock("expo-router", () => ({ router: { back: jest.fn() } }));
-jest.mock("@infrastructure/fetcher");
-jest.mock("@application/useCases", () => ({
-  useCases: {
-    createFamilyUseCase: { execute: jest.fn(), uniqueName: "create_family" },
-  },
+jest.mock("../hooks/useAddNewFamilyViewModel", () => ({
+  __esModule: true,
+  default: jest.fn(),
+  FAMILY_NAME_MAX: 50,
 }));
 
-// region mocks
-const mutation = new UseMutationFixture<unknown, void>();
-// endregion mocks
-
-// region spies
 const spies = {
-  back: jest.mocked(router.back),
-  useMutation: jest.mocked(useMutation),
+  onChangeName: jest.fn(),
+  onClose: jest.fn(),
+  onSubmit: jest.fn(),
+  useViewModel: jest.mocked(useAddNewFamilyViewModel),
 };
-// endregion spies
 
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
-function press(label: string) {
-  fireEvent.press(screen.UNSAFE_getAllByProps({ label })[0]);
-}
-
-function setup(status: "idle" | "success" = "idle") {
-  const built = mutation.reset().withStatus(status).build();
-  spies.useMutation.mockReturnValue(built as never);
+function setup(
+  overrides: Partial<ReturnType<typeof useAddNewFamilyViewModel>> = {},
+) {
+  spies.useViewModel.mockReturnValue({
+    counterVisible: false,
+    errorKey: undefined,
+    hasGenericError: false,
+    isSubmitting: false,
+    name: "",
+    onChangeName: spies.onChangeName,
+    onClose: spies.onClose,
+    onSubmit: spies.onSubmit,
+    ...overrides,
+  });
 
   render(<AddNewFamilyModal />);
-
-  return { mutate: built.mutate };
 }
 
-const mocks = { Pressable, useCases };
-
-export { mocks, press, setup, spies };
 export { hasText } from "@tests";
-export { fireEvent, screen };
+export { fireEvent, screen, setup, spies };

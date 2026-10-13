@@ -7,9 +7,7 @@ import {
 // Each of specs 010-014 removes its folders; 014 deletes this list.
 export const migrationAllowList = [
   "src/presentation/screens/Config/**",
-  "src/presentation/screens/Family/**",
   "src/presentation/screens/Feedback/**",
-  "src/presentation/screens/Invite/**",
   "src/presentation/screens/Login/**",
   "src/presentation/screens/Signup/**",
   "src/presentation/screens/index.tsx",

@@ -235,6 +235,24 @@ it("SHOULD go home WITHOUT any request WHEN declined", () => {
   expect(spies.invalidate).not.toHaveBeenCalled();
 });
 
+it("SHOULD go Home on onGoHome without calling the API", () => {
+  const { mutate, result } = setup();
+
+  result.current.onGoHome();
+
+  expect(spies.replace).toHaveBeenCalledWith("/(app)/(tabs)/index");
+  expect(mutate).not.toHaveBeenCalled();
+  expect(spies.getInvite).not.toHaveBeenCalled();
+});
+
+it("SHOULD refetch the invite on onRetry", () => {
+  const { result } = setup();
+
+  result.current.onRetry();
+
+  expect(query.value.refetch).toHaveBeenCalledTimes(1);
+});
+
 it("SHOULD refetch with the NEW token and report loading WHEN a 2nd deep link changes the token", async () => {
   const tokenB = "tokenB-0123456789";
   const { refetch, rerender, result } = setup({ data: ui });

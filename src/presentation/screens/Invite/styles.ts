@@ -2,24 +2,23 @@ import { StyleSheet } from "react-native";
 
 import { useTheme } from "@presentation/theme";
 
-function getStyles() {
+function useStyles() {
   const { theme } = useTheme();
 
   return {
     styles: StyleSheet.create({
-      buttonContainer: {
-        flexDirection: "row",
-        width: "70%",
-      },
-      container: {
+      actions: { alignSelf: "stretch", gap: theme.sizes.spacing.sm },
+      column: {
         alignItems: "center",
-        backgroundColor: theme.colors.background,
-        flex: 1,
-        padding: theme.sizes.spacing.xxxl,
+        alignSelf: "center",
+        gap: theme.sizes.spacing.sm,
+        maxWidth: 480,
+        paddingVertical: theme.sizes.spacing.xl,
+        width: "100%",
       },
     }),
     theme,
   };
 }
 
-export default getStyles;
+export default useStyles;
