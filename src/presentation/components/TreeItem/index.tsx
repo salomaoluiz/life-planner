@@ -6,6 +6,7 @@ import { useKitTheme } from "@components/utils/useKitTheme";
 
 export interface TreeItemProps {
   depth: number;
+  divider?: boolean;
   leading?: ReactNode;
   onPress?: () => void;
   subtitle?: string;
@@ -30,13 +31,16 @@ function TreeItem(props: TreeItemProps) {
     container: {
       borderLeftColor: colors.border,
       borderLeftWidth: props.depth > 0 ? 1 : 0,
-      marginLeft: getIndentPerLevel(width) * props.depth,
+      // The 1 px guide line is part of the indent, so the content starts exactly 24 dp per level in.
+      marginLeft:
+        getIndentPerLevel(width) * props.depth - (props.depth > 0 ? 1 : 0),
     },
   });
 
   return (
     <View style={styles.container} testID={`${props.testID}-container`}>
       <ListItem
+        divider={props.divider}
         leading={props.leading}
         onPress={props.onPress}
         subtitle={props.subtitle}

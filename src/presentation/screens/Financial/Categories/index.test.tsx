@@ -64,3 +64,14 @@ it("SHOULD space the toolbar blocks and the list by 20 px", () => {
   expect(style.gap).toBe(20);
   expect(style.paddingBottom).toBe(20);
 });
+
+it("SHOULD draw a divider between rows but not after the last one", () => {
+  setup({ rows: makeRows() });
+
+  const rows = makeRows();
+  const dividers = rows.map((row) =>
+    screen.queryByTestId(`category-row-${row.id}-divider`),
+  );
+  expect(dividers.slice(0, -1).every(Boolean)).toBe(true);
+  expect(dividers[dividers.length - 1]).toBeNull();
+});

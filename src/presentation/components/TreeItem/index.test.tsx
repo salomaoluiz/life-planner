@@ -35,7 +35,7 @@ it("SHOULD indent by depth and draw the guide line at depth > 0", () => {
   const style = JSON.stringify(
     screen.getByTestId("tree-item-container").props.style,
   );
-  expect(style).toContain('"marginLeft":48');
+  expect(style).toContain('"marginLeft":47');
   expect(style).toContain('"borderLeftWidth":1');
 });
 
@@ -46,4 +46,14 @@ it("SHOULD call onPress when the row is pressed", () => {
   fireEvent.press(screen.getByTestId("tree-item"));
 
   expect(onPress).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD draw a divider WHEN asked and none by default", () => {
+  setup({ divider: true });
+  expect(screen.getByTestId("tree-item-divider")).toBeOnTheScreen();
+});
+
+it("SHOULD NOT draw a divider by default", () => {
+  setup();
+  expect(screen.queryByTestId("tree-item-divider")).toBeNull();
 });

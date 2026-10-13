@@ -60,7 +60,13 @@ function FinancialCategories() {
     </View>
   );
 
-  function renderItem({ item }: { item: CategoryRowUIModel }) {
+  function renderItem({
+    index,
+    item,
+  }: {
+    index: number;
+    item: CategoryRowUIModel;
+  }) {
     let subtitle: string | undefined;
     if (item.subcount > 0) {
       subtitle = t(pluralKey("financial.categories.subcount", item.subcount), {
@@ -71,6 +77,7 @@ function FinancialCategories() {
     return (
       <TreeItem
         depth={item.depth}
+        divider={index < vm.rows.length - 1}
         leading={<IconTile color={item.color} name={item.icon} />}
         onPress={() => vm.onRowPress(item.id)}
         subtitle={subtitle}
