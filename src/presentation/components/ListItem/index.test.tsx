@@ -58,3 +58,10 @@ it("SHOULD keep an empty title without crashing", () => {
   setup({ title: "" });
   expect(screen.getByTestId("item-title").props.children).toBe("");
 });
+
+it("SHOULD expose the selected state", () => {
+  setup({ onPress, selected: true });
+  expect(screen.getByTestId("item").props.accessibilityState.selected).toBe(
+    true,
+  );
+});
