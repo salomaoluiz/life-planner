@@ -32,7 +32,7 @@ it("SHOULD configure the delete mutation with the use case", () => {
 it("SHOULD call mutate with item and owner ids WHEN delete is pressed", () => {
   const { mutate } = setup();
 
-  fireEvent.press(screen.UNSAFE_getAllByProps({ icon: "delete" })[0]);
+  fireEvent.press(screen.getAllByLabelText("common.actions.delete")[0]);
 
   expect(mutate).toHaveBeenCalledWith({ id: "stock-1", ownerId: "owner-1" });
 });

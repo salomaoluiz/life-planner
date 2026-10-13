@@ -266,6 +266,7 @@ function NewCategoryModal() {
                               ]}
                             >
                               <IconButton
+                                accessibilityLabel={iconName}
                                 color={
                                   isSelected
                                     ? theme.colors.accent

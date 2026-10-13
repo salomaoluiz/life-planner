@@ -12,7 +12,7 @@ it("SHOULD configure the refresh mutation with the use case", () => {
 it("SHOULD trigger the refresh mutation WHEN the refresh button is pressed", () => {
   const { mutate } = setup();
 
-  fireEvent.press(screen.UNSAFE_getAllByProps({ icon: "refresh" })[0]);
+  fireEvent.press(screen.getAllByLabelText("common.actions.tryAgain")[0]);
 
   expect(mutate).toHaveBeenCalledTimes(1);
 });

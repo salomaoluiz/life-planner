@@ -2,12 +2,14 @@ import { View } from "react-native";
 
 import { Text } from "@components";
 import Icon, { IconButton } from "@components/Icon";
+import { useTranslation } from "@presentation/i18n";
 import { useTheme } from "@presentation/theme";
 
 import useListItem, { Props } from "./hooks";
 import { getStyles } from "./styles";
 
 function ListItem(props: Props) {
+  const { t } = useTranslation();
   const { theme } = useTheme();
   const { styles } = getStyles();
   const { onDelete, onEdit } = useListItem(props);
@@ -48,11 +50,13 @@ function ListItem(props: Props) {
       </View>
       <View style={styles.actionColumn}>
         <IconButton
+          accessibilityLabel={t("financial.accounts.editAccount")}
           name={"pencil"}
           onPress={onEdit}
           size={theme.sizes.spacing.xl}
         />
         <IconButton
+          accessibilityLabel={t("common.actions.delete")}
           name={"delete"}
           onPress={onDelete}
           size={theme.sizes.spacing.xl}

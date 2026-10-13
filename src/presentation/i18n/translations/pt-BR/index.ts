@@ -1,4 +1,5 @@
 import auth from "./auth";
+import common from "./common";
 import configurations from "./configurations";
 import dashboard from "./dashboard";
 import errors from "./errors";
@@ -12,6 +13,7 @@ import stock from "./stock";
 const ptBR = {
   translation: {
     auth,
+    common,
     configurations,
     dashboard,
     errors,

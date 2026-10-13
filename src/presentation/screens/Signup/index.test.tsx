@@ -85,19 +85,20 @@ it("SHOULD submit and go to login through the buttons", () => {
 it("SHOULD show loading and disable everything WHEN submitting", () => {
   setup({ isSubmitting: true });
 
-  expect(screen.getByTestId("signup-submit").props).toMatchObject({
-    disabled: true,
-    loading: true,
-  });
+  expect(screen.getByTestId("signup-submit").props.accessibilityState).toEqual(
+    expect.objectContaining({ busy: true, disabled: true }),
+  );
   for (const id of [
     "signup-name",
     "signup-email",
     "signup-password",
     "signup-confirm-password",
-    "signup-go-to-login",
   ]) {
     expect(screen.getByTestId(id).props.disabled).toBe(true);
   }
+  expect(
+    screen.getByTestId("signup-go-to-login").props.accessibilityState.disabled,
+  ).toBe(true);
 });
 
 it("SHOULD render every field error and the form error", () => {

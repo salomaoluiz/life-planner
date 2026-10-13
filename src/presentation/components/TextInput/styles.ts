@@ -11,19 +11,17 @@ function getStyles({ disabled, isFocused }: StyleProps) {
   const { theme } = useTheme();
   return {
     styles: StyleSheet.create({
-      blurView: {
-        backgroundColor: isFocused
-          ? theme.colors.surface
-          : theme.colors.surface,
-        borderColor: isFocused ? theme.colors.accent : theme.colors.border,
-        borderRadius: theme.sizes.borderRadius.lg,
-        borderWidth: 1,
-        opacity: disabled ? 0.5 : 1,
-        overflow: "hidden",
-      },
       container: {
         marginBottom: theme.sizes.spacing.md,
         width: "100%",
+      },
+      frame: {
+        backgroundColor: theme.colors.surface,
+        borderColor: isFocused ? theme.colors.accent : theme.colors.border,
+        borderRadius: theme.sizes.borderRadius.md,
+        borderWidth: 1,
+        opacity: disabled ? 0.5 : 1,
+        overflow: "hidden",
       },
       labelContainer: {
         color: theme.colors.textPrimary,

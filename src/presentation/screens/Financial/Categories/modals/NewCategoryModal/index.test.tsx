@@ -236,7 +236,7 @@ describe("icon selector", () => {
     const { fields } = setup();
     act(() => menus().icon.props.anchor.props.onPress());
 
-    fireEvent.press(screen.UNSAFE_getAllByProps({ icon: "wifi" })[0]);
+    fireEvent.press(screen.getAllByLabelText("wifi")[0]);
 
     expect(fields.icon.onChange).toHaveBeenCalledWith("wifi");
     expect(menus().icon.props.visible).toBe(false);
@@ -244,10 +244,10 @@ describe("icon selector", () => {
 
   it("SHOULD highlight only the selected icon", () => {
     setup({ fieldValues: { icon: "car" } });
-    const selected = screen.UNSAFE_getAllByProps({ icon: "car" })[0];
-    const other = screen.UNSAFE_getAllByProps({ icon: "home" })[0];
+    const selected = screen.UNSAFE_getAllByProps({ source: "car" })[0];
+    const other = screen.UNSAFE_getAllByProps({ source: "home" })[0];
 
-    expect(selected.props.iconColor).not.toBe(other.props.iconColor);
+    expect(selected.props.color).not.toBe(other.props.color);
   });
 });
 

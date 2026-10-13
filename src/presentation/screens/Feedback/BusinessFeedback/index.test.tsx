@@ -53,9 +53,9 @@ it.each([
   async (type, icon, color) => {
     await setup(type);
 
-    expect(screen.UNSAFE_getAllByProps({ source: icon })[0].props.color).toBe(
-      mocks.theme().colors[color],
-    );
+    expect(
+      screen.UNSAFE_getAllByProps({ source: icon }).at(-1)?.props.color,
+    ).toBe(mocks.theme().colors[color]);
   },
 );
 
@@ -70,7 +70,7 @@ it("SHOULD run the primary action WHEN the primary button is pressed", async () 
 it("SHOULD run the close action WHEN the close button is pressed", async () => {
   await setup();
 
-  fireEvent.press(screen.UNSAFE_getAllByProps({ icon: "close-circle" })[0]);
+  fireEvent.press(screen.getAllByLabelText("common.actions.close")[0]);
 
   expect(spies.handleAction).toHaveBeenCalledWith(mocks.closeButton);
 });
@@ -78,7 +78,7 @@ it("SHOULD run the close action WHEN the close button is pressed", async () => {
 it("SHOULD use the primary text color for the close button", async () => {
   await setup();
 
-  const close = screen.UNSAFE_getAllByProps({ icon: "close-circle" })[0];
+  const close = screen.UNSAFE_getAllByProps({ source: "close-circle" })[0];
 
-  expect(close.props.iconColor).toBe(mocks.theme().colors.textPrimary);
+  expect(close.props.color).toBe(mocks.theme().colors.textPrimary);
 });
