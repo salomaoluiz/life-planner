@@ -56,3 +56,13 @@ it("SHOULD render the caller's list with the children as header WHEN list", () =
   expect(screen.getByText("child")).toBeTruthy();
   expect(screen.getByText("row")).toBeTruthy();
 });
+
+it("SHOULD add lg top spacing on top of the safe area inset", () => {
+  setup();
+  expect(root().paddingTop).toBe(lightTheme.sizes.spacing.lg);
+});
+
+it("SHOULD not add top spacing WHEN the top edge is not requested", () => {
+  setup({ edges: ["bottom"] });
+  expect(root().paddingTop).toBe(0);
+});

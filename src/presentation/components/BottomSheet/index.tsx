@@ -18,6 +18,7 @@ import Animated, {
 import { IconButton } from "@components/Icon";
 import Text from "@components/Text";
 import { useKitTheme } from "@components/utils/useKitTheme";
+import { isWeb } from "@utils/platform";
 
 import useStyles from "./styles";
 
@@ -58,6 +59,20 @@ function BottomSheet(props: BottomSheetProps) {
       offset.value = withTiming(0, { duration: reduce ? 0 : SLIDE_MS });
     });
   }, [props.visible, wide, offset]);
+
+  useEffect(() => {
+    if (!props.visible || !isWeb() || typeof document === "undefined") {
+      return;
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        onCloseRef.current();
+      }
+    }
+    document.addEventListener("keydown", onKeyDown);
+
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [props.visible]);
 
   const pan = useRef(
     PanResponder.create({

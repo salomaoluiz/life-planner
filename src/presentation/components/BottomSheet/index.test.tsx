@@ -3,8 +3,80 @@ import { AccessibilityInfo, Modal, StyleSheet, Text } from "react-native";
 import { act, fireEvent, screen, waitFor } from "@tests";
 
 import { lightTheme } from "@presentation/theme/provider";
+import { isWeb } from "@utils/platform";
 
 import { onClose, setup } from "./mocks/index.mocks";
+
+jest.mock("@utils/platform", () => ({ isWeb: jest.fn() }));
+
+function stubDocument() {
+  const handlers: Record<string, (event: { key: string }) => void> = {};
+  const documentStub = {
+    addEventListener: jest.fn((type: string, handler: never) => {
+      handlers[type] = handler;
+    }),
+    removeEventListener: jest.fn(),
+  };
+  Object.defineProperty(globalThis, "document", {
+    configurable: true,
+    value: documentStub,
+  });
+
+  return { documentStub, handlers };
+}
+
+afterEach(() => {
+  jest.mocked(isWeb).mockReset();
+  Reflect.deleteProperty(globalThis, "document");
+});
+
+it("SHOULD use 20 px padding in header, body and footer", () => {
+  setup({ footer: <Text>footer</Text> });
+  expect(
+    StyleSheet.flatten(
+      screen.getByTestId("sheet-body").props.contentContainerStyle,
+    ).padding,
+  ).toBe(20);
+  expect(
+    StyleSheet.flatten(screen.getByTestId("sheet-footer").props.style).padding,
+  ).toBe(20);
+});
+
+it("SHOULD call onClose WHEN Escape is pressed on web", () => {
+  jest.mocked(isWeb).mockReturnValue(true);
+  const { handlers } = stubDocument();
+  setup();
+  handlers.keydown({ key: "Escape" });
+  expect(onClose).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD ignore other keys on web", () => {
+  jest.mocked(isWeb).mockReturnValue(true);
+  const { handlers } = stubDocument();
+  setup();
+  handlers.keydown({ key: "Enter" });
+  expect(onClose).not.toHaveBeenCalled();
+});
+
+it("SHOULD NOT listen WHEN not visible or on native, and SHOULD remove the listener on unmount", () => {
+  jest.mocked(isWeb).mockReturnValue(true);
+  const { documentStub } = stubDocument();
+  setup({ visible: false });
+  expect(documentStub.addEventListener).not.toHaveBeenCalled();
+
+  jest.mocked(isWeb).mockReturnValue(false);
+  setup();
+  expect(documentStub.addEventListener).not.toHaveBeenCalled();
+
+  jest.mocked(isWeb).mockReturnValue(true);
+  screen.unmount();
+  setup();
+  screen.unmount();
+  expect(documentStub.removeEventListener).toHaveBeenCalledWith(
+    "keydown",
+    expect.any(Function),
+  );
+});
 
 it("SHOULD render nothing WHEN not visible", () => {
   setup({ visible: false });

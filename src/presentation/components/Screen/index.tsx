@@ -49,7 +49,7 @@ function Screen(props: ScreenProps) {
       flex: 1,
       paddingBottom: edges.includes("bottom") ? insets.bottom : 0,
       paddingHorizontal: horizontal,
-      paddingTop: edges.includes("top") ? insets.top : 0,
+      paddingTop: edges.includes("top") ? insets.top + spacing.lg : 0,
     },
   });
 
