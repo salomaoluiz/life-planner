@@ -9,8 +9,8 @@ function useStyles() {
     styles: StyleSheet.create({
       root: { flex: 1 },
       toolbar: {
-        gap: theme.sizes.spacing.sm,
-        paddingBottom: theme.sizes.spacing.sm,
+        gap: theme.sizes.spacing.lg,
+        paddingBottom: theme.sizes.spacing.lg,
       },
       typeControl: { flex: 1 },
       typeRow: {

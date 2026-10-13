@@ -29,7 +29,7 @@ function FinancialCategories() {
   const vm = useCategoriesViewModel();
 
   const toolbar = (
-    <View style={styles.toolbar}>
+    <View style={styles.toolbar} testID="categories-toolbar">
       <View style={styles.typeRow}>
         <View style={styles.typeControl}>
           <SegmentedControl

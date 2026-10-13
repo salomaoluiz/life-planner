@@ -1,4 +1,5 @@
 import { fireEvent, screen } from "@testing-library/react-native";
+import { StyleSheet } from "react-native";
 
 import { hasText } from "@tests";
 
@@ -52,4 +53,14 @@ it("SHOULD call onRowPress with the id WHEN a row is tapped", () => {
 
   fireEvent.press(screen.getByText("Snacks"));
   expect(onRowPress).toHaveBeenCalledWith("leaf");
+});
+
+it("SHOULD space the toolbar blocks and the list by 20 px", () => {
+  setup({ rows: makeRows() });
+
+  const style = StyleSheet.flatten(
+    screen.getByTestId("categories-toolbar").props.style,
+  );
+  expect(style.gap).toBe(20);
+  expect(style.paddingBottom).toBe(20);
 });

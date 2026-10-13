@@ -9,10 +9,10 @@ function useStyles() {
     styles: StyleSheet.create({
       root: { flex: 1 },
       toolbar: {
-        gap: theme.sizes.spacing.sm,
-        paddingBottom: theme.sizes.spacing.sm,
+        gap: theme.sizes.spacing.lg,
+        paddingBottom: theme.sizes.spacing.lg,
       },
-      totalColumn: { flex: 1, gap: theme.sizes.spacing.xs },
+      totalColumn: { flex: 1 },
       totalRow: {
         alignItems: "center",
         flexDirection: "row",
