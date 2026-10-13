@@ -213,6 +213,10 @@ The View renders the following and calls `t()` on every key:
 
 A modal also needs a route file and a `Stack.Screen` entry (see `routing.md`).
 
+## Composition with the kit
+
+Screens compose kit components (`components.md`) and never style visual details themselves (no color literals, no Paper imports; lint-enforced outside the temporary migration allow-list). Forms and selects open in a `BottomSheet`. Legacy snippets above that mention `Button.Text`/`Button.Filled`/`Card customStyles` describe unmigrated screens; new code uses `Button.Secondary`/`Button.Primary` and `BottomSheet`.
+
 ## Testing (see `testing.md`)
 
 - ViewModel hooks: `renderHook(() => useXViewModel(props))` from `@tests`. Mock `@application/useCases` and `@infrastructure/fetcher`. Assert the returned shape and that handlers call `mutate` or `router` correctly.
