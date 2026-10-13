@@ -15,12 +15,18 @@ import { BlockState } from "@screens/Home/hooks/useHomeViewModel";
 import StockAttentionUIModel from "@screens/Home/models/StockAttentionUIModel";
 
 interface Props {
+  fill?: boolean;
   onAddItemPress: () => void;
   onSeeAllPress: () => void;
   state: BlockState<StockAttentionUIModel>;
 }
 
-function StockAttentionCard({ onAddItemPress, onSeeAllPress, state }: Props) {
+function StockAttentionCard({
+  fill,
+  onAddItemPress,
+  onSeeAllPress,
+  state,
+}: Props) {
   const { t } = useTranslation();
 
   if (state.isLoading) {
@@ -41,7 +47,7 @@ function StockAttentionCard({ onAddItemPress, onSeeAllPress, state }: Props) {
   const { data } = state;
 
   return (
-    <Card testID="home-stock">
+    <Card fill={fill} testID="home-stock">
       <Section
         actionLabel={t("common.actions.seeAll")}
         onActionPress={onSeeAllPress}

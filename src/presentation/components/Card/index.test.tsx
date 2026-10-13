@@ -76,3 +76,27 @@ it("SHOULD still accept the legacy customStyles", () => {
     StyleSheet.flatten(screen.getByTestId("card").props.style).marginTop,
   ).toBe(7);
 });
+
+it("SHOULD stretch to the parent height WHEN fill", () => {
+  render(
+    <Card fill testID="card">
+      <Text>child</Text>
+    </Card>,
+  );
+
+  expect(StyleSheet.flatten(screen.getByTestId("card").props.style).flex).toBe(
+    1,
+  );
+});
+
+it("SHOULD NOT flex WHEN fill is not set", () => {
+  render(
+    <Card testID="card">
+      <Text>child</Text>
+    </Card>,
+  );
+
+  expect(
+    StyleSheet.flatten(screen.getByTestId("card").props.style).flex,
+  ).toBeUndefined();
+});

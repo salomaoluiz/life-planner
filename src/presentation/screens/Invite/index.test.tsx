@@ -98,3 +98,23 @@ it("SHOULD cap the content column at 480", () => {
     StyleSheet.flatten(screen.getByTestId("invite-column").props.style),
   ).toEqual(expect.objectContaining({ maxWidth: 480 }));
 });
+
+it.each(["loading", "notFound", "expired", "error", "ready"] as const)(
+  "SHOULD center the column vertically and horizontally WHEN %s",
+  (status) => {
+    setup({ status });
+
+    expect(
+      StyleSheet.flatten(screen.getByTestId("invite-center").props.style),
+    ).toEqual(expect.objectContaining({ flex: 1, justifyContent: "center" }));
+    expect(
+      StyleSheet.flatten(screen.getByTestId("invite-column").props.style),
+    ).toEqual(
+      expect.objectContaining({
+        alignSelf: "center",
+        maxWidth: 480,
+        width: "100%",
+      }),
+    );
+  },
+);

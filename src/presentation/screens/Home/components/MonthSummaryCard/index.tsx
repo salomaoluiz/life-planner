@@ -9,11 +9,12 @@ import MonthSummaryUIModel from "@screens/Home/models/MonthSummaryUIModel";
 import useStyles from "./styles";
 
 interface Props {
+  fill?: boolean;
   onPress: () => void;
   state: BlockState<MonthSummaryUIModel>;
 }
 
-function MonthSummaryCard({ onPress, state }: Props) {
+function MonthSummaryCard({ fill, onPress, state }: Props) {
   const { styles } = useStyles();
   const { t } = useTranslation();
 
@@ -35,7 +36,7 @@ function MonthSummaryCard({ onPress, state }: Props) {
   const { data } = state;
 
   return (
-    <Card onPress={onPress} testID="home-summary">
+    <Card fill={fill} onPress={onPress} testID="home-summary">
       <Text.Overline
         value={t("home.summary.title", { month: data.monthName })}
       />

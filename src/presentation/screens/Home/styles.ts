@@ -9,7 +9,7 @@ function useStyles() {
     styles: StyleSheet.create({
       column: { flex: 1 },
       split: {
-        alignItems: "flex-start",
+        alignItems: "stretch",
         flexDirection: "row",
         gap: theme.sizes.spacing.lg,
       },

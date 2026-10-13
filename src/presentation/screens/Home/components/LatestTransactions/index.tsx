@@ -1,3 +1,5 @@
+import { View } from "react-native";
+
 import {
   AmountText,
   EmptyState,
@@ -11,6 +13,8 @@ import { useTranslation } from "@presentation/i18n";
 import { BlockState } from "@screens/Home/hooks/useHomeViewModel";
 import RecentTransactionUIModel from "@screens/Home/models/RecentTransactionUIModel";
 
+import useStyles from "./styles";
+
 interface Props {
   onAddPress: () => void;
   onSeeAllPress: () => void;
@@ -19,6 +23,7 @@ interface Props {
 
 function LatestTransactions({ onAddPress, onSeeAllPress, state }: Props) {
   const { t } = useTranslation();
+  const { styles } = useStyles();
 
   function renderBody() {
     if (state.isLoading) {
@@ -79,13 +84,15 @@ function LatestTransactions({ onAddPress, onSeeAllPress, state }: Props) {
   }
 
   return (
-    <Section
-      actionLabel={t("common.actions.seeAll")}
-      onActionPress={onSeeAllPress}
-      title={t("home.transactions.title")}
-    >
-      {renderBody()}
-    </Section>
+    <View style={styles.list} testID="home-transactions-list">
+      <Section
+        actionLabel={t("common.actions.seeAll")}
+        onActionPress={onSeeAllPress}
+        title={t("home.transactions.title")}
+      >
+        {renderBody()}
+      </Section>
+    </View>
   );
 }
 

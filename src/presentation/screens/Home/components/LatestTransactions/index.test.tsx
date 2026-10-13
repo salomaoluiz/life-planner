@@ -1,3 +1,5 @@
+import { StyleSheet } from "react-native";
+
 import { fireEvent, render, screen } from "@tests";
 
 import RecentTransactionDTO from "@application/dto/home/RecentTransactionDTO";
@@ -95,4 +97,20 @@ it("SHOULD offer to add a transaction WHEN there are none", () => {
 
   expect(screen.getByText("home.transactions.emptyTitle")).toBeOnTheScreen();
   expect(handlers.onAddPress).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD cap the list block at 720 px and center it", () => {
+  renderLoaded([row("tx-1", "Market")]);
+
+  expect(
+    StyleSheet.flatten(
+      screen.getByTestId("home-transactions-list").props.style,
+    ),
+  ).toEqual(
+    expect.objectContaining({
+      alignSelf: "center",
+      maxWidth: 720,
+      width: "100%",
+    }),
+  );
 });
