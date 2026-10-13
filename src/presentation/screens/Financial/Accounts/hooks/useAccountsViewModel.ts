@@ -10,6 +10,7 @@ import {
   ALL_OWNERS,
   buildOwnerFilterChoices,
 } from "@screens/Financial/models/ownerOptions";
+import { listQueryKey } from "@screens/Financial/models/queryKeys";
 
 import {
   buildAccountEntries,
@@ -39,7 +40,7 @@ function useAccountsViewModel() {
   const [archivedExpanded, setArchivedExpanded] = useState(false);
 
   const query = useQuery<AccountsData>({
-    cacheKey: [useCases.getFinancialAccountsUseCase.uniqueName],
+    cacheKey: listQueryKey(useCases.getFinancialAccountsUseCase.uniqueName),
     fetch: fetchAccounts,
   });
 
