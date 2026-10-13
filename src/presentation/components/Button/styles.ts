@@ -9,6 +9,7 @@ function useStyles(
   size: "lg" | "md",
   fullWidth: boolean,
   tone?: "expense",
+  inline?: boolean,
 ) {
   const { colors, radius, sizes, spacing } = useKitTheme();
 
@@ -41,13 +42,13 @@ function useStyles(
     styles: StyleSheet.create({
       root: {
         alignItems: "center",
-        alignSelf: fullWidth ? "stretch" : "flex-start",
+        ...(fullWidth ? { alignSelf: "stretch" as const } : {}),
         borderRadius: radius.md,
         flexDirection: "row",
         gap: spacing.xs,
         height: size === "lg" ? sizes.buttonHeight + 6 : sizes.buttonHeight,
         justifyContent: "center",
-        paddingHorizontal: spacing.md,
+        paddingHorizontal: variant === "ghost" && inline ? 0 : spacing.md,
         ...(variants.background
           ? { backgroundColor: variants.background }
           : {}),

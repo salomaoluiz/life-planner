@@ -40,6 +40,7 @@ function Section(props: SectionProps) {
         </View>
         {props.actionLabel && props.onActionPress ? (
           <Button.Ghost
+            inline
             label={props.actionLabel}
             onPress={props.onActionPress}
             testID={testID && `${testID}-action`}

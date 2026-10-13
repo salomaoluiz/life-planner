@@ -106,3 +106,25 @@ it("SHOULD keep the legacy names mapped", () => {
   expect(Button.Outlined).toBe(Button.Secondary);
   expect(Button.Text).toBe(Button.Ghost);
 });
+
+it("SHOULD inherit the parent alignment WHEN not fullWidth", () => {
+  setup();
+  expect(rootStyle().alignSelf).toBeUndefined();
+});
+
+it("SHOULD keep 16 px side padding on Ghost by default", () => {
+  setup({ variant: "Ghost" });
+  expect(rootStyle().paddingHorizontal).toBe(16);
+});
+
+it("SHOULD drop side padding and widen the hit area WHEN Ghost is inline", () => {
+  setup({ inline: true, variant: "Ghost" });
+  expect(rootStyle().paddingHorizontal).toBe(0);
+  expect(root().props.hitSlop).toEqual({ left: 8, right: 8 });
+});
+
+it("SHOULD ignore inline on non-Ghost variants", () => {
+  setup({ inline: true });
+  expect(rootStyle().paddingHorizontal).toBe(16);
+  expect(root().props.hitSlop).toBeUndefined();
+});

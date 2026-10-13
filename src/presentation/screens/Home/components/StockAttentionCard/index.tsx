@@ -57,6 +57,7 @@ function StockAttentionCard({ onAddItemPress, onSeeAllPress, state }: Props) {
             title={t("home.stock.empty")}
             trailing={
               <Button.Ghost
+                inline
                 label={t("home.stock.addItem")}
                 onPress={onAddItemPress}
               />
