@@ -1,281 +1,220 @@
-import { router } from "expo-router";
-import { useEffect, useMemo } from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { View } from "react-native";
 
-import { useCases } from "@application/useCases";
 import {
+  AmountInput,
+  BottomSheet,
   Button,
-  Card,
-  DatePicker,
-  HelperText,
-  Picker,
-  Spacer,
+  ChipGroup,
+  ConfirmDialog,
+  DateField,
+  ErrorState,
+  SegmentedControl,
+  SelectField,
   Text,
-  TextInput,
+  TextField,
 } from "@components";
-import { TransactionType } from "@domain/entities/financial/TransactionEntity";
-import { useMutation, useQuery } from "@infrastructure/fetcher";
-import useFinancialErrorFeedback from "@screens/Financial/hooks/useFinancialErrorFeedback";
+import Skeleton from "@components/Skeleton";
+import { useTranslation } from "@presentation/i18n";
+import { TranslationKeys } from "@presentation/i18n/types";
+import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
-import useForm from "./hooks/useForm";
-import NewTransactionItemViewModel from "./models/NewTransactionViewModel";
-import getStyles from "./styles";
+import CategoryChips from "./components/CategoryChips";
+import CategoryPickerSheet from "./components/CategoryPickerSheet";
+import MissingRecordHint from "./components/MissingRecordHint";
+import { useNewTransactionViewModel } from "./hooks";
+import useStyles from "./styles";
 
-function NewTransactionItemModal() {
-  const { styles, theme } = getStyles();
-  const owners = useQuery({
-    cacheKey: [useCases.getOwnersUseCase.uniqueName],
-    fetch: useCases.getOwnersUseCase.execute,
-  });
-  const categories = useQuery({
-    cacheKey: [useCases.getFinancialCategoriesUseCase.uniqueName],
-    fetch: async () => {
-      const owner = await useCases.getOwnersUseCase.execute();
-      const ownerIds = owner.map((o) => o.id);
-      return useCases.getFinancialCategoriesUseCase.execute(ownerIds);
-    },
-  });
-  const accounts = useQuery({
-    cacheKey: [useCases.getFinancialAccountsUseCase.uniqueName],
-    fetch: async () => {
-      const owner = await useCases.getOwnersUseCase.execute();
-      const ownerIds = owner.map((o) => o.id);
-      return useCases.getFinancialAccountsUseCase.execute(ownerIds);
-    },
-  });
+const SKELETON_ROWS = [0, 1, 2];
 
-  const { errors, fields, validateForm } = useForm();
+function NewTransactionModal() {
+  const { styles } = useStyles();
+  const { t } = useTranslation();
+  const vm = useNewTransactionViewModel();
 
-  const addTransaction = useMutation({
-    cacheKey: [useCases.createFinancialTransactionUseCase.uniqueName],
-    fetch: useCases.createFinancialTransactionUseCase.execute,
-  });
+  function err(key?: TranslationKeys) {
+    return key ? t(key) : undefined;
+  }
 
-  useFinancialErrorFeedback(addTransaction.error);
-
-  const newTransactionItemModel = useMemo(
-    () =>
-      owners.data && categories.data && accounts.data
-        ? new NewTransactionItemViewModel({
-            accountsDTO: accounts.data,
-            categoriesDTO: categories.data,
-            ownersDTO: owners.data,
-          })
-        : null,
-    [owners.data, categories.data, accounts.data],
-  );
-
-  const activeOwnerId =
-    fields.ownerId.value ?? (owners.data ? owners.data[0].id : undefined);
-
-  // The API rejects a category whose type differs from the transaction type.
-  const activeType = fields.type.value ?? TransactionType.EXPENSE;
-
-  useEffect(() => {
-    if (newTransactionItemModel && activeOwnerId) {
-      const ownerCategories = newTransactionItemModel.categoriesForOwner(
-        activeOwnerId,
-        activeType,
+  function renderBody() {
+    if (vm.isNotFound) {
+      return (
+        <ErrorState
+          message={t("financial.errors.notFound")}
+          onRetry={vm.onClose}
+          retryLabel={t("common.actions.close")}
+        />
       );
-      const ownerAccounts =
-        newTransactionItemModel.accountsForOwner(activeOwnerId);
-
-      const currentCategoryIsValid = ownerCategories.some(
-        (c) => c.value === fields.categoryId.value,
-      );
-      if (ownerCategories.length === 0) {
-        // No category of this type for the owner: drop a stale choice so the form asks for one.
-        if (fields.categoryId.value) {
-          fields.categoryId.onChange(undefined);
-          fields.category.onChange(undefined);
-        }
-      } else if (!fields.categoryId.value || !currentCategoryIsValid) {
-        fields.categoryId.onChange(ownerCategories[0].value);
-        fields.category.onChange(ownerCategories[0].label);
-      }
-
-      const currentAccountIsValid = ownerAccounts.some(
-        (a) => a.value === fields.accountId.value,
-      );
-      if (
-        ownerAccounts.length > 0 &&
-        (!fields.accountId.value || !currentAccountIsValid)
-      ) {
-        fields.accountId.onChange(ownerAccounts[0].value);
-      }
     }
-  }, [newTransactionItemModel, activeOwnerId, activeType]);
 
-  useEffect(() => {
-    if (addTransaction.status === "success") {
-      router.back();
+    if (vm.isLoading) {
+      return (
+        <View>
+          {SKELETON_ROWS.map((row) => (
+            <Skeleton.ListItem key={row} testID={"transaction-form-skeleton"} />
+          ))}
+        </View>
+      );
     }
-  }, [addTransaction.status]);
 
-  if (
-    owners.isFetching ||
-    categories.isFetching ||
-    accounts.isFetching ||
-    !newTransactionItemModel
-  ) {
     return (
-      <View>
-        <Text.Headline value={"Loading"} />
+      <View style={styles.form}>
+        <SegmentedControl
+          accessibilityLabel={t("financial.categories.type")}
+          onChange={(value) => vm.onTypeChange(value as typeof vm.type)}
+          options={vm.typeOptions.map((option) => ({
+            label: t(option.labelKey),
+            tone: option.value === "EXPENSE" ? "expense" : "income",
+            value: option.value,
+          }))}
+          value={vm.type}
+        />
+        <AmountInput
+          error={err(vm.amountError)}
+          label={t("financial.transactions.form.amount")}
+          onChange={vm.onAmountChange}
+          tone={vm.typeTone}
+          value={vm.amountCents}
+        />
+        <TextField
+          error={err(vm.descriptionError)}
+          label={t("financial.transactions.form.description")}
+          maxLength={200}
+          onChangeText={vm.onDescriptionChange}
+          placeholder={t("financial.transactions.form.descriptionPlaceholder")}
+          value={vm.description}
+        />
+        {vm.hasNoCategories ? (
+          <MissingRecordHint
+            actionLabel={t("financial.transactions.form.createCategory")}
+            message={t("financial.transactions.form.noCategories")}
+            onCreate={vm.onCreateCategoryPress}
+          />
+        ) : (
+          <CategoryChips
+            categories={vm.categoryChips}
+            error={err(vm.categoryError)}
+            label={t("financial.transactions.form.category")}
+            moreLabel={t("financial.transactions.form.moreCategories")}
+            onMore={vm.onCategoryPickerOpen}
+            onSelect={vm.onCategorySelect}
+            selected={vm.selectedCategoryId}
+          />
+        )}
+        <View style={styles.row}>
+          <View style={styles.field}>
+            {vm.hasNoAccounts ? (
+              <MissingRecordHint
+                actionLabel={t("financial.transactions.form.createAccount")}
+                message={t("financial.transactions.form.noAccounts")}
+                onCreate={vm.onCreateAccountPress}
+              />
+            ) : (
+              <SelectField
+                closeLabel={t("common.actions.close")}
+                error={err(vm.accountError)}
+                label={t("financial.transactions.form.account")}
+                onChange={vm.onAccountChange}
+                options={vm.accountOptions.map((option) => ({
+                  description: option.descriptionKey
+                    ? t(option.descriptionKey)
+                    : undefined,
+                  label: option.label,
+                  value: option.value,
+                }))}
+                sheetTitle={t("financial.transactions.form.account")}
+                value={vm.selectedAccountId}
+              />
+            )}
+          </View>
+          <View style={styles.field}>
+            <DateField
+              error={err(vm.dateError)}
+              label={t("financial.transactions.form.date")}
+              onChange={(date) => date && vm.onDateChange(date)}
+              todayLabel={t("common.date.today")}
+              value={vm.date}
+              yesterdayLabel={t("common.date.yesterday")}
+            />
+          </View>
+        </View>
+        <ChipGroup
+          label={t("financial.common.belongsTo")}
+          layout={"wrap"}
+          mode={"single"}
+          onChange={vm.onOwnerChange}
+          options={translateChoices(vm.ownerChoices, t)}
+          value={vm.ownerId}
+        />
+        {vm.formErrorKey && (
+          <Text.Body tone={"expense"} value={t(vm.formErrorKey)} />
+        )}
+        {vm.isEditing && (
+          <Button.Ghost
+            label={t("financial.transactions.delete")}
+            onPress={vm.onDeletePress}
+            tone={"expense"}
+          />
+        )}
       </View>
     );
   }
 
-  function onCancel() {
-    if (router.canGoBack()) {
-      return router.back();
-    }
-    return router.replace("/financial");
-  }
-
-  function onAdd() {
-    const params = validateForm(owners.data!);
-    if (params) {
-      addTransaction.mutate(params);
-    }
-  }
-
   return (
     <>
-      <Pressable onPress={onCancel} style={styles.backdrop} />
-      <Card customStyles={styles.container}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={styles.titleContainer}>
-            <Text.Headline value={"Add new Transaction"} />
-          </View>
-          <Spacer direction={"vertical"} size={"md"} />
-          <View style={styles.lineContainer}>
-            <TextInput.Outlined
-              label={fields.description.label}
-              onChangeText={fields.description.onChange}
-              value={fields.description.value}
-            />
-          </View>
-          <HelperText
-            label={errors["description"]}
-            type={"error"}
-            visible={!!errors["description"]}
+      <BottomSheet
+        closeLabel={t("common.actions.close")}
+        footer={
+          <Button.Primary
+            fullWidth
+            label={t(vm.saveLabelKey)}
+            loading={vm.isSaving}
+            onPress={vm.onSave}
+            size={"lg"}
           />
-          <Spacer direction={"vertical"} size={"md"} />
-          <View style={styles.lineContainer}>
-            <View style={styles.helperTextContainer}>
-              <TextInput.Outlined
-                label={fields.value.label}
-                onChangeText={fields.value.onChange}
-                value={fields.value.value ?? ""}
-              />
-              <HelperText
-                label={errors["value"]}
-                type={"error"}
-                visible={!!errors["value"]}
-              />
-            </View>
-            <Spacer direction={"horizontal"} size={"md"} />
-            <View style={styles.helperTextContainer}>
-              <Picker
-                items={newTransactionItemModel.transactionTypes}
-                onValueChange={(value) => {
-                  fields.type.onChange(value);
-                }}
-                selectedValue={fields.type.value}
-              />
-              <HelperText
-                label={errors["type"]}
-                type={"error"}
-                visible={!!errors["type"]}
-              />
-            </View>
-          </View>
-          <Spacer direction={"vertical"} size={"md"} />
-          <Picker
-            items={newTransactionItemModel.stockOwners}
-            label={fields.owner.label}
-            onValueChange={(value) => {
-              fields.ownerId.onChange(value);
-              fields.owner.onChange(newTransactionItemModel.ownerType(value!));
-            }}
-            selectedValue={fields.ownerId.value}
-          />
-          <HelperText
-            label={errors["owner"]}
-            type={"error"}
-            visible={!!errors["owner"]}
-          />
-          <Spacer direction={"vertical"} size={"md"} />
-          <View style={styles.lineContainer}>
-            <Spacer direction={"horizontal"} size={"md"} />
-            <View style={styles.helperTextContainer}>
-              <DatePicker
-                date={fields.transactionDate.value}
-                label={fields.transactionDate.label}
-                mode={"single"}
-                onConfirm={({ date }) => {
-                  fields.transactionDate.onChange(date);
-                }}
-              />
-              <HelperText
-                label={errors["transactionDate"]}
-                type={"error"}
-                visible={!!errors["transactionDate"]}
-              />
-            </View>
-          </View>
-          <Spacer direction={"vertical"} size={"md"} />
-          <Picker
-            items={newTransactionItemModel.accountsForOwner(
-              activeOwnerId ?? "",
-            )}
-            label={"Account"}
-            onValueChange={(value) => {
-              fields.accountId.onChange(value);
-            }}
-            selectedValue={fields.accountId.value}
-          />
-          <HelperText
-            label={errors["accountId"]}
-            type={"error"}
-            visible={!!errors["accountId"]}
-          />
-          <Spacer direction={"vertical"} size={"md"} />
-          <Picker
-            items={newTransactionItemModel.categoriesForOwner(
-              activeOwnerId ?? "",
-              activeType,
-            )}
-            label={"Category"}
-            onValueChange={(value) => {
-              fields.categoryId.onChange(value);
-              const name = newTransactionItemModel
-                .categoriesForOwner(activeOwnerId ?? "", activeType)
-                .find((c) => c.value === value)?.label;
-              fields.category.onChange(name);
-            }}
-            selectedValue={fields.categoryId.value}
-          />
-          <HelperText
-            label={errors["categoryId"]}
-            type={"error"}
-            visible={!!errors["categoryId"]}
-          />
-        </ScrollView>
-        <Card customStyles={styles.buttonContainer}>
-          <View style={styles.button}>
-            <Button.Text
-              customStyles={{ textColor: theme.colors.expense }}
-              label={"Cancel"}
-              onPress={onCancel}
-            />
-            <Spacer direction={"horizontal"} size={"xl"} />
-            <Button.Filled label={"Add"} onPress={onAdd} />
-          </View>
-        </Card>
-      </Card>
+        }
+        onClose={vm.onClose}
+        presentation={"inline"}
+        title={t(vm.titleKey)}
+        visible
+      >
+        {renderBody()}
+      </BottomSheet>
+      {vm.isCategoryPickerOpen && (
+        <CategoryPickerSheet
+          closeLabel={t("common.actions.close")}
+          onClose={vm.onCategoryPickerClose}
+          onQueryChange={vm.onCategoryQueryChange}
+          onSelect={vm.onCategorySelect}
+          query={vm.categoryQuery}
+          rows={vm.categoryPickerRows}
+          searchPlaceholder={t("common.search.placeholder")}
+          selected={vm.selectedCategoryId}
+          title={t("financial.transactions.form.chooseCategory")}
+        />
+      )}
+      <ConfirmDialog
+        cancelLabel={t("common.form.keepEditing")}
+        closeLabel={t("common.actions.close")}
+        confirmLabel={t("common.form.discard")}
+        message={t("common.form.discardMessage")}
+        onCancel={vm.onDiscardCancel}
+        onConfirm={vm.onDiscardConfirm}
+        title={t("common.form.discardTitle")}
+        visible={vm.isDiscardDialogOpen}
+      />
+      <ConfirmDialog
+        cancelLabel={t("common.actions.cancel")}
+        closeLabel={t("common.actions.close")}
+        confirmLabel={t("common.actions.delete")}
+        loading={vm.isDeleting}
+        message={""}
+        onCancel={vm.onDeleteCancel}
+        onConfirm={vm.onDeleteConfirm}
+        title={t("financial.transactions.deleteTitle")}
+        visible={vm.isDeleteDialogOpen}
+      />
     </>
   );
 }
 
-export default NewTransactionItemModal;
+export default NewTransactionModal;

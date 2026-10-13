@@ -1,107 +1,166 @@
-import { useIsFocused } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
-import { useNavigation } from "expo-router";
-import { useEffect } from "react";
-import { ScrollView, View } from "react-native";
+import { View } from "react-native";
 
-import { useCases } from "@application/useCases";
-import { Text } from "@components";
-import { useQuery } from "@infrastructure/fetcher";
-import ListHeader from "@screens/Financial/Transactions/containers/ListHeader";
-import RefetchCache from "@screens/Financial/Transactions/containers/RefetchCache";
+import {
+  AmountText,
+  ChipGroup,
+  EmptyState,
+  ErrorState,
+  GroupHeader,
+} from "@components";
+import Skeleton from "@components/Skeleton";
+import { useTranslation } from "@presentation/i18n";
+import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
-import ItemSeparator from "./containers/ItemSeparator";
-import ListItem from "./containers/ListItem";
-import FinancialTransactionViewModel, {
-  SortRule,
-} from "./models/FinancialTransactionViewModel";
-import getStyles from "./styles";
+import MonthPickerSheet from "./components/MonthPickerSheet";
+import MonthSummary from "./components/MonthSummary";
+import MonthSwitcher from "./components/MonthSwitcher";
+import TransactionRow from "./components/TransactionRow";
+import { useTransactionsViewModel } from "./hooks";
+import { formatDayTitle, ListEntry, netAmount } from "./models/transactionList";
+import useStyles from "./styles";
 
-function FinancialTransaction() {
-  const { styles } = getStyles();
-  const isFocused = useIsFocused();
-  const navigation = useNavigation();
+const SKELETON_ROWS = [0, 1, 2, 3, 4, 5];
 
-  const { data, error, isFetching, refetch } = useQuery<
-    FinancialTransactionViewModel[]
-  >({
-    cacheKey: [useCases.getFinancialTransactionsUseCase.uniqueName],
-    fetch: async () => {
-      const owner = await useCases.getOwnersUseCase.execute();
-      const ownerIds = owner.map((owner) => owner.id);
+function FinancialTransactions() {
+  const { styles } = useStyles();
+  const { t } = useTranslation();
+  const vm = useTransactionsViewModel();
 
-      const transactionDTOs =
-        await useCases.getFinancialTransactionsUseCase.execute({
-          ownerIds,
-        });
-
-      const transactions = transactionDTOs.map(
-        (stockDTO) => new FinancialTransactionViewModel(stockDTO, owner),
-      );
-
-      return FinancialTransactionViewModel.sort(
-        transactions,
-        SortRule.DATE_ASC,
-      );
-    },
-  });
-
-  useEffect(() => {
-    if (!isFetching) {
-      navigation.setOptions({
-        headerRight: () => <RefetchCache refetchQuery={refetch} />,
-      });
+  function dayTitle(entry: Extract<ListEntry, { kind: "header" }>) {
+    if (entry.label.kind === "today") {
+      return t("financial.transactions.today");
     }
-  }, [navigation, isFetching]);
-
-  useEffect(() => {
-    if (isFocused) {
-      refetch();
+    if (entry.label.kind === "yesterday") {
+      return t("financial.transactions.yesterday");
     }
-  }, [isFocused]);
+    return formatDayTitle(entry.label.date, vm.languageTag);
+  }
 
-  if (isFetching) {
+  function renderItem({ item }: { item: ListEntry }) {
+    if (item.kind === "item") {
+      return <TransactionRow item={item.item} onPress={vm.onRowPress} />;
+    }
+
+    const net = netAmount(item.netCents);
     return (
-      <View>
-        <Text.Title value={"Loading..."} />
+      <GroupHeader
+        testID={`day-header-${item.key}`}
+        title={dayTitle(item)}
+        trailing={
+          <AmountText size={"body"} type={net.type} value={net.value} />
+        }
+      />
+    );
+  }
+
+  const toolbar = (
+    <View style={styles.toolbar}>
+      <MonthSwitcher
+        monthLabel={vm.monthLabel}
+        nextLabel={t("financial.transactions.nextMonth")}
+        onMonthPress={vm.onMonthPickerOpen}
+        onNext={vm.onNextMonth}
+        onPrevious={vm.onPreviousMonth}
+        previousLabel={t("financial.transactions.previousMonth")}
+      />
+      <MonthSummary
+        balanceCents={vm.summary?.balanceCents ?? 0}
+        balanceLabel={t("financial.common.balance")}
+        errorMessage={t("common.errors.generic")}
+        expenseCents={vm.summary?.expenseCents ?? 0}
+        expensesLabel={t("financial.common.expenses")}
+        incomeCents={vm.summary?.incomeCents ?? 0}
+        incomesLabel={t("financial.common.incomes")}
+        isError={vm.summaryError}
+        isLoading={!vm.summary && !vm.summaryError}
+        onRetry={vm.onSummaryRetry}
+        retryLabel={t("common.actions.tryAgain")}
+      />
+      <ChipGroup
+        layout={"scroll"}
+        mode={"single"}
+        onChange={vm.onFilterChange}
+        options={translateChoices(vm.filterChoices, t)}
+        value={vm.filter}
+      />
+    </View>
+  );
+
+  if (vm.errorMessage) {
+    return (
+      <ErrorState
+        message={vm.errorMessage}
+        onRetry={vm.onRetry}
+        retryLabel={t("common.actions.tryAgain")}
+      />
+    );
+  }
+
+  if (vm.isLoading) {
+    return (
+      <View style={styles.root}>
+        {toolbar}
+        {SKELETON_ROWS.map((row) => (
+          <Skeleton.ListItem key={row} testID={"transactions-skeleton"} />
+        ))}
       </View>
     );
   }
 
-  function renderItem({
-    item,
-  }: {
-    index: number;
-    item: FinancialTransactionViewModel;
-  }) {
-    return <ListItem item={item} refetch={refetch} />;
-  }
-
-  if (error) {
-    return (
-      <View>
-        <Text.Headline value={`Error ${error.message}`} />
-      </View>
+  let empty = null;
+  if (vm.isEmptyMonth) {
+    empty = (
+      <EmptyState
+        actionLabel={t("financial.transactions.add")}
+        message={t("financial.transactions.emptyMessage")}
+        onAction={vm.onAddPress}
+        title={t("financial.transactions.emptyTitle", { month: vm.monthLabel })}
+      />
+    );
+  } else if (vm.isFilteredEmpty) {
+    empty = (
+      <EmptyState
+        actionLabel={t("financial.common.clearFilters")}
+        message={t("financial.transactions.noMatchMessage")}
+        onAction={vm.onClearFilters}
+        title={t("financial.transactions.noMatch")}
+      />
     );
   }
 
   return (
-    <>
-      <ScrollView style={styles.scrollView}>
-        <View style={styles.container}>
-          <View style={styles.listContainer}>
-            <FlashList
-              contentContainerStyle={styles.listContentContainer}
-              data={data}
-              ItemSeparatorComponent={ItemSeparator}
-              ListHeaderComponent={ListHeader}
-              renderItem={renderItem}
-            />
-          </View>
-        </View>
-      </ScrollView>
-    </>
+    <View style={styles.root}>
+      <FlashList
+        data={vm.entries}
+        estimatedItemSize={64}
+        getItemType={(entry) => entry.kind}
+        keyExtractor={(entry) => entry.key}
+        ListEmptyComponent={empty}
+        ListHeaderComponent={toolbar}
+        onRefresh={vm.onRefresh}
+        refreshing={vm.isRefreshing}
+        renderItem={renderItem}
+        stickyHeaderIndices={vm.stickyIndices}
+      />
+      {vm.isMonthPickerOpen && (
+        <MonthPickerSheet
+          closeLabel={t("common.actions.close")}
+          months={vm.monthChoices}
+          nextYearLabel={t("financial.transactions.monthPicker.nextYear")}
+          onClose={vm.onMonthPickerClose}
+          onSelect={vm.onMonthSelect}
+          onYearChange={vm.onPickerYearChange}
+          previousYearLabel={t(
+            "financial.transactions.monthPicker.previousYear",
+          )}
+          selected={vm.selectedMonthIndex}
+          title={t("financial.transactions.monthPicker.title")}
+          year={vm.pickerYear}
+        />
+      )}
+    </View>
   );
 }
 
-export default FinancialTransaction;
+export default FinancialTransactions;
