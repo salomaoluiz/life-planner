@@ -112,6 +112,7 @@ function NewStockItemModal() {
           />
           <Button.Ghost
             icon={vm.isMoreOpen ? "chevron-up" : "chevron-down"}
+            inline
             label={t("stock.form.moreDetails")}
             onPress={vm.onToggleMore}
           />

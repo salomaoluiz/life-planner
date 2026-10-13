@@ -150,3 +150,8 @@ it("SHOULD still dim a disabled Secondary", () => {
   setup({ disabled: true, variant: "Secondary" });
   expect(rootStyle().opacity).toBe(0.5);
 });
+
+it("SHOULD align an inline Ghost to the start of a column parent", () => {
+  setup({ inline: true, variant: "Ghost" });
+  expect(rootStyle().alignSelf).toBe("flex-start");
+});

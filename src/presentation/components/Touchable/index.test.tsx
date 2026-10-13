@@ -1,4 +1,4 @@
-import { Pressable } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 
 import { act, fireEvent, screen } from "@tests";
 
@@ -82,6 +82,16 @@ describe("focus ring on web", () => {
     expect(screen.getByTestId("focus-ring")).toBeTruthy();
     act(() => pressable().props.onBlur());
     expect(screen.queryByTestId("focus-ring")).toBeNull();
+  });
+
+  it("SHOULD paint the ring with the given color", () => {
+    setup({ focusRingColor: "#123456" });
+
+    act(() => pressable().props.onFocus({ target: { matches: () => true } }));
+    expect(
+      StyleSheet.flatten(screen.getByTestId("focus-ring").props.style)
+        .borderColor,
+    ).toBe("#123456");
   });
 
   it("SHOULD NOT show the ring WHEN focus comes from a mouse click", () => {

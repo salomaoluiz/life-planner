@@ -1,7 +1,8 @@
 import { AccessibilityInfo, Modal, StyleSheet, Text } from "react-native";
 
-import { act, fireEvent, screen, waitFor } from "@tests";
+import { act, fireEvent, render, screen, waitFor } from "@tests";
 
+import { BottomSheet } from "@components";
 import { lightTheme } from "@presentation/theme/provider";
 import { isWeb } from "@utils/platform";
 
@@ -61,6 +62,32 @@ it("SHOULD call onClose WHEN Escape is pressed on web", () => {
   setup();
   handlers.keydown({ key: "Escape" });
   expect(onClose).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD close only the top-most sheet WHEN Escape is pressed with stacked sheets", () => {
+  jest.mocked(isWeb).mockReturnValue(true);
+  const { documentStub } = stubDocument();
+  const handlers: ((event: { key: string }) => void)[] = [];
+  documentStub.addEventListener.mockImplementation((_type, handler) => {
+    handlers.push(handler as never);
+  });
+  const parentClose = jest.fn();
+  const childClose = jest.fn();
+  render(
+    <>
+      <BottomSheet closeLabel="Close" onClose={parentClose} title="A" visible>
+        <Text>a</Text>
+      </BottomSheet>
+      <BottomSheet closeLabel="Close" onClose={childClose} title="B" visible>
+        <Text>b</Text>
+      </BottomSheet>
+    </>,
+  );
+
+  handlers.forEach((handler) => handler({ key: "Escape" }));
+
+  expect(childClose).toHaveBeenCalledTimes(1);
+  expect(parentClose).not.toHaveBeenCalled();
 });
 
 it("SHOULD ignore other keys on web", () => {

@@ -34,6 +34,8 @@ export interface BottomSheetProps {
   visible: boolean;
 }
 
+// Visible sheets on web, oldest first; Esc closes the last one only.
+const openSheets: symbol[] = [];
 const SLIDE_MS = 250;
 const SLIDE_OFFSET = 600;
 const SWIPE_CLOSE_DISTANCE = 80;
@@ -64,14 +66,23 @@ function BottomSheet(props: BottomSheetProps) {
     if (!props.visible || !isWeb() || typeof document === "undefined") {
       return;
     }
+    const token = Symbol("sheet");
+    openSheets.push(token);
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
+      // Only the top-most sheet reacts, so Esc on a nested picker leaves the form open.
+      if (
+        event.key === "Escape" &&
+        openSheets[openSheets.length - 1] === token
+      ) {
         onCloseRef.current();
       }
     }
     document.addEventListener("keydown", onKeyDown);
 
-    return () => document.removeEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      openSheets.splice(openSheets.indexOf(token), 1);
+    };
   }, [props.visible]);
 
   const pan = useRef(

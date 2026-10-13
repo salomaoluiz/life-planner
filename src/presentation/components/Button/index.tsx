@@ -26,7 +26,7 @@ export interface ButtonProps {
 }
 
 function ButtonBase(props: ButtonProps & { variant: ButtonVariant }) {
-  const { radius, sizes, spacing } = useKitTheme();
+  const { colors, radius, sizes, spacing } = useKitTheme();
   const { iconColor, labelColor, styles } = useStyles(
     props.variant,
     props.size ?? "md",
@@ -65,6 +65,7 @@ function ButtonBase(props: ButtonProps & { variant: ButtonVariant }) {
       dimWhenDisabled={props.variant !== "primary"}
       disabled={props.disabled}
       focusRadius={radius.md}
+      focusRingColor={props.variant === "primary" ? colors.onAccent : undefined}
       hitSlop={
         props.variant === "ghost" && props.inline
           ? { left: spacing.xs, right: spacing.xs }

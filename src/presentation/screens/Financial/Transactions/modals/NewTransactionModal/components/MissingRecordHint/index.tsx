@@ -15,7 +15,7 @@ function MissingRecordHint(props: Props) {
   return (
     <View style={styles.hint}>
       <Text.Caption tone={"secondary"} value={props.message} />
-      <Button.Ghost label={props.actionLabel} onPress={props.onCreate} />
+      <Button.Ghost inline label={props.actionLabel} onPress={props.onCreate} />
     </View>
   );
 }

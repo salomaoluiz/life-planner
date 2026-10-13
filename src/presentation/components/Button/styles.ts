@@ -49,6 +49,9 @@ function useStyles(
       root: {
         alignItems: "center",
         ...(fullWidth ? { alignSelf: "stretch" as const } : {}),
+        ...(!fullWidth && variant === "ghost" && inline
+          ? { alignSelf: "flex-start" as const }
+          : {}),
         borderRadius: radius.md,
         flexDirection: "row",
         gap: spacing.xs,

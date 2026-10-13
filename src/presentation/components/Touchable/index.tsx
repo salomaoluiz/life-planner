@@ -25,6 +25,8 @@ export interface TouchableProps {
   dimWhenDisabled?: boolean;
   disabled?: boolean;
   focusRadius?: number;
+  /** Ring color; pass a contrasting one on accent-filled controls (default: accent) */
+  focusRingColor?: string;
   hitSlop?: Insets;
   minTouchTarget?: boolean;
   onLongPress?: () => void;
@@ -76,6 +78,7 @@ function Touchable(props: TouchableProps) {
       )}
       {props.children}
       <FocusRing
+        color={props.focusRingColor}
         radius={props.focusRadius ?? radius.md}
         visible={onWeb && focused}
       />
