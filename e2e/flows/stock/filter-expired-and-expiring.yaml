@@ -65,6 +65,9 @@ tags:
     id: "stock.list.status-expired"
 - assertVisible:
     id: "stock.list.status-expiring"
+# Only rows without a badge render the quantity caption: the 60-day item is the only one
+- assertVisible:
+    id: "stock.list.row-quantity"
 # EXPIRED: only the expired row
 - tapOn:
     id: "stock.list.filter-EXPIRED"
