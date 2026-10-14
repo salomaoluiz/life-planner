@@ -23,6 +23,7 @@ import CategoryPickerSheet from "./components/CategoryPickerSheet";
 import MissingRecordHint from "./components/MissingRecordHint";
 import { useNewTransactionViewModel } from "./hooks";
 import useStyles from "./styles";
+import transactionFormTestIds from "./testIds";
 
 const SKELETON_ROWS = [0, 1, 2];
 
@@ -66,12 +67,14 @@ function NewTransactionModal() {
             tone: option.value === "EXPENSE" ? "expense" : "income",
             value: option.value,
           }))}
+          testID={transactionFormTestIds.type}
           value={vm.type}
         />
         <AmountInput
           error={err(vm.amountError)}
           label={t("financial.transactions.form.amount")}
           onChange={vm.onAmountChange}
+          testID={transactionFormTestIds.amountInput}
           tone={vm.typeTone}
           value={vm.amountCents}
         />
@@ -81,6 +84,7 @@ function NewTransactionModal() {
           maxLength={200}
           onChangeText={vm.onDescriptionChange}
           placeholder={t("financial.transactions.form.descriptionPlaceholder")}
+          testID={transactionFormTestIds.descriptionInput}
           value={vm.description}
         />
         {vm.hasNoCategories ? (
@@ -88,6 +92,7 @@ function NewTransactionModal() {
             actionLabel={t("financial.transactions.form.createCategory")}
             message={t("financial.transactions.form.noCategories")}
             onCreate={vm.onCreateCategoryPress}
+            testID={transactionFormTestIds.missingCategoryHint}
           />
         ) : (
           <CategoryChips
@@ -107,6 +112,7 @@ function NewTransactionModal() {
                 actionLabel={t("financial.transactions.form.createAccount")}
                 message={t("financial.transactions.form.noAccounts")}
                 onCreate={vm.onCreateAccountPress}
+                testID={transactionFormTestIds.missingAccountHint}
               />
             ) : (
               <SelectField
@@ -122,6 +128,7 @@ function NewTransactionModal() {
                   value: option.value,
                 }))}
                 sheetTitle={t("financial.transactions.form.account")}
+                testID={transactionFormTestIds.accountSelect}
                 value={vm.selectedAccountId}
               />
             )}
@@ -131,6 +138,7 @@ function NewTransactionModal() {
               error={err(vm.dateError)}
               label={t("financial.transactions.form.date")}
               onChange={(date) => date && vm.onDateChange(date)}
+              testID={transactionFormTestIds.dateField}
               todayLabel={t("common.date.today")}
               value={vm.date}
               yesterdayLabel={t("common.date.yesterday")}
@@ -146,12 +154,17 @@ function NewTransactionModal() {
           value={vm.ownerId}
         />
         {vm.formErrorKey && (
-          <Text.Body tone={"expense"} value={t(vm.formErrorKey)} />
+          <Text.Body
+            testID={transactionFormTestIds.formError}
+            tone={"expense"}
+            value={t(vm.formErrorKey)}
+          />
         )}
         {vm.isEditing && (
           <Button.Ghost
             label={t("financial.transactions.delete")}
             onPress={vm.onDeletePress}
+            testID={transactionFormTestIds.deleteButton}
             tone={"expense"}
           />
         )}
@@ -170,10 +183,12 @@ function NewTransactionModal() {
             loading={vm.isSaving}
             onPress={vm.onSave}
             size={"lg"}
+            testID={transactionFormTestIds.saveButton}
           />
         }
         onClose={vm.onClose}
         presentation={"inline"}
+        testID={transactionFormTestIds.sheet}
         title={t(vm.titleKey)}
         visible
       >
@@ -210,6 +225,7 @@ function NewTransactionModal() {
         message={""}
         onCancel={vm.onDeleteCancel}
         onConfirm={vm.onDeleteConfirm}
+        testID={transactionFormTestIds.deleteDialog}
         title={t("financial.transactions.deleteTitle")}
         visible={vm.isDeleteDialogOpen}
       />

@@ -1,4 +1,5 @@
 import { ChipGroup } from "@components";
+import transactionFormTestIds from "@screens/Financial/Transactions/modals/NewTransactionModal/testIds";
 
 interface Props {
   categories: { colorDot: string; label: string; value: string }[];
@@ -32,7 +33,7 @@ function CategoryChips(props: Props) {
         ...props.categories,
         { label: props.moreLabel, value: MORE_VALUE, variant: "add" },
       ]}
-      testID={"transaction-category-chips"}
+      testID={transactionFormTestIds.categoryChips}
       value={props.selected}
     />
   );

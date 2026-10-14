@@ -1,4 +1,4 @@
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import {
   closeSync,
   existsSync,
@@ -10,6 +10,7 @@ import {
   writeFileSync,
 } from "node:fs";
 
+import { findRunning, parseFinished, renderProgress } from "./progress.mjs";
 import { runE2e } from "./run.mjs";
 
 const REPORT_DIR = "e2e-report";
@@ -36,13 +37,77 @@ function git(dir, args) {
   return result.status === 0 ? result.stdout.trim() : null;
 }
 
+// Maestro creates one folder per flow (path with / as _) inside a timestamped folder when the flow starts.
+function latestArtifactDirs() {
+  try {
+    const root = `${REPORT_DIR}/artifacts`;
+    const runs = readdirSync(root).sort();
+    return runs.length > 0
+      ? readdirSync(`${root}/${runs[runs.length - 1]}`)
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function readText(path) {
+  try {
+    return readFileSync(path, "utf8");
+  } catch {
+    return "";
+  }
+}
+
+function startProgress({ expected, logFile, started }) {
+  let previousLines = 0;
+
+  function draw() {
+    const finished = parseFinished(readText(logFile));
+    const running = findRunning(expected, finished, latestArtifactDirs());
+    const lines = renderProgress({
+      elapsedSeconds: (Date.now() - started) / 1000,
+      expected,
+      finished,
+      running,
+    });
+    if (previousLines > 0) {
+      process.stdout.write(`\x1b[${previousLines}A\x1b[0J`);
+    }
+    process.stdout.write(`${lines.join("\n")}\n`);
+    previousLines = lines.length;
+  }
+
+  draw();
+  const timer = setInterval(draw, 1000);
+  return () => {
+    clearInterval(timer);
+    draw();
+  };
+}
+
 const deps = {
-  exec({ args, command, logFile }) {
+  async exec({ args, command, expected, logFile, started }) {
     mkdirSync(REPORT_DIR, { recursive: true });
     const fd = openSync(logFile, "a");
+    // Humans (a terminal) get a live list of passed / running / pending flows; AI shells and CI are not a TTY
+    // and keep the quiet path, so nothing but the final summary reaches their context.
+    const live = process.stdout.isTTY && expected.length > 0;
     try {
-      const result = spawnSync(command, args, { stdio: ["ignore", fd, fd] });
-      return { status: result.status ?? 1 };
+      if (!live) {
+        const result = spawnSync(command, args, { stdio: ["ignore", fd, fd] });
+        return { status: result.status ?? 1 };
+      }
+      const child = spawn(command, args, { stdio: ["ignore", fd, fd] });
+      const exited = new Promise((resolve) => {
+        child.on("close", (status) => resolve({ status: status ?? 1 }));
+        child.on("error", () => resolve({ status: 1 }));
+      });
+      const stopProgress = startProgress({ expected, logFile, started });
+      try {
+        return await exited;
+      } finally {
+        stopProgress();
+      }
     } finally {
       closeSync(fd);
     }

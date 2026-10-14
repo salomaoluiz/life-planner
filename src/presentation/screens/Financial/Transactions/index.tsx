@@ -19,6 +19,7 @@ import TransactionRow from "./components/TransactionRow";
 import { useTransactionsViewModel } from "./hooks";
 import { formatDayTitle, ListEntry, netAmount } from "./models/transactionList";
 import useStyles from "./styles";
+import transactionsTestIds from "./testIds";
 
 const SKELETON_ROWS = [0, 1, 2, 3, 4, 5];
 
@@ -59,10 +60,12 @@ function FinancialTransactions() {
       <MonthSwitcher
         monthLabel={vm.monthLabel}
         nextLabel={t("financial.transactions.nextMonth")}
+        nextTestID={transactionsTestIds.monthNext}
         onMonthPress={vm.onMonthPickerOpen}
         onNext={vm.onNextMonth}
         onPrevious={vm.onPreviousMonth}
         previousLabel={t("financial.transactions.previousMonth")}
+        previousTestID={transactionsTestIds.monthPrevious}
       />
       <MonthSummary
         balanceCents={vm.summary?.balanceCents ?? 0}
@@ -70,12 +73,14 @@ function FinancialTransactions() {
         errorMessage={t("common.errors.generic")}
         expenseCents={vm.summary?.expenseCents ?? 0}
         expensesLabel={t("financial.common.expenses")}
+        expenseTestID={transactionsTestIds.summaryExpense}
         incomeCents={vm.summary?.incomeCents ?? 0}
         incomesLabel={t("financial.common.incomes")}
         isError={vm.summaryError}
         isLoading={!vm.summary && !vm.summaryError}
         onRetry={vm.onSummaryRetry}
         retryLabel={t("common.actions.tryAgain")}
+        testID={transactionsTestIds.monthSummary}
       />
       <ChipGroup
         layout={"scroll"}
@@ -99,7 +104,7 @@ function FinancialTransactions() {
 
   if (vm.isLoading) {
     return (
-      <View style={styles.root}>
+      <View style={styles.root} testID={transactionsTestIds.screen}>
         {toolbar}
         {SKELETON_ROWS.map((row) => (
           <Skeleton.ListItem key={row} testID={"transactions-skeleton"} />
@@ -115,6 +120,7 @@ function FinancialTransactions() {
         actionLabel={t("financial.transactions.add")}
         message={t("financial.transactions.emptyMessage")}
         onAction={vm.onAddPress}
+        testID={transactionsTestIds.emptyMonth}
         title={t("financial.transactions.emptyTitle", { month: vm.monthLabel })}
       />
     );
@@ -130,7 +136,7 @@ function FinancialTransactions() {
   }
 
   return (
-    <View style={styles.root}>
+    <View style={styles.root} testID={transactionsTestIds.screen}>
       {toolbar}
       <FlashList
         data={vm.entries}

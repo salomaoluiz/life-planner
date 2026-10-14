@@ -1,0 +1,36 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/create-missing-records
+tags:
+  - financial
+  - spec-013
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.empty-month-action"
+    timeout: 20000
+- tapOn:
+    id: "financial.transactions.empty-month-action"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.missing-category-hint"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- assertVisible:
+    id: "financial.transaction-form.missing-account-hint"
+- tapOn:
+    id: "financial.transaction-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.amount-input-error"
+    timeout: 20000
+- assertVisible:
+    id: "financial.transaction-form.sheet"

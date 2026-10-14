@@ -1,0 +1,41 @@
+url: ${E2E_WEB_URL}
+---
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Account
+      KEY: ACCOUNT_NAME
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Expense Category
+      KEY: EXPENSE_CATEGORY_NAME
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Income Category
+      KEY: INCOME_CATEGORY_NAME
+- runFlow:
+    file: create-account.yaml
+    env:
+      TOKEN: ${TOKEN}
+      OWNER_ID: ${OWNER_ID}
+      NAME: ${output.ACCOUNT_NAME}
+- evalScript: ${output.KEEP_ACCOUNT_ID = output.ACCOUNT_ID}
+- runFlow:
+    file: create-category.yaml
+    env:
+      TOKEN: ${TOKEN}
+      OWNER_ID: ${OWNER_ID}
+      NAME: ${output.EXPENSE_CATEGORY_NAME}
+      TYPE: EXPENSE
+- evalScript: ${output.EXPENSE_CATEGORY_ID = output.CATEGORY_ID}
+- runFlow:
+    file: create-category.yaml
+    env:
+      TOKEN: ${TOKEN}
+      OWNER_ID: ${OWNER_ID}
+      NAME: ${output.INCOME_CATEGORY_NAME}
+      TYPE: INCOME
+- evalScript: ${output.INCOME_CATEGORY_ID = output.CATEGORY_ID}
+- evalScript: ${output.ACCOUNT_ID = output.KEEP_ACCOUNT_ID}

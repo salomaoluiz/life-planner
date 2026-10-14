@@ -10,12 +10,14 @@ interface Props {
   errorMessage: string;
   expenseCents: number;
   expensesLabel: string;
+  expenseTestID?: string;
   incomeCents: number;
   incomesLabel: string;
   isError: boolean;
   isLoading: boolean;
   onRetry: () => void;
   retryLabel: string;
+  testID?: string;
 }
 
 function MonthSummary(props: Props) {
@@ -37,7 +39,7 @@ function MonthSummary(props: Props) {
   const negative = props.balanceCents < 0;
 
   return (
-    <Card>
+    <Card testID={props.testID}>
       <Text.Overline tone={"secondary"} value={props.balanceLabel} />
       <AmountText
         size={"heading"}
@@ -53,7 +55,13 @@ function MonthSummary(props: Props) {
         <MetricBlock
           label={props.expensesLabel}
           trend={"expense"}
-          value={<AmountText tone={"expense"} value={props.expenseCents} />}
+          value={
+            <AmountText
+              testID={props.expenseTestID}
+              tone={"expense"}
+              value={props.expenseCents}
+            />
+          }
         />
       </View>
     </Card>

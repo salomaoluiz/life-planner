@@ -1,6 +1,7 @@
 import { fireEvent, screen } from "@tests";
 
 import { AmountText } from "@components";
+import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
 import { setup } from "./mocks/index.mocks";
 
@@ -17,7 +18,7 @@ it("SHOULD render description, subtitle and the signed amount", () => {
 it("SHOULD call onPress with the id WHEN pressed", () => {
   const { onPress } = setup();
 
-  fireEvent.press(screen.getByTestId("transaction-row-tx-1"));
+  fireEvent.press(screen.getByTestId(transactionsTestIds.row));
 
   expect(onPress).toHaveBeenCalledWith("tx-1");
 });

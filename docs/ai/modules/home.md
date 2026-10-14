@@ -77,3 +77,7 @@ routes_opened:
 ```yaml
 - The old stock dashboard container, view model, use case and DTO (replaced by getStockAttentionUseCase)
 ```
+
+## E2E (spec 020)
+
+`Home/testIds.ts` has `latestTransactionsRow` (`home.latest-transactions.row`, title `-title`). Flow: `e2e/flows/financial/transactions/home-latest-transactions.yaml` (tags `financial`, `home`, `spec-010`).

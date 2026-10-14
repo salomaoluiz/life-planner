@@ -1,0 +1,63 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/create-expense
+tags:
+  - financial
+  - spec-006
+  - spec-013
+  - smoke
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Transaction
+      KEY: TRANSACTION_NAME
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.empty-month-action"
+    timeout: 20000
+- tapOn:
+    id: "financial.transactions.empty-month-action"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.amount-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.transaction-form.amount-input"
+- eraseText
+- inputText: "23490"
+- tapOn:
+    id: "financial.transaction-form.description-input"
+- inputText: ${output.TRANSACTION_NAME}
+- tapOn:
+    id: "financial.transaction-form.category-${output.EXPENSE_CATEGORY_ID}"
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.transaction-form.account-select"
+- tapOn:
+    id: "financial.transaction-form.account-select-option-${output.ACCOUNT_ID}"
+- tapOn:
+    id: "financial.transaction-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.TRANSACTION_NAME}
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.transactions.empty-month"
+- assertVisible:
+    id: "financial.transactions.summary-expense"
+    text: ".*234[.,]90.*"

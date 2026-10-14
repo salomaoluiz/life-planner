@@ -1,0 +1,47 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/create-validation
+tags:
+  - financial
+  - spec-013
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.empty-month-action"
+    timeout: 20000
+- tapOn:
+    id: "financial.transactions.empty-month-action"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.save-button"
+    timeout: 20000
+- tapOn:
+    id: "financial.transaction-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.amount-input-error"
+    timeout: 20000
+- assertVisible:
+    id: "financial.transaction-form.description-input-error"
+- tapOn:
+    id: "financial.transaction-form.description-input"
+- inputText: "   "
+- tapOn:
+    id: "financial.transaction-form.save-button"
+- assertVisible:
+    id: "financial.transaction-form.description-input-error"
+- assertVisible:
+    id: "financial.transaction-form.sheet"

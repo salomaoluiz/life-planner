@@ -1,4 +1,5 @@
 import { fireEvent, screen, setup } from "./mocks/index.mocks";
+import transactionFormTestIds from "./testIds";
 
 it("SHOULD show the create title and the save expense footer", () => {
   setup();
@@ -10,6 +11,17 @@ it("SHOULD show the create title and the save expense footer", () => {
     screen.getByText("financial.transactions.form.saveExpense"),
   ).toBeOnTheScreen();
   expect(screen.queryByText("financial.transactions.delete")).toBeNull();
+  expect(screen.getByTestId(transactionFormTestIds.sheet)).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(transactionFormTestIds.saveButton),
+  ).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(transactionFormTestIds.descriptionInput),
+  ).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(transactionFormTestIds.amountInput),
+  ).toBeOnTheScreen();
+  expect(screen.queryByTestId(transactionFormTestIds.deleteButton)).toBeNull();
 });
 
 it("SHOULD show the save income label", () => {
@@ -35,6 +47,9 @@ it("SHOULD show the edit title, save changes and the delete button", () => {
   ).toBeOnTheScreen();
   expect(screen.getByText("financial.common.saveChanges")).toBeOnTheScreen();
   expect(screen.getByText("financial.transactions.delete")).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(transactionFormTestIds.deleteButton),
+  ).toBeOnTheScreen();
 });
 
 it("SHOULD NOT render a Cancel button", () => {

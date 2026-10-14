@@ -4,6 +4,7 @@ import { fireEvent, render, screen } from "@tests";
 
 import RecentTransactionDTO from "@application/dto/home/RecentTransactionDTO";
 import RecentTransactionUIModel from "@screens/Home/models/RecentTransactionUIModel";
+import homeTestIds from "@screens/Home/testIds";
 
 import LatestTransactions from "./";
 
@@ -71,7 +72,9 @@ it("SHOULD render the rows with title, subtitle and amount", () => {
       'home.transactions.subtitle {"category":"Groceries","date":"common.date.today"}',
     ),
   ).toBeOnTheScreen();
-  expect(screen.getByTestId("home-transaction-tx-1")).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(homeTestIds.latestTransactionsRow),
+  ).toBeOnTheScreen();
 });
 
 it("SHOULD open the transactions WHEN pressing See all", () => {
@@ -85,7 +88,7 @@ it("SHOULD open the transactions WHEN pressing See all", () => {
 it("SHOULD open the transactions WHEN pressing a row", () => {
   renderLoaded([row("tx-1", "Market")]);
 
-  fireEvent.press(screen.getByTestId("home-transaction-tx-1"));
+  fireEvent.press(screen.getByTestId(homeTestIds.latestTransactionsRow));
 
   expect(handlers.onSeeAllPress).toHaveBeenCalledTimes(1);
 });

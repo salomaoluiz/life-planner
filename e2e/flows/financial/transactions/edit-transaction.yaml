@@ -1,0 +1,76 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/edit-transaction
+tags:
+  - financial
+  - spec-006
+  - spec-013
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Transaction
+      KEY: TRANSACTION_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Edited
+      KEY: EDITED_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: ${output.TRANSACTION_NAME}
+      VALUE_CENTS: "11100"
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.TRANSACTION_NAME}
+    timeout: 20000
+- tapOn:
+    id: "financial.transactions.row-title"
+    text: ${output.TRANSACTION_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.description-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.transaction-form.amount-input"
+- eraseText
+- inputText: "22200"
+- tapOn:
+    id: "financial.transaction-form.description-input"
+- eraseText
+- inputText: ${output.EDITED_NAME}
+- tapOn:
+    id: "financial.transaction-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.EDITED_NAME}
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.transactions.row-title"
+    text: ${output.TRANSACTION_NAME}
+- assertVisible:
+    id: "financial.transactions.summary-expense"
+    text: ".*222[.,]00.*"
+- assertNotVisible:
+    id: "financial.transactions.summary-expense"
+    text: ".*111[.,]00.*"
