@@ -254,7 +254,5 @@ navigation_files: `screens/Navigation/*` (AppTabBar, navigationItems), `screens/
 testIDs: `Financial/Layout/testIds.ts`, `Financial/Accounts/testIds.ts`, `Financial/Accounts/modals/NewAccountModal/testIds.ts`. Flows in `e2e/flows/financial/accounts/` (tags `financial` + spec):
 
 - `create-account` (spec-006, spec-013, smoke), `create-account-validation` (spec-013)
-- `edit-account` (spec-006, spec-013), `archive-account` (spec-013), `delete-account` (spec-006, spec-013)
+- `edit-account` (spec-006, spec-013), `archive-account` (spec-013, spec-023, includes the un-archive round trip), `delete-account` (spec-006, spec-013)
 - `delete-account-with-transactions` (spec-006)
-
-Known app quirk found by the flows: reopening an account right after changing its status shows stale form data (the form cache is not refreshed), so there is no un-archive flow yet.

@@ -3,6 +3,7 @@ name: financial/accounts/archive-account
 tags:
   - financial
   - spec-013
+  - spec-023
 ---
 - launchApp:
     clearState: true
@@ -50,3 +51,26 @@ tags:
       id: "financial.accounts.row-title"
       text: ${output.ACCOUNT_NAME}
     timeout: 20000
+# Reopen right after the change: the form must show the saved status (spec 023).
+- tapOn:
+    id: "financial.accounts.row-title"
+    text: ${output.ACCOUNT_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.account-form.name-input"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- assertVisible:
+    id: "financial.account-form.archived-switch"
+    checked: true
+- tapOn:
+    id: "financial.account-form.archived-switch"
+- tapOn:
+    id: "financial.account-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.row-title"
+      text: ${output.ACCOUNT_NAME}
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.accounts.archived-toggle"
