@@ -1,0 +1,49 @@
+url: ${E2E_WEB_URL}
+name: family/create-family
+tags:
+  - family
+  - spec-003
+  - spec-012
+  - smoke
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Family
+      KEY: FAMILY_NAME
+- runFlow:
+    file: ../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../subflows/family/open-family.yaml
+- extendedWaitUntil:
+    visible:
+      id: "family.list.empty-state"
+    timeout: 20000
+- tapOn:
+    id: "family.list.new-button"
+- extendedWaitUntil:
+    visible:
+      id: "family.new-family.name-input"
+    timeout: 20000
+- tapOn:
+    id: "family.new-family.name-input"
+- inputText: ${output.FAMILY_NAME}
+- tapOn:
+    id: "family.new-family.save-button"
+# The new card is expanded: the creator is the owner (owner badge on their member row, invite button only owners see)
+- extendedWaitUntil:
+    visible:
+      id: "family.card.title-.*"
+      text: ${output.FAMILY_NAME}
+    timeout: 20000
+- assertVisible:
+    id: "family.card.member-.*-badge"
+- assertVisible:
+    id: "family.card.invite-button-.*"
+- assertNotVisible:
+    id: "family.list.empty-state"
