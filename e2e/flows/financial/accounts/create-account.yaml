@@ -1,0 +1,51 @@
+url: ${E2E_WEB_URL}
+name: financial/accounts/create-account
+tags:
+  - financial
+  - spec-006
+  - spec-013
+  - smoke
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Account
+      KEY: ACCOUNT_NAME
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-accounts.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.empty-state"
+    timeout: 20000
+- tapOn:
+    id: "financial.accounts.add-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.account-form.name-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.account-form.name-input"
+- inputText: ${output.ACCOUNT_NAME}
+- tapOn:
+    id: "financial.account-form.icon-icon-wallet"
+- tapOn:
+    id: "financial.account-form.balance-input"
+- eraseText
+- inputText: "123456"
+- tapOn:
+    id: "financial.account-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.row-title"
+      text: ${output.ACCOUNT_NAME}
+    timeout: 20000
+- assertVisible:
+    id: "financial.accounts.row-balance"
+    text: ".*1[.,]234[.,]56.*"
