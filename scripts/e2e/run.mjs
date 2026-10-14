@@ -15,6 +15,9 @@ export function buildMaestroArgs({
   const args = [
     "test",
     target,
+    "--platform",
+    "web",
+    "--headless",
     "--format",
     "junit",
     "--output",
@@ -26,6 +29,10 @@ export function buildMaestroArgs({
     "-e",
     `E2E_WEB_URL=${webUrl}`,
   ];
+
+  if (target === "e2e/flows") {
+    args.push("--config", "e2e/config.yaml");
+  }
 
   if (!failedOnly) {
     if (tags.length > 0) {

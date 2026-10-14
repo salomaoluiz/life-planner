@@ -44,6 +44,29 @@ describe("parseArgs AND buildMaestroArgs", () => {
     );
   });
 
+  it("SHOULD run on web, headless, with the workspace config for a directory target", () => {
+    const base = {
+      apiUrl: "a",
+      failedOnly: false,
+      junitPath: "j",
+      tags: [],
+      webUrl: "w",
+    };
+
+    expect(buildMaestroArgs({ ...base, target: "e2e/flows" })).toEqual(
+      expect.arrayContaining([
+        "--platform",
+        "web",
+        "--headless",
+        "--config",
+        "e2e/config.yaml",
+      ]),
+    );
+    expect(
+      buildMaestroArgs({ ...base, target: "e2e/flows/x.yaml" }),
+    ).not.toContain("--config");
+  });
+
   it("SHOULD NOT exclude wip WHEN wip is requested", () => {
     const args = buildMaestroArgs({
       apiUrl: "a",

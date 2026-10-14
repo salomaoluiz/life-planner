@@ -46,6 +46,17 @@ export function extractStep(message) {
   return match ? match[1].trim() : null;
 }
 
+// Maestro names the failure screenshot after the step: step-007-tapOnElement-<selector>.png
+export function extractStepFromScreenshot(path) {
+  const match = /step-(\d+)-([^/]+)\.png$/.exec(path);
+  if (!match) {
+    return null;
+  }
+  const [action, ...rest] = match[2].split("-");
+  const selector = rest.join("-");
+  return `${action}${selector ? ` ${selector}` : ""} (step ${Number(match[1])})`;
+}
+
 export function formatDuration(seconds) {
   const total = Math.round(seconds);
   const minutes = Math.floor(total / 60);
@@ -105,8 +116,10 @@ function buildBlock(index, flow, input) {
   const file = `e2e/flows/${flow.name}.yaml`;
   const yaml = input.readFlowFile(file);
   const tags = yaml ? readTags(yaml) : [];
-  const step = extractStep(flow.message);
   const screenshot = pickArtifact(input.artifactFiles, flow.name, ".png");
+  const step =
+    extractStep(flow.message) ??
+    (screenshot ? extractStepFromScreenshot(screenshot) : null);
   const log = pickArtifact(input.artifactFiles, flow.name, ".log");
 
   return [
@@ -165,17 +178,14 @@ function parseAttributes(text) {
 }
 
 function pickArtifact(files, name, extension) {
-  const last = name.split("/").pop();
-  const sanitized = name.replace(/[\\/]/g, "_");
-  return (
-    [...files]
-      .sort()
-      .find(
-        (file) =>
-          file.endsWith(extension) &&
-          [sanitized, last].some((part) => file.includes(part)),
-      ) ?? null
-  );
+  const sanitized = name.replaceAll("/", "_");
+  const matches = files
+    .filter(
+      (file) => file.endsWith(extension) && file.includes(`/${sanitized}/`),
+    )
+    .sort();
+  // The failing step is the last screenshot Maestro took.
+  return matches.at(-1) ?? null;
 }
 
 function xmlText(raw) {

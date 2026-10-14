@@ -84,6 +84,7 @@ function TextField(props: TextFieldProps) {
           keyboardType={props.keyboardType}
           maxLength={props.maxLength}
           multiline={props.multiline}
+          nativeID={testID}
           onBlur={() => setFocused(false)}
           onChangeText={props.onChangeText}
           onFocus={() => setFocused(true)}

@@ -5,6 +5,8 @@ tags:
   - spec-002
   - smoke
 ---
+- launchApp:
+    clearState: true
 - runFlow: ../../subflows/signup-via-api.yaml
 - runFlow:
     file: ../../subflows/login.yaml

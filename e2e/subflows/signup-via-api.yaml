@@ -1,3 +1,5 @@
+url: ${E2E_WEB_URL}
+---
 - runScript: ../scripts/unique-user.js
 - runScript:
     file: ../scripts/api.js

@@ -4,6 +4,8 @@ tags:
   - auth
   - spec-002
 ---
+- launchApp:
+    clearState: true
 - runScript: ../../scripts/unique-user.js
 - extendedWaitUntil:
     visible:

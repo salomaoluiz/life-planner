@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" tests="2" failures="1" time="37.638" timestamp="2026-10-14T08:37:46">
+    <testcase id="auth/login" name="auth/login" classname="auth/login" file="e2e/flows/auth/login.yaml" time="14.699" timestamp="2026-10-14T08:37:46" status="SUCCESS">
+      <properties>
+        <property name="tags" value="auth, spec-002, smoke"/>
+      </properties>
+    </testcase>
+    <testcase id="zz/fails" name="zz/fails" classname="zz/fails" file="e2e/flows/zz/fails.yaml" time="22.928" timestamp="2026-10-14T08:38:01" status="ERROR">
+      <properties>
+        <property name="tags" value="auth, spec-016"/>
+      </properties>
+      <failure>Element not found: Id matching regex: this-id-does-not-exist</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

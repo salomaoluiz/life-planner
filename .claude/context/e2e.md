@@ -31,7 +31,7 @@ Open only `e2e-report/summary.md` (it is also what the command prints):
 
 ## Writing a flow
 
-- Header: `url: ${E2E_WEB_URL}`, `name:` equal to the path under `flows/` without extension, `tags:` in list form (one module tag, `spec-NNN`, `smoke` on 1–2 flows per module, `wip` only while building).
+- Header: `url: ${E2E_WEB_URL}` and first step `- launchApp: { clearState: true }`, `name:` equal to the path under `flows/` without extension, `tags:` in list form (one module tag, `spec-NNN`, `smoke` on 1–2 flows per module, `wip` only while building).
 - Create the user with `runFlow: ../../subflows/signup-via-api.yaml`; it exposes `${output.EMAIL}`, `${output.PASSWORD}`, `${output.TOKEN}`. Set up data through the API, drive only the behavior under test through the UI.
 - Select by `id` only (testIDs), never by visible text. No fixed sleeps: `extendedWaitUntil`.
 - One behavior per flow; each flow must pass alone and in any order.
@@ -39,5 +39,7 @@ Open only `e2e-report/summary.md` (it is also what the command prints):
 ## testIDs
 
 Format `<module>.<screen>.<element>` in kebab-case, defined in the screen folder's `testIds.ts` (for example `Login/testIds.ts`) and used by the View, its Jest tests and the flows. `@components` that wrap RN elements forward `testID` (and derive `-error`, `-toggle`, `-frame` suffixes for `TextField`).
+
+A wrapped component that takes an `accessibilityLabel` must also set `nativeID={testID}` (Maestro web resolves `id` before `data-testid`; `Touchable` and `TextField` already do).
 
 Maestro facts verified on this Mac (flags, JUnit mapping, `id` matching on web) are recorded in `e2e/README.md`.

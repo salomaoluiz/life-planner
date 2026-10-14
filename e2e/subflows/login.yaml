@@ -1,3 +1,9 @@
+url: ${E2E_WEB_URL}
+---
+- extendedWaitUntil:
+    visible:
+      id: "auth.login.email-input"
+    timeout: 20000
 - tapOn:
     id: "auth.login.email-input"
 - inputText: ${EMAIL}

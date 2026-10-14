@@ -123,3 +123,9 @@ it("SHOULD NOT add outline styles on native", () => {
   setup();
   expect(StyleSheet.flatten(input().props.style).outlineStyle).toBeUndefined();
 });
+
+it("SHOULD expose the testID as nativeID so Maestro web can select it by id", () => {
+  setup();
+
+  expect(input().props.nativeID).toBe("field");
+});

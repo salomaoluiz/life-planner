@@ -1,5 +1,10 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import {
+  buildSummary,
   extractStep,
+  extractStepFromScreenshot,
   formatDuration,
   parseJUnit,
   readTags,
@@ -170,5 +175,57 @@ describe("buildSummary", () => {
       "1. odd name/with spaces\n   file: e2e/flows/odd name/with spaces.yaml",
     );
     expect(result.failedFiles).toEqual(["e2e/flows/odd name/with spaces.yaml"]);
+  });
+});
+
+describe("with the real Maestro output captured on the Mac", () => {
+  function read(name) {
+    return readFileSync(join(__dirname, "fixtures", name), "utf8");
+  }
+
+  it("SHOULD parse the real reports", () => {
+    expect(parseJUnit(read("junit-pass.xml")).flows).toEqual([
+      { failed: false, message: "", name: "auth/signup" },
+      { failed: false, message: "", name: "auth/login" },
+    ]);
+    expect(parseJUnit(read("junit-fail.xml")).flows[1]).toEqual({
+      failed: true,
+      message: "Element not found: Id matching regex: this-id-does-not-exist",
+      name: "zz/fails",
+    });
+  });
+
+  it("SHOULD derive the failing step from the last screenshot file name", () => {
+    expect(
+      extractStepFromScreenshot(
+        "e2e-report/artifacts/2026-10-14_083745/zz_fails/screenshots/step-007-tapOnElement-this-id-does-not-exist.png",
+      ),
+    ).toBe("tapOnElement this-id-does-not-exist (step 7)");
+    expect(extractStepFromScreenshot("something-else.png")).toBeNull();
+  });
+
+  it("SHOULD show the step AND the screenshot AND the log of a failed flow", () => {
+    const flows = parseJUnit(read("junit-fail.xml")).flows;
+    const base = "e2e-report/artifacts/2026-10-14_083745/zz_fails";
+    const result = buildSummary({
+      artifactFiles: [
+        `${base}/logs/maestro.log`,
+        `${base}/screenshots/step-005-tapOnElement-auth.login.email-input.png`,
+        `${base}/screenshots/step-007-tapOnElement-this-id-does-not-exist.png`,
+        "e2e-report/artifacts/2026-10-14_083745/auth_login/screenshots/step-003.png",
+      ],
+      durationSeconds: 38,
+      flows,
+      readFlowFile: () => null,
+      revisions: "",
+    });
+
+    expect(result.text).toContain(
+      "   step: tapOnElement this-id-does-not-exist (step 7)",
+    );
+    expect(result.text).toContain(
+      `   screenshot: ${base}/screenshots/step-007-tapOnElement-this-id-does-not-exist.png`,
+    );
+    expect(result.text).toContain(`   log: ${base}/logs/maestro.log`);
   });
 });
