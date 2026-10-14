@@ -66,7 +66,9 @@ it("SHOULD render the header, the filter and the three blocks", () => {
   ).toBeOnTheScreen();
   expect(screen.getByTestId("home-filter-ALL")).toBeOnTheScreen();
   expect(screen.getByTestId("home-summary-loading")).toBeOnTheScreen();
-  expect(screen.getByTestId("home-stock-loading")).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(homeTestIds.stockAttentionLoading),
+  ).toBeOnTheScreen();
   expect(screen.getAllByTestId("home-transactions-loading")).toHaveLength(3);
 });
 
@@ -83,7 +85,7 @@ it("SHOULD show an error only in the failed block", () => {
 
   render(<Home />);
 
-  expect(screen.getByTestId("home-stock-error")).toBeOnTheScreen();
+  expect(screen.getByTestId(homeTestIds.stockAttentionError)).toBeOnTheScreen();
   expect(screen.getByTestId("home-summary-loading")).toBeOnTheScreen();
 });
 
@@ -104,5 +106,7 @@ it("SHOULD render with the split layout on wide screens", () => {
   render(<Home />);
 
   expect(screen.getByTestId("home-summary-loading")).toBeOnTheScreen();
-  expect(screen.getByTestId("home-stock-loading")).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(homeTestIds.stockAttentionLoading),
+  ).toBeOnTheScreen();
 });

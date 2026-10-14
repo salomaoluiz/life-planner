@@ -13,6 +13,7 @@ import { useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
 import { BlockState } from "@screens/Home/hooks/useHomeViewModel";
 import StockAttentionUIModel from "@screens/Home/models/StockAttentionUIModel";
+import homeTestIds from "@screens/Home/testIds";
 
 interface Props {
   fill?: boolean;
@@ -30,7 +31,7 @@ function StockAttentionCard({
   const { t } = useTranslation();
 
   if (state.isLoading) {
-    return <Skeleton.Card testID="home-stock-loading" />;
+    return <Skeleton.Card testID={homeTestIds.stockAttentionLoading} />;
   }
 
   if (state.isError || !state.data) {
@@ -39,7 +40,7 @@ function StockAttentionCard({
         message={t("common.errors.generic")}
         onRetry={state.onRetry}
         retryLabel={t("common.actions.tryAgain")}
-        testID="home-stock-error"
+        testID={homeTestIds.stockAttentionError}
       />
     );
   }
@@ -47,14 +48,14 @@ function StockAttentionCard({
   const { data } = state;
 
   return (
-    <Card fill={fill} testID="home-stock">
+    <Card fill={fill} testID={homeTestIds.stockAttentionCard}>
       <Section
         actionLabel={t("common.actions.seeAll")}
         onActionPress={onSeeAllPress}
         title={t("home.stock.title")}
       >
         <Text.Caption
-          testID="home-stock-count"
+          testID={homeTestIds.stockAttentionCount}
           value={t(
             pluralKey("home.stock.count", data.countLabelParams.count),
             data.countLabelParams,
@@ -63,7 +64,7 @@ function StockAttentionCard({
         {data.isEmpty && (
           <ListItem
             leading={<IconTile name="package-variant-closed" tone="neutral" />}
-            testID="home-stock-empty"
+            testID={homeTestIds.stockAttentionEmpty}
             title={t("home.stock.empty")}
             trailing={
               <Button.Ghost
@@ -77,7 +78,7 @@ function StockAttentionCard({
         {data.isNothingExpiring && (
           <ListItem
             leading={<IconTile name="check" tone="income" />}
-            testID="home-stock-nothing-expiring"
+            testID={homeTestIds.stockAttentionNothingExpiring}
             title={t("home.stock.nothingExpiring")}
           />
         )}
@@ -96,7 +97,7 @@ function StockAttentionCard({
               quantity: row.quantity,
               unit: t(row.unitKey),
             })}
-            testID={`home-stock-row-${row.id}`}
+            testID={homeTestIds.stockAttentionRow}
             title={row.title}
             trailing={
               <Badge

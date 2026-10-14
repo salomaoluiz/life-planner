@@ -10,6 +10,7 @@ import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { StockOwners, StockUnits } from "@domain/entities/stock/StockEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import StockAttentionUIModel from "@screens/Home/models/StockAttentionUIModel";
+import homeTestIds from "@screens/Home/testIds";
 
 import StockAttentionCard from "./";
 
@@ -75,7 +76,9 @@ it("SHOULD render the skeleton WHILE loading", () => {
     />,
   );
 
-  expect(screen.getByTestId("home-stock-loading")).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(homeTestIds.stockAttentionLoading),
+  ).toBeOnTheScreen();
 });
 
 it("SHOULD render the error with a retry that refetches only this block", () => {
@@ -107,7 +110,7 @@ it("SHOULD render the rows with title, subtitle and badge", () => {
 it("SHOULD show the item count under the title", () => {
   renderLoaded(model(5));
 
-  expect(screen.getByTestId("home-stock-count")).toHaveTextContent(
+  expect(screen.getByTestId(homeTestIds.stockAttentionCount)).toHaveTextContent(
     'home.stock.count_other {"count":5}',
   );
 });
@@ -123,7 +126,7 @@ it("SHOULD open the stock WHEN pressing See all", () => {
 it("SHOULD open the stock WHEN pressing a row", () => {
   renderLoaded(model(5));
 
-  fireEvent.press(screen.getByTestId("home-stock-row-s-1"));
+  fireEvent.press(screen.getAllByTestId(homeTestIds.stockAttentionRow)[0]);
 
   expect(handlers.onSeeAllPress).toHaveBeenCalledTimes(1);
 });
@@ -132,7 +135,9 @@ it("SHOULD say nothing is expiring WHEN there are items but none need attention"
   renderLoaded(model(5, false));
 
   expect(screen.getByText("home.stock.nothingExpiring")).toBeOnTheScreen();
-  expect(screen.queryByTestId("home-stock-row-s-1")).not.toBeOnTheScreen();
+  expect(
+    screen.queryByTestId(homeTestIds.stockAttentionRow),
+  ).not.toBeOnTheScreen();
 });
 
 it("SHOULD offer to add an item WHEN the stock is empty", () => {
@@ -147,7 +152,7 @@ it("SHOULD offer to add an item WHEN the stock is empty", () => {
 it("SHOULD use the singular count key WHEN there is one item", () => {
   renderLoaded(model(1));
 
-  expect(screen.getByTestId("home-stock-count")).toHaveTextContent(
+  expect(screen.getByTestId(homeTestIds.stockAttentionCount)).toHaveTextContent(
     'home.stock.count_one {"count":1}',
   );
 });
@@ -167,6 +172,19 @@ it("SHOULD fill its column WHEN fill is set", () => {
   );
 
   expect(
-    StyleSheet.flatten(screen.getByTestId("home-stock").props.style).flex,
+    StyleSheet.flatten(
+      screen.getByTestId(homeTestIds.stockAttentionCard).props.style,
+    ).flex,
   ).toBe(1);
+});
+
+it("SHOULD expose the row and its title ids", () => {
+  renderLoaded(model(5));
+
+  expect(
+    screen.getAllByTestId(homeTestIds.stockAttentionRow).length,
+  ).toBeGreaterThan(0);
+  expect(
+    screen.getAllByTestId(`${homeTestIds.stockAttentionRow}-title`).length,
+  ).toBeGreaterThan(0);
 });
