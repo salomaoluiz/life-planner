@@ -1,0 +1,50 @@
+url: ${E2E_WEB_URL}
+name: financial/categories/create-category-validation
+tags:
+  - financial
+  - spec-013
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-categories.yaml
+- tapOn:
+    id: "financial.categories.add-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.category-form.name-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.category-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.category-form.name-input-error"
+    timeout: 20000
+- assertVisible:
+    id: "financial.category-form.sheet"
+# whitespace-only name is still empty
+- tapOn:
+    id: "financial.category-form.name-input"
+- inputText: "     "
+- tapOn:
+    id: "financial.category-form.save-button"
+- assertVisible:
+    id: "financial.category-form.name-input-error"
+- assertVisible:
+    id: "financial.category-form.sheet"
+# name over 60 characters is rejected, form stays open
+- tapOn:
+    id: "financial.category-form.name-input"
+- eraseText
+- inputText: "E2E category name that is clearly longer than the sixty character limit"
+- tapOn:
+    id: "financial.category-form.save-button"
+- assertVisible:
+    id: "financial.category-form.name-input-error"
+- assertVisible:
+    id: "financial.category-form.sheet"
