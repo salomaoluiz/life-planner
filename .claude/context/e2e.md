@@ -9,7 +9,7 @@ e2e/
   config.yaml      workspace config
   flows/<module>/  one folder per module (auth, financial/accounts, financial/categories)
   subflows/        signup-via-api.yaml (fresh user; outputs EMAIL, PASSWORD, TOKEN, USER_ID), login.yaml (UI login with EMAIL/PASSWORD),
-                   setup/create-<resource>.yaml (API setup), financial/open-accounts.yaml, financial/open-categories.yaml, financial/scroll-form-down.yaml
+                   setup/create-<resource>.yaml (API setup), financial/open-accounts.yaml, financial/open-categories.yaml, financial/open-transactions.yaml, financial/scroll-form-down.yaml
   scripts/         unique-user.js, api.js, random-name.js (output[KEY] = "<PREFIX> <4 digits>"), setup/create-<resource>.js
 scripts/e2e/       run.mjs + cli.mjs (runner), summarize.mjs (report), unit tested
 e2e-report/        generated, gitignored
@@ -20,6 +20,7 @@ e2e-report/        generated, gitignored
 - `yarn e2e --list-tags` (or `yarn e2e:tags`) lists every tag with its flow count; it only reads `e2e/flows`, so it needs no Maestro, API or app.
 - `yarn e2e` whole suite, `yarn e2e --tags <tag>`, `yarn e2e:smoke`, `yarn e2e:failed` (only the flows in `e2e-report/failed.txt`).
 - By default the Chromium window is visible; `--headless` hides it and combines with the other flags (`yarn e2e --headless --tags auth`). AI sessions use `--headless` so no window pops up on the owner's Mac.
+- In a terminal (TTY) the runner shows live progress (`scripts/e2e/progress.mjs`): every flow as ✔ passed (duration) / ✖ failed / ▶ running / · pending, redrawn each second. AI shells and CI are not a TTY, so they only get the final summary.
 - Needs Maestro and `E2E_ENABLED=true` in the gitignored `.env` (Mac only). The runner never starts, builds or stops the app or the API.
 - Exit codes: 0 all passed, 1 a flow failed, 2 could not run (guard, Maestro, API or app missing, no report). Exit 2 means **not validated**.
 
@@ -34,7 +35,7 @@ Open only `e2e-report/summary.md` (it is also what the command prints):
 
 ## Writing a flow
 
-- Header: `url: ${E2E_WEB_URL}` and first step `- launchApp: { clearState: true }`, `name:` equal to the path under `flows/` without extension, `tags:` in list form (one module tag, `spec-NNN`, `smoke` on 1–2 flows per module, `wip` only while building).
+- Header: `url: ${E2E_WEB_URL}` and first step `- launchApp: { clearState: true }`, `name:` equal to the path under `flows/` without extension, `tags:` in list form (one **primary** module tag (the folder; other module tags are allowed on cross-module flows), `spec-NNN`, `smoke` on 1–2 flows per module, `wip` only while building).
 - Create the user with `runFlow: ../../subflows/signup-via-api.yaml`; it exposes `${output.EMAIL}`, `${output.PASSWORD}`, `${output.TOKEN}`. Set up data through the API, drive only the behavior under test through the UI.
 - Select by `id` only (testIDs), never by visible text. No fixed sleeps: `extendedWaitUntil`.
 - One behavior per flow; each flow must pass alone and in any order.
@@ -54,3 +55,5 @@ Data that is not under test is created through the API, never the UI. One self-c
 Maestro web facts from spec 018: the form sheet does not scroll with `scrollUntilVisible` or a center swipe, use `subflows/financial/scroll-form-down.yaml` (swipes with explicit coordinates); elements outside the viewport are not found. `AmountInput` keeps the typed digits after the current ones, so `eraseText` before `inputText` (digits only: `123456` shows `$1,234.56`; assert with a locale-tolerant regex like `.*1[.,]234[.,]56.*`). An `id` is a regex, so `a|b` matches either. Derived ids: `<id>-error` (FieldShell), `<id>-icon-<value>` (IconChoiceGroup), `<id>-confirm` (ConfirmDialog), `<id>-close` (BottomSheet), `<id>-title` / `-balance` (ListItem rows). Components that take an `accessibilityLabel` must set `nativeID` (SegmentedControl and AmountInput were fixed in 018).
 
 Categories (spec 019): `create-category` also nests a category when the caller passes `PARENT_ID` (a caller-scoped variable the script reads if defined; do not declare it in the subflow header or the runScript env, Maestro dropped it there). Keep the parent id under another key (`PARENT_CATEGORY_ID`). More derived ids: `<id>-EXPENSE` / `<id>-INCOME` (SegmentedControl appends the uppercase option value), `<id>-option-<value>` (SelectField, value = category id), `<id>-swatch-<hex>` (ColorSwatchGroup), `financial.category-form.name-preview` (typed name heading, use it to assert a saved name since Maestro web matches text, not input values). The list plus button does not pass the current type to the form, so flows pick the type in the form.
+
+Transactions (spec 020): `subflows/setup/finance-basics.yaml` creates one account plus an EXPENSE and an INCOME category (inputs `TOKEN`, `OWNER_ID`; outputs `ACCOUNT_ID`, `ACCOUNT_NAME`, `EXPENSE_CATEGORY_ID/NAME`, `INCOME_CATEGORY_ID/NAME`). `create-transaction` takes `DESCRIPTION`, `VALUE_CENTS`, `DATE` (explicit) or `MONTHS_AGO` (`0` = today by the local date, `n` = the 10th of the month n months ago), `TYPE`, `OWNER`; these optional params are read by the script and must **not** be header defaults, because Maestro keeps the header default over the caller value (also true of `TYPE` in `create-category`). `assertNotVisible` with only a `text:` regex matched on web although the text was not on screen: scope it with an `id` (for example `financial.transactions.summary-expense`) and pair it with a positive assertion on the same id. Quick add is `quick-add-button|navigation-rail-add` (the wide layout shows the rail button).

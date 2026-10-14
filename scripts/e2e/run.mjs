@@ -1,5 +1,6 @@
+import { flowNameFromFile } from "./progress.mjs";
 import { buildSummary, parseJUnit } from "./summarize.mjs";
-import { buildTagList } from "./tags.mjs";
+import { buildTagList, parseFlowTags } from "./tags.mjs";
 
 const REPORT_DIR = "e2e-report";
 const DEFAULT_API_URL = "http://localhost:3000/api";
@@ -126,14 +127,16 @@ export async function runE2e({ argv, env }, deps) {
   }
 
   deps.removeReportFiles();
+  const expected = plannedFlows(options, targets, deps);
   const started = deps.now();
-  const junitPaths = targets.map((target, index) => {
+  const junitPaths = [];
+  for (const [index, target] of targets.entries()) {
     const junitPath =
       targets.length === 1
         ? `${REPORT_DIR}/junit.xml`
         : `${REPORT_DIR}/junit-${index}.xml`;
     // All Maestro output goes to the log file, never to the terminal: this is the token saving.
-    deps.exec({
+    await deps.exec({
       args: buildMaestroArgs({
         apiUrl,
         failedOnly: options.failedOnly,
@@ -144,10 +147,12 @@ export async function runE2e({ argv, env }, deps) {
         webUrl,
       }),
       command: "maestro",
+      expected,
       logFile: `${REPORT_DIR}/maestro.log`,
+      started,
     });
-    return junitPath;
-  });
+    junitPaths.push(junitPath);
+  }
   const durationSeconds = (deps.now() - started) / 1000;
 
   const reports = junitPaths
@@ -192,6 +197,26 @@ export async function runE2e({ argv, env }, deps) {
 
 function nonEmpty(value, fallback) {
   return typeof value === "string" && value !== "" ? value : fallback;
+}
+
+// Names of the flows this run will execute, in file order; the CLI uses them to show live progress.
+function plannedFlows(options, targets, deps) {
+  if (options.failedOnly) {
+    return targets.map(flowNameFromFile);
+  }
+  return deps
+    .listFiles("e2e/flows")
+    .filter((file) => file.endsWith(".yaml"))
+    .filter((file) => {
+      const tags = parseFlowTags(deps.readFile(`e2e/flows/${file}`) ?? "");
+      const included =
+        options.tags.length === 0 ||
+        options.tags.some((tag) => tags.includes(tag));
+      const excluded = tags.includes("wip") && !options.tags.includes("wip");
+      return included && !excluded;
+    })
+    .sort()
+    .map((file) => flowNameFromFile(file));
 }
 
 function readFailedTargets(deps) {

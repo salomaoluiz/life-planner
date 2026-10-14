@@ -267,6 +267,44 @@ describe("runE2e execution", () => {
   });
 });
 
+describe("runE2e progress plan", () => {
+  const flowFiles = [
+    "auth/login.yaml",
+    "auth/signup.yaml",
+    "stock/wip-flow.yaml",
+  ];
+  function flowYaml(tags) {
+    return `name: x\ntags:\n${tags.map((tag) => `  - ${tag}`).join("\n")}\n---\n`;
+  }
+  const files = {
+    "e2e-report/junit.xml": junit([{ name: "auth/login" }]),
+    "e2e/flows/auth/login.yaml": flowYaml(["auth"]),
+    "e2e/flows/auth/signup.yaml": flowYaml(["auth", "smoke"]),
+    "e2e/flows/stock/wip-flow.yaml": flowYaml(["stock", "wip"]),
+  };
+
+  it("SHOULD pass the flows to run, without wip ones, to exec", async () => {
+    const { deps } = await run(
+      { deps: { listFiles: jest.fn(() => flowFiles) }, files },
+      {},
+    );
+
+    expect(deps.exec.mock.calls[0][0].expected).toEqual([
+      "auth/login",
+      "auth/signup",
+    ]);
+  });
+
+  it("SHOULD pass only the flows matching --tags to exec", async () => {
+    const { deps } = await run(
+      { deps: { listFiles: jest.fn(() => flowFiles) }, files },
+      { argv: ["--tags", "smoke"] },
+    );
+
+    expect(deps.exec.mock.calls[0][0].expected).toEqual(["auth/signup"]);
+  });
+});
+
 describe("runE2e --failed", () => {
   it("SHOULD stop WHEN there is no failed.txt", async () => {
     const { exitCode, printed } = await run({}, { argv: ["--failed"] });
