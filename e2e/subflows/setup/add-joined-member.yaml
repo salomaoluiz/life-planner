@@ -1,0 +1,14 @@
+url: ${E2E_WEB_URL}
+---
+# Caller env: FAMILY_ID. The current user (output.TOKEN) must own the family.
+- runFlow:
+    file: create-extra-user.yaml
+    env:
+      PREFIX: MEMBER_
+- runScript:
+    file: ../../scripts/setup/join-family.js
+    env:
+      OWNER_TOKEN: ${output.TOKEN}
+      MEMBER_TOKEN: ${output.MEMBER_TOKEN}
+      MEMBER_EMAIL: ${output.MEMBER_EMAIL}
+      FAMILY_ID: ${FAMILY_ID}
