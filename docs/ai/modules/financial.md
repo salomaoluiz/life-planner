@@ -264,3 +264,12 @@ testIDs: `Financial/Categories/testIds.ts` (`financial.categories.*`; a root row
 - `create-expense-category` (spec-006, spec-013, smoke), `create-income-category` (spec-013), `create-category-validation` (spec-013)
 - `create-subcategory` (spec-006, spec-013), `edit-category` (spec-006, spec-013)
 - `delete-category-with-subtree` (spec-006), `delete-category-with-transactions` (spec-006; the transaction is on the child, the root delete is refused)
+
+## E2E flows: transactions (spec 020)
+
+testIDs: `Financial/Transactions/testIds.ts` (`financial.transactions.*`; the row id is shared, use `row-title` plus the typed description to pick one; `empty-month` with its `-action`, `month-previous`, `month-next`, `month-summary`, `summary-expense`) and `Financial/Transactions/modals/NewTransactionModal/testIds.ts` (`financial.transaction-form.*`; category chips are `category-<categoryId>`, the account select options `account-select-option-<accountId>`). The list has no add button: the entry points are `empty-month-action` and the global Quick add. Flows in `e2e/flows/financial/transactions/` (tags `financial` + spec):
+
+- `create-expense` (spec-006, spec-013, smoke), `create-income` (spec-013, asserts no EXPENSE chip), `create-from-quick-add` (spec-009, spec-013)
+- `create-missing-records` (spec-013), `create-validation` (spec-013, includes a whitespace-only description)
+- `edit-transaction` (spec-006, spec-013), `delete-transaction` (spec-006, spec-013)
+- `month-navigation` (spec-013; the transaction is dated the 10th of last month), `home-latest-transactions` (spec-010, secondary tag `home`)

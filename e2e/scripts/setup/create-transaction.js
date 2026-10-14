@@ -20,6 +20,9 @@ function computeDate() {
   var target = new Date(now.getFullYear(), now.getMonth() - monthsAgo, 10);
   return target.getFullYear() + "-" + pad(target.getMonth() + 1) + "-10";
 }
+function param(value, fallback) {
+  return typeof value !== "undefined" && value ? value : fallback;
+}
 var date = typeof DATE !== "undefined" && DATE ? DATE : computeDate();
 var response = http.post(E2E_API_URL + "/v1/finance/transactions", {
   headers: {
@@ -30,11 +33,16 @@ var response = http.post(E2E_API_URL + "/v1/finance/transactions", {
     accountId: ACCOUNT_ID,
     categoryId: CATEGORY_ID,
     date: date,
-    description: DESCRIPTION,
-    owner: OWNER,
+    description: param(
+      typeof DESCRIPTION === "undefined" ? undefined : DESCRIPTION,
+      "E2E transaction",
+    ),
+    owner: param(typeof OWNER === "undefined" ? undefined : OWNER, "USER"),
     ownerId: OWNER_ID,
-    type: TYPE,
-    value: Number(VALUE_CENTS),
+    type: param(typeof TYPE === "undefined" ? undefined : TYPE, "EXPENSE"),
+    value: Number(
+      param(typeof VALUE_CENTS === "undefined" ? undefined : VALUE_CENTS, 1000),
+    ),
   }),
 });
 if (!response.ok) {

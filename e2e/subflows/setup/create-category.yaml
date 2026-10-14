@@ -12,5 +12,4 @@ env:
       NAME: ${NAME}
       ICON: ${ICON}
       ICON_COLOR: ${ICON_COLOR}
-      TYPE: ${TYPE}
       OWNER: ${OWNER}

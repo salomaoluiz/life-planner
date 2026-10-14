@@ -1,12 +1,7 @@
 url: ${E2E_WEB_URL}
-env:
-  DESCRIPTION: E2E transaction
-  VALUE_CENTS: "1000"
-  DATE: ""
-  MONTHS_AGO: "0"
-  TYPE: EXPENSE
-  OWNER: USER
 ---
+# Optional caller-scoped params are read by the script (Maestro ignores caller values for header defaults):
+# DESCRIPTION, VALUE_CENTS, DATE, MONTHS_AGO, TYPE, OWNER.
 - runScript:
     file: ../../scripts/setup/create-transaction.js
     env:
@@ -14,9 +9,3 @@ env:
       OWNER_ID: ${OWNER_ID}
       ACCOUNT_ID: ${ACCOUNT_ID}
       CATEGORY_ID: ${CATEGORY_ID}
-      DESCRIPTION: ${DESCRIPTION}
-      VALUE_CENTS: ${VALUE_CENTS}
-      DATE: ${DATE}
-      MONTHS_AGO: ${MONTHS_AGO}
-      TYPE: ${TYPE}
-      OWNER: ${OWNER}
