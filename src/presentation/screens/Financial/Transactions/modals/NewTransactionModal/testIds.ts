@@ -9,6 +9,7 @@ const transactionFormTestIds = {
   formError: "financial.transaction-form.form-error",
   missingAccountHint: "financial.transaction-form.missing-account-hint",
   missingCategoryHint: "financial.transaction-form.missing-category-hint",
+  owner: "financial.transaction-form.owner",
   saveButton: "financial.transaction-form.save-button",
   sheet: "financial.transaction-form.sheet",
   type: "financial.transaction-form.type",

@@ -6,6 +6,7 @@ const accountFormTestIds = {
   formError: "financial.account-form.form-error",
   icon: "financial.account-form.icon",
   nameInput: "financial.account-form.name-input",
+  owner: "financial.account-form.owner",
   saveButton: "financial.account-form.save-button",
   sheet: "financial.account-form.sheet",
 } as const;

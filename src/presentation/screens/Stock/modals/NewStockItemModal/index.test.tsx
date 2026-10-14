@@ -176,3 +176,11 @@ it("SHOULD expose the brand input and the derived error ids", () => {
     screen.getByTestId(`${stockItemFormTestIds.descriptionInput}-error`),
   ).toBeOnTheScreen();
 });
+
+it("SHOULD give every owner chip an id from its owner id", () => {
+  setup();
+
+  expect(
+    screen.getByTestId(`${stockItemFormTestIds.owner}-family-id`),
+  ).toBeOnTheScreen();
+});

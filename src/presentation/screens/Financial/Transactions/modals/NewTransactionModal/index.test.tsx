@@ -185,3 +185,11 @@ it("SHOULD report the amount, description and owner changes", () => {
   expect(vm.onDescriptionChange).toHaveBeenCalledWith("Shop");
   expect(vm.onTypeChange).toHaveBeenCalledWith("INCOME");
 });
+
+it("SHOULD give every owner chip an id from its owner id", () => {
+  setup({ ownerChoices: [{ label: "Test Family", value: "owner-2" }] });
+
+  expect(
+    screen.getByTestId(`${transactionFormTestIds.owner}-owner-2`),
+  ).toBeOnTheScreen();
+});

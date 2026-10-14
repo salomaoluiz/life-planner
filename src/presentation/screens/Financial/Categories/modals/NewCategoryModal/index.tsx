@@ -137,6 +137,7 @@ function NewCategoryModal() {
             mode={"single"}
             onChange={vm.onOwnerChange}
             options={translateChoices(vm.ownerChoices, t)}
+            testID={categoryFormTestIds.owner}
             value={vm.ownerId}
           />
           {vm.ownerHelperKey && (

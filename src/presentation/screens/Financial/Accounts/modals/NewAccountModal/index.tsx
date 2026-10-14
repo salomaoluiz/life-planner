@@ -124,6 +124,7 @@ function NewAccountModal() {
             mode={"single"}
             onChange={vm.onOwnerChange}
             options={translateChoices(vm.ownerChoices, t)}
+            testID={accountFormTestIds.owner}
             value={vm.ownerId}
           />
           {vm.ownerHelperKey && (

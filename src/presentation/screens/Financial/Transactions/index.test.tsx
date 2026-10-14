@@ -98,3 +98,16 @@ it("SHOULD render the toolbar outside the list with 20 px gaps so the sticky day
     screen.getByTestId("flashList").props.ListHeaderComponent,
   ).toBeUndefined();
 });
+
+it("SHOULD give every owner filter chip an id from its owner id", () => {
+  setup({
+    filterChoices: [
+      { labelKey: "financial.common.all", value: "ALL" },
+      { label: "Test Family", value: "OWNER:owner-2" },
+    ],
+  });
+
+  expect(
+    screen.getByTestId(`${transactionsTestIds.filter}-OWNER:owner-2`),
+  ).toBeOnTheScreen();
+});

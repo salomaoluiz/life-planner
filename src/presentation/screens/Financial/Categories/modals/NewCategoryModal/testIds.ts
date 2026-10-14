@@ -5,6 +5,7 @@ const categoryFormTestIds = {
   icon: "financial.category-form.icon",
   nameInput: "financial.category-form.name-input",
   namePreview: "financial.category-form.name-preview",
+  owner: "financial.category-form.owner",
   parentSelect: "financial.category-form.parent",
   saveButton: "financial.category-form.save-button",
   sheet: "financial.category-form.sheet",
