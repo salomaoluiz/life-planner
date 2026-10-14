@@ -1,0 +1,7 @@
+url: ${E2E_WEB_URL}
+---
+- runScript:
+    file: ../../scripts/setup/create-family.js
+    env:
+      TOKEN: ${TOKEN}
+      NAME: ${NAME}

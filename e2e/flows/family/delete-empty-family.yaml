@@ -1,0 +1,52 @@
+url: ${E2E_WEB_URL}
+name: family/delete-empty-family
+tags:
+  - family
+  - spec-003
+  - spec-012
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Family
+      KEY: FAMILY_NAME
+- runFlow:
+    file: ../../subflows/setup/create-family.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      NAME: ${output.FAMILY_NAME}
+- runFlow:
+    file: ../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../subflows/family/open-family.yaml
+- extendedWaitUntil:
+    visible:
+      id: "family.card.title-${output.FAMILY_ID}"
+      text: ${output.FAMILY_NAME}
+    timeout: 20000
+- tapOn:
+    id: "family.card.options-${output.FAMILY_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "family.card.menu-${output.FAMILY_ID}-action"
+    timeout: 20000
+- tapOn:
+    id: "family.card.menu-${output.FAMILY_ID}-action"
+- extendedWaitUntil:
+    visible:
+      id: "family.card.confirm-${output.FAMILY_ID}-confirm"
+    timeout: 20000
+- tapOn:
+    id: "family.card.confirm-${output.FAMILY_ID}-confirm"
+# The card is gone and the empty state is back
+- extendedWaitUntil:
+    visible:
+      id: "family.list.empty-state"
+    timeout: 20000
+- assertNotVisible:
+    id: "family.card.container-${output.FAMILY_ID}"
