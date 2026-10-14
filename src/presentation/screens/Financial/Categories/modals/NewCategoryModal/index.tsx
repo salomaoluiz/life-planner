@@ -23,6 +23,7 @@ import CustomColorSheet from "./components/CustomColorSheet";
 import IconPickerSheet from "./components/IconPickerSheet";
 import { useNewCategoryViewModel } from "./hooks";
 import useStyles from "./styles";
+import categoryFormTestIds from "./testIds";
 
 const SKELETON_ROWS = [0, 1, 2];
 
@@ -61,6 +62,7 @@ function NewCategoryModal() {
         <View style={styles.preview}>
           <IconTile color={vm.iconColor} name={vm.icon} size={"lg"} />
           <Text.Heading
+            testID={categoryFormTestIds.namePreview}
             tone={vm.name ? "primary" : "secondary"}
             value={vm.name || t("financial.categories.form.namePlaceholder")}
           />
@@ -71,6 +73,7 @@ function NewCategoryModal() {
           maxLength={80}
           onChangeText={vm.onNameChange}
           placeholder={t("financial.categories.form.namePlaceholder")}
+          testID={categoryFormTestIds.nameInput}
           value={vm.name}
         />
         <View style={styles.helper}>
@@ -83,6 +86,7 @@ function NewCategoryModal() {
               tone: option.value === "EXPENSE" ? "expense" : "income",
               value: option.value,
             }))}
+            testID={categoryFormTestIds.type}
             value={vm.type}
           />
           {vm.typeHelperKey && (
@@ -101,6 +105,7 @@ function NewCategoryModal() {
             })),
           ]}
           sheetTitle={t("financial.categories.form.parent")}
+          testID={categoryFormTestIds.parentSelect}
           value={vm.parentId}
         />
         <ColorSwatchGroup
@@ -112,7 +117,7 @@ function NewCategoryModal() {
             label: t(option.labelKey),
             value: option.value,
           }))}
-          testID={"category-color"}
+          testID={categoryFormTestIds.swatches}
           value={vm.iconColor}
         />
         <IconChoiceGroup
@@ -121,7 +126,7 @@ function NewCategoryModal() {
           onChange={vm.onIconChange}
           onMorePress={vm.onIconPickerOpen}
           options={vm.inlineIcons}
-          testID={"category-icon"}
+          testID={categoryFormTestIds.icon}
           value={vm.icon}
         />
         <View style={styles.helper}>
@@ -139,12 +144,17 @@ function NewCategoryModal() {
           )}
         </View>
         {vm.formErrorKey && (
-          <Text.Body tone={"expense"} value={t(vm.formErrorKey)} />
+          <Text.Body
+            testID={categoryFormTestIds.formError}
+            tone={"expense"}
+            value={t(vm.formErrorKey)}
+          />
         )}
         {vm.isEditing && (
           <Button.Ghost
             label={t("financial.categories.delete")}
             onPress={vm.onDeletePress}
+            testID={categoryFormTestIds.deleteButton}
             tone={"expense"}
           />
         )}
@@ -163,10 +173,12 @@ function NewCategoryModal() {
             loading={vm.isSaving}
             onPress={vm.onSave}
             size={"lg"}
+            testID={categoryFormTestIds.saveButton}
           />
         }
         onClose={vm.onClose}
         presentation={"inline"}
+        testID={categoryFormTestIds.sheet}
         title={t(vm.titleKey)}
         visible
       >
@@ -217,6 +229,7 @@ function NewCategoryModal() {
         message={vm.deleteMessageKeys.map((key) => t(key)).join(" ")}
         onCancel={vm.onDeleteCancel}
         onConfirm={vm.onDeleteConfirm}
+        testID={categoryFormTestIds.deleteDialog}
         title={t("financial.categories.deleteTitle", vm.deleteTitleParams)}
         visible={vm.isDeleteDialogOpen}
       />

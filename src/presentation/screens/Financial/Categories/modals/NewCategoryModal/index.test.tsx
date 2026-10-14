@@ -1,4 +1,5 @@
 import { fireEvent, screen, setup } from "./mocks/index.mocks";
+import categoryFormTestIds from "./testIds";
 
 it("SHOULD show the create title, the save footer and no delete or cancel", () => {
   setup();
@@ -7,6 +8,13 @@ it("SHOULD show the create title, the save footer and no delete or cancel", () =
   expect(screen.getByText("financial.categories.form.save")).toBeOnTheScreen();
   expect(screen.queryByText("financial.categories.delete")).toBeNull();
   expect(screen.queryByText("common.actions.cancel")).toBeNull();
+  [
+    categoryFormTestIds.sheet,
+    categoryFormTestIds.nameInput,
+    categoryFormTestIds.namePreview,
+    categoryFormTestIds.saveButton,
+    `${categoryFormTestIds.type}-INCOME`,
+  ].forEach((id) => expect(screen.getByTestId(id)).toBeOnTheScreen());
 });
 
 it("SHOULD show the edit title, save changes and the delete button", () => {
@@ -18,6 +26,9 @@ it("SHOULD show the edit title, save changes and the delete button", () => {
 
   expect(screen.getByText("financial.categories.edit")).toBeOnTheScreen();
   expect(screen.getByText("financial.common.saveChanges")).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(categoryFormTestIds.deleteButton),
+  ).toBeOnTheScreen();
   fireEvent.press(screen.getByText("financial.categories.delete"));
 
   expect(vm.onDeletePress).toHaveBeenCalledTimes(1);
@@ -74,8 +85,16 @@ it("SHOULD show the type and owner helpers WHEN locked", () => {
 it("SHOULD offer the no-parent option first and report the parent", () => {
   const vm = setup();
 
-  fireEvent.press(screen.getByText("financial.categories.form.noParent"));
-  fireEvent.press(screen.getByText("Housing"));
+  fireEvent.press(screen.getByTestId(categoryFormTestIds.parentSelect));
+  expect(
+    screen.getByTestId(`${categoryFormTestIds.parentSelect}-option-housing`),
+  ).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(`${categoryFormTestIds.parentSelect}-option-`),
+  ).toBeOnTheScreen();
+  fireEvent.press(
+    screen.getByTestId(`${categoryFormTestIds.parentSelect}-option-housing`),
+  );
 
   expect(vm.onParentChange).toHaveBeenCalledWith("housing");
 });
@@ -83,11 +102,17 @@ it("SHOULD offer the no-parent option first and report the parent", () => {
 it("SHOULD render swatches and the icon group and open the custom color and icon sheets", () => {
   const vm = setup();
 
-  expect(screen.getByTestId("category-color-swatch-#F59E0B")).toBeOnTheScreen();
-  expect(screen.getByTestId("category-icon-icon-car")).toBeOnTheScreen();
-  fireEvent.press(screen.getByTestId("category-color-custom"));
-  fireEvent.press(screen.getByTestId("category-icon-more"));
-  fireEvent.press(screen.getByTestId("category-color-swatch-#F59E0B"));
+  expect(
+    screen.getByTestId(`${categoryFormTestIds.swatches}-swatch-#F59E0B`),
+  ).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(`${categoryFormTestIds.icon}-icon-car`),
+  ).toBeOnTheScreen();
+  fireEvent.press(screen.getByTestId(`${categoryFormTestIds.swatches}-custom`));
+  fireEvent.press(screen.getByTestId(`${categoryFormTestIds.icon}-more`));
+  fireEvent.press(
+    screen.getByTestId(`${categoryFormTestIds.swatches}-swatch-#F59E0B`),
+  );
 
   expect(vm.onCustomColorOpen).toHaveBeenCalledTimes(1);
   expect(vm.onIconPickerOpen).toHaveBeenCalledTimes(1);
@@ -120,6 +145,10 @@ it("SHOULD render the name error and the form-level error", () => {
     screen.getByText("financial.categories.nameRequired"),
   ).toBeOnTheScreen();
   expect(screen.getByText("financial.errors.notFound")).toBeOnTheScreen();
+  expect(screen.getByTestId(categoryFormTestIds.formError)).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(`${categoryFormTestIds.nameInput}-error`),
+  ).toBeOnTheScreen();
 });
 
 it("SHOULD show skeletons WHEN loading and the not found copy WHEN missing", () => {
@@ -151,7 +180,9 @@ it("SHOULD render the delete dialog with its message and confirm", () => {
       "financial.categories.deleteAlertMsg financial.categories.deleteConfirm.withSubcategories",
     ),
   ).toBeOnTheScreen();
-  fireEvent.press(screen.getByText("common.actions.delete"));
+  fireEvent.press(
+    screen.getByTestId(`${categoryFormTestIds.deleteDialog}-confirm`),
+  );
 
   expect(vm.onDeleteConfirm).toHaveBeenCalledTimes(1);
 });
