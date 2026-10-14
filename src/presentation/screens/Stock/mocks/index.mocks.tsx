@@ -126,7 +126,7 @@ function setup(overrides: Record<string, unknown> = {}) {
   return vm;
 }
 
-const mocks = { list, view, View };
+const mocks = { DAY_MS, list, owners, view, View };
 
 export { mocks, setup };
 export { fireEvent, screen } from "@tests";

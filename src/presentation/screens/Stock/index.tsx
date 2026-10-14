@@ -17,6 +17,7 @@ import {
   Text,
 } from "@components";
 import Skeleton from "@components/Skeleton";
+import { StockExpirationStatus } from "@domain/entities/stock/stockExpiration";
 import { useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
 import StockItemDetails from "@screens/Stock/containers/StockItemDetails";
@@ -24,6 +25,7 @@ import { StockListRow } from "@screens/Stock/models/StockListUIModel";
 
 import { useStockViewModel } from "./hooks";
 import useStyles from "./styles";
+import stockTestIds from "./testIds";
 
 const SKELETON_ROWS = [0, 1, 2, 3, 4, 5];
 
@@ -57,6 +59,10 @@ function Stock() {
     const quantity = `${item.quantityText} ${t(item.unitKey)}`;
     const badge = item.badge;
     const status = badge ? t(badge.labelKey, badge.params) : "";
+    const statusTestId =
+      item.status === StockExpirationStatus.EXPIRED
+        ? stockTestIds.statusExpired
+        : stockTestIds.statusExpiring;
 
     return (
       <ListItem
@@ -70,13 +76,13 @@ function Stock() {
         }
         onPress={() => vm.onItemPress(item.id)}
         subtitle={[item.ownerName, date].filter(Boolean).join(" · ")}
-        testID={`stock-row-${item.id}`}
+        testID={stockTestIds.row}
         title={item.description}
         trailing={
           badge ? (
-            <Badge label={status} tone={badge.tone} />
+            <Badge label={status} testID={statusTestId} tone={badge.tone} />
           ) : (
-            <Text.Caption value={quantity} />
+            <Text.Caption testID={stockTestIds.rowQuantity} value={quantity} />
           )
         }
       />
@@ -86,7 +92,7 @@ function Stock() {
   function renderEmpty() {
     if (vm.isLoading) {
       return (
-        <View testID="stock-skeleton">
+        <View testID={stockTestIds.skeleton}>
           {SKELETON_ROWS.map((key) => (
             <Skeleton.ListItem key={key} />
           ))}
@@ -110,17 +116,19 @@ function Stock() {
           actionLabel={t("stock.list.add")}
           message={t("stock.list.emptyMessage")}
           onAction={vm.onAddPress}
+          testID={stockTestIds.emptyState}
           title={t("stock.list.emptyTitle")}
         />
       );
     }
 
     return (
-      <View style={styles.noResults}>
+      <View style={styles.noResults} testID={stockTestIds.noResults}>
         <Text.Body align="center" value={t("stock.list.noResults")} />
         <Button.Ghost
           label={t("stock.list.clearFilters")}
           onPress={vm.onClearFilters}
+          testID={stockTestIds.clearFilters}
         />
       </View>
     );
@@ -141,7 +149,7 @@ function Stock() {
       }
       onRefresh={vm.onRefresh}
       refreshing={vm.isRefreshing}
-      testID="stock"
+      testID={stockTestIds.screen}
     >
       <View style={styles.header}>
         <ScreenHeader
@@ -152,13 +160,14 @@ function Stock() {
                   accessibilityLabel={t("stock.list.sort.open")}
                   name="sort"
                   onPress={vm.onOpenSort}
+                  testID={stockTestIds.sortButton}
                 />
               ) : null}
               <IconButton
                 accessibilityLabel={t("stock.list.add")}
                 name="plus"
                 onPress={vm.onAddPress}
-                testID="stock-add"
+                testID={stockTestIds.addButton}
               />
             </>
           }
@@ -171,6 +180,7 @@ function Stock() {
               clearLabel={t("common.actions.clear")}
               onChangeText={vm.onSearchChange}
               placeholder={t("stock.list.search")}
+              testID={stockTestIds.search}
               value={vm.search}
             />
             <ChipGroup
@@ -184,7 +194,7 @@ function Stock() {
                   : (option.label ?? ""),
                 value: option.value,
               }))}
-              testID="stock-filter"
+              testID={stockTestIds.filter}
               value={vm.activeFilter}
             />
           </>
@@ -200,11 +210,13 @@ function Stock() {
           <ListItem
             key={option.value}
             onPress={() => vm.onSortChange(option.value)}
-            testID={`stock-sort-${option.value}`}
+            testID={`${stockTestIds.sortOption}-${option.value}`}
             title={t(option.labelKey)}
             trailing={
               vm.sort === option.value ? (
-                <View testID={`stock-sort-${option.value}-selected`}>
+                <View
+                  testID={`${stockTestIds.sortOption}-${option.value}-selected`}
+                >
                   <IconTile name="check" tone="accent" />
                 </View>
               ) : undefined

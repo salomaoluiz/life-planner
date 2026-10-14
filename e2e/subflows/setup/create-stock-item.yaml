@@ -1,0 +1,9 @@
+url: ${E2E_WEB_URL}
+---
+# Optional caller-scoped params are read by the script (Maestro ignores caller values for header defaults):
+# DESCRIPTION, QUANTITY, UNIT, EXPIRATION_IN_DAYS, OWNER.
+- runScript:
+    file: ../../scripts/setup/create-stock-item.js
+    env:
+      TOKEN: ${TOKEN}
+      OWNER_ID: ${OWNER_ID}

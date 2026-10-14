@@ -1,0 +1,109 @@
+url: ${E2E_WEB_URL}
+name: stock/filter-expired-and-expiring
+tags:
+  - stock
+  - spec-011
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Expired
+      KEY: EXPIRED_NAME
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Expiring
+      KEY: EXPIRING_NAME
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Fresh
+      KEY: FRESH_NAME
+- runFlow:
+    file: ../../subflows/setup/create-stock-item.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      DESCRIPTION: ${output.EXPIRED_NAME}
+      EXPIRATION_IN_DAYS: "-3"
+- runFlow:
+    file: ../../subflows/setup/create-stock-item.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      DESCRIPTION: ${output.EXPIRING_NAME}
+      EXPIRATION_IN_DAYS: "2"
+- runFlow:
+    file: ../../subflows/setup/create-stock-item.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      DESCRIPTION: ${output.FRESH_NAME}
+      EXPIRATION_IN_DAYS: "60"
+- runFlow:
+    file: ../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../subflows/stock/open-stock.yaml
+# ALL: the three rows
+- extendedWaitUntil:
+    visible:
+      id: "stock.list.row-title"
+      text: ${output.FRESH_NAME}
+    timeout: 20000
+- assertVisible:
+    id: "stock.list.row-title"
+    text: ${output.EXPIRED_NAME}
+- assertVisible:
+    id: "stock.list.row-title"
+    text: ${output.EXPIRING_NAME}
+- assertVisible:
+    id: "stock.list.status-expired"
+- assertVisible:
+    id: "stock.list.status-expiring"
+# EXPIRED: only the expired row
+- tapOn:
+    id: "stock.list.filter-EXPIRED"
+- extendedWaitUntil:
+    notVisible:
+      id: "stock.list.row-title"
+      text: ${output.FRESH_NAME}
+    timeout: 20000
+- assertVisible:
+    id: "stock.list.row-title"
+    text: ${output.EXPIRED_NAME}
+- assertNotVisible:
+    id: "stock.list.row-title"
+    text: ${output.EXPIRING_NAME}
+# EXPIRING: expired + expiring, never the fresh one (the filter includes expired items)
+- tapOn:
+    id: "stock.list.filter-EXPIRING"
+- extendedWaitUntil:
+    visible:
+      id: "stock.list.row-title"
+      text: ${output.EXPIRING_NAME}
+    timeout: 20000
+- assertVisible:
+    id: "stock.list.row-title"
+    text: ${output.EXPIRED_NAME}
+- assertNotVisible:
+    id: "stock.list.row-title"
+    text: ${output.FRESH_NAME}
+# ALL again: the three rows
+- tapOn:
+    id: "stock.list.filter-ALL"
+- extendedWaitUntil:
+    visible:
+      id: "stock.list.row-title"
+      text: ${output.FRESH_NAME}
+    timeout: 20000
+- assertVisible:
+    id: "stock.list.row-title"
+    text: ${output.EXPIRED_NAME}
+- assertVisible:
+    id: "stock.list.row-title"
+    text: ${output.EXPIRING_NAME}
