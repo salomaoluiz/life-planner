@@ -1,0 +1,9 @@
+url: ${E2E_WEB_URL}
+---
+# Reverse of scroll-form-down (explicit coordinates, see that file).
+- swipe:
+    start: 50%, 20%
+    end: 50%, 70%
+- swipe:
+    start: 50%, 20%
+    end: 50%, 70%
