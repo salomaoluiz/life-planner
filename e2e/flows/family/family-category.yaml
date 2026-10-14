@@ -1,0 +1,75 @@
+url: ${E2E_WEB_URL}
+name: family/family-category
+tags:
+  - family
+  - financial
+  - spec-006
+  - spec-013
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Family
+      KEY: FAMILY_NAME
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Category
+      KEY: CATEGORY_NAME
+- runFlow:
+    file: ../../subflows/setup/create-family.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      NAME: ${output.FAMILY_NAME}
+- runFlow:
+    file: ../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../subflows/financial/open-categories.yaml
+- tapOn:
+    id: "financial.categories.type-EXPENSE"
+- extendedWaitUntil:
+    visible:
+      id: "financial.categories.empty-state"
+    timeout: 20000
+- tapOn:
+    id: "financial.categories.add-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.category-form.name-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.category-form.name-input"
+- inputText: ${output.CATEGORY_NAME}
+- tapOn:
+    id: "financial.category-form.type-EXPENSE"
+- runFlow: ../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.category-form.owner-${output.FAMILY_ID}"
+- tapOn:
+    id: "financial.category-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.categories.row-title"
+      text: ${output.CATEGORY_NAME}
+    timeout: 20000
+# Filter by the family: visible
+- tapOn:
+    id: "financial.categories.owner-filter-${output.FAMILY_ID}"
+- assertVisible:
+    id: "financial.categories.row-title"
+    text: ${output.CATEGORY_NAME}
+# Filter by personal: not visible
+- tapOn:
+    id: "financial.categories.owner-filter-${output.USER_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "financial.categories.empty-state"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.categories.row-title"
+    text: ${output.CATEGORY_NAME}
