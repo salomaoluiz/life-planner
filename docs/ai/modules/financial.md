@@ -273,3 +273,7 @@ testIDs: `Financial/Transactions/testIds.ts` (`financial.transactions.*`; the ro
 - `create-missing-records` (spec-013), `create-validation` (spec-013, includes a whitespace-only description)
 - `edit-transaction` (spec-006, spec-013), `delete-transaction` (spec-006, spec-013)
 - `month-navigation` (spec-013; the transaction is dated the 10th of last month), `home-latest-transactions` (spec-010, secondary tag `home`)
+
+## E2E flows: family-owned records (spec 022)
+
+Owner pickers are chip groups: `financial.account-form.owner`, `financial.category-form.owner`, `financial.transaction-form.owner` (chip = `<id>-<ownerId>`; the personal chip is the user id). Owner filters: `financial.accounts.owner-filter`, `financial.categories.owner-filter`, `financial.transactions.filter` (chips `-<ownerId>`, Transactions uses `-OWNER:<ownerId>` plus `-ALL|-EXPENSE|-INCOME`). Flows in `e2e/flows/family/`: `family-account`, `family-category`, `family-transaction`, `member-sees-family-data`.

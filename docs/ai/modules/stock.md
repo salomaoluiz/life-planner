@@ -108,5 +108,5 @@ ui_models:
   - StockListUIModel: src/presentation/screens/Stock/models/StockListUIModel.ts (search, filter, sort, grouping "Needs attention"/"OK", counts; Expiring filter includes expired items)
   - NewStockItemUIModel: src/presentation/screens/Stock/modals/NewStockItemModal/models/NewStockItemUIModel.ts
 
-notes: E2E flows in `e2e/flows/stock/` (spec 021); status badges expose `stock.list.status-expired|expiring`, there is no out-of-stock status; no edit flow (spec 011 out of scope); i18n namespace `stock` (units shown via common.units.*)
+notes: E2E flows in `e2e/flows/stock/` (spec 021) and `e2e/flows/family/family-stock-item.yaml` (spec 022; owner chips `stock.item-form.owner-<ownerId>`, filter chips `stock.list.filter-<ownerId|PERSONAL>`); status badges expose `stock.list.status-expired|expiring`, there is no out-of-stock status; no edit flow (spec 011 out of scope); i18n namespace `stock` (units shown via common.units.*)
 ```

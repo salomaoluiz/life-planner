@@ -143,3 +143,7 @@ Notes:
 - Expansion state lives in `useFamilyViewModel`; the owner/member action matrix lives in the UI models.
 - After any destructive success (delete family, leave, remove member, cancel invite) `invalidateFetcherData()` refetches families, members and owners.
 - The Family screen folder is out of the lint migration allow-list (spec 012): kit components only, no style typography/color keys.
+
+## E2E flows (spec 022)
+
+testIDs: `Family/testIds.ts` (`family.list.*`; per-record ids append `-<familyId>`: `family.card.container|title|toggle|options|invite-button|menu|confirm|notice-<familyId>`; member rows `family.card.member-<memberId>` with `-badge` / `-options`; the owner is the member row with a badge, and only owners see `invite-button`) and `Family/modals/AddNewFamily/testIds.ts` (`family.new-family.sheet|name-input|save-button`, error `name-input-error`). Flows in `e2e/flows/family/` (tags `family` + spec): `create-family` (smoke), `create-family-validation`, `delete-empty-family`, `delete-family-with-records`, `family-account`, `family-category`, `family-transaction`, `family-stock-item`, `member-sees-family-data` (owner A, joined member B, stranger C; set up through the API). No flow drives the member invite UI yet.
