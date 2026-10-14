@@ -3,6 +3,8 @@ import { StyleSheet } from "react-native";
 
 import { hasText } from "@tests";
 
+import transactionsTestIds from "@screens/Financial/Transactions/testIds";
+
 import { makeEntries, setup } from "./mocks/screen.mocks";
 
 it("SHOULD render skeletons WHEN loading", () => {
@@ -29,6 +31,7 @@ it("SHOULD render the empty month state with the month in the title and an add b
     onAddPress,
   });
 
+  expect(screen.getByTestId(transactionsTestIds.emptyMonth)).toBeOnTheScreen();
   expect(
     hasText('financial.transactions.emptyTitle {"month":"October 2026"}'),
   ).toBe(true);
@@ -48,8 +51,9 @@ it("SHOULD render the filtered empty state and clear filters", () => {
 it("SHOULD render the day header with Today and the rows", () => {
   setup({ entries: makeEntries(), stickyIndices: [0] });
 
+  expect(screen.getByTestId(transactionsTestIds.screen)).toBeOnTheScreen();
   expect(hasText("financial.transactions.today")).toBe(true);
-  expect(screen.getAllByTestId(/^transaction-row-tx-\d$/)).toHaveLength(2);
+  expect(screen.getAllByTestId(transactionsTestIds.row)).toHaveLength(2);
 });
 
 it("SHOULD pass the day header indices to the list as sticky", () => {
@@ -64,7 +68,7 @@ it("SHOULD call onRowPress with the transaction id", () => {
   const onRowPress = jest.fn();
   setup({ entries: makeEntries(), onRowPress, stickyIndices: [0] });
 
-  fireEvent.press(screen.getAllByTestId(/^transaction-row-tx-\d$/)[0]);
+  fireEvent.press(screen.getAllByTestId(transactionsTestIds.row)[0]);
 
   expect(onRowPress).toHaveBeenCalledWith("tx-1");
 });

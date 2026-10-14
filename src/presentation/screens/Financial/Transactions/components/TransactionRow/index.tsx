@@ -1,5 +1,6 @@
 import { AmountText, IconTile, ListItem } from "@components";
 import TransactionUIModel from "@screens/Financial/Transactions/models/TransactionUIModel";
+import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
 interface Props {
   item: TransactionUIModel;
@@ -14,7 +15,7 @@ function TransactionRow(props: Props) {
       leading={<IconTile color={item.categoryColor} name={item.categoryIcon} />}
       onPress={() => props.onPress(item.id)}
       subtitle={item.subtitle}
-      testID={`transaction-row-${item.id}`}
+      testID={transactionsTestIds.row}
       title={item.description}
       trailing={<AmountText type={item.amountType} value={item.amountCents} />}
     />

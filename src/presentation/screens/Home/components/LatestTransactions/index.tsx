@@ -12,6 +12,7 @@ import Skeleton from "@components/Skeleton";
 import { useTranslation } from "@presentation/i18n";
 import { BlockState } from "@screens/Home/hooks/useHomeViewModel";
 import RecentTransactionUIModel from "@screens/Home/models/RecentTransactionUIModel";
+import homeTestIds from "@screens/Home/testIds";
 
 import useStyles from "./styles";
 
@@ -70,7 +71,7 @@ function LatestTransactions({ onAddPress, onSeeAllPress, state }: Props) {
           category: row.categoryName,
           date: row.dateKey ? t(row.dateKey) : row.dateText,
         })}
-        testID={`home-transaction-${row.id}`}
+        testID={homeTestIds.latestTransactionsRow}
         title={row.title}
         trailing={
           <AmountText
