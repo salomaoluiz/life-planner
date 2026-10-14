@@ -13,7 +13,10 @@ it("SHOULD render the sheet title", () => {
 it("SHOULD call onChangeName WHEN typing", () => {
   setup();
 
-  fireEvent.changeText(screen.getByTestId("new-family-name"), "Casa");
+  fireEvent.changeText(
+    screen.getByTestId("family.new-family.name-input"),
+    "Casa",
+  );
 
   expect(spies.onChangeName).toHaveBeenCalledWith("Casa");
 });
@@ -21,7 +24,7 @@ it("SHOULD call onChangeName WHEN typing", () => {
 it("SHOULD call onSubmit WHEN the footer button is pressed", () => {
   setup();
 
-  fireEvent.press(screen.getByTestId("new-family-submit"));
+  fireEvent.press(screen.getByTestId("family.new-family.save-button"));
 
   expect(spies.onSubmit).toHaveBeenCalledTimes(1);
 });
@@ -30,7 +33,8 @@ it("SHOULD show the button as busy WHEN submitting", () => {
   setup({ isSubmitting: true });
 
   expect(
-    screen.getByTestId("new-family-submit").props.accessibilityState,
+    screen.getByTestId("family.new-family.save-button").props
+      .accessibilityState,
   ).toMatchObject({ busy: true });
 });
 

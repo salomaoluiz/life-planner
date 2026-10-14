@@ -3,6 +3,7 @@ import { IconButton } from "@components/Icon";
 import Skeleton from "@components/Skeleton";
 import { useTranslation } from "@presentation/i18n";
 import { useFamilyViewModel } from "@screens/Family/hooks";
+import familyTestIds from "@screens/Family/testIds";
 
 import * as Containers from "./containers";
 
@@ -15,7 +16,7 @@ function Family() {
       onRefresh={vm.onRefresh}
       refreshing={vm.refreshing}
       scroll
-      testID="family-screen"
+      testID={familyTestIds.screen}
     >
       <ScreenHeader
         actions={
@@ -23,7 +24,7 @@ function Family() {
             accessibilityLabel={t("family.list.newFamily")}
             name="plus"
             onPress={vm.onNewFamily}
-            testID="family-new"
+            testID={familyTestIds.newButton}
           />
         }
         subtitle={
@@ -36,8 +37,8 @@ function Family() {
 
       {vm.status === "loading" ? (
         <>
-          <Skeleton.Card testID="family-skeleton-0" />
-          <Skeleton.Card testID="family-skeleton-1" />
+          <Skeleton.Card testID={`${familyTestIds.skeleton}-0`} />
+          <Skeleton.Card testID={`${familyTestIds.skeleton}-1`} />
         </>
       ) : null}
 
@@ -46,7 +47,7 @@ function Family() {
           message={t("common.errors.generic")}
           onRetry={vm.onRetry}
           retryLabel={t("common.actions.tryAgain")}
-          testID="family-error"
+          testID={familyTestIds.errorState}
         />
       ) : null}
 
@@ -56,7 +57,7 @@ function Family() {
           icon="account-group-outline"
           message={t("family.empty.message")}
           onAction={vm.onNewFamily}
-          testID="family-empty"
+          testID={familyTestIds.emptyState}
           title={t("family.empty.title")}
         />
       ) : null}

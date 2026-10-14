@@ -61,7 +61,7 @@ it("SHOULD render the header AND open the new family form from the plus button",
     screen.getByText('family.list.subtitle_other {"count":2}'),
   ).toBeOnTheScreen();
 
-  fireEvent.press(screen.getByTestId("family-new"));
+  fireEvent.press(screen.getByTestId("family.list.new-button"));
 
   expect(vm.onNewFamily).toHaveBeenCalledTimes(1);
 });
@@ -80,8 +80,8 @@ it("SHOULD render one card per family with expansion AND toggle bound to the id"
 it("SHOULD render two skeleton cards WHEN loading", () => {
   setup({ families: [], status: "loading" });
 
-  expect(screen.getByTestId("family-skeleton-0")).toBeOnTheScreen();
-  expect(screen.getByTestId("family-skeleton-1")).toBeOnTheScreen();
+  expect(screen.getByTestId("family.list.skeleton-0")).toBeOnTheScreen();
+  expect(screen.getByTestId("family.list.skeleton-1")).toBeOnTheScreen();
 });
 
 it("SHOULD render the error state AND retry", () => {
@@ -89,7 +89,7 @@ it("SHOULD render the error state AND retry", () => {
 
   fireEvent.press(screen.getByText("common.actions.tryAgain"));
 
-  expect(screen.getByTestId("family-error")).toBeOnTheScreen();
+  expect(screen.getByTestId("family.list.error-state")).toBeOnTheScreen();
   expect(vm.onRetry).toHaveBeenCalledTimes(1);
 });
 
