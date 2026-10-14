@@ -1,0 +1,66 @@
+url: ${E2E_WEB_URL}
+name: stock/home-attention-card
+tags:
+  - stock
+  - home
+  - spec-010
+---
+# "See all" and the attention rows open /stock?filter=EXPIRING (spec 021 deviation: not EXPIRED).
+# The active filter is asserted by effect: the attention row is listed, a far-future row is not.
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Expired
+      KEY: EXPIRED_NAME
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Fresh
+      KEY: FRESH_NAME
+- runFlow:
+    file: ../../subflows/setup/create-stock-item.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      DESCRIPTION: ${output.EXPIRED_NAME}
+      EXPIRATION_IN_DAYS: "-3"
+- runFlow:
+    file: ../../subflows/setup/create-stock-item.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      DESCRIPTION: ${output.FRESH_NAME}
+      EXPIRATION_IN_DAYS: "60"
+- runFlow:
+    file: ../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- extendedWaitUntil:
+    visible:
+      id: "home.stock-attention.card"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "home.stock-attention.row-title"
+      text: ${output.EXPIRED_NAME}
+    timeout: 20000
+# The fresh item does not need attention: not on the card
+- assertNotVisible:
+    id: "home.stock-attention.row-title"
+    text: ${output.FRESH_NAME}
+- tapOn:
+    id: "home.stock-attention.row-title"
+    text: ${output.EXPIRED_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "stock.list.row-title"
+      text: ${output.EXPIRED_NAME}
+    timeout: 20000
+# The attention filter is active: the fresh item is hidden
+- assertNotVisible:
+    id: "stock.list.row-title"
+    text: ${output.FRESH_NAME}

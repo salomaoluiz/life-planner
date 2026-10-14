@@ -15,6 +15,7 @@ import { useTranslation } from "@presentation/i18n";
 
 import { useNewStockItemViewModel } from "./hooks";
 import useStyles from "./styles";
+import stockItemFormTestIds from "./testIds";
 
 function NewStockItemModal() {
   const { styles } = useStyles();
@@ -51,10 +52,12 @@ function NewStockItemModal() {
           loading={vm.isSaving}
           onPress={vm.onSave}
           size="lg"
+          testID={stockItemFormTestIds.saveButton}
         />
       }
       onClose={vm.onClose}
       presentation="inline"
+      testID={stockItemFormTestIds.sheet}
       title={t("stock.form.title")}
       visible
     >
@@ -67,6 +70,7 @@ function NewStockItemModal() {
             label={t("stock.form.description")}
             onChangeText={(value) => vm.setField("description", value)}
             placeholder={t("stock.form.descriptionPlaceholder")}
+            testID={stockItemFormTestIds.descriptionInput}
             value={values.description}
           />
           <View style={styles.pair}>
@@ -76,6 +80,7 @@ function NewStockItemModal() {
                 keyboardType="number-pad"
                 label={t("stock.form.quantity")}
                 onChangeText={onQuantityChange}
+                testID={stockItemFormTestIds.quantityInput}
                 value={values.quantity}
               />
             </View>
@@ -89,6 +94,7 @@ function NewStockItemModal() {
                   value: option.value,
                 }))}
                 sheetTitle={t("stock.form.unit")}
+                testID={stockItemFormTestIds.unitSelect}
                 value={values.unit}
               />
             </View>
@@ -108,6 +114,7 @@ function NewStockItemModal() {
             {...dateLabels}
             label={t("stock.form.expiration")}
             onChange={(date) => vm.setField("expirationDate", date)}
+            testID={stockItemFormTestIds.expirationField}
             value={values.expirationDate}
           />
           <Button.Ghost
@@ -115,6 +122,7 @@ function NewStockItemModal() {
             inline
             label={t("stock.form.moreDetails")}
             onPress={vm.onToggleMore}
+            testID={stockItemFormTestIds.moreToggle}
           />
           {vm.isMoreOpen ? (
             <>
@@ -143,6 +151,7 @@ function NewStockItemModal() {
                   <TextField
                     label={t("stock.form.brand")}
                     onChangeText={(value) => vm.setField("brand", value)}
+                    testID={stockItemFormTestIds.brandInput}
                     value={values.brand}
                   />
                 </View>

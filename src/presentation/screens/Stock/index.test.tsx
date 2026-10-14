@@ -1,10 +1,15 @@
+import StockDTO from "@application/dto/stock/StockDTO";
+import { StockOwners, StockUnits } from "@domain/entities/stock/StockEntity";
+import StockListUIModel from "@screens/Stock/models/StockListUIModel";
+
 import { fireEvent, mocks, screen, setup } from "./mocks/index.mocks";
+import stockTestIds from "./testIds";
 
 it("SHOULD render six skeleton rows and no list content WHEN loading", () => {
   setup({ isLoading: true, rows: [] });
 
-  expect(screen.getByTestId("stock-skeleton")).toBeOnTheScreen();
-  expect(screen.getByTestId("stock-skeleton").children).toHaveLength(6);
+  expect(screen.getByTestId(stockTestIds.skeleton)).toBeOnTheScreen();
+  expect(screen.getByTestId(stockTestIds.skeleton).children).toHaveLength(6);
   expect(screen.queryByText("stock.list.group.ok")).toBeNull();
 });
 
@@ -36,8 +41,9 @@ it("SHOULD show the no-results text and clear the filters", () => {
   const vm = setup({ hasNoResults: true, rows: [] });
 
   expect(screen.getByText("stock.list.noResults")).toBeOnTheScreen();
+  expect(screen.getByTestId(stockTestIds.noResults)).toBeOnTheScreen();
 
-  fireEvent.press(screen.getByText("stock.list.clearFilters"));
+  fireEvent.press(screen.getByTestId(stockTestIds.clearFilters));
 
   expect(vm.onClearFilters).toHaveBeenCalled();
 });
@@ -72,14 +78,14 @@ describe("content", () => {
     expect(screen.getByText('stock.status.days {"count":2}')).toBeOnTheScreen();
     expect(screen.getByText("5 common.units.kilogram")).toBeOnTheScreen();
     expect(
-      screen.getByTestId("stock-row-stock-2").props.accessibilityLabel,
+      screen.getAllByTestId(stockTestIds.row)[1].props.accessibilityLabel,
     ).toContain("stock.list.rowA11y");
   });
 
   it("SHOULD open the item WHEN a row is pressed", () => {
     const vm = setup();
 
-    fireEvent.press(screen.getByTestId("stock-row-stock-1"));
+    fireEvent.press(screen.getAllByTestId(stockTestIds.row)[0]);
 
     expect(vm.onItemPress).toHaveBeenCalledWith("stock-1");
   });
@@ -100,7 +106,7 @@ describe("toolbar", () => {
   it("SHOULD forward a chip press", () => {
     const vm = setup();
 
-    fireEvent.press(screen.getByTestId("stock-filter-EXPIRING"));
+    fireEvent.press(screen.getByTestId(`${stockTestIds.filter}-EXPIRING`));
 
     expect(vm.onFilterChange).toHaveBeenCalledWith("EXPIRING");
   });
@@ -108,7 +114,7 @@ describe("toolbar", () => {
   it("SHOULD add an item from the toolbar button", () => {
     const vm = setup();
 
-    fireEvent.press(screen.getByTestId("stock-add"));
+    fireEvent.press(screen.getByTestId(stockTestIds.addButton));
 
     expect(vm.onAddPress).toHaveBeenCalled();
     expect(screen.queryByTestId("fab")).toBeNull();
@@ -128,7 +134,7 @@ describe("toolbar", () => {
     expect(screen.getByText("stock.list.sort.name")).toBeOnTheScreen();
     expect(screen.getByText("stock.list.sort.recent")).toBeOnTheScreen();
     expect(
-      screen.getByTestId("stock-sort-EXPIRATION-selected"),
+      screen.getByTestId(`${stockTestIds.sortOption}-EXPIRATION-selected`),
     ).toBeOnTheScreen();
 
     fireEvent.press(screen.getByText("stock.list.sort.name"));
@@ -164,5 +170,58 @@ describe("details", () => {
     });
 
     expect(screen.getByTestId("stockItemDetails")).toBeOnTheScreen();
+  });
+});
+
+describe("test ids", () => {
+  it("SHOULD expose the screen and the empty state", () => {
+    setup({ isEmpty: true, rows: [] });
+
+    expect(screen.getByTestId(stockTestIds.screen)).toBeOnTheScreen();
+    expect(screen.getByTestId(stockTestIds.emptyState)).toBeOnTheScreen();
+  });
+
+  it("SHOULD expose the rows, the expiring status and the quantity", () => {
+    setup();
+
+    expect(screen.getAllByTestId(stockTestIds.row)).toHaveLength(2);
+    expect(screen.getByTestId(stockTestIds.statusExpiring)).toBeOnTheScreen();
+    expect(screen.queryByTestId(stockTestIds.statusExpired)).toBeNull();
+    expect(screen.getByTestId(stockTestIds.rowQuantity)).toHaveTextContent(
+      "5 common.units.kilogram",
+    );
+  });
+
+  it("SHOULD expose the expired status for an expired item", () => {
+    const expired = new StockListUIModel(
+      [
+        new StockDTO({
+          description: "Iogurte",
+          expirationDate: new Date(Date.now() - 3 * mocks.DAY_MS),
+          id: "stock-3",
+          owner: StockOwners.USER,
+          ownerId: "user-id",
+          quantity: 1,
+          unit: StockUnits.UNIT,
+        }),
+      ],
+      mocks.owners,
+      new Date(),
+      "en-US",
+    );
+    setup({
+      rows: expired.view({ filter: "ALL", search: "", sort: "EXPIRATION" })
+        .rows,
+    });
+
+    expect(screen.getByTestId(stockTestIds.statusExpired)).toBeOnTheScreen();
+    expect(screen.queryByTestId(stockTestIds.statusExpiring)).toBeNull();
+  });
+
+  it("SHOULD expose the search input and the sort button", () => {
+    setup();
+
+    expect(screen.getByTestId(stockTestIds.search)).toBeOnTheScreen();
+    expect(screen.getByTestId(stockTestIds.sortButton)).toBeOnTheScreen();
   });
 });

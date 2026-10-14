@@ -23,3 +23,8 @@ it("SHOULD show the clear button WHEN not empty and clear on press", () => {
   fireEvent.press(clear);
   expect(defaultProps.onChangeText).toHaveBeenCalledWith("");
 });
+
+it("SHOULD set nativeID to the testID so web E2E can find the input by id", () => {
+  setup();
+  expect(screen.getByTestId("search").props.nativeID).toBe("search");
+});

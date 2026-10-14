@@ -32,6 +32,7 @@ function SearchField(props: SearchFieldProps) {
       <TextInput
         accessibilityLabel={props.placeholder}
         autoFocus={props.autoFocus}
+        nativeID={testID}
         onBlur={() => setFocused(false)}
         onChangeText={props.onChangeText}
         onFocus={() => setFocused(true)}

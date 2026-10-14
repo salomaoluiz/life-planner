@@ -1,6 +1,7 @@
 import { act } from "@testing-library/react-native";
 
 import { fireEvent, screen, setup } from "./mocks/index.mocks";
+import stockItemFormTestIds from "./testIds";
 
 it("SHOULD render the sheet title and the main fields", () => {
   setup();
@@ -135,4 +136,43 @@ it("SHOULD render a skeleton and no fields WHEN loading", () => {
 
   expect(screen.getByText("stock.form.title")).toBeOnTheScreen();
   expect(screen.queryByText("stock.form.description")).toBeNull();
+});
+
+it("SHOULD expose the form ids", () => {
+  setup();
+
+  expect(screen.getByTestId(stockItemFormTestIds.sheet)).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(stockItemFormTestIds.descriptionInput),
+  ).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(stockItemFormTestIds.quantityInput),
+  ).toBeOnTheScreen();
+  expect(screen.getByTestId(stockItemFormTestIds.unitSelect)).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(stockItemFormTestIds.expirationField),
+  ).toBeOnTheScreen();
+  expect(screen.getByTestId(stockItemFormTestIds.moreToggle)).toBeOnTheScreen();
+});
+
+it("SHOULD save and toggle more details through their ids", () => {
+  const { vm } = setup();
+
+  fireEvent.press(screen.getByTestId(stockItemFormTestIds.saveButton));
+  fireEvent.press(screen.getByTestId(stockItemFormTestIds.moreToggle));
+
+  expect(vm.onSave).toHaveBeenCalled();
+  expect(vm.onToggleMore).toHaveBeenCalled();
+});
+
+it("SHOULD expose the brand input and the derived error ids", () => {
+  setup({
+    errors: { description: "stock.form.descriptionRequired" },
+    isMoreOpen: true,
+  });
+
+  expect(screen.getByTestId(stockItemFormTestIds.brandInput)).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(`${stockItemFormTestIds.descriptionInput}-error`),
+  ).toBeOnTheScreen();
 });

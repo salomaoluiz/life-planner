@@ -85,7 +85,7 @@ models:
 screens:
   Stock (list):
     path: src/presentation/screens/Stock/index.tsx
-    composition: Screen + FlashList (ScreenHeader, SearchField, ChipGroup filters, grouped rows with ListItem/IconTile/Badge); sort sheet; states Skeleton/ErrorState/EmptyState/no-results; route param `/stock?filter=EXPIRING|EXPIRED|ALL` preselects the filter; toolbar add button (testID stock-add)
+    composition: Screen + FlashList (ScreenHeader, SearchField, ChipGroup filters, grouped rows with ListItem/IconTile/Badge); sort sheet; states Skeleton/ErrorState/EmptyState/no-results; route param `/stock?filter=EXPIRING|EXPIRED|ALL` preselects the filter; toolbar add button; testIDs in `Stock/testIds.ts` (`stock.list.*`), form ids in `NewStockItemModal/testIds.ts` (`stock.item-form.*`), details ids in `StockItemDetails/testIds.ts` (`stock.item-details.*`)
   Home: see home.md
 
 containers:
@@ -108,5 +108,5 @@ ui_models:
   - StockListUIModel: src/presentation/screens/Stock/models/StockListUIModel.ts (search, filter, sort, grouping "Needs attention"/"OK", counts; Expiring filter includes expired items)
   - NewStockItemUIModel: src/presentation/screens/Stock/modals/NewStockItemModal/models/NewStockItemUIModel.ts
 
-notes: no edit flow (spec 011 out of scope); i18n namespace `stock` (units shown via common.units.*)
+notes: E2E flows in `e2e/flows/stock/` (spec 021); status badges expose `stock.list.status-expired|expiring`, there is no out-of-stock status; no edit flow (spec 011 out of scope); i18n namespace `stock` (units shown via common.units.*)
 ```

@@ -1,0 +1,46 @@
+url: ${E2E_WEB_URL}
+name: stock/add-from-quick-add
+tags:
+  - stock
+  - spec-009
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Quick Rice
+      KEY: ITEM_NAME
+- runFlow:
+    file: ../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+- tapOn:
+    id: "quick-add-button|navigation-rail-add"
+- extendedWaitUntil:
+    visible:
+      id: "quick-add-stock-item"
+    timeout: 20000
+- tapOn:
+    id: "quick-add-stock-item"
+- extendedWaitUntil:
+    visible:
+      id: "stock.item-form.description-input"
+    timeout: 20000
+- tapOn:
+    id: "stock.item-form.description-input"
+- inputText: ${output.ITEM_NAME}
+- tapOn:
+    id: "stock.item-form.save-button"
+- runFlow: ../../subflows/stock/open-stock.yaml
+- extendedWaitUntil:
+    visible:
+      id: "stock.list.row-title"
+      text: ${output.ITEM_NAME}
+    timeout: 20000

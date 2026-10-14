@@ -5,6 +5,7 @@ import {
   screen,
   setup,
 } from "./mocks/index.mocks";
+import stockItemDetailsTestIds from "./testIds";
 
 it("SHOULD render the sheet titled with the description and the quantity", () => {
   setup();
@@ -76,4 +77,40 @@ it("SHOULD close the sheet", () => {
   fireEvent.press(screen.getAllByLabelText("common.actions.close")[0]);
 
   expect(props.onClose).toHaveBeenCalled();
+});
+
+it("SHOULD expose the sheet, the brand row and the delete button", () => {
+  setup(givenItem({ brand: "Piracanjuba" }));
+
+  expect(screen.getByTestId(stockItemDetailsTestIds.sheet)).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(`${stockItemDetailsTestIds.brand}-value`),
+  ).toHaveTextContent("Piracanjuba");
+  expect(
+    screen.getByTestId(stockItemDetailsTestIds.deleteButton),
+  ).toBeOnTheScreen();
+});
+
+it("SHOULD NOT expose the brand row WHEN the item has no brand", () => {
+  setup();
+
+  expect(screen.queryByTestId(stockItemDetailsTestIds.brand)).toBeNull();
+});
+
+it("SHOULD start the delete from the delete button id", () => {
+  const { vm } = setup();
+
+  fireEvent.press(screen.getByTestId(stockItemDetailsTestIds.deleteButton));
+
+  expect(vm.onDeletePress).toHaveBeenCalled();
+});
+
+it("SHOULD expose the confirm button of the delete dialog", () => {
+  const { vm } = setup(givenItem(), { isConfirmOpen: true });
+
+  fireEvent.press(
+    screen.getByTestId(`${stockItemDetailsTestIds.deleteDialog}-confirm`),
+  );
+
+  expect(vm.onConfirmDelete).toHaveBeenCalled();
 });

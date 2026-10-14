@@ -1,0 +1,59 @@
+url: ${E2E_WEB_URL}
+name: stock/add-item-with-details
+tags:
+  - stock
+  - spec-011
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Milk
+      KEY: ITEM_NAME
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Brand
+      KEY: BRAND_NAME
+- runFlow:
+    file: ../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../subflows/stock/open-stock.yaml
+- tapOn:
+    id: "stock.list.add-button"
+- extendedWaitUntil:
+    visible:
+      id: "stock.item-form.description-input"
+    timeout: 20000
+- tapOn:
+    id: "stock.item-form.description-input"
+- inputText: ${output.ITEM_NAME}
+- tapOn:
+    id: "stock.item-form.more-toggle"
+- runFlow: ../../subflows/financial/scroll-form-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "stock.item-form.brand-input"
+    timeout: 20000
+- tapOn:
+    id: "stock.item-form.brand-input"
+- inputText: ${output.BRAND_NAME}
+- tapOn:
+    id: "stock.item-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "stock.list.row-title"
+      text: ${output.ITEM_NAME}
+    timeout: 20000
+- tapOn:
+    id: "stock.list.row-title"
+    text: ${output.ITEM_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "stock.item-details.brand-value"
+      text: ${output.BRAND_NAME}
+    timeout: 20000
