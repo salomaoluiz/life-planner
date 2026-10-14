@@ -26,6 +26,7 @@ Clean Architecture: `app/` (expo-router routes) → `src/presentation` → `src/
 | Lint rules, import order, naming, commit flow                                    | `.claude/context/conventions.md`                                          |
 | What already exists in a module (file inventory per layer)                       | `docs/ai/modules/<auth\|family\|familyMember\|financial\|home\|stock>.md` |
 | Backend API (`../life-planner-back`): endpoints, auth, contract, Supabase → API  | `.claude/context/backend.md`                                              |
+| E2E flows, testIDs, running the suite                                            | `.claude/context/e2e.md`                                                  |
 | Building a whole new feature / CRUD slice end-to-end                             | skill `new-feature-slice` (`.claude/skills/new-feature-slice/`)           |
 
 Tip: for a single-layer change read just that layer file + `conventions.md`. Do not open the module inventory unless you need to locate existing files.
@@ -48,3 +49,12 @@ Reference implementation for any new CRUD work: **financial accounts** (smallest
     - Tests and mocks use fake data (`"user-id"`, random UUIDs, `test@example.com`).
     - Before every commit run `git diff --cached` and check it; stage files explicitly (no `git add -A` / `git add .`). If anything looks secret or personal, unstage it, don't commit, and tell the user. If a secret was already committed, stop and tell the user (the key must be rotated); don't try to rewrite history yourself.
 11. **Always branch from the latest `main`, to keep history linear.** Before creating any new branch run `git fetch origin main` and create it from `origin/main` (`git checkout -b <branch> origin/main`) — never from a stale local `main` or from another feature branch. Before opening a PR, rebase onto the latest `origin/main` (`git fetch origin main && git rebase origin/main`) rather than merging `main` into the branch; no merge commits on feature branches.
+12. **E2E guardrail (Maestro).**
+    - Every feature or fix that changes user-visible behavior ships with at least one flow in `e2e/flows/<module>/`, tagged with its module and `spec-NNN`. It covers the happy path and the main error or empty state from the spec's acceptance criteria. New interactive elements get testIDs (`<module>.<screen>.<element>`) from the module's `testIds.ts`.
+    - While building, tag the new flow `wip` and run it alone (`yarn e2e --tags wip`). Remove `wip` before committing; a committed `wip` tag is a bug.
+    - Before reporting a task as done, run `yarn e2e` (the full suite) and read **only** `e2e-report/summary.md`. Do not open `junit.xml`, `maestro.log` or artifacts of passing flows. For each failure, open only the files named in its block.
+    - Fix loop: fix, run `yarn e2e:failed`, and repeat until it passes. Then run `yarn e2e` once more in full.
+    - Never delete, skip, `wip`-tag or weaken an existing flow (for example removing an assertion or changing it to a text match) to make the suite pass. If an existing flow is wrong because the spec changed the behavior, update it in the same commit and give the spec number in the commit message.
+    - E2E runs only on the owner's Mac. In a cloud session, ask for a session on the Mac to run it; never set up Maestro, browsers or servers in the cloud. The owner keeps the app and the API running; do not start or restart them yourself.
+    - If `yarn e2e` exits with code 2 (could not run), say so in the final report with its one-line reason. Do not claim the feature was validated.
+    - Report the final summary line (`E2E PASSED: N/N` or the failures) in the PR description.
