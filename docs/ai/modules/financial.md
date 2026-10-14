@@ -256,3 +256,11 @@ testIDs: `Financial/Layout/testIds.ts`, `Financial/Accounts/testIds.ts`, `Financ
 - `create-account` (spec-006, spec-013, smoke), `create-account-validation` (spec-013)
 - `edit-account` (spec-006, spec-013), `archive-account` (spec-013, spec-023, includes the un-archive round trip), `delete-account` (spec-006, spec-013)
 - `delete-account-with-transactions` (spec-006)
+
+## E2E flows: categories (spec 019)
+
+testIDs: `Financial/Categories/testIds.ts` (`financial.categories.*`; a root row is `row`, a subcategory row `child-row`) and `Financial/Categories/modals/NewCategoryModal/testIds.ts` (`financial.category-form.*`). Flows in `e2e/flows/financial/categories/` (tags `financial` + spec):
+
+- `create-expense-category` (spec-006, spec-013, smoke), `create-income-category` (spec-013), `create-category-validation` (spec-013)
+- `create-subcategory` (spec-006, spec-013), `edit-category` (spec-006, spec-013)
+- `delete-category-with-subtree` (spec-006), `delete-category-with-transactions` (spec-006; the transaction is on the child, the root delete is refused)
