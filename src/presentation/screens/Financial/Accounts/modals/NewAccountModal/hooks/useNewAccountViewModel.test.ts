@@ -6,6 +6,7 @@ import {
   acc,
   givenLoaded,
   mutations,
+  queries,
   setup,
   spies,
 } from "./mocks/useNewAccountViewModel.mocks";
@@ -155,13 +156,62 @@ it("SHOULD go back without a request WHEN nothing changed in edit", () => {
   expect(spies.back).toHaveBeenCalledTimes(1);
 });
 
-it("SHOULD go back WHEN a mutation succeeds", () => {
-  givenLoaded();
-  mutations.create.withStatus("success");
+it.each(["create", "update", "delete"] as const)(
+  "SHOULD invalidate the accounts cache and go back WHEN %s succeeds",
+  (name) => {
+    givenLoaded();
+    mutations[name].withStatus("success");
+
+    setup();
+
+    expect(spies.invalidate).toHaveBeenCalledTimes(1);
+    expect(spies.invalidate).toHaveBeenCalledWith(["accounts"]);
+    expect(spies.back).toHaveBeenCalledTimes(1);
+  },
+);
+
+it("SHOULD NOT invalidate WHEN a mutation fails", () => {
+  givenLoaded({ accounts: [acc("a1")], params: { id: "a1" } });
+  mutations.update.withError(new AccountHasTransactions());
 
   setup();
 
-  expect(spies.back).toHaveBeenCalled();
+  expect(spies.invalidate).not.toHaveBeenCalled();
+  expect(spies.back).not.toHaveBeenCalled();
+});
+
+it("SHOULD NOT invalidate WHEN saving an edit with no changes", () => {
+  givenLoaded({ accounts: [acc("a1")], params: { id: "a1" } });
+  const { result } = setup();
+
+  act(() => result.current.onSave());
+
+  expect(mutations.update.value.mutate).not.toHaveBeenCalled();
+  expect(spies.invalidate).not.toHaveBeenCalled();
+});
+
+it("SHOULD keep the user's edits WHEN fresh data arrives", () => {
+  givenLoaded({ accounts: [acc("a1")], params: { id: "a1" } });
+  const { rerender, result } = setup();
+
+  act(() => result.current.onNameChange("My edit"));
+  queries.accounts.withData([
+    acc("a1", 0, { name: "Server name", status: "ARCHIVED" }),
+  ]);
+  rerender({});
+
+  expect(result.current.name).toBe("My edit");
+});
+
+it("SHOULD show the fresh archived status WHEN the user has not edited", () => {
+  givenLoaded({ accounts: [acc("a1")], params: { id: "a1" } });
+  const { rerender, result } = setup();
+
+  expect(result.current.isArchived).toBe(false);
+  queries.accounts.withData([acc("a1", 0, { status: "ARCHIVED" })]);
+  rerender({});
+
+  expect(result.current.isArchived).toBe(true);
 });
 
 it("SHOULD keep the values and expose the 006 copy WHEN deleting an account with transactions fails", () => {

@@ -5,7 +5,11 @@ import { renderHook } from "@tests";
 import AccountDTO from "@application/dto/financial/AccountDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
-import { useMutation, useQuery } from "@infrastructure/fetcher";
+import {
+  invalidateFetcherData,
+  useMutation,
+  useQuery,
+} from "@infrastructure/fetcher";
 import UseMutationFixture from "@infrastructure/fetcher/mocks/useMutation.fixture";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
 
@@ -65,6 +69,7 @@ const mutations: Record<string, UseMutationFixture<unknown, unknown>> = {};
 // region spies
 const spies = {
   back: jest.mocked(router.back),
+  invalidate: jest.mocked(invalidateFetcherData),
   params: jest.mocked(useLocalSearchParams),
   useMutation: jest.mocked(useMutation),
   useQuery: jest.mocked(useQuery),
