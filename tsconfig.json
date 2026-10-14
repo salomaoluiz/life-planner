@@ -27,5 +27,12 @@
       "@tests": ["tests"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "scripts/**/*.js",
+    "scripts/**/*.mjs",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+  ]
 }
