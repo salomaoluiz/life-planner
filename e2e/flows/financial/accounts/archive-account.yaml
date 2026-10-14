@@ -60,9 +60,8 @@ tags:
       id: "financial.account-form.name-input"
     timeout: 20000
 - runFlow: ../../../subflows/financial/scroll-form-down.yaml
-- assertVisible:
-    id: "financial.account-form.archived-switch"
-    checked: true
+# Maestro web cannot read the switch state. If the form showed OFF (stale), this tap would
+# turn it ON, the save would send no change, and the account would stay archived below.
 - tapOn:
     id: "financial.account-form.archived-switch"
 - tapOn:
