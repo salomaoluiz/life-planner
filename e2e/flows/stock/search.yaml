@@ -1,0 +1,77 @@
+url: ${E2E_WEB_URL}
+name: stock/search
+tags:
+  - stock
+  - spec-011
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Rice
+      KEY: RICE_NAME
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Beans
+      KEY: BEANS_NAME
+- runFlow:
+    file: ../../subflows/setup/create-stock-item.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      DESCRIPTION: ${output.RICE_NAME}
+- runFlow:
+    file: ../../subflows/setup/create-stock-item.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      DESCRIPTION: ${output.BEANS_NAME}
+- runFlow:
+    file: ../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../subflows/stock/open-stock.yaml
+- extendedWaitUntil:
+    visible:
+      id: "stock.list.row-title"
+      text: ${output.BEANS_NAME}
+    timeout: 20000
+- assertVisible:
+    id: "stock.list.row-title"
+    text: ${output.RICE_NAME}
+# Lower-case substring: the search ignores case. The 200 ms debounce is covered by the wait.
+- tapOn:
+    id: "stock.list.search-input"
+- inputText: "e2e rice"
+- extendedWaitUntil:
+    notVisible:
+      id: "stock.list.row-title"
+      text: ${output.BEANS_NAME}
+    timeout: 20000
+- assertVisible:
+    id: "stock.list.row-title"
+    text: ${output.RICE_NAME}
+# A term that matches nothing: the no-results block, then "clear filters" brings everything back.
+- tapOn:
+    id: "stock.list.search-input-clear"
+- tapOn:
+    id: "stock.list.search-input"
+- inputText: "zzzz nothing"
+- extendedWaitUntil:
+    visible:
+      id: "stock.list.no-results"
+    timeout: 20000
+- tapOn:
+    id: "stock.list.clear-filters"
+- extendedWaitUntil:
+    visible:
+      id: "stock.list.row-title"
+      text: ${output.BEANS_NAME}
+    timeout: 20000
+- assertVisible:
+    id: "stock.list.row-title"
+    text: ${output.RICE_NAME}

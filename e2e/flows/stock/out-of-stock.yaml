@@ -1,0 +1,41 @@
+url: ${E2E_WEB_URL}
+name: stock/out-of-stock
+tags:
+  - stock
+  - spec-005
+---
+# The app has no out-of-stock status (spec 021 deviation): a quantity-0 item renders as a plain row
+# with quantity 0 and no expiration badge.
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Empty Jar
+      KEY: ITEM_NAME
+- runFlow:
+    file: ../../subflows/setup/create-stock-item.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      DESCRIPTION: ${output.ITEM_NAME}
+      QUANTITY: "0"
+- runFlow:
+    file: ../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../subflows/stock/open-stock.yaml
+- extendedWaitUntil:
+    visible:
+      id: "stock.list.row-title"
+      text: ${output.ITEM_NAME}
+    timeout: 20000
+- assertVisible:
+    id: "stock.list.row-quantity"
+    text: "0.*"
+- assertNotVisible:
+    id: "stock.list.status-expired"
+- assertNotVisible:
+    id: "stock.list.status-expiring"
