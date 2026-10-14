@@ -43,6 +43,7 @@ function AmountInput(props: AmountInputProps) {
           accessibilityHint={props.error}
           accessibilityLabel={props.label}
           keyboardType="number-pad"
+          nativeID={props.testID}
           onBlur={() => setFocused(false)}
           onChangeText={(text) => props.onChange(parseCents(text))}
           onFocus={() => setFocused(true)}

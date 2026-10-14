@@ -1,12 +1,13 @@
 import { fireEvent, screen } from "@tests";
 
 import { setup, spies } from "./mocks/index.mocks";
+import layoutTestIds from "./testIds";
 
 it("SHOULD render the Finances title AND the 3 segments", () => {
   setup();
 
   expect(screen.getByText("navigation.tabs.finances")).toBeOnTheScreen();
-  expect(screen.getByTestId("financial-segments")).toBeOnTheScreen();
+  expect(screen.getByTestId(layoutTestIds.segments)).toBeOnTheScreen();
   [
     "financial.sections.transactions",
     "financial.sections.categories",
@@ -24,7 +25,8 @@ it("SHOULD select the segment that matches the current route", () => {
   setup("/financial/accounts");
 
   expect(
-    screen.getByTestId("financial-segments-accounts").props.accessibilityState,
+    screen.getByTestId(`${layoutTestIds.segments}-accounts`).props
+      .accessibilityState,
   ).toEqual(expect.objectContaining({ selected: true }));
 });
 

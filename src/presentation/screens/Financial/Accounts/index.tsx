@@ -22,6 +22,7 @@ import { translateChoices } from "@screens/Financial/models/ownerOptions";
 import { useAccountsViewModel } from "./hooks";
 import { AccountEntry } from "./models/accountList";
 import useStyles from "./styles";
+import accountsTestIds from "./testIds";
 
 const SKELETON_ROWS = [0, 1, 2, 3, 4, 5];
 
@@ -51,6 +52,7 @@ function FinancialAccounts() {
           accessibilityLabel={t("financial.accounts.new")}
           name={"plus"}
           onPress={vm.onAddPress}
+          testID={accountsTestIds.addButton}
         />
       </View>
       <ChipGroup
@@ -72,7 +74,7 @@ function FinancialAccounts() {
       return (
         <ListItem
           onPress={vm.onArchivedToggle}
-          testID={"archived-toggle"}
+          testID={accountsTestIds.archivedToggle}
           title={t("financial.accounts.archived", { count: item.count })}
           trailing={
             <Icon
@@ -95,9 +97,14 @@ function FinancialAccounts() {
         leading={<IconTile name={account.icon} tone={tone} />}
         onPress={() => vm.onRowPress(account.id)}
         subtitle={account.ownerName}
-        testID={`account-row-${account.id}`}
+        testID={accountsTestIds.row}
         title={account.name}
-        trailing={<AmountText {...account.balanceAmount} />}
+        trailing={
+          <AmountText
+            {...account.balanceAmount}
+            testID={`${accountsTestIds.row}-balance`}
+          />
+        }
       />
     );
   }
@@ -114,7 +121,7 @@ function FinancialAccounts() {
 
   if (vm.isLoading) {
     return (
-      <View style={styles.root}>
+      <View style={styles.root} testID={accountsTestIds.screen}>
         {toolbar}
         {SKELETON_ROWS.map((row) => (
           <Skeleton.ListItem key={row} testID={"accounts-skeleton"} />
@@ -124,7 +131,7 @@ function FinancialAccounts() {
   }
 
   return (
-    <View style={styles.root}>
+    <View style={styles.root} testID={accountsTestIds.screen}>
       <FlashList
         data={vm.entries}
         estimatedItemSize={64}
@@ -135,6 +142,7 @@ function FinancialAccounts() {
             actionLabel={t("financial.accounts.new")}
             message={t("financial.accounts.emptyMessage")}
             onAction={vm.onAddPress}
+            testID={accountsTestIds.emptyState}
             title={t("financial.accounts.emptyTitle")}
           />
         }

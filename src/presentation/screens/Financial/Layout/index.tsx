@@ -5,6 +5,7 @@ import { Screen, ScreenHeader, SegmentedControl } from "@components";
 
 import { useFinancialLayoutViewModel } from "./hooks";
 import useStyles from "./styles";
+import layoutTestIds from "./testIds";
 
 function FinancialLayout() {
   const { styles } = useStyles();
@@ -17,7 +18,7 @@ function FinancialLayout() {
         accessibilityLabel={vm.title}
         onChange={vm.onSectionChange}
         options={vm.options}
-        testID={"financial-segments"}
+        testID={layoutTestIds.segments}
         value={vm.section}
       />
       <View style={styles.content}>

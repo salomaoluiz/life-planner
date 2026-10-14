@@ -1,4 +1,5 @@
 import { fireEvent, screen, setup } from "./mocks/index.mocks";
+import accountFormTestIds from "./testIds";
 
 it("SHOULD show the create title, the save footer and no delete, archive or cancel", () => {
   setup();
@@ -8,6 +9,9 @@ it("SHOULD show the create title, the save footer and no delete, archive or canc
   expect(screen.queryByText("financial.accounts.delete")).toBeNull();
   expect(screen.queryByText("financial.accounts.form.archived")).toBeNull();
   expect(screen.queryByText("common.actions.cancel")).toBeNull();
+  expect(screen.getByTestId(accountFormTestIds.sheet)).toBeOnTheScreen();
+  expect(screen.getByTestId(accountFormTestIds.nameInput)).toBeOnTheScreen();
+  expect(screen.getByTestId(accountFormTestIds.saveButton)).toBeOnTheScreen();
 });
 
 it("SHOULD show the edit title, save changes, the archive switch and the delete button", () => {
@@ -25,7 +29,10 @@ it("SHOULD show the edit title, save changes, the archive switch and the delete 
   expect(
     screen.getByText("financial.accounts.form.archivedHelper"),
   ).toBeOnTheScreen();
-  fireEvent.press(screen.getByText("financial.accounts.delete"));
+  expect(
+    screen.getByTestId(accountFormTestIds.archivedSwitch),
+  ).toBeOnTheScreen();
+  fireEvent.press(screen.getByTestId(accountFormTestIds.deleteButton));
 
   expect(vm.onDeletePress).toHaveBeenCalledTimes(1);
 });
@@ -55,7 +62,7 @@ it("SHOULD report name, icon and sign changes", () => {
     screen.getByLabelText("financial.accounts.form.name"),
     "Main",
   );
-  fireEvent.press(screen.getByTestId("account-icon-icon-wallet"));
+  fireEvent.press(screen.getByTestId(`${accountFormTestIds.icon}-icon-wallet`));
   fireEvent.press(screen.getByText("financial.accounts.form.negative"));
 
   expect(vm.onNameChange).toHaveBeenCalledWith("Main");
@@ -66,7 +73,7 @@ it("SHOULD report name, icon and sign changes", () => {
 it("SHOULD show the balance input, its helper and the amount error", () => {
   setup({ amountError: "financial.accounts.form.errors.balanceTooLarge" });
 
-  expect(screen.getByTestId("account-balance")).toBeOnTheScreen();
+  expect(screen.getByTestId(accountFormTestIds.balanceInput)).toBeOnTheScreen();
   expect(
     screen.getByText("financial.accounts.form.balanceHelper"),
   ).toBeOnTheScreen();
@@ -91,6 +98,10 @@ it("SHOULD render the name error and the form-level error", () => {
   });
 
   expect(screen.getByText("financial.accounts.nameRequired")).toBeOnTheScreen();
+  expect(screen.getByTestId(accountFormTestIds.formError)).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(`${accountFormTestIds.nameInput}-error`),
+  ).toBeOnTheScreen();
   expect(
     screen.getByText("financial.accounts.errors.hasTransactions"),
   ).toBeOnTheScreen();
@@ -116,6 +127,9 @@ it("SHOULD render the delete dialog and confirm", () => {
 
   expect(
     screen.getByText("financial.accounts.deleteAlertMsg"),
+  ).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(`${accountFormTestIds.deleteDialog}-confirm`),
   ).toBeOnTheScreen();
   fireEvent.press(screen.getByText("common.actions.delete"));
 

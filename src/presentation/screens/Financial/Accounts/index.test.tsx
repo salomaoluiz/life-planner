@@ -4,6 +4,7 @@ import { StyleSheet } from "react-native";
 import { hasText } from "@tests";
 
 import { makeEntries, setup } from "./mocks/screen.mocks";
+import accountsTestIds from "./testIds";
 
 it("SHOULD render skeletons WHEN loading", () => {
   setup({ isLoading: true });
@@ -25,6 +26,7 @@ it("SHOULD render the empty state with a new account action", () => {
   setup({ isEmpty: true, onAddPress });
 
   expect(hasText("financial.accounts.emptyTitle")).toBe(true);
+  expect(screen.getByTestId(accountsTestIds.emptyState)).toBeOnTheScreen();
   fireEvent.press(screen.getAllByText("financial.accounts.new")[0]);
   expect(onAddPress).toHaveBeenCalledTimes(1);
 });
@@ -35,7 +37,7 @@ it("SHOULD show the total label and amount and call onAddPress from the plus but
 
   expect(hasText("financial.accounts.total")).toBe(true);
   expect(screen.getByTestId("accounts-total")).toBeTruthy();
-  fireEvent.press(screen.getByLabelText("financial.accounts.new"));
+  fireEvent.press(screen.getByTestId(accountsTestIds.addButton));
   expect(onAddPress).toHaveBeenCalledTimes(1);
 });
 
@@ -46,6 +48,12 @@ it("SHOULD render the section, rows with owner and balance", () => {
   expect(hasText("Checking")).toBe(true);
   expect(hasText("Card")).toBe(true);
   expect(screen.getAllByText("Alice Test")).toHaveLength(2);
+  expect(screen.getByTestId(accountsTestIds.screen)).toBeOnTheScreen();
+  expect(screen.getAllByTestId(accountsTestIds.row)).toHaveLength(2);
+  expect(screen.getAllByTestId(`${accountsTestIds.row}-title`)).toHaveLength(2);
+  expect(screen.getAllByTestId(`${accountsTestIds.row}-balance`)).toHaveLength(
+    2,
+  );
 });
 
 it("SHOULD show the archived toggle with count and call onArchivedToggle", () => {
@@ -54,7 +62,7 @@ it("SHOULD show the archived toggle with count and call onArchivedToggle", () =>
 
   expect(hasText('financial.accounts.archived {"count":2}')).toBe(true);
   expect(screen.queryByText("Old")).toBeNull();
-  fireEvent.press(screen.getByTestId("archived-toggle"));
+  fireEvent.press(screen.getByTestId(accountsTestIds.archivedToggle));
   expect(onArchivedToggle).toHaveBeenCalledTimes(1);
 });
 
