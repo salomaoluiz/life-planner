@@ -1,0 +1,78 @@
+url: ${E2E_WEB_URL}
+name: financial/accounts/edit-account
+tags:
+  - financial
+  - spec-006
+  - spec-013
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Account
+      KEY: OLD_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Renamed
+      KEY: NEW_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: ${output.OLD_NAME}
+      BALANCE_CENTS: "5000"
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-accounts.yaml
+- tapOn:
+    id: "financial.accounts.row-title"
+    text: ${output.OLD_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.account-form.name-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.account-form.name-input"
+- eraseText
+- inputText: ${output.NEW_NAME}
+- tapOn:
+    id: "financial.account-form.balance-input"
+- eraseText
+- inputText: "98765"
+- tapOn:
+    id: "financial.account-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.row-title"
+      text: ${output.NEW_NAME}
+    timeout: 20000
+- assertVisible:
+    id: "financial.accounts.row-balance"
+    text: ".*987[.,]65.*"
+- assertNotVisible:
+    id: "financial.accounts.row-title"
+    text: ${output.OLD_NAME}
+# saving without changes closes the form and leaves the list as is
+- tapOn:
+    id: "financial.accounts.row-title"
+    text: ${output.NEW_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.account-form.save-button"
+    timeout: 20000
+- tapOn:
+    id: "financial.account-form.save-button"
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.account-form.sheet"
+    timeout: 20000
+- assertVisible:
+    id: "financial.accounts.row-title"
+    text: ${output.NEW_NAME}
