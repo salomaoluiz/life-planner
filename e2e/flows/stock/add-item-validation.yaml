@@ -1,0 +1,51 @@
+url: ${E2E_WEB_URL}
+name: stock/add-item-validation
+tags:
+  - stock
+  - spec-011
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../subflows/stock/open-stock.yaml
+- tapOn:
+    id: "stock.list.add-button"
+- extendedWaitUntil:
+    visible:
+      id: "stock.item-form.save-button"
+    timeout: 20000
+# Empty description
+- tapOn:
+    id: "stock.item-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "stock.item-form.description-input-error"
+    timeout: 20000
+- assertVisible:
+    id: "stock.item-form.description-input"
+# Whitespace-only description is rejected too
+- tapOn:
+    id: "stock.item-form.description-input"
+- inputText: "   "
+- tapOn:
+    id: "stock.item-form.save-button"
+- assertVisible:
+    id: "stock.item-form.description-input-error"
+# Quantity 0 is rejected
+- tapOn:
+    id: "stock.item-form.quantity-input"
+- eraseText
+- inputText: "0"
+- tapOn:
+    id: "stock.item-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "stock.item-form.quantity-input-error"
+    timeout: 20000
+- assertVisible:
+    id: "stock.item-form.save-button"
