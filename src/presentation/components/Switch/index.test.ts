@@ -52,3 +52,34 @@ it("SHOULD use the accent color of the active theme", () => {
   );
   restore();
 });
+
+it("SHOULD follow a changed initialStatus AFTER mount", () => {
+  const { rerenderWith } = setup({ initialStatus: false });
+
+  expect(screen.getByTestId("default-switch").props.value).toBe(false);
+
+  rerenderWith({ initialStatus: true });
+
+  expect(screen.getByTestId("default-switch").props.value).toBe(true);
+});
+
+it("SHOULD still toggle locally and call onToggle after following the prop", () => {
+  const { rerenderWith } = setup({ initialStatus: false });
+
+  rerenderWith({ initialStatus: true });
+  act(() => {
+    screen.getByTestId("default-switch").props.onValueChange(false);
+  });
+
+  expect(screen.getByTestId("default-switch").props.value).toBe(false);
+  expect(defaultProps.onToggle).toHaveBeenLastCalledWith(false);
+});
+
+it("SHOULD NOT call onToggle WHEN only the prop changes", () => {
+  jest.mocked(defaultProps.onToggle).mockClear();
+  const { rerenderWith } = setup({ initialStatus: false });
+
+  rerenderWith({ initialStatus: true });
+
+  expect(defaultProps.onToggle).not.toHaveBeenCalled();
+});

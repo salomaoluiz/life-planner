@@ -13,11 +13,13 @@ describe("parseArgs AND buildMaestroArgs", () => {
     expect(parseArgs(["--tags", "auth,smoke", "--failed"])).toEqual({
       failedOnly: true,
       headless: false,
+      listTags: false,
       tags: ["auth", "smoke"],
     });
     expect(parseArgs([])).toEqual({
       failedOnly: false,
       headless: false,
+      listTags: false,
       tags: [],
     });
   });
@@ -299,5 +301,52 @@ describe("runE2e --headless", () => {
 
     expect(headed.deps.exec.mock.calls[0][0].args).not.toContain("--headless");
     expect(headless.deps.exec.mock.calls[0][0].args).toContain("--headless");
+  });
+});
+
+describe("runE2e --list-tags", () => {
+  function flow(tags) {
+    return `url: x\nname: n\ntags:\n${tags.map((t) => `  - ${t}`).join("\n")}\n---\n- launchApp\n`;
+  }
+
+  it("SHOULD print each tag with its flow count and skip every precondition", async () => {
+    const { deps, exitCode, printed, written } = await run(
+      {
+        deps: {
+          exists: jest.fn(() => false),
+          hasCommand: jest.fn(() => false),
+          listFiles: jest.fn(() => [
+            "auth/login.yaml",
+            "auth/signup.yaml",
+            "stock/add.yaml",
+            "notes.md",
+          ]),
+        },
+        files: {
+          "e2e/flows/auth/login.yaml": flow(["auth", "spec-002", "smoke"]),
+          "e2e/flows/auth/signup.yaml": flow(["auth", "spec-002"]),
+          "e2e/flows/stock/add.yaml": flow(["stock", "spec-021"]),
+        },
+      },
+      { argv: ["--list-tags"], env: {} },
+    );
+
+    expect(exitCode).toBe(0);
+    expect(deps.exec).not.toHaveBeenCalled();
+    expect(written).toEqual({});
+    expect(printed[0]).toContain("(3 flows)");
+    expect(printed[0]).toContain("auth      2 flows");
+    expect(printed[0]).toContain("smoke     1 flow");
+    expect(printed[0]).toContain("spec-021  1 flow");
+  });
+
+  it("SHOULD say so WHEN no flow has tags", async () => {
+    const { exitCode, printed } = await run(
+      { deps: { listFiles: jest.fn(() => []) } },
+      { argv: ["--list-tags"] },
+    );
+
+    expect(exitCode).toBe(0);
+    expect(printed).toEqual(["No tags found in e2e/flows"]);
   });
 });

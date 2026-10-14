@@ -3,7 +3,11 @@ import { useEffect, useMemo, useState } from "react";
 
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
-import { useMutation, useQuery } from "@infrastructure/fetcher";
+import {
+  invalidateFetcherData,
+  useMutation,
+  useQuery,
+} from "@infrastructure/fetcher";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { personalOwnerId } from "@screens/Financial/models/ownerOptions";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
@@ -96,6 +100,8 @@ function useNewAccountViewModel() {
       updateMutation.status === "success" ||
       deleteMutation.status === "success"
     ) {
+      // Narrow key (prefix also covers the list); the form must not reopen on old data.
+      invalidateFetcherData([useCases.getFinancialAccountsUseCase.uniqueName]);
       router.back();
     }
   }, [createMutation.status, updateMutation.status, deleteMutation.status]);

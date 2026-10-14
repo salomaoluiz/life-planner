@@ -1,4 +1,5 @@
 import { buildSummary, parseJUnit } from "./summarize.mjs";
+import { buildTagList } from "./tags.mjs";
 
 const REPORT_DIR = "e2e-report";
 const DEFAULT_API_URL = "http://localhost:3000/api";
@@ -51,10 +52,17 @@ export function buildMaestroArgs({
 }
 
 export function parseArgs(argv) {
-  const options = { failedOnly: false, headless: false, tags: [] };
+  const options = {
+    failedOnly: false,
+    headless: false,
+    listTags: false,
+    tags: [],
+  };
   for (let index = 0; index < argv.length; index += 1) {
     if (argv[index] === "--failed") {
       options.failedOnly = true;
+    } else if (argv[index] === "--list-tags") {
+      options.listTags = true;
     } else if (argv[index] === "--headless") {
       options.headless = true;
     } else if (argv[index] === "--tags") {
@@ -67,6 +75,15 @@ export function parseArgs(argv) {
 
 export async function runE2e({ argv, env }, deps) {
   const options = parseArgs(argv);
+
+  // Read-only: needs no Maestro, API or app, and leaves the last run's report alone.
+  if (options.listTags) {
+    deps.print(
+      buildTagList(deps.listFiles("e2e/flows"), (path) => deps.readFile(path)),
+    );
+    return 0;
+  }
+
   const apiUrl = nonEmpty(env.E2E_API_URL, DEFAULT_API_URL).replace(/\/+$/, "");
   const webUrl = nonEmpty(env.E2E_WEB_URL, DEFAULT_WEB_URL);
 

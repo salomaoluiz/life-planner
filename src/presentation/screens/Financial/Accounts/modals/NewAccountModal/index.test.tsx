@@ -37,6 +37,19 @@ it("SHOULD show the edit title, save changes, the archive switch and the delete 
   expect(vm.onDeletePress).toHaveBeenCalledTimes(1);
 });
 
+it("SHOULD render the archived switch ON for an archived account and OFF for an active one", () => {
+  setup({ isArchived: true, isEditing: true });
+  expect(
+    screen.getByTestId(accountFormTestIds.archivedSwitch).props.value,
+  ).toBe(true);
+
+  screen.unmount();
+  setup({ isArchived: false, isEditing: true });
+  expect(
+    screen.getByTestId(accountFormTestIds.archivedSwitch).props.value,
+  ).toBe(false);
+});
+
 it("SHOULD call onSave from the footer", () => {
   const vm = setup();
 

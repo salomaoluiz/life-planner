@@ -17,6 +17,7 @@ e2e-report/        generated, gitignored
 
 ## Running
 
+- `yarn e2e --list-tags` (or `yarn e2e:tags`) lists every tag with its flow count; it only reads `e2e/flows`, so it needs no Maestro, API or app.
 - `yarn e2e` whole suite, `yarn e2e --tags <tag>`, `yarn e2e:smoke`, `yarn e2e:failed` (only the flows in `e2e-report/failed.txt`).
 - By default the Chromium window is visible; `--headless` hides it and combines with the other flags (`yarn e2e --headless --tags auth`). AI sessions use `--headless` so no window pops up on the owner's Mac.
 - Needs Maestro and `E2E_ENABLED=true` in the gitignored `.env` (Mac only). The runner never starts, builds or stops the app or the API.
