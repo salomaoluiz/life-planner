@@ -9,10 +9,16 @@ import {
   Text,
 } from "@components";
 import { useTranslation } from "@presentation/i18n";
+import { TranslationKeys } from "@presentation/i18n/types";
 
 import { useStockItemDetailsViewModel } from "./hooks";
 import { Props } from "./hooks/useStockItemDetailsViewModel";
 import useStyles from "./styles";
+import stockItemDetailsTestIds from "./testIds";
+
+const ROW_TEST_IDS: Partial<Record<TranslationKeys, string>> = {
+  "stock.details.brand": stockItemDetailsTestIds.brand,
+};
 
 function StockItemDetails(props: Props) {
   const { styles } = useStyles();
@@ -21,11 +27,16 @@ function StockItemDetails(props: Props) {
   const { item } = props;
   const badge = item.badge;
 
-  function renderRow(label: string, value: string, key: string) {
+  function renderRow(
+    label: string,
+    value: string,
+    key: string,
+    testID?: string,
+  ) {
     return (
-      <View key={key} style={styles.row}>
+      <View key={key} style={styles.row} testID={testID}>
         <Text.Caption value={label} />
-        <Text.Body value={value} />
+        <Text.Body testID={testID && `${testID}-value`} value={value} />
       </View>
     );
   }
@@ -39,9 +50,11 @@ function StockItemDetails(props: Props) {
           label={t("stock.details.delete")}
           onPress={vm.onDeletePress}
           size="lg"
+          testID={stockItemDetailsTestIds.deleteButton}
         />
       }
       onClose={props.onClose}
+      testID={stockItemDetailsTestIds.sheet}
       title={item.description}
       visible
     >
@@ -54,7 +67,12 @@ function StockItemDetails(props: Props) {
         "quantity",
       )}
       {item.detailRows.map((row) =>
-        renderRow(t(row.labelKey), row.value, row.labelKey),
+        renderRow(
+          t(row.labelKey),
+          row.value,
+          row.labelKey,
+          ROW_TEST_IDS[row.labelKey],
+        ),
       )}
       {vm.errorKey ? (
         <ErrorState
@@ -71,6 +89,7 @@ function StockItemDetails(props: Props) {
         message={t("stock.details.deleteMessage")}
         onCancel={vm.onCancelDelete}
         onConfirm={vm.onConfirmDelete}
+        testID={stockItemDetailsTestIds.deleteDialog}
         title={t("stock.details.deleteTitle", { name: item.description })}
         visible={vm.isConfirmOpen}
       />
