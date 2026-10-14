@@ -79,10 +79,12 @@ wrappers:
 ```yaml
 routes: /login (app/login.tsx), /signup (app/signup.tsx) — both public; a logged user is redirected to "/"
 screens:
-  Login: src/presentation/screens/Login (index.tsx View, hooks/useLoginViewModel.ts, utils/mapAuthError.ts)
-  Signup: src/presentation/screens/Signup (index.tsx View, hooks/useSignupViewModel.ts)
+  Login: src/presentation/screens/Login (testIds.ts, index.tsx View, hooks/useLoginViewModel.ts, utils/mapAuthError.ts)
+  Signup: src/presentation/screens/Signup (testIds.ts, index.tsx View, hooks/useSignupViewModel.ts)
 validation: src/utils/authValidation.ts (returns i18n keys)
 copy: i18n keys auth.*, login.*, signup.* (en-US + pt-BR)
 ```
 
 Security notes: passwords are only sent in the request body, never stored, logged, put in breadcrumbs or in error context.
+
+testIDs: Login and Signup export their ids from `testIds.ts` (`<module>.<screen>.<element>`, e.g. `auth.login.email-input`); the View, its Jest tests and the Maestro flows in `e2e/` use the same strings.

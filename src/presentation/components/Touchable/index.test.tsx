@@ -101,3 +101,10 @@ describe("focus ring on web", () => {
     expect(screen.queryByTestId("focus-ring")).toBeNull();
   });
 });
+
+it("SHOULD expose the testID as nativeID so Maestro web can select it by id", () => {
+  const element = setup();
+
+  expect(element.props.nativeID).toBe(element.props.testID);
+  expect(element.props.nativeID).toBeTruthy();
+});

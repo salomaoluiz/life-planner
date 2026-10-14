@@ -41,6 +41,7 @@ rules:
 ```yaml
 screen:
   path: src/presentation/screens/Home/index.tsx
+  testIds: src/presentation/screens/Home/testIds.ts (screen id `home.home.screen`, used by E2E flows)
   layout: Screen (maxWidth 960, pull to refresh); two columns (summary + stock) on the `expanded` breakpoint, stacked otherwise.
   uses: ScreenHeader (with ProfileButton), ChipGroup (owner filter), Skeleton, kit cards
 

@@ -20,6 +20,20 @@ This project is the Life Planner, a mobile application that helps families organ
     yarn expo start
    ```
 
+## E2E tests (Maestro)
+
+Web E2E flows live in `e2e/` and run only on the owner's Mac, with `yarn web` and the API (`yarn start:dev` in `../life-planner-back`) already running and `E2E_ENABLED=true` in `.env`.
+
+```bash
+yarn e2e              # whole suite
+yarn e2e --tags auth  # one module
+yarn e2e --headless   # no browser window (default shows it)
+yarn e2e:smoke        # critical path
+yarn e2e:failed       # re-run what failed last time
+```
+
+The report is `e2e-report/summary.md`. More in `e2e/README.md`.
+
 ## Contributing
 
 You can find the contributing guidelines in the [CONTRIBUTING.md](https://github.com/salomaoluiz/life-planner/blob/main/CONTRIBUTING.md) file.

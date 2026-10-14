@@ -58,8 +58,10 @@ Placeholders: `<module>` (e.g. `financial`), `<sub>` (e.g. `accounts`, optional)
 
 - [ ] `.test.ts` + `mocks/*.mocks.ts` for: model, DTO, datasource methods, repository methods + impl, use cases (happy + error paths), UI models, ViewModel hooks, useForm, Views (with the hook mocked).
 - [ ] Add new keys to the registration tests (`cases/index.test.ts`, datasource/repository `index.test.ts`) — they assert the exact key set.
+- [ ] E2E flow in `e2e/flows/<module>/` (+ `testIds.ts` constants, tags module + `spec-NNN`); build it with the `wip` tag, then remove `wip`
 
 ## 8. Docs & commit → `.claude/context/conventions.md`
 
 - [ ] Update/create `docs/ai/modules/<module>.md` (and add module to `docs/ai/INDEX.md` if new)
+- [ ] Run the full suite: `yarn e2e`; read only `e2e-report/summary.md` (CLAUDE.md rule 12)
 - [ ] Commit (conventional message); fix Husky failures (lint, type-check, tests). Don't run them manually before.

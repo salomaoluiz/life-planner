@@ -2,6 +2,8 @@
 
 Global coverage threshold **90%** (branches/functions/lines/statements) — `pre-push` runs `yarn test --coverage` and CI runs `yarn test --ci --coverage`. The gate is enforced: **screens must ship with tests**, and the threshold must not be lowered, bypassed with `istanbul ignore`, or dodged by excluding source files. `*.mocks.ts(x)` and `*.fixture.ts` are excluded from coverage.
 
+E2E (Maestro) is separate from Jest: see `.claude/context/e2e.md`.
+
 ## Layout
 
 ```

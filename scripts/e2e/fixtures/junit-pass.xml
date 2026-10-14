@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" tests="2" failures="0" time="37.586" timestamp="2026-10-14T08:36:59">
+    <testcase id="auth/signup" name="auth/signup" classname="auth/signup" file="e2e/flows/auth/signup.yaml" time="23.801" timestamp="2026-10-14T08:36:59" status="SUCCESS">
+      <properties>
+        <property name="tags" value="auth, spec-002"/>
+      </properties>
+    </testcase>
+    <testcase id="auth/login" name="auth/login" classname="auth/login" file="e2e/flows/auth/login.yaml" time="13.773" timestamp="2026-10-14T08:37:23" status="SUCCESS">
+      <properties>
+        <property name="tags" value="auth, spec-002, smoke"/>
+      </properties>
+    </testcase>
+  </testsuite>
+</testsuites>

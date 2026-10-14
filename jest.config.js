@@ -25,5 +25,8 @@ module.exports = {
   preset: "jest-expo",
   setupFilesAfterEnv: ["<rootDir>/tests/setup.tsx"],
   testPathIgnorePatterns: ["/node_modules/", "/tests/"],
+  transform: {
+    "\\.mjs$": ["babel-jest", { presets: ["babel-preset-expo"] }],
+  },
   transformIgnorePatterns: ["jest-runner"],
 };

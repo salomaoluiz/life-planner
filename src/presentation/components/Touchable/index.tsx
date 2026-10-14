@@ -59,6 +59,7 @@ function Touchable(props: TouchableProps) {
       }}
       disabled={disabled}
       hitSlop={props.hitSlop}
+      nativeID={props.testID}
       onBlur={() => setFocused(false)}
       onFocus={(event) => setFocused(isKeyboardFocus(event))}
       onHoverIn={() => setHovered(true)}

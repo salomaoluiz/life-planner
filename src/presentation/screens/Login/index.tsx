@@ -7,6 +7,7 @@ import { useTranslation } from "@presentation/i18n";
 import { Welcome } from "./components";
 import useLoginViewModel from "./hooks/useLoginViewModel";
 import useStyles from "./styles";
+import loginTestIds from "./testIds";
 
 function Login() {
   const { t } = useTranslation();
@@ -20,8 +21,8 @@ function Login() {
   return (
     <View style={styles.container}>
       <Welcome />
-      <View style={styles.cardWrap} testID="login-card-wrap">
-        <Card padding="lg" testID="login-card">
+      <View style={styles.cardWrap} testID={loginTestIds.cardWrap}>
+        <Card padding="lg" testID={loginTestIds.card}>
           <View style={styles.form}>
             <TextField
               autoCapitalize="none"
@@ -33,7 +34,7 @@ function Login() {
               onChangeText={vm.onChangeEmail}
               onSubmitEditing={vm.onEmailSubmit}
               returnKeyType="next"
-              testID="login-email"
+              testID={loginTestIds.emailInput}
               textContentType="emailAddress"
               value={vm.email}
             />
@@ -50,13 +51,13 @@ function Login() {
               returnKeyType="done"
               secureTextEntry
               showPasswordLabel={t("login.form.showPassword")}
-              testID="login-password"
+              testID={loginTestIds.passwordInput}
               textContentType="password"
               value={vm.password}
             />
             <HelperText
               label={vm.formError?.message ?? ""}
-              testID="login-form-error"
+              testID={loginTestIds.formError}
               type={vm.formError?.type ?? "error"}
               visible={!!vm.formError}
             />
@@ -66,14 +67,14 @@ function Login() {
               label={t("login.button.signIn")}
               loading={vm.isSubmitting}
               onPress={vm.onSubmit}
-              testID="login-submit"
+              testID={loginTestIds.submitButton}
             />
             <Button.Ghost
               disabled={vm.isSubmitting}
               fullWidth
               label={t("login.button.goToSignUp")}
               onPress={vm.onGoToSignUp}
-              testID="login-go-to-signup"
+              testID={loginTestIds.goToSignupButton}
             />
           </View>
         </Card>

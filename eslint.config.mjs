@@ -15,6 +15,10 @@ import presentationGuardrails from "./eslint/rules/presentation-guardrails.mjs";
 export default [
   { files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"] },
   { languageOptions: { globals: globals.browser } },
+  {
+    files: ["scripts/**/*.{js,mjs}"],
+    languageOptions: { globals: { ...globals.node, ...globals.jest } },
+  },
   pluginJs.configs.recommended,
   ...tsEslintConfig.recommended,
   {
