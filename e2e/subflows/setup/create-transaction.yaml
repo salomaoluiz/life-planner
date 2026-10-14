@@ -3,6 +3,7 @@ env:
   DESCRIPTION: E2E transaction
   VALUE_CENTS: "1000"
   DATE: ""
+  MONTHS_AGO: "0"
   TYPE: EXPENSE
   OWNER: USER
 ---
@@ -16,5 +17,6 @@ env:
       DESCRIPTION: ${DESCRIPTION}
       VALUE_CENTS: ${VALUE_CENTS}
       DATE: ${DATE}
+      MONTHS_AGO: ${MONTHS_AGO}
       TYPE: ${TYPE}
       OWNER: ${OWNER}
