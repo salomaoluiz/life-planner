@@ -1,5 +1,6 @@
 // Maestro runScript (GraalJS). Creates a financial category through the API.
-// Reads E2E_API_URL, TOKEN, NAME, ICON, ICON_COLOR, TYPE, OWNER, OWNER_ID, PARENT_ID (optional, undefined = root) from env. Never logs the token.
+// Reads E2E_API_URL, TOKEN, NAME, ICON, ICON_COLOR, TYPE (undefined = EXPENSE), OWNER, OWNER_ID, PARENT_ID (optional, undefined = root) from env. Never logs the token.
+var categoryType = typeof TYPE !== "undefined" && TYPE ? TYPE : "EXPENSE";
 var response = http.post(E2E_API_URL + "/v1/finance/categories", {
   headers: {
     "Content-Type": "application/json",
@@ -13,7 +14,7 @@ var response = http.post(E2E_API_URL + "/v1/finance/categories", {
     ownerId: OWNER_ID,
     parentId:
       typeof PARENT_ID !== "undefined" && PARENT_ID ? PARENT_ID : undefined,
-    type: TYPE,
+    type: categoryType,
   }),
 });
 if (!response.ok) {

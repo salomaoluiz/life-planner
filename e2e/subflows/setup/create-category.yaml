@@ -2,7 +2,6 @@ url: ${E2E_WEB_URL}
 env:
   ICON: tag
   ICON_COLOR: "#336699"
-  TYPE: EXPENSE
   OWNER: USER
 ---
 - runScript:

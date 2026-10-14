@@ -1,0 +1,58 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/create-from-quick-add
+tags:
+  - financial
+  - spec-009
+  - spec-013
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Transaction
+      KEY: TRANSACTION_NAME
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+- tapOn:
+    id: "quick-add-button|navigation-rail-add"
+- extendedWaitUntil:
+    visible:
+      id: "quick-add-transaction"
+    timeout: 20000
+- tapOn:
+    id: "quick-add-transaction"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.amount-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.transaction-form.amount-input"
+- eraseText
+- inputText: "4500"
+- tapOn:
+    id: "financial.transaction-form.description-input"
+- inputText: ${output.TRANSACTION_NAME}
+- tapOn:
+    id: "financial.transaction-form.category-${output.EXPENSE_CATEGORY_ID}"
+- tapOn:
+    id: "financial.transaction-form.save-button"
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.TRANSACTION_NAME}
+    timeout: 20000
