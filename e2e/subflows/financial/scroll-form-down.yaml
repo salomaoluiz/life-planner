@@ -1,0 +1,10 @@
+url: ${E2E_WEB_URL}
+---
+# Maestro web only sees elements inside the viewport and the default swipe from the
+# center does not scroll the form sheet; explicit coordinates do.
+- swipe:
+    start: 50%, 70%
+    end: 50%, 20%
+- swipe:
+    start: 50%, 70%
+    end: 50%, 20%

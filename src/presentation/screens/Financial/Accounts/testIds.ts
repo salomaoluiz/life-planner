@@ -1,0 +1,9 @@
+const accountsTestIds = {
+  addButton: "financial.accounts.add-button",
+  archivedToggle: "financial.accounts.archived-toggle",
+  emptyState: "financial.accounts.empty-state",
+  row: "financial.accounts.row",
+  screen: "financial.accounts.screen",
+} as const;
+
+export default accountsTestIds;

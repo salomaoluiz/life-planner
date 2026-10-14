@@ -1,0 +1,17 @@
+url: ${E2E_WEB_URL}
+env:
+  ICON: bank
+  BALANCE_CENTS: "0"
+  STATUS: ACTIVE
+  OWNER: USER
+---
+- runScript:
+    file: ../../scripts/setup/create-account.js
+    env:
+      TOKEN: ${TOKEN}
+      OWNER_ID: ${OWNER_ID}
+      NAME: ${NAME}
+      ICON: ${ICON}
+      BALANCE_CENTS: ${BALANCE_CENTS}
+      STATUS: ${STATUS}
+      OWNER: ${OWNER}

@@ -1,0 +1,17 @@
+url: ${E2E_WEB_URL}
+env:
+  ICON: tag
+  ICON_COLOR: "#336699"
+  TYPE: EXPENSE
+  OWNER: USER
+---
+- runScript:
+    file: ../../scripts/setup/create-category.js
+    env:
+      TOKEN: ${TOKEN}
+      OWNER_ID: ${OWNER_ID}
+      NAME: ${NAME}
+      ICON: ${ICON}
+      ICON_COLOR: ${ICON_COLOR}
+      TYPE: ${TYPE}
+      OWNER: ${OWNER}

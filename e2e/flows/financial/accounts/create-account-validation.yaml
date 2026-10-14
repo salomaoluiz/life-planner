@@ -1,0 +1,52 @@
+url: ${E2E_WEB_URL}
+name: financial/accounts/create-account-validation
+tags:
+  - financial
+  - spec-013
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-accounts.yaml
+- tapOn:
+    id: "financial.accounts.add-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.account-form.name-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.account-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.account-form.name-input-error"
+    timeout: 20000
+- assertVisible:
+    id: "financial.account-form.sheet"
+# a name made only of spaces is still empty
+- tapOn:
+    id: "financial.account-form.name-input"
+- inputText: "     "
+- tapOn:
+    id: "financial.account-form.save-button"
+- assertVisible:
+    id: "financial.account-form.name-input-error"
+- assertVisible:
+    id: "financial.account-form.sheet"
+# a name over the API limit (60) is rejected and the form stays open
+- tapOn:
+    id: "financial.account-form.name-input"
+- eraseText
+- inputText: "E2E account name that is clearly longer than the sixty character limit"
+- tapOn:
+    id: "financial.account-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.account-form.name-input-error|financial.account-form.form-error"
+    timeout: 20000
+- assertVisible:
+    id: "financial.account-form.sheet"

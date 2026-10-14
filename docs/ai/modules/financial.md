@@ -248,3 +248,13 @@ navigation_files: `screens/Navigation/*` (AppTabBar, navigationItems), `screens/
 - Categories: tree rows via `categoryTree`; palette (`categoryColors`) plus a custom `#RRGGBB` sheet ("Custom" shows as selected for a stored color outside the palette, never rewritten unless the user picks another); 12 inline icons plus a searchable sheet of 18. PATCH sends only changed fields among name, icon, iconColor, type, parentId (`null` removes the parent). Type is locked in edit when it has a parent, subcategories or transactions; changing type or owner clears the parent. Delete warns with `financial.categories.deleteConfirm.withSubcategories` for parents and shows `financial.categories.errors.hasTransactions` on 409. The form state field is `iconColor` because the guardrail forbids a `color` property key in screens.
 - Accounts: total (`accounts-total`), owner chips, active list and a collapsible archived section; delete with transactions shows `financial.accounts.errors.hasTransactions` in the sheet.
 - Error mapping (all three resources, `financialApiError.ts`): 400 -> `FieldInvalid`, 403 -> `FinancialOwnerNotAllowed`, 404 -> `FinancialNotFound`, 409 on account/category delete -> `AccountHasTransactions` / `CategoryHasTransactions`, other -> `GenericError`. Contexts hold ids only.
+
+## E2E flows (spec 018)
+
+testIDs: `Financial/Layout/testIds.ts`, `Financial/Accounts/testIds.ts`, `Financial/Accounts/modals/NewAccountModal/testIds.ts`. Flows in `e2e/flows/financial/accounts/` (tags `financial` + spec):
+
+- `create-account` (spec-006, spec-013, smoke), `create-account-validation` (spec-013)
+- `edit-account` (spec-006, spec-013), `archive-account` (spec-013), `delete-account` (spec-006, spec-013)
+- `delete-account-with-transactions` (spec-006)
+
+Known app quirk found by the flows: reopening an account right after changing its status shows stale form data (the form cache is not refreshed), so there is no un-archive flow yet.

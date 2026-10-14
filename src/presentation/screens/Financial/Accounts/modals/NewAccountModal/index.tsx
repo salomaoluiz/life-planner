@@ -21,6 +21,7 @@ import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
 import { useNewAccountViewModel } from "./hooks";
 import useStyles from "./styles";
+import accountFormTestIds from "./testIds";
 
 const SKELETON_ROWS = [0, 1, 2];
 
@@ -68,13 +69,14 @@ function NewAccountModal() {
           label={t("financial.accounts.form.name")}
           maxLength={80}
           onChangeText={vm.onNameChange}
+          testID={accountFormTestIds.nameInput}
           value={vm.name}
         />
         <IconChoiceGroup
           label={t("financial.accounts.form.icon")}
           onChange={vm.onIconChange}
           options={vm.iconOptions}
-          testID={"account-icon"}
+          testID={accountFormTestIds.icon}
           value={vm.icon}
         />
         <View style={styles.helper}>
@@ -82,7 +84,7 @@ function NewAccountModal() {
             error={err(vm.amountError)}
             label={t("financial.accounts.form.balance")}
             onChange={vm.onAmountChange}
-            testID={"account-balance"}
+            testID={accountFormTestIds.balanceInput}
             tone={vm.sign === "NEGATIVE" ? "expense" : "neutral"}
             value={vm.amountCents}
           />
@@ -105,7 +107,7 @@ function NewAccountModal() {
               <Switch
                 initialStatus={vm.isArchived}
                 onToggle={vm.onArchivedChange}
-                testID={"account-archived-switch"}
+                testID={accountFormTestIds.archivedSwitch}
               />
             </View>
             <Text.Caption
@@ -129,12 +131,17 @@ function NewAccountModal() {
           )}
         </View>
         {vm.formErrorKey && (
-          <Text.Body tone={"expense"} value={t(vm.formErrorKey)} />
+          <Text.Body
+            testID={accountFormTestIds.formError}
+            tone={"expense"}
+            value={t(vm.formErrorKey)}
+          />
         )}
         {vm.isEditing && (
           <Button.Ghost
             label={t("financial.accounts.delete")}
             onPress={vm.onDeletePress}
+            testID={accountFormTestIds.deleteButton}
             tone={"expense"}
           />
         )}
@@ -153,10 +160,12 @@ function NewAccountModal() {
             loading={vm.isSaving}
             onPress={vm.onSave}
             size={"lg"}
+            testID={accountFormTestIds.saveButton}
           />
         }
         onClose={vm.onClose}
         presentation={"inline"}
+        testID={accountFormTestIds.sheet}
         title={t(vm.titleKey)}
         visible
       >
@@ -180,6 +189,7 @@ function NewAccountModal() {
         message={t("financial.accounts.deleteAlertMsg")}
         onCancel={vm.onDeleteCancel}
         onConfirm={vm.onDeleteConfirm}
+        testID={accountFormTestIds.deleteDialog}
         title={t("financial.accounts.deleteTitle", vm.deleteTitleParams)}
         visible={vm.isDeleteDialogOpen}
       />

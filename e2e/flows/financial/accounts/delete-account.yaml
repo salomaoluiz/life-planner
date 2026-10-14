@@ -1,0 +1,50 @@
+url: ${E2E_WEB_URL}
+name: financial/accounts/delete-account
+tags:
+  - financial
+  - spec-006
+  - spec-013
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Account
+      KEY: ACCOUNT_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: ${output.ACCOUNT_NAME}
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-accounts.yaml
+- tapOn:
+    id: "financial.accounts.row-title"
+    text: ${output.ACCOUNT_NAME}
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.account-form.delete-button"
+    timeout: 20000
+- tapOn:
+    id: "financial.account-form.delete-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.account-form.delete-dialog-confirm"
+    timeout: 20000
+- tapOn:
+    id: "financial.account-form.delete-dialog-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.empty-state"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.accounts.row-title"
+    text: ${output.ACCOUNT_NAME}

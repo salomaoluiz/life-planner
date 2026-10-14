@@ -56,6 +56,11 @@ it.each([
   );
 });
 
+it("SHOULD expose the testID as nativeID for web selectors", () => {
+  setup();
+  expect(input().props.nativeID).toBe("amount");
+});
+
 it("SHOULD show label and error", () => {
   setup({ error: "Required" });
   expect(screen.getByTestId("amount-label").props.children).toBe("Amount");

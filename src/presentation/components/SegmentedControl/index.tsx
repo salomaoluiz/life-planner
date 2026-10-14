@@ -56,6 +56,7 @@ function SegmentedControl(props: SegmentedControlProps) {
     <View
       accessibilityLabel={props.accessibilityLabel}
       accessibilityRole="tablist"
+      nativeID={testID}
       style={styles.track}
       testID={testID}
     >
