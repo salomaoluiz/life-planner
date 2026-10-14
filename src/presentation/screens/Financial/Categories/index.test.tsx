@@ -4,6 +4,7 @@ import { StyleSheet } from "react-native";
 import { hasText } from "@tests";
 
 import { makeRows, setup } from "./mocks/screen.mocks";
+import categoriesTestIds from "./testIds";
 
 it("SHOULD render skeletons WHEN loading", () => {
   setup({ isLoading: true });
@@ -25,6 +26,7 @@ it("SHOULD render the empty state per type with a new category action", () => {
   setup({ isEmpty: true, onAddPress });
 
   expect(hasText("financial.categories.emptyExpense")).toBe(true);
+  expect(screen.getByTestId(categoriesTestIds.emptyState)).toBeOnTheScreen();
   fireEvent.press(screen.getAllByText("financial.categories.new")[0]);
   expect(onAddPress).toHaveBeenCalledTimes(1);
 });
@@ -34,8 +36,11 @@ it("SHOULD show the sub count only on roots and a chevron only with children", (
 
   expect(hasText('financial.categories.subcount_other {"count":2}')).toBe(true);
   expect(screen.getAllByText(/financial.categories.subcount/)).toHaveLength(1);
-  expect(screen.getByTestId("category-row-root-container")).toBeTruthy();
-  expect(screen.getByTestId("category-row-leaf-container")).toBeTruthy();
+  expect(screen.getByTestId(categoriesTestIds.screen)).toBeOnTheScreen();
+  expect(screen.getByTestId(`${categoriesTestIds.row}-container`)).toBeTruthy();
+  expect(
+    screen.getByTestId(`${categoriesTestIds.childRow}-container`),
+  ).toBeTruthy();
   expect(screen.getAllByTestId("category-row-chevron")).toHaveLength(1);
 });
 
@@ -45,6 +50,22 @@ it("SHOULD call onAddPress from the plus button", () => {
 
   fireEvent.press(screen.getByLabelText("financial.categories.new"));
   expect(onAddPress).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD call onAddPress from the add button testID", () => {
+  const onAddPress = jest.fn();
+  setup({ onAddPress, rows: makeRows() });
+
+  fireEvent.press(screen.getByTestId(categoriesTestIds.addButton));
+  expect(onAddPress).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD report the type change from the segmented control", () => {
+  const onTypeChange = jest.fn();
+  setup({ onTypeChange, rows: makeRows() });
+
+  fireEvent.press(screen.getByTestId(`${categoriesTestIds.type}-INCOME`));
+  expect(onTypeChange).toHaveBeenCalledWith("INCOME");
 });
 
 it("SHOULD call onRowPress with the id WHEN a row is tapped", () => {
@@ -68,10 +89,7 @@ it("SHOULD space the toolbar blocks and the list by 20 px", () => {
 it("SHOULD draw a divider between rows but not after the last one", () => {
   setup({ rows: makeRows() });
 
-  const rows = makeRows();
-  const dividers = rows.map((row) =>
-    screen.queryByTestId(`category-row-${row.id}-divider`),
-  );
-  expect(dividers.slice(0, -1).every(Boolean)).toBe(true);
-  expect(dividers[dividers.length - 1]).toBeNull();
+  expect(
+    screen.getAllByTestId(/^financial\.categories\.(child-)?row-divider$/),
+  ).toHaveLength(makeRows().length - 1);
 });

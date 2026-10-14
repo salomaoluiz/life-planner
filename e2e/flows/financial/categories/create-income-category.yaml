@@ -1,0 +1,61 @@
+url: ${E2E_WEB_URL}
+name: financial/categories/create-income-category
+tags:
+  - financial
+  - spec-013
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Income
+      KEY: CATEGORY_NAME
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-categories.yaml
+- tapOn:
+    id: "financial.categories.type-INCOME"
+- extendedWaitUntil:
+    visible:
+      id: "financial.categories.empty-state"
+    timeout: 20000
+- tapOn:
+    id: "financial.categories.add-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.category-form.name-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.category-form.name-input"
+- inputText: ${output.CATEGORY_NAME}
+# The plus button does not pass the current type to the form: pick INCOME explicitly (a no-op if it ever does).
+- tapOn:
+    id: "financial.category-form.type-INCOME"
+- tapOn:
+    id: "financial.category-form.save-button"
+# Back on the list: be on INCOME whether or not the screen kept its tab (a no-op if already selected).
+- extendedWaitUntil:
+    visible:
+      id: "financial.categories.type-INCOME"
+    timeout: 20000
+- tapOn:
+    id: "financial.categories.type-INCOME"
+- extendedWaitUntil:
+    visible:
+      id: "financial.categories.row-title"
+      text: ${output.CATEGORY_NAME}
+    timeout: 20000
+- tapOn:
+    id: "financial.categories.type-EXPENSE"
+- extendedWaitUntil:
+    visible:
+      id: "financial.categories.empty-state"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.categories.row-title"
+    text: ${output.CATEGORY_NAME}

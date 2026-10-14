@@ -1,0 +1,51 @@
+url: ${E2E_WEB_URL}
+name: financial/categories/create-expense-category
+tags:
+  - financial
+  - spec-006
+  - spec-013
+  - smoke
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Category
+      KEY: CATEGORY_NAME
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-categories.yaml
+- tapOn:
+    id: "financial.categories.type-EXPENSE"
+- extendedWaitUntil:
+    visible:
+      id: "financial.categories.empty-state"
+    timeout: 20000
+- tapOn:
+    id: "financial.categories.add-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.category-form.name-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.category-form.name-input"
+- inputText: ${output.CATEGORY_NAME}
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.category-form.color-swatch-#F59E0B"
+- tapOn:
+    id: "financial.category-form.icon-icon-car"
+- tapOn:
+    id: "financial.category-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.categories.row-title"
+      text: ${output.CATEGORY_NAME}
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.categories.empty-state"

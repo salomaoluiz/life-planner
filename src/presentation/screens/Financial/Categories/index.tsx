@@ -20,6 +20,7 @@ import { translateChoices } from "@screens/Financial/models/ownerOptions";
 import { useCategoriesViewModel } from "./hooks";
 import CategoryRowUIModel from "./models/CategoryRowUIModel";
 import useStyles from "./styles";
+import categoriesTestIds from "./testIds";
 
 const SKELETON_ROWS = [0, 1, 2, 3, 4, 5];
 
@@ -41,6 +42,7 @@ function FinancialCategories() {
               tone: option.value === "EXPENSE" ? "expense" : "income",
               value: option.value,
             }))}
+            testID={categoriesTestIds.type}
             value={vm.type}
           />
         </View>
@@ -48,6 +50,7 @@ function FinancialCategories() {
           accessibilityLabel={t("financial.categories.new")}
           name={"plus"}
           onPress={vm.onAddPress}
+          testID={categoriesTestIds.addButton}
         />
       </View>
       <ChipGroup
@@ -67,6 +70,8 @@ function FinancialCategories() {
     index: number;
     item: CategoryRowUIModel;
   }) {
+    const rowTestID =
+      item.depth > 0 ? categoriesTestIds.childRow : categoriesTestIds.row;
     let subtitle: string | undefined;
     if (item.subcount > 0) {
       subtitle = t(pluralKey("financial.categories.subcount", item.subcount), {
@@ -81,7 +86,7 @@ function FinancialCategories() {
         leading={<IconTile color={item.color} name={item.icon} />}
         onPress={() => vm.onRowPress(item.id)}
         subtitle={subtitle}
-        testID={`category-row-${item.id}`}
+        testID={rowTestID}
         title={item.name}
         trailing={
           item.hasChildren ? (
@@ -108,7 +113,7 @@ function FinancialCategories() {
 
   if (vm.isLoading) {
     return (
-      <View style={styles.root}>
+      <View style={styles.root} testID={categoriesTestIds.screen}>
         {toolbar}
         {SKELETON_ROWS.map((row) => (
           <Skeleton.ListItem key={row} testID={"categories-skeleton"} />
@@ -118,7 +123,7 @@ function FinancialCategories() {
   }
 
   return (
-    <View style={styles.root}>
+    <View style={styles.root} testID={categoriesTestIds.screen}>
       <FlashList
         data={vm.rows}
         estimatedItemSize={64}
@@ -128,6 +133,7 @@ function FinancialCategories() {
             actionLabel={t("financial.categories.new")}
             message={t("financial.categories.emptyMessage")}
             onAction={vm.onAddPress}
+            testID={categoriesTestIds.emptyState}
             title={t(vm.emptyTitleKey)}
           />
         }

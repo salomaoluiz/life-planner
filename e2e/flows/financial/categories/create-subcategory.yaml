@@ -1,0 +1,68 @@
+url: ${E2E_WEB_URL}
+name: financial/categories/create-subcategory
+tags:
+  - financial
+  - spec-006
+  - spec-013
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Parent
+      KEY: PARENT_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Child
+      KEY: CHILD_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-category.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: ${output.PARENT_NAME}
+- evalScript: ${output.PARENT_CATEGORY_ID = output.CATEGORY_ID}
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-categories.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.categories.row-title"
+      text: ${output.PARENT_NAME}
+    timeout: 20000
+- tapOn:
+    id: "financial.categories.add-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.category-form.name-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.category-form.name-input"
+- inputText: ${output.CHILD_NAME}
+- tapOn:
+    id: "financial.category-form.parent"
+- extendedWaitUntil:
+    visible:
+      id: "financial.category-form.parent-option-${output.PARENT_CATEGORY_ID}"
+    timeout: 20000
+- tapOn:
+    id: "financial.category-form.parent-option-${output.PARENT_CATEGORY_ID}"
+- tapOn:
+    id: "financial.category-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.categories.child-row-title"
+      text: ${output.CHILD_NAME}
+    timeout: 20000
+- assertVisible:
+    id: "financial.categories.row-title"
+    text: ${output.PARENT_NAME}
+- assertNotVisible:
+    id: "financial.categories.row-title"
+    text: ${output.CHILD_NAME}
