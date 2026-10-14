@@ -9,6 +9,7 @@ import MonthSummaryCard from "./components/MonthSummaryCard";
 import StockAttentionCard from "./components/StockAttentionCard";
 import { useHomeViewModel } from "./hooks";
 import useStyles from "./styles";
+import homeTestIds from "./testIds";
 
 // Home has two columns on wide screens, so it is wider than the 720 default.
 const HOME_MAX_WIDTH = 960;
@@ -24,7 +25,7 @@ function Home() {
       onRefresh={vm.onRefresh}
       refreshing={vm.isRefreshing}
       scroll
-      testID="home"
+      testID={homeTestIds.screen}
     >
       <ScreenHeader
         actions={

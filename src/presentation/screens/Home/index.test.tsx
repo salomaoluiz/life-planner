@@ -1,11 +1,11 @@
-import "@shopify/flash-list/jestSetup";
-
 import { render, screen } from "@tests";
+import "@shopify/flash-list/jestSetup";
 
 import ProfileButton from "@screens/Navigation/containers/ProfileButton";
 
 import Home from "./";
 import { useHomeViewModel } from "./hooks";
+import homeTestIds from "./testIds";
 
 jest.mock("./hooks");
 jest.mock(
@@ -68,6 +68,14 @@ it("SHOULD render the header, the filter and the three blocks", () => {
   expect(screen.getByTestId("home-summary-loading")).toBeOnTheScreen();
   expect(screen.getByTestId("home-stock-loading")).toBeOnTheScreen();
   expect(screen.getAllByTestId("home-transactions-loading")).toHaveLength(3);
+});
+
+it("SHOULD expose the screen testID used by the E2E flows", () => {
+  givenViewModel();
+
+  render(<Home />);
+
+  expect(screen.getByTestId(homeTestIds.screen)).toBeOnTheScreen();
 });
 
 it("SHOULD show an error only in the failed block", () => {

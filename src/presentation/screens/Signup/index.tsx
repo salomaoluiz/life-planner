@@ -6,6 +6,7 @@ import { useTranslation } from "@presentation/i18n";
 
 import useSignupViewModel from "./hooks/useSignupViewModel";
 import useStyles from "./styles";
+import signupTestIds from "./testIds";
 
 function Signup() {
   const { t } = useTranslation();
@@ -23,10 +24,13 @@ function Signup() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.cardWrap} testID="signup-card-wrap">
-        <Card padding="lg" testID="signup-card">
+      <View style={styles.cardWrap} testID={signupTestIds.cardWrap}>
+        <Card padding="lg" testID={signupTestIds.card}>
           <View style={styles.form}>
-            <Text.Title testID="signup-title" value={t("signup.title")} />
+            <Text.Title
+              testID={signupTestIds.title}
+              value={t("signup.title")}
+            />
             <TextField
               autoComplete="name"
               disabled={vm.isSubmitting}
@@ -35,7 +39,7 @@ function Signup() {
               onChangeText={vm.onChangeName}
               onSubmitEditing={vm.onNameSubmit}
               returnKeyType="next"
-              testID="signup-name"
+              testID={signupTestIds.nameInput}
               textContentType="name"
               value={vm.name}
             />
@@ -50,7 +54,7 @@ function Signup() {
               onChangeText={vm.onChangeEmail}
               onSubmitEditing={vm.onEmailSubmit}
               returnKeyType="next"
-              testID="signup-email"
+              testID={signupTestIds.emailInput}
               textContentType="emailAddress"
               value={vm.email}
             />
@@ -65,7 +69,7 @@ function Signup() {
               onSubmitEditing={vm.onPasswordSubmit}
               returnKeyType="next"
               secureTextEntry
-              testID="signup-password"
+              testID={signupTestIds.passwordInput}
               textContentType="newPassword"
               value={vm.password}
               {...passwordLabels}
@@ -81,14 +85,14 @@ function Signup() {
               onSubmitEditing={vm.onSubmit}
               returnKeyType="done"
               secureTextEntry
-              testID="signup-confirm-password"
+              testID={signupTestIds.confirmPasswordInput}
               textContentType="newPassword"
               value={vm.confirmPassword}
               {...passwordLabels}
             />
             <HelperText
               label={vm.formError ?? ""}
-              testID="signup-form-error"
+              testID={signupTestIds.formError}
               type="error"
               visible={!!vm.formError}
             />
@@ -98,14 +102,14 @@ function Signup() {
               label={t("signup.button.submit")}
               loading={vm.isSubmitting}
               onPress={vm.onSubmit}
-              testID="signup-submit"
+              testID={signupTestIds.submitButton}
             />
             <Button.Ghost
               disabled={vm.isSubmitting}
               fullWidth
               label={t("signup.button.goToLogin")}
               onPress={vm.onGoToLogin}
-              testID="signup-go-to-login"
+              testID={signupTestIds.goToLoginButton}
             />
           </View>
         </Card>

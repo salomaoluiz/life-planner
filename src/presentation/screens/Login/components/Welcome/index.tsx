@@ -3,6 +3,7 @@ import { View } from "react-native";
 import { Text } from "@components";
 import { useTranslation } from "@presentation/i18n";
 
+import loginTestIds from "../../testIds";
 import getStyles from "./styles";
 
 function Welcome() {
@@ -13,7 +14,7 @@ function Welcome() {
     <View style={styles.container}>
       <Text.Headline
         color={theme.colors.textPrimary}
-        testID={"login_welcome"}
+        testID={loginTestIds.welcome}
         value={t("login.welcome")}
       />
     </View>
