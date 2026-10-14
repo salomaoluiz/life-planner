@@ -1,0 +1,76 @@
+url: ${E2E_WEB_URL}
+name: financial/accounts/delete-account-with-transactions
+tags:
+  - financial
+  - spec-006
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Account
+      KEY: ACCOUNT_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Category
+      KEY: CATEGORY_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: ${output.ACCOUNT_NAME}
+- evalScript: ${output.KEEP_ACCOUNT_ID = output.ACCOUNT_ID}
+- runFlow:
+    file: ../../../subflows/setup/create-category.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: ${output.CATEGORY_NAME}
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.KEEP_ACCOUNT_ID}
+      CATEGORY_ID: ${output.CATEGORY_ID}
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-accounts.yaml
+- tapOn:
+    id: "financial.accounts.row-title"
+    text: ${output.ACCOUNT_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.account-form.name-input"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.account-form.delete-button"
+    timeout: 20000
+- tapOn:
+    id: "financial.account-form.delete-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.account-form.delete-dialog-confirm"
+    timeout: 20000
+- tapOn:
+    id: "financial.account-form.delete-dialog-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "financial.account-form.form-error"
+    timeout: 20000
+- tapOn:
+    id: "financial.account-form.sheet-close"
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.row-title"
+      text: ${output.ACCOUNT_NAME}
+    timeout: 20000
