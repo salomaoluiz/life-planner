@@ -1,0 +1,74 @@
+url: ${E2E_WEB_URL}
+name: financial/categories/delete-category-with-subtree
+tags:
+  - financial
+  - spec-006
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Parent
+      KEY: PARENT_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Child
+      KEY: CHILD_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-category.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: ${output.PARENT_NAME}
+- evalScript: ${output.PARENT_CATEGORY_ID = output.CATEGORY_ID}
+- runFlow:
+    file: ../../../subflows/setup/create-category.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: ${output.CHILD_NAME}
+      PARENT_ID: ${output.PARENT_CATEGORY_ID}
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-categories.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.categories.child-row-title"
+      text: ${output.CHILD_NAME}
+    timeout: 20000
+- tapOn:
+    id: "financial.categories.row-title"
+    text: ${output.PARENT_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.category-form.name-input"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.category-form.delete-button"
+    timeout: 20000
+- tapOn:
+    id: "financial.category-form.delete-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.category-form.delete-dialog-confirm"
+    timeout: 20000
+- tapOn:
+    id: "financial.category-form.delete-dialog-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "financial.categories.empty-state"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.categories.row-title"
+    text: ${output.PARENT_NAME}
+- assertNotVisible:
+    id: "financial.categories.child-row-title"
+    text: ${output.CHILD_NAME}
