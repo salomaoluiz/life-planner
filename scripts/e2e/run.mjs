@@ -7,6 +7,7 @@ const DEFAULT_WEB_URL = "http://localhost:8081";
 export function buildMaestroArgs({
   apiUrl,
   failedOnly,
+  headless,
   junitPath,
   tags,
   target,
@@ -17,7 +18,6 @@ export function buildMaestroArgs({
     target,
     "--platform",
     "web",
-    "--headless",
     "--format",
     "junit",
     "--output",
@@ -29,6 +29,10 @@ export function buildMaestroArgs({
     "-e",
     `E2E_WEB_URL=${webUrl}`,
   ];
+
+  if (headless) {
+    args.push("--headless");
+  }
 
   if (target === "e2e/flows") {
     args.push("--config", "e2e/config.yaml");
@@ -47,10 +51,12 @@ export function buildMaestroArgs({
 }
 
 export function parseArgs(argv) {
-  const options = { failedOnly: false, tags: [] };
+  const options = { failedOnly: false, headless: false, tags: [] };
   for (let index = 0; index < argv.length; index += 1) {
     if (argv[index] === "--failed") {
       options.failedOnly = true;
+    } else if (argv[index] === "--headless") {
+      options.headless = true;
     } else if (argv[index] === "--tags") {
       options.tags = (argv[index + 1] ?? "").split(",").filter(Boolean);
       index += 1;
@@ -114,6 +120,7 @@ export async function runE2e({ argv, env }, deps) {
       args: buildMaestroArgs({
         apiUrl,
         failedOnly: options.failedOnly,
+        headless: options.headless,
         junitPath,
         tags: options.tags,
         target,

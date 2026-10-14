@@ -9,6 +9,7 @@ Prerequisites: Maestro installed, `E2E_ENABLED=true` in the gitignored `.env`, t
 ```bash
 yarn e2e                # whole suite
 yarn e2e --tags auth    # one module (or any tag)
+yarn e2e --headless     # no browser window (default: the Chromium window is visible)
 yarn e2e:smoke          # fast critical-path subset
 yarn e2e:failed         # only the flows that failed in the previous run
 ```

@@ -12,9 +12,18 @@ describe("parseArgs AND buildMaestroArgs", () => {
   it("SHOULD parse --tags and --failed", () => {
     expect(parseArgs(["--tags", "auth,smoke", "--failed"])).toEqual({
       failedOnly: true,
+      headless: false,
       tags: ["auth", "smoke"],
     });
-    expect(parseArgs([])).toEqual({ failedOnly: false, tags: [] });
+    expect(parseArgs([])).toEqual({
+      failedOnly: false,
+      headless: false,
+      tags: [],
+    });
+  });
+
+  it("SHOULD parse --headless", () => {
+    expect(parseArgs(["--headless"]).headless).toBe(true);
   });
 
   it("SHOULD include the tags AND exclude wip by default", () => {
@@ -44,7 +53,7 @@ describe("parseArgs AND buildMaestroArgs", () => {
     );
   });
 
-  it("SHOULD run on web, headless, with the workspace config for a directory target", () => {
+  it("SHOULD run on web with the workspace config for a directory target, and headless only on request", () => {
     const base = {
       apiUrl: "a",
       failedOnly: false,
@@ -57,11 +66,16 @@ describe("parseArgs AND buildMaestroArgs", () => {
       expect.arrayContaining([
         "--platform",
         "web",
-        "--headless",
         "--config",
         "e2e/config.yaml",
       ]),
     );
+    expect(buildMaestroArgs({ ...base, target: "e2e/flows" })).not.toContain(
+      "--headless",
+    );
+    expect(
+      buildMaestroArgs({ ...base, headless: true, target: "e2e/flows" }),
+    ).toContain("--headless");
     expect(
       buildMaestroArgs({ ...base, target: "e2e/flows/x.yaml" }),
     ).not.toContain("--config");
@@ -275,5 +289,15 @@ describe("runE2e --failed", () => {
     expect(deps.exec.mock.calls[1][0].args[1]).toBe(
       "e2e/flows/auth/signup.yaml",
     );
+  });
+});
+
+describe("runE2e --headless", () => {
+  it("SHOULD pass --headless to Maestro only WHEN the flag is given", async () => {
+    const headed = await run({});
+    const headless = await run({}, { argv: ["--headless"] });
+
+    expect(headed.deps.exec.mock.calls[0][0].args).not.toContain("--headless");
+    expect(headless.deps.exec.mock.calls[0][0].args).toContain("--headless");
   });
 });

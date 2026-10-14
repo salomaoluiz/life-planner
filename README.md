@@ -27,6 +27,7 @@ Web E2E flows live in `e2e/` and run only on the owner's Mac, with `yarn web` an
 ```bash
 yarn e2e              # whole suite
 yarn e2e --tags auth  # one module
+yarn e2e --headless   # no browser window (default shows it)
 yarn e2e:smoke        # critical path
 yarn e2e:failed       # re-run what failed last time
 ```
