@@ -7,6 +7,11 @@ import { lightTheme } from "@presentation/theme/provider";
 
 import { onChange, setup, setupAccent } from "./mocks/index.mocks";
 
+it("SHOULD expose the testID as nativeID for web selectors", () => {
+  setup();
+  expect(screen.getByTestId("seg").props.nativeID).toBe("seg");
+});
+
 it("SHOULD expose a tablist with selected state and call onChange for the other segment", () => {
   setup();
   expect(screen.getByTestId("seg").props.accessibilityRole).toBe("tablist");
