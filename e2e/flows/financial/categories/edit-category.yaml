@@ -1,0 +1,71 @@
+url: ${E2E_WEB_URL}
+name: financial/categories/edit-category
+tags:
+  - financial
+  - spec-006
+  - spec-013
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Category
+      KEY: OLD_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Renamed
+      KEY: NEW_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-category.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: ${output.OLD_NAME}
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-categories.yaml
+- tapOn:
+    id: "financial.categories.row-title"
+    text: ${output.OLD_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.category-form.name-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.category-form.name-input"
+- eraseText
+- inputText: ${output.NEW_NAME}
+- tapOn:
+    id: "financial.category-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.categories.row-title"
+      text: ${output.NEW_NAME}
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.categories.row-title"
+    text: ${output.OLD_NAME}
+# reopening shows the saved name (no stale cache), and saving without changes closes the form
+- tapOn:
+    id: "financial.categories.row-title"
+    text: ${output.NEW_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.category-form.name-preview"
+      text: ${output.NEW_NAME}
+    timeout: 20000
+- tapOn:
+    id: "financial.category-form.save-button"
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.category-form.sheet"
+    timeout: 20000
+- assertVisible:
+    id: "financial.categories.row-title"
+    text: ${output.NEW_NAME}
