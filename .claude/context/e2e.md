@@ -7,9 +7,10 @@ One suite guards both repos. The flows live **only** here (`e2e/`); the backend'
 ```
 e2e/
   config.yaml      workspace config
-  flows/<module>/  one folder per module (auth today)
-  subflows/        signup-via-api.yaml (fresh user through the API), login.yaml (UI login with EMAIL/PASSWORD)
-  scripts/         unique-user.js, api.js (Maestro GraalJS helpers)
+  flows/<module>/  one folder per module (auth, financial/accounts)
+  subflows/        signup-via-api.yaml (fresh user; outputs EMAIL, PASSWORD, TOKEN, USER_ID), login.yaml (UI login with EMAIL/PASSWORD),
+                   setup/create-<resource>.yaml (API setup), financial/open-accounts.yaml, financial/scroll-form-down.yaml
+  scripts/         unique-user.js, api.js, random-name.js (output[KEY] = "<PREFIX> <4 digits>"), setup/create-<resource>.js
 scripts/e2e/       run.mjs + cli.mjs (runner), summarize.mjs (report), unit tested
 e2e-report/        generated, gitignored
 ```
@@ -44,3 +45,9 @@ Format `<module>.<screen>.<element>` in kebab-case, defined in the screen folder
 A wrapped component that takes an `accessibilityLabel` must also set `nativeID={testID}` (Maestro web resolves `id` before `data-testid`; `Touchable` and `TextField` already do).
 
 Maestro facts verified on this Mac (flags, JUnit mapping, `id` matching on web) are recorded in `e2e/README.md`.
+
+## Setup through the API (spec 018)
+
+Data that is not under test is created through the API, never the UI. One self-contained GraalJS script per resource in `e2e/scripts/setup/` (no imports) reads `E2E_API_URL` (already ends in `/api`), `TOKEN` and its params from `env`, calls the endpoint with `Authorization: Bearer`, throws `E2E setup: <resource> failed with status <n>` on non-2xx and writes the id to `output` (`ACCOUNT_ID`, `CATEGORY_ID`, `TRANSACTION_ID`). A thin subflow in `e2e/subflows/setup/` passes the params and holds defaults in its header `env:`. Existing: `create-account`, `create-category`, `create-transaction`. USER-owned records use `OWNER_ID: ${output.USER_ID}`. Names typed or created by flows use `random-name.js`. When two setup calls output different ids, copy the first one right away (`- evalScript: ${output.KEEP_ACCOUNT_ID = output.ACCOUNT_ID}`) only if a later script reuses the same key.
+
+Maestro web facts from spec 018: the form sheet does not scroll with `scrollUntilVisible` or a center swipe, use `subflows/financial/scroll-form-down.yaml` (swipes with explicit coordinates); elements outside the viewport are not found. `AmountInput` keeps the typed digits after the current ones, so `eraseText` before `inputText` (digits only: `123456` shows `$1,234.56`; assert with a locale-tolerant regex like `.*1[.,]234[.,]56.*`). An `id` is a regex, so `a|b` matches either. Derived ids: `<id>-error` (FieldShell), `<id>-icon-<value>` (IconChoiceGroup), `<id>-confirm` (ConfirmDialog), `<id>-close` (BottomSheet), `<id>-title` / `-balance` (ListItem rows). Components that take an `accessibilityLabel` must set `nativeID` (SegmentedControl and AmountInput were fixed in 018).

@@ -22,8 +22,8 @@ The terminal shows only `e2e-report/summary.md`. Exit code: 0 passed, 1 a flow f
 e2e/
   config.yaml      # workspace config
   flows/           # only files here are run as tests, one folder per module
-  subflows/        # reusable steps, never run alone
-  scripts/         # Maestro runScript helpers (GraalJS)
+  subflows/        # reusable steps, never run alone (setup/ = API setup, financial/ = navigation helpers)
+  scripts/         # Maestro runScript helpers (GraalJS); setup/ = one script per API resource
 scripts/e2e/       # runner (run.mjs, cli.mjs) and summarizer (summarize.mjs), unit tested
 e2e-report/        # generated, gitignored
 ```
@@ -52,3 +52,5 @@ e2e-report/        # generated, gitignored
 | JUnit                   | `<testcase name="auth/login" file="e2e/flows/auth/login.yaml" status="SUCCESS\|ERROR">`; tags are in `<properties>`; the failure text is only the error (`Element not found: Id matching regex: ...`), no step.                                                                                                                                                                                      |
 | Artifacts               | `e2e-report/artifacts/<timestamp>/<flow with / as _>/{commands.json, screenshots/step-NNN-<command>-<selector>.png, screen-hierarchy/, logs/maestro.log}`. The failing step is the last screenshot's file name; the summarizer derives `step:` from it.                                                                                                                                              |
 | Health                  | `GET /api/health` answers 200 online and 503 offline (it pings an external host); the runner treats any HTTP answer as "API up".                                                                                                                                                                                                                                                                     |
+
+- Subflow headers accept default params (`env:` with defaults; callers override them). `output.X` survives several scripts. `id` is a regex. The form sheet needs explicit-coordinate swipes to scroll (`subflows/financial/scroll-form-down.yaml`). See `.claude/context/e2e.md` for the API setup pattern.
