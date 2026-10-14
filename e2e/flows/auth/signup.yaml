@@ -1,0 +1,31 @@
+url: ${E2E_WEB_URL}
+name: auth/signup
+tags:
+  - auth
+  - spec-002
+---
+- runScript: ../../scripts/unique-user.js
+- extendedWaitUntil:
+    visible:
+      id: "auth.login.go-to-signup-button"
+    timeout: 20000
+- tapOn:
+    id: "auth.login.go-to-signup-button"
+- tapOn:
+    id: "auth.signup.name-input"
+- inputText: ${output.NAME}
+- tapOn:
+    id: "auth.signup.email-input"
+- inputText: ${output.EMAIL}
+- tapOn:
+    id: "auth.signup.password-input"
+- inputText: ${output.PASSWORD}
+- tapOn:
+    id: "auth.signup.confirm-password-input"
+- inputText: ${output.PASSWORD}
+- tapOn:
+    id: "auth.signup.submit-button"
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000

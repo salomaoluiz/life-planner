@@ -18,5 +18,6 @@ export default {
     "jest.config.js",
     "eslint.config.mjs",
     "eslint/**/*",
+    "e2e/scripts/**/*",
   ],
 };

@@ -1,0 +1,17 @@
+url: ${E2E_WEB_URL}
+name: auth/login
+tags:
+  - auth
+  - spec-002
+  - smoke
+---
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000

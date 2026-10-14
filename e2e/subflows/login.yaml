@@ -1,0 +1,8 @@
+- tapOn:
+    id: "auth.login.email-input"
+- inputText: ${EMAIL}
+- tapOn:
+    id: "auth.login.password-input"
+- inputText: ${PASSWORD}
+- tapOn:
+    id: "auth.login.submit-button"

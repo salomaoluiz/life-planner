@@ -1,0 +1,7 @@
+- runScript: ../scripts/unique-user.js
+- runScript:
+    file: ../scripts/api.js
+    env:
+      EMAIL: ${output.EMAIL}
+      NAME: ${output.NAME}
+      PASSWORD: ${output.PASSWORD}
