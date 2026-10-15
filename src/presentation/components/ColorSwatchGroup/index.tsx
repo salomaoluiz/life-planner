@@ -6,10 +6,10 @@ import Touchable from "@components/Touchable";
 import { useKitTheme } from "@components/utils/useKitTheme";
 
 export interface ColorSwatchGroupProps {
-  customLabel: string;
+  customLabel?: string;
   label: string;
   onChange: (value: string) => void;
-  onCustomPress: () => void;
+  onCustomPress?: () => void;
   options: { label: string; value: string }[];
   testID?: string;
   value: string;
@@ -79,28 +79,30 @@ function ColorSwatchGroup(props: ColorSwatchGroupProps) {
             </Touchable>
           );
         })}
-        <Touchable
-          accessibilityLabel={props.customLabel}
-          accessibilityRole={"radio"}
-          focusRadius={radius.full}
-          onPress={props.onCustomPress}
-          selected={isCustom}
-          style={[styles.ring, isCustom && styles.ringSelected]}
-          testID={`${props.testID}-custom`}
-        >
-          <View
-            style={[
-              styles.swatch,
-              isCustom ? swatchFill(props.value) : styles.swatchCustom,
-            ]}
+        {props.onCustomPress && (
+          <Touchable
+            accessibilityLabel={props.customLabel}
+            accessibilityRole={"radio"}
+            focusRadius={radius.full}
+            onPress={props.onCustomPress}
+            selected={isCustom}
+            style={[styles.ring, isCustom && styles.ringSelected]}
+            testID={`${props.testID}-custom`}
           >
-            <Icon
-              color={isCustom ? colors.onAccent : colors.textSecondary}
-              name={isCustom ? "check" : "palette-outline"}
-              size={CHECK}
-            />
-          </View>
-        </Touchable>
+            <View
+              style={[
+                styles.swatch,
+                isCustom ? swatchFill(props.value) : styles.swatchCustom,
+              ]}
+            >
+              <Icon
+                color={isCustom ? colors.onAccent : colors.textSecondary}
+                name={isCustom ? "check" : "palette-outline"}
+                size={CHECK}
+              />
+            </View>
+          </Touchable>
+        )}
       </View>
     </View>
   );

@@ -24,6 +24,7 @@ it("SHOULD init with correct params IN success of query empty", () => {
   expect(spies.init).toHaveBeenCalledTimes(1);
   expect(spies.init).toHaveBeenCalledWith({
     fallbackLng: "en-US",
+    interpolation: { escapeValue: false },
     lng: mocks.i18next.language,
     resources: {
       "en-US": mocks.translations["en-US"],
@@ -40,6 +41,7 @@ it("SHOULD init with correct params IN success of query with saved language", ()
   expect(spies.init).toHaveBeenCalledTimes(1);
   expect(spies.init).toHaveBeenCalledWith({
     fallbackLng: "en-US",
+    interpolation: { escapeValue: false },
     lng: mocks.useQuery.success.withData.data?.language,
     resources: {
       "en-US": mocks.translations["en-US"],

@@ -27,6 +27,7 @@ function useFinancialLayoutViewModel() {
       { label: t("financial.sections.transactions"), value: "transactions" },
       { label: t("financial.sections.categories"), value: "categories" },
       { label: t("financial.sections.accounts"), value: "accounts" },
+      { label: t("financial.sections.cards"), value: "cards" },
     ],
     section,
     title: t("navigation.tabs.finances"),

@@ -1,0 +1,10 @@
+url: ${E2E_WEB_URL}
+---
+# Optional caller-scoped param read by the script: OWNER (USER default, or FAMILY).
+- runScript:
+    file: ../../scripts/setup/create-credit-card.js
+    env:
+      TOKEN: ${TOKEN}
+      OWNER_ID: ${OWNER_ID}
+      OWNER: ${OWNER}
+      TITLE: ${TITLE}

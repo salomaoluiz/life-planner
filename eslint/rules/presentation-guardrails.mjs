@@ -19,6 +19,8 @@ export const colorLiteralIgnores = [
   "src/presentation/theme/constants/**",
   // stored category colors are user data (spec 013)
   "src/presentation/constants/categoryColors.ts",
+  // stored card colors are user data (spec 026)
+  "src/presentation/constants/cardColors.ts",
 ];
 
 const testsAndMocks = [

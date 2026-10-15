@@ -23,6 +23,10 @@ it("SHOULD NOT hard-code colors in src/presentation (only theme/constants and th
       (file) =>
         !file.endsWith(`${path.sep}constants${path.sep}categoryColors.ts`),
     )
+    // User-facing card palette (spec 026), also in colorLiteralIgnores.
+    .filter(
+      (file) => !file.endsWith(`${path.sep}constants${path.sep}cardColors.ts`),
+    )
     .filter(
       (file) => !/\.test\.tsx?$|\.mocks\.tsx?$|\.fixture\.tsx?$/.test(file),
     )

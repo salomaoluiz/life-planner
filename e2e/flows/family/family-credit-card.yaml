@@ -1,0 +1,67 @@
+url: ${E2E_WEB_URL}
+name: family/family-credit-card
+tags:
+  - family
+  - financial
+  - spec-026
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+# Owner A: one personal card and one card owned by the family
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Family
+      KEY: FAMILY_NAME
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Personal Card
+      KEY: PERSONAL_CARD
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Family Card
+      KEY: FAMILY_CARD
+- runFlow:
+    file: ../../subflows/setup/create-family.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      NAME: ${output.FAMILY_NAME}
+# Member B joined the family
+- runFlow:
+    file: ../../subflows/setup/add-joined-member.yaml
+    env:
+      FAMILY_ID: ${output.FAMILY_ID}
+- runFlow:
+    file: ../../subflows/setup/create-credit-card.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      OWNER: USER
+      TITLE: ${output.PERSONAL_CARD}
+- runFlow:
+    file: ../../subflows/setup/create-credit-card.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.FAMILY_ID}
+      OWNER: FAMILY
+      TITLE: ${output.FAMILY_CARD}
+# B sees the family card but never A's personal card
+- runFlow:
+    file: ../../subflows/login.yaml
+    env:
+      EMAIL: ${output.MEMBER_EMAIL}
+      PASSWORD: ${output.MEMBER_PASSWORD}
+- runFlow: ../../subflows/financial/open-cards.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.cards.tile-title"
+      text: ${output.FAMILY_CARD}
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.cards.tile-title"
+    text: ${output.PERSONAL_CARD}

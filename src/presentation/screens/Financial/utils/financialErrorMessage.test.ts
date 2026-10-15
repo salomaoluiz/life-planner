@@ -1,6 +1,7 @@
 import {
   AccountHasTransactions,
   CategoryHasTransactions,
+  CreditCardHasTransactions,
   FinancialNotFound,
   FinancialOwnerNotAllowed,
   GenericError,
@@ -19,6 +20,9 @@ it("SHOULD map each 006 business error to its copy key", () => {
   );
   expect(getFinancialErrorMessageKey(new CategoryHasTransactions())).toBe(
     "financial.categories.errors.hasTransactions",
+  );
+  expect(getFinancialErrorMessageKey(new CreditCardHasTransactions())).toBe(
+    "financial.cards.delete.hasTransactions",
   );
   expect(getFinancialErrorMessageKey(new FinancialNotFound())).toBe(
     "financial.errors.notFound",

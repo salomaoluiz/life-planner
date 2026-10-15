@@ -35,6 +35,13 @@ const repositoriesMocks: Repositories = {
       getCategories: jest.fn(),
       updateCategory: jest.fn(),
     },
+    creditCard: {
+      createCreditCard: jest.fn(),
+      deleteCreditCard: jest.fn(),
+      getCreditCards: jest.fn(),
+      getCreditCardsOverview: jest.fn(),
+      updateCreditCard: jest.fn(),
+    },
     transaction: {
       createTransaction: jest.fn(),
       deleteTransaction: jest.fn(),

@@ -25,6 +25,24 @@ entities:
       - owner
       - ownerId
       - parentId
+  CreditCardEntity:
+    path: src/domain/entities/financial/CreditCardEntity.ts
+    properties:
+      - brand
+      - closingDay
+      - color
+      - dueDay
+      - id
+      - lastDigits
+      - limit # cents
+      - owner
+      - ownerId
+      - paymentDay
+      - status
+      - title
+  InvoiceEntity / CreditCardOverviewEntity:
+    path: src/domain/entities/financial/{InvoiceEntity,CreditCardOverviewEntity}.ts
+    notes: invoices are computed by the API (open + up to 3 closed per card), dates are YYYY-MM-DD strings, amounts in cents
   TransactionEntity:
     path: src/domain/entities/financial/TransactionEntity.ts
     properties:
@@ -40,6 +58,14 @@ entities:
       - value
 
 interfaces:
+  CreditCardRepository:
+    path: src/domain/repositories/financial/financialCreditCardRepository.ts
+    methods:
+      - createCreditCard
+      - deleteCreditCard
+      - getCreditCards
+      - getCreditCardsOverview
+      - updateCreditCard
   AccountRepository:
     path: src/domain/repositories/financial/financialAccountRepository.ts
     methods:
@@ -111,6 +137,11 @@ use_cases:
     path: src/application/useCases/cases/financial/categories/getMostUsedCategoriesUseCase.ts
     behavior: 5 most used categories of a type and owner in the last 90 days, fallback by name.
 
+  creditCards (spec 026):
+    path: src/application/useCases/cases/financial/creditCards/
+    useCases: createFinancialCreditCardUseCase, updateFinancialCreditCardUseCase (null clears paymentDay/lastDigits), deleteFinancialCreditCardUseCase, getFinancialCreditCardsUseCase, getFinancialCreditCardsOverviewUseCase
+    dtos: src/application/dto/financial/{CreditCardDTO,CreditCardOverviewDTO}.ts
+
   createTransactionUseCase:
     path: src/application/useCases/cases/financial/transactions/createTransactionUseCase.ts
     behavior: Creates a new financial transaction.
@@ -175,6 +206,10 @@ datasources:
       - deleteCategory: src/data/datasource/data/financial/categories/api/deleteCategory.ts # 409 -> CategoryHasTransactions
       - getCategories: src/data/datasource/data/financial/categories/api/getCategories.ts
       - updateCategory: src/data/datasource/data/financial/categories/api/updateCategory.ts
+  creditCardsDatasource (API):
+    path: src/data/datasource/data/financial/creditCards/api/
+    uses: "@infrastructure/api (/v1/finance/credit-cards, /overview); CreditCardModel/CreditCardOverviewModel keep money in cents (no cache layer: invoices are server-computed); delete 409 -> CreditCardHasTransactions; error context never holds the title or last digits"
+    repository: src/data/repositories/repos/financial/creditCards/{creditCardRepositoryImpl,creditCardMapper}.ts
   transactionsDatasource (API):
     path: src/data/datasource/data/financial/transactions/api/
     uses: "@infrastructure/api (/v1/finance/transactions); TransactionModel JSON = API shape (value cents <-> '234.90', date YYYY-MM-DD <-> local-midnight ISO via models/financial/calendarDate.ts, category name from the embedded category.name — the name is no longer stored or sent)"
@@ -225,6 +260,18 @@ Accounts:
     - hooks/useNewAccountViewModel.ts
     - models/{accountFormState.ts,NewAccountUIModel.ts}
 
+Cards (spec 026):
+  view: Cards/index.tsx (+ styles.ts, testIds.ts) # aggregate Card (total limit, ProgressBar, used/available MetricBlocks), owner chips, CreditCardTile carousel, selected-card header with Edit, Open|Closed SegmentedControl, invoice rows, collapsible Archived list
+  hooks: Cards/hooks/useCardsViewModel.ts (fetchCards: owners + overview + list)
+  models: Cards/models/cardList.ts (aggregateOf follows the owner filter, buildCardEntries, formatDayMonth, formatReferenceMonth)
+  components: Cards/components/InvoiceRow/
+  form: Cards/modals/NewCreditCardModal/
+    - index.tsx, styles.ts, testIds.ts
+    - hooks/useNewCreditCardViewModel.ts
+    - models/{cardFormState.ts,NewCreditCardUIModel.ts}
+  constants: src/presentation/constants/cardColors.ts # 8 swatches, stored data (excluded from the color lint rule)
+  kit: ProgressBar, CreditCardTile, ColorSwatchGroup (custom swatch optional)
+
 shared:
   - models/ownerOptions.ts # ALL_OWNERS, buildOwnerChoices, buildOwnerFilterChoices, personalOwnerId, translateChoices
   - models/categoryTree.ts # buildCategoryRows, descendantIds, categoriesOf, filterRowsByQuery
@@ -248,6 +295,8 @@ navigation_files: `screens/Navigation/*` (AppTabBar, navigationItems), `screens/
 - Categories: tree rows via `categoryTree`; palette (`categoryColors`) plus a custom `#RRGGBB` sheet ("Custom" shows as selected for a stored color outside the palette, never rewritten unless the user picks another); 12 inline icons plus a searchable sheet of 18. PATCH sends only changed fields among name, icon, iconColor, type, parentId (`null` removes the parent). Type is locked in edit when it has a parent, subcategories or transactions; changing type or owner clears the parent. Delete warns with `financial.categories.deleteConfirm.withSubcategories` for parents and shows `financial.categories.errors.hasTransactions` on 409. The form state field is `iconColor` because the guardrail forbids a `color` property key in screens.
 - Accounts: total (`accounts-total`), owner chips, active list and a collapsible archived section; delete with transactions shows `financial.accounts.errors.hasTransactions` in the sheet.
 - Error mapping (all three resources, `financialApiError.ts`): 400 -> `FieldInvalid`, 403 -> `FinancialOwnerNotAllowed`, 404 -> `FinancialNotFound`, 409 on account/category delete -> `AccountHasTransactions` / `CategoryHasTransactions`, other -> `GenericError`. Contexts hold ids only.
+
+- Credit cards (spec 026): the owner (Personal or a family) is chosen on the card and CAN change on edit (unlike accounts and categories); the form has no account link. Days use `SelectField` 1-31 (payment day has a leading "Same as due day" option that sends `null` on edit); a payment after the due date only shows a warning (`isPaymentAfterDue`). Archive/Reactivate and Delete live in the form (no overflow menu); an archived card opens the same form from the collapsed Archived list. The form state field is `tint` (screens cannot use a `color` key) and the testID key `swatches` (same reason). Invoice amounts are 0 until the next spec links transactions to cards; `used`/`available` come from the API per card and the aggregate is recomputed client-side for the active scope filter.
 
 ## E2E flows (spec 018)
 
@@ -277,3 +326,7 @@ testIDs: `Financial/Transactions/testIds.ts` (`financial.transactions.*`; the ro
 ## E2E flows: family-owned records (spec 022)
 
 Owner pickers are chip groups: `financial.account-form.owner`, `financial.category-form.owner`, `financial.transaction-form.owner` (chip = `<id>-<ownerId>`; the personal chip is the user id). Owner filters: `financial.accounts.owner-filter`, `financial.categories.owner-filter`, `financial.transactions.scope-filter` (chips `-<ownerId>` or `-ALL`; the type is `financial.transactions.type-filter-ALL|EXPENSE|INCOME`). Flows in `e2e/flows/family/`: `family-account`, `family-category`, `family-transaction`, `member-sees-family-data`.
+
+## E2E flows: credit cards (spec 026)
+
+testIDs: `Financial/Cards/testIds.ts` (`financial.cards.*`: `screen`, `empty-state` with `-action`, `add-button`, `total-limit`, `tile` with `tile-title`, `edit-button`, `invoice-tabs`, `invoice-row`, `no-closed`, `archived-toggle`, `row` with `row-title`, `owner-filter`) and `Cards/modals/NewCreditCardModal/testIds.ts` (`financial.card-form.*`; select options are `<id>-option-<value>`, e.g. `closing-day-option-5`; swatches `swatches` / `color`). Flows (tags `financial`/`family` + `spec-026`): `financial/credit-cards` (create -> list + aggregate -> edit -> archive -> reactivate -> delete) and `family/family-credit-card` (a member sees the family card, never another user's personal card). NOT validated on this machine at the time of writing: Maestro was not installed, `yarn e2e` exited 2.

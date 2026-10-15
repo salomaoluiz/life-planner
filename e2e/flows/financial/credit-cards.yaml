@@ -1,0 +1,149 @@
+url: ${E2E_WEB_URL}
+name: financial/credit-cards
+tags:
+  - financial
+  - spec-026
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Card
+      KEY: CARD_TITLE
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Card Renamed
+      KEY: CARD_TITLE_EDITED
+- runFlow:
+    file: ../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../subflows/financial/open-cards.yaml
+# Empty state, then create
+- extendedWaitUntil:
+    visible:
+      id: "financial.cards.empty-state"
+    timeout: 20000
+- tapOn:
+    id: "financial.cards.empty-state-action"
+- extendedWaitUntil:
+    visible:
+      id: "financial.card-form.title-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.card-form.title-input"
+- inputText: ${output.CARD_TITLE}
+- tapOn:
+    id: "financial.card-form.limit-input"
+- eraseText
+- inputText: "500000"
+- runFlow: ../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.card-form.closing-day"
+- tapOn:
+    id: "financial.card-form.closing-day-option-2"
+- tapOn:
+    id: "financial.card-form.due-day"
+- tapOn:
+    id: "financial.card-form.due-day-option-4"
+- tapOn:
+    id: "financial.card-form.save-button"
+# List: tile, aggregate and the open invoice
+- extendedWaitUntil:
+    visible:
+      id: "financial.cards.tile-title"
+      text: ${output.CARD_TITLE}
+    timeout: 20000
+- assertVisible:
+    id: "financial.cards.total-limit"
+    text: ".*5[.,]000[.,]00.*"
+# The invoice sits below the fold: scroll to it, then back to the top for the edit button
+- runFlow: ../../subflows/financial/scroll-list-down.yaml
+- assertVisible:
+    id: "financial.cards.invoice-row"
+- swipe:
+    start: 50%, 20%
+    end: 50%, 80%
+# Edit: rename
+- tapOn:
+    id: "financial.cards.edit-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.card-form.title-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.card-form.title-input"
+- eraseText
+- inputText: ${output.CARD_TITLE_EDITED}
+- tapOn:
+    id: "financial.card-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.cards.tile-title"
+      text: ${output.CARD_TITLE_EDITED}
+    timeout: 20000
+# Archive: leaves the carousel and shows under Archived
+- tapOn:
+    id: "financial.cards.edit-button"
+- runFlow: ../../subflows/financial/scroll-form-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.card-form.archive-button"
+    timeout: 20000
+- tapOn:
+    id: "financial.card-form.archive-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.cards.archived-toggle"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.cards.tile-title"
+- tapOn:
+    id: "financial.cards.archived-toggle"
+- assertVisible:
+    id: "financial.cards.row-title"
+    text: ${output.CARD_TITLE_EDITED}
+# Reactivate
+- tapOn:
+    id: "financial.cards.row-title"
+    text: ${output.CARD_TITLE_EDITED}
+- runFlow: ../../subflows/financial/scroll-form-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.card-form.archive-button"
+    timeout: 20000
+- tapOn:
+    id: "financial.card-form.archive-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.cards.tile-title"
+      text: ${output.CARD_TITLE_EDITED}
+    timeout: 20000
+# Delete
+- tapOn:
+    id: "financial.cards.edit-button"
+# The form is long: a third scroll brings Delete above the sticky Save footer
+- runFlow: ../../subflows/financial/scroll-form-down.yaml
+- runFlow: ../../subflows/financial/scroll-form-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.card-form.delete-button"
+    timeout: 20000
+- tapOn:
+    id: "financial.card-form.delete-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.card-form.delete-dialog-confirm"
+    timeout: 20000
+- tapOn:
+    id: "financial.card-form.delete-dialog-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "financial.cards.empty-state"
+    timeout: 20000

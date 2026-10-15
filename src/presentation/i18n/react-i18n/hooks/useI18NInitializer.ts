@@ -18,6 +18,8 @@ function useI18NInitializer() {
     use(initReactI18next)
       .init({
         fallbackLng: "en-US",
+        // React Native does not render HTML: escaping would show "&#x2F;" for "/" (dates) and "&amp;" in names.
+        interpolation: { escapeValue: false },
         lng: data?.language ?? i18next.language,
         resources: {
           "en-US": translations["en-US"],

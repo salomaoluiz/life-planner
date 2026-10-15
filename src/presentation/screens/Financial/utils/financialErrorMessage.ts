@@ -1,6 +1,7 @@
 import {
   AccountHasTransactions,
   CategoryHasTransactions,
+  CreditCardHasTransactions,
   FinancialNotFound,
   FinancialOwnerNotAllowed,
 } from "@domain/entities/errors";
@@ -21,6 +22,10 @@ function getFinancialErrorMessageKey(
 
   if (error instanceof CategoryHasTransactions) {
     return "financial.categories.errors.hasTransactions";
+  }
+
+  if (error instanceof CreditCardHasTransactions) {
+    return "financial.cards.delete.hasTransactions";
   }
 
   if (error instanceof FinancialNotFound) {

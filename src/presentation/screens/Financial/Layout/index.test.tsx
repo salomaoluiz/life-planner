@@ -3,7 +3,7 @@ import { fireEvent, screen } from "@tests";
 import { setup, spies } from "./mocks/index.mocks";
 import layoutTestIds from "./testIds";
 
-it("SHOULD render the Finances title AND the 3 segments", () => {
+it("SHOULD render the Finances title AND the 4 segments", () => {
   setup();
 
   expect(screen.getByText("navigation.tabs.finances")).toBeOnTheScreen();
@@ -12,6 +12,7 @@ it("SHOULD render the Finances title AND the 3 segments", () => {
     "financial.sections.transactions",
     "financial.sections.categories",
     "financial.sections.accounts",
+    "financial.sections.cards",
   ].forEach((label) => expect(screen.getByText(label)).toBeOnTheScreen());
 });
 
