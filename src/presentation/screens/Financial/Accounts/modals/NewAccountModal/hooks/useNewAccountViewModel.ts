@@ -13,6 +13,7 @@ import { personalOwnerId } from "@screens/Financial/models/ownerOptions";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
 
 import {
+  AccountChanges,
   AccountFormState,
   createInitialState,
   isSameState,
@@ -28,6 +29,35 @@ async function fetchByOwners<T>(
   execute: (ownerIds: string[]) => Promise<T>,
 ) {
   return execute(owners.map((owner) => owner.id));
+}
+
+// The balance is no longer a field of the account: changing it records an adjustment transaction.
+// Archiving adjusts first (an archived account refuses adjustments); reactivating patches first.
+// The adjustment targets a balance, so repeating a half-failed save is safe.
+async function saveAccountChanges({ balance, ...fields }: AccountChanges) {
+  async function patch() {
+    if (Object.keys(fields).length > 1) {
+      await useCases.updateFinancialAccountUseCase.execute(fields);
+    }
+  }
+  async function adjust() {
+    if (balance !== undefined) {
+      await useCases.adjustFinancialAccountBalanceUseCase.execute({
+        balance,
+        id: fields.id,
+      });
+    }
+  }
+
+  if (fields.status === "ACTIVE") {
+    await patch();
+    await adjust();
+
+    return;
+  }
+
+  await adjust();
+  await patch();
 }
 
 function useNewAccountViewModel() {
@@ -87,7 +117,7 @@ function useNewAccountViewModel() {
   });
   const updateMutation = useMutation({
     cacheKey: [useCases.updateFinancialAccountUseCase.uniqueName],
-    fetch: useCases.updateFinancialAccountUseCase.execute,
+    fetch: saveAccountChanges,
   });
   const deleteMutation = useMutation({
     cacheKey: [useCases.deleteFinancialAccountUseCase.uniqueName],
@@ -109,7 +139,8 @@ function useNewAccountViewModel() {
   // Owner is immutable on the API (edit) and fixed when opened from the transaction form (create).
   const isOwnerLocked = isEditing || !!params.ownerId;
 
-  const errors = submitted && state ? validate(state) : {};
+  const validationInitial = isEditing ? initial : undefined;
+  const errors = submitted && state ? validate(state, validationInitial) : {};
   const formErrorKey = getFinancialErrorMessageKey(
     createMutation.error ?? updateMutation.error ?? deleteMutation.error,
   );
@@ -120,7 +151,12 @@ function useNewAccountViewModel() {
 
   function onSave() {
     setSubmitted(true);
-    if (!state || !initial || !uiModel || Object.keys(validate(state)).length) {
+    if (
+      !state ||
+      !initial ||
+      !uiModel ||
+      Object.keys(validate(state, validationInitial)).length
+    ) {
       return;
     }
 
@@ -155,8 +191,12 @@ function useNewAccountViewModel() {
   return {
     amountCents: state?.amountCents ?? 0,
     amountError: errors.amount,
-    balanceHelperKey:
-      "financial.accounts.form.balanceHelper" as TranslationKeys,
+    balanceHelperKey: (isEditing
+      ? "financial.accounts.form.balanceHelper"
+      : "financial.accounts.form.initialBalanceHelper") as TranslationKeys,
+    balanceLabelKey: (isEditing
+      ? "financial.accounts.form.balance"
+      : "financial.accounts.form.initialBalance") as TranslationKeys,
     deleteTitleParams: { name: state?.name ?? "" },
     formErrorKey,
     icon: state?.icon ?? "",
@@ -227,4 +267,5 @@ function useNewAccountViewModel() {
   };
 }
 
+export { saveAccountChanges };
 export default useNewAccountViewModel;

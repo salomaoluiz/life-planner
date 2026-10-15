@@ -108,8 +108,8 @@ it("SHOULD send only changed fields on update and never the owner", () => {
     id: "a1",
     status: "ARCHIVED",
   });
-  // The balance never travels in the PATCH: changing it is a balance adjustment (spec 028).
   expect(toUpdateParams("a1", { ...base, isNegative: true }, base)).toEqual({
+    balance: -1520.75,
     id: "a1",
   });
   expect(toUpdateParams("a1", base, base)).toEqual({ id: "a1" });
@@ -120,4 +120,24 @@ it("SHOULD restore ACTIVE WHEN an archived account is unarchived", () => {
     id: "a1",
     status: "ACTIVE",
   });
+});
+
+it("SHOULD reject a balance change on an account that is archived AND stays archived", () => {
+  const archived = { ...base, isArchived: true };
+
+  expect(validate({ ...archived, amountCents: 100 }, archived).amount).toBe(
+    "financial.errors.accountArchived",
+  );
+  // no balance change: fine
+  expect(validate({ ...archived, name: "Renamed" }, archived)).toEqual({});
+  // un-archiving in the same save: allowed (the patch goes first)
+  expect(
+    validate({ ...archived, amountCents: 100, isArchived: false }, archived),
+  ).toEqual({});
+  // archiving in the same save: allowed (the adjustment goes first)
+  expect(
+    validate({ ...base, amountCents: 100, isArchived: true }, base),
+  ).toEqual({});
+  // creating: no initial state to compare with
+  expect(validate({ ...base, amountCents: 100 })).toEqual({});
 });

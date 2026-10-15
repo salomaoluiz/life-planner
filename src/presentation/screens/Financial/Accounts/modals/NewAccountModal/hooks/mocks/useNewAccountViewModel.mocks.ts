@@ -4,6 +4,7 @@ import { renderHook } from "@tests";
 
 import AccountDTO from "@application/dto/financial/AccountDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
+import { useCases } from "@application/useCases";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import {
   invalidateFetcherData,
@@ -22,6 +23,10 @@ jest.mock("expo-router", () => ({
 jest.mock("@infrastructure/fetcher");
 jest.mock("@application/useCases", () => ({
   useCases: {
+    adjustFinancialAccountBalanceUseCase: {
+      execute: jest.fn(),
+      uniqueName: "adjust",
+    },
     createFinancialAccountUseCase: {
       execute: jest.fn(),
       uniqueName: "create",
@@ -68,9 +73,11 @@ const mutations: Record<string, UseMutationFixture<unknown, unknown>> = {};
 
 // region spies
 const spies = {
+  adjust: jest.mocked(useCases.adjustFinancialAccountBalanceUseCase.execute),
   back: jest.mocked(router.back),
   invalidate: jest.mocked(invalidateFetcherData),
   params: jest.mocked(useLocalSearchParams),
+  update: jest.mocked(useCases.updateFinancialAccountUseCase.execute),
   useMutation: jest.mocked(useMutation),
   useQuery: jest.mocked(useQuery),
 };

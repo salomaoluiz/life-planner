@@ -10,6 +10,7 @@ import {
   setup,
   spies,
 } from "./mocks/useNewAccountViewModel.mocks";
+import { saveAccountChanges } from "./useNewAccountViewModel";
 
 it("SHOULD be loading until owners and accounts are loaded", () => {
   expect(setup().result.current.isLoading).toBe(true);
@@ -32,7 +33,10 @@ it("SHOULD start a new account with the bank icon, zero positive balance, Person
   expect(result.current.titleKey).toBe("financial.accounts.new");
   expect(result.current.saveLabelKey).toBe("financial.accounts.form.save");
   expect(result.current.balanceHelperKey).toBe(
-    "financial.accounts.form.balanceHelper",
+    "financial.accounts.form.initialBalanceHelper",
+  );
+  expect(result.current.balanceLabelKey).toBe(
+    "financial.accounts.form.initialBalance",
   );
 });
 
@@ -57,6 +61,12 @@ it("SHOULD prefill in edit mode, lock the owner and report notFound for an unkno
   expect(result.current.ownerHelperKey).toBe("financial.common.ownerLocked");
   expect(result.current.titleKey).toBe("financial.accounts.edit");
   expect(result.current.saveLabelKey).toBe("financial.common.saveChanges");
+  expect(result.current.balanceHelperKey).toBe(
+    "financial.accounts.form.balanceHelper",
+  );
+  expect(result.current.balanceLabelKey).toBe(
+    "financial.accounts.form.balance",
+  );
 
   givenLoaded({ accounts: [acc("a1")], params: { id: "gone" } });
   expect(setup().result.current.isNotFound).toBe(true);
@@ -265,5 +275,82 @@ it("SHOULD confirm delete and then delete with id and ownerId", () => {
   expect(mutations.delete.value.mutate).toHaveBeenCalledWith({
     id: "a1",
     ownerId: "user-id",
+  });
+});
+
+describe("saveAccountChanges", () => {
+  beforeEach(() => {
+    spies.adjust.mockResolvedValue(undefined);
+    spies.update.mockResolvedValue(undefined);
+  });
+
+  it("SHOULD only adjust WHEN just the balance changed (no PATCH)", async () => {
+    await saveAccountChanges({ balance: 120, id: "a1" });
+
+    expect(spies.adjust).toHaveBeenCalledWith({ balance: 120, id: "a1" });
+    expect(spies.update).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD only patch WHEN the balance did not change", async () => {
+    await saveAccountChanges({ id: "a1", name: "New" });
+
+    expect(spies.update).toHaveBeenCalledWith({ id: "a1", name: "New" });
+    expect(spies.adjust).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD adjust BEFORE archiving (an archived account refuses adjustments)", async () => {
+    await saveAccountChanges({ balance: 5, id: "a1", status: "ARCHIVED" });
+
+    expect(spies.adjust.mock.invocationCallOrder[0]).toBeLessThan(
+      spies.update.mock.invocationCallOrder[0],
+    );
+    expect(spies.update).toHaveBeenCalledWith({
+      id: "a1",
+      status: "ARCHIVED",
+    });
+  });
+
+  it("SHOULD reactivate BEFORE adjusting", async () => {
+    await saveAccountChanges({ balance: 5, id: "a1", status: "ACTIVE" });
+
+    expect(spies.update.mock.invocationCallOrder[0]).toBeLessThan(
+      spies.adjust.mock.invocationCallOrder[0],
+    );
+  });
+
+  it("SHOULD NOT adjust WHEN the patch fails first (reactivation)", async () => {
+    spies.update.mockRejectedValueOnce(new Error("boom"));
+
+    await expect(
+      saveAccountChanges({ balance: 5, id: "a1", status: "ACTIVE" }),
+    ).rejects.toThrow("boom");
+    expect(spies.adjust).not.toHaveBeenCalled();
+  });
+});
+
+it("SHOULD block saving a balance change on an archived account that stays archived", () => {
+  givenLoaded({
+    accounts: [acc("a1", 10, { status: "ARCHIVED" })],
+    params: { id: "a1" },
+  });
+  const { result } = setup();
+
+  act(() => result.current.onAmountChange(5000));
+  act(() => result.current.onSave());
+
+  expect(result.current.amountError).toBe("financial.errors.accountArchived");
+  expect(mutations.update.value.mutate).not.toHaveBeenCalled();
+});
+
+it("SHOULD hand the balance change to the update mutation WHEN editing an active account", () => {
+  givenLoaded({ accounts: [acc("a1", 10)], params: { id: "a1" } });
+  const { result } = setup();
+
+  act(() => result.current.onAmountChange(5000));
+  act(() => result.current.onSave());
+
+  expect(mutations.update.value.mutate).toHaveBeenCalledWith({
+    balance: 50,
+    id: "a1",
   });
 });

@@ -9,6 +9,7 @@ const defaultViewModel: ReturnType<typeof useNewAccountViewModel> = {
   amountCents: 0,
   amountError: undefined,
   balanceHelperKey: "financial.accounts.form.balanceHelper",
+  balanceLabelKey: "financial.accounts.form.balance",
   deleteTitleParams: { name: "Main" },
   formErrorKey: undefined,
   icon: "bank",

@@ -1,4 +1,5 @@
 import {
+  AccountArchived,
   AccountHasTransactions,
   CategoryHasTransactions,
   CreditCardHasTransactions,
@@ -38,5 +39,11 @@ it("SHOULD fall back to the generic message for any other error", () => {
   );
   expect(getFinancialErrorMessageKey(new Error("boom"))).toBe(
     "common.errors.generic",
+  );
+});
+
+it("SHOULD map AccountArchived to its copy", () => {
+  expect(getFinancialErrorMessageKey(new AccountArchived())).toBe(
+    "financial.errors.accountArchived",
   );
 });
