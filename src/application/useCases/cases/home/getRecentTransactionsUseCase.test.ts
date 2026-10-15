@@ -1,4 +1,5 @@
 import { BusinessError } from "@domain/entities/errors";
+import TransactionEntityFixture from "@domain/entities/financial/mocks/TransactionEntity.fixture";
 
 import {
   mocks,
@@ -96,4 +97,20 @@ it("SHOULD add the use case to the context of a business error", async () => {
     any_context: "any_value",
     useCase: "home.getRecentTransactionsUseCase",
   });
+});
+
+it("SHOULD NOT list balance adjustments (they have no category to show)", async () => {
+  getTransactions.mockResolvedValueOnce([
+    transaction("regular", new Date(2026, 9, 3)),
+    new TransactionEntityFixture()
+      .withDefault()
+      .withId("adjustment")
+      .withDate(new Date(2026, 9, 4))
+      .withBalanceAdjustment()
+      .build(),
+  ]);
+
+  const result = await setup();
+
+  expect(result.map((t) => t.id)).toEqual(["regular"]);
 });

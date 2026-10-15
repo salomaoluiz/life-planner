@@ -32,6 +32,7 @@ function getRecentTransactionsUseCase(
         // Newest first. Array.sort is stable, so the same date keeps the
         // repository order (the API already returns createdAt descending).
         return [...transactions]
+          .filter((transaction) => !transaction.excludeFromTotals)
           .sort(
             (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
           )

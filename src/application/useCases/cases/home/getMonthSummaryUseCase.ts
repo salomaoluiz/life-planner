@@ -29,7 +29,11 @@ function getMonthSummaryUseCase(
         let expense = 0;
 
         transactions
-          .filter((transaction) => isInMonth(transaction.date, params.month))
+          .filter(
+            (transaction) =>
+              !transaction.excludeFromTotals &&
+              isInMonth(transaction.date, params.month),
+          )
           .forEach((transaction) => {
             if (transaction.type === TransactionType.INCOME) {
               income += decimalStringToCents(transaction.value);
