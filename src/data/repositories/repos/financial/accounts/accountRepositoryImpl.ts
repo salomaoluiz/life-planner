@@ -2,6 +2,7 @@ import { Datasources } from "@data/datasource";
 import AccountEntity from "@domain/entities/financial/AccountEntity";
 import { FinancialAccountRepository } from "@domain/repositories/financial";
 
+import adjustAccountBalance from "./adjustAccountBalance";
 import createAccount from "./createAccount";
 import deleteAccount from "./deleteAccount";
 import getAccounts from "./getAccounts";
@@ -11,6 +12,9 @@ function accountRepositoryImpl(
   datasources: Datasources,
 ): FinancialAccountRepository {
   return {
+    async adjustAccountBalance(params): Promise<void> {
+      return adjustAccountBalance(params, datasources);
+    },
     async createAccount(params): Promise<AccountEntity> {
       return createAccount(params, datasources);
     },

@@ -1,4 +1,3 @@
-import { decimalToCents } from "@data/models/financial/money";
 import { AccountDatasource } from "@data/repositories/repos/financial/accounts/accountDatasource";
 import { api } from "@infrastructure/api";
 
@@ -10,8 +9,6 @@ export type Response = ReturnType<AccountDatasource["updateAccount"]>;
 async function updateAccount(params: Params): Response {
   // The API rejects owner / ownerId on PATCH: only editable fields travel.
   const body = {
-    balance:
-      params.balance === undefined ? undefined : decimalToCents(params.balance),
     icon: params.icon,
     name: params.name,
     status: params.status,

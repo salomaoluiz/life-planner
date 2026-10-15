@@ -3,11 +3,16 @@ import { AccountStatus } from "@domain/entities/financial/AccountEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import accountRepositoryImpl from "./accountRepositoryImpl";
+import adjustAccountBalance from "./adjustAccountBalance";
 import createAccount from "./createAccount";
 import deleteAccount from "./deleteAccount";
 import getAccounts from "./getAccounts";
 import updateAccount from "./updateAccount";
 
+jest.mock("./adjustAccountBalance", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
 jest.mock("./createAccount", () => ({ __esModule: true, default: jest.fn() }));
 jest.mock("./deleteAccount", () => ({ __esModule: true, default: jest.fn() }));
 jest.mock("./getAccounts", () => ({ __esModule: true, default: jest.fn() }));
@@ -28,6 +33,7 @@ beforeEach(() => {
 
 it("SHOULD expose repository methods", () => {
   const repo = accountRepositoryImpl(datasourcesMocks);
+  expect(repo).toHaveProperty("adjustAccountBalance");
   expect(repo).toHaveProperty("createAccount");
   expect(repo).toHaveProperty("deleteAccount");
   expect(repo).toHaveProperty("getAccounts");
@@ -71,4 +77,12 @@ it("SHOULD delegate updateAccount with the params and datasources", async () => 
   await accountRepositoryImpl(datasourcesMocks).updateAccount(params);
 
   expect(updateAccount).toHaveBeenCalledWith(params, datasourcesMocks);
+});
+
+it("SHOULD delegate adjustAccountBalance with the params and datasources", async () => {
+  const params = { balance: 120, id: "acc-1" };
+
+  await accountRepositoryImpl(datasourcesMocks).adjustAccountBalance(params);
+
+  expect(adjustAccountBalance).toHaveBeenCalledWith(params, datasourcesMocks);
 });

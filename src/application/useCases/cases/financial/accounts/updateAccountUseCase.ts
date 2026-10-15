@@ -3,7 +3,6 @@ import { DefaultError } from "@domain/entities/errors";
 import Repositories from "@domain/repositories";
 
 export interface UpdateAccountUseCaseParams {
-  balance?: number;
   icon?: string;
   id: string;
   name?: string;
@@ -19,7 +18,6 @@ function updateAccountUseCase(
     execute: async (params: UpdateAccountUseCaseParams) => {
       try {
         await repositories.financialRepository.account.updateAccount({
-          balance: params.balance,
           icon: params.icon,
           id: params.id,
           name: params.name,

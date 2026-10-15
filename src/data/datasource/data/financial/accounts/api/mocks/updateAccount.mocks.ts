@@ -11,7 +11,6 @@ jest.mock("@infrastructure/api", () => ({
 // region mocks
 const id = "6f1c2b9e-1d2a-4c55-9a7e-0b8e3c1f2a10";
 const params = {
-  balance: 1520.75,
   icon: "bank",
   id,
   name: "Checking",
@@ -20,7 +19,6 @@ const params = {
   status: AccountStatus.ARCHIVED,
 };
 const onlyId = {
-  balance: undefined,
   icon: undefined,
   name: undefined,
   owner: undefined,

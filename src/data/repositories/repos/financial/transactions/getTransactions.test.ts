@@ -1,3 +1,4 @@
+import TransactionModel from "@data/models/financial/TransactionModel";
 import TransactionEntity, {
   TransactionType,
 } from "@domain/entities/financial/TransactionEntity";
@@ -86,4 +87,21 @@ it("SHOULD return transactions from datasource", async () => {
       value: mocks.secondTransaction.value,
     }),
   ]);
+});
+
+it("SHOULD keep the system category key and excludeFromTotals from the model", async () => {
+  spies.cache.get.mockReturnValue(null);
+  const adjustment = new TransactionModel({
+    ...mocks.firstTransaction,
+    excludeFromTotals: true,
+    systemKey: "BALANCE_ADJUSTMENT",
+  });
+  spies.financialTransactionDatasource.getTransactions.mockResolvedValueOnce([
+    adjustment,
+  ]);
+
+  const [result] = await setup();
+
+  expect(result.systemKey).toBe("BALANCE_ADJUSTMENT");
+  expect(result.excludeFromTotals).toBe(true);
 });

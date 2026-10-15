@@ -1,4 +1,5 @@
 import AccountModel from "@data/models/financial/AccountModel";
+import { todayCalendarDate } from "@data/models/financial/calendarDate";
 import { AccountDatasource } from "@data/repositories/repos/financial/accounts/accountDatasource";
 import { api } from "@infrastructure/api";
 
@@ -16,7 +17,8 @@ async function getAccounts(ownerIds: Params): Response {
 
   try {
     const data = await api.get<Record<string, unknown>[]>(
-      `/v1/finance/accounts${toOwnerQuery(ownerIds)}`,
+      // The API derives the current and end-of-month balances from the client's calendar day.
+      `/v1/finance/accounts${toOwnerQuery(ownerIds)}&today=${todayCalendarDate()}`,
     );
 
     return data.map((account) => AccountModel.fromJSON(account));

@@ -13,5 +13,7 @@ async function deleteTransaction(params: Params, datasources: Datasources) {
   });
 
   cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA);
+  // Every transaction write moves an account balance.
+  cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_ACCOUNT_DATA);
 }
 export default deleteTransaction;

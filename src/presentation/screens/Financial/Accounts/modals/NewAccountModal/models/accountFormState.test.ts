@@ -108,8 +108,8 @@ it("SHOULD send only changed fields on update and never the owner", () => {
     id: "a1",
     status: "ARCHIVED",
   });
+  // The balance never travels in the PATCH: changing it is a balance adjustment (spec 028).
   expect(toUpdateParams("a1", { ...base, isNegative: true }, base)).toEqual({
-    balance: -1520.75,
     id: "a1",
   });
   expect(toUpdateParams("a1", base, base)).toEqual({ id: "a1" });

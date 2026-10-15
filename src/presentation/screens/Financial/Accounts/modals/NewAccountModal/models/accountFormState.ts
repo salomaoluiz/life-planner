@@ -95,9 +95,6 @@ function toUpdateParams(
   if (state.icon !== initial.icon) {
     params.icon = state.icon;
   }
-  if (signedBalance(state) !== signedBalance(initial)) {
-    params.balance = signedBalance(state);
-  }
   if (state.isArchived !== initial.isArchived) {
     params.status = state.isArchived ? "ARCHIVED" : "ACTIVE";
   }

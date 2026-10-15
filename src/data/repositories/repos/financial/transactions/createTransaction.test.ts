@@ -50,3 +50,11 @@ it("SHOULD invalidate cache after transaction created", async () => {
     CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA,
   );
 });
+
+it("SHOULD also invalidate the accounts cache (their balances changed)", async () => {
+  await setup();
+
+  expect(spies.cache.invalidate).toHaveBeenCalledWith(
+    CacheStringKeys.CACHE_FINANCIAL_ACCOUNT_DATA,
+  );
+});

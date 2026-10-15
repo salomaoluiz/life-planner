@@ -1,6 +1,7 @@
 import { isoToCalendarDate } from "@data/models/financial/calendarDate";
 import { decimalStringToCents } from "@data/models/financial/money";
 import { TransactionDatasource } from "@data/repositories/repos/financial/transactions/transactionDatasource";
+import { AccountArchived } from "@domain/entities/errors";
 import { api } from "@infrastructure/api";
 
 import handleFinancialApiError from "../../financialApiError";
@@ -38,7 +39,7 @@ async function updateTransaction(params: Params): Response {
         datasource: "TransactionDatasource - updateTransaction",
         id: params.id,
       },
-      { fields: body },
+      { fields: body, unprocessable: () => new AccountArchived() },
     );
   }
 }

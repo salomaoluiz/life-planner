@@ -20,6 +20,7 @@ const apiAccounts = [
     name: "Checking",
     owner: "USER",
     ownerId: ownerIds[0],
+    projectedBalance: 150000,
     status: "ACTIVE",
     updatedAt: "2026-10-04T12:00:00.000Z",
   },
@@ -28,6 +29,11 @@ const apiAccounts = [
 
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.useFakeTimers({ now: new Date(2026, 9, 15, 12, 0, 0) });
+});
+
+afterEach(() => {
+  jest.useRealTimers();
 });
 
 async function setup(ids: string[] = ownerIds) {

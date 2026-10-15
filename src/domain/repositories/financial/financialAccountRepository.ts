@@ -2,13 +2,22 @@ import AccountEntity from "@domain/entities/financial/AccountEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 export type FinancialAccountRepository = {
+  adjustAccountBalance(
+    params: AdjustAccountBalanceRepositoryParams,
+  ): Promise<void>;
   createAccount(params: CreateAccountRepositoryParams): Promise<AccountEntity>;
   deleteAccount(params: DeleteAccountRepositoryParams): Promise<void>;
   getAccounts(ownerIds: string[]): Promise<AccountEntity[]>;
   updateAccount(params: UpdateAccountRepositoryParams): Promise<void>;
 };
 
+interface AdjustAccountBalanceRepositoryParams {
+  balance: number;
+  id: string;
+}
+
 interface CreateAccountRepositoryParams {
+  // The initial balance of the new account.
   balance: number;
   icon: string;
   name: string;
@@ -23,7 +32,6 @@ interface DeleteAccountRepositoryParams {
 }
 
 interface UpdateAccountRepositoryParams {
-  balance?: number;
   icon?: string;
   id: string;
   name?: string;
@@ -32,4 +40,8 @@ interface UpdateAccountRepositoryParams {
   status?: string;
 }
 
-export { CreateAccountRepositoryParams, UpdateAccountRepositoryParams };
+export {
+  AdjustAccountBalanceRepositoryParams,
+  CreateAccountRepositoryParams,
+  UpdateAccountRepositoryParams,
+};

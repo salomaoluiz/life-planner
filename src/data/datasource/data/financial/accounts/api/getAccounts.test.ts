@@ -15,10 +15,11 @@ it("SHOULD GET /v1/finance/accounts with repeated ownerId params AND return Acco
   const result = await setup();
 
   expect(spies.get).toHaveBeenCalledWith(
-    `/v1/finance/accounts?ownerId=${mocks.ownerIds[0]}&ownerId=${mocks.ownerIds[1]}`,
+    `/v1/finance/accounts?ownerId=${mocks.ownerIds[0]}&ownerId=${mocks.ownerIds[1]}&today=2026-10-15`,
   );
   expect(result).toEqual([AccountModel.fromJSON(mocks.apiAccounts[0])]);
   expect(result[0].balance).toBe(1520.75);
+  expect(result[0].projectedBalance).toBe(1500);
 });
 
 it("SHOULD NOT call the API WHEN there are no ownerIds (it would return every accessible owner)", async () => {
