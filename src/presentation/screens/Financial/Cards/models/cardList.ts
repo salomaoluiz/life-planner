@@ -1,6 +1,15 @@
 import CreditCardDTO from "@application/dto/financial/CreditCardDTO";
-import { CreditCardSummaryDTO } from "@application/dto/financial/CreditCardOverviewDTO";
+import {
+  CreditCardSummaryDTO,
+  InvoiceDTO,
+} from "@application/dto/financial/CreditCardOverviewDTO";
 import { ALL_OWNERS } from "@screens/Financial/models/ownerOptions";
+
+type CardEntry =
+  | { card: CreditCardDTO; key: string; kind: "archivedRow" }
+  | { count: number; expanded: boolean; key: string; kind: "archivedToggle" }
+  | { invoice: InvoiceDTO; key: string; kind: "invoice" }
+  | { key: string; kind: "noClosed" };
 
 interface CardsAggregate {
   available: number;
@@ -22,6 +31,52 @@ function amountProps(cents: number): { type?: "EXPENSE"; value: number } {
   }
 
   return { value: cents };
+}
+
+// Rows under the carousel: the selected card's invoices (open or closed tab), then the collapsed Archived section.
+function buildCardEntries(params: {
+  archived: CreditCardDTO[];
+  archivedExpanded: boolean;
+  invoiceTab: "closed" | "open";
+  selected?: CreditCardSummaryDTO;
+}): CardEntry[] {
+  const entries: CardEntry[] = [];
+  const { selected } = params;
+
+  if (selected && params.invoiceTab === "open") {
+    entries.push({
+      invoice: selected.openInvoice,
+      key: `invoice-${selected.card.id}-${selected.openInvoice.referenceMonth}`,
+      kind: "invoice",
+    });
+  }
+  if (selected && params.invoiceTab === "closed") {
+    if (selected.closedInvoices.length === 0) {
+      entries.push({ key: "no-closed", kind: "noClosed" });
+    }
+    selected.closedInvoices.forEach((invoice) =>
+      entries.push({
+        invoice,
+        key: `invoice-${selected.card.id}-${invoice.referenceMonth}`,
+        kind: "invoice",
+      }),
+    );
+  }
+  if (params.archived.length > 0) {
+    entries.push({
+      count: params.archived.length,
+      expanded: params.archivedExpanded,
+      key: "archived-toggle",
+      kind: "archivedToggle",
+    });
+    if (params.archivedExpanded) {
+      params.archived.forEach((card) =>
+        entries.push({ card, key: `archived-${card.id}`, kind: "archivedRow" }),
+      );
+    }
+  }
+
+  return entries;
 }
 
 function filterCardsByOwner(cards: CreditCardDTO[], ownerFilter: string) {
@@ -79,10 +134,11 @@ function usedProgress(aggregate: CardsAggregate): number {
   return aggregate.used / aggregate.totalLimit;
 }
 
-export type { CardsAggregate };
+export type { CardEntry, CardsAggregate };
 export {
   aggregateOf,
   amountProps,
+  buildCardEntries,
   filterCardsByOwner,
   filterSummariesByOwner,
   formatDayMonth,

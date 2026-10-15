@@ -26,6 +26,7 @@ function FinancialLayout() {
           <Stack.Screen name={"index"} />
           <Stack.Screen name={"categories"} />
           <Stack.Screen name={"accounts"} />
+          <Stack.Screen name={"cards"} />
         </Stack>
       </View>
     </Screen>

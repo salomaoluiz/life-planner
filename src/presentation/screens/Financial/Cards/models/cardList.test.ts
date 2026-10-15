@@ -1,6 +1,7 @@
 import {
   aggregateOf,
   amountProps,
+  buildCardEntries,
   filterCardsByOwner,
   filterSummariesByOwner,
   formatDayMonth,
@@ -93,5 +94,86 @@ describe("formatReferenceMonth", () => {
 
     expect(label).toContain("Oct");
     expect(label).toContain("2026");
+  });
+});
+
+describe("buildCardEntries", () => {
+  function invoice(referenceMonth: string) {
+    return { referenceMonth, status: "OPEN" } as never;
+  }
+  const selected = {
+    card: { id: "a" },
+    closedInvoices: [invoice("2026-09"), invoice("2026-08")],
+    openInvoice: invoice("2026-10"),
+  } as never;
+  const archived = [{ id: "z" }, { id: "y" }] as never[];
+
+  it("SHOULD list only the open invoice on the open tab", () => {
+    const entries = buildCardEntries({
+      archived: [],
+      archivedExpanded: false,
+      invoiceTab: "open",
+      selected,
+    });
+
+    expect(entries.map((entry) => entry.kind)).toEqual(["invoice"]);
+  });
+
+  it("SHOULD list the closed invoices newest first on the closed tab, or noClosed WHEN there are none", () => {
+    const closed = buildCardEntries({
+      archived: [],
+      archivedExpanded: false,
+      invoiceTab: "closed",
+      selected,
+    });
+    const none = buildCardEntries({
+      archived: [],
+      archivedExpanded: false,
+      invoiceTab: "closed",
+      selected: { ...(selected as object), closedInvoices: [] } as never,
+    });
+
+    expect(closed.map((entry) => entry.kind)).toEqual(["invoice", "invoice"]);
+    expect(none.map((entry) => entry.kind)).toEqual(["noClosed"]);
+  });
+
+  it("SHOULD add the archived toggle AND the rows only WHEN expanded", () => {
+    const collapsed = buildCardEntries({
+      archived,
+      archivedExpanded: false,
+      invoiceTab: "open",
+      selected: undefined,
+    });
+    const expanded = buildCardEntries({
+      archived,
+      archivedExpanded: true,
+      invoiceTab: "open",
+      selected: undefined,
+    });
+
+    expect(collapsed).toEqual([
+      {
+        count: 2,
+        expanded: false,
+        key: "archived-toggle",
+        kind: "archivedToggle",
+      },
+    ]);
+    expect(expanded.map((entry) => entry.kind)).toEqual([
+      "archivedToggle",
+      "archivedRow",
+      "archivedRow",
+    ]);
+  });
+
+  it("SHOULD be empty WHEN there is no selected card and nothing archived", () => {
+    expect(
+      buildCardEntries({
+        archived: [],
+        archivedExpanded: false,
+        invoiceTab: "open",
+        selected: undefined,
+      }),
+    ).toEqual([]);
   });
 });
