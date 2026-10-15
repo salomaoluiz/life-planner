@@ -4,6 +4,8 @@ tags:
   - stock
   - home
   - spec-010
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
 ---
 # "See all" and the attention rows open /stock?filter=EXPIRING (spec 021 deviation: not EXPIRED).
 # The active filter is asserted by effect: the attention row is listed, a far-future row is not.

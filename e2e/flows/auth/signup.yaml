@@ -3,6 +3,8 @@ name: auth/signup
 tags:
   - auth
   - spec-002
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
 ---
 - launchApp:
     clearState: true

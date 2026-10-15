@@ -3,6 +3,8 @@ name: family/delete-family-with-records
 tags:
   - family
   - spec-003
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
 ---
 - launchApp:
     clearState: true

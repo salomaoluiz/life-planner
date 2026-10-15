@@ -3,6 +3,8 @@ name: family/create-family-validation
 tags:
   - family
   - spec-012
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
 ---
 - launchApp:
     clearState: true

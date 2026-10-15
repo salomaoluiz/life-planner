@@ -3,6 +3,8 @@ name: account/delete-account-other-user-rejected
 tags:
   - account
   - spec-024
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
 ---
 - launchApp:
     clearState: true
