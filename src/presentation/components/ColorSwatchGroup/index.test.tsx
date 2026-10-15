@@ -50,3 +50,12 @@ it("SHOULD label each swatch with its color name", () => {
     screen.getByTestId("swatches-swatch-#F59E0B").props.accessibilityLabel,
   ).toBe("Amber");
 });
+
+it("SHOULD NOT render the Custom swatch WHEN onCustomPress is not given", () => {
+  setup({ customLabel: undefined, onCustomPress: undefined });
+
+  expect(screen.queryByTestId("swatches-custom")).toBeNull();
+  expect(screen.getAllByTestId(/^swatches-swatch-/)).toHaveLength(
+    defaultProps.options.length,
+  );
+});

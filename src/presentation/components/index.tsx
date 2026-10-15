@@ -14,6 +14,10 @@ export {
   ColorSwatchGroupProps,
 } from "./ColorSwatchGroup";
 export { default as ConfirmDialog, ConfirmDialogProps } from "./ConfirmDialog";
+export {
+  default as CreditCardTile,
+  CreditCardTileProps,
+} from "./CreditCardTile";
 export { default as DateField, DateFieldProps } from "./DateField";
 export { default as DatePicker, DatePickerProps } from "./DatePicker";
 export { default as Divider, DividerProps } from "./Divider";
@@ -41,6 +45,7 @@ export {
   NavigationRailProps,
 } from "./NavigationRail";
 export { default as Picker } from "./Picker";
+export { default as ProgressBar, ProgressBarProps } from "./ProgressBar";
 export {
   default as QuickAddButton,
   QuickAddButtonProps,
