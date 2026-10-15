@@ -1,0 +1,83 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/delete-adjustment
+tags:
+  - financial
+  - spec-028
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Account
+      KEY: ACCOUNT_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: ${output.ACCOUNT_NAME}
+      BALANCE_CENTS: "5000"
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-accounts.yaml
+# edit the current balance: the app records an adjustment
+- tapOn:
+    id: "financial.accounts.row-title"
+    text: ${output.ACCOUNT_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.account-form.balance-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.account-form.balance-input"
+- eraseText
+- inputText: "98765"
+- tapOn:
+    id: "financial.account-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.row-balance"
+      text: ".*987[.,]65.*"
+    timeout: 20000
+# the adjustment is listed as a transaction with a delete-only sheet
+- tapOn:
+    id: "financial.layout.segments-transactions"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.adjustment-row-title"
+    timeout: 20000
+- tapOn:
+    id: "financial.transactions.adjustment-row-title"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.adjustment-sheet"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.transaction-form.sheet"
+- tapOn:
+    id: "financial.transactions.adjustment-delete"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.adjustment-delete-dialog-confirm"
+    timeout: 20000
+- tapOn:
+    id: "financial.transactions.adjustment-delete-dialog-confirm"
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.transactions.adjustment-row-title"
+    timeout: 20000
+# deleting it reverses its effect: back to the initial 50,00
+- tapOn:
+    id: "financial.layout.segments-accounts"
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.row-balance"
+      text: ".*50[.,]00.*"
+    timeout: 20000
