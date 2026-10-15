@@ -13,6 +13,7 @@ entities:
       - name
       - owner
       - ownerId
+      - projectedBalance # balance at the end of the current month (defaults to balance)
       - status
   CategoryEntity:
     path: src/domain/entities/financial/CategoryEntity.ts
@@ -51,9 +52,11 @@ entities:
       - categoryId
       - date
       - description
+      - excludeFromTotals
       - id
       - owner
       - ownerId
+      - systemKey # system category key; BALANCE_ADJUSTMENT = balance adjustment
       - type
       - value
 
@@ -93,6 +96,10 @@ interfaces:
 
 ```yaml
 use_cases:
+  adjustFinancialAccountBalanceUseCase:
+    path: src/application/useCases/cases/financial/accounts/adjustAccountBalanceUseCase.ts
+    behavior: Makes the CURRENT balance equal to a desired value; the API records the difference as a transaction.
+
   createAccountUseCase:
     path: src/application/useCases/cases/financial/accounts/createAccountUseCase.ts
     behavior: Creates a new financial account.
@@ -111,7 +118,7 @@ use_cases:
 
   updateAccountUseCase:
     path: src/application/useCases/cases/financial/accounts/updateAccountUseCase.ts
-    behavior: Updates an existing financial account.
+    behavior: Updates an existing financial account (name, icon, status; no balance, spec 028).
 
   createCategoryUseCase:
     path: src/application/useCases/cases/financial/categories/createCategoryUseCase.ts
@@ -188,8 +195,9 @@ repositories:
 datasources:
   accountsDatasource (API):
     path: src/data/datasource/data/financial/accounts/api/
-    uses: "@infrastructure/api (/v1/finance/accounts); AccountModel JSON = API shape (balance in cents <-> decimal number), also the repository cache shape"
+    uses: "@infrastructure/api (/v1/finance/accounts); AccountModel JSON = API shape (balance and projectedBalance in cents <-> decimal number), also the repository cache shape; create sends initialBalance; getAccounts sends ?today= (device local date via todayCalendarDate); 422 -> AccountArchived (adjust, and transaction create/update); transaction repositories also invalidate the accounts cache; TransactionModel JSON category = { excludeFromTotals, name, systemKey }"
     methods:
+      - adjustAccountBalance: src/data/datasource/data/financial/accounts/api/adjustAccountBalance.ts # POST /v1/finance/accounts/:id/balance-adjustment?today=
       - createAccount: src/data/datasource/data/financial/accounts/api/createAccount.ts
       - deleteAccount: src/data/datasource/data/financial/accounts/api/deleteAccount.ts
       - getAccounts: src/data/datasource/data/financial/accounts/api/getAccounts.ts
@@ -290,7 +298,7 @@ navigation_files: `screens/Navigation/*` (AppTabBar, navigationItems), `screens/
 
 - Forms are `BottomSheet`s (centered dialogs on wide web); create has no params, edit uses route param `id`. Delete always goes through `ConfirmDialog`. Save and delete errors are form-level copy through `getFinancialErrorMessageKey` (006 keys); the old `useFinancialErrorFeedback` hook and `/business_feedback` route are no longer used by Finances. Closing a dirty form asks to discard (`common.form.discardMessage`). `isSaving`/`isDeleting` come from `useMutation().isFetching`.
 - Owner is immutable in edit for accounts and categories (the API answers 400 when PATCH carries `owner`/`ownerId`); the "Belongs to" chips are locked in edit and also when `ownerId` arrives as a route param on create (pushed by the transaction form's inline create). Transactions may change owner (the form clears the stale account/category).
-- Money: `@utils/money`. The transaction value (decimal string from the API) and the account balance (decimal number) are converted to cents in the form state modules (`transactionFormState`, `accountFormState`); the UI works in cents (`AmountInput`/`AmountText`). The account balance has a Positive/Negative sign control and is not updated by transactions.
+- Money: `@utils/money`. The transaction value (decimal string from the API) and the account balance (decimal number) are converted to cents in the form state modules (`transactionFormState`, `accountFormState`); the UI works in cents (`AmountInput`/`AmountText`). The account amount is the INITIAL balance on create and the CURRENT balance on edit (a change records a balance adjustment: `saveAccountChanges` adjusts before archiving and patches before reactivating; an archived account that stays archived cannot change its balance). Rows show an 'End of month' line only when the projected balance differs; the toolbar totals current and end-of-month. Balance adjustments (`TransactionUIModel.isAdjustment`) show a translated label, the `scale-balance` icon and no category; tapping one opens `AdjustmentSheet` (delete only, with a confirm dialog) instead of the form; month summaries (`getMonthSummaryUseCase`) and Home's latest list skip `excludeFromTotals` transactions. The transaction form no longer lists archived accounts except the one already selected.
 - Transactions: month filtering and day grouping are client-side (`transactionList`); the month summary comes from `getMonthSummaryUseCase` (spec 010) for the selected month and owner (it uses only the scope/owner filter and ignores the type filter; `ownerFilter` + `typeFilter` state, `filterByOwner`/`filterByType` in `transactionList`; a scope that is no longer an owner falls back to All). Most-used rule: the category chips show the 5 most used categories of the type and owner (`getMostUsedFinancialCategoriesUseCase`) plus a "More" tree picker with search; changing type or owner clears the category and swaps the account; a missing account or category is created inline (the new record is selected when the stacked sheet returns).
 - Categories: tree rows via `categoryTree`; palette (`categoryColors`) plus a custom `#RRGGBB` sheet ("Custom" shows as selected for a stored color outside the palette, never rewritten unless the user picks another); 12 inline icons plus a searchable sheet of 18. PATCH sends only changed fields among name, icon, iconColor, type, parentId (`null` removes the parent). Type is locked in edit when it has a parent, subcategories or transactions; changing type or owner clears the parent. Delete warns with `financial.categories.deleteConfirm.withSubcategories` for parents and shows `financial.categories.errors.hasTransactions` on 409. The form state field is `iconColor` because the guardrail forbids a `color` property key in screens.
 - Accounts: total (`accounts-total`), owner chips, active list and a collapsible archived section; delete with transactions shows `financial.accounts.errors.hasTransactions` in the sheet.
@@ -330,3 +338,7 @@ Owner pickers are chip groups: `financial.account-form.owner`, `financial.catego
 ## E2E flows: credit cards (spec 026)
 
 testIDs: `Financial/Cards/testIds.ts` (`financial.cards.*`: `screen`, `empty-state` with `-action`, `add-button`, `total-limit`, `tile` with `tile-title`, `edit-button`, `invoice-tabs`, `invoice-row`, `no-closed`, `archived-toggle`, `row` with `row-title`, `owner-filter`) and `Cards/modals/NewCreditCardModal/testIds.ts` (`financial.card-form.*`; select options are `<id>-option-<value>`, e.g. `closing-day-option-5`; swatches `swatches` / `color`). Flows (tags `financial`/`family` + `spec-026`): `financial/credit-cards` (create -> list + aggregate -> edit -> archive -> reactivate -> delete) and `family/family-credit-card` (a member sees the family card, never another user's personal card). NOT validated on this machine at the time of writing: Maestro was not installed, `yarn e2e` exited 2.
+
+## E2E flows: account balance (spec 028)
+
+Flows (tags `financial` + `spec-028`): `financial/accounts/balance-from-transactions` (initial balance, an expense today, one next month and one later this month: current balance and the end-of-month line), `financial/transactions/delete-adjustment` (editing the balance records an adjustment shown with a delete-only sheet; deleting it restores the balance), `financial/transactions/archived-account` (an archived account is not offered in the transaction form). `BALANCE_CENTS` is the INITIAL balance; `BALANCE_CENTS` and `STATUS` are caller-scoped params of `setup/create-account`, not header defaults. `e2e/scripts/future-date.js` outputs `NEXT_MONTH_DATE` and `LATER_THIS_MONTH_DATE` (empty on the last day of the month). testIDs: `financial.accounts.row-projected`, `financial.accounts.total-projected`, `financial.transactions.adjustment-row|sheet|delete|delete-dialog`. NOT validated at the time of writing: Maestro was not on the PATH and the API was an older build, `yarn e2e` was not run.

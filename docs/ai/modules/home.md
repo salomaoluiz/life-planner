@@ -61,7 +61,7 @@ ui_models:
 components:
   - MonthSummaryCard
   - StockAttentionCard (testIDs `home.stock-attention.*` in `Home/testIds.ts`; rows and "See all" open `/stock?filter=EXPIRING`; E2E `stock/home-attention-card`, spec 021)
-  - LatestTransactions
+  - LatestTransactions (balance adjustments, `excludeFromTotals`, are not listed)
   path: src/presentation/screens/Home/components/
 
 routes_opened:
