@@ -17,6 +17,7 @@ import {
   filterByOwner,
   totalActiveCents,
   totalAmount,
+  totalProjectedCents,
 } from "../models/accountList";
 import AccountUIModel from "../models/AccountUIModel";
 
@@ -85,6 +86,7 @@ function useAccountsViewModel() {
     ownerChoices: buildOwnerFilterChoices(query.data?.owners ?? []),
     ownerFilter,
     totalAmount: totalAmount(totalActiveCents(filtered)),
+    totalProjectedAmount: totalAmount(totalProjectedCents(filtered)),
   };
 }
 

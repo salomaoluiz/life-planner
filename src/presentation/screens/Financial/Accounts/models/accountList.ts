@@ -78,4 +78,16 @@ function totalAmount(cents: number): { type?: "EXPENSE"; value: number } {
   return { value: cents };
 }
 
-export { buildAccountEntries, filterByOwner, totalActiveCents, totalAmount };
+function totalProjectedCents(accounts: AccountUIModel[]) {
+  return accounts
+    .filter((account) => !account.isArchived)
+    .reduce((sum, account) => sum + account.projectedBalanceCents, 0);
+}
+
+export {
+  buildAccountEntries,
+  filterByOwner,
+  totalActiveCents,
+  totalAmount,
+  totalProjectedCents,
+};

@@ -7,6 +7,7 @@ function useStyles() {
 
   return {
     styles: StyleSheet.create({
+      balanceColumn: { alignItems: "flex-end" },
       root: { flex: 1 },
       toolbar: {
         gap: theme.sizes.spacing.lg,

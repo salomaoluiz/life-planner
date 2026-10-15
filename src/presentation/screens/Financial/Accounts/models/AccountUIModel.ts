@@ -17,6 +17,10 @@ class AccountUIModel {
     return decimalToCents(this.dto.balance);
   }
 
+  get hasProjectedDifference() {
+    return this.projectedBalanceCents !== this.balanceCents;
+  }
+
   get icon() {
     return this.dto.icon;
   }
@@ -41,6 +45,10 @@ class AccountUIModel {
     return (
       this.owners.find((owner) => owner.id === this.dto.ownerId)?.name ?? ""
     );
+  }
+
+  get projectedBalanceCents() {
+    return decimalToCents(this.dto.projectedBalance);
   }
 
   constructor(

@@ -19,6 +19,7 @@ import { useKitTheme } from "@components/utils/useKitTheme";
 import { useTranslation } from "@presentation/i18n";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
+import ProjectedBalance from "./components/ProjectedBalance";
 import { useAccountsViewModel } from "./hooks";
 import { AccountEntry } from "./models/accountList";
 import useStyles from "./styles";
@@ -45,6 +46,15 @@ function FinancialAccounts() {
               size={"heading"}
               testID={"accounts-total"}
               {...vm.totalAmount}
+            />
+            <Text.Caption
+              tone={"secondary"}
+              value={t("financial.accounts.totalProjected")}
+            />
+            <AmountText
+              size={"body"}
+              testID={accountsTestIds.totalProjected}
+              {...vm.totalProjectedAmount}
             />
           </Card>
         </View>
@@ -101,10 +111,18 @@ function FinancialAccounts() {
         testID={accountsTestIds.row}
         title={account.name}
         trailing={
-          <AmountText
-            {...account.balanceAmount}
-            testID={`${accountsTestIds.row}-balance`}
-          />
+          <View style={styles.balanceColumn}>
+            <AmountText
+              {...account.balanceAmount}
+              testID={`${accountsTestIds.row}-balance`}
+            />
+            {account.hasProjectedDifference && (
+              <ProjectedBalance
+                cents={account.projectedBalanceCents}
+                testID={`${accountsTestIds.row}-projected`}
+              />
+            )}
+          </View>
         }
       />
     );

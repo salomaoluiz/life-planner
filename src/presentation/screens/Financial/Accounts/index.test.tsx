@@ -3,7 +3,9 @@ import { StyleSheet } from "react-native";
 
 import { hasText } from "@tests";
 
+import { makeAccountDTO, owners } from "./mocks/index.mocks";
 import { makeEntries, setup } from "./mocks/screen.mocks";
+import AccountUIModel from "./models/AccountUIModel";
 import accountsTestIds from "./testIds";
 
 it("SHOULD render skeletons WHEN loading", () => {
@@ -107,5 +109,38 @@ it("SHOULD give every owner filter chip an id from its owner id", () => {
 
   expect(
     screen.getByTestId(`${accountsTestIds.ownerFilter}-owner-2`),
+  ).toBeOnTheScreen();
+});
+
+it("SHOULD show the end-of-month total next to the current total", () => {
+  setup({
+    entries: makeEntries(),
+    totalAmount: { value: 12345 },
+    totalProjectedAmount: { value: 20000 },
+  });
+
+  expect(hasText("financial.accounts.totalProjected")).toBe(true);
+  expect(screen.getByTestId(accountsTestIds.totalProjected)).toBeOnTheScreen();
+});
+
+it("SHOULD show the end-of-month line ONLY on rows whose projected balance differs", () => {
+  setup({ entries: makeEntries() });
+  expect(screen.queryByTestId(`${accountsTestIds.row}-projected`)).toBeNull();
+
+  const projected = new AccountUIModel(
+    makeAccountDTO({
+      balance: 100,
+      id: "acc-9",
+      name: "Projected",
+      projectedBalance: 130,
+    }),
+    owners,
+  );
+  setup({
+    entries: [{ account: projected, key: "row-acc-9", kind: "row" }],
+  });
+
+  expect(
+    screen.getByTestId(`${accountsTestIds.row}-projected`),
   ).toBeOnTheScreen();
 });

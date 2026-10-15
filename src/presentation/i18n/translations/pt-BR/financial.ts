@@ -18,13 +18,15 @@ const financial = {
       archivedHelper:
         "Contas arquivadas aparecem por último ao escolher uma conta.",
       balance: "Saldo atual",
-      balanceHelper:
-        "O saldo não é atualizado automaticamente pelas transações.",
+      balanceHelper: "Alterar registra um ajuste de saldo.",
       errors: {
         balanceTooLarge: "Esse saldo é grande demais.",
         nameTooLong: "O nome pode ter no máximo 60 caracteres.",
       },
       icon: "Ícone",
+      initialBalance: "Saldo inicial",
+      initialBalanceHelper:
+        "O saldo com que você começa. As transações o alteram a partir daqui.",
       name: "Nome",
       negative: "Negativo",
       positive: "Positivo",
@@ -33,7 +35,9 @@ const financial = {
     name: "Nome",
     nameRequired: "Nome é obrigatório",
     new: "Nova conta",
+    projectedBalance: "Fim do mês: {{value}}",
     total: "Total nas contas",
+    totalProjected: "Fim do mês",
   },
   cardForm: {
     archive: "Arquivar cartão",
@@ -168,6 +172,7 @@ const financial = {
     saveChanges: "Salvar alterações",
   },
   errors: {
+    accountArchived: "Esta conta está arquivada.",
     close: "OK",
     notFound: "Este item não existe mais ou você não tem acesso a ele.",
     ownerNotAllowed: "Você não tem acesso a este proprietário.",
@@ -181,6 +186,8 @@ const financial = {
   },
   transactions: {
     add: "Adicionar transação",
+    adjustment: "Ajuste de saldo",
+    adjustmentDeleteMessage: "Excluir reverte o efeito dele no saldo da conta.",
     balanceOf: "Saldo de {{month}}",
     delete: "Excluir transação",
     deleteTitle: "Excluir esta transação?",
