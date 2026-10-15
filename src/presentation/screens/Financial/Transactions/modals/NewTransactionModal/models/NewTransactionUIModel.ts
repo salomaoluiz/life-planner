@@ -39,22 +39,30 @@ class NewTransactionUIModel {
     return this.accountsOf(ownerId).map((account) => account.id);
   }
 
-  accountOptions(ownerId: string): AccountOption[] {
+  // Archived accounts are not offered for new records; the one already selected stays so an old
+  // transaction can still be edited (and shows where it lives).
+  accountOptions(ownerId: string, selectedAccountId?: string): AccountOption[] {
     const accounts = this.accountsOf(ownerId);
     const active = accounts
       .filter((account) => account.status !== "ARCHIVED")
       .sort(byName);
-    const archived = accounts
-      .filter((account) => account.status === "ARCHIVED")
-      .sort(byName);
+    const selectedArchived = accounts.find(
+      (account) =>
+        account.status === "ARCHIVED" && account.id === selectedAccountId,
+    );
 
     return [
       ...active.map((account) => ({ label: account.name, value: account.id })),
-      ...archived.map((account) => ({
-        descriptionKey: "financial.accounts.archivedLabel" as TranslationKeys,
-        label: account.name,
-        value: account.id,
-      })),
+      ...(selectedArchived
+        ? [
+            {
+              descriptionKey:
+                "financial.accounts.archivedLabel" as TranslationKeys,
+              label: selectedArchived.name,
+              value: selectedArchived.id,
+            },
+          ]
+        : []),
     ];
   }
 
@@ -78,7 +86,9 @@ class NewTransactionUIModel {
   }
 
   hasAccounts(ownerId: string) {
-    return this.accountsOf(ownerId).length > 0;
+    return this.accountsOf(ownerId).some(
+      (account) => account.status !== "ARCHIVED",
+    );
   }
 
   hasCategories(ownerId: string, type: string) {
