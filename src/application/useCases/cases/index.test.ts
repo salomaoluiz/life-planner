@@ -6,6 +6,7 @@ const useCases = {
   createFinancialCategoryUseCase: expect.any(Function),
   createFinancialTransactionUseCase: expect.any(Function),
   createStockItemUseCase: expect.any(Function),
+  deleteAccountUseCase: expect.any(Function),
   deleteFamilyMemberUseCase: expect.any(Function),
   deleteFamilyUseCase: expect.any(Function),
   deleteFinancialAccountUseCase: expect.any(Function),

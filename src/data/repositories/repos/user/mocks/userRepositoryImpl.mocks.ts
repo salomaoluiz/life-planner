@@ -1,5 +1,6 @@
 import { datasourcesMocks } from "@data/datasource/mocks/listDatasources.mocks";
 
+import * as deleteAccount from "../deleteAccount";
 import * as getUser from "../getUser";
 import * as getUserById from "../getUserById";
 import userRepositoryImpl from "../userRepositoryImpl";
@@ -9,6 +10,9 @@ import userRepositoryImpl from "../userRepositoryImpl";
 // endregion mocks
 
 // region spies
+
+const deleteAccountSpy = jest.spyOn(deleteAccount, "default");
+deleteAccountSpy.mockResolvedValue(undefined as never);
 
 const getUserSpy = jest.spyOn(getUser, "default");
 getUserSpy.mockResolvedValue("getUser response" as never);
@@ -27,6 +31,7 @@ function setup() {
 }
 
 const spies = {
+  deleteAccount: deleteAccountSpy,
   getUser: getUserSpy,
   getUserById: getUserByIdSpy,
 };
