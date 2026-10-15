@@ -182,16 +182,17 @@ function FinancialTransactions() {
 
   return (
     <View style={styles.root} testID={transactionsTestIds.screen}>
-      {toolbar}
       <FlashList
         data={vm.entries}
         estimatedItemSize={64}
         getItemType={(entry) => entry.kind}
         keyExtractor={(entry) => entry.key}
         ListEmptyComponent={empty}
+        ListHeaderComponent={toolbar}
         onRefresh={vm.onRefresh}
         refreshing={vm.isRefreshing}
         renderItem={renderItem}
+        showsVerticalScrollIndicator={false}
         stickyHeaderIndices={vm.stickyIndices}
       />
       {vm.isMonthPickerOpen && (

@@ -1,4 +1,4 @@
-import { fireEvent, screen } from "@testing-library/react-native";
+import { fireEvent, screen, within } from "@testing-library/react-native";
 import { StyleSheet } from "react-native";
 
 import { hasText } from "@tests";
@@ -89,14 +89,13 @@ it("SHOULD show a summary retry WHEN the summary failed", () => {
   expect(onSummaryRetry).toHaveBeenCalledTimes(1);
 });
 
-it("SHOULD render the toolbar outside the list with 20 px gaps so the sticky day header cannot cover it", () => {
+it("SHOULD render the toolbar as the list header with 20 px gaps so it scrolls with the list", () => {
   setup({ entries: makeEntries() });
 
-  const toolbar = screen.getByTestId("transactions-toolbar");
+  const toolbar = within(screen.getByTestId("flashList")).getByTestId(
+    "transactions-toolbar",
+  );
   expect(StyleSheet.flatten(toolbar.props.style).gap).toBe(20);
-  expect(
-    screen.getByTestId("flashList").props.ListHeaderComponent,
-  ).toBeUndefined();
 });
 
 const scopeChoices = [

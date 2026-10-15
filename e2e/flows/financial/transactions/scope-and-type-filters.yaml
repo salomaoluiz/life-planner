@@ -84,7 +84,8 @@ onFlowComplete:
 - assertVisible:
     id: "financial.transactions.summary-expense"
     text: ".*42[.,]00.*"
-# Clear filters resets scope and type
+# The header is taller since spec 025: scroll the list to reach the action
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - tapOn:
     id: "financial.transactions.filtered-empty-action"
 - assertVisible:
