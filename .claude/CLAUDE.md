@@ -55,6 +55,7 @@ Reference implementation for any new CRUD work: **financial accounts** (smallest
     - Before reporting a task as done, run `yarn e2e` (the full suite) and read **only** `e2e-report/summary.md`. Do not open `junit.xml`, `maestro.log` or artifacts of passing flows. For each failure, open only the files named in its block.
     - Fix loop: fix, run `yarn e2e:failed`, and repeat until it passes. Then run `yarn e2e` once more in full.
     - Never delete, skip, `wip`-tag or weaken an existing flow (for example removing an assertion or changing it to a text match) to make the suite pass. If an existing flow is wrong because the spec changed the behavior, update it in the same commit and give the spec number in the commit message.
+    - Maestro is already on the owner's zsh `PATH` (and `JAVA_HOME`), but the non-interactive shell of an AI session does not load it, so `yarn e2e` exits 2 with "maestro is not installed". Run it through zsh: `zsh -ic 'yarn e2e --headless'` (same for `yarn e2e:failed`). Never install or reconfigure Maestro for this.
     - E2E runs only on the owner's Mac. In a cloud session, ask for a session on the Mac to run it; never set up Maestro, browsers or servers in the cloud. The owner keeps the app and the API running; do not start or restart them yourself.
     - If `yarn e2e` exits with code 2 (could not run), say so in the final report with its one-line reason. Do not claim the feature was validated.
     - Report the final summary line (`E2E PASSED: N/N` or the failures) in the PR description.
