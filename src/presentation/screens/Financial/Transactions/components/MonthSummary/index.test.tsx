@@ -1,6 +1,6 @@
 import { fireEvent, screen } from "@tests";
 
-import { AmountText } from "@components";
+import { AmountText, MetricBlock } from "@components";
 
 import { setup } from "./mocks/index.mocks";
 
@@ -44,4 +44,24 @@ it("SHOULD show a positive balance without type", () => {
   setup();
 
   expect(screen.UNSAFE_getAllByType(AmountText)[0].props.type).toBeUndefined();
+});
+
+it("SHOULD show the scope caption under the balance", () => {
+  setup({ scopeLabel: "Test Family", scopeTestID: "scope-id" });
+
+  expect(screen.getByText("Test Family")).toBeOnTheScreen();
+  expect(screen.getByTestId("scope-id")).toBeOnTheScreen();
+});
+
+it("SHOULD give the income and expense amounts their own test ids", () => {
+  setup({ expenseTestID: "expense-id", incomeTestID: "income-id" });
+
+  expect(screen.getByTestId("income-id")).toBeOnTheScreen();
+  expect(screen.getByTestId("expense-id")).toBeOnTheScreen();
+});
+
+it("SHOULD NOT render nested metric boxes", () => {
+  setup();
+
+  expect(screen.UNSAFE_queryAllByType(MetricBlock)).toHaveLength(0);
 });

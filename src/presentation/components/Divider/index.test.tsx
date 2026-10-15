@@ -17,3 +17,10 @@ it("SHOULD inset 52 px WHEN inset", () => {
     StyleSheet.flatten(screen.getByTestId("divider").props.style).marginLeft,
   ).toBe(52);
 });
+
+it("SHOULD render a full-height 1 px column line WHEN vertical", () => {
+  render(<Divider testID="divider" vertical />);
+  expect(StyleSheet.flatten(screen.getByTestId("divider").props.style)).toEqual(
+    expect.objectContaining({ alignSelf: "stretch", width: 1 }),
+  );
+});

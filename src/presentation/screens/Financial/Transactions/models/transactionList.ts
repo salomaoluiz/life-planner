@@ -1,8 +1,6 @@
 import TransactionUIModel from "./TransactionUIModel";
 
 export const ALL_FILTER = "ALL";
-const OWNER_PREFIX = "OWNER:";
-
 export type DayLabel =
   | { date: Date; kind: "date" }
   | { kind: "today" }
@@ -18,21 +16,7 @@ export type ListEntry =
     }
   | { item: TransactionUIModel; key: string; kind: "item" };
 
-function applyFilter(items: TransactionUIModel[], filter: string) {
-  if (filter === "EXPENSE") {
-    return items.filter((item) => item.isExpense);
-  }
-  if (filter === "INCOME") {
-    return items.filter((item) => !item.isExpense);
-  }
-  if (filter.startsWith(OWNER_PREFIX)) {
-    const ownerId = filter.slice(OWNER_PREFIX.length);
-
-    return items.filter((item) => item.ownerId === ownerId);
-  }
-
-  return items;
-}
+export type TypeFilter = "ALL" | "EXPENSE" | "INCOME";
 
 function buildEntries(items: TransactionUIModel[], now: Date): ListEntry[] {
   const sorted = [...items].sort((a, b) => b.date.getTime() - a.date.getTime());
@@ -64,6 +48,25 @@ function buildEntries(items: TransactionUIModel[], now: Date): ListEntry[] {
   return entries;
 }
 
+function filterByOwner(items: TransactionUIModel[], ownerFilter: string) {
+  if (ownerFilter === ALL_FILTER) {
+    return items;
+  }
+
+  return items.filter((item) => item.ownerId === ownerFilter);
+}
+
+function filterByType(items: TransactionUIModel[], typeFilter: TypeFilter) {
+  if (typeFilter === "EXPENSE") {
+    return items.filter((item) => item.isExpense);
+  }
+  if (typeFilter === "INCOME") {
+    return items.filter((item) => !item.isExpense);
+  }
+
+  return items;
+}
+
 // "Wed, 30 Sep": weekday, day-first, short month, in the active language.
 function formatDayTitle(day: Date, languageTag: string) {
   const weekday = new Intl.DateTimeFormat(languageTag, {
@@ -81,6 +84,10 @@ function formatMonthLabel(month: Date, languageTag: string) {
     month: "long",
     year: "numeric",
   }).format(month);
+}
+
+function formatMonthName(month: Date, languageTag: string) {
+  return new Intl.DateTimeFormat(languageTag, { month: "long" }).format(month);
 }
 
 function isInMonth(date: Date, month: Date) {
@@ -111,10 +118,6 @@ function netAmount(netCents: number): {
     type: netCents < 0 ? "EXPENSE" : "INCOME",
     value: Math.abs(netCents),
   };
-}
-
-function ownerFilter(ownerId: string) {
-  return `${OWNER_PREFIX}${ownerId}`;
 }
 
 function resolveDayLabel(day: Date, now: Date): DayLabel {
@@ -155,14 +158,15 @@ function stickyIndices(entries: ListEntry[]) {
 }
 
 export {
-  applyFilter,
   buildEntries,
+  filterByOwner,
+  filterByType,
   formatDayTitle,
   formatMonthLabel,
+  formatMonthName,
   isInMonth,
   monthChoices,
   netAmount,
-  ownerFilter,
   resolveDayLabel,
   shiftMonth,
   startOfMonth,

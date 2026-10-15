@@ -8,40 +8,30 @@ import { useCases } from "@application/useCases";
 import { useQuery } from "@infrastructure/fetcher";
 import useTranslationLocale from "@presentation/i18n/useTranslationLocale";
 import {
-  buildOwnerChoices,
-  ChoiceOption,
+  buildOwnerFilterChoices,
+  personalOwnerId as findPersonalOwnerId,
 } from "@screens/Financial/models/ownerOptions";
 import { listQueryKey } from "@screens/Financial/models/queryKeys";
 
 import {
   ALL_FILTER,
-  applyFilter,
   buildEntries,
+  filterByOwner,
+  filterByType,
   formatMonthLabel,
+  formatMonthName,
   isInMonth,
   monthChoices,
-  ownerFilter,
   shiftMonth,
   startOfMonth,
   stickyIndices,
+  TypeFilter,
 } from "../models/transactionList";
 import TransactionUIModel from "../models/TransactionUIModel";
 
 interface TransactionsData {
   items: TransactionUIModel[];
   owners: OwnerDTO[];
-}
-
-function buildFilterChoices(owners: OwnerDTO[]): ChoiceOption[] {
-  return [
-    { labelKey: "financial.common.all", value: ALL_FILTER },
-    { labelKey: "financial.common.expenses", value: "EXPENSE" },
-    { labelKey: "financial.common.incomes", value: "INCOME" },
-    ...buildOwnerChoices(owners).map((choice) => ({
-      ...choice,
-      value: ownerFilter(choice.value),
-    })),
-  ];
 }
 
 async function fetchSummary(
@@ -80,7 +70,8 @@ function useTransactionsViewModel() {
   const languageTag = getLocale().languageTag ?? "en-US";
 
   const [month, setMonth] = useState(() => startOfMonth(new Date()));
-  const [filter, setFilter] = useState(ALL_FILTER);
+  const [ownerSelection, setOwnerSelection] = useState(ALL_FILTER);
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>("ALL");
   const [isMonthPickerOpen, setMonthPickerOpen] = useState(false);
   const [pickerYear, setPickerYear] = useState(month.getFullYear());
 
@@ -90,13 +81,19 @@ function useTransactionsViewModel() {
   });
 
   const owners = transactions.data?.owners;
-  const summaryOwnerIds = useMemo(() => {
-    if (filter.startsWith("OWNER:")) {
-      return [filter.slice("OWNER:".length)];
-    }
-
-    return (owners ?? []).map((owner) => owner.id);
-  }, [filter, owners]);
+  // A selected family that is no longer an owner (user left it) falls back to All.
+  const ownerFilter =
+    ownerSelection === ALL_FILTER ||
+    (owners ?? []).some((owner) => owner.id === ownerSelection)
+      ? ownerSelection
+      : ALL_FILTER;
+  const summaryOwnerIds = useMemo(
+    () =>
+      ownerFilter === ALL_FILTER
+        ? (owners ?? []).map((owner) => owner.id)
+        : [ownerFilter],
+    [ownerFilter, owners],
+  );
 
   const summary = useQuery<MonthSummary>({
     cacheKey: [
@@ -123,8 +120,8 @@ function useTransactionsViewModel() {
     [transactions.data, month],
   );
   const visible = useMemo(
-    () => applyFilter(itemsOfMonth, filter),
-    [itemsOfMonth, filter],
+    () => filterByType(filterByOwner(itemsOfMonth, ownerFilter), typeFilter),
+    [itemsOfMonth, ownerFilter, typeFilter],
   );
   const entries = useMemo(() => buildEntries(visible, new Date()), [visible]);
 
@@ -146,8 +143,6 @@ function useTransactionsViewModel() {
   return {
     entries,
     errorMessage: transactions.error?.message,
-    filter,
-    filterChoices: buildFilterChoices(owners ?? []),
     isEmptyMonth: itemsOfMonth.length === 0,
     isFilteredEmpty: itemsOfMonth.length > 0 && visible.length === 0,
     isLoading: transactions.isFetching && !transactions.data,
@@ -156,14 +151,18 @@ function useTransactionsViewModel() {
     languageTag,
     monthChoices: monthChoices(languageTag),
     monthLabel: formatMonthLabel(month, languageTag),
+    monthName: formatMonthName(month, languageTag),
     onAddPress: () =>
       router.push({ pathname: "/financial/transaction/add_new_transaction" }),
-    onClearFilters: () => setFilter(ALL_FILTER),
-    onFilterChange: setFilter,
+    onClearFilters: () => {
+      setOwnerSelection(ALL_FILTER);
+      setTypeFilter("ALL");
+    },
     onMonthPickerClose: () => setMonthPickerOpen(false),
     onMonthPickerOpen,
     onMonthSelect,
     onNextMonth: () => setMonth((current) => shiftMonth(current, 1)),
+    onOwnerFilterChange: setOwnerSelection,
     onPickerYearChange: (delta: number) =>
       setPickerYear((year) => year + delta),
     onPreviousMonth: () => setMonth((current) => shiftMonth(current, -1)),
@@ -175,7 +174,11 @@ function useTransactionsViewModel() {
         pathname: "/financial/transaction/add_new_transaction",
       }),
     onSummaryRetry: async () => summary.refetch(),
+    onTypeFilterChange: (value: string) => setTypeFilter(value as TypeFilter),
+    ownerFilter,
+    personalOwnerId: findPersonalOwnerId(owners ?? []),
     pickerYear,
+    scopeChoices: buildOwnerFilterChoices(owners ?? []),
     selectedMonthIndex:
       pickerYear === month.getFullYear() ? String(month.getMonth()) : undefined,
     stickyIndices: stickyIndices(entries),
@@ -187,6 +190,7 @@ function useTransactionsViewModel() {
         }
       : undefined,
     summaryError: !!summary.error,
+    typeFilter,
   };
 }
 

@@ -1,0 +1,101 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/scope-and-type-filters
+tags:
+  - financial
+  - spec-025
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Family
+      KEY: FAMILY_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Family Expense
+      KEY: FAMILY_EXPENSE_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-family.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      NAME: ${output.FAMILY_NAME}
+- runFlow:
+    file: ../../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.FAMILY_ID}
+      OWNER: FAMILY
+      NAME: E2E Family Account
+- evalScript: ${output.FAMILY_ACCOUNT_ID = output.ACCOUNT_ID}
+- runFlow:
+    file: ../../../subflows/setup/create-category.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.FAMILY_ID}
+      OWNER: FAMILY
+      NAME: E2E Family Category
+      TYPE: EXPENSE
+- evalScript: ${output.FAMILY_CATEGORY_ID = output.CATEGORY_ID}
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER: FAMILY
+      OWNER_ID: ${output.FAMILY_ID}
+      ACCOUNT_ID: ${output.FAMILY_ACCOUNT_ID}
+      CATEGORY_ID: ${output.FAMILY_CATEGORY_ID}
+      DESCRIPTION: ${output.FAMILY_EXPENSE_NAME}
+      VALUE_CENTS: "4200"
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.FAMILY_EXPENSE_NAME}
+    timeout: 20000
+# Scope: the family. The caption under the balance shows its name.
+- tapOn:
+    id: "financial.transactions.scope-filter-${output.FAMILY_ID}"
+- assertVisible:
+    id: "financial.transactions.summary-scope"
+    text: ${output.FAMILY_NAME}
+- assertVisible:
+    id: "financial.transactions.summary-expense"
+    text: ".*42[.,]00.*"
+# Type: Income inside the family scope leaves the filtered-empty state; the card does not change
+- tapOn:
+    id: "financial.transactions.type-filter-INCOME"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.filtered-empty"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.transactions.row-title"
+    text: ${output.FAMILY_EXPENSE_NAME}
+- assertVisible:
+    id: "financial.transactions.summary-expense"
+    text: ".*42[.,]00.*"
+# Clear filters resets scope and type
+- tapOn:
+    id: "financial.transactions.filtered-empty-action"
+- assertVisible:
+    id: "financial.transactions.summary-scope"
+    text: "Everything"
+- assertVisible:
+    id: "financial.transactions.row-title"
+    text: ${output.FAMILY_EXPENSE_NAME}
+# Type: Expenses shows only expense rows
+- tapOn:
+    id: "financial.transactions.type-filter-EXPENSE"
+- assertVisible:
+    id: "financial.transactions.row-title"
+    text: ${output.FAMILY_EXPENSE_NAME}

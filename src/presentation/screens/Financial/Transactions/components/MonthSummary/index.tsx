@@ -1,8 +1,8 @@
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
-import { AmountText, Button, Card, MetricBlock, Text } from "@components";
+import { AmountText, Button, Card, Divider, Text } from "@components";
 import Skeleton from "@components/Skeleton";
-import useStyles from "@screens/Financial/Transactions/styles";
+import { useKitTheme } from "@components/utils/useKitTheme";
 
 interface Props {
   balanceCents: number;
@@ -13,15 +13,29 @@ interface Props {
   expenseTestID?: string;
   incomeCents: number;
   incomesLabel: string;
+  incomeTestID?: string;
   isError: boolean;
   isLoading: boolean;
   onRetry: () => void;
   retryLabel: string;
+  scopeLabel: string;
+  scopeTestID?: string;
   testID?: string;
 }
 
 function MonthSummary(props: Props) {
-  const { styles } = useStyles();
+  const { spacing } = useKitTheme();
+  const styles = StyleSheet.create({
+    column: {
+      flex: 1,
+      gap: spacing.xs,
+      paddingVertical: spacing.md,
+    },
+    columnLeft: { paddingLeft: spacing.lg, paddingRight: spacing.md },
+    columnRight: { paddingLeft: spacing.md, paddingRight: spacing.lg },
+    metrics: { flexDirection: "row" },
+    top: { gap: spacing.xs, padding: spacing.lg },
+  });
 
   if (props.isLoading) {
     return <Skeleton.Card />;
@@ -39,30 +53,39 @@ function MonthSummary(props: Props) {
   const negative = props.balanceCents < 0;
 
   return (
-    <Card testID={props.testID}>
-      <Text.Overline tone={"secondary"} value={props.balanceLabel} />
-      <AmountText
-        size={"heading"}
-        type={negative ? "EXPENSE" : undefined}
-        value={Math.abs(props.balanceCents)}
-      />
-      <View style={styles.summaryRow}>
-        <MetricBlock
-          label={props.incomesLabel}
-          trend={"income"}
-          value={<AmountText tone={"income"} value={props.incomeCents} />}
+    <Card customStyles={{ padding: 0 }} testID={props.testID}>
+      <View style={styles.top}>
+        <Text.Overline tone={"secondary"} value={props.balanceLabel} />
+        <AmountText
+          size={"heading"}
+          type={negative ? "EXPENSE" : undefined}
+          value={Math.abs(props.balanceCents)}
         />
-        <MetricBlock
-          label={props.expensesLabel}
-          trend={"expense"}
-          value={
-            <AmountText
-              testID={props.expenseTestID}
-              tone={"expense"}
-              value={props.expenseCents}
-            />
-          }
+        <Text.Caption
+          testID={props.scopeTestID}
+          tone={"secondary"}
+          value={props.scopeLabel}
         />
+      </View>
+      <Divider />
+      <View style={styles.metrics}>
+        <View style={[styles.column, styles.columnLeft]}>
+          <Text.Overline tone={"secondary"} value={props.incomesLabel} />
+          <AmountText
+            testID={props.incomeTestID}
+            tone={"income"}
+            value={props.incomeCents}
+          />
+        </View>
+        <Divider vertical />
+        <View style={[styles.column, styles.columnRight]}>
+          <Text.Overline tone={"secondary"} value={props.expensesLabel} />
+          <AmountText
+            testID={props.expenseTestID}
+            tone={"expense"}
+            value={props.expenseCents}
+          />
+        </View>
       </View>
     </Card>
   );

@@ -5,6 +5,7 @@ tags:
   - financial
   - spec-006
   - spec-013
+  - spec-025
 onFlowComplete:
   - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
 ---
@@ -116,7 +117,7 @@ onFlowComplete:
     timeout: 20000
 # Filter by the family: still visible
 - tapOn:
-    id: "financial.transactions.filter-OWNER:${output.FAMILY_ID}"
+    id: "financial.transactions.scope-filter-${output.FAMILY_ID}"
 - assertVisible:
     id: "financial.transactions.row-title"
     text: ${output.TRANSACTION_NAME}
