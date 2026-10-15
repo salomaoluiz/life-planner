@@ -1,4 +1,5 @@
 export { api } from "./client";
+export { refreshSessionIfNeeded } from "./refresh";
 export {
   clearAccountDeletedNotice,
   clearSessionExpiredNotice,
@@ -7,3 +8,4 @@ export {
   onSessionExpired,
   setAccountDeletedNotice,
 } from "./session";
+export { useRefreshOnForeground } from "./useRefreshOnForeground";

@@ -6,7 +6,9 @@ import * as session from "../session";
 jest.mock("@infrastructure/token", () => ({
   tokenStorage: {
     clearToken: jest.fn(),
+    getRefreshToken: jest.fn().mockResolvedValue(null),
     getToken: jest.fn().mockResolvedValue(null),
+    setRefreshToken: jest.fn(),
     setToken: jest.fn(),
   },
 }));
@@ -60,6 +62,7 @@ async function setupThrowable(method: Method, path: string, body?: unknown) {
 beforeEach(() => {
   jest.clearAllMocks();
   jest.mocked(tokenStorage.getToken).mockResolvedValue(null);
+  jest.mocked(tokenStorage.getRefreshToken).mockResolvedValue(null);
 });
 
 const spies = {

@@ -1,39 +1,13 @@
 import {
   ApiBusinessError,
-  ConnectivityError,
   GenericError,
   UserNotLoggedError,
 } from "@domain/entities/errors";
 import { tokenStorage } from "@infrastructure/token";
 
+import * as refresh from "./refresh";
 import * as session from "./session";
-
-const REQUEST_TIMEOUT_MS = 15_000;
-
-type Method = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
-
-function getBaseUrl() {
-  // Direct read is inlined by Expo at build time; the alias keeps it readable at runtime (tests).
-  const envs = process.env;
-  const url = process.env.EXPO_PUBLIC_API_URL ?? envs.EXPO_PUBLIC_API_URL;
-
-  if (!url) {
-    throw new Error("Missing EXPO_PUBLIC_API_URL");
-  }
-
-  return url.replace(/\/+$/, "");
-}
-
-function parseBody(text: string): Record<string, unknown> | undefined {
-  if (!text) {
-    return undefined;
-  }
-  try {
-    return JSON.parse(text) as Record<string, unknown>;
-  } catch {
-    return undefined;
-  }
-}
+import { getBaseUrl, type Method, send } from "./transport";
 
 const INVITE_TOKEN_SEGMENT = /(\/family-invites\/)[^/?#]+/;
 
@@ -46,42 +20,25 @@ async function request<T>(
   method: Method,
   path: string,
   body?: unknown,
+  retried = false,
 ): Promise<T> {
-  const baseUrl = getBaseUrl();
+  getBaseUrl(); // fail fast on a missing config, before touching storage
   // Auth endpoints are public: never send a (possibly stale) token to them.
   const token = path.startsWith("/v1/auth/")
     ? null
     : await tokenStorage.getToken();
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-
-  let status: number;
-  let json: Record<string, unknown> | undefined;
-
-  try {
-    const response = await fetch(`${baseUrl}${path}`, {
-      body: body === undefined ? undefined : JSON.stringify(body),
-      headers: {
-        Accept: "application/json",
-        ...(body !== undefined && { "Content-Type": "application/json" }),
-        ...(token && { Authorization: `Bearer ${token}` }),
-      },
-      method,
-      signal: controller.signal,
-    });
-    status = response.status;
-    json = parseBody(await response.text());
-  } catch {
-    throw new ConnectivityError();
-  } finally {
-    clearTimeout(timer);
-  }
+  const { json, status } = await send(method, path, body, token);
 
   if (status >= 200 && status < 300) {
     return json as T;
   }
 
   if (status === 401 && token) {
+    // May throw ConnectivityError/GenericError: the original request then fails with that error
+    // and the tokens are kept (being offline must not log the user out).
+    if (!retried && (await refresh.refreshAccessToken(token))) {
+      return request<T>(method, path, body, true);
+    }
     await session.handleSessionExpired(token);
     throw new UserNotLoggedError();
   }
