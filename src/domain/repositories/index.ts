@@ -7,6 +7,7 @@ import { FamilyMemberRepository } from "./familyMember";
 import {
   FinancialAccountRepository,
   FinancialCategoryRepository,
+  FinancialCreditCardRepository,
   FinancialTransactionRepository,
 } from "./financial";
 import { StockRepository } from "./stock";
@@ -20,6 +21,7 @@ interface Repositories {
   financialRepository: {
     account: FinancialAccountRepository;
     category: FinancialCategoryRepository;
+    creditCard: FinancialCreditCardRepository;
     transaction: FinancialTransactionRepository;
   };
   loginRepository: LoginRepository;
