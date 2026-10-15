@@ -3,7 +3,7 @@ import { View } from "react-native";
 import { Card, Screen, ScreenHeader } from "@components";
 import { useTranslation } from "@presentation/i18n";
 
-import { Language, Logout, Theme } from "./containers";
+import { DeleteAccount, Language, Logout, Theme } from "./containers";
 import useStyles from "./styles";
 
 function Config() {
@@ -21,6 +21,7 @@ function Config() {
       </Card>
       <View style={styles.logout}>
         <Logout />
+        <DeleteAccount />
       </View>
     </Screen>
   );

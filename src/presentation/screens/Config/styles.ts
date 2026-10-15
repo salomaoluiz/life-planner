@@ -8,7 +8,7 @@ function useStyles() {
   return {
     styles: StyleSheet.create({
       fields: { gap: theme.sizes.spacing.lg },
-      logout: { alignItems: "flex-start" },
+      logout: { alignItems: "flex-start", gap: theme.sizes.spacing.md },
     }),
   };
 }

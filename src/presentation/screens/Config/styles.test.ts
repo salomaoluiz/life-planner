@@ -9,4 +9,5 @@ it("SHOULD space the fields by lg and align the logout action to the content edg
 
   expect(StyleSheet.flatten(styles.fields).gap).toBe(20);
   expect(StyleSheet.flatten(styles.logout).alignItems).toBe("flex-start");
+  expect(StyleSheet.flatten(styles.logout).gap).toBe(16);
 });
