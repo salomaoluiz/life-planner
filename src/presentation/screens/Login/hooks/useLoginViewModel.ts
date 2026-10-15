@@ -59,10 +59,13 @@ function useLoginViewModel() {
   const [sessionExpired, setSessionExpired] = useState(hasSessionExpiredNotice);
   const [accountDeleted, setAccountDeleted] = useState(hasAccountDeletedNotice);
 
-  // Shown once: the flag is consumed after the screen mounted with it.
+  // Shown once: the flag is consumed only when the form is really on screen. Right after the deletion the
+  // user query is still "logged" for a moment and this screen just redirects, so it must survive that mount.
   useEffect(() => {
-    clearAccountDeletedNotice();
-  }, []);
+    if (!logged) {
+      clearAccountDeletedNotice();
+    }
+  }, [logged]);
 
   // The fetch function never rejects: failures become form messages, not error boundaries.
   const { isFetching, mutate } = useMutation<SubmitParams, SubmitResult>({

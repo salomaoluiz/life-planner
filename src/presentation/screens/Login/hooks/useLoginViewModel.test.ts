@@ -252,6 +252,19 @@ it("SHOULD show the account deleted notice WHEN the flag is set AND consume it o
   expect(spies.clearAccountDeletedNotice).toHaveBeenCalledTimes(1);
 });
 
+it("SHOULD keep the flag WHILE the user query is still logged (the screen only redirects), and show it on the next mount", () => {
+  spies.hasAccountDeletedNotice.mockReturnValue(true);
+  spies.useUser.mockReturnValue({
+    data: undefined,
+    logged: true,
+    update: jest.fn(),
+  } as never);
+
+  setup();
+
+  expect(spies.clearAccountDeletedNotice).not.toHaveBeenCalled();
+});
+
 it("SHOULD NOT show the notice WHEN the flag is not set, but still consume it", () => {
   const { result } = setup();
 
