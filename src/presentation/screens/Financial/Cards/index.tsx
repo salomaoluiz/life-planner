@@ -136,6 +136,7 @@ function FinancialCards() {
             options={[
               { label: t("financial.cards.open"), value: "open" },
               { label: t("financial.cards.closed"), value: "closed" },
+              { label: t("financial.cards.upcoming"), value: "upcoming" },
             ]}
             testID={cardsTestIds.invoiceTabs}
             value={vm.invoiceTab}
@@ -147,7 +148,24 @@ function FinancialCards() {
 
   function renderItem({ item }: { item: CardEntry }) {
     if (item.kind === "invoice") {
-      return <InvoiceRow invoice={item.invoice} />;
+      return (
+        <InvoiceRow
+          invoice={item.invoice}
+          onPress={() =>
+            vm.onInvoicePress(item.cardId, item.invoice.referenceMonth)
+          }
+        />
+      );
+    }
+
+    if (item.kind === "noUpcoming") {
+      return (
+        <Text.Body
+          testID={cardsTestIds.noUpcoming}
+          tone="secondary"
+          value={t("financial.cards.noUpcoming")}
+        />
+      );
     }
 
     if (item.kind === "noClosed") {

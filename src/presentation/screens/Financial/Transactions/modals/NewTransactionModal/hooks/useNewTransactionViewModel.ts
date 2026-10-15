@@ -2,6 +2,8 @@ import { useIsFocused } from "@react-navigation/native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import CreditCardOverviewDTO from "@application/dto/financial/CreditCardOverviewDTO";
+import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
@@ -9,12 +11,18 @@ import { useMutation, useQuery } from "@infrastructure/fetcher";
 import { normalizeCategoryColor } from "@presentation/constants/categoryColors";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { filterRowsByQuery } from "@screens/Financial/models/categoryTree";
+import {
+  dueDateOf,
+  invoiceMonthOf,
+} from "@screens/Financial/models/invoiceMonth";
 import { personalOwnerId } from "@screens/Financial/models/ownerOptions";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
+import { decimalStringToCents } from "@utils/money";
 
 import NewTransactionUIModel from "../models/NewTransactionUIModel";
 import {
   changeOwner,
+  changePayWith,
   changeType,
   chipCategories,
   createInitialState,
@@ -28,6 +36,54 @@ import {
   validate,
 } from "../models/transactionFormState";
 
+// Live hints of Card mode (spec 029 FR 30): which invoice the purchase lands on, whether it passes
+// the limit (non-blocking) and whether that invoice is already paid (blocks saving).
+function cardHintsOf(
+  state: TransactionFormState | undefined,
+  uiModel: NewTransactionUIModel | undefined,
+  overview: CreditCardOverviewDTO | undefined,
+  existing: TransactionDTO | undefined,
+) {
+  const none = {
+    invoiceHint: undefined,
+    isInvoicePaid: false,
+    monthDate: undefined,
+    overLimitCents: 0,
+  };
+  const card =
+    state?.payWith === "CARD" ? uiModel?.card(state.creditCardId) : undefined;
+
+  if (!state || !card) {
+    return none;
+  }
+
+  const date = state.date;
+  const day = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  const month = invoiceMonthOf(day, card.closingDay);
+  const summary = overview?.cards.find((item) => item.card.id === card.id);
+  const paid = (summary?.closedInvoices ?? []).some(
+    (invoice) => invoice.referenceMonth === month && invoice.status === "PAID",
+  );
+  // The purchase being edited already counts in `used`: give its value back before comparing.
+  const stored =
+    existing?.creditCardId === card.id
+      ? decimalStringToCents(existing.value)
+      : 0;
+  const available = summary ? summary.available + stored : undefined;
+  const [year, monthNumber] = month.split("-").map(Number);
+
+  return {
+    invoiceHint: {
+      due: dueDateOf(month, card.closingDay, card.dueDay),
+      month,
+    },
+    isInvoicePaid: paid,
+    monthDate: new Date(year, monthNumber - 1, 1),
+    overLimitCents:
+      available === undefined ? 0 : Math.max(0, state.amountCents - available),
+  };
+}
+
 async function fetchByOwners<T>(
   owners: OwnerDTO[],
   execute: (ownerIds: string[]) => Promise<T>,
@@ -36,7 +92,7 @@ async function fetchByOwners<T>(
 }
 
 function useNewTransactionViewModel() {
-  const params = useLocalSearchParams<{ id?: string }>();
+  const params = useLocalSearchParams<{ creditCardId?: string; id?: string }>();
   const isEditing = !!params.id;
   const isFocused = useIsFocused();
 
@@ -49,6 +105,25 @@ function useNewTransactionViewModel() {
     enabled: !!owners.data,
     fetch: async () =>
       fetchByOwners(owners.data!, useCases.getFinancialAccountsUseCase.execute),
+  });
+  const cards = useQuery({
+    cacheKey: [useCases.getFinancialCreditCardsUseCase.uniqueName],
+    enabled: !!owners.data,
+    fetch: async () =>
+      fetchByOwners(
+        owners.data!,
+        useCases.getFinancialCreditCardsUseCase.execute,
+      ),
+  });
+  // The overview carries the available limit and the paid invoices used by the live hints.
+  const overview = useQuery({
+    cacheKey: [useCases.getFinancialCreditCardsOverviewUseCase.uniqueName],
+    enabled: !!owners.data,
+    fetch: async () =>
+      fetchByOwners(
+        owners.data!,
+        useCases.getFinancialCreditCardsOverviewUseCase.execute,
+      ),
   });
   const categories = useQuery({
     cacheKey: [useCases.getFinancialCategoriesUseCase.uniqueName],
@@ -73,11 +148,12 @@ function useNewTransactionViewModel() {
       owners.data && accounts.data && categories.data
         ? new NewTransactionUIModel({
             accounts: accounts.data,
+            cards: cards.data,
             categories: categories.data,
             owners: owners.data,
           })
         : undefined,
-    [owners.data, accounts.data, categories.data],
+    [owners.data, accounts.data, cards.data, categories.data],
   );
 
   const existing = transactions.data?.find((item) => item.id === params.id);
@@ -93,10 +169,18 @@ function useNewTransactionViewModel() {
 
     return createInitialState({
       accounts: accounts.data,
+      card: uiModel.card(params.creditCardId),
       now: new Date(),
       ownerId: personalOwnerId(owners.data) ?? owners.data[0].id,
     });
-  }, [uiModel, owners.data, accounts.data, isEditing, existing]);
+  }, [
+    uiModel,
+    owners.data,
+    accounts.data,
+    isEditing,
+    existing,
+    params.creditCardId,
+  ]);
 
   const [edited, setEdited] = useState<TransactionFormState>();
   const [submitted, setSubmitted] = useState(false);
@@ -151,6 +235,8 @@ function useNewTransactionViewModel() {
   useEffect(() => {
     if (isFocused) {
       accounts.refetch();
+      cards.refetch();
+      overview.refetch();
       categories.refetch();
     }
   }, [isFocused]);
@@ -177,6 +263,7 @@ function useNewTransactionViewModel() {
   }, [accounts.data, categories.data]);
 
   const errors = submitted && state ? validate(state) : {};
+  const cardHints = cardHintsOf(state, uiModel, overview.data, existing);
   const formErrorKey = getFinancialErrorMessageKey(
     createMutation.error ?? updateMutation.error ?? deleteMutation.error,
   );
@@ -187,7 +274,12 @@ function useNewTransactionViewModel() {
 
   function onSave() {
     setSubmitted(true);
-    if (!state || !uiModel || Object.keys(validate(state)).length) {
+    if (
+      !state ||
+      !uiModel ||
+      cardHints.isInvoicePaid ||
+      Object.keys(validate(state)).length
+    ) {
       return;
     }
     const owner = uiModel.owner(state.ownerId);
@@ -260,6 +352,8 @@ function useNewTransactionViewModel() {
     accountOptions: uiModel?.accountOptions(ownerId, state?.accountId) ?? [],
     amountCents: state?.amountCents ?? 0,
     amountError: errors.amount,
+    cardError: errors.creditCardId,
+    cardOptions: uiModel?.cardOptions(ownerId, state?.creditCardId) ?? [],
     categoryChips,
     categoryError: errors.categoryId,
     categoryPickerRows: uiModel
@@ -271,15 +365,23 @@ function useNewTransactionViewModel() {
     description: state?.description ?? "",
     descriptionError: errors.description,
     formErrorKey,
+    hasCards:
+      (cards.data ?? []).some((card) => card.status === "ACTIVE") ||
+      state?.payWith === "CARD",
     hasNoAccounts: uiModel ? !uiModel.hasAccounts(ownerId) : false,
+    hasNoCards: uiModel ? !uiModel.hasCards(ownerId) : false,
     hasNoCategories: uiModel ? !uiModel.hasCategories(ownerId, type) : false,
+    invoiceHint: cardHints.invoiceHint,
+    invoiceMonthLabelDate: cardHints.monthDate,
     isCategoryPickerOpen,
     isDeleteDialogOpen,
     isDeleting: deleteMutation.isFetching,
     isDiscardDialogOpen,
     isEditing,
+    isInvoicePaid: cardHints.isInvoicePaid,
     isLoading: !state && !isNotFound,
     isNotFound,
+    isSaveDisabled: cardHints.isInvoicePaid,
     isSaving: createMutation.isFetching || updateMutation.isFetching,
     onAccountChange: (id: string) => {
       if (state) {
@@ -289,6 +391,11 @@ function useNewTransactionViewModel() {
     onAmountChange: (cents: number) => {
       if (state) {
         update({ ...state, amountCents: cents });
+      }
+    },
+    onCardChange: (id: string) => {
+      if (state) {
+        update({ ...state, creditCardId: id });
       }
     },
     onCategoryPickerClose: () => setCategoryPickerOpen(false),
@@ -324,7 +431,25 @@ function useNewTransactionViewModel() {
     onOwnerChange: (id: string) => {
       if (state) {
         update(
-          changeOwner(state, id, categories.data ?? [], accounts.data ?? []),
+          changeOwner(
+            state,
+            id,
+            categories.data ?? [],
+            accounts.data ?? [],
+            cards.data ?? [],
+          ),
+        );
+      }
+    },
+    onPayWithChange: (value: string) => {
+      if (state) {
+        update(
+          changePayWith(
+            state,
+            value === "CARD" ? "CARD" : "ACCOUNT",
+            categories.data ?? [],
+            cards.data ?? [],
+          ),
         );
       }
     },
@@ -334,10 +459,13 @@ function useNewTransactionViewModel() {
         update(changeType(state, next, categories.data ?? []));
       }
     },
+    overLimitCents: cardHints.overLimitCents,
     ownerChoices: uiModel?.ownerChoices ?? [],
     ownerId,
+    payWith: state?.payWith ?? "ACCOUNT",
     saveLabelKey,
     selectedAccountId: state?.accountId,
+    selectedCardId: state?.creditCardId,
     selectedCategoryId: state?.categoryId,
     titleKey: (isEditing
       ? "financial.transactions.form.editTitle"

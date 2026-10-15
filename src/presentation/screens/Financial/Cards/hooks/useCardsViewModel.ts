@@ -18,11 +18,13 @@ import {
   buildCardEntries,
   filterCardsByOwner,
   filterSummariesByOwner,
+  InvoiceTab,
   resolveSelectedId,
   usedProgress,
 } from "../models/cardList";
 
 const FORM_ROUTE = "/financial/credit_card/add_new_credit_card";
+const INVOICE_ROUTE = "/financial/invoice/invoice_detail";
 
 interface CardsData {
   cards: CreditCardDTO[];
@@ -45,7 +47,7 @@ function useCardsViewModel() {
   const isFocused = useIsFocused();
   const [ownerFilter, setOwnerFilter] = useState(ALL_OWNERS);
   const [selectedId, setSelectedId] = useState<string>();
-  const [invoiceTab, setInvoiceTab] = useState<"closed" | "open">("open");
+  const [invoiceTab, setInvoiceTab] = useState<InvoiceTab>("open");
   const [archivedExpanded, setArchivedExpanded] = useState(false);
 
   const query = useQuery<CardsData>({
@@ -107,8 +109,15 @@ function useCardsViewModel() {
         } as never);
       }
     },
+    onInvoicePress: (cardId: string, month: string) =>
+      router.push({
+        params: { cardId, month },
+        pathname: INVOICE_ROUTE,
+      } as never),
     onInvoiceTabChange: (value: string) =>
-      setInvoiceTab(value === "closed" ? "closed" : "open"),
+      setInvoiceTab(
+        value === "closed" || value === "upcoming" ? value : "open",
+      ),
     onOwnerFilterChange: setOwnerFilter,
     onRefresh: async () => query.refetch(),
     onRetry: async () => query.refetch(),

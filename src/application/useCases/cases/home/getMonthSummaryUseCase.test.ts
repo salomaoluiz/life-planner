@@ -141,3 +141,59 @@ it("SHOULD sum only the transactions of the requested owners (the repository ret
 
   expect(await setup()).toEqual({ balance: 10000, expense: 0, income: 10000 });
 });
+
+describe("card invoices (spec 029 FR 25)", () => {
+  const getInvoices = spies.creditCardRepository.getCardInvoicesForMonth;
+
+  function invoiceOf(ownerId: string, amount: number) {
+    return {
+      card: { ownerId },
+      invoice: { amount },
+    } as never;
+  }
+
+  it("SHOULD ask for the invoices of the selected month and owners", async () => {
+    await setup();
+
+    expect(getInvoices).toHaveBeenCalledWith({
+      month: "2026-10",
+      ownerIds: mocks.defaultParams.ownerIds,
+    });
+  });
+
+  it("SHOULD add the amount of the month's invoices to the expenses", async () => {
+    getTransactions.mockResolvedValueOnce([
+      transaction(new Date(2026, 9, 2), "10.00", TransactionType.EXPENSE),
+    ]);
+    getInvoices.mockResolvedValueOnce([
+      invoiceOf(mocks.defaultParams.ownerIds[0], 45000),
+      invoiceOf("someone-else", 99999),
+    ]);
+
+    expect(await setup()).toEqual({
+      balance: -46000,
+      expense: 46000,
+      income: 0,
+    });
+  });
+
+  it("SHOULD NOT count card purchases in the month they were bought", async () => {
+    getTransactions.mockResolvedValueOnce([
+      new TransactionEntityFixture()
+        .withDefault()
+        .withOwnerId(mocks.defaultParams.ownerIds[0])
+        .withCard("card-1", "2026-10")
+        .withDate(new Date(2026, 9, 2))
+        .withValue("250.00")
+        .build(),
+    ]);
+
+    expect(await setup()).toEqual({ balance: 0, expense: 0, income: 0 });
+  });
+
+  it("SHOULD rethrow a failing invoices request", async () => {
+    getInvoices.mockRejectedValueOnce(mocks.errors.unknown);
+
+    expect(await setupThrowable()).toBe(mocks.errors.unknown);
+  });
+});

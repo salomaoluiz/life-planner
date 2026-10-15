@@ -1,0 +1,63 @@
+import CardInvoiceDTO from "@application/dto/financial/CardInvoiceDTO";
+import { InvoiceDTO } from "@application/dto/financial/CreditCardOverviewDTO";
+
+import CardInvoiceUIModel from "../models/CardInvoiceUIModel";
+
+function makeInvoice(
+  overrides: Partial<ConstructorParameters<typeof InvoiceDTO>[0]> = {},
+) {
+  return new CardInvoiceUIModel(makeInvoiceDTO(overrides));
+}
+
+function makeInvoiceDTO(
+  overrides: Partial<ConstructorParameters<typeof InvoiceDTO>[0]> = {},
+  purchases = 2,
+) {
+  return new CardInvoiceDTO({
+    card: {
+      color: "#2B3A8C",
+      id: "card-1",
+      lastDigits: "1234",
+      owner: "USER" as never,
+      ownerId: "user-id",
+      title: "Main card",
+    },
+    invoice: new InvoiceDTO({
+      amount: 45000,
+      closingDate: "2026-10-31",
+      dueDate: "2026-11-10",
+      listDate: "2026-11-05",
+      paymentAfterDue: false,
+      paymentDate: "2026-11-05",
+      periodEnd: "2026-10-31",
+      periodStart: "2026-10-01",
+      referenceMonth: "2026-10",
+      status: "CLOSED",
+      ...overrides,
+    }),
+    purchases: [
+      {
+        category: "Food",
+        categoryIcon: "cart",
+        categoryIconColor: "#2E7D32",
+        categoryId: "cat-1",
+        date: "2026-10-02",
+        description: "Market",
+        id: "purchase-1",
+        ownerId: "user-id",
+        value: 25000,
+      },
+      {
+        category: "Transport",
+        categoryId: "cat-2",
+        date: "2026-10-28",
+        description: "Fuel",
+        id: "purchase-2",
+        ownerId: "user-id",
+        value: 20000,
+      },
+    ].slice(0, purchases),
+  });
+}
+
+export { makeInvoice, makeInvoiceDTO };

@@ -46,6 +46,7 @@ const transactionRepositorySpy = jest.mocked(
 beforeEach(() => {
   jest.clearAllMocks();
   transactionRepositorySpy.getTransactions.mockResolvedValue([]);
+  creditCardRepositorySpy.getCardInvoicesForMonth.mockResolvedValue([]);
 });
 
 async function setup(params: GetMonthSummaryUseCaseParams = defaultParams) {
@@ -62,7 +63,14 @@ async function setupThrowable(
   }
 }
 
-const spies = { transactionRepository: transactionRepositorySpy };
+const creditCardRepositorySpy = jest.mocked(
+  repositoriesMocks.financialRepository.creditCard,
+);
+
+const spies = {
+  creditCardRepository: creditCardRepositorySpy,
+  transactionRepository: transactionRepositorySpy,
+};
 
 const mocks = {
   defaultParams,

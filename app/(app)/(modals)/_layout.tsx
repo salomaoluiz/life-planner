@@ -13,6 +13,7 @@ export default function AppLayout() {
       <Stack.Screen name={"financial/category/add_new_category"} />
       <Stack.Screen name={"financial/account/add_new_account"} />
       <Stack.Screen name={"financial/credit_card/add_new_credit_card"} />
+      <Stack.Screen name={"financial/invoice/invoice_detail"} />
       <Stack.Screen name={"invite"} />
       <Stack.Screen name={"quick_add"} />
     </Stack>

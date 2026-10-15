@@ -11,6 +11,7 @@ import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { useQuery } from "@infrastructure/fetcher";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
 
+import CardInvoiceUIModel from "../../models/CardInvoiceUIModel";
 import TransactionUIModel from "../../models/TransactionUIModel";
 import useTransactionsViewModel from "../useTransactionsViewModel";
 
@@ -23,6 +24,10 @@ jest.mock("@presentation/i18n/useTranslationLocale", () => ({
 }));
 jest.mock("@application/useCases", () => ({
   useCases: {
+    getFinancialCardInvoicesForMonthUseCase: {
+      execute: jest.fn(),
+      uniqueName: "cardInvoices",
+    },
     getFinancialCategoriesUseCase: {
       execute: jest.fn(),
       uniqueName: "categories",
@@ -79,6 +84,7 @@ const transactionsQuery = new UseQueryFixture<{
   items: TransactionUIModel[];
   owners: OwnerDTO[];
 }>();
+const invoicesQuery = new UseQueryFixture<CardInvoiceUIModel[]>();
 const summaryQuery = new UseQueryFixture<{
   balance: number;
   expense: number;
@@ -89,6 +95,9 @@ const summaryQuery = new UseQueryFixture<{
 // region spies
 const spies = {
   getCategories: jest.mocked(useCases.getFinancialCategoriesUseCase.execute),
+  getInvoices: jest.mocked(
+    useCases.getFinancialCardInvoicesForMonthUseCase.execute,
+  ),
   getOwners: jest.mocked(useCases.getOwnersUseCase.execute),
   getSummary: jest.mocked(useCases.getMonthSummaryUseCase.execute),
   getTransactions: jest.mocked(
@@ -105,11 +114,19 @@ beforeEach(() => {
   jest.useFakeTimers().setSystemTime(new Date(2026, 9, 5, 12));
   transactionsQuery.reset();
   summaryQuery.reset();
+  invoicesQuery.reset();
+  invoicesQuery.withData([]);
   spies.isFocused.mockReturnValue(false);
-  spies.useQuery.mockImplementation(((options: { cacheKey: string[] }) =>
-    options.cacheKey[0] === "summary"
-      ? summaryQuery.build()
-      : transactionsQuery.build()) as never);
+  spies.useQuery.mockImplementation(((options: { cacheKey: string[] }) => {
+    if (options.cacheKey[0] === "summary") {
+      return summaryQuery.build();
+    }
+    if (options.cacheKey[0] === "cardInvoices") {
+      return invoicesQuery.build();
+    }
+
+    return transactionsQuery.build();
+  }) as never);
 });
 
 function givenData(items: TransactionUIModel[]) {
@@ -134,6 +151,7 @@ function ui(
 export {
   dto,
   givenData,
+  invoicesQuery,
   owners,
   setup,
   spies,

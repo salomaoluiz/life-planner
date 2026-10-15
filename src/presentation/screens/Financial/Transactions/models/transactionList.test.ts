@@ -1,10 +1,13 @@
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 
+import { makeInvoice } from "../mocks/invoice.mocks";
 import {
   ALL_FILTER,
   buildEntries,
   filterByOwner,
   filterByType,
+  filterInvoicesByOwner,
+  filterInvoicesByType,
   formatDayTitle,
   formatMonthLabel,
   formatMonthName,
@@ -202,5 +205,51 @@ describe("formatting", () => {
     expect(choices).toHaveLength(12);
     expect(choices[0]).toEqual({ label: "January", value: "0" });
     expect(choices[11]).toEqual({ label: "December", value: "11" });
+  });
+});
+
+describe("card invoice lines (spec 029)", () => {
+  it("SHOULD put the invoice in the day section of its list day, between account rows", () => {
+    const entries = buildEntries(
+      [
+        tx("before", new Date(2026, 10, 6)),
+        tx("same-day", new Date(2026, 10, 5)),
+      ],
+      now,
+      [makeInvoice()],
+    );
+
+    expect(entries.map((entry) => entry.kind)).toEqual([
+      "header",
+      "item",
+      "header",
+      "item",
+      "invoice",
+    ]);
+    const header = entries[2];
+    expect(header.kind === "header" && header.netCents).toBe(-1000 - 45000);
+  });
+
+  it("SHOULD build a day with only an invoice", () => {
+    const entries = buildEntries([], now, [makeInvoice()]);
+
+    expect(entries).toHaveLength(2);
+    expect(entries[0]).toMatchObject({ kind: "header", netCents: -45000 });
+  });
+
+  it("SHOULD hide invoices for the Income filter AND keep them for Expense and All", () => {
+    const invoices = [makeInvoice()];
+
+    expect(filterInvoicesByType(invoices, "INCOME")).toEqual([]);
+    expect(filterInvoicesByType(invoices, "EXPENSE")).toBe(invoices);
+    expect(filterInvoicesByType(invoices, "ALL")).toBe(invoices);
+  });
+
+  it("SHOULD filter invoices by the owner of the card", () => {
+    const invoices = [makeInvoice()];
+
+    expect(filterInvoicesByOwner(invoices, ALL_FILTER)).toBe(invoices);
+    expect(filterInvoicesByOwner(invoices, "user-id")).toHaveLength(1);
+    expect(filterInvoicesByOwner(invoices, "family-1")).toEqual([]);
   });
 });

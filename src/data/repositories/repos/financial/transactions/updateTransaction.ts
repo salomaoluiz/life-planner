@@ -11,6 +11,7 @@ async function updateTransaction(params: Params, datasources: Datasources) {
     accountId: params.accountId,
     category: params.category,
     categoryId: params.categoryId,
+    creditCardId: params.creditCardId,
     date: params.date,
     description: params.description,
     id: params.id,

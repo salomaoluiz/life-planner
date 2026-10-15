@@ -19,8 +19,12 @@ export {
 export {
   createCreditCardUseCase as createFinancialCreditCardUseCase,
   deleteCreditCardUseCase as deleteFinancialCreditCardUseCase,
+  getCardInvoicesForMonthUseCase as getFinancialCardInvoicesForMonthUseCase,
+  getCardInvoiceUseCase as getFinancialCardInvoiceUseCase,
   getCreditCardsOverviewUseCase as getFinancialCreditCardsOverviewUseCase,
   getCreditCardsUseCase as getFinancialCreditCardsUseCase,
+  payInvoiceUseCase as payFinancialInvoiceUseCase,
+  undoInvoicePaymentUseCase as undoFinancialInvoicePaymentUseCase,
   updateCreditCardUseCase as updateFinancialCreditCardUseCase,
 } from "./creditCards";
 

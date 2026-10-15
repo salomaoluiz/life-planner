@@ -1,5 +1,6 @@
 import AccountDTO from "@application/dto/financial/AccountDTO";
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
+import CreditCardDTO from "@application/dto/financial/CreditCardDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { TranslationKeys } from "@presentation/i18n/types";
@@ -17,6 +18,7 @@ interface AccountOption {
 
 interface Props {
   accounts: AccountDTO[];
+  cards?: CreditCardDTO[];
   categories: CategoryDTO[];
   owners: OwnerDTO[];
 }
@@ -66,6 +68,34 @@ class NewTransactionUIModel {
     ];
   }
 
+  card(cardId?: string) {
+    return (this.props.cards ?? []).find((card) => card.id === cardId);
+  }
+
+  // Archived cards are not offered for new purchases; the selected one stays so an old purchase can be edited.
+  cardOptions(ownerId: string, selectedCardId?: string): AccountOption[] {
+    const cards = this.cardsOf(ownerId);
+    const active = cards
+      .filter((card) => card.status !== "ARCHIVED")
+      .sort((a, b) => a.title.localeCompare(b.title));
+    const selectedArchived = cards.find(
+      (card) => card.status === "ARCHIVED" && card.id === selectedCardId,
+    );
+
+    return [...active, ...(selectedArchived ? [selectedArchived] : [])].map(
+      (card) => ({
+        descriptionKey:
+          card.status === "ARCHIVED"
+            ? ("financial.accounts.archivedLabel" as TranslationKeys)
+            : undefined,
+        label: card.lastDigits
+          ? `${card.title} ••${card.lastDigits}`
+          : card.title,
+        value: card.id,
+      }),
+    );
+  }
+
   categoriesFor(ownerId: string, type: string) {
     return categoriesOf(this.props.categories, ownerId, type);
   }
@@ -91,6 +121,10 @@ class NewTransactionUIModel {
     );
   }
 
+  hasCards(ownerId: string) {
+    return this.cardsOf(ownerId).some((card) => card.status !== "ARCHIVED");
+  }
+
   hasCategories(ownerId: string, type: string) {
     return this.categoriesFor(ownerId, type).length > 0;
   }
@@ -104,6 +138,10 @@ class NewTransactionUIModel {
 
   private accountsOf(ownerId: string) {
     return this.props.accounts.filter((account) => account.ownerId === ownerId);
+  }
+
+  private cardsOf(ownerId: string) {
+    return (this.props.cards ?? []).filter((card) => card.ownerId === ownerId);
   }
 }
 

@@ -1,3 +1,4 @@
+import CardInvoiceUIModel from "./CardInvoiceUIModel";
 import TransactionUIModel from "./TransactionUIModel";
 
 export const ALL_FILTER = "ALL";
@@ -14,24 +15,47 @@ export type ListEntry =
       label: DayLabel;
       netCents: number;
     }
+  | { invoice: CardInvoiceUIModel; key: string; kind: "invoice" }
   | { item: TransactionUIModel; key: string; kind: "item" };
 
 export type TypeFilter = "ALL" | "EXPENSE" | "INCOME";
 
-function buildEntries(items: TransactionUIModel[], now: Date): ListEntry[] {
-  const sorted = [...items].sort((a, b) => b.date.getTime() - a.date.getTime());
+// Account rows and card invoice lines share the day sections: an invoice sits on its list day.
+function buildEntries(
+  items: TransactionUIModel[],
+  now: Date,
+  invoices: CardInvoiceUIModel[] = [],
+): ListEntry[] {
+  const rows = [
+    ...items.map((item) => ({
+      date: item.date,
+      dateKey: item.dateKey,
+      entry: { item, key: `item-${item.id}`, kind: "item" } as const,
+      signedCents: item.signedCents,
+    })),
+    ...invoices.map((invoice) => ({
+      date: invoice.listDate,
+      dateKey: invoice.dateKey,
+      entry: {
+        invoice,
+        key: `invoice-${invoice.id}`,
+        kind: "invoice",
+      } as const,
+      signedCents: invoice.signedCents,
+    })),
+  ].sort((a, b) => b.date.getTime() - a.date.getTime());
   const entries: ListEntry[] = [];
   let currentKey: string | undefined;
   let headerIndex = -1;
 
-  sorted.forEach((item) => {
-    if (item.dateKey !== currentKey) {
-      currentKey = item.dateKey;
-      const day = startOfDay(item.date);
+  rows.forEach((row) => {
+    if (row.dateKey !== currentKey) {
+      currentKey = row.dateKey;
+      const day = startOfDay(row.date);
       headerIndex = entries.length;
       entries.push({
         day,
-        key: `header-${item.dateKey}`,
+        key: `header-${row.dateKey}`,
         kind: "header",
         label: resolveDayLabel(day, now),
         netCents: 0,
@@ -40,9 +64,9 @@ function buildEntries(items: TransactionUIModel[], now: Date): ListEntry[] {
 
     const header = entries[headerIndex];
     if (header.kind === "header") {
-      header.netCents += item.signedCents;
+      header.netCents += row.signedCents;
     }
-    entries.push({ item, key: `item-${item.id}`, kind: "item" });
+    entries.push(row.entry);
   });
 
   return entries;
@@ -65,6 +89,25 @@ function filterByType(items: TransactionUIModel[], typeFilter: TypeFilter) {
   }
 
   return items;
+}
+
+function filterInvoicesByOwner(
+  invoices: CardInvoiceUIModel[],
+  ownerFilter: string,
+) {
+  if (ownerFilter === ALL_FILTER) {
+    return invoices;
+  }
+
+  return invoices.filter((invoice) => invoice.ownerId === ownerFilter);
+}
+
+// Card invoices are expenses: the Income filter hides them.
+function filterInvoicesByType(
+  invoices: CardInvoiceUIModel[],
+  typeFilter: TypeFilter,
+) {
+  return typeFilter === "INCOME" ? [] : invoices;
 }
 
 // "Wed, 30 Sep": weekday, day-first, short month, in the active language.
@@ -161,6 +204,8 @@ export {
   buildEntries,
   filterByOwner,
   filterByType,
+  filterInvoicesByOwner,
+  filterInvoicesByType,
   formatDayTitle,
   formatMonthLabel,
   formatMonthName,

@@ -19,6 +19,7 @@ export class CreditCardSummaryEntity {
   card: CreditCardEntity;
   closedInvoices: InvoiceEntity[];
   openInvoice: InvoiceEntity;
+  upcomingInvoices: InvoiceEntity[];
   used: number;
 
   constructor(params: {
@@ -26,12 +27,14 @@ export class CreditCardSummaryEntity {
     card: CreditCardEntity;
     closedInvoices: InvoiceEntity[];
     openInvoice: InvoiceEntity;
+    upcomingInvoices: InvoiceEntity[];
     used: number;
   }) {
     this.available = params.available;
     this.card = params.card;
     this.closedInvoices = params.closedInvoices;
     this.openInvoice = params.openInvoice;
+    this.upcomingInvoices = params.upcomingInvoices;
     this.used = params.used;
   }
 }

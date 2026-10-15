@@ -1,6 +1,9 @@
 export { default as AccountArchived } from "./AccountArchived";
 export { default as AccountHasTransactions } from "./AccountHasTransactions";
 export { default as CategoryHasTransactions } from "./CategoryHasTransactions";
+export { default as CreditCardArchived } from "./CreditCardArchived";
 export { default as CreditCardHasTransactions } from "./CreditCardHasTransactions";
 export { default as FinancialNotFound } from "./FinancialNotFound";
 export { default as FinancialOwnerNotAllowed } from "./FinancialOwnerNotAllowed";
+export { default as InvoiceIsPaid } from "./InvoiceIsPaid";
+export { default as InvoiceNotPayable } from "./InvoiceNotPayable";

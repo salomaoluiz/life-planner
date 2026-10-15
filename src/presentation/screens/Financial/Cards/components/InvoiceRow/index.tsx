@@ -1,7 +1,7 @@
 import { View } from "react-native";
 
 import { InvoiceDTO } from "@application/dto/financial/CreditCardOverviewDTO";
-import { AmountText, Badge, Card, Text } from "@components";
+import { AmountText, Badge, Button, Card, Text } from "@components";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
 import {
@@ -14,15 +14,16 @@ import useStyles from "./styles";
 
 interface InvoiceRowProps {
   invoice: InvoiceDTO;
+  onPress?: () => void;
 }
 
-function InvoiceRow({ invoice }: InvoiceRowProps) {
+function InvoiceRow({ invoice, onPress }: InvoiceRowProps) {
   const { styles } = useStyles();
   const { t } = useTranslation();
   const localeTag = useLocaleTag();
 
   return (
-    <Card testID={cardsTestIds.invoiceRow}>
+    <Card onPress={onPress} testID={cardsTestIds.invoiceRow}>
       <View style={styles.body}>
         <View style={styles.header}>
           <View style={styles.title}>
@@ -63,6 +64,13 @@ function InvoiceRow({ invoice }: InvoiceRowProps) {
             />
           ) : null}
         </View>
+        {invoice.status === "CLOSED" && invoice.amount > 0 ? (
+          <Button.Secondary
+            label={t("financial.cards.invoice.pay")}
+            onPress={onPress ?? (() => undefined)}
+            testID={cardsTestIds.invoicePay}
+          />
+        ) : null}
       </View>
     </Card>
   );

@@ -61,6 +61,7 @@ function invoice(referenceMonth: string) {
     amount: 0,
     closingDate: `${referenceMonth}-05`,
     dueDate: `${referenceMonth}-08`,
+    listDate: `${referenceMonth}-08`,
     paymentAfterDue: false,
     paymentDate: `${referenceMonth}-08`,
     periodEnd: `${referenceMonth}-05`,
@@ -76,6 +77,7 @@ function summary(dto: CreditCardDTO, used = 0) {
     card: dto,
     closedInvoices: [invoice("2026-09")],
     openInvoice: invoice("2026-10"),
+    upcomingInvoices: [],
     used,
   });
 }

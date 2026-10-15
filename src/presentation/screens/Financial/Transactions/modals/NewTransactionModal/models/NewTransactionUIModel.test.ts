@@ -1,5 +1,6 @@
 import AccountDTO from "@application/dto/financial/AccountDTO";
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
+import CreditCardDTO from "@application/dto/financial/CreditCardDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
@@ -120,4 +121,56 @@ it("SHOULD expose type options and owner choices", () => {
 it("SHOULD fall back to the first owner", () => {
   expect(model.owner("family-1").id).toBe("family-1");
   expect(model.owner("nobody").id).toBe("user-id");
+});
+
+describe("cards (spec 029)", () => {
+  function card(id: string, title: string, ownerId: string, status = "ACTIVE") {
+    return new CreditCardDTO({
+      brand: "VISA",
+      closingDay: 31,
+      color: "#2B3A8C",
+      dueDay: 10,
+      id,
+      lastDigits: "1234",
+      limit: 1000,
+      owner: "USER",
+      ownerId,
+      status,
+      title,
+    });
+  }
+  const model = new NewTransactionUIModel({
+    accounts: [],
+    cards: [
+      card("b", "Beta", "user-id"),
+      card("a", "Alpha", "user-id"),
+      card("old", "Old", "user-id", "ARCHIVED"),
+      card("other", "Other", "family-1"),
+    ],
+    categories: [],
+    owners: [],
+  });
+
+  it("SHOULD list the active cards of the owner by title WITH the last digits", () => {
+    expect(model.cardOptions("user-id").map((option) => option.label)).toEqual([
+      "Alpha ••1234",
+      "Beta ••1234",
+    ]);
+  });
+
+  it("SHOULD keep the selected archived card so an old purchase can be edited", () => {
+    const options = model.cardOptions("user-id", "old");
+
+    expect(options[2]).toMatchObject({
+      descriptionKey: "financial.accounts.archivedLabel",
+      value: "old",
+    });
+  });
+
+  it("SHOULD find a card AND tell whether the owner has an active one", () => {
+    expect(model.card("a")?.title).toBe("Alpha");
+    expect(model.card("nope")).toBeUndefined();
+    expect(model.hasCards("user-id")).toBe(true);
+    expect(model.hasCards("nobody")).toBe(false);
+  });
 });

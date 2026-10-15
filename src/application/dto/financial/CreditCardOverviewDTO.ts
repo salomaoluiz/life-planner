@@ -1,11 +1,15 @@
 import CreditCardDTO from "@application/dto/financial/CreditCardDTO";
 import CreditCardOverviewEntity from "@domain/entities/financial/CreditCardOverviewEntity";
-import InvoiceEntity from "@domain/entities/financial/InvoiceEntity";
+import InvoiceEntity, {
+  InvoicePaymentEntity,
+} from "@domain/entities/financial/InvoiceEntity";
 
 export interface IInvoiceDTO {
   amount: number;
   closingDate: string;
   dueDate: string;
+  listDate: string;
+  payment?: InvoicePaymentEntity;
   paymentAfterDue: boolean;
   paymentDate: string;
   periodEnd: string;
@@ -38,6 +42,9 @@ class CreditCardOverviewDTO {
               InvoiceDTO.fromEntity(invoice),
             ),
             openInvoice: InvoiceDTO.fromEntity(summary.openInvoice),
+            upcomingInvoices: summary.upcomingInvoices.map((invoice) =>
+              InvoiceDTO.fromEntity(invoice),
+            ),
             used: summary.used,
           }),
       ),
@@ -50,6 +57,7 @@ export class CreditCardSummaryDTO {
   card: CreditCardDTO;
   closedInvoices: InvoiceDTO[];
   openInvoice: InvoiceDTO;
+  upcomingInvoices: InvoiceDTO[];
   used: number;
 
   constructor(params: {
@@ -57,12 +65,14 @@ export class CreditCardSummaryDTO {
     card: CreditCardDTO;
     closedInvoices: InvoiceDTO[];
     openInvoice: InvoiceDTO;
+    upcomingInvoices: InvoiceDTO[];
     used: number;
   }) {
     this.available = params.available;
     this.card = params.card;
     this.closedInvoices = params.closedInvoices;
     this.openInvoice = params.openInvoice;
+    this.upcomingInvoices = params.upcomingInvoices;
     this.used = params.used;
   }
 }
@@ -71,6 +81,8 @@ export class InvoiceDTO implements IInvoiceDTO {
   amount: number;
   closingDate: string;
   dueDate: string;
+  listDate: string;
+  payment?: InvoicePaymentEntity;
   paymentAfterDue: boolean;
   paymentDate: string;
   periodEnd: string;
@@ -82,6 +94,8 @@ export class InvoiceDTO implements IInvoiceDTO {
     this.amount = params.amount;
     this.closingDate = params.closingDate;
     this.dueDate = params.dueDate;
+    this.listDate = params.listDate;
+    this.payment = params.payment;
     this.paymentAfterDue = params.paymentAfterDue;
     this.paymentDate = params.paymentDate;
     this.periodEnd = params.periodEnd;
@@ -95,6 +109,8 @@ export class InvoiceDTO implements IInvoiceDTO {
       amount: entity.amount,
       closingDate: entity.closingDate,
       dueDate: entity.dueDate,
+      listDate: entity.listDate,
+      payment: entity.payment,
       paymentAfterDue: entity.paymentAfterDue,
       paymentDate: entity.paymentDate,
       periodEnd: entity.periodEnd,

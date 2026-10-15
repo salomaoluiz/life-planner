@@ -13,9 +13,11 @@ import {
   Text,
   TextField,
 } from "@components";
+import { formatAmount } from "@components/AmountText/formatAmount";
 import Skeleton from "@components/Skeleton";
-import { useTranslation } from "@presentation/i18n";
+import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
+import { formatDayMonth } from "@screens/Financial/Cards/models/cardList";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
 import CategoryChips from "./components/CategoryChips";
@@ -27,10 +29,16 @@ import transactionFormTestIds from "./testIds";
 
 const SKELETON_ROWS = [0, 1, 2];
 
+function monthName(month: Date, localeTag: string) {
+  return new Intl.DateTimeFormat(localeTag, { month: "long" }).format(month);
+}
+
 function NewTransactionModal() {
   const { styles } = useStyles();
   const { t } = useTranslation();
   const vm = useNewTransactionViewModel();
+  const localeTag = useLocaleTag();
+  const isCard = vm.payWith === "CARD";
 
   function err(key?: TranslationKeys) {
     return key ? t(key) : undefined;
@@ -59,17 +67,37 @@ function NewTransactionModal() {
 
     return (
       <View style={styles.form}>
-        <SegmentedControl
-          accessibilityLabel={t("financial.categories.type")}
-          onChange={(value) => vm.onTypeChange(value as typeof vm.type)}
-          options={vm.typeOptions.map((option) => ({
-            label: t(option.labelKey),
-            tone: option.value === "EXPENSE" ? "expense" : "income",
-            value: option.value,
-          }))}
-          testID={transactionFormTestIds.type}
-          value={vm.type}
-        />
+        {vm.hasCards ? (
+          <SegmentedControl
+            accessibilityLabel={t("financial.transactions.form.payWith")}
+            onChange={vm.onPayWithChange}
+            options={[
+              {
+                label: t("financial.transactions.form.payWithAccount"),
+                value: "ACCOUNT",
+              },
+              {
+                label: t("financial.transactions.form.payWithCard"),
+                value: "CARD",
+              },
+            ]}
+            testID={transactionFormTestIds.payWith}
+            value={vm.payWith}
+          />
+        ) : null}
+        {isCard ? null : (
+          <SegmentedControl
+            accessibilityLabel={t("financial.categories.type")}
+            onChange={(value) => vm.onTypeChange(value as typeof vm.type)}
+            options={vm.typeOptions.map((option) => ({
+              label: t(option.labelKey),
+              tone: option.value === "EXPENSE" ? "expense" : "income",
+              value: option.value,
+            }))}
+            testID={transactionFormTestIds.type}
+            value={vm.type}
+          />
+        )}
         <AmountInput
           error={err(vm.amountError)}
           label={t("financial.transactions.form.amount")}
@@ -105,34 +133,92 @@ function NewTransactionModal() {
             selected={vm.selectedCategoryId}
           />
         )}
-        <View style={styles.row}>
-          <View style={styles.field}>
-            {vm.hasNoAccounts ? (
-              <MissingRecordHint
-                actionLabel={t("financial.transactions.form.createAccount")}
-                message={t("financial.transactions.form.noAccounts")}
-                onCreate={vm.onCreateAccountPress}
-                testID={transactionFormTestIds.missingAccountHint}
+        {isCard ? (
+          <View style={styles.form}>
+            {vm.hasNoCards ? (
+              <Text.Caption
+                testID={transactionFormTestIds.missingCardHint}
+                tone={"secondary"}
+                value={t("financial.transactions.form.noCards")}
               />
             ) : (
               <SelectField
                 closeLabel={t("common.actions.close")}
-                error={err(vm.accountError)}
-                label={t("financial.transactions.form.account")}
-                onChange={vm.onAccountChange}
-                options={vm.accountOptions.map((option) => ({
+                error={err(vm.cardError)}
+                label={t("financial.transactions.form.card")}
+                onChange={vm.onCardChange}
+                options={vm.cardOptions.map((option) => ({
                   description: option.descriptionKey
                     ? t(option.descriptionKey)
                     : undefined,
                   label: option.label,
                   value: option.value,
                 }))}
-                sheetTitle={t("financial.transactions.form.account")}
-                testID={transactionFormTestIds.accountSelect}
-                value={vm.selectedAccountId}
+                sheetTitle={t("financial.transactions.form.card")}
+                testID={transactionFormTestIds.cardSelect}
+                value={vm.selectedCardId}
               />
             )}
+            {vm.invoiceHint && vm.invoiceMonthLabelDate ? (
+              <Text.Caption
+                testID={transactionFormTestIds.invoiceHint}
+                tone={"secondary"}
+                value={t("financial.transactions.form.invoiceHint", {
+                  due: formatDayMonth(vm.invoiceHint.due),
+                  month: monthName(vm.invoiceMonthLabelDate, localeTag),
+                })}
+              />
+            ) : null}
+            {vm.overLimitCents > 0 ? (
+              <Text.Caption
+                testID={transactionFormTestIds.overLimit}
+                tone={"expense"}
+                value={t("financial.transactions.form.overLimit", {
+                  amount: formatAmount(vm.overLimitCents, localeTag),
+                })}
+              />
+            ) : null}
+            {vm.isInvoicePaid && vm.invoiceMonthLabelDate ? (
+              <Text.Caption
+                testID={transactionFormTestIds.invoicePaid}
+                tone={"expense"}
+                value={t("financial.transactions.form.invoicePaid", {
+                  month: monthName(vm.invoiceMonthLabelDate, localeTag),
+                })}
+              />
+            ) : null}
           </View>
+        ) : null}
+        <View style={styles.row}>
+          {isCard ? null : (
+            <View style={styles.field}>
+              {vm.hasNoAccounts ? (
+                <MissingRecordHint
+                  actionLabel={t("financial.transactions.form.createAccount")}
+                  message={t("financial.transactions.form.noAccounts")}
+                  onCreate={vm.onCreateAccountPress}
+                  testID={transactionFormTestIds.missingAccountHint}
+                />
+              ) : (
+                <SelectField
+                  closeLabel={t("common.actions.close")}
+                  error={err(vm.accountError)}
+                  label={t("financial.transactions.form.account")}
+                  onChange={vm.onAccountChange}
+                  options={vm.accountOptions.map((option) => ({
+                    description: option.descriptionKey
+                      ? t(option.descriptionKey)
+                      : undefined,
+                    label: option.label,
+                    value: option.value,
+                  }))}
+                  sheetTitle={t("financial.transactions.form.account")}
+                  testID={transactionFormTestIds.accountSelect}
+                  value={vm.selectedAccountId}
+                />
+              )}
+            </View>
+          )}
           <View style={styles.field}>
             <DateField
               error={err(vm.dateError)}
@@ -179,6 +265,7 @@ function NewTransactionModal() {
         closeLabel={t("common.actions.close")}
         footer={
           <Button.Primary
+            disabled={vm.isSaveDisabled}
             fullWidth
             label={t(vm.saveLabelKey)}
             loading={vm.isSaving}

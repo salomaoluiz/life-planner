@@ -10,7 +10,7 @@ import {
 interface Options {
   conflict?: () => BusinessError;
   fields?: Record<string, unknown>;
-  unprocessable?: () => BusinessError;
+  unprocessable?: (message: string) => BusinessError;
 }
 
 function handleFinancialApiError(
@@ -19,7 +19,7 @@ function handleFinancialApiError(
   options: Options = {},
 ): never {
   if (error instanceof ApiBusinessError) {
-    const mapped = mapStatus(error.statusCode, options);
+    const mapped = mapStatus(error.statusCode, error.message, options);
 
     if (mapped) {
       throw mapped;
@@ -35,6 +35,7 @@ function handleFinancialApiError(
 
 function mapStatus(
   statusCode: number,
+  message: string,
   options: Options,
 ): BusinessError | undefined {
   switch (statusCode) {
@@ -47,7 +48,7 @@ function mapStatus(
     case 409:
       return options.conflict?.();
     case 422:
-      return options.unprocessable?.();
+      return options.unprocessable?.(message);
     default:
       return undefined;
   }

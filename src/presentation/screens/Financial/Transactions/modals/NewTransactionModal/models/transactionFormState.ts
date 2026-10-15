@@ -1,5 +1,6 @@
 import AccountDTO from "@application/dto/financial/AccountDTO";
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
+import CreditCardDTO from "@application/dto/financial/CreditCardDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { CreateTransactionUseCaseParams } from "@application/useCases/cases/financial/transactions/createTransactionUseCase";
@@ -14,9 +15,16 @@ import {
 
 const MAX_DESCRIPTION = 200;
 
+type PayWith = "ACCOUNT" | "CARD";
+
 type TransactionFormErrors = Partial<
   Record<
-    "accountId" | "amount" | "categoryId" | "date" | "description",
+    | "accountId"
+    | "amount"
+    | "categoryId"
+    | "creditCardId"
+    | "date"
+    | "description",
     TranslationKeys
   >
 >;
@@ -25,9 +33,11 @@ interface TransactionFormState {
   accountId?: string;
   amountCents: number;
   categoryId?: string;
+  creditCardId?: string;
   date: Date;
   description: string;
   ownerId: string;
+  payWith: PayWith;
   type: TransactionType;
 }
 
@@ -36,9 +46,11 @@ function changeOwner(
   ownerId: string,
   categories: CategoryDTO[],
   accounts: AccountDTO[],
+  cards: CreditCardDTO[] = [],
 ): TransactionFormState {
   const category = categories.find((item) => item.id === state.categoryId);
   const account = accounts.find((item) => item.id === state.accountId);
+  const card = cards.find((item) => item.id === state.creditCardId);
 
   return {
     ...state,
@@ -48,7 +60,28 @@ function changeOwner(
         : defaultAccountId(accounts, ownerId),
     categoryId:
       category && category.ownerId === ownerId ? state.categoryId : undefined,
+    creditCardId:
+      card && card.ownerId === ownerId
+        ? state.creditCardId
+        : defaultCardId(cards, ownerId),
     ownerId,
+  };
+}
+
+// Card purchases are expenses: switching to Card fixes the type (and drops an income category).
+function changePayWith(
+  state: TransactionFormState,
+  payWith: PayWith,
+  categories: CategoryDTO[],
+  cards: CreditCardDTO[],
+): TransactionFormState {
+  if (payWith === "ACCOUNT") {
+    return { ...state, payWith };
+  }
+
+  return {
+    ...changeType({ ...state, payWith }, TransactionType.EXPENSE, categories),
+    creditCardId: state.creditCardId ?? defaultCardId(cards, state.ownerId),
   };
 }
 
@@ -83,16 +116,22 @@ function chipCategories(
 
 function createInitialState(params: {
   accounts: AccountDTO[];
+  // A card to start on ("Add purchase" from an invoice): opens in Card mode with the card's owner.
+  card?: CreditCardDTO;
   now: Date;
   ownerId: string;
 }): TransactionFormState {
+  const ownerId = params.card?.ownerId ?? params.ownerId;
+
   return {
-    accountId: defaultAccountId(params.accounts, params.ownerId),
+    accountId: defaultAccountId(params.accounts, ownerId),
     amountCents: 0,
     categoryId: undefined,
+    creditCardId: params.card?.id,
     date: normalizeDate(params.now),
     description: "",
-    ownerId: params.ownerId,
+    ownerId,
+    payWith: params.card ? "CARD" : "ACCOUNT",
     type: TransactionType.EXPENSE,
   };
 }
@@ -103,14 +142,22 @@ function defaultAccountId(accounts: AccountDTO[], ownerId: string) {
   )?.id;
 }
 
+function defaultCardId(cards: CreditCardDTO[], ownerId: string) {
+  return cards.find(
+    (card) => card.ownerId === ownerId && card.status === "ACTIVE",
+  )?.id;
+}
+
 function isSameState(a: TransactionFormState, b: TransactionFormState) {
   return (
     a.accountId === b.accountId &&
     a.amountCents === b.amountCents &&
     a.categoryId === b.categoryId &&
+    a.creditCardId === b.creditCardId &&
     a.date.getTime() === b.date.getTime() &&
     a.description === b.description &&
     a.ownerId === b.ownerId &&
+    a.payWith === b.payWith &&
     a.type === b.type
   );
 }
@@ -128,9 +175,11 @@ function stateFromDto(dto: TransactionDTO): TransactionFormState {
     accountId: dto.accountId,
     amountCents: decimalStringToCents(dto.value),
     categoryId: dto.categoryId,
+    creditCardId: dto.creditCardId,
     date: normalizeDate(new Date(dto.date)),
     description: dto.description,
     ownerId: dto.ownerId,
+    payWith: dto.creditCardId ? "CARD" : "ACCOUNT",
     type: dto.type as TransactionType,
   };
 }
@@ -140,10 +189,13 @@ function toCreateParams(
   owner: OwnerDTO,
   categoryName: string,
 ): CreateTransactionUseCaseParams {
+  const isCard = state.payWith === "CARD";
+
   return {
-    accountId: state.accountId!,
+    accountId: isCard ? undefined : state.accountId,
     category: categoryName,
     categoryId: state.categoryId!,
+    creditCardId: isCard ? state.creditCardId : undefined,
     date: state.date.toISOString(),
     description: state.description.trim(),
     owner: owner.type,
@@ -181,7 +233,11 @@ function validate(state: TransactionFormState): TransactionFormErrors {
   if (!state.categoryId) {
     errors.categoryId = "financial.transactions.form.errors.categoryRequired";
   }
-  if (!state.accountId) {
+  if (state.payWith === "CARD") {
+    if (!state.creditCardId) {
+      errors.creditCardId = "financial.transactions.form.errors.cardRequired";
+    }
+  } else if (!state.accountId) {
     errors.accountId = "financial.transactions.form.errors.accountRequired";
   }
   if (Number.isNaN(state.date.getTime())) {
@@ -191,13 +247,15 @@ function validate(state: TransactionFormState): TransactionFormErrors {
   return errors;
 }
 
-export type { TransactionFormErrors, TransactionFormState };
+export type { PayWith, TransactionFormErrors, TransactionFormState };
 export {
   changeOwner,
+  changePayWith,
   changeType,
   chipCategories,
   createInitialState,
   defaultAccountId,
+  defaultCardId,
   isSameState,
   normalizeDate,
   pickNewRecordId,

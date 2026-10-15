@@ -33,6 +33,7 @@ jest.mock("@application/useCases", () => {
     "deleteFinancialAccountUseCase",
     "deleteFinancialCategoryUseCase",
     "getFinancialAccountsUseCase",
+    "getFinancialCardInvoicesForMonthUseCase",
     "getFinancialCategoriesUseCase",
     "getFinancialTransactionsUseCase",
     "getMonthSummaryUseCase",
@@ -90,6 +91,9 @@ beforeEach(() => {
   mocked(useCases.getFinancialTransactionsUseCase.execute).mockResolvedValue(
     [],
   );
+  mocked(
+    useCases.getFinancialCardInvoicesForMonthUseCase.execute,
+  ).mockResolvedValue([]);
   mocked(useCases.getMonthSummaryUseCase.execute).mockResolvedValue({
     balanceCents: 0,
     expenseCents: 0,

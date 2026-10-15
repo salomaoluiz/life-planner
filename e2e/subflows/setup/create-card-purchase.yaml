@@ -1,0 +1,12 @@
+url: ${E2E_WEB_URL}
+---
+# Needs TOKEN, OWNER_ID, CATEGORY_ID, TITLE, DESCRIPTION and VALUE_CENTS from the caller.
+- runScript:
+    file: ../../scripts/setup/create-card-purchase.js
+    env:
+      TOKEN: ${TOKEN}
+      OWNER_ID: ${OWNER_ID}
+      CATEGORY_ID: ${CATEGORY_ID}
+      TITLE: ${TITLE}
+      DESCRIPTION: ${DESCRIPTION}
+      VALUE_CENTS: ${VALUE_CENTS}

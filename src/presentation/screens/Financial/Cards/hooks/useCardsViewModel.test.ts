@@ -168,3 +168,21 @@ it("SHOULD mirror loading, refreshing and error from the query", () => {
   cardsQuery.withError(new Error("boom") as never);
   expect(setup().result.current.errorMessage).toBe("boom");
 });
+
+it("SHOULD switch to the upcoming tab AND open the invoice detail route", () => {
+  givenData([card("a", 1000)]);
+  const { result } = setup();
+
+  act(() => {
+    result.current.onInvoiceTabChange("upcoming");
+  });
+  expect(result.current.invoiceTab).toBe("upcoming");
+
+  act(() => {
+    result.current.onInvoicePress("a", "2026-10");
+  });
+  expect(spies.push).toHaveBeenCalledWith({
+    params: { cardId: "a", month: "2026-10" },
+    pathname: "/financial/invoice/invoice_detail",
+  });
+});

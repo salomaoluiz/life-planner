@@ -1,11 +1,21 @@
+import CardInvoiceModel from "@data/models/financial/CardInvoiceModel";
 import CreditCardModel from "@data/models/financial/CreditCardModel";
 import CreditCardOverviewModel from "@data/models/financial/CreditCardOverviewModel";
+import CardInvoiceEntity from "@domain/entities/financial/CardInvoiceEntity";
 import CreditCardEntity from "@domain/entities/financial/CreditCardEntity";
 import CreditCardOverviewEntity, {
   CreditCardSummaryEntity,
 } from "@domain/entities/financial/CreditCardOverviewEntity";
 import InvoiceEntity from "@domain/entities/financial/InvoiceEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
+
+function toCardInvoiceEntity(model: CardInvoiceModel): CardInvoiceEntity {
+  return new CardInvoiceEntity({
+    card: { ...model.card, owner: OwnerType[model.card.owner] },
+    invoice: new InvoiceEntity({ ...model.invoice }),
+    purchases: model.purchases.map((purchase) => ({ ...purchase })),
+  });
+}
 
 function toCreditCardEntity(model: CreditCardModel): CreditCardEntity {
   return new CreditCardEntity({
@@ -38,10 +48,13 @@ function toOverviewEntity(
             (invoice) => new InvoiceEntity({ ...invoice }),
           ),
           openInvoice: new InvoiceEntity({ ...summary.openInvoice }),
+          upcomingInvoices: summary.upcomingInvoices.map(
+            (invoice) => new InvoiceEntity({ ...invoice }),
+          ),
           used: summary.used,
         }),
     ),
   });
 }
 
-export { toCreditCardEntity, toOverviewEntity };
+export { toCardInvoiceEntity, toCreditCardEntity, toOverviewEntity };

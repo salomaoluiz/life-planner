@@ -9,16 +9,45 @@ import {
 } from "./mocks/getTransactions.mocks";
 
 it("SHOULD GET /v1/finance/transactions with repeated ownerId params AND return TransactionModels (cents -> decimal string, category name filled)", async () => {
-  spies.get.mockResolvedValueOnce(mocks.apiTransactions);
+  spies.get
+    .mockResolvedValueOnce(mocks.apiTransactions)
+    .mockResolvedValueOnce([]);
 
   const result = await setup();
 
   expect(spies.get).toHaveBeenCalledWith(
     `/v1/finance/transactions?ownerId=${mocks.ownerIds[0]}&ownerId=${mocks.ownerIds[1]}`,
   );
+  expect(spies.get).toHaveBeenCalledWith(
+    `/v1/finance/transactions?ownerId=${mocks.ownerIds[0]}&ownerId=${mocks.ownerIds[1]}&source=CARD`,
+  );
   expect(result).toEqual([TransactionModel.fromJSON(mocks.apiTransactions[0])]);
   expect(result[0].value).toBe("234.90");
   expect(result[0].category).toBe("Groceries");
+});
+
+it("SHOULD merge card purchases (source=CARD) after the account rows", async () => {
+  spies.get.mockResolvedValueOnce(mocks.apiTransactions).mockResolvedValueOnce([
+    {
+      ...mocks.apiTransactions[0],
+      accountId: null,
+      creditCardId: "card-1",
+      id: "purchase-1",
+      invoiceMonth: "2026-10",
+    },
+  ]);
+
+  const result = await setup();
+
+  expect(result.map((item) => item.id)).toEqual([
+    mocks.apiTransactions[0].id,
+    "purchase-1",
+  ]);
+  expect(result[1]).toMatchObject({
+    accountId: undefined,
+    creditCardId: "card-1",
+    invoiceMonth: "2026-10",
+  });
 });
 
 it("SHOULD NOT call the API WHEN there are no ownerIds", async () => {
@@ -27,7 +56,7 @@ it("SHOULD NOT call the API WHEN there are no ownerIds", async () => {
 });
 
 it("SHOULD return an empty list WHEN the API returns []", async () => {
-  spies.get.mockResolvedValueOnce([]);
+  spies.get.mockResolvedValue([]);
 
   expect(await setup()).toEqual([]);
 });

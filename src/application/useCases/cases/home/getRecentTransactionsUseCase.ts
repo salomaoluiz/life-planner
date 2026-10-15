@@ -31,28 +31,34 @@ function getRecentTransactionsUseCase(
 
         // Newest first. Array.sort is stable, so the same date keeps the
         // repository order (the API already returns createdAt descending).
-        return [...transactions]
-          .filter((transaction) => !transaction.excludeFromTotals)
-          .sort(
-            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-          )
-          .slice(0, params.limit ?? DEFAULT_RECENT_LIMIT)
-          .map((transaction) => {
-            const category = categories.find(
-              (c) => c.id === transaction.categoryId,
-            );
+        return (
+          [...transactions]
+            // Card purchases belong to their invoice line, not to the latest account rows.
+            .filter(
+              (transaction) =>
+                !transaction.excludeFromTotals && !transaction.creditCardId,
+            )
+            .sort(
+              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+            )
+            .slice(0, params.limit ?? DEFAULT_RECENT_LIMIT)
+            .map((transaction) => {
+              const category = categories.find(
+                (c) => c.id === transaction.categoryId,
+              );
 
-            return new RecentTransactionDTO({
-              categoryColor: category?.iconColor,
-              categoryIcon: category?.icon,
-              categoryName: category?.name ?? transaction.category,
-              date: transaction.date,
-              description: transaction.description,
-              id: transaction.id,
-              type: transaction.type,
-              value: decimalStringToCents(transaction.value),
-            });
-          });
+              return new RecentTransactionDTO({
+                categoryColor: category?.iconColor,
+                categoryIcon: category?.icon,
+                categoryName: category?.name ?? transaction.category,
+                date: transaction.date,
+                description: transaction.description,
+                id: transaction.id,
+                type: transaction.type,
+                value: decimalStringToCents(transaction.value),
+              });
+            })
+        );
       } catch (error) {
         if (error instanceof DefaultError) {
           error.addContext({ useCase: "home.getRecentTransactionsUseCase" });

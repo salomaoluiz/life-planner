@@ -20,10 +20,16 @@ function getMonthSummaryUseCase(
   return {
     execute: async (params) => {
       try {
-        const transactions =
-          await repositories.financialRepository.transaction.getTransactions(
+        const [transactions, invoices] = await Promise.all([
+          repositories.financialRepository.transaction.getTransactions(
             params.ownerIds,
-          );
+          ),
+          // Card purchases count on the month their invoice is paid (spec 029 FR 25).
+          repositories.financialRepository.creditCard.getCardInvoicesForMonth({
+            month: toMonthKey(params.month),
+            ownerIds: params.ownerIds,
+          }),
+        ]);
 
         let income = 0;
         let expense = 0;
@@ -33,6 +39,7 @@ function getMonthSummaryUseCase(
             (transaction) =>
               // The repository cache holds every owner's transactions: narrow here.
               params.ownerIds.includes(transaction.ownerId) &&
+              !transaction.creditCardId &&
               !transaction.excludeFromTotals &&
               isInMonth(transaction.date, params.month),
           )
@@ -42,6 +49,12 @@ function getMonthSummaryUseCase(
             } else {
               expense += decimalStringToCents(transaction.value);
             }
+          });
+
+        invoices
+          .filter((item) => params.ownerIds.includes(item.card.ownerId))
+          .forEach((item) => {
+            expense += item.invoice.amount;
           });
 
         return new MonthSummaryDTO({
@@ -70,6 +83,11 @@ function isInMonth(isoDate: string, month: Date): boolean {
     date.getFullYear() === month.getFullYear() &&
     date.getMonth() === month.getMonth()
   );
+}
+
+// `YYYY-MM` of the local month.
+function toMonthKey(month: Date): string {
+  return `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, "0")}`;
 }
 
 export default getMonthSummaryUseCase;

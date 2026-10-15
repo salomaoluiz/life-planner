@@ -14,6 +14,7 @@ import { useTranslation } from "@presentation/i18n";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
 import AdjustmentSheet from "./components/AdjustmentSheet";
+import CardInvoiceRow from "./components/CardInvoiceRow";
 import MonthPickerSheet from "./components/MonthPickerSheet";
 import MonthSummary from "./components/MonthSummary";
 import MonthSwitcher from "./components/MonthSwitcher";
@@ -48,6 +49,18 @@ function FinancialTransactions() {
   }
 
   function renderItem({ item }: { item: ListEntry }) {
+    if (item.kind === "invoice") {
+      return (
+        <CardInvoiceRow
+          expanded={vm.expandedInvoiceId === item.invoice.id}
+          invoice={item.invoice}
+          onOpen={vm.onInvoiceOpen}
+          onPurchasePress={vm.onRowPress}
+          onToggle={vm.onInvoiceToggle}
+        />
+      );
+    }
+
     if (item.kind === "item") {
       const transaction = item.item;
 
@@ -140,6 +153,14 @@ function FinancialTransactions() {
         scopeTestID={transactionsTestIds.summaryScope}
         testID={transactionsTestIds.monthSummary}
       />
+      {vm.invoicesError ? (
+        <ErrorState
+          message={t("financial.transactions.cardInvoice.error")}
+          onRetry={vm.onInvoiceRetry}
+          retryLabel={t("common.actions.tryAgain")}
+          testID={transactionsTestIds.cardInvoiceError}
+        />
+      ) : null}
       <SegmentedControl
         accessibilityLabel={t("financial.transactions.typeFilter.label")}
         onChange={vm.onTypeFilterChange}
@@ -199,6 +220,8 @@ function FinancialTransactions() {
       <FlashList
         data={vm.entries}
         estimatedItemSize={64}
+        // Expanding an invoice only changes this id: without it the virtualized row keeps its old render.
+        extraData={vm.expandedInvoiceId}
         getItemType={(entry) => entry.kind}
         keyExtractor={(entry) => entry.key}
         ListEmptyComponent={empty}
