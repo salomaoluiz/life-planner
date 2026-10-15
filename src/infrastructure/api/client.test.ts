@@ -207,3 +207,44 @@ it("SHOULD keep other paths untouched in the GenericError context", async () => 
     statusCode: 500,
   });
 });
+
+it("SHOULD send the JSON body and Content-Type on DELETE WHEN a body is given", async () => {
+  spies.fetch.mockResolvedValueOnce(mocks.json(204, undefined));
+
+  await setup("DELETE", "/v1/user/me", { email: "test@example.com" });
+
+  const init = spies.fetch.mock.calls[0][1] as RequestInit;
+  expect(init.method).toBe("DELETE");
+  expect(init.body).toBe(JSON.stringify({ email: "test@example.com" }));
+  expect(init.headers).toMatchObject({ "Content-Type": "application/json" });
+});
+
+it("SHOULD send no body and no Content-Type on DELETE WHEN no body is given", async () => {
+  spies.fetch.mockResolvedValueOnce(mocks.json(204, undefined));
+
+  await setup("DELETE", "/v1/a");
+
+  const init = spies.fetch.mock.calls[0][1] as RequestInit;
+  expect(init.body).toBeUndefined();
+  expect(init.headers).not.toHaveProperty("Content-Type");
+});
+
+it("SHOULD resolve undefined on a 204 with an empty body AND reject a 422 with ApiBusinessError", async () => {
+  spies.fetch.mockResolvedValueOnce(mocks.json(204, undefined));
+  expect(
+    await setup("DELETE", "/v1/user/me", { email: "a@example.com" }),
+  ).toBeUndefined();
+
+  spies.fetch.mockResolvedValueOnce(
+    mocks.json(422, { message: "Email does not match", statusCode: 422 }),
+  );
+  const error = await setupThrowable("DELETE", "/v1/user/me", {
+    email: "b@example.com",
+  });
+
+  expect(error).toBeInstanceOf(ApiBusinessError);
+  expect(error).toMatchObject({
+    message: "Email does not match",
+    statusCode: 422,
+  });
+});

@@ -38,7 +38,7 @@ const calls: Record<
   Method,
   (path: string, body?: unknown) => Promise<unknown>
 > = {
-  DELETE: async (path) => api.delete(path),
+  DELETE: async (path, body) => api.delete(path, body),
   GET: async (path) => api.get(path),
   PATCH: async (path, body) => api.patch(path, body),
   POST: async (path, body) => api.post(path, body),

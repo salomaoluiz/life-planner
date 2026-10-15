@@ -99,7 +99,8 @@ async function request<T>(
 }
 
 const api = {
-  delete: async <T>(path: string) => request<T>("DELETE", path),
+  delete: async <T>(path: string, body?: unknown) =>
+    request<T>("DELETE", path, body),
   get: async <T>(path: string) => request<T>("GET", path),
   patch: async <T>(path: string, body?: unknown) =>
     request<T>("PATCH", path, body),
