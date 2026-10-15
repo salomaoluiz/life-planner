@@ -10,6 +10,7 @@ import useStyles, { getFrameStyle } from "./styles";
 export type TextFieldProps = SecureProps & {
   autoCapitalize?: "characters" | "none" | "sentences" | "words";
   autoComplete?: React.ComponentProps<typeof TextInput>["autoComplete"];
+  autoCorrect?: boolean;
   disabled?: boolean;
   error?: string;
   helper?: string;
@@ -80,6 +81,7 @@ function TextField(props: TextFieldProps) {
           accessibilityLabel={props.label}
           autoCapitalize={props.autoCapitalize}
           autoComplete={props.autoComplete}
+          autoCorrect={props.autoCorrect}
           editable={!props.disabled}
           keyboardType={props.keyboardType}
           maxLength={props.maxLength}
