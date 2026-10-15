@@ -47,11 +47,11 @@ onFlowComplete:
 - tapOn:
     id: "financial.card-form.closing-day"
 - tapOn:
-    id: "financial.card-form.closing-day-option-5"
+    id: "financial.card-form.closing-day-option-2"
 - tapOn:
     id: "financial.card-form.due-day"
 - tapOn:
-    id: "financial.card-form.due-day-option-8"
+    id: "financial.card-form.due-day-option-4"
 - tapOn:
     id: "financial.card-form.save-button"
 # List: tile, aggregate and the open invoice
@@ -63,8 +63,13 @@ onFlowComplete:
 - assertVisible:
     id: "financial.cards.total-limit"
     text: ".*5[.,]000[.,]00.*"
+# The invoice sits below the fold: scroll to it, then back to the top for the edit button
+- runFlow: ../../subflows/financial/scroll-list-down.yaml
 - assertVisible:
     id: "financial.cards.invoice-row"
+- swipe:
+    start: 50%, 20%
+    end: 50%, 80%
 # Edit: rename
 - tapOn:
     id: "financial.cards.edit-button"
@@ -123,6 +128,8 @@ onFlowComplete:
 # Delete
 - tapOn:
     id: "financial.cards.edit-button"
+# The form is long: a third scroll brings Delete above the sticky Save footer
+- runFlow: ../../subflows/financial/scroll-form-down.yaml
 - runFlow: ../../subflows/financial/scroll-form-down.yaml
 - extendedWaitUntil:
     visible:
