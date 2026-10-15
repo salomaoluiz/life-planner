@@ -1,9 +1,11 @@
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
+import { BALANCE_ADJUSTMENT } from "@domain/entities/financial/TransactionEntity";
 import { normalizeCategoryColor } from "@presentation/constants/categoryColors";
 import { decimalStringToCents } from "@utils/money";
 
 const FALLBACK_ICON = "help-circle-outline";
+const ADJUSTMENT_ICON = "scale-balance";
 
 class TransactionUIModel {
   get accountName() {
@@ -19,6 +21,11 @@ class TransactionUIModel {
   }
 
   get categoryColor() {
+    // An adjustment has no category: neutral tile.
+    if (this.isAdjustment) {
+      return undefined;
+    }
+
     const color = this.category?.iconColor;
 
     // No category: undefined, so the tile renders neutral like on Home (spec 015 FR 10).
@@ -26,6 +33,10 @@ class TransactionUIModel {
   }
 
   get categoryIcon() {
+    if (this.isAdjustment) {
+      return ADJUSTMENT_ICON;
+    }
+
     return this.category?.icon ?? FALLBACK_ICON;
   }
 
@@ -51,6 +62,10 @@ class TransactionUIModel {
     return this.dto.id;
   }
 
+  get isAdjustment() {
+    return this.dto.systemKey === BALANCE_ADJUSTMENT;
+  }
+
   get isExpense() {
     return this.dto.type === "EXPENSE";
   }
@@ -64,6 +79,10 @@ class TransactionUIModel {
   }
 
   get subtitle() {
+    if (this.isAdjustment) {
+      return this.accountName;
+    }
+
     return [this.categoryName, this.accountName].filter(Boolean).join(" · ");
   }
 

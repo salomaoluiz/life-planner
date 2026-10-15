@@ -1,4 +1,5 @@
 import { AmountText, IconTile, ListItem } from "@components";
+import { useTranslation } from "@presentation/i18n";
 import TransactionUIModel from "@screens/Financial/Transactions/models/TransactionUIModel";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
@@ -8,6 +9,7 @@ interface Props {
 }
 
 function TransactionRow(props: Props) {
+  const { t } = useTranslation();
   const { item } = props;
 
   return (
@@ -15,8 +17,17 @@ function TransactionRow(props: Props) {
       leading={<IconTile color={item.categoryColor} name={item.categoryIcon} />}
       onPress={() => props.onPress(item.id)}
       subtitle={item.subtitle}
-      testID={transactionsTestIds.row}
-      title={item.description}
+      testID={
+        item.isAdjustment
+          ? transactionsTestIds.adjustmentRow
+          : transactionsTestIds.row
+      }
+      // The stored description is English text; the app shows its own translated label.
+      title={
+        item.isAdjustment
+          ? t("financial.transactions.adjustment")
+          : item.description
+      }
       trailing={<AmountText type={item.amountType} value={item.amountCents} />}
     />
   );

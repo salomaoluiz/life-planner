@@ -2,11 +2,13 @@ import { render } from "@tests";
 
 import FinancialTransactions from "../";
 import { useTransactionsViewModel } from "../hooks";
+import useAdjustmentSheet from "../hooks/useAdjustmentSheet";
 import { ListEntry } from "../models/transactionList";
 import TransactionUIModel from "../models/TransactionUIModel";
 import { categories, makeTransactionDTO } from "./index.mocks";
 
 jest.mock("../hooks");
+jest.mock("../hooks/useAdjustmentSheet");
 jest.mock("@shopify/flash-list", () => {
   const { View: MockView } = jest.requireActual("react-native");
   return {
@@ -70,6 +72,15 @@ const defaultViewModel: ReturnType<typeof useTransactionsViewModel> = {
   typeFilter: "ALL",
 };
 
+const defaultAdjustmentSheet: ReturnType<typeof useAdjustmentSheet> = {
+  errorKey: undefined,
+  isDeleting: false,
+  item: undefined,
+  onClose: jest.fn(),
+  onDelete: jest.fn(),
+  onOpen: jest.fn(),
+};
+
 function makeEntries(): ListEntry[] {
   const day = new Date(2026, 9, 5);
 
@@ -100,12 +111,18 @@ function makeEntries(): ListEntry[] {
   ];
 }
 
-function setup(overrides: Partial<typeof defaultViewModel> = {}) {
+function setup(
+  overrides: Partial<typeof defaultViewModel> = {},
+  adjustmentOverrides: Partial<typeof defaultAdjustmentSheet> = {},
+) {
   jest
     .mocked(useTransactionsViewModel)
     .mockReturnValue({ ...defaultViewModel, ...overrides });
+  jest
+    .mocked(useAdjustmentSheet)
+    .mockReturnValue({ ...defaultAdjustmentSheet, ...adjustmentOverrides });
 
   return render(<FinancialTransactions />);
 }
 
-export { defaultViewModel, makeEntries, setup };
+export { defaultAdjustmentSheet, defaultViewModel, makeEntries, setup };

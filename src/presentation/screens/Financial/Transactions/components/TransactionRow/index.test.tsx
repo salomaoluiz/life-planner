@@ -1,8 +1,11 @@
-import { fireEvent, screen } from "@tests";
+import { fireEvent, render, screen } from "@tests";
 
 import { AmountText } from "@components";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
+import { makeTransactionDTO } from "../../mocks/index.mocks";
+import TransactionUIModel from "../../models/TransactionUIModel";
+import TransactionRow from "./index";
 import { setup } from "./mocks/index.mocks";
 
 it("SHOULD render description, subtitle and the signed amount", () => {
@@ -21,4 +24,30 @@ it("SHOULD call onPress with the id WHEN pressed", () => {
   fireEvent.press(screen.getByTestId(transactionsTestIds.row));
 
   expect(onPress).toHaveBeenCalledWith("tx-1");
+});
+
+it("SHOULD show the translated adjustment label AND its own testID for a balance adjustment", () => {
+  const onPress = jest.fn();
+  const adjustment = new TransactionUIModel(
+    makeTransactionDTO({
+      description: "Balance adjustment",
+      excludeFromTotals: true,
+      id: "adj-1",
+      systemKey: "BALANCE_ADJUSTMENT",
+      type: "INCOME",
+      value: "50.00",
+    }),
+  );
+
+  render(<TransactionRow item={adjustment} onPress={onPress} />);
+
+  expect(
+    screen.getByTestId(transactionsTestIds.adjustmentRow),
+  ).toBeOnTheScreen();
+  expect(
+    screen.getByText("financial.transactions.adjustment"),
+  ).toBeOnTheScreen();
+  expect(screen.queryByTestId(transactionsTestIds.row)).toBeNull();
+  fireEvent.press(screen.getByTestId(transactionsTestIds.adjustmentRow));
+  expect(onPress).toHaveBeenCalledWith("adj-1");
 });

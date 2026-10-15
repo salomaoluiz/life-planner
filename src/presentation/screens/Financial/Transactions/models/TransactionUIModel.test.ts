@@ -88,3 +88,36 @@ it("SHOULD build the local date key", () => {
       .dateKey,
   ).toBe("2026-01-05");
 });
+
+describe("balance adjustments", () => {
+  const adjustment = new TransactionUIModel(
+    dto({
+      category: "Balance adjustment",
+      categoryId: "00000000-0000-4000-8000-000000000001",
+      categoryName: undefined,
+      description: "Balance adjustment",
+      excludeFromTotals: true,
+      systemKey: "BALANCE_ADJUSTMENT",
+      type: "INCOME",
+      value: "50.00",
+    }),
+  );
+
+  it("SHOULD be flagged AND use the adjustment icon without a category color", () => {
+    expect(adjustment.isAdjustment).toBe(true);
+    expect(adjustment.categoryIcon).toBe("scale-balance");
+    expect(adjustment.categoryColor).toBeUndefined();
+  });
+
+  it("SHOULD show only the account name as subtitle (an adjustment has no category)", () => {
+    expect(adjustment.subtitle).toBe("Checking");
+  });
+
+  it("SHOULD keep a regular transaction unflagged", () => {
+    expect(new TransactionUIModel(dto(), category).isAdjustment).toBe(false);
+  });
+
+  it("SHOULD still count in the signed cents of its day", () => {
+    expect(adjustment.signedCents).toBe(5000);
+  });
+});

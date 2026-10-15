@@ -13,11 +13,13 @@ import Skeleton from "@components/Skeleton";
 import { useTranslation } from "@presentation/i18n";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
+import AdjustmentSheet from "./components/AdjustmentSheet";
 import MonthPickerSheet from "./components/MonthPickerSheet";
 import MonthSummary from "./components/MonthSummary";
 import MonthSwitcher from "./components/MonthSwitcher";
 import TransactionRow from "./components/TransactionRow";
 import { useTransactionsViewModel } from "./hooks";
+import useAdjustmentSheet from "./hooks/useAdjustmentSheet";
 import {
   ALL_FILTER,
   formatDayTitle,
@@ -33,6 +35,7 @@ function FinancialTransactions() {
   const { styles } = useStyles();
   const { t } = useTranslation();
   const vm = useTransactionsViewModel();
+  const adjustment = useAdjustmentSheet({ onDeleted: vm.onRefresh });
 
   function dayTitle(entry: Extract<ListEntry, { kind: "header" }>) {
     if (entry.label.kind === "today") {
@@ -46,7 +49,18 @@ function FinancialTransactions() {
 
   function renderItem({ item }: { item: ListEntry }) {
     if (item.kind === "item") {
-      return <TransactionRow item={item.item} onPress={vm.onRowPress} />;
+      const transaction = item.item;
+
+      return (
+        <TransactionRow
+          item={transaction}
+          onPress={
+            transaction.isAdjustment
+              ? () => adjustment.onOpen(transaction)
+              : vm.onRowPress
+          }
+        />
+      );
     }
 
     const net = netAmount(item.netCents);
@@ -209,6 +223,26 @@ function FinancialTransactions() {
           selected={vm.selectedMonthIndex}
           title={t("financial.transactions.monthPicker.title")}
           year={vm.pickerYear}
+        />
+      )}
+      {adjustment.item && (
+        <AdjustmentSheet
+          accountName={adjustment.item.accountName}
+          amountCents={adjustment.item.amountCents}
+          amountType={adjustment.item.amountType}
+          cancelLabel={t("common.actions.cancel")}
+          closeLabel={t("common.actions.close")}
+          confirmLabel={t("common.actions.delete")}
+          deleteLabel={t("financial.transactions.delete")}
+          deleteMessage={t("financial.transactions.adjustmentDeleteMessage")}
+          deleteTitle={t("financial.transactions.deleteTitle")}
+          errorMessage={
+            adjustment.errorKey ? t(adjustment.errorKey) : undefined
+          }
+          isDeleting={adjustment.isDeleting}
+          onClose={adjustment.onClose}
+          onDelete={adjustment.onDelete}
+          title={t("financial.transactions.adjustment")}
         />
       )}
     </View>
