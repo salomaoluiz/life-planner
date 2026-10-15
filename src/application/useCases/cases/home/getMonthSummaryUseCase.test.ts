@@ -109,6 +109,7 @@ it("SHOULD skip transactions excluded from totals (balance adjustments)", async 
     new TransactionEntityFixture()
       .withDefault()
       .withBalanceAdjustment()
+      .withOwnerId(mocks.defaultParams.ownerIds[0])
       .withDate(new Date(2026, 9, 3))
       .withType(TransactionType.INCOME)
       .withValue("999.00")
@@ -116,9 +117,25 @@ it("SHOULD skip transactions excluded from totals (balance adjustments)", async 
     new TransactionEntityFixture()
       .withDefault()
       .withBalanceAdjustment()
+      .withOwnerId(mocks.defaultParams.ownerIds[0])
       .withDate(new Date(2026, 9, 4))
       .withType(TransactionType.EXPENSE)
       .withValue("500.00")
+      .build(),
+  ]);
+
+  expect(await setup()).toEqual({ balance: 10000, expense: 0, income: 10000 });
+});
+
+it("SHOULD sum only the transactions of the requested owners (the repository returns every cached owner)", async () => {
+  getTransactions.mockResolvedValueOnce([
+    transaction(new Date(2026, 9, 2), "100.00", TransactionType.INCOME),
+    new TransactionEntityFixture()
+      .withDefault()
+      .withOwnerId("someone-else")
+      .withDate(new Date(2026, 9, 3))
+      .withType(TransactionType.INCOME)
+      .withValue("900.00")
       .build(),
   ]);
 

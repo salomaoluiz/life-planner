@@ -31,6 +31,8 @@ function getMonthSummaryUseCase(
         transactions
           .filter(
             (transaction) =>
+              // The repository cache holds every owner's transactions: narrow here.
+              params.ownerIds.includes(transaction.ownerId) &&
               !transaction.excludeFromTotals &&
               isInMonth(transaction.date, params.month),
           )
