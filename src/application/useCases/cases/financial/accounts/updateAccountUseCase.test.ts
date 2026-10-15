@@ -13,7 +13,6 @@ it("SHOULD update an account", async () => {
 
 describe("error handling and arguments", () => {
   const params = {
-    balance: 5,
     icon: "icon",
     id: "acc-id",
     name: "Updated",
@@ -34,7 +33,6 @@ describe("error handling and arguments", () => {
     await updateAccountUseCase(repositoriesMocks).execute(params);
 
     expect(repository()).toHaveBeenCalledWith({
-      balance: 5,
       icon: "icon",
       id: "acc-id",
       name: "Updated",

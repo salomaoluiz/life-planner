@@ -6,7 +6,6 @@ export type Params = Parameters<FinancialAccountRepository["updateAccount"]>[0];
 
 async function updateAccount(params: Params, datasources: Datasources) {
   await datasources.financialAccountDatasource.updateAccount({
-    balance: params.balance,
     icon: params.icon,
     id: params.id,
     name: params.name,

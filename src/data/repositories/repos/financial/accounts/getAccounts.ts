@@ -31,6 +31,7 @@ async function getAccounts(ownerIds: string[], datasources: Datasources) {
         name: account.name,
         owner: OwnerType[account.owner],
         ownerId: account.ownerId,
+        projectedBalance: account.projectedBalance,
         status: account.status,
       }),
   );

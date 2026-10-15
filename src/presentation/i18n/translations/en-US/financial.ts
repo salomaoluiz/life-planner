@@ -19,12 +19,15 @@ const financial = {
       archivedHelper:
         "Archived accounts are listed last when choosing an account.",
       balance: "Current balance",
-      balanceHelper: "Balance is not updated automatically by transactions.",
+      balanceHelper: "Changing it records a balance adjustment.",
       errors: {
         balanceTooLarge: "This balance is too large.",
         nameTooLong: "Name can have at most 60 characters.",
       },
       icon: "Icon",
+      initialBalance: "Initial balance",
+      initialBalanceHelper:
+        "The balance you start with. Transactions change it from here.",
       name: "Name",
       negative: "Negative",
       positive: "Positive",
@@ -33,7 +36,9 @@ const financial = {
     name: "Name",
     nameRequired: "Name is required",
     new: "New account",
+    projectedBalance: "End of month: {{value}}",
     total: "Total in accounts",
+    totalProjected: "End of month",
   },
   cardForm: {
     archive: "Archive card",
@@ -169,6 +174,7 @@ const financial = {
     saveChanges: "Save changes",
   },
   errors: {
+    accountArchived: "This account is archived.",
     close: "OK",
     notFound: "This item no longer exists or you don't have access to it.",
     ownerNotAllowed: "You don't have access to this owner.",
@@ -182,6 +188,9 @@ const financial = {
   },
   transactions: {
     add: "Add transaction",
+    adjustment: "Balance adjustment",
+    adjustmentDeleteMessage:
+      "Deleting it reverses its effect on the account balance.",
     balanceOf: "Balance of {{month}}",
     delete: "Delete transaction",
     deleteTitle: "Delete this transaction?",

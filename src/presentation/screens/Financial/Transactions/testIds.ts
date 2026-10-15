@@ -1,4 +1,8 @@
 const transactionsTestIds = {
+  adjustmentDelete: "financial.transactions.adjustment-delete",
+  adjustmentDeleteDialog: "financial.transactions.adjustment-delete-dialog",
+  adjustmentRow: "financial.transactions.adjustment-row",
+  adjustmentSheet: "financial.transactions.adjustment-sheet",
   emptyMonth: "financial.transactions.empty-month",
   filteredEmpty: "financial.transactions.filtered-empty",
   monthNext: "financial.transactions.month-next",

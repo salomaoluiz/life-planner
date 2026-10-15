@@ -22,6 +22,7 @@ const defaultParams: GetMonthSummaryUseCaseParams = {
 function transaction(date: Date, value: string, type: TransactionType) {
   return new TransactionEntityFixture()
     .withDefault()
+    .withOwnerId(defaultParams.ownerIds[0])
     .withDate(date)
     .withType(type)
     .withValue(value)

@@ -44,4 +44,9 @@ function isoToCalendarDate(iso: string): string {
   return `${year}-${month}-${day}`;
 }
 
-export { calendarDateToIso, isoToCalendarDate };
+// The device's LOCAL calendar day: the API treats it as the client's "today" (balances).
+function todayCalendarDate(now: Date = new Date()): string {
+  return isoToCalendarDate(now.toISOString());
+}
+
+export { calendarDateToIso, isoToCalendarDate, todayCalendarDate };

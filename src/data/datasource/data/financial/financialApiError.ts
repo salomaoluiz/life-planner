@@ -10,6 +10,7 @@ import {
 interface Options {
   conflict?: () => BusinessError;
   fields?: Record<string, unknown>;
+  unprocessable?: () => BusinessError;
 }
 
 function handleFinancialApiError(
@@ -45,6 +46,8 @@ function mapStatus(
       return new FinancialNotFound();
     case 409:
       return options.conflict?.();
+    case 422:
+      return options.unprocessable?.();
     default:
       return undefined;
   }

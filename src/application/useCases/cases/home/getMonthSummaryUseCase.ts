@@ -29,7 +29,13 @@ function getMonthSummaryUseCase(
         let expense = 0;
 
         transactions
-          .filter((transaction) => isInMonth(transaction.date, params.month))
+          .filter(
+            (transaction) =>
+              // The repository cache holds every owner's transactions: narrow here.
+              params.ownerIds.includes(transaction.ownerId) &&
+              !transaction.excludeFromTotals &&
+              isInMonth(transaction.date, params.month),
+          )
           .forEach((transaction) => {
             if (transaction.type === TransactionType.INCOME) {
               income += decimalStringToCents(transaction.value);

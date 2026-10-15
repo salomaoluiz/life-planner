@@ -2,6 +2,7 @@ import { isoToCalendarDate } from "@data/models/financial/calendarDate";
 import { decimalStringToCents } from "@data/models/financial/money";
 import TransactionModel from "@data/models/financial/TransactionModel";
 import { TransactionDatasource } from "@data/repositories/repos/financial/transactions/transactionDatasource";
+import { AccountArchived } from "@domain/entities/errors";
 import { api } from "@infrastructure/api";
 
 import handleFinancialApiError from "../../financialApiError";
@@ -37,7 +38,7 @@ async function createTransaction(params: Params): Response {
         datasource: "TransactionDatasource - createTransaction",
         ownerId: params.ownerId,
       },
-      { fields: body },
+      { fields: body, unprocessable: () => new AccountArchived() },
     );
   }
 }

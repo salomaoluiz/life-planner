@@ -7,6 +7,7 @@ export interface IAccountDTO {
   name: string;
   owner: string;
   ownerId: string;
+  projectedBalance?: number;
   status: string;
 }
 
@@ -17,6 +18,7 @@ class AccountDTO {
   name: string;
   owner: string;
   ownerId: string;
+  projectedBalance: number;
   status: string;
 
   constructor(params: IAccountDTO) {
@@ -26,6 +28,7 @@ class AccountDTO {
     this.name = params.name;
     this.owner = params.owner;
     this.ownerId = params.ownerId;
+    this.projectedBalance = params.projectedBalance ?? params.balance;
     this.status = params.status;
   }
 
@@ -37,6 +40,7 @@ class AccountDTO {
       name: entity.name,
       owner: entity.owner,
       ownerId: entity.ownerId,
+      projectedBalance: entity.projectedBalance,
       status: entity.status,
     });
   }

@@ -24,6 +24,7 @@ const repositoriesMocks: Repositories = {
   },
   financialRepository: {
     account: {
+      adjustAccountBalance: jest.fn(),
       createAccount: jest.fn(),
       deleteAccount: jest.fn(),
       getAccounts: jest.fn(),

@@ -50,3 +50,30 @@ it("SHOULD expose id, name, icon and owner id", () => {
   expect(account.icon).toBe("bank");
   expect(account.ownerId).toBe("user-id");
 });
+
+function modelWithProjected(balance: number, projectedBalance: number) {
+  return new AccountUIModel(
+    new AccountDTO({
+      balance,
+      icon: "bank",
+      id: "a1",
+      name: "Checking",
+      owner: "USER",
+      ownerId: "user-id",
+      projectedBalance,
+      status: "ACTIVE",
+    }),
+    owners,
+  );
+}
+
+it("SHOULD expose the projected balance in signed cents without float drift", () => {
+  expect(modelWithProjected(10, 980.3).projectedBalanceCents).toBe(98030);
+  expect(modelWithProjected(10, -0.7).projectedBalanceCents).toBe(-70);
+});
+
+it("SHOULD flag a projected balance that differs from the current one", () => {
+  expect(modelWithProjected(100, 120).hasProjectedDifference).toBe(true);
+  expect(modelWithProjected(100.1, 100.1).hasProjectedDifference).toBe(false);
+  expect(model(50).hasProjectedDifference).toBe(false);
+});

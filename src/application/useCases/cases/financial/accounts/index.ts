@@ -1,3 +1,4 @@
+export { default as adjustAccountBalanceUseCase } from "./adjustAccountBalanceUseCase";
 export { default as createAccountUseCase } from "./createAccountUseCase";
 export { default as deleteAccountUseCase } from "./deleteAccountUseCase";
 export { default as getAccountsUseCase } from "./getAccountsUseCase";

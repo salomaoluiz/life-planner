@@ -39,3 +39,19 @@ it("SHOULD round-trip toJSON and fromJSON (repository cache)", () => {
 
   expect(AccountModel.fromJSON(model.toJSON())).toStrictEqual(model);
 });
+
+it("SHOULD expose the projected balance as a decimal AND write it back in cents", () => {
+  const model = setup();
+
+  expect(model.projectedBalance).toBe(1500);
+  expect(model.toJSON().projectedBalance).toBe(150000);
+});
+
+it("SHOULD default the projected balance to the balance WHEN the payload has none", () => {
+  const model = AccountModel.fromJSON({
+    ...mocks.json,
+    projectedBalance: undefined,
+  });
+
+  expect(model.projectedBalance).toBe(1520.75);
+});

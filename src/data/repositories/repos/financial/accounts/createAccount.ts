@@ -25,6 +25,7 @@ async function createAccount(params: Params, datasources: Datasources) {
     name: account.name,
     owner: OwnerType[account.owner],
     ownerId: account.ownerId,
+    projectedBalance: account.projectedBalance,
     status: account.status,
   });
 }

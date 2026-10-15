@@ -11,6 +11,9 @@ import {
 
 const MAX_NAME = 60;
 
+// What an edit changes: the account fields plus, apart, the balance the user wants to see.
+type AccountChanges = UpdateAccountUseCaseParams & { balance?: number };
+
 type AccountFormErrors = Partial<Record<"amount" | "name", TranslationKeys>>;
 
 interface AccountFormState {
@@ -86,8 +89,8 @@ function toUpdateParams(
   id: string,
   state: AccountFormState,
   initial: AccountFormState,
-): UpdateAccountUseCaseParams {
-  const params: UpdateAccountUseCaseParams = { id };
+): AccountChanges {
+  const params: AccountChanges = { id };
 
   if (state.name.trim() !== initial.name.trim()) {
     params.name = state.name.trim();
@@ -105,7 +108,10 @@ function toUpdateParams(
   return params;
 }
 
-function validate(state: AccountFormState): AccountFormErrors {
+function validate(
+  state: AccountFormState,
+  initial?: AccountFormState,
+): AccountFormErrors {
   const errors: AccountFormErrors = {};
   const name = state.name.trim();
 
@@ -116,12 +122,19 @@ function validate(state: AccountFormState): AccountFormErrors {
   }
   if (state.amountCents > MAX_TRANSACTION_CENTS) {
     errors.amount = "financial.accounts.form.errors.balanceTooLarge";
+  } else if (
+    // An archived account refuses adjustments: say so instead of failing after the tap.
+    initial?.isArchived &&
+    state.isArchived &&
+    signedBalance(state) !== signedBalance(initial)
+  ) {
+    errors.amount = "financial.errors.accountArchived";
   }
 
   return errors;
 }
 
-export type { AccountFormErrors, AccountFormState };
+export type { AccountChanges, AccountFormErrors, AccountFormState };
 export {
   createInitialState,
   isSameState,

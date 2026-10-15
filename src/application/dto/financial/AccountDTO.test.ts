@@ -13,3 +13,13 @@ it("SHOULD the AccountDTO fromEntity return a DTO object", () => {
   expect(result).toHaveProperty("ownerId", mocks.defaultProps.ownerId);
   expect(result).toHaveProperty("status", mocks.defaultProps.status);
 });
+
+it("SHOULD carry the projected balance AND default it to the balance", () => {
+  expect(setupFromEntity()).toHaveProperty(
+    "projectedBalance",
+    mocks.defaultProps.balance,
+  );
+  expect(
+    new AccountDTO({ ...mocks.defaultProps, projectedBalance: 99 }),
+  ).toHaveProperty("projectedBalance", 99);
+});

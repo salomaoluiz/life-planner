@@ -5,6 +5,7 @@ import {
   filterByOwner,
   totalActiveCents,
   totalAmount,
+  totalProjectedCents,
 } from "./accountList";
 import AccountUIModel from "./AccountUIModel";
 
@@ -98,4 +99,36 @@ it("SHOULD use unique keys", () => {
   const keys = buildAccountEntries(accounts, true).map((e) => e.key);
 
   expect(new Set(keys).size).toBe(keys.length);
+});
+
+function withProjection(
+  id: string,
+  balance: number,
+  projected: number,
+  status = "ACTIVE",
+) {
+  return new AccountUIModel(
+    new AccountDTO({
+      balance,
+      icon: "bank",
+      id,
+      name: id,
+      owner: "USER",
+      ownerId: "user-id",
+      projectedBalance: projected,
+      status,
+    }),
+    [],
+  );
+}
+
+it("SHOULD total the projected balance of the active accounts only", () => {
+  expect(
+    totalProjectedCents([
+      withProjection("a", 100, 120),
+      withProjection("b", 50, 20.5),
+      withProjection("c", 999, 1, "ARCHIVED"),
+    ]),
+  ).toBe(14050);
+  expect(totalProjectedCents([])).toBe(0);
 });

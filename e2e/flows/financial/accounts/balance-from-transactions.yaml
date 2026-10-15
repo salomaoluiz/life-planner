@@ -1,0 +1,96 @@
+url: ${E2E_WEB_URL}
+name: financial/accounts/balance-from-transactions
+tags:
+  - financial
+  - spec-028
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Account
+      KEY: ACCOUNT_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Category
+      KEY: CATEGORY_NAME
+- runScript: ../../../scripts/future-date.js
+# initial balance 1.000,00
+- runFlow:
+    file: ../../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: ${output.ACCOUNT_NAME}
+      BALANCE_CENTS: "100000"
+- evalScript: ${output.KEEP_ACCOUNT_ID = output.ACCOUNT_ID}
+- runFlow:
+    file: ../../../subflows/setup/create-category.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: ${output.CATEGORY_NAME}
+- evalScript: ${output.KEEP_CATEGORY_ID = output.CATEGORY_ID}
+# expense today: 30,00 -> current balance 970,00
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.KEEP_ACCOUNT_ID}
+      CATEGORY_ID: ${output.KEEP_CATEGORY_ID}
+      VALUE_CENTS: "3000"
+# expense dated next month: neither the current nor the end-of-month balance counts it
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.KEEP_ACCOUNT_ID}
+      CATEGORY_ID: ${output.KEEP_CATEGORY_ID}
+      VALUE_CENTS: "700"
+      DATE: ${output.NEXT_MONTH_DATE}
+# expense later this month (the last day): only the end-of-month balance counts it. Skipped on the last day of the month.
+- runFlow:
+    when:
+      true: ${output.LATER_THIS_MONTH_DATE != ""}
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.KEEP_ACCOUNT_ID}
+      CATEGORY_ID: ${output.KEEP_CATEGORY_ID}
+      VALUE_CENTS: "2000"
+      DATE: ${output.LATER_THIS_MONTH_DATE}
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-accounts.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.row-title"
+      text: ${output.ACCOUNT_NAME}
+    timeout: 20000
+- assertVisible:
+    id: "financial.accounts.row-balance"
+    text: ".*970[.,]00.*"
+- runFlow:
+    when:
+      true: ${output.LATER_THIS_MONTH_DATE != ""}
+    commands:
+      - assertVisible:
+          id: "financial.accounts.row-projected"
+          text: ".*950[.,]00.*"
+- runFlow:
+    when:
+      true: ${output.LATER_THIS_MONTH_DATE == ""}
+    commands:
+      - assertNotVisible:
+          id: "financial.accounts.row-projected"

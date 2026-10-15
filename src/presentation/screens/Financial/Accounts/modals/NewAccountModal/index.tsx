@@ -82,14 +82,14 @@ function NewAccountModal() {
         <View style={styles.helper}>
           <AmountInput
             error={err(vm.amountError)}
-            label={t("financial.accounts.form.balance")}
+            label={t(vm.balanceLabelKey)}
             onChange={vm.onAmountChange}
             testID={accountFormTestIds.balanceInput}
             tone={vm.sign === "NEGATIVE" ? "expense" : "neutral"}
             value={vm.amountCents}
           />
           <SegmentedControl
-            accessibilityLabel={t("financial.accounts.form.balance")}
+            accessibilityLabel={t(vm.balanceLabelKey)}
             onChange={vm.onSignChange}
             options={vm.signOptions.map((option) => ({
               label: t(option.labelKey),

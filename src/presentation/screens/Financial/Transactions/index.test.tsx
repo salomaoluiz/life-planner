@@ -5,7 +5,9 @@ import { hasText } from "@tests";
 
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
+import { makeTransactionDTO } from "./mocks/index.mocks";
 import { makeEntries, setup } from "./mocks/screen.mocks";
+import TransactionUIModel from "./models/TransactionUIModel";
 
 it("SHOULD render skeletons WHEN loading", () => {
   setup({ isLoading: true });
@@ -167,4 +169,54 @@ it("SHOULD title the balance with the month name only", () => {
   expect(hasText('financial.transactions.balanceOf {"month":"October"}')).toBe(
     true,
   );
+});
+
+it("SHOULD open the delete-only sheet (and NOT the form) WHEN an adjustment row is tapped", () => {
+  const onOpen = jest.fn();
+  const onRowPress = jest.fn();
+  const adjustment = new TransactionUIModel(
+    makeTransactionDTO({
+      excludeFromTotals: true,
+      id: "adj-1",
+      systemKey: "BALANCE_ADJUSTMENT",
+    }),
+  );
+  setup(
+    {
+      entries: [{ item: adjustment, key: "item-adj-1", kind: "item" }],
+      onRowPress,
+    },
+    { onOpen },
+  );
+
+  fireEvent.press(screen.getByTestId(transactionsTestIds.adjustmentRow));
+
+  expect(onOpen).toHaveBeenCalledWith(adjustment);
+  expect(onRowPress).not.toHaveBeenCalled();
+});
+
+it("SHOULD still open the form WHEN a regular row is tapped", () => {
+  const onOpen = jest.fn();
+  const onRowPress = jest.fn();
+  setup({ entries: makeEntries(), onRowPress }, { onOpen });
+
+  fireEvent.press(screen.getAllByTestId(transactionsTestIds.row)[0]);
+
+  expect(onRowPress).toHaveBeenCalledWith("tx-1");
+  expect(onOpen).not.toHaveBeenCalled();
+});
+
+it("SHOULD render the sheet for the opened adjustment", () => {
+  const adjustment = new TransactionUIModel(
+    makeTransactionDTO({
+      excludeFromTotals: true,
+      id: "adj-1",
+      systemKey: "BALANCE_ADJUSTMENT",
+    }),
+  );
+  setup({}, { item: adjustment });
+
+  expect(
+    screen.getByTestId(transactionsTestIds.adjustmentSheet),
+  ).toBeOnTheScreen();
 });

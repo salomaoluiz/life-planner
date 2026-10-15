@@ -166,3 +166,11 @@ it("SHOULD give every owner chip an id from its owner id", () => {
     screen.getByTestId(`${accountFormTestIds.owner}-owner-2`),
   ).toBeOnTheScreen();
 });
+
+it("SHOULD label the amount with the view model's label key", () => {
+  setup({ balanceLabelKey: "financial.accounts.form.initialBalance" });
+
+  expect(
+    screen.getByText("financial.accounts.form.initialBalance"),
+  ).toBeOnTheScreen();
+});

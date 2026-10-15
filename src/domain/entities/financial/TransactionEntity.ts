@@ -5,15 +5,20 @@ export enum TransactionType {
   INCOME = "INCOME",
 }
 
+// Key of the system category that marks a balance adjustment (spec 028).
+export const BALANCE_ADJUSTMENT = "BALANCE_ADJUSTMENT";
+
 interface ITransactionEntity {
   accountId: string;
   category: string;
   categoryId: string;
   date: string;
   description: string;
+  excludeFromTotals?: boolean;
   id: string;
   owner: OwnerType;
   ownerId: string;
+  systemKey?: string;
   type: TransactionType;
   value: string;
 }
@@ -24,9 +29,11 @@ class TransactionEntity {
   categoryId: string;
   date: string;
   description: string;
+  excludeFromTotals: boolean;
   id: string;
   owner: OwnerType;
   ownerId: string;
+  systemKey?: string;
   type: TransactionType;
   value: string;
 
@@ -39,6 +46,8 @@ class TransactionEntity {
     this.owner = params.owner;
     this.description = params.description;
     this.ownerId = params.ownerId;
+    this.excludeFromTotals = params.excludeFromTotals ?? false;
+    this.systemKey = params.systemKey;
     this.type = params.type;
     this.value = params.value;
   }

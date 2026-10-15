@@ -53,8 +53,16 @@ const categories = [
 
 const model = new NewTransactionUIModel({ accounts, categories, owners });
 
-it("SHOULD list ACTIVE accounts by name then ARCHIVED, only of the owner", () => {
+it("SHOULD list only the ACTIVE accounts of the owner, by name", () => {
   expect(model.accountOptions("user-id")).toEqual([
+    { label: "Alpha", value: "a" },
+    { label: "Bravo", value: "b" },
+  ]);
+  expect(model.accountIds("family-1")).toEqual(["other"]);
+});
+
+it("SHOULD keep the SELECTED account in the list WHEN it is archived (editing an old transaction)", () => {
+  expect(model.accountOptions("user-id", "a-arch")).toEqual([
     { label: "Alpha", value: "a" },
     { label: "Bravo", value: "b" },
     {
@@ -62,13 +70,15 @@ it("SHOULD list ACTIVE accounts by name then ARCHIVED, only of the owner", () =>
       label: "Aaa",
       value: "a-arch",
     },
-    {
-      descriptionKey: "financial.accounts.archivedLabel",
-      label: "Zeta",
-      value: "z-arch",
-    },
   ]);
-  expect(model.accountIds("family-1")).toEqual(["other"]);
+});
+
+it("SHOULD NOT add the selected account WHEN it belongs to another owner or is active", () => {
+  expect(model.accountOptions("user-id", "other")).toEqual([
+    { label: "Alpha", value: "a" },
+    { label: "Bravo", value: "b" },
+  ]);
+  expect(model.accountOptions("user-id", "a")).toHaveLength(2);
 });
 
 it("SHOULD build the category tree for the owner and type only", () => {
@@ -82,6 +92,13 @@ it("SHOULD build the category tree for the owner and type only", () => {
 it("SHOULD tell whether the owner has accounts and categories", () => {
   expect(model.hasAccounts("user-id")).toBe(true);
   expect(model.hasAccounts("nobody")).toBe(false);
+  expect(
+    new NewTransactionUIModel({
+      accounts: [account("only-arch", "Old", "user-id", "ARCHIVED")],
+      categories,
+      owners,
+    }).hasAccounts("user-id"),
+  ).toBe(false);
   expect(model.hasCategories("family-1", "EXPENSE")).toBe(true);
   expect(model.hasCategories("family-1", "INCOME")).toBe(false);
 });

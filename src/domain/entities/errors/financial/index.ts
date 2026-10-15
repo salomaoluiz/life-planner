@@ -1,3 +1,4 @@
+export { default as AccountArchived } from "./AccountArchived";
 export { default as AccountHasTransactions } from "./AccountHasTransactions";
 export { default as CategoryHasTransactions } from "./CategoryHasTransactions";
 export { default as CreditCardHasTransactions } from "./CreditCardHasTransactions";

@@ -11,5 +11,13 @@ it("SHOULD delete a transaction AND invalidate cache WHEN called", async () => {
   expect(spies.cache.invalidate).toHaveBeenCalledWith(
     CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA,
   );
-  expect(spies.cache.invalidate).toHaveBeenCalledTimes(1);
+  expect(spies.cache.invalidate).toHaveBeenCalledTimes(2);
+});
+
+it("SHOULD also invalidate the accounts cache (their balances changed)", async () => {
+  await setup();
+
+  expect(spies.cache.invalidate).toHaveBeenCalledWith(
+    CacheStringKeys.CACHE_FINANCIAL_ACCOUNT_DATA,
+  );
 });

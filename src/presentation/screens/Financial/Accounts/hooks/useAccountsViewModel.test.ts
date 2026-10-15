@@ -1,5 +1,7 @@
 import { act } from "@tests";
 
+import AccountDTO from "@application/dto/financial/AccountDTO";
+
 import {
   acc,
   accountsQuery,
@@ -107,4 +109,46 @@ it("SHOULD expose the loading and error states", () => {
 
   accountsQuery.reset().withError();
   expect(setup().result.current.errorMessage).toBeDefined();
+});
+
+it("SHOULD total the end-of-month balance of the active accounts of the selected owner", () => {
+  givenData([
+    new AccountDTO({
+      balance: 100,
+      icon: "bank",
+      id: "a",
+      name: "a",
+      owner: "USER",
+      ownerId: "user-id",
+      projectedBalance: 130,
+      status: "ACTIVE",
+    }),
+    new AccountDTO({
+      balance: 40,
+      icon: "bank",
+      id: "b",
+      name: "b",
+      owner: "FAMILY",
+      ownerId: "family-1",
+      projectedBalance: 10,
+      status: "ACTIVE",
+    }),
+    new AccountDTO({
+      balance: 900,
+      icon: "bank",
+      id: "c",
+      name: "c",
+      owner: "USER",
+      ownerId: "user-id",
+      projectedBalance: 5,
+      status: "ARCHIVED",
+    }),
+  ]);
+  const { result } = setup();
+
+  expect(result.current.totalProjectedAmount).toEqual({ value: 14000 });
+  act(() => {
+    result.current.onOwnerFilterChange("family-1");
+  });
+  expect(result.current.totalProjectedAmount).toEqual({ value: 1000 });
 });

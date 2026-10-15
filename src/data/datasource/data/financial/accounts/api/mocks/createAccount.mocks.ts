@@ -22,9 +22,11 @@ const apiAccount = {
   createdAt: "2026-10-04T12:00:00.000Z",
   icon: "bank",
   id: "6f1c2b9e-1d2a-4c55-9a7e-0b8e3c1f2a10",
+  initialBalance: 152075,
   name: "Checking",
   owner: "USER",
   ownerId: params.ownerId,
+  projectedBalance: 152075,
   status: "ACTIVE",
   updatedAt: "2026-10-04T12:00:00.000Z",
 };

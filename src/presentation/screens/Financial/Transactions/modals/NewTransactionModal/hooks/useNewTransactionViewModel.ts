@@ -257,7 +257,7 @@ function useNewTransactionViewModel() {
 
   return {
     accountError: errors.accountId,
-    accountOptions: uiModel?.accountOptions(ownerId) ?? [],
+    accountOptions: uiModel?.accountOptions(ownerId, state?.accountId) ?? [],
     amountCents: state?.amountCents ?? 0,
     amountError: errors.amount,
     categoryChips,

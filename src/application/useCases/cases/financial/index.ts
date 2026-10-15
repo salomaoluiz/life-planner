@@ -1,4 +1,5 @@
 export {
+  adjustAccountBalanceUseCase as adjustFinancialAccountBalanceUseCase,
   createAccountUseCase as createFinancialAccountUseCase,
   deleteAccountUseCase as deleteFinancialAccountUseCase,
   getAccountsUseCase as getFinancialAccountsUseCase,

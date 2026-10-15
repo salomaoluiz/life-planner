@@ -17,7 +17,6 @@ it("SHOULD PATCH /v1/finance/accounts/:id with ONLY the editable fields (no owne
   await expect(setup()).resolves.toBeUndefined();
 
   expect(spies.patch).toHaveBeenCalledWith(`/v1/finance/accounts/${mocks.id}`, {
-    balance: 152075,
     icon: "bank",
     name: "Checking",
     status: "ARCHIVED",

@@ -19,8 +19,8 @@ it("SHOULD POST /v1/finance/accounts with the balance in cents AND return the cr
   const result = await setup();
 
   expect(spies.post).toHaveBeenCalledWith("/v1/finance/accounts", {
-    balance: 152075,
     icon: "bank",
+    initialBalance: 152075,
     name: "Checking",
     owner: "USER",
     ownerId: mocks.params.ownerId,
@@ -36,7 +36,7 @@ it("SHOULD send a negative balance in cents", async () => {
 
   expect(spies.post).toHaveBeenCalledWith(
     "/v1/finance/accounts",
-    expect.objectContaining({ balance: -5050 }),
+    expect.objectContaining({ initialBalance: -5050 }),
   );
 });
 

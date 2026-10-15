@@ -25,6 +25,8 @@ async function createTransaction(params: Params, datasources: Datasources) {
     });
 
   cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA);
+  // Every transaction write moves an account balance.
+  cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_ACCOUNT_DATA);
 
   return new TransactionEntity({
     accountId: transaction.accountId,
@@ -32,9 +34,11 @@ async function createTransaction(params: Params, datasources: Datasources) {
     categoryId: transaction.categoryId,
     date: transaction.date,
     description: transaction.description,
+    excludeFromTotals: transaction.excludeFromTotals,
     id: transaction.id,
     owner: OwnerType[transaction.owner],
     ownerId: transaction.ownerId,
+    systemKey: transaction.systemKey,
     type: TransactionType[transaction.type],
     value: transaction.value,
   });

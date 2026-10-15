@@ -1,4 +1,5 @@
 import {
+  AccountArchived,
   AccountHasTransactions,
   CategoryHasTransactions,
   CreditCardHasTransactions,
@@ -14,6 +15,10 @@ function getFinancialErrorMessageKey(
 ): TranslationKeys | undefined {
   if (!error) {
     return undefined;
+  }
+
+  if (error instanceof AccountArchived) {
+    return "financial.errors.accountArchived";
   }
 
   if (error instanceof AccountHasTransactions) {

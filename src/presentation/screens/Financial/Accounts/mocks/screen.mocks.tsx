@@ -49,6 +49,7 @@ const defaultViewModel: ReturnType<typeof useAccountsViewModel> = {
   ownerChoices: [{ labelKey: "financial.common.all", value: "ALL" }],
   ownerFilter: "ALL",
   totalAmount: { value: 0 },
+  totalProjectedAmount: { value: 0 },
 };
 
 function makeEntries(expanded = false): AccountEntry[] {

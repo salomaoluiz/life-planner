@@ -121,3 +121,23 @@ it("SHOULD restore ACTIVE WHEN an archived account is unarchived", () => {
     status: "ACTIVE",
   });
 });
+
+it("SHOULD reject a balance change on an account that is archived AND stays archived", () => {
+  const archived = { ...base, isArchived: true };
+
+  expect(validate({ ...archived, amountCents: 100 }, archived).amount).toBe(
+    "financial.errors.accountArchived",
+  );
+  // no balance change: fine
+  expect(validate({ ...archived, name: "Renamed" }, archived)).toEqual({});
+  // un-archiving in the same save: allowed (the patch goes first)
+  expect(
+    validate({ ...archived, amountCents: 100, isArchived: false }, archived),
+  ).toEqual({});
+  // archiving in the same save: allowed (the adjustment goes first)
+  expect(
+    validate({ ...base, amountCents: 100, isArchived: true }, base),
+  ).toEqual({});
+  // creating: no initial state to compare with
+  expect(validate({ ...base, amountCents: 100 })).toEqual({});
+});
