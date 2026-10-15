@@ -1,0 +1,26 @@
+url: ${E2E_WEB_URL}
+name: auth/stay-logged-in
+tags:
+  - auth
+  - spec-027
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+# Relaunch WITHOUT clearing state: the stored session must bring the user straight back to Home.
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
