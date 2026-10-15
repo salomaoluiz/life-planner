@@ -16,6 +16,14 @@ export {
 } from "./categories";
 
 export {
+  createCreditCardUseCase as createFinancialCreditCardUseCase,
+  deleteCreditCardUseCase as deleteFinancialCreditCardUseCase,
+  getCreditCardsOverviewUseCase as getFinancialCreditCardsOverviewUseCase,
+  getCreditCardsUseCase as getFinancialCreditCardsUseCase,
+  updateCreditCardUseCase as updateFinancialCreditCardUseCase,
+} from "./creditCards";
+
+export {
   createTransactionUseCase as createFinancialTransactionUseCase,
   deleteTransactionUseCase as deleteFinancialTransactionUseCase,
   getTransactionsUseCase as getFinancialTransactionsUseCase,
