@@ -8,6 +8,7 @@ jest.mock("../hooks/useLoginViewModel");
 
 // region mocks
 const viewModel = {
+  accountDeletedNotice: undefined as string | undefined,
   email: "test@example.com",
   emailError: undefined as string | undefined,
   formError: undefined as
@@ -33,6 +34,7 @@ const spies = { useLoginViewModel: jest.mocked(useLoginViewModel) };
 beforeEach(() => {
   jest.clearAllMocks();
   Object.assign(viewModel, {
+    accountDeletedNotice: undefined,
     emailError: undefined,
     formError: undefined,
     isSubmitting: false,

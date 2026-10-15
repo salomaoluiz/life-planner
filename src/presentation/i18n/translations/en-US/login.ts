@@ -1,4 +1,5 @@
 const login = {
+  accountDeletedNotice: "Your account was deleted.",
   button: {
     goToSignUp: "Create account",
     signIn: "Sign in",
