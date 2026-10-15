@@ -58,6 +58,7 @@ function FinancialCategories() {
         mode={"single"}
         onChange={vm.onOwnerFilterChange}
         options={translateChoices(vm.ownerChoices, t)}
+        testID={categoriesTestIds.ownerFilter}
         value={vm.ownerFilter}
       />
     </View>

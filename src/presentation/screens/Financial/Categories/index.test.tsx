@@ -93,3 +93,17 @@ it("SHOULD draw a divider between rows but not after the last one", () => {
     screen.getAllByTestId(/^financial\.categories\.(child-)?row-divider$/),
   ).toHaveLength(makeRows().length - 1);
 });
+
+it("SHOULD give every owner filter chip an id from its owner id", () => {
+  setup({
+    ownerChoices: [
+      { labelKey: "financial.common.all", value: "ALL" },
+      { label: "Test Family", value: "owner-2" },
+    ],
+    rows: makeRows(),
+  });
+
+  expect(
+    screen.getByTestId(`${categoriesTestIds.ownerFilter}-owner-2`),
+  ).toBeOnTheScreen();
+});

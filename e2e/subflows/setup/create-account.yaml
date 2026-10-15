@@ -3,8 +3,8 @@ env:
   ICON: bank
   BALANCE_CENTS: "0"
   STATUS: ACTIVE
-  OWNER: USER
 ---
+# Optional caller-scoped param read by the script: OWNER (USER default, or FAMILY).
 - runScript:
     file: ../../scripts/setup/create-account.js
     env:
@@ -14,4 +14,3 @@ env:
       ICON: ${ICON}
       BALANCE_CENTS: ${BALANCE_CENTS}
       STATUS: ${STATUS}
-      OWNER: ${OWNER}

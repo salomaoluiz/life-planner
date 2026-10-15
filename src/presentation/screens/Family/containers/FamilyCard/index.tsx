@@ -12,6 +12,7 @@ import { IconButton } from "@components/Icon";
 import { useTranslation } from "@presentation/i18n";
 import * as Components from "@screens/Family/components";
 import FamilyViewModel from "@screens/Family/models/FamilyViewModel";
+import familyTestIds from "@screens/Family/testIds";
 
 import useFamilyCardViewModel from "./hooks/useFamilyCardViewModel";
 import useStyles from "./styles";
@@ -30,14 +31,14 @@ function FamilyCard(props: Props) {
   const subtitle = family.subtitle;
 
   return (
-    <Card testID={`family-card-${family.familyId}`}>
+    <Card testID={`${familyTestIds.card}-${family.familyId}`}>
       <View style={styles.body}>
         <Pressable
           accessibilityRole="button"
           accessibilityState={{ expanded: props.expanded }}
           onPress={props.onToggle}
           style={styles.header}
-          testID={`family-card-toggle-${family.familyId}`}
+          testID={`${familyTestIds.cardToggle}-${family.familyId}`}
         >
           <IconTile
             label={family.initial}
@@ -45,7 +46,11 @@ function FamilyCard(props: Props) {
             tone={getAvatarTone(family.familyName)}
           />
           <View style={styles.headerText}>
-            <Text.Heading numberOfLines={1} value={family.familyName} />
+            <Text.Heading
+              numberOfLines={1}
+              testID={`${familyTestIds.cardTitle}-${family.familyId}`}
+              value={family.familyName}
+            />
             <Text.Caption
               numberOfLines={1}
               value={t(subtitle.key, subtitle.params)}
@@ -58,7 +63,7 @@ function FamilyCard(props: Props) {
               })}
               name="dots-horizontal"
               onPress={vm.onFamilyOptions}
-              testID={`family-card-options-${family.familyId}`}
+              testID={`${familyTestIds.cardOptions}-${family.familyId}`}
             />
           ) : null}
         </Pressable>
@@ -89,7 +94,7 @@ function FamilyCard(props: Props) {
                   })}
                   photoUrl={member.avatar.photoUrl}
                   subtitle={member.isPending ? undefined : member.email}
-                  testID={`member-row-${member.id}`}
+                  testID={`${familyTestIds.member}-${member.id}`}
                   title={
                     member.isCurrentUser
                       ? t("family.card.you")
@@ -104,7 +109,7 @@ function FamilyCard(props: Props) {
                 icon="account-plus-outline"
                 label={t("family.card.invite")}
                 onPress={vm.onInviteMember}
-                testID={`invite-member-${family.familyId}`}
+                testID={`${familyTestIds.inviteButton}-${family.familyId}`}
               />
             ) : null}
           </>
@@ -117,7 +122,7 @@ function FamilyCard(props: Props) {
         onAction={vm.onMenuAction}
         onClose={vm.onCloseMenu}
         subtitle={vm.menu?.subtitle ?? ""}
-        testID={`family-menu-${family.familyId}`}
+        testID={`${familyTestIds.menu}-${family.familyId}`}
         title={vm.menu ? t(vm.menu.titleKey) : ""}
         visible={!!vm.menu}
       />
@@ -129,7 +134,7 @@ function FamilyCard(props: Props) {
         message={vm.confirmCopy ? t(vm.confirmCopy.messageKey) : ""}
         onCancel={vm.onCancelConfirm}
         onConfirm={vm.onConfirm}
-        testID={`family-confirm-${family.familyId}`}
+        testID={`${familyTestIds.confirm}-${family.familyId}`}
         title={
           vm.confirmCopy
             ? t(vm.confirmCopy.titleKey, vm.confirmCopy.params)
@@ -150,7 +155,7 @@ function FamilyCard(props: Props) {
             : t("family.card.ok")
         }
         onClose={vm.onCloseNotice}
-        testID={`family-notice-${family.familyId}`}
+        testID={`${familyTestIds.notice}-${family.familyId}`}
         title={
           vm.notice === "DELETE_BLOCKED"
             ? t("family.deleteBlocked.title")

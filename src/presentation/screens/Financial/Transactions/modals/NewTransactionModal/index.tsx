@@ -151,6 +151,7 @@ function NewTransactionModal() {
           mode={"single"}
           onChange={vm.onOwnerChange}
           options={translateChoices(vm.ownerChoices, t)}
+          testID={transactionFormTestIds.owner}
           value={vm.ownerId}
         />
         {vm.formErrorKey && (

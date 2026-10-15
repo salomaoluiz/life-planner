@@ -4,6 +4,7 @@ import { useTranslation } from "@presentation/i18n";
 import useAddNewFamilyViewModel, {
   FAMILY_NAME_MAX,
 } from "./hooks/useAddNewFamilyViewModel";
+import newFamilyTestIds from "./testIds";
 
 function AddNewFamilyModal() {
   const { t } = useTranslation();
@@ -26,12 +27,12 @@ function AddNewFamilyModal() {
           loading={vm.isSubmitting}
           onPress={vm.onSubmit}
           size="lg"
-          testID="new-family-submit"
+          testID={newFamilyTestIds.saveButton}
         />
       }
       onClose={vm.onClose}
       presentation="inline"
-      testID="new-family-sheet"
+      testID={newFamilyTestIds.sheet}
       title={t("family.form.title")}
       visible
     >
@@ -51,7 +52,7 @@ function AddNewFamilyModal() {
         onChangeText={vm.onChangeName}
         onSubmitEditing={vm.onSubmit}
         returnKeyType="done"
-        testID="new-family-name"
+        testID={newFamilyTestIds.nameInput}
         value={vm.name}
       />
     </BottomSheet>

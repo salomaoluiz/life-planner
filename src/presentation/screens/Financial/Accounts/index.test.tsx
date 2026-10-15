@@ -95,3 +95,17 @@ it("SHOULD space the toolbar blocks and the list by 20 px", () => {
   expect(style.gap).toBe(20);
   expect(style.paddingBottom).toBe(20);
 });
+
+it("SHOULD give every owner filter chip an id from its owner id", () => {
+  setup({
+    entries: makeEntries(),
+    ownerChoices: [
+      { labelKey: "financial.common.all", value: "ALL" },
+      { label: "Test Family", value: "owner-2" },
+    ],
+  });
+
+  expect(
+    screen.getByTestId(`${accountsTestIds.ownerFilter}-owner-2`),
+  ).toBeOnTheScreen();
+});

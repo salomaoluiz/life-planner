@@ -1,5 +1,6 @@
 const transactionsTestIds = {
   emptyMonth: "financial.transactions.empty-month",
+  filter: "financial.transactions.filter",
   monthNext: "financial.transactions.month-next",
   monthPrevious: "financial.transactions.month-previous",
   monthSummary: "financial.transactions.month-summary",

@@ -1,0 +1,66 @@
+url: ${E2E_WEB_URL}
+name: family/delete-family-with-records
+tags:
+  - family
+  - spec-003
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Family
+      KEY: FAMILY_NAME
+- runFlow:
+    file: ../../subflows/setup/create-family.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      NAME: ${output.FAMILY_NAME}
+- runFlow:
+    file: ../../subflows/setup/create-stock-item.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.FAMILY_ID}
+      OWNER: FAMILY
+- runFlow:
+    file: ../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../subflows/family/open-family.yaml
+- extendedWaitUntil:
+    visible:
+      id: "family.card.title-${output.FAMILY_ID}"
+      text: ${output.FAMILY_NAME}
+    timeout: 20000
+- tapOn:
+    id: "family.card.options-${output.FAMILY_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "family.card.menu-${output.FAMILY_ID}-action"
+    timeout: 20000
+- tapOn:
+    id: "family.card.menu-${output.FAMILY_ID}-action"
+- extendedWaitUntil:
+    visible:
+      id: "family.card.confirm-${output.FAMILY_ID}-confirm"
+    timeout: 20000
+- tapOn:
+    id: "family.card.confirm-${output.FAMILY_ID}-confirm"
+# Blocked: the notice shows and the family stays
+- extendedWaitUntil:
+    visible:
+      id: "family.card.notice-${output.FAMILY_ID}-ok"
+    timeout: 20000
+- tapOn:
+    id: "family.card.notice-${output.FAMILY_ID}-ok"
+- extendedWaitUntil:
+    visible:
+      id: "family.card.title-${output.FAMILY_ID}"
+      text: ${output.FAMILY_NAME}
+    timeout: 20000
+- assertNotVisible:
+    id: "family.list.empty-state"
+- assertNotVisible:
+    id: "family.list.error-state"

@@ -2,8 +2,8 @@ url: ${E2E_WEB_URL}
 env:
   ICON: tag
   ICON_COLOR: "#336699"
-  OWNER: USER
 ---
+# Optional caller-scoped params read by the script: OWNER (USER default, or FAMILY), TYPE, PARENT_ID.
 - runScript:
     file: ../../scripts/setup/create-category.js
     env:
@@ -12,4 +12,3 @@ env:
       NAME: ${NAME}
       ICON: ${ICON}
       ICON_COLOR: ${ICON_COLOR}
-      OWNER: ${OWNER}

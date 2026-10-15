@@ -60,6 +60,7 @@ function FinancialAccounts() {
         mode={"single"}
         onChange={vm.onOwnerFilterChange}
         options={translateChoices(vm.ownerChoices, t)}
+        testID={accountsTestIds.ownerFilter}
         value={vm.ownerFilter}
       />
     </View>

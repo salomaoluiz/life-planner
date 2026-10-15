@@ -87,6 +87,7 @@ function FinancialTransactions() {
         mode={"single"}
         onChange={vm.onFilterChange}
         options={translateChoices(vm.filterChoices, t)}
+        testID={transactionsTestIds.filter}
         value={vm.filter}
       />
     </View>

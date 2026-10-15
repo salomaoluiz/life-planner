@@ -1,0 +1,79 @@
+url: ${E2E_WEB_URL}
+name: family/family-stock-item
+tags:
+  - family
+  - stock
+  - spec-005
+  - spec-011
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Family
+      KEY: FAMILY_NAME
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Rice
+      KEY: ITEM_NAME
+- runFlow:
+    file: ../../subflows/setup/create-family.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      NAME: ${output.FAMILY_NAME}
+- runFlow:
+    file: ../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../subflows/stock/open-stock.yaml
+- extendedWaitUntil:
+    visible:
+      id: "stock.list.empty-state"
+    timeout: 20000
+- tapOn:
+    id: "stock.list.add-button"
+- extendedWaitUntil:
+    visible:
+      id: "stock.item-form.description-input"
+    timeout: 20000
+- tapOn:
+    id: "stock.item-form.description-input"
+- inputText: ${output.ITEM_NAME}
+- tapOn:
+    id: "stock.item-form.quantity-input"
+- eraseText
+- inputText: "2"
+- runFlow: ../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "stock.item-form.owner-${output.FAMILY_ID}"
+- tapOn:
+    id: "stock.item-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "stock.list.row-title"
+      text: ${output.ITEM_NAME}
+    timeout: 20000
+# The row shows the family as its owner
+- assertVisible:
+    id: "stock.list.row-subtitle"
+    text: ".*${output.FAMILY_NAME}.*"
+# Filter by the family: visible
+- tapOn:
+    id: "stock.list.filter-${output.FAMILY_ID}"
+- assertVisible:
+    id: "stock.list.row-title"
+    text: ${output.ITEM_NAME}
+# Filter by personal: not visible (no-results appears)
+- tapOn:
+    id: "stock.list.filter-PERSONAL"
+- extendedWaitUntil:
+    visible:
+      id: "stock.list.no-results"
+    timeout: 20000
+- assertNotVisible:
+    id: "stock.list.row-title"
+    text: ${output.ITEM_NAME}

@@ -1,0 +1,42 @@
+url: ${E2E_WEB_URL}
+name: family/create-family-validation
+tags:
+  - family
+  - spec-012
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../subflows/family/open-family.yaml
+- tapOn:
+    id: "family.list.new-button"
+- extendedWaitUntil:
+    visible:
+      id: "family.new-family.name-input"
+    timeout: 20000
+# Empty name: error shown, the form stays open
+- tapOn:
+    id: "family.new-family.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "family.new-family.name-input-error"
+    timeout: 20000
+- assertVisible:
+    id: "family.new-family.sheet"
+# Whitespace-only name is rejected like an empty one
+- tapOn:
+    id: "family.new-family.name-input"
+- inputText: "   "
+- tapOn:
+    id: "family.new-family.save-button"
+- assertVisible:
+    id: "family.new-family.name-input-error"
+- assertVisible:
+    id: "family.new-family.sheet"
+- assertNotVisible:
+    id: "family.card.container-.*"

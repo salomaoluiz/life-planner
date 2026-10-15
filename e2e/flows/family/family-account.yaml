@@ -1,0 +1,75 @@
+url: ${E2E_WEB_URL}
+name: family/family-account
+tags:
+  - family
+  - financial
+  - spec-006
+  - spec-013
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Family
+      KEY: FAMILY_NAME
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Account
+      KEY: ACCOUNT_NAME
+- runFlow:
+    file: ../../subflows/setup/create-family.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      NAME: ${output.FAMILY_NAME}
+- runFlow:
+    file: ../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../subflows/financial/open-accounts.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.empty-state"
+    timeout: 20000
+- tapOn:
+    id: "financial.accounts.add-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.account-form.name-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.account-form.name-input"
+- inputText: ${output.ACCOUNT_NAME}
+- runFlow: ../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.account-form.owner-${output.FAMILY_ID}"
+- tapOn:
+    id: "financial.account-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.row-title"
+      text: ${output.ACCOUNT_NAME}
+    timeout: 20000
+# The row shows the family as its owner
+- assertVisible:
+    id: "financial.accounts.row-subtitle"
+    text: ".*${output.FAMILY_NAME}.*"
+# Filter by the family: visible
+- tapOn:
+    id: "financial.accounts.owner-filter-${output.FAMILY_ID}"
+- assertVisible:
+    id: "financial.accounts.row-title"
+    text: ${output.ACCOUNT_NAME}
+# Filter by personal: not visible (the empty state appears)
+- tapOn:
+    id: "financial.accounts.owner-filter-${output.USER_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.empty-state"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.accounts.row-title"
+    text: ${output.ACCOUNT_NAME}

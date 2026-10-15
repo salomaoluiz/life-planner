@@ -1,5 +1,5 @@
 // Maestro runScript (GraalJS). Creates a financial account through the API.
-// Reads E2E_API_URL, TOKEN, NAME, ICON, BALANCE_CENTS, STATUS, OWNER, OWNER_ID from env. Never logs the token.
+// Reads E2E_API_URL, TOKEN, NAME, ICON, BALANCE_CENTS, STATUS, OWNER (undefined = USER), OWNER_ID from env. Never logs the token.
 var response = http.post(E2E_API_URL + "/v1/finance/accounts", {
   headers: {
     "Content-Type": "application/json",
@@ -9,7 +9,7 @@ var response = http.post(E2E_API_URL + "/v1/finance/accounts", {
     balance: Number(BALANCE_CENTS),
     icon: ICON,
     name: NAME,
-    owner: OWNER,
+    owner: typeof OWNER !== "undefined" && OWNER ? OWNER : "USER",
     ownerId: OWNER_ID,
     status: STATUS,
   }),

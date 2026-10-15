@@ -107,6 +107,7 @@ function NewStockItemModal() {
               label: option.labelKey ? t(option.labelKey) : option.label,
               value: option.value,
             }))}
+            testID={stockItemFormTestIds.owner}
             value={values.ownerId ?? model.defaultOwnerId}
           />
           <DateField

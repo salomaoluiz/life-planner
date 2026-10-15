@@ -1,0 +1,120 @@
+url: ${E2E_WEB_URL}
+name: family/family-transaction
+tags:
+  - family
+  - financial
+  - spec-006
+  - spec-013
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Family
+      KEY: FAMILY_NAME
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Family Account
+      KEY: FAMILY_ACCOUNT_NAME
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Personal Account
+      KEY: PERSONAL_ACCOUNT_NAME
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Family Category
+      KEY: FAMILY_CATEGORY_NAME
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Transaction
+      KEY: TRANSACTION_NAME
+- runFlow:
+    file: ../../subflows/setup/create-family.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      NAME: ${output.FAMILY_NAME}
+- runFlow:
+    file: ../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.FAMILY_ID}
+      OWNER: FAMILY
+      NAME: ${output.FAMILY_ACCOUNT_NAME}
+- evalScript: ${output.FAMILY_ACCOUNT_ID = output.ACCOUNT_ID}
+- runFlow:
+    file: ../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: ${output.PERSONAL_ACCOUNT_NAME}
+- evalScript: ${output.PERSONAL_ACCOUNT_ID = output.ACCOUNT_ID}
+- runFlow:
+    file: ../../subflows/setup/create-category.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.FAMILY_ID}
+      OWNER: FAMILY
+      NAME: ${output.FAMILY_CATEGORY_NAME}
+      TYPE: EXPENSE
+- evalScript: ${output.FAMILY_CATEGORY_ID = output.CATEGORY_ID}
+- runFlow:
+    file: ../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../subflows/financial/open-transactions.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.empty-month-action"
+    timeout: 20000
+- tapOn:
+    id: "financial.transactions.empty-month-action"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.amount-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.transaction-form.amount-input"
+- eraseText
+- inputText: "23490"
+- tapOn:
+    id: "financial.transaction-form.description-input"
+- inputText: ${output.TRANSACTION_NAME}
+# Choose the family as owner (last field of the form); this resets category and account
+- runFlow: ../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.transaction-form.owner-${output.FAMILY_ID}"
+- runFlow: ../../subflows/financial/scroll-form-up.yaml
+- tapOn:
+    id: "financial.transaction-form.category-${output.FAMILY_CATEGORY_ID}"
+- runFlow: ../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.transaction-form.account-select"
+# Only the family's account is offered, never the personal one
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.account-select-option-${output.FAMILY_ACCOUNT_ID}"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.transaction-form.account-select-option-${output.PERSONAL_ACCOUNT_ID}"
+- tapOn:
+    id: "financial.transaction-form.account-select-option-${output.FAMILY_ACCOUNT_ID}"
+- tapOn:
+    id: "financial.transaction-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.TRANSACTION_NAME}
+    timeout: 20000
+# Filter by the family: still visible
+- tapOn:
+    id: "financial.transactions.filter-OWNER:${output.FAMILY_ID}"
+- assertVisible:
+    id: "financial.transactions.row-title"
+    text: ${output.TRANSACTION_NAME}

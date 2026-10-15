@@ -1,0 +1,20 @@
+url: ${E2E_WEB_URL}
+---
+# Caller env: PREFIX (for example MEMBER_). Creates one more API user and stores it as
+# <PREFIX>EMAIL / PASSWORD / TOKEN / USER_ID; the main user's keys come back unchanged.
+- runScript:
+    file: ../../scripts/copy-user.js
+    env:
+      MODE: save
+      PREFIX: SAVED_
+- runFlow: ../signup-via-api.yaml
+- runScript:
+    file: ../../scripts/copy-user.js
+    env:
+      MODE: save
+      PREFIX: ${PREFIX}
+- runScript:
+    file: ../../scripts/copy-user.js
+    env:
+      MODE: restore
+      PREFIX: SAVED_
