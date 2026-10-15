@@ -8,9 +8,11 @@ export interface ITransactionDTO {
   categoryName?: string;
   date: string;
   description: string;
+  excludeFromTotals?: boolean;
   id: string;
   owner: string;
   ownerId: string;
+  systemKey?: string;
   type: string;
   value: string;
 }
@@ -23,9 +25,11 @@ class TransactionDTO {
   categoryName?: string;
   date: string;
   description: string;
+  excludeFromTotals: boolean;
   id: string;
   owner: string;
   ownerId: string;
+  systemKey?: string;
   type: string;
   value: string;
 
@@ -40,6 +44,8 @@ class TransactionDTO {
     this.id = params.id;
     this.owner = params.owner;
     this.ownerId = params.ownerId;
+    this.excludeFromTotals = params.excludeFromTotals ?? false;
+    this.systemKey = params.systemKey;
     this.type = params.type;
     this.value = params.value;
   }
@@ -57,9 +63,11 @@ class TransactionDTO {
       categoryName: categoryName,
       date: entity.date,
       description: entity.description,
+      excludeFromTotals: entity.excludeFromTotals,
       id: entity.id,
       owner: entity.owner,
       ownerId: entity.ownerId,
+      systemKey: entity.systemKey,
       type: entity.type,
       value: entity.value,
     });

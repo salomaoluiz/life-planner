@@ -22,6 +22,13 @@ class TransactionEntityFixture {
     return this;
   }
 
+  withBalanceAdjustment() {
+    this.value.excludeFromTotals = true;
+    this.value.systemKey = "BALANCE_ADJUSTMENT";
+
+    return this;
+  }
+
   withCategory(category: string) {
     this.value.category = category;
 
@@ -47,6 +54,7 @@ class TransactionEntityFixture {
       categoryId: "7820cfbb-f1aa-4254-8e42-7a0fe1ee981f",
       date: new Date(2025, 5, 5).toISOString(),
       description: "Shopping at the mall",
+      excludeFromTotals: false,
       id: "d9b513b5-6a02-45b0-9144-397c97a8917f",
       owner: OwnerType.FAMILY,
       ownerId: "b11923e6-bfbb-4965-b3f6-a075249d1e63",

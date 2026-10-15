@@ -9,7 +9,11 @@ import TransactionModel, {
 // API / cache shape: camelCase, value in cents, date-only, category as an object.
 const jsonMock = {
   accountId: "c5598687-dfeb-485e-990a-a035d8e7d23d",
-  category: { name: "Some Category" },
+  category: {
+    excludeFromTotals: false,
+    name: "Some Category",
+    systemKey: null,
+  },
   categoryId: "7820cfbb-f1aa-4254-8e42-7a0fe1ee981f",
   date: "2023-10-01",
   description: "Some Description",

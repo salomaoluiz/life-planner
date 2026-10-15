@@ -10,6 +10,7 @@ interface IAccountModel {
   name: string;
   owner: OwnerType;
   ownerId: string;
+  projectedBalance?: number;
   status: AccountStatus;
 }
 
@@ -20,6 +21,7 @@ class AccountModel implements IAccountModel {
   name: string;
   owner: OwnerType;
   ownerId: string;
+  projectedBalance: number;
   status: AccountStatus;
 
   constructor(params: IAccountModel) {
@@ -29,17 +31,24 @@ class AccountModel implements IAccountModel {
     this.name = params.name;
     this.owner = params.owner;
     this.ownerId = params.ownerId;
+    this.projectedBalance = params.projectedBalance ?? params.balance;
     this.status = params.status;
   }
 
   static fromJSON(data: Record<string, unknown>): AccountModel {
+    const balance = centsToDecimal(Number(data.balance));
+
     return new AccountModel({
-      balance: centsToDecimal(Number(data.balance)),
+      balance,
       icon: data.icon as string,
       id: data.id as string,
       name: data.name as string,
       owner: data.owner as OwnerType,
       ownerId: data.ownerId as string,
+      projectedBalance:
+        data.projectedBalance === undefined || data.projectedBalance === null
+          ? balance
+          : centsToDecimal(Number(data.projectedBalance)),
       status: data.status as AccountStatus,
     });
   }
@@ -53,6 +62,7 @@ class AccountModel implements IAccountModel {
       name: this.name,
       owner: this.owner,
       ownerId: this.ownerId,
+      projectedBalance: decimalToCents(this.projectedBalance),
       status: this.status,
     };
   }

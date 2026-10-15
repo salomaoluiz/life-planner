@@ -11,9 +11,11 @@ interface ITransactionModel {
   categoryId: string;
   date: string;
   description: string;
+  excludeFromTotals?: boolean;
   id: string;
   owner: OwnerType;
   ownerId: string;
+  systemKey?: string;
   type: TransactionType;
   value: string;
 }
@@ -24,9 +26,11 @@ class TransactionModel implements ITransactionModel {
   categoryId: string;
   date: string;
   description: string;
+  excludeFromTotals: boolean;
   id: string;
   owner: OwnerType;
   ownerId: string;
+  systemKey?: string;
   type: TransactionType;
   value: string;
 
@@ -39,12 +43,20 @@ class TransactionModel implements ITransactionModel {
     this.owner = params.owner;
     this.id = params.id;
     this.ownerId = params.ownerId;
+    this.excludeFromTotals = params.excludeFromTotals ?? false;
+    this.systemKey = params.systemKey;
     this.type = params.type;
     this.value = params.value;
   }
 
   static fromJSON(data: Record<string, unknown>): TransactionModel {
-    const category = data.category as undefined | { name?: string };
+    const category = data.category as
+      | undefined
+      | {
+          excludeFromTotals?: boolean;
+          name?: string;
+          systemKey?: null | string;
+        };
 
     return new TransactionModel({
       accountId: data.accountId as string,
@@ -52,9 +64,11 @@ class TransactionModel implements ITransactionModel {
       categoryId: data.categoryId as string,
       date: calendarDateToIso(data.date as string),
       description: data.description as string,
+      excludeFromTotals: category?.excludeFromTotals === true,
       id: data.id as string,
       owner: data.owner as OwnerType,
       ownerId: data.ownerId as string,
+      systemKey: category?.systemKey ?? undefined,
       type: data.type as TransactionType,
       value: centsToDecimalString(Number(data.value)),
     });
@@ -64,7 +78,11 @@ class TransactionModel implements ITransactionModel {
   toJSON() {
     return {
       accountId: this.accountId,
-      category: { name: this.category },
+      category: {
+        excludeFromTotals: this.excludeFromTotals,
+        name: this.category,
+        systemKey: this.systemKey ?? null,
+      },
       categoryId: this.categoryId,
       date: isoToCalendarDate(this.date),
       description: this.description,

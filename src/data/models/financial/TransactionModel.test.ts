@@ -68,3 +68,29 @@ it("SHOULD throw FieldInvalid WHEN the stored value text cannot be converted to 
 
   expect(() => model.toJSON()).toThrow(FieldInvalid);
 });
+
+it("SHOULD read the system category key and excludeFromTotals from the embedded category AND write them back", () => {
+  const model = TransactionModel.fromJSON({
+    ...mocks.json,
+    category: {
+      excludeFromTotals: true,
+      name: "Balance adjustment",
+      systemKey: "BALANCE_ADJUSTMENT",
+    },
+  });
+
+  expect(model.systemKey).toBe("BALANCE_ADJUSTMENT");
+  expect(model.excludeFromTotals).toBe(true);
+  expect(model.toJSON().category).toEqual({
+    excludeFromTotals: true,
+    name: "Balance adjustment",
+    systemKey: "BALANCE_ADJUSTMENT",
+  });
+});
+
+it("SHOULD treat a regular category as not excluded and without a key", () => {
+  const model = setup();
+
+  expect(model.excludeFromTotals).toBe(false);
+  expect(model.systemKey).toBeUndefined();
+});

@@ -12,6 +12,7 @@ interface IAccountEntity {
   name: string;
   owner: OwnerType;
   ownerId: string;
+  projectedBalance?: number;
   status: AccountStatus;
 }
 
@@ -22,6 +23,8 @@ class AccountEntity implements IAccountEntity {
   name: string;
   owner: OwnerType;
   ownerId: string;
+  // Balance at the end of the current month: equals `balance` when nothing is scheduled later this month.
+  projectedBalance: number;
   status: AccountStatus;
 
   constructor(params: IAccountEntity) {
@@ -31,6 +34,7 @@ class AccountEntity implements IAccountEntity {
     this.name = params.name;
     this.owner = params.owner;
     this.ownerId = params.ownerId;
+    this.projectedBalance = params.projectedBalance ?? params.balance;
     this.status = params.status;
   }
 }

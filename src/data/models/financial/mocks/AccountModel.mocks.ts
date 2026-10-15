@@ -11,6 +11,7 @@ const jsonMock = {
   name: "Savings Account",
   owner: "USER",
   ownerId: "9e6cd00a-f854-48c0-be6d-c2e904bfd9b7",
+  projectedBalance: 150000,
   status: "ACTIVE",
 };
 
@@ -26,6 +27,7 @@ function setup() {
     name: jsonMock.name,
     owner: jsonMock.owner as OwnerType,
     ownerId: jsonMock.ownerId,
+    projectedBalance: 1500,
     status: jsonMock.status as AccountStatus,
   });
 }
