@@ -17,7 +17,12 @@ jest.mock("@infrastructure/storage", () => ({
     getString: jest.fn(),
     setString: jest.fn(),
   },
-  StorageKeys: { string: { SESSION_TOKEN: "@session_token" } },
+  StorageKeys: {
+    string: {
+      SESSION_REFRESH_TOKEN: "@session_refresh_token",
+      SESSION_TOKEN: "@session_token",
+    },
+  },
 }));
 
 beforeEach(() => {

@@ -1,10 +1,11 @@
-import { api } from "@infrastructure/api";
+import { api, refreshSessionIfNeeded } from "@infrastructure/api";
 import { tokenStorage } from "@infrastructure/token";
 
 import getUser from "../getUser";
 
 jest.mock("@infrastructure/api", () => ({
   api: { get: jest.fn() },
+  refreshSessionIfNeeded: jest.fn().mockResolvedValue(undefined),
 }));
 jest.mock("@infrastructure/token", () => ({
   tokenStorage: {
@@ -23,6 +24,7 @@ const apiUser = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.mocked(tokenStorage.getToken).mockReset();
 });
 
 async function setup() {
@@ -40,6 +42,7 @@ async function setupThrowable() {
 const spies = {
   get: jest.mocked(api.get),
   getToken: jest.mocked(tokenStorage.getToken),
+  refresh: jest.mocked(refreshSessionIfNeeded),
 };
 const mocks = { apiUser };
 

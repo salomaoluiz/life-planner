@@ -30,6 +30,23 @@ describe("GIVEN a native platform", () => {
     expect(spies.secureStore.deleteItemAsync).toHaveBeenCalledWith(
       "session_token",
     );
+    expect(spies.secureStore.deleteItemAsync).toHaveBeenCalledWith(
+      "session_refresh_token",
+    );
+  });
+
+  it("SHOULD store and read the refresh token under its own key", async () => {
+    await setup().setRefreshToken("refresh");
+    expect(spies.secureStore.setItemAsync).toHaveBeenCalledWith(
+      "session_refresh_token",
+      "refresh",
+    );
+
+    spies.secureStore.getItemAsync.mockResolvedValueOnce("refresh");
+    expect(await setup().getRefreshToken()).toBe("refresh");
+    expect(spies.secureStore.getItemAsync).toHaveBeenCalledWith(
+      "session_refresh_token",
+    );
   });
 });
 
@@ -61,6 +78,23 @@ describe("GIVEN the web platform", () => {
     await setup().clearToken();
     expect(spies.asyncStorage.deleteItem).toHaveBeenCalledWith(
       "@session_token",
+    );
+    expect(spies.asyncStorage.deleteItem).toHaveBeenCalledWith(
+      "@session_refresh_token",
+    );
+  });
+
+  it("SHOULD store and read the refresh token with the storage wrapper", async () => {
+    await setup().setRefreshToken("refresh");
+    expect(spies.asyncStorage.setString).toHaveBeenCalledWith(
+      "@session_refresh_token",
+      "refresh",
+    );
+
+    spies.asyncStorage.getString.mockReturnValueOnce("refresh");
+    expect(await setup().getRefreshToken()).toBe("refresh");
+    expect(spies.asyncStorage.getString).toHaveBeenCalledWith(
+      "@session_refresh_token",
     );
   });
 });

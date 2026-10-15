@@ -1,5 +1,6 @@
 enum StorageStringKeys {
   FALLBACK_LANGUAGE = "@fallback_language",
+  SESSION_REFRESH_TOKEN = "@session_refresh_token",
   SESSION_TOKEN = "@session_token",
 }
 

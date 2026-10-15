@@ -1,6 +1,6 @@
 # Auth Module Context
 
-Email + password against the NestJS API (`../life-planner-back`). Google Sign-In and `supabase.auth.*` were removed (spec 002). There is no refresh token: when the JWT expires the API answers 401 and the app sends the user back to `/login`.
+Email + password against the NestJS API (`../life-planner-back`). Google Sign-In and `supabase.auth.*` were removed (spec 002). Sessions (spec 027): login also returns a rotating refresh token; the app renews the access token on 401 and on app open, so a user who opens the app at least every 2 days stays logged in. Only when the refresh is refused (401: idle > 2 days, copied token, deleted user) the session-expired flow sends the user back to `/login`.
 
 ## Domain
 
@@ -9,9 +9,9 @@ interfaces:
   LoginRepository:
     path: src/domain/repositories/auth/loginRepository.ts
     methods:
-      - loginWithEmail(params: { email, password }): Promise<void> # stores the token
+      - loginWithEmail(params: { email, password }): Promise<void> # stores the token and the refresh token
       - signUpWithEmail(params: { email, name, password }): Promise<void>
-      - logout(): Promise<void> # local only, never fails because of the network
+      - logout(): Promise<void> # clears both tokens locally; tells the API best effort; never fails because of the network
 
 errors:
   - UserNotLoggedError (src/domain/entities/errors/auth/UserNotLogged.ts)
@@ -33,7 +33,7 @@ use_cases:
     behavior: signs up, then logs in with the same credentials; a failing second step throws AutoLoginFailedError (the account exists).
   logoutUseCase:
     path: src/application/useCases/cases/auth/logoutUseCase.ts
-    behavior: clears the token and all cache. No API call.
+    behavior: clears both tokens and all cache; the datasource also calls POST /v1/auth/logout best effort (fire and forget).
 
 providers:
   UserProvider (src/application/providers/user/index.tsx):
@@ -45,11 +45,11 @@ providers:
 ```yaml
 datasources:
   loginDatasource (src/data/datasource/data/auth/api):
-    loginWithEmail: POST /v1/auth/login/email -> stores { token } with tokenStorage; 401 -> InvalidCredentialsError
+    loginWithEmail: POST /v1/auth/login/email (sends deviceName = platform) -> stores { token, refreshToken? } with tokenStorage (no refreshToken from an old API = behaves as before); 401 -> InvalidCredentialsError
     signUpWithEmail: POST /v1/auth/signup/email; 422 -> EmailAlreadyInUseError
-    logout: tokenStorage.clearToken()
+    logout: reads the refresh token, tokenStorage.clearToken() (clears both), then POST /v1/auth/logout { refreshToken } ignoring any failure
   userDatasource (src/data/datasource/data/user/api):
-    getUser: GET /v1/user/me (no stored token -> UserNotLoggedError without calling the API)
+    getUser: GET /v1/user/me (no stored token -> UserNotLoggedError without calling the API; calls refreshSessionIfNeeded() first, so opening the app renews an access token that expires within 5 minutes)
     getUserById: GET /v1/user/:id (404 -> undefined)
 
 models:
@@ -63,12 +63,13 @@ models:
 ```yaml
 wrappers:
   "@infrastructure/token":
-    api: tokenStorage.{getToken,setToken,clearToken}
-    storage: expo-secure-store on native, the storage wrapper (localStorage) on web. Only the raw JWT is stored.
+    api: tokenStorage.{getToken,setToken,getRefreshToken,setRefreshToken,clearToken} (clearToken clears both)
+    storage: expo-secure-store on native (keys session_token, session_refresh_token), the storage wrapper (localStorage) on web. Only the raw tokens are stored.
   "@infrastructure/api":
     api: api.{get,post,patch,put,delete}("/v1/...")
     config: EXPO_PUBLIC_API_URL (includes /api), 15 s timeout, Bearer token auto-attached
     errors: network/timeout -> ConnectivityError; 400/422/other 4xx -> ApiBusinessError; 5xx/non-JSON -> GenericError (context has no body); 401 with token -> session expiry + UserNotLoggedError; 401 without token -> ApiBusinessError
+    refresh: a 401 on an authenticated request calls POST /v1/auth/refresh once (single flight shared by parallel requests; a request whose token was already renewed does not call again), saves the new pair and retries the request once. Refresh 401 -> session expired flow; refresh offline/5xx -> the original request fails with that error and the tokens are kept. /v1/auth/* never refreshes. refreshSessionIfNeeded() (proactive, 5-minute window, decodes `exp` locally) runs in getUser and, through useRefreshOnForeground (AppState), when the app returns to the foreground.
     session: onSessionExpired(listener), hasSessionExpiredNotice(), clearSessionExpiredNotice(). Parallel 401s are handled once.
     accountDeleted: setAccountDeletedNotice(), hasAccountDeletedNotice(), clearAccountDeletedNotice() (spec 024; one-time notice on Login, consumed on mount).
     delete: api.delete(path, body?) accepts a JSON body.
@@ -90,6 +91,10 @@ copy: i18n keys auth.*, login.*, signup.* (en-US + pt-BR)
 Security notes: passwords are only sent in the request body, never stored, logged, put in breadcrumbs or in error context.
 
 testIDs: Login and Signup export their ids from `testIds.ts` (`<module>.<screen>.<element>`, e.g. `auth.login.email-input`); the View, its Jest tests and the Maestro flows in `e2e/` use the same strings.
+
+## E2E
+
+`e2e/flows/auth/stay-logged-in.yaml` (tags `auth`, `spec-027`): log in, relaunch without clearing state, Home is shown.
 
 ## Account deletion (spec 024)
 

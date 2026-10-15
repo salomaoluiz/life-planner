@@ -5,14 +5,25 @@ import { isWeb } from "@utils/platform";
 
 // SecureStore keys allow only [A-Za-z0-9._-]
 const NATIVE_KEY = "session_token";
+const NATIVE_REFRESH_KEY = "session_refresh_token";
 const WEB_KEY = StorageKeys.string.SESSION_TOKEN;
+const WEB_REFRESH_KEY = StorageKeys.string.SESSION_REFRESH_TOKEN;
 
 async function clearToken(): Promise<void> {
   if (isWeb()) {
     asyncStorage.deleteItem(WEB_KEY);
+    asyncStorage.deleteItem(WEB_REFRESH_KEY);
     return;
   }
   await SecureStore.deleteItemAsync(NATIVE_KEY);
+  await SecureStore.deleteItemAsync(NATIVE_REFRESH_KEY);
+}
+
+async function getRefreshToken(): Promise<null | string> {
+  if (isWeb()) {
+    return asyncStorage.getString(WEB_REFRESH_KEY);
+  }
+  return SecureStore.getItemAsync(NATIVE_REFRESH_KEY);
 }
 
 async function getToken(): Promise<null | string> {
@@ -20,6 +31,14 @@ async function getToken(): Promise<null | string> {
     return asyncStorage.getString(WEB_KEY);
   }
   return SecureStore.getItemAsync(NATIVE_KEY);
+}
+
+async function setRefreshToken(token: string): Promise<void> {
+  if (isWeb()) {
+    asyncStorage.setString(WEB_REFRESH_KEY, token);
+    return;
+  }
+  await SecureStore.setItemAsync(NATIVE_REFRESH_KEY, token);
 }
 
 async function setToken(token: string): Promise<void> {
@@ -30,6 +49,12 @@ async function setToken(token: string): Promise<void> {
   await SecureStore.setItemAsync(NATIVE_KEY, token);
 }
 
-const tokenStorage = { clearToken, getToken, setToken };
+const tokenStorage = {
+  clearToken,
+  getRefreshToken,
+  getToken,
+  setRefreshToken,
+  setToken,
+};
 
 export { tokenStorage };

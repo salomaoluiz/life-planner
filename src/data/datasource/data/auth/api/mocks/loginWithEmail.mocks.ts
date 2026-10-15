@@ -10,6 +10,7 @@ jest.mock("@infrastructure/token", () => ({
   tokenStorage: {
     clearToken: jest.fn(),
     getToken: jest.fn(),
+    setRefreshToken: jest.fn(),
     setToken: jest.fn(),
   },
 }));
@@ -34,6 +35,7 @@ async function setupThrowable() {
 
 const spies = {
   post: jest.mocked(api.post),
+  setRefreshToken: jest.mocked(tokenStorage.setRefreshToken),
   setToken: jest.mocked(tokenStorage.setToken),
 };
 const mocks = { params };

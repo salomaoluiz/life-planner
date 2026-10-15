@@ -7,14 +7,19 @@ import {
 } from "@domain/entities/errors";
 import { api } from "@infrastructure/api";
 import { tokenStorage } from "@infrastructure/token";
+import { getPlatform } from "@utils/platform";
 
 type Params = Parameters<LoginDatasource["loginWithEmail"]>[0];
 
 async function loginWithEmail(params: Params): Promise<void> {
   try {
-    const response = await api.post<{ token?: string }>(
+    const response = await api.post<{ refreshToken?: string; token?: string }>(
       "/v1/auth/login/email",
-      { email: params.email, password: params.password },
+      {
+        deviceName: getPlatform(),
+        email: params.email,
+        password: params.password,
+      },
     );
 
     if (!response?.token) {
@@ -22,6 +27,10 @@ async function loginWithEmail(params: Params): Promise<void> {
     }
 
     await tokenStorage.setToken(response.token);
+    // An API without sessions sends no refresh token: the app then behaves as before.
+    if (response.refreshToken) {
+      await tokenStorage.setRefreshToken(response.refreshToken);
+    }
   } catch (error) {
     if (error instanceof ApiBusinessError && error.statusCode === 401) {
       throw new InvalidCredentialsError();

@@ -15,6 +15,12 @@ it("SHOULD render the children component", () => {
   expect(screen.getByTestId("user-provider-children")).toBeDefined();
 });
 
+it("SHOULD renew the session when the app returns to the foreground", () => {
+  setup();
+
+  expect(spies.useRefreshOnForeground).toHaveBeenCalledTimes(1);
+});
+
 it("SHOULD request the user data on mount", () => {
   setup();
 
