@@ -1,0 +1,100 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/scope-summary-totals
+tags:
+  - financial
+  - spec-028
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Family
+      KEY: FAMILY_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-family.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      NAME: ${output.FAMILY_NAME}
+# personal expense 10,00
+- runFlow:
+    file: ../../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: E2E Personal Account
+- evalScript: ${output.PERSONAL_ACCOUNT_ID = output.ACCOUNT_ID}
+- runFlow:
+    file: ../../../subflows/setup/create-category.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: E2E Personal Category
+      TYPE: EXPENSE
+- evalScript: ${output.PERSONAL_CATEGORY_ID = output.CATEGORY_ID}
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.PERSONAL_ACCOUNT_ID}
+      CATEGORY_ID: ${output.PERSONAL_CATEGORY_ID}
+      VALUE_CENTS: "1000"
+# family expense 42,00
+- runFlow:
+    file: ../../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.FAMILY_ID}
+      OWNER: FAMILY
+      NAME: E2E Family Account
+- evalScript: ${output.FAMILY_ACCOUNT_ID = output.ACCOUNT_ID}
+- runFlow:
+    file: ../../../subflows/setup/create-category.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.FAMILY_ID}
+      OWNER: FAMILY
+      NAME: E2E Family Category
+      TYPE: EXPENSE
+- evalScript: ${output.FAMILY_CATEGORY_ID = output.CATEGORY_ID}
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER: FAMILY
+      OWNER_ID: ${output.FAMILY_ID}
+      ACCOUNT_ID: ${output.FAMILY_ACCOUNT_ID}
+      CATEGORY_ID: ${output.FAMILY_CATEGORY_ID}
+      VALUE_CENTS: "4200"
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+# Everything: 10,00 + 42,00
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.summary-expense"
+      text: ".*52[.,]00.*"
+    timeout: 20000
+# Family only: 42,00
+- tapOn:
+    id: "financial.transactions.scope-filter-${output.FAMILY_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.summary-expense"
+      text: ".*42[.,]00.*"
+    timeout: 20000
+# Personal only: 10,00
+- tapOn:
+    id: "financial.transactions.scope-filter-${output.USER_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.summary-expense"
+      text: ".*10[.,]00.*"
+    timeout: 20000
