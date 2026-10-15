@@ -1,11 +1,13 @@
 import { Href, router, useLocalSearchParams } from "expo-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TextInput as RNTextInput } from "react-native";
 
 import { useUser } from "@application/providers/user";
 import { useCases } from "@application/useCases";
 import {
+  clearAccountDeletedNotice,
   clearSessionExpiredNotice,
+  hasAccountDeletedNotice,
   hasSessionExpiredNotice,
 } from "@infrastructure/api";
 import { useMutation } from "@infrastructure/fetcher";
@@ -55,6 +57,15 @@ function useLoginViewModel() {
     params.autoLoginFailed ? "auth.errors.generic" : undefined,
   );
   const [sessionExpired, setSessionExpired] = useState(hasSessionExpiredNotice);
+  const [accountDeleted, setAccountDeleted] = useState(hasAccountDeletedNotice);
+
+  // Shown once: the flag is consumed only when the form is really on screen. Right after the deletion the
+  // user query is still "logged" for a moment and this screen just redirects, so it must survive that mount.
+  useEffect(() => {
+    if (!logged) {
+      clearAccountDeletedNotice();
+    }
+  }, [logged]);
 
   // The fetch function never rejects: failures become form messages, not error boundaries.
   const { isFetching, mutate } = useMutation<SubmitParams, SubmitResult>({
@@ -85,6 +96,7 @@ function useLoginViewModel() {
   function clearFormErrors() {
     setApiErrorKey(undefined);
     setSessionExpired(false);
+    setAccountDeleted(false);
     clearSessionExpiredNotice();
   }
 
@@ -132,6 +144,9 @@ function useLoginViewModel() {
   }
 
   return {
+    accountDeletedNotice: accountDeleted
+      ? t("login.accountDeletedNotice")
+      : undefined,
     email,
     emailError,
     formError: getFormError(),

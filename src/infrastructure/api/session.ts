@@ -5,7 +5,12 @@ type Listener = () => void;
 
 const listeners = new Set<Listener>();
 let handlingToken: null | string = null;
+let accountDeletedNotice = false;
 let expiredNotice = false;
+
+function clearAccountDeletedNotice() {
+  accountDeletedNotice = false;
+}
 
 function clearSessionExpiredNotice() {
   expiredNotice = false;
@@ -32,6 +37,10 @@ async function handleSessionExpired(sentToken: string) {
   }
 }
 
+function hasAccountDeletedNotice() {
+  return accountDeletedNotice;
+}
+
 function hasSessionExpiredNotice() {
   return expiredNotice;
 }
@@ -43,9 +52,16 @@ function onSessionExpired(listener: Listener) {
   };
 }
 
+function setAccountDeletedNotice() {
+  accountDeletedNotice = true;
+}
+
 export {
+  clearAccountDeletedNotice,
   clearSessionExpiredNotice,
   handleSessionExpired,
+  hasAccountDeletedNotice,
   hasSessionExpiredNotice,
   onSessionExpired,
+  setAccountDeletedNotice,
 };

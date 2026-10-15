@@ -3,6 +3,8 @@ name: stock/add-from-quick-add
 tags:
   - stock
   - spec-009
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
 ---
 - launchApp:
     clearState: true

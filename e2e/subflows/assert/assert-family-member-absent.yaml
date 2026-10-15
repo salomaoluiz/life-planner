@@ -1,0 +1,9 @@
+url: ${E2E_WEB_URL}
+---
+# Caller env: TOKEN (a family member), FAMILY_ID, EMAIL
+- runScript:
+    file: ../../scripts/assert/assert-family-member-absent.js
+    env:
+      TOKEN: ${TOKEN}
+      FAMILY_ID: ${FAMILY_ID}
+      EMAIL: ${EMAIL}

@@ -129,3 +129,15 @@ it("SHOULD expose the testID as nativeID so Maestro web can select it by id", ()
 
   expect(input().props.nativeID).toBe("field");
 });
+
+it("SHOULD forward autoCorrect to the input", () => {
+  setup({ autoCorrect: false });
+
+  expect(input().props.autoCorrect).toBe(false);
+});
+
+it("SHOULD leave autoCorrect unset by default", () => {
+  setup();
+
+  expect(input().props.autoCorrect).toBeUndefined();
+});

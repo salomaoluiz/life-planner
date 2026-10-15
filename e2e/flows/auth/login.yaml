@@ -4,6 +4,8 @@ tags:
   - auth
   - spec-002
   - smoke
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
 ---
 - launchApp:
     clearState: true

@@ -3,6 +3,8 @@ name: stock/out-of-stock
 tags:
   - stock
   - spec-005
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
 ---
 # The app has no out-of-stock status (spec 021 deviation): a quantity-0 item renders as a plain row
 # with quantity 0 and no expiration badge.

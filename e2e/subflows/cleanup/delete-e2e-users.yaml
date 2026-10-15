@@ -1,0 +1,3 @@
+url: ${E2E_WEB_URL}
+---
+- runScript: ../../scripts/cleanup/delete-e2e-users.js

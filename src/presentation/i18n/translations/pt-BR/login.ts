@@ -1,4 +1,5 @@
 const login = {
+  accountDeletedNotice: "Sua conta foi excluída.",
   button: {
     goToSignUp: "Criar conta",
     signIn: "Entrar",

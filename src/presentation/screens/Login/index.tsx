@@ -56,6 +56,12 @@ function Login() {
               value={vm.password}
             />
             <HelperText
+              label={vm.accountDeletedNotice ?? ""}
+              testID={loginTestIds.accountDeletedNotice}
+              type="info"
+              visible={!!vm.accountDeletedNotice}
+            />
+            <HelperText
               label={vm.formError?.message ?? ""}
               testID={loginTestIds.formError}
               type={vm.formError?.type ?? "error"}

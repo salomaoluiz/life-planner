@@ -45,6 +45,7 @@ const datasourcesMocks: jest.MockedObjectDeep<Datasources> = {
     updateStockItem: jest.fn(),
   },
   userDatasource: {
+    deleteAccount: jest.fn(),
     getUser: jest.fn(),
     getUserById: jest.fn(),
   },

@@ -20,3 +20,15 @@ it("SHOULD call getUserById correctly", async () => {
   expect(spies.getUserById).toHaveBeenCalledWith(userId, mocks.datasources);
   expect(user).toEqual("getUserById response");
 });
+
+it("SHOULD call deleteAccount correctly", async () => {
+  const { deleteAccount } = setup();
+
+  await deleteAccount("test@example.com");
+
+  expect(spies.deleteAccount).toHaveBeenCalledTimes(1);
+  expect(spies.deleteAccount).toHaveBeenCalledWith(
+    "test@example.com",
+    mocks.datasources,
+  );
+});

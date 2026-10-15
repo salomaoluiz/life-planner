@@ -3,6 +3,8 @@ name: financial/accounts/delete-account-with-transactions
 tags:
   - financial
   - spec-006
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
 ---
 - launchApp:
     clearState: true

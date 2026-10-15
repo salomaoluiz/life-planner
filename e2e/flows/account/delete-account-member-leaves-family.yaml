@@ -1,0 +1,84 @@
+url: ${E2E_WEB_URL}
+name: account/delete-account-member-leaves-family
+tags:
+  - account
+  - family
+  - spec-024
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Family
+      KEY: FAMILY_NAME
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Rice
+      KEY: ITEM_NAME
+- runFlow:
+    file: ../../subflows/setup/create-family.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      NAME: ${output.FAMILY_NAME}
+- runFlow:
+    file: ../../subflows/setup/add-joined-member.yaml
+    env:
+      FAMILY_ID: ${output.FAMILY_ID}
+- runFlow:
+    file: ../../subflows/setup/create-stock-item.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.FAMILY_ID}
+      OWNER: FAMILY
+      DESCRIPTION: ${output.ITEM_NAME}
+- runFlow:
+    file: ../../subflows/login.yaml
+    env:
+      EMAIL: ${output.MEMBER_EMAIL}
+      PASSWORD: ${output.MEMBER_PASSWORD}
+- runFlow: ../../subflows/account/open-settings.yaml
+- tapOn:
+    id: "settings.delete-account.button"
+- extendedWaitUntil:
+    visible:
+      id: "settings.delete-account.confirm-dialog-confirm"
+    timeout: 20000
+- tapOn:
+    id: "settings.delete-account.confirm-dialog-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "settings.delete-account.email-input"
+    timeout: 20000
+- tapOn:
+    id: "settings.delete-account.email-input"
+- inputText: ${output.MEMBER_EMAIL}
+- tapOn:
+    id: "settings.delete-account.submit-button"
+- extendedWaitUntil:
+    visible:
+      id: "auth.login.account-deleted-notice"
+    timeout: 20000
+- runFlow:
+    file: ../../subflows/assert/assert-family-member-absent.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      FAMILY_ID: ${output.FAMILY_ID}
+      EMAIL: ${output.MEMBER_EMAIL}
+- launchApp:
+    clearState: true
+- runFlow:
+    file: ../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../subflows/stock/open-stock.yaml
+- extendedWaitUntil:
+    visible:
+      id: "stock.list.row-title"
+      text: ${output.ITEM_NAME}
+    timeout: 20000

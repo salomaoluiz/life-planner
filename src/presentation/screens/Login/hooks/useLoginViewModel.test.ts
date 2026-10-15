@@ -240,3 +240,52 @@ it("SHOULD ignore submit WHEN a request is already running", () => {
   expect(spies.mutate).not.toHaveBeenCalled();
   expect(result.current.isSubmitting).toBe(true);
 });
+
+it("SHOULD show the account deleted notice WHEN the flag is set AND consume it on mount", () => {
+  spies.hasAccountDeletedNotice.mockReturnValue(true);
+
+  const { result } = setup();
+
+  expect(result.current.accountDeletedNotice).toBe(
+    "login.accountDeletedNotice",
+  );
+  expect(spies.clearAccountDeletedNotice).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD keep the flag WHILE the user query is still logged (the screen only redirects), and show it on the next mount", () => {
+  spies.hasAccountDeletedNotice.mockReturnValue(true);
+  spies.useUser.mockReturnValue({
+    data: undefined,
+    logged: true,
+    update: jest.fn(),
+  } as never);
+
+  setup();
+
+  expect(spies.clearAccountDeletedNotice).not.toHaveBeenCalled();
+});
+
+it("SHOULD NOT show the notice WHEN the flag is not set, but still consume it", () => {
+  const { result } = setup();
+
+  expect(result.current.accountDeletedNotice).toBeUndefined();
+  expect(spies.clearAccountDeletedNotice).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD show the notice only once (a later mount sees the cleared flag)", () => {
+  spies.hasAccountDeletedNotice
+    .mockReturnValueOnce(true)
+    .mockReturnValue(false);
+
+  expect(setup().result.current.accountDeletedNotice).toBeDefined();
+  expect(setup().result.current.accountDeletedNotice).toBeUndefined();
+});
+
+it("SHOULD hide the notice WHEN the user starts typing", () => {
+  spies.hasAccountDeletedNotice.mockReturnValue(true);
+  const { result } = setup();
+
+  act(() => result.current.onChangeEmail("a"));
+
+  expect(result.current.accountDeletedNotice).toBeUndefined();
+});

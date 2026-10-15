@@ -3,6 +3,8 @@ name: stock/search
 tags:
   - stock
   - spec-011
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
 ---
 - launchApp:
     clearState: true

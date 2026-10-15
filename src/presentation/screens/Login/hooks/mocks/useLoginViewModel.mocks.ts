@@ -5,7 +5,9 @@ import { act, renderHook } from "@tests";
 import { useUser } from "@application/providers/user";
 import { useCases } from "@application/useCases";
 import {
+  clearAccountDeletedNotice,
   clearSessionExpiredNotice,
+  hasAccountDeletedNotice,
   hasSessionExpiredNotice,
 } from "@infrastructure/api";
 import { useMutation } from "@infrastructure/fetcher";
@@ -40,8 +42,10 @@ const captured: { fetch?: (params: unknown) => Promise<unknown> } = {};
 const spies = {
   addBreadcrumb: jest.mocked(addBreadcrumb),
   captureException: jest.mocked(captureException),
+  clearAccountDeletedNotice: jest.mocked(clearAccountDeletedNotice),
   clearSessionExpiredNotice: jest.mocked(clearSessionExpiredNotice),
   execute: jest.mocked(useCases.loginWithEmailUseCase.execute),
+  hasAccountDeletedNotice: jest.mocked(hasAccountDeletedNotice),
   hasSessionExpiredNotice: jest.mocked(hasSessionExpiredNotice),
   localSearchParams: jest.mocked(useLocalSearchParams),
   mutate,
@@ -54,6 +58,7 @@ const spies = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  spies.hasAccountDeletedNotice.mockReturnValue(false);
   spies.hasSessionExpiredNotice.mockReturnValue(false);
   spies.localSearchParams.mockReturnValue({});
   spies.execute.mockResolvedValue(undefined);

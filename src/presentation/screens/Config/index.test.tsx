@@ -10,6 +10,7 @@ jest.mock("react-native-safe-area-context", () => ({
 jest.mock("./containers", () => {
   const { View: MockView } = jest.requireActual("react-native");
   return {
+    DeleteAccount: () => <MockView testID="delete-account" />,
     Language: () => <MockView testID="language" />,
     Logout: () => <MockView testID="logout" />,
     Theme: () => <MockView testID="theme" />,
@@ -27,4 +28,15 @@ it("SHOULD render the title and every config container inside one full-width car
   expect(
     StyleSheet.flatten(screen.getByTestId("settings-card").props.style).width,
   ).toBeUndefined();
+});
+
+it("SHOULD render the delete account action below logout (and keep logout, theme and language)", () => {
+  render(<Config />);
+
+  const order = screen
+    .getAllByTestId(/^(logout|delete-account)$/)
+    .map((node) => node.props.testID);
+  expect(order).toEqual(["logout", "delete-account"]);
+  expect(screen.getByTestId("theme")).toBeOnTheScreen();
+  expect(screen.getByTestId("language")).toBeOnTheScreen();
 });

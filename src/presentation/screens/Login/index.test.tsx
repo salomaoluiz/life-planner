@@ -141,3 +141,16 @@ it("SHOULD center the form in a card of at most 420 px with 20 px side padding a
     ).alignSelf,
   ).toBe("stretch");
 });
+
+it("SHOULD render the account deleted notice as info WHEN the view model provides it", () => {
+  setup({ accountDeletedNotice: "deleted" });
+
+  const notice = screen.getByTestId(loginTestIds.accountDeletedNotice);
+  expect(notice.props.type).toBe("info");
+});
+
+it("SHOULD NOT render the account deleted notice WHEN there is none", () => {
+  setup();
+
+  expect(screen.queryByTestId(loginTestIds.accountDeletedNotice)).toBeNull();
+});

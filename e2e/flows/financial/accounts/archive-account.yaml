@@ -4,6 +4,8 @@ tags:
   - financial
   - spec-013
   - spec-023
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
 ---
 - launchApp:
     clearState: true

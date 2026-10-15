@@ -70,6 +70,8 @@ wrappers:
     config: EXPO_PUBLIC_API_URL (includes /api), 15 s timeout, Bearer token auto-attached
     errors: network/timeout -> ConnectivityError; 400/422/other 4xx -> ApiBusinessError; 5xx/non-JSON -> GenericError (context has no body); 401 with token -> session expiry + UserNotLoggedError; 401 without token -> ApiBusinessError
     session: onSessionExpired(listener), hasSessionExpiredNotice(), clearSessionExpiredNotice(). Parallel 401s are handled once.
+    accountDeleted: setAccountDeletedNotice(), hasAccountDeletedNotice(), clearAccountDeletedNotice() (spec 024; one-time notice on Login, consumed on mount).
+    delete: api.delete(path, body?) accepts a JSON body.
   "@infrastructure/fetcher":
     resetFetcherData(): queryClient.resetQueries()
 ```
@@ -88,3 +90,15 @@ copy: i18n keys auth.*, login.*, signup.* (en-US + pt-BR)
 Security notes: passwords are only sent in the request body, never stored, logged, put in breadcrumbs or in error context.
 
 testIDs: Login and Signup export their ids from `testIds.ts` (`<module>.<screen>.<element>`, e.g. `auth.login.email-input`); the View, its Jest tests and the Maestro flows in `e2e/` use the same strings.
+
+## Account deletion (spec 024)
+
+```yaml
+api: DELETE /v1/user/me with { email } -> 204; 422 -> AccountEmailMismatchError; 401 -> session-expired flow
+domain: UserRepository.deleteAccount(email); AccountEmailMismatchError (errors/auth)
+data: src/data/datasource/data/user/api/deleteAccount.ts, src/data/repositories/repos/user/deleteAccount.ts (errors never carry the email)
+application: deleteAccountUseCase (user.delete_account_use_case) = userRepository.deleteAccount then loginRepository.logout() (local session cleanup); no logout when the delete fails
+presentation: src/presentation/screens/Config/containers/DeleteAccount (index.tsx View, hooks/useDeleteAccountViewModel.ts, styles.ts), ids in Config/testIds.ts (settings.delete-account.*)
+flow: Settings "Delete account" -> ConfirmDialog (names owned families) -> BottomSheet with email TextField (submit enabled when trimmed+lowercased email equals the user's) -> request; success = same cleanup as Logout + setAccountDeletedNotice + router.replace("/login")
+login notice: auth.login.account-deleted-notice (i18n login.accountDeletedNotice)
+```

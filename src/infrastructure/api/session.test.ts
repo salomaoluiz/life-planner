@@ -48,3 +48,25 @@ it("SHOULD clear the notice WHEN clearSessionExpiredNotice is called", async () 
 
   expect(setup.hasSessionExpiredNotice()).toBe(false);
 });
+
+it("SHOULD track the account deleted notice independently of the session expired one", async () => {
+  expect(setup.hasAccountDeletedNotice()).toBe(false);
+
+  setup.setAccountDeletedNotice();
+  expect(setup.hasAccountDeletedNotice()).toBe(true);
+  expect(setup.hasSessionExpiredNotice()).toBe(false);
+
+  setup.clearSessionExpiredNotice();
+  expect(setup.hasAccountDeletedNotice()).toBe(true);
+
+  setup.clearAccountDeletedNotice();
+  expect(setup.hasAccountDeletedNotice()).toBe(false);
+});
+
+it("SHOULD NOT set the account deleted notice WHEN the session expires", async () => {
+  spies.tokenStorage.getToken.mockResolvedValue("old");
+
+  await setup.handleSessionExpired("old");
+
+  expect(setup.hasAccountDeletedNotice()).toBe(false);
+});

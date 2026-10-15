@@ -1,0 +1,56 @@
+url: ${E2E_WEB_URL}
+name: account/delete-account-cancel
+tags:
+  - account
+  - spec-024
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../subflows/account/open-settings.yaml
+- tapOn:
+    id: "settings.delete-account.button"
+- extendedWaitUntil:
+    visible:
+      id: "settings.delete-account.confirm-dialog-confirm"
+    timeout: 20000
+- tapOn:
+    id: "settings.delete-account.confirm-dialog-cancel"
+- assertNotVisible:
+    id: "settings.delete-account.confirm-dialog-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "settings.delete-account.button"
+    timeout: 20000
+- tapOn:
+    id: "settings.delete-account.button"
+- extendedWaitUntil:
+    visible:
+      id: "settings.delete-account.confirm-dialog-confirm"
+    timeout: 20000
+- tapOn:
+    id: "settings.delete-account.confirm-dialog-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "settings.delete-account.email-input"
+    timeout: 20000
+- tapOn:
+    id: "settings.delete-account.cancel-button"
+- assertNotVisible:
+    id: "settings.delete-account.email-sheet"
+- extendedWaitUntil:
+    visible:
+      id: "settings.delete-account.button"
+    timeout: 20000
+- runFlow:
+    file: ../../subflows/assert/assert-login-works.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}

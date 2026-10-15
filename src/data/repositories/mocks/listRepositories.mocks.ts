@@ -54,6 +54,7 @@ const repositoriesMocks: Repositories = {
     updateStockItem: jest.fn(),
   },
   userRepository: {
+    deleteAccount: jest.fn(),
     getUser: jest.fn(),
     getUserById: jest.fn(),
   },

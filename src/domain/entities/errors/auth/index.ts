@@ -1,3 +1,4 @@
+export { default as AccountEmailMismatchError } from "./AccountEmailMismatch";
 export { default as AutoLoginFailedError } from "./AutoLoginFailed";
 export { default as EmailAlreadyInUseError } from "./EmailAlreadyInUse";
 export { default as InvalidCredentialsError } from "./InvalidCredentials";

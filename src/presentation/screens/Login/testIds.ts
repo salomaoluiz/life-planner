@@ -1,4 +1,5 @@
 const loginTestIds = {
+  accountDeletedNotice: "auth.login.account-deleted-notice",
   card: "auth.login.card",
   cardWrap: "auth.login.card-wrap",
   emailInput: "auth.login.email-input",
