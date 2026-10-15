@@ -5,7 +5,7 @@ import {
   GenericError,
   UserNotLoggedError,
 } from "@domain/entities/errors";
-import { api } from "@infrastructure/api";
+import { api, refreshSessionIfNeeded } from "@infrastructure/api";
 import { tokenStorage } from "@infrastructure/token";
 
 export type Response = ReturnType<UserDatasource["getUser"]>;
@@ -13,6 +13,13 @@ export type Response = ReturnType<UserDatasource["getUser"]>;
 async function getUser(): Response {
   try {
     // No token: skip the network entirely (cold start / after logout) and let the app route to /login.
+    if (!(await tokenStorage.getToken())) {
+      throw new UserNotLoggedError();
+    }
+
+    // Opening the app counts as use: renew an access token that is about to expire before the first request.
+    await refreshSessionIfNeeded();
+    // The refresh may have ended the session (refused by the API).
     if (!(await tokenStorage.getToken())) {
       throw new UserNotLoggedError();
     }

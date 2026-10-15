@@ -52,6 +52,10 @@ const useQuerySpy = jest
   .spyOn(fetcher, "useQuery")
   .mockReturnValue(useQueryPendingResponse as never);
 
+const useRefreshOnForegroundSpy = jest
+  .spyOn(api, "useRefreshOnForeground")
+  .mockReturnValue(undefined);
+
 const onSessionExpiredSpy = jest
   .spyOn(api, "onSessionExpired")
   .mockReturnValue(unsubscribe);
@@ -85,6 +89,7 @@ const spies = {
   resetFetcherData: jest.mocked(fetcher.resetFetcherData),
   unsubscribe,
   useQuery: useQuerySpy,
+  useRefreshOnForeground: useRefreshOnForegroundSpy,
 };
 
 const mocks = {

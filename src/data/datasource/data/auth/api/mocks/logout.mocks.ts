@@ -9,6 +9,7 @@ jest.mock("@infrastructure/api", () => ({
 jest.mock("@infrastructure/token", () => ({
   tokenStorage: {
     clearToken: jest.fn(),
+    getRefreshToken: jest.fn(),
     getToken: jest.fn(),
     setToken: jest.fn(),
   },
@@ -16,6 +17,8 @@ jest.mock("@infrastructure/token", () => ({
 
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.mocked(api.post).mockResolvedValue(undefined);
+  jest.mocked(tokenStorage.getRefreshToken).mockResolvedValue("refresh");
 });
 
 async function setup() {
@@ -33,6 +36,7 @@ async function setupThrowable() {
 const spies = {
   api: jest.mocked(api),
   clearToken: jest.mocked(tokenStorage.clearToken),
+  getRefreshToken: jest.mocked(tokenStorage.getRefreshToken),
 };
 
 export { setup, setupThrowable, spies };

@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo } from "react";
 
 import { useCases } from "@application/useCases";
 import UserProfileEntity from "@domain/entities/user/UserProfileEntity";
-import { onSessionExpired } from "@infrastructure/api";
+import { onSessionExpired, useRefreshOnForeground } from "@infrastructure/api";
 import { resetFetcherData, useQuery } from "@infrastructure/fetcher";
 import { useProviderLoader } from "@providers/loader";
 
@@ -24,6 +24,8 @@ const UserContext = createContext<IUserContext | undefined>(undefined);
 
 function UserProvider(props: Props) {
   const { setIsLoading } = useProviderLoader();
+
+  useRefreshOnForeground();
 
   const { data, isFetching, refetch, status } = useQuery<UserProfileEntity>({
     cacheKey: [useCases.getUserUseCase.uniqueName],
