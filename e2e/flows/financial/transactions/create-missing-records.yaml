@@ -17,8 +17,10 @@ onFlowComplete:
 - runFlow: ../../../subflows/financial/open-transactions.yaml
 - extendedWaitUntil:
     visible:
-      id: "financial.transactions.empty-month-action"
+      id: "financial.transactions.empty-month"
     timeout: 20000
+# The header is taller since spec 025: scroll the list to reach the action
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - tapOn:
     id: "financial.transactions.empty-month-action"
 - extendedWaitUntil:

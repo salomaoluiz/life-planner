@@ -1,0 +1,7 @@
+url: ${E2E_WEB_URL}
+---
+# The Transactions header scrolls with the list (spec 025) and can push the empty-state action below
+# the fold. Maestro web needs explicit coordinates to scroll (see scroll-form-down.yaml).
+- swipe:
+    start: 50%, 70%
+    end: 50%, 20%

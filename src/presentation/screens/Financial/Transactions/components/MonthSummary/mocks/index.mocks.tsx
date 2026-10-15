@@ -18,6 +18,7 @@ function setup(props: Partial<React.ComponentProps<typeof MonthSummary>> = {}) {
       isLoading={false}
       onRetry={onRetry}
       retryLabel={"Try again"}
+      scopeLabel={"Everything"}
       {...props}
     />,
   );

@@ -3,6 +3,7 @@ import { act } from "@tests";
 import {
   dto,
   givenData,
+  owners,
   setup,
   spies,
   summaryQuery,
@@ -86,65 +87,146 @@ it("SHOULD select a month and year from the picker", () => {
   expect(result.current.isMonthPickerOpen).toBe(false);
 });
 
-it("SHOULD filter by type and by owner, and clear the filters", () => {
-  givenData([
+function itemIds(entries: { key: string; kind: string }[]) {
+  return entries.filter((e) => e.kind === "item").map((e) => e.key);
+}
+
+function items() {
+  return [
     ui("exp", new Date(2026, 9, 1)),
     ui("inc", new Date(2026, 9, 2), "user-id", "INCOME"),
-    ui("fam", new Date(2026, 9, 3), "family-1"),
-  ]);
+    ui("fam-exp", new Date(2026, 9, 3), "family-1"),
+    ui("fam-inc", new Date(2026, 9, 4), "family-1", "INCOME"),
+  ];
+}
+
+function lastSummaryKey() {
+  return spies.useQuery.mock.calls
+    .map((call) => call[0])
+    .filter((o) => o.cacheKey[0] === "summary")
+    .pop()!.cacheKey;
+}
+
+it("SHOULD combine owner and type filters, owner first", () => {
+  givenData(items());
   const { result } = setup();
 
-  act(() => result.current.onFilterChange("INCOME"));
-  expect(result.current.entries.filter((e) => e.kind === "item")).toHaveLength(
-    1,
-  );
+  act(() => result.current.onOwnerFilterChange("family-1"));
+  act(() => result.current.onTypeFilterChange("EXPENSE"));
 
-  act(() => result.current.onFilterChange("OWNER:family-1"));
-  expect(result.current.entries.filter((e) => e.kind === "item")).toHaveLength(
-    1,
-  );
-
-  act(() => result.current.onClearFilters());
-  expect(result.current.filter).toBe("ALL");
-  expect(result.current.entries.filter((e) => e.kind === "item")).toHaveLength(
-    3,
-  );
+  expect(itemIds(result.current.entries)).toEqual(["item-fam-exp"]);
+  expect(result.current.ownerFilter).toBe("family-1");
+  expect(result.current.typeFilter).toBe("EXPENSE");
 });
 
-it("SHOULD report a filtered empty state only WHEN the month has data but the filter hides it", () => {
+it("SHOULD filter by type alone and by owner alone", () => {
+  givenData(items());
+  const { result } = setup();
+
+  act(() => result.current.onTypeFilterChange("INCOME"));
+  expect(itemIds(result.current.entries)).toHaveLength(2);
+
+  act(() => result.current.onTypeFilterChange("ALL"));
+  act(() => result.current.onOwnerFilterChange("user-id"));
+  expect(itemIds(result.current.entries)).toHaveLength(2);
+});
+
+it("SHOULD reset BOTH filters on clear", () => {
+  givenData(items());
+  const { result } = setup();
+  act(() => result.current.onOwnerFilterChange("family-1"));
+  act(() => result.current.onTypeFilterChange("INCOME"));
+
+  act(() => result.current.onClearFilters());
+
+  expect(result.current.ownerFilter).toBe("ALL");
+  expect(result.current.typeFilter).toBe("ALL");
+  expect(itemIds(result.current.entries)).toHaveLength(4);
+});
+
+it("SHOULD report a filtered empty state only WHEN the month has data but scope + type hide it", () => {
   givenData([ui("exp", new Date(2026, 9, 1))]);
   const { result } = setup();
 
-  act(() => result.current.onFilterChange("INCOME"));
-
+  act(() => result.current.onTypeFilterChange("INCOME"));
   expect(result.current.isFilteredEmpty).toBe(true);
   expect(result.current.isEmptyMonth).toBe(false);
+
+  act(() => result.current.onTypeFilterChange("ALL"));
+  act(() => result.current.onOwnerFilterChange("family-1"));
+  expect(result.current.isFilteredEmpty).toBe(true);
 });
 
-it("SHOULD build filter choices: All, Expenses, Income, Personal, families", () => {
+it("SHOULD keep both filters WHEN the month changes", () => {
+  givenData(items());
+  const { result } = setup();
+  act(() => result.current.onOwnerFilterChange("family-1"));
+  act(() => result.current.onTypeFilterChange("EXPENSE"));
+
+  act(() => result.current.onPreviousMonth());
+
+  expect(result.current.ownerFilter).toBe("family-1");
+  expect(result.current.typeFilter).toBe("EXPENSE");
+});
+
+it("SHOULD build scope choices: All, Personal, families, and expose the personal owner id", () => {
   givenData([]);
   const { result } = setup();
 
-  expect(result.current.filterChoices.map((c) => c.value)).toEqual([
+  expect(result.current.scopeChoices.map((c) => c.value)).toEqual([
     "ALL",
-    "EXPENSE",
-    "INCOME",
-    "OWNER:user-id",
-    "OWNER:family-1",
+    "user-id",
+    "family-1",
+  ]);
+  expect(result.current.personalOwnerId).toBe("user-id");
+  expect(result.current.monthName).toBe("October");
+});
+
+it("SHOULD summarize for the selected owner only and ignore the type filter", () => {
+  givenData([]);
+  const { result } = setup();
+
+  act(() => result.current.onOwnerFilterChange("family-1"));
+  act(() => result.current.onTypeFilterChange("EXPENSE"));
+
+  expect(lastSummaryKey()).toEqual(["summary", "2026-9", "family-1"]);
+});
+
+it("SHOULD summarize every owner WHEN the scope is All", () => {
+  givenData([]);
+  setup();
+
+  expect(lastSummaryKey()).toEqual([
+    "summary",
+    "2026-9",
+    "user-id",
+    "family-1",
   ]);
 });
 
-it("SHOULD summarize for the owner of the owner filter only", () => {
-  givenData([]);
+it("SHOULD fall back to All WHEN the selected family is no longer an owner", () => {
+  givenData(items());
+  const { rerender, result } = setup();
+  act(() => result.current.onOwnerFilterChange("family-1"));
+
+  transactionsQuery.withData({
+    items: items(),
+    owners: owners.filter((owner) => owner.id === "user-id"),
+  });
+  rerender({});
+
+  expect(result.current.ownerFilter).toBe("ALL");
+  expect(itemIds(result.current.entries)).toHaveLength(4);
+  expect(lastSummaryKey()).toEqual(["summary", "2026-9", "user-id"]);
+});
+
+it("SHOULD render only the All scope WHEN the user has no personal owner or families", () => {
+  transactionsQuery.withData({ items: [], owners: [] });
+  summaryQuery.withData({ balance: 0, expense: 0, income: 0 });
   const { result } = setup();
 
-  act(() => result.current.onFilterChange("OWNER:family-1"));
-
-  const options = spies.useQuery.mock.calls
-    .map((call) => call[0])
-    .filter((o) => o.cacheKey[0] === "summary")
-    .pop()!;
-  expect(options.cacheKey).toContain("family-1");
+  expect(result.current.scopeChoices.map((c) => c.value)).toEqual(["ALL"]);
+  expect(result.current.personalOwnerId).toBeUndefined();
 });
 
 it("SHOULD expose the summary in cents and the loading and error states", () => {

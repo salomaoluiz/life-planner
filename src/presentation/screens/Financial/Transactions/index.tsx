@@ -7,6 +7,7 @@ import {
   EmptyState,
   ErrorState,
   GroupHeader,
+  SegmentedControl,
 } from "@components";
 import Skeleton from "@components/Skeleton";
 import { useTranslation } from "@presentation/i18n";
@@ -17,7 +18,12 @@ import MonthSummary from "./components/MonthSummary";
 import MonthSwitcher from "./components/MonthSwitcher";
 import TransactionRow from "./components/TransactionRow";
 import { useTransactionsViewModel } from "./hooks";
-import { formatDayTitle, ListEntry, netAmount } from "./models/transactionList";
+import {
+  ALL_FILTER,
+  formatDayTitle,
+  ListEntry,
+  netAmount,
+} from "./models/transactionList";
 import useStyles from "./styles";
 import transactionsTestIds from "./testIds";
 
@@ -55,6 +61,29 @@ function FinancialTransactions() {
     );
   }
 
+  const scopeOptions = translateChoices(vm.scopeChoices, t).map((option) => ({
+    ...option,
+    icon: scopeIcon(option.value, vm.personalOwnerId),
+  }));
+  const scopeLabel =
+    vm.ownerFilter === ALL_FILTER
+      ? t("financial.transactions.scope.all")
+      : (scopeOptions.find((option) => option.value === vm.ownerFilter)
+          ?.label ?? t("financial.transactions.scope.all"));
+  const typeOptions = [
+    { label: t("financial.common.all"), tone: "accent" as const, value: "ALL" },
+    {
+      label: t("financial.common.expenses"),
+      tone: "expense" as const,
+      value: "EXPENSE",
+    },
+    {
+      label: t("financial.common.incomes"),
+      tone: "income" as const,
+      value: "INCOME",
+    },
+  ];
+
   const toolbar = (
     <View style={styles.toolbar} testID="transactions-toolbar">
       <MonthSwitcher
@@ -67,28 +96,42 @@ function FinancialTransactions() {
         previousLabel={t("financial.transactions.previousMonth")}
         previousTestID={transactionsTestIds.monthPrevious}
       />
+      <View accessibilityLabel={t("financial.transactions.scope.label")}>
+        <ChipGroup
+          layout={"scroll"}
+          mode={"single"}
+          onChange={vm.onOwnerFilterChange}
+          options={scopeOptions}
+          testID={transactionsTestIds.scopeFilter}
+          value={vm.ownerFilter}
+        />
+      </View>
       <MonthSummary
         balanceCents={vm.summary?.balanceCents ?? 0}
-        balanceLabel={t("financial.common.balance")}
+        balanceLabel={t("financial.transactions.balanceOf", {
+          month: vm.monthName,
+        })}
         errorMessage={t("common.errors.generic")}
         expenseCents={vm.summary?.expenseCents ?? 0}
         expensesLabel={t("financial.common.expenses")}
         expenseTestID={transactionsTestIds.summaryExpense}
         incomeCents={vm.summary?.incomeCents ?? 0}
         incomesLabel={t("financial.common.incomes")}
+        incomeTestID={transactionsTestIds.summaryIncome}
         isError={vm.summaryError}
         isLoading={!vm.summary && !vm.summaryError}
         onRetry={vm.onSummaryRetry}
         retryLabel={t("common.actions.tryAgain")}
+        scopeLabel={scopeLabel}
+        scopeTestID={transactionsTestIds.summaryScope}
         testID={transactionsTestIds.monthSummary}
       />
-      <ChipGroup
-        layout={"scroll"}
-        mode={"single"}
-        onChange={vm.onFilterChange}
-        options={translateChoices(vm.filterChoices, t)}
-        testID={transactionsTestIds.filter}
-        value={vm.filter}
+      <SegmentedControl
+        accessibilityLabel={t("financial.transactions.typeFilter.label")}
+        onChange={vm.onTypeFilterChange}
+        options={typeOptions}
+        testID={transactionsTestIds.typeFilter}
+        value={vm.typeFilter}
       />
     </View>
   );
@@ -131,6 +174,7 @@ function FinancialTransactions() {
         actionLabel={t("financial.common.clearFilters")}
         message={t("financial.transactions.noMatchMessage")}
         onAction={vm.onClearFilters}
+        testID={transactionsTestIds.filteredEmpty}
         title={t("financial.transactions.noMatch")}
       />
     );
@@ -138,16 +182,17 @@ function FinancialTransactions() {
 
   return (
     <View style={styles.root} testID={transactionsTestIds.screen}>
-      {toolbar}
       <FlashList
         data={vm.entries}
         estimatedItemSize={64}
         getItemType={(entry) => entry.kind}
         keyExtractor={(entry) => entry.key}
         ListEmptyComponent={empty}
+        ListHeaderComponent={toolbar}
         onRefresh={vm.onRefresh}
         refreshing={vm.isRefreshing}
         renderItem={renderItem}
+        showsVerticalScrollIndicator={false}
         stickyHeaderIndices={vm.stickyIndices}
       />
       {vm.isMonthPickerOpen && (
@@ -168,6 +213,14 @@ function FinancialTransactions() {
       )}
     </View>
   );
+}
+
+function scopeIcon(value: string, personalOwnerId?: string) {
+  if (value === ALL_FILTER) {
+    return undefined;
+  }
+
+  return value === personalOwnerId ? "account" : "account-group";
 }
 
 export default FinancialTransactions;

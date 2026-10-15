@@ -117,6 +117,7 @@ const financial = {
   },
   transactions: {
     add: "Adicionar transação",
+    balanceOf: "Saldo de {{month}}",
     delete: "Excluir transação",
     deleteTitle: "Excluir esta transação?",
     emptyMessage: "Adicione uma receita ou despesa para este mês.",
@@ -157,7 +158,14 @@ const financial = {
     noMatch: "Nenhuma transação com esses filtros",
     noMatchMessage: "Tente outro filtro ou outro mês.",
     previousMonth: "Mês anterior",
+    scope: {
+      all: "Tudo",
+      label: "Mostrar transações de",
+    },
     today: "Hoje",
+    typeFilter: {
+      label: "Tipo de transação",
+    },
     yesterday: "Ontem",
   },
 };

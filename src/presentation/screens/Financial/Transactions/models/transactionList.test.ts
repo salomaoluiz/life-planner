@@ -2,14 +2,15 @@ import TransactionDTO from "@application/dto/financial/TransactionDTO";
 
 import {
   ALL_FILTER,
-  applyFilter,
   buildEntries,
+  filterByOwner,
+  filterByType,
   formatDayTitle,
   formatMonthLabel,
+  formatMonthName,
   isInMonth,
   monthChoices,
   netAmount,
-  ownerFilter,
   resolveDayLabel,
   shiftMonth,
   startOfMonth,
@@ -75,28 +76,40 @@ describe("filters", () => {
     tx("e1", new Date(2026, 9, 1)),
     tx("i1", new Date(2026, 9, 2), "INCOME"),
     tx("f1", new Date(2026, 9, 3), "EXPENSE", "5.00", "family-1"),
+    tx("fi", new Date(2026, 9, 4), "INCOME", "7.00", "family-1"),
   ];
 
-  it("SHOULD return everything for ALL", () => {
-    expect(applyFilter(items, ALL_FILTER)).toHaveLength(3);
+  it("SHOULD return everything for owner ALL and type ALL", () => {
+    expect(filterByOwner(items, ALL_FILTER)).toHaveLength(4);
+    expect(filterByType(items, "ALL")).toHaveLength(4);
   });
 
   it("SHOULD filter by type", () => {
-    expect(applyFilter(items, "EXPENSE").map((i) => i.id)).toEqual([
+    expect(filterByType(items, "EXPENSE").map((i) => i.id)).toEqual([
       "e1",
       "f1",
     ]);
-    expect(applyFilter(items, "INCOME").map((i) => i.id)).toEqual(["i1"]);
+    expect(filterByType(items, "INCOME").map((i) => i.id)).toEqual([
+      "i1",
+      "fi",
+    ]);
   });
 
-  it("SHOULD filter by owner", () => {
-    expect(
-      applyFilter(items, ownerFilter("family-1")).map((i) => i.id),
-    ).toEqual(["f1"]);
+  it("SHOULD filter by owner id", () => {
+    expect(filterByOwner(items, "family-1").map((i) => i.id)).toEqual([
+      "f1",
+      "fi",
+    ]);
   });
 
   it("SHOULD return nothing for an owner without transactions", () => {
-    expect(applyFilter(items, ownerFilter("nobody"))).toEqual([]);
+    expect(filterByOwner(items, "nobody")).toEqual([]);
+  });
+
+  it("SHOULD combine owner then type", () => {
+    const result = filterByType(filterByOwner(items, "family-1"), "EXPENSE");
+
+    expect(result.map((i) => i.id)).toEqual(["f1"]);
   });
 });
 
@@ -172,6 +185,11 @@ describe("formatting", () => {
     expect(formatMonthLabel(new Date(2026, 9, 1), "en-US")).toBe(
       "October 2026",
     );
+  });
+
+  it("SHOULD format the month name alone in the active language", () => {
+    expect(formatMonthName(new Date(2026, 9, 1), "en-US")).toBe("October");
+    expect(formatMonthName(new Date(2026, 9, 1), "pt-BR")).toBe("outubro");
   });
 
   it("SHOULD format the day title as weekday, day and month", () => {

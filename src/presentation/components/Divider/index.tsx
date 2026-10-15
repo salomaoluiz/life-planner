@@ -5,6 +5,8 @@ import { useKitTheme } from "@components/utils/useKitTheme";
 export interface DividerProps {
   inset?: boolean;
   testID?: string;
+  /** Full-height 1 px line, for splitting columns in a row */
+  vertical?: boolean;
 }
 
 const INSET = 52;
@@ -17,8 +19,10 @@ function Divider(props: DividerProps) {
       accessibilityRole="none"
       style={{
         backgroundColor: colors.border,
-        height: 1,
         marginLeft: props.inset ? INSET : 0,
+        ...(props.vertical
+          ? { alignSelf: "stretch", width: 1 }
+          : { height: 1 }),
       }}
       testID={props.testID}
     />

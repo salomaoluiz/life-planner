@@ -1,4 +1,4 @@
-import { fireEvent, screen } from "@testing-library/react-native";
+import { fireEvent, screen, within } from "@testing-library/react-native";
 import { StyleSheet } from "react-native";
 
 import { hasText } from "@tests";
@@ -89,25 +89,82 @@ it("SHOULD show a summary retry WHEN the summary failed", () => {
   expect(onSummaryRetry).toHaveBeenCalledTimes(1);
 });
 
-it("SHOULD render the toolbar outside the list with 20 px gaps so the sticky day header cannot cover it", () => {
+it("SHOULD render the toolbar as the list header with 20 px gaps so it scrolls with the list", () => {
   setup({ entries: makeEntries() });
 
-  const toolbar = screen.getByTestId("transactions-toolbar");
+  const toolbar = within(screen.getByTestId("flashList")).getByTestId(
+    "transactions-toolbar",
+  );
   expect(StyleSheet.flatten(toolbar.props.style).gap).toBe(20);
-  expect(
-    screen.getByTestId("flashList").props.ListHeaderComponent,
-  ).toBeUndefined();
 });
 
-it("SHOULD give every owner filter chip an id from its owner id", () => {
-  setup({
-    filterChoices: [
-      { labelKey: "financial.common.all", value: "ALL" },
-      { label: "Test Family", value: "OWNER:owner-2" },
-    ],
-  });
+const scopeChoices = [
+  { labelKey: "financial.common.all", value: "ALL" },
+  { labelKey: "financial.common.personal", value: "user-id" },
+  { label: "Test Family", value: "family-1" },
+] as const;
+
+it("SHOULD render the header with switcher, scope chips, summary and type control", () => {
+  setup({ scopeChoices: [...scopeChoices] });
+
+  [
+    transactionsTestIds.monthPrevious,
+    `${transactionsTestIds.scopeFilter}-ALL`,
+    transactionsTestIds.monthSummary,
+    transactionsTestIds.typeFilter,
+  ].forEach((id) => expect(screen.getByTestId(id)).toBeOnTheScreen());
+  expect(screen.getByTestId("transactions-toolbar").children).toHaveLength(4);
+});
+
+it("SHOULD give every scope chip an id from its owner id and call onOwnerFilterChange", () => {
+  const onOwnerFilterChange = jest.fn();
+  setup({ onOwnerFilterChange, scopeChoices: [...scopeChoices] });
+
+  fireEvent.press(
+    screen.getByTestId(`${transactionsTestIds.scopeFilter}-family-1`),
+  );
+
+  expect(onOwnerFilterChange).toHaveBeenCalledWith("family-1");
+});
+
+it("SHOULD put an icon on Personal and families but none on All", () => {
+  setup({ scopeChoices: [...scopeChoices] });
+
+  const scope = transactionsTestIds.scopeFilter;
+  expect(screen.queryByTestId(`${scope}-ALL-icon`)).not.toBeOnTheScreen();
+  expect(screen.getByTestId(`${scope}-user-id-icon`)).toBeOnTheScreen();
+  expect(screen.getByTestId(`${scope}-family-1-icon`)).toBeOnTheScreen();
+});
+
+it.each([
+  ["ALL", "financial.common.all"],
+  ["user-id", "financial.common.personal"],
+  ["family-1", "Test Family"],
+])("SHOULD show the scope caption for %s", (ownerFilter, caption) => {
+  setup({ ownerFilter, scopeChoices: [...scopeChoices] });
 
   expect(
-    screen.getByTestId(`${transactionsTestIds.filter}-OWNER:owner-2`),
-  ).toBeOnTheScreen();
+    screen.getByTestId(transactionsTestIds.summaryScope),
+  ).toHaveTextContent(
+    ownerFilter === "ALL" ? "financial.transactions.scope.all" : caption,
+  );
+});
+
+it("SHOULD call onTypeFilterChange from the segmented control", () => {
+  const onTypeFilterChange = jest.fn();
+  setup({ onTypeFilterChange });
+
+  fireEvent.press(
+    screen.getByTestId(`${transactionsTestIds.typeFilter}-EXPENSE`),
+  );
+
+  expect(onTypeFilterChange).toHaveBeenCalledWith("EXPENSE");
+});
+
+it("SHOULD title the balance with the month name only", () => {
+  setup({ monthName: "October" });
+
+  expect(hasText('financial.transactions.balanceOf {"month":"October"}')).toBe(
+    true,
+  );
 });

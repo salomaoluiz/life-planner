@@ -5,6 +5,7 @@ tags:
   - financial
   - spec-006
   - spec-013
+  - spec-025
 onFlowComplete:
   - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
 ---
@@ -73,8 +74,10 @@ onFlowComplete:
 - runFlow: ../../subflows/financial/open-transactions.yaml
 - extendedWaitUntil:
     visible:
-      id: "financial.transactions.empty-month-action"
+      id: "financial.transactions.empty-month"
     timeout: 20000
+# The header is taller since spec 025: scroll the list to reach the action
+- runFlow: ../../subflows/financial/scroll-list-down.yaml
 - tapOn:
     id: "financial.transactions.empty-month-action"
 - extendedWaitUntil:
@@ -116,7 +119,7 @@ onFlowComplete:
     timeout: 20000
 # Filter by the family: still visible
 - tapOn:
-    id: "financial.transactions.filter-OWNER:${output.FAMILY_ID}"
+    id: "financial.transactions.scope-filter-${output.FAMILY_ID}"
 - assertVisible:
     id: "financial.transactions.row-title"
     text: ${output.TRANSACTION_NAME}

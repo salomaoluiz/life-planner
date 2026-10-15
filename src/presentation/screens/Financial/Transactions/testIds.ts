@@ -1,12 +1,16 @@
 const transactionsTestIds = {
   emptyMonth: "financial.transactions.empty-month",
-  filter: "financial.transactions.filter",
+  filteredEmpty: "financial.transactions.filtered-empty",
   monthNext: "financial.transactions.month-next",
   monthPrevious: "financial.transactions.month-previous",
   monthSummary: "financial.transactions.month-summary",
   row: "financial.transactions.row",
+  scopeFilter: "financial.transactions.scope-filter",
   screen: "financial.transactions.screen",
   summaryExpense: "financial.transactions.summary-expense",
+  summaryIncome: "financial.transactions.summary-income",
+  summaryScope: "financial.transactions.summary-scope",
+  typeFilter: "financial.transactions.type-filter",
 } as const;
 
 export default transactionsTestIds;
