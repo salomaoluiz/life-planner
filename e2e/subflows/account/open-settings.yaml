@@ -1,0 +1,12 @@
+url: ${E2E_WEB_URL}
+---
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+- tapOn:
+    id: "home-profile-button"
+- extendedWaitUntil:
+    visible:
+      id: "settings.delete-account.button"
+    timeout: 20000

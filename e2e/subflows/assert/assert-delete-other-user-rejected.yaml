@@ -1,0 +1,8 @@
+url: ${E2E_WEB_URL}
+---
+# Caller env: TOKEN (the attacker), VICTIM_EMAIL
+- runScript:
+    file: ../../scripts/assert/assert-delete-other-user-rejected.js
+    env:
+      TOKEN: ${TOKEN}
+      VICTIM_EMAIL: ${VICTIM_EMAIL}

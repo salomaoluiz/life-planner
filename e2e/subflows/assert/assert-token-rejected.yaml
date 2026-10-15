@@ -1,0 +1,7 @@
+url: ${E2E_WEB_URL}
+---
+# Caller env: TOKEN
+- runScript:
+    file: ../../scripts/assert/assert-token-rejected.js
+    env:
+      TOKEN: ${TOKEN}

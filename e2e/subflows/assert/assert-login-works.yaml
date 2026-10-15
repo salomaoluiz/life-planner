@@ -1,0 +1,8 @@
+url: ${E2E_WEB_URL}
+---
+# Caller env: EMAIL, PASSWORD
+- runScript:
+    file: ../../scripts/assert/assert-login-works.js
+    env:
+      EMAIL: ${EMAIL}
+      PASSWORD: ${PASSWORD}

@@ -1,0 +1,34 @@
+url: ${E2E_WEB_URL}
+name: account/delete-account-other-user-rejected
+tags:
+  - account
+  - spec-024
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/setup/create-extra-user.yaml
+    env:
+      PREFIX: OTHER_
+- runFlow:
+    file: ../../subflows/assert/assert-delete-other-user-rejected.yaml
+    env:
+      TOKEN: ${output.OTHER_TOKEN}
+      VICTIM_EMAIL: ${output.EMAIL}
+- runFlow:
+    file: ../../subflows/assert/assert-login-works.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow:
+    file: ../../subflows/assert/assert-login-works.yaml
+    env:
+      EMAIL: ${output.OTHER_EMAIL}
+      PASSWORD: ${output.OTHER_PASSWORD}
+- runFlow:
+    file: ../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../subflows/account/open-settings.yaml
