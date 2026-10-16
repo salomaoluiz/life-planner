@@ -30,6 +30,7 @@ function useStyles(wide: boolean) {
       flexDirection: "row",
       justifyContent: "space-between",
       paddingHorizontal: spacing.lg,
+      paddingTop: spacing.sm,
     },
     overlay: { flex: 1, justifyContent: wide ? "center" : "flex-end" },
     // react-native-web passes scrollbarColor through; RN's ViewStyle does not declare it.
@@ -43,6 +44,8 @@ function useStyles(wide: boolean) {
           borderRadius: radius.lg,
           maxHeight: "90%",
           maxWidth: DIALOG_MAX_WIDTH,
+          // Outer breathing room: the close button never touches the dialog border.
+          paddingTop: spacing.xs,
           width: "100%",
         }
       : {

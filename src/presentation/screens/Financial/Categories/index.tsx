@@ -142,6 +142,7 @@ function FinancialCategories() {
         onRefresh={vm.onRefresh}
         refreshing={vm.isRefreshing}
         renderItem={renderItem}
+        showsVerticalScrollIndicator={false}
       />
     </View>
   );

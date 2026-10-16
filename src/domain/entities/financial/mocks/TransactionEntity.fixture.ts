@@ -29,6 +29,15 @@ class TransactionEntityFixture {
     return this;
   }
 
+  // A card purchase: no account, on the invoice of `invoiceMonth` (`YYYY-MM`).
+  withCard(creditCardId: string, invoiceMonth: string) {
+    this.value.accountId = undefined;
+    this.value.creditCardId = creditCardId;
+    this.value.invoiceMonth = invoiceMonth;
+
+    return this;
+  }
+
   withCategory(category: string) {
     this.value.category = category;
 

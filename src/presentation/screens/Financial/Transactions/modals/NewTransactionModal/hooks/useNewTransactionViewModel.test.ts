@@ -1,5 +1,9 @@
 import { act } from "@tests";
 
+import CreditCardOverviewDTO, {
+  CreditCardSummaryDTO,
+  InvoiceDTO,
+} from "@application/dto/financial/CreditCardOverviewDTO";
 import {
   AccountHasTransactions,
   FinancialNotFound,
@@ -7,6 +11,7 @@ import {
 
 import {
   acc,
+  card,
   cat,
   givenLoaded,
   mutations,
@@ -345,4 +350,166 @@ it("SHOULD filter the category picker rows by the search text", () => {
   expect(
     result.current.categoryPickerRows.map((row) => row.category.id),
   ).toEqual(["rent"]);
+});
+
+describe("card mode (spec 029)", () => {
+  const mainCard = card("c1");
+
+  function invoice(referenceMonth: string, status: string) {
+    return new InvoiceDTO({
+      amount: 1000,
+      closingDate: `${referenceMonth}-31`,
+      dueDate: `${referenceMonth}-10`,
+      listDate: `${referenceMonth}-05`,
+      paymentAfterDue: false,
+      paymentDate: `${referenceMonth}-05`,
+      periodEnd: `${referenceMonth}-31`,
+      periodStart: `${referenceMonth}-01`,
+      referenceMonth,
+      status,
+    });
+  }
+
+  function overviewWith(available: number, closed: InvoiceDTO[] = []) {
+    return new CreditCardOverviewDTO({
+      aggregate: { available, totalLimit: 100000, used: 100000 - available },
+      cards: [
+        new CreditCardSummaryDTO({
+          available,
+          card: mainCard,
+          closedInvoices: closed,
+          openInvoice: invoice("2026-10", "OPEN"),
+          upcomingInvoices: [],
+          used: 100000 - available,
+        }),
+      ],
+    });
+  }
+
+  function inCardMode(overview = overviewWith(50000)) {
+    givenLoaded({ cards: [mainCard], overview });
+    const hook = setup();
+    act(() => hook.result.current.onPayWithChange("CARD"));
+
+    return hook;
+  }
+
+  it("SHOULD offer Pay with only WHEN the user has an active card", () => {
+    givenLoaded();
+    expect(setup().result.current.hasCards).toBe(false);
+
+    givenLoaded({ cards: [mainCard] });
+    expect(setup().result.current.hasCards).toBe(true);
+  });
+
+  it("SHOULD switch to Card: fixed expense, the card of the owner selected AND its options listed", () => {
+    const { result } = inCardMode();
+
+    expect(result.current.payWith).toBe("CARD");
+    expect(result.current.type).toBe("EXPENSE");
+    expect(result.current.selectedCardId).toBe("c1");
+    expect(result.current.cardOptions).toEqual([
+      { descriptionKey: undefined, label: "c1 ••1234", value: "c1" },
+    ]);
+  });
+
+  it("SHOULD tell which invoice the purchase goes to and its due day", () => {
+    const { result } = inCardMode();
+
+    act(() => result.current.onDateChange(new Date(2026, 10, 1)));
+
+    expect(result.current.invoiceHint).toEqual({
+      due: "2026-12-10",
+      month: "2026-11",
+    });
+  });
+
+  it("SHOULD warn (non-blocking) WHEN the value passes the available limit by the difference", () => {
+    const { result } = inCardMode(overviewWith(10000));
+
+    act(() => result.current.onAmountChange(12000));
+
+    expect(result.current.overLimitCents).toBe(2000);
+    expect(result.current.isSaveDisabled).toBe(false);
+  });
+
+  it("SHOULD give the stored value of the purchase being edited back to the limit", () => {
+    givenLoaded({
+      cards: [mainCard],
+      overview: overviewWith(1000),
+      params: { id: "p1" },
+      transactions: [
+        tx("p1", { accountId: undefined, creditCardId: "c1", value: "100.00" }),
+      ],
+    });
+    const { result } = setup();
+
+    expect(result.current.payWith).toBe("CARD");
+    act(() => result.current.onAmountChange(10500));
+    expect(result.current.overLimitCents).toBe(0);
+    act(() => result.current.onAmountChange(11500));
+    expect(result.current.overLimitCents).toBe(500);
+  });
+
+  it("SHOULD block saving WHEN the invoice of the date is already paid", () => {
+    const paid = invoice("2026-10", "PAID");
+    const { result } = inCardMode(overviewWith(50000, [paid]));
+
+    act(() => result.current.onAmountChange(1000));
+    act(() => result.current.onDescriptionChange("Market"));
+    act(() => result.current.onCategorySelect("food"));
+    act(() => result.current.onSave());
+
+    expect(result.current.isInvoicePaid).toBe(true);
+    expect(result.current.isSaveDisabled).toBe(true);
+    expect(mutations.create.value.mutate).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD create the purchase with creditCardId and no account", () => {
+    const { result } = inCardMode();
+
+    act(() => result.current.onAmountChange(1000));
+    act(() => result.current.onDescriptionChange("Market"));
+    act(() => result.current.onCategorySelect("food"));
+    act(() => result.current.onSave());
+
+    expect(mutations.create.value.mutate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        accountId: undefined,
+        creditCardId: "c1",
+        type: "EXPENSE",
+      }),
+    );
+  });
+
+  it("SHOULD start in Card mode WHEN opened with a creditCardId param", () => {
+    givenLoaded({ cards: [mainCard], params: { creditCardId: "c1" } });
+
+    const { result } = setup();
+
+    expect(result.current.payWith).toBe("CARD");
+    expect(result.current.selectedCardId).toBe("c1");
+  });
+
+  it("SHOULD require a card WHEN none is chosen", () => {
+    givenLoaded({ cards: [mainCard] });
+    const { result } = setup();
+    act(() => result.current.onPayWithChange("CARD"));
+    act(() => result.current.onCardChange(""));
+    act(() => result.current.onSave());
+
+    expect(result.current.cardError).toBe(
+      "financial.transactions.form.errors.cardRequired",
+    );
+  });
+
+  it("SHOULD change the selected card AND switch back to Account", () => {
+    const { result } = inCardMode();
+
+    act(() => result.current.onCardChange("c1"));
+    act(() => result.current.onPayWithChange("ACCOUNT"));
+
+    expect(result.current.payWith).toBe("ACCOUNT");
+    expect(result.current.invoiceHint).toBeUndefined();
+  });
 });

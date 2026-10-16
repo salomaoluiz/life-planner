@@ -193,3 +193,61 @@ it("SHOULD give every owner chip an id from its owner id", () => {
     screen.getByTestId(`${transactionFormTestIds.owner}-owner-2`),
   ).toBeOnTheScreen();
 });
+
+describe("Pay with (spec 029)", () => {
+  it("SHOULD hide the Pay with control WHEN the user has no card", () => {
+    setup({ hasCards: false });
+
+    expect(screen.queryByTestId(transactionFormTestIds.payWith)).toBeNull();
+  });
+
+  it("SHOULD call onPayWithChange WHEN Card is picked", () => {
+    const vm = setup();
+
+    fireEvent.press(
+      screen.getByText("financial.transactions.form.payWithCard"),
+    );
+
+    expect(vm.onPayWithChange).toHaveBeenCalledWith("CARD");
+  });
+
+  it("SHOULD hide the type control, show the card field with the hints AND disable Save WHEN the invoice is paid", () => {
+    setup({
+      invoiceHint: { due: "2026-11-10", month: "2026-10" },
+      invoiceMonthLabelDate: new Date(2026, 9, 1),
+      isInvoicePaid: true,
+      isSaveDisabled: true,
+      overLimitCents: 12000,
+      payWith: "CARD",
+    });
+
+    expect(screen.queryByTestId(transactionFormTestIds.type)).toBeNull();
+    expect(
+      screen.queryByTestId(transactionFormTestIds.accountSelect),
+    ).toBeNull();
+    expect(
+      screen.getByTestId(transactionFormTestIds.cardSelect),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(transactionFormTestIds.invoiceHint),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(transactionFormTestIds.overLimit),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(transactionFormTestIds.invoicePaid),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(transactionFormTestIds.saveButton).props
+        .accessibilityState?.disabled,
+    ).toBe(true);
+  });
+
+  it("SHOULD show a hint WHEN the owner has no card", () => {
+    setup({ hasNoCards: true, payWith: "CARD" });
+
+    expect(
+      screen.getByTestId(transactionFormTestIds.missingCardHint),
+    ).toBeOnTheScreen();
+  });
+});

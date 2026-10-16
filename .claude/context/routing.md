@@ -17,6 +17,7 @@ app/
   (app)/(modals)/_layout.tsx     Stack, presentation "transparentModal", headerShown false
   (app)/(modals)/quick_add.tsx   quick-add BottomSheet (Transaction / Stock item); options router.replace to the add forms
   (app)/(modals)/family/..., financial/..., stock/add_new_stock_item.tsx, business_feedback.tsx, invite.tsx
+  (app)/(modals)/financial/invoice/invoice_detail.tsx   invoice detail + payment sheet (params cardId, month; spec 029)
 ```
 
 ## Add a screen

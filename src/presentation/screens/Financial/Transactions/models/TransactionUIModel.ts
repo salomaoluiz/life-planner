@@ -66,6 +66,11 @@ class TransactionUIModel {
     return this.dto.systemKey === BALANCE_ADJUSTMENT;
   }
 
+  // A purchase on a card: shown inside its invoice line, never as an account row.
+  get isCardPurchase() {
+    return !!this.dto.creditCardId;
+  }
+
   get isExpense() {
     return this.dto.type === "EXPENSE";
   }

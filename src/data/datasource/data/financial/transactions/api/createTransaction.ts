@@ -2,10 +2,10 @@ import { isoToCalendarDate } from "@data/models/financial/calendarDate";
 import { decimalStringToCents } from "@data/models/financial/money";
 import TransactionModel from "@data/models/financial/TransactionModel";
 import { TransactionDatasource } from "@data/repositories/repos/financial/transactions/transactionDatasource";
-import { AccountArchived } from "@domain/entities/errors";
 import { api } from "@infrastructure/api";
 
 import handleFinancialApiError from "../../financialApiError";
+import unprocessableError from "../unprocessableError";
 
 export type Params = Parameters<TransactionDatasource["createTransaction"]>[0];
 export type Response = ReturnType<TransactionDatasource["createTransaction"]>;
@@ -16,6 +16,7 @@ async function createTransaction(params: Params): Response {
   const body = {
     accountId: params.accountId,
     categoryId: params.categoryId,
+    creditCardId: params.creditCardId,
     date: isoToCalendarDate(params.date),
     description: params.description,
     owner: params.owner,
@@ -38,7 +39,7 @@ async function createTransaction(params: Params): Response {
         datasource: "TransactionDatasource - createTransaction",
         ownerId: params.ownerId,
       },
-      { fields: body, unprocessable: () => new AccountArchived() },
+      { fields: body, unprocessable: unprocessableError },
     );
   }
 }

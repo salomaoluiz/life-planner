@@ -9,13 +9,15 @@ export enum TransactionType {
 export const BALANCE_ADJUSTMENT = "BALANCE_ADJUSTMENT";
 
 interface ITransactionEntity {
-  accountId: string;
+  accountId?: string;
   category: string;
   categoryId: string;
+  creditCardId?: string;
   date: string;
   description: string;
   excludeFromTotals?: boolean;
   id: string;
+  invoiceMonth?: string;
   owner: OwnerType;
   ownerId: string;
   systemKey?: string;
@@ -24,13 +26,15 @@ interface ITransactionEntity {
 }
 
 class TransactionEntity {
-  accountId: string;
+  accountId?: string;
   category: string;
   categoryId: string;
+  creditCardId?: string;
   date: string;
   description: string;
   excludeFromTotals: boolean;
   id: string;
+  invoiceMonth?: string;
   owner: OwnerType;
   ownerId: string;
   systemKey?: string;
@@ -41,6 +45,8 @@ class TransactionEntity {
     this.accountId = params.accountId;
     this.category = params.category;
     this.categoryId = params.categoryId;
+    this.creditCardId = params.creditCardId;
+    this.invoiceMonth = params.invoiceMonth;
     this.date = params.date;
     this.id = params.id;
     this.owner = params.owner;

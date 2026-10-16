@@ -63,6 +63,7 @@ function makeInvoice(
     amount: 0,
     closingDate: "2026-10-31",
     dueDate: "2026-11-10",
+    listDate: "2026-11-05",
     paymentAfterDue: false,
     paymentDate: "2026-11-05",
     periodEnd: "2026-10-31",
@@ -79,6 +80,7 @@ function makeSummary(card = makeCard()) {
     card,
     closedInvoices: [],
     openInvoice: makeInvoice(),
+    upcomingInvoices: [],
     used: 0,
   });
 }
@@ -96,6 +98,7 @@ const defaultViewModel: ReturnType<typeof useCardsViewModel> = {
   onArchivedToggle: jest.fn(),
   onCardSelect: jest.fn(),
   onEditPress: jest.fn(),
+  onInvoicePress: jest.fn(),
   onInvoiceTabChange: jest.fn(),
   onOwnerFilterChange: jest.fn(),
   onRefresh: jest.fn(),
@@ -120,7 +123,12 @@ function setup(overrides: Partial<typeof defaultViewModel> = {}) {
 function withCards(): Partial<typeof defaultViewModel> {
   const summary = makeSummary();
   const entries: CardEntry[] = [
-    { invoice: summary.openInvoice, key: "invoice-1", kind: "invoice" },
+    {
+      cardId: summary.card.id,
+      invoice: summary.openInvoice,
+      key: "invoice-1",
+      kind: "invoice",
+    },
   ];
 
   return {

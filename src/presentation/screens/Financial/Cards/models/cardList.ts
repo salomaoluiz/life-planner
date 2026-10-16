@@ -7,15 +7,18 @@ import { ALL_OWNERS } from "@screens/Financial/models/ownerOptions";
 
 type CardEntry =
   | { card: CreditCardDTO; key: string; kind: "archivedRow" }
+  | { cardId: string; invoice: InvoiceDTO; key: string; kind: "invoice" }
   | { count: number; expanded: boolean; key: string; kind: "archivedToggle" }
-  | { invoice: InvoiceDTO; key: string; kind: "invoice" }
-  | { key: string; kind: "noClosed" };
+  | { key: string; kind: "noClosed" }
+  | { key: string; kind: "noUpcoming" };
 
 interface CardsAggregate {
   available: number;
   totalLimit: number;
   used: number;
 }
+
+type InvoiceTab = "closed" | "open" | "upcoming";
 
 // The aggregate follows the current scope filter, so it is derived from what is shown (FR 22).
 function aggregateOf(summaries: CreditCardSummaryDTO[]): CardsAggregate {
@@ -37,7 +40,7 @@ function amountProps(cents: number): { type?: "EXPENSE"; value: number } {
 function buildCardEntries(params: {
   archived: CreditCardDTO[];
   archivedExpanded: boolean;
-  invoiceTab: "closed" | "open";
+  invoiceTab: InvoiceTab;
   selected?: CreditCardSummaryDTO;
 }): CardEntry[] {
   const entries: CardEntry[] = [];
@@ -45,6 +48,7 @@ function buildCardEntries(params: {
 
   if (selected && params.invoiceTab === "open") {
     entries.push({
+      cardId: selected.card.id,
       invoice: selected.openInvoice,
       key: `invoice-${selected.card.id}-${selected.openInvoice.referenceMonth}`,
       kind: "invoice",
@@ -56,6 +60,20 @@ function buildCardEntries(params: {
     }
     selected.closedInvoices.forEach((invoice) =>
       entries.push({
+        cardId: selected.card.id,
+        invoice,
+        key: `invoice-${selected.card.id}-${invoice.referenceMonth}`,
+        kind: "invoice",
+      }),
+    );
+  }
+  if (selected && params.invoiceTab === "upcoming") {
+    if (selected.upcomingInvoices.length === 0) {
+      entries.push({ key: "no-upcoming", kind: "noUpcoming" });
+    }
+    selected.upcomingInvoices.forEach((invoice) =>
+      entries.push({
+        cardId: selected.card.id,
         invoice,
         key: `invoice-${selected.card.id}-${invoice.referenceMonth}`,
         kind: "invoice",
@@ -134,7 +152,7 @@ function usedProgress(aggregate: CardsAggregate): number {
   return aggregate.used / aggregate.totalLimit;
 }
 
-export type { CardEntry, CardsAggregate };
+export type { CardEntry, CardsAggregate, InvoiceTab };
 export {
   aggregateOf,
   amountProps,

@@ -13,9 +13,10 @@ export interface TransactionDatasource {
 }
 
 interface CreateTransactionDatasourceParams {
-  accountId: string;
+  accountId?: string;
   category: string;
   categoryId: string;
+  creditCardId?: string;
   date: string;
   description: string;
   owner: OwnerType;
@@ -33,6 +34,7 @@ interface UpdateTransactionDatasourceParams {
   accountId?: string;
   category?: string;
   categoryId?: string;
+  creditCardId?: string;
   date?: string;
   description?: string;
   id: string;

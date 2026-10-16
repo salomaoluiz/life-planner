@@ -1,8 +1,13 @@
 import { act } from "@tests";
 
+import TransactionDTO from "@application/dto/financial/TransactionDTO";
+
+import { makeInvoice } from "../mocks/invoice.mocks";
+import TransactionUIModel from "../models/TransactionUIModel";
 import {
   dto,
   givenData,
+  invoicesQuery,
   owners,
   setup,
   spies,
@@ -271,4 +276,78 @@ it("SHOULD refetch WHEN the screen is focused", () => {
   setup();
 
   expect(transactionsQuery.value.refetch).toHaveBeenCalled();
+});
+
+describe("card invoices (spec 029)", () => {
+  it("SHOULD NOT treat the month as empty WHEN it only has a card invoice", () => {
+    givenData([]);
+    invoicesQuery.withData([makeInvoice({ listDate: "2026-10-12" })]);
+
+    const { result } = setup();
+
+    expect(result.current.isEmptyMonth).toBe(false);
+    expect(result.current.entries.map((entry) => entry.kind)).toEqual([
+      "header",
+      "invoice",
+    ]);
+  });
+
+  it("SHOULD hide card purchases from the account rows", () => {
+    const purchase = new TransactionUIModel(
+      new TransactionDTO({
+        ...dto("purchase", new Date(2026, 9, 3)),
+        accountId: undefined,
+        creditCardId: "card-1",
+      }),
+    );
+    givenData([ui("tx-1", new Date(2026, 9, 2)), purchase]);
+
+    expect(
+      setup().result.current.entries.filter((e) => e.kind === "item"),
+    ).toHaveLength(1);
+  });
+
+  it("SHOULD hide the invoice for the Income filter, show a filtered-empty state AND restore it", () => {
+    givenData([]);
+    invoicesQuery.withData([makeInvoice({ listDate: "2026-10-12" })]);
+    const { result } = setup();
+
+    act(() => result.current.onTypeFilterChange("INCOME"));
+
+    expect(result.current.entries).toEqual([]);
+    expect(result.current.isFilteredEmpty).toBe(true);
+
+    act(() => result.current.onTypeFilterChange("ALL"));
+    expect(result.current.entries).toHaveLength(2);
+  });
+
+  it("SHOULD keep the account rows AND flag the error WHEN the invoices request fails", () => {
+    givenData([ui("tx-1", new Date(2026, 9, 2))]);
+    invoicesQuery.withError();
+
+    const { result } = setup();
+
+    expect(result.current.invoicesError).toBe(true);
+    expect(
+      result.current.entries.filter((e) => e.kind === "item"),
+    ).toHaveLength(1);
+  });
+
+  it("SHOULD expand one invoice at a time AND open the detail route", () => {
+    givenData([]);
+    const invoice = makeInvoice({ listDate: "2026-10-12" });
+    invoicesQuery.withData([invoice]);
+    const { result } = setup();
+
+    act(() => result.current.onInvoiceToggle(invoice.id));
+    expect(result.current.expandedInvoiceId).toBe(invoice.id);
+    act(() => result.current.onInvoiceToggle(invoice.id));
+    expect(result.current.expandedInvoiceId).toBeUndefined();
+
+    act(() => result.current.onInvoiceOpen(invoice));
+    expect(spies.push).toHaveBeenCalledWith({
+      params: { cardId: "card-1", month: "2026-10" },
+      pathname: "/financial/invoice/invoice_detail",
+    });
+  });
 });

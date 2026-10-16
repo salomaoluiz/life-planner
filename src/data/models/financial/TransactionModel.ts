@@ -6,13 +6,15 @@ export type OwnerType = "FAMILY" | "USER";
 export type TransactionType = "EXPENSE" | "INCOME";
 
 interface ITransactionModel {
-  accountId: string;
+  accountId?: string;
   category: string;
   categoryId: string;
+  creditCardId?: string;
   date: string;
   description: string;
   excludeFromTotals?: boolean;
   id: string;
+  invoiceMonth?: string;
   owner: OwnerType;
   ownerId: string;
   systemKey?: string;
@@ -21,13 +23,15 @@ interface ITransactionModel {
 }
 
 class TransactionModel implements ITransactionModel {
-  accountId: string;
+  accountId?: string;
   category: string;
   categoryId: string;
+  creditCardId?: string;
   date: string;
   description: string;
   excludeFromTotals: boolean;
   id: string;
+  invoiceMonth?: string;
   owner: OwnerType;
   ownerId: string;
   systemKey?: string;
@@ -39,6 +43,8 @@ class TransactionModel implements ITransactionModel {
     this.date = params.date;
     this.category = params.category;
     this.categoryId = params.categoryId;
+    this.creditCardId = params.creditCardId;
+    this.invoiceMonth = params.invoiceMonth;
     this.description = params.description;
     this.owner = params.owner;
     this.id = params.id;
@@ -59,13 +65,15 @@ class TransactionModel implements ITransactionModel {
         };
 
     return new TransactionModel({
-      accountId: data.accountId as string,
+      accountId: (data.accountId as null | string) ?? undefined,
       category: category?.name ?? "",
       categoryId: data.categoryId as string,
+      creditCardId: (data.creditCardId as null | string) ?? undefined,
       date: calendarDateToIso(data.date as string),
       description: data.description as string,
       excludeFromTotals: category?.excludeFromTotals === true,
       id: data.id as string,
+      invoiceMonth: (data.invoiceMonth as null | string) ?? undefined,
       owner: data.owner as OwnerType,
       ownerId: data.ownerId as string,
       systemKey: category?.systemKey ?? undefined,
@@ -77,16 +85,18 @@ class TransactionModel implements ITransactionModel {
   // Same shape as the API: also what the repository cache stores.
   toJSON() {
     return {
-      accountId: this.accountId,
+      accountId: this.accountId ?? null,
       category: {
         excludeFromTotals: this.excludeFromTotals,
         name: this.category,
         systemKey: this.systemKey ?? null,
       },
       categoryId: this.categoryId,
+      creditCardId: this.creditCardId ?? null,
       date: isoToCalendarDate(this.date),
       description: this.description,
       id: this.id,
+      invoiceMonth: this.invoiceMonth ?? null,
       owner: this.owner,
       ownerId: this.ownerId,
       type: this.type,

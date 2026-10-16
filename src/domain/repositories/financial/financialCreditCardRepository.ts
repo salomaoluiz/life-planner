@@ -1,7 +1,9 @@
+import CardInvoiceEntity from "@domain/entities/financial/CardInvoiceEntity";
 import CreditCardEntity, {
   CreditCardBrand,
 } from "@domain/entities/financial/CreditCardEntity";
 import CreditCardOverviewEntity from "@domain/entities/financial/CreditCardOverviewEntity";
+import { InvoicePaymentMethod } from "@domain/entities/financial/InvoiceEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 export type FinancialCreditCardRepository = {
@@ -9,10 +11,23 @@ export type FinancialCreditCardRepository = {
     params: CreateCreditCardRepositoryParams,
   ): Promise<CreditCardEntity>;
   deleteCreditCard(params: DeleteCreditCardRepositoryParams): Promise<void>;
+  getCardInvoice(params: CardInvoiceKey): Promise<CardInvoiceEntity>;
+  getCardInvoicesForMonth(params: {
+    month: string;
+    ownerIds: string[];
+  }): Promise<CardInvoiceEntity[]>;
   getCreditCards(ownerIds: string[]): Promise<CreditCardEntity[]>;
   getCreditCardsOverview(ownerIds: string[]): Promise<CreditCardOverviewEntity>;
+  payInvoice(params: PayInvoiceRepositoryParams): Promise<void>;
+  undoInvoicePayment(params: CardInvoiceKey): Promise<void>;
   updateCreditCard(params: UpdateCreditCardRepositoryParams): Promise<void>;
 };
+
+interface CardInvoiceKey {
+  creditCardId: string;
+  // `YYYY-MM`
+  month: string;
+}
 
 interface CreateCreditCardRepositoryParams {
   brand: CreditCardBrand;
@@ -31,6 +46,13 @@ interface DeleteCreditCardRepositoryParams {
   id: string;
 }
 
+interface PayInvoiceRepositoryParams extends CardInvoiceKey {
+  accountId?: string;
+  method: InvoicePaymentMethod;
+  // `YYYY-MM-DD`
+  paidOn: string;
+}
+
 // `null` clears the optional fields on the API.
 interface UpdateCreditCardRepositoryParams {
   brand?: CreditCardBrand;
@@ -47,4 +69,9 @@ interface UpdateCreditCardRepositoryParams {
   title?: string;
 }
 
-export { CreateCreditCardRepositoryParams, UpdateCreditCardRepositoryParams };
+export {
+  CardInvoiceKey,
+  CreateCreditCardRepositoryParams,
+  PayInvoiceRepositoryParams,
+  UpdateCreditCardRepositoryParams,
+};

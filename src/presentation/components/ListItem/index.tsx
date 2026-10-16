@@ -9,6 +9,8 @@ import { useKitTheme } from "@components/utils/useKitTheme";
 export interface ListItemProps {
   accessibilityLabel?: string;
   divider?: boolean;
+  /** Horizontal padding inside the pressable area, so the content doesn't touch the hover edge */
+  inset?: boolean;
   leading?: React.ReactNode;
   onLongPress?: () => void;
   onPress?: () => void;
@@ -30,6 +32,7 @@ function ListItem(props: ListItemProps) {
       flexDirection: "row",
       gap: spacing.sm,
       minHeight: MIN_HEIGHT,
+      paddingHorizontal: props.inset ? spacing.sm : 0,
       paddingVertical: spacing.sm,
     },
     text: { flex: 1, minWidth: 0 },

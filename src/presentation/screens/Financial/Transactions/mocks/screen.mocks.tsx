@@ -38,6 +38,8 @@ jest.mock("@shopify/flash-list", () => {
 const defaultViewModel: ReturnType<typeof useTransactionsViewModel> = {
   entries: [],
   errorMessage: undefined,
+  expandedInvoiceId: undefined,
+  invoicesError: false,
   isEmptyMonth: false,
   isFilteredEmpty: false,
   isLoading: false,
@@ -49,6 +51,9 @@ const defaultViewModel: ReturnType<typeof useTransactionsViewModel> = {
   monthName: "October",
   onAddPress: jest.fn(),
   onClearFilters: jest.fn(),
+  onInvoiceOpen: jest.fn(),
+  onInvoiceRetry: jest.fn(),
+  onInvoiceToggle: jest.fn(),
   onMonthPickerClose: jest.fn(),
   onMonthPickerOpen: jest.fn(),
   onMonthSelect: jest.fn(),

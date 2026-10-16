@@ -26,7 +26,7 @@ function getIndentPerLevel(width: number) {
 
 function TreeItem(props: TreeItemProps) {
   const { width } = useWindowDimensions();
-  const { colors } = useKitTheme();
+  const { colors, spacing } = useKitTheme();
   const styles = StyleSheet.create({
     container: {
       borderLeftColor: colors.border,
@@ -34,6 +34,8 @@ function TreeItem(props: TreeItemProps) {
       // The 1 px guide line is part of the indent, so the content starts exactly 24 dp per level in.
       marginLeft:
         getIndentPerLevel(width) * props.depth - (props.depth > 0 ? 1 : 0),
+      // Keeps the hover off the guide line of a subcategory.
+      paddingLeft: props.depth > 0 ? spacing.xs : 0,
     },
   });
 
@@ -41,6 +43,7 @@ function TreeItem(props: TreeItemProps) {
     <View style={styles.container} testID={`${props.testID}-container`}>
       <ListItem
         divider={props.divider}
+        inset
         leading={props.leading}
         onPress={props.onPress}
         subtitle={props.subtitle}

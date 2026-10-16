@@ -2,9 +2,12 @@ import {
   AccountArchived,
   AccountHasTransactions,
   CategoryHasTransactions,
+  CreditCardArchived,
   CreditCardHasTransactions,
   FinancialNotFound,
   FinancialOwnerNotAllowed,
+  InvoiceIsPaid,
+  InvoiceNotPayable,
 } from "@domain/entities/errors";
 import { TranslationKeys } from "@presentation/i18n/types";
 
@@ -19,6 +22,18 @@ function getFinancialErrorMessageKey(
 
   if (error instanceof AccountArchived) {
     return "financial.errors.accountArchived";
+  }
+
+  if (error instanceof CreditCardArchived) {
+    return "financial.errors.cardArchived";
+  }
+
+  if (error instanceof InvoiceIsPaid) {
+    return "financial.errors.invoicePaid";
+  }
+
+  if (error instanceof InvoiceNotPayable) {
+    return "financial.errors.invoiceNotPayable";
   }
 
   if (error instanceof AccountHasTransactions) {

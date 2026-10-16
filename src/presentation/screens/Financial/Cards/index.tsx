@@ -46,42 +46,44 @@ function FinancialCards() {
   const toolbar = (
     <View style={styles.toolbar} testID="cards-toolbar">
       <Card testID={cardsTestIds.total}>
-        <View style={styles.totalRow}>
-          <View style={styles.totalColumn}>
-            <Text.Overline
-              tone="secondary"
-              value={t("financial.cards.totalLimit")}
-            />
-            <AmountText
-              size="heading"
-              testID={cardsTestIds.totalLimit}
-              value={vm.aggregate.totalLimit}
+        <View style={styles.totalBody}>
+          <View style={styles.totalRow}>
+            <View style={styles.totalColumn}>
+              <Text.Overline
+                tone="secondary"
+                value={t("financial.cards.totalLimit")}
+              />
+              <AmountText
+                size="heading"
+                testID={cardsTestIds.totalLimit}
+                value={vm.aggregate.totalLimit}
+              />
+            </View>
+            <IconButton
+              accessibilityLabel={t("financial.cardForm.titleNew")}
+              name="plus"
+              onPress={vm.onAddPress}
+              testID={cardsTestIds.addButton}
             />
           </View>
-          <IconButton
-            accessibilityLabel={t("financial.cardForm.titleNew")}
-            name="plus"
-            onPress={vm.onAddPress}
-            testID={cardsTestIds.addButton}
+          <ProgressBar
+            accessibilityLabel={t("financial.cards.usedPercent", {
+              percent: Math.round(vm.usedProgress * 100),
+            })}
+            progress={vm.usedProgress}
+            testID="cards-progress"
+            tone={vm.aggregate.available < 0 ? "expense" : "accent"}
           />
-        </View>
-        <ProgressBar
-          accessibilityLabel={t("financial.cards.usedPercent", {
-            percent: Math.round(vm.usedProgress * 100),
-          })}
-          progress={vm.usedProgress}
-          testID="cards-progress"
-          tone={vm.aggregate.available < 0 ? "expense" : "accent"}
-        />
-        <View style={styles.metrics}>
-          <MetricBlock
-            label={t("financial.cards.used")}
-            value={<AmountText {...amountProps(vm.aggregate.used)} />}
-          />
-          <MetricBlock
-            label={t("financial.cards.available")}
-            value={<AmountText {...amountProps(vm.aggregate.available)} />}
-          />
+          <View style={styles.metrics}>
+            <MetricBlock
+              label={t("financial.cards.used")}
+              value={<AmountText {...amountProps(vm.aggregate.used)} />}
+            />
+            <MetricBlock
+              label={t("financial.cards.available")}
+              value={<AmountText {...amountProps(vm.aggregate.available)} />}
+            />
+          </View>
         </View>
       </Card>
       <ChipGroup
@@ -136,6 +138,7 @@ function FinancialCards() {
             options={[
               { label: t("financial.cards.open"), value: "open" },
               { label: t("financial.cards.closed"), value: "closed" },
+              { label: t("financial.cards.upcoming"), value: "upcoming" },
             ]}
             testID={cardsTestIds.invoiceTabs}
             value={vm.invoiceTab}
@@ -147,7 +150,24 @@ function FinancialCards() {
 
   function renderItem({ item }: { item: CardEntry }) {
     if (item.kind === "invoice") {
-      return <InvoiceRow invoice={item.invoice} />;
+      return (
+        <InvoiceRow
+          invoice={item.invoice}
+          onPress={() =>
+            vm.onInvoicePress(item.cardId, item.invoice.referenceMonth)
+          }
+        />
+      );
+    }
+
+    if (item.kind === "noUpcoming") {
+      return (
+        <Text.Body
+          testID={cardsTestIds.noUpcoming}
+          tone="secondary"
+          value={t("financial.cards.noUpcoming")}
+        />
+      );
     }
 
     if (item.kind === "noClosed") {
@@ -163,6 +183,7 @@ function FinancialCards() {
     if (item.kind === "archivedToggle") {
       return (
         <ListItem
+          inset
           onPress={vm.onArchivedToggle}
           testID={cardsTestIds.archivedToggle}
           title={t("financial.cards.archived", { count: item.count })}
@@ -178,6 +199,7 @@ function FinancialCards() {
 
     return (
       <ListItem
+        inset
         onPress={() => vm.onArchivedCardPress(item.card.id)}
         subtitle={vm.ownerName(item.card.ownerId)}
         testID={cardsTestIds.row}
@@ -229,6 +251,7 @@ function FinancialCards() {
         onRefresh={vm.onRefresh}
         refreshing={vm.isRefreshing}
         renderItem={renderItem}
+        showsVerticalScrollIndicator={false}
       />
     </View>
   );

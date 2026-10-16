@@ -5,9 +5,11 @@ import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import Repositories from "@domain/repositories";
 
 export interface CreateTransactionUseCaseParams {
-  accountId: string;
+  // Exactly one of accountId / creditCardId (a card purchase has no account).
+  accountId?: string;
   category: string;
   categoryId: string;
+  creditCardId?: string;
   date: string;
   description: string;
   owner: string;
@@ -37,6 +39,7 @@ function createTransactionUseCase(
           accountId: params.accountId,
           category: params.category,
           categoryId: params.categoryId,
+          creditCardId: params.creditCardId,
           date: params.date,
           description: params.description,
           owner,

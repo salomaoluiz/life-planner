@@ -105,6 +105,7 @@ describe("buildCardEntries", () => {
     card: { id: "a" },
     closedInvoices: [invoice("2026-09"), invoice("2026-08")],
     openInvoice: invoice("2026-10"),
+    upcomingInvoices: [invoice("2026-11"), invoice("2026-12")],
   } as never;
   const archived = [{ id: "z" }, { id: "y" }] as never[];
 
@@ -175,5 +176,40 @@ describe("buildCardEntries", () => {
         selected: undefined,
       }),
     ).toEqual([]);
+  });
+});
+
+describe("upcoming tab (spec 029)", () => {
+  function invoice(referenceMonth: string) {
+    return { referenceMonth, status: "OPEN" } as never;
+  }
+  const selected = {
+    card: { id: "a" },
+    closedInvoices: [],
+    openInvoice: invoice("2026-10"),
+    upcomingInvoices: [invoice("2026-11"), invoice("2026-12")],
+  } as never;
+
+  it("SHOULD list the upcoming invoices with their card id", () => {
+    const entries = buildCardEntries({
+      archived: [],
+      archivedExpanded: false,
+      invoiceTab: "upcoming",
+      selected,
+    });
+
+    expect(entries.map((entry) => entry.kind)).toEqual(["invoice", "invoice"]);
+    expect(entries[0]).toMatchObject({ cardId: "a" });
+  });
+
+  it("SHOULD show noUpcoming WHEN there are none", () => {
+    const entries = buildCardEntries({
+      archived: [],
+      archivedExpanded: false,
+      invoiceTab: "upcoming",
+      selected: { ...(selected as object), upcomingInvoices: [] } as never,
+    });
+
+    expect(entries.map((entry) => entry.kind)).toEqual(["noUpcoming"]);
   });
 });

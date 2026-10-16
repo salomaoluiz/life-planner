@@ -24,6 +24,7 @@ function MemberRow(props: Props) {
   return (
     <ListItem
       divider={props.divider}
+      inset
       leading={
         <Avatar
           name={props.name}

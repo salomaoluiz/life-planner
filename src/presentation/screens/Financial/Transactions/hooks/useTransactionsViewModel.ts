@@ -13,11 +13,14 @@ import {
 } from "@screens/Financial/models/ownerOptions";
 import { listQueryKey } from "@screens/Financial/models/queryKeys";
 
+import CardInvoiceUIModel from "../models/CardInvoiceUIModel";
 import {
   ALL_FILTER,
   buildEntries,
   filterByOwner,
   filterByType,
+  filterInvoicesByOwner,
+  filterInvoicesByType,
   formatMonthLabel,
   formatMonthName,
   isInMonth,
@@ -95,6 +98,31 @@ function useTransactionsViewModel() {
     [ownerFilter, owners],
   );
 
+  const monthKey = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, "0")}`;
+  const allOwnerIds = useMemo(
+    () => (owners ?? []).map((owner) => owner.id),
+    [owners],
+  );
+  // A failing invoices request keeps the account rows: only the inline error row appears.
+  const invoices = useQuery<CardInvoiceUIModel[]>({
+    cacheKey: [
+      ...listQueryKey(
+        useCases.getFinancialCardInvoicesForMonthUseCase.uniqueName,
+      ),
+      monthKey,
+      ...allOwnerIds,
+    ],
+    enabled: !!owners,
+    fetch: async () =>
+      (
+        await useCases.getFinancialCardInvoicesForMonthUseCase.execute({
+          month: monthKey,
+          ownerIds: allOwnerIds,
+        })
+      ).map((invoice) => new CardInvoiceUIModel(invoice)),
+  });
+  const [expandedInvoiceId, setExpandedInvoiceId] = useState<string>();
+
   const summary = useQuery<MonthSummary>({
     cacheKey: [
       useCases.getMonthSummaryUseCase.uniqueName,
@@ -108,14 +136,15 @@ function useTransactionsViewModel() {
   useEffect(() => {
     if (isFocused) {
       transactions.refetch();
+      invoices.refetch();
       summary.refetch();
     }
   }, [isFocused]);
 
   const itemsOfMonth = useMemo(
     () =>
-      (transactions.data?.items ?? []).filter((item) =>
-        isInMonth(item.date, month),
+      (transactions.data?.items ?? []).filter(
+        (item) => !item.isCardPurchase && isInMonth(item.date, month),
       ),
     [transactions.data, month],
   );
@@ -123,7 +152,19 @@ function useTransactionsViewModel() {
     () => filterByType(filterByOwner(itemsOfMonth, ownerFilter), typeFilter),
     [itemsOfMonth, ownerFilter, typeFilter],
   );
-  const entries = useMemo(() => buildEntries(visible, new Date()), [visible]);
+  const invoicesOfMonth = invoices.data ?? [];
+  const visibleInvoices = useMemo(
+    () =>
+      filterInvoicesByType(
+        filterInvoicesByOwner(invoices.data ?? [], ownerFilter),
+        typeFilter,
+      ),
+    [invoices.data, ownerFilter, typeFilter],
+  );
+  const entries = useMemo(
+    () => buildEntries(visible, new Date(), visibleInvoices),
+    [visible, visibleInvoices],
+  );
 
   function onMonthSelect(monthIndex: string) {
     setMonth(new Date(pickerYear, Number(monthIndex), 1));
@@ -137,14 +178,18 @@ function useTransactionsViewModel() {
 
   function onRefresh() {
     transactions.refetch();
+    invoices.refetch();
     summary.refetch();
   }
 
   return {
     entries,
     errorMessage: transactions.error?.message,
-    isEmptyMonth: itemsOfMonth.length === 0,
-    isFilteredEmpty: itemsOfMonth.length > 0 && visible.length === 0,
+    expandedInvoiceId,
+    invoicesError: !!invoices.error,
+    isEmptyMonth: itemsOfMonth.length === 0 && invoicesOfMonth.length === 0,
+    isFilteredEmpty:
+      itemsOfMonth.length + invoicesOfMonth.length > 0 && entries.length === 0,
     isLoading: transactions.isFetching && !transactions.data,
     isMonthPickerOpen,
     isRefreshing: transactions.isFetching && !!transactions.data,
@@ -158,6 +203,14 @@ function useTransactionsViewModel() {
       setOwnerSelection(ALL_FILTER);
       setTypeFilter("ALL");
     },
+    onInvoiceOpen: (invoice: CardInvoiceUIModel) =>
+      router.push({
+        params: { cardId: invoice.cardId, month: invoice.referenceMonth },
+        pathname: "/financial/invoice/invoice_detail",
+      } as never),
+    onInvoiceRetry: async () => invoices.refetch(),
+    onInvoiceToggle: (id: string) =>
+      setExpandedInvoiceId((current) => (current === id ? undefined : id)),
     onMonthPickerClose: () => setMonthPickerOpen(false),
     onMonthPickerOpen,
     onMonthSelect,

@@ -74,3 +74,6 @@ Kept only so unmigrated screens compile, marked with a "Legacy, kept until spec 
 - `useLocaleTag` (from `@presentation/i18n`) is globally mocked to `"en-US"` in `tests/setup.tsx`; so are `useTranslation` and `useTheme`.
 - `react-native-reanimated` is mocked in `tests/setup.tsx` (add missing APIs there). `Screen` tests import `@shopify/flash-list/jestSetup` and mock `react-native-safe-area-context`.
 - Paper components are mocked as `View`s: query by `testID`/label, not text.
+
+- Scroll indicators are hidden everywhere: every `ScrollView`/`FlashList` sets `showsVerticalScrollIndicator={false}` (and horizontal when it scrolls sideways); new lists do the same.
+- `Touchable` hover (web) draws a rounded overlay with a thin accent border that follows `focusRadius`, so pills and round buttons never overflow.

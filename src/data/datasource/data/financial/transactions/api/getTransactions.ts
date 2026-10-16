@@ -15,11 +15,18 @@ async function getTransactions(ownerIds: Params): Response {
   }
 
   try {
-    const data = await api.get<Record<string, unknown>[]>(
-      `/v1/finance/transactions${toOwnerQuery(ownerIds)}`,
-    );
+    // Account rows (the API default) and card purchases (source=CARD): the form edits both kinds.
+    const query = toOwnerQuery(ownerIds);
+    const [accountRows, cardRows] = await Promise.all([
+      api.get<Record<string, unknown>[]>(`/v1/finance/transactions${query}`),
+      api.get<Record<string, unknown>[]>(
+        `/v1/finance/transactions${query}&source=CARD`,
+      ),
+    ]);
 
-    return data.map((transaction) => TransactionModel.fromJSON(transaction));
+    return [...accountRows, ...cardRows].map((transaction) =>
+      TransactionModel.fromJSON(transaction),
+    );
   } catch (error) {
     return handleFinancialApiError(error, {
       datasource: "TransactionDatasource - getTransactions",

@@ -5,6 +5,8 @@ import { renderHook } from "@tests";
 
 import AccountDTO from "@application/dto/financial/AccountDTO";
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
+import CreditCardDTO from "@application/dto/financial/CreditCardDTO";
+import CreditCardOverviewDTO from "@application/dto/financial/CreditCardOverviewDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
@@ -35,6 +37,11 @@ jest.mock("@application/useCases", () => ({
       execute: jest.fn(),
       uniqueName: "categories",
     },
+    getFinancialCreditCardsOverviewUseCase: {
+      execute: jest.fn(),
+      uniqueName: "overview",
+    },
+    getFinancialCreditCardsUseCase: { execute: jest.fn(), uniqueName: "cards" },
     getFinancialTransactionsUseCase: {
       execute: jest.fn(),
       uniqueName: "transactions",
@@ -67,6 +74,27 @@ function acc(id: string, ownerId = "user-id", status = "ACTIVE") {
     ownerId,
     status,
   } as never);
+}
+
+function card(
+  id: string,
+  overrides: Partial<ConstructorParameters<typeof CreditCardDTO>[0]> = {},
+) {
+  return new CreditCardDTO({
+    brand: "VISA",
+    closingDay: 31,
+    color: "#2B3A8C",
+    dueDay: 10,
+    id,
+    lastDigits: "1234",
+    limit: 100000,
+    owner: "USER",
+    ownerId: "user-id",
+    paymentDay: 5,
+    status: "ACTIVE",
+    title: id,
+    ...overrides,
+  });
 }
 
 function cat(
@@ -120,11 +148,17 @@ const spies = {
 beforeEach(() => {
   jest.clearAllMocks();
   jest.useFakeTimers().setSystemTime(new Date(2026, 9, 5, 12));
-  ["owners", "accounts", "categories", "transactions", "most_used"].forEach(
-    (key) => {
-      queries[key] = new UseQueryFixture<unknown>();
-    },
-  );
+  [
+    "owners",
+    "accounts",
+    "cards",
+    "overview",
+    "categories",
+    "transactions",
+    "most_used",
+  ].forEach((key) => {
+    queries[key] = new UseQueryFixture<unknown>();
+  });
   ["create", "update", "delete"].forEach((key) => {
     mutations[key] = new UseMutationFixture<unknown, unknown>();
   });
@@ -139,7 +173,9 @@ beforeEach(() => {
 function givenLoaded(
   data: {
     accounts?: AccountDTO[];
+    cards?: CreditCardDTO[];
     categories?: CategoryDTO[];
+    overview?: CreditCardOverviewDTO;
     params?: Record<string, string>;
     top?: CategoryDTO[];
     transactions?: TransactionDTO[];
@@ -147,6 +183,14 @@ function givenLoaded(
 ) {
   queries.owners.withData(owners);
   queries.accounts.withData(data.accounts ?? [acc("a1")]);
+  queries.cards.withData(data.cards ?? []);
+  queries.overview.withData(
+    data.overview ??
+      new CreditCardOverviewDTO({
+        aggregate: { available: 0, totalLimit: 0, used: 0 },
+        cards: [],
+      }),
+  );
   queries.categories.withData(
     data.categories ?? [cat("food"), cat("salary", "user-id", "INCOME")],
   );
@@ -159,4 +203,4 @@ function setup() {
   return renderHook(() => useNewTransactionViewModel());
 }
 
-export { acc, cat, givenLoaded, mutations, queries, setup, spies, tx };
+export { acc, card, cat, givenLoaded, mutations, queries, setup, spies, tx };

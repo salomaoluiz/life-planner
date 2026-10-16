@@ -39,6 +39,7 @@ export interface TouchableProps {
 function Touchable(props: TouchableProps) {
   const { radius } = useKitTheme();
   const { styles } = useStyles({
+    hoverRadius: props.focusRadius ?? radius.md,
     minTouchTarget: props.minTouchTarget ?? true,
   });
   const [hovered, setHovered] = useState(false);

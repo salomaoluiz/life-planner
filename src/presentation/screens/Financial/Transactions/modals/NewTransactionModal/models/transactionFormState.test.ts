@@ -1,5 +1,6 @@
 import AccountDTO from "@application/dto/financial/AccountDTO";
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
+import CreditCardDTO from "@application/dto/financial/CreditCardDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
@@ -7,10 +8,12 @@ import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import {
   changeOwner,
+  changePayWith,
   changeType,
   chipCategories,
   createInitialState,
   defaultAccountId,
+  defaultCardId,
   isSameState,
   normalizeDate,
   pickNewRecordId,
@@ -70,6 +73,7 @@ function state(
     date: new Date(2026, 9, 5),
     description: "Groceries",
     ownerId: "user-id",
+    payWith: "ACCOUNT",
     type: TransactionType.EXPENSE,
     ...overrides,
   };
@@ -88,9 +92,11 @@ it("SHOULD create an expense form for today with the default account", () => {
     accountId: "active",
     amountCents: 0,
     categoryId: undefined,
+    creditCardId: undefined,
     date: new Date(2026, 9, 5),
     description: "",
     ownerId: "user-id",
+    payWith: "ACCOUNT",
     type: TransactionType.EXPENSE,
   });
 });
@@ -113,9 +119,11 @@ it("SHOULD build the state of an existing transaction from its DTO", () => {
     accountId: "active",
     amountCents: 31290,
     categoryId: "food",
+    creditCardId: undefined,
     date: new Date(2026, 8, 30),
     description: "Shop",
     ownerId: "user-id",
+    payWith: "ACCOUNT",
     type: TransactionType.INCOME,
   });
 });
@@ -272,4 +280,138 @@ it("SHOULD normalize a date to local midnight", () => {
   expect(normalizeDate(new Date(2026, 9, 5, 23, 59))).toEqual(
     new Date(2026, 9, 5),
   );
+});
+
+describe("card mode (spec 029)", () => {
+  const cards = [
+    new CreditCardDTO({
+      brand: "VISA",
+      closingDay: 31,
+      color: "#2B3A8C",
+      dueDay: 10,
+      id: "card-1",
+      limit: 100000,
+      owner: "USER",
+      ownerId: "user-id",
+      status: "ACTIVE",
+      title: "Main",
+    }),
+    new CreditCardDTO({
+      brand: "VISA",
+      closingDay: 31,
+      color: "#2B3A8C",
+      dueDay: 10,
+      id: "card-family",
+      limit: 100000,
+      owner: "FAMILY",
+      ownerId: "family-1",
+      status: "ACTIVE",
+      title: "Family",
+    }),
+  ];
+
+  it("SHOULD pick the first ACTIVE card of the owner as default", () => {
+    expect(defaultCardId(cards, "user-id")).toBe("card-1");
+    expect(defaultCardId(cards, "nobody")).toBeUndefined();
+  });
+
+  it("SHOULD switch to Card: fixes the type to EXPENSE, drops an income category AND selects a card", () => {
+    const next = changePayWith(
+      state({ categoryId: "salary", type: TransactionType.INCOME }),
+      "CARD",
+      categories,
+      cards,
+    );
+
+    expect(next).toMatchObject({
+      categoryId: undefined,
+      creditCardId: "card-1",
+      payWith: "CARD",
+      type: TransactionType.EXPENSE,
+    });
+  });
+
+  it("SHOULD switch back to Account without touching the rest", () => {
+    const card = state({ creditCardId: "card-1", payWith: "CARD" });
+
+    expect(changePayWith(card, "ACCOUNT", categories, cards)).toEqual({
+      ...card,
+      payWith: "ACCOUNT",
+    });
+  });
+
+  it("SHOULD change the card WHEN the owner changes to one the card does not belong to", () => {
+    const next = changeOwner(
+      state({ creditCardId: "card-1", payWith: "CARD" }),
+      "family-1",
+      categories,
+      accounts,
+      cards,
+    );
+
+    expect(next.creditCardId).toBe("card-family");
+  });
+
+  it('SHOULD start on a card ("Add purchase") with the card\'s owner', () => {
+    const initial = createInitialState({
+      accounts,
+      card: cards[1],
+      now,
+      ownerId: "user-id",
+    });
+
+    expect(initial).toMatchObject({
+      creditCardId: "card-family",
+      ownerId: "family-1",
+      payWith: "CARD",
+    });
+  });
+
+  it("SHOULD require a card (and no account) in Card mode", () => {
+    const card = state({ accountId: undefined, payWith: "CARD" });
+
+    expect(validate(card).creditCardId).toBe(
+      "financial.transactions.form.errors.cardRequired",
+    );
+    expect(validate(card).accountId).toBeUndefined();
+    expect(
+      validate({ ...card, creditCardId: "card-1" }).creditCardId,
+    ).toBeUndefined();
+  });
+
+  it("SHOULD send creditCardId and no accountId WHEN paying with a card", () => {
+    const card = state({ creditCardId: "card-1", payWith: "CARD" });
+
+    expect(toCreateParams(card, user, "Food")).toMatchObject({
+      accountId: undefined,
+      creditCardId: "card-1",
+    });
+    expect(toCreateParams(state(), user, "Food")).toMatchObject({
+      accountId: "active",
+      creditCardId: undefined,
+    });
+  });
+
+  it("SHOULD read the card of a purchase from its DTO AND count card switches as changes", () => {
+    const fromDto = stateFromDto(
+      new TransactionDTO({
+        category: "Food",
+        categoryId: "food",
+        creditCardId: "card-1",
+        date: new Date(2026, 9, 2).toISOString(),
+        description: "Market",
+        id: "p1",
+        owner: "USER",
+        ownerId: "user-id",
+        type: "EXPENSE",
+        value: "10.00",
+      }),
+    );
+
+    expect(fromDto).toMatchObject({ creditCardId: "card-1", payWith: "CARD" });
+    expect(isSameState(fromDto, { ...fromDto, payWith: "ACCOUNT" })).toBe(
+      false,
+    );
+    expect(isSameState(fromDto, { ...fromDto, creditCardId: "x" })).toBe(false);
+  });
 });

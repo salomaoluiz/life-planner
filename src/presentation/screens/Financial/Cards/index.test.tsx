@@ -81,6 +81,7 @@ it("SHOULD show the warning badge WHEN the payment is after the due date", () =>
     ...withCards(),
     entries: [
       {
+        cardId: "card-1",
         invoice: makeInvoice({ paymentAfterDue: true }),
         key: "k",
         kind: "invoice",
@@ -140,4 +141,62 @@ it("SHOULD show the archived toggle AND rows that open the form", () => {
   expect(onArchivedCardPress).toHaveBeenCalledWith("old");
   expect(hasText('financial.cards.archived {"count":1}')).toBe(true);
   expect(hasText("Old")).toBe(true);
+});
+
+describe("upcoming and pay (spec 029)", () => {
+  it("SHOULD offer the Upcoming tab AND report it", () => {
+    const onInvoiceTabChange = jest.fn();
+    setup({ ...withCards(), onInvoiceTabChange });
+
+    fireEvent.press(screen.getByText("financial.cards.upcoming"));
+
+    expect(onInvoiceTabChange).toHaveBeenCalledWith("upcoming");
+  });
+
+  it("SHOULD show the no upcoming text", () => {
+    setup({
+      ...withCards(),
+      entries: [{ key: "no-upcoming", kind: "noUpcoming" }],
+      invoiceTab: "upcoming",
+    });
+
+    expect(screen.getByTestId(cardsTestIds.noUpcoming)).toBeOnTheScreen();
+  });
+
+  it("SHOULD show Pay only on a closed invoice with an amount AND open the invoice on press", () => {
+    const onInvoicePress = jest.fn();
+    const summary = makeSummary();
+    setup({
+      ...withCards(),
+      entries: [
+        {
+          cardId: "card-1",
+          invoice: makeInvoice({ amount: 45000, status: "CLOSED" }),
+          key: "closed",
+          kind: "invoice",
+        },
+        {
+          cardId: "card-1",
+          invoice: makeInvoice({
+            amount: 0,
+            referenceMonth: "2026-09",
+            status: "CLOSED",
+          }),
+          key: "closed-zero",
+          kind: "invoice",
+        },
+        {
+          cardId: "card-1",
+          invoice: summary.openInvoice,
+          key: "open",
+          kind: "invoice",
+        },
+      ],
+      onInvoicePress,
+    });
+
+    expect(screen.getAllByTestId(cardsTestIds.invoicePay)).toHaveLength(1);
+    fireEvent.press(screen.getByTestId(cardsTestIds.invoicePay));
+    expect(onInvoicePress).toHaveBeenCalledWith("card-1", "2026-10");
+  });
 });

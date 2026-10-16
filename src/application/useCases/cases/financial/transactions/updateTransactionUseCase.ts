@@ -8,6 +8,7 @@ export interface UpdateTransactionUseCaseParams {
   accountId?: string;
   category?: string;
   categoryId?: string;
+  creditCardId?: string;
   date?: string;
   description?: string;
   id: string;
@@ -44,6 +45,7 @@ function updateTransactionUseCase(
           accountId: params.accountId,
           category: params.category,
           categoryId: params.categoryId,
+          creditCardId: params.creditCardId,
           date: params.date,
           description: params.description,
           id: params.id,

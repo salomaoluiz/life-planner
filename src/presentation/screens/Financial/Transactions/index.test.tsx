@@ -6,6 +6,7 @@ import { hasText } from "@tests";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
 import { makeTransactionDTO } from "./mocks/index.mocks";
+import { makeInvoice } from "./mocks/invoice.mocks";
 import { makeEntries, setup } from "./mocks/screen.mocks";
 import TransactionUIModel from "./models/TransactionUIModel";
 
@@ -219,4 +220,31 @@ it("SHOULD render the sheet for the opened adjustment", () => {
   expect(
     screen.getByTestId(transactionsTestIds.adjustmentSheet),
   ).toBeOnTheScreen();
+});
+
+describe("card invoices (spec 029)", () => {
+  it("SHOULD render an invoice entry as a CardInvoiceRow", () => {
+    setup({
+      entries: [
+        ...makeEntries(),
+        { invoice: makeInvoice(), key: "invoice-1", kind: "invoice" },
+      ],
+    });
+
+    expect(
+      screen.getByTestId(transactionsTestIds.cardInvoiceRow),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD show an inline error with retry WHEN the invoices failed AND keep the account rows", () => {
+    const onInvoiceRetry = jest.fn();
+    setup({ entries: makeEntries(), invoicesError: true, onInvoiceRetry });
+
+    expect(screen.getAllByTestId(transactionsTestIds.row)).toHaveLength(2);
+    expect(
+      screen.getByTestId(transactionsTestIds.cardInvoiceError),
+    ).toBeOnTheScreen();
+    fireEvent.press(screen.getByText("common.actions.tryAgain"));
+    expect(onInvoiceRetry).toHaveBeenCalledTimes(1);
+  });
 });
