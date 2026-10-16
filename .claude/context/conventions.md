@@ -37,3 +37,10 @@ Module folder names: `financial/accounts`, `stock`, `family`, `familyMember`, `u
 - **Secrets/personal data check before every commit** (golden rule 10 in `.claude/CLAUDE.md`): stage files by name, review `git diff --cached` for keys, tokens, DSNs, URLs with credentials, and real personal or financial data. Gitignored and never staged: `.env`, `.env*.local`, `*.jks *.p8 *.p12 *.key *.pem *.mobileprovision`.
 - Conventional commits (`feat:`, `fix:`, `style:`, `test:`, `docs:`, scope optional based on the module that was worked e.g. `feat(financial): ...`).
 - After code changes update `docs/ai/modules/<module>.md`; don't commit plan files (`docs/superpowers/plans` are working notes).
+
+## Production build (spec 031)
+
+- `EXPO_PUBLIC_*` are inlined at build time. Production values live in `.env.production` (git-ignored; Expo loads it automatically on `expo export` and release builds with `NODE_ENV=production`) or in the Portainer stack environment. `.env.example` stays placeholder-only. There are no app variants: one bundle id for every build.
+- Web: `Dockerfile.web` (`npx expo export -p web` → nginx, `nginx.web.conf` SPA fallback) + `docker-compose.web.prod.yml` (host port 1016, Portainer Git stack, `refs/heads/main`).
+- Android: `yarn build:android:prod` (`scripts/build-android-prod.sh`) runs `expo prebuild --clean` + `assembleRelease`. The config plugin `plugins/withReleaseSigning.js` replaces the debug signing of the release build type with the `LP_RELEASE_*` Gradle properties (keystore outside the repo) and fails the release build when one is missing; `plugins/*.js` are CommonJS and not linted (like `metro.config.js`).
+- Details and owner steps: README "Production" and `docs/production.md` in `life-planner-back`.
