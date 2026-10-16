@@ -15,6 +15,9 @@ export default function AppLayout() {
       <Stack.Screen name={"financial/credit_card/add_new_credit_card"} />
       <Stack.Screen name={"financial/invoice/invoice_detail"} />
       <Stack.Screen name={"financial/installment/edit_installment"} />
+      <Stack.Screen name={"financial/prepayment/prepay_installments"} />
+      <Stack.Screen name={"financial/refund/card_refund"} />
+      <Stack.Screen name={"financial/early_payment/card_early_payment"} />
       <Stack.Screen name={"invite"} />
       <Stack.Screen name={"quick_add"} />
     </Stack>

@@ -18,9 +18,13 @@ const installmentPlanTestIds = {
   count: "financial.installmentPlan.count",
   delete: "financial.installmentPlan.delete",
   deleteConfirm: "financial.installmentPlan.delete-confirm",
+  prepay: "financial.installmentPlan.prepay",
+  prepayment: "financial.installmentPlan.prepayment",
   row: "financial.installmentPlan.row",
   sheet: "financial.installmentPlan.sheet",
   total: "financial.installmentPlan.total",
+  undoPrepayment: "financial.installmentPlan.undo-prepayment",
+  undoPrepaymentConfirm: "financial.installmentPlan.undo-prepayment-confirm",
 } as const;
 
 export { installmentEditTestIds, installmentPlanTestIds };

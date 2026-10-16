@@ -235,6 +235,7 @@ const financial = {
     count: "Installments",
     delete: "Delete installment plan",
     deleteConfirm: "Delete all {{n}} installments?",
+    prepaidInto: "Prepaid into {{month}} (discount {{discount}})",
     purchaseDate: "Purchase date",
     see: "See installment plan",
     statusClosed: "Closed",
@@ -275,6 +276,10 @@ const financial = {
     date: "Date",
     discount: "Discount",
     discountLine: "Prepayment discount · {{description}}",
+    empty: "There are no installments to prepay into this invoice.",
+    errors: {
+      discount: "Enter a discount from 0.01 up to the prepaid total.",
+    },
     hasDiscount: "I got a discount",
     hint: "The {{month}} invoice will be {{value}}",
     invoiceOption: "{{month}} · {{status}}",

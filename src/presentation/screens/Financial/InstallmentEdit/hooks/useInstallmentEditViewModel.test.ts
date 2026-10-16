@@ -272,3 +272,44 @@ describe("after a write", () => {
     expect(spies.back).toHaveBeenCalled();
   });
 });
+
+describe("prepayment (spec 032)", () => {
+  it("SHOULD open the prepayment sheet of the plan", () => {
+    givenLoaded();
+    const { result } = setup();
+
+    act(() => result.current.onPrepayPress());
+
+    expect(spies.replace).toHaveBeenCalledWith({
+      params: { planId: "plan-1" },
+      pathname: "/financial/prepayment/prepay_installments",
+    });
+  });
+
+  it("SHOULD undo the prepayment after the confirmation", () => {
+    givenLoaded();
+    const { result } = setup();
+
+    act(() => result.current.onUndoPrepaymentPress());
+    expect(result.current.isUndoPrepaymentOpen).toBe(true);
+    act(() => result.current.onUndoPrepaymentConfirm());
+
+    expect(
+      mutations.undoFinancialPrepaymentUseCase.value.mutate,
+    ).toHaveBeenCalledWith("plan-1");
+    act(() => result.current.onUndoPrepaymentCancel());
+    expect(result.current.isUndoPrepaymentOpen).toBe(false);
+  });
+
+  it("SHOULD refresh the plan AND close the dialog WHEN the undo succeeds", () => {
+    givenLoaded();
+    mutations.undoFinancialPrepaymentUseCase.withStatus("success");
+
+    setup();
+
+    expect(
+      queries.getFinancialInstallmentPlanUseCase.value.refetch,
+    ).toHaveBeenCalled();
+    expect(spies.invalidate).toHaveBeenCalled();
+  });
+});

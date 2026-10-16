@@ -1,6 +1,8 @@
 import { fireEvent, screen } from "@tests";
 
-import { setup } from "./mocks/index.mocks";
+import InstallmentPlanDTO from "@application/dto/financial/InstallmentPlanDTO";
+
+import { defaultViewModel, setup } from "./mocks/index.mocks";
 import { installmentEditTestIds, installmentPlanTestIds } from "./testIds";
 
 it("SHOULD title the sheet with the installment number AND offer the three scopes", () => {
@@ -128,4 +130,70 @@ it("SHOULD show the recalculation and delete confirmations", () => {
     screen.getByText('financial.installmentPlan.deleteConfirm {"n":3}'),
   ).toBeOnTheScreen();
   expect(vm.onRecalcConfirm).not.toHaveBeenCalled();
+});
+
+describe("prepayment (spec 032)", () => {
+  function planWith(
+    prepayment?: object,
+    statuses: string[] = ["OPEN", "OPEN"],
+  ) {
+    const base = defaultViewModel.plan as InstallmentPlanDTO;
+
+    return Object.assign(Object.create(Object.getPrototypeOf(base)), base, {
+      installments: base.installments.map((row, index) => ({
+        ...row,
+        invoiceStatus: statuses[index],
+        prepaid: !!prepayment && index === 1,
+      })),
+      prepayment,
+    }) as InstallmentPlanDTO;
+  }
+
+  it("SHOULD offer Prepay installments in the plan sheet AND call onPrepayPress", () => {
+    const vm = setup({ isPlanOpen: true, plan: planWith() });
+
+    fireEvent.press(screen.getByTestId(installmentPlanTestIds.prepay));
+
+    expect(vm.onPrepayPress).toHaveBeenCalledTimes(1);
+    expect(
+      screen.queryByTestId(installmentPlanTestIds.undoPrepayment),
+    ).toBeNull();
+  });
+
+  it("SHOULD NOT offer it WHEN every installment is paid", () => {
+    setup({ isPlanOpen: true, plan: planWith(undefined, ["PAID", "PAID"]) });
+
+    expect(screen.queryByTestId(installmentPlanTestIds.prepay)).toBeNull();
+  });
+
+  it("SHOULD show where it was prepaid, the prepaid badge AND offer Undo prepayment", () => {
+    const vm = setup({
+      isPlanOpen: true,
+      plan: planWith({
+        date: "2026-10-16",
+        discount: 12000,
+        id: "p1",
+        targetInvoiceMonth: "2026-10",
+      }),
+    });
+
+    expect(
+      screen.getByTestId(installmentPlanTestIds.prepayment),
+    ).toBeOnTheScreen();
+    expect(screen.queryByTestId(installmentPlanTestIds.prepay)).toBeNull();
+    expect(
+      screen.getAllByText("financial.prepayment.prepaidBadge"),
+    ).toHaveLength(1);
+    fireEvent.press(screen.getByTestId(installmentPlanTestIds.undoPrepayment));
+
+    expect(vm.onUndoPrepaymentPress).toHaveBeenCalledTimes(1);
+  });
+
+  it("SHOULD show the undo confirmation", () => {
+    setup({ isUndoPrepaymentOpen: true });
+
+    expect(
+      screen.getByText("financial.prepayment.undoConfirm"),
+    ).toBeOnTheScreen();
+  });
 });

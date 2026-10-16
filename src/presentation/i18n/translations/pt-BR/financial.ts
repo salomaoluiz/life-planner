@@ -233,6 +233,7 @@ const financial = {
     count: "Parcelas",
     delete: "Excluir parcelamento",
     deleteConfirm: "Excluir as {{n}} parcelas?",
+    prepaidInto: "Adiantado para {{month}} (desconto {{discount}})",
     purchaseDate: "Data da compra",
     see: "Ver parcelamento",
     statusClosed: "Fechada",
@@ -272,6 +273,10 @@ const financial = {
     date: "Data",
     discount: "Desconto",
     discountLine: "Desconto de adiantamento · {{description}}",
+    empty: "Não há parcelas para adiantar para esta fatura.",
+    errors: {
+      discount: "Informe um desconto de 0,01 até o total adiantado.",
+    },
     hasDiscount: "Tive desconto",
     hint: "A fatura de {{month}} fica com {{value}}",
     invoiceOption: "{{month}} · {{status}}",

@@ -225,6 +225,8 @@ function InstallmentEditModal() {
         <InstallmentPlanSheet
           cardTitle={card?.label}
           onClose={vm.onPlanClose}
+          onPrepay={vm.onPrepayPress}
+          onUndoPrepayment={vm.onUndoPrepaymentPress}
           plan={vm.plan}
         />
       ) : null}
@@ -238,6 +240,18 @@ function InstallmentEditModal() {
         testID={installmentEditTestIds.recalcConfirm}
         title={t("financial.installmentEdit.recalcTitle")}
         visible={vm.isRecalcOpen}
+      />
+      <ConfirmDialog
+        cancelLabel={t("common.actions.cancel")}
+        closeLabel={t("common.actions.close")}
+        confirmLabel={t("financial.prepayment.undo")}
+        loading={vm.isUndoingPrepayment}
+        message={t("financial.prepayment.undoConfirm")}
+        onCancel={vm.onUndoPrepaymentCancel}
+        onConfirm={vm.onUndoPrepaymentConfirm}
+        testID={installmentPlanTestIds.undoPrepaymentConfirm}
+        title={t("financial.prepayment.undoTitle")}
+        visible={vm.isUndoPrepaymentOpen}
       />
       <ConfirmDialog
         cancelLabel={t("common.actions.cancel")}
