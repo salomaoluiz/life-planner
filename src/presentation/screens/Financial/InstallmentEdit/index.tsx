@@ -174,14 +174,6 @@ function InstallmentEditModal() {
             onPress={vm.onPlanOpen}
             testID={installmentEditTestIds.seePlan}
           />
-          <Button.Primary
-            fullWidth
-            label={t("financial.installmentEdit.save")}
-            loading={vm.isSaving}
-            onPress={vm.onSave}
-            size="lg"
-            testID={installmentEditTestIds.save}
-          />
           <Button.Ghost
             label={t("financial.installmentPlan.delete")}
             onPress={vm.onDeletePress}
@@ -201,6 +193,18 @@ function InstallmentEditModal() {
     <>
       <BottomSheet
         closeLabel={t("common.actions.close")}
+        footer={
+          state && vm.plan ? (
+            <Button.Primary
+              fullWidth
+              label={t("financial.installmentEdit.save")}
+              loading={vm.isSaving}
+              onPress={vm.onSave}
+              size="lg"
+              testID={installmentEditTestIds.save}
+            />
+          ) : undefined
+        }
         onClose={vm.onClose}
         presentation="inline"
         testID={installmentEditTestIds.sheet}

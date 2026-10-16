@@ -1,0 +1,10 @@
+url: ${E2E_WEB_URL}
+---
+# Back to the top of the Transactions list (the month switcher lives in its header); Maestro web needs
+# explicit coordinates to scroll (see scroll-form-down.yaml).
+- swipe:
+    start: 50%, 20%
+    end: 50%, 80%
+- swipe:
+    start: 50%, 20%
+    end: 50%, 80%
