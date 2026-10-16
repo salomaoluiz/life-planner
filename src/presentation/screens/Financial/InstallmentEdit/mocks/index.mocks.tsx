@@ -76,6 +76,7 @@ const defaultViewModel: ReturnType<typeof useInstallmentEditViewModel> = {
   onPrepayPress: jest.fn(),
   onRecalcCancel: jest.fn(),
   onRecalcConfirm: jest.fn(),
+  onRefundPress: jest.fn(),
   onSave: jest.fn(),
   onScopeChange: jest.fn(),
   onUndoPrepaymentCancel: jest.fn(),

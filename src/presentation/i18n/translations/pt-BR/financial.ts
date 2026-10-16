@@ -299,6 +299,11 @@ const financial = {
     delete: "Excluir estorno",
     deleteConfirm: "A fatura volta ao que era antes deste estorno.",
     description: "Descrição",
+    errors: {
+      amount: "Informe um valor maior que zero.",
+      description: "A descrição é obrigatória.",
+      invoice: "Escolha uma fatura.",
+    },
     hint: "Esta fatura ficará com crédito de {{value}}, levado para {{month}}",
     invoice: "Fatura",
     linked: "Compra estornada (opcional)",

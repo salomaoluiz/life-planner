@@ -22,6 +22,7 @@ import {
   validate,
 } from "../models/installmentEditState";
 
+const REFUND_ROUTE = "/financial/refund/card_refund";
 const PREPAY_ROUTE = "/financial/prepayment/prepay_installments";
 
 // Plan writes move card purchases, invoices, the limit and the month lists (spec 030).
@@ -248,6 +249,14 @@ function useInstallmentEditViewModel() {
     onRecalcConfirm: () => {
       setRecalcOpen(false);
       save();
+    },
+    onRefundPress: () => {
+      if (planId && state?.creditCardId) {
+        router.replace({
+          params: { creditCardId: state.creditCardId, refundedPlanId: planId },
+          pathname: REFUND_ROUTE,
+        } as never);
+      }
     },
     onSave,
     onScopeChange: (value: string) => {

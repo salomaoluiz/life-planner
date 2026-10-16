@@ -302,6 +302,11 @@ const financial = {
     delete: "Delete refund",
     deleteConfirm: "The invoice goes back to what it was before this refund.",
     description: "Description",
+    errors: {
+      amount: "Enter a value greater than zero.",
+      description: "Description is required.",
+      invoice: "Choose an invoice.",
+    },
     hint: "This invoice will have a credit of {{value}}, carried to {{month}}",
     invoice: "Invoice",
     linked: "Refunded purchase (optional)",

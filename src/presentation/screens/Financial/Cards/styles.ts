@@ -8,6 +8,7 @@ function useStyles() {
   return {
     styles: StyleSheet.create({
       carousel: { gap: theme.sizes.spacing.sm },
+      headerActions: { flexDirection: "row" },
       metrics: { flexDirection: "row", gap: theme.sizes.spacing.sm },
       root: { flex: 1 },
       selectedHeader: {

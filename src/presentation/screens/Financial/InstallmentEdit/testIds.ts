@@ -8,6 +8,7 @@ const installmentEditTestIds = {
   formError: "financial.installmentEdit.form-error",
   paidHelper: "financial.installmentEdit.paid-helper",
   recalcConfirm: "financial.installmentEdit.recalc-confirm",
+  refund: "financial.installmentEdit.refund",
   save: "financial.installmentEdit.save",
   scope: "financial.installmentEdit.scope",
   seePlan: "financial.installmentEdit.see-plan",

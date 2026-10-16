@@ -619,6 +619,32 @@ describe("card mode (spec 029)", () => {
       expect(result.current.isLoading).toBe(true);
     });
 
+    it("SHOULD offer to refund a card purchase AND open the refund sheet linked to it (spec 032)", () => {
+      givenLoaded({
+        cards: [mainCard],
+        params: { id: "t1" },
+        transactions: [tx("t1", { creditCardId: "c1" })],
+      });
+
+      const { result } = setup();
+
+      expect(result.current.canRefund).toBe(true);
+      act(() => result.current.onRefundPress());
+      expect(spies.replace).toHaveBeenCalledWith({
+        params: { creditCardId: "c1", refundedTransactionId: "t1" },
+        pathname: "/financial/refund/card_refund",
+      });
+    });
+
+    it("SHOULD NOT offer a refund for an account transaction or a new purchase", () => {
+      givenLoaded({ params: { id: "t1" }, transactions: [tx("t1")] });
+      const { result } = setup();
+
+      expect(result.current.canRefund).toBe(false);
+      act(() => result.current.onRefundPress());
+      expect(spies.replace).not.toHaveBeenCalled();
+    });
+
     it("SHOULD NOT offer installments WHEN editing a purchase", () => {
       givenLoaded({
         cards: [mainCard],

@@ -157,18 +157,49 @@ it("SHOULD open the refund and early payment sheets for this invoice (spec 032)"
 it("SHOULD edit a credit in the sheet of its kind", () => {
   givenLoaded({ invoice: makeInvoice() });
   const { result } = setup();
-  const credit = { id: "c1", kind: "REFUND" } as never;
+  const credit = {
+    amountCents: 50000,
+    date: new Date(2026, 9, 16),
+    description: "Chargeback",
+    id: "c1",
+    kind: "REFUND",
+    refundedTransactionId: "t1",
+  } as never;
 
   act(() => result.current.onCreditPress(credit));
   expect(spies.replace).toHaveBeenLastCalledWith({
-    params: { creditCardId: "card-1", id: "c1" },
+    params: {
+      accountId: undefined,
+      creditCardId: "card-1",
+      date: "2026-10-16",
+      description: "Chargeback",
+      id: "c1",
+      invoiceMonth: "2026-10",
+      method: undefined,
+      refundedPlanId: undefined,
+      refundedTransactionId: "t1",
+      value: "50000",
+    },
     pathname: "/financial/refund/card_refund",
   });
   act(() =>
-    result.current.onCreditPress({ id: "c2", kind: "EARLY_PAYMENT" } as never),
+    result.current.onCreditPress({
+      accountId: "a1",
+      amountCents: 60000,
+      date: new Date(2026, 9, 16),
+      description: "Early payment",
+      id: "c2",
+      kind: "EARLY_PAYMENT",
+      method: "ACCOUNT",
+    } as never),
   );
   expect(spies.replace).toHaveBeenLastCalledWith({
-    params: { creditCardId: "card-1", id: "c2" },
+    params: expect.objectContaining({
+      accountId: "a1",
+      id: "c2",
+      method: "ACCOUNT",
+      value: "60000",
+    }),
     pathname: "/financial/early_payment/card_early_payment",
   });
 });

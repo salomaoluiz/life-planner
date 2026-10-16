@@ -313,3 +313,15 @@ describe("prepayment (spec 032)", () => {
     expect(spies.invalidate).toHaveBeenCalled();
   });
 });
+
+it("SHOULD open the refund sheet linked to the plan (spec 032)", () => {
+  givenLoaded();
+  const { result } = setup();
+
+  act(() => result.current.onRefundPress());
+
+  expect(spies.replace).toHaveBeenCalledWith({
+    params: { creditCardId: "card-1", refundedPlanId: "plan-1" },
+    pathname: "/financial/refund/card_refund",
+  });
+});

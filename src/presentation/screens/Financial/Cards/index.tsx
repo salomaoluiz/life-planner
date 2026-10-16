@@ -125,12 +125,26 @@ function FinancialCards() {
         <View>
           <View style={styles.selectedHeader}>
             <GroupHeader title={vm.selected.card.title} />
-            <IconButton
-              accessibilityLabel={t("financial.cards.edit")}
-              name="pencil-outline"
-              onPress={vm.onEditPress}
-              testID={cardsTestIds.editButton}
-            />
+            <View style={styles.headerActions}>
+              <IconButton
+                accessibilityLabel={t("financial.refund.new")}
+                name="cash-refund"
+                onPress={vm.onRefundPress}
+                testID={cardsTestIds.refundButton}
+              />
+              <IconButton
+                accessibilityLabel={t("financial.earlyPayment.action")}
+                name="cash-fast"
+                onPress={vm.onEarlyPaymentPress}
+                testID={cardsTestIds.earlyPaymentButton}
+              />
+              <IconButton
+                accessibilityLabel={t("financial.cards.edit")}
+                name="pencil-outline"
+                onPress={vm.onEditPress}
+                testID={cardsTestIds.editButton}
+              />
+            </View>
           </View>
           <SegmentedControl
             accessibilityLabel={vm.selected.card.title}

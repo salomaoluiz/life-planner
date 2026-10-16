@@ -332,6 +332,14 @@ function NewTransactionModal() {
             value={t(vm.formErrorKey)}
           />
         )}
+        {vm.canRefund && (
+          <Button.Secondary
+            fullWidth
+            label={t("financial.refund.ofPurchase")}
+            onPress={vm.onRefundPress}
+            testID={transactionFormTestIds.refundButton}
+          />
+        )}
         {vm.isEditing && (
           <Button.Ghost
             label={t("financial.transactions.delete")}

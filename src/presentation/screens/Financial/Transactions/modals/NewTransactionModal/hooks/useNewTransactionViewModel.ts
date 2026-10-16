@@ -196,6 +196,13 @@ function useNewTransactionViewModel() {
   const isNotFound = isEditing && !!transactions.data && !existing;
   // An installment is edited through its own sheet (spec 030): hand over instead of opening this form.
   const isInstallment = isEditing && !!existing?.installmentPlanId;
+  // A card purchase can be refunded from its own sheet (spec 032 FR 21).
+  const canRefund =
+    isEditing &&
+    !!existing?.creditCardId &&
+    !existing.installmentPlanId &&
+    existing.type === "EXPENSE" &&
+    !existing.systemKey;
 
   useEffect(() => {
     if (isInstallment) {
@@ -420,6 +427,7 @@ function useNewTransactionViewModel() {
     accountOptions: uiModel?.accountOptions(ownerId, state?.accountId) ?? [],
     amountCents: state?.amountCents ?? 0,
     amountError: errors.amount,
+    canRefund,
     cardError: errors.creditCardId,
     cardOptions: uiModel?.cardOptions(ownerId, state?.creditCardId) ?? [],
     categoryChips,
@@ -536,6 +544,17 @@ function useNewTransactionViewModel() {
             cards.data ?? [],
           ),
         );
+      }
+    },
+    onRefundPress: () => {
+      if (existing?.creditCardId) {
+        router.replace({
+          params: {
+            creditCardId: existing.creditCardId,
+            refundedTransactionId: existing.id,
+          },
+          pathname: "/financial/refund/card_refund",
+        } as never);
       }
     },
     onSave,

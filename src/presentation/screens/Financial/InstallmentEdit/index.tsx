@@ -174,6 +174,12 @@ function InstallmentEditModal() {
             onPress={vm.onPlanOpen}
             testID={installmentEditTestIds.seePlan}
           />
+          <Button.Secondary
+            fullWidth
+            label={t("financial.refund.ofPurchase")}
+            onPress={vm.onRefundPress}
+            testID={installmentEditTestIds.refund}
+          />
           <Button.Ghost
             label={t("financial.installmentPlan.delete")}
             onPress={vm.onDeletePress}

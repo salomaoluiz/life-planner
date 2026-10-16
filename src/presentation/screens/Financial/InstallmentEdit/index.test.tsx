@@ -197,3 +197,11 @@ describe("prepayment (spec 032)", () => {
     ).toBeOnTheScreen();
   });
 });
+
+it("SHOULD refund the whole plan from its sheet", () => {
+  const vm = setup();
+
+  fireEvent.press(screen.getByTestId(installmentEditTestIds.refund));
+
+  expect(vm.onRefundPress).toHaveBeenCalledTimes(1);
+});

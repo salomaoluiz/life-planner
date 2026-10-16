@@ -23,6 +23,8 @@ import {
   usedProgress,
 } from "../models/cardList";
 
+const EARLY_PAYMENT_ROUTE = "/financial/early_payment/card_early_payment";
+const REFUND_ROUTE = "/financial/refund/card_refund";
 const FORM_ROUTE = "/financial/credit_card/add_new_credit_card";
 const INVOICE_ROUTE = "/financial/invoice/invoice_detail";
 
@@ -101,6 +103,14 @@ function useCardsViewModel() {
       router.push({ params: { id }, pathname: FORM_ROUTE } as never),
     onArchivedToggle: () => setArchivedExpanded((expanded) => !expanded),
     onCardSelect: (id: string) => setSelectedId(id),
+    onEarlyPaymentPress: () => {
+      if (resolvedId) {
+        router.push({
+          params: { creditCardId: resolvedId },
+          pathname: EARLY_PAYMENT_ROUTE,
+        } as never);
+      }
+    },
     onEditPress: () => {
       if (resolvedId) {
         router.push({
@@ -120,6 +130,14 @@ function useCardsViewModel() {
       ),
     onOwnerFilterChange: setOwnerFilter,
     onRefresh: async () => query.refetch(),
+    onRefundPress: () => {
+      if (resolvedId) {
+        router.push({
+          params: { creditCardId: resolvedId },
+          pathname: REFUND_ROUTE,
+        } as never);
+      }
+    },
     onRetry: async () => query.refetch(),
     ownerChoices: buildOwnerFilterChoices(query.data?.owners ?? []),
     ownerFilter,
