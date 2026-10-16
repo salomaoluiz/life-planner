@@ -18,6 +18,7 @@ import {
   normalizeDate,
   pickNewRecordId,
   stateFromDto,
+  toCreateInstallmentParams,
   toCreateParams,
   toUpdateParams,
   TransactionFormState,
@@ -72,6 +73,8 @@ function state(
     categoryId: "food",
     date: new Date(2026, 9, 5),
     description: "Groceries",
+    installmentsCount: 2,
+    installmentsOn: false,
     ownerId: "user-id",
     payWith: "ACCOUNT",
     type: TransactionType.EXPENSE,
@@ -95,6 +98,8 @@ it("SHOULD create an expense form for today with the default account", () => {
     creditCardId: undefined,
     date: new Date(2026, 9, 5),
     description: "",
+    installmentsCount: 2,
+    installmentsOn: false,
     ownerId: "user-id",
     payWith: "ACCOUNT",
     type: TransactionType.EXPENSE,
@@ -122,6 +127,8 @@ it("SHOULD build the state of an existing transaction from its DTO", () => {
     creditCardId: undefined,
     date: new Date(2026, 8, 30),
     description: "Shop",
+    installmentsCount: 2,
+    installmentsOn: false,
     ownerId: "user-id",
     payWith: "ACCOUNT",
     type: TransactionType.INCOME,
@@ -413,5 +420,106 @@ describe("card mode (spec 029)", () => {
       false,
     );
     expect(isSameState(fromDto, { ...fromDto, creditCardId: "x" })).toBe(false);
+  });
+});
+
+describe("installments (spec 030)", () => {
+  function cardState(overrides: Partial<TransactionFormState> = {}) {
+    return state({
+      accountId: undefined,
+      creditCardId: "c1",
+      payWith: "CARD",
+      ...overrides,
+    });
+  }
+
+  it("SHOULD start with installments off and reset them WHEN switching back to Account", () => {
+    const on = cardState({ installmentsCount: 10, installmentsOn: true });
+
+    expect(createInitialState({ accounts, now, ownerId: "user-id" })).toEqual(
+      expect.objectContaining({ installmentsCount: 2, installmentsOn: false }),
+    );
+    expect(changePayWith(on, "ACCOUNT", categories, [])).toEqual(
+      expect.objectContaining({ installmentsCount: 2, installmentsOn: false }),
+    );
+  });
+
+  it("SHOULD treat the installment fields as part of a dirty form", () => {
+    expect(isSameState(cardState(), cardState({ installmentsOn: true }))).toBe(
+      false,
+    );
+    expect(isSameState(cardState(), cardState({ installmentsCount: 5 }))).toBe(
+      false,
+    );
+  });
+
+  it("SHOULD validate the count only WHEN installments are on in Card mode", () => {
+    expect(validate(cardState({ installmentsCount: 1 })).installments).toBe(
+      undefined,
+    );
+    expect(
+      validate(cardState({ installmentsCount: 1, installmentsOn: true }))
+        .installments,
+    ).toBe("financial.transactions.form.errors.installmentsRange");
+    expect(
+      validate(cardState({ installmentsCount: 49, installmentsOn: true }))
+        .installments,
+    ).toBeDefined();
+    expect(
+      validate(
+        cardState({
+          amountCents: 5,
+          installmentsCount: 10,
+          installmentsOn: true,
+        }),
+      ).installments,
+    ).toBeDefined();
+    expect(
+      validate(
+        cardState({
+          amountCents: 512000,
+          installmentsCount: 10,
+          installmentsOn: true,
+        }),
+      ).installments,
+    ).toBeUndefined();
+  });
+
+  it("SHOULD build the plan params with the TOTAL as a decimal string", () => {
+    expect(
+      toCreateInstallmentParams(
+        cardState({ amountCents: 512000, installmentsCount: 10 }),
+        user,
+      ),
+    ).toEqual({
+      categoryId: "food",
+      creditCardId: "c1",
+      date: new Date(2026, 9, 5).toISOString(),
+      description: "Groceries",
+      installments: 10,
+      owner: user.type,
+      ownerId: "user-id",
+      value: "5120.00",
+    });
+  });
+
+  it("SHOULD read the installment count of a stored purchase", () => {
+    const dto = new TransactionDTO({
+      category: "Food",
+      categoryId: "food",
+      creditCardId: "c1",
+      date: new Date(2026, 9, 5).toISOString(),
+      description: "Notebook",
+      id: "t1",
+      installmentCount: 10,
+      owner: "USER",
+      ownerId: "user-id",
+      type: "EXPENSE",
+      value: "10.00",
+    });
+
+    expect(stateFromDto(dto)).toEqual(
+      expect.objectContaining({ installmentsCount: 10, installmentsOn: false }),
+    );
   });
 });

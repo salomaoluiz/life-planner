@@ -24,6 +24,10 @@ jest.mock("@react-navigation/native", () => ({ useIsFocused: jest.fn() }));
 jest.mock("@infrastructure/fetcher");
 jest.mock("@application/useCases", () => ({
   useCases: {
+    createFinancialInstallmentPlanUseCase: {
+      execute: jest.fn(),
+      uniqueName: "create_plan",
+    },
     createFinancialTransactionUseCase: {
       execute: jest.fn(),
       uniqueName: "create",
@@ -159,7 +163,7 @@ beforeEach(() => {
   ].forEach((key) => {
     queries[key] = new UseQueryFixture<unknown>();
   });
-  ["create", "update", "delete"].forEach((key) => {
+  ["create", "create_plan", "update", "delete"].forEach((key) => {
     mutations[key] = new UseMutationFixture<unknown, unknown>();
   });
   spies.focused.mockReturnValue(false);

@@ -10,6 +10,7 @@ import {
   ErrorState,
   SegmentedControl,
   SelectField,
+  Switch,
   Text,
   TextField,
 } from "@components";
@@ -29,8 +30,21 @@ import transactionFormTestIds from "./testIds";
 
 const SKELETON_ROWS = [0, 1, 2];
 
+function monthDateOf(month: string) {
+  const [year, value] = month.split("-").map(Number);
+
+  return new Date(year, value - 1, 1);
+}
+
 function monthName(month: Date, localeTag: string) {
   return new Intl.DateTimeFormat(localeTag, { month: "long" }).format(month);
+}
+
+function monthYearName(month: Date, localeTag: string) {
+  return new Intl.DateTimeFormat(localeTag, {
+    month: "long",
+    year: "numeric",
+  }).format(month);
 }
 
 function NewTransactionModal() {
@@ -39,6 +53,24 @@ function NewTransactionModal() {
   const vm = useNewTransactionViewModel();
   const localeTag = useLocaleTag();
   const isCard = vm.payWith === "CARD";
+
+  function renderPreview(installments: NonNullable<typeof vm.installments>) {
+    const { first, hasRemainder, others } = installments.preview!;
+
+    if (!hasRemainder) {
+      return t("financial.transactions.form.installmentsPreview", {
+        n: installments.count,
+        value: formatAmount(first, localeTag),
+      });
+    }
+
+    return `${t("financial.transactions.form.installmentsPreviewFirst", {
+      value: formatAmount(first, localeTag),
+    })} + ${t("financial.transactions.form.installmentsPreview", {
+      n: installments.count - 1,
+      value: formatAmount(others, localeTag),
+    })}`;
+  }
 
   function err(key?: TranslationKeys) {
     return key ? t(key) : undefined;
@@ -100,7 +132,11 @@ function NewTransactionModal() {
         )}
         <AmountInput
           error={err(vm.amountError)}
-          label={t("financial.transactions.form.amount")}
+          label={t(
+            vm.installments.enabled
+              ? "financial.transactions.form.totalValue"
+              : "financial.transactions.form.amount",
+          )}
           onChange={vm.onAmountChange}
           testID={transactionFormTestIds.amountInput}
           tone={vm.typeTone}
@@ -184,6 +220,55 @@ function NewTransactionModal() {
                 tone={"expense"}
                 value={t("financial.transactions.form.invoicePaid", {
                   month: monthName(vm.invoiceMonthLabelDate, localeTag),
+                })}
+              />
+            ) : null}
+          </View>
+        ) : null}
+        {vm.installments.visible ? (
+          <View style={styles.form}>
+            <View style={styles.switchRow}>
+              <Text.BodyStrong
+                value={t("financial.transactions.form.installments")}
+              />
+              <Switch
+                initialStatus={vm.installments.enabled}
+                onToggle={vm.onInstallmentsToggle}
+                testID={transactionFormTestIds.installmentsSwitch}
+              />
+            </View>
+            {vm.installments.enabled ? (
+              <TextField
+                error={err(vm.installments.error)}
+                helper={t("financial.transactions.form.installmentsRange")}
+                keyboardType="number-pad"
+                label={t("financial.transactions.form.installmentsCount")}
+                maxLength={2}
+                onChangeText={vm.onInstallmentsCountChange}
+                testID={transactionFormTestIds.installmentsCount}
+                value={vm.installments.countText}
+              />
+            ) : null}
+            {vm.installments.preview ? (
+              <Text.Caption
+                testID={transactionFormTestIds.installmentsPreview}
+                tone={"secondary"}
+                value={renderPreview(vm.installments)}
+              />
+            ) : null}
+            {vm.installments.range ? (
+              <Text.Caption
+                testID={transactionFormTestIds.installmentsInvoices}
+                tone={"secondary"}
+                value={t("financial.transactions.form.installmentsInvoices", {
+                  first: monthName(
+                    monthDateOf(vm.installments.range.first),
+                    localeTag,
+                  ),
+                  last: monthYearName(
+                    monthDateOf(vm.installments.range.last),
+                    localeTag,
+                  ),
                 })}
               />
             ) : null}

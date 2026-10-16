@@ -11,6 +11,11 @@ function addMonths(reference: YearMonth, delta: number): YearMonth {
   return { month: (index % 12) + 1, year: Math.floor(index / 12) };
 }
 
+// "2026-10" + 3 -> "2027-01".
+function addMonthsTo(month: string, delta: number): string {
+  return formatMonth(addMonths(parseMonth(month), delta));
+}
+
 // Due day of the invoice of `referenceMonth`: in that month when after the closing day, else the next.
 function dueDateOf(
   referenceMonth: string,
@@ -49,4 +54,4 @@ function toDate(reference: YearMonth, day: number) {
   return `${formatMonth(reference)}-${String(day).padStart(2, "0")}`;
 }
 
-export { dueDateOf, invoiceMonthOf };
+export { addMonthsTo, dueDateOf, invoiceMonthOf };
