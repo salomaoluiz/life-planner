@@ -121,6 +121,7 @@ function SelectField(props: SelectFieldProps) {
         ) : null}
         {visible.map((option) => (
           <ListItem
+            inset
             key={option.value}
             leading={option.leading}
             onPress={() => {

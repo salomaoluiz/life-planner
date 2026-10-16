@@ -16,6 +16,7 @@ function QuickAdd() {
     >
       {vm.options.map((option) => (
         <ListItem
+          inset
           key={option.testID}
           leading={<IconTile name={option.icon} tone={"accent"} />}
           onPress={option.onPress}
