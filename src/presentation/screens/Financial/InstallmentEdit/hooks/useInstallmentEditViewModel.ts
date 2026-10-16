@@ -270,7 +270,11 @@ function useInstallmentEditViewModel() {
         undoPrepaymentMutation.mutate(planId);
       }
     },
-    onUndoPrepaymentPress: () => setUndoPrepaymentOpen(true),
+    // The confirmation lives behind the plan sheet: close it first.
+    onUndoPrepaymentPress: () => {
+      setPlanOpen(false);
+      setUndoPrepaymentOpen(true);
+    },
     plan: plan.data,
     state,
   };
