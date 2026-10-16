@@ -20,6 +20,7 @@ export default {
     orientation: "portrait",
     plugins: [
       "expo-router",
+      "./plugins/withReleaseSigning",
       [
         "expo-splash-screen",
         {

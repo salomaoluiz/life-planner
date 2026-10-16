@@ -16,6 +16,7 @@ export default {
     ".expo/*",
     "metro.config.js",
     "jest.config.js",
+    "plugins/*.js",
     "eslint.config.mjs",
     "eslint/**/*",
     "e2e/scripts/**/*",
