@@ -6,6 +6,7 @@
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
+    "build:android:prod": "bash scripts/build-android-prod.sh",
     "ios": "expo run:ios",
     "web": "expo start --web",
     "e2e": "node scripts/e2e/cli.mjs",

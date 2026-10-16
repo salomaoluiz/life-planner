@@ -45,3 +45,6 @@ ios
 .idea
 docs/superpowers
 e2e-report
+
+# Production build (never committed)
+.env.production

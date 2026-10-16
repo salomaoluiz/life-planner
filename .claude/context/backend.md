@@ -17,6 +17,16 @@ Sibling repo: NestJS 10 + Prisma/Postgres REST API (Clean Architecture/DDD) that
 - **Stock is migrated** (spec 005): `GET|POST /api/v1/stock/items` and `GET|PATCH|DELETE …/:id`; the API enforces USER/FAMILY ownership (404 for items of others, 403 for a forbidden owner) and the stock datasource lives in `src/data/datasource/data/storage/items/api/`.
 - Swagger (when the backend runs): `/swagger`; base path `/api/v1`.
 
+## Environments
+
+| Environment | API                                            | Notes                                                                                                                                         |
+| ----------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Local       | `http://localhost:3000/api` (`yarn start:dev`) | watch mode on the owner's Mac; E2E target                                                                                                     |
+| Staging     | `http://<home-server>:1009/api`                | `life-planner-back`, staging database; `/swagger` on                                                                                          |
+| Production  | `https://life-planner-api.example.com/api`     | `life-planner-back-prod`, own database and `JWT_SECRET`, `/swagger` off, Tailscale only; web at `https://life-planner.example.com` (spec 031) |
+
+`EXPO_PUBLIC_API_URL` selects the environment; production values go in `.env.production` (git-ignored) or the Portainer stack env. Staging and production tokens are not interchangeable.
+
 ## Rules when touching the API contract
 
 - New data/behavior needed by the app → check the backend endpoint table (`../life-planner-back/.claude/context/api.md`) first; if it's missing, tell the user the backend needs it (don't invent endpoints).
