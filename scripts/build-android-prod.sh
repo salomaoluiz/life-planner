@@ -14,7 +14,7 @@ fail() {
 
 [ -f .env.production ] || fail ".env.production not found. Create it from .env.example with the production values."
 
-API_URL="$(grep -E '^EXPO_PUBLIC_API_URL=' .env.production | tail -n 1 | cut -d= -f2- | tr -d "\"' \r")"
+API_URL="$( (grep -E '^EXPO_PUBLIC_API_URL=' .env.production || true) | tail -n 1 | cut -d= -f2- | tr -d "\"' \r")"
 [ -n "$API_URL" ] || fail "EXPO_PUBLIC_API_URL is missing in .env.production."
 case "$API_URL" in
   https://*) ;;

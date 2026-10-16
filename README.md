@@ -71,7 +71,7 @@ One app id for every build (`com.jacobysoftware.lifeplanner`); installing the pr
    LP_RELEASE_KEY_PASSWORD=...
    ```
 
-3. Create `.env.production` (git-ignored) from `.env.example` with the production values, at least `EXPO_PUBLIC_API_URL=https://life-planner-api.example.com/api`.
+3. Create `.env.production` (git-ignored) from `.env.example` and set **every** `EXPO_PUBLIC_*` variable there, starting with `EXPO_PUBLIC_API_URL=https://life-planner-api.example.com/api` and `EXPO_PUBLIC_SENTRY_ENVIRONMENT=production`. Expo also loads `.env`, so a variable missing from `.env.production` silently takes its development value.
 4. Run `yarn build:android:prod`. It refuses to run without `.env.production`, with a non-https or local API URL, or without the keystore properties. It runs `expo prebuild --clean` (this regenerates the git-ignored `android/` folder) and `./gradlew assembleRelease`, and prints the APK path (`android/app/build/outputs/apk/release/app-release.apk`).
 5. Install it by hand (`adb install -r <apk>` or copy it to the phone). If Android reports a signature mismatch, uninstall the old build first.
 
