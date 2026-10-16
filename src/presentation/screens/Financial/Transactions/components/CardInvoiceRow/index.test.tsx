@@ -103,3 +103,16 @@ it("SHOULD show the boleto copy for an external payment AND the warning badge af
     screen.getByText("financial.cards.invoice.paymentAfterDue"),
   ).toBeOnTheScreen();
 });
+
+it("SHOULD title an installment purchase with its number AND a plain one with the description", () => {
+  setup({}, true);
+
+  const titles = screen
+    .getAllByTestId(`${transactionsTestIds.cardInvoicePurchase}-title`)
+    .map((node) => node.props.children);
+
+  expect(titles).toContain("Market");
+  expect(titles).toContain(
+    'financial.installment.label {"description":"Fuel","k":3,"n":10}',
+  );
+});

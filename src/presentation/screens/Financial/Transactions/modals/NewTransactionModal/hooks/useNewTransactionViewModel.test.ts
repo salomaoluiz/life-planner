@@ -482,6 +482,151 @@ describe("card mode (spec 029)", () => {
     );
   });
 
+  describe("installments (spec 030)", () => {
+    it("SHOULD be off by default, only in Card mode AND show nothing until turned on", () => {
+      givenLoaded({ cards: [mainCard] });
+      const { result } = setup();
+
+      expect(result.current.installments.visible).toBe(false);
+      act(() => result.current.onPayWithChange("CARD"));
+      expect(result.current.installments).toEqual(
+        expect.objectContaining({
+          count: 2,
+          enabled: false,
+          preview: undefined,
+          range: undefined,
+          visible: true,
+        }),
+      );
+    });
+
+    it("SHOULD preview the split AND the first and last invoice WHEN turned on", () => {
+      const { result } = inCardMode();
+
+      act(() => result.current.onAmountChange(10000));
+      act(() => result.current.onInstallmentsToggle(true));
+      act(() => result.current.onInstallmentsCountChange("3"));
+
+      expect(result.current.installments.enabled).toBe(true);
+      expect(result.current.installments.countText).toBe("3");
+      expect(result.current.installments.preview).toEqual({
+        first: 3334,
+        hasRemainder: true,
+        others: 3333,
+      });
+      expect(result.current.installments.range).toEqual({
+        first: "2026-10",
+        last: "2026-12",
+      });
+    });
+
+    it("SHOULD keep only digits in the count", () => {
+      const { result } = inCardMode();
+
+      act(() => result.current.onInstallmentsCountChange("1a2"));
+
+      expect(result.current.installments.count).toBe(12);
+    });
+
+    it("SHOULD create the PLAN with the total, not a transaction, WHEN saved with installments on", () => {
+      const { result } = inCardMode();
+
+      act(() => result.current.onAmountChange(512000));
+      act(() => result.current.onDescriptionChange("Notebook"));
+      act(() => result.current.onCategorySelect("food"));
+      act(() => result.current.onInstallmentsToggle(true));
+      act(() => result.current.onInstallmentsCountChange("10"));
+      act(() => result.current.onSave());
+
+      expect(mutations.create_plan.value.mutate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          creditCardId: "c1",
+          description: "Notebook",
+          installments: 10,
+          value: "5120.00",
+        }),
+      );
+      expect(mutations.create.value.mutate).not.toHaveBeenCalled();
+    });
+
+    it.each(["1", "49", ""])(
+      "SHOULD NOT save with %s installments AND show the range error",
+      (count) => {
+        const { result } = inCardMode();
+
+        act(() => result.current.onAmountChange(512000));
+        act(() => result.current.onDescriptionChange("Notebook"));
+        act(() => result.current.onCategorySelect("food"));
+        act(() => result.current.onInstallmentsToggle(true));
+        act(() => result.current.onInstallmentsCountChange(count));
+        act(() => result.current.onSave());
+
+        expect(mutations.create_plan.value.mutate).not.toHaveBeenCalled();
+        expect(result.current.installments.error).toBe(
+          "financial.transactions.form.errors.installmentsRange",
+        );
+      },
+    );
+
+    it("SHOULD reject a total smaller than the number of installments", () => {
+      const { result } = inCardMode();
+
+      act(() => result.current.onAmountChange(5));
+      act(() => result.current.onDescriptionChange("Tiny"));
+      act(() => result.current.onCategorySelect("food"));
+      act(() => result.current.onInstallmentsToggle(true));
+      act(() => result.current.onInstallmentsCountChange("10"));
+      act(() => result.current.onSave());
+
+      expect(mutations.create_plan.value.mutate).not.toHaveBeenCalled();
+    });
+
+    it("SHOULD reset the installments WHEN going back to Account", () => {
+      const { result } = inCardMode();
+
+      act(() => result.current.onInstallmentsToggle(true));
+      act(() => result.current.onPayWithChange("ACCOUNT"));
+      act(() => result.current.onPayWithChange("CARD"));
+
+      expect(result.current.installments.enabled).toBe(false);
+    });
+
+    it("SHOULD hand an installment over to its own edit sheet instead of opening this form", () => {
+      givenLoaded({
+        cards: [mainCard],
+        params: { id: "t1" },
+        transactions: [
+          tx("t1", {
+            creditCardId: "c1",
+            installmentCount: 10,
+            installmentNumber: 3,
+            installmentPlanId: "plan-1",
+          }),
+        ],
+      });
+
+      const { result } = setup();
+
+      expect(spies.replace).toHaveBeenCalledWith({
+        params: { id: "t1" },
+        pathname: "/financial/installment/edit_installment",
+      });
+      expect(result.current.isLoading).toBe(true);
+    });
+
+    it("SHOULD NOT offer installments WHEN editing a purchase", () => {
+      givenLoaded({
+        cards: [mainCard],
+        params: { id: "t1" },
+        transactions: [tx("t1", { creditCardId: "c1" })],
+      });
+
+      const { result } = setup();
+
+      expect(result.current.installments.visible).toBe(false);
+    });
+  });
+
   it("SHOULD start in Card mode WHEN opened with a creditCardId param", () => {
     givenLoaded({ cards: [mainCard], params: { creditCardId: "c1" } });
 

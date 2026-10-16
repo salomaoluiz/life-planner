@@ -25,6 +25,8 @@ it("SHOULD map the purchases with local dates, colors and a fallback icon", () =
   expect(market.categoryColor).toBeDefined();
   expect(fuel.categoryIcon).toBe("help-circle-outline");
   expect(fuel.categoryColor).toBeUndefined();
+  expect(market.installment).toBeUndefined();
+  expect(fuel.installment).toEqual({ count: 10, number: 3 });
 });
 
 it("SHOULD describe how a paid invoice was paid", () => {

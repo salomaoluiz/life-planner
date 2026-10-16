@@ -1,3 +1,4 @@
+import { InstallmentScope } from "@domain/entities/financial/InstallmentPlanEntity";
 import TransactionEntity, {
   TransactionType,
 } from "@domain/entities/financial/TransactionEntity";
@@ -39,6 +40,7 @@ interface UpdateTransactionRepositoryParams {
   id: string;
   owner?: OwnerType;
   ownerId?: string;
+  scope?: InstallmentScope;
   type?: TransactionType;
   value?: string;
 }

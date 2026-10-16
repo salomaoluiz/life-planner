@@ -29,6 +29,13 @@ export {
 } from "./creditCards";
 
 export {
+  createInstallmentPlanUseCase as createFinancialInstallmentPlanUseCase,
+  deleteInstallmentPlanUseCase as deleteFinancialInstallmentPlanUseCase,
+  getInstallmentPlanUseCase as getFinancialInstallmentPlanUseCase,
+  updateInstallmentPlanUseCase as updateFinancialInstallmentPlanUseCase,
+} from "./installmentPlans";
+
+export {
   createTransactionUseCase as createFinancialTransactionUseCase,
   deleteTransactionUseCase as deleteFinancialTransactionUseCase,
   getTransactionsUseCase as getFinancialTransactionsUseCase,

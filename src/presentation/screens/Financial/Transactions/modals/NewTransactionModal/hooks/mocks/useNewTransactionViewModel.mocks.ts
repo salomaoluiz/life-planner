@@ -17,13 +17,17 @@ import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
 import useNewTransactionViewModel from "../useNewTransactionViewModel";
 
 jest.mock("expo-router", () => ({
-  router: { back: jest.fn(), push: jest.fn() },
+  router: { back: jest.fn(), push: jest.fn(), replace: jest.fn() },
   useLocalSearchParams: jest.fn(),
 }));
 jest.mock("@react-navigation/native", () => ({ useIsFocused: jest.fn() }));
 jest.mock("@infrastructure/fetcher");
 jest.mock("@application/useCases", () => ({
   useCases: {
+    createFinancialInstallmentPlanUseCase: {
+      execute: jest.fn(),
+      uniqueName: "create_plan",
+    },
     createFinancialTransactionUseCase: {
       execute: jest.fn(),
       uniqueName: "create",
@@ -140,6 +144,7 @@ const spies = {
   focused: jest.mocked(useIsFocused),
   params: jest.mocked(useLocalSearchParams),
   push: jest.mocked(router.push),
+  replace: jest.mocked(router.replace),
   useMutation: jest.mocked(useMutation),
   useQuery: jest.mocked(useQuery),
 };
@@ -159,7 +164,7 @@ beforeEach(() => {
   ].forEach((key) => {
     queries[key] = new UseQueryFixture<unknown>();
   });
-  ["create", "update", "delete"].forEach((key) => {
+  ["create", "create_plan", "update", "delete"].forEach((key) => {
     mutations[key] = new UseMutationFixture<unknown, unknown>();
   });
   spies.focused.mockReturnValue(false);

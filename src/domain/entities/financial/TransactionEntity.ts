@@ -17,6 +17,9 @@ interface ITransactionEntity {
   description: string;
   excludeFromTotals?: boolean;
   id: string;
+  installmentCount?: number;
+  installmentNumber?: number;
+  installmentPlanId?: string;
   invoiceMonth?: string;
   owner: OwnerType;
   ownerId: string;
@@ -34,6 +37,9 @@ class TransactionEntity {
   description: string;
   excludeFromTotals: boolean;
   id: string;
+  installmentCount?: number;
+  installmentNumber?: number;
+  installmentPlanId?: string;
   invoiceMonth?: string;
   owner: OwnerType;
   ownerId: string;
@@ -46,6 +52,9 @@ class TransactionEntity {
     this.category = params.category;
     this.categoryId = params.categoryId;
     this.creditCardId = params.creditCardId;
+    this.installmentCount = params.installmentCount;
+    this.installmentNumber = params.installmentNumber;
+    this.installmentPlanId = params.installmentPlanId;
     this.invoiceMonth = params.invoiceMonth;
     this.date = params.date;
     this.id = params.id;

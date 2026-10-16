@@ -211,6 +211,68 @@ describe("Pay with (spec 029)", () => {
     expect(vm.onPayWithChange).toHaveBeenCalledWith("CARD");
   });
 
+  it("SHOULD NOT offer the Installments switch outside Card mode", () => {
+    setup();
+    expect(
+      screen.queryByTestId(transactionFormTestIds.installmentsSwitch),
+    ).toBeNull();
+  });
+
+  it("SHOULD show the count, the split preview and the first/last invoice WHEN installments are on", () => {
+    const vm = setup({
+      installments: {
+        count: 3,
+        countText: "3",
+        enabled: true,
+        error: undefined,
+        preview: { first: 3334, hasRemainder: true, others: 3333 },
+        range: { first: "2026-10", last: "2026-12" },
+        visible: true,
+      },
+      payWith: "CARD",
+    });
+
+    expect(
+      screen.getByTestId(transactionFormTestIds.installmentsSwitch),
+    ).toBeOnTheScreen();
+    fireEvent.changeText(
+      screen.getByTestId(transactionFormTestIds.installmentsCount),
+      "4",
+    );
+    expect(vm.onInstallmentsCountChange).toHaveBeenCalledWith("4");
+    expect(
+      screen.getByTestId(transactionFormTestIds.installmentsPreview),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(transactionFormTestIds.installmentsInvoices),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD show the plain preview WHEN the split is even AND the total label", () => {
+    setup({
+      installments: {
+        count: 10,
+        countText: "10",
+        enabled: true,
+        error: undefined,
+        preview: { first: 51200, hasRemainder: false, others: 51200 },
+        range: undefined,
+        visible: true,
+      },
+      payWith: "CARD",
+    });
+
+    expect(
+      screen.getByTestId(transactionFormTestIds.installmentsPreview),
+    ).toBeOnTheScreen();
+    expect(
+      screen.queryByTestId(transactionFormTestIds.installmentsInvoices),
+    ).toBeNull();
+    expect(
+      screen.getByText("financial.transactions.form.totalValue"),
+    ).toBeOnTheScreen();
+  });
+
   it("SHOULD hide the type control, show the card field with the hints AND disable Save WHEN the invoice is paid", () => {
     setup({
       invoiceHint: { due: "2026-11-10", month: "2026-10" },

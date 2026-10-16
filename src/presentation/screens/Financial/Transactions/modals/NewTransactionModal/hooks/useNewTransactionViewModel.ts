@@ -12,6 +12,11 @@ import { normalizeCategoryColor } from "@presentation/constants/categoryColors";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { filterRowsByQuery } from "@screens/Financial/models/categoryTree";
 import {
+  installmentInvoiceRange,
+  installmentPreview,
+  isValidInstallmentCount,
+} from "@screens/Financial/models/installments";
+import {
   dueDateOf,
   invoiceMonthOf,
 } from "@screens/Financial/models/invoiceMonth";
@@ -30,6 +35,7 @@ import {
   normalizeDate,
   pickNewRecordId,
   stateFromDto,
+  toCreateInstallmentParams,
   toCreateParams,
   toUpdateParams,
   TransactionFormState,
@@ -89,6 +95,36 @@ async function fetchByOwners<T>(
   execute: (ownerIds: string[]) => Promise<T>,
 ) {
   return execute(owners.map((owner) => owner.id));
+}
+
+// The "Installments" block of Card mode (spec 030 FR 1-3, 8.1): count, split preview and first/last invoice.
+// Only when creating: an existing purchase is edited as an installment through its own sheet.
+function installmentsOf(
+  state: TransactionFormState | undefined,
+  cardHints: ReturnType<typeof cardHintsOf>,
+  isEditing: boolean,
+  error: TranslationKeys | undefined,
+) {
+  const visible = !!state && state.payWith === "CARD" && !isEditing;
+  const enabled = visible && !!state && state.installmentsOn;
+  const count = state?.installmentsCount ?? 0;
+  const valid =
+    enabled &&
+    isValidInstallmentCount(count) &&
+    (state?.amountCents ?? 0) >= count;
+
+  return {
+    count,
+    countText: count > 0 ? String(count) : "",
+    enabled,
+    error,
+    preview: valid ? installmentPreview(state!.amountCents, count) : undefined,
+    range:
+      valid && cardHints.invoiceHint
+        ? installmentInvoiceRange(cardHints.invoiceHint.month, count)
+        : undefined,
+    visible,
+  };
 }
 
 function useNewTransactionViewModel() {
@@ -158,6 +194,17 @@ function useNewTransactionViewModel() {
 
   const existing = transactions.data?.find((item) => item.id === params.id);
   const isNotFound = isEditing && !!transactions.data && !existing;
+  // An installment is edited through its own sheet (spec 030): hand over instead of opening this form.
+  const isInstallment = isEditing && !!existing?.installmentPlanId;
+
+  useEffect(() => {
+    if (isInstallment) {
+      router.replace({
+        params: { id: params.id },
+        pathname: "/financial/installment/edit_installment",
+      } as never);
+    }
+  }, [isInstallment]);
 
   const initial = useMemo(() => {
     if (!uiModel || !owners.data || !accounts.data) {
@@ -212,6 +259,10 @@ function useNewTransactionViewModel() {
     cacheKey: [useCases.createFinancialTransactionUseCase.uniqueName],
     fetch: useCases.createFinancialTransactionUseCase.execute,
   });
+  const createPlanMutation = useMutation({
+    cacheKey: [useCases.createFinancialInstallmentPlanUseCase.uniqueName],
+    fetch: useCases.createFinancialInstallmentPlanUseCase.execute,
+  });
   const updateMutation = useMutation({
     cacheKey: [useCases.updateFinancialTransactionUseCase.uniqueName],
     fetch: useCases.updateFinancialTransactionUseCase.execute,
@@ -224,12 +275,18 @@ function useNewTransactionViewModel() {
   useEffect(() => {
     if (
       createMutation.status === "success" ||
+      createPlanMutation.status === "success" ||
       updateMutation.status === "success" ||
       deleteMutation.status === "success"
     ) {
       router.back();
     }
-  }, [createMutation.status, updateMutation.status, deleteMutation.status]);
+  }, [
+    createMutation.status,
+    createPlanMutation.status,
+    updateMutation.status,
+    deleteMutation.status,
+  ]);
 
   // Records created in the stacked create sheet appear on return: refetch on focus.
   useEffect(() => {
@@ -265,7 +322,10 @@ function useNewTransactionViewModel() {
   const errors = submitted && state ? validate(state) : {};
   const cardHints = cardHintsOf(state, uiModel, overview.data, existing);
   const formErrorKey = getFinancialErrorMessageKey(
-    createMutation.error ?? updateMutation.error ?? deleteMutation.error,
+    createMutation.error ??
+      createPlanMutation.error ??
+      updateMutation.error ??
+      deleteMutation.error,
   );
 
   function update(next: TransactionFormState) {
@@ -289,6 +349,8 @@ function useNewTransactionViewModel() {
       updateMutation.mutate(
         toUpdateParams(params.id!, state, owner, categoryName),
       );
+    } else if (state.payWith === "CARD" && state.installmentsOn) {
+      createPlanMutation.mutate(toCreateInstallmentParams(state, owner));
     } else {
       createMutation.mutate(toCreateParams(state, owner, categoryName));
     }
@@ -325,6 +387,12 @@ function useNewTransactionViewModel() {
     } as never);
   }
 
+  const installments = installmentsOf(
+    state,
+    cardHints,
+    isEditing,
+    errors.installments,
+  );
   const ownerId = state?.ownerId ?? "";
   const type = state?.type ?? TransactionType.EXPENSE;
   const categoryChips = uiModel
@@ -371,6 +439,7 @@ function useNewTransactionViewModel() {
     hasNoAccounts: uiModel ? !uiModel.hasAccounts(ownerId) : false,
     hasNoCards: uiModel ? !uiModel.hasCards(ownerId) : false,
     hasNoCategories: uiModel ? !uiModel.hasCategories(ownerId, type) : false,
+    installments,
     invoiceHint: cardHints.invoiceHint,
     invoiceMonthLabelDate: cardHints.monthDate,
     isCategoryPickerOpen,
@@ -379,10 +448,13 @@ function useNewTransactionViewModel() {
     isDiscardDialogOpen,
     isEditing,
     isInvoicePaid: cardHints.isInvoicePaid,
-    isLoading: !state && !isNotFound,
+    isLoading: (!state && !isNotFound) || isInstallment,
     isNotFound,
     isSaveDisabled: cardHints.isInvoicePaid,
-    isSaving: createMutation.isFetching || updateMutation.isFetching,
+    isSaving:
+      createMutation.isFetching ||
+      createPlanMutation.isFetching ||
+      updateMutation.isFetching,
     onAccountChange: (id: string) => {
       if (state) {
         update({ ...state, accountId: id });
@@ -428,6 +500,19 @@ function useNewTransactionViewModel() {
     },
     onDiscardCancel: () => setDiscardDialogOpen(false),
     onDiscardConfirm: () => router.back(),
+    onInstallmentsCountChange: (text: string) => {
+      if (state) {
+        update({
+          ...state,
+          installmentsCount: Number(text.replace(/\D/g, "")) || 0,
+        });
+      }
+    },
+    onInstallmentsToggle: (on: boolean) => {
+      if (state) {
+        update({ ...state, installmentsOn: on });
+      }
+    },
     onOwnerChange: (id: string) => {
       if (state) {
         update(

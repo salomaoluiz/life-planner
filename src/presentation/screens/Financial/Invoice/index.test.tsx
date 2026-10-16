@@ -130,3 +130,14 @@ it("SHOULD show the undo confirmation dialog", () => {
 
   expect(screen.getByText("financial.invoice.undoTitle")).toBeOnTheScreen();
 });
+
+it("SHOULD title an installment purchase with its number", () => {
+  setup();
+
+  expect(
+    screen.getByText(
+      'financial.installment.label {"description":"Fuel","k":3,"n":10}',
+    ),
+  ).toBeOnTheScreen();
+  expect(screen.getByText("Market")).toBeOnTheScreen();
+});

@@ -9,6 +9,8 @@ export interface InvoicePurchaseModel {
   date: string;
   description: string;
   id: string;
+  installmentCount?: number;
+  installmentNumber?: number;
   ownerId: string;
   value: number;
 }
@@ -58,6 +60,10 @@ class CardInvoiceModel {
         date: purchase.date as string,
         description: purchase.description as string,
         id: purchase.id as string,
+        installmentCount:
+          (purchase.installmentCount as null | number) ?? undefined,
+        installmentNumber:
+          (purchase.installmentNumber as null | number) ?? undefined,
         ownerId: purchase.ownerId as string,
         value: Number(purchase.value),
       })),

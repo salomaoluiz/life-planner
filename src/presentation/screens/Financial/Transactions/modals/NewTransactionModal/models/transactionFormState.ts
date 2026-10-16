@@ -3,10 +3,12 @@ import CategoryDTO from "@application/dto/financial/CategoryDTO";
 import CreditCardDTO from "@application/dto/financial/CreditCardDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
+import { CreateInstallmentPlanUseCaseParams } from "@application/useCases/cases/financial/installmentPlans/createInstallmentPlanUseCase";
 import { CreateTransactionUseCaseParams } from "@application/useCases/cases/financial/transactions/createTransactionUseCase";
 import { UpdateTransactionUseCaseParams } from "@application/useCases/cases/financial/transactions/updateTransactionUseCase";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { TranslationKeys } from "@presentation/i18n/types";
+import { isValidInstallmentCount } from "@screens/Financial/models/installments";
 import {
   centsToDecimalString,
   decimalStringToCents,
@@ -24,7 +26,8 @@ type TransactionFormErrors = Partial<
     | "categoryId"
     | "creditCardId"
     | "date"
-    | "description",
+    | "description"
+    | "installments",
     TranslationKeys
   >
 >;
@@ -36,6 +39,9 @@ interface TransactionFormState {
   creditCardId?: string;
   date: Date;
   description: string;
+  // Card purchases only (spec 030): the amount is then the TOTAL split in `installmentsCount` parts.
+  installmentsCount: number;
+  installmentsOn: boolean;
   ownerId: string;
   payWith: PayWith;
   type: TransactionType;
@@ -76,7 +82,7 @@ function changePayWith(
   cards: CreditCardDTO[],
 ): TransactionFormState {
   if (payWith === "ACCOUNT") {
-    return { ...state, payWith };
+    return { ...state, installmentsCount: 2, installmentsOn: false, payWith };
   }
 
   return {
@@ -130,6 +136,8 @@ function createInitialState(params: {
     creditCardId: params.card?.id,
     date: normalizeDate(params.now),
     description: "",
+    installmentsCount: 2,
+    installmentsOn: false,
     ownerId,
     payWith: params.card ? "CARD" : "ACCOUNT",
     type: TransactionType.EXPENSE,
@@ -156,6 +164,8 @@ function isSameState(a: TransactionFormState, b: TransactionFormState) {
     a.creditCardId === b.creditCardId &&
     a.date.getTime() === b.date.getTime() &&
     a.description === b.description &&
+    a.installmentsCount === b.installmentsCount &&
+    a.installmentsOn === b.installmentsOn &&
     a.ownerId === b.ownerId &&
     a.payWith === b.payWith &&
     a.type === b.type
@@ -178,9 +188,28 @@ function stateFromDto(dto: TransactionDTO): TransactionFormState {
     creditCardId: dto.creditCardId,
     date: normalizeDate(new Date(dto.date)),
     description: dto.description,
+    installmentsCount: dto.installmentCount ?? 2,
+    installmentsOn: false,
     ownerId: dto.ownerId,
     payWith: dto.creditCardId ? "CARD" : "ACCOUNT",
     type: dto.type as TransactionType,
+  };
+}
+
+// Installments (spec 030): the form amount is the TOTAL, the API splits it.
+function toCreateInstallmentParams(
+  state: TransactionFormState,
+  owner: OwnerDTO,
+): CreateInstallmentPlanUseCaseParams {
+  return {
+    categoryId: state.categoryId!,
+    creditCardId: state.creditCardId!,
+    date: state.date.toISOString(),
+    description: state.description.trim(),
+    installments: state.installmentsCount,
+    owner: owner.type,
+    ownerId: owner.id,
+    value: centsToDecimalString(state.amountCents),
   };
 }
 
@@ -240,6 +269,15 @@ function validate(state: TransactionFormState): TransactionFormErrors {
   } else if (!state.accountId) {
     errors.accountId = "financial.transactions.form.errors.accountRequired";
   }
+  if (
+    state.payWith === "CARD" &&
+    state.installmentsOn &&
+    (!isValidInstallmentCount(state.installmentsCount) ||
+      state.amountCents < state.installmentsCount)
+  ) {
+    errors.installments =
+      "financial.transactions.form.errors.installmentsRange";
+  }
   if (Number.isNaN(state.date.getTime())) {
     errors.date = "financial.transactions.form.errors.dateRequired";
   }
@@ -260,6 +298,7 @@ export {
   normalizeDate,
   pickNewRecordId,
   stateFromDto,
+  toCreateInstallmentParams,
   toCreateParams,
   toUpdateParams,
   validate,

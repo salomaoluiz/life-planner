@@ -1,0 +1,182 @@
+url: ${E2E_WEB_URL}
+name: financial/credit-cards/installments
+tags:
+  - financial
+  - spec-030
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- evalScript: ${output.KEEP_CATEGORY_ID = output.EXPENSE_CATEGORY_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Card
+      KEY: CARD_TITLE
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Seed
+      KEY: SEED_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Notebook
+      KEY: PLAN_NAME
+# A card that closed yesterday: a purchase made today goes to the NEXT invoice (1/3), the others to the following months
+- runFlow:
+    file: ../../../subflows/setup/create-card-purchase.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      CATEGORY_ID: ${output.KEEP_CATEGORY_ID}
+      TITLE: ${output.CARD_TITLE}
+      DESCRIPTION: ${output.SEED_NAME}
+      VALUE_CENTS: "10000"
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+# Create a 3x purchase of 30,00 in the app
+- tapOn:
+    id: "quick-add-button|navigation-rail-add"
+- extendedWaitUntil:
+    visible:
+      id: "quick-add-transaction"
+    timeout: 20000
+- tapOn:
+    id: "quick-add-transaction"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactionForm.payWith"
+    timeout: 20000
+- tapOn:
+    id: "financial.transactionForm.payWith-CARD"
+- tapOn:
+    id: "financial.transaction-form.amount-input"
+- eraseText
+- inputText: "3000"
+- tapOn:
+    id: "financial.transaction-form.description-input"
+- inputText: ${output.PLAN_NAME}
+- tapOn:
+    id: "financial.transaction-form.category-${output.KEEP_CATEGORY_ID}"
+# Installments are off by default (the sheet footer hides the switch until the form is scrolled); turn them on and type the count
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- assertNotVisible:
+    id: "financial.transactionForm.installments.count"
+- tapOn:
+    id: "financial.transactionForm.installments.switch"
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactionForm.installments.count"
+    timeout: 20000
+- tapOn:
+    id: "financial.transactionForm.installments.count"
+- eraseText
+- inputText: "3"
+- assertVisible:
+    id: "financial.transactionForm.installments.preview"
+    text: ".*10[.,]00.*"
+- tapOn:
+    id: "financial.transaction-form.save-button"
+# 1/3 sits in the first invoice (next month), 2/3 in the one after
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- tapOn:
+    id: "financial.transactions.month-next"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.cardInvoice.row"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- tapOn:
+    id: "financial.transactions.cardInvoice.toggle"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- assertVisible:
+    id: "financial.transactions.cardInvoice.purchase-title"
+    text: ".*1/3.*"
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
+- tapOn:
+    id: "financial.transactions.month-next"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.cardInvoice.row"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- tapOn:
+    id: "financial.transactions.cardInvoice.toggle"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- assertVisible:
+    id: "financial.transactions.cardInvoice.purchase-title"
+    text: ".*2/3.*"
+# Edit 2/3 with "Only this one": 15,00
+- tapOn:
+    id: "financial.transactions.cardInvoice.purchase"
+- extendedWaitUntil:
+    visible:
+      id: "financial.installmentEdit.sheet"
+    timeout: 20000
+- tapOn:
+    id: "financial.installmentEdit.amount"
+- eraseText
+- inputText: "1500"
+- tapOn:
+    id: "financial.installmentEdit.save"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.cardInvoice.amount"
+      text: ".*15[.,]00.*"
+    timeout: 20000
+# The plan total is the sum of the installments: 10,00 + 15,00 + 10,00
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- runFlow:
+    when:
+      notVisible:
+        id: "financial.transactions.cardInvoice.purchase"
+    commands:
+      - tapOn:
+          id: "financial.transactions.cardInvoice.toggle"
+      - runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- tapOn:
+    id: "financial.transactions.cardInvoice.purchase"
+- extendedWaitUntil:
+    visible:
+      id: "financial.installmentEdit.sheet"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.installmentEdit.see-plan"
+- extendedWaitUntil:
+    visible:
+      id: "financial.installmentPlan.total"
+      text: ".*35[.,]00.*"
+    timeout: 20000
+- tapOn:
+    id: "financial.installmentPlan.sheet-close"
+# Delete the whole plan
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.installmentPlan.delete"
+- tapOn:
+    id: "financial.installmentPlan.delete-confirm-confirm"
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.installmentEdit.sheet"
+    timeout: 20000
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.transactions.cardInvoice.row"
+    timeout: 20000

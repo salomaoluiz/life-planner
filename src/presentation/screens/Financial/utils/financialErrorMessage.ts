@@ -6,6 +6,7 @@ import {
   CreditCardHasTransactions,
   FinancialNotFound,
   FinancialOwnerNotAllowed,
+  InstallmentPaid,
   InvoiceIsPaid,
   InvoiceNotPayable,
 } from "@domain/entities/errors";
@@ -26,6 +27,10 @@ function getFinancialErrorMessageKey(
 
   if (error instanceof CreditCardArchived) {
     return "financial.errors.cardArchived";
+  }
+
+  if (error instanceof InstallmentPaid) {
+    return "financial.errors.installmentPaid";
   }
 
   if (error instanceof InvoiceIsPaid) {

@@ -53,6 +53,8 @@ function makeInvoiceDTO(
         date: "2026-10-28",
         description: "Fuel",
         id: "purchase-2",
+        installmentCount: 10,
+        installmentNumber: 3,
         ownerId: "user-id",
         value: 20000,
       },

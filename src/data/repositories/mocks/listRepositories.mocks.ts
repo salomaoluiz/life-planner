@@ -47,6 +47,12 @@ const repositoriesMocks: Repositories = {
       undoInvoicePayment: jest.fn(),
       updateCreditCard: jest.fn(),
     },
+    installmentPlan: {
+      createInstallmentPlan: jest.fn(),
+      deleteInstallmentPlan: jest.fn(),
+      getInstallmentPlan: jest.fn(),
+      updateInstallmentPlan: jest.fn(),
+    },
     transaction: {
       createTransaction: jest.fn(),
       deleteTransaction: jest.fn(),

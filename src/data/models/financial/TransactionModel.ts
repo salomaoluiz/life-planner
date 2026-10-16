@@ -14,6 +14,9 @@ interface ITransactionModel {
   description: string;
   excludeFromTotals?: boolean;
   id: string;
+  installmentCount?: number;
+  installmentNumber?: number;
+  installmentPlanId?: string;
   invoiceMonth?: string;
   owner: OwnerType;
   ownerId: string;
@@ -31,6 +34,9 @@ class TransactionModel implements ITransactionModel {
   description: string;
   excludeFromTotals: boolean;
   id: string;
+  installmentCount?: number;
+  installmentNumber?: number;
+  installmentPlanId?: string;
   invoiceMonth?: string;
   owner: OwnerType;
   ownerId: string;
@@ -44,6 +50,9 @@ class TransactionModel implements ITransactionModel {
     this.category = params.category;
     this.categoryId = params.categoryId;
     this.creditCardId = params.creditCardId;
+    this.installmentCount = params.installmentCount;
+    this.installmentNumber = params.installmentNumber;
+    this.installmentPlanId = params.installmentPlanId;
     this.invoiceMonth = params.invoiceMonth;
     this.description = params.description;
     this.owner = params.owner;
@@ -73,6 +82,9 @@ class TransactionModel implements ITransactionModel {
       description: data.description as string,
       excludeFromTotals: category?.excludeFromTotals === true,
       id: data.id as string,
+      installmentCount: (data.installmentCount as null | number) ?? undefined,
+      installmentNumber: (data.installmentNumber as null | number) ?? undefined,
+      installmentPlanId: (data.installmentPlanId as null | string) ?? undefined,
       invoiceMonth: (data.invoiceMonth as null | string) ?? undefined,
       owner: data.owner as OwnerType,
       ownerId: data.ownerId as string,
@@ -96,6 +108,9 @@ class TransactionModel implements ITransactionModel {
       date: isoToCalendarDate(this.date),
       description: this.description,
       id: this.id,
+      installmentCount: this.installmentCount ?? null,
+      installmentNumber: this.installmentNumber ?? null,
+      installmentPlanId: this.installmentPlanId ?? null,
       invoiceMonth: this.invoiceMonth ?? null,
       owner: this.owner,
       ownerId: this.ownerId,

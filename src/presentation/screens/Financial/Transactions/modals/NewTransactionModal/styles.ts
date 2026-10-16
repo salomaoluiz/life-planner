@@ -11,6 +11,11 @@ function useStyles() {
       form: { gap: theme.sizes.spacing.md },
       hint: { gap: theme.sizes.spacing.xs },
       row: { flexDirection: "row", gap: theme.sizes.spacing.sm },
+      switchRow: {
+        alignItems: "center",
+        flexDirection: "row",
+        justifyContent: "space-between",
+      },
     }),
   };
 }

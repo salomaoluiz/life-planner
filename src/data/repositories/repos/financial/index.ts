@@ -3,6 +3,7 @@ import { Datasources } from "@data/datasource";
 import accountRepository from "./accounts/accountRepositoryImpl";
 import categoryRepository from "./categories/categoryRepositoryImpl";
 import creditCardRepository from "./creditCards/creditCardRepositoryImpl";
+import installmentPlanRepository from "./installmentPlans/installmentPlanRepositoryImpl";
 import transactionRepository from "./transactions/transactionRepositoryImpl";
 
 export function financialRepository(datasources: Datasources) {
@@ -10,6 +11,7 @@ export function financialRepository(datasources: Datasources) {
     account: accountRepository(datasources),
     category: categoryRepository(datasources),
     creditCard: creditCardRepository(datasources),
+    installmentPlan: installmentPlanRepository(datasources),
     transaction: transactionRepository(datasources),
   };
 }
