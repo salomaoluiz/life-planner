@@ -5,5 +5,6 @@ export { default as CreditCardArchived } from "./CreditCardArchived";
 export { default as CreditCardHasTransactions } from "./CreditCardHasTransactions";
 export { default as FinancialNotFound } from "./FinancialNotFound";
 export { default as FinancialOwnerNotAllowed } from "./FinancialOwnerNotAllowed";
+export { default as InstallmentPaid } from "./InstallmentPaid";
 export { default as InvoiceIsPaid } from "./InvoiceIsPaid";
 export { default as InvoiceNotPayable } from "./InvoiceNotPayable";

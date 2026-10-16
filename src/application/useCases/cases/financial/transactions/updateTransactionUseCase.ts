@@ -1,5 +1,6 @@
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import { DefaultError, FieldInvalid } from "@domain/entities/errors";
+import { InstallmentScope } from "@domain/entities/financial/InstallmentPlanEntity";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import Repositories from "@domain/repositories";
@@ -14,6 +15,7 @@ export interface UpdateTransactionUseCaseParams {
   id: string;
   owner?: string;
   ownerId?: string;
+  scope?: InstallmentScope;
   type?: string;
   value?: string;
 }
@@ -51,6 +53,7 @@ function updateTransactionUseCase(
           id: params.id,
           owner,
           ownerId: params.ownerId,
+          scope: params.scope,
           type,
           value: params.value,
         });

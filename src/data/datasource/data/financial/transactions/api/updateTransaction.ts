@@ -20,6 +20,7 @@ async function updateTransaction(params: Params): Response {
     description: params.description,
     owner: params.owner,
     ownerId: params.ownerId,
+    scope: params.scope,
     type: params.type,
     value:
       params.value === undefined

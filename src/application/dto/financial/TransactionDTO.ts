@@ -11,6 +11,9 @@ export interface ITransactionDTO {
   description: string;
   excludeFromTotals?: boolean;
   id: string;
+  installmentCount?: number;
+  installmentNumber?: number;
+  installmentPlanId?: string;
   invoiceMonth?: string;
   owner: string;
   ownerId: string;
@@ -30,6 +33,9 @@ class TransactionDTO {
   description: string;
   excludeFromTotals: boolean;
   id: string;
+  installmentCount?: number;
+  installmentNumber?: number;
+  installmentPlanId?: string;
   invoiceMonth?: string;
   owner: string;
   ownerId: string;
@@ -43,6 +49,9 @@ class TransactionDTO {
     this.category = params.category;
     this.categoryId = params.categoryId;
     this.creditCardId = params.creditCardId;
+    this.installmentCount = params.installmentCount;
+    this.installmentNumber = params.installmentNumber;
+    this.installmentPlanId = params.installmentPlanId;
     this.invoiceMonth = params.invoiceMonth;
     this.categoryName = params.categoryName;
     this.accountName = params.accountName;
@@ -72,6 +81,9 @@ class TransactionDTO {
       description: entity.description,
       excludeFromTotals: entity.excludeFromTotals,
       id: entity.id,
+      installmentCount: entity.installmentCount,
+      installmentNumber: entity.installmentNumber,
+      installmentPlanId: entity.installmentPlanId,
       invoiceMonth: entity.invoiceMonth,
       owner: entity.owner,
       ownerId: entity.ownerId,

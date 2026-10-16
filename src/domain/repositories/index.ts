@@ -8,6 +8,7 @@ import {
   FinancialAccountRepository,
   FinancialCategoryRepository,
   FinancialCreditCardRepository,
+  FinancialInstallmentPlanRepository,
   FinancialTransactionRepository,
 } from "./financial";
 import { StockRepository } from "./stock";
@@ -22,6 +23,7 @@ interface Repositories {
     account: FinancialAccountRepository;
     category: FinancialCategoryRepository;
     creditCard: FinancialCreditCardRepository;
+    installmentPlan: FinancialInstallmentPlanRepository;
     transaction: FinancialTransactionRepository;
   };
   loginRepository: LoginRepository;

@@ -2,6 +2,7 @@ import TransactionModel, {
   OwnerType,
   TransactionType,
 } from "@data/models/financial/TransactionModel";
+import { InstallmentScope } from "@domain/entities/financial/InstallmentPlanEntity";
 
 export interface TransactionDatasource {
   createTransaction(
@@ -40,6 +41,8 @@ interface UpdateTransactionDatasourceParams {
   id: string;
   owner?: OwnerType;
   ownerId?: string;
+  // Required by the API when the transaction is an installment (spec 030).
+  scope?: InstallmentScope;
   type?: TransactionType;
   value?: string;
 }

@@ -1,0 +1,61 @@
+import InstallmentPlanEntity, {
+  InstallmentEntity,
+} from "@domain/entities/financial/InstallmentPlanEntity";
+
+class InstallmentPlanDTO {
+  categoryId: string;
+  creditCardId: string;
+  date: string;
+  description: string;
+  id: string;
+  installmentCount: number;
+  installments: InstallmentEntity[];
+  overLimit?: boolean;
+  owner: string;
+  ownerId: string;
+  totalValue: string;
+
+  constructor(params: {
+    categoryId: string;
+    creditCardId: string;
+    date: string;
+    description: string;
+    id: string;
+    installmentCount: number;
+    installments: InstallmentEntity[];
+    overLimit?: boolean;
+    owner: string;
+    ownerId: string;
+    totalValue: string;
+  }) {
+    this.categoryId = params.categoryId;
+    this.creditCardId = params.creditCardId;
+    this.date = params.date;
+    this.description = params.description;
+    this.id = params.id;
+    this.installmentCount = params.installmentCount;
+    this.installments = params.installments;
+    this.overLimit = params.overLimit;
+    this.owner = params.owner;
+    this.ownerId = params.ownerId;
+    this.totalValue = params.totalValue;
+  }
+
+  static fromEntity(entity: InstallmentPlanEntity) {
+    return new InstallmentPlanDTO({
+      categoryId: entity.categoryId,
+      creditCardId: entity.creditCardId,
+      date: entity.date,
+      description: entity.description,
+      id: entity.id,
+      installmentCount: entity.installmentCount,
+      installments: entity.installments.map((row) => ({ ...row })),
+      overLimit: entity.overLimit,
+      owner: entity.owner,
+      ownerId: entity.ownerId,
+      totalValue: entity.totalValue,
+    });
+  }
+}
+
+export default InstallmentPlanDTO;

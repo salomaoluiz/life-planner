@@ -18,6 +18,8 @@ export interface InvoicePurchaseEntity {
   date: string;
   description: string;
   id: string;
+  installmentCount?: number;
+  installmentNumber?: number;
   ownerId: string;
   // Integer cents.
   value: number;
