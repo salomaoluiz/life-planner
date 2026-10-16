@@ -1,20 +1,24 @@
 import { InvoiceDTO } from "@application/dto/financial/CreditCardOverviewDTO";
 import CardInvoiceEntity, {
   CardInvoiceCardEntity,
+  InvoiceCreditEntity,
   InvoicePurchaseEntity,
 } from "@domain/entities/financial/CardInvoiceEntity";
 
 class CardInvoiceDTO {
   card: CardInvoiceCardEntity;
+  credits: InvoiceCreditEntity[];
   invoice: InvoiceDTO;
   purchases: InvoicePurchaseEntity[];
 
   constructor(params: {
     card: CardInvoiceCardEntity;
+    credits?: InvoiceCreditEntity[];
     invoice: InvoiceDTO;
     purchases: InvoicePurchaseEntity[];
   }) {
     this.card = params.card;
+    this.credits = params.credits ?? [];
     this.invoice = params.invoice;
     this.purchases = params.purchases;
   }
@@ -22,6 +26,7 @@ class CardInvoiceDTO {
   static fromEntity(entity: CardInvoiceEntity) {
     return new CardInvoiceDTO({
       card: { ...entity.card },
+      credits: entity.credits.map((credit) => ({ ...credit })),
       invoice: InvoiceDTO.fromEntity(entity.invoice),
       purchases: entity.purchases.map((purchase) => ({ ...purchase })),
     });

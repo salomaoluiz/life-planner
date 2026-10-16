@@ -8,6 +8,15 @@ export {
 } from "./accounts";
 
 export {
+  createEarlyPaymentUseCase as createFinancialEarlyPaymentUseCase,
+  createRefundUseCase as createFinancialRefundUseCase,
+  deleteEarlyPaymentUseCase as deleteFinancialEarlyPaymentUseCase,
+  deleteRefundUseCase as deleteFinancialRefundUseCase,
+  updateEarlyPaymentUseCase as updateFinancialEarlyPaymentUseCase,
+  updateRefundUseCase as updateFinancialRefundUseCase,
+} from "./cardCredits";
+
+export {
   createCategoryUseCase as createFinancialCategoryUseCase,
   deleteCategoryUseCase as deleteFinancialCategoryUseCase,
   getCategoriesUseCase as getFinancialCategoriesUseCase,
@@ -32,6 +41,9 @@ export {
   createInstallmentPlanUseCase as createFinancialInstallmentPlanUseCase,
   deleteInstallmentPlanUseCase as deleteFinancialInstallmentPlanUseCase,
   getInstallmentPlanUseCase as getFinancialInstallmentPlanUseCase,
+  prepayInstallmentPlanUseCase as prepayFinancialInstallmentPlanUseCase,
+  previewPrepaymentUseCase as previewFinancialPrepaymentUseCase,
+  undoPrepaymentUseCase as undoFinancialPrepaymentUseCase,
   updateInstallmentPlanUseCase as updateFinancialInstallmentPlanUseCase,
 } from "./installmentPlans";
 

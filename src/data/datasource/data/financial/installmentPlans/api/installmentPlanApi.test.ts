@@ -6,12 +6,16 @@ import {
   FinancialNotFound,
   GenericError,
   InstallmentPaid,
+  InvoiceIsPaid,
 } from "@domain/entities/errors";
 import { api } from "@infrastructure/api";
 
 import createInstallmentPlan from "./createInstallmentPlan";
 import deleteInstallmentPlan from "./deleteInstallmentPlan";
 import getInstallmentPlan from "./getInstallmentPlan";
+import prepayInstallmentPlan from "./prepayInstallmentPlan";
+import previewPrepayment from "./previewPrepayment";
+import undoPrepayment from "./undoPrepayment";
 import updateInstallmentPlan from "./updateInstallmentPlan";
 
 jest.mock("@infrastructure/api", () => ({
@@ -170,6 +174,97 @@ describe("deleteInstallmentPlan", () => {
       );
     expect(await capture(deleteInstallmentPlan("plan-1"))).toBeInstanceOf(
       InstallmentPaid,
+    );
+  });
+});
+
+describe("prepayment (spec 032)", () => {
+  it("SHOULD GET the preview with the target month AND today", async () => {
+    jest.mocked(api.get).mockResolvedValueOnce({
+      eligible: [
+        {
+          id: "r4",
+          installmentNumber: 4,
+          invoiceMonth: "2026-11",
+          value: 51200,
+        },
+      ],
+      total: 51200,
+    });
+
+    const result = await previewPrepayment({
+      planId: "plan-1",
+      targetInvoiceMonth: "2026-10",
+    });
+
+    expect(result.total).toBe(51200);
+    expect(result.eligible[0].installmentNumber).toBe(4);
+    expect(api.get).toHaveBeenCalledWith(
+      "/v1/finance/installment-plans/plan-1/prepayment-preview?targetInvoiceMonth=2026-10&today=2026-10-16",
+    );
+  });
+
+  it("SHOULD POST the prepayment in cents AND map the plan", async () => {
+    jest.mocked(api.post).mockResolvedValueOnce(apiInstallmentPlan);
+
+    const result = await prepayInstallmentPlan({
+      date: "2026-10-16",
+      discount: 12000,
+      planId: "plan-1",
+      targetInvoiceMonth: "2026-10",
+    });
+
+    expect(result.id).toBe("plan-1");
+    expect(api.post).toHaveBeenCalledWith(
+      "/v1/finance/installment-plans/plan-1/prepayment",
+      {
+        date: "2026-10-16",
+        discount: 12000,
+        targetInvoiceMonth: "2026-10",
+        today: "2026-10-16",
+      },
+    );
+  });
+
+  it("SHOULD map 400, 409 and 422 of a prepayment", async () => {
+    const params = {
+      date: "2026-10-16",
+      planId: "plan-1",
+      targetInvoiceMonth: "2026-10",
+    };
+
+    jest.mocked(api.post).mockRejectedValueOnce(new ApiBusinessError("x", 400));
+    expect(await capture(prepayInstallmentPlan(params))).toBeInstanceOf(
+      FieldInvalid,
+    );
+
+    jest.mocked(api.post).mockRejectedValueOnce(new ApiBusinessError("x", 409));
+    expect(await capture(prepayInstallmentPlan(params))).toBeInstanceOf(
+      InstallmentPaid,
+    );
+
+    jest
+      .mocked(api.get)
+      .mockRejectedValueOnce(new ApiBusinessError("Invoice is paid", 422));
+    expect(
+      await capture(
+        previewPrepayment({ planId: "plan-1", targetInvoiceMonth: "2026-10" }),
+      ),
+    ).toBeInstanceOf(InvoiceIsPaid);
+  });
+
+  it("SHOULD DELETE the prepayment AND map 422", async () => {
+    await undoPrepayment("plan-1");
+
+    expect(api.delete).toHaveBeenCalledWith(
+      "/v1/finance/installment-plans/plan-1/prepayment",
+    );
+
+    jest
+      .mocked(api.delete)
+      .mockRejectedValueOnce(new ApiBusinessError("Invoice is paid", 422));
+    expect(await capture(undoPrepayment("plan-1"))).toBeInstanceOf(
+      InvoiceIsPaid,
     );
   });
 });

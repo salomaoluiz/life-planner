@@ -1,6 +1,7 @@
 import { Datasources } from "@data/datasource";
 import InstallmentPlanModel from "@data/models/financial/InstallmentPlanModel";
 import InstallmentPlanEntity from "@domain/entities/financial/InstallmentPlanEntity";
+import PrepaymentPreviewEntity from "@domain/entities/financial/PrepaymentPreviewEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { FinancialInstallmentPlanRepository } from "@domain/repositories/financial";
 import cache, { CacheStringKeys } from "@infrastructure/cache";
@@ -26,6 +27,25 @@ function installmentPlanRepositoryImpl(
     },
     async getInstallmentPlan(id): Promise<InstallmentPlanEntity> {
       return toInstallmentPlanEntity(await datasource().getInstallmentPlan(id));
+    },
+    async prepayInstallmentPlan(params): Promise<InstallmentPlanEntity> {
+      const model = await datasource().prepayInstallmentPlan(params);
+
+      invalidateFinancialCaches();
+
+      return toInstallmentPlanEntity(model);
+    },
+    async previewPrepayment(params): Promise<PrepaymentPreviewEntity> {
+      const model = await datasource().previewPrepayment(params);
+
+      return new PrepaymentPreviewEntity({
+        eligible: model.eligible.map((row) => ({ ...row })),
+        total: model.total,
+      });
+    },
+    async undoPrepayment(planId): Promise<void> {
+      await datasource().undoPrepayment(planId);
+      invalidateFinancialCaches();
     },
     async updateInstallmentPlan(params): Promise<InstallmentPlanEntity> {
       const model = await datasource().updateInstallmentPlan(params);
@@ -57,6 +77,7 @@ function toInstallmentPlanEntity(
     overLimit: model.overLimit,
     owner: OwnerType[model.owner],
     ownerId: model.ownerId,
+    prepayment: model.prepayment ? { ...model.prepayment } : undefined,
     totalValue: model.totalValue,
   });
 }

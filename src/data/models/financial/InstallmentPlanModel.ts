@@ -9,7 +9,15 @@ export interface InstallmentModel {
   installmentNumber: number;
   invoiceMonth: string;
   invoiceStatus: InstallmentInvoiceStatus;
+  prepaid: boolean;
   value: string;
+}
+
+export interface PrepaymentModel {
+  date: string;
+  discount: number;
+  id: string;
+  targetInvoiceMonth: string;
 }
 
 // API shape of `POST|GET|PATCH /v1/finance/installment-plans`: money in cents there, decimal strings here.
@@ -24,6 +32,7 @@ class InstallmentPlanModel {
   overLimit?: boolean;
   owner: OwnerType;
   ownerId: string;
+  prepayment?: PrepaymentModel;
   totalValue: string;
 
   constructor(params: {
@@ -37,6 +46,7 @@ class InstallmentPlanModel {
     overLimit?: boolean;
     owner: OwnerType;
     ownerId: string;
+    prepayment?: PrepaymentModel;
     totalValue: string;
   }) {
     this.categoryId = params.categoryId;
@@ -49,6 +59,7 @@ class InstallmentPlanModel {
     this.overLimit = params.overLimit;
     this.owner = params.owner;
     this.ownerId = params.ownerId;
+    this.prepayment = params.prepayment;
     this.totalValue = params.totalValue;
   }
 
@@ -68,14 +79,31 @@ class InstallmentPlanModel {
         installmentNumber: Number(row.installmentNumber),
         invoiceMonth: row.invoiceMonth as string,
         invoiceStatus: row.invoiceStatus as InstallmentInvoiceStatus,
+        prepaid: Boolean(row.prepaid),
         value: centsToDecimalString(Number(row.value)),
       })),
       overLimit: (data.overLimit as boolean | undefined) ?? undefined,
       owner: plan.owner as OwnerType,
       ownerId: plan.ownerId as string,
+      prepayment: toPrepayment(
+        plan.prepayment as null | Record<string, unknown>,
+      ),
       totalValue: centsToDecimalString(Number(plan.totalValue)),
     });
   }
+}
+
+function toPrepayment(
+  raw: null | Record<string, unknown> | undefined,
+): PrepaymentModel | undefined {
+  return raw
+    ? {
+        date: raw.date as string,
+        discount: Number(raw.discount),
+        id: raw.id as string,
+        targetInvoiceMonth: raw.targetInvoiceMonth as string,
+      }
+    : undefined;
 }
 
 export default InstallmentPlanModel;

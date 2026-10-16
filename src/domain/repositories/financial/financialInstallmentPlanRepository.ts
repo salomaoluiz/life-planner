@@ -1,4 +1,5 @@
 import InstallmentPlanEntity from "@domain/entities/financial/InstallmentPlanEntity";
+import PrepaymentPreviewEntity from "@domain/entities/financial/PrepaymentPreviewEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 export type FinancialInstallmentPlanRepository = {
@@ -7,6 +8,13 @@ export type FinancialInstallmentPlanRepository = {
   ): Promise<InstallmentPlanEntity>;
   deleteInstallmentPlan(id: string): Promise<void>;
   getInstallmentPlan(id: string): Promise<InstallmentPlanEntity>;
+  prepayInstallmentPlan(
+    params: PrepayInstallmentPlanRepositoryParams,
+  ): Promise<InstallmentPlanEntity>;
+  previewPrepayment(
+    params: PreviewPrepaymentRepositoryParams,
+  ): Promise<PrepaymentPreviewEntity>;
+  undoPrepayment(planId: string): Promise<void>;
   updateInstallmentPlan(
     params: UpdateInstallmentPlanRepositoryParams,
   ): Promise<InstallmentPlanEntity>;
@@ -25,6 +33,21 @@ interface CreateInstallmentPlanRepositoryParams {
   value: string;
 }
 
+interface PrepayInstallmentPlanRepositoryParams {
+  // `YYYY-MM-DD`
+  date: string;
+  // Cents; omitted or 0 = no discount.
+  discount?: number;
+  planId: string;
+  // `YYYY-MM`
+  targetInvoiceMonth: string;
+}
+
+interface PreviewPrepaymentRepositoryParams {
+  planId: string;
+  targetInvoiceMonth: string;
+}
+
 interface UpdateInstallmentPlanRepositoryParams {
   categoryId?: string;
   creditCardId?: string;
@@ -37,5 +60,7 @@ interface UpdateInstallmentPlanRepositoryParams {
 
 export {
   CreateInstallmentPlanRepositoryParams,
+  PrepayInstallmentPlanRepositoryParams,
+  PreviewPrepaymentRepositoryParams,
   UpdateInstallmentPlanRepositoryParams,
 };

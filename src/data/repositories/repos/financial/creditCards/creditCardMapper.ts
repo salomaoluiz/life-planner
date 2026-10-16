@@ -12,6 +12,7 @@ import { OwnerType } from "@domain/entities/user/OwnerEntity";
 function toCardInvoiceEntity(model: CardInvoiceModel): CardInvoiceEntity {
   return new CardInvoiceEntity({
     card: { ...model.card, owner: OwnerType[model.card.owner] },
+    credits: model.credits.map((credit) => ({ ...credit })),
     invoice: new InvoiceEntity({ ...model.invoice }),
     purchases: model.purchases.map((purchase) => ({ ...purchase })),
   });

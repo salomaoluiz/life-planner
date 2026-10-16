@@ -2,11 +2,15 @@ import {
   AccountArchived,
   BusinessError,
   CreditCardArchived,
+  HasRefunds,
   InstallmentPaid,
   InvoiceIsPaid,
+  OverAmountDue,
+  PrepaymentBlocksEdit,
+  RefundOverPurchase,
 } from "@domain/entities/errors";
 
-// The API answers 422 for three reasons on a transaction write; the message tells them apart.
+// The API answers 422 for several reasons on a transaction or card-credit write; the message tells them apart.
 function unprocessableError(message: string): BusinessError {
   if (message.includes("An installment is in a paid invoice")) {
     return new InstallmentPaid();
@@ -18,6 +22,22 @@ function unprocessableError(message: string): BusinessError {
 
   if (message.includes("Credit card is archived")) {
     return new CreditCardArchived();
+  }
+
+  if (message.includes("Undo the prepayment first")) {
+    return new PrepaymentBlocksEdit();
+  }
+
+  if (message.includes("Delete its refunds first")) {
+    return new HasRefunds();
+  }
+
+  if (message.includes("Refunds can't exceed")) {
+    return new RefundOverPurchase();
+  }
+
+  if (message.includes("can't exceed what is left to pay")) {
+    return new OverAmountDue();
   }
 
   return new AccountArchived();

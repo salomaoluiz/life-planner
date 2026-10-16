@@ -10,6 +10,7 @@ it("SHOULD turn cents into decimal strings, the calendar date into an ISO date A
     installmentNumber: 1,
     invoiceMonth: "2026-10",
     invoiceStatus: "OPEN",
+    prepaid: false,
     value: "33.34",
   });
   expect(model.installmentCount).toBe(2);
@@ -22,5 +23,32 @@ it("SHOULD leave overLimit undefined WHEN the API does not send it", () => {
 
   expect(
     InstallmentPlanModel.fromJSON(withoutOverLimit).overLimit,
+  ).toBeUndefined();
+});
+
+it("SHOULD map the prepayment and the prepaid rows (spec 032)", () => {
+  const model = InstallmentPlanModel.fromJSON({
+    ...apiInstallmentPlan,
+    installments: [{ ...apiInstallmentPlan.installments[0], prepaid: true }],
+    plan: {
+      ...apiInstallmentPlan.plan,
+      prepayment: {
+        date: "2026-10-16",
+        discount: 12000,
+        id: "prepayment-1",
+        targetInvoiceMonth: "2026-10",
+      },
+    },
+  });
+
+  expect(model.prepayment).toEqual({
+    date: "2026-10-16",
+    discount: 12000,
+    id: "prepayment-1",
+    targetInvoiceMonth: "2026-10",
+  });
+  expect(model.installments[0].prepaid).toBe(true);
+  expect(
+    InstallmentPlanModel.fromJSON(apiInstallmentPlan).prepayment,
   ).toBeUndefined();
 });

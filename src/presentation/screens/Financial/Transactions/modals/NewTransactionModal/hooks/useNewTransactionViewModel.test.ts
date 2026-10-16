@@ -358,15 +358,20 @@ describe("card mode (spec 029)", () => {
   function invoice(referenceMonth: string, status: string) {
     return new InvoiceDTO({
       amount: 1000,
+      amountDue: 1000,
+      carryIn: 0,
       closingDate: `${referenceMonth}-31`,
       dueDate: `${referenceMonth}-10`,
+      earlyPaid: 0,
       listDate: `${referenceMonth}-05`,
+      net: 1000,
       paymentAfterDue: false,
       paymentDate: `${referenceMonth}-05`,
       periodEnd: `${referenceMonth}-31`,
       periodStart: `${referenceMonth}-01`,
       referenceMonth,
       status,
+      total: 1000,
     });
   }
 

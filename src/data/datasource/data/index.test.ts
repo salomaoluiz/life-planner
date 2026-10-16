@@ -6,6 +6,7 @@ const useCases: Datasources = {
   familyDatasource: expect.any(Function),
   familyMemberDatasource: expect.any(Function),
   financialAccountDatasource: expect.any(Function),
+  financialCardCreditDatasource: expect.any(Function),
   financialCategoryDatasource: expect.any(Function),
   financialCreditCardDatasource: expect.any(Function),
   financialInstallmentPlanDatasource: expect.any(Function),

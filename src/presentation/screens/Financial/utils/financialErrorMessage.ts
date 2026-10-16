@@ -6,9 +6,13 @@ import {
   CreditCardHasTransactions,
   FinancialNotFound,
   FinancialOwnerNotAllowed,
+  HasRefunds,
   InstallmentPaid,
   InvoiceIsPaid,
   InvoiceNotPayable,
+  OverAmountDue,
+  PrepaymentBlocksEdit,
+  RefundOverPurchase,
 } from "@domain/entities/errors";
 import { TranslationKeys } from "@presentation/i18n/types";
 
@@ -39,6 +43,22 @@ function getFinancialErrorMessageKey(
 
   if (error instanceof InvoiceNotPayable) {
     return "financial.errors.invoiceNotPayable";
+  }
+
+  if (error instanceof PrepaymentBlocksEdit) {
+    return "financial.errors.undoPrepaymentFirst";
+  }
+
+  if (error instanceof HasRefunds) {
+    return "financial.errors.deleteRefundsFirst";
+  }
+
+  if (error instanceof RefundOverPurchase) {
+    return "financial.errors.refundOverPurchase";
+  }
+
+  if (error instanceof OverAmountDue) {
+    return "financial.errors.overAmountDue";
   }
 
   if (error instanceof AccountHasTransactions) {
