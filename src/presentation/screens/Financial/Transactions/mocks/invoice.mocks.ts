@@ -1,17 +1,20 @@
 import CardInvoiceDTO from "@application/dto/financial/CardInvoiceDTO";
 import { InvoiceDTO } from "@application/dto/financial/CreditCardOverviewDTO";
+import { InvoiceCreditEntity } from "@domain/entities/financial/CardInvoiceEntity";
 
 import CardInvoiceUIModel from "../models/CardInvoiceUIModel";
 
 function makeInvoice(
   overrides: Partial<ConstructorParameters<typeof InvoiceDTO>[0]> = {},
+  credits: InvoiceCreditEntity[] = [],
 ) {
-  return new CardInvoiceUIModel(makeInvoiceDTO(overrides));
+  return new CardInvoiceUIModel(makeInvoiceDTO(overrides, 2, credits));
 }
 
 function makeInvoiceDTO(
   overrides: Partial<ConstructorParameters<typeof InvoiceDTO>[0]> = {},
   purchases = 2,
+  credits: InvoiceCreditEntity[] = [],
 ) {
   return new CardInvoiceDTO({
     card: {
@@ -22,6 +25,7 @@ function makeInvoiceDTO(
       ownerId: "user-id",
       title: "Main card",
     },
+    credits,
     invoice: new InvoiceDTO({
       amount: 45000,
       amountDue: 45000,
@@ -50,6 +54,7 @@ function makeInvoiceDTO(
         description: "Market",
         id: "purchase-1",
         ownerId: "user-id",
+        prepaid: true,
         value: 25000,
       },
       {

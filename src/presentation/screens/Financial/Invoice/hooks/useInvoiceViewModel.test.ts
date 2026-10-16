@@ -137,3 +137,38 @@ it("SHOULD navigate to the add form with the card AND to a purchase edit AND clo
   act(() => result.current.onClose());
   expect(spies.back).toHaveBeenCalled();
 });
+
+it("SHOULD open the refund and early payment sheets for this invoice (spec 032)", () => {
+  givenLoaded({ invoice: makeInvoice() });
+  const { result } = setup();
+
+  act(() => result.current.onRefundPress());
+  expect(spies.replace).toHaveBeenLastCalledWith({
+    params: { creditCardId: "card-1", invoiceMonth: "2026-10" },
+    pathname: "/financial/refund/card_refund",
+  });
+  act(() => result.current.onEarlyPaymentPress());
+  expect(spies.replace).toHaveBeenLastCalledWith({
+    params: { creditCardId: "card-1", invoiceMonth: "2026-10" },
+    pathname: "/financial/early_payment/card_early_payment",
+  });
+});
+
+it("SHOULD edit a credit in the sheet of its kind", () => {
+  givenLoaded({ invoice: makeInvoice() });
+  const { result } = setup();
+  const credit = { id: "c1", kind: "REFUND" } as never;
+
+  act(() => result.current.onCreditPress(credit));
+  expect(spies.replace).toHaveBeenLastCalledWith({
+    params: { creditCardId: "card-1", id: "c1" },
+    pathname: "/financial/refund/card_refund",
+  });
+  act(() =>
+    result.current.onCreditPress({ id: "c2", kind: "EARLY_PAYMENT" } as never),
+  );
+  expect(spies.replace).toHaveBeenLastCalledWith({
+    params: { creditCardId: "card-1", id: "c2" },
+    pathname: "/financial/early_payment/card_early_payment",
+  });
+});

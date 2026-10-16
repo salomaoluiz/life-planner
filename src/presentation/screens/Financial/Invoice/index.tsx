@@ -12,16 +12,29 @@ import {
   ListItem,
   Text,
 } from "@components";
+import { formatAmount } from "@components/AmountText/formatAmount";
 import Skeleton from "@components/Skeleton";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
-import { formatDayMonth } from "@screens/Financial/Cards/models/cardList";
+import {
+  formatDayMonth,
+  formatReferenceMonth,
+} from "@screens/Financial/Cards/models/cardList";
 import { installmentTitle } from "@screens/Financial/models/installments";
+import { InvoiceCreditUIModel } from "@screens/Financial/Transactions/models/CardInvoiceUIModel";
 
 import PayInvoiceSheet from "./components/PayInvoiceSheet";
 import { useInvoiceViewModel } from "./hooks";
 import useStyles from "./styles";
 import invoiceTestIds from "./testIds";
+
+const CREDIT_ICONS = {
+  EARLY_PAYMENT: "cash-fast",
+  PREPAYMENT_DISCOUNT: "tag-minus",
+  REFUND: "cash-refund",
+} as const;
+// The API stores the English description of the discount row; the screen translates it.
+const DISCOUNT_PREFIX = "Prepayment discount · ";
 
 function InvoiceModal() {
   const { styles } = useStyles();
@@ -75,6 +88,34 @@ function InvoiceModal() {
               pay: formatDayMonth(dates.paymentDate),
             })}
           />
+          {invoice.earlyPaidCents > 0 ? (
+            <View>
+              <Text.Body
+                testID={invoiceTestIds.paidEarly}
+                tone="income"
+                value={t("financial.earlyPayment.paidEarly", {
+                  value: formatAmount(invoice.earlyPaidCents, localeTag),
+                })}
+              />
+              <Text.Body
+                testID={invoiceTestIds.leftToPay}
+                value={`${t("financial.earlyPayment.leftToPay")}: ${formatAmount(invoice.amountCents, localeTag)}`}
+              />
+            </View>
+          ) : null}
+          {invoice.creditCarryCents > 0 ? (
+            <Text.Body
+              testID={invoiceTestIds.creditCarry}
+              tone="income"
+              value={t("financial.invoice.creditCarry", {
+                month: formatReferenceMonth(
+                  invoice.creditCarryMonth,
+                  localeTag,
+                ),
+                value: formatAmount(invoice.creditCarryCents, localeTag),
+              })}
+            />
+          ) : null}
           {isPaid && invoice.paidOn ? (
             <Text.Body
               testID={invoiceTestIds.paidInfo}
@@ -116,11 +157,62 @@ function InvoiceModal() {
                 (params) => t("financial.installment.label", params),
               )}
               trailing={
-                <AmountText type="EXPENSE" value={purchase.amountCents} />
+                <View style={styles.trailing}>
+                  <AmountText type="EXPENSE" value={purchase.amountCents} />
+                  {purchase.prepaid ? (
+                    <Badge
+                      label={t("financial.prepayment.prepaidBadge")}
+                      testID={invoiceTestIds.prepaid}
+                      tone="accent"
+                    />
+                  ) : null}
+                </View>
               }
             />
           ))}
         </View>
+        {invoice.credits.length > 0 || invoice.carryInCents < 0 ? (
+          <View>
+            <GroupHeader
+              title={t("financial.invoice.credits", {
+                count: invoice.credits.length,
+              })}
+            />
+            {invoice.carryInCents < 0 ? (
+              <ListItem
+                inset
+                leading={<IconTile name="swap-horizontal" tone="income" />}
+                testID={invoiceTestIds.carryIn}
+                title={t("financial.invoice.creditFrom", {
+                  month: formatReferenceMonth(invoice.previousMonth, localeTag),
+                })}
+                trailing={
+                  <AmountText type="INCOME" value={-invoice.carryInCents} />
+                }
+              />
+            ) : null}
+            {invoice.credits.map((credit) => (
+              <ListItem
+                inset
+                key={credit.id}
+                leading={
+                  <IconTile name={CREDIT_ICONS[credit.kind]} tone="income" />
+                }
+                onPress={
+                  credit.kind === "PREPAYMENT_DISCOUNT"
+                    ? undefined
+                    : () => vm.onCreditPress(credit)
+                }
+                subtitle={creditSubtitle(credit)}
+                testID={invoiceTestIds.credit}
+                title={creditTitle(credit)}
+                trailing={
+                  <AmountText type="INCOME" value={credit.amountCents} />
+                }
+              />
+            ))}
+          </View>
+        ) : null}
         <View style={styles.actions}>
           {isClosed ? (
             <Button.Primary
@@ -131,7 +223,23 @@ function InvoiceModal() {
               testID={invoiceTestIds.pay}
             />
           ) : null}
-          {isPaid ? (
+          {invoice.canAddCredit ? (
+            <Button.Secondary
+              fullWidth
+              label={t("financial.refund.new")}
+              onPress={vm.onRefundPress}
+              testID={invoiceTestIds.refund}
+            />
+          ) : null}
+          {invoice.canAddCredit && invoice.amountCents > 0 ? (
+            <Button.Secondary
+              fullWidth
+              label={t("financial.earlyPayment.action")}
+              onPress={vm.onEarlyPaymentPress}
+              testID={invoiceTestIds.earlyPayment}
+            />
+          ) : null}
+          {isPaid && invoice.paidOn ? (
             <Button.Ghost
               label={t("financial.invoice.undo")}
               onPress={vm.onUndoPress}
@@ -150,6 +258,30 @@ function InvoiceModal() {
         </View>
       </View>
     );
+  }
+
+  function creditTitle(credit: InvoiceCreditUIModel) {
+    return credit.kind === "PREPAYMENT_DISCOUNT"
+      ? t("financial.prepayment.discountLine", {
+          description: credit.description.replace(DISCOUNT_PREFIX, ""),
+        })
+      : credit.description;
+  }
+
+  function creditSubtitle(credit: InvoiceCreditUIModel) {
+    if (credit.kind === "REFUND") {
+      return credit.refundedName
+        ? `${credit.refundedName} · ${formatDayMonth(toIsoDate(credit.date))}`
+        : formatDayMonth(toIsoDate(credit.date));
+    }
+
+    if (credit.kind === "EARLY_PAYMENT") {
+      return credit.method === "EXTERNAL" || !credit.accountName
+        ? t("financial.earlyPayment.boleto")
+        : credit.accountName;
+    }
+
+    return formatDayMonth(toIsoDate(credit.date));
   }
 
   const month = invoice
