@@ -1,0 +1,13 @@
+url: ${E2E_WEB_URL}
+---
+# Needs TOKEN, OWNER_ID, CATEGORY_ID, TITLE, PURCHASE_NAME and PLAN_NAME from the caller.
+# Outputs CARD_ID, CLOSED_MONTH (YYYY-MM of the closed invoice), PLAN_ID and PURCHASE_ID.
+- runScript:
+    file: ../../scripts/setup/create-card-with-plan.js
+    env:
+      TOKEN: ${TOKEN}
+      OWNER_ID: ${OWNER_ID}
+      CATEGORY_ID: ${CATEGORY_ID}
+      TITLE: ${TITLE}
+      PURCHASE_NAME: ${PURCHASE_NAME}
+      PLAN_NAME: ${PLAN_NAME}
