@@ -16,6 +16,7 @@ import Skeleton from "@components/Skeleton";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { formatDayMonth } from "@screens/Financial/Cards/models/cardList";
+import { installmentTitle } from "@screens/Financial/models/installments";
 
 import PayInvoiceSheet from "./components/PayInvoiceSheet";
 import { useInvoiceViewModel } from "./hooks";
@@ -109,7 +110,11 @@ function InvoiceModal() {
               onPress={() => vm.onPurchasePress(purchase.id)}
               subtitle={`${purchase.categoryName} · ${formatDayMonth(toIsoDate(purchase.date))}`}
               testID={invoiceTestIds.purchase}
-              title={purchase.description}
+              title={installmentTitle(
+                purchase.description,
+                purchase.installment,
+                (params) => t("financial.installment.label", params),
+              )}
               trailing={
                 <AmountText type="EXPENSE" value={purchase.amountCents} />
               }

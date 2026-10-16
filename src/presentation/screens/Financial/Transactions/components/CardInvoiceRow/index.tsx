@@ -13,6 +13,7 @@ import {
 } from "@components";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
+import { installmentTitle } from "@screens/Financial/models/installments";
 import CardInvoiceUIModel from "@screens/Financial/Transactions/models/CardInvoiceUIModel";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
@@ -110,7 +111,11 @@ function CardInvoiceRow(props: Props) {
               onPress={() => props.onPurchasePress(purchase.id)}
               subtitle={`${purchase.categoryName} · ${formatShortDate(purchase.date, localeTag)}`}
               testID={transactionsTestIds.cardInvoicePurchase}
-              title={purchase.description}
+              title={installmentTitle(
+                purchase.description,
+                purchase.installment,
+                (params) => t("financial.installment.label", params),
+              )}
               trailing={
                 <AmountText type="EXPENSE" value={purchase.amountCents} />
               }

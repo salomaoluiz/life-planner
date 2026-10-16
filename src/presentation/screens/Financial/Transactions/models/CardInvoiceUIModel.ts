@@ -1,5 +1,6 @@
 import CardInvoiceDTO from "@application/dto/financial/CardInvoiceDTO";
 import { normalizeCategoryColor } from "@presentation/constants/categoryColors";
+import { InstallmentLabel } from "@screens/Financial/models/installments";
 
 const FALLBACK_ICON = "help-circle-outline";
 
@@ -11,6 +12,8 @@ export interface InvoicePurchaseUIModel {
   date: Date;
   description: string;
   id: string;
+  // Set for an installment: "k of n" (spec 030 FR 8).
+  installment?: InstallmentLabel;
 }
 
 // One card invoice as a line of the transactions list (spec 029 FR 24).
@@ -85,6 +88,13 @@ class CardInvoiceUIModel {
       date: parseCalendarDate(purchase.date),
       description: purchase.description,
       id: purchase.id,
+      installment:
+        purchase.installmentNumber && purchase.installmentCount
+          ? {
+              count: purchase.installmentCount,
+              number: purchase.installmentNumber,
+            }
+          : undefined,
     }));
   }
 
