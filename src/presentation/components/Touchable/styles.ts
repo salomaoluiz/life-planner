@@ -2,7 +2,7 @@ import { StyleSheet } from "react-native";
 
 import { useKitTheme } from "@components/utils/useKitTheme";
 
-function useStyles(options: { minTouchTarget: boolean }) {
+function useStyles(options: { hoverRadius: number; minTouchTarget: boolean }) {
   const { colors, sizes } = useKitTheme();
 
   return {
@@ -11,6 +11,9 @@ function useStyles(options: { minTouchTarget: boolean }) {
       disabled: { opacity: 0.5 },
       hover: {
         backgroundColor: colors.surfaceRaised,
+        borderColor: colors.accent,
+        borderRadius: options.hoverRadius,
+        borderWidth: 1,
         bottom: 0,
         left: 0,
         opacity: 0.6,

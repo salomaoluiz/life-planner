@@ -44,7 +44,10 @@ function CategoryPickerSheet(props: Props) {
         placeholder={props.searchPlaceholder}
         value={props.query}
       />
-      <ScrollView keyboardShouldPersistTaps={"handled"}>
+      <ScrollView
+        keyboardShouldPersistTaps={"handled"}
+        showsVerticalScrollIndicator={false}
+      >
         {rows.map((row) => (
           <TreeItem
             depth={row.depth}

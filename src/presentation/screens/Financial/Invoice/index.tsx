@@ -98,6 +98,7 @@ function InvoiceModal() {
           />
           {invoice.purchases.map((purchase) => (
             <ListItem
+              inset
               key={purchase.id}
               leading={
                 <IconTile

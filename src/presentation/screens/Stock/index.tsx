@@ -71,6 +71,7 @@ function Stock() {
           quantity,
           status,
         })}
+        inset
         leading={
           <IconTile name={item.iconTile.icon} tone={item.iconTile.tone} />
         }
@@ -144,6 +145,7 @@ function Stock() {
           keyExtractor={(row: StockListRow) => row.id}
           ListEmptyComponent={renderEmpty()}
           renderItem={renderRow}
+          showsVerticalScrollIndicator={false}
           testID="flashList"
         />
       }
@@ -208,6 +210,7 @@ function Stock() {
       >
         {vm.sortOptions.map((option) => (
           <ListItem
+            inset
             key={option.value}
             onPress={() => vm.onSortChange(option.value)}
             testID={`${stockTestIds.sortOption}-${option.value}`}

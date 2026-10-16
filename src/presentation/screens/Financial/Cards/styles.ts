@@ -19,6 +19,7 @@ function useStyles() {
         gap: theme.sizes.spacing.lg,
         paddingBottom: theme.sizes.spacing.lg,
       },
+      totalBody: { gap: theme.sizes.spacing.md },
       totalColumn: { flex: 1 },
       totalRow: {
         alignItems: "center",

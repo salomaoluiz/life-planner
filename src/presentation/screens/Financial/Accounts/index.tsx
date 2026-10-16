@@ -84,6 +84,7 @@ function FinancialAccounts() {
     if (item.kind === "archivedToggle") {
       return (
         <ListItem
+          inset
           onPress={vm.onArchivedToggle}
           testID={accountsTestIds.archivedToggle}
           title={t("financial.accounts.archived", { count: item.count })}
@@ -105,6 +106,7 @@ function FinancialAccounts() {
 
     return (
       <ListItem
+        inset
         leading={<IconTile name={account.icon} tone={tone} />}
         onPress={() => vm.onRowPress(account.id)}
         subtitle={account.ownerName}
@@ -169,6 +171,7 @@ function FinancialAccounts() {
         onRefresh={vm.onRefresh}
         refreshing={vm.isRefreshing}
         renderItem={renderItem}
+        showsVerticalScrollIndicator={false}
       />
     </View>
   );

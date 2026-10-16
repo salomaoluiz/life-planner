@@ -14,6 +14,7 @@ function useStyles() {
         flexDirection: "row",
         justifyContent: "space-between",
       },
+      row: { paddingBottom: theme.sizes.spacing.sm },
       title: {
         alignItems: "center",
         flexDirection: "row",

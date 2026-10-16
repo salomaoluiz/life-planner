@@ -14,6 +14,7 @@ function TransactionRow(props: Props) {
 
   return (
     <ListItem
+      inset
       leading={<IconTile color={item.categoryColor} name={item.categoryIcon} />}
       onPress={() => props.onPress(item.id)}
       subtitle={item.subtitle}
