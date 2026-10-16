@@ -194,6 +194,17 @@ function useNewTransactionViewModel() {
 
   const existing = transactions.data?.find((item) => item.id === params.id);
   const isNotFound = isEditing && !!transactions.data && !existing;
+  // An installment is edited through its own sheet (spec 030): hand over instead of opening this form.
+  const isInstallment = isEditing && !!existing?.installmentPlanId;
+
+  useEffect(() => {
+    if (isInstallment) {
+      router.replace({
+        params: { id: params.id },
+        pathname: "/financial/installment/edit_installment",
+      } as never);
+    }
+  }, [isInstallment]);
 
   const initial = useMemo(() => {
     if (!uiModel || !owners.data || !accounts.data) {
@@ -437,7 +448,7 @@ function useNewTransactionViewModel() {
     isDiscardDialogOpen,
     isEditing,
     isInvoicePaid: cardHints.isInvoicePaid,
-    isLoading: !state && !isNotFound,
+    isLoading: (!state && !isNotFound) || isInstallment,
     isNotFound,
     isSaveDisabled: cardHints.isInvoicePaid,
     isSaving:

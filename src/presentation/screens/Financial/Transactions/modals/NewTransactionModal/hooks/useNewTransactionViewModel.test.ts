@@ -591,6 +591,29 @@ describe("card mode (spec 029)", () => {
       expect(result.current.installments.enabled).toBe(false);
     });
 
+    it("SHOULD hand an installment over to its own edit sheet instead of opening this form", () => {
+      givenLoaded({
+        cards: [mainCard],
+        params: { id: "t1" },
+        transactions: [
+          tx("t1", {
+            creditCardId: "c1",
+            installmentCount: 10,
+            installmentNumber: 3,
+            installmentPlanId: "plan-1",
+          }),
+        ],
+      });
+
+      const { result } = setup();
+
+      expect(spies.replace).toHaveBeenCalledWith({
+        params: { id: "t1" },
+        pathname: "/financial/installment/edit_installment",
+      });
+      expect(result.current.isLoading).toBe(true);
+    });
+
     it("SHOULD NOT offer installments WHEN editing a purchase", () => {
       givenLoaded({
         cards: [mainCard],

@@ -17,7 +17,7 @@ import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
 import useNewTransactionViewModel from "../useNewTransactionViewModel";
 
 jest.mock("expo-router", () => ({
-  router: { back: jest.fn(), push: jest.fn() },
+  router: { back: jest.fn(), push: jest.fn(), replace: jest.fn() },
   useLocalSearchParams: jest.fn(),
 }));
 jest.mock("@react-navigation/native", () => ({ useIsFocused: jest.fn() }));
@@ -144,6 +144,7 @@ const spies = {
   focused: jest.mocked(useIsFocused),
   params: jest.mocked(useLocalSearchParams),
   push: jest.mocked(router.push),
+  replace: jest.mocked(router.replace),
   useMutation: jest.mocked(useMutation),
   useQuery: jest.mocked(useQuery),
 };
