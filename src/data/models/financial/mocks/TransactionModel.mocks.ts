@@ -18,6 +18,7 @@ const jsonMock = {
   creditCardId: null,
   date: "2023-10-01",
   description: "Some Description",
+  earlyPayment: null,
   id: "9e6cd00a-f854-48c0-be6d-c2e904bfd9b7",
   installmentCount: null,
   installmentNumber: null,

@@ -619,6 +619,33 @@ describe("card mode (spec 029)", () => {
       expect(result.current.isLoading).toBe(true);
     });
 
+    it("SHOULD hand the account row of an early payment over to the early payment sheet (spec 032 FR 35)", () => {
+      givenLoaded({
+        params: { id: "t1" },
+        transactions: [
+          tx("t1", {
+            earlyPayment: {
+              creditCardId: "c1",
+              id: "early-1",
+              invoiceMonth: "2026-10",
+            },
+          }),
+        ],
+      });
+
+      const { result } = setup();
+
+      expect(spies.replace).toHaveBeenCalledWith({
+        params: {
+          creditCardId: "c1",
+          id: "early-1",
+          invoiceMonth: "2026-10",
+        },
+        pathname: "/financial/early_payment/card_early_payment",
+      });
+      expect(result.current.isLoading).toBe(true);
+    });
+
     it("SHOULD offer to refund a card purchase AND open the refund sheet linked to it (spec 032)", () => {
       givenLoaded({
         cards: [mainCard],

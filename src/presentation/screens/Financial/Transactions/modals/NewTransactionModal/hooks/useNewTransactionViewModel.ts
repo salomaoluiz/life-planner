@@ -196,6 +196,8 @@ function useNewTransactionViewModel() {
   const isNotFound = isEditing && !!transactions.data && !existing;
   // An installment is edited through its own sheet (spec 030): hand over instead of opening this form.
   const isInstallment = isEditing && !!existing?.installmentPlanId;
+  // The account debit row of an early payment is edited on the card (spec 032 FR 35): hand over as well.
+  const earlyPayment = isEditing ? existing?.earlyPayment : undefined;
   // A card purchase can be refunded from its own sheet (spec 032 FR 21).
   const canRefund =
     isEditing &&
@@ -212,6 +214,19 @@ function useNewTransactionViewModel() {
       } as never);
     }
   }, [isInstallment]);
+
+  useEffect(() => {
+    if (earlyPayment) {
+      router.replace({
+        params: {
+          creditCardId: earlyPayment.creditCardId,
+          id: earlyPayment.id,
+          invoiceMonth: earlyPayment.invoiceMonth,
+        },
+        pathname: "/financial/early_payment/card_early_payment",
+      } as never);
+    }
+  }, [earlyPayment?.id]);
 
   const initial = useMemo(() => {
     if (!uiModel || !owners.data || !accounts.data) {
@@ -456,7 +471,7 @@ function useNewTransactionViewModel() {
     isDiscardDialogOpen,
     isEditing,
     isInvoicePaid: cardHints.isInvoicePaid,
-    isLoading: (!state && !isNotFound) || isInstallment,
+    isLoading: (!state && !isNotFound) || isInstallment || !!earlyPayment,
     isNotFound,
     isSaveDisabled: cardHints.isInvoicePaid,
     isSaving:

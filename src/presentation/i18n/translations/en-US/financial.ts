@@ -188,6 +188,12 @@ const financial = {
     deleteConfirm: "The invoice goes back to what it was before this payment.",
     description: "Description",
     editOnCard: "Edit on the card",
+    errors: {
+      account: "Choose an account.",
+      amount: "Enter a value greater than zero.",
+      date: "The date cannot be after today.",
+      description: "Description is required.",
+    },
     hint: "The {{month}} invoice will have {{value}} left to pay",
     invoice: "Invoice",
     leftToPay: "Left to pay",

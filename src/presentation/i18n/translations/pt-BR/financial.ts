@@ -186,6 +186,12 @@ const financial = {
     deleteConfirm: "A fatura volta ao que era antes deste pagamento.",
     description: "Descrição",
     editOnCard: "Editar no cartão",
+    errors: {
+      account: "Escolha uma conta.",
+      amount: "Informe um valor maior que zero.",
+      date: "A data não pode ser depois de hoje.",
+      description: "A descrição é obrigatória.",
+    },
     hint: "A fatura de {{month}} fica com {{value}} a pagar",
     invoice: "Fatura",
     leftToPay: "Falta pagar",
