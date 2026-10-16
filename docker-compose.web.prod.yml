@@ -1,0 +1,26 @@
+# Production web stack (Portainer Git stack `life-planner-prod-web`, ref refs/heads/main).
+# EXPO_PUBLIC_* come from the stack environment and are inlined at build time.
+services:
+  web:
+    container_name: life-planner-web-prod
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      args:
+        EXPO_PUBLIC_API_URL: ${EXPO_PUBLIC_API_URL:?EXPO_PUBLIC_API_URL is required}
+        EXPO_PUBLIC_PROJECT_WEBSITE_URL: ${EXPO_PUBLIC_PROJECT_WEBSITE_URL:?EXPO_PUBLIC_PROJECT_WEBSITE_URL is required}
+        EXPO_PUBLIC_SENTRY_ORGANIZATION: ${EXPO_PUBLIC_SENTRY_ORGANIZATION:-}
+        EXPO_PUBLIC_SENTRY_PROJECT: ${EXPO_PUBLIC_SENTRY_PROJECT:-}
+        EXPO_PUBLIC_SENTRY_DSN: ${EXPO_PUBLIC_SENTRY_DSN:-}
+        EXPO_PUBLIC_SENTRY_URL: ${EXPO_PUBLIC_SENTRY_URL:-https://sentry.io/}
+        EXPO_PUBLIC_SENTRY_TRACES_SAMPLER: ${EXPO_PUBLIC_SENTRY_TRACES_SAMPLER:-1}
+        EXPO_PUBLIC_SENTRY_ENVIRONMENT: ${EXPO_PUBLIC_SENTRY_ENVIRONMENT:-production}
+        EXPO_PUBLIC_SENTRY_ENABLED: ${EXPO_PUBLIC_SENTRY_ENABLED:-true}
+    ports:
+      - "1016:80"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M

@@ -1,0 +1,14 @@
+node_modules
+.git
+.env*
+android
+ios
+dist
+coverage
+e2e-report
+.expo
+docs
+.claude
+.superpowers
+.idea
+.scannerwork
