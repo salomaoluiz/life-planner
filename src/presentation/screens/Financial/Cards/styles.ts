@@ -14,6 +14,7 @@ function useStyles() {
         alignItems: "center",
         flexDirection: "row",
         justifyContent: "space-between",
+        paddingBottom: theme.sizes.spacing.sm,
       },
       toolbar: {
         gap: theme.sizes.spacing.lg,
