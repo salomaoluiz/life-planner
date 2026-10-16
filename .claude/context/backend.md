@@ -19,11 +19,11 @@ Sibling repo: NestJS 10 + Prisma/Postgres REST API (Clean Architecture/DDD) that
 
 ## Environments
 
-| Environment | API                                             | Notes                                                                                                                                              |
-| ----------- | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Local       | `http://localhost:3000/api` (`yarn start:dev`)  | watch mode on the owner's Mac; E2E target                                                                                                          |
-| Staging     | `http://<home-server>:1009/api`                 | `life-planner-back`, staging database; `/swagger` on                                                                                               |
-| Production  | `https://life-planner-api.example.com/api` | `life-planner-back-prod`, own database and `JWT_SECRET`, `/swagger` off, Tailscale only; web at `https://life-planner.example.com` (spec 031) |
+| Environment | API                                            | Notes                                                                                                                                         |
+| ----------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Local       | `http://localhost:3000/api` (`yarn start:dev`) | watch mode on the owner's Mac; E2E target                                                                                                     |
+| Staging     | `http://<home-server>:1009/api`                | `life-planner-back`, staging database; `/swagger` on                                                                                          |
+| Production  | `https://life-planner-api.example.com/api`     | `life-planner-back-prod`, own database and `JWT_SECRET`, `/swagger` off, Tailscale only; web at `https://life-planner.example.com` (spec 031) |
 
 `EXPO_PUBLIC_API_URL` selects the environment; production values go in `.env.production` (git-ignored) or the Portainer stack env. Staging and production tokens are not interchangeable.
 

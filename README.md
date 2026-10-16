@@ -36,7 +36,7 @@ The report is `e2e-report/summary.md`. More in `e2e/README.md`.
 
 ## Production
 
-Production runs on the home server, reachable over Tailscale: web at `https://life-planner.example.com`, API at `https://life-planner-api.example.com/api`. It follows `main`: merging and redeploying in Portainer is the release. Server-side steps (database, API stack, Nginx, DNS) are in `docs/production.md` of the backend repo (`life-planner-back`).
+Production runs on the home server (the hostnames below use `example.com`; use your own domain), reachable over Tailscale: web at `https://life-planner.example.com`, API at `https://life-planner-api.example.com/api`. It follows `main`: merging and redeploying in Portainer is the release. Server-side steps (database, API stack, Nginx, DNS) are in `docs/production.md` of the backend repo (`life-planner-back`).
 
 ### Web stack (Portainer)
 
@@ -44,8 +44,8 @@ Stacks → Add stack → Repository: `https://github.com/salomaoluiz/life-planne
 
 | Variable                                                                         | Value                                                        |
 | -------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| `EXPO_PUBLIC_API_URL`                                                            | `https://life-planner-api.example.com/api`              |
-| `EXPO_PUBLIC_PROJECT_WEBSITE_URL`                                                | `https://life-planner.example.com`                      |
+| `EXPO_PUBLIC_API_URL`                                                            | `https://life-planner-api.example.com/api`                   |
+| `EXPO_PUBLIC_PROJECT_WEBSITE_URL`                                                | `https://life-planner.example.com`                           |
 | `EXPO_PUBLIC_SENTRY_ENVIRONMENT` / `EXPO_PUBLIC_SENTRY_ENABLED`                  | `production` / `true`                                        |
 | `EXPO_PUBLIC_SENTRY_ORGANIZATION`, `_PROJECT`, `_DSN`, `_URL`, `_TRACES_SAMPLER` | same Sentry project as development (values from your `.env`) |
 
