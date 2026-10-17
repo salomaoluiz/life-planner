@@ -152,18 +152,32 @@ onFlowComplete:
       id: "financial.cards.invoice-row-amount"
       text: ".*100[.,]00.*"
     timeout: 20000
-# Refund 100,00 of the market purchase on the closed invoice (250,00 -> 150,00)
+# Refund 100,00 of the market purchase from its own sheet on the closed invoice (250,00 -> 150,00)
 - runFlow: ../../../subflows/financial/scroll-list-up.yaml
 - tapOn:
-    id: "financial.cards.refund-button"
+    id: "financial.cards.invoice-tabs-closed"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- tapOn:
+    id: "financial.cards.invoice-row"
+- extendedWaitUntil:
+    visible:
+      id: "financial.invoice.purchase"
+    timeout: 20000
+- tapOn:
+    id: "financial.invoice.purchase"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.save-button"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.transaction-form.refund-button"
 - extendedWaitUntil:
     visible:
       id: "financial.refund.sheet"
     timeout: 20000
-- tapOn:
+- assertVisible:
     id: "financial.refund.linked"
-- tapOn:
-    id: "financial.refund.linked-option-tx:${output.PURCHASE_ID}"
 - tapOn:
     id: "financial.refund.amount"
 - eraseText

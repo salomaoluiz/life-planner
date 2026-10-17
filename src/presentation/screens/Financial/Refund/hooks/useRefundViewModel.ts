@@ -68,7 +68,8 @@ function useRefundViewModel() {
   );
   const [description, setDescription] = useState(params.description);
   const [invoiceChoice, setInvoiceChoice] = useState(params.invoiceMonth);
-  const [linked, setLinked] = useState(() => linkedFromParams(params));
+  // The link comes only from the purchase or plan the sheet was opened from, and never changes (spec 032 FR 22).
+  const linked = linkedFromParams(params);
   const [submitted, setSubmitted] = useState(false);
   const [isDeleteOpen, setDeleteOpen] = useState(false);
 
@@ -210,8 +211,8 @@ function useRefundViewModel() {
     isLocked,
     isSaving: createMutation.isFetching || updateMutation.isFetching,
     linked,
+    linkedIsPlan: !!linked?.startsWith("plan:"),
     linkedName: options.find((option) => option.value === linked)?.name,
-    linkedOptions: options,
     onAmountChange: setAmountCents,
     onClose: () => router.back(),
     onDateChange: (value?: Date) => value && setDate(value),
@@ -226,8 +227,6 @@ function useRefundViewModel() {
     onDeletePress: () => setDeleteOpen(true),
     onDescriptionChange: setDescription,
     onInvoiceChange: setInvoiceChoice,
-    onLinkedChange: (value: string) => setLinked(value),
-    onLinkedClear: () => setLinked(undefined),
     onSave,
   };
 }

@@ -3,6 +3,12 @@ import { fireEvent, screen } from "@tests";
 import { setup } from "./mocks/index.mocks";
 import refundTestIds from "./testIds";
 
+it("SHOULD NOT show the purchase field WHEN opened from an invoice", () => {
+  setup();
+
+  expect(screen.queryByTestId(refundTestIds.linked)).toBeNull();
+});
+
 it("SHOULD title the sheet with the card AND show every field", () => {
   setup();
 
@@ -10,7 +16,6 @@ it("SHOULD title the sheet with the card AND show every field", () => {
     screen.getByText('financial.refund.titleCard {"card":"Main card"}'),
   ).toBeOnTheScreen();
   [
-    refundTestIds.linked,
     refundTestIds.description,
     refundTestIds.amount,
     refundTestIds.date,
@@ -46,18 +51,18 @@ it("SHOULD save with the default description", () => {
   expect(vm.onSave).toHaveBeenCalledWith("financial.refund.defaultDescription");
 });
 
-it("SHOULD offer to clear the link only WHEN there is one", () => {
-  const vm = setup({ linked: "plan:p1" });
+it("SHOULD show the linked purchase as a fixed field WHEN opened from a transaction", () => {
+  setup({ linked: "tx:t2", linkedName: "TV" });
 
-  fireEvent.press(screen.getByTestId(refundTestIds.linkedClear));
-
-  expect(vm.onLinkedClear).toHaveBeenCalledTimes(1);
+  expect(screen.getByTestId(refundTestIds.linked)).toBeOnTheScreen();
 });
 
-it("SHOULD hide Clear WHEN nothing is linked", () => {
-  setup();
+it("SHOULD name a refunded plan", () => {
+  setup({ linked: "plan:p1", linkedIsPlan: true, linkedName: "Notebook" });
 
-  expect(screen.queryByTestId(refundTestIds.linkedClear)).toBeNull();
+  expect(
+    screen.getByDisplayValue('financial.refund.linkedPlan {"name":"Notebook"}'),
+  ).toBeOnTheScreen();
 });
 
 it("SHOULD show the carry hint WHEN the invoice goes negative", () => {

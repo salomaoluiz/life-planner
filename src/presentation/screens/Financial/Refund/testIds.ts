@@ -8,7 +8,6 @@ const refundTestIds = {
   hint: "financial.refund.hint",
   invoice: "financial.refund.invoice",
   linked: "financial.refund.linked",
-  linkedClear: "financial.refund.linked-clear",
   save: "financial.refund.save",
   sheet: "financial.refund.sheet",
 } as const;

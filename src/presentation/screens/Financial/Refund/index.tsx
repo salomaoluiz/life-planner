@@ -42,34 +42,19 @@ function RefundModal() {
 
     return (
       <View style={styles.form}>
-        <View style={styles.linkedRow}>
-          <View style={styles.linkedSelect}>
-            <SelectField
-              closeLabel={t("common.actions.close")}
-              disabled={vm.isLocked}
-              label={t("financial.refund.linked")}
-              onChange={vm.onLinkedChange}
-              options={vm.linkedOptions.map((option) => ({
-                label: option.isPlan
-                  ? t("financial.refund.linkedPlan", { name: option.name })
-                  : option.name,
-                value: option.value,
-              }))}
-              placeholder={t("financial.refund.linkedNone")}
-              sheetTitle={t("financial.refund.linked")}
-              testID={refundTestIds.linked}
-              value={vm.linked}
-            />
-          </View>
-          {vm.linked && !vm.isLocked ? (
-            <Button.Ghost
-              inline
-              label={t("financial.refund.clear")}
-              onPress={vm.onLinkedClear}
-              testID={refundTestIds.linkedClear}
-            />
-          ) : null}
-        </View>
+        {vm.linked ? (
+          <TextField
+            disabled
+            label={t("financial.refund.linked")}
+            onChangeText={() => undefined}
+            testID={refundTestIds.linked}
+            value={
+              vm.linkedIsPlan
+                ? t("financial.refund.linkedPlan", { name: vm.linkedName })
+                : (vm.linkedName ?? "")
+            }
+          />
+        ) : null}
         <TextField
           error={err(vm.errors.description)}
           label={t("financial.refund.description")}

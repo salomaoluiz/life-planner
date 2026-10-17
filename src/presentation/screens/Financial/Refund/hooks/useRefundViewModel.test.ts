@@ -41,25 +41,33 @@ it("SHOULD default the invoice by the date (16/10 with closing day 10 = November
   expect(result.current.invoiceMonth).toBe("2026-11");
 });
 
-it("SHOULD offer the purchases AND plans of the card as the link", () => {
+it("SHOULD keep the link of the purchase the sheet was opened from, fixed", () => {
+  spies.params.mockReturnValue({
+    creditCardId: "card-1",
+    refundedTransactionId: "t2",
+  });
   givenLoaded();
   const { result } = setup();
 
-  expect(result.current.linkedOptions.map((option) => option.value)).toEqual(
-    expect.arrayContaining(["tx:t1", "tx:t2", "plan:plan-1"]),
-  );
-
-  act(() => result.current.onLinkedChange("tx:t2"));
+  expect(result.current.linked).toBe("tx:t2");
   expect(result.current.linkedName).toBe("TV");
-  act(() => result.current.onLinkedClear());
-  expect(result.current.linked).toBeUndefined();
+  expect(result.current.linkedIsPlan).toBe(false);
+});
+
+it("SHOULD have no link WHEN opened from an invoice or the card", () => {
+  givenLoaded();
+
+  expect(setup().result.current.linked).toBeUndefined();
 });
 
 it("SHOULD create the refund with the link, the date and the default description", () => {
+  spies.params.mockReturnValue({
+    creditCardId: "card-1",
+    refundedTransactionId: "t1",
+  });
   givenLoaded();
   const { result } = setup();
 
-  act(() => result.current.onLinkedChange("tx:t1"));
   act(() => result.current.onAmountChange(50000));
   act(() => result.current.onSave("Refund · Notebook"));
 
@@ -121,7 +129,7 @@ describe("editing a refund", () => {
     });
   });
 
-  it("SHOULD start from the stored refund AND send every field (null removes the link)", () => {
+  it("SHOULD start from the stored refund AND send every field (the link is unchanged)", () => {
     givenLoaded();
     const { result } = setup();
 
@@ -130,7 +138,6 @@ describe("editing a refund", () => {
     expect(result.current.description).toBe("Chargeback");
     expect(result.current.linked).toBe("tx:t1");
 
-    act(() => result.current.onLinkedClear());
     act(() => result.current.onSave("Refund"));
 
     expect(update()).toHaveBeenCalledWith({
@@ -140,7 +147,7 @@ describe("editing a refund", () => {
       id: "refund-1",
       invoiceMonth: "2026-10",
       refundedPlanId: null,
-      refundedTransactionId: null,
+      refundedTransactionId: "t1",
       value: 20000,
     });
   });

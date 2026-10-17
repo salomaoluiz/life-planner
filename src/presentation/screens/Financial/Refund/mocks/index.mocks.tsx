@@ -31,11 +31,8 @@ const defaultViewModel: ReturnType<typeof useRefundViewModel> = {
   isLocked: false,
   isSaving: false,
   linked: undefined,
+  linkedIsPlan: false,
   linkedName: undefined,
-  linkedOptions: [
-    { isPlan: false, name: "TV", value: "tx:t2" },
-    { isPlan: true, name: "Notebook", value: "plan:p1" },
-  ],
   onAmountChange: jest.fn(),
   onClose: jest.fn(),
   onDateChange: jest.fn(),
@@ -44,8 +41,6 @@ const defaultViewModel: ReturnType<typeof useRefundViewModel> = {
   onDeletePress: jest.fn(),
   onDescriptionChange: jest.fn(),
   onInvoiceChange: jest.fn(),
-  onLinkedChange: jest.fn(),
-  onLinkedClear: jest.fn(),
   onSave: jest.fn(),
 };
 
