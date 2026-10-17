@@ -77,7 +77,7 @@ it("SHOULD render the to receive and to pay amounts WHEN their labels are given 
   const values = screen
     .UNSAFE_getAllByType(AmountText)
     .map((n) => n.props.value);
-  expect(values).toEqual([1000, 3000, 2000, 900, 700]);
+  expect(values).toEqual([1000, 3000, 900, 2000, 700]);
   expect(screen.getByText("To pay")).toBeOnTheScreen();
   expect(screen.getByText("To receive")).toBeOnTheScreen();
 });

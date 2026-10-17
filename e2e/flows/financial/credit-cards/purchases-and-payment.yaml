@@ -87,10 +87,12 @@ onFlowComplete:
       id: "financial.transactions.cardInvoice.row"
     timeout: 20000
 - assertVisible:
-    id: "financial.transactions.cardInvoice.amount"
-    text: ".*250[.,]00.*"
-- assertVisible:
     id: "financial.transactions.summary-expense"
+    text: ".*250[.,]00.*"
+# The month summary got a "to pay" line (spec 033): scroll to the invoice line
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- assertVisible:
+    id: "financial.transactions.cardInvoice.amount"
     text: ".*250[.,]00.*"
 # The purchase made in the app is not an account row
 - assertNotVisible:

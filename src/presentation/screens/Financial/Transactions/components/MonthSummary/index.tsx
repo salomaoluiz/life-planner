@@ -40,6 +40,7 @@ function MonthSummary(props: Props) {
     columnLeft: { paddingLeft: spacing.lg, paddingRight: spacing.md },
     columnRight: { paddingLeft: spacing.md, paddingRight: spacing.lg },
     metrics: { flexDirection: "row" },
+    pending: { alignItems: "center", flexDirection: "row", gap: spacing.xs },
     top: { gap: spacing.xs, padding: spacing.lg },
   });
 
@@ -82,6 +83,17 @@ function MonthSummary(props: Props) {
             tone={"income"}
             value={props.incomeCents}
           />
+          {props.toReceiveLabel ? (
+            <View style={styles.pending}>
+              <Text.Caption tone={"secondary"} value={props.toReceiveLabel} />
+              <AmountText
+                size={"caption"}
+                testID={props.toReceiveTestID}
+                tone={"income"}
+                value={props.toReceiveCents ?? 0}
+              />
+            </View>
+          ) : null}
         </View>
         <Divider vertical />
         <View style={[styles.column, styles.columnRight]}>
@@ -91,32 +103,19 @@ function MonthSummary(props: Props) {
             tone={"expense"}
             value={props.expenseCents}
           />
-        </View>
-      </View>
-      {props.toPayLabel && props.toReceiveLabel ? (
-        <>
-          <Divider />
-          <View style={styles.metrics}>
-            <View style={[styles.column, styles.columnLeft]}>
-              <Text.Overline tone={"secondary"} value={props.toReceiveLabel} />
+          {props.toPayLabel ? (
+            <View style={styles.pending}>
+              <Text.Caption tone={"secondary"} value={props.toPayLabel} />
               <AmountText
-                testID={props.toReceiveTestID}
-                tone={"income"}
-                value={props.toReceiveCents ?? 0}
-              />
-            </View>
-            <Divider vertical />
-            <View style={[styles.column, styles.columnRight]}>
-              <Text.Overline tone={"secondary"} value={props.toPayLabel} />
-              <AmountText
+                size={"caption"}
                 testID={props.toPayTestID}
                 tone={"expense"}
                 value={props.toPayCents ?? 0}
               />
             </View>
-          </View>
-        </>
-      ) : null}
+          ) : null}
+        </View>
+      </View>
     </Card>
   );
 }

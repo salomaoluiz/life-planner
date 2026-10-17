@@ -8,7 +8,7 @@ use_cases:
     path: src/application/useCases/cases/home/getMonthSummaryUseCase.ts
     uniqueName: home.get_month_summary_use_case
     params: "{ month: Date, ownerIds: string[] }"
-    returns: MonthSummaryDTO
+    returns: MonthSummaryDTO # balance, income, expense and (spec 033) toPay / toReceive
     behavior: Sums income and expenses of the transactions inside the local calendar month of `month`; balance = income - expense (integer cents).
   getRecentTransactionsUseCase:
     path: src/application/useCases/cases/home/getRecentTransactionsUseCase.ts
