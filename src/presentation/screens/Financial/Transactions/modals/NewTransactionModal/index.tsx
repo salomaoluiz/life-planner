@@ -315,6 +315,16 @@ function NewTransactionModal() {
               yesterdayLabel={t("common.date.yesterday")}
             />
           </View>
+          {vm.showPaid ? (
+            <View style={styles.switchRow}>
+              <Text.BodyStrong value={t(vm.paidLabelKey)} />
+              <Switch
+                initialStatus={vm.paid}
+                onToggle={vm.onPaidChange}
+                testID={transactionFormTestIds.paid}
+              />
+            </View>
+          ) : null}
         </View>
         <ChipGroup
           label={t("financial.common.belongsTo")}

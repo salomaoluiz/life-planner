@@ -19,6 +19,7 @@ const transactionFormTestIds = {
   missingCategoryHint: "financial.transaction-form.missing-category-hint",
   overLimit: "financial.transaction-form.over-limit",
   owner: "financial.transaction-form.owner",
+  paid: "financial.transactionForm.paid",
   payWith: "financial.transactionForm.payWith",
   refundButton: "financial.transaction-form.refund-button",
   saveButton: "financial.transaction-form.save-button",

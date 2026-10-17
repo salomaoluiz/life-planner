@@ -26,7 +26,9 @@ import { decimalStringToCents } from "@utils/money";
 
 import NewTransactionUIModel from "../models/NewTransactionUIModel";
 import {
+  changeDate,
   changeOwner,
+  changePaid,
   changePayWith,
   changeType,
   chipCategories,
@@ -510,7 +512,7 @@ function useNewTransactionViewModel() {
     onCreateCategoryPress,
     onDateChange: (date: Date) => {
       if (state) {
-        update({ ...state, date: normalizeDate(date) });
+        update(changeDate(state, date, isEditing));
       }
     },
     onDeleteCancel: () => setDeleteDialogOpen(false),
@@ -549,6 +551,11 @@ function useNewTransactionViewModel() {
         );
       }
     },
+    onPaidChange: (paid: boolean) => {
+      if (state) {
+        update(changePaid(state, paid, isEditing));
+      }
+    },
     onPayWithChange: (value: string) => {
       if (state) {
         update(
@@ -581,11 +588,17 @@ function useNewTransactionViewModel() {
     overLimitCents: cardHints.overLimitCents,
     ownerChoices: uiModel?.ownerChoices ?? [],
     ownerId,
+    paid: state?.paid ?? true,
+    paidLabelKey: (type === TransactionType.EXPENSE
+      ? "financial.transactions.form.paid"
+      : "financial.transactions.form.received") as TranslationKeys,
     payWith: state?.payWith ?? "ACCOUNT",
     saveLabelKey,
     selectedAccountId: state?.accountId,
     selectedCardId: state?.creditCardId,
     selectedCategoryId: state?.categoryId,
+    // Card purchases follow their invoice: no switch (spec 033 FR 19).
+    showPaid: state?.payWith !== "CARD",
     titleKey: (isEditing
       ? "financial.transactions.form.editTitle"
       : "financial.transactions.form.newTitle") as TranslationKeys,

@@ -7,7 +7,9 @@ import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import {
+  changeDate,
   changeOwner,
+  changePaid,
   changePayWith,
   changeType,
   chipCategories,
@@ -76,6 +78,8 @@ function state(
     installmentsCount: 2,
     installmentsOn: false,
     ownerId: "user-id",
+    paid: true,
+    paidTouched: false,
     payWith: "ACCOUNT",
     type: TransactionType.EXPENSE,
     ...overrides,
@@ -101,6 +105,8 @@ it("SHOULD create an expense form for today with the default account", () => {
     installmentsCount: 2,
     installmentsOn: false,
     ownerId: "user-id",
+    paid: true,
+    paidTouched: false,
     payWith: "ACCOUNT",
     type: TransactionType.EXPENSE,
   });
@@ -129,7 +135,10 @@ it("SHOULD build the state of an existing transaction from its DTO", () => {
     description: "Shop",
     installmentsCount: 2,
     installmentsOn: false,
+    originalPaid: true,
     ownerId: "user-id",
+    paid: true,
+    paidTouched: true,
     payWith: "ACCOUNT",
     type: TransactionType.INCOME,
   });
@@ -249,6 +258,7 @@ it("SHOULD build create params with the decimal string value and trimmed descrip
     description: "Groceries",
     owner: "USER",
     ownerId: "user-id",
+    paid: true,
     type: "EXPENSE",
     value: "312.90",
   });
@@ -339,12 +349,14 @@ describe("card mode (spec 029)", () => {
   });
 
   it("SHOULD switch back to Account without touching the rest", () => {
+    jest.useFakeTimers().setSystemTime(new Date(2026, 9, 15, 12));
     const card = state({ creditCardId: "card-1", payWith: "CARD" });
 
     expect(changePayWith(card, "ACCOUNT", categories, cards)).toEqual({
       ...card,
       payWith: "ACCOUNT",
     });
+    jest.useRealTimers();
   });
 
   it("SHOULD change the card WHEN the owner changes to one the card does not belong to", () => {
@@ -521,5 +533,107 @@ describe("installments (spec 030)", () => {
     expect(stateFromDto(dto)).toEqual(
       expect.objectContaining({ installmentsCount: 10, installmentsOn: false }),
     );
+  });
+});
+
+describe("paid switch (spec 033 FR 19)", () => {
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date(2026, 9, 15, 12));
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it("SHOULD follow the date on create until the user touches the switch", () => {
+    const toNextMonth = changeDate(state(), new Date(2026, 10, 3), false);
+    const backToToday = changeDate(toNextMonth, new Date(2026, 9, 15), false);
+
+    expect(toNextMonth.paid).toBe(false);
+    expect(backToToday.paid).toBe(true);
+  });
+
+  it("SHOULD keep the user's choice WHEN the date changes after touching the switch", () => {
+    const touched = changePaid(
+      state({ date: new Date(2026, 9, 15) }),
+      false,
+      false,
+    );
+
+    expect(changeDate(touched, new Date(2026, 9, 1), false).paid).toBe(false);
+    expect(changeDate(touched, new Date(2026, 10, 1), false).paid).toBe(false);
+  });
+
+  it("SHOULD set the date to today WHEN turning it on with a future date on create", () => {
+    const future = state({ date: new Date(2026, 10, 3), paid: false });
+
+    expect(changePaid(future, true, false).date).toEqual(new Date(2026, 9, 15));
+    expect(
+      changePaid(
+        state({ date: new Date(2026, 9, 1), paid: false }),
+        true,
+        false,
+      ).date,
+    ).toEqual(new Date(2026, 9, 1));
+  });
+
+  it("SHOULD never follow the date on edit AND set today when an unpaid row is marked paid", () => {
+    const stored = state({
+      date: new Date(2026, 9, 10),
+      originalPaid: false,
+      paid: false,
+      paidTouched: true,
+    });
+
+    expect(changeDate(stored, new Date(2026, 9, 1), true).paid).toBe(false);
+
+    const paying = changePaid(stored, true, true);
+
+    expect(paying.paid).toBe(true);
+    expect(paying.date).toEqual(new Date(2026, 9, 15));
+    expect(changeDate(paying, new Date(2026, 9, 12), true).date).toEqual(
+      new Date(2026, 9, 12),
+    );
+  });
+
+  it("SHOULD keep the date WHEN turning it off AND WHEN a paid row is toggled back on", () => {
+    const paidRow = state({
+      date: new Date(2026, 9, 10),
+      originalPaid: true,
+      paid: true,
+      paidTouched: true,
+    });
+    const off = changePaid(paidRow, false, true);
+
+    expect(off.date).toEqual(new Date(2026, 9, 10));
+    expect(changePaid(off, true, true).date).toEqual(new Date(2026, 9, 10));
+  });
+
+  it("SHOULD send paid for account rows only", () => {
+    const owner = user;
+
+    expect(toCreateParams(state({ paid: false }), owner, "Food").paid).toBe(
+      false,
+    );
+    expect(
+      toCreateParams(
+        state({ creditCardId: "card-1", paid: false, payWith: "CARD" }),
+        owner,
+        "Food",
+      ).paid,
+    ).toBeUndefined();
+  });
+
+  it("SHOULD restart the status from the date WHEN a card row moves back to an account", () => {
+    const fromCard = state({
+      date: new Date(2026, 10, 3),
+      paid: true,
+      paidTouched: true,
+      payWith: "CARD",
+    });
+
+    const next = changePayWith(fromCard, "ACCOUNT", [], []);
+
+    expect(next.paid).toBe(false);
+    expect(next.paidTouched).toBe(false);
   });
 });
