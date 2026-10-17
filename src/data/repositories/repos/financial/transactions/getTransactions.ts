@@ -49,6 +49,7 @@ async function getTransactions(ownerIds: Params, datasources: Datasources) {
         invoiceMonth: transaction.invoiceMonth,
         owner: OwnerType[transaction.owner],
         ownerId: transaction.ownerId,
+        paid: transaction.paid,
         systemKey: transaction.systemKey,
         type: TransactionType[transaction.type],
         value: transaction.value,

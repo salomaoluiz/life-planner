@@ -1,4 +1,7 @@
-import { isoToCalendarDate } from "@data/models/financial/calendarDate";
+import {
+  isoToCalendarDate,
+  todayCalendarDate,
+} from "@data/models/financial/calendarDate";
 import { decimalStringToCents } from "@data/models/financial/money";
 import { TransactionDatasource } from "@data/repositories/repos/financial/transactions/transactionDatasource";
 import { api } from "@infrastructure/api";
@@ -20,6 +23,7 @@ async function updateTransaction(params: Params): Response {
     description: params.description,
     owner: params.owner,
     ownerId: params.ownerId,
+    paid: params.paid,
     scope: params.scope,
     type: params.type,
     value:
@@ -33,7 +37,10 @@ async function updateTransaction(params: Params): Response {
   }
 
   try {
-    await api.patch(`/v1/finance/transactions/${params.id}`, body);
+    await api.patch(
+      `/v1/finance/transactions/${params.id}?today=${todayCalendarDate()}`,
+      body,
+    );
   } catch (error) {
     return handleFinancialApiError(
       error,

@@ -1,3 +1,4 @@
+import { todayCalendarDate } from "@data/models/financial/calendarDate";
 import TransactionModel from "@data/models/financial/TransactionModel";
 import { TransactionDatasource } from "@data/repositories/repos/financial/transactions/transactionDatasource";
 import { api } from "@infrastructure/api";
@@ -16,7 +17,8 @@ async function getTransactions(ownerIds: Params): Response {
 
   try {
     // Account rows (the API default) and card purchases (source=CARD): the form edits both kinds.
-    const query = toOwnerQuery(ownerIds);
+    // `today` lets the API derive the paid status of card purchases from their invoice.
+    const query = `${toOwnerQuery(ownerIds)}&today=${todayCalendarDate()}`;
     const [accountRows, cardRows] = await Promise.all([
       api.get<Record<string, unknown>[]>(`/v1/finance/transactions${query}`),
       api.get<Record<string, unknown>[]>(

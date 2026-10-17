@@ -32,6 +32,8 @@ interface ITransactionEntity {
   invoiceMonth?: string;
   owner: OwnerType;
   ownerId: string;
+  // Account rows: stored status. Card rows: whether the invoice is paid (spec 033).
+  paid?: boolean;
   systemKey?: string;
   type: TransactionType;
   value: string;
@@ -53,6 +55,7 @@ class TransactionEntity {
   invoiceMonth?: string;
   owner: OwnerType;
   ownerId: string;
+  paid: boolean;
   systemKey?: string;
   type: TransactionType;
   value: string;
@@ -72,6 +75,7 @@ class TransactionEntity {
     this.description = params.description;
     this.earlyPayment = params.earlyPayment;
     this.ownerId = params.ownerId;
+    this.paid = params.paid ?? true;
     this.excludeFromTotals = params.excludeFromTotals ?? false;
     this.systemKey = params.systemKey;
     this.type = params.type;

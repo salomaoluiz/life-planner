@@ -27,6 +27,7 @@ interface ITransactionModel {
   invoiceMonth?: string;
   owner: OwnerType;
   ownerId: string;
+  paid?: boolean;
   systemKey?: string;
   type: TransactionType;
   value: string;
@@ -48,6 +49,7 @@ class TransactionModel implements ITransactionModel {
   invoiceMonth?: string;
   owner: OwnerType;
   ownerId: string;
+  paid: boolean;
   systemKey?: string;
   type: TransactionType;
   value: string;
@@ -67,6 +69,7 @@ class TransactionModel implements ITransactionModel {
     this.owner = params.owner;
     this.id = params.id;
     this.ownerId = params.ownerId;
+    this.paid = params.paid ?? true;
     this.excludeFromTotals = params.excludeFromTotals ?? false;
     this.systemKey = params.systemKey;
     this.type = params.type;
@@ -99,6 +102,8 @@ class TransactionModel implements ITransactionModel {
       invoiceMonth: (data.invoiceMonth as null | string) ?? undefined,
       owner: data.owner as OwnerType,
       ownerId: data.ownerId as string,
+      // An API without spec 033 sends no status: every row then counts as paid.
+      paid: (data.paid as boolean | undefined) ?? true,
       systemKey: category?.systemKey ?? undefined,
       type: data.type as TransactionType,
       value: centsToDecimalString(Number(data.value)),
@@ -126,6 +131,7 @@ class TransactionModel implements ITransactionModel {
       invoiceMonth: this.invoiceMonth ?? null,
       owner: this.owner,
       ownerId: this.ownerId,
+      paid: this.paid,
       type: this.type,
       value: decimalStringToCents(this.value),
     };

@@ -18,7 +18,11 @@ it("SHOULD PATCH /v1/finance/transactions/:id with converted value / date (trans
   await expect(setup()).resolves.toBeUndefined();
 
   expect(spies.patch).toHaveBeenCalledWith(
-    `/v1/finance/transactions/${mocks.id}`,
+    expect.stringMatching(
+      new RegExp(
+        `^/v1/finance/transactions/${mocks.id}\\?today=\\d{4}-\\d{2}-\\d{2}$`,
+      ),
+    ),
     {
       accountId: mocks.params.accountId,
       categoryId: mocks.params.categoryId,
@@ -39,6 +43,15 @@ it("SHOULD send only the fields that are defined", async () => {
 
   const [, body] = spies.patch.mock.calls[0];
   expect(JSON.parse(JSON.stringify(body))).toEqual({ description: "Renamed" });
+});
+
+it("SHOULD send a paid-only update (no other field)", async () => {
+  spies.patch.mockResolvedValueOnce({});
+
+  await setup({ ...mocks.onlyId, paid: true });
+
+  const [, body] = spies.patch.mock.calls[0];
+  expect(JSON.parse(JSON.stringify(body))).toEqual({ paid: true });
 });
 
 it("SHOULD skip the request WHEN there is nothing to update (the category name alone is not a field)", async () => {
