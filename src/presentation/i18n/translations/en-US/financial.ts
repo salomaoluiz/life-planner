@@ -315,7 +315,7 @@ const financial = {
     },
     hint: "This invoice will have a credit of {{value}}, carried to {{month}}",
     invoice: "Invoice",
-    linked: "Refunded purchase (optional)",
+    linked: "Refunded purchase",
     linkedNone: "No purchase",
     linkedPlan: "{{name}} (installments)",
     new: "New refund",

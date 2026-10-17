@@ -312,7 +312,7 @@ const financial = {
     },
     hint: "Esta fatura ficará com crédito de {{value}}, levado para {{month}}",
     invoice: "Fatura",
-    linked: "Compra estornada (opcional)",
+    linked: "Compra estornada",
     linkedNone: "Nenhuma compra",
     linkedPlan: "{{name}} (parcelado)",
     new: "Novo estorno",
