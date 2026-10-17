@@ -8,8 +8,14 @@ import {
   useMutation,
   useQuery,
 } from "@infrastructure/fetcher";
-import CardInvoiceUIModel from "@screens/Financial/Transactions/models/CardInvoiceUIModel";
+import { toCalendarDate } from "@screens/Financial/models/creditSheet";
+import CardInvoiceUIModel, {
+  InvoiceCreditUIModel,
+} from "@screens/Financial/Transactions/models/CardInvoiceUIModel";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
+
+const EARLY_PAYMENT_ROUTE = "/financial/early_payment/card_early_payment";
+const REFUND_ROUTE = "/financial/refund/card_refund";
 
 type PayMethod = "ACCOUNT" | "EXTERNAL";
 
@@ -22,10 +28,6 @@ function invalidateAfterPayment() {
     useCases.getFinancialAccountsUseCase.uniqueName,
     useCases.getMonthSummaryUseCase.uniqueName,
   ].forEach(async (key) => invalidateFetcherData([key]));
-}
-
-function toCalendarDate(date: Date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
 function todayDate() {
@@ -135,6 +137,27 @@ function useInvoiceViewModel() {
       } as never);
     },
     onClose: () => router.back(),
+    onCreditPress: (credit: InvoiceCreditUIModel) =>
+      router.replace({
+        params: {
+          accountId: credit.accountId,
+          creditCardId: params.cardId,
+          date: toCalendarDate(credit.date),
+          description: credit.description,
+          id: credit.id,
+          invoiceMonth: params.month,
+          method: credit.method,
+          refundedPlanId: credit.refundedPlanId,
+          refundedTransactionId: credit.refundedTransactionId,
+          value: String(credit.amountCents),
+        },
+        pathname: credit.kind === "REFUND" ? REFUND_ROUTE : EARLY_PAYMENT_ROUTE,
+      } as never),
+    onEarlyPaymentPress: () =>
+      router.replace({
+        params: { creditCardId: params.cardId, invoiceMonth: params.month },
+        pathname: EARLY_PAYMENT_ROUTE,
+      } as never),
     onMethodChange: (value: string) =>
       setMethod(value === "EXTERNAL" ? "EXTERNAL" : "ACCOUNT"),
     onPaidOnChange: (date?: Date) => date && setPaidOn(date),
@@ -147,6 +170,11 @@ function useInvoiceViewModel() {
       router.replace({
         params: { id },
         pathname: "/financial/transaction/add_new_transaction",
+      } as never),
+    onRefundPress: () =>
+      router.replace({
+        params: { creditCardId: params.cardId, invoiceMonth: params.month },
+        pathname: REFUND_ROUTE,
       } as never),
     onRetry: async () => invoice.refetch(),
     onUndoCancel: () => setUndoOpen(false),

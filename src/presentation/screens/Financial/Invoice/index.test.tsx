@@ -141,3 +141,114 @@ it("SHOULD title an installment purchase with its number", () => {
   ).toBeOnTheScreen();
   expect(screen.getByText("Market")).toBeOnTheScreen();
 });
+
+describe("credits (spec 032)", () => {
+  beforeEach(() => jest.setSystemTime(new Date(2026, 10, 1)));
+
+  const credits = [
+    {
+      date: "2026-10-16",
+      description: "Refund · Notebook",
+      id: "credit-refund",
+      kind: "REFUND" as const,
+      refundedName: "Notebook",
+      value: 50000,
+    },
+    {
+      accountName: "Checking",
+      date: "2026-10-16",
+      description: "Early payment",
+      id: "credit-early",
+      kind: "EARLY_PAYMENT" as const,
+      method: "ACCOUNT" as const,
+      value: 60000,
+    },
+    {
+      date: "2026-10-16",
+      description: "Prepayment discount · Notebook",
+      id: "credit-discount",
+      kind: "PREPAYMENT_DISCOUNT" as const,
+      value: 12000,
+    },
+  ];
+
+  it("SHOULD list every credit with its title AND open a refund or an early payment", () => {
+    const vm = setup({ invoice: makeInvoice({}, credits) });
+
+    expect(screen.getAllByTestId(invoiceTestIds.credit)).toHaveLength(3);
+    expect(
+      screen.getByText(
+        'financial.prepayment.discountLine {"description":"Notebook"}',
+      ),
+    ).toBeOnTheScreen();
+    expect(screen.getByText("Checking")).toBeOnTheScreen();
+
+    fireEvent.press(screen.getAllByTestId(invoiceTestIds.credit)[0]);
+    fireEvent.press(screen.getAllByTestId(invoiceTestIds.credit)[1]);
+    fireEvent.press(screen.getAllByTestId(invoiceTestIds.credit)[2]);
+
+    expect(vm.onCreditPress).toHaveBeenCalledTimes(2);
+    expect(vm.onCreditPress).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "credit-refund" }),
+    );
+  });
+
+  it("SHOULD name a boleto early payment AND a refund without purchase", () => {
+    setup({
+      invoice: makeInvoice({}, [
+        { ...credits[1], accountName: undefined, method: "EXTERNAL" },
+        { ...credits[0], refundedName: undefined },
+      ]),
+    });
+
+    expect(screen.getByText("financial.earlyPayment.boleto")).toBeOnTheScreen();
+  });
+
+  it("SHOULD show the prepaid badge of a prepaid purchase", () => {
+    setup();
+
+    expect(screen.getAllByTestId(invoiceTestIds.prepaid)).toHaveLength(1);
+  });
+
+  it("SHOULD show Paid early AND Left to pay WHEN the invoice has early payments", () => {
+    setup({ invoice: makeInvoice({ amount: 40000, earlyPaid: 60000 }) });
+
+    expect(screen.getByTestId(invoiceTestIds.paidEarly)).toBeOnTheScreen();
+    expect(screen.getByTestId(invoiceTestIds.leftToPay)).toBeOnTheScreen();
+  });
+
+  it("SHOULD show the carry text AND hide Pay AND Pay early WHEN the invoice is negative", () => {
+    setup({
+      invoice: makeInvoice({
+        amount: 0,
+        carryIn: -100,
+        status: "PAID",
+        total: -200,
+      }),
+    });
+
+    expect(screen.getByTestId(invoiceTestIds.creditCarry)).toBeOnTheScreen();
+    expect(screen.getByTestId(invoiceTestIds.carryIn)).toBeOnTheScreen();
+    expect(screen.queryByTestId(invoiceTestIds.pay)).toBeNull();
+    expect(screen.queryByTestId(invoiceTestIds.earlyPayment)).toBeNull();
+    expect(screen.queryByTestId(invoiceTestIds.undo)).toBeNull();
+    expect(screen.getByTestId(invoiceTestIds.refund)).toBeOnTheScreen();
+  });
+
+  it("SHOULD offer Refund AND Pay early on an invoice that can take credits", () => {
+    const vm = setup();
+
+    fireEvent.press(screen.getByTestId(invoiceTestIds.refund));
+    fireEvent.press(screen.getByTestId(invoiceTestIds.earlyPayment));
+
+    expect(vm.onRefundPress).toHaveBeenCalledTimes(1);
+    expect(vm.onEarlyPaymentPress).toHaveBeenCalledTimes(1);
+  });
+
+  it("SHOULD offer neither on a paid or upcoming invoice", () => {
+    setup({ invoice: makeInvoice({ periodStart: "2999-01-01" }) });
+
+    expect(screen.queryByTestId(invoiceTestIds.refund)).toBeNull();
+    expect(screen.queryByTestId(invoiceTestIds.earlyPayment)).toBeNull();
+  });
+});

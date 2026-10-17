@@ -27,15 +27,20 @@ const cardEntity = new CreditCardEntity({
 
 const invoiceEntity = new InvoiceEntity({
   amount: 0,
+  amountDue: 0,
+  carryIn: 0,
   closingDate: "2026-10-31",
   dueDate: "2026-11-10",
+  earlyPaid: 0,
   listDate: "2026-11-05",
+  net: 0,
   paymentAfterDue: false,
   paymentDate: "2026-11-05",
   periodEnd: "2026-10-31",
   periodStart: "2026-10-01",
   referenceMonth: "2026-10",
   status: InvoiceStatus.OPEN,
+  total: 0,
 });
 
 const overviewEntity = new CreditCardOverviewEntity({

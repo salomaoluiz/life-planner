@@ -20,6 +20,7 @@ const transactionFormTestIds = {
   overLimit: "financial.transaction-form.over-limit",
   owner: "financial.transaction-form.owner",
   payWith: "financial.transactionForm.payWith",
+  refundButton: "financial.transaction-form.refund-button",
   saveButton: "financial.transaction-form.save-button",
   sheet: "financial.transaction-form.sheet",
   type: "financial.transaction-form.type",

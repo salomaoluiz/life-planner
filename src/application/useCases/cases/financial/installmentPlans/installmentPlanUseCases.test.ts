@@ -11,6 +11,9 @@ import Repositories from "@domain/repositories";
 import createInstallmentPlanUseCase from "./createInstallmentPlanUseCase";
 import deleteInstallmentPlanUseCase from "./deleteInstallmentPlanUseCase";
 import getInstallmentPlanUseCase from "./getInstallmentPlanUseCase";
+import prepayInstallmentPlanUseCase from "./prepayInstallmentPlanUseCase";
+import previewPrepaymentUseCase from "./previewPrepaymentUseCase";
+import undoPrepaymentUseCase from "./undoPrepaymentUseCase";
 import updateInstallmentPlanUseCase from "./updateInstallmentPlanUseCase";
 
 const entity = new InstallmentPlanEntity({
@@ -30,6 +33,9 @@ const plans = {
   createInstallmentPlan: jest.fn(),
   deleteInstallmentPlan: jest.fn(),
   getInstallmentPlan: jest.fn(),
+  prepayInstallmentPlan: jest.fn(),
+  previewPrepayment: jest.fn(),
+  undoPrepayment: jest.fn(),
   updateInstallmentPlan: jest.fn(),
 };
 const repositories = {
@@ -176,5 +182,87 @@ describe("deleteInstallmentPlanUseCase", () => {
 
     plans.deleteInstallmentPlan.mockRejectedValueOnce(unknown);
     await expect(useCase.execute("plan-1")).rejects.toBe(unknown);
+  });
+});
+
+describe("prepayment (spec 032)", () => {
+  it("SHOULD preview, prepay and undo through the repository", async () => {
+    plans.previewPrepayment.mockResolvedValueOnce({ eligible: [], total: 0 });
+    plans.prepayInstallmentPlan.mockResolvedValueOnce(entity);
+
+    const preview = await previewPrepaymentUseCase(repositories).execute({
+      planId: "plan-1",
+      targetInvoiceMonth: "2026-10",
+    });
+    const plan = await prepayInstallmentPlanUseCase(repositories).execute({
+      date: "2026-10-16",
+      discount: 12000,
+      planId: "plan-1",
+      targetInvoiceMonth: "2026-10",
+    });
+    await undoPrepaymentUseCase(repositories).execute("plan-1");
+
+    expect(preview.total).toBe(0);
+    expect(plan.id).toBe("plan-1");
+    expect(plans.undoPrepayment).toHaveBeenCalledWith("plan-1");
+  });
+
+  it("SHOULD refuse a bad month, date or discount BEFORE the repository", async () => {
+    const base = {
+      date: "2026-10-16",
+      planId: "plan-1",
+      targetInvoiceMonth: "2026-10",
+    };
+
+    await expect(
+      previewPrepaymentUseCase(repositories).execute({
+        planId: "plan-1",
+        targetInvoiceMonth: "2026-13",
+      }),
+    ).rejects.toBeInstanceOf(FieldInvalid);
+    for (const patch of [
+      { targetInvoiceMonth: "10/2026" },
+      { date: "16/10/2026" },
+      { discount: -1 },
+      { discount: 1.5 },
+    ]) {
+      await expect(
+        prepayInstallmentPlanUseCase(repositories).execute({
+          ...base,
+          ...patch,
+        }),
+      ).rejects.toBeInstanceOf(FieldInvalid);
+    }
+    expect(plans.prepayInstallmentPlan).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD add the use case name to a DefaultError AND rethrow other errors", async () => {
+    const error = new GenericError();
+
+    plans.previewPrepayment.mockRejectedValueOnce(error);
+    plans.prepayInstallmentPlan.mockRejectedValueOnce(error);
+    plans.undoPrepayment.mockRejectedValueOnce(error);
+    await expect(
+      previewPrepaymentUseCase(repositories).execute({
+        planId: "p",
+        targetInvoiceMonth: "2026-10",
+      }),
+    ).rejects.toBe(error);
+    await expect(
+      prepayInstallmentPlanUseCase(repositories).execute({
+        date: "2026-10-16",
+        planId: "p",
+        targetInvoiceMonth: "2026-10",
+      }),
+    ).rejects.toBe(error);
+    await expect(undoPrepaymentUseCase(repositories).execute("p")).rejects.toBe(
+      error,
+    );
+
+    const plain = new Error("boom");
+    plans.undoPrepayment.mockRejectedValueOnce(plain);
+    await expect(undoPrepaymentUseCase(repositories).execute("p")).rejects.toBe(
+      plain,
+    );
   });
 });

@@ -313,3 +313,16 @@ describe("Pay with (spec 029)", () => {
     ).toBeOnTheScreen();
   });
 });
+
+it("SHOULD show Refund this purchase only WHEN the view model allows it", () => {
+  const vm = setup({ canRefund: true, isEditing: true });
+
+  fireEvent.press(screen.getByTestId(transactionFormTestIds.refundButton));
+  expect(vm.onRefundPress).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD hide Refund this purchase on a new transaction", () => {
+  setup();
+
+  expect(screen.queryByTestId(transactionFormTestIds.refundButton)).toBeNull();
+});

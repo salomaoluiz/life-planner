@@ -5,6 +5,14 @@ export enum TransactionType {
   INCOME = "INCOME",
 }
 
+// The early payment (card row) an account debit row belongs to (spec 032 FR 35).
+export interface EarlyPaymentRefEntity {
+  creditCardId: string;
+  id: string;
+  // `YYYY-MM`
+  invoiceMonth: string;
+}
+
 // Key of the system category that marks a balance adjustment (spec 028).
 export const BALANCE_ADJUSTMENT = "BALANCE_ADJUSTMENT";
 
@@ -15,6 +23,7 @@ interface ITransactionEntity {
   creditCardId?: string;
   date: string;
   description: string;
+  earlyPayment?: EarlyPaymentRefEntity;
   excludeFromTotals?: boolean;
   id: string;
   installmentCount?: number;
@@ -35,6 +44,7 @@ class TransactionEntity {
   creditCardId?: string;
   date: string;
   description: string;
+  earlyPayment?: EarlyPaymentRefEntity;
   excludeFromTotals: boolean;
   id: string;
   installmentCount?: number;
@@ -60,6 +70,7 @@ class TransactionEntity {
     this.id = params.id;
     this.owner = params.owner;
     this.description = params.description;
+    this.earlyPayment = params.earlyPayment;
     this.ownerId = params.ownerId;
     this.excludeFromTotals = params.excludeFromTotals ?? false;
     this.systemKey = params.systemKey;

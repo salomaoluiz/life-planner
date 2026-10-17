@@ -1,4 +1,6 @@
-import TransactionEntity from "@domain/entities/financial/TransactionEntity";
+import TransactionEntity, {
+  EarlyPaymentRefEntity,
+} from "@domain/entities/financial/TransactionEntity";
 
 export interface ITransactionDTO {
   accountId?: string;
@@ -9,6 +11,7 @@ export interface ITransactionDTO {
   creditCardId?: string;
   date: string;
   description: string;
+  earlyPayment?: EarlyPaymentRefEntity;
   excludeFromTotals?: boolean;
   id: string;
   installmentCount?: number;
@@ -31,6 +34,7 @@ class TransactionDTO {
   creditCardId?: string;
   date: string;
   description: string;
+  earlyPayment?: EarlyPaymentRefEntity;
   excludeFromTotals: boolean;
   id: string;
   installmentCount?: number;
@@ -56,6 +60,7 @@ class TransactionDTO {
     this.categoryName = params.categoryName;
     this.accountName = params.accountName;
     this.description = params.description;
+    this.earlyPayment = params.earlyPayment;
     this.id = params.id;
     this.owner = params.owner;
     this.ownerId = params.ownerId;
@@ -79,6 +84,7 @@ class TransactionDTO {
       creditCardId: entity.creditCardId,
       date: entity.date,
       description: entity.description,
+      earlyPayment: entity.earlyPayment,
       excludeFromTotals: entity.excludeFromTotals,
       id: entity.id,
       installmentCount: entity.installmentCount,

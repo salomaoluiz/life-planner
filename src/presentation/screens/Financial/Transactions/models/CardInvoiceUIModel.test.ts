@@ -59,3 +59,64 @@ it("SHOULD expose the status and the warning flag", () => {
   expect(invoice.cardId).toBe("card-1");
   expect(invoice.ownerId).toBe("user-id");
 });
+
+describe("credits (spec 032)", () => {
+  beforeEach(() => jest.setSystemTime(new Date(2026, 10, 1)));
+
+  const refund = {
+    date: "2026-10-16",
+    description: "Refund · Notebook",
+    id: "credit-1",
+    kind: "REFUND" as const,
+    refundedName: "Notebook",
+    refundedTransactionId: "purchase-1",
+    value: 50000,
+  };
+
+  it("SHOULD map the credits with a local date AND flag the prepaid purchases", () => {
+    const invoice = makeInvoice({}, [refund]);
+
+    expect(invoice.credits).toEqual([
+      expect.objectContaining({
+        amountCents: 50000,
+        date: new Date(2026, 9, 16),
+        id: "credit-1",
+        kind: "REFUND",
+        refundedName: "Notebook",
+      }),
+    ]);
+    expect(invoice.purchases[0].prepaid).toBe(true);
+    expect(invoice.purchases[1].prepaid).toBe(false);
+  });
+
+  it("SHOULD expose the carry-in, the early paid AND the credit carried to the next month", () => {
+    const invoice = makeInvoice({
+      amount: 0,
+      carryIn: -200,
+      earlyPaid: 600,
+      total: -500,
+    });
+
+    expect(invoice.carryInCents).toBe(-200);
+    expect(invoice.earlyPaidCents).toBe(600);
+    expect(invoice.creditCarryCents).toBe(500);
+    expect(invoice.creditCarryMonth).toBe("2026-11");
+    expect(invoice.previousMonth).toBe("2026-09");
+    expect(makeInvoice().creditCarryCents).toBe(0);
+  });
+
+  it("SHOULD allow new credits only WITHOUT a payment record AND once the period started", () => {
+    expect(makeInvoice().canAddCredit).toBe(true);
+    expect(makeInvoice({ periodStart: "2999-01-01" }).canAddCredit).toBe(false);
+    expect(
+      makeInvoice({
+        payment: { amount: 1, method: "EXTERNAL", paidOn: "2026-11-05" },
+      }).canAddCredit,
+    ).toBe(false);
+    expect(
+      makeInvoice({
+        payment: { amount: 1, method: "EXTERNAL", paidOn: "2026-11-05" },
+      }).hasPayment,
+    ).toBe(true);
+  });
+});

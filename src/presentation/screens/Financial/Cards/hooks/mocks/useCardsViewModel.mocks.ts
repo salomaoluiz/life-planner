@@ -59,15 +59,20 @@ function card(
 function invoice(referenceMonth: string) {
   return new InvoiceDTO({
     amount: 0,
+    amountDue: 0,
+    carryIn: 0,
     closingDate: `${referenceMonth}-05`,
     dueDate: `${referenceMonth}-08`,
+    earlyPaid: 0,
     listDate: `${referenceMonth}-08`,
+    net: 0,
     paymentAfterDue: false,
     paymentDate: `${referenceMonth}-08`,
     periodEnd: `${referenceMonth}-05`,
     periodStart: `${referenceMonth}-01`,
     referenceMonth,
     status: "OPEN",
+    total: 0,
   });
 }
 

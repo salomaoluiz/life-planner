@@ -8,6 +8,7 @@ const installmentEditTestIds = {
   formError: "financial.installmentEdit.form-error",
   paidHelper: "financial.installmentEdit.paid-helper",
   recalcConfirm: "financial.installmentEdit.recalc-confirm",
+  refund: "financial.installmentEdit.refund",
   save: "financial.installmentEdit.save",
   scope: "financial.installmentEdit.scope",
   seePlan: "financial.installmentEdit.see-plan",
@@ -18,9 +19,13 @@ const installmentPlanTestIds = {
   count: "financial.installmentPlan.count",
   delete: "financial.installmentPlan.delete",
   deleteConfirm: "financial.installmentPlan.delete-confirm",
+  prepay: "financial.installmentPlan.prepay",
+  prepayment: "financial.installmentPlan.prepayment",
   row: "financial.installmentPlan.row",
   sheet: "financial.installmentPlan.sheet",
   total: "financial.installmentPlan.total",
+  undoPrepayment: "financial.installmentPlan.undo-prepayment",
+  undoPrepaymentConfirm: "financial.installmentPlan.undo-prepayment-confirm",
 } as const;
 
 export { installmentEditTestIds, installmentPlanTestIds };

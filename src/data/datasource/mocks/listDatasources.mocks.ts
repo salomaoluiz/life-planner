@@ -22,6 +22,14 @@ const datasourcesMocks: jest.MockedObjectDeep<Datasources> = {
     getAccounts: jest.fn(),
     updateAccount: jest.fn(),
   },
+  financialCardCreditDatasource: {
+    createEarlyPayment: jest.fn(),
+    createRefund: jest.fn(),
+    deleteEarlyPayment: jest.fn(),
+    deleteRefund: jest.fn(),
+    updateEarlyPayment: jest.fn(),
+    updateRefund: jest.fn(),
+  },
   financialCategoryDatasource: {
     createCategory: jest.fn(),
     deleteCategory: jest.fn(),
@@ -43,6 +51,9 @@ const datasourcesMocks: jest.MockedObjectDeep<Datasources> = {
     createInstallmentPlan: jest.fn(),
     deleteInstallmentPlan: jest.fn(),
     getInstallmentPlan: jest.fn(),
+    prepayInstallmentPlan: jest.fn(),
+    previewPrepayment: jest.fn(),
+    undoPrepayment: jest.fn(),
     updateInstallmentPlan: jest.fn(),
   },
   financialTransactionDatasource: {

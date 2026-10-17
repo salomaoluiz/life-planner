@@ -15,6 +15,10 @@ function useStyles() {
         flexDirection: "row",
         justifyContent: "space-between",
       },
+      trailing: {
+        alignItems: "flex-end",
+        gap: theme.sizes.spacing.xxs,
+      },
     }),
   };
 }

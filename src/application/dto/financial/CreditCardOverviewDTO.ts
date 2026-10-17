@@ -6,9 +6,13 @@ import InvoiceEntity, {
 
 export interface IInvoiceDTO {
   amount: number;
+  amountDue: number;
+  carryIn: number;
   closingDate: string;
   dueDate: string;
+  earlyPaid: number;
   listDate: string;
+  net: number;
   payment?: InvoicePaymentEntity;
   paymentAfterDue: boolean;
   paymentDate: string;
@@ -16,6 +20,7 @@ export interface IInvoiceDTO {
   periodStart: string;
   referenceMonth: string;
   status: string;
+  total: number;
 }
 
 class CreditCardOverviewDTO {
@@ -79,9 +84,13 @@ export class CreditCardSummaryDTO {
 
 export class InvoiceDTO implements IInvoiceDTO {
   amount: number;
+  amountDue: number;
+  carryIn: number;
   closingDate: string;
   dueDate: string;
+  earlyPaid: number;
   listDate: string;
+  net: number;
   payment?: InvoicePaymentEntity;
   paymentAfterDue: boolean;
   paymentDate: string;
@@ -89,12 +98,17 @@ export class InvoiceDTO implements IInvoiceDTO {
   periodStart: string;
   referenceMonth: string;
   status: string;
+  total: number;
 
   constructor(params: IInvoiceDTO) {
     this.amount = params.amount;
+    this.amountDue = params.amountDue;
+    this.carryIn = params.carryIn;
     this.closingDate = params.closingDate;
     this.dueDate = params.dueDate;
+    this.earlyPaid = params.earlyPaid;
     this.listDate = params.listDate;
+    this.net = params.net;
     this.payment = params.payment;
     this.paymentAfterDue = params.paymentAfterDue;
     this.paymentDate = params.paymentDate;
@@ -102,14 +116,19 @@ export class InvoiceDTO implements IInvoiceDTO {
     this.periodStart = params.periodStart;
     this.referenceMonth = params.referenceMonth;
     this.status = params.status;
+    this.total = params.total;
   }
 
   static fromEntity(entity: InvoiceEntity) {
     return new InvoiceDTO({
       amount: entity.amount,
+      amountDue: entity.amountDue,
+      carryIn: entity.carryIn,
       closingDate: entity.closingDate,
       dueDate: entity.dueDate,
+      earlyPaid: entity.earlyPaid,
       listDate: entity.listDate,
+      net: entity.net,
       payment: entity.payment,
       paymentAfterDue: entity.paymentAfterDue,
       paymentDate: entity.paymentDate,
@@ -117,6 +136,7 @@ export class InvoiceDTO implements IInvoiceDTO {
       periodStart: entity.periodStart,
       referenceMonth: entity.referenceMonth,
       status: entity.status,
+      total: entity.total,
     });
   }
 }

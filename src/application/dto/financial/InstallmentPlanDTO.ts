@@ -1,5 +1,6 @@
 import InstallmentPlanEntity, {
   InstallmentEntity,
+  PrepaymentEntity,
 } from "@domain/entities/financial/InstallmentPlanEntity";
 
 class InstallmentPlanDTO {
@@ -13,6 +14,7 @@ class InstallmentPlanDTO {
   overLimit?: boolean;
   owner: string;
   ownerId: string;
+  prepayment?: PrepaymentEntity;
   totalValue: string;
 
   constructor(params: {
@@ -26,6 +28,7 @@ class InstallmentPlanDTO {
     overLimit?: boolean;
     owner: string;
     ownerId: string;
+    prepayment?: PrepaymentEntity;
     totalValue: string;
   }) {
     this.categoryId = params.categoryId;
@@ -38,6 +41,7 @@ class InstallmentPlanDTO {
     this.overLimit = params.overLimit;
     this.owner = params.owner;
     this.ownerId = params.ownerId;
+    this.prepayment = params.prepayment;
     this.totalValue = params.totalValue;
   }
 
@@ -53,6 +57,7 @@ class InstallmentPlanDTO {
       overLimit: entity.overLimit,
       owner: entity.owner,
       ownerId: entity.ownerId,
+      prepayment: entity.prepayment ? { ...entity.prepayment } : undefined,
       totalValue: entity.totalValue,
     });
   }

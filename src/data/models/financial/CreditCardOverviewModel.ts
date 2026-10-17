@@ -83,9 +83,13 @@ export class CreditCardSummaryModel {
 
 export class InvoiceModel {
   amount: number;
+  amountDue: number;
+  carryIn: number;
   closingDate: string;
   dueDate: string;
+  earlyPaid: number;
   listDate: string;
+  net: number;
   payment?: InvoicePaymentEntity;
   paymentAfterDue: boolean;
   paymentDate: string;
@@ -93,12 +97,17 @@ export class InvoiceModel {
   periodStart: string;
   referenceMonth: string;
   status: InvoiceStatus;
+  total: number;
 
   constructor(params: {
     amount: number;
+    amountDue: number;
+    carryIn: number;
     closingDate: string;
     dueDate: string;
+    earlyPaid: number;
     listDate: string;
+    net: number;
     payment?: InvoicePaymentEntity;
     paymentAfterDue: boolean;
     paymentDate: string;
@@ -106,11 +115,16 @@ export class InvoiceModel {
     periodStart: string;
     referenceMonth: string;
     status: InvoiceStatus;
+    total: number;
   }) {
     this.amount = params.amount;
+    this.amountDue = params.amountDue;
+    this.carryIn = params.carryIn;
     this.closingDate = params.closingDate;
     this.dueDate = params.dueDate;
+    this.earlyPaid = params.earlyPaid;
     this.listDate = params.listDate;
+    this.net = params.net;
     this.payment = params.payment;
     this.paymentAfterDue = params.paymentAfterDue;
     this.paymentDate = params.paymentDate;
@@ -118,15 +132,20 @@ export class InvoiceModel {
     this.periodStart = params.periodStart;
     this.referenceMonth = params.referenceMonth;
     this.status = params.status;
+    this.total = params.total;
   }
 
   static fromJSON(data: Record<string, unknown>): InvoiceModel {
     return new InvoiceModel({
       amount: Number(data.amount),
+      amountDue: Number(data.amountDue ?? data.amount),
+      carryIn: Number(data.carryIn ?? 0),
       closingDate: data.closingDate as string,
       dueDate: data.dueDate as string,
+      earlyPaid: Number(data.earlyPaid ?? 0),
       listDate:
         (data.listDate as string | undefined) ?? (data.paymentDate as string),
+      net: Number(data.net ?? data.amount),
       payment: toPayment(data.payment as null | Record<string, unknown>),
       paymentAfterDue: Boolean(data.paymentAfterDue),
       paymentDate: data.paymentDate as string,
@@ -134,6 +153,7 @@ export class InvoiceModel {
       periodStart: data.periodStart as string,
       referenceMonth: data.referenceMonth as string,
       status: data.status as InvoiceStatus,
+      total: Number(data.total ?? data.amount),
     });
   }
 }

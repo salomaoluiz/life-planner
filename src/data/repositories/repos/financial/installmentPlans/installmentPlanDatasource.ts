@@ -1,4 +1,5 @@
 import InstallmentPlanModel from "@data/models/financial/InstallmentPlanModel";
+import PrepaymentPreviewModel from "@data/models/financial/PrepaymentPreviewModel";
 import { OwnerType } from "@data/models/financial/TransactionModel";
 
 export interface InstallmentPlanDatasource {
@@ -7,6 +8,13 @@ export interface InstallmentPlanDatasource {
   ): Promise<InstallmentPlanModel>;
   deleteInstallmentPlan(id: string): Promise<void>;
   getInstallmentPlan(id: string): Promise<InstallmentPlanModel>;
+  prepayInstallmentPlan(
+    params: PrepayInstallmentPlanDatasourceParams,
+  ): Promise<InstallmentPlanModel>;
+  previewPrepayment(
+    params: PreviewPrepaymentDatasourceParams,
+  ): Promise<PrepaymentPreviewModel>;
+  undoPrepayment(planId: string): Promise<void>;
   updateInstallmentPlan(
     params: UpdateInstallmentPlanDatasourceParams,
   ): Promise<InstallmentPlanModel>;
@@ -23,6 +31,21 @@ interface CreateInstallmentPlanDatasourceParams {
   value: string;
 }
 
+interface PrepayInstallmentPlanDatasourceParams {
+  // `YYYY-MM-DD`
+  date: string;
+  // Cents; omitted or 0 = no discount.
+  discount?: number;
+  planId: string;
+  // `YYYY-MM`
+  targetInvoiceMonth: string;
+}
+
+interface PreviewPrepaymentDatasourceParams {
+  planId: string;
+  targetInvoiceMonth: string;
+}
+
 interface UpdateInstallmentPlanDatasourceParams {
   categoryId?: string;
   creditCardId?: string;
@@ -35,5 +58,7 @@ interface UpdateInstallmentPlanDatasourceParams {
 
 export {
   CreateInstallmentPlanDatasourceParams,
+  PrepayInstallmentPlanDatasourceParams,
+  PreviewPrepaymentDatasourceParams,
   UpdateInstallmentPlanDatasourceParams,
 };

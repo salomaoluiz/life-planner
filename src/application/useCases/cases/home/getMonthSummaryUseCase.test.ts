@@ -145,10 +145,10 @@ it("SHOULD sum only the transactions of the requested owners (the repository ret
 describe("card invoices (spec 029 FR 25)", () => {
   const getInvoices = spies.creditCardRepository.getCardInvoicesForMonth;
 
-  function invoiceOf(ownerId: string, amount: number) {
+  function invoiceOf(ownerId: string, amount: number, earlyPaid = 0) {
     return {
       card: { ownerId },
-      invoice: { amount },
+      invoice: { amount, earlyPaid },
     } as never;
   }
 
@@ -173,6 +173,18 @@ describe("card invoices (spec 029 FR 25)", () => {
     expect(await setup()).toEqual({
       balance: -46000,
       expense: 46000,
+      income: 0,
+    });
+  });
+
+  it("SHOULD add what was paid early to what is still due (spec 032 FR 9)", async () => {
+    getInvoices.mockResolvedValueOnce([
+      invoiceOf(mocks.defaultParams.ownerIds[0], 40000, 60000),
+    ]);
+
+    expect(await setup()).toEqual({
+      balance: -100000,
+      expense: 100000,
       income: 0,
     });
   });

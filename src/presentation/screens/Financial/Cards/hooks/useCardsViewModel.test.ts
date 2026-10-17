@@ -186,3 +186,30 @@ it("SHOULD switch to the upcoming tab AND open the invoice detail route", () => 
     pathname: "/financial/invoice/invoice_detail",
   });
 });
+
+it("SHOULD open the refund and early payment sheets for the selected card (spec 032)", () => {
+  givenData([card("a", 1000)]);
+  const { result } = setup();
+
+  result.current.onRefundPress();
+  result.current.onEarlyPaymentPress();
+
+  expect(spies.push).toHaveBeenNthCalledWith(1, {
+    params: { creditCardId: "a" },
+    pathname: "/financial/refund/card_refund",
+  });
+  expect(spies.push).toHaveBeenNthCalledWith(2, {
+    params: { creditCardId: "a" },
+    pathname: "/financial/early_payment/card_early_payment",
+  });
+});
+
+it("SHOULD NOT open them WHEN no card is selected", () => {
+  givenData([]);
+  const { result } = setup();
+
+  result.current.onRefundPress();
+  result.current.onEarlyPaymentPress();
+
+  expect(spies.push).not.toHaveBeenCalled();
+});

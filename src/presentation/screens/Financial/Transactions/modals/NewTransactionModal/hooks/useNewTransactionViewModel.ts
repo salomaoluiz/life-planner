@@ -196,6 +196,15 @@ function useNewTransactionViewModel() {
   const isNotFound = isEditing && !!transactions.data && !existing;
   // An installment is edited through its own sheet (spec 030): hand over instead of opening this form.
   const isInstallment = isEditing && !!existing?.installmentPlanId;
+  // The account debit row of an early payment is edited on the card (spec 032 FR 35): hand over as well.
+  const earlyPayment = isEditing ? existing?.earlyPayment : undefined;
+  // A card purchase can be refunded from its own sheet (spec 032 FR 21).
+  const canRefund =
+    isEditing &&
+    !!existing?.creditCardId &&
+    !existing.installmentPlanId &&
+    existing.type === "EXPENSE" &&
+    !existing.systemKey;
 
   useEffect(() => {
     if (isInstallment) {
@@ -205,6 +214,19 @@ function useNewTransactionViewModel() {
       } as never);
     }
   }, [isInstallment]);
+
+  useEffect(() => {
+    if (earlyPayment) {
+      router.replace({
+        params: {
+          creditCardId: earlyPayment.creditCardId,
+          id: earlyPayment.id,
+          invoiceMonth: earlyPayment.invoiceMonth,
+        },
+        pathname: "/financial/early_payment/card_early_payment",
+      } as never);
+    }
+  }, [earlyPayment?.id]);
 
   const initial = useMemo(() => {
     if (!uiModel || !owners.data || !accounts.data) {
@@ -420,6 +442,7 @@ function useNewTransactionViewModel() {
     accountOptions: uiModel?.accountOptions(ownerId, state?.accountId) ?? [],
     amountCents: state?.amountCents ?? 0,
     amountError: errors.amount,
+    canRefund,
     cardError: errors.creditCardId,
     cardOptions: uiModel?.cardOptions(ownerId, state?.creditCardId) ?? [],
     categoryChips,
@@ -448,7 +471,7 @@ function useNewTransactionViewModel() {
     isDiscardDialogOpen,
     isEditing,
     isInvoicePaid: cardHints.isInvoicePaid,
-    isLoading: (!state && !isNotFound) || isInstallment,
+    isLoading: (!state && !isNotFound) || isInstallment || !!earlyPayment,
     isNotFound,
     isSaveDisabled: cardHints.isInvoicePaid,
     isSaving:
@@ -536,6 +559,17 @@ function useNewTransactionViewModel() {
             cards.data ?? [],
           ),
         );
+      }
+    },
+    onRefundPress: () => {
+      if (existing?.creditCardId) {
+        router.replace({
+          params: {
+            creditCardId: existing.creditCardId,
+            refundedTransactionId: existing.id,
+          },
+          pathname: "/financial/refund/card_refund",
+        } as never);
       }
     },
     onSave,

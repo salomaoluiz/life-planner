@@ -1,6 +1,12 @@
 import { calendarDateToIso, isoToCalendarDate } from "./calendarDate";
 import { centsToDecimalString, decimalStringToCents } from "./money";
 
+export interface EarlyPaymentRefModel {
+  creditCardId: string;
+  id: string;
+  invoiceMonth: string;
+}
+
 export type OwnerType = "FAMILY" | "USER";
 
 export type TransactionType = "EXPENSE" | "INCOME";
@@ -12,6 +18,7 @@ interface ITransactionModel {
   creditCardId?: string;
   date: string;
   description: string;
+  earlyPayment?: EarlyPaymentRefModel;
   excludeFromTotals?: boolean;
   id: string;
   installmentCount?: number;
@@ -32,6 +39,7 @@ class TransactionModel implements ITransactionModel {
   creditCardId?: string;
   date: string;
   description: string;
+  earlyPayment?: EarlyPaymentRefModel;
   excludeFromTotals: boolean;
   id: string;
   installmentCount?: number;
@@ -55,6 +63,7 @@ class TransactionModel implements ITransactionModel {
     this.installmentPlanId = params.installmentPlanId;
     this.invoiceMonth = params.invoiceMonth;
     this.description = params.description;
+    this.earlyPayment = params.earlyPayment;
     this.owner = params.owner;
     this.id = params.id;
     this.ownerId = params.ownerId;
@@ -80,6 +89,8 @@ class TransactionModel implements ITransactionModel {
       creditCardId: (data.creditCardId as null | string) ?? undefined,
       date: calendarDateToIso(data.date as string),
       description: data.description as string,
+      earlyPayment:
+        (data.earlyPayment as EarlyPaymentRefModel | null) ?? undefined,
       excludeFromTotals: category?.excludeFromTotals === true,
       id: data.id as string,
       installmentCount: (data.installmentCount as null | number) ?? undefined,
@@ -107,6 +118,7 @@ class TransactionModel implements ITransactionModel {
       creditCardId: this.creditCardId ?? null,
       date: isoToCalendarDate(this.date),
       description: this.description,
+      earlyPayment: this.earlyPayment ?? null,
       id: this.id,
       installmentCount: this.installmentCount ?? null,
       installmentNumber: this.installmentNumber ?? null,

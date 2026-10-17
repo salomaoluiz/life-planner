@@ -358,15 +358,20 @@ describe("card mode (spec 029)", () => {
   function invoice(referenceMonth: string, status: string) {
     return new InvoiceDTO({
       amount: 1000,
+      amountDue: 1000,
+      carryIn: 0,
       closingDate: `${referenceMonth}-31`,
       dueDate: `${referenceMonth}-10`,
+      earlyPaid: 0,
       listDate: `${referenceMonth}-05`,
+      net: 1000,
       paymentAfterDue: false,
       paymentDate: `${referenceMonth}-05`,
       periodEnd: `${referenceMonth}-31`,
       periodStart: `${referenceMonth}-01`,
       referenceMonth,
       status,
+      total: 1000,
     });
   }
 
@@ -612,6 +617,59 @@ describe("card mode (spec 029)", () => {
         pathname: "/financial/installment/edit_installment",
       });
       expect(result.current.isLoading).toBe(true);
+    });
+
+    it("SHOULD hand the account row of an early payment over to the early payment sheet (spec 032 FR 35)", () => {
+      givenLoaded({
+        params: { id: "t1" },
+        transactions: [
+          tx("t1", {
+            earlyPayment: {
+              creditCardId: "c1",
+              id: "early-1",
+              invoiceMonth: "2026-10",
+            },
+          }),
+        ],
+      });
+
+      const { result } = setup();
+
+      expect(spies.replace).toHaveBeenCalledWith({
+        params: {
+          creditCardId: "c1",
+          id: "early-1",
+          invoiceMonth: "2026-10",
+        },
+        pathname: "/financial/early_payment/card_early_payment",
+      });
+      expect(result.current.isLoading).toBe(true);
+    });
+
+    it("SHOULD offer to refund a card purchase AND open the refund sheet linked to it (spec 032)", () => {
+      givenLoaded({
+        cards: [mainCard],
+        params: { id: "t1" },
+        transactions: [tx("t1", { creditCardId: "c1" })],
+      });
+
+      const { result } = setup();
+
+      expect(result.current.canRefund).toBe(true);
+      act(() => result.current.onRefundPress());
+      expect(spies.replace).toHaveBeenCalledWith({
+        params: { creditCardId: "c1", refundedTransactionId: "t1" },
+        pathname: "/financial/refund/card_refund",
+      });
+    });
+
+    it("SHOULD NOT offer a refund for an account transaction or a new purchase", () => {
+      givenLoaded({ params: { id: "t1" }, transactions: [tx("t1")] });
+      const { result } = setup();
+
+      expect(result.current.canRefund).toBe(false);
+      act(() => result.current.onRefundPress());
+      expect(spies.replace).not.toHaveBeenCalled();
     });
 
     it("SHOULD NOT offer installments WHEN editing a purchase", () => {

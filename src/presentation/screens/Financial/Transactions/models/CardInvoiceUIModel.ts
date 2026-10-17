@@ -1,8 +1,25 @@
 import CardInvoiceDTO from "@application/dto/financial/CardInvoiceDTO";
+import { InvoiceCreditKind } from "@domain/entities/financial/CardInvoiceEntity";
 import { normalizeCategoryColor } from "@presentation/constants/categoryColors";
 import { InstallmentLabel } from "@screens/Financial/models/installments";
+import { addMonthsTo } from "@screens/Financial/models/invoiceMonth";
 
 const FALLBACK_ICON = "help-circle-outline";
+
+// A refund, a prepayment discount or an early payment as a "+" line of the invoice (spec 032 FR 27, 38).
+export interface InvoiceCreditUIModel {
+  accountId?: string;
+  accountName?: string;
+  amountCents: number;
+  date: Date;
+  description: string;
+  id: string;
+  kind: InvoiceCreditKind;
+  method?: "ACCOUNT" | "EXTERNAL";
+  refundedName?: string;
+  refundedPlanId?: string;
+  refundedTransactionId?: string;
+}
 
 export interface InvoicePurchaseUIModel {
   amountCents: number;
@@ -14,12 +31,21 @@ export interface InvoicePurchaseUIModel {
   id: string;
   // Set for an installment: "k of n" (spec 030 FR 8).
   installment?: InstallmentLabel;
+  // Moved into this invoice by a prepayment.
+  prepaid: boolean;
 }
 
 // One card invoice as a line of the transactions list (spec 029 FR 24).
 class CardInvoiceUIModel {
   get amountCents() {
     return this.dto.invoice.amount;
+  }
+
+  // Refunds and early payments can be added to an invoice that has started and has no payment record.
+  get canAddCredit() {
+    return (
+      !this.dto.invoice.payment && this.dto.invoice.periodStart <= todayIso()
+    );
   }
 
   get cardColor() {
@@ -34,6 +60,36 @@ class CardInvoiceUIModel {
     return this.dto.card.title;
   }
 
+  // Negative credit coming from the previous invoice (cents, <= 0).
+  get carryInCents() {
+    return this.dto.invoice.carryIn;
+  }
+
+  // Credit left on a negative invoice, carried to the next one (cents, > 0).
+  get creditCarryCents() {
+    return this.dto.invoice.total < 0 ? -this.dto.invoice.total : 0;
+  }
+
+  get creditCarryMonth() {
+    return addMonthsTo(this.dto.invoice.referenceMonth, 1);
+  }
+
+  get credits(): InvoiceCreditUIModel[] {
+    return this.dto.credits.map((credit) => ({
+      accountId: credit.accountId,
+      accountName: credit.accountName,
+      amountCents: credit.value,
+      date: parseCalendarDate(credit.date),
+      description: credit.description,
+      id: credit.id,
+      kind: credit.kind,
+      method: credit.method,
+      refundedName: credit.refundedName,
+      refundedPlanId: credit.refundedPlanId,
+      refundedTransactionId: credit.refundedTransactionId,
+    }));
+  }
+
   get dateKey() {
     return this.dto.invoice.listDate;
   }
@@ -42,6 +98,15 @@ class CardInvoiceUIModel {
     const { closingDate, dueDate, paymentDate } = this.dto.invoice;
 
     return { closingDate, dueDate, paymentDate };
+  }
+
+  // Σ of the early payments of the invoice (cents).
+  get earlyPaidCents() {
+    return this.dto.invoice.earlyPaid;
+  }
+
+  get hasPayment() {
+    return !!this.dto.invoice.payment;
   }
 
   get id() {
@@ -77,6 +142,10 @@ class CardInvoiceUIModel {
     return this.dto.invoice.paymentAfterDue;
   }
 
+  get previousMonth() {
+    return addMonthsTo(this.dto.invoice.referenceMonth, -1);
+  }
+
   get purchases(): InvoicePurchaseUIModel[] {
     return this.dto.purchases.map((purchase) => ({
       amountCents: purchase.value,
@@ -95,6 +164,7 @@ class CardInvoiceUIModel {
               number: purchase.installmentNumber,
             }
           : undefined,
+      prepaid: !!purchase.prepaid,
     }));
   }
 
@@ -127,6 +197,12 @@ function parseCalendarDate(value: string) {
   const [year, month, day] = value.split("-").map(Number);
 
   return new Date(year, month - 1, day);
+}
+
+function todayIso() {
+  const now = new Date();
+
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }
 
 export default CardInvoiceUIModel;

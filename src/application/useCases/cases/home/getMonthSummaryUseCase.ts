@@ -54,7 +54,8 @@ function getMonthSummaryUseCase(
         invoices
           .filter((item) => params.ownerIds.includes(item.card.ownerId))
           .forEach((item) => {
-            expense += item.invoice.amount;
+            // What is due plus what was paid early: credits lower the expense, early payments only move money (spec 032 FR 9).
+            expense += item.invoice.amount + item.invoice.earlyPaid;
           });
 
         return new MonthSummaryDTO({

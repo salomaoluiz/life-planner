@@ -77,3 +77,81 @@ it("SHOULD map the upcoming invoices of the overview (and tolerate old payloads 
   );
   expect(old.cards[0].upcomingInvoices).toEqual([]);
 });
+
+describe("card credits (spec 032)", () => {
+  const credit = {
+    accountId: "acc-1",
+    accountName: "Checking",
+    date: "2026-10-16",
+    description: "Early payment",
+    id: "credit-1",
+    kind: "EARLY_PAYMENT",
+    method: "ACCOUNT",
+    refundedName: null,
+    refundedPlanId: null,
+    refundedTransactionId: null,
+    value: 60000,
+  };
+
+  it("SHOULD map the credits (nulls become undefined) AND the prepaid flag", () => {
+    const model = CardInvoiceModel.fromJSON({
+      ...apiCardInvoice,
+      credits: [credit],
+      purchases: [{ ...apiCardInvoice.purchases[0], prepaid: true }],
+    });
+
+    expect(model.credits).toEqual([
+      {
+        accountId: "acc-1",
+        accountName: "Checking",
+        date: "2026-10-16",
+        description: "Early payment",
+        id: "credit-1",
+        kind: "EARLY_PAYMENT",
+        method: "ACCOUNT",
+        refundedName: undefined,
+        refundedPlanId: undefined,
+        refundedTransactionId: undefined,
+        value: 60000,
+      },
+    ]);
+    expect(model.purchases[0].prepaid).toBe(true);
+  });
+
+  it("SHOULD default to no credits, not prepaid AND the old amount as due/net/total", () => {
+    const model = CardInvoiceModel.fromJSON(apiCardInvoice);
+
+    expect(model.credits).toEqual([]);
+    expect(model.purchases[0].prepaid).toBe(false);
+    expect(model.invoice).toMatchObject({
+      amountDue: 45000,
+      carryIn: 0,
+      earlyPaid: 0,
+      net: 45000,
+      total: 45000,
+    });
+  });
+
+  it("SHOULD read the invoice credit fields WHEN the API sends them", () => {
+    const model = CardInvoiceModel.fromJSON({
+      ...apiCardInvoice,
+      invoice: {
+        ...apiCardInvoice.invoice,
+        amount: 0,
+        amountDue: 0,
+        carryIn: -200,
+        earlyPaid: 600,
+        net: -100,
+        total: -300,
+      },
+    });
+
+    expect(model.invoice).toMatchObject({
+      amountDue: 0,
+      carryIn: -200,
+      earlyPaid: 600,
+      net: -100,
+      total: -300,
+    });
+  });
+});

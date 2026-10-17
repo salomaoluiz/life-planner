@@ -40,6 +40,7 @@ async function getTransactions(ownerIds: Params, datasources: Datasources) {
         creditCardId: transaction.creditCardId,
         date: transaction.date,
         description: transaction.description,
+        earlyPayment: transaction.earlyPayment,
         excludeFromTotals: transaction.excludeFromTotals,
         id: transaction.id,
         installmentCount: transaction.installmentCount,

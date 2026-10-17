@@ -200,3 +200,15 @@ describe("upcoming and pay (spec 029)", () => {
     expect(onInvoicePress).toHaveBeenCalledWith("card-1", "2026-10");
   });
 });
+
+it("SHOULD open the refund and the early payment sheets from the card header (spec 032)", () => {
+  const onRefundPress = jest.fn();
+  const onEarlyPaymentPress = jest.fn();
+  setup({ ...withCards(), onEarlyPaymentPress, onRefundPress });
+
+  fireEvent.press(screen.getByTestId(cardsTestIds.refundButton));
+  fireEvent.press(screen.getByTestId(cardsTestIds.earlyPaymentButton));
+
+  expect(onRefundPress).toHaveBeenCalledTimes(1);
+  expect(onEarlyPaymentPress).toHaveBeenCalledTimes(1);
+});

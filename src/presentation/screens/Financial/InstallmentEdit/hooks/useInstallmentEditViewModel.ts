@@ -22,6 +22,9 @@ import {
   validate,
 } from "../models/installmentEditState";
 
+const REFUND_ROUTE = "/financial/refund/card_refund";
+const PREPAY_ROUTE = "/financial/prepayment/prepay_installments";
+
 // Plan writes move card purchases, invoices, the limit and the month lists (spec 030).
 function invalidateAfterWrite() {
   [
@@ -29,6 +32,7 @@ function invalidateAfterWrite() {
     useCases.getFinancialCardInvoiceUseCase.uniqueName,
     useCases.getFinancialCardInvoicesForMonthUseCase.uniqueName,
     useCases.getFinancialCreditCardsOverviewUseCase.uniqueName,
+    useCases.getFinancialInstallmentPlanUseCase.uniqueName,
     useCases.getFinancialAccountsUseCase.uniqueName,
     useCases.getMonthSummaryUseCase.uniqueName,
   ].forEach(async (key) => invalidateFetcherData([key]));
@@ -83,6 +87,7 @@ function useInstallmentEditViewModel() {
   const [isPlanOpen, setPlanOpen] = useState(false);
   const [isRecalcOpen, setRecalcOpen] = useState(false);
   const [isDeleteOpen, setDeleteOpen] = useState(false);
+  const [isUndoPrepaymentOpen, setUndoPrepaymentOpen] = useState(false);
   const state = edited ?? initial;
 
   const updateTransactionMutation = useMutation({
@@ -97,6 +102,19 @@ function useInstallmentEditViewModel() {
     cacheKey: [useCases.deleteFinancialInstallmentPlanUseCase.uniqueName],
     fetch: useCases.deleteFinancialInstallmentPlanUseCase.execute,
   });
+
+  const undoPrepaymentMutation = useMutation({
+    cacheKey: [useCases.undoFinancialPrepaymentUseCase.uniqueName],
+    fetch: useCases.undoFinancialPrepaymentUseCase.execute,
+  });
+
+  useEffect(() => {
+    if (undoPrepaymentMutation.status === "success") {
+      invalidateAfterWrite();
+      setUndoPrepaymentOpen(false);
+      plan.refetch();
+    }
+  }, [undoPrepaymentMutation.status]);
 
   useEffect(() => {
     if (
@@ -122,7 +140,8 @@ function useInstallmentEditViewModel() {
   const formErrorKey = getFinancialErrorMessageKey(
     updateTransactionMutation.error ??
       updatePlanMutation.error ??
-      deletePlanMutation.error,
+      deletePlanMutation.error ??
+      undoPrepaymentMutation.error,
   );
   const ownerId = plan.data?.ownerId;
 
@@ -188,6 +207,8 @@ function useInstallmentEditViewModel() {
     isPlanOpen,
     isRecalcOpen,
     isSaving,
+    isUndoingPrepayment: undoPrepaymentMutation.isFetching,
+    isUndoPrepaymentOpen,
     onAmountChange: (cents: number) =>
       state && update({ ...state, amountCents: cents }),
     onCardChange: (id: string) =>
@@ -216,16 +237,43 @@ function useInstallmentEditViewModel() {
       state && update({ ...state, description: text }),
     onPlanClose: () => setPlanOpen(false),
     onPlanOpen: () => setPlanOpen(true),
+    onPrepayPress: () => {
+      if (planId) {
+        router.replace({
+          params: { planId },
+          pathname: PREPAY_ROUTE,
+        } as never);
+      }
+    },
     onRecalcCancel: () => setRecalcOpen(false),
     onRecalcConfirm: () => {
       setRecalcOpen(false);
       save();
+    },
+    onRefundPress: () => {
+      if (planId && state?.creditCardId) {
+        router.replace({
+          params: { creditCardId: state.creditCardId, refundedPlanId: planId },
+          pathname: REFUND_ROUTE,
+        } as never);
+      }
     },
     onSave,
     onScopeChange: (value: string) => {
       if (state && plan.data && transaction) {
         update(changeScope(state, value as EditScope, plan.data, transaction));
       }
+    },
+    onUndoPrepaymentCancel: () => setUndoPrepaymentOpen(false),
+    onUndoPrepaymentConfirm: () => {
+      if (planId) {
+        undoPrepaymentMutation.mutate(planId);
+      }
+    },
+    // The confirmation lives behind the plan sheet: close it first.
+    onUndoPrepaymentPress: () => {
+      setPlanOpen(false);
+      setUndoPrepaymentOpen(true);
     },
     plan: plan.data,
     state,

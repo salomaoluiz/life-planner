@@ -1,0 +1,268 @@
+url: ${E2E_WEB_URL}
+name: financial/credit-cards/prepayment-and-refund
+tags:
+  - financial
+  - spec-032
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- evalScript: ${output.KEEP_ACCOUNT_ID = output.ACCOUNT_ID}
+- evalScript: ${output.KEEP_CATEGORY_ID = output.EXPENSE_CATEGORY_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Card
+      KEY: CARD_TITLE
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Market
+      KEY: PURCHASE_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Notebook
+      KEY: PLAN_NAME
+# A card closed yesterday: closed invoice with a 250,00 purchase, open invoice with installment 1/3 (100,00)
+- runFlow:
+    file: ../../../subflows/setup/create-card-with-plan.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      CATEGORY_ID: ${output.KEEP_CATEGORY_ID}
+      TITLE: ${output.CARD_TITLE}
+      PURCHASE_NAME: ${output.PURCHASE_NAME}
+      PLAN_NAME: ${output.PLAN_NAME}
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-cards.yaml
+# The open invoice is selected by default: open its detail and the installment sheet
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.cards.invoice-row"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- tapOn:
+    id: "financial.cards.invoice-row"
+- extendedWaitUntil:
+    visible:
+      id: "financial.invoice.purchase"
+    timeout: 20000
+- tapOn:
+    id: "financial.invoice.purchase"
+- extendedWaitUntil:
+    visible:
+      id: "financial.installmentEdit.sheet"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.installmentEdit.see-plan"
+- extendedWaitUntil:
+    visible:
+      id: "financial.installmentPlan.prepay"
+    timeout: 20000
+# Prepay the 2 remaining installments (200,00) into the open invoice with a 20,00 discount
+- tapOn:
+    id: "financial.installmentPlan.prepay"
+- extendedWaitUntil:
+    visible:
+      id: "financial.prepayment.sheet"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "financial.prepayment.total"
+      text: ".*200[.,]00.*"
+    timeout: 20000
+- tapOn:
+    id: "financial.prepayment.has-discount"
+- extendedWaitUntil:
+    visible:
+      id: "financial.prepayment.discount"
+    timeout: 20000
+- tapOn:
+    id: "financial.prepayment.discount"
+- eraseText
+- inputText: "2000"
+# The open invoice becomes 100,00 + 200,00 - 20,00 = 280,00
+- assertVisible:
+    id: "financial.prepayment.hint"
+    text: ".*280[.,]00.*"
+- tapOn:
+    id: "financial.prepayment.confirm"
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.prepayment.sheet"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.cards.invoice-row-amount"
+      text: ".*280[.,]00.*"
+    timeout: 20000
+# The invoice shows the prepaid badges and the discount as a credit line
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- tapOn:
+    id: "financial.cards.invoice-row"
+- extendedWaitUntil:
+    visible:
+      id: "financial.invoice.prepaid"
+    timeout: 20000
+- assertVisible:
+    text: ".*20[.,]00.*"
+# Undo the prepayment from the plan sheet
+- tapOn:
+    id: "financial.invoice.purchase"
+- extendedWaitUntil:
+    visible:
+      id: "financial.installmentEdit.sheet"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.installmentEdit.see-plan"
+- extendedWaitUntil:
+    visible:
+      id: "financial.installmentPlan.undo-prepayment"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.installmentPlan.undo-prepayment"
+- tapOn:
+    id: "financial.installmentPlan.undo-prepayment-confirm-confirm"
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.installmentPlan.undo-prepayment-confirm"
+    timeout: 20000
+- tapOn:
+    id: "financial.installmentEdit.sheet-close"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.cards.invoice-row-amount"
+      text: ".*100[.,]00.*"
+    timeout: 20000
+# Refund 100,00 of the market purchase from its own sheet on the closed invoice (250,00 -> 150,00)
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
+- tapOn:
+    id: "financial.cards.invoice-tabs-closed"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- tapOn:
+    id: "financial.cards.invoice-row"
+- extendedWaitUntil:
+    visible:
+      id: "financial.invoice.purchase"
+    timeout: 20000
+- tapOn:
+    id: "financial.invoice.purchase"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.save-button"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.transaction-form.refund-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.refund.sheet"
+    timeout: 20000
+- assertVisible:
+    id: "financial.refund.linked"
+- tapOn:
+    id: "financial.refund.amount"
+- eraseText
+- inputText: "10000"
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.refund.invoice"
+- extendedWaitUntil:
+    visible:
+      id: "financial.refund.invoice-sheet"
+    timeout: 20000
+- tapOn:
+    id: "financial.refund.invoice-option-${output.CLOSED_MONTH}"
+- tapOn:
+    id: "financial.refund.save"
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.refund.sheet"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
+- tapOn:
+    id: "financial.cards.invoice-tabs-closed"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.cards.invoice-row-amount"
+      text: ".*150[.,]00.*"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- tapOn:
+    id: "financial.cards.invoice-row"
+- extendedWaitUntil:
+    visible:
+      text: ".*100[.,]00.*"
+    timeout: 20000
+# Pay 50,00 of the closed invoice early from the account: 100,00 left to pay
+- tapOn:
+    id: "financial.invoice.pay-early"
+- extendedWaitUntil:
+    visible:
+      id: "financial.earlyPayment.sheet"
+    timeout: 20000
+- assertVisible:
+    id: "financial.earlyPayment.left-to-pay"
+    text: ".*150[.,]00.*"
+- tapOn:
+    id: "financial.earlyPayment.amount"
+- eraseText
+- inputText: "5000"
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.earlyPayment.account"
+- tapOn:
+    id: "financial.earlyPayment.account-option-${output.KEEP_ACCOUNT_ID}"
+- tapOn:
+    id: "financial.earlyPayment.save"
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.earlyPayment.sheet"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- tapOn:
+    id: "financial.cards.invoice-row"
+- extendedWaitUntil:
+    visible:
+      id: "financial.invoice.paid-early"
+      text: ".*50[.,]00.*"
+    timeout: 20000
+- assertVisible:
+    id: "financial.invoice.left-to-pay"
+    text: ".*100[.,]00.*"
+- tapOn:
+    id: "financial.invoice.screen-close"
+# The account lost 50,00 and shows the debit row
+- tapOn:
+    id: "financial.layout.segments-accounts"
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.row-balance"
+      text: ".*50[.,]00.*"
+    timeout: 20000
+- tapOn:
+    id: "financial.layout.segments-transactions"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ".*Early payment.*"
+    timeout: 20000

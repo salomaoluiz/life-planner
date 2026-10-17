@@ -64,3 +64,53 @@ it("SHOULD update and delete a plan AND invalidate the caches", async () => {
   expect(datasource.deleteInstallmentPlan).toHaveBeenCalledWith("plan-1");
   expect(cache.invalidate).toHaveBeenCalledTimes(4);
 });
+
+it("SHOULD preview a prepayment WITHOUT touching the caches", async () => {
+  datasource.previewPrepayment.mockResolvedValueOnce({
+    eligible: [
+      { id: "r1", installmentNumber: 4, invoiceMonth: "2026-11", value: 100 },
+    ],
+    total: 100,
+  });
+
+  const result = await repository.previewPrepayment({
+    planId: "plan-1",
+    targetInvoiceMonth: "2026-10",
+  });
+
+  expect(result.total).toBe(100);
+  expect(cache.invalidate).not.toHaveBeenCalled();
+});
+
+it("SHOULD prepay AND undo, invalidating the transaction and account caches", async () => {
+  datasource.prepayInstallmentPlan.mockResolvedValueOnce(
+    InstallmentPlanModel.fromJSON({
+      ...apiInstallmentPlan,
+      plan: {
+        ...apiInstallmentPlan.plan,
+        prepayment: {
+          date: "2026-10-16",
+          discount: 12000,
+          id: "prepayment-1",
+          targetInvoiceMonth: "2026-10",
+        },
+      },
+    }),
+  );
+
+  const result = await repository.prepayInstallmentPlan({
+    date: "2026-10-16",
+    planId: "plan-1",
+    targetInvoiceMonth: "2026-10",
+  });
+  await repository.undoPrepayment("plan-1");
+
+  expect(result.prepayment).toEqual({
+    date: "2026-10-16",
+    discount: 12000,
+    id: "prepayment-1",
+    targetInvoiceMonth: "2026-10",
+  });
+  expect(datasource.undoPrepayment).toHaveBeenCalledWith("plan-1");
+  expect(cache.invalidate).toHaveBeenCalledTimes(4);
+});

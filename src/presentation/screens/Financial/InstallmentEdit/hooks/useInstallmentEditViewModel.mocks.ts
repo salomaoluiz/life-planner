@@ -19,7 +19,7 @@ import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
 import useInstallmentEditViewModel from "./useInstallmentEditViewModel";
 
 jest.mock("expo-router", () => ({
-  router: { back: jest.fn() },
+  router: { back: jest.fn(), replace: jest.fn() },
   useLocalSearchParams: jest.fn(),
 }));
 jest.mock("@infrastructure/fetcher");
@@ -33,6 +33,7 @@ jest.mock("@application/useCases", () => {
     "updateFinancialTransactionUseCase",
     "updateFinancialInstallmentPlanUseCase",
     "deleteFinancialInstallmentPlanUseCase",
+    "undoFinancialPrepaymentUseCase",
     "getFinancialCardInvoiceUseCase",
     "getFinancialCardInvoicesForMonthUseCase",
     "getFinancialCreditCardsOverviewUseCase",
@@ -127,6 +128,7 @@ const spies = {
   back: jest.mocked(router.back),
   invalidate: jest.mocked(invalidateFetcherData),
   params: jest.mocked(useLocalSearchParams),
+  replace: jest.mocked(router.replace),
   useMutation: jest.mocked(useMutation),
   useQuery: jest.mocked(useQuery),
 };
@@ -146,6 +148,7 @@ beforeEach(() => {
     "updateFinancialTransactionUseCase",
     "updateFinancialInstallmentPlanUseCase",
     "deleteFinancialInstallmentPlanUseCase",
+    "undoFinancialPrepaymentUseCase",
   ].forEach((key) => {
     mutations[key] = new UseMutationFixture<unknown, unknown>();
   });

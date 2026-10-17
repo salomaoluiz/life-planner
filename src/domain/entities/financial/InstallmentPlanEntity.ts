@@ -6,6 +6,8 @@ export interface InstallmentEntity {
   // `YYYY-MM`
   invoiceMonth: string;
   invoiceStatus: InstallmentInvoiceStatus;
+  // Moved by the plan's prepayment (spec 032).
+  prepaid?: boolean;
   // Decimal string, like transactions.
   value: string;
 }
@@ -14,6 +16,16 @@ export type InstallmentInvoiceStatus = "CLOSED" | "OPEN" | "PAID";
 
 // Which rows an installment edit reaches (spec 030 FR 11); "All" goes through the plan.
 export type InstallmentScope = "ONLY_THIS" | "THIS_AND_NEXT";
+
+export interface PrepaymentEntity {
+  // `YYYY-MM-DD`
+  date: string;
+  // Cents; 0 when the user got no discount.
+  discount: number;
+  id: string;
+  // `YYYY-MM`
+  targetInvoiceMonth: string;
+}
 
 interface IInstallmentPlanEntity {
   categoryId: string;
@@ -26,6 +38,7 @@ interface IInstallmentPlanEntity {
   overLimit?: boolean;
   owner: OwnerType;
   ownerId: string;
+  prepayment?: PrepaymentEntity;
   totalValue: string;
 }
 
@@ -40,6 +53,7 @@ class InstallmentPlanEntity {
   overLimit?: boolean;
   owner: OwnerType;
   ownerId: string;
+  prepayment?: PrepaymentEntity;
   // The SUM of the current installment values.
   totalValue: string;
 
@@ -54,6 +68,7 @@ class InstallmentPlanEntity {
     this.overLimit = params.overLimit;
     this.owner = params.owner;
     this.ownerId = params.ownerId;
+    this.prepayment = params.prepayment;
     this.totalValue = params.totalValue;
   }
 }

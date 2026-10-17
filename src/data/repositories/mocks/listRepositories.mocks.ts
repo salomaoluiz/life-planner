@@ -30,6 +30,14 @@ const repositoriesMocks: Repositories = {
       getAccounts: jest.fn(),
       updateAccount: jest.fn(),
     },
+    cardCredit: {
+      createEarlyPayment: jest.fn(),
+      createRefund: jest.fn(),
+      deleteEarlyPayment: jest.fn(),
+      deleteRefund: jest.fn(),
+      updateEarlyPayment: jest.fn(),
+      updateRefund: jest.fn(),
+    },
     category: {
       createCategory: jest.fn(),
       deleteCategory: jest.fn(),
@@ -51,6 +59,9 @@ const repositoriesMocks: Repositories = {
       createInstallmentPlan: jest.fn(),
       deleteInstallmentPlan: jest.fn(),
       getInstallmentPlan: jest.fn(),
+      prepayInstallmentPlan: jest.fn(),
+      previewPrepayment: jest.fn(),
+      undoPrepayment: jest.fn(),
       updateInstallmentPlan: jest.fn(),
     },
     transaction: {

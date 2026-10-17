@@ -137,3 +137,69 @@ it("SHOULD navigate to the add form with the card AND to a purchase edit AND clo
   act(() => result.current.onClose());
   expect(spies.back).toHaveBeenCalled();
 });
+
+it("SHOULD open the refund and early payment sheets for this invoice (spec 032)", () => {
+  givenLoaded({ invoice: makeInvoice() });
+  const { result } = setup();
+
+  act(() => result.current.onRefundPress());
+  expect(spies.replace).toHaveBeenLastCalledWith({
+    params: { creditCardId: "card-1", invoiceMonth: "2026-10" },
+    pathname: "/financial/refund/card_refund",
+  });
+  act(() => result.current.onEarlyPaymentPress());
+  expect(spies.replace).toHaveBeenLastCalledWith({
+    params: { creditCardId: "card-1", invoiceMonth: "2026-10" },
+    pathname: "/financial/early_payment/card_early_payment",
+  });
+});
+
+it("SHOULD edit a credit in the sheet of its kind", () => {
+  givenLoaded({ invoice: makeInvoice() });
+  const { result } = setup();
+  const credit = {
+    amountCents: 50000,
+    date: new Date(2026, 9, 16),
+    description: "Chargeback",
+    id: "c1",
+    kind: "REFUND",
+    refundedTransactionId: "t1",
+  } as never;
+
+  act(() => result.current.onCreditPress(credit));
+  expect(spies.replace).toHaveBeenLastCalledWith({
+    params: {
+      accountId: undefined,
+      creditCardId: "card-1",
+      date: "2026-10-16",
+      description: "Chargeback",
+      id: "c1",
+      invoiceMonth: "2026-10",
+      method: undefined,
+      refundedPlanId: undefined,
+      refundedTransactionId: "t1",
+      value: "50000",
+    },
+    pathname: "/financial/refund/card_refund",
+  });
+  act(() =>
+    result.current.onCreditPress({
+      accountId: "a1",
+      amountCents: 60000,
+      date: new Date(2026, 9, 16),
+      description: "Early payment",
+      id: "c2",
+      kind: "EARLY_PAYMENT",
+      method: "ACCOUNT",
+    } as never),
+  );
+  expect(spies.replace).toHaveBeenLastCalledWith({
+    params: expect.objectContaining({
+      accountId: "a1",
+      id: "c2",
+      method: "ACCOUNT",
+      value: "60000",
+    }),
+    pathname: "/financial/early_payment/card_early_payment",
+  });
+});

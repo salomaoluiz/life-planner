@@ -1,7 +1,15 @@
 import { View } from "react-native";
 
 import InstallmentPlanDTO from "@application/dto/financial/InstallmentPlanDTO";
-import { AmountText, Badge, BottomSheet, ListItem, Text } from "@components";
+import {
+  AmountText,
+  Badge,
+  BottomSheet,
+  Button,
+  ListItem,
+  Text,
+} from "@components";
+import { formatAmount } from "@components/AmountText/formatAmount";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { formatReferenceMonth } from "@screens/Financial/Cards/models/cardList";
@@ -12,6 +20,8 @@ import { decimalStringToCents } from "@utils/money";
 interface Props {
   cardTitle?: string;
   onClose: () => void;
+  onPrepay?: () => void;
+  onUndoPrepayment?: () => void;
   plan: InstallmentPlanDTO;
 }
 
@@ -27,6 +37,12 @@ function InstallmentPlanSheet(props: Props) {
   const { t } = useTranslation();
   const { styles } = useStyles();
   const localeTag = useLocaleTag();
+  const { prepayment } = plan;
+  // Prepaying needs at least one installment outside a paid invoice (spec 032 FR 11).
+  const canPrepay =
+    !prepayment &&
+    !!props.onPrepay &&
+    plan.installments.some((row) => row.invoiceStatus !== "PAID");
 
   return (
     <BottomSheet
@@ -57,6 +73,19 @@ function InstallmentPlanSheet(props: Props) {
             value={decimalStringToCents(plan.totalValue)}
           />
         </View>
+        {prepayment ? (
+          <Text.Body
+            testID={installmentPlanTestIds.prepayment}
+            tone="secondary"
+            value={t("financial.installmentPlan.prepaidInto", {
+              discount: formatAmount(prepayment.discount, localeTag),
+              month: formatReferenceMonth(
+                prepayment.targetInvoiceMonth,
+                localeTag,
+              ),
+            })}
+          />
+        ) : null}
         <View>
           {plan.installments.map((row) => (
             <ListItem
@@ -74,11 +103,33 @@ function InstallmentPlanSheet(props: Props) {
                     label={t(STATUS_KEYS[row.invoiceStatus])}
                     tone={row.invoiceStatus === "PAID" ? "income" : "accent"}
                   />
+                  {row.prepaid ? (
+                    <Badge
+                      label={t("financial.prepayment.prepaidBadge")}
+                      tone="accent"
+                    />
+                  ) : null}
                 </View>
               }
             />
           ))}
         </View>
+        {canPrepay ? (
+          <Button.Secondary
+            fullWidth
+            label={t("financial.prepayment.action")}
+            onPress={props.onPrepay as () => void}
+            testID={installmentPlanTestIds.prepay}
+          />
+        ) : null}
+        {prepayment && props.onUndoPrepayment ? (
+          <Button.Ghost
+            label={t("financial.prepayment.undo")}
+            onPress={props.onUndoPrepayment}
+            testID={installmentPlanTestIds.undoPrepayment}
+            tone="expense"
+          />
+        ) : null}
       </View>
     </BottomSheet>
   );
