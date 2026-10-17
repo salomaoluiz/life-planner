@@ -24,7 +24,13 @@ it("SHOULD return zeros WHEN the month has no transactions", async () => {
   const result = await setup();
 
   expect(result).toBeInstanceOf(MonthSummaryDTO);
-  expect(result).toEqual({ balance: 0, expense: 0, income: 0 });
+  expect(result).toEqual({
+    balance: 0,
+    expense: 0,
+    income: 0,
+    toPay: 0,
+    toReceive: 0,
+  });
 });
 
 it("SHOULD sum only income", async () => {
@@ -33,7 +39,11 @@ it("SHOULD sum only income", async () => {
     transaction(new Date(2026, 9, 3), "50.50", TransactionType.INCOME),
   ]);
 
-  expect(await setup()).toEqual({ balance: 15050, expense: 0, income: 15050 });
+  expect(await setup()).toMatchObject({
+    balance: 15050,
+    expense: 0,
+    income: 15050,
+  });
 });
 
 it("SHOULD sum only expenses AND return a negative balance", async () => {
@@ -42,7 +52,11 @@ it("SHOULD sum only expenses AND return a negative balance", async () => {
     transaction(new Date(2026, 9, 3), "0.05", TransactionType.EXPENSE),
   ]);
 
-  expect(await setup()).toEqual({ balance: -1005, expense: 1005, income: 0 });
+  expect(await setup()).toMatchObject({
+    balance: -1005,
+    expense: 1005,
+    income: 0,
+  });
 });
 
 it("SHOULD give the exact cents WHEN decimals are not representable (spec example)", async () => {
@@ -52,7 +66,7 @@ it("SHOULD give the exact cents WHEN decimals are not representable (spec exampl
     transaction(new Date(2026, 9, 11), "48.70", TransactionType.EXPENSE),
   ]);
 
-  expect(await setup()).toEqual({
+  expect(await setup()).toMatchObject({
     balance: 613840,
     expense: 36160,
     income: 650000,
@@ -74,7 +88,7 @@ it("SHOULD ignore the day before and the day after the month", async () => {
     transaction(new Date(2026, 10, 1), "2.00", TransactionType.EXPENSE),
   ]);
 
-  expect(await setup()).toEqual({ balance: 0, expense: 0, income: 0 });
+  expect(await setup()).toMatchObject({ balance: 0, expense: 0, income: 0 });
 });
 
 it("SHOULD ignore the same month of another year", async () => {
@@ -124,7 +138,11 @@ it("SHOULD skip transactions excluded from totals (balance adjustments)", async 
       .build(),
   ]);
 
-  expect(await setup()).toEqual({ balance: 10000, expense: 0, income: 10000 });
+  expect(await setup()).toMatchObject({
+    balance: 10000,
+    expense: 0,
+    income: 10000,
+  });
 });
 
 it("SHOULD sum only the transactions of the requested owners (the repository returns every cached owner)", async () => {
@@ -139,16 +157,31 @@ it("SHOULD sum only the transactions of the requested owners (the repository ret
       .build(),
   ]);
 
-  expect(await setup()).toEqual({ balance: 10000, expense: 0, income: 10000 });
+  expect(await setup()).toMatchObject({
+    balance: 10000,
+    expense: 0,
+    income: 10000,
+  });
 });
 
 describe("card invoices (spec 029 FR 25)", () => {
   const getInvoices = spies.creditCardRepository.getCardInvoicesForMonth;
 
-  function invoiceOf(ownerId: string, amount: number, earlyPaid = 0) {
+  function invoiceOf(
+    ownerId: string,
+    amount: number,
+    earlyPaid = 0,
+    extra: Record<string, unknown> = {},
+  ) {
     return {
       card: { ownerId },
-      invoice: { amount, earlyPaid },
+      invoice: {
+        amount,
+        amountDue: amount,
+        earlyPaid,
+        status: "CLOSED",
+        ...extra,
+      },
     } as never;
   }
 
@@ -170,7 +203,7 @@ describe("card invoices (spec 029 FR 25)", () => {
       invoiceOf("someone-else", 99999),
     ]);
 
-    expect(await setup()).toEqual({
+    expect(await setup()).toMatchObject({
       balance: -46000,
       expense: 46000,
       income: 0,
@@ -182,7 +215,7 @@ describe("card invoices (spec 029 FR 25)", () => {
       invoiceOf(mocks.defaultParams.ownerIds[0], 40000, 60000),
     ]);
 
-    expect(await setup()).toEqual({
+    expect(await setup()).toMatchObject({
       balance: -100000,
       expense: 100000,
       income: 0,
@@ -200,12 +233,82 @@ describe("card invoices (spec 029 FR 25)", () => {
         .build(),
     ]);
 
-    expect(await setup()).toEqual({ balance: 0, expense: 0, income: 0 });
+    expect(await setup()).toMatchObject({ balance: 0, expense: 0, income: 0 });
   });
 
   it("SHOULD rethrow a failing invoices request", async () => {
     getInvoices.mockRejectedValueOnce(mocks.errors.unknown);
 
     expect(await setupThrowable()).toBe(mocks.errors.unknown);
+  });
+});
+
+describe("to pay and to receive (spec 033 FR 16)", () => {
+  const getInvoices = spies.creditCardRepository.getCardInvoicesForMonth;
+
+  function invoiceOf(
+    ownerId: string,
+    amount: number,
+    earlyPaid = 0,
+    extra: Record<string, unknown> = {},
+  ) {
+    return {
+      card: { ownerId },
+      invoice: {
+        amount,
+        amountDue: amount,
+        earlyPaid,
+        status: "CLOSED",
+        ...extra,
+      },
+    } as never;
+  }
+
+  function row(
+    date: Date,
+    value: string,
+    type: TransactionType,
+    paid: boolean,
+  ) {
+    const entity = transaction(date, value, type);
+    entity.paid = paid;
+
+    return entity;
+  }
+
+  it("SHOULD sum the unpaid expenses and incomes of the month apart, whatever their date inside it", async () => {
+    getTransactions.mockResolvedValueOnce([
+      row(new Date(2026, 9, 2), "10.00", TransactionType.EXPENSE, false),
+      row(new Date(2026, 9, 28), "5.50", TransactionType.EXPENSE, false),
+      row(new Date(2026, 9, 3), "7.00", TransactionType.EXPENSE, true),
+      row(new Date(2026, 9, 4), "100.00", TransactionType.INCOME, false),
+      row(new Date(2026, 9, 5), "40.00", TransactionType.INCOME, true),
+    ]);
+
+    expect(await setup()).toMatchObject({
+      expense: 2250,
+      income: 14000,
+      toPay: 1550,
+      toReceive: 10000,
+    });
+  });
+
+  it("SHOULD leave unpaid rows of other months out", async () => {
+    getTransactions.mockResolvedValueOnce([
+      row(new Date(2026, 8, 20), "10.00", TransactionType.EXPENSE, false),
+      row(new Date(2026, 10, 1), "10.00", TransactionType.INCOME, false),
+    ]);
+
+    expect(await setup()).toMatchObject({ toPay: 0, toReceive: 0 });
+  });
+
+  it("SHOULD add the amount due of an unpaid invoice AND nothing for a paid one", async () => {
+    getInvoices.mockResolvedValueOnce([
+      invoiceOf(mocks.defaultParams.ownerIds[0], 40000, 60000),
+      invoiceOf(mocks.defaultParams.ownerIds[0], 0, 0, { status: "PAID" }),
+      invoiceOf(mocks.defaultParams.ownerIds[0], 5000, 0, { status: "PAID" }),
+    ]);
+
+    expect(await setup()).toMatchObject({ toPay: 40000 });
   });
 });

@@ -17,6 +17,7 @@ async function updateTransaction(params: Params, datasources: Datasources) {
     id: params.id,
     owner: params.owner,
     ownerId: params.ownerId,
+    paid: params.paid,
     scope: params.scope,
     type: params.type,
     value: params.value,

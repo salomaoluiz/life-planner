@@ -2,6 +2,7 @@ import { View } from "react-native";
 
 import {
   AmountText,
+  Badge,
   EmptyState,
   ErrorState,
   IconTile,
@@ -65,6 +66,15 @@ function LatestTransactions({ onAddPress, onSeeAllPress, state }: Props) {
             color={row.categoryColor}
             name={row.categoryIcon ?? "tag-outline"}
           />
+        }
+        meta={
+          row.isOverdue ? (
+            <Badge
+              label={t("financial.transactions.overdue")}
+              testID={homeTestIds.latestTransactionsOverdue}
+              tone={"expense"}
+            />
+          ) : undefined
         }
         onPress={onSeeAllPress}
         subtitle={t("home.transactions.subtitle", {

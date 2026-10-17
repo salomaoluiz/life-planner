@@ -386,3 +386,17 @@ testIDs: `financial.transactions.cardInvoice.*` (`row`, `toggle`, `title`, `stat
 ### E2E flows: prepayment, refund and early payment (spec 032)
 
 `financial/credit-cards/prepayment-and-refund` (tags `financial`, `spec-032`): a card that closed yesterday with a 250,00 purchase (closed invoice) and a 3x plan of 300,00 (1/3 in the open invoice), set up through the API (`scripts/setup/create-card-with-plan.js`); prepay the other two into the open invoice with a 20,00 discount (invoice 100,00 → 280,00, prepaid badges and discount line), undo it, refund 100,00 of the purchase on the closed invoice (250,00 → 150,00 and the credit line), pay 50,00 early from the account ("Paid early", "Left to pay" 100,00, the account balance and the debit row).
+
+## Paid status (spec 033)
+
+- `TransactionEntity` / `TransactionDTO` / `TransactionModel` carry `paid: boolean` (account rows: stored status; card rows: derived by the API from the invoice; a response without it counts as paid). `createTransaction` / `updateTransaction` send `paid` and `?today=`; `getTransactions` sends `today` so card rows get their derived status.
+- `getMonthSummaryUseCase` returns `toPay` (unpaid account expenses of the month + `amountDue` of the month's invoices that are not `PAID`) and `toReceive` (unpaid incomes); income/expense totals are unchanged.
+- List: `TransactionUIModel.canPay` (unpaid, no card, no system key) and `isOverdue` (`canPay` and dated before today). `TransactionRow` shows the overdue `Badge` (`meta` of `ListItem`) and a check `IconButton`; `usePayTransaction` sends `{ paid: true }` through `updateFinancialTransactionUseCase` (the API moves the date to today), then `onRefresh`. There is no snackbar in the kit: a failure shows the generic error text under the summary and the row stays unpaid. Unpaying is only possible from the form.
+- Summary: "To receive" / "To pay" sit under Income / Expenses in `MonthSummary` (a compact caption row; a separate row pushed the list below the fold of the E2E viewport).
+- Form: `transactionFormState` has `paid`, `paidTouched`, `originalPaid`; `changeDate` (create follows the date until touched, edit never follows) and `changePaid` (turning on with a future date on create, or on an unpaid stored row on edit, sets the date to today). The switch (`financial.transactionForm.paid`, label Paid/Received by type) is hidden in Card mode and `toCreateParams` sends no `paid` for cards.
+- Home latest transactions: `RecentTransactionDTO.isOverdue` shows the same badge (`home.latest-transactions.overdue`).
+- testIDs: `financial.transactions.row.pay`, `.row.overdue`, `.summary.toPay`, `.summary.toReceive`, `financial.transactionForm.paid`.
+
+### E2E flows: paid status (spec 033)
+
+`financial/transactions/paid-status`: an unpaid bill from last month shows the overdue badge, the pay button and "To pay"; one tap moves it to today, the account balance counts it; turning "Paid" off in the form makes it unpaid again; the card form hides the switch. `create-transaction` takes `PAID`. The date-follow rules of the switch are covered by unit tests (the date picker has no ids).

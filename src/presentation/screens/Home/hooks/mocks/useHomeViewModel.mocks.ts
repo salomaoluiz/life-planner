@@ -52,7 +52,13 @@ const user = new UserDTO({
   id: "user-id",
   name: "Ana Souza",
 });
-const summary = new MonthSummaryDTO({ balance: 100, expense: 50, income: 150 });
+const summary = new MonthSummaryDTO({
+  balance: 100,
+  expense: 50,
+  income: 150,
+  toPay: 0,
+  toReceive: 0,
+});
 const stock = new StockAttentionDTO({
   attentionCount: 0,
   items: [],

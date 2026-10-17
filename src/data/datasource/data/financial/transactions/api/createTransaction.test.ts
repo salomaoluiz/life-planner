@@ -14,12 +14,14 @@ import {
   spies,
 } from "./mocks/createTransaction.mocks";
 
+const TODAY_URL = /^\/v1\/finance\/transactions\?today=\d{4}-\d{2}-\d{2}$/;
+
 it("SHOULD POST /v1/finance/transactions with the value in cents AND the date as YYYY-MM-DD (the category name is NOT sent)", async () => {
   spies.post.mockResolvedValueOnce(mocks.apiTransaction);
 
   const result = await setup();
 
-  expect(spies.post).toHaveBeenCalledWith("/v1/finance/transactions", {
+  expect(spies.post).toHaveBeenCalledWith(expect.stringMatching(TODAY_URL), {
     accountId: mocks.params.accountId,
     categoryId: mocks.params.categoryId,
     date: "2026-10-03",
@@ -43,7 +45,7 @@ it.each([
   await setup({ value });
 
   expect(spies.post).toHaveBeenCalledWith(
-    "/v1/finance/transactions",
+    expect.stringMatching(TODAY_URL),
     expect.objectContaining({ value: cents }),
   );
 });
@@ -91,4 +93,15 @@ it("SHOULD wrap unknown errors in GenericError with the owner id only (no descri
     error: expect.any(Error),
     ownerId: mocks.params.ownerId,
   });
+});
+
+it("SHOULD send paid WHEN the form chose it (spec 033)", async () => {
+  spies.post.mockResolvedValueOnce(mocks.apiTransaction);
+
+  await setup({ paid: false });
+
+  expect(spies.post).toHaveBeenCalledWith(
+    expect.stringMatching(TODAY_URL),
+    expect.objectContaining({ paid: false }),
+  );
 });

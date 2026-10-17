@@ -1,6 +1,6 @@
 // Maestro runScript (GraalJS). Creates a financial transaction through the API.
 // Reads E2E_API_URL, TOKEN, DESCRIPTION, VALUE_CENTS, DATE (empty = computed), MONTHS_AGO (0 = today,
-// n = the 10th of the month n months ago), TYPE, ACCOUNT_ID, CATEGORY_ID, OWNER, OWNER_ID from env.
+// n = the 10th of the month n months ago), PAID ("true"/"false"; absent = the API default), TYPE, ACCOUNT_ID, CATEGORY_ID, OWNER, OWNER_ID from env.
 // Never logs the token.
 function pad(value) {
   return value < 10 ? "0" + value : String(value);
@@ -39,6 +39,7 @@ var response = http.post(E2E_API_URL + "/v1/finance/transactions", {
     ),
     owner: param(typeof OWNER === "undefined" ? undefined : OWNER, "USER"),
     ownerId: OWNER_ID,
+    paid: typeof PAID === "undefined" || !PAID ? undefined : PAID === "true",
     type: param(typeof TYPE === "undefined" ? undefined : TYPE, "EXPENSE"),
     value: Number(
       param(typeof VALUE_CENTS === "undefined" ? undefined : VALUE_CENTS, 1000),

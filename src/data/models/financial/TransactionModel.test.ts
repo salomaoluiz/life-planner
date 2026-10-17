@@ -94,3 +94,15 @@ it("SHOULD treat a regular category as not excluded and without a key", () => {
   expect(model.excludeFromTotals).toBe(false);
   expect(model.systemKey).toBeUndefined();
 });
+
+it("SHOULD read the paid status AND default to paid WHEN the API sends none (spec 033)", () => {
+  const withStatus = TransactionModel.fromJSON({ ...mocks.json, paid: false });
+  const withoutStatus = TransactionModel.fromJSON({
+    ...mocks.json,
+    paid: undefined,
+  });
+
+  expect(withStatus.paid).toBe(false);
+  expect(withStatus.toJSON().paid).toBe(false);
+  expect(withoutStatus.paid).toBe(true);
+});

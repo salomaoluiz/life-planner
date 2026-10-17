@@ -1,4 +1,5 @@
 const homeTestIds = {
+  latestTransactionsOverdue: "home.latest-transactions.overdue",
   latestTransactionsRow: "home.latest-transactions.row",
   screen: "home.home.screen",
   stockAttentionCard: "home.stock-attention.card",

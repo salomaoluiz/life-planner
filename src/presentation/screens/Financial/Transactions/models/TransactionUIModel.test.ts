@@ -121,3 +121,45 @@ describe("balance adjustments", () => {
     expect(adjustment.signedCents).toBe(5000);
   });
 });
+
+describe("paid status (spec 033)", () => {
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date(2026, 9, 15, 12));
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it("SHOULD flag an unpaid past account row as overdue AND payable", () => {
+    const item = new TransactionUIModel(
+      dto({ date: new Date(2026, 9, 10).toISOString(), paid: false }),
+    );
+
+    expect(item.isOverdue).toBe(true);
+    expect(item.canPay).toBe(true);
+  });
+
+  it("SHOULD NOT flag an unpaid row due today or later as overdue, but still payable", () => {
+    const today = new TransactionUIModel(
+      dto({ date: new Date(2026, 9, 15).toISOString(), paid: false }),
+    );
+    const later = new TransactionUIModel(
+      dto({ date: new Date(2026, 9, 20).toISOString(), paid: false }),
+    );
+
+    expect([today.isOverdue, later.isOverdue]).toEqual([false, false]);
+    expect([today.canPay, later.canPay]).toEqual([true, true]);
+  });
+
+  it("SHOULD offer nothing for a paid row, a card row or a system row", () => {
+    const past = new Date(2026, 9, 1).toISOString();
+    const rows = [
+      dto({ date: past, paid: true }),
+      dto({ creditCardId: "card-1", date: past, paid: false }),
+      dto({ date: past, paid: false, systemKey: "BALANCE_ADJUSTMENT" }),
+    ].map((row) => new TransactionUIModel(row));
+
+    expect(rows.map((row) => row.canPay)).toEqual([false, false, false]);
+    expect(rows.map((row) => row.isOverdue)).toEqual([false, false, false]);
+  });
+});

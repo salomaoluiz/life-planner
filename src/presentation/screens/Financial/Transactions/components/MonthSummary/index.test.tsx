@@ -65,3 +65,19 @@ it("SHOULD NOT render nested metric boxes", () => {
 
   expect(screen.UNSAFE_queryAllByType(MetricBlock)).toHaveLength(0);
 });
+
+it("SHOULD render the to receive and to pay amounts WHEN their labels are given (spec 033)", () => {
+  setup({
+    toPayCents: 700,
+    toPayLabel: "To pay",
+    toReceiveCents: 900,
+    toReceiveLabel: "To receive",
+  });
+
+  const values = screen
+    .UNSAFE_getAllByType(AmountText)
+    .map((n) => n.props.value);
+  expect(values).toEqual([1000, 3000, 900, 2000, 700]);
+  expect(screen.getByText("To pay")).toBeOnTheScreen();
+  expect(screen.getByText("To receive")).toBeOnTheScreen();
+});

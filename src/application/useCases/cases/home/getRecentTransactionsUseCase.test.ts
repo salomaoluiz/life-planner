@@ -114,3 +114,22 @@ it("SHOULD NOT list balance adjustments (they have no category to show)", async 
 
   expect(result.map((t) => t.id)).toEqual(["regular"]);
 });
+
+it("SHOULD flag only the unpaid rows dated before today as overdue (spec 033)", async () => {
+  jest.useFakeTimers().setSystemTime(new Date(2026, 9, 15, 12));
+  const unpaidPast = transaction("late", new Date(2026, 9, 10));
+  unpaidPast.paid = false;
+  const unpaidToday = transaction("today", new Date(2026, 9, 15));
+  unpaidToday.paid = false;
+  const paidPast = transaction("done", new Date(2026, 9, 9));
+  getTransactions.mockResolvedValueOnce([unpaidPast, unpaidToday, paidPast]);
+
+  const result = await setup();
+  jest.useRealTimers();
+
+  expect(result.map((t) => [t.id, t.isOverdue])).toEqual([
+    ["today", false],
+    ["late", true],
+    ["done", false],
+  ]);
+});

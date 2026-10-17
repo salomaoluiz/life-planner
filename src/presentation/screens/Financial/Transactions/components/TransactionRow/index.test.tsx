@@ -51,3 +51,73 @@ it("SHOULD show the translated adjustment label AND its own testID for a balance
   fireEvent.press(screen.getByTestId(transactionsTestIds.adjustmentRow));
   expect(onPress).toHaveBeenCalledWith("adj-1");
 });
+
+describe("paid status (spec 033)", () => {
+  function unpaid(date: Date) {
+    return new TransactionUIModel(
+      makeTransactionDTO({ date: date.toISOString(), paid: false }),
+    );
+  }
+
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date(2026, 9, 15, 12));
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it("SHOULD show the overdue badge AND the pay button for an unpaid past row, and call onPay", () => {
+    const onPay = jest.fn();
+    const item = unpaid(new Date(2026, 9, 10));
+
+    render(<TransactionRow item={item} onPay={onPay} onPress={jest.fn()} />);
+
+    expect(
+      screen.getByTestId(transactionsTestIds.rowOverdue),
+    ).toBeOnTheScreen();
+    fireEvent.press(screen.getByTestId(transactionsTestIds.rowPay));
+    expect(onPay).toHaveBeenCalledWith(item);
+  });
+
+  it("SHOULD show the pay button WITHOUT the badge for an unpaid future row", () => {
+    render(
+      <TransactionRow
+        item={unpaid(new Date(2026, 9, 20))}
+        onPay={jest.fn()}
+        onPress={jest.fn()}
+      />,
+    );
+
+    expect(screen.queryByTestId(transactionsTestIds.rowOverdue)).toBeNull();
+    expect(screen.getByTestId(transactionsTestIds.rowPay)).toBeOnTheScreen();
+  });
+
+  it("SHOULD NOT call onPay again WHILE the row is paying", () => {
+    const onPay = jest.fn();
+
+    render(
+      <TransactionRow
+        isPaying
+        item={unpaid(new Date(2026, 9, 20))}
+        onPay={onPay}
+        onPress={jest.fn()}
+      />,
+    );
+    fireEvent.press(screen.getByTestId(transactionsTestIds.rowPay));
+
+    expect(onPay).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD show neither WHEN the row is paid", () => {
+    render(
+      <TransactionRow
+        item={new TransactionUIModel(makeTransactionDTO({ paid: true }))}
+        onPay={jest.fn()}
+        onPress={jest.fn()}
+      />,
+    );
+
+    expect(screen.queryByTestId(transactionsTestIds.rowPay)).toBeNull();
+    expect(screen.queryByTestId(transactionsTestIds.rowOverdue)).toBeNull();
+  });
+});

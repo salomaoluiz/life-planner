@@ -40,7 +40,13 @@ describe("fetchTransactions", () => {
 describe("fetchSummary", () => {
   it("SHOULD call the 010 use case with month and owners", async () => {
     const month = new Date(2026, 9, 1);
-    spies.getSummary.mockResolvedValue({ balance: 0, expense: 0, income: 0 });
+    spies.getSummary.mockResolvedValue({
+      balance: 0,
+      expense: 0,
+      income: 0,
+      toPay: 0,
+      toReceive: 0,
+    });
 
     await fetchSummary(month, ["user-id"]);
 
@@ -227,7 +233,13 @@ it("SHOULD fall back to All WHEN the selected family is no longer an owner", () 
 
 it("SHOULD render only the All scope WHEN the user has no personal owner or families", () => {
   transactionsQuery.withData({ items: [], owners: [] });
-  summaryQuery.withData({ balance: 0, expense: 0, income: 0 });
+  summaryQuery.withData({
+    balance: 0,
+    expense: 0,
+    income: 0,
+    toPay: 0,
+    toReceive: 0,
+  });
   const { result } = setup();
 
   expect(result.current.scopeChoices.map((c) => c.value)).toEqual(["ALL"]);
@@ -240,6 +252,8 @@ it("SHOULD expose the summary in cents and the loading and error states", () => 
     balanceCents: 4000,
     expenseCents: 1000,
     incomeCents: 5000,
+    toPayCents: 700,
+    toReceiveCents: 900,
   });
 
   transactionsQuery.reset().withIsFetching(true);

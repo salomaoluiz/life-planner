@@ -157,6 +157,7 @@ it("SHOULD call create with a decimal-string value and the category name WHEN va
     description: "Weekly shop",
     owner: "USER",
     ownerId: "user-id",
+    paid: true,
     type: "EXPENSE",
     value: "312.90",
   });
@@ -714,5 +715,39 @@ describe("card mode (spec 029)", () => {
 
     expect(result.current.payWith).toBe("ACCOUNT");
     expect(result.current.invoiceHint).toBeUndefined();
+  });
+});
+
+describe("paid switch (spec 033)", () => {
+  it("SHOULD start on AND turn off WHEN the date moves to next month, then keep the user's choice", () => {
+    givenLoaded();
+    const { result } = setup();
+
+    expect(result.current.paid).toBe(true);
+    expect(result.current.showPaid).toBe(true);
+    expect(result.current.paidLabelKey).toBe(
+      "financial.transactions.form.paid",
+    );
+
+    act(() => result.current.onDateChange(new Date(2026, 10, 3)));
+    expect(result.current.paid).toBe(false);
+
+    act(() => result.current.onPaidChange(true));
+    expect(result.current.paid).toBe(true);
+    // Turning it on with a future date moves the date to today.
+    expect(result.current.date).toEqual(new Date(2026, 9, 5));
+
+    act(() => result.current.onDateChange(new Date(2026, 10, 3)));
+    expect(result.current.paid).toBe(true);
+  });
+
+  it("SHOULD say Received for an income AND hide the switch in Card mode", () => {
+    givenLoaded();
+    const { result } = setup();
+
+    act(() => result.current.onTypeChange("INCOME" as never));
+    expect(result.current.paidLabelKey).toBe(
+      "financial.transactions.form.received",
+    );
   });
 });

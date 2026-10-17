@@ -89,6 +89,8 @@ const summaryQuery = new UseQueryFixture<{
   balance: number;
   expense: number;
   income: number;
+  toPay: number;
+  toReceive: number;
 }>();
 // endregion mocks
 
@@ -131,7 +133,13 @@ beforeEach(() => {
 
 function givenData(items: TransactionUIModel[]) {
   transactionsQuery.withData({ items, owners });
-  summaryQuery.withData({ balance: 4000, expense: 1000, income: 5000 });
+  summaryQuery.withData({
+    balance: 4000,
+    expense: 1000,
+    income: 5000,
+    toPay: 700,
+    toReceive: 900,
+  });
 }
 
 function setup() {

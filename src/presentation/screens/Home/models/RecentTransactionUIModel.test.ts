@@ -78,3 +78,19 @@ it("SHOULD map the legacy black token to a hex and keep a missing color undefine
   expect(build(now, "EXPENSE", "black").categoryColor).toBe("#000000");
   expect(build(now, "EXPENSE", null).categoryColor).toBeUndefined();
 });
+
+it("SHOULD expose the overdue flag of the row (spec 033)", () => {
+  const dto = new RecentTransactionDTO({
+    categoryName: "Bills",
+    date: new Date(2026, 9, 10).toISOString(),
+    description: "Electricity",
+    id: "tx-1",
+    isOverdue: true,
+    type: "EXPENSE",
+    value: 18990,
+  });
+
+  expect(new RecentTransactionUIModel(dto, new Date(), "en-US").isOverdue).toBe(
+    true,
+  );
+});

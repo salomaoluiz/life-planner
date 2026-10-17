@@ -8,6 +8,7 @@ import {
   ErrorState,
   GroupHeader,
   SegmentedControl,
+  Text,
 } from "@components";
 import Skeleton from "@components/Skeleton";
 import { useTranslation } from "@presentation/i18n";
@@ -21,6 +22,7 @@ import MonthSwitcher from "./components/MonthSwitcher";
 import TransactionRow from "./components/TransactionRow";
 import { useTransactionsViewModel } from "./hooks";
 import useAdjustmentSheet from "./hooks/useAdjustmentSheet";
+import usePayTransaction from "./hooks/usePayTransaction";
 import {
   ALL_FILTER,
   formatDayTitle,
@@ -37,6 +39,7 @@ function FinancialTransactions() {
   const { t } = useTranslation();
   const vm = useTransactionsViewModel();
   const adjustment = useAdjustmentSheet({ onDeleted: vm.onRefresh });
+  const pay = usePayTransaction({ onPaid: vm.onRefresh });
 
   function dayTitle(entry: Extract<ListEntry, { kind: "header" }>) {
     if (entry.label.kind === "today") {
@@ -66,7 +69,9 @@ function FinancialTransactions() {
 
       return (
         <TransactionRow
+          isPaying={pay.payingId === transaction.id}
           item={transaction}
+          onPay={pay.onPay}
           onPress={
             transaction.isAdjustment
               ? () => adjustment.onOpen(transaction)
@@ -152,7 +157,16 @@ function FinancialTransactions() {
         scopeLabel={scopeLabel}
         scopeTestID={transactionsTestIds.summaryScope}
         testID={transactionsTestIds.monthSummary}
+        toPayCents={vm.summary?.toPayCents}
+        toPayLabel={t("financial.transactions.summary.toPay")}
+        toPayTestID={transactionsTestIds.summaryToPay}
+        toReceiveCents={vm.summary?.toReceiveCents}
+        toReceiveLabel={t("financial.transactions.summary.toReceive")}
+        toReceiveTestID={transactionsTestIds.summaryToReceive}
       />
+      {pay.hasError ? (
+        <Text.Body tone={"expense"} value={t("common.errors.generic")} />
+      ) : null}
       {vm.invoicesError ? (
         <ErrorState
           message={t("financial.transactions.cardInvoice.error")}
