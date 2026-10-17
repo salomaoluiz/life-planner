@@ -240,6 +240,8 @@ function useTransactionsViewModel() {
           balanceCents: summary.data.balance,
           expenseCents: summary.data.expense,
           incomeCents: summary.data.income,
+          toPayCents: summary.data.toPay,
+          toReceiveCents: summary.data.toReceive,
         }
       : undefined,
     summaryError: !!summary.error,

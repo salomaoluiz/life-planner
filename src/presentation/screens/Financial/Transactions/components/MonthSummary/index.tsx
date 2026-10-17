@@ -21,6 +21,12 @@ interface Props {
   scopeLabel: string;
   scopeTestID?: string;
   testID?: string;
+  toPayCents?: number;
+  toPayLabel?: string;
+  toPayTestID?: string;
+  toReceiveCents?: number;
+  toReceiveLabel?: string;
+  toReceiveTestID?: string;
 }
 
 function MonthSummary(props: Props) {
@@ -87,6 +93,30 @@ function MonthSummary(props: Props) {
           />
         </View>
       </View>
+      {props.toPayLabel && props.toReceiveLabel ? (
+        <>
+          <Divider />
+          <View style={styles.metrics}>
+            <View style={[styles.column, styles.columnLeft]}>
+              <Text.Overline tone={"secondary"} value={props.toReceiveLabel} />
+              <AmountText
+                testID={props.toReceiveTestID}
+                tone={"income"}
+                value={props.toReceiveCents ?? 0}
+              />
+            </View>
+            <Divider vertical />
+            <View style={[styles.column, styles.columnRight]}>
+              <Text.Overline tone={"secondary"} value={props.toPayLabel} />
+              <AmountText
+                testID={props.toPayTestID}
+                tone={"expense"}
+                value={props.toPayCents ?? 0}
+              />
+            </View>
+          </View>
+        </>
+      ) : null}
     </Card>
   );
 }

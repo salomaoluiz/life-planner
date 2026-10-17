@@ -387,9 +387,11 @@ const financial = {
       noCards: "No active cards for this owner yet.",
       noCategories: "No categories of this type for this owner yet.",
       overLimit: "This purchase passes the card limit by {{amount}}",
+      paid: "Paid",
       payWith: "Pay with",
       payWithAccount: "Account",
       payWithCard: "Card",
+      received: "Received",
       saveExpense: "Save expense",
       saveIncome: "Save income",
       totalValue: "Total value",
@@ -403,10 +405,16 @@ const financial = {
     nextMonth: "Next month",
     noMatch: "No transactions match the filters",
     noMatchMessage: "Try another filter or month.",
+    overdue: "Overdue",
+    pay: "Mark as paid",
     previousMonth: "Previous month",
     scope: {
       all: "Everything",
       label: "Show transactions of",
+    },
+    summary: {
+      toPay: "To pay",
+      toReceive: "To receive",
     },
     today: "Today",
     typeFilter: {

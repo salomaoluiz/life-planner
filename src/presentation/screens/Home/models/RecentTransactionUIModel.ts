@@ -49,6 +49,10 @@ class RecentTransactionUIModel {
     return this.dto.id;
   }
 
+  get isOverdue() {
+    return this.dto.isOverdue;
+  }
+
   get title() {
     return this.dto.description;
   }

@@ -18,11 +18,15 @@ const transactionsTestIds = {
   monthPrevious: "financial.transactions.month-previous",
   monthSummary: "financial.transactions.month-summary",
   row: "financial.transactions.row",
+  rowOverdue: "financial.transactions.row.overdue",
+  rowPay: "financial.transactions.row.pay",
   scopeFilter: "financial.transactions.scope-filter",
   screen: "financial.transactions.screen",
   summaryExpense: "financial.transactions.summary-expense",
   summaryIncome: "financial.transactions.summary-income",
   summaryScope: "financial.transactions.summary-scope",
+  summaryToPay: "financial.transactions.summary.toPay",
+  summaryToReceive: "financial.transactions.summary.toReceive",
   typeFilter: "financial.transactions.type-filter",
 } as const;
 

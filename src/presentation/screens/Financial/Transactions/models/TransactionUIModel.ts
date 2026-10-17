@@ -20,6 +20,11 @@ class TransactionUIModel {
     return this.isExpense ? "EXPENSE" : "INCOME";
   }
 
+  // Account rows that are not settled yet and are not system rows: the list offers the pay button.
+  get canPay() {
+    return !this.dto.paid && !this.dto.creditCardId && !this.dto.systemKey;
+  }
+
   get categoryColor() {
     // An adjustment has no category: neutral tile.
     if (this.isAdjustment) {
@@ -75,6 +80,11 @@ class TransactionUIModel {
     return this.dto.type === "EXPENSE";
   }
 
+  // Unpaid and already past: flagged in the list (spec 033 FR 7).
+  get isOverdue() {
+    return this.canPay && this.dateKey < todayKey();
+  }
+
   get ownerId() {
     return this.dto.ownerId;
   }
@@ -99,6 +109,12 @@ class TransactionUIModel {
 
 function pad(value: number) {
   return String(value).padStart(2, "0");
+}
+
+function todayKey() {
+  const now = new Date();
+
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 }
 
 export default TransactionUIModel;
