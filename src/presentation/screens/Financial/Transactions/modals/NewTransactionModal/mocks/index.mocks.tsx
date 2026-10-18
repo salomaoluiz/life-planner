@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@tests";
 
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
+import { TranslationKeys } from "@presentation/i18n/types";
 
 import NewTransactionModal from "../";
 import { useNewTransactionViewModel } from "../hooks";
@@ -21,6 +22,7 @@ const defaultViewModel: ReturnType<typeof useNewTransactionViewModel> = {
   categoryQuery: "",
   date: new Date(2026, 9, 5),
   dateError: undefined,
+  dateLabelKey: "financial.transactions.form.date" as TranslationKeys,
   description: "",
   descriptionError: undefined,
   formErrorKey: undefined,
@@ -69,6 +71,7 @@ const defaultViewModel: ReturnType<typeof useNewTransactionViewModel> = {
   onInstallmentsCountChange: jest.fn(),
   onInstallmentsToggle: jest.fn(),
   onOwnerChange: jest.fn(),
+  onPaidChange: jest.fn(),
   onPayWithChange: jest.fn(),
   onRefundPress: jest.fn(),
   onSave: jest.fn(),
@@ -76,11 +79,16 @@ const defaultViewModel: ReturnType<typeof useNewTransactionViewModel> = {
   overLimitCents: 0,
   ownerChoices: [{ label: "Personal", labelKey: undefined, value: "user-id" }],
   ownerId: "user-id",
+  paid: true,
+  paidHelpKey: "financial.transactions.form.paidHelpCreate" as TranslationKeys,
+  paidHintKey: undefined as TranslationKeys | undefined,
+  paidLabelKey: "financial.transactions.form.paid" as TranslationKeys,
   payWith: "ACCOUNT" as "ACCOUNT" | "CARD",
   saveLabelKey: "financial.transactions.form.saveExpense",
   selectedAccountId: "a1",
   selectedCardId: undefined,
   selectedCategoryId: undefined,
+  showPaid: true,
   titleKey: "financial.transactions.form.newTitle",
   type: TransactionType.EXPENSE,
   typeOptions: [

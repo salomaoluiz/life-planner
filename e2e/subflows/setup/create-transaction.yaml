@@ -1,7 +1,7 @@
 url: ${E2E_WEB_URL}
 ---
 # Optional caller-scoped params are read by the script (Maestro ignores caller values for header defaults):
-# DESCRIPTION, VALUE_CENTS, DATE, MONTHS_AGO, TYPE, OWNER.
+# DESCRIPTION, VALUE_CENTS, DATE, MONTHS_AGO, PAID, TYPE, OWNER.
 - runScript:
     file: ../../scripts/setup/create-transaction.js
     env:

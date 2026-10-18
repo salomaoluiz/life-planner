@@ -21,6 +21,7 @@ async function createTransaction(params: Params, datasources: Datasources) {
       description: params.description,
       owner: params.owner,
       ownerId: params.ownerId,
+      paid: params.paid,
       type: params.type,
       value: params.value,
     });
@@ -45,6 +46,7 @@ async function createTransaction(params: Params, datasources: Datasources) {
     invoiceMonth: transaction.invoiceMonth,
     owner: OwnerType[transaction.owner],
     ownerId: transaction.ownerId,
+    paid: transaction.paid,
     systemKey: transaction.systemKey,
     type: TransactionType[transaction.type],
     value: transaction.value,

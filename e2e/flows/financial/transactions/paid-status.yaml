@@ -1,0 +1,156 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/paid-status
+tags:
+  - financial
+  - spec-033
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Bill
+      KEY: BILL_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Card
+      KEY: CARD_TITLE
+- runFlow:
+    file: ../../../subflows/setup/create-credit-card.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      OWNER: USER
+      TITLE: ${output.CARD_TITLE}
+# A bill of 50,00 due on the 10th of last month and never paid: overdue
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: ${output.BILL_NAME}
+      VALUE_CENTS: "5000"
+      MONTHS_AGO: "1"
+      PAID: "false"
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+# The unpaid bill sits in last month: overdue badge, pay button and "To pay" in the summary
+- tapOn:
+    id: "financial.transactions.month-previous"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.BILL_NAME}
+    timeout: 20000
+# The summary makes the header taller: scroll the list to reach the row's badge and button
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- assertVisible:
+    id: "financial.transactions.row.overdue"
+- assertVisible:
+    id: "financial.transactions.row.pay"
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
+- assertVisible:
+    id: "financial.transactions.summary.toPay"
+    text: ".*50[.,]00.*"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+# One tap pays it: it moves to today's date, so it leaves last month
+- tapOn:
+    id: "financial.transactions.row.pay"
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.transactions.row.pay"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.transactions.row-title"
+    text: ${output.BILL_NAME}
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
+- assertVisible:
+    id: "financial.transactions.summary.toPay"
+    text: ".*[^0-9]0[.,]00.*"
+# It is now a paid row of the current month: no badge, no button
+- tapOn:
+    id: "financial.transactions.month-next"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.BILL_NAME}
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- assertNotVisible:
+    id: "financial.transactions.row.overdue"
+- assertNotVisible:
+    id: "financial.transactions.row.pay"
+# The account balance counts the paid bill
+- runFlow: ../../../subflows/financial/open-accounts.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.row-title"
+      text: ${output.ACCOUNT_NAME}
+    timeout: 20000
+- assertVisible:
+    id: "financial.accounts.row-balance"
+    text: ".*50[.,]00.*"
+# Opening the paid row and turning "Paid" off makes it unpaid again; only the form can unpay
+- tapOn:
+    id: "financial.layout.segments-transactions"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.screen"
+    timeout: 20000
+- tapOn:
+    id: "financial.transactions.row-title"
+    text: ${output.BILL_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.description-input"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.transactionForm.paid"
+- tapOn:
+    id: "financial.transaction-form.save-button"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row.pay"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
+- assertVisible:
+    id: "financial.transactions.summary.toPay"
+    text: ".*50[.,]00.*"
+# The new form offers "Paid" for an account purchase and hides it for a card purchase
+- tapOn:
+    id: "quick-add-button|navigation-rail-add"
+- extendedWaitUntil:
+    visible:
+      id: "quick-add-transaction"
+    timeout: 20000
+- tapOn:
+    id: "quick-add-transaction"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactionForm.payWith"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- assertVisible:
+    id: "financial.transactionForm.paid"
+- runFlow: ../../../subflows/financial/scroll-form-up.yaml
+- tapOn:
+    id: "financial.transactionForm.payWith-CARD"
+- assertNotVisible:
+    id: "financial.transactionForm.paid"

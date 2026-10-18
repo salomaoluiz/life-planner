@@ -1,6 +1,7 @@
 import MonthSummaryDTO from "@application/dto/home/MonthSummaryDTO";
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import { DefaultError } from "@domain/entities/errors";
+import { InvoiceStatus } from "@domain/entities/financial/InvoiceEntity";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import Repositories from "@domain/repositories";
 import { decimalStringToCents } from "@utils/money";
@@ -33,6 +34,8 @@ function getMonthSummaryUseCase(
 
         let income = 0;
         let expense = 0;
+        let toPay = 0;
+        let toReceive = 0;
 
         transactions
           .filter(
@@ -44,10 +47,14 @@ function getMonthSummaryUseCase(
               isInMonth(transaction.date, params.month),
           )
           .forEach((transaction) => {
+            const cents = decimalStringToCents(transaction.value);
+
             if (transaction.type === TransactionType.INCOME) {
-              income += decimalStringToCents(transaction.value);
+              income += cents;
+              toReceive += transaction.paid ? 0 : cents;
             } else {
-              expense += decimalStringToCents(transaction.value);
+              expense += cents;
+              toPay += transaction.paid ? 0 : cents;
             }
           });
 
@@ -56,12 +63,18 @@ function getMonthSummaryUseCase(
           .forEach((item) => {
             // What is due plus what was paid early: credits lower the expense, early payments only move money (spec 032 FR 9).
             expense += item.invoice.amount + item.invoice.earlyPaid;
+            // An invoice that is paid (or settled by credits) has nothing left to pay (spec 033 FR 16).
+            if (item.invoice.status !== InvoiceStatus.PAID) {
+              toPay += item.invoice.amountDue;
+            }
           });
 
         return new MonthSummaryDTO({
           balance: income - expense,
           expense,
           income,
+          toPay,
+          toReceive,
         });
       } catch (error) {
         if (error instanceof DefaultError) {

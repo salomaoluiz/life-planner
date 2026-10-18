@@ -20,6 +20,7 @@ export interface ITransactionDTO {
   invoiceMonth?: string;
   owner: string;
   ownerId: string;
+  paid?: boolean;
   systemKey?: string;
   type: string;
   value: string;
@@ -43,6 +44,7 @@ class TransactionDTO {
   invoiceMonth?: string;
   owner: string;
   ownerId: string;
+  paid: boolean;
   systemKey?: string;
   type: string;
   value: string;
@@ -64,6 +66,7 @@ class TransactionDTO {
     this.id = params.id;
     this.owner = params.owner;
     this.ownerId = params.ownerId;
+    this.paid = params.paid ?? true;
     this.excludeFromTotals = params.excludeFromTotals ?? false;
     this.systemKey = params.systemKey;
     this.type = params.type;
@@ -93,6 +96,7 @@ class TransactionDTO {
       invoiceMonth: entity.invoiceMonth,
       owner: entity.owner,
       ownerId: entity.ownerId,
+      paid: entity.paid,
       systemKey: entity.systemKey,
       type: entity.type,
       value: entity.value,

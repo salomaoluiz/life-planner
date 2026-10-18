@@ -12,6 +12,8 @@ export interface ListItemProps {
   /** Horizontal padding inside the pressable area, so the content doesn't touch the hover edge */
   inset?: boolean;
   leading?: React.ReactNode;
+  /** Extra line under the subtitle, e.g. a status badge */
+  meta?: React.ReactNode;
   onLongPress?: () => void;
   onPress?: () => void;
   selected?: boolean;
@@ -54,6 +56,7 @@ function ListItem(props: ListItemProps) {
             value={props.subtitle}
           />
         ) : null}
+        {props.meta}
       </View>
       {props.trailing}
     </>

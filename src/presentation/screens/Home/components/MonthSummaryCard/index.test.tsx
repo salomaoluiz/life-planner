@@ -7,7 +7,13 @@ import MonthSummaryCard from "./";
 
 function model(balance: number) {
   return new MonthSummaryUIModel(
-    new MonthSummaryDTO({ balance, expense: 36160, income: 650000 }),
+    new MonthSummaryDTO({
+      balance,
+      expense: 36160,
+      income: 650000,
+      toPay: 0,
+      toReceive: 0,
+    }),
     new Date(2026, 9, 15),
     "en-US",
   );

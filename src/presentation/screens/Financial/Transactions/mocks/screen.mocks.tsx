@@ -3,12 +3,14 @@ import { render } from "@tests";
 import FinancialTransactions from "../";
 import { useTransactionsViewModel } from "../hooks";
 import useAdjustmentSheet from "../hooks/useAdjustmentSheet";
+import usePayTransaction from "../hooks/usePayTransaction";
 import { ListEntry } from "../models/transactionList";
 import TransactionUIModel from "../models/TransactionUIModel";
 import { categories, makeTransactionDTO } from "./index.mocks";
 
 jest.mock("../hooks");
 jest.mock("../hooks/useAdjustmentSheet");
+jest.mock("../hooks/usePayTransaction");
 jest.mock("@shopify/flash-list", () => {
   const { View: MockView } = jest.requireActual("react-native");
   return {
@@ -72,7 +74,13 @@ const defaultViewModel: ReturnType<typeof useTransactionsViewModel> = {
   scopeChoices: [],
   selectedMonthIndex: undefined,
   stickyIndices: [],
-  summary: { balanceCents: 1000, expenseCents: 2000, incomeCents: 3000 },
+  summary: {
+    balanceCents: 1000,
+    expenseCents: 2000,
+    incomeCents: 3000,
+    toPayCents: 500,
+    toReceiveCents: 800,
+  },
   summaryError: false,
   typeFilter: "ALL",
 };
@@ -84,6 +92,12 @@ const defaultAdjustmentSheet: ReturnType<typeof useAdjustmentSheet> = {
   onClose: jest.fn(),
   onDelete: jest.fn(),
   onOpen: jest.fn(),
+};
+
+const defaultPay: ReturnType<typeof usePayTransaction> = {
+  hasError: false,
+  onPay: jest.fn(),
+  payingId: undefined,
 };
 
 function makeEntries(): ListEntry[] {
@@ -119,6 +133,7 @@ function makeEntries(): ListEntry[] {
 function setup(
   overrides: Partial<typeof defaultViewModel> = {},
   adjustmentOverrides: Partial<typeof defaultAdjustmentSheet> = {},
+  payOverrides: Partial<typeof defaultPay> = {},
 ) {
   jest
     .mocked(useTransactionsViewModel)
@@ -126,8 +141,17 @@ function setup(
   jest
     .mocked(useAdjustmentSheet)
     .mockReturnValue({ ...defaultAdjustmentSheet, ...adjustmentOverrides });
+  jest
+    .mocked(usePayTransaction)
+    .mockReturnValue({ ...defaultPay, ...payOverrides });
 
   return render(<FinancialTransactions />);
 }
 
-export { defaultAdjustmentSheet, defaultViewModel, makeEntries, setup };
+export {
+  defaultAdjustmentSheet,
+  defaultPay,
+  defaultViewModel,
+  makeEntries,
+  setup,
+};

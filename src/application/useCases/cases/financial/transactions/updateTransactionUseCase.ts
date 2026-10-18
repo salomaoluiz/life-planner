@@ -15,6 +15,7 @@ export interface UpdateTransactionUseCaseParams {
   id: string;
   owner?: string;
   ownerId?: string;
+  paid?: boolean;
   scope?: InstallmentScope;
   type?: string;
   value?: string;
@@ -53,6 +54,7 @@ function updateTransactionUseCase(
           id: params.id,
           owner,
           ownerId: params.ownerId,
+          paid: params.paid,
           scope: params.scope,
           type,
           value: params.value,

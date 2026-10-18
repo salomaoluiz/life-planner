@@ -1,3 +1,4 @@
+import { todayCalendarDate } from "@data/models/financial/calendarDate";
 import TransactionModel from "@data/models/financial/TransactionModel";
 import { ConnectivityError, GenericError } from "@domain/entities/errors";
 
@@ -16,10 +17,10 @@ it("SHOULD GET /v1/finance/transactions with repeated ownerId params AND return 
   const result = await setup();
 
   expect(spies.get).toHaveBeenCalledWith(
-    `/v1/finance/transactions?ownerId=${mocks.ownerIds[0]}&ownerId=${mocks.ownerIds[1]}`,
+    `/v1/finance/transactions?ownerId=${mocks.ownerIds[0]}&ownerId=${mocks.ownerIds[1]}&today=${todayCalendarDate()}`,
   );
   expect(spies.get).toHaveBeenCalledWith(
-    `/v1/finance/transactions?ownerId=${mocks.ownerIds[0]}&ownerId=${mocks.ownerIds[1]}&source=CARD`,
+    `/v1/finance/transactions?ownerId=${mocks.ownerIds[0]}&ownerId=${mocks.ownerIds[1]}&today=${todayCalendarDate()}&source=CARD`,
   );
   expect(result).toEqual([TransactionModel.fromJSON(mocks.apiTransactions[0])]);
   expect(result[0].value).toBe("234.90");

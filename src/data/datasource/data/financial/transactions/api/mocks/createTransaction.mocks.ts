@@ -17,6 +17,7 @@ const params = {
   description: "Weekly groceries",
   owner: OwnerType.USER,
   ownerId: "0b6a1e7c-3f4d-4b2a-8c9d-1e2f3a4b5c6d",
+  paid: undefined as boolean | undefined,
   type: "EXPENSE" as never,
   value: "234,90",
 };

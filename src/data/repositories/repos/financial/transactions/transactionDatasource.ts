@@ -22,6 +22,8 @@ interface CreateTransactionDatasourceParams {
   description: string;
   owner: OwnerType;
   ownerId: string;
+  // Account rows only; omitted → the API decides from the date (spec 033).
+  paid?: boolean;
   type: TransactionType;
   value: string;
 }
@@ -41,6 +43,7 @@ interface UpdateTransactionDatasourceParams {
   id: string;
   owner?: OwnerType;
   ownerId?: string;
+  paid?: boolean;
   // Required by the API when the transaction is an installment (spec 030).
   scope?: InstallmentScope;
   type?: TransactionType;

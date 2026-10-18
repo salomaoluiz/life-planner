@@ -326,3 +326,15 @@ it("SHOULD hide Refund this purchase on a new transaction", () => {
 
   expect(screen.queryByTestId(transactionFormTestIds.refundButton)).toBeNull();
 });
+
+describe("paid switch (spec 033)", () => {
+  it("SHOULD render the switch WHEN paying with an account AND hide it for a card", () => {
+    setup();
+    expect(screen.getByTestId(transactionFormTestIds.paid)).toBeOnTheScreen();
+  });
+
+  it("SHOULD hide the switch WHEN the view model says so", () => {
+    setup({ showPaid: false });
+    expect(screen.queryByTestId(transactionFormTestIds.paid)).toBeNull();
+  });
+});

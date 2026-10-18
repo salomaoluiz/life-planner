@@ -42,9 +42,27 @@ interface TransactionFormState {
   // Card purchases only (spec 030): the amount is then the TOTAL split in `installmentsCount` parts.
   installmentsCount: number;
   installmentsOn: boolean;
+  // Origin of the transaction being edited: true/false = its stored status, undefined while creating.
+  originalPaid?: boolean;
   ownerId: string;
+  // Account rows only (spec 033): the "Paid" switch; on create it follows the date until touched.
+  paid: boolean;
+  paidTouched: boolean;
   payWith: PayWith;
   type: TransactionType;
+}
+
+// Create: the switch follows the date until the user touches it. Edit: it shows the stored status and never follows.
+function changeDate(
+  state: TransactionFormState,
+  date: Date,
+  isEditing: boolean,
+): TransactionFormState {
+  const next = { ...state, date: normalizeDate(date) };
+
+  return isEditing || state.paidTouched
+    ? next
+    : { ...next, paid: !isAfterToday(next.date) };
 }
 
 function changeOwner(
@@ -74,6 +92,25 @@ function changeOwner(
   };
 }
 
+// Marking a transaction as paid makes its date the payment day (FR 19): a future date, or an unpaid
+// stored row being paid, moves to today. The user can still pick another day afterwards.
+function changePaid(
+  state: TransactionFormState,
+  paid: boolean,
+  isEditing: boolean,
+): TransactionFormState {
+  const movesToToday =
+    paid &&
+    (isEditing ? state.originalPaid === false : isAfterToday(state.date));
+
+  return {
+    ...state,
+    date: movesToToday ? normalizeDate(new Date()) : state.date,
+    paid,
+    paidTouched: true,
+  };
+}
+
 // Card purchases are expenses: switching to Card fixes the type (and drops an income category).
 function changePayWith(
   state: TransactionFormState,
@@ -82,7 +119,15 @@ function changePayWith(
   cards: CreditCardDTO[],
 ): TransactionFormState {
   if (payWith === "ACCOUNT") {
-    return { ...state, installmentsCount: 2, installmentsOn: false, payWith };
+    return {
+      ...state,
+      installmentsCount: 2,
+      installmentsOn: false,
+      // Coming back from a card the status restarts from the date.
+      paid: state.payWith === "CARD" ? !isAfterToday(state.date) : state.paid,
+      paidTouched: state.payWith === "CARD" ? false : state.paidTouched,
+      payWith,
+    };
   }
 
   return {
@@ -139,6 +184,8 @@ function createInitialState(params: {
     installmentsCount: 2,
     installmentsOn: false,
     ownerId,
+    paid: true,
+    paidTouched: false,
     payWith: params.card ? "CARD" : "ACCOUNT",
     type: TransactionType.EXPENSE,
   };
@@ -156,6 +203,10 @@ function defaultCardId(cards: CreditCardDTO[], ownerId: string) {
   )?.id;
 }
 
+function isAfterToday(date: Date) {
+  return normalizeDate(date).getTime() > normalizeDate(new Date()).getTime();
+}
+
 function isSameState(a: TransactionFormState, b: TransactionFormState) {
   return (
     a.accountId === b.accountId &&
@@ -167,6 +218,7 @@ function isSameState(a: TransactionFormState, b: TransactionFormState) {
     a.installmentsCount === b.installmentsCount &&
     a.installmentsOn === b.installmentsOn &&
     a.ownerId === b.ownerId &&
+    a.paid === b.paid &&
     a.payWith === b.payWith &&
     a.type === b.type
   );
@@ -190,7 +242,10 @@ function stateFromDto(dto: TransactionDTO): TransactionFormState {
     description: dto.description,
     installmentsCount: dto.installmentCount ?? 2,
     installmentsOn: false,
+    originalPaid: dto.paid,
     ownerId: dto.ownerId,
+    paid: dto.paid,
+    paidTouched: true,
     payWith: dto.creditCardId ? "CARD" : "ACCOUNT",
     type: dto.type as TransactionType,
   };
@@ -229,6 +284,8 @@ function toCreateParams(
     description: state.description.trim(),
     owner: owner.type,
     ownerId: owner.id,
+    // A card purchase follows its invoice: no status is sent (spec 033 FR 2).
+    paid: isCard ? undefined : state.paid,
     type: state.type,
     value: centsToDecimalString(state.amountCents),
   };
@@ -287,7 +344,9 @@ function validate(state: TransactionFormState): TransactionFormErrors {
 
 export type { PayWith, TransactionFormErrors, TransactionFormState };
 export {
+  changeDate,
   changeOwner,
+  changePaid,
   changePayWith,
   changeType,
   chipCategories,

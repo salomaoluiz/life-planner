@@ -54,6 +54,8 @@ function getRecentTransactionsUseCase(
                 date: transaction.date,
                 description: transaction.description,
                 id: transaction.id,
+                isOverdue:
+                  !transaction.paid && transaction.date < startOfToday(),
                 type: transaction.type,
                 value: decimalStringToCents(transaction.value),
               });
@@ -70,6 +72,17 @@ function getRecentTransactionsUseCase(
     },
     uniqueName: "home.get_recent_transactions_use_case",
   };
+}
+
+// ISO of the local midnight of today: dates are stored as the ISO of the local calendar day.
+function startOfToday() {
+  const now = new Date();
+
+  return new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  ).toISOString();
 }
 
 export default getRecentTransactionsUseCase;

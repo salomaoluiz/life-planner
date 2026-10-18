@@ -22,6 +22,8 @@ interface CreateTransactionRepositoryParams {
   description: string;
   owner: OwnerType;
   ownerId: string;
+  // Account rows only; omitted → the API decides from the date (spec 033).
+  paid?: boolean;
   type: TransactionType;
   value: string;
 }
@@ -40,6 +42,7 @@ interface UpdateTransactionRepositoryParams {
   id: string;
   owner?: OwnerType;
   ownerId?: string;
+  paid?: boolean;
   scope?: InstallmentScope;
   type?: TransactionType;
   value?: string;

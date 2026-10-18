@@ -383,9 +383,17 @@ const financial = {
       noCards: "Ainda não há cartões ativos para este dono.",
       noCategories: "Ainda não há categorias deste tipo para este dono.",
       overLimit: "Esta compra passa o limite do cartão em {{amount}}",
+      paid: "Pago",
+      paidHelpCreate:
+        "Com data até hoje o switch vem ligado. Ligar com data futura muda a data para hoje.",
+      paidHelpEdit:
+        "Ao ligar “Pago” a data muda para hoje. Se pagou em outro dia, troque antes de salvar. Desligar “Pago” não muda a data.",
+      paidHintFuture: "Data futura: começa como não paga",
+      paymentDate: "Data do pagamento",
       payWith: "Pagar com",
       payWithAccount: "Conta",
       payWithCard: "Cartão",
+      received: "Recebido",
       saveExpense: "Salvar despesa",
       saveIncome: "Salvar receita",
       totalValue: "Valor total",
@@ -399,10 +407,16 @@ const financial = {
     nextMonth: "Próximo mês",
     noMatch: "Nenhuma transação com esses filtros",
     noMatchMessage: "Tente outro filtro ou outro mês.",
+    overdue: "Atrasada",
+    pay: "Marcar como pago",
     previousMonth: "Mês anterior",
     scope: {
       all: "Tudo",
       label: "Mostrar transações de",
+    },
+    summary: {
+      toPay: "A pagar",
+      toReceive: "A receber",
     },
     today: "Hoje",
     typeFilter: {

@@ -1,4 +1,7 @@
-import { isoToCalendarDate } from "@data/models/financial/calendarDate";
+import {
+  isoToCalendarDate,
+  todayCalendarDate,
+} from "@data/models/financial/calendarDate";
 import { decimalStringToCents } from "@data/models/financial/money";
 import TransactionModel from "@data/models/financial/TransactionModel";
 import { TransactionDatasource } from "@data/repositories/repos/financial/transactions/transactionDatasource";
@@ -21,13 +24,14 @@ async function createTransaction(params: Params): Response {
     description: params.description,
     owner: params.owner,
     ownerId: params.ownerId,
+    paid: params.paid,
     type: params.type,
     value: decimalStringToCents(params.value),
   };
 
   try {
     const data = await api.post<Record<string, unknown>>(
-      "/v1/finance/transactions",
+      `/v1/finance/transactions?today=${todayCalendarDate()}`,
       body,
     );
 
