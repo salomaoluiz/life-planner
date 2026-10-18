@@ -388,6 +388,12 @@ const financial = {
       noCategories: "No categories of this type for this owner yet.",
       overLimit: "This purchase passes the card limit by {{amount}}",
       paid: "Paid",
+      paidHelpCreate:
+        "With a date up to today the switch starts on. Turning it on with a future date sets the date to today.",
+      paidHelpEdit:
+        "Turning on “Paid” sets the date to today. If you paid on another day, change it before saving. Turning it off keeps the date.",
+      paidHintFuture: "Future date: starts as not paid",
+      paymentDate: "Payment date",
       payWith: "Pay with",
       payWithAccount: "Account",
       payWithCard: "Card",

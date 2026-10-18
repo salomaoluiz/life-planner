@@ -455,6 +455,9 @@ function useNewTransactionViewModel() {
     categoryQuery,
     date: state?.date ?? normalizeDate(new Date()),
     dateError: errors.date,
+    dateLabelKey: (isEditing && state?.payWith !== "CARD" && state?.paid
+      ? "financial.transactions.form.paymentDate"
+      : "financial.transactions.form.date") as TranslationKeys,
     description: state?.description ?? "",
     descriptionError: errors.description,
     formErrorKey,
@@ -589,6 +592,17 @@ function useNewTransactionViewModel() {
     ownerChoices: uiModel?.ownerChoices ?? [],
     ownerId,
     paid: state?.paid ?? true,
+    // Create + future date + off: tell why the switch starts off. Edit: the date is the payment day once paid.
+    paidHelpKey: (isEditing
+      ? "financial.transactions.form.paidHelpEdit"
+      : "financial.transactions.form.paidHelpCreate") as TranslationKeys,
+    paidHintKey:
+      !isEditing &&
+      state &&
+      !state.paid &&
+      state.date > normalizeDate(new Date())
+        ? ("financial.transactions.form.paidHintFuture" as TranslationKeys)
+        : undefined,
     paidLabelKey: (type === TransactionType.EXPENSE
       ? "financial.transactions.form.paid"
       : "financial.transactions.form.received") as TranslationKeys,

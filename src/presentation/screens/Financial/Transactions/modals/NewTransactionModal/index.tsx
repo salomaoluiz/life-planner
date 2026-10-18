@@ -11,6 +11,7 @@ import {
   SegmentedControl,
   SelectField,
   Switch,
+  SwitchRow,
   Text,
   TextField,
 } from "@components";
@@ -274,58 +275,27 @@ function NewTransactionModal() {
             ) : null}
           </View>
         ) : null}
-        <View style={styles.row}>
-          {isCard ? null : (
-            <View style={styles.field}>
-              {vm.hasNoAccounts ? (
-                <MissingRecordHint
-                  actionLabel={t("financial.transactions.form.createAccount")}
-                  message={t("financial.transactions.form.noAccounts")}
-                  onCreate={vm.onCreateAccountPress}
-                  testID={transactionFormTestIds.missingAccountHint}
-                />
-              ) : (
-                <SelectField
-                  closeLabel={t("common.actions.close")}
-                  error={err(vm.accountError)}
-                  label={t("financial.transactions.form.account")}
-                  onChange={vm.onAccountChange}
-                  options={vm.accountOptions.map((option) => ({
-                    description: option.descriptionKey
-                      ? t(option.descriptionKey)
-                      : undefined,
-                    label: option.label,
-                    value: option.value,
-                  }))}
-                  sheetTitle={t("financial.transactions.form.account")}
-                  testID={transactionFormTestIds.accountSelect}
-                  value={vm.selectedAccountId}
-                />
-              )}
+        {vm.isEditing && vm.showPaid ? (
+          <>
+            {isCard ? null : <View style={styles.row}>{accountField}</View>}
+            {paidRow}
+            <View style={styles.row}>{dateField}</View>
+            <Text.Caption tone={"secondary"} value={t(vm.paidHelpKey)} />
+          </>
+        ) : (
+          <>
+            <View style={styles.row}>
+              {isCard ? null : accountField}
+              {dateField}
             </View>
-          )}
-          <View style={styles.field}>
-            <DateField
-              error={err(vm.dateError)}
-              label={t("financial.transactions.form.date")}
-              onChange={(date) => date && vm.onDateChange(date)}
-              testID={transactionFormTestIds.dateField}
-              todayLabel={t("common.date.today")}
-              value={vm.date}
-              yesterdayLabel={t("common.date.yesterday")}
-            />
-          </View>
-          {vm.showPaid ? (
-            <View style={styles.switchRow}>
-              <Text.BodyStrong value={t(vm.paidLabelKey)} />
-              <Switch
-                initialStatus={vm.paid}
-                onToggle={vm.onPaidChange}
-                testID={transactionFormTestIds.paid}
-              />
-            </View>
-          ) : null}
-        </View>
+            {vm.showPaid ? (
+              <>
+                {paidRow}
+                <Text.Caption tone={"secondary"} value={t(vm.paidHelpKey)} />
+              </>
+            ) : null}
+          </>
+        )}
         <ChipGroup
           label={t("financial.common.belongsTo")}
           layout={"wrap"}
@@ -361,6 +331,58 @@ function NewTransactionModal() {
       </View>
     );
   }
+
+  const accountField = (
+    <View style={styles.field}>
+      {vm.hasNoAccounts ? (
+        <MissingRecordHint
+          actionLabel={t("financial.transactions.form.createAccount")}
+          message={t("financial.transactions.form.noAccounts")}
+          onCreate={vm.onCreateAccountPress}
+          testID={transactionFormTestIds.missingAccountHint}
+        />
+      ) : (
+        <SelectField
+          closeLabel={t("common.actions.close")}
+          error={err(vm.accountError)}
+          label={t("financial.transactions.form.account")}
+          onChange={vm.onAccountChange}
+          options={vm.accountOptions.map((option) => ({
+            description: option.descriptionKey
+              ? t(option.descriptionKey)
+              : undefined,
+            label: option.label,
+            value: option.value,
+          }))}
+          sheetTitle={t("financial.transactions.form.account")}
+          testID={transactionFormTestIds.accountSelect}
+          value={vm.selectedAccountId}
+        />
+      )}
+    </View>
+  );
+  const dateField = (
+    <View style={styles.field}>
+      <DateField
+        error={err(vm.dateError)}
+        label={t(vm.dateLabelKey)}
+        onChange={(date) => date && vm.onDateChange(date)}
+        testID={transactionFormTestIds.dateField}
+        todayLabel={t("common.date.today")}
+        value={vm.date}
+        yesterdayLabel={t("common.date.yesterday")}
+      />
+    </View>
+  );
+  const paidRow = vm.showPaid ? (
+    <SwitchRow
+      hint={vm.paidHintKey ? t(vm.paidHintKey) : undefined}
+      label={t(vm.paidLabelKey)}
+      onToggle={vm.onPaidChange}
+      testID={transactionFormTestIds.paid}
+      value={vm.paid}
+    />
+  ) : null;
 
   return (
     <>

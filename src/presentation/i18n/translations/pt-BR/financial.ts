@@ -384,6 +384,12 @@ const financial = {
       noCategories: "Ainda não há categorias deste tipo para este dono.",
       overLimit: "Esta compra passa o limite do cartão em {{amount}}",
       paid: "Pago",
+      paidHelpCreate:
+        "Com data até hoje o switch vem ligado. Ligar com data futura muda a data para hoje.",
+      paidHelpEdit:
+        "Ao ligar “Pago” a data muda para hoje. Se pagou em outro dia, troque antes de salvar. Desligar “Pago” não muda a data.",
+      paidHintFuture: "Data futura: começa como não paga",
+      paymentDate: "Data do pagamento",
       payWith: "Pagar com",
       payWithAccount: "Conta",
       payWithCard: "Cartão",

@@ -751,3 +751,37 @@ describe("paid switch (spec 033)", () => {
     );
   });
 });
+
+describe("paid switch design copy (spec 033)", () => {
+  it("SHOULD hint why a future-dated new row starts unpaid AND label the date normally on create", () => {
+    givenLoaded();
+    const { result } = setup();
+
+    expect(result.current.paidHintKey).toBeUndefined();
+    expect(result.current.dateLabelKey).toBe(
+      "financial.transactions.form.date",
+    );
+    expect(result.current.paidHelpKey).toBe(
+      "financial.transactions.form.paidHelpCreate",
+    );
+
+    act(() => result.current.onDateChange(new Date(2026, 10, 3)));
+
+    expect(result.current.paidHintKey).toBe(
+      "financial.transactions.form.paidHintFuture",
+    );
+  });
+
+  it("SHOULD call the date the payment date WHEN a paid row is edited", () => {
+    givenLoaded({ params: { id: "tx-1" }, transactions: [tx("tx-1")] });
+    const { result } = setup();
+
+    expect(result.current.dateLabelKey).toBe(
+      "financial.transactions.form.paymentDate",
+    );
+    expect(result.current.paidHelpKey).toBe(
+      "financial.transactions.form.paidHelpEdit",
+    );
+    expect(result.current.paidHintKey).toBeUndefined();
+  });
+});
