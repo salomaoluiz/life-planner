@@ -32,6 +32,8 @@ onFlowComplete:
     id: "financial.transaction-form.missing-account-hint"
 - tapOn:
     id: "financial.transaction-form.save-button"
+# The form grew with the Repeat row (spec 034): the amount error sits above the fold
+- runFlow: ../../../subflows/financial/scroll-form-up.yaml
 - extendedWaitUntil:
     visible:
       id: "financial.transaction-form.amount-input-error"
