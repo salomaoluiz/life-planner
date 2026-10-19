@@ -18,6 +18,7 @@ import CardInvoiceUIModel from "../models/CardInvoiceUIModel";
 import {
   ALL_FILTER,
   buildEntries,
+  DayBalanceView,
   filterByOwner,
   filterByType,
   filterInvoicesByOwner,
@@ -31,9 +32,13 @@ import {
   shiftMonth,
   startOfMonth,
   stickyIndices,
+  toDayBalanceViews,
   TypeFilter,
 } from "../models/transactionList";
 import TransactionUIModel from "../models/TransactionUIModel";
+
+// Balances exist up to this many months after the current one (spec 035 FR 10).
+const MAX_BALANCE_MONTHS_AHEAD = 12;
 
 // What the API projects for the months after the current one (spec 034 FR 14).
 interface ProjectedData {
@@ -204,6 +209,29 @@ function useTransactionsViewModel() {
     fetch: async () => fetchProjections(projectionsFrom, monthKey, allOwnerIds),
   });
   const [expandedInvoiceId, setExpandedInvoiceId] = useState<string>();
+  const [expandedDayKey, setExpandedDayKey] = useState<string>();
+
+  // End-of-day balances of the scope filter (spec 035). They load in parallel with the list and never block it:
+  // a failed or missing request leaves the day headers with their net, and the type filter never touches them.
+  const balancesEnabled =
+    !!owners &&
+    summaryOwnerIds.length > 0 &&
+    monthKey <= addMonthsTo(currentMonthKey, MAX_BALANCE_MONTHS_AHEAD);
+  const balances = useQuery<Map<string, DayBalanceView>>({
+    cacheKey: [
+      ...listQueryKey(useCases.getFinancialDailyBalancesUseCase.uniqueName),
+      monthKey,
+      ...summaryOwnerIds,
+    ],
+    enabled: balancesEnabled,
+    fetch: async () =>
+      toDayBalanceViews(
+        await useCases.getFinancialDailyBalancesUseCase.execute({
+          month: monthKey,
+          ownerIds: summaryOwnerIds,
+        }),
+      ),
+  });
 
   const summary = useQuery<MonthSummary>({
     cacheKey: [
@@ -215,11 +243,19 @@ function useTransactionsViewModel() {
     fetch: async () => fetchSummary(month, summaryOwnerIds),
   });
 
+  // A new month or scope shows other days: nothing stays expanded.
+  useEffect(() => {
+    setExpandedDayKey(undefined);
+  }, [monthKey, ownerFilter]);
+
   useEffect(() => {
     if (isFocused) {
       transactions.refetch();
       invoices.refetch();
       summary.refetch();
+      if (balancesEnabled) {
+        balances.refetch();
+      }
       if (isFutureMonth) {
         projections.refetch();
       }
@@ -263,9 +299,17 @@ function useTransactionsViewModel() {
       ),
     [allInvoices, ownerFilter, typeFilter],
   );
+  const balanceViews = useMemo(
+    () => (balances.error ? undefined : balances.data),
+    [balances.data, balances.error],
+  );
   const entries = useMemo(
-    () => buildEntries(visible, new Date(), visibleInvoices),
-    [visible, visibleInvoices],
+    () =>
+      buildEntries(visible, new Date(), visibleInvoices, {
+        balances: balanceViews,
+        expandedDateKey: expandedDayKey,
+      }),
+    [visible, visibleInvoices, balanceViews, expandedDayKey],
   );
 
   function onMonthSelect(monthIndex: string) {
@@ -282,14 +326,19 @@ function useTransactionsViewModel() {
     transactions.refetch();
     invoices.refetch();
     summary.refetch();
+    if (balancesEnabled) {
+      balances.refetch();
+    }
     if (isFutureMonth) {
       projections.refetch();
     }
   }
 
   return {
+    balances: balanceViews ?? new Map<string, DayBalanceView>(),
     entries,
     errorMessage: transactions.error?.message,
+    expandedDayKey,
     expandedInvoiceId,
     invoicesError: !!invoices.error,
     isEmptyMonth: itemsOfMonth.length === 0 && invoicesOfMonth.length === 0,
@@ -308,6 +357,10 @@ function useTransactionsViewModel() {
       setOwnerSelection(ALL_FILTER);
       setTypeFilter("ALL");
     },
+    onDayToggle: (dateKey: string) =>
+      setExpandedDayKey((current) =>
+        current === dateKey ? undefined : dateKey,
+      ),
     onInvoiceOpen: (invoice: CardInvoiceUIModel) =>
       router.push({
         params: { cardId: invoice.cardId, month: invoice.referenceMonth },

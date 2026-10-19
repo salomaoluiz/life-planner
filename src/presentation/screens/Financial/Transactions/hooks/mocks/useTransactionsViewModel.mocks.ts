@@ -12,7 +12,10 @@ import { useQuery } from "@infrastructure/fetcher";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
 
 import CardInvoiceUIModel from "../../models/CardInvoiceUIModel";
-import { ProjectedInvoiceGroup } from "../../models/transactionList";
+import {
+  DayBalanceView,
+  ProjectedInvoiceGroup,
+} from "../../models/transactionList";
 import TransactionUIModel from "../../models/TransactionUIModel";
 import useTransactionsViewModel from "../useTransactionsViewModel";
 
@@ -32,6 +35,10 @@ jest.mock("@application/useCases", () => ({
     getFinancialCategoriesUseCase: {
       execute: jest.fn(),
       uniqueName: "categories",
+    },
+    getFinancialDailyBalancesUseCase: {
+      execute: jest.fn(),
+      uniqueName: "dailyBalances",
     },
     getFinancialProjectionsUseCase: {
       execute: jest.fn(),
@@ -94,6 +101,7 @@ const projectionsQuery = new UseQueryFixture<{
   accountItems: TransactionUIModel[];
   cardGroups: ProjectedInvoiceGroup[];
 }>();
+const balancesQuery = new UseQueryFixture<Map<string, DayBalanceView>>();
 const summaryQuery = new UseQueryFixture<{
   balance: number;
   expense: number;
@@ -107,6 +115,7 @@ const summaryQuery = new UseQueryFixture<{
 
 // region spies
 const spies = {
+  getBalances: jest.mocked(useCases.getFinancialDailyBalancesUseCase.execute),
   getCategories: jest.mocked(useCases.getFinancialCategoriesUseCase.execute),
   getInvoices: jest.mocked(
     useCases.getFinancialCardInvoicesForMonthUseCase.execute,
@@ -128,6 +137,7 @@ beforeEach(() => {
   jest.useFakeTimers().setSystemTime(new Date(2026, 9, 5, 12));
   transactionsQuery.reset();
   summaryQuery.reset();
+  balancesQuery.reset();
   invoicesQuery.reset();
   invoicesQuery.withData([]);
   projectionsQuery.reset();
@@ -135,6 +145,9 @@ beforeEach(() => {
   spies.useQuery.mockImplementation(((options: { cacheKey: string[] }) => {
     if (options.cacheKey[0] === "summary") {
       return summaryQuery.build();
+    }
+    if (options.cacheKey[0] === "dailyBalances") {
+      return balancesQuery.build();
     }
     if (options.cacheKey[0] === "projections") {
       return projectionsQuery.build();
@@ -173,6 +186,7 @@ function ui(
 }
 
 export {
+  balancesQuery,
   dto,
   givenData,
   invoicesQuery,

@@ -38,8 +38,10 @@ jest.mock("@shopify/flash-list", () => {
 });
 
 const defaultViewModel: ReturnType<typeof useTransactionsViewModel> = {
+  balances: new Map(),
   entries: [],
   errorMessage: undefined,
+  expandedDayKey: undefined,
   expandedInvoiceId: undefined,
   invoicesError: false,
   isEmptyMonth: false,
@@ -53,6 +55,7 @@ const defaultViewModel: ReturnType<typeof useTransactionsViewModel> = {
   monthName: "October",
   onAddPress: jest.fn(),
   onClearFilters: jest.fn(),
+  onDayToggle: jest.fn(),
   onInvoiceOpen: jest.fn(),
   onInvoiceRetry: jest.fn(),
   onInvoiceToggle: jest.fn(),
@@ -108,6 +111,7 @@ function makeEntries(): ListEntry[] {
 
   return [
     {
+      dateKey: "2026-10-05",
       day,
       key: "header-2026-10-05",
       kind: "header",

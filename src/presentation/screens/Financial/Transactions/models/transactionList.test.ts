@@ -1,3 +1,4 @@
+import DailyBalanceDTO from "@application/dto/financial/DailyBalanceDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 
 import { makeInvoice } from "../mocks/invoice.mocks";
@@ -19,6 +20,7 @@ import {
   shiftMonth,
   startOfMonth,
   stickyIndices,
+  toDayBalanceViews,
 } from "./transactionList";
 import TransactionUIModel from "./TransactionUIModel";
 
@@ -329,5 +331,113 @@ describe("projected occurrences (spec 034)", () => {
     const real = makeInvoice();
 
     expect(mergeProjectedInvoices([real], [])).toEqual([real]);
+  });
+});
+
+describe("day balances (spec 035)", () => {
+  const balances = toDayBalanceViews(
+    new DailyBalanceDTO({
+      accounts: [
+        {
+          icon: "bank",
+          id: "a1",
+          name: "Checking",
+          owner: "USER" as never,
+          ownerId: "u",
+        },
+        {
+          icon: "piggy-bank",
+          id: "a2",
+          name: "Savings",
+          owner: "USER" as never,
+          ownerId: "u",
+        },
+      ],
+      days: [
+        {
+          accounts: [
+            { accountId: "a1", balanceCents: 157000 },
+            { accountId: "a2", balanceCents: 0 },
+          ],
+          cardsDueCents: -45000,
+          date: "2026-10-05",
+          projected: true,
+          totalCents: 112000,
+        },
+      ],
+      month: "2026-10",
+    }),
+  );
+  const items = [
+    tx("a", new Date(2026, 9, 5, 10)),
+    tx("b", new Date(2026, 9, 6, 10)),
+  ];
+
+  it("SHOULD join the account names AND keep zero-balance accounts", () => {
+    expect(balances.get("2026-10-05")?.accounts).toEqual([
+      { accountId: "a1", balanceCents: 157000, icon: "bank", name: "Checking" },
+      { accountId: "a2", balanceCents: 0, icon: "piggy-bank", name: "Savings" },
+    ]);
+  });
+
+  it("SHOULD attach the balance to the matching header AND leave the others without one", () => {
+    const entries = buildEntries(items, now, [], { balances });
+    const headers = entries.filter((entry) => entry.kind === "header");
+
+    expect(headers.find((h) => h.dateKey === "2026-10-05")).toMatchObject({
+      balanceCents: 112000,
+      projected: true,
+    });
+    expect(
+      headers.find((h) => h.dateKey === "2026-10-06")?.balanceCents,
+    ).toBeUndefined();
+  });
+
+  it("SHOULD insert one line per account plus the cards line right after the expanded header only", () => {
+    const entries = buildEntries(items, now, [], {
+      balances,
+      expandedDateKey: "2026-10-05",
+    });
+    const index = entries.findIndex(
+      (entry) => entry.kind === "header" && entry.dateKey === "2026-10-05",
+    );
+
+    expect(entries.slice(index + 1, index + 4).map((e) => e.kind)).toEqual([
+      "balanceLine",
+      "balanceLine",
+      "balanceLine",
+    ]);
+    expect(entries[index + 3]).toMatchObject({
+      balanceCents: -45000,
+      isCards: true,
+    });
+    expect(entries[index + 4].kind).toBe("item");
+    expect(
+      entries.filter((entry) => entry.kind === "balanceLine"),
+    ).toHaveLength(3);
+  });
+
+  it("SHOULD omit the cards line WHEN nothing is due AND keep stickyIndices on headers only", () => {
+    const quiet = new Map([
+      ["2026-10-05", { ...balances.get("2026-10-05")!, cardsDueCents: 0 }],
+    ]);
+    const entries = buildEntries(items, now, [], {
+      balances: quiet,
+      expandedDateKey: "2026-10-05",
+    });
+
+    expect(entries.filter((e) => e.kind === "balanceLine")).toHaveLength(2);
+    expect(
+      stickyIndices(entries).every((i) => entries[i].kind === "header"),
+    ).toBe(true);
+  });
+
+  it("SHOULD not expand a day without balance data", () => {
+    const entries = buildEntries(items, now, [], {
+      balances,
+      expandedDateKey: "2026-10-06",
+    });
+
+    expect(entries.some((entry) => entry.kind === "balanceLine")).toBe(false);
   });
 });

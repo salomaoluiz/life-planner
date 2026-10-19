@@ -7,6 +7,11 @@ function useStyles() {
 
   return {
     styles: StyleSheet.create({
+      balance: {
+        alignItems: "center",
+        flexDirection: "row",
+        gap: theme.sizes.spacing.xs,
+      },
       monthSwitcher: {
         alignItems: "center",
         flexDirection: "row",

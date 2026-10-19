@@ -8,6 +8,7 @@ import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 import { makeTransactionDTO } from "./mocks/index.mocks";
 import { makeInvoice } from "./mocks/invoice.mocks";
 import { makeEntries, setup } from "./mocks/screen.mocks";
+import { ListEntry } from "./models/transactionList";
 import TransactionUIModel from "./models/TransactionUIModel";
 
 it("SHOULD render skeletons WHEN loading", () => {
@@ -246,5 +247,80 @@ describe("card invoices (spec 029)", () => {
     ).toBeOnTheScreen();
     fireEvent.press(screen.getByText("common.actions.tryAgain"));
     expect(onInvoiceRetry).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("day balance header (spec 035)", () => {
+  function entriesWithBalance(): ListEntry[] {
+    const entries = makeEntries();
+
+    return [
+      { ...entries[0], balanceCents: -5000, projected: true } as ListEntry,
+      ...entries.slice(1),
+    ];
+  }
+
+  it("SHOULD show the day net as the trailing value WHEN there is no balance", () => {
+    setup({ entries: makeEntries(), stickyIndices: [0] });
+
+    expect(
+      screen.queryByTestId(`${transactionsTestIds.dayBalance}-2026-10-05`),
+    ).toBeNull();
+  });
+
+  it("SHOULD make the header a toggle with the balance, the net and the projected mark", () => {
+    const onDayToggle = jest.fn();
+    setup({ entries: entriesWithBalance(), onDayToggle, stickyIndices: [0] });
+
+    const header = screen.getByTestId(
+      `${transactionsTestIds.dayBalance}-2026-10-05`,
+    );
+
+    expect(header.props.accessibilityRole).toBe("button");
+    expect(
+      screen.getByTestId(transactionsTestIds.dayBalanceProjected),
+    ).toBeOnTheScreen();
+
+    fireEvent.press(header);
+    expect(onDayToggle).toHaveBeenCalledWith("2026-10-05");
+  });
+
+  it("SHOULD render the account lines AND the cards line of the expanded day", () => {
+    const lines: ListEntry[] = [
+      {
+        accountId: "a1",
+        balanceCents: 1000,
+        dateKey: "2026-10-05",
+        icon: "bank",
+        isCards: false,
+        key: "l1",
+        kind: "balanceLine",
+        name: "Checking",
+      },
+      {
+        balanceCents: -450,
+        dateKey: "2026-10-05",
+        icon: "credit-card-outline",
+        isCards: true,
+        key: "l2",
+        kind: "balanceLine",
+        name: "",
+      },
+    ];
+    const [header, ...rest] = entriesWithBalance();
+    setup({
+      entries: [header, ...lines, ...rest],
+      expandedDayKey: "2026-10-05",
+      stickyIndices: [0],
+    });
+
+    expect(
+      screen.getByTestId(`${transactionsTestIds.dayBalanceLine}-a1`),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(transactionsTestIds.dayBalanceCards),
+    ).toBeOnTheScreen();
+    expect(hasText("Checking")).toBe(true);
+    expect(hasText("financial.transactions.dayBalance.cardsDue")).toBe(true);
   });
 });

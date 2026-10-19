@@ -1,5 +1,6 @@
 import CardInvoiceDTO from "@application/dto/financial/CardInvoiceDTO";
 import { InvoiceDTO } from "@application/dto/financial/CreditCardOverviewDTO";
+import DailyBalanceDTO from "@application/dto/financial/DailyBalanceDTO";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import CardInvoiceUIModel from "./CardInvoiceUIModel";
@@ -7,17 +8,42 @@ import TransactionUIModel from "./TransactionUIModel";
 
 export const ALL_FILTER = "ALL";
 
+// End-of-day balance of one day (spec 035): the aggregate and one line per account.
+export interface DayBalanceView {
+  accounts: {
+    accountId: string;
+    balanceCents: number;
+    icon: string;
+    name: string;
+  }[];
+  cardsDueCents: number;
+  projected: boolean;
+  totalCents: number;
+}
 export type DayLabel =
   | { date: Date; kind: "date" }
   | { kind: "today" }
   | { kind: "yesterday" };
 export type ListEntry =
   | {
+      accountId?: string;
+      balanceCents: number;
+      dateKey: string;
+      icon: string;
+      isCards: boolean;
+      key: string;
+      kind: "balanceLine";
+      name: string;
+    }
+  | {
+      balanceCents?: number;
+      dateKey: string;
       day: Date;
       key: string;
       kind: "header";
       label: DayLabel;
       netCents: number;
+      projected?: boolean;
     }
   | { invoice: CardInvoiceUIModel; key: string; kind: "invoice" }
   | { item: TransactionUIModel; key: string; kind: "item" };
@@ -41,11 +67,43 @@ export interface ProjectedInvoiceGroup {
 
 export type TypeFilter = "ALL" | "EXPENSE" | "INCOME";
 
+// One line per account (API order), plus the card invoices line only when it is not zero.
+function balanceLines(dateKey: string, balance: DayBalanceView): ListEntry[] {
+  const lines: ListEntry[] = balance.accounts.map((account) => ({
+    accountId: account.accountId,
+    balanceCents: account.balanceCents,
+    dateKey,
+    icon: account.icon,
+    isCards: false,
+    key: `balance-${dateKey}-${account.accountId}`,
+    kind: "balanceLine",
+    name: account.name,
+  }));
+
+  if (balance.cardsDueCents !== 0) {
+    lines.push({
+      balanceCents: balance.cardsDueCents,
+      dateKey,
+      icon: "credit-card-outline",
+      isCards: true,
+      key: `balance-${dateKey}-cards`,
+      kind: "balanceLine",
+      name: "",
+    });
+  }
+
+  return lines;
+}
+
 // Account rows and card invoice lines share the day sections: an invoice sits on its list day.
 function buildEntries(
   items: TransactionUIModel[],
   now: Date,
   invoices: CardInvoiceUIModel[] = [],
+  options: {
+    balances?: Map<string, DayBalanceView>;
+    expandedDateKey?: string;
+  } = {},
 ): ListEntry[] {
   const rows = [
     ...items.map((item) => ({
@@ -75,13 +133,21 @@ function buildEntries(
       currentKey = row.dateKey;
       const day = startOfDay(row.date);
       headerIndex = entries.length;
+      const balance = options.balances?.get(row.dateKey);
+
       entries.push({
+        balanceCents: balance?.totalCents,
+        dateKey: row.dateKey,
         day,
         key: `header-${row.dateKey}`,
         kind: "header",
         label: resolveDayLabel(day, now),
         netCents: 0,
+        projected: balance?.projected,
       });
+      if (balance && options.expandedDateKey === row.dateKey) {
+        entries.push(...balanceLines(row.dateKey, balance));
+      }
     }
 
     const header = entries[headerIndex];
@@ -277,6 +343,30 @@ function stickyIndices(entries: ListEntry[]) {
   );
 }
 
+// The API days by `YYYY-MM-DD`, with the account names joined in.
+function toDayBalanceViews(dto: DailyBalanceDTO): Map<string, DayBalanceView> {
+  const accountById = new Map(
+    dto.accounts.map((account) => [account.id, account]),
+  );
+
+  return new Map(
+    dto.days.map((day) => [
+      day.date,
+      {
+        accounts: day.accounts.map((item) => ({
+          accountId: item.accountId,
+          balanceCents: item.balanceCents,
+          icon: accountById.get(item.accountId)?.icon ?? "bank",
+          name: accountById.get(item.accountId)?.name ?? "",
+        })),
+        cardsDueCents: day.cardsDueCents,
+        projected: day.projected,
+        totalCents: day.totalCents,
+      },
+    ]),
+  );
+}
+
 export {
   buildEntries,
   filterByOwner,
@@ -294,4 +384,5 @@ export {
   shiftMonth,
   startOfMonth,
   stickyIndices,
+  toDayBalanceViews,
 };
