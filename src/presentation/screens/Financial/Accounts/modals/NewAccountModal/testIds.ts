@@ -1,5 +1,6 @@
 const accountFormTestIds = {
   archivedSwitch: "financial.account-form.archived-switch",
+  archiveWarning: "financial.account-form.archive-warning",
   balanceInput: "financial.account-form.balance-input",
   deleteButton: "financial.account-form.delete-button",
   deleteDialog: "financial.account-form.delete-dialog",

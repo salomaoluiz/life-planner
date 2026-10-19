@@ -16,6 +16,7 @@ import {
 } from "@components";
 import Skeleton from "@components/Skeleton";
 import { useTranslation } from "@presentation/i18n";
+import pluralKey from "@presentation/i18n/pluralKey";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
@@ -182,6 +183,22 @@ function NewCreditCardModal() {
             visible
           />
         )}
+        {vm.archiveWarningCount > 0 ? (
+          <HelperText
+            label={t(
+              pluralKey(
+                "financial.recurrence.archiveWarning",
+                vm.archiveWarningCount,
+              ),
+              {
+                count: vm.archiveWarningCount,
+              },
+            )}
+            testID={cardFormTestIds.archiveWarning}
+            type="info"
+            visible
+          />
+        ) : null}
         {vm.isEditing && (
           <Button.Ghost
             label={t(vm.archiveLabelKey)}

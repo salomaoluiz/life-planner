@@ -16,6 +16,7 @@ import {
 } from "@components";
 import Skeleton from "@components/Skeleton";
 import { useTranslation } from "@presentation/i18n";
+import pluralKey from "@presentation/i18n/pluralKey";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
@@ -114,6 +115,21 @@ function NewAccountModal() {
               tone={"secondary"}
               value={t("financial.accounts.form.archivedHelper")}
             />
+            {vm.archiveWarningCount > 0 ? (
+              <Text.Caption
+                testID={accountFormTestIds.archiveWarning}
+                tone={"expense"}
+                value={t(
+                  pluralKey(
+                    "financial.recurrence.archiveWarning",
+                    vm.archiveWarningCount,
+                  ),
+                  {
+                    count: vm.archiveWarningCount,
+                  },
+                )}
+              />
+            ) : null}
           </View>
         )}
         <View style={styles.helper}>

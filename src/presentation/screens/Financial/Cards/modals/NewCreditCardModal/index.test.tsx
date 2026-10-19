@@ -83,3 +83,15 @@ it("SHOULD show the not found state AND skeletons WHILE loading", () => {
   setup({ isLoading: true });
   expect(screen.getAllByTestId("card-form-skeleton")).toHaveLength(3);
 });
+
+it("SHOULD warn that recurring transactions will end BEFORE archiving the card", () => {
+  setup({ archiveWarningCount: 2, isEditing: true });
+
+  expect(screen.getByTestId(cardFormTestIds.archiveWarning)).toBeOnTheScreen();
+});
+
+it("SHOULD show no archive warning WHEN there is nothing to end", () => {
+  setup({ archiveWarningCount: 0, isEditing: true });
+
+  expect(screen.queryByTestId(cardFormTestIds.archiveWarning)).toBeNull();
+});

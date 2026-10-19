@@ -7,6 +7,7 @@ jest.mock("../hooks");
 
 const defaultViewModel: ReturnType<typeof useNewCreditCardViewModel> = {
   archiveLabelKey: "financial.cardForm.archive",
+  archiveWarningCount: 0,
   brand: "VISA",
   brandOptions: [{ labelKey: "financial.cards.brand.VISA", value: "VISA" }],
   closingDay: "",

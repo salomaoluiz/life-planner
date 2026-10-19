@@ -61,6 +61,22 @@ function useNewCreditCardViewModel() {
     });
   }, [owners.data, cards.data, isEditing, existing]);
 
+  // The recurring series that end when the card is archived (spec 034 FR 34).
+  const series = useQuery({
+    cacheKey: [
+      useCases.getFinancialRecurrencesUseCase.uniqueName,
+      "card",
+      params.id ?? "",
+    ],
+    enabled: isEditing && !!existing && existing.status !== "ARCHIVED",
+    fetch: async () =>
+      useCases.getFinancialRecurrencesUseCase.execute({
+        creditCardId: params.id,
+        ownerIds: [existing!.ownerId],
+        status: "ACTIVE",
+      }),
+  });
+
   const [edited, setEdited] = useState<CardFormState>();
   const [submitted, setSubmitted] = useState(false);
   const [isDiscardDialogOpen, setDiscardDialogOpen] = useState(false);
@@ -167,6 +183,7 @@ function useNewCreditCardViewModel() {
     archiveLabelKey: (initial?.isArchived
       ? "financial.cardForm.reactivate"
       : "financial.cardForm.archive") as TranslationKeys,
+    archiveWarningCount: initial?.isArchived ? 0 : (series.data?.length ?? 0),
     brand: state?.brand ?? "VISA",
     brandOptions: uiModel?.brandOptions ?? [],
     closingDay: state?.closingDay ?? "",

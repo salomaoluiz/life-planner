@@ -6,6 +6,7 @@ import {
   card,
   givenLoaded,
   mutations,
+  queries,
   setup,
   spies,
 } from "./mocks/useNewCreditCardViewModel.mocks";
@@ -230,4 +231,44 @@ it("SHOULD ask to discard WHEN closing a dirty form and close directly WHEN clea
   expect(result.current.isDiscardDialogOpen).toBe(false);
   act(() => result.current.onDiscardConfirm());
   expect(spies.back).toHaveBeenCalledTimes(2);
+});
+
+describe("archiving ends the recurring series (spec 034 FR 34)", () => {
+  it("SHOULD warn with the count of active series of an active card", () => {
+    givenLoaded({ cards: [card("c1")], params: { id: "c1" } });
+    queries.recurrences.withData([{}, {}, {}]);
+
+    expect(setup().result.current.archiveWarningCount).toBe(3);
+  });
+
+  it("SHOULD not warn for an archived card OR WHEN there are no series", () => {
+    givenLoaded({
+      cards: [card("c1", { status: "ARCHIVED" })],
+      params: { id: "c1" },
+    });
+    queries.recurrences.withData([{}]);
+    expect(setup().result.current.archiveWarningCount).toBe(0);
+
+    givenLoaded({ cards: [card("c1")], params: { id: "c1" } });
+    queries.recurrences.reset();
+    expect(setup().result.current.archiveWarningCount).toBe(0);
+  });
+
+  it("SHOULD load the series of the card through the use case", async () => {
+    givenLoaded({ cards: [card("c1")], params: { id: "c1" } });
+    setup();
+
+    const options = spies.useQuery.mock.calls.find(
+      ([option]) =>
+        (option as { cacheKey: string[] }).cacheKey[0] === "recurrences",
+    )![0] as { fetch: () => Promise<unknown> };
+
+    await options.fetch();
+
+    expect(spies.getRecurrences).toHaveBeenCalledWith({
+      creditCardId: "c1",
+      ownerIds: ["user-id"],
+      status: "ACTIVE",
+    });
+  });
 });
