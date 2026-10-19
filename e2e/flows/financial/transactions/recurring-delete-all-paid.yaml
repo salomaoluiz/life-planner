@@ -1,0 +1,96 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/recurring-delete-all-paid
+tags:
+  - financial
+  - spec-034
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Series
+      KEY: SERIES_NAME
+# A monthly series started last month: last month's occurrence is paid (50,00 left the account)
+- runFlow:
+    file: ../../../subflows/setup/create-recurrence.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: ${output.SERIES_NAME}
+      VALUE_CENTS: "5000"
+      MONTHS_AGO: "1"
+      PAID: "true"
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-accounts.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.row-balance"
+      text: ".*50[.,]00.*"
+    timeout: 20000
+- tapOn:
+    id: "financial.layout.segments-transactions"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-recurring-title"
+      text: ${output.SERIES_NAME}
+    timeout: 20000
+# Delete "All": the first confirmation, then the warning about the paid occurrence
+- tapOn:
+    id: "financial.transactions.row-recurring-title"
+    text: ${output.SERIES_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.description-input"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.transaction-form.delete-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.recurrence-delete.scope-ALL"
+    timeout: 20000
+- tapOn:
+    id: "financial.recurrence-delete.scope-ALL"
+- tapOn:
+    id: "financial.recurrence-delete.sheet"
+- extendedWaitUntil:
+    visible:
+      id: "financial.recurrence-delete.confirm-confirm"
+    timeout: 20000
+- tapOn:
+    id: "financial.recurrence-delete.confirm-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "financial.recurrence-delete.paid-confirm-confirm"
+    timeout: 20000
+- tapOn:
+    id: "financial.recurrence-delete.paid-confirm-confirm"
+# The series and its rows are gone and the balance is back
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.empty-month"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/open-accounts.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.row-balance"
+      text: ".*0[.,]00.*"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.accounts.row-balance"
+    text: ".*50[.,]00.*"

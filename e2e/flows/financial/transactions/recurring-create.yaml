@@ -1,0 +1,66 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/recurring-create
+tags:
+  - financial
+  - spec-034
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Series
+      KEY: SERIES_NAME
+# A monthly series that ends 3 months after it starts: 4 occurrences. This month's is real, the next one is projected
+- runFlow:
+    file: ../../../subflows/setup/create-recurrence.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: ${output.SERIES_NAME}
+      VALUE_CENTS: "20000"
+      MONTHS_AGO: "0"
+      END_MONTHS_AFTER_START: "3"
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+# The real occurrence shows the repeat icon and the counter "1/4"; the current month has no projected line
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-recurring-title"
+      text: "${output.SERIES_NAME} 1/4"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- assertVisible:
+    id: "financial.transactions.row.repeat"
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
+- assertNotVisible:
+    id: "financial.transactions.summary-projected"
+# The next month shows the occurrence as projected, with its badge, and the "Projected" line of the summary
+- tapOn:
+    id: "financial.transactions.month-next"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-projected-title"
+      text: "${output.SERIES_NAME} 2/4"
+    timeout: 20000
+- assertVisible:
+    id: "financial.transactions.summary-projected"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- assertVisible:
+    id: "financial.transactions.row.projected"
+- assertNotVisible:
+    id: "financial.transactions.row.pay"

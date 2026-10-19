@@ -1,0 +1,72 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/recurring-card-exclusive
+tags:
+  - financial
+  - spec-034
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Series
+      KEY: SERIES_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Card
+      KEY: CARD_TITLE
+- runFlow:
+    file: ../../../subflows/setup/create-credit-card.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      OWNER: USER
+      TITLE: ${output.CARD_TITLE}
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- tapOn:
+    id: "quick-add-button|navigation-rail-add"
+- extendedWaitUntil:
+    visible:
+      id: "quick-add-transaction"
+    timeout: 20000
+- tapOn:
+    id: "quick-add-transaction"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactionForm.payWith"
+    timeout: 20000
+- tapOn:
+    id: "financial.transactionForm.payWith-CARD"
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+# Installments on: its count field shows; Repeat turns it off
+- tapOn:
+    id: "financial.transactionForm.installments.switch"
+- assertVisible:
+    id: "financial.transactionForm.installments.count"
+- tapOn:
+    id: "financial.transaction-form.repeat"
+- assertNotVisible:
+    id: "financial.transactionForm.installments.count"
+- assertVisible:
+    id: "financial.transaction-form.repeat-frequency-MONTHLY"
+# And the other way around
+- tapOn:
+    id: "financial.transactionForm.installments.switch"
+- assertVisible:
+    id: "financial.transactionForm.installments.count"
+- assertNotVisible:
+    id: "financial.transaction-form.repeat-frequency-MONTHLY"

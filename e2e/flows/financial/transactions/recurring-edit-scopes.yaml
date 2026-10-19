@@ -1,0 +1,72 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/recurring-edit-scopes
+tags:
+  - financial
+  - spec-034
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Series
+      KEY: SERIES_NAME
+# A monthly series started last month: last month's and this month's occurrences are real, both of 10,00
+- runFlow:
+    file: ../../../subflows/setup/create-recurrence.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: ${output.SERIES_NAME}
+      VALUE_CENTS: "1000"
+      MONTHS_AGO: "1"
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-recurring-title"
+      text: ${output.SERIES_NAME}
+    timeout: 20000
+# "This and the next ones": the value changes from this month on
+- tapOn:
+    id: "financial.transactions.row-recurring-title"
+    text: ${output.SERIES_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.recurrence-edit.scope-THIS_AND_NEXT"
+    timeout: 20000
+- tapOn:
+    id: "financial.recurrence-edit.scope-THIS_AND_NEXT"
+- tapOn:
+    id: "financial.transaction-form.amount-input"
+- eraseText
+- inputText: "2000"
+- tapOn:
+    id: "financial.transaction-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.summary-expense"
+      text: ".*20[.,]00.*"
+    timeout: 20000
+# Last month keeps the old value
+- tapOn:
+    id: "financial.transactions.month-previous"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.summary-expense"
+      text: ".*10[.,]00.*"
+    timeout: 20000
