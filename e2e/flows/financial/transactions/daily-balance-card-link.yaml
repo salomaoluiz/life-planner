@@ -1,0 +1,126 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/daily-balance-card-link
+tags:
+  - financial
+  - spec-035
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- evalScript: ${output.KEEP_ACCOUNT_ID = output.ACCOUNT_ID}
+- evalScript: ${output.KEEP_ACCOUNT_NAME = output.ACCOUNT_NAME}
+- evalScript: ${output.KEEP_CATEGORY_ID = output.EXPENSE_CATEGORY_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Card
+      KEY: CARD_TITLE
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Market
+      KEY: PURCHASE_NAME
+- runScript: ../../../scripts/today-dates.js
+# A card whose last invoice closed yesterday (listed today) with one purchase of 250,00
+- runFlow:
+    file: ../../../subflows/setup/create-card-purchase.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      CATEGORY_ID: ${output.KEEP_CATEGORY_ID}
+      TITLE: ${output.CARD_TITLE}
+      DESCRIPTION: ${output.PURCHASE_NAME}
+      VALUE_CENTS: "25000"
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+# Not linked: the invoice is the separate "card invoices" line, the account keeps 0,00
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.day-balance-${output.TODAY_KEY}"
+    timeout: 20000
+- tapOn:
+    id: "financial.transactions.day-balance-${output.TODAY_KEY}"
+- extendedWaitUntil:
+    visible:
+      text: "(?s).*250[.,]00.*"
+      childOf:
+        id: "financial.transactions.day-balance-cards"
+    timeout: 20000
+- assertVisible:
+    text: "(?s).*0[.,]00.*"
+    childOf:
+      id: "financial.transactions.day-balance-line-${output.KEEP_ACCOUNT_ID}"
+# Link the card to the account in the card form
+- runFlow: ../../../subflows/financial/open-cards.yaml
+- tapOn:
+    id: "financial.cards.edit-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.card-form.title-input"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.card-form.payment-account"
+- tapOn:
+    id: "financial.card-form.payment-account-option-${output.KEEP_ACCOUNT_ID}"
+- tapOn:
+    id: "financial.card-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.cards.tile-title"
+      text: ${output.CARD_TITLE}
+    timeout: 20000
+# Linked: the invoice leaves the cards line and lowers the account line
+- tapOn:
+    id: "financial.layout.segments-transactions"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.day-balance-${output.TODAY_KEY}"
+    timeout: 20000
+- runFlow:
+    when:
+      notVisible:
+        id: "financial.transactions.day-balance-line-${output.KEEP_ACCOUNT_ID}"
+    commands:
+      - tapOn:
+          id: "financial.transactions.day-balance-${output.TODAY_KEY}"
+- extendedWaitUntil:
+    visible:
+      text: "(?s).*250[.,]00.*"
+      childOf:
+        id: "financial.transactions.day-balance-line-${output.KEEP_ACCOUNT_ID}"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.transactions.day-balance-cards"
+# The payment sheet of the invoice opens with that account selected
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- tapOn:
+    id: "financial.transactions.cardInvoice.toggle"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- tapOn:
+    id: "financial.transactions.cardInvoice.open"
+- extendedWaitUntil:
+    visible:
+      id: "financial.invoice.pay"
+    timeout: 20000
+- tapOn:
+    id: "financial.invoice.pay"
+- extendedWaitUntil:
+    visible:
+      text: ${output.KEEP_ACCOUNT_NAME}
+      childOf:
+        id: "financial.invoice.pay-sheet"
+    timeout: 20000
