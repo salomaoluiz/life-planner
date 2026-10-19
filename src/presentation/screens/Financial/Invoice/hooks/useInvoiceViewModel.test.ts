@@ -25,8 +25,20 @@ it("SHOULD read the invoice of the route params", () => {
 
   expect(spies.useQuery.mock.calls[0][0].cacheKey).toEqual([
     "invoice",
+    "list",
     "card-1",
     "2026-10",
+  ]);
+});
+
+it("SHOULD NOT share its cache key with the raw invoice read by the early payment form", () => {
+  givenLoaded({ invoice: makeInvoice() });
+  setup();
+
+  // The form caches the DTO under ["invoice", cardId, month]: the UI model must live elsewhere.
+  expect(spies.useQuery.mock.calls[0][0].cacheKey.slice(0, 2)).not.toEqual([
+    "invoice",
+    "card-1",
   ]);
 });
 

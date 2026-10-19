@@ -10,6 +10,7 @@ import {
 } from "@infrastructure/fetcher";
 import { toCalendarDate } from "@screens/Financial/models/creditSheet";
 import { addMonthsTo } from "@screens/Financial/models/invoiceMonth";
+import { listQueryKey } from "@screens/Financial/models/queryKeys";
 import CardInvoiceUIModel, {
   InvoiceCreditUIModel,
 } from "@screens/Financial/Transactions/models/CardInvoiceUIModel";
@@ -56,9 +57,11 @@ function useInvoiceViewModel() {
   const [accountId, setAccountId] = useState<string>();
   const [paidOn, setPaidOn] = useState(todayDate);
 
+  // The early payment and refund forms cache the raw DTO under `[uniqueName, ...]`: this screen caches the UI
+  // model, so it gets its own key (sharing one crashed both screens: LIFE-PLANNER-5Z and -61).
   const invoice = useQuery<CardInvoiceUIModel>({
     cacheKey: [
-      useCases.getFinancialCardInvoiceUseCase.uniqueName,
+      ...listQueryKey(useCases.getFinancialCardInvoiceUseCase.uniqueName),
       params.cardId,
       params.month,
     ],
