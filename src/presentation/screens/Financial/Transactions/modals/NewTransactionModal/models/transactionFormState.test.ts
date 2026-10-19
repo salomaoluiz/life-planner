@@ -1,6 +1,7 @@
 import AccountDTO from "@application/dto/financial/AccountDTO";
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
 import CreditCardDTO from "@application/dto/financial/CreditCardDTO";
+import RecurrenceDTO from "@application/dto/financial/RecurrenceDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
@@ -8,9 +9,11 @@ import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import {
   changeDate,
+  changeInstallmentsOn,
   changeOwner,
   changePaid,
   changePayWith,
+  changeRepeatOn,
   changeType,
   chipCategories,
   createInitialState,
@@ -22,6 +25,7 @@ import {
   stateFromDto,
   toCreateInstallmentParams,
   toCreateParams,
+  toCreateRecurrenceParams,
   toUpdateParams,
   TransactionFormState,
   validate,
@@ -81,6 +85,9 @@ function state(
     paid: true,
     paidTouched: false,
     payWith: "ACCOUNT",
+    repeatEnd: undefined,
+    repeatFrequency: "MONTHLY",
+    repeatOn: false,
     type: TransactionType.EXPENSE,
     ...overrides,
   };
@@ -108,6 +115,8 @@ it("SHOULD create an expense form for today with the default account", () => {
     paid: true,
     paidTouched: false,
     payWith: "ACCOUNT",
+    repeatFrequency: "MONTHLY",
+    repeatOn: false,
     type: TransactionType.EXPENSE,
   });
 });
@@ -140,6 +149,8 @@ it("SHOULD build the state of an existing transaction from its DTO", () => {
     paid: true,
     paidTouched: true,
     payWith: "ACCOUNT",
+    repeatFrequency: "MONTHLY",
+    repeatOn: false,
     type: TransactionType.INCOME,
   });
 });
@@ -635,5 +646,157 @@ describe("paid switch (spec 033 FR 19)", () => {
 
     expect(next.paid).toBe(false);
     expect(next.paidTouched).toBe(false);
+  });
+});
+
+describe("repeat (spec 034)", () => {
+  it("SHOULD start with Repeat off, monthly and without an end date", () => {
+    const initial = createInitialState({
+      accounts,
+      now,
+      ownerId: "user-id",
+    });
+
+    expect(initial).toMatchObject({
+      repeatEnd: undefined,
+      repeatFrequency: "MONTHLY",
+      repeatOn: false,
+    });
+  });
+
+  it("SHOULD turn Installments off WHEN Repeat is turned on AND the other way around (FR 17)", () => {
+    const withInstallments = state({ installmentsOn: true, payWith: "CARD" });
+    const repeating = changeRepeatOn(withInstallments, true);
+
+    expect(repeating).toMatchObject({ installmentsOn: false, repeatOn: true });
+    expect(changeInstallmentsOn(repeating, true)).toMatchObject({
+      installmentsOn: true,
+      repeatOn: false,
+    });
+  });
+
+  it("SHOULD keep the other switch WHEN one is turned off", () => {
+    expect(
+      changeRepeatOn(state({ installmentsOn: true, repeatOn: false }), false),
+    ).toMatchObject({ installmentsOn: true, repeatOn: false });
+    expect(
+      changeInstallmentsOn(
+        state({ installmentsOn: false, repeatOn: true }),
+        false,
+      ),
+    ).toMatchObject({ installmentsOn: false, repeatOn: true });
+  });
+
+  it("SHOULD build the recurrence params: occurrence 1 date, end date, frequency AND paid for an account series", () => {
+    const params = toCreateRecurrenceParams(
+      state({
+        repeatEnd: new Date(2027, 8, 5),
+        repeatFrequency: "WEEKLY",
+        repeatOn: true,
+      }),
+      user,
+    );
+
+    expect(params).toEqual({
+      accountId: "active",
+      categoryId: "food",
+      creditCardId: undefined,
+      date: new Date(2026, 9, 5).toISOString(),
+      description: "Groceries",
+      endDate: new Date(2027, 8, 5).toISOString(),
+      frequency: "WEEKLY",
+      owner: user.type,
+      ownerId: "user-id",
+      paid: true,
+      type: TransactionType.EXPENSE,
+      value: "312.90",
+    });
+  });
+
+  it("SHOULD send a card series without account, paid AND end date", () => {
+    const params = toCreateRecurrenceParams(
+      state({ creditCardId: "card-1", payWith: "CARD", repeatOn: true }),
+      user,
+    );
+
+    expect(params).toMatchObject({
+      accountId: undefined,
+      creditCardId: "card-1",
+      endDate: undefined,
+      paid: undefined,
+    });
+  });
+
+  it("SHOULD reject an end date before the first date, only WHEN repeating", () => {
+    const early = new Date(2026, 9, 4);
+
+    expect(
+      validate(state({ repeatEnd: early, repeatOn: true })).repeatEnd,
+    ).toBe("financial.transactions.form.errors.repeatEndBeforeStart");
+    expect(
+      validate(state({ repeatEnd: early, repeatOn: false })).repeatEnd,
+    ).toBeUndefined();
+    expect(
+      validate(state({ repeatEnd: new Date(2026, 9, 5), repeatOn: true }))
+        .repeatEnd,
+    ).toBeUndefined();
+  });
+
+  it("SHOULD show the series of the occurrence being edited", () => {
+    const series = new RecurrenceDTO({
+      category: "Rent",
+      categoryId: "food",
+      description: "Rent",
+      endDate: new Date(2027, 8, 5).toISOString(),
+      firstNumber: 1,
+      frequency: "BIWEEKLY",
+      id: "series-1",
+      occurrenceCount: 12,
+      owner: "USER",
+      ownerId: "user-id",
+      startDate: new Date(2026, 9, 5).toISOString(),
+      status: "ACTIVE",
+      type: "EXPENSE",
+      value: "10.00",
+    });
+    const dto = new TransactionDTO({
+      accountId: "active",
+      category: "Rent",
+      categoryId: "food",
+      date: new Date(2026, 9, 5).toISOString(),
+      description: "Rent",
+      id: "t-1",
+      owner: "USER",
+      ownerId: "user-id",
+      recurrenceId: "series-1",
+      type: "EXPENSE",
+      value: "10.00",
+    });
+
+    expect(stateFromDto(dto, series)).toMatchObject({
+      repeatEnd: new Date(2027, 8, 5),
+      repeatFrequency: "BIWEEKLY",
+      repeatOn: true,
+    });
+    expect(stateFromDto(dto)).toMatchObject({
+      repeatEnd: undefined,
+      repeatFrequency: "MONTHLY",
+      repeatOn: true,
+    });
+    expect(
+      stateFromDto({ ...dto, recurrenceId: undefined } as TransactionDTO)
+        .repeatOn,
+    ).toBe(false);
+  });
+
+  it("SHOULD see a repeat change as a change of the form", () => {
+    expect(isSameState(state(), state({ repeatOn: true }))).toBe(false);
+    expect(isSameState(state(), state({ repeatFrequency: "YEARLY" }))).toBe(
+      false,
+    );
+    expect(
+      isSameState(state(), state({ repeatEnd: new Date(2027, 1, 1) })),
+    ).toBe(false);
+    expect(isSameState(state(), state())).toBe(true);
   });
 });

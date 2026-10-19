@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@tests";
 
+import { RecurrenceHasPaidOccurrences } from "@domain/entities/errors";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { TranslationKeys } from "@presentation/i18n/types";
 
@@ -73,18 +74,57 @@ const defaultViewModel: ReturnType<typeof useNewTransactionViewModel> = {
   onOwnerChange: jest.fn(),
   onPaidChange: jest.fn(),
   onPayWithChange: jest.fn(),
+  onRecurrenceDeleteCancel: jest.fn(),
+  onRecurrenceDeleteConfirm: jest.fn(),
+  onRecurrenceDeletePaidConfirm: jest.fn(),
+  onRecurrenceDeletePress: jest.fn(),
+  onRecurrenceDeleteScopeChange: jest.fn(),
   onRefundPress: jest.fn(),
+  onRepeatEndChange: jest.fn(),
+  onRepeatFrequencyChange: jest.fn(),
+  onRepeatToggle: jest.fn(),
   onSave: jest.fn(),
+  onScopeChange: jest.fn(),
   onTypeChange: jest.fn(),
   overLimitCents: 0,
   ownerChoices: [{ label: "Personal", labelKey: undefined, value: "user-id" }],
   ownerId: "user-id",
   paid: true,
+  paidConflict: undefined as RecurrenceHasPaidOccurrences | undefined,
   paidHelpKey: "financial.transactions.form.paidHelpCreate" as TranslationKeys,
   paidHintKey: undefined as TranslationKeys | undefined,
   paidLabelKey: "financial.transactions.form.paid" as TranslationKeys,
   payWith: "ACCOUNT" as "ACCOUNT" | "CARD",
+  recurrence: {
+    deleteScope: "ONLY_THIS" as "ALL" | "ONLY_THIS" | "THIS_AND_NEXT",
+    endError: undefined as TranslationKeys | undefined,
+    endHelperKey: undefined as TranslationKeys | undefined,
+    frequencyHelperKey: undefined as TranslationKeys | undefined,
+    isAllDeleteOpen: false,
+    isEndLocked: false,
+    isFrequencyLocked: false,
+    isRecurring: false,
+    isRepeatToggleVisible: true,
+    preview: undefined as
+      | undefined
+      | { count: number; kind: "times"; last: Date }
+      | { frequency: "MONTHLY"; kind: "forever" }
+      | { kind: "none" },
+    scope: "ONLY_THIS" as "ALL" | "ONLY_THIS" | "THIS_AND_NEXT",
+  },
+  repeatEnd: undefined as Date | undefined,
+  repeatFrequency: "MONTHLY" as "BIWEEKLY" | "MONTHLY" | "WEEKLY" | "YEARLY",
+  repeatOn: false,
   saveLabelKey: "financial.transactions.form.saveExpense",
+  scopeLocks: undefined as
+    | undefined
+    | {
+        account: boolean;
+        accountHelperKey: TranslationKeys | undefined;
+        date: boolean;
+        dateHelperKey: TranslationKeys | undefined;
+        paid: boolean;
+      },
   selectedAccountId: "a1",
   selectedCardId: undefined,
   selectedCategoryId: undefined,

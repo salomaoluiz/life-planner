@@ -1,11 +1,14 @@
 import AccountDTO from "@application/dto/financial/AccountDTO";
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
 import CreditCardDTO from "@application/dto/financial/CreditCardDTO";
+import RecurrenceDTO from "@application/dto/financial/RecurrenceDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { CreateInstallmentPlanUseCaseParams } from "@application/useCases/cases/financial/installmentPlans/createInstallmentPlanUseCase";
+import { CreateRecurrenceUseCaseParams } from "@application/useCases/cases/financial/recurrences/createRecurrenceUseCase";
 import { CreateTransactionUseCaseParams } from "@application/useCases/cases/financial/transactions/createTransactionUseCase";
 import { UpdateTransactionUseCaseParams } from "@application/useCases/cases/financial/transactions/updateTransactionUseCase";
+import { RecurrenceFrequency } from "@domain/entities/financial/RecurrenceEntity";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { isValidInstallmentCount } from "@screens/Financial/models/installments";
@@ -27,7 +30,8 @@ type TransactionFormErrors = Partial<
     | "creditCardId"
     | "date"
     | "description"
-    | "installments",
+    | "installments"
+    | "repeatEnd",
     TranslationKeys
   >
 >;
@@ -49,6 +53,10 @@ interface TransactionFormState {
   paid: boolean;
   paidTouched: boolean;
   payWith: PayWith;
+  // Spec 034: "Repeat". Create: a new series; edit: the series of the occurrence being edited.
+  repeatEnd?: Date;
+  repeatFrequency: RecurrenceFrequency;
+  repeatOn: boolean;
   type: TransactionType;
 }
 
@@ -63,6 +71,18 @@ function changeDate(
   return isEditing || state.paidTouched
     ? next
     : { ...next, paid: !isAfterToday(next.date) };
+}
+
+// "Repeat" and "Installments" never go together (spec 034 FR 17).
+function changeInstallmentsOn(
+  state: TransactionFormState,
+  on: boolean,
+): TransactionFormState {
+  return {
+    ...state,
+    installmentsOn: on,
+    repeatOn: on ? false : state.repeatOn,
+  };
 }
 
 function changeOwner(
@@ -136,6 +156,17 @@ function changePayWith(
   };
 }
 
+function changeRepeatOn(
+  state: TransactionFormState,
+  on: boolean,
+): TransactionFormState {
+  return {
+    ...state,
+    installmentsOn: on ? false : state.installmentsOn,
+    repeatOn: on,
+  };
+}
+
 function changeType(
   state: TransactionFormState,
   type: TransactionType,
@@ -187,6 +218,9 @@ function createInitialState(params: {
     paid: true,
     paidTouched: false,
     payWith: params.card ? "CARD" : "ACCOUNT",
+    repeatEnd: undefined,
+    repeatFrequency: "MONTHLY",
+    repeatOn: false,
     type: TransactionType.EXPENSE,
   };
 }
@@ -220,6 +254,9 @@ function isSameState(a: TransactionFormState, b: TransactionFormState) {
     a.ownerId === b.ownerId &&
     a.paid === b.paid &&
     a.payWith === b.payWith &&
+    a.repeatEnd?.getTime() === b.repeatEnd?.getTime() &&
+    a.repeatFrequency === b.repeatFrequency &&
+    a.repeatOn === b.repeatOn &&
     a.type === b.type
   );
 }
@@ -232,7 +269,10 @@ function pickNewRecordId(previousIds: string[], current: { id: string }[]) {
   return current.find((record) => !previousIds.includes(record.id))?.id;
 }
 
-function stateFromDto(dto: TransactionDTO): TransactionFormState {
+function stateFromDto(
+  dto: TransactionDTO,
+  series?: RecurrenceDTO,
+): TransactionFormState {
   return {
     accountId: dto.accountId,
     amountCents: decimalStringToCents(dto.value),
@@ -247,6 +287,11 @@ function stateFromDto(dto: TransactionDTO): TransactionFormState {
     paid: dto.paid,
     paidTouched: true,
     payWith: dto.creditCardId ? "CARD" : "ACCOUNT",
+    repeatEnd: series?.endDate
+      ? normalizeDate(new Date(series.endDate))
+      : undefined,
+    repeatFrequency: dto.recurrenceFrequency ?? series?.frequency ?? "MONTHLY",
+    repeatOn: !!dto.recurrenceId,
     type: dto.type as TransactionType,
   };
 }
@@ -285,6 +330,29 @@ function toCreateParams(
     owner: owner.type,
     ownerId: owner.id,
     // A card purchase follows its invoice: no status is sent (spec 033 FR 2).
+    paid: isCard ? undefined : state.paid,
+    type: state.type,
+    value: centsToDecimalString(state.amountCents),
+  };
+}
+
+// Repeat (spec 034): the date is occurrence 1; `paid` applies to it only (account series).
+function toCreateRecurrenceParams(
+  state: TransactionFormState,
+  owner: OwnerDTO,
+): CreateRecurrenceUseCaseParams {
+  const isCard = state.payWith === "CARD";
+
+  return {
+    accountId: isCard ? undefined : state.accountId,
+    categoryId: state.categoryId!,
+    creditCardId: isCard ? state.creditCardId : undefined,
+    date: state.date.toISOString(),
+    description: state.description.trim(),
+    endDate: state.repeatEnd?.toISOString(),
+    frequency: state.repeatFrequency,
+    owner: owner.type,
+    ownerId: owner.id,
     paid: isCard ? undefined : state.paid,
     type: state.type,
     value: centsToDecimalString(state.amountCents),
@@ -335,6 +403,15 @@ function validate(state: TransactionFormState): TransactionFormErrors {
     errors.installments =
       "financial.transactions.form.errors.installmentsRange";
   }
+  if (
+    state.repeatOn &&
+    state.repeatEnd &&
+    normalizeDate(state.repeatEnd).getTime() <
+      normalizeDate(state.date).getTime()
+  ) {
+    errors.repeatEnd =
+      "financial.transactions.form.errors.repeatEndBeforeStart";
+  }
   if (Number.isNaN(state.date.getTime())) {
     errors.date = "financial.transactions.form.errors.dateRequired";
   }
@@ -345,9 +422,11 @@ function validate(state: TransactionFormState): TransactionFormErrors {
 export type { PayWith, TransactionFormErrors, TransactionFormState };
 export {
   changeDate,
+  changeInstallmentsOn,
   changeOwner,
   changePaid,
   changePayWith,
+  changeRepeatOn,
   changeType,
   chipCategories,
   createInitialState,
@@ -359,6 +438,7 @@ export {
   stateFromDto,
   toCreateInstallmentParams,
   toCreateParams,
+  toCreateRecurrenceParams,
   toUpdateParams,
   validate,
 };

@@ -7,6 +7,8 @@ import AccountDTO from "@application/dto/financial/AccountDTO";
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
 import CreditCardDTO from "@application/dto/financial/CreditCardDTO";
 import CreditCardOverviewDTO from "@application/dto/financial/CreditCardOverviewDTO";
+import ProjectedOccurrenceDTO from "@application/dto/financial/ProjectedOccurrenceDTO";
+import RecurrenceDTO from "@application/dto/financial/RecurrenceDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
@@ -28,9 +30,21 @@ jest.mock("@application/useCases", () => ({
       execute: jest.fn(),
       uniqueName: "create_plan",
     },
+    createFinancialRecurrenceUseCase: {
+      execute: jest.fn(),
+      uniqueName: "create_recurrence",
+    },
     createFinancialTransactionUseCase: {
       execute: jest.fn(),
       uniqueName: "create",
+    },
+    deleteFinancialOccurrenceUseCase: {
+      execute: jest.fn(),
+      uniqueName: "delete_occurrence",
+    },
+    deleteFinancialRecurrenceUseCase: {
+      execute: jest.fn(),
+      uniqueName: "delete_recurrence",
     },
     deleteFinancialTransactionUseCase: {
       execute: jest.fn(),
@@ -46,6 +60,14 @@ jest.mock("@application/useCases", () => ({
       uniqueName: "overview",
     },
     getFinancialCreditCardsUseCase: { execute: jest.fn(), uniqueName: "cards" },
+    getFinancialProjectionsUseCase: {
+      execute: jest.fn(),
+      uniqueName: "projections",
+    },
+    getFinancialRecurrencesUseCase: {
+      execute: jest.fn(),
+      uniqueName: "recurrences",
+    },
     getFinancialTransactionsUseCase: {
       execute: jest.fn(),
       uniqueName: "transactions",
@@ -55,6 +77,18 @@ jest.mock("@application/useCases", () => ({
       uniqueName: "most_used",
     },
     getOwnersUseCase: { execute: jest.fn(), uniqueName: "owners" },
+    materializeFinancialOccurrenceUseCase: {
+      execute: jest.fn(),
+      uniqueName: "materialize",
+    },
+    splitFinancialRecurrenceUseCase: {
+      execute: jest.fn(),
+      uniqueName: "split",
+    },
+    updateFinancialRecurrenceUseCase: {
+      execute: jest.fn(),
+      uniqueName: "update_recurrence",
+    },
     updateFinancialTransactionUseCase: {
       execute: jest.fn(),
       uniqueName: "update",
@@ -161,10 +195,23 @@ beforeEach(() => {
     "categories",
     "transactions",
     "most_used",
+    "projections",
+    "recurrences",
   ].forEach((key) => {
     queries[key] = new UseQueryFixture<unknown>();
   });
-  ["create", "create_plan", "update", "delete"].forEach((key) => {
+  [
+    "create",
+    "create_plan",
+    "update",
+    "delete",
+    "create_recurrence",
+    "update_recurrence",
+    "split",
+    "materialize",
+    "delete_occurrence",
+    "delete_recurrence",
+  ].forEach((key) => {
     mutations[key] = new UseMutationFixture<unknown, unknown>();
   });
   spies.focused.mockReturnValue(false);
@@ -182,6 +229,8 @@ function givenLoaded(
     categories?: CategoryDTO[];
     overview?: CreditCardOverviewDTO;
     params?: Record<string, string>;
+    projected?: ProjectedOccurrenceDTO[];
+    series?: RecurrenceDTO[];
     top?: CategoryDTO[];
     transactions?: TransactionDTO[];
   } = {},
@@ -200,6 +249,8 @@ function givenLoaded(
     data.categories ?? [cat("food"), cat("salary", "user-id", "INCOME")],
   );
   queries.transactions.withData(data.transactions ?? []);
+  queries.projections.withData(data.projected ?? []);
+  queries.recurrences.withData(data.series ?? []);
   queries.most_used.withData(data.top ?? [cat("food")]);
   spies.params.mockReturnValue(data.params ?? {});
 }
