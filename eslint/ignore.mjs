@@ -20,5 +20,6 @@ export default {
     "eslint.config.mjs",
     "eslint/**/*",
     "e2e/scripts/**/*",
+    ".claude/worktrees/**",
   ],
 };
