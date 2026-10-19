@@ -45,6 +45,7 @@ jest.mock("@application/useCases", () => ({
       execute: jest.fn(),
       uniqueName: "overview",
     },
+    getFinancialCreditCardsUseCase: { execute: jest.fn(), uniqueName: "cards" },
     getFinancialProjectionsUseCase: {
       execute: jest.fn(),
       uniqueName: "projections",
@@ -91,7 +92,7 @@ const spies = {
 beforeEach(() => {
   jest.clearAllMocks();
   jest.useFakeTimers().setSystemTime(new Date(2026, 10, 5, 12));
-  ["invoice", "owners", "accounts", "projections"].forEach((key) => {
+  ["invoice", "owners", "accounts", "projections", "cards"].forEach((key) => {
     queries[key] = new UseQueryFixture<unknown>();
   });
   ["pay", "undo"].forEach((key) => {
@@ -105,13 +106,20 @@ beforeEach(() => {
 });
 
 function givenLoaded(
-  data: { accounts?: AccountDTO[]; invoice?: CardInvoiceUIModel } = {},
+  data: {
+    accounts?: AccountDTO[];
+    invoice?: CardInvoiceUIModel;
+    linkedAccountId?: string;
+  } = {},
 ) {
   if (data.invoice) {
     queries.invoice.withData(data.invoice);
   }
   queries.owners.withData(owners);
   queries.accounts.withData(data.accounts ?? [account("a1")]);
+  queries.cards.withData([
+    { id: "card-1", paymentAccountId: data.linkedAccountId } as never,
+  ]);
 }
 
 function setup() {
