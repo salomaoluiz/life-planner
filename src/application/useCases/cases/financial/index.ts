@@ -3,6 +3,7 @@ export {
   createAccountUseCase as createFinancialAccountUseCase,
   deleteAccountUseCase as deleteFinancialAccountUseCase,
   getAccountsUseCase as getFinancialAccountsUseCase,
+  getDailyBalancesUseCase as getFinancialDailyBalancesUseCase,
   refreshAccountsUseCase as refreshFinancialAccountsUseCase,
   updateAccountUseCase as updateFinancialAccountUseCase,
 } from "./accounts";

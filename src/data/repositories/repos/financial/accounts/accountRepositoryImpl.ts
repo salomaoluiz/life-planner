@@ -1,11 +1,13 @@
 import { Datasources } from "@data/datasource";
 import AccountEntity from "@domain/entities/financial/AccountEntity";
+import DailyBalanceEntity from "@domain/entities/financial/DailyBalanceEntity";
 import { FinancialAccountRepository } from "@domain/repositories/financial";
 
 import adjustAccountBalance from "./adjustAccountBalance";
 import createAccount from "./createAccount";
 import deleteAccount from "./deleteAccount";
 import getAccounts from "./getAccounts";
+import getDailyBalances from "./getDailyBalances";
 import updateAccount from "./updateAccount";
 
 function accountRepositoryImpl(
@@ -23,6 +25,9 @@ function accountRepositoryImpl(
     },
     async getAccounts(ownerIds): Promise<AccountEntity[]> {
       return getAccounts(ownerIds, datasources);
+    },
+    async getDailyBalances(params): Promise<DailyBalanceEntity> {
+      return getDailyBalances(params, datasources);
     },
     async updateAccount(params): Promise<void> {
       return updateAccount(params, datasources);

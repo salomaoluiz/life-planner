@@ -1,4 +1,5 @@
 import AccountEntity from "@domain/entities/financial/AccountEntity";
+import DailyBalanceEntity from "@domain/entities/financial/DailyBalanceEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 export type FinancialAccountRepository = {
@@ -8,6 +9,9 @@ export type FinancialAccountRepository = {
   createAccount(params: CreateAccountRepositoryParams): Promise<AccountEntity>;
   deleteAccount(params: DeleteAccountRepositoryParams): Promise<void>;
   getAccounts(ownerIds: string[]): Promise<AccountEntity[]>;
+  getDailyBalances(
+    params: GetDailyBalancesRepositoryParams,
+  ): Promise<DailyBalanceEntity>;
   updateAccount(params: UpdateAccountRepositoryParams): Promise<void>;
 };
 
@@ -31,6 +35,11 @@ interface DeleteAccountRepositoryParams {
   ownerId: string;
 }
 
+interface GetDailyBalancesRepositoryParams {
+  // `YYYY-MM`
+  month: string;
+  ownerIds: string[];
+}
 interface UpdateAccountRepositoryParams {
   icon?: string;
   id: string;
@@ -43,5 +52,6 @@ interface UpdateAccountRepositoryParams {
 export {
   AdjustAccountBalanceRepositoryParams,
   CreateAccountRepositoryParams,
+  GetDailyBalancesRepositoryParams,
   UpdateAccountRepositoryParams,
 };
