@@ -22,7 +22,7 @@ function Tooltip(props: TooltipProps) {
       borderColor: colors.border,
       borderRadius: radius.md,
       borderWidth: 1,
-      boxShadow: "0 12px 32px rgba(0, 0, 0, 0.45)",
+      boxShadow: `0 12px 32px ${colors.scrim}`,
       marginTop: spacing.xxs,
       padding: spacing.sm,
       position: "absolute",

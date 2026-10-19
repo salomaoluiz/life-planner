@@ -35,6 +35,7 @@ const useCases = {
   getFinancialCategoriesUseCase: expect.any(Function),
   getFinancialCreditCardsOverviewUseCase: expect.any(Function),
   getFinancialCreditCardsUseCase: expect.any(Function),
+  getFinancialDailyBalancesUseCase: expect.any(Function),
   getFinancialInstallmentPlanUseCase: expect.any(Function),
   getFinancialProjectionsUseCase: expect.any(Function),
   getFinancialRecurrencesUseCase: expect.any(Function),
