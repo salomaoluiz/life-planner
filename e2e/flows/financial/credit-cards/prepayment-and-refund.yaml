@@ -249,6 +249,60 @@ onFlowComplete:
 - assertVisible:
     id: "financial.invoice.left-to-pay"
     text: ".*100[.,]00.*"
+# Edit each credit line (the refund and the early payment) and come back: the invoice screen and the
+# forms must not share a cache entry (Sentry LIFE-PLANNER-5Z and LIFE-PLANNER-61)
+- tapOn:
+    id: "financial.invoice.credit"
+    index: 0
+- extendedWaitUntil:
+    visible:
+      id: "financial.(refund|earlyPayment).sheet"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.(refund|earlyPayment).delete"
+    timeout: 20000
+- tapOn:
+    id: "financial.(refund|earlyPayment).sheet-close"
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.(refund|earlyPayment).sheet"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- tapOn:
+    id: "financial.cards.invoice-row"
+- extendedWaitUntil:
+    visible:
+      id: "financial.invoice.paid-early"
+      text: ".*50[.,]00.*"
+    timeout: 20000
+- tapOn:
+    id: "financial.invoice.credit"
+    index: 1
+- extendedWaitUntil:
+    visible:
+      id: "financial.(refund|earlyPayment).sheet"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.(refund|earlyPayment).delete"
+    timeout: 20000
+- tapOn:
+    id: "financial.(refund|earlyPayment).sheet-close"
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.(refund|earlyPayment).sheet"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- tapOn:
+    id: "financial.cards.invoice-row"
+- extendedWaitUntil:
+    visible:
+      id: "financial.invoice.paid-early"
+      text: ".*50[.,]00.*"
+    timeout: 20000
 - tapOn:
     id: "financial.invoice.screen-close"
 # The account lost 50,00 and shows the debit row
