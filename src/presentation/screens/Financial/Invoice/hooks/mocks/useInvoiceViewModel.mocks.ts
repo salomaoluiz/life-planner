@@ -4,6 +4,7 @@ import { renderHook } from "@tests";
 
 import AccountDTO from "@application/dto/financial/AccountDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
+import { useCases } from "@application/useCases";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import {
   invalidateFetcherData,
@@ -36,9 +37,17 @@ jest.mock("@application/useCases", () => ({
       execute: jest.fn(),
       uniqueName: "invoice",
     },
+    getFinancialCategoriesUseCase: {
+      execute: jest.fn(),
+      uniqueName: "categories",
+    },
     getFinancialCreditCardsOverviewUseCase: {
       execute: jest.fn(),
       uniqueName: "overview",
+    },
+    getFinancialProjectionsUseCase: {
+      execute: jest.fn(),
+      uniqueName: "projections",
     },
     getMonthSummaryUseCase: { execute: jest.fn(), uniqueName: "summary" },
     getOwnersUseCase: { execute: jest.fn(), uniqueName: "owners" },
@@ -70,6 +79,8 @@ function account(id: string, status = "ACTIVE") {
 
 const spies = {
   back: jest.mocked(router.back),
+  getCategories: jest.mocked(useCases.getFinancialCategoriesUseCase.execute),
+  getProjections: jest.mocked(useCases.getFinancialProjectionsUseCase.execute),
   invalidate: jest.mocked(invalidateFetcherData),
   params: jest.mocked(useLocalSearchParams),
   replace: jest.mocked(router.replace),
@@ -80,7 +91,7 @@ const spies = {
 beforeEach(() => {
   jest.clearAllMocks();
   jest.useFakeTimers().setSystemTime(new Date(2026, 10, 5, 12));
-  ["invoice", "owners", "accounts"].forEach((key) => {
+  ["invoice", "owners", "accounts", "projections"].forEach((key) => {
     queries[key] = new UseQueryFixture<unknown>();
   });
   ["pay", "undo"].forEach((key) => {

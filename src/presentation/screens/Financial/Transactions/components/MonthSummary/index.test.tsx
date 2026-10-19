@@ -81,3 +81,47 @@ it("SHOULD render the to receive and to pay amounts WHEN their labels are given 
   expect(screen.getByText("To pay")).toBeOnTheScreen();
   expect(screen.getByText("To receive")).toBeOnTheScreen();
 });
+
+describe("projected line (spec 034 FR 15)", () => {
+  it("SHOULD show the projected income and expense of a future month", () => {
+    setup({
+      projectedExpenseCents: 12000,
+      projectedIncomeCents: 5000,
+      projectedLabel: "Projected",
+      projectedTestID: "projected-line",
+    });
+
+    expect(screen.getByTestId("projected-line")).toBeOnTheScreen();
+    expect(screen.getByText("Projected")).toBeOnTheScreen();
+    const values = screen
+      .UNSAFE_getAllByType(AmountText)
+      .map((n) => n.props.value);
+    expect(values).toEqual(expect.arrayContaining([5000, 12000]));
+  });
+
+  it("SHOULD show only the side that has a projection", () => {
+    setup({
+      projectedExpenseCents: 0,
+      projectedIncomeCents: 5000,
+      projectedLabel: "Projected",
+      projectedTestID: "projected-line",
+    });
+
+    const values = screen
+      .UNSAFE_getAllByType(AmountText)
+      .map((n) => n.props.value);
+    expect(values).toEqual(expect.arrayContaining([5000]));
+    expect(values).not.toContain(0);
+  });
+
+  it("SHOULD hide the line WHEN nothing is projected (current and past months)", () => {
+    setup({
+      projectedExpenseCents: 0,
+      projectedIncomeCents: 0,
+      projectedLabel: "Projected",
+      projectedTestID: "projected-line",
+    });
+
+    expect(screen.queryByTestId("projected-line")).toBeNull();
+  });
+});

@@ -22,7 +22,12 @@ class TransactionUIModel {
 
   // Account rows that are not settled yet and are not system rows: the list offers the pay button.
   get canPay() {
-    return !this.dto.paid && !this.dto.creditCardId && !this.dto.systemKey;
+    return (
+      !this.dto.paid &&
+      !this.dto.creditCardId &&
+      !this.dto.systemKey &&
+      !this.dto.isProjected
+    );
   }
 
   get categoryColor() {
@@ -49,6 +54,13 @@ class TransactionUIModel {
     return this.dto.categoryName ?? this.dto.category;
   }
 
+  // "3/10" next to the description of a series with an end date; none without one (spec 034 FR 13).
+  get counter() {
+    return this.dto.occurrenceNumber && this.dto.occurrenceCount
+      ? `${this.dto.occurrenceNumber}/${this.dto.occurrenceCount}`
+      : undefined;
+  }
+
   get date() {
     return new Date(this.dto.date);
   }
@@ -61,6 +73,13 @@ class TransactionUIModel {
 
   get description() {
     return this.dto.description;
+  }
+
+  // The frequency label of a series WITHOUT an end date (the list shows it instead of a counter).
+  get frequency() {
+    return this.dto.recurrenceId && !this.dto.occurrenceCount
+      ? this.dto.recurrenceFrequency
+      : undefined;
   }
 
   get id() {
@@ -85,8 +104,30 @@ class TransactionUIModel {
     return this.canPay && this.dateKey < todayKey();
   }
 
+  // An occurrence of a series that has no stored row yet: muted, no pay button (spec 034 FR 14).
+  get isProjected() {
+    return !!this.dto.isProjected;
+  }
+
+  get isRecurring() {
+    return !!this.dto.recurrenceId;
+  }
+
+  // `YYYY-MM` of the day the row is shown on.
+  get monthKey() {
+    return this.dateKey.slice(0, 7);
+  }
+
+  get occurrenceNumber() {
+    return this.dto.occurrenceNumber;
+  }
+
   get ownerId() {
     return this.dto.ownerId;
+  }
+
+  get recurrenceId() {
+    return this.dto.recurrenceId;
   }
 
   get signedCents() {

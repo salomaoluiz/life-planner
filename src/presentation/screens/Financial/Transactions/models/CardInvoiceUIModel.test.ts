@@ -1,4 +1,8 @@
-import { makeInvoice } from "../mocks/invoice.mocks";
+import TransactionDTO from "@application/dto/financial/TransactionDTO";
+
+import { makeInvoice, makeInvoiceDTO } from "../mocks/invoice.mocks";
+import CardInvoiceUIModel from "./CardInvoiceUIModel";
+import TransactionUIModel from "./TransactionUIModel";
 
 it("SHOULD expose the card, the amount and the list day (local, no time-zone shift)", () => {
   const invoice = makeInvoice();
@@ -118,5 +122,58 @@ describe("credits (spec 032)", () => {
         payment: { amount: 1, method: "EXTERNAL", paidOn: "2026-11-05" },
       }).hasPayment,
     ).toBe(true);
+  });
+});
+
+describe("projected purchases (spec 034 FR 14)", () => {
+  function projected(value: string) {
+    return new TransactionUIModel(
+      new TransactionDTO({
+        category: "Food",
+        categoryId: "cat-1",
+        creditCardId: "card-1",
+        date: new Date(2026, 9, 28).toISOString(),
+        description: "Streaming",
+        id: `projected-${value}`,
+        isProjected: true,
+        owner: "USER",
+        ownerId: "user-id",
+        type: "EXPENSE",
+        value,
+      }),
+    );
+  }
+
+  it("SHOULD add the projected purchases to the line without moving the net of the day", () => {
+    const invoice = makeInvoice().withProjected([
+      projected("10.00"),
+      projected("5.50"),
+    ]);
+
+    expect(invoice.includesProjected).toBe(true);
+    expect(invoice.projectedCents).toBe(1550);
+    expect(invoice.amountCents).toBe(46550);
+    expect(invoice.signedCents).toBe(-45000);
+    expect(invoice.isProjectedOnly).toBe(false);
+    expect(invoice.canOpen).toBe(true);
+  });
+
+  it("SHOULD not include anything WHEN there are no projections", () => {
+    const invoice = makeInvoice();
+
+    expect(invoice.includesProjected).toBe(false);
+    expect(invoice.projectedCents).toBe(0);
+    expect(invoice.canOpen).toBe(true);
+  });
+
+  it("SHOULD not open an invoice that only exists as a projection", () => {
+    const invoice = new CardInvoiceUIModel(
+      makeInvoiceDTO({ amount: 0, net: 0, total: 0 }, 0),
+      [projected("10.00")],
+    );
+
+    expect(invoice.isProjectedOnly).toBe(true);
+    expect(invoice.canOpen).toBe(false);
+    expect(invoice.amountCents).toBe(1000);
   });
 });

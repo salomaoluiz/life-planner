@@ -174,3 +174,17 @@ it("SHOULD label the amount with the view model's label key", () => {
     screen.getByText("financial.accounts.form.initialBalance"),
   ).toBeOnTheScreen();
 });
+
+it("SHOULD warn that recurring transactions will end WHEN archiving", () => {
+  setup({ archiveWarningCount: 2, isEditing: true });
+
+  expect(
+    screen.getByTestId(accountFormTestIds.archiveWarning),
+  ).toBeOnTheScreen();
+});
+
+it("SHOULD show no archive warning WHEN there is nothing to end", () => {
+  setup({ archiveWarningCount: 0, isEditing: true });
+
+  expect(screen.queryByTestId(accountFormTestIds.archiveWarning)).toBeNull();
+});

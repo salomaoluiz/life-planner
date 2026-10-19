@@ -1,5 +1,6 @@
 const cardFormTestIds = {
   archiveButton: "financial.card-form.archive-button",
+  archiveWarning: "financial.card-form.archive-warning",
   brand: "financial.card-form.brand",
   closingDay: "financial.card-form.closing-day",
   deleteButton: "financial.card-form.delete-button",

@@ -12,6 +12,7 @@ import { useQuery } from "@infrastructure/fetcher";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
 
 import CardInvoiceUIModel from "../../models/CardInvoiceUIModel";
+import { ProjectedInvoiceGroup } from "../../models/transactionList";
 import TransactionUIModel from "../../models/TransactionUIModel";
 import useTransactionsViewModel from "../useTransactionsViewModel";
 
@@ -31,6 +32,10 @@ jest.mock("@application/useCases", () => ({
     getFinancialCategoriesUseCase: {
       execute: jest.fn(),
       uniqueName: "categories",
+    },
+    getFinancialProjectionsUseCase: {
+      execute: jest.fn(),
+      uniqueName: "projections",
     },
     getFinancialTransactionsUseCase: {
       execute: jest.fn(),
@@ -85,10 +90,16 @@ const transactionsQuery = new UseQueryFixture<{
   owners: OwnerDTO[];
 }>();
 const invoicesQuery = new UseQueryFixture<CardInvoiceUIModel[]>();
+const projectionsQuery = new UseQueryFixture<{
+  accountItems: TransactionUIModel[];
+  cardGroups: ProjectedInvoiceGroup[];
+}>();
 const summaryQuery = new UseQueryFixture<{
   balance: number;
   expense: number;
   income: number;
+  projectedExpense?: number;
+  projectedIncome?: number;
   toPay: number;
   toReceive: number;
 }>();
@@ -101,6 +112,7 @@ const spies = {
     useCases.getFinancialCardInvoicesForMonthUseCase.execute,
   ),
   getOwners: jest.mocked(useCases.getOwnersUseCase.execute),
+  getProjections: jest.mocked(useCases.getFinancialProjectionsUseCase.execute),
   getSummary: jest.mocked(useCases.getMonthSummaryUseCase.execute),
   getTransactions: jest.mocked(
     useCases.getFinancialTransactionsUseCase.execute,
@@ -118,10 +130,14 @@ beforeEach(() => {
   summaryQuery.reset();
   invoicesQuery.reset();
   invoicesQuery.withData([]);
+  projectionsQuery.reset();
   spies.isFocused.mockReturnValue(false);
   spies.useQuery.mockImplementation(((options: { cacheKey: string[] }) => {
     if (options.cacheKey[0] === "summary") {
       return summaryQuery.build();
+    }
+    if (options.cacheKey[0] === "projections") {
+      return projectionsQuery.build();
     }
     if (options.cacheKey[0] === "cardInvoices") {
       return invoicesQuery.build();
@@ -161,6 +177,7 @@ export {
   givenData,
   invoicesQuery,
   owners,
+  projectionsQuery,
   setup,
   spies,
   summaryQuery,

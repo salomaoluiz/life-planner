@@ -9,6 +9,8 @@ export interface EarlyPaymentRefModel {
 
 export type OwnerType = "FAMILY" | "USER";
 
+export type RecurrenceFrequency = "BIWEEKLY" | "MONTHLY" | "WEEKLY" | "YEARLY";
+
 export type TransactionType = "EXPENSE" | "INCOME";
 
 interface ITransactionModel {
@@ -25,9 +27,13 @@ interface ITransactionModel {
   installmentNumber?: number;
   installmentPlanId?: string;
   invoiceMonth?: string;
+  occurrenceCount?: number;
+  occurrenceNumber?: number;
   owner: OwnerType;
   ownerId: string;
   paid?: boolean;
+  recurrenceFrequency?: RecurrenceFrequency;
+  recurrenceId?: string;
   systemKey?: string;
   type: TransactionType;
   value: string;
@@ -47,9 +53,13 @@ class TransactionModel implements ITransactionModel {
   installmentNumber?: number;
   installmentPlanId?: string;
   invoiceMonth?: string;
+  occurrenceCount?: number;
+  occurrenceNumber?: number;
   owner: OwnerType;
   ownerId: string;
   paid: boolean;
+  recurrenceFrequency?: RecurrenceFrequency;
+  recurrenceId?: string;
   systemKey?: string;
   type: TransactionType;
   value: string;
@@ -66,10 +76,14 @@ class TransactionModel implements ITransactionModel {
     this.invoiceMonth = params.invoiceMonth;
     this.description = params.description;
     this.earlyPayment = params.earlyPayment;
+    this.occurrenceCount = params.occurrenceCount;
+    this.occurrenceNumber = params.occurrenceNumber;
     this.owner = params.owner;
     this.id = params.id;
     this.ownerId = params.ownerId;
     this.paid = params.paid ?? true;
+    this.recurrenceFrequency = params.recurrenceFrequency;
+    this.recurrenceId = params.recurrenceId;
     this.excludeFromTotals = params.excludeFromTotals ?? false;
     this.systemKey = params.systemKey;
     this.type = params.type;
@@ -100,10 +114,15 @@ class TransactionModel implements ITransactionModel {
       installmentNumber: (data.installmentNumber as null | number) ?? undefined,
       installmentPlanId: (data.installmentPlanId as null | string) ?? undefined,
       invoiceMonth: (data.invoiceMonth as null | string) ?? undefined,
+      occurrenceCount: (data.occurrenceCount as null | number) ?? undefined,
+      occurrenceNumber: (data.occurrenceNumber as null | number) ?? undefined,
       owner: data.owner as OwnerType,
       ownerId: data.ownerId as string,
       // An API without spec 033 sends no status: every row then counts as paid.
       paid: (data.paid as boolean | undefined) ?? true,
+      recurrenceFrequency:
+        (data.recurrenceFrequency as null | RecurrenceFrequency) ?? undefined,
+      recurrenceId: (data.recurrenceId as null | string) ?? undefined,
       systemKey: category?.systemKey ?? undefined,
       type: data.type as TransactionType,
       value: centsToDecimalString(Number(data.value)),
@@ -129,9 +148,13 @@ class TransactionModel implements ITransactionModel {
       installmentNumber: this.installmentNumber ?? null,
       installmentPlanId: this.installmentPlanId ?? null,
       invoiceMonth: this.invoiceMonth ?? null,
+      occurrenceCount: this.occurrenceCount ?? null,
+      occurrenceNumber: this.occurrenceNumber ?? null,
       owner: this.owner,
       ownerId: this.ownerId,
       paid: this.paid,
+      recurrenceFrequency: this.recurrenceFrequency ?? null,
+      recurrenceId: this.recurrenceId ?? null,
       type: this.type,
       value: decimalStringToCents(this.value),
     };

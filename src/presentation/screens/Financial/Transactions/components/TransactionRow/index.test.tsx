@@ -121,3 +121,104 @@ describe("paid status (spec 033)", () => {
     expect(screen.queryByTestId(transactionsTestIds.rowOverdue)).toBeNull();
   });
 });
+
+describe("recurring series (spec 034)", () => {
+  function recurring(overrides = {}) {
+    return new TransactionUIModel(
+      makeTransactionDTO({
+        description: "Rent",
+        id: "tx-r",
+        occurrenceCount: 10,
+        occurrenceNumber: 3,
+        recurrenceFrequency: "MONTHLY",
+        recurrenceId: "series-1",
+        ...overrides,
+      }),
+    );
+  }
+
+  it("SHOULD show the repeat icon AND the counter WHEN the series has an end date", () => {
+    render(<TransactionRow item={recurring()} onPress={jest.fn()} />);
+
+    expect(screen.getByText("Rent 3/10")).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(transactionsTestIds.rowRecurring),
+    ).toBeOnTheScreen();
+    expect(screen.getByTestId(transactionsTestIds.rowRepeat)).toBeOnTheScreen();
+    expect(screen.queryByTestId(transactionsTestIds.row)).toBeNull();
+  });
+
+  it("SHOULD show the frequency in the subtitle AND no counter WHEN the series has no end date", () => {
+    render(
+      <TransactionRow
+        item={recurring({ occurrenceCount: undefined })}
+        onPress={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByText("Rent")).toBeOnTheScreen();
+    expect(
+      screen.getByText(/financial.recurrence.frequency.MONTHLY/),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD keep the pay button AND the overdue badge on a real recurring row", () => {
+    render(
+      <TransactionRow
+        item={recurring({
+          date: new Date(2020, 0, 1).toISOString(),
+          paid: false,
+        })}
+        onPay={jest.fn()}
+        onPress={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByTestId(transactionsTestIds.rowPay)).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(transactionsTestIds.rowOverdue),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD mark a projected row, hide the pay button AND open it through onProjectedPress", () => {
+    const onPress = jest.fn();
+    const onProjectedPress = jest.fn();
+    const item = recurring({ isProjected: true, paid: false });
+
+    render(
+      <TransactionRow
+        item={item}
+        onPay={jest.fn()}
+        onPress={onPress}
+        onProjectedPress={onProjectedPress}
+      />,
+    );
+
+    expect(
+      screen.getByTestId(transactionsTestIds.rowProjected),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(transactionsTestIds.rowProjectedBadge),
+    ).toBeOnTheScreen();
+    expect(screen.queryByTestId(transactionsTestIds.rowPay)).toBeNull();
+
+    fireEvent.press(screen.getByTestId(transactionsTestIds.rowProjected));
+
+    expect(onProjectedPress).toHaveBeenCalledWith(item);
+    expect(onPress).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD fall back to onPress WHEN a projected row has no projected handler", () => {
+    const onPress = jest.fn();
+
+    render(
+      <TransactionRow
+        item={recurring({ isProjected: true })}
+        onPress={onPress}
+      />,
+    );
+    fireEvent.press(screen.getByTestId(transactionsTestIds.rowProjected));
+
+    expect(onPress).toHaveBeenCalledWith("tx-r");
+  });
+});

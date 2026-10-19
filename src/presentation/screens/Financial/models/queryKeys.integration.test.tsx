@@ -35,6 +35,8 @@ jest.mock("@application/useCases", () => {
     "getFinancialAccountsUseCase",
     "getFinancialCardInvoicesForMonthUseCase",
     "getFinancialCategoriesUseCase",
+    "getFinancialProjectionsUseCase",
+    "getFinancialRecurrencesUseCase",
     "getFinancialTransactionsUseCase",
     "getMonthSummaryUseCase",
     "getOwnersUseCase",

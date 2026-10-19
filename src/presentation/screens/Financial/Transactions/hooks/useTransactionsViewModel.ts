@@ -7,6 +7,7 @@ import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
 import { useQuery } from "@infrastructure/fetcher";
 import useTranslationLocale from "@presentation/i18n/useTranslationLocale";
+import { addMonthsTo } from "@screens/Financial/models/invoiceMonth";
 import {
   buildOwnerFilterChoices,
   personalOwnerId as findPersonalOwnerId,
@@ -24,7 +25,9 @@ import {
   formatMonthLabel,
   formatMonthName,
   isInMonth,
+  mergeProjectedInvoices,
   monthChoices,
+  ProjectedInvoiceGroup,
   shiftMonth,
   startOfMonth,
   stickyIndices,
@@ -32,9 +35,60 @@ import {
 } from "../models/transactionList";
 import TransactionUIModel from "../models/TransactionUIModel";
 
+// What the API projects for the months after the current one (spec 034 FR 14).
+interface ProjectedData {
+  accountItems: TransactionUIModel[];
+  cardGroups: ProjectedInvoiceGroup[];
+}
+
 interface TransactionsData {
   items: TransactionUIModel[];
   owners: OwnerDTO[];
+}
+
+async function fetchProjections(
+  from: string,
+  to: string,
+  ownerIds: string[],
+): Promise<ProjectedData> {
+  const [items, categories] = await Promise.all([
+    useCases.getFinancialProjectionsUseCase.execute({ from, ownerIds, to }),
+    useCases.getFinancialCategoriesUseCase.execute(ownerIds),
+  ]);
+  const categoryById = new Map(
+    categories.map((category) => [category.id, category]),
+  );
+  const groups = new Map<string, ProjectedInvoiceGroup>();
+  const accountItems: TransactionUIModel[] = [];
+
+  items.forEach((item) => {
+    const row = new TransactionUIModel(
+      item.toTransactionDTO(),
+      categoryById.get(item.categoryId),
+    );
+
+    if (!item.creditCardId) {
+      accountItems.push(row);
+
+      return;
+    }
+    if (!item.invoiceListDate || !item.invoiceMonth) {
+      return;
+    }
+
+    const key = `${item.creditCardId}:${item.invoiceMonth}`;
+    const group = groups.get(key) ?? {
+      card: item.toInvoiceCard()!,
+      items: [],
+      listDate: item.invoiceListDate,
+      referenceMonth: item.invoiceMonth,
+    };
+
+    group.items.push(row);
+    groups.set(key, group);
+  });
+
+  return { accountItems, cardGroups: [...groups.values()] };
 }
 
 async function fetchSummary(
@@ -65,6 +119,16 @@ async function fetchTransactions(): Promise<TransactionsData> {
     ),
     owners,
   };
+}
+
+// The later of two `YYYY-MM` keys.
+function maxMonth(a: string, b: string) {
+  return a > b ? a : b;
+}
+
+// `YYYY-MM` of the local month.
+function toMonthKey(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 }
 
 function useTransactionsViewModel() {
@@ -121,6 +185,24 @@ function useTransactionsViewModel() {
         })
       ).map((invoice) => new CardInvoiceUIModel(invoice)),
   });
+  // Months after the current one also show what the series will create. Card purchases show on the invoice
+  // they would land on, which appears up to two months after the purchase: the range looks that far back.
+  const currentMonthKey = toMonthKey(new Date());
+  const isFutureMonth = monthKey > currentMonthKey;
+  const projectionsFrom = maxMonth(
+    addMonthsTo(monthKey, -2),
+    addMonthsTo(currentMonthKey, 1),
+  );
+  const projections = useQuery<ProjectedData>({
+    cacheKey: [
+      ...listQueryKey(useCases.getFinancialProjectionsUseCase.uniqueName),
+      projectionsFrom,
+      monthKey,
+      ...allOwnerIds,
+    ],
+    enabled: !!owners && isFutureMonth,
+    fetch: async () => fetchProjections(projectionsFrom, monthKey, allOwnerIds),
+  });
   const [expandedInvoiceId, setExpandedInvoiceId] = useState<string>();
 
   const summary = useQuery<MonthSummary>({
@@ -138,28 +220,48 @@ function useTransactionsViewModel() {
       transactions.refetch();
       invoices.refetch();
       summary.refetch();
+      if (isFutureMonth) {
+        projections.refetch();
+      }
     }
   }, [isFocused]);
 
   const itemsOfMonth = useMemo(
-    () =>
-      (transactions.data?.items ?? []).filter(
+    () => [
+      ...(transactions.data?.items ?? []).filter(
         (item) => !item.isCardPurchase && isInMonth(item.date, month),
       ),
-    [transactions.data, month],
+      ...(isFutureMonth ? (projections.data?.accountItems ?? []) : []).filter(
+        (item) => isInMonth(item.date, month),
+      ),
+    ],
+    [transactions.data, projections.data, month, isFutureMonth],
+  );
+  // Real invoices of the month carrying their projections, plus the invoices that only exist as projections.
+  const allInvoices = useMemo(
+    () =>
+      mergeProjectedInvoices(
+        invoices.data ?? [],
+        isFutureMonth
+          ? (projections.data?.cardGroups ?? []).filter(
+              (group) => group.listDate.slice(0, 7) === monthKey,
+            )
+          : [],
+      ),
+    [invoices.data, projections.data, monthKey, isFutureMonth],
   );
   const visible = useMemo(
     () => filterByType(filterByOwner(itemsOfMonth, ownerFilter), typeFilter),
     [itemsOfMonth, ownerFilter, typeFilter],
   );
-  const invoicesOfMonth = invoices.data ?? [];
+  const invoicesOfMonth = allInvoices;
   const visibleInvoices = useMemo(
     () =>
       filterInvoicesByType(
-        filterInvoicesByOwner(invoices.data ?? [], ownerFilter),
+        filterInvoicesByOwner(allInvoices, ownerFilter),
         typeFilter,
       ),
-    [invoices.data, ownerFilter, typeFilter],
+    [allInvoices, ownerFilter, typeFilter],
   );
   const entries = useMemo(
     () => buildEntries(visible, new Date(), visibleInvoices),
@@ -180,6 +282,9 @@ function useTransactionsViewModel() {
     transactions.refetch();
     invoices.refetch();
     summary.refetch();
+    if (isFutureMonth) {
+      projections.refetch();
+    }
   }
 
   return {
@@ -219,6 +324,15 @@ function useTransactionsViewModel() {
     onPickerYearChange: (delta: number) =>
       setPickerYear((year) => year + delta),
     onPreviousMonth: () => setMonth((current) => shiftMonth(current, -1)),
+    onProjectedPress: (item: TransactionUIModel) =>
+      router.push({
+        params: {
+          month: item.monthKey,
+          occurrenceNumber: String(item.occurrenceNumber),
+          recurrenceId: item.recurrenceId,
+        },
+        pathname: "/financial/transaction/add_new_transaction",
+      } as never),
     onRefresh,
     onRetry: async () => transactions.refetch(),
     onRowPress: (id: string) =>
@@ -240,6 +354,8 @@ function useTransactionsViewModel() {
           balanceCents: summary.data.balance,
           expenseCents: summary.data.expense,
           incomeCents: summary.data.income,
+          projectedExpenseCents: summary.data.projectedExpense ?? 0,
+          projectedIncomeCents: summary.data.projectedIncome ?? 0,
           toPayCents: summary.data.toPay,
           toReceiveCents: summary.data.toReceive,
         }
@@ -249,5 +365,5 @@ function useTransactionsViewModel() {
   };
 }
 
-export { fetchSummary, fetchTransactions };
+export { fetchProjections, fetchSummary, fetchTransactions };
 export default useTransactionsViewModel;

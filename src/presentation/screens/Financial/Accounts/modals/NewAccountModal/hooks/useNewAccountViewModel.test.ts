@@ -354,3 +354,71 @@ it("SHOULD hand the balance change to the update mutation WHEN editing an active
     id: "a1",
   });
 });
+
+describe("archiving ends the recurring series (spec 034 FR 34)", () => {
+  it("SHOULD ask for the active series of the account", () => {
+    givenLoaded({ accounts: [acc("a1")], params: { id: "a1" } });
+    setup();
+
+    expect(spies.useQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cacheKey: ["recurrences", "account", "a1"],
+        enabled: true,
+      }),
+    );
+  });
+
+  it("SHOULD not ask for a new or an already archived account", () => {
+    givenLoaded({
+      accounts: [acc("a1", 0, { status: "ARCHIVED" })],
+      params: { id: "a1" },
+    });
+    setup();
+
+    expect(spies.useQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cacheKey: ["recurrences", "account", "a1"],
+        enabled: false,
+      }),
+    );
+  });
+
+  it("SHOULD warn with the count WHEN the archived switch is turned on", () => {
+    givenLoaded({ accounts: [acc("a1")], params: { id: "a1" } });
+    queries.recurrences.withData([{}, {}]);
+    const { result } = setup();
+
+    expect(result.current.archiveWarningCount).toBe(0);
+
+    act(() => result.current.onArchivedChange(true));
+
+    expect(result.current.archiveWarningCount).toBe(2);
+  });
+
+  it("SHOULD stay silent WHEN there are no series or the switch is off", () => {
+    givenLoaded({ accounts: [acc("a1")], params: { id: "a1" } });
+    const { result } = setup();
+
+    act(() => result.current.onArchivedChange(true));
+
+    expect(result.current.archiveWarningCount).toBe(0);
+  });
+
+  it("SHOULD load the series of the owner through the use case", async () => {
+    givenLoaded({ accounts: [acc("a1")], params: { id: "a1" } });
+    setup();
+
+    const options = spies.useQuery.mock.calls.find(
+      ([option]) =>
+        (option as { cacheKey: string[] }).cacheKey[0] === "recurrences",
+    )![0] as { fetch: () => Promise<unknown> };
+
+    await options.fetch();
+
+    expect(spies.getRecurrences).toHaveBeenCalledWith({
+      accountId: "a1",
+      ownerIds: ["user-id"],
+      status: "ACTIVE",
+    });
+  });
+});

@@ -77,6 +77,25 @@ it.each([
   },
 );
 
+it("SHOULD keep ONLY the numeric fields of the error body as details (counts, never free text)", async () => {
+  spies.fetch.mockResolvedValueOnce(
+    mocks.json(409, {
+      detachedCount: 1,
+      message: "Paid occurrences",
+      note: "free text",
+      paidCount: 3,
+      paidTotal: 600000,
+    }),
+  );
+
+  const error = await setupThrowable("DELETE", "/v1/x");
+
+  expect(error).toMatchObject({
+    details: { detachedCount: 1, paidCount: 3, paidTotal: 600000 },
+    statusCode: 409,
+  });
+});
+
 it("SHOULD map 401 WITHOUT a stored token to ApiBusinessError and NOT start session expiry (wrong password on login)", async () => {
   spies.fetch.mockResolvedValueOnce(
     mocks.json(401, { message: "Invalid Credentials", statusCode: 401 }),

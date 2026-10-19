@@ -1,3 +1,5 @@
+import { RecurrenceHasPaidOccurrences } from "@domain/entities/errors";
+
 import { fireEvent, screen, setup } from "./mocks/index.mocks";
 import transactionFormTestIds from "./testIds";
 
@@ -336,5 +338,233 @@ describe("paid switch (spec 033)", () => {
   it("SHOULD hide the switch WHEN the view model says so", () => {
     setup({ showPaid: false });
     expect(screen.queryByTestId(transactionFormTestIds.paid)).toBeNull();
+  });
+});
+
+describe("repeat and recurring occurrences (spec 034)", () => {
+  const recurring = {
+    ...{
+      deleteScope: "ONLY_THIS" as const,
+      endError: undefined,
+      endHelperKey: undefined,
+      frequencyHelperKey: undefined,
+      isAllDeleteOpen: false,
+      isEndLocked: false,
+      isFrequencyLocked: false,
+      isRecurring: false,
+      isRepeatToggleVisible: true,
+      preview: undefined,
+      scope: "ONLY_THIS" as const,
+    },
+  };
+
+  it("SHOULD show the Repeat switch AND call the toggle", () => {
+    const vm = setup();
+
+    fireEvent(
+      screen.getByTestId(transactionFormTestIds.repeat),
+      "valueChange",
+      true,
+    );
+
+    expect(vm.onRepeatToggle).toHaveBeenCalledWith(true);
+    expect(screen.queryByTestId(transactionFormTestIds.repeatEnd)).toBeNull();
+  });
+
+  it("SHOULD show the frequency chips, the end date and the preview WHEN Repeat is on", () => {
+    const vm = setup({
+      recurrence: {
+        ...recurring,
+        preview: { count: 12, kind: "times", last: new Date(2027, 8, 5) },
+      },
+      repeatOn: true,
+    });
+
+    expect(
+      screen.getByTestId(transactionFormTestIds.repeatEnd),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(transactionFormTestIds.repeatPreview),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(transactionFormTestIds.repeatPreview),
+    ).toHaveTextContent(/form.repeatPreview/);
+    expect(
+      screen.getByText("financial.transactions.form.paidFirstOnly"),
+    ).toBeOnTheScreen();
+
+    fireEvent.press(
+      screen.getByTestId(`${transactionFormTestIds.repeatFrequency}-WEEKLY`),
+    );
+    expect(vm.onRepeatFrequencyChange).toHaveBeenCalledWith("WEEKLY");
+  });
+
+  it("SHOULD preview the cadence WHEN there is no end date", () => {
+    setup({
+      recurrence: {
+        ...recurring,
+        preview: { frequency: "MONTHLY", kind: "forever" },
+      },
+      repeatOn: true,
+    });
+
+    expect(
+      screen.getByTestId(transactionFormTestIds.repeatPreview),
+    ).toHaveTextContent(/form.repeatForever/);
+  });
+
+  it("SHOULD show an empty preview text WHEN no occurrence fits the end date", () => {
+    setup({
+      recurrence: { ...recurring, preview: { kind: "none" } },
+      repeatOn: true,
+    });
+
+    expect(
+      screen.getByTestId(transactionFormTestIds.repeatPreview),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD show the scope selector AND lock account, date, frequency and end WHEN editing a recurring row", () => {
+    const vm = setup({
+      isEditing: true,
+      recurrence: {
+        ...recurring,
+        endHelperKey: "financial.recurrence.lockedAll" as never,
+        frequencyHelperKey: "financial.recurrence.lockedThisAndNext" as never,
+        isEndLocked: true,
+        isFrequencyLocked: true,
+        isRecurring: true,
+        isRepeatToggleVisible: false,
+      },
+      repeatOn: true,
+      scopeLocks: {
+        account: true,
+        accountHelperKey: "financial.recurrence.lockedThisAndNext" as never,
+        date: false,
+        dateHelperKey: undefined,
+        paid: false,
+      },
+    });
+
+    fireEvent.press(
+      screen.getByTestId("financial.recurrence-edit.scope-THIS_AND_NEXT"),
+    );
+
+    expect(vm.onScopeChange).toHaveBeenCalledWith("THIS_AND_NEXT");
+    expect(screen.queryByTestId(transactionFormTestIds.repeat)).toBeNull();
+    expect(
+      screen.getAllByText("financial.recurrence.lockedThisAndNext").length,
+    ).toBeGreaterThan(0);
+    expect(
+      screen.getByText("financial.recurrence.lockedAll"),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD hide the paid switch WHEN the scope locks it", () => {
+    setup({
+      isEditing: true,
+      recurrence: {
+        ...recurring,
+        isRecurring: true,
+        isRepeatToggleVisible: false,
+      },
+      repeatOn: true,
+      scopeLocks: {
+        account: true,
+        accountHelperKey: undefined,
+        date: true,
+        dateHelperKey: "financial.recurrence.lockedOnlyThis" as never,
+        paid: true,
+      },
+    });
+
+    expect(screen.queryByTestId(transactionFormTestIds.paid)).toBeNull();
+    expect(
+      screen.getByText("financial.recurrence.lockedOnlyThis"),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD open the delete sheet WITH the three scopes AND delete by scope", () => {
+    const vm = setup({
+      isDeleteDialogOpen: true,
+      isEditing: true,
+      recurrence: {
+        ...recurring,
+        isRecurring: true,
+        isRepeatToggleVisible: false,
+      },
+      repeatOn: true,
+    });
+
+    fireEvent.press(
+      screen.getByTestId(`${transactionFormTestIds.recurrenceDeleteScope}-ALL`),
+    );
+    fireEvent.press(
+      screen.getByTestId(transactionFormTestIds.recurrenceDeleteSheet),
+    );
+
+    expect(vm.onRecurrenceDeleteScopeChange).toHaveBeenCalledWith("ALL");
+    expect(vm.onRecurrenceDeletePress).toHaveBeenCalled();
+    expect(
+      screen.queryByTestId(transactionFormTestIds.deleteDialog),
+    ).toBeNull();
+  });
+
+  it("SHOULD ask to delete all, then ask again WITH the counts for paid occurrences", () => {
+    const vm = setup({
+      isEditing: true,
+      paidConflict: new RecurrenceHasPaidOccurrences({
+        detachedCount: 1,
+        paidCount: 3,
+        paidTotal: 600000,
+      }),
+      recurrence: {
+        ...recurring,
+        isAllDeleteOpen: true,
+        isRecurring: true,
+        isRepeatToggleVisible: false,
+      },
+      repeatOn: true,
+    });
+
+    expect(
+      screen.getByText("financial.recurrence.deleteAnyway"),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByText(/financial.recurrence.deletePaidWarning/),
+    ).toBeOnTheScreen();
+
+    fireEvent.press(
+      screen.getByTestId(
+        `${transactionFormTestIds.recurrenceDeletePaidDialog}-confirm`,
+      ),
+    );
+    fireEvent.press(
+      screen.getByTestId(
+        `${transactionFormTestIds.recurrenceDeleteAllDialog}-confirm`,
+      ),
+    );
+
+    expect(vm.onRecurrenceDeletePaidConfirm).toHaveBeenCalled();
+    expect(vm.onRecurrenceDeleteConfirm).toHaveBeenCalled();
+  });
+
+  it("SHOULD NOT mention detached purchases WHEN there are none", () => {
+    setup({
+      isEditing: true,
+      paidConflict: new RecurrenceHasPaidOccurrences({
+        detachedCount: 0,
+        paidCount: 1,
+        paidTotal: 100,
+      }),
+      recurrence: {
+        ...recurring,
+        isRecurring: true,
+        isRepeatToggleVisible: false,
+      },
+      repeatOn: true,
+    });
+
+    expect(screen.queryByText(/detachedWarning/)).toBeNull();
   });
 });

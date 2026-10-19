@@ -22,6 +22,16 @@ it("SHOULD DELETE /v1/finance/transactions/:id (204, empty body)", async () => {
   );
 });
 
+it("SHOULD send the scope of a recurring occurrence", async () => {
+  spies.delete.mockResolvedValueOnce(undefined);
+
+  await setup({ scope: "ONLY_THIS" });
+
+  expect(spies.delete).toHaveBeenCalledWith(
+    `/v1/finance/transactions/${mocks.params.id}?scope=ONLY_THIS`,
+  );
+});
+
 it("SHOULD throw FinancialNotFound WHEN the API answers 404", async () => {
   spies.delete.mockRejectedValueOnce(new ApiBusinessError("Not Found", 404));
 

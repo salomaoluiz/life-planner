@@ -4,9 +4,12 @@ import CreditCardOverviewDTO, {
   CreditCardSummaryDTO,
   InvoiceDTO,
 } from "@application/dto/financial/CreditCardOverviewDTO";
+import ProjectedOccurrenceDTO from "@application/dto/financial/ProjectedOccurrenceDTO";
+import RecurrenceDTO from "@application/dto/financial/RecurrenceDTO";
 import {
   AccountHasTransactions,
   FinancialNotFound,
+  RecurrenceHasPaidOccurrences,
 } from "@domain/entities/errors";
 
 import {
@@ -783,5 +786,561 @@ describe("paid switch design copy (spec 033)", () => {
       "financial.transactions.form.paidHelpEdit",
     );
     expect(result.current.paidHintKey).toBeUndefined();
+  });
+});
+
+describe("repeat on create (spec 034)", () => {
+  function fill(result: ReturnType<typeof setup>["result"]) {
+    act(() => {
+      result.current.onAmountChange(200000);
+    });
+    act(() => {
+      result.current.onDescriptionChange("Rent");
+    });
+    act(() => {
+      result.current.onCategorySelect("food");
+    });
+  }
+
+  it("SHOULD start with Repeat off AND show the toggle only when creating", () => {
+    givenLoaded();
+    const { result } = setup();
+
+    expect(result.current.repeatOn).toBe(false);
+    expect(result.current.recurrence.isRepeatToggleVisible).toBe(true);
+    expect(result.current.recurrence.preview).toBeUndefined();
+  });
+
+  it("SHOULD create a series WHEN Repeat is on, with the frequency and the end date", () => {
+    givenLoaded();
+    const { result } = setup();
+
+    fill(result);
+    act(() => {
+      result.current.onRepeatToggle(true);
+    });
+    act(() => {
+      result.current.onRepeatFrequencyChange("WEEKLY");
+    });
+    act(() => {
+      result.current.onRepeatEndChange(new Date(2026, 10, 2, 15));
+    });
+    act(() => {
+      result.current.onSave();
+    });
+
+    expect(mutations.create_recurrence.value.mutate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        accountId: "a1",
+        endDate: new Date(2026, 10, 2).toISOString(),
+        frequency: "WEEKLY",
+        value: "2000.00",
+      }),
+    );
+    expect(mutations.create.value.mutate).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD preview the count and the last date WHEN there is an end date, AND the cadence WHEN there is none", () => {
+    givenLoaded();
+    const { result } = setup();
+
+    act(() => {
+      result.current.onRepeatToggle(true);
+    });
+    expect(result.current.recurrence.preview).toEqual({
+      frequency: "MONTHLY",
+      kind: "forever",
+    });
+
+    act(() => {
+      result.current.onRepeatEndChange(new Date(2027, 8, 5));
+    });
+    expect(result.current.recurrence.preview).toEqual({
+      count: 12,
+      kind: "times",
+      last: new Date(2027, 8, 5),
+    });
+
+    act(() => {
+      result.current.onRepeatEndChange(new Date(2026, 9, 1));
+    });
+    expect(result.current.recurrence.preview).toEqual({ kind: "none" });
+
+    act(() => {
+      result.current.onSave();
+    });
+    expect(result.current.recurrence.endError).toBe(
+      "financial.transactions.form.errors.repeatEndBeforeStart",
+    );
+  });
+
+  it("SHOULD ignore an unknown frequency AND block saving an end date before the first date", () => {
+    givenLoaded();
+    const { result } = setup();
+
+    fill(result);
+    act(() => {
+      result.current.onRepeatToggle(true);
+    });
+    act(() => {
+      result.current.onRepeatFrequencyChange("DAILY");
+    });
+    act(() => {
+      result.current.onRepeatEndChange(new Date(2026, 9, 1));
+    });
+    act(() => {
+      result.current.onSave();
+    });
+
+    expect(result.current.repeatFrequency).toBe("MONTHLY");
+    expect(mutations.create_recurrence.value.mutate).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD clear the end date WHEN it is removed", () => {
+    givenLoaded();
+    const { result } = setup();
+
+    act(() => {
+      result.current.onRepeatToggle(true);
+    });
+    act(() => {
+      result.current.onRepeatEndChange(new Date(2027, 8, 5));
+    });
+    act(() => {
+      result.current.onRepeatEndChange(undefined);
+    });
+
+    expect(result.current.repeatEnd).toBeUndefined();
+  });
+
+  it("SHOULD turn Repeat off WHEN Installments are turned on in Card mode", () => {
+    givenLoaded({ cards: [card("c1")] });
+    const { result } = setup();
+
+    act(() => {
+      result.current.onPayWithChange("CARD");
+    });
+    act(() => {
+      result.current.onRepeatToggle(true);
+    });
+    act(() => {
+      result.current.onInstallmentsToggle(true);
+    });
+
+    expect(result.current.repeatOn).toBe(false);
+    expect(result.current.installments.enabled).toBe(true);
+  });
+
+  it("SHOULD go back WHEN the series is created", () => {
+    givenLoaded();
+    mutations.create_recurrence.withStatus("success");
+
+    setup();
+
+    expect(spies.back).toHaveBeenCalled();
+  });
+});
+
+describe("editing a recurring occurrence (spec 034)", () => {
+  const series = new RecurrenceDTO({
+    accountId: "a1",
+    category: "Food",
+    categoryId: "food",
+    description: "Rent",
+    endDate: new Date(2027, 8, 5).toISOString(),
+    firstNumber: 1,
+    frequency: "MONTHLY",
+    id: "series-1",
+    occurrenceCount: 12,
+    owner: "USER",
+    ownerId: "user-id",
+    startDate: new Date(2026, 9, 5).toISOString(),
+    status: "ACTIVE",
+    type: "EXPENSE",
+    value: "2000.00",
+  });
+  const row = tx("tx-r", {
+    description: "Rent",
+    occurrenceCount: 12,
+    occurrenceNumber: 5,
+    paid: false,
+    recurrenceFrequency: "MONTHLY",
+    recurrenceId: "series-1",
+    value: "2000.00",
+  });
+
+  function loadReal() {
+    givenLoaded({
+      params: { id: "tx-r" },
+      series: [series],
+      transactions: [row],
+    });
+  }
+
+  it("SHOULD load the series AND show its frequency, end date and the scope selector (default only this one)", () => {
+    loadReal();
+    const { result } = setup();
+
+    expect(result.current.recurrence.isRecurring).toBe(true);
+    expect(result.current.recurrence.scope).toBe("ONLY_THIS");
+    expect(result.current.repeatOn).toBe(true);
+    expect(result.current.repeatEnd).toEqual(new Date(2027, 8, 5));
+    expect(result.current.recurrence.isFrequencyLocked).toBe(true);
+    expect(result.current.recurrence.frequencyHelperKey).toBe(
+      "financial.recurrence.lockedThisAndNext",
+    );
+    expect(result.current.scopeLocks).toMatchObject({
+      account: true,
+      date: false,
+      paid: false,
+    });
+    expect(result.current.recurrence.isRepeatToggleVisible).toBe(false);
+  });
+
+  it("SHOULD wait for the series before showing the form", () => {
+    givenLoaded({ params: { id: "tx-r" }, transactions: [row] });
+    queries.recurrences.reset();
+
+    expect(setup().result.current.isLoading).toBe(true);
+  });
+
+  it("SHOULD report notFound WHEN the series is gone", () => {
+    givenLoaded({ params: { id: "tx-r" }, series: [], transactions: [row] });
+
+    expect(setup().result.current.isNotFound).toBe(true);
+  });
+
+  it("SHOULD update only that row with scope ONLY_THIS sending only what changed", () => {
+    loadReal();
+    const { result } = setup();
+
+    act(() => {
+      result.current.onAmountChange(220000);
+    });
+    act(() => {
+      result.current.onSave();
+    });
+
+    expect(mutations.update.value.mutate).toHaveBeenCalledWith({
+      categoryId: undefined,
+      date: undefined,
+      description: undefined,
+      id: "tx-r",
+      paid: undefined,
+      scope: "ONLY_THIS",
+      value: "2200.00",
+    });
+  });
+
+  it("SHOULD split the series WHEN the scope is this and the next ones", () => {
+    loadReal();
+    const { result } = setup();
+
+    act(() => {
+      result.current.onScopeChange("THIS_AND_NEXT");
+    });
+    act(() => {
+      result.current.onAmountChange(220000);
+    });
+    act(() => {
+      result.current.onRepeatFrequencyChange("WEEKLY");
+    });
+    act(() => {
+      result.current.onSave();
+    });
+
+    expect(result.current.recurrence.isFrequencyLocked).toBe(false);
+    expect(mutations.split.value.mutate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        frequency: "WEEKLY",
+        occurrenceNumber: 5,
+        recurrenceId: "series-1",
+        value: "2200.00",
+      }),
+    );
+  });
+
+  it("SHOULD update the series WHEN the scope is all", () => {
+    loadReal();
+    const { result } = setup();
+
+    act(() => {
+      result.current.onScopeChange("ALL");
+    });
+    act(() => {
+      result.current.onRepeatEndChange(undefined);
+    });
+    act(() => {
+      result.current.onSave();
+    });
+
+    expect(mutations.update_recurrence.value.mutate).toHaveBeenCalledWith({
+      categoryId: undefined,
+      description: undefined,
+      endDate: null,
+      id: "series-1",
+      value: undefined,
+    });
+  });
+
+  it("SHOULD start from the stored values WHEN the scope changes", () => {
+    loadReal();
+    const { result } = setup();
+
+    act(() => {
+      result.current.onAmountChange(1);
+    });
+    act(() => {
+      result.current.onScopeChange("ALL");
+    });
+
+    expect(result.current.amountCents).toBe(200000);
+  });
+
+  it("SHOULD just close WHEN nothing changed", () => {
+    loadReal();
+    const { result } = setup();
+
+    act(() => {
+      result.current.onSave();
+    });
+
+    expect(spies.back).toHaveBeenCalled();
+    expect(mutations.update.value.mutate).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD open a projected occurrence by series, number and month AND materialize it WHEN edited", () => {
+    const projected = new ProjectedOccurrenceDTO({
+      accountId: "a1",
+      accountName: "a1",
+      category: "Food",
+      categoryId: "food",
+      date: new Date(2026, 10, 5).toISOString(),
+      description: "Rent",
+      frequency: "MONTHLY",
+      occurrenceCount: 12,
+      occurrenceNumber: 2,
+      owner: "USER",
+      ownerId: "user-id",
+      recurrenceId: "series-1",
+      type: "EXPENSE",
+      value: "2000.00",
+    });
+
+    givenLoaded({
+      params: {
+        month: "2026-11",
+        occurrenceNumber: "2",
+        recurrenceId: "series-1",
+      },
+      projected: [projected],
+      series: [series],
+    });
+    const { result } = setup();
+
+    expect(result.current.isEditing).toBe(true);
+    expect(result.current.date).toEqual(new Date(2026, 10, 5));
+
+    act(() => {
+      result.current.onAmountChange(210000);
+    });
+    act(() => {
+      result.current.onSave();
+    });
+
+    expect(mutations.materialize.value.mutate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        occurrenceNumber: 2,
+        recurrenceId: "series-1",
+        value: "2100.00",
+      }),
+    );
+  });
+
+  it("SHOULD report notFound WHEN the projected occurrence is not in the projections", () => {
+    givenLoaded({
+      params: {
+        month: "2026-11",
+        occurrenceNumber: "9",
+        recurrenceId: "series-1",
+      },
+      projected: [],
+    });
+
+    expect(setup().result.current.isNotFound).toBe(true);
+  });
+});
+
+describe("deleting a recurring occurrence (spec 034 FR 28-31)", () => {
+  const series = new RecurrenceDTO({
+    accountId: "a1",
+    category: "Food",
+    categoryId: "food",
+    description: "Rent",
+    firstNumber: 1,
+    frequency: "MONTHLY",
+    id: "series-1",
+    owner: "USER",
+    ownerId: "user-id",
+    startDate: new Date(2026, 9, 5).toISOString(),
+    status: "ACTIVE",
+    type: "EXPENSE",
+    value: "2000.00",
+  });
+  const row = tx("tx-r", {
+    occurrenceNumber: 5,
+    recurrenceFrequency: "MONTHLY",
+    recurrenceId: "series-1",
+  });
+
+  function loadReal() {
+    givenLoaded({
+      params: { id: "tx-r" },
+      series: [series],
+      transactions: [row],
+    });
+  }
+
+  it("SHOULD delete only this occurrence by default", () => {
+    loadReal();
+    const { result } = setup();
+
+    act(() => {
+      result.current.onDeletePress();
+    });
+    expect(result.current.isDeleteDialogOpen).toBe(true);
+    expect(result.current.recurrence.deleteScope).toBe("ONLY_THIS");
+
+    act(() => {
+      result.current.onRecurrenceDeletePress();
+    });
+
+    expect(mutations.delete_occurrence.value.mutate).toHaveBeenCalledWith({
+      confirmPaid: false,
+      occurrenceNumber: 5,
+      recurrenceId: "series-1",
+      scope: "ONLY_THIS",
+    });
+    expect(result.current.isDeleteDialogOpen).toBe(false);
+  });
+
+  it("SHOULD delete this and the next ones through the same endpoint", () => {
+    loadReal();
+    const { result } = setup();
+
+    act(() => {
+      result.current.onRecurrenceDeleteScopeChange("THIS_AND_NEXT");
+    });
+    act(() => {
+      result.current.onRecurrenceDeletePress();
+    });
+
+    expect(mutations.delete_occurrence.value.mutate).toHaveBeenCalledWith(
+      expect.objectContaining({ scope: "THIS_AND_NEXT" }),
+    );
+  });
+
+  it("SHOULD ask to confirm BEFORE deleting all, then delete the series", () => {
+    loadReal();
+    const { result } = setup();
+
+    act(() => {
+      result.current.onRecurrenceDeleteScopeChange("ALL");
+    });
+    act(() => {
+      result.current.onRecurrenceDeletePress();
+    });
+
+    expect(result.current.recurrence.isAllDeleteOpen).toBe(true);
+    expect(mutations.delete_recurrence.value.mutate).not.toHaveBeenCalled();
+
+    act(() => {
+      result.current.onRecurrenceDeleteConfirm();
+    });
+
+    expect(mutations.delete_recurrence.value.mutate).toHaveBeenCalledWith({
+      confirmPaid: false,
+      id: "series-1",
+    });
+    expect(result.current.recurrence.isAllDeleteOpen).toBe(false);
+  });
+
+  it("SHOULD close the all-confirmation WHEN cancelled", () => {
+    loadReal();
+    const { result } = setup();
+
+    act(() => {
+      result.current.onRecurrenceDeleteScopeChange("ALL");
+    });
+    act(() => {
+      result.current.onRecurrenceDeletePress();
+    });
+    act(() => {
+      result.current.onRecurrenceDeleteCancel();
+    });
+
+    expect(result.current.recurrence.isAllDeleteOpen).toBe(false);
+  });
+
+  it("SHOULD show the second, paid confirmation with the counts WHEN the API answers 409, AND retry confirmed", () => {
+    loadReal();
+    mutations.delete_recurrence.withError(
+      new RecurrenceHasPaidOccurrences({
+        detachedCount: 1,
+        paidCount: 3,
+        paidTotal: 600000,
+      }),
+    );
+    const { result } = setup();
+
+    expect(result.current.paidConflict).toMatchObject({
+      detachedCount: 1,
+      paidCount: 3,
+      paidTotal: 600000,
+    });
+    expect(result.current.formErrorKey).toBeUndefined();
+
+    act(() => {
+      result.current.onRecurrenceDeleteScopeChange("ALL");
+    });
+    act(() => {
+      result.current.onRecurrenceDeletePaidConfirm();
+    });
+
+    expect(mutations.delete_recurrence.value.mutate).toHaveBeenCalledWith({
+      confirmPaid: true,
+      id: "series-1",
+    });
+  });
+
+  it("SHOULD hide the paid confirmation WHEN dismissed", () => {
+    loadReal();
+    mutations.delete_occurrence.withError(
+      new RecurrenceHasPaidOccurrences({
+        detachedCount: 0,
+        paidCount: 1,
+        paidTotal: 100,
+      }),
+    );
+    const { result } = setup();
+
+    expect(result.current.paidConflict).toBeDefined();
+
+    act(() => {
+      result.current.onRecurrenceDeleteCancel();
+    });
+
+    expect(result.current.paidConflict).toBeUndefined();
+  });
+
+  it("SHOULD not delete WHEN the row is not part of a series", () => {
+    givenLoaded({ params: { id: "tx-1" }, transactions: [tx("tx-1")] });
+    const { result } = setup();
+
+    act(() => {
+      result.current.onRecurrenceDeletePress();
+    });
+
+    expect(mutations.delete_occurrence.value.mutate).not.toHaveBeenCalled();
   });
 });

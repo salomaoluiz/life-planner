@@ -33,3 +33,7 @@ Sibling repo: NestJS 10 + Prisma/Postgres REST API (Clean Architecture/DDD) that
 - Keep enum values (`USER`/`FAMILY`, …) and UUID ids identical to the backend. API JSON is camelCase.
 - When integrating, follow the existing layering: a new datasource under `src/data/datasource` using `@infrastructure/fetcher` (never call `fetch`/axios from presentation), Model `fromJSON/toJSON`, repository impl, use case. The base URL comes from an `EXPO_PUBLIC_*` env var (placeholder in `.env.example`; never a real URL/secret in tracked files).
 - Don't edit the backend repo unless asked; report what must change there.
+
+## Recurring transactions (spec 034)
+
+`/v1/finance/recurrences/*` (create, list, get, patch = scope ALL, `split` = THIS_AND_NEXT, `occurrences/:number` = make a projected occurrence real, delete by occurrence or whole series, `projections?from=&to=`). `PATCH`/`DELETE /v1/finance/transactions/:id` on a recurring row need `scope` (paying needs none). Transaction payloads carry `recurrenceId`, `occurrenceNumber`, `occurrenceCount`, `recurrenceFrequency`. Every read of rows (list, accounts, cards, invoices, projections) makes the API create the real occurrences up to the end of the client's current month (`?today=`), so the app always sends its local day. 409 on a delete answers `{ paidCount, paidTotal, detachedCount }` (the app keeps only the numbers, see `ApiBusinessError.details`).

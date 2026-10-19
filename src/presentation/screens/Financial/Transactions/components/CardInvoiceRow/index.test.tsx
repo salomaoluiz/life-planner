@@ -1,8 +1,11 @@
 import { fireEvent, render, screen } from "@tests";
 
+import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
-import { makeInvoice } from "../../mocks/invoice.mocks";
+import { makeInvoice, makeInvoiceDTO } from "../../mocks/invoice.mocks";
+import CardInvoiceUIModel from "../../models/CardInvoiceUIModel";
+import TransactionUIModel from "../../models/TransactionUIModel";
 import CardInvoiceRow from "./index";
 
 function setup(
@@ -115,4 +118,110 @@ it("SHOULD title an installment purchase with its number AND a plain one with th
   expect(titles).toContain(
     'financial.installment.label {"description":"Fuel","k":3,"n":10}',
   );
+});
+
+describe("projected purchases (spec 034 FR 14)", () => {
+  function projected(id: string, value: string) {
+    return new TransactionUIModel(
+      new TransactionDTO({
+        category: "Food",
+        categoryId: "cat-1",
+        creditCardId: "card-1",
+        date: new Date(2026, 9, 28).toISOString(),
+        description: "Streaming",
+        id,
+        isProjected: true,
+        occurrenceCount: 12,
+        occurrenceNumber: 2,
+        owner: "USER",
+        ownerId: "user-id",
+        type: "EXPENSE",
+        value,
+      }),
+    );
+  }
+
+  it("SHOULD say the line includes projected purchases AND show the sum", () => {
+    const props = {
+      expanded: false,
+      invoice: makeInvoice().withProjected([projected("p-1", "10.00")]),
+      onOpen: jest.fn(),
+      onPurchasePress: jest.fn(),
+      onToggle: jest.fn(),
+    };
+
+    render(<CardInvoiceRow {...props} />);
+
+    expect(
+      screen.getByTestId(transactionsTestIds.cardInvoiceIncludesProjected),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(transactionsTestIds.cardInvoiceAmount),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD list the projected purchases WHEN expanded, open one through onProjectedPress AND still open the invoice", () => {
+    const onProjectedPress = jest.fn();
+    const onOpen = jest.fn();
+    const item = projected("p-1", "10.00");
+
+    render(
+      <CardInvoiceRow
+        expanded
+        invoice={makeInvoice().withProjected([item])}
+        onOpen={onOpen}
+        onProjectedPress={onProjectedPress}
+        onPurchasePress={jest.fn()}
+        onToggle={jest.fn()}
+      />,
+    );
+
+    fireEvent.press(
+      screen.getByTestId(transactionsTestIds.cardInvoiceProjectedPurchase),
+    );
+    fireEvent.press(screen.getByTestId(transactionsTestIds.cardInvoiceOpen));
+
+    expect(screen.getByText("Streaming 2/12")).toBeOnTheScreen();
+    expect(onProjectedPress).toHaveBeenCalledWith(item);
+    expect(onOpen).toHaveBeenCalled();
+  });
+
+  it("SHOULD not offer to open an invoice that only exists as a projection", () => {
+    const only = new CardInvoiceUIModel(
+      makeInvoiceDTO({ amount: 0, net: 0, total: 0 }, 0),
+      [projected("p-1", "10.00")],
+    );
+
+    render(
+      <CardInvoiceRow
+        expanded
+        invoice={only}
+        onOpen={jest.fn()}
+        onPurchasePress={jest.fn()}
+        onToggle={jest.fn()}
+      />,
+    );
+
+    expect(
+      screen.queryByTestId(transactionsTestIds.cardInvoiceOpen),
+    ).toBeNull();
+  });
+
+  it("SHOULD not press a projected purchase WHEN there is no handler", () => {
+    render(
+      <CardInvoiceRow
+        expanded
+        invoice={makeInvoice().withProjected([projected("p-1", "10.00")])}
+        onOpen={jest.fn()}
+        onPurchasePress={jest.fn()}
+        onToggle={jest.fn()}
+      />,
+    );
+
+    expect(() =>
+      fireEvent.press(
+        screen.getByTestId(transactionsTestIds.cardInvoiceProjectedPurchase),
+      ),
+    ).not.toThrow();
+  });
 });

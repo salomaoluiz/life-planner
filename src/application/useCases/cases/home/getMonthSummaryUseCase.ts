@@ -32,6 +32,11 @@ function getMonthSummaryUseCase(
           }),
         ]);
 
+        // Only the months after the current one have projected occurrences (spec 034 FR 15).
+        const { projectedExpense, projectedIncome } = await projectedTotals(
+          repositories,
+          params,
+        );
         let income = 0;
         let expense = 0;
         let toPay = 0;
@@ -73,6 +78,8 @@ function getMonthSummaryUseCase(
           balance: income - expense,
           expense,
           income,
+          projectedExpense,
+          projectedIncome,
           toPay,
           toReceive,
         });
@@ -97,6 +104,70 @@ function isInMonth(isoDate: string, month: Date): boolean {
     date.getFullYear() === month.getFullYear() &&
     date.getMonth() === month.getMonth()
   );
+}
+
+function laterMonth(a: string, b: string) {
+  return a > b ? a : b;
+}
+
+// The expense and income that series will add to the month: account occurrences dated in it and card
+// occurrences whose invoice appears in it (the cash view of spec 029 FR 25).
+async function projectedTotals(
+  repositories: Repositories,
+  params: GetMonthSummaryUseCaseParams,
+) {
+  const monthKey = toMonthKey(params.month);
+  const currentKey = toMonthKey(new Date());
+  let projectedExpense = 0;
+  let projectedIncome = 0;
+
+  if (monthKey <= currentKey || params.ownerIds.length === 0) {
+    return { projectedExpense, projectedIncome };
+  }
+
+  // A card purchase appears on the invoice up to two months later.
+  const from = laterMonth(
+    shiftMonthKey(monthKey, -2),
+    shiftMonthKey(currentKey, 1),
+  );
+  const items =
+    await repositories.financialRepository.recurrence.getProjections({
+      from,
+      ownerIds: params.ownerIds,
+      to: monthKey,
+    });
+
+  items
+    .filter((item) => params.ownerIds.includes(item.ownerId))
+    .forEach((item) => {
+      const cents = decimalStringToCents(item.value);
+
+      if (item.creditCardId) {
+        if (item.invoiceListDate?.slice(0, 7) === monthKey) {
+          projectedExpense += cents;
+        }
+
+        return;
+      }
+      if (!isInMonth(item.date, params.month)) {
+        return;
+      }
+      if (item.type === TransactionType.INCOME) {
+        projectedIncome += cents;
+      } else {
+        projectedExpense += cents;
+      }
+    });
+
+  return { projectedExpense, projectedIncome };
+}
+
+// "2026-10" + 3 -> "2027-01".
+function shiftMonthKey(month: string, delta: number) {
+  const [year, value] = month.split("-").map(Number);
+  const index = year * 12 + (value - 1) + delta;
+
+  return `${Math.floor(index / 12)}-${String((index % 12) + 1).padStart(2, "0")}`;
 }
 
 // `YYYY-MM` of the local month.

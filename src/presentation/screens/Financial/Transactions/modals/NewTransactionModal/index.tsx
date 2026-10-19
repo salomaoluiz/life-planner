@@ -8,6 +8,7 @@ import {
   ConfirmDialog,
   DateField,
   ErrorState,
+  RadioGroup,
   SegmentedControl,
   SelectField,
   Switch,
@@ -21,10 +22,12 @@ import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { formatDayMonth } from "@screens/Financial/Cards/models/cardList";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
+import { RECURRENCE_FREQUENCIES } from "@screens/Financial/models/recurrence";
 
 import CategoryChips from "./components/CategoryChips";
 import CategoryPickerSheet from "./components/CategoryPickerSheet";
 import MissingRecordHint from "./components/MissingRecordHint";
+import RecurrenceDeleteSheet from "./components/RecurrenceDeleteSheet";
 import { useNewTransactionViewModel } from "./hooks";
 import useStyles from "./styles";
 import transactionFormTestIds from "./testIds";
@@ -73,6 +76,34 @@ function NewTransactionModal() {
     })}`;
   }
 
+  function lockedCaption(key?: TranslationKeys) {
+    return key ? <Text.Caption tone={"secondary"} value={t(key)} /> : null;
+  }
+
+  function renderRepeatPreview(
+    preview: NonNullable<typeof vm.recurrence.preview>,
+  ) {
+    if (preview.kind === "forever") {
+      return t("financial.transactions.form.repeatForever", {
+        frequency: t(
+          `financial.recurrence.frequencyEvery.${preview.frequency}`,
+        ),
+      });
+    }
+    if (preview.kind === "times") {
+      return t("financial.transactions.form.repeatPreview", {
+        date: new Intl.DateTimeFormat(localeTag, {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        }).format(preview.last),
+        n: preview.count,
+      });
+    }
+
+    return "";
+  }
+
   function err(key?: TranslationKeys) {
     return key ? t(key) : undefined;
   }
@@ -100,9 +131,29 @@ function NewTransactionModal() {
 
     return (
       <View style={styles.form}>
+        {vm.recurrence.isRecurring ? (
+          <RadioGroup
+            accessibilityLabel={t("financial.recurrence.editScope")}
+            onChange={vm.onScopeChange}
+            options={[
+              {
+                label: t("financial.recurrence.scope.onlyThis"),
+                value: "ONLY_THIS",
+              },
+              {
+                label: t("financial.recurrence.scope.thisAndNext"),
+                value: "THIS_AND_NEXT",
+              },
+              { label: t("financial.recurrence.scope.all"), value: "ALL" },
+            ]}
+            testID={transactionFormTestIds.recurrenceEditScope}
+            value={vm.recurrence.scope}
+          />
+        ) : null}
         {vm.hasCards ? (
           <SegmentedControl
             accessibilityLabel={t("financial.transactions.form.payWith")}
+            disabled={vm.recurrence.isRecurring}
             onChange={vm.onPayWithChange}
             options={[
               {
@@ -121,6 +172,7 @@ function NewTransactionModal() {
         {isCard ? null : (
           <SegmentedControl
             accessibilityLabel={t("financial.categories.type")}
+            disabled={vm.recurrence.isRecurring}
             onChange={(value) => vm.onTypeChange(value as typeof vm.type)}
             options={vm.typeOptions.map((option) => ({
               label: t(option.labelKey),
@@ -181,6 +233,7 @@ function NewTransactionModal() {
             ) : (
               <SelectField
                 closeLabel={t("common.actions.close")}
+                disabled={vm.scopeLocks?.account}
                 error={err(vm.cardError)}
                 label={t("financial.transactions.form.card")}
                 onChange={vm.onCardChange}
@@ -275,11 +328,70 @@ function NewTransactionModal() {
             ) : null}
           </View>
         ) : null}
+        {vm.recurrence.isRepeatToggleVisible ? (
+          <SwitchRow
+            label={t("financial.transactions.form.repeat")}
+            onToggle={vm.onRepeatToggle}
+            testID={transactionFormTestIds.repeat}
+            value={vm.repeatOn}
+          />
+        ) : null}
+        {vm.repeatOn ? (
+          <View style={styles.form}>
+            <ChipGroup
+              disabled={vm.recurrence.isFrequencyLocked}
+              label={t("financial.transactions.form.repeatFrequency")}
+              layout={"wrap"}
+              mode={"single"}
+              onChange={vm.onRepeatFrequencyChange}
+              options={RECURRENCE_FREQUENCIES.map((frequency) => ({
+                label: t(`financial.recurrence.frequency.${frequency}`),
+                value: frequency,
+              }))}
+              testID={transactionFormTestIds.repeatFrequency}
+              value={vm.repeatFrequency}
+            />
+            {vm.recurrence.frequencyHelperKey ? (
+              <Text.Caption
+                tone={"secondary"}
+                value={t(vm.recurrence.frequencyHelperKey)}
+              />
+            ) : null}
+            <DateField
+              clearable
+              clearLabel={t("financial.transactions.form.repeatEndClear")}
+              disabled={vm.recurrence.isEndLocked}
+              error={err(vm.recurrence.endError)}
+              label={t("financial.transactions.form.repeatEnd")}
+              onChange={vm.onRepeatEndChange}
+              placeholder={t("financial.recurrence.noEnd")}
+              testID={transactionFormTestIds.repeatEnd}
+              todayLabel={t("common.date.today")}
+              value={vm.repeatEnd}
+              yesterdayLabel={t("common.date.yesterday")}
+            />
+            {vm.recurrence.endHelperKey ? (
+              <Text.Caption
+                tone={"secondary"}
+                value={t(vm.recurrence.endHelperKey)}
+              />
+            ) : null}
+            {vm.recurrence.preview ? (
+              <Text.Caption
+                testID={transactionFormTestIds.repeatPreview}
+                tone={"secondary"}
+                value={renderRepeatPreview(vm.recurrence.preview)}
+              />
+            ) : null}
+          </View>
+        ) : null}
         {vm.isEditing && vm.showPaid ? (
           <>
             {isCard ? null : <View style={styles.row}>{accountField}</View>}
+            {lockedCaption(vm.scopeLocks?.accountHelperKey)}
             {paidRow}
             <View style={styles.row}>{dateField}</View>
+            {lockedCaption(vm.scopeLocks?.dateHelperKey)}
             <Text.Caption tone={"secondary"} value={t(vm.paidHelpKey)} />
           </>
         ) : (
@@ -291,12 +403,20 @@ function NewTransactionModal() {
             {vm.showPaid ? (
               <>
                 {paidRow}
-                <Text.Caption tone={"secondary"} value={t(vm.paidHelpKey)} />
+                <Text.Caption
+                  tone={"secondary"}
+                  value={t(
+                    vm.repeatOn
+                      ? "financial.transactions.form.paidFirstOnly"
+                      : vm.paidHelpKey,
+                  )}
+                />
               </>
             ) : null}
           </>
         )}
         <ChipGroup
+          disabled={vm.recurrence.isRecurring}
           label={t("financial.common.belongsTo")}
           layout={"wrap"}
           mode={"single"}
@@ -344,6 +464,7 @@ function NewTransactionModal() {
       ) : (
         <SelectField
           closeLabel={t("common.actions.close")}
+          disabled={vm.scopeLocks?.account}
           error={err(vm.accountError)}
           label={t("financial.transactions.form.account")}
           onChange={vm.onAccountChange}
@@ -364,6 +485,7 @@ function NewTransactionModal() {
   const dateField = (
     <View style={styles.field}>
       <DateField
+        disabled={vm.scopeLocks?.date}
         error={err(vm.dateError)}
         label={t(vm.dateLabelKey)}
         onChange={(date) => date && vm.onDateChange(date)}
@@ -374,15 +496,16 @@ function NewTransactionModal() {
       />
     </View>
   );
-  const paidRow = vm.showPaid ? (
-    <SwitchRow
-      hint={vm.paidHintKey ? t(vm.paidHintKey) : undefined}
-      label={t(vm.paidLabelKey)}
-      onToggle={vm.onPaidChange}
-      testID={transactionFormTestIds.paid}
-      value={vm.paid}
-    />
-  ) : null;
+  const paidRow =
+    vm.showPaid && !vm.scopeLocks?.paid ? (
+      <SwitchRow
+        hint={vm.paidHintKey ? t(vm.paidHintKey) : undefined}
+        label={t(vm.paidLabelKey)}
+        onToggle={vm.onPaidChange}
+        testID={transactionFormTestIds.paid}
+        value={vm.paid}
+      />
+    ) : null;
 
   return (
     <>
@@ -430,6 +553,20 @@ function NewTransactionModal() {
         title={t("common.form.discardTitle")}
         visible={vm.isDiscardDialogOpen}
       />
+      <RecurrenceDeleteSheet
+        isAllConfirmOpen={vm.recurrence.isAllDeleteOpen}
+        isDeleting={vm.isDeleting}
+        onAllCancel={vm.onRecurrenceDeleteCancel}
+        onAllConfirm={vm.onRecurrenceDeleteConfirm}
+        onClose={vm.onDeleteCancel}
+        onDelete={vm.onRecurrenceDeletePress}
+        onPaidCancel={vm.onRecurrenceDeleteCancel}
+        onPaidConfirm={vm.onRecurrenceDeletePaidConfirm}
+        onScopeChange={vm.onRecurrenceDeleteScopeChange}
+        paidConflict={vm.paidConflict}
+        scope={vm.recurrence.deleteScope}
+        visible={vm.recurrence.isRecurring && vm.isDeleteDialogOpen}
+      />
       <ConfirmDialog
         cancelLabel={t("common.actions.cancel")}
         closeLabel={t("common.actions.close")}
@@ -440,7 +577,7 @@ function NewTransactionModal() {
         onConfirm={vm.onDeleteConfirm}
         testID={transactionFormTestIds.deleteDialog}
         title={t("financial.transactions.deleteTitle")}
-        visible={vm.isDeleteDialogOpen}
+        visible={!vm.recurrence.isRecurring && vm.isDeleteDialogOpen}
       />
     </>
   );

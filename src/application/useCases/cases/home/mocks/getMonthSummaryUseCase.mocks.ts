@@ -45,6 +45,9 @@ const transactionRepositorySpy = jest.mocked(
 
 beforeEach(() => {
   jest.clearAllMocks();
+  // October 2026 is the current month: it has no projected occurrences (spec 034 FR 15).
+  jest.useFakeTimers().setSystemTime(new Date(2026, 9, 20, 12));
+  recurrenceRepositorySpy.getProjections.mockResolvedValue([]);
   transactionRepositorySpy.getTransactions.mockResolvedValue([]);
   creditCardRepositorySpy.getCardInvoicesForMonth.mockResolvedValue([]);
 });
@@ -67,8 +70,17 @@ const creditCardRepositorySpy = jest.mocked(
   repositoriesMocks.financialRepository.creditCard,
 );
 
+const recurrenceRepositorySpy = jest.mocked(
+  repositoriesMocks.financialRepository.recurrence,
+);
+
+afterEach(() => {
+  jest.useRealTimers();
+});
+
 const spies = {
   creditCardRepository: creditCardRepositorySpy,
+  recurrenceRepository: recurrenceRepositorySpy,
   transactionRepository: transactionRepositorySpy,
 };
 

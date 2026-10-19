@@ -64,6 +64,16 @@ const repositoriesMocks: Repositories = {
       undoPrepayment: jest.fn(),
       updateInstallmentPlan: jest.fn(),
     },
+    recurrence: {
+      createRecurrence: jest.fn(),
+      deleteOccurrence: jest.fn(),
+      deleteRecurrence: jest.fn(),
+      getProjections: jest.fn(),
+      getRecurrences: jest.fn(),
+      materializeOccurrence: jest.fn(),
+      splitRecurrence: jest.fn(),
+      updateRecurrence: jest.fn(),
+    },
     transaction: {
       createTransaction: jest.fn(),
       deleteTransaction: jest.fn(),

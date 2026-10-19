@@ -1,5 +1,7 @@
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
+import type { RecurrenceFrequency } from "./RecurrenceEntity";
+
 export enum TransactionType {
   EXPENSE = "EXPENSE",
   INCOME = "INCOME",
@@ -30,10 +32,15 @@ interface ITransactionEntity {
   installmentNumber?: number;
   installmentPlanId?: string;
   invoiceMonth?: string;
+  // Position in a recurring series, its total (absent without an end date), series id and frequency (spec 034).
+  occurrenceCount?: number;
+  occurrenceNumber?: number;
   owner: OwnerType;
   ownerId: string;
   // Account rows: stored status. Card rows: whether the invoice is paid (spec 033).
   paid?: boolean;
+  recurrenceFrequency?: RecurrenceFrequency;
+  recurrenceId?: string;
   systemKey?: string;
   type: TransactionType;
   value: string;
@@ -53,9 +60,13 @@ class TransactionEntity {
   installmentNumber?: number;
   installmentPlanId?: string;
   invoiceMonth?: string;
+  occurrenceCount?: number;
+  occurrenceNumber?: number;
   owner: OwnerType;
   ownerId: string;
   paid: boolean;
+  recurrenceFrequency?: RecurrenceFrequency;
+  recurrenceId?: string;
   systemKey?: string;
   type: TransactionType;
   value: string;
@@ -71,11 +82,15 @@ class TransactionEntity {
     this.invoiceMonth = params.invoiceMonth;
     this.date = params.date;
     this.id = params.id;
+    this.occurrenceCount = params.occurrenceCount;
+    this.occurrenceNumber = params.occurrenceNumber;
     this.owner = params.owner;
     this.description = params.description;
     this.earlyPayment = params.earlyPayment;
     this.ownerId = params.ownerId;
     this.paid = params.paid ?? true;
+    this.recurrenceFrequency = params.recurrenceFrequency;
+    this.recurrenceId = params.recurrenceId;
     this.excludeFromTotals = params.excludeFromTotals ?? false;
     this.systemKey = params.systemKey;
     this.type = params.type;

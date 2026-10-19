@@ -6,6 +6,8 @@ import CreditCardOverviewDTO from "@application/dto/financial/CreditCardOverview
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
+import { RecurrenceHasPaidOccurrences } from "@domain/entities/errors";
+import { RecurrenceScope } from "@domain/entities/financial/RecurrenceEntity";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
 import { normalizeCategoryColor } from "@presentation/constants/categoryColors";
@@ -21,15 +23,27 @@ import {
   invoiceMonthOf,
 } from "@screens/Financial/models/invoiceMonth";
 import { personalOwnerId } from "@screens/Financial/models/ownerOptions";
+import {
+  RECURRENCE_FREQUENCIES,
+  recurrenceLastDate,
+  recurrenceOccurrenceCount,
+} from "@screens/Financial/models/recurrence";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
 import { decimalStringToCents } from "@utils/money";
 
 import NewTransactionUIModel from "../models/NewTransactionUIModel";
 import {
+  buildRecurringSave,
+  lockedHelperKey,
+  recurrenceLocks,
+} from "../models/recurrenceEdit";
+import {
   changeDate,
+  changeInstallmentsOn,
   changeOwner,
   changePaid,
   changePayWith,
+  changeRepeatOn,
   changeType,
   chipCategories,
   createInitialState,
@@ -39,6 +53,7 @@ import {
   stateFromDto,
   toCreateInstallmentParams,
   toCreateParams,
+  toCreateRecurrenceParams,
   toUpdateParams,
   TransactionFormState,
   validate,
@@ -129,9 +144,42 @@ function installmentsOf(
   };
 }
 
+// "12 times, last on 05/09/2027" (with an end date) or "Repeats every month" (without), spec 034 FR 17.
+function repeatPreviewOf(state: TransactionFormState | undefined) {
+  if (!state || !state.repeatOn) {
+    return undefined;
+  }
+  if (!state.repeatEnd) {
+    return { frequency: state.repeatFrequency, kind: "forever" as const };
+  }
+
+  const count = recurrenceOccurrenceCount(
+    state.date,
+    state.repeatEnd,
+    state.repeatFrequency,
+  );
+  const last = recurrenceLastDate(
+    state.date,
+    state.repeatEnd,
+    state.repeatFrequency,
+  );
+
+  return last
+    ? { count, kind: "times" as const, last }
+    : { kind: "none" as const };
+}
+
 function useNewTransactionViewModel() {
-  const params = useLocalSearchParams<{ creditCardId?: string; id?: string }>();
-  const isEditing = !!params.id;
+  const params = useLocalSearchParams<{
+    creditCardId?: string;
+    id?: string;
+    // A PROJECTED occurrence of a series is opened by series + number + its month (spec 034 FR 16).
+    month?: string;
+    occurrenceNumber?: string;
+    recurrenceId?: string;
+  }>();
+  const isProjected = !!params.recurrenceId && !params.id;
+  const isEditing = !!params.id || isProjected;
   const isFocused = useIsFocused();
 
   const owners = useQuery({
@@ -181,6 +229,20 @@ function useNewTransactionViewModel() {
       }),
   });
 
+  const projections = useQuery({
+    cacheKey: [
+      useCases.getFinancialProjectionsUseCase.uniqueName,
+      params.month ?? "",
+    ],
+    enabled: isProjected && !!params.month && !!owners.data,
+    fetch: async () =>
+      useCases.getFinancialProjectionsUseCase.execute({
+        from: params.month!,
+        ownerIds: owners.data!.map((owner) => owner.id),
+        to: params.month!,
+      }),
+  });
+
   const uiModel = useMemo(
     () =>
       owners.data && accounts.data && categories.data
@@ -194,8 +256,34 @@ function useNewTransactionViewModel() {
     [owners.data, accounts.data, cards.data, categories.data],
   );
 
-  const existing = transactions.data?.find((item) => item.id === params.id);
-  const isNotFound = isEditing && !!transactions.data && !existing;
+  const projectedExisting = projections.data
+    ?.find(
+      (item) =>
+        item.recurrenceId === params.recurrenceId &&
+        item.occurrenceNumber === Number(params.occurrenceNumber),
+    )
+    ?.toTransactionDTO();
+  const existing = isProjected
+    ? projectedExisting
+    : transactions.data?.find((item) => item.id === params.id);
+  const isRecurring = isEditing && !!existing?.recurrenceId;
+  // The series (end date, frequency) of the occurrence being edited.
+  const seriesList = useQuery({
+    cacheKey: [useCases.getFinancialRecurrencesUseCase.uniqueName],
+    enabled: isRecurring && !!owners.data,
+    fetch: async () =>
+      useCases.getFinancialRecurrencesUseCase.execute({
+        ownerIds: owners.data!.map((owner) => owner.id),
+      }),
+  });
+  const series = seriesList.data?.find(
+    (item) => item.id === existing?.recurrenceId,
+  );
+  const isSeriesMissing = isRecurring && !!seriesList.data && !series;
+  const isNotFound =
+    (isProjected
+      ? !!projections.data && !projectedExisting
+      : isEditing && !!transactions.data && !existing) || isSeriesMissing;
   // An installment is edited through its own sheet (spec 030): hand over instead of opening this form.
   const isInstallment = isEditing && !!existing?.installmentPlanId;
   // The account debit row of an early payment is edited on the card (spec 032 FR 35): hand over as well.
@@ -235,7 +323,11 @@ function useNewTransactionViewModel() {
       return undefined;
     }
     if (isEditing) {
-      return existing ? stateFromDto(existing) : undefined;
+      if (!existing || (existing.recurrenceId && !series)) {
+        return undefined;
+      }
+
+      return stateFromDto(existing, series);
     }
 
     return createInitialState({
@@ -250,10 +342,16 @@ function useNewTransactionViewModel() {
     accounts.data,
     isEditing,
     existing,
+    series,
     params.creditCardId,
   ]);
 
   const [edited, setEdited] = useState<TransactionFormState>();
+  // Which occurrences an edit of a recurring row reaches (spec 034 FR 19); changing it starts from the stored values.
+  const [scope, setScope] = useState<RecurrenceScope>("ONLY_THIS");
+  const [deleteScope, setDeleteScope] = useState<RecurrenceScope>("ONLY_THIS");
+  const [isAllDeleteOpen, setAllDeleteOpen] = useState(false);
+  const [isPaidDeleteDismissed, setPaidDeleteDismissed] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [isDiscardDialogOpen, setDiscardDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -295,22 +393,48 @@ function useNewTransactionViewModel() {
     cacheKey: [useCases.deleteFinancialTransactionUseCase.uniqueName],
     fetch: useCases.deleteFinancialTransactionUseCase.execute,
   });
+  const createRecurrenceMutation = useMutation({
+    cacheKey: [useCases.createFinancialRecurrenceUseCase.uniqueName],
+    fetch: useCases.createFinancialRecurrenceUseCase.execute,
+  });
+  const updateRecurrenceMutation = useMutation({
+    cacheKey: [useCases.updateFinancialRecurrenceUseCase.uniqueName],
+    fetch: useCases.updateFinancialRecurrenceUseCase.execute,
+  });
+  const splitRecurrenceMutation = useMutation({
+    cacheKey: [useCases.splitFinancialRecurrenceUseCase.uniqueName],
+    fetch: useCases.splitFinancialRecurrenceUseCase.execute,
+  });
+  const materializeMutation = useMutation({
+    cacheKey: [useCases.materializeFinancialOccurrenceUseCase.uniqueName],
+    fetch: useCases.materializeFinancialOccurrenceUseCase.execute,
+  });
+  const deleteOccurrenceMutation = useMutation({
+    cacheKey: [useCases.deleteFinancialOccurrenceUseCase.uniqueName],
+    fetch: useCases.deleteFinancialOccurrenceUseCase.execute,
+  });
+  const deleteRecurrenceMutation = useMutation({
+    cacheKey: [useCases.deleteFinancialRecurrenceUseCase.uniqueName],
+    fetch: useCases.deleteFinancialRecurrenceUseCase.execute,
+  });
+  const mutations = [
+    createMutation,
+    createPlanMutation,
+    updateMutation,
+    deleteMutation,
+    createRecurrenceMutation,
+    updateRecurrenceMutation,
+    splitRecurrenceMutation,
+    materializeMutation,
+    deleteOccurrenceMutation,
+    deleteRecurrenceMutation,
+  ];
 
   useEffect(() => {
-    if (
-      createMutation.status === "success" ||
-      createPlanMutation.status === "success" ||
-      updateMutation.status === "success" ||
-      deleteMutation.status === "success"
-    ) {
+    if (mutations.some((mutation) => mutation.status === "success")) {
       router.back();
     }
-  }, [
-    createMutation.status,
-    createPlanMutation.status,
-    updateMutation.status,
-    deleteMutation.status,
-  ]);
+  }, [mutations.map((mutation) => mutation.status).join(",")]);
 
   // Records created in the stacked create sheet appear on return: refetch on focus.
   useEffect(() => {
@@ -345,12 +469,17 @@ function useNewTransactionViewModel() {
 
   const errors = submitted && state ? validate(state) : {};
   const cardHints = cardHintsOf(state, uiModel, overview.data, existing);
-  const formErrorKey = getFinancialErrorMessageKey(
-    createMutation.error ??
-      createPlanMutation.error ??
-      updateMutation.error ??
-      deleteMutation.error,
-  );
+  const mutationError = mutations.find((mutation) => mutation.error)?.error;
+  // Deleting paid occurrences needs a second, explicit confirmation (spec 034 FR 31).
+  const paidConflict =
+    (deleteRecurrenceMutation.error ??
+      deleteOccurrenceMutation.error) instanceof RecurrenceHasPaidOccurrences
+      ? (deleteRecurrenceMutation.error ?? deleteOccurrenceMutation.error)
+      : undefined;
+  const formErrorKey = paidConflict
+    ? undefined
+    : getFinancialErrorMessageKey(mutationError);
+  const locks = recurrenceLocks(scope);
 
   function update(next: TransactionFormState) {
     setEdited(next);
@@ -369,15 +498,95 @@ function useNewTransactionViewModel() {
     const owner = uiModel.owner(state.ownerId);
     const categoryName = uiModel.categoryName(state.categoryId);
 
-    if (isEditing) {
+    if (isRecurring && initial && existing) {
+      saveRecurring(state, initial, existing);
+    } else if (isEditing) {
       updateMutation.mutate(
         toUpdateParams(params.id!, state, owner, categoryName),
       );
     } else if (state.payWith === "CARD" && state.installmentsOn) {
       createPlanMutation.mutate(toCreateInstallmentParams(state, owner));
+    } else if (state.repeatOn) {
+      createRecurrenceMutation.mutate(toCreateRecurrenceParams(state, owner));
     } else {
       createMutation.mutate(toCreateParams(state, owner, categoryName));
     }
+  }
+
+  // Spec 034 FR 19-23: the scope decides which endpoint takes the change.
+  function saveRecurring(
+    current: TransactionFormState,
+    stored: TransactionFormState,
+    row: TransactionDTO,
+  ) {
+    const request = buildRecurringSave(scope, current, stored, {
+      isCard: !!row.creditCardId,
+      isProjected,
+      occurrenceNumber: row.occurrenceNumber!,
+      recurrenceId: row.recurrenceId!,
+      transactionId: isProjected ? undefined : row.id,
+    });
+
+    switch (request.kind) {
+      case "materialize":
+        materializeMutation.mutate(request.params);
+        break;
+      case "none":
+        router.back();
+        break;
+      case "split":
+        splitRecurrenceMutation.mutate(request.params);
+        break;
+      case "update-series":
+        updateRecurrenceMutation.mutate(request.params);
+        break;
+      case "update-transaction":
+        updateMutation.mutate(request.params);
+        break;
+    }
+  }
+
+  function onScopeChange(value: string) {
+    setScope(value as RecurrenceScope);
+    setEdited(undefined);
+  }
+
+  // Delete of a recurring occurrence: "All" asks first; paid occurrences ask again (FR 31).
+  function onRecurrenceDelete(confirmPaid = false) {
+    if (!existing?.recurrenceId) {
+      return;
+    }
+
+    setPaidDeleteDismissed(false);
+    setAllDeleteOpen(false);
+    setDeleteDialogOpen(false);
+
+    if (deleteScope === "ALL") {
+      deleteRecurrenceMutation.mutate({
+        confirmPaid,
+        id: existing.recurrenceId,
+      });
+
+      return;
+    }
+
+    deleteOccurrenceMutation.mutate({
+      confirmPaid,
+      occurrenceNumber: existing.occurrenceNumber!,
+      recurrenceId: existing.recurrenceId,
+      scope: deleteScope,
+    });
+  }
+
+  function onRecurrenceDeletePress() {
+    if (deleteScope === "ALL") {
+      setDeleteDialogOpen(false);
+      setAllDeleteOpen(true);
+
+      return;
+    }
+
+    onRecurrenceDelete();
   }
 
   function onClose() {
@@ -472,7 +681,10 @@ function useNewTransactionViewModel() {
     invoiceMonthLabelDate: cardHints.monthDate,
     isCategoryPickerOpen,
     isDeleteDialogOpen,
-    isDeleting: deleteMutation.isFetching,
+    isDeleting:
+      deleteMutation.isFetching ||
+      deleteOccurrenceMutation.isFetching ||
+      deleteRecurrenceMutation.isFetching,
     isDiscardDialogOpen,
     isEditing,
     isInvoicePaid: cardHints.isInvoicePaid,
@@ -482,7 +694,11 @@ function useNewTransactionViewModel() {
     isSaving:
       createMutation.isFetching ||
       createPlanMutation.isFetching ||
-      updateMutation.isFetching,
+      updateMutation.isFetching ||
+      createRecurrenceMutation.isFetching ||
+      updateRecurrenceMutation.isFetching ||
+      splitRecurrenceMutation.isFetching ||
+      materializeMutation.isFetching,
     onAccountChange: (id: string) => {
       if (state) {
         update({ ...state, accountId: id });
@@ -538,7 +754,7 @@ function useNewTransactionViewModel() {
     },
     onInstallmentsToggle: (on: boolean) => {
       if (state) {
-        update({ ...state, installmentsOn: on });
+        update(changeInstallmentsOn(state, on));
       }
     },
     onOwnerChange: (id: string) => {
@@ -571,6 +787,15 @@ function useNewTransactionViewModel() {
         );
       }
     },
+    onRecurrenceDeleteCancel: () => {
+      setAllDeleteOpen(false);
+      setPaidDeleteDismissed(true);
+    },
+    onRecurrenceDeleteConfirm: () => onRecurrenceDelete(),
+    onRecurrenceDeletePaidConfirm: () => onRecurrenceDelete(true),
+    onRecurrenceDeletePress,
+    onRecurrenceDeleteScopeChange: (value: string) =>
+      setDeleteScope(value as RecurrenceScope),
     onRefundPress: () => {
       if (existing?.creditCardId) {
         router.replace({
@@ -582,7 +807,25 @@ function useNewTransactionViewModel() {
         } as never);
       }
     },
+    onRepeatEndChange: (date?: Date) => {
+      if (state) {
+        update({ ...state, repeatEnd: date ? normalizeDate(date) : undefined });
+      }
+    },
+    onRepeatFrequencyChange: (value: string) => {
+      const frequency = RECURRENCE_FREQUENCIES.find((item) => item === value);
+
+      if (state && frequency) {
+        update({ ...state, repeatFrequency: frequency });
+      }
+    },
+    onRepeatToggle: (on: boolean) => {
+      if (state) {
+        update(changeRepeatOn(state, on));
+      }
+    },
     onSave,
+    onScopeChange,
     onTypeChange: (next: TransactionType) => {
       if (state) {
         update(changeType(state, next, categories.data ?? []));
@@ -592,6 +835,10 @@ function useNewTransactionViewModel() {
     ownerChoices: uiModel?.ownerChoices ?? [],
     ownerId,
     paid: state?.paid ?? true,
+    paidConflict:
+      paidConflict && !isPaidDeleteDismissed
+        ? (paidConflict as RecurrenceHasPaidOccurrences)
+        : undefined,
     // Create + future date + off: tell why the switch starts off. Edit: the date is the payment day once paid.
     paidHelpKey: (isEditing
       ? "financial.transactions.form.paidHelpEdit"
@@ -607,7 +854,37 @@ function useNewTransactionViewModel() {
       ? "financial.transactions.form.paid"
       : "financial.transactions.form.received") as TranslationKeys,
     payWith: state?.payWith ?? "ACCOUNT",
+    recurrence: {
+      // Create: the "Repeat" switch. Edit: the series of the occurrence, with the scope selector (FR 17, 19).
+      deleteScope,
+      endError: errors.repeatEnd,
+      endHelperKey: isRecurring
+        ? lockedHelperKey(locks.endDate, "endDate")
+        : undefined,
+      frequencyHelperKey: isRecurring
+        ? lockedHelperKey(locks.frequency, "frequency")
+        : undefined,
+      isAllDeleteOpen,
+      isEndLocked: isRecurring && locks.endDate,
+      isFrequencyLocked: isRecurring && locks.frequency,
+      isRecurring,
+      isRepeatToggleVisible: !isEditing,
+      preview: repeatPreviewOf(state),
+      scope,
+    },
+    repeatEnd: state?.repeatEnd,
+    repeatFrequency: state?.repeatFrequency ?? "MONTHLY",
+    repeatOn: state?.repeatOn ?? false,
     saveLabelKey,
+    scopeLocks: isRecurring
+      ? {
+          account: locks.account,
+          accountHelperKey: lockedHelperKey(locks.account, "account"),
+          date: locks.date,
+          dateHelperKey: lockedHelperKey(locks.date, "date"),
+          paid: locks.paid,
+        }
+      : undefined,
     selectedAccountId: state?.accountId,
     selectedCardId: state?.creditCardId,
     selectedCategoryId: state?.categoryId,

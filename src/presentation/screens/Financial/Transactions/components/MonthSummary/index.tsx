@@ -17,6 +17,11 @@ interface Props {
   isError: boolean;
   isLoading: boolean;
   onRetry: () => void;
+  // Spec 034 FR 15: what series will add to a future month; the line is hidden when both are zero.
+  projectedExpenseCents?: number;
+  projectedIncomeCents?: number;
+  projectedLabel?: string;
+  projectedTestID?: string;
   retryLabel: string;
   scopeLabel: string;
   scopeTestID?: string;
@@ -41,6 +46,13 @@ function MonthSummary(props: Props) {
     columnRight: { paddingLeft: spacing.md, paddingRight: spacing.lg },
     metrics: { flexDirection: "row" },
     pending: { alignItems: "center", flexDirection: "row", gap: spacing.xs },
+    projected: {
+      alignItems: "center",
+      flexDirection: "row",
+      justifyContent: "space-between",
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
+    },
     top: { gap: spacing.xs, padding: spacing.lg },
   });
 
@@ -116,6 +128,31 @@ function MonthSummary(props: Props) {
           ) : null}
         </View>
       </View>
+      {props.projectedLabel &&
+      (props.projectedExpenseCents || props.projectedIncomeCents) ? (
+        <>
+          <Divider />
+          <View style={styles.projected} testID={props.projectedTestID}>
+            <Text.Caption tone={"secondary"} value={props.projectedLabel} />
+            <View style={styles.pending}>
+              {props.projectedIncomeCents ? (
+                <AmountText
+                  size={"caption"}
+                  tone={"income"}
+                  value={props.projectedIncomeCents}
+                />
+              ) : null}
+              {props.projectedExpenseCents ? (
+                <AmountText
+                  size={"caption"}
+                  tone={"expense"}
+                  value={props.projectedExpenseCents}
+                />
+              ) : null}
+            </View>
+          </View>
+        </>
+      ) : null}
     </Card>
   );
 }

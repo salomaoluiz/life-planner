@@ -103,6 +103,22 @@ function useNewAccountViewModel() {
     });
   }, [owners.data, accounts.data, isEditing, existing, params.ownerId]);
 
+  // The recurring series that end when the account is archived (spec 034 FR 34).
+  const series = useQuery({
+    cacheKey: [
+      useCases.getFinancialRecurrencesUseCase.uniqueName,
+      "account",
+      params.id ?? "",
+    ],
+    enabled: isEditing && !!existing && existing.status !== "ARCHIVED",
+    fetch: async () =>
+      useCases.getFinancialRecurrencesUseCase.execute({
+        accountId: params.id,
+        ownerIds: [existing!.ownerId],
+        status: "ACTIVE",
+      }),
+  });
+
   const [edited, setEdited] = useState<AccountFormState>();
   const [submitted, setSubmitted] = useState(false);
   const [isDiscardDialogOpen, setDiscardDialogOpen] = useState(false);
@@ -191,6 +207,10 @@ function useNewAccountViewModel() {
   return {
     amountCents: state?.amountCents ?? 0,
     amountError: errors.amount,
+    archiveWarningCount:
+      state?.isArchived && !initial?.isArchived
+        ? (series.data?.length ?? 0)
+        : 0,
     balanceHelperKey: (isEditing
       ? "financial.accounts.form.balanceHelper"
       : "financial.accounts.form.initialBalanceHelper") as TranslationKeys,

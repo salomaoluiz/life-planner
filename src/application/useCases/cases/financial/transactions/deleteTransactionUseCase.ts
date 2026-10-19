@@ -1,10 +1,13 @@
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import { DefaultError } from "@domain/entities/errors";
+import { InstallmentScope } from "@domain/entities/financial/InstallmentPlanEntity";
 import Repositories from "@domain/repositories";
 
 export interface DeleteTransactionUseCaseParams {
   id: string;
   ownerId: string;
+  // Required on a recurring occurrence (spec 034 FR 29).
+  scope?: InstallmentScope;
 }
 
 function deleteTransactionUseCase(
@@ -16,6 +19,7 @@ function deleteTransactionUseCase(
         await repositories.financialRepository.transaction.deleteTransaction({
           id: params.id,
           ownerId: params.ownerId,
+          scope: params.scope,
         });
       } catch (error) {
         if (error instanceof DefaultError) {

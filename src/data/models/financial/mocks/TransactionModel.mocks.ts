@@ -24,9 +24,13 @@ const jsonMock = {
   installmentNumber: null,
   installmentPlanId: null,
   invoiceMonth: null,
+  occurrenceCount: null,
+  occurrenceNumber: null,
   owner: "FAMILY",
   ownerId: "9e6cd00a-f854-48c0-be6d-c2e904bfd9b7",
   paid: true,
+  recurrenceFrequency: null,
+  recurrenceId: null,
   type: "EXPENSE",
   value: 10000,
 };

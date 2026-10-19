@@ -36,6 +36,10 @@ jest.mock("@application/useCases", () => ({
       uniqueName: "delete",
     },
     getFinancialAccountsUseCase: { execute: jest.fn(), uniqueName: "accounts" },
+    getFinancialRecurrencesUseCase: {
+      execute: jest.fn(),
+      uniqueName: "recurrences",
+    },
     getOwnersUseCase: { execute: jest.fn(), uniqueName: "owners" },
     updateFinancialAccountUseCase: {
       execute: jest.fn(),
@@ -75,6 +79,7 @@ const mutations: Record<string, UseMutationFixture<unknown, unknown>> = {};
 const spies = {
   adjust: jest.mocked(useCases.adjustFinancialAccountBalanceUseCase.execute),
   back: jest.mocked(router.back),
+  getRecurrences: jest.mocked(useCases.getFinancialRecurrencesUseCase.execute),
   invalidate: jest.mocked(invalidateFetcherData),
   params: jest.mocked(useLocalSearchParams),
   update: jest.mocked(useCases.updateFinancialAccountUseCase.execute),
@@ -85,7 +90,7 @@ const spies = {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  ["owners", "accounts"].forEach((key) => {
+  ["owners", "accounts", "recurrences"].forEach((key) => {
     queries[key] = new UseQueryFixture<unknown>();
   });
   ["create", "update", "delete"].forEach((key) => {

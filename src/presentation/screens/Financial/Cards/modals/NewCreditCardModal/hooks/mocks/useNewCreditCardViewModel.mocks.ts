@@ -4,6 +4,7 @@ import { renderHook } from "@tests";
 
 import CreditCardDTO from "@application/dto/financial/CreditCardDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
+import { useCases } from "@application/useCases";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import {
   invalidateFetcherData,
@@ -35,6 +36,10 @@ jest.mock("@application/useCases", () => ({
       uniqueName: "overview",
     },
     getFinancialCreditCardsUseCase: { execute: jest.fn(), uniqueName: "cards" },
+    getFinancialRecurrencesUseCase: {
+      execute: jest.fn(),
+      uniqueName: "recurrences",
+    },
     getOwnersUseCase: { execute: jest.fn(), uniqueName: "owners" },
     updateFinancialCreditCardUseCase: {
       execute: jest.fn(),
@@ -77,6 +82,7 @@ const mutations: Record<string, UseMutationFixture<unknown, unknown>> = {};
 // region spies
 const spies = {
   back: jest.mocked(router.back),
+  getRecurrences: jest.mocked(useCases.getFinancialRecurrencesUseCase.execute),
   invalidate: jest.mocked(invalidateFetcherData),
   params: jest.mocked(useLocalSearchParams),
   useMutation: jest.mocked(useMutation),
@@ -86,7 +92,7 @@ const spies = {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  ["owners", "cards"].forEach((key) => {
+  ["owners", "cards", "recurrences"].forEach((key) => {
     queries[key] = new UseQueryFixture<unknown>();
   });
   ["create", "update", "delete"].forEach((key) => {

@@ -1,6 +1,7 @@
 import { FieldInvalid } from "@domain/entities/errors";
 
 import { calendarDateToIso } from "./calendarDate";
+import { apiRecurringTransaction } from "./mocks/Recurrence.mocks";
 import { mocks, setup } from "./mocks/TransactionModel.mocks";
 import TransactionModel from "./TransactionModel";
 
@@ -105,4 +106,39 @@ it("SHOULD read the paid status AND default to paid WHEN the API sends none (spe
   expect(withStatus.paid).toBe(false);
   expect(withStatus.toJSON().paid).toBe(false);
   expect(withoutStatus.paid).toBe(true);
+});
+
+it("SHOULD read AND write the recurring series fields (spec 034)", () => {
+  const model = TransactionModel.fromJSON(apiRecurringTransaction);
+
+  expect(model).toMatchObject({
+    occurrenceCount: 12,
+    occurrenceNumber: 1,
+    recurrenceFrequency: "MONTHLY",
+    recurrenceId: "recurrence-1",
+  });
+  expect(model.toJSON()).toMatchObject({
+    occurrenceCount: 12,
+    occurrenceNumber: 1,
+    recurrenceFrequency: "MONTHLY",
+    recurrenceId: "recurrence-1",
+  });
+});
+
+it("SHOULD leave the series fields empty outside a recurring series", () => {
+  const model = TransactionModel.fromJSON({
+    ...apiRecurringTransaction,
+    occurrenceCount: null,
+    occurrenceNumber: null,
+    recurrenceFrequency: null,
+    recurrenceId: null,
+  });
+
+  expect(model.recurrenceId).toBeUndefined();
+  expect(model.toJSON()).toMatchObject({
+    occurrenceCount: null,
+    occurrenceNumber: null,
+    recurrenceFrequency: null,
+    recurrenceId: null,
+  });
 });

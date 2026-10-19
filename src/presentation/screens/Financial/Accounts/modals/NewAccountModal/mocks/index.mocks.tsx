@@ -8,6 +8,7 @@ jest.mock("../hooks");
 const defaultViewModel: ReturnType<typeof useNewAccountViewModel> = {
   amountCents: 0,
   amountError: undefined,
+  archiveWarningCount: 0,
   balanceHelperKey: "financial.accounts.form.balanceHelper",
   balanceLabelKey: "financial.accounts.form.balance",
   deleteTitleParams: { name: "Main" },
