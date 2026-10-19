@@ -93,6 +93,7 @@ const financial = {
     },
     invoice: {
       dates: "Closes {{closing}} · Due {{due}}",
+      includesProjected: "Includes projected",
       pay: "Pay",
       paymentAfterDue: "Payment after due date",
       payOn: "Pay on {{date}}",
@@ -216,6 +217,9 @@ const financial = {
     notFound: "This item no longer exists or you don't have access to it.",
     overAmountDue: "The value can't exceed what is left to pay.",
     ownerNotAllowed: "You don't have access to this owner.",
+    recurrenceFrequencyBlocked:
+      "Some occurrences are already paid, so the frequency can't change.",
+    recurrencePaidAfterEnd: "Occurrences after the new end date are paid.",
     refundOverPurchase: "Refunds can't exceed the purchase value.",
     title: "We couldn't complete this action",
     undoPrepaymentFirst: "Undo the prepayment first.",
@@ -298,6 +302,39 @@ const financial = {
     undoConfirm:
       "The installments go back to their invoices and the discount is removed.",
     undoTitle: "Undo this prepayment?",
+  },
+  recurrence: {
+    archiveWarning_one: "1 recurring transaction will end.",
+    archiveWarning_other: "{{count}} recurring transactions will end.",
+    delete: "Delete",
+    deleteAllConfirm: "Delete all occurrences?",
+    deleteAnyway: "Delete anyway",
+    deletePaidWarning:
+      "{{count}} occurrences are already paid ({{total}}). Deleting them changes your account balances and cannot be undone.",
+    deleteTitle: "Delete recurring transaction",
+    detachedWarning: "{{count}} purchases in paid invoices stay.",
+    editScope: "Edit",
+    frequency: {
+      BIWEEKLY: "Every 2 weeks",
+      MONTHLY: "Monthly",
+      WEEKLY: "Weekly",
+      YEARLY: "Yearly",
+    },
+    frequencyEvery: {
+      BIWEEKLY: "every 2 weeks",
+      MONTHLY: "every month",
+      WEEKLY: "every week",
+      YEARLY: "every year",
+    },
+    lockedAll: "Change this in All",
+    lockedThisAndNext: "Change this in This and the next ones",
+    noEnd: "No end date",
+    projected: "Projected",
+    scope: {
+      all: "All",
+      onlyThis: "Only this one",
+      thisAndNext: "This and the next ones",
+    },
   },
   refund: {
     amount: "Value",
@@ -388,6 +425,7 @@ const financial = {
       noCategories: "No categories of this type for this owner yet.",
       overLimit: "This purchase passes the card limit by {{amount}}",
       paid: "Paid",
+      paidFirstOnly: "Applies to this first one",
       paidHelpCreate:
         "With a date up to today the switch starts on. Turning it on with a future date sets the date to today.",
       paidHelpEdit:
@@ -398,6 +436,12 @@ const financial = {
       payWithAccount: "Account",
       payWithCard: "Card",
       received: "Received",
+      repeat: "Repeat",
+      repeatEnd: "Ends on",
+      repeatEndClear: "Remove the end date",
+      repeatForever: "Repeats {{frequency}}, no end date",
+      repeatFrequency: "Frequency",
+      repeatPreview: "{{n}} times, last on {{date}}",
       saveExpense: "Save expense",
       saveIncome: "Save income",
       totalValue: "Total value",
@@ -419,6 +463,7 @@ const financial = {
       label: "Show transactions of",
     },
     summary: {
+      projected: "Projected",
       toPay: "To pay",
       toReceive: "To receive",
     },

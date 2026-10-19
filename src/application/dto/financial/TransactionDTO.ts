@@ -1,3 +1,4 @@
+import { RecurrenceFrequency } from "@domain/entities/financial/RecurrenceEntity";
 import TransactionEntity, {
   EarlyPaymentRefEntity,
 } from "@domain/entities/financial/TransactionEntity";
@@ -18,9 +19,15 @@ export interface ITransactionDTO {
   installmentNumber?: number;
   installmentPlanId?: string;
   invoiceMonth?: string;
+  // Front-only: a projected occurrence of a series (spec 034), not a stored row.
+  isProjected?: boolean;
+  occurrenceCount?: number;
+  occurrenceNumber?: number;
   owner: string;
   ownerId: string;
   paid?: boolean;
+  recurrenceFrequency?: RecurrenceFrequency;
+  recurrenceId?: string;
   systemKey?: string;
   type: string;
   value: string;
@@ -42,9 +49,14 @@ class TransactionDTO {
   installmentNumber?: number;
   installmentPlanId?: string;
   invoiceMonth?: string;
+  isProjected: boolean;
+  occurrenceCount?: number;
+  occurrenceNumber?: number;
   owner: string;
   ownerId: string;
   paid: boolean;
+  recurrenceFrequency?: RecurrenceFrequency;
+  recurrenceId?: string;
   systemKey?: string;
   type: string;
   value: string;
@@ -59,6 +71,11 @@ class TransactionDTO {
     this.installmentNumber = params.installmentNumber;
     this.installmentPlanId = params.installmentPlanId;
     this.invoiceMonth = params.invoiceMonth;
+    this.isProjected = params.isProjected ?? false;
+    this.occurrenceCount = params.occurrenceCount;
+    this.occurrenceNumber = params.occurrenceNumber;
+    this.recurrenceFrequency = params.recurrenceFrequency;
+    this.recurrenceId = params.recurrenceId;
     this.categoryName = params.categoryName;
     this.accountName = params.accountName;
     this.description = params.description;
@@ -94,9 +111,13 @@ class TransactionDTO {
       installmentNumber: entity.installmentNumber,
       installmentPlanId: entity.installmentPlanId,
       invoiceMonth: entity.invoiceMonth,
+      occurrenceCount: entity.occurrenceCount,
+      occurrenceNumber: entity.occurrenceNumber,
       owner: entity.owner,
       ownerId: entity.ownerId,
       paid: entity.paid,
+      recurrenceFrequency: entity.recurrenceFrequency,
+      recurrenceId: entity.recurrenceId,
       systemKey: entity.systemKey,
       type: entity.type,
       value: entity.value,

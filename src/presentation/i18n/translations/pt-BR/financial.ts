@@ -91,6 +91,7 @@ const financial = {
     },
     invoice: {
       dates: "Fecha {{closing}} · Vence {{due}}",
+      includesProjected: "Inclui previstas",
       pay: "Pagar",
       paymentAfterDue: "Pagamento após o vencimento",
       payOn: "Pagar em {{date}}",
@@ -214,6 +215,9 @@ const financial = {
     notFound: "Este item não existe mais ou você não tem acesso a ele.",
     overAmountDue: "O valor não pode passar do que falta pagar.",
     ownerNotAllowed: "Você não tem acesso a este proprietário.",
+    recurrenceFrequencyBlocked:
+      "Há ocorrências já pagas, então a frequência não pode mudar.",
+    recurrencePaidAfterEnd: "Há ocorrências pagas depois da nova data final.",
     refundOverPurchase: "Os estornos não podem passar do valor da compra.",
     title: "Não foi possível concluir a ação",
     undoPrepaymentFirst: "Desfaça o adiantamento antes.",
@@ -295,6 +299,39 @@ const financial = {
     undoConfirm:
       "As parcelas voltam para as faturas originais e o desconto é removido.",
     undoTitle: "Desfazer este adiantamento?",
+  },
+  recurrence: {
+    archiveWarning_one: "1 transação recorrente será encerrada.",
+    archiveWarning_other: "{{count}} transações recorrentes serão encerradas.",
+    delete: "Excluir",
+    deleteAllConfirm: "Excluir todas as ocorrências?",
+    deleteAnyway: "Excluir mesmo assim",
+    deletePaidWarning:
+      "{{count}} ocorrências já foram pagas ({{total}}). Excluir muda o saldo das suas contas e não pode ser desfeito.",
+    deleteTitle: "Excluir transação recorrente",
+    detachedWarning: "{{count}} compras em faturas pagas continuam.",
+    editScope: "Editar",
+    frequency: {
+      BIWEEKLY: "Quinzenal",
+      MONTHLY: "Mensal",
+      WEEKLY: "Semanal",
+      YEARLY: "Anual",
+    },
+    frequencyEvery: {
+      BIWEEKLY: "a cada 2 semanas",
+      MONTHLY: "todo mês",
+      WEEKLY: "toda semana",
+      YEARLY: "todo ano",
+    },
+    lockedAll: "Altere em Todas",
+    lockedThisAndNext: "Altere em Esta e as próximas",
+    noEnd: "Sem data final",
+    projected: "Prevista",
+    scope: {
+      all: "Todas",
+      onlyThis: "Somente esta",
+      thisAndNext: "Esta e as próximas",
+    },
   },
   refund: {
     amount: "Valor",
@@ -384,6 +421,7 @@ const financial = {
       noCategories: "Ainda não há categorias deste tipo para este dono.",
       overLimit: "Esta compra passa o limite do cartão em {{amount}}",
       paid: "Pago",
+      paidFirstOnly: "Vale para esta primeira",
       paidHelpCreate:
         "Com data até hoje o switch vem ligado. Ligar com data futura muda a data para hoje.",
       paidHelpEdit:
@@ -394,6 +432,12 @@ const financial = {
       payWithAccount: "Conta",
       payWithCard: "Cartão",
       received: "Recebido",
+      repeat: "Repetir",
+      repeatEnd: "Termina em",
+      repeatEndClear: "Remover a data final",
+      repeatForever: "Repete {{frequency}}, sem data para terminar",
+      repeatFrequency: "Frequência",
+      repeatPreview: "{{n}} vezes, última em {{date}}",
       saveExpense: "Salvar despesa",
       saveIncome: "Salvar receita",
       totalValue: "Valor total",
@@ -415,6 +459,7 @@ const financial = {
       label: "Mostrar transações de",
     },
     summary: {
+      projected: "Previsto",
       toPay: "A pagar",
       toReceive: "A receber",
     },

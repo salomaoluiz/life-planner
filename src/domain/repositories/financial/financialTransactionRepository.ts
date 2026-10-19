@@ -30,6 +30,8 @@ interface CreateTransactionRepositoryParams {
 interface DeleteTransactionRepositoryParams {
   id: string;
   ownerId: string;
+  // Required by the API on a recurring occurrence (spec 034 FR 29).
+  scope?: InstallmentScope;
 }
 
 interface UpdateTransactionRepositoryParams {

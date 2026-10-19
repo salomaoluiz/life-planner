@@ -31,6 +31,7 @@ interface CreateTransactionDatasourceParams {
 interface DeleteTransactionDatasourceParams {
   id: string;
   ownerId: string;
+  scope?: InstallmentScope;
 }
 
 interface UpdateTransactionDatasourceParams {

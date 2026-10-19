@@ -11,4 +11,7 @@ export { default as InvoiceIsPaid } from "./InvoiceIsPaid";
 export { default as InvoiceNotPayable } from "./InvoiceNotPayable";
 export { default as OverAmountDue } from "./OverAmountDue";
 export { default as PrepaymentBlocksEdit } from "./PrepaymentBlocksEdit";
+export { default as RecurrenceFrequencyBlocked } from "./RecurrenceFrequencyBlocked";
+export { default as RecurrenceHasPaidOccurrences } from "./RecurrenceHasPaidOccurrences";
+export { default as RecurrencePaidAfterEnd } from "./RecurrencePaidAfterEnd";
 export { default as RefundOverPurchase } from "./RefundOverPurchase";

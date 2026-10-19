@@ -7,6 +7,8 @@ import {
   InvoiceIsPaid,
   OverAmountDue,
   PrepaymentBlocksEdit,
+  RecurrenceFrequencyBlocked,
+  RecurrencePaidAfterEnd,
   RefundOverPurchase,
 } from "@domain/entities/errors";
 
@@ -14,6 +16,19 @@ import {
 function unprocessableError(message: string): BusinessError {
   if (message.includes("An installment is in a paid invoice")) {
     return new InstallmentPaid();
+  }
+
+  if (message.includes("Occurrences after the new end date are paid")) {
+    return new RecurrencePaidAfterEnd();
+  }
+
+  if (message.includes("An occurrence is paid")) {
+    return new RecurrenceFrequencyBlocked();
+  }
+
+  // A recurring card occurrence in a paid invoice (spec 034 FR 30).
+  if (message.includes("An occurrence is in a paid invoice")) {
+    return new InvoiceIsPaid();
   }
 
   if (message.includes("Invoice is paid")) {

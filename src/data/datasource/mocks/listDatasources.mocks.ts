@@ -56,6 +56,16 @@ const datasourcesMocks: jest.MockedObjectDeep<Datasources> = {
     undoPrepayment: jest.fn(),
     updateInstallmentPlan: jest.fn(),
   },
+  financialRecurrenceDatasource: {
+    createRecurrence: jest.fn(),
+    deleteOccurrence: jest.fn(),
+    deleteRecurrence: jest.fn(),
+    getProjections: jest.fn(),
+    getRecurrences: jest.fn(),
+    materializeOccurrence: jest.fn(),
+    splitRecurrence: jest.fn(),
+    updateRecurrence: jest.fn(),
+  },
   financialTransactionDatasource: {
     createTransaction: jest.fn(),
     deleteTransaction: jest.fn(),

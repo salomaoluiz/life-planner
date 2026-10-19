@@ -11,6 +11,13 @@ import { getBaseUrl, type Method, send } from "./transport";
 
 const INVITE_TOKEN_SEGMENT = /(\/family-invites\/)[^/?#]+/;
 
+// Only the numeric fields of an error body (counts); text could hold personal data.
+function numericDetails(json?: Record<string, unknown>) {
+  return Object.fromEntries(
+    Object.entries(json ?? {}).filter(([, value]) => typeof value === "number"),
+  ) as Record<string, number>;
+}
+
 // The invite token is a secret that travels in the URL path: keep it out of error contexts.
 function redactPath(path: string) {
   return path.replace(INVITE_TOKEN_SEGMENT, "$1:token");
@@ -52,7 +59,7 @@ async function request<T>(
 
   const message =
     typeof json?.message === "string" ? json.message : "Request failed";
-  throw new ApiBusinessError(message, status);
+  throw new ApiBusinessError(message, status, numericDetails(json));
 }
 
 const api = {

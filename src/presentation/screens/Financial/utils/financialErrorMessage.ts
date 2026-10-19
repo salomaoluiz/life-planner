@@ -12,6 +12,8 @@ import {
   InvoiceNotPayable,
   OverAmountDue,
   PrepaymentBlocksEdit,
+  RecurrenceFrequencyBlocked,
+  RecurrencePaidAfterEnd,
   RefundOverPurchase,
 } from "@domain/entities/errors";
 import { TranslationKeys } from "@presentation/i18n/types";
@@ -47,6 +49,14 @@ function getFinancialErrorMessageKey(
 
   if (error instanceof PrepaymentBlocksEdit) {
     return "financial.errors.undoPrepaymentFirst";
+  }
+
+  if (error instanceof RecurrencePaidAfterEnd) {
+    return "financial.errors.recurrencePaidAfterEnd";
+  }
+
+  if (error instanceof RecurrenceFrequencyBlocked) {
+    return "financial.errors.recurrenceFrequencyBlocked";
   }
 
   if (error instanceof HasRefunds) {

@@ -10,6 +10,7 @@ async function deleteTransaction(params: Params, datasources: Datasources) {
   await datasources.financialTransactionDatasource.deleteTransaction({
     id: params.id,
     ownerId: params.ownerId,
+    scope: params.scope,
   });
 
   cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA);

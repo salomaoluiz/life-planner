@@ -48,6 +48,17 @@ export {
 } from "./installmentPlans";
 
 export {
+  createRecurrenceUseCase as createFinancialRecurrenceUseCase,
+  deleteOccurrenceUseCase as deleteFinancialOccurrenceUseCase,
+  deleteRecurrenceUseCase as deleteFinancialRecurrenceUseCase,
+  getProjectionsUseCase as getFinancialProjectionsUseCase,
+  getRecurrencesUseCase as getFinancialRecurrencesUseCase,
+  materializeOccurrenceUseCase as materializeFinancialOccurrenceUseCase,
+  splitRecurrenceUseCase as splitFinancialRecurrenceUseCase,
+  updateRecurrenceUseCase as updateFinancialRecurrenceUseCase,
+} from "./recurrences";
+
+export {
   createTransactionUseCase as createFinancialTransactionUseCase,
   deleteTransactionUseCase as deleteFinancialTransactionUseCase,
   getTransactionsUseCase as getFinancialTransactionsUseCase,

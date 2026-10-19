@@ -17,8 +17,8 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-async function setup() {
-  return deleteTransaction(params);
+async function setup(extra: { scope?: "ONLY_THIS" | "THIS_AND_NEXT" } = {}) {
+  return deleteTransaction({ ...params, ...extra });
 }
 
 async function setupThrowable() {
