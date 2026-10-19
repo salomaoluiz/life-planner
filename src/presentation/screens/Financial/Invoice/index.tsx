@@ -171,6 +171,44 @@ function InvoiceModal() {
             />
           ))}
         </View>
+        {vm.projected.length > 0 ? (
+          <View>
+            <GroupHeader
+              title={t("financial.invoice.projectedTitle", {
+                count: vm.projected.length,
+              })}
+            />
+            {vm.projected.map((item) => (
+              <ListItem
+                inset
+                key={item.id}
+                leading={
+                  <IconTile
+                    color={item.categoryColor}
+                    name={item.categoryIcon}
+                  />
+                }
+                meta={
+                  <Badge
+                    label={t("financial.recurrence.projected")}
+                    tone="accent"
+                  />
+                }
+                onPress={() => vm.onProjectedPress(item)}
+                subtitle={`${item.categoryName} · ${formatDayMonth(toIsoDate(item.date))}`}
+                testID={invoiceTestIds.projected}
+                title={
+                  item.counter
+                    ? `${item.description} ${item.counter}`
+                    : item.description
+                }
+                trailing={
+                  <AmountText type="EXPENSE" value={item.amountCents} />
+                }
+              />
+            ))}
+          </View>
+        ) : null}
         {invoice.credits.length > 0 || invoice.carryInCents < 0 ? (
           <View>
             <GroupHeader

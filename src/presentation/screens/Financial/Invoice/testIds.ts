@@ -16,6 +16,7 @@ const invoiceTestIds = {
   payMethod: "financial.invoice.pay-method",
   paySheet: "financial.invoice.pay-sheet",
   prepaid: "financial.invoice.prepaid",
+  projected: "financial.invoice.projected",
   purchase: "financial.invoice.purchase",
   refund: "financial.invoice.refund",
   screen: "financial.invoice.screen",

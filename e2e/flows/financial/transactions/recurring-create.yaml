@@ -54,12 +54,14 @@ onFlowComplete:
     id: "financial.transactions.month-next"
 - extendedWaitUntil:
     visible:
+      id: "financial.transactions.summary-projected"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
       id: "financial.transactions.row-projected-title"
       text: "${output.SERIES_NAME} 2/4"
     timeout: 20000
-- assertVisible:
-    id: "financial.transactions.summary-projected"
-- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - assertVisible:
     id: "financial.transactions.row.projected"
 - assertNotVisible:

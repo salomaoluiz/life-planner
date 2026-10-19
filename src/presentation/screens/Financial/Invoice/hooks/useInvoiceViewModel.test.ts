@@ -1,5 +1,7 @@
 import { act } from "@tests";
 
+import ProjectedOccurrenceDTO from "@application/dto/financial/ProjectedOccurrenceDTO";
+
 import { makeInvoice } from "../../Transactions/mocks/invoice.mocks";
 import {
   account,
@@ -201,5 +203,94 @@ it("SHOULD edit a credit in the sheet of its kind", () => {
       value: "60000",
     }),
     pathname: "/financial/early_payment/card_early_payment",
+  });
+});
+
+describe("projected purchases (spec 034 FR 14)", () => {
+  function projected(overrides = {}) {
+    return new ProjectedOccurrenceDTO({
+      category: "Food",
+      categoryId: "cat-1",
+      creditCardId: "card-1",
+      date: new Date(2026, 11, 28).toISOString(),
+      description: "Streaming",
+      frequency: "MONTHLY",
+      invoiceListDate: "2027-01-05",
+      invoiceMonth: "2027-01",
+      occurrenceCount: 12,
+      occurrenceNumber: 3,
+      owner: "USER",
+      ownerId: "user-id",
+      recurrenceId: "series-1",
+      type: "EXPENSE",
+      value: "20.00",
+      ...overrides,
+    });
+  }
+
+  function projectionsOptions() {
+    return spies.useQuery.mock.calls.find(
+      ([option]) =>
+        (option as { cacheKey: string[] }).cacheKey[0] === "projections",
+    )![0] as { enabled: boolean; fetch: () => Promise<unknown> };
+  }
+
+  it("SHOULD not look for projections WHEN the invoice month is the current one or a past one", () => {
+    givenLoaded({ invoice: makeInvoice() });
+    setup();
+
+    expect(projectionsOptions().enabled).toBe(false);
+  });
+
+  it("SHOULD look for the purchases that would land on a future invoice AND keep only that card and month", async () => {
+    spies.params.mockReturnValue({ cardId: "card-1", month: "2027-01" });
+    givenLoaded({ invoice: makeInvoice({ referenceMonth: "2027-01" }) });
+    spies.getProjections.mockResolvedValue([
+      projected(),
+      projected({ creditCardId: "card-2", occurrenceNumber: 4 }),
+      projected({ invoiceMonth: "2027-02", occurrenceNumber: 5 }),
+    ]);
+    spies.getCategories.mockResolvedValue([]);
+    setup();
+
+    const options = projectionsOptions();
+    const rows = (await options.fetch()) as { counter?: string; id: string }[];
+
+    expect(options.enabled).toBe(true);
+    expect(spies.getProjections).toHaveBeenCalledWith({
+      from: "2026-12",
+      ownerIds: ["user-id"],
+      to: "2027-01",
+    });
+    expect(rows).toHaveLength(1);
+    expect(rows[0].counter).toBe("3/12");
+  });
+
+  it("SHOULD expose the projected rows AND open one by series, number and month", () => {
+    spies.params.mockReturnValue({ cardId: "card-1", month: "2027-01" });
+    givenLoaded({ invoice: makeInvoice({ referenceMonth: "2027-01" }) });
+    const row = new ProjectedOccurrenceDTO({
+      ...projected(),
+    }).toTransactionDTO();
+    queries.projections.withData([
+      { monthKey: "2026-12", occurrenceNumber: 3, recurrenceId: "series-1" },
+    ]);
+    const { result } = setup();
+
+    expect(result.current.projected).toHaveLength(1);
+
+    act(() =>
+      result.current.onProjectedPress(result.current.projected[0] as never),
+    );
+
+    expect(spies.replace).toHaveBeenCalledWith({
+      params: {
+        month: "2026-12",
+        occurrenceNumber: "3",
+        recurrenceId: "series-1",
+      },
+      pathname: "/financial/transaction/add_new_transaction",
+    });
+    expect(row.isProjected).toBe(true);
   });
 });

@@ -9,9 +9,11 @@ import {
   useQuery,
 } from "@infrastructure/fetcher";
 import { toCalendarDate } from "@screens/Financial/models/creditSheet";
+import { addMonthsTo } from "@screens/Financial/models/invoiceMonth";
 import CardInvoiceUIModel, {
   InvoiceCreditUIModel,
 } from "@screens/Financial/Transactions/models/CardInvoiceUIModel";
+import TransactionUIModel from "@screens/Financial/Transactions/models/TransactionUIModel";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
 
 const EARLY_PAYMENT_ROUTE = "/financial/early_payment/card_early_payment";
@@ -30,10 +32,20 @@ function invalidateAfterPayment() {
   ].forEach(async (key) => invalidateFetcherData([key]));
 }
 
+// The later of two `YYYY-MM` keys.
+function maxMonth(a: string, b: string) {
+  return a > b ? a : b;
+}
+
 function todayDate() {
   const now = new Date();
 
   return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+}
+
+// `YYYY-MM` of the local month.
+function toMonthKey(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 }
 
 function useInvoiceViewModel() {
@@ -57,6 +69,45 @@ function useInvoiceViewModel() {
           month: params.month,
         }),
       ),
+  });
+  // Purchases of series that would land on this invoice (spec 034 FR 14): only months after the current one have any.
+  const projectionsFrom = maxMonth(
+    addMonthsTo(params.month, -1),
+    addMonthsTo(toMonthKey(new Date()), 1),
+  );
+  const projected = useQuery<TransactionUIModel[]>({
+    cacheKey: [
+      useCases.getFinancialProjectionsUseCase.uniqueName,
+      "invoice",
+      params.cardId,
+      params.month,
+    ],
+    enabled: !!invoice.data && projectionsFrom <= params.month,
+    fetch: async () => {
+      const owner = invoice.data!.ownerId;
+      const [items, categories] = await Promise.all([
+        useCases.getFinancialProjectionsUseCase.execute({
+          from: projectionsFrom,
+          ownerIds: [owner],
+          to: params.month,
+        }),
+        useCases.getFinancialCategoriesUseCase.execute([owner]),
+      ]);
+
+      return items
+        .filter(
+          (item) =>
+            item.creditCardId === params.cardId &&
+            item.invoiceMonth === params.month,
+        )
+        .map(
+          (item) =>
+            new TransactionUIModel(
+              item.toTransactionDTO(),
+              categories.find((category) => category.id === item.categoryId),
+            ),
+        );
+    },
   });
   const owners = useQuery({
     cacheKey: [useCases.getOwnersUseCase.uniqueName],
@@ -166,6 +217,15 @@ function useInvoiceViewModel() {
     onPayPress: () => {
       setPayOpen(true);
     },
+    onProjectedPress: (item: TransactionUIModel) =>
+      router.replace({
+        params: {
+          month: item.monthKey,
+          occurrenceNumber: String(item.occurrenceNumber),
+          recurrenceId: item.recurrenceId,
+        },
+        pathname: "/financial/transaction/add_new_transaction",
+      } as never),
     onPurchasePress: (id: string) =>
       router.replace({
         params: { id },
@@ -185,6 +245,7 @@ function useInvoiceViewModel() {
       }),
     onUndoPress: () => setUndoOpen(true),
     paidOn,
+    projected: projected.data ?? [],
   };
 }
 

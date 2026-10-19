@@ -271,6 +271,7 @@ const financial = {
       paidOn: "Pago em",
       title: "Pagar {{amount}}",
     },
+    projectedTitle: "Previstas ({{count}})",
     purchases: "Compras ({{count}})",
     title: "{{card}} · Fatura de {{month}}",
     undo: "Desfazer pagamento",

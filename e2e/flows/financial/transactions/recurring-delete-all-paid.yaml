@@ -58,6 +58,8 @@ onFlowComplete:
       id: "financial.transaction-form.description-input"
     timeout: 20000
 - runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
 - tapOn:
     id: "financial.transaction-form.delete-button"
 - extendedWaitUntil:

@@ -1,5 +1,7 @@
 import { render } from "@tests";
 
+import TransactionUIModel from "@screens/Financial/Transactions/models/TransactionUIModel";
+
 import { InvoiceModal } from "../";
 import { makeInvoice } from "../../Transactions/mocks/invoice.mocks";
 import { useInvoiceViewModel } from "../hooks";
@@ -29,6 +31,7 @@ const defaultViewModel: ReturnType<typeof useInvoiceViewModel> = {
   onPayClose: jest.fn(),
   onPayConfirm: jest.fn(),
   onPayPress: jest.fn(),
+  onProjectedPress: jest.fn(),
   onPurchasePress: jest.fn(),
   onRefundPress: jest.fn(),
   onRetry: jest.fn(),
@@ -36,6 +39,7 @@ const defaultViewModel: ReturnType<typeof useInvoiceViewModel> = {
   onUndoConfirm: jest.fn(),
   onUndoPress: jest.fn(),
   paidOn: new Date(2026, 10, 5),
+  projected: [] as TransactionUIModel[],
 };
 
 function setup(overrides: Partial<typeof defaultViewModel> = {}) {

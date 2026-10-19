@@ -273,6 +273,7 @@ const financial = {
       paidOn: "Paid on",
       title: "Pay {{amount}}",
     },
+    projectedTitle: "Projected ({{count}})",
     purchases: "Purchases ({{count}})",
     title: "{{card}} · {{month}} invoice",
     undo: "Undo payment",

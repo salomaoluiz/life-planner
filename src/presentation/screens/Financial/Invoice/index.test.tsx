@@ -1,5 +1,8 @@
 import { fireEvent, screen } from "@tests";
 
+import TransactionDTO from "@application/dto/financial/TransactionDTO";
+import TransactionUIModel from "@screens/Financial/Transactions/models/TransactionUIModel";
+
 import { makeInvoice } from "../Transactions/mocks/invoice.mocks";
 import { setup } from "./mocks/index.mocks";
 import invoiceTestIds from "./testIds";
@@ -250,5 +253,43 @@ describe("credits (spec 032)", () => {
 
     expect(screen.queryByTestId(invoiceTestIds.refund)).toBeNull();
     expect(screen.queryByTestId(invoiceTestIds.earlyPayment)).toBeNull();
+  });
+});
+
+describe("projected purchases (spec 034)", () => {
+  const projected = new TransactionUIModel(
+    new TransactionDTO({
+      category: "Food",
+      categoryId: "cat-1",
+      creditCardId: "card-1",
+      date: new Date(2026, 11, 28).toISOString(),
+      description: "Streaming",
+      id: "projected-series-1-3",
+      isProjected: true,
+      occurrenceCount: 12,
+      occurrenceNumber: 3,
+      owner: "USER",
+      ownerId: "user-id",
+      recurrenceId: "series-1",
+      type: "EXPENSE",
+      value: "20.00",
+    }),
+  );
+
+  it("SHOULD list the projected purchases apart from the real ones AND open one", () => {
+    const vm = setup({ projected: [projected] });
+
+    expect(screen.getAllByTestId(invoiceTestIds.purchase)).toHaveLength(2);
+    expect(screen.getByText("Streaming 3/12")).toBeOnTheScreen();
+
+    fireEvent.press(screen.getByTestId(invoiceTestIds.projected));
+
+    expect(vm.onProjectedPress).toHaveBeenCalledWith(projected);
+  });
+
+  it("SHOULD show no projected section WHEN there is nothing projected", () => {
+    setup();
+
+    expect(screen.queryByTestId(invoiceTestIds.projected)).toBeNull();
   });
 });
