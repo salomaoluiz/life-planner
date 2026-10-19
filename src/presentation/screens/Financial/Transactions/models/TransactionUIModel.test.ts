@@ -163,3 +163,59 @@ describe("paid status (spec 033)", () => {
     expect(rows.map((row) => row.isOverdue)).toEqual([false, false, false]);
   });
 });
+
+describe("recurring series (spec 034)", () => {
+  it("SHOULD show the counter WHEN the series has an end date AND the frequency WHEN it has none", () => {
+    const withEnd = new TransactionUIModel(
+      dto({ occurrenceCount: 10, occurrenceNumber: 3, recurrenceId: "s-1" }),
+    );
+    const noEnd = new TransactionUIModel(
+      dto({
+        occurrenceNumber: 3,
+        recurrenceFrequency: "MONTHLY",
+        recurrenceId: "s-1",
+      }),
+    );
+
+    expect(withEnd.counter).toBe("3/10");
+    expect(withEnd.frequency).toBeUndefined();
+    expect(noEnd.counter).toBeUndefined();
+    expect(noEnd.frequency).toBe("MONTHLY");
+    expect(withEnd.isRecurring).toBe(true);
+    expect(withEnd.recurrenceId).toBe("s-1");
+    expect(withEnd.occurrenceNumber).toBe(3);
+  });
+
+  it("SHOULD have no counter, frequency or recurring flag outside a series", () => {
+    const plain = new TransactionUIModel(dto());
+
+    expect(plain.counter).toBeUndefined();
+    expect(plain.frequency).toBeUndefined();
+    expect(plain.isRecurring).toBe(false);
+    expect(plain.isProjected).toBe(false);
+  });
+
+  it("SHOULD not offer the pay button or the overdue badge for a projected occurrence", () => {
+    const projected = new TransactionUIModel(
+      dto({
+        date: new Date(2020, 0, 1).toISOString(),
+        isProjected: true,
+        paid: false,
+        recurrenceId: "s-1",
+      }),
+    );
+    const real = new TransactionUIModel(
+      dto({ date: new Date(2020, 0, 1).toISOString(), paid: false }),
+    );
+
+    expect(projected.isProjected).toBe(true);
+    expect(projected.canPay).toBe(false);
+    expect(projected.isOverdue).toBe(false);
+    expect(real.canPay).toBe(true);
+    expect(real.isOverdue).toBe(true);
+  });
+
+  it("SHOULD expose the month of the day it is shown on", () => {
+    expect(new TransactionUIModel(dto()).monthKey).toBe("2026-09");
+  });
+});

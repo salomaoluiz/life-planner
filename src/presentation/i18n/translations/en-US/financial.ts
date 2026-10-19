@@ -93,7 +93,6 @@ const financial = {
     },
     invoice: {
       dates: "Closes {{closing}} · Due {{due}}",
-      includesProjected: "Includes projected",
       pay: "Pay",
       paymentAfterDue: "Payment after due date",
       payOn: "Pay on {{date}}",
@@ -260,6 +259,7 @@ const financial = {
     creditFrom: "Credit from {{month}}",
     credits: "Credits ({{count}})",
     dates: "Closed {{closing}} · Due {{due}} · Pay {{pay}}",
+    includesProjected: "Includes projected",
     notFound: "This invoice no longer exists.",
     paidInfo: "Paid on {{date}} with {{account}}",
     paidInfoExternal: "Paid on {{date}} by boleto",

@@ -1,6 +1,13 @@
 import { StyleSheet, View } from "react-native";
 
-import { AmountText, Badge, IconButton, IconTile, ListItem } from "@components";
+import {
+  AmountText,
+  Badge,
+  Icon,
+  IconButton,
+  IconTile,
+  ListItem,
+} from "@components";
 import { useKitTheme } from "@components/utils/useKitTheme";
 import { useTranslation } from "@presentation/i18n";
 import TransactionUIModel from "@screens/Financial/Transactions/models/TransactionUIModel";
@@ -11,6 +18,7 @@ interface Props {
   item: TransactionUIModel;
   onPay?: (item: TransactionUIModel) => void;
   onPress: (id: string) => void;
+  onProjectedPress?: (item: TransactionUIModel) => void;
 }
 
 function TransactionRow(props: Props) {
@@ -18,35 +26,68 @@ function TransactionRow(props: Props) {
   const { spacing } = useKitTheme();
   const { item } = props;
   const styles = StyleSheet.create({
+    muted: { opacity: 0.6 },
     trailing: { alignItems: "center", flexDirection: "row", gap: spacing.xs },
   });
 
-  return (
+  const title = item.counter
+    ? `${item.description} ${item.counter}`
+    : item.description;
+  const subtitle = item.frequency
+    ? [item.subtitle, t(`financial.recurrence.frequency.${item.frequency}`)]
+        .filter(Boolean)
+        .join(" · ")
+    : item.subtitle;
+  let rowTestID: string = transactionsTestIds.row;
+
+  if (item.isAdjustment) {
+    rowTestID = transactionsTestIds.adjustmentRow;
+  } else if (item.isProjected) {
+    rowTestID = transactionsTestIds.rowProjected;
+  } else if (item.isRecurring) {
+    rowTestID = transactionsTestIds.rowRecurring;
+  }
+
+  const row = (
     <ListItem
       inset
       leading={<IconTile color={item.categoryColor} name={item.categoryIcon} />}
       meta={
-        item.isOverdue ? (
-          <Badge
-            label={t("financial.transactions.overdue")}
-            testID={transactionsTestIds.rowOverdue}
-            tone={"expense"}
-          />
+        item.isOverdue || item.isProjected || item.isRecurring ? (
+          <View style={styles.trailing}>
+            {item.isRecurring ? (
+              <Icon
+                name={"repeat"}
+                size={16}
+                testID={transactionsTestIds.rowRepeat}
+              />
+            ) : null}
+            {item.isOverdue ? (
+              <Badge
+                label={t("financial.transactions.overdue")}
+                testID={transactionsTestIds.rowOverdue}
+                tone={"expense"}
+              />
+            ) : null}
+            {item.isProjected ? (
+              <Badge
+                label={t("financial.recurrence.projected")}
+                testID={transactionsTestIds.rowProjectedBadge}
+                tone={"accent"}
+              />
+            ) : null}
+          </View>
         ) : undefined
       }
-      onPress={() => props.onPress(item.id)}
-      subtitle={item.subtitle}
-      testID={
-        item.isAdjustment
-          ? transactionsTestIds.adjustmentRow
-          : transactionsTestIds.row
+      onPress={() =>
+        item.isProjected && props.onProjectedPress
+          ? props.onProjectedPress(item)
+          : props.onPress(item.id)
       }
+      subtitle={subtitle}
+      testID={rowTestID}
       // The stored description is English text; the app shows its own translated label.
-      title={
-        item.isAdjustment
-          ? t("financial.transactions.adjustment")
-          : item.description
-      }
+      title={item.isAdjustment ? t("financial.transactions.adjustment") : title}
       trailing={
         <View style={styles.trailing}>
           <AmountText type={item.amountType} value={item.amountCents} />
@@ -67,6 +108,8 @@ function TransactionRow(props: Props) {
       }
     />
   );
+
+  return item.isProjected ? <View style={styles.muted}>{row}</View> : row;
 }
 
 export default TransactionRow;

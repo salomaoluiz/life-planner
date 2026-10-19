@@ -413,3 +413,44 @@ describe("deletes", () => {
     }
   });
 });
+
+describe("ProjectedOccurrenceDTO.toInvoiceCard", () => {
+  it("SHOULD describe the card of a card occurrence AND nothing for an account one", async () => {
+    recurrences.getProjections.mockResolvedValue([
+      new ProjectedOccurrenceEntity({
+        category: "Food",
+        categoryId: "category-1",
+        creditCardColor: "#112233",
+        creditCardId: "card-1",
+        creditCardLastDigits: "1234",
+        creditCardTitle: "Main card",
+        date: "2026-11-05T03:00:00.000Z",
+        description: "Streaming",
+        frequency: "MONTHLY",
+        occurrenceNumber: 2,
+        owner: OwnerType.USER,
+        ownerId: "user-id",
+        recurrenceId: "recurrence-1",
+        type: TransactionType.EXPENSE,
+        value: "20.00",
+      }),
+      projected,
+    ]);
+
+    const [card, account] = await getProjectionsUseCase(repositories).execute({
+      from: "2026-11",
+      ownerIds: ["user-id"],
+      to: "2026-11",
+    });
+
+    expect(card.toInvoiceCard()).toEqual({
+      color: "#112233",
+      id: "card-1",
+      lastDigits: "1234",
+      owner: OwnerType.USER,
+      ownerId: "user-id",
+      title: "Main card",
+    });
+    expect(account.toInvoiceCard()).toBeUndefined();
+  });
+});

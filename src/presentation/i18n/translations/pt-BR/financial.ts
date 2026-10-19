@@ -91,7 +91,6 @@ const financial = {
     },
     invoice: {
       dates: "Fecha {{closing}} · Vence {{due}}",
-      includesProjected: "Inclui previstas",
       pay: "Pagar",
       paymentAfterDue: "Pagamento após o vencimento",
       payOn: "Pagar em {{date}}",
@@ -258,6 +257,7 @@ const financial = {
     creditFrom: "Crédito de {{month}}",
     credits: "Créditos ({{count}})",
     dates: "Fechou {{closing}} · Vence {{due}} · Pagar {{pay}}",
+    includesProjected: "Inclui previstas",
     notFound: "Esta fatura não existe mais.",
     paidInfo: "Paga em {{date}} com {{account}}",
     paidInfoExternal: "Paga em {{date}} por boleto",

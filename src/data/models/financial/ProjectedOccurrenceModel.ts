@@ -11,7 +11,9 @@ interface IProjectedOccurrenceModel {
   accountName?: string;
   category: string;
   categoryId: string;
+  creditCardColor?: string;
   creditCardId?: string;
+  creditCardLastDigits?: string;
   creditCardTitle?: string;
   date: string;
   description: string;
@@ -33,7 +35,9 @@ class ProjectedOccurrenceModel implements IProjectedOccurrenceModel {
   accountName?: string;
   category: string;
   categoryId: string;
+  creditCardColor?: string;
   creditCardId?: string;
+  creditCardLastDigits?: string;
   creditCardTitle?: string;
   date: string;
   description: string;
@@ -53,7 +57,9 @@ class ProjectedOccurrenceModel implements IProjectedOccurrenceModel {
     this.accountName = params.accountName;
     this.category = params.category;
     this.categoryId = params.categoryId;
+    this.creditCardColor = params.creditCardColor;
     this.creditCardId = params.creditCardId;
+    this.creditCardLastDigits = params.creditCardLastDigits;
     this.creditCardTitle = params.creditCardTitle;
     this.date = params.date;
     this.description = params.description;
@@ -80,14 +86,16 @@ class ProjectedOccurrenceModel implements IProjectedOccurrenceModel {
     const card = data.creditCard as
       | null
       | undefined
-      | { id: string; title: string };
+      | { color?: string; id: string; lastDigits?: string; title: string };
 
     return new ProjectedOccurrenceModel({
       accountId: account?.id,
       accountName: account?.name,
       category: category?.name ?? "",
       categoryId: category?.id as string,
+      creditCardColor: card?.color,
       creditCardId: card?.id,
+      creditCardLastDigits: card?.lastDigits,
       creditCardTitle: card?.title,
       date: calendarDateToIso(data.date as string),
       description: data.description as string,

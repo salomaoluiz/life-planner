@@ -4,6 +4,8 @@ import { normalizeCategoryColor } from "@presentation/constants/categoryColors";
 import { InstallmentLabel } from "@screens/Financial/models/installments";
 import { addMonthsTo } from "@screens/Financial/models/invoiceMonth";
 
+import TransactionUIModel from "./TransactionUIModel";
+
 const FALLBACK_ICON = "help-circle-outline";
 
 // A refund, a prepayment discount or an early payment as a "+" line of the invoice (spec 032 FR 27, 38).
@@ -37,8 +39,9 @@ export interface InvoicePurchaseUIModel {
 
 // One card invoice as a line of the transactions list (spec 029 FR 24).
 class CardInvoiceUIModel {
+  // What the line shows: the invoice plus the projected purchases that would land on it (spec 034 FR 14).
   get amountCents() {
-    return this.dto.invoice.amount;
+    return this.dto.invoice.amount + this.projectedCents;
   }
 
   // Refunds and early payments can be added to an invoice that has started and has no payment record.
@@ -46,6 +49,11 @@ class CardInvoiceUIModel {
     return (
       !this.dto.invoice.payment && this.dto.invoice.periodStart <= todayIso()
     );
+  }
+
+  // Only projections: the invoice does not exist yet, so it can't be opened or paid.
+  get canOpen() {
+    return !this.isProjectedOnly;
   }
 
   get cardColor() {
@@ -113,6 +121,20 @@ class CardInvoiceUIModel {
     return `${this.dto.card.id}:${this.dto.invoice.referenceMonth}`;
   }
 
+  get includesProjected() {
+    return this.projectedItems.length > 0;
+  }
+
+  // The invoice has no real purchases or credits: it only exists as a projection.
+  get isProjectedOnly() {
+    return (
+      this.projectedItems.length > 0 &&
+      this.dto.purchases.length === 0 &&
+      this.dto.credits.length === 0 &&
+      this.dto.invoice.amount === 0
+    );
+  }
+
   get lastDigits() {
     return this.dto.card.lastDigits;
   }
@@ -144,6 +166,10 @@ class CardInvoiceUIModel {
 
   get previousMonth() {
     return addMonthsTo(this.dto.invoice.referenceMonth, -1);
+  }
+
+  get projectedCents() {
+    return this.projectedItems.reduce((sum, item) => sum + item.amountCents, 0);
   }
 
   get purchases(): InvoicePurchaseUIModel[] {
@@ -180,7 +206,7 @@ class CardInvoiceUIModel {
     return new Date(year, month - 1, 1);
   }
 
-  // Always an expense: negative in the day's net.
+  // Always an expense: negative in the day's net. Projections do not move the net.
   get signedCents() {
     return -this.dto.invoice.amount;
   }
@@ -189,7 +215,15 @@ class CardInvoiceUIModel {
     return this.dto.invoice.status;
   }
 
-  constructor(private readonly dto: CardInvoiceDTO) {}
+  constructor(
+    private readonly dto: CardInvoiceDTO,
+    readonly projectedItems: TransactionUIModel[] = [],
+  ) {}
+
+  // The same invoice line with the projected purchases of its month.
+  withProjected(items: TransactionUIModel[]) {
+    return new CardInvoiceUIModel(this.dto, items);
+  }
 }
 
 // "2026-11-05" -> local Date: parsed from the string, never through a time-zone conversion.

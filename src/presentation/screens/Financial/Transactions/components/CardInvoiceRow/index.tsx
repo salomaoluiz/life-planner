@@ -15,6 +15,7 @@ import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { installmentTitle } from "@screens/Financial/models/installments";
 import CardInvoiceUIModel from "@screens/Financial/Transactions/models/CardInvoiceUIModel";
+import TransactionUIModel from "@screens/Financial/Transactions/models/TransactionUIModel";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
 import useStyles from "./styles";
@@ -23,6 +24,7 @@ interface Props {
   expanded: boolean;
   invoice: CardInvoiceUIModel;
   onOpen: (invoice: CardInvoiceUIModel) => void;
+  onProjectedPress?: (item: TransactionUIModel) => void;
   onPurchasePress: (id: string) => void;
   onToggle: (id: string) => void;
 }
@@ -60,6 +62,13 @@ function CardInvoiceRow(props: Props) {
               tone="secondary"
               value={t("financial.transactions.cardInvoice.title", { month })}
             />
+            {invoice.includesProjected ? (
+              <Text.Caption
+                testID={transactionsTestIds.cardInvoiceIncludesProjected}
+                tone="secondary"
+                value={t("financial.invoice.includesProjected")}
+              />
+            ) : null}
             <View style={styles.badges}>
               <Badge
                 label={t(
@@ -121,12 +130,37 @@ function CardInvoiceRow(props: Props) {
               }
             />
           ))}
-          <Button.Secondary
-            fullWidth
-            label={t("financial.transactions.cardInvoice.open")}
-            onPress={() => props.onOpen(invoice)}
-            testID={transactionsTestIds.cardInvoiceOpen}
-          />
+          {invoice.projectedItems.map((item) => (
+            <ListItem
+              key={item.id}
+              leading={
+                <IconTile color={item.categoryColor} name={item.categoryIcon} />
+              }
+              meta={
+                <Badge
+                  label={t("financial.recurrence.projected")}
+                  tone="accent"
+                />
+              }
+              onPress={() => props.onProjectedPress?.(item)}
+              subtitle={`${item.categoryName} · ${formatShortDate(item.date, localeTag)}`}
+              testID={transactionsTestIds.cardInvoiceProjectedPurchase}
+              title={
+                item.counter
+                  ? `${item.description} ${item.counter}`
+                  : item.description
+              }
+              trailing={<AmountText type="EXPENSE" value={item.amountCents} />}
+            />
+          ))}
+          {invoice.canOpen ? (
+            <Button.Secondary
+              fullWidth
+              label={t("financial.transactions.cardInvoice.open")}
+              onPress={() => props.onOpen(invoice)}
+              testID={transactionsTestIds.cardInvoiceOpen}
+            />
+          ) : null}
         </View>
       ) : null}
     </Card>

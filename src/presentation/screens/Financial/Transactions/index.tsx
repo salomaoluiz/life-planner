@@ -58,6 +58,7 @@ function FinancialTransactions() {
           expanded={vm.expandedInvoiceId === item.invoice.id}
           invoice={item.invoice}
           onOpen={vm.onInvoiceOpen}
+          onProjectedPress={vm.onProjectedPress}
           onPurchasePress={vm.onRowPress}
           onToggle={vm.onInvoiceToggle}
         />
@@ -77,6 +78,7 @@ function FinancialTransactions() {
               ? () => adjustment.onOpen(transaction)
               : vm.onRowPress
           }
+          onProjectedPress={vm.onProjectedPress}
         />
       );
     }
@@ -153,6 +155,10 @@ function FinancialTransactions() {
         isError={vm.summaryError}
         isLoading={!vm.summary && !vm.summaryError}
         onRetry={vm.onSummaryRetry}
+        projectedExpenseCents={vm.summary?.projectedExpenseCents}
+        projectedIncomeCents={vm.summary?.projectedIncomeCents}
+        projectedLabel={t("financial.transactions.summary.projected")}
+        projectedTestID={transactionsTestIds.summaryProjected}
         retryLabel={t("common.actions.tryAgain")}
         scopeLabel={scopeLabel}
         scopeTestID={transactionsTestIds.summaryScope}

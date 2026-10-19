@@ -8,7 +8,9 @@ interface IProjectedOccurrenceEntity {
   accountName?: string;
   category: string;
   categoryId: string;
+  creditCardColor?: string;
   creditCardId?: string;
+  creditCardLastDigits?: string;
   creditCardTitle?: string;
   // ISO date-time of the local day.
   date: string;
@@ -33,7 +35,9 @@ class ProjectedOccurrenceEntity {
   accountName?: string;
   category: string;
   categoryId: string;
+  creditCardColor?: string;
   creditCardId?: string;
+  creditCardLastDigits?: string;
   creditCardTitle?: string;
   date: string;
   description: string;
@@ -53,7 +57,9 @@ class ProjectedOccurrenceEntity {
     this.accountName = params.accountName;
     this.category = params.category;
     this.categoryId = params.categoryId;
+    this.creditCardColor = params.creditCardColor;
     this.creditCardId = params.creditCardId;
+    this.creditCardLastDigits = params.creditCardLastDigits;
     this.creditCardTitle = params.creditCardTitle;
     this.date = params.date;
     this.description = params.description;

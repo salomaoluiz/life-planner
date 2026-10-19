@@ -1,12 +1,16 @@
+import CardInvoiceDTO from "@application/dto/financial/CardInvoiceDTO";
+import { InvoiceDTO } from "@application/dto/financial/CreditCardOverviewDTO";
+import { OwnerType } from "@domain/entities/user/OwnerEntity";
+
 import CardInvoiceUIModel from "./CardInvoiceUIModel";
 import TransactionUIModel from "./TransactionUIModel";
 
 export const ALL_FILTER = "ALL";
+
 export type DayLabel =
   | { date: Date; kind: "date" }
   | { kind: "today" }
   | { kind: "yesterday" };
-
 export type ListEntry =
   | {
       day: Date;
@@ -17,6 +21,23 @@ export type ListEntry =
     }
   | { invoice: CardInvoiceUIModel; key: string; kind: "invoice" }
   | { item: TransactionUIModel; key: string; kind: "item" };
+
+// Projected card purchases that would land on one invoice (spec 034 FR 14).
+export interface ProjectedInvoiceGroup {
+  card: {
+    color: string;
+    id: string;
+    lastDigits?: string;
+    owner: OwnerType;
+    ownerId: string;
+    title: string;
+  };
+  items: TransactionUIModel[];
+  // `YYYY-MM-DD` the invoice appears in the list.
+  listDate: string;
+  // `YYYY-MM`
+  referenceMonth: string;
+}
 
 export type TypeFilter = "ALL" | "EXPENSE" | "INCOME";
 
@@ -31,7 +52,8 @@ function buildEntries(
       date: item.date,
       dateKey: item.dateKey,
       entry: { item, key: `item-${item.id}`, kind: "item" } as const,
-      signedCents: item.signedCents,
+      // A projection is a preview: it never moves the net of the day.
+      signedCents: item.isProjected ? 0 : item.signedCents,
     })),
     ...invoices.map((invoice) => ({
       date: invoice.listDate,
@@ -140,6 +162,34 @@ function isInMonth(date: Date, month: Date) {
   );
 }
 
+// The real invoices of the month, each carrying its projected purchases, plus an invoice line for the
+// projections whose invoice has no real purchase yet.
+function mergeProjectedInvoices(
+  invoices: CardInvoiceUIModel[],
+  groups: ProjectedInvoiceGroup[],
+) {
+  const used = new Set<string>();
+  const merged = invoices.map((invoice) => {
+    const group = groups.find(
+      (item) =>
+        item.card.id === invoice.cardId &&
+        item.referenceMonth === invoice.referenceMonth,
+    );
+
+    if (!group) {
+      return invoice;
+    }
+    used.add(`${group.card.id}:${group.referenceMonth}`);
+
+    return invoice.withProjected(group.items);
+  });
+  const only = groups
+    .filter((group) => !used.has(`${group.card.id}:${group.referenceMonth}`))
+    .map((group) => projectedOnlyInvoice(group));
+
+  return [...merged, ...only];
+}
+
 function monthChoices(languageTag: string) {
   const formatter = new Intl.DateTimeFormat(languageTag, { month: "long" });
 
@@ -161,6 +211,33 @@ function netAmount(netCents: number): {
     type: netCents < 0 ? "EXPENSE" : "INCOME",
     value: Math.abs(netCents),
   };
+}
+
+// A projected-only invoice: no real purchases yet, so the line only carries the projected ones.
+function projectedOnlyInvoice(group: ProjectedInvoiceGroup) {
+  const dto = new CardInvoiceDTO({
+    card: { ...group.card },
+    invoice: new InvoiceDTO({
+      amount: 0,
+      amountDue: 0,
+      carryIn: 0,
+      closingDate: group.listDate,
+      dueDate: group.listDate,
+      earlyPaid: 0,
+      listDate: group.listDate,
+      net: 0,
+      paymentAfterDue: false,
+      paymentDate: group.listDate,
+      periodEnd: group.listDate,
+      periodStart: group.listDate,
+      referenceMonth: group.referenceMonth,
+      status: "OPEN",
+      total: 0,
+    }),
+    purchases: [],
+  });
+
+  return new CardInvoiceUIModel(dto, group.items);
 }
 
 function resolveDayLabel(day: Date, now: Date): DayLabel {
@@ -210,6 +287,7 @@ export {
   formatMonthLabel,
   formatMonthName,
   isInMonth,
+  mergeProjectedInvoices,
   monthChoices,
   netAmount,
   resolveDayLabel,

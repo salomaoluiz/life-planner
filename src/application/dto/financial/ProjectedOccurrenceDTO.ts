@@ -1,5 +1,7 @@
+import { CardInvoiceCardEntity } from "@domain/entities/financial/CardInvoiceEntity";
 import ProjectedOccurrenceEntity from "@domain/entities/financial/ProjectedOccurrenceEntity";
 import { RecurrenceFrequency } from "@domain/entities/financial/RecurrenceEntity";
+import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import TransactionDTO from "./TransactionDTO";
 
@@ -8,7 +10,9 @@ class ProjectedOccurrenceDTO {
   accountName?: string;
   category: string;
   categoryId: string;
+  creditCardColor?: string;
   creditCardId?: string;
+  creditCardLastDigits?: string;
   creditCardTitle?: string;
   date: string;
   description: string;
@@ -28,7 +32,9 @@ class ProjectedOccurrenceDTO {
     accountName?: string;
     category: string;
     categoryId: string;
+    creditCardColor?: string;
     creditCardId?: string;
+    creditCardLastDigits?: string;
     creditCardTitle?: string;
     date: string;
     description: string;
@@ -47,7 +53,9 @@ class ProjectedOccurrenceDTO {
     this.accountName = params.accountName;
     this.category = params.category;
     this.categoryId = params.categoryId;
+    this.creditCardColor = params.creditCardColor;
     this.creditCardId = params.creditCardId;
+    this.creditCardLastDigits = params.creditCardLastDigits;
     this.creditCardTitle = params.creditCardTitle;
     this.date = params.date;
     this.description = params.description;
@@ -65,6 +73,20 @@ class ProjectedOccurrenceDTO {
 
   static fromEntity(entity: ProjectedOccurrenceEntity) {
     return new ProjectedOccurrenceDTO({ ...entity });
+  }
+
+  // The card of a card occurrence, as the invoice line needs it.
+  toInvoiceCard(): CardInvoiceCardEntity | undefined {
+    return this.creditCardId
+      ? {
+          color: this.creditCardColor ?? "",
+          id: this.creditCardId,
+          lastDigits: this.creditCardLastDigits,
+          owner: OwnerType[this.owner as keyof typeof OwnerType],
+          ownerId: this.ownerId,
+          title: this.creditCardTitle ?? "",
+        }
+      : undefined;
   }
 
   // A projected row shown like a transaction (muted, no pay button): the list reuses the transaction row.

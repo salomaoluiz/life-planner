@@ -1,5 +1,7 @@
 import { act } from "@tests";
 
+import CategoryDTO from "@application/dto/financial/CategoryDTO";
+import ProjectedOccurrenceDTO from "@application/dto/financial/ProjectedOccurrenceDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 
 import { makeInvoice } from "../mocks/invoice.mocks";
@@ -9,13 +11,18 @@ import {
   givenData,
   invoicesQuery,
   owners,
+  projectionsQuery,
   setup,
   spies,
   summaryQuery,
   transactionsQuery,
   ui,
 } from "./mocks/useTransactionsViewModel.mocks";
-import { fetchSummary, fetchTransactions } from "./useTransactionsViewModel";
+import {
+  fetchProjections,
+  fetchSummary,
+  fetchTransactions,
+} from "./useTransactionsViewModel";
 
 describe("fetchTransactions", () => {
   it("SHOULD load owners, transactions and categories and join the category to each row", async () => {
@@ -44,6 +51,8 @@ describe("fetchSummary", () => {
       balance: 0,
       expense: 0,
       income: 0,
+      projectedExpense: 0,
+      projectedIncome: 0,
       toPay: 0,
       toReceive: 0,
     });
@@ -252,6 +261,8 @@ it("SHOULD expose the summary in cents and the loading and error states", () => 
     balanceCents: 4000,
     expenseCents: 1000,
     incomeCents: 5000,
+    projectedExpenseCents: 0,
+    projectedIncomeCents: 0,
     toPayCents: 700,
     toReceiveCents: 900,
   });
@@ -363,5 +374,215 @@ describe("card invoices (spec 029)", () => {
       params: { cardId: "card-1", month: "2026-10" },
       pathname: "/financial/invoice/invoice_detail",
     });
+  });
+});
+
+describe("projected occurrences (spec 034)", () => {
+  function projectedDto(overrides = {}) {
+    return new ProjectedOccurrenceDTO({
+      accountId: "account-id",
+      accountName: "Checking",
+      category: "Food",
+      categoryId: "cat-1",
+      date: new Date(2026, 10, 5).toISOString(),
+      description: "Rent",
+      frequency: "MONTHLY",
+      occurrenceCount: 12,
+      occurrenceNumber: 2,
+      owner: "USER",
+      ownerId: "user-id",
+      recurrenceId: "series-1",
+      type: "EXPENSE",
+      value: "2000.00",
+      ...overrides,
+    });
+  }
+
+  describe("fetchProjections", () => {
+    it("SHOULD turn account occurrences into muted rows with their category AND group card ones by invoice", async () => {
+      spies.getCategories.mockResolvedValue([
+        new CategoryDTO({
+          icon: "food",
+          iconColor: "#F59E0B",
+          id: "cat-1",
+          name: "Food",
+          owner: "USER",
+          ownerId: "user-id",
+          type: "EXPENSE",
+        }),
+      ]);
+      spies.getProjections.mockResolvedValue([
+        projectedDto(),
+        projectedDto({
+          creditCardColor: "#112233",
+          creditCardId: "card-1",
+          creditCardLastDigits: "1234",
+          creditCardTitle: "Main card",
+          invoiceListDate: "2026-12-10",
+          invoiceMonth: "2026-11",
+          occurrenceNumber: 2,
+        }),
+        projectedDto({
+          creditCardId: "card-1",
+          creditCardTitle: "Main card",
+          invoiceListDate: "2026-12-10",
+          invoiceMonth: "2026-11",
+          occurrenceNumber: 3,
+        }),
+        // A card occurrence without its invoice day cannot be placed: it is left out.
+        projectedDto({ creditCardId: "card-1" }),
+      ]);
+
+      const result = await fetchProjections("2026-11", "2026-12", ["user-id"]);
+
+      expect(spies.getProjections).toHaveBeenCalledWith({
+        from: "2026-11",
+        ownerIds: ["user-id"],
+        to: "2026-12",
+      });
+      expect(result.accountItems).toHaveLength(1);
+      expect(result.accountItems[0]).toMatchObject({
+        categoryIcon: "food",
+        isProjected: true,
+      });
+      expect(result.cardGroups).toHaveLength(1);
+      expect(result.cardGroups[0]).toMatchObject({
+        card: {
+          color: "#112233",
+          id: "card-1",
+          lastDigits: "1234",
+          title: "Main card",
+        },
+        listDate: "2026-12-10",
+        referenceMonth: "2026-11",
+      });
+      expect(result.cardGroups[0].items).toHaveLength(2);
+    });
+
+    it("SHOULD give a card without data neutral defaults", async () => {
+      spies.getCategories.mockResolvedValue([]);
+      spies.getProjections.mockResolvedValue([
+        projectedDto({
+          creditCardId: "card-1",
+          invoiceListDate: "2026-12-10",
+          invoiceMonth: "2026-11",
+        }),
+      ]);
+
+      const result = await fetchProjections("2026-11", "2026-11", ["user-id"]);
+
+      expect(result.cardGroups[0].card).toMatchObject({ color: "", title: "" });
+    });
+  });
+
+  it("SHOULD show the projected rows of a month after the current one AND not in the current month", () => {
+    givenData([]);
+    projectionsQuery.withData({
+      accountItems: [
+        new TransactionUIModel(projectedDto().toTransactionDTO()),
+        new TransactionUIModel(
+          projectedDto({
+            date: new Date(2026, 11, 5).toISOString(),
+            occurrenceNumber: 3,
+          }).toTransactionDTO(),
+        ),
+      ],
+      cardGroups: [],
+    });
+    const { result } = setup();
+
+    // October 2026 (current): projections are not part of it.
+    expect(
+      result.current.entries.filter((e) => e.kind === "item"),
+    ).toHaveLength(0);
+
+    act(() => result.current.onNextMonth());
+
+    const items = result.current.entries.filter((e) => e.kind === "item");
+
+    expect(items).toHaveLength(1);
+    expect(result.current.isEmptyMonth).toBe(false);
+  });
+
+  it("SHOULD put the projected card purchases on the invoice of the month, carrying the real one", () => {
+    givenData([]);
+    invoicesQuery.withData([
+      makeInvoice({ listDate: "2026-11-12", referenceMonth: "2026-10" }),
+    ]);
+    projectionsQuery.withData({
+      accountItems: [],
+      cardGroups: [
+        {
+          card: {
+            color: "#2B3A8C",
+            id: "card-1",
+            lastDigits: "1234",
+            owner: "USER" as never,
+            ownerId: "user-id",
+            title: "Main card",
+          },
+          items: [
+            new TransactionUIModel(
+              projectedDto({
+                creditCardId: "card-1",
+                invoiceListDate: "2026-11-12",
+                invoiceMonth: "2026-10",
+              }).toTransactionDTO(),
+            ),
+          ],
+          listDate: "2026-11-12",
+          referenceMonth: "2026-10",
+        },
+        {
+          card: {
+            color: "#2B3A8C",
+            id: "card-1",
+            owner: "USER" as never,
+            ownerId: "user-id",
+            title: "Main card",
+          },
+          items: [],
+          listDate: "2026-12-12",
+          referenceMonth: "2026-11",
+        },
+      ],
+    });
+    const { result } = setup();
+
+    act(() => result.current.onNextMonth());
+
+    const lines = result.current.entries.filter((e) => e.kind === "invoice");
+
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toMatchObject({ invoice: { includesProjected: true } });
+  });
+
+  it("SHOULD open a projected occurrence by series, number and month", () => {
+    givenData([]);
+    const { result } = setup();
+    const item = new TransactionUIModel(projectedDto().toTransactionDTO());
+
+    act(() => result.current.onProjectedPress(item));
+
+    expect(spies.push).toHaveBeenCalledWith({
+      params: {
+        month: "2026-11",
+        occurrenceNumber: "2",
+        recurrenceId: "series-1",
+      },
+      pathname: "/financial/transaction/add_new_transaction",
+    });
+  });
+
+  it("SHOULD refetch the projections WHEN refreshing a future month, not the current one", () => {
+    givenData([]);
+    const { result } = setup();
+
+    act(() => result.current.onRefresh());
+    expect(projectionsQuery.value.refetch).not.toHaveBeenCalled();
+
+    act(() => result.current.onNextMonth());
+    act(() => result.current.onRefresh());
+    expect(projectionsQuery.value.refetch).toHaveBeenCalled();
   });
 });

@@ -56,7 +56,12 @@ describe("ProjectedOccurrenceModel.fromJSON", () => {
     const model = ProjectedOccurrenceModel.fromJSON({
       ...apiProjected,
       account: null,
-      creditCard: { id: "card-1", title: "Card" },
+      creditCard: {
+        color: "#112233",
+        id: "card-1",
+        lastDigits: "1234",
+        title: "Card",
+      },
       invoiceListDate: "2026-12-10",
       invoiceMonth: "2026-11",
       occurrenceCount: null,
@@ -64,7 +69,9 @@ describe("ProjectedOccurrenceModel.fromJSON", () => {
 
     expect(model).toMatchObject({
       accountId: undefined,
+      creditCardColor: "#112233",
       creditCardId: "card-1",
+      creditCardLastDigits: "1234",
       creditCardTitle: "Card",
       invoiceListDate: "2026-12-10",
       invoiceMonth: "2026-11",

@@ -28,6 +28,8 @@ it("SHOULD return zeros WHEN the month has no transactions", async () => {
     balance: 0,
     expense: 0,
     income: 0,
+    projectedExpense: 0,
+    projectedIncome: 0,
     toPay: 0,
     toReceive: 0,
   });
@@ -310,5 +312,102 @@ describe("to pay and to receive (spec 033 FR 16)", () => {
     ]);
 
     expect(await setup()).toMatchObject({ toPay: 40000 });
+  });
+});
+
+describe("projected occurrences (spec 034 FR 15)", () => {
+  const november = new Date(2026, 10, 10);
+  const owner = mocks.defaultParams.ownerIds[0];
+
+  function projected(overrides: Record<string, unknown>) {
+    return {
+      creditCardId: undefined,
+      date: new Date(2026, 10, 5).toISOString(),
+      invoiceListDate: undefined,
+      ownerId: owner,
+      type: TransactionType.EXPENSE,
+      value: "100.00",
+      ...overrides,
+    } as never;
+  }
+
+  it("SHOULD NOT ask for projections in the current or a past month", async () => {
+    await setup();
+    await setup({ ...mocks.defaultParams, month: new Date(2026, 7, 1) });
+
+    expect(spies.recurrenceRepository.getProjections).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD ask for the projections of the next months, looking two months back for card invoices", async () => {
+    await setup({ ...mocks.defaultParams, month: new Date(2027, 2, 10) });
+
+    expect(spies.recurrenceRepository.getProjections).toHaveBeenCalledWith({
+      from: "2027-01",
+      ownerIds: mocks.defaultParams.ownerIds,
+      to: "2027-03",
+    });
+  });
+
+  it("SHOULD never ask before the month after the current one", async () => {
+    await setup({ ...mocks.defaultParams, month: november });
+
+    expect(spies.recurrenceRepository.getProjections).toHaveBeenCalledWith(
+      expect.objectContaining({ from: "2026-11", to: "2026-11" }),
+    );
+  });
+
+  it("SHOULD add the account occurrences of the month apart from the real totals", async () => {
+    spies.recurrenceRepository.getProjections.mockResolvedValueOnce([
+      projected({ value: "200.00" }),
+      projected({ type: TransactionType.INCOME, value: "50.00" }),
+      projected({ date: new Date(2026, 11, 5).toISOString() }),
+    ]);
+
+    const result = await setup({ ...mocks.defaultParams, month: november });
+
+    expect(result).toMatchObject({
+      expense: 0,
+      income: 0,
+      projectedExpense: 20000,
+      projectedIncome: 5000,
+      toPay: 0,
+      toReceive: 0,
+    });
+  });
+
+  it("SHOULD add the card occurrences whose invoice appears in the month, whatever their own date", async () => {
+    spies.recurrenceRepository.getProjections.mockResolvedValueOnce([
+      projected({
+        creditCardId: "card-1",
+        date: new Date(2026, 9, 28).toISOString(),
+        invoiceListDate: "2026-11-10",
+      }),
+      projected({
+        creditCardId: "card-1",
+        invoiceListDate: "2026-12-10",
+      }),
+      projected({ creditCardId: "card-1" }),
+    ]);
+
+    const result = await setup({ ...mocks.defaultParams, month: november });
+
+    expect(result.projectedExpense).toBe(10000);
+  });
+
+  it("SHOULD ignore projections of owners that are not selected", async () => {
+    spies.recurrenceRepository.getProjections.mockResolvedValueOnce([
+      projected({ ownerId: "someone-else" }),
+    ]);
+
+    expect(
+      (await setup({ ...mocks.defaultParams, month: november }))
+        .projectedExpense,
+    ).toBe(0);
+  });
+
+  it("SHOULD not ask WHEN there are no owners", async () => {
+    await setup({ month: november, ownerIds: [] });
+
+    expect(spies.recurrenceRepository.getProjections).not.toHaveBeenCalled();
   });
 });

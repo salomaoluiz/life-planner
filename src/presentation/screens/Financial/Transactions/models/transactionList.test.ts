@@ -12,6 +12,7 @@ import {
   formatMonthLabel,
   formatMonthName,
   isInMonth,
+  mergeProjectedInvoices,
   monthChoices,
   netAmount,
   resolveDayLabel,
@@ -251,5 +252,82 @@ describe("card invoice lines (spec 029)", () => {
     expect(filterInvoicesByOwner(invoices, ALL_FILTER)).toBe(invoices);
     expect(filterInvoicesByOwner(invoices, "user-id")).toHaveLength(1);
     expect(filterInvoicesByOwner(invoices, "family-1")).toEqual([]);
+  });
+});
+
+describe("projected occurrences (spec 034)", () => {
+  function projectedRow(id: string, date: Date) {
+    return new TransactionUIModel(
+      new TransactionDTO({
+        accountId: "a",
+        category: "c",
+        categoryId: "c",
+        date: date.toISOString(),
+        description: id,
+        id,
+        isProjected: true,
+        owner: "USER",
+        ownerId: "user-id",
+        type: "EXPENSE",
+        value: "100.00",
+      }),
+    );
+  }
+  const group = {
+    card: {
+      color: "#2B3A8C",
+      id: "card-1",
+      lastDigits: "1234",
+      owner: "USER" as never,
+      ownerId: "user-id",
+      title: "Main card",
+    },
+    items: [projectedRow("netflix", new Date(2026, 9, 28))],
+    listDate: "2026-11-05",
+    referenceMonth: "2026-10",
+  };
+
+  it("SHOULD keep a projected row out of the net of its day", () => {
+    const entries = buildEntries(
+      [
+        tx("real", new Date(2026, 10, 5)),
+        projectedRow("p", new Date(2026, 10, 5)),
+      ],
+      new Date(2026, 10, 20),
+    );
+    const header = entries.find((entry) => entry.kind === "header");
+
+    expect(header).toMatchObject({ netCents: -1000 });
+    expect(entries.filter((entry) => entry.kind === "item")).toHaveLength(2);
+  });
+
+  it("SHOULD add the projections to the real invoice of the same card and month", () => {
+    const [merged] = mergeProjectedInvoices([makeInvoice()], [group]);
+
+    expect(merged.includesProjected).toBe(true);
+    expect(merged.amountCents).toBe(45000 + 10000);
+  });
+
+  it("SHOULD leave an invoice of another month alone AND add a line for a projection with no real invoice", () => {
+    const merged = mergeProjectedInvoices(
+      [makeInvoice({ referenceMonth: "2026-09" })],
+      [group],
+    );
+
+    expect(merged).toHaveLength(2);
+    expect(merged[0].includesProjected).toBe(false);
+    expect(merged[1]).toMatchObject({
+      cardTitle: "Main card",
+      isProjectedOnly: true,
+      referenceMonth: "2026-10",
+    });
+    expect(merged[1].dateKey).toBe("2026-11-05");
+    expect(merged[1].amountCents).toBe(10000);
+  });
+
+  it("SHOULD change nothing WHEN there are no projections", () => {
+    const real = makeInvoice();
+
+    expect(mergeProjectedInvoices([real], [])).toEqual([real]);
   });
 });
