@@ -293,7 +293,7 @@ describe("runE2e progress plan", () => {
       {},
     );
 
-    expect(deps.exec.mock.calls[0][0].expected).toEqual([
+    expect(deps.startProgress.mock.calls[0][0].expected).toEqual([
       "auth/login",
       "auth/signup",
     ]);
@@ -305,7 +305,9 @@ describe("runE2e progress plan", () => {
       { argv: ["--tags", "smoke"] },
     );
 
-    expect(deps.exec.mock.calls[0][0].expected).toEqual(["auth/signup"]);
+    expect(deps.startProgress.mock.calls[0][0].expected).toEqual([
+      "auth/signup",
+    ]);
   });
 });
 
@@ -390,6 +392,69 @@ describe("runE2e --list-tags", () => {
 
     expect(exitCode).toBe(0);
     expect(printed).toEqual(["No tags found in e2e/flows"]);
+  });
+});
+
+describe("runE2e with workers", () => {
+  const files = ["auth/a.yaml", "auth/b.yaml", "auth/c.yaml"];
+  const workerReports = {
+    "e2e-report/junit-w0.xml": junit([{ name: "auth/a" }, { name: "auth/c" }]),
+    "e2e-report/junit-w1.xml": junit([{ name: "auth/b" }]),
+  };
+
+  function workerDeps(extraFiles = {}) {
+    return {
+      deps: {
+        listFiles: jest.fn((dir) => (dir === "e2e/flows" ? files : [])),
+      },
+      files: { ...workerReports, ...extraFiles },
+    };
+  }
+
+  it("SHOULD split the flows into one maestro call per worker AND merge the reports", async () => {
+    const { deps, exitCode, printed, written } = await run(workerDeps(), {
+      argv: ["--workers", "2"],
+    });
+
+    expect(exitCode).toBe(0);
+    expect(deps.exec).toHaveBeenCalledTimes(2);
+    const calls = deps.exec.mock.calls.map(([call]) => call);
+    expect(calls[0].args).toEqual(
+      expect.arrayContaining([
+        "e2e/flows/auth/a.yaml",
+        "--output",
+        "e2e-report/junit-w0.xml",
+        "--test-output-dir",
+        "e2e-report/artifacts/w0",
+      ]),
+    );
+    expect(calls.map((call) => call.logFile)).toEqual([
+      "e2e-report/maestro-w0.log",
+      "e2e-report/maestro-w1.log",
+    ]);
+    expect(printed.join("\n")).toContain("E2E PASSED: 3/3 flows");
+    expect(printed.join("\n")).toContain("2 workers");
+    expect(written["e2e/.durations.json"]).toBeDefined();
+  });
+
+  it("SHOULD exit 2 WHEN a worker produced no report", async () => {
+    const { exitCode } = await run(
+      {
+        ...workerDeps(),
+        files: {
+          "e2e-report/junit-w0.xml": workerReports["e2e-report/junit-w0.xml"],
+        },
+      },
+      { argv: ["--workers", "2"] },
+    );
+
+    expect(exitCode).toBe(2);
+  });
+
+  it("SHOULD keep one maestro call with --workers 1", async () => {
+    const { deps } = await run(workerDeps(), { argv: ["--workers", "1"] });
+
+    expect(deps.exec).toHaveBeenCalledTimes(1);
   });
 });
 

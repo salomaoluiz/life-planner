@@ -2,7 +2,9 @@ import { selectImpact } from "./impact.mjs";
 import { flowNameFromFile } from "./progress.mjs";
 import { buildSummary, parseJUnit } from "./summarize.mjs";
 import { buildTagList, parseFlowTags } from "./tags.mjs";
+import { parseDurations, resolveWorkers, splitFlows } from "./workers.mjs";
 
+const DURATIONS_FILE = "e2e/.durations.json";
 const MAX_REASONS = 10;
 const REPORT_DIR = "e2e-report";
 const DEFAULT_API_URL = "http://localhost:3000/api";
@@ -10,6 +12,7 @@ const DEFAULT_WEB_URL = "http://localhost:8081";
 
 export function buildMaestroArgs({
   apiUrl,
+  artifactsDir = `${REPORT_DIR}/artifacts`,
   failedOnly,
   headless,
   junitPath,
@@ -19,7 +22,7 @@ export function buildMaestroArgs({
 }) {
   const args = [
     "test",
-    target,
+    ...[target].flat(),
     "--platform",
     "web",
     "--format",
@@ -27,7 +30,7 @@ export function buildMaestroArgs({
     "--output",
     junitPath,
     "--test-output-dir",
-    `${REPORT_DIR}/artifacts`,
+    artifactsDir,
     "-e",
     `E2E_API_URL=${apiUrl}`,
     "-e",
@@ -70,6 +73,9 @@ export function parseArgs(argv) {
       options.changed = true;
     } else if (argv[index] === "--dry-run") {
       options.dryRun = true;
+    } else if (argv[index] === "--workers") {
+      options.workers = argv[index + 1];
+      index += 1;
     } else if (argv[index] === "--list-tags") {
       options.listTags = true;
     } else if (argv[index] === "--headless") {
@@ -182,39 +188,83 @@ export async function runE2e({ argv, env }, deps) {
     ...extraFiles.map((file) => flowNameFromFile(file)),
   ];
   const started = deps.now();
-  const junitPaths = [];
-  const runs = [
-    ...targets.map((target) => ({ tags: options.tags, target })),
-    ...extraFiles.map((target) => ({ tags: [], target })),
-  ];
-  for (const [index, { tags, target }] of runs.entries()) {
-    const junitPath =
-      runs.length === 1
-        ? `${REPORT_DIR}/junit.xml`
-        : `${REPORT_DIR}/junit-${index}.xml`;
+  const workerCount = resolveWorkers({ env, option: options.workers });
+  const allFiles = options.failedOnly
+    ? targets
+    : [...tagged, ...extraFiles.map(flowNameFromFile)].map(
+        (name) => `e2e/flows/${name}.yaml`,
+      );
+  const parallel = workerCount > 1 && allFiles.length > 1;
+  const runs = parallel
+    ? splitFlows(allFiles, readDurations(deps), workerCount).map(
+        (files, index) => ({
+          artifactsDir: `${REPORT_DIR}/artifacts/w${index}`,
+          junitPath: `${REPORT_DIR}/junit-w${index}.xml`,
+          logFile: `${REPORT_DIR}/maestro-w${index}.log`,
+          tags: options.tags.includes("wip") ? ["wip"] : [],
+          target: files,
+        }),
+      )
+    : [
+        ...targets.map((target) => ({ tags: options.tags, target })),
+        ...extraFiles.map((target) => ({ tags: [], target })),
+      ].map((run, index, list) => ({
+        ...run,
+        artifactsDir: `${REPORT_DIR}/artifacts`,
+        junitPath:
+          list.length === 1
+            ? `${REPORT_DIR}/junit.xml`
+            : `${REPORT_DIR}/junit-${index}.xml`,
+        logFile: `${REPORT_DIR}/maestro.log`,
+      }));
+  const junitPaths = runs.map((run) => run.junitPath);
+  const stopProgress =
+    deps.startProgress?.({
+      artifactRoots: [...new Set(runs.map((run) => run.artifactsDir))],
+      expected,
+      logFiles: [...new Set(runs.map((run) => run.logFile))],
+      started,
+    }) ?? (() => {});
+
+  function execRun(run) {
     // All Maestro output goes to the log file, never to the terminal: this is the token saving.
-    await deps.exec({
+    return deps.exec({
       args: buildMaestroArgs({
         apiUrl,
-        failedOnly: options.failedOnly,
+        artifactsDir: run.artifactsDir,
+        failedOnly: options.failedOnly || parallel,
         headless: options.headless,
-        junitPath,
-        tags,
-        target,
+        junitPath: run.junitPath,
+        tags: run.tags,
+        target: run.target,
         webUrl,
       }),
       command: "maestro",
-      expected,
-      logFile: `${REPORT_DIR}/maestro.log`,
-      started,
+      logFile: run.logFile,
     });
-    junitPaths.push(junitPath);
+  }
+
+  try {
+    if (parallel) {
+      await Promise.all(runs.map(execRun));
+    } else {
+      for (const run of runs) {
+        await execRun(run);
+      }
+    }
+  } finally {
+    stopProgress();
   }
   const durationSeconds = (deps.now() - started) / 1000;
 
   const reports = junitPaths
     .map((path) => deps.readFile(path))
     .filter((xml) => xml !== null);
+  if (parallel && reports.length < runs.length) {
+    return notRun(
+      "a worker produced no report, see e2e-report/maestro-w*.log (try --workers 1)",
+    );
+  }
   if (reports.length === 0) {
     return notRun(
       "maestro produced no report (wrong --tags?), see e2e-report/maestro.log",
@@ -244,8 +294,22 @@ export async function runE2e({ argv, env }, deps) {
     partialLabel,
     readFlowFile: (path) => deps.readFile(path),
     revisions: deps.revisions(),
+    workers: runs.length,
   });
 
+  // Only the new durations are merged in; a failed flow's time is not representative.
+  const failedNames = new Set(
+    flows.filter((flow) => flow.failed).map((flow) => flow.name),
+  );
+  const measured = Object.fromEntries(
+    Object.entries(
+      reports.reduce((all, xml) => ({ ...all, ...parseDurations(xml) }), {}),
+    ).filter(([file]) => !failedNames.has(flowNameFromFile(file))),
+  );
+  deps.writeFile(
+    DURATIONS_FILE,
+    `${JSON.stringify({ ...readDurations(deps), ...measured }, null, 2)}\n`,
+  );
   deps.writeFile(
     `${REPORT_DIR}/failed.txt`,
     summary.failedFiles.map((file) => `${file}\n`).join(""),
@@ -275,6 +339,14 @@ function plannedFlows(options, targets, deps) {
     })
     .sort()
     .map((file) => flowNameFromFile(file));
+}
+
+function readDurations(deps) {
+  try {
+    return JSON.parse(deps.readFile(DURATIONS_FILE) ?? "{}");
+  } catch {
+    return {};
+  }
 }
 
 function readFailedTargets(deps) {

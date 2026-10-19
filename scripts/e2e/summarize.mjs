@@ -6,7 +6,8 @@ const FAILED_FILE = "e2e-report/failed.txt";
 export function buildSummary(input) {
   const total = input.flows.length;
   const failed = input.flows.filter((flow) => flow.failed);
-  const duration = formatDuration(input.durationSeconds);
+  const workerText = input.workers > 1 ? `, ${input.workers} workers` : "";
+  const duration = `${formatDuration(input.durationSeconds)}${workerText}`;
   const suffix = input.revisions ? ` · ${input.revisions}` : "";
   const partial = input.partialLabel ? ` (${input.partialLabel})` : "";
 

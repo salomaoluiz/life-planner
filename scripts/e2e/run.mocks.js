@@ -1,6 +1,6 @@
 import { junit } from "./summarize.mocks";
 
-export const enabledEnv = { E2E_ENABLED: "true" };
+export const enabledEnv = { E2E_ENABLED: "true", E2E_WORKERS: "1" };
 
 export function createDeps(overrides = {}) {
   const files = {
@@ -21,6 +21,7 @@ export function createDeps(overrides = {}) {
     readFile: jest.fn((path) => files[path] ?? null),
     removeReportFiles: jest.fn(),
     revisions: jest.fn(() => ""),
+    startProgress: jest.fn(() => jest.fn()),
     writeFile: jest.fn((path, content) => {
       written[path] = content;
     }),
