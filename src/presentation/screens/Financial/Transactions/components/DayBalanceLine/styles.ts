@@ -4,18 +4,17 @@ import { useTheme } from "@presentation/theme";
 
 function useStyles() {
   const { theme } = useTheme();
+  const { spacing } = theme.sizes;
 
   return {
     styles: StyleSheet.create({
-      root: {
+      row: {
         alignItems: "center",
         flexDirection: "row",
-        gap: theme.sizes.spacing.sm,
-        minHeight: 40,
-        paddingLeft: theme.sizes.spacing.sm,
-        paddingVertical: theme.sizes.spacing.xs,
+        gap: spacing.sm,
+        minHeight: 44,
       },
-      title: { flex: 1, minWidth: 0 },
+      title: { flex: 1, gap: spacing.xxs, minWidth: 0 },
     }),
   };
 }

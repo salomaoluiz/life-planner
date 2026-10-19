@@ -12,12 +12,12 @@ export interface IconTileProps {
   color?: string;
   label?: string;
   name?: string;
-  size?: "lg" | "md";
+  size?: "lg" | "md" | "sm";
   testID?: string;
   tone?: Tone;
 }
 
-const TILE = { lg: 48, md: 40 };
+const TILE = { lg: 48, md: 40, sm: 28 };
 const CATEGORY_TINT = 0.16;
 
 function IconTile(props: IconTileProps) {
@@ -61,7 +61,7 @@ function IconTile(props: IconTileProps) {
       <Icon
         color={iconColor}
         name={props.name}
-        size={sizes.iconMd}
+        size={props.size === "sm" ? sizes.iconSm : sizes.iconMd}
         testID={testID && `${testID}-icon`}
       />
     );

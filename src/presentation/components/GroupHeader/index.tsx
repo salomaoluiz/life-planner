@@ -22,7 +22,9 @@ export interface GroupHeaderProps {
 }
 
 function GroupHeader(props: GroupHeaderProps) {
-  const { colors, spacing } = useKitTheme();
+  const { colors, radius, spacing } = useKitTheme();
+  const interactive = !!props.onPress;
+  const expanded = !!props.expanded;
   const styles = StyleSheet.create({
     container: {
       alignItems: "center",
@@ -31,16 +33,25 @@ function GroupHeader(props: GroupHeaderProps) {
       justifyContent: "space-between",
       paddingVertical: spacing.xs,
     },
-    titleRow: {
-      alignItems: "center",
-      flexDirection: "row",
-      flexShrink: 1,
-      gap: spacing.xs,
+    // A pressable day opens into a card (the lines below close it): rounded, with room at the edges.
+    interactive: {
+      borderColor: expanded ? colors.border : "transparent",
+      borderRadius: radius.md,
+      borderWidth: 1,
+      paddingHorizontal: spacing.sm,
+      ...(expanded
+        ? {
+            backgroundColor: colors.surface,
+            borderBottomLeftRadius: 0,
+            borderBottomRightRadius: 0,
+          }
+        : { borderRadius: radius.sm }),
     },
+    titleColumn: { flexShrink: 1, gap: spacing.xxs },
   });
   const content = (
     <>
-      <View style={styles.titleRow}>
+      <View style={interactive ? styles.titleColumn : undefined}>
         <Text.Overline value={props.title} />
         {props.meta}
       </View>
@@ -66,10 +77,10 @@ function GroupHeader(props: GroupHeaderProps) {
         accessibilityLabel={props.accessibilityLabel}
         accessibilityRole="button"
         expanded={props.expanded}
-        focusRadius={0}
+        focusRadius={expanded ? radius.md : radius.sm}
         minTouchTarget={false}
         onPress={props.onPress}
-        style={styles.container}
+        style={[styles.container, styles.interactive]}
         testID={props.testID}
       >
         {content}

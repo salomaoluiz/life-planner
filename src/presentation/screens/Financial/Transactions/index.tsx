@@ -7,6 +7,7 @@ import {
   EmptyState,
   ErrorState,
   GroupHeader,
+  Icon,
   SegmentedControl,
   Text,
 } from "@components";
@@ -93,6 +94,7 @@ function FinancialTransactions() {
           balanceCents={item.balanceCents}
           icon={item.icon}
           isCards={item.isCards}
+          isLast={item.isLast}
           name={item.name}
         />
       );
@@ -129,17 +131,24 @@ function FinancialTransactions() {
         })}
         expanded={expanded}
         meta={
-          <>
-            <Text.Caption tone={"secondary"} value={"·"} />
+          <View style={styles.net}>
             <AmountText size={"caption"} type={net.type} value={net.value} />
-          </>
+            <Text.Caption
+              tone={"secondary"}
+              value={t("financial.transactions.dayBalance.netSuffix")}
+            />
+          </View>
         }
         onPress={() => vm.onDayToggle(item.dateKey)}
         testID={`${transactionsTestIds.dayBalance}-${item.dateKey}`}
         title={title}
         tooltip={
           expanded || !day ? undefined : (
-            <>
+            <View style={styles.tooltip}>
+              <Text.Overline
+                tone={"secondary"}
+                value={t("financial.transactions.dayBalance.title")}
+              />
               {day.accounts.map((account) => (
                 <DayBalanceLine
                   accountId={account.accountId}
@@ -148,6 +157,7 @@ function FinancialTransactions() {
                   isCards={false}
                   key={account.accountId}
                   name={account.name}
+                  variant={"tooltip"}
                 />
               ))}
               {day.cardsDueCents !== 0 ? (
@@ -156,25 +166,39 @@ function FinancialTransactions() {
                   icon={"credit-card-outline"}
                   isCards
                   name={""}
+                  variant={"tooltip"}
                 />
               ) : null}
-            </>
+              <Text.Caption
+                tone={"secondary"}
+                value={t("financial.transactions.dayBalance.pinHint")}
+              />
+            </View>
           )
         }
         trailing={
           <View style={styles.balance}>
-            {item.projected ? (
-              <Text.Caption
-                testID={transactionsTestIds.dayBalanceProjected}
-                tone={"secondary"}
-                value={t("financial.recurrence.projected")}
+            <View style={styles.balanceColumn}>
+              <View style={styles.balanceLabel}>
+                {item.projected ? (
+                  <Text.Caption
+                    testID={transactionsTestIds.dayBalanceProjected}
+                    tone={"secondary"}
+                    value={t("financial.recurrence.projected")}
+                  />
+                ) : null}
+                <Text.Overline
+                  tone={"secondary"}
+                  value={t("financial.transactions.dayBalance.label")}
+                />
+              </View>
+              <AmountText
+                size={"body"}
+                type={balanceNegative ? "EXPENSE" : undefined}
+                value={Math.abs(item.balanceCents)}
               />
-            ) : null}
-            <AmountText
-              size={"body"}
-              type={balanceNegative ? "EXPENSE" : undefined}
-              value={Math.abs(item.balanceCents)}
-            />
+            </View>
+            <Icon name={expanded ? "chevron-up" : "chevron-down"} size={16} />
           </View>
         }
       />

@@ -31,6 +31,8 @@ export type ListEntry =
       dateKey: string;
       icon: string;
       isCards: boolean;
+      // The last line of the group closes the card the header opened.
+      isLast: boolean;
       key: string;
       kind: "balanceLine";
       name: string;
@@ -75,6 +77,7 @@ function balanceLines(dateKey: string, balance: DayBalanceView): ListEntry[] {
     dateKey,
     icon: account.icon,
     isCards: false,
+    isLast: false,
     key: `balance-${dateKey}-${account.accountId}`,
     kind: "balanceLine",
     name: account.name,
@@ -86,10 +89,17 @@ function balanceLines(dateKey: string, balance: DayBalanceView): ListEntry[] {
       dateKey,
       icon: "credit-card-outline",
       isCards: true,
+      isLast: false,
       key: `balance-${dateKey}-cards`,
       kind: "balanceLine",
       name: "",
     });
+  }
+
+  const last = lines[lines.length - 1];
+
+  if (last?.kind === "balanceLine") {
+    last.isLast = true;
   }
 
   return lines;
