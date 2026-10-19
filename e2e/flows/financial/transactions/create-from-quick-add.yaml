@@ -53,6 +53,7 @@ onFlowComplete:
 - tapOn:
     id: "financial.transaction-form.save-button"
 - runFlow: ../../../subflows/financial/open-transactions.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.row-title"

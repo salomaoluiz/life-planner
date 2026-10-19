@@ -1,4 +1,5 @@
 import AccountModel from "@data/models/financial/AccountModel";
+import DailyBalanceModel from "@data/models/financial/DailyBalanceModel";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 export interface AccountDatasource {
@@ -8,6 +9,9 @@ export interface AccountDatasource {
   createAccount(params: CreateAccountDatasourceParams): Promise<AccountModel>;
   deleteAccount(params: DeleteAccountDatasourceParams): Promise<void>;
   getAccounts(ownerIds: string[]): Promise<AccountModel[]>;
+  getDailyBalances(
+    params: GetDailyBalancesDatasourceParams,
+  ): Promise<DailyBalanceModel>;
   updateAccount(params: UpdateAccountDatasourceParams): Promise<void>;
 }
 
@@ -31,6 +35,10 @@ interface DeleteAccountDatasourceParams {
   ownerId: string;
 }
 
+interface GetDailyBalancesDatasourceParams {
+  month: string;
+  ownerIds: string[];
+}
 interface UpdateAccountDatasourceParams {
   icon?: string;
   id: string;
@@ -43,5 +51,6 @@ interface UpdateAccountDatasourceParams {
 export {
   AdjustAccountBalanceDatasourceParams,
   CreateAccountDatasourceParams,
+  GetDailyBalancesDatasourceParams,
   UpdateAccountDatasourceParams,
 };

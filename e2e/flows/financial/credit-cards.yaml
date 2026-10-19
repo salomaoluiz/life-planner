@@ -81,6 +81,8 @@ onFlowComplete:
     id: "financial.card-form.title-input"
 - eraseText
 - inputText: ${output.CARD_TITLE_EDITED}
+- runFlow: ../../subflows/financial/scroll-form-down.yaml
+- runFlow: ../../subflows/financial/scroll-form-down.yaml
 - tapOn:
     id: "financial.card-form.save-button"
 - extendedWaitUntil:
@@ -91,6 +93,7 @@ onFlowComplete:
 # Archive: leaves the carousel and shows under Archived
 - tapOn:
     id: "financial.cards.edit-button"
+- runFlow: ../../subflows/financial/scroll-form-down.yaml
 - runFlow: ../../subflows/financial/scroll-form-down.yaml
 - extendedWaitUntil:
     visible:
@@ -113,6 +116,7 @@ onFlowComplete:
 - tapOn:
     id: "financial.cards.row-title"
     text: ${output.CARD_TITLE_EDITED}
+- runFlow: ../../subflows/financial/scroll-form-down.yaml
 - runFlow: ../../subflows/financial/scroll-form-down.yaml
 - extendedWaitUntil:
     visible:

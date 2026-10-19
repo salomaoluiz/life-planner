@@ -7,6 +7,7 @@ import {
   createInitialState,
   isPaymentAfterDue,
   isSameState,
+  paymentAccountOptions,
   stateFromDto,
   toCreateParams,
   toUpdateParams,
@@ -52,6 +53,7 @@ describe("createInitialState / stateFromDto / isSameState", () => {
       lastDigits: "",
       limitCents: 0,
       ownerId: "o",
+      paymentAccountId: "",
       paymentDay: "",
       tint: "#6366F1",
       title: "",
@@ -237,6 +239,60 @@ describe("toUpdateParams", () => {
       dueDay: 2,
       id: "card-id",
       status: "ARCHIVED",
+    });
+  });
+});
+
+describe("payment account (spec 035)", () => {
+  const checking = { id: "a1", name: "Checking", status: "ACTIVE" } as never;
+  const old = { id: "a2", name: "Old", status: "ARCHIVED" } as never;
+
+  it("SHOULD load the linked id, send it on create AND omit it when empty", () => {
+    const linked = stateFromDto(
+      new CreditCardDTO({ ...dto, paymentAccountId: "a1" }),
+    );
+
+    expect(linked.paymentAccountId).toBe("a1");
+    expect(stateFromDto(dto).paymentAccountId).toBe("");
+    expect(toCreateParams(valid({ paymentAccountId: "a1" }), owner)).toEqual(
+      expect.objectContaining({ paymentAccountId: "a1" }),
+    );
+    expect(toCreateParams(valid(), owner).paymentAccountId).toBeUndefined();
+  });
+
+  it("SHOULD send null when cleared on edit AND nothing when untouched", () => {
+    const initial = valid({ paymentAccountId: "a1" });
+
+    expect(
+      toUpdateParams("id", valid({ paymentAccountId: "" }), initial, owner)
+        .paymentAccountId,
+    ).toBeNull();
+    expect(
+      "paymentAccountId" in toUpdateParams("id", initial, initial, owner),
+    ).toBe(false);
+    expect(
+      toUpdateParams("id", valid({ paymentAccountId: "a9" }), initial, owner)
+        .paymentAccountId,
+    ).toBe("a9");
+    expect(isSameState(initial, valid())).toBe(false);
+  });
+
+  it("SHOULD offer None AND the active accounts only", () => {
+    expect(paymentAccountOptions([checking, old], "")).toEqual([
+      { labelKey: "financial.cardForm.paymentAccountNone", value: "" },
+      { label: "Checking", value: "a1" },
+    ]);
+  });
+
+  it("SHOULD keep an archived linked account (marked) AND the other-member placeholder", () => {
+    expect(paymentAccountOptions([checking, old], "a2").at(-1)).toEqual({
+      archived: true,
+      label: "Old",
+      value: "a2",
+    });
+    expect(paymentAccountOptions([checking], "x9").at(-1)).toEqual({
+      labelKey: "financial.cardForm.paymentAccountOther",
+      value: "x9",
     });
   });
 });

@@ -294,3 +294,47 @@ describe("projected purchases (spec 034 FR 14)", () => {
     expect(row.isProjected).toBe(true);
   });
 });
+
+describe("payment account prefill (spec 035)", () => {
+  it("SHOULD preselect the linked ACTIVE account WHEN the pay sheet opens", () => {
+    givenLoaded({
+      accounts: [account("a1"), account("a2")],
+      invoice: makeInvoice(),
+      linkedAccountId: "a2",
+    });
+    const { result } = setup();
+
+    expect(result.current.accountId).toBeUndefined();
+
+    act(() => result.current.onPayPress());
+
+    expect(result.current.accountId).toBe("a2");
+  });
+
+  it("SHOULD leave it empty WHEN the link is archived, unknown or missing", () => {
+    givenLoaded({
+      accounts: [account("a1"), account("old", "ARCHIVED")],
+      invoice: makeInvoice(),
+      linkedAccountId: "old",
+    });
+    const { result } = setup();
+
+    act(() => result.current.onPayPress());
+
+    expect(result.current.accountId).toBeUndefined();
+  });
+
+  it("SHOULD NOT overwrite an account the user already picked", () => {
+    givenLoaded({
+      accounts: [account("a1"), account("a2")],
+      invoice: makeInvoice(),
+      linkedAccountId: "a2",
+    });
+    const { result } = setup();
+
+    act(() => result.current.onAccountChange("a1"));
+    act(() => result.current.onPayPress());
+
+    expect(result.current.accountId).toBe("a1");
+  });
+});

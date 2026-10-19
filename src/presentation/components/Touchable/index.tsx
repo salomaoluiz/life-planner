@@ -24,6 +24,8 @@ export interface TouchableProps {
   /** Set false when the caller paints its own disabled look (default: dim to 50%) */
   dimWhenDisabled?: boolean;
   disabled?: boolean;
+  /** Exposed to screen readers for disclosure rows */
+  expanded?: boolean;
   focusRadius?: number;
   /** Ring color; pass a contrasting one on accent-filled controls (default: accent) */
   focusRingColor?: string;
@@ -56,6 +58,7 @@ function Touchable(props: TouchableProps) {
       accessibilityState={{
         busy: !!props.busy,
         disabled: !!props.disabled || !!props.busy,
+        expanded: props.expanded,
         selected: !!props.selected,
       }}
       disabled={disabled}

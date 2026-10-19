@@ -38,6 +38,7 @@ interface CreateCreditCardRepositoryParams {
   limit: number;
   owner: OwnerType;
   ownerId: string;
+  paymentAccountId?: string;
   paymentDay?: number;
   title: string;
 }
@@ -64,6 +65,7 @@ interface UpdateCreditCardRepositoryParams {
   limit?: number;
   owner?: OwnerType;
   ownerId?: string;
+  paymentAccountId?: null | string;
   paymentDay?: null | number;
   status?: string;
   title?: string;

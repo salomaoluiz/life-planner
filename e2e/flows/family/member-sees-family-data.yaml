@@ -92,6 +92,7 @@ onFlowComplete:
       EMAIL: ${output.MEMBER_EMAIL}
       PASSWORD: ${output.MEMBER_PASSWORD}
 - runFlow: ../../subflows/financial/open-transactions.yaml
+- runFlow: ../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.row-title"
@@ -121,6 +122,7 @@ onFlowComplete:
       PASSWORD: ${output.STRANGER_PASSWORD}
 # C sees none of them (each module shows its empty state, never the records)
 - runFlow: ../../subflows/financial/open-transactions.yaml
+- runFlow: ../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.empty-month"

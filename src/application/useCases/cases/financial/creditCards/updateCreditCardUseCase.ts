@@ -14,6 +14,7 @@ export interface UpdateCreditCardUseCaseParams {
   limit?: number;
   owner?: string;
   ownerId?: string;
+  paymentAccountId?: null | string;
   paymentDay?: null | number;
   status?: string;
   title?: string;
@@ -51,6 +52,7 @@ function updateCreditCardUseCase(
           limit: params.limit,
           owner,
           ownerId: params.ownerId,
+          paymentAccountId: params.paymentAccountId,
           paymentDay: params.paymentDay,
           status: params.status,
           title: params.title,

@@ -57,12 +57,14 @@ onFlowComplete:
       EMAIL: ${output.EMAIL}
       PASSWORD: ${output.PASSWORD}
 - runFlow: ../../../subflows/financial/open-transactions.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.row-title"
       text: ${output.FAMILY_EXPENSE_NAME}
     timeout: 20000
 # Scope: the family. The caption under the balance shows its name.
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
 - tapOn:
     id: "financial.transactions.scope-filter-${output.FAMILY_ID}"
 - assertVisible:

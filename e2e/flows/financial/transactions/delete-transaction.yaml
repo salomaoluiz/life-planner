@@ -35,6 +35,7 @@ onFlowComplete:
       EMAIL: ${output.EMAIL}
       PASSWORD: ${output.PASSWORD}
 - runFlow: ../../../subflows/financial/open-transactions.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.row-title"

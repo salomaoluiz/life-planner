@@ -17,6 +17,7 @@ async function createCreditCard(params: Params): Response {
     limit: params.limit,
     owner: params.owner,
     ownerId: params.ownerId,
+    paymentAccountId: params.paymentAccountId,
     paymentDay: params.paymentDay,
     title: params.title,
   };

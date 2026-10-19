@@ -1,4 +1,6 @@
-import CreditCardEntity from "@domain/entities/financial/CreditCardEntity";
+import CreditCardEntity, {
+  PaymentAccountSummary,
+} from "@domain/entities/financial/CreditCardEntity";
 
 export interface ICreditCardDTO {
   brand: string;
@@ -10,6 +12,8 @@ export interface ICreditCardDTO {
   limit: number;
   owner: string;
   ownerId: string;
+  paymentAccount?: null | PaymentAccountSummary;
+  paymentAccountId?: string;
   paymentDay?: number;
   status: string;
   title: string;
@@ -25,6 +29,8 @@ class CreditCardDTO implements ICreditCardDTO {
   limit: number;
   owner: string;
   ownerId: string;
+  paymentAccount?: null | PaymentAccountSummary;
+  paymentAccountId?: string;
   paymentDay?: number;
   status: string;
   title: string;
@@ -39,6 +45,8 @@ class CreditCardDTO implements ICreditCardDTO {
     this.limit = params.limit;
     this.owner = params.owner;
     this.ownerId = params.ownerId;
+    this.paymentAccount = params.paymentAccount;
+    this.paymentAccountId = params.paymentAccountId;
     this.paymentDay = params.paymentDay;
     this.status = params.status;
     this.title = params.title;
@@ -55,6 +63,8 @@ class CreditCardDTO implements ICreditCardDTO {
       limit: entity.limit,
       owner: entity.owner,
       ownerId: entity.ownerId,
+      paymentAccount: entity.paymentAccount,
+      paymentAccountId: entity.paymentAccountId,
       paymentDay: entity.paymentDay,
       status: entity.status,
       title: entity.title,

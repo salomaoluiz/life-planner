@@ -7,15 +7,18 @@ import {
   EmptyState,
   ErrorState,
   GroupHeader,
+  Icon,
   SegmentedControl,
   Text,
 } from "@components";
+import { formatAmount } from "@components/AmountText/formatAmount";
 import Skeleton from "@components/Skeleton";
-import { useTranslation } from "@presentation/i18n";
+import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
 import AdjustmentSheet from "./components/AdjustmentSheet";
 import CardInvoiceRow from "./components/CardInvoiceRow";
+import DayBalanceLine from "./components/DayBalanceLine";
 import MonthPickerSheet from "./components/MonthPickerSheet";
 import MonthSummary from "./components/MonthSummary";
 import MonthSwitcher from "./components/MonthSwitcher";
@@ -37,6 +40,7 @@ const SKELETON_ROWS = [0, 1, 2, 3, 4, 5];
 function FinancialTransactions() {
   const { styles } = useStyles();
   const { t } = useTranslation();
+  const localeTag = useLocaleTag();
   const vm = useTransactionsViewModel();
   const adjustment = useAdjustmentSheet({ onDeleted: vm.onRefresh });
   const pay = usePayTransaction({ onPaid: vm.onRefresh });
@@ -83,13 +87,119 @@ function FinancialTransactions() {
       );
     }
 
+    if (item.kind === "balanceLine") {
+      return (
+        <DayBalanceLine
+          accountId={item.accountId}
+          balanceCents={item.balanceCents}
+          icon={item.icon}
+          isCards={item.isCards}
+          isLast={item.isLast}
+          name={item.name}
+        />
+      );
+    }
+
     const net = netAmount(item.netCents);
+
+    if (item.balanceCents === undefined) {
+      return (
+        <GroupHeader
+          testID={`day-header-${item.key}`}
+          title={dayTitle(item)}
+          trailing={
+            <AmountText size={"body"} type={net.type} value={net.value} />
+          }
+        />
+      );
+    }
+
+    const expanded = vm.expandedDayKey === item.dateKey;
+    const balanceNegative = item.balanceCents < 0;
+    const day = vm.balances.get(item.dateKey);
+    const title = dayTitle(item);
+
     return (
       <GroupHeader
-        testID={`day-header-${item.key}`}
-        title={dayTitle(item)}
+        accessibilityLabel={t("financial.transactions.dayBalance.a11y", {
+          day: title,
+          value: formatAmount(
+            Math.abs(item.balanceCents),
+            localeTag,
+            balanceNegative ? "EXPENSE" : undefined,
+          ),
+        })}
+        expanded={expanded}
+        meta={
+          <View style={styles.net}>
+            <AmountText size={"caption"} type={net.type} value={net.value} />
+            <Text.Caption
+              tone={"secondary"}
+              value={t("financial.transactions.dayBalance.netSuffix")}
+            />
+          </View>
+        }
+        onPress={() => vm.onDayToggle(item.dateKey)}
+        testID={`${transactionsTestIds.dayBalance}-${item.dateKey}`}
+        title={title}
+        tooltip={
+          expanded || !day ? undefined : (
+            <View style={styles.tooltip}>
+              <Text.Overline
+                tone={"secondary"}
+                value={t("financial.transactions.dayBalance.title")}
+              />
+              {day.accounts.map((account) => (
+                <DayBalanceLine
+                  accountId={account.accountId}
+                  balanceCents={account.balanceCents}
+                  icon={account.icon}
+                  isCards={false}
+                  key={account.accountId}
+                  name={account.name}
+                  variant={"tooltip"}
+                />
+              ))}
+              {day.cardsDueCents !== 0 ? (
+                <DayBalanceLine
+                  balanceCents={day.cardsDueCents}
+                  icon={"credit-card-outline"}
+                  isCards
+                  name={""}
+                  variant={"tooltip"}
+                />
+              ) : null}
+              <Text.Caption
+                tone={"secondary"}
+                value={t("financial.transactions.dayBalance.pinHint")}
+              />
+            </View>
+          )
+        }
         trailing={
-          <AmountText size={"body"} type={net.type} value={net.value} />
+          <View style={styles.balance}>
+            <View style={styles.balanceColumn}>
+              <View style={styles.balanceLabel}>
+                {item.projected ? (
+                  <Text.Caption
+                    testID={transactionsTestIds.dayBalanceProjected}
+                    tone={"secondary"}
+                    value={t("financial.recurrence.projected")}
+                  />
+                ) : null}
+                <Text.Overline
+                  tone={"secondary"}
+                  value={t("financial.transactions.dayBalance.label")}
+                />
+              </View>
+              <AmountText
+                size={"body"}
+                type={balanceNegative ? "EXPENSE" : undefined}
+                value={Math.abs(item.balanceCents)}
+              />
+            </View>
+            <Icon name={expanded ? "chevron-up" : "chevron-down"} size={16} />
+          </View>
         }
       />
     );
@@ -241,7 +351,7 @@ function FinancialTransactions() {
         data={vm.entries}
         estimatedItemSize={64}
         // Expanding an invoice only changes this id: without it the virtualized row keeps its old render.
-        extraData={vm.expandedInvoiceId}
+        extraData={`${vm.expandedInvoiceId ?? ""}|${vm.expandedDayKey ?? ""}`}
         getItemType={(entry) => entry.kind}
         keyExtractor={(entry) => entry.key}
         ListEmptyComponent={empty}

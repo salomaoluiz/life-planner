@@ -1,0 +1,153 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/daily-balance
+tags:
+  - financial
+  - spec-035
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- evalScript: ${output.BASICS_ACCOUNT_ID = output.ACCOUNT_ID}
+- evalScript: ${output.KEEP_CATEGORY_ID = output.EXPENSE_CATEGORY_ID}
+- evalScript: ${output.KEEP_INCOME_CATEGORY_ID = output.INCOME_CATEGORY_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Savings
+      KEY: SAVINGS_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Rent
+      KEY: RENT_NAME
+- runScript: ../../../scripts/today-dates.js
+# The account under test starts with 1.000,00 (the basics account stays at 0,00)
+- runFlow:
+    file: ../../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: ${output.SAVINGS_NAME}
+      BALANCE_CENTS: "100000"
+- evalScript: ${output.KEEP_ACCOUNT_ID = output.ACCOUNT_ID}
+# Paid rows: -100,00 yesterday, -300,00 and +50,00 today
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.KEEP_ACCOUNT_ID}
+      CATEGORY_ID: ${output.KEEP_CATEGORY_ID}
+      DESCRIPTION: E2E yesterday
+      VALUE_CENTS: "10000"
+      DATE: ${output.YESTERDAY_KEY}
+      PAID: "true"
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.KEEP_ACCOUNT_ID}
+      CATEGORY_ID: ${output.KEEP_CATEGORY_ID}
+      DESCRIPTION: E2E today expense
+      VALUE_CENTS: "30000"
+      PAID: "true"
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.KEEP_ACCOUNT_ID}
+      CATEGORY_ID: ${output.KEEP_INCOME_CATEGORY_ID}
+      DESCRIPTION: E2E today income
+      VALUE_CENTS: "5000"
+      TYPE: INCOME
+      PAID: "true"
+- runFlow:
+    file: ../../../subflows/login.yaml
+    env:
+      EMAIL: ${output.EMAIL}
+      PASSWORD: ${output.PASSWORD}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+# Today ends with 1.000 - 100 - 300 + 50 = 650,00; yesterday with 900,00
+- extendedWaitUntil:
+    visible:
+      text: "(?s).*650[.,]00.*"
+      childOf:
+        id: "financial.transactions.day-balance-${output.TODAY_KEY}"
+    timeout: 20000
+- runFlow:
+    when:
+      true: ${output.YESTERDAY_IN_PREVIOUS_MONTH == 'false'}
+    commands:
+      - assertVisible:
+          text: "(?s).*900[.,]00.*"
+          childOf:
+            id: "financial.transactions.day-balance-${output.YESTERDAY_KEY}"
+# The first and last day of the month always have a header with the balance, even without rows
+- assertVisible:
+    text: "(?s).*650[.,]00.*"
+    childOf:
+      id: "financial.transactions.day-balance-${output.LAST_OF_MONTH_KEY}"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.day-balance-${output.FIRST_OF_MONTH_KEY}"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+# Tap: one line per account (the basics account and the one under test); tap again hides them
+- tapOn:
+    id: "financial.transactions.day-balance-${output.TODAY_KEY}"
+- extendedWaitUntil:
+    visible:
+      text: "(?s).*650[.,]00.*"
+      childOf:
+        id: "financial.transactions.day-balance-line-${output.KEEP_ACCOUNT_ID}"
+    timeout: 20000
+- assertVisible:
+    id: "financial.transactions.day-balance-line-${output.BASICS_ACCOUNT_ID}"
+- tapOn:
+    id: "financial.transactions.day-balance-${output.TODAY_KEY}"
+- assertNotVisible:
+    id: "financial.transactions.day-balance-line-${output.KEEP_ACCOUNT_ID}"
+# The type filter never changes the balance
+- tapOn:
+    id: "financial.transactions.type-filter-INCOME"
+- assertVisible:
+    text: "(?s).*650[.,]00.*"
+    childOf:
+      id: "financial.transactions.day-balance-${output.TODAY_KEY}"
+- tapOn:
+    id: "financial.transactions.type-filter-ALL"
+# A monthly expense of 200,00 starting today (paid today): next month shows 650 - 200 - 200 = 250,00, projected
+- runFlow:
+    file: ../../../subflows/setup/create-recurrence.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.KEEP_ACCOUNT_ID}
+      CATEGORY_ID: ${output.KEEP_CATEGORY_ID}
+      DESCRIPTION: ${output.RENT_NAME}
+      VALUE_CENTS: "20000"
+      FREQUENCY: MONTHLY
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
+- tapOn:
+    id: "financial.transactions.month-next"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      text: "(?s).*250[.,]00.*"
+      childOf:
+        id: "financial.transactions.day-balance-${output.NEXT_MONTH_SAME_DAY_KEY}"
+    timeout: 20000
+- assertVisible:
+    id: "financial.transactions.day-balance-projected"

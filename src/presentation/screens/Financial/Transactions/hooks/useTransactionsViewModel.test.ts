@@ -7,6 +7,7 @@ import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import { makeInvoice } from "../mocks/invoice.mocks";
 import TransactionUIModel from "../models/TransactionUIModel";
 import {
+  balancesQuery,
   dto,
   givenData,
   invoicesQuery,
@@ -584,5 +585,119 @@ describe("projected occurrences (spec 034)", () => {
     act(() => result.current.onNextMonth());
     act(() => result.current.onRefresh());
     expect(projectionsQuery.value.refetch).toHaveBeenCalled();
+  });
+});
+
+describe("day balances (spec 035)", () => {
+  const views = new Map([
+    [
+      "2026-10-03",
+      { accounts: [], cardsDueCents: 0, projected: false, totalCents: 5000 },
+    ],
+  ]);
+
+  it("SHOULD put the balance on the header AND expand the lines on toggle, one day at a time", () => {
+    givenData([ui("a", new Date(2026, 9, 3)), ui("b", new Date(2026, 9, 4))]);
+    balancesQuery.withData(views);
+    const { result } = setup();
+
+    expect(
+      result.current.entries.find(
+        (entry) => entry.kind === "header" && entry.dateKey === "2026-10-03",
+      ),
+    ).toMatchObject({ balanceCents: 5000 });
+
+    act(() => result.current.onDayToggle("2026-10-03"));
+    expect(result.current.expandedDayKey).toBe("2026-10-03");
+
+    act(() => result.current.onDayToggle("2026-10-04"));
+    expect(result.current.expandedDayKey).toBe("2026-10-04");
+
+    act(() => result.current.onDayToggle("2026-10-04"));
+    expect(result.current.expandedDayKey).toBeUndefined();
+  });
+
+  it("SHOULD keep the day net WHEN the balances request failed AND not report an error", () => {
+    givenData([ui("a", new Date(2026, 9, 3))]);
+    balancesQuery.withError();
+    const { result } = setup();
+
+    expect(result.current.entries[0]).toMatchObject({
+      balanceCents: undefined,
+    });
+    expect(result.current.errorMessage).toBeUndefined();
+  });
+
+  it("SHOULD collapse the day WHEN the month changes", () => {
+    givenData([ui("a", new Date(2026, 9, 3))]);
+    balancesQuery.withData(views);
+    const { result } = setup();
+
+    act(() => result.current.onDayToggle("2026-10-03"));
+    act(() => result.current.onNextMonth());
+
+    expect(result.current.expandedDayKey).toBeUndefined();
+  });
+
+  it("SHOULD follow the scope filter in the query key AND ignore the type filter", () => {
+    givenData([ui("a", new Date(2026, 9, 3))]);
+    balancesQuery.withData(views);
+    const { result } = setup();
+
+    act(() => result.current.onTypeFilterChange("INCOME"));
+    const keys = spies.useQuery.mock.calls
+      .map(([options]) => options.cacheKey as string[])
+      .filter((key) => key[0] === "dailyBalances");
+
+    expect(keys.at(-1)).toEqual([
+      "dailyBalances",
+      "list",
+      "2026-10",
+      "user-id",
+      "family-1",
+    ]);
+
+    act(() => result.current.onOwnerFilterChange("family-1"));
+    const last = spies.useQuery.mock.calls
+      .map(([options]) => options.cacheKey as string[])
+      .filter((key) => key[0] === "dailyBalances")
+      .at(-1);
+
+    expect(last).toEqual(["dailyBalances", "list", "2026-10", "family-1"]);
+  });
+
+  it("SHOULD not enable the query for a month more than 12 ahead", () => {
+    givenData([]);
+    const { result } = setup();
+
+    for (let i = 0; i < 13; i += 1) {
+      act(() => result.current.onNextMonth());
+    }
+    const last = spies.useQuery.mock.calls
+      .map(([options]) => options)
+      .filter((options) => options.cacheKey[0] === "dailyBalances")
+      .at(-1);
+
+    expect(last?.enabled).toBe(false);
+  });
+
+  it("SHOULD fetch the month with the selected owners", async () => {
+    givenData([]);
+    spies.getBalances.mockResolvedValue({
+      accounts: [],
+      days: [],
+      month: "2026-10",
+    } as never);
+    setup();
+    const options = spies.useQuery.mock.calls
+      .map(([item]) => item)
+      .find((item) => item.cacheKey[0] === "dailyBalances");
+
+    await options?.fetch();
+
+    expect(spies.getBalances).toHaveBeenCalledWith({
+      month: "2026-10",
+      ownerIds: ["user-id", "family-1"],
+    });
   });
 });

@@ -122,6 +122,15 @@ function useInvoiceViewModel() {
         owners.data!.map((owner) => owner.id),
       ),
   });
+  // The card's linked account prefills "Pay from" (spec 035 FR 20).
+  const cards = useQuery({
+    cacheKey: [useCases.getFinancialCreditCardsUseCase.uniqueName],
+    enabled: isPayOpen && !!owners.data,
+    fetch: async () =>
+      useCases.getFinancialCreditCardsUseCase.execute(
+        owners.data!.map((owner) => owner.id),
+      ),
+  });
   const payMutation = useMutation({
     cacheKey: [useCases.payFinancialInvoiceUseCase.uniqueName],
     fetch: useCases.payFinancialInvoiceUseCase.execute,
@@ -136,6 +145,21 @@ function useInvoiceViewModel() {
       (accounts.data ?? []).filter((account) => account.status === "ACTIVE"),
     [accounts.data],
   );
+
+  const linkedAccountId = cards.data?.find(
+    (card) => card.id === params.cardId,
+  )?.paymentAccountId;
+
+  useEffect(() => {
+    if (
+      isPayOpen &&
+      !accountId &&
+      linkedAccountId &&
+      activeAccounts.some((item) => item.id === linkedAccountId)
+    ) {
+      setAccountId(linkedAccountId);
+    }
+  }, [isPayOpen, linkedAccountId, activeAccounts]);
 
   useEffect(() => {
     if (payMutation.status === "success" || undoMutation.status === "success") {

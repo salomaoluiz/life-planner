@@ -28,6 +28,7 @@ const repositoriesMocks: Repositories = {
       createAccount: jest.fn(),
       deleteAccount: jest.fn(),
       getAccounts: jest.fn(),
+      getDailyBalances: jest.fn(),
       updateAccount: jest.fn(),
     },
     cardCredit: {

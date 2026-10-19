@@ -24,6 +24,7 @@ export { default as Divider, DividerProps } from "./Divider";
 export { default as EmptyState, EmptyStateProps } from "./EmptyState";
 export { default as ErrorState, ErrorStateProps } from "./ErrorState";
 export { default as FieldShell, FieldShellProps } from "./FieldShell";
+export { default as GroupBodyRow, GroupBodyRowProps } from "./GroupBodyRow";
 export { default as GroupHeader, GroupHeaderProps } from "./GroupHeader";
 export { default as HelperText, HelperTextProps } from "./HelperText";
 export {
@@ -67,5 +68,6 @@ export { default as TabBar, TabBarItem, TabBarProps } from "./TabBar";
 export { default as Text, TextProps } from "./Text";
 export { default as TextField, TextFieldProps } from "./TextField";
 export { default as TextInput, TextInputProps } from "./TextInput";
+export { default as Tooltip, TooltipProps } from "./Tooltip";
 export { default as Touchable, TouchableProps } from "./Touchable";
 export { default as TreeItem, TreeItemProps } from "./TreeItem";

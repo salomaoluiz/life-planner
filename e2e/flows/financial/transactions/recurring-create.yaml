@@ -37,6 +37,7 @@ onFlowComplete:
       EMAIL: ${output.EMAIL}
       PASSWORD: ${output.PASSWORD}
 - runFlow: ../../../subflows/financial/open-transactions.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 # The real occurrence shows the repeat icon and the counter "1/4"; the current month has no projected line
 - extendedWaitUntil:
     visible:
