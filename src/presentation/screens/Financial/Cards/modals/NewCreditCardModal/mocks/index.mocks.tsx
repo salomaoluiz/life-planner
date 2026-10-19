@@ -42,12 +42,17 @@ const defaultViewModel: ReturnType<typeof useNewCreditCardViewModel> = {
   onLastDigitsChange: jest.fn(),
   onLimitChange: jest.fn(),
   onOwnerChange: jest.fn(),
+  onPaymentAccountChange: jest.fn(),
   onPaymentDayChange: jest.fn(),
   onSave: jest.fn(),
   onTintChange: jest.fn(),
   onTitleChange: jest.fn(),
   ownerChoices: [{ label: "Personal", value: "user-id" }],
   ownerId: "user-id",
+  paymentAccountId: "",
+  paymentAccountOptions: [
+    { labelKey: "financial.cardForm.paymentAccountNone", value: "" },
+  ],
   paymentDay: "",
   paymentDayOptions: [
     { labelKey: "financial.cardForm.paymentSameAsDue", value: "" },

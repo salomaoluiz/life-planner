@@ -9,6 +9,14 @@ export enum CreditCardBrand {
   VISA = "VISA",
 }
 
+// The account that pays the invoice (spec 035); `null` while `paymentAccountId` is set = the reader cannot see it.
+export interface PaymentAccountSummary {
+  icon: string;
+  id: string;
+  name: string;
+  status: AccountStatus;
+}
+
 interface ICreditCardEntity {
   brand: CreditCardBrand;
   closingDay: number;
@@ -19,6 +27,8 @@ interface ICreditCardEntity {
   limit: number;
   owner: OwnerType;
   ownerId: string;
+  paymentAccount?: null | PaymentAccountSummary;
+  paymentAccountId?: string;
   paymentDay?: number;
   status: AccountStatus;
   title: string;
@@ -34,6 +44,8 @@ class CreditCardEntity implements ICreditCardEntity {
   limit: number;
   owner: OwnerType;
   ownerId: string;
+  paymentAccount?: null | PaymentAccountSummary;
+  paymentAccountId?: string;
   paymentDay?: number;
   status: AccountStatus;
   title: string;
@@ -48,6 +60,8 @@ class CreditCardEntity implements ICreditCardEntity {
     this.limit = params.limit;
     this.owner = params.owner;
     this.ownerId = params.ownerId;
+    this.paymentAccount = params.paymentAccount;
+    this.paymentAccountId = params.paymentAccountId;
     this.paymentDay = params.paymentDay;
     this.status = params.status;
     this.title = params.title;

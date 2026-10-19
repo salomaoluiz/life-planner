@@ -29,6 +29,8 @@ function toCreditCardEntity(model: CreditCardModel): CreditCardEntity {
     limit: model.limit,
     owner: OwnerType[model.owner],
     ownerId: model.ownerId,
+    paymentAccount: model.paymentAccount,
+    paymentAccountId: model.paymentAccountId,
     paymentDay: model.paymentDay,
     status: model.status,
     title: model.title,

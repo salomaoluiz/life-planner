@@ -21,6 +21,7 @@ import { TranslationKeys } from "@presentation/i18n/types";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
 import { useNewCreditCardViewModel } from "./hooks";
+import { PaymentAccountOption } from "./models/cardFormState";
 import useStyles from "./styles";
 import cardFormTestIds from "./testIds";
 
@@ -29,6 +30,16 @@ const SKELETON_ROWS = [0, 1, 2];
 function NewCreditCardModal() {
   const { styles } = useStyles();
   const { t } = useTranslation();
+
+  function paymentAccountLabel(option: PaymentAccountOption) {
+    if (option.labelKey) {
+      return t(option.labelKey);
+    }
+
+    return option.archived
+      ? `${option.label} (${t("financial.accounts.archivedLabel")})`
+      : (option.label ?? "");
+  }
   const vm = useNewCreditCardViewModel();
 
   function err(key?: TranslationKeys) {
@@ -153,6 +164,19 @@ function NewCreditCardModal() {
             />
           </View>
         </View>
+        <SelectField
+          closeLabel={t("common.actions.close")}
+          helper={t("financial.cardForm.paymentAccountHelper")}
+          label={t("financial.cardForm.paymentAccount")}
+          onChange={vm.onPaymentAccountChange}
+          options={vm.paymentAccountOptions.map((option) => ({
+            label: paymentAccountLabel(option),
+            value: option.value,
+          }))}
+          sheetTitle={t("financial.cardForm.paymentAccount")}
+          testID={cardFormTestIds.paymentAccount}
+          value={vm.paymentAccountId}
+        />
         <SelectField
           closeLabel={t("common.actions.close")}
           label={t("financial.cardForm.paymentDay")}

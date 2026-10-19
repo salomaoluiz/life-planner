@@ -10,6 +10,7 @@ const cardFormTestIds = {
   lastDigitsInput: "financial.card-form.last-digits-input",
   limitInput: "financial.card-form.limit-input",
   owner: "financial.card-form.owner",
+  paymentAccount: "financial.card-form.payment-account",
   paymentAfterDueWarning: "financial.card-form.payment-after-due",
   paymentDay: "financial.card-form.payment-day",
   preview: "financial.card-form.preview",

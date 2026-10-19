@@ -1,5 +1,8 @@
 import { AccountStatus } from "@domain/entities/financial/AccountEntity";
-import { CreditCardBrand } from "@domain/entities/financial/CreditCardEntity";
+import {
+  CreditCardBrand,
+  PaymentAccountSummary,
+} from "@domain/entities/financial/CreditCardEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 interface ICreditCardModel {
@@ -12,6 +15,8 @@ interface ICreditCardModel {
   limit: number;
   owner: OwnerType;
   ownerId: string;
+  paymentAccount?: null | PaymentAccountSummary;
+  paymentAccountId?: string;
   paymentDay?: number;
   status: AccountStatus;
   title: string;
@@ -27,6 +32,8 @@ class CreditCardModel implements ICreditCardModel {
   limit: number;
   owner: OwnerType;
   ownerId: string;
+  paymentAccount?: null | PaymentAccountSummary;
+  paymentAccountId?: string;
   paymentDay?: number;
   status: AccountStatus;
   title: string;
@@ -41,6 +48,8 @@ class CreditCardModel implements ICreditCardModel {
     this.limit = params.limit;
     this.owner = params.owner;
     this.ownerId = params.ownerId;
+    this.paymentAccount = params.paymentAccount;
+    this.paymentAccountId = params.paymentAccountId;
     this.paymentDay = params.paymentDay;
     this.status = params.status;
     this.title = params.title;
@@ -58,6 +67,11 @@ class CreditCardModel implements ICreditCardModel {
       limit: Number(data.limit),
       owner: data.owner as OwnerType,
       ownerId: data.ownerId as string,
+      paymentAccount:
+        data.paymentAccount === undefined
+          ? undefined
+          : (data.paymentAccount as null | PaymentAccountSummary),
+      paymentAccountId: (data.paymentAccountId as null | string) ?? undefined,
       paymentDay:
         data.paymentDay === undefined || data.paymentDay === null
           ? undefined

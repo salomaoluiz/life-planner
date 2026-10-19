@@ -1,5 +1,6 @@
 import { act } from "@tests";
 
+import AccountDTO from "@application/dto/financial/AccountDTO";
 import { CreditCardHasTransactions } from "@domain/entities/errors";
 
 import {
@@ -269,6 +270,71 @@ describe("archiving ends the recurring series (spec 034 FR 34)", () => {
       creditCardId: "c1",
       ownerIds: ["user-id"],
       status: "ACTIVE",
+    });
+  });
+});
+
+describe("payment account (spec 035)", () => {
+  const checking = new AccountDTO({
+    balance: 0,
+    icon: "bank",
+    id: "a1",
+    name: "Checking",
+    owner: "USER",
+    ownerId: "user-id",
+    status: "ACTIVE",
+  });
+
+  it("SHOULD list None plus the active accounts AND send the chosen one on create", () => {
+    givenLoaded({ accounts: [checking] });
+    const { result } = setup();
+
+    expect(
+      result.current.paymentAccountOptions.map((item) => item.value),
+    ).toEqual(["", "a1"]);
+
+    act(() => result.current.onTitleChange("Main"));
+    act(() => result.current.onLimitChange(500000));
+    act(() => result.current.onClosingDayChange("5"));
+    act(() => result.current.onDueDayChange("8"));
+    act(() => result.current.onPaymentAccountChange("a1"));
+    act(() => result.current.onSave());
+
+    expect(mutations.create.value.mutate).toHaveBeenCalledWith(
+      expect.objectContaining({ paymentAccountId: "a1" }),
+    );
+  });
+
+  it("SHOULD send null WHEN the link is removed in edit", () => {
+    givenLoaded({
+      accounts: [checking],
+      cards: [card("c1", { paymentAccountId: "a1" })],
+      params: { id: "c1" },
+    });
+    const { result } = setup();
+
+    expect(result.current.paymentAccountId).toBe("a1");
+
+    act(() => result.current.onPaymentAccountChange(""));
+    act(() => result.current.onSave());
+
+    expect(mutations.update.value.mutate).toHaveBeenCalledWith({
+      id: "c1",
+      paymentAccountId: null,
+    });
+  });
+
+  it("SHOULD keep the id of an account the reader cannot see AND mark it as another member's", () => {
+    givenLoaded({
+      accounts: [checking],
+      cards: [card("c1", { paymentAccountId: "hidden" })],
+      params: { id: "c1" },
+    });
+    const { result } = setup();
+
+    expect(result.current.paymentAccountOptions.at(-1)).toEqual({
+      labelKey: "financial.cardForm.paymentAccountOther",
+      value: "hidden",
     });
   });
 });

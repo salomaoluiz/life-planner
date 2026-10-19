@@ -17,6 +17,7 @@ it("SHOULD show the create title, every field AND no archive or delete", () => {
     cardFormTestIds.swatches,
     cardFormTestIds.closingDay,
     cardFormTestIds.dueDay,
+    cardFormTestIds.paymentAccount,
     cardFormTestIds.paymentDay,
     cardFormTestIds.saveButton,
   ].forEach((id) => expect(screen.getByTestId(id)).toBeOnTheScreen());

@@ -13,6 +13,7 @@ export interface CreateCreditCardUseCaseParams {
   limit: number;
   owner: string;
   ownerId: string;
+  paymentAccountId?: string;
   paymentDay?: number;
   title: string;
 }
@@ -43,6 +44,7 @@ function createCreditCardUseCase(
           limit: params.limit,
           owner,
           ownerId: params.ownerId,
+          paymentAccountId: params.paymentAccountId,
           paymentDay: params.paymentDay,
           title: params.title,
         });

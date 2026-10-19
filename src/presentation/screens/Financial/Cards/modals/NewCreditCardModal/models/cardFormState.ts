@@ -1,3 +1,4 @@
+import AccountDTO from "@application/dto/financial/AccountDTO";
 import CreditCardDTO from "@application/dto/financial/CreditCardDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { CreateCreditCardUseCaseParams } from "@application/useCases/cases/financial/creditCards/createCreditCardUseCase";
@@ -24,9 +25,18 @@ interface CardFormState {
   lastDigits: string;
   limitCents: number;
   ownerId: string;
+  // Account that pays the invoice; "" = none (spec 035).
+  paymentAccountId: string;
   paymentDay: string;
   tint: string;
   title: string;
+}
+
+interface PaymentAccountOption {
+  archived?: boolean;
+  label?: string;
+  labelKey?: TranslationKeys;
+  value: string;
 }
 
 function createInitialState(params: { ownerId: string }): CardFormState {
@@ -38,6 +48,7 @@ function createInitialState(params: { ownerId: string }): CardFormState {
     lastDigits: "",
     limitCents: 0,
     ownerId: params.ownerId,
+    paymentAccountId: "",
     paymentDay: "",
     tint: DEFAULT_CARD_COLOR,
     title: "",
@@ -72,10 +83,39 @@ function isSameState(a: CardFormState, b: CardFormState) {
     a.lastDigits === b.lastDigits &&
     a.limitCents === b.limitCents &&
     a.ownerId === b.ownerId &&
+    a.paymentAccountId === b.paymentAccountId &&
     a.paymentDay === b.paymentDay &&
     a.tint === b.tint &&
     a.title === b.title
   );
+}
+
+// "None", the active accounts, and the currently linked one when it is archived or not visible to the reader.
+function paymentAccountOptions(
+  accounts: AccountDTO[],
+  selectedId: string,
+): PaymentAccountOption[] {
+  const options: PaymentAccountOption[] = [
+    { labelKey: "financial.cardForm.paymentAccountNone", value: "" },
+    ...accounts
+      .filter((account) => account.status === "ACTIVE")
+      .map((account) => ({ label: account.name, value: account.id })),
+  ];
+
+  if (selectedId !== "" && !options.some((item) => item.value === selectedId)) {
+    const linked = accounts.find((account) => account.id === selectedId);
+
+    options.push(
+      linked
+        ? { archived: true, label: linked.name, value: linked.id }
+        : {
+            labelKey: "financial.cardForm.paymentAccountOther",
+            value: selectedId,
+          },
+    );
+  }
+
+  return options;
 }
 
 function stateFromDto(dto: CreditCardDTO): CardFormState {
@@ -87,6 +127,7 @@ function stateFromDto(dto: CreditCardDTO): CardFormState {
     lastDigits: dto.lastDigits ?? "",
     limitCents: dto.limit,
     ownerId: dto.ownerId,
+    paymentAccountId: dto.paymentAccountId ?? "",
     paymentDay: dto.paymentDay === undefined ? "" : String(dto.paymentDay),
     tint: dto.color,
     title: dto.title,
@@ -107,6 +148,8 @@ function toCreateParams(
     limit: state.limitCents,
     owner: owner.type,
     ownerId: owner.id,
+    paymentAccountId:
+      state.paymentAccountId === "" ? undefined : state.paymentAccountId,
     paymentDay: state.paymentDay === "" ? undefined : Number(state.paymentDay),
     title: state.title.trim(),
   };
@@ -139,6 +182,10 @@ function toUpdateParams(
   if (state.paymentDay !== initial.paymentDay) {
     params.paymentDay =
       state.paymentDay === "" ? null : Number(state.paymentDay);
+  }
+  if (state.paymentAccountId !== initial.paymentAccountId) {
+    params.paymentAccountId =
+      state.paymentAccountId === "" ? null : state.paymentAccountId;
   }
   if (state.lastDigits !== initial.lastDigits) {
     params.lastDigits = state.lastDigits === "" ? null : state.lastDigits;
@@ -184,11 +231,12 @@ function validate(state: CardFormState): CardFormErrors {
   return errors;
 }
 
-export type { CardFormErrors, CardFormState };
+export type { CardFormErrors, CardFormState, PaymentAccountOption };
 export {
   createInitialState,
   isPaymentAfterDue,
   isSameState,
+  paymentAccountOptions,
   stateFromDto,
   toCreateParams,
   toUpdateParams,

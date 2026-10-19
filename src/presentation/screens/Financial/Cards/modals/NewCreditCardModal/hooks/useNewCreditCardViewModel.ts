@@ -1,6 +1,7 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
+import AccountDTO from "@application/dto/financial/AccountDTO";
 import { useCases } from "@application/useCases";
 import {
   invalidateFetcherData,
@@ -16,6 +17,7 @@ import {
   createInitialState,
   isPaymentAfterDue,
   isSameState,
+  paymentAccountOptions,
   stateFromDto,
   toCreateParams,
   toUpdateParams,
@@ -36,6 +38,15 @@ function useNewCreditCardViewModel() {
     enabled: !!owners.data,
     fetch: async () =>
       useCases.getFinancialCreditCardsUseCase.execute(
+        owners.data!.map((owner) => owner.id),
+      ),
+  });
+
+  const accounts = useQuery<AccountDTO[]>({
+    cacheKey: [useCases.getFinancialAccountsUseCase.uniqueName],
+    enabled: !!owners.data,
+    fetch: async () =>
+      useCases.getFinancialAccountsUseCase.execute(
         owners.data!.map((owner) => owner.id),
       ),
   });
@@ -219,12 +230,19 @@ function useNewCreditCardViewModel() {
       change({ lastDigits: value.replace(/\D/g, "").slice(0, 4) }),
     onLimitChange: (cents: number) => change({ limitCents: cents }),
     onOwnerChange: (value: string) => change({ ownerId: value }),
+    onPaymentAccountChange: (value: string) =>
+      change({ paymentAccountId: value }),
     onPaymentDayChange: (value: string) => change({ paymentDay: value }),
     onSave,
     onTintChange: (value: string) => change({ tint: value }),
     onTitleChange: (value: string) => change({ title: value }),
     ownerChoices: uiModel?.ownerChoices ?? [],
     ownerId: state?.ownerId ?? "",
+    paymentAccountId: state?.paymentAccountId ?? "",
+    paymentAccountOptions: paymentAccountOptions(
+      accounts.data ?? [],
+      state?.paymentAccountId ?? "",
+    ),
     paymentDay: state?.paymentDay ?? "",
     paymentDayOptions: uiModel?.paymentDayOptions ?? [],
     paymentWarning: state ? isPaymentAfterDue(state) : false,

@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from "expo-router";
 
 import { renderHook } from "@tests";
 
+import AccountDTO from "@application/dto/financial/AccountDTO";
 import CreditCardDTO from "@application/dto/financial/CreditCardDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
@@ -31,6 +32,7 @@ jest.mock("@application/useCases", () => ({
       execute: jest.fn(),
       uniqueName: "delete",
     },
+    getFinancialAccountsUseCase: { execute: jest.fn(), uniqueName: "accounts" },
     getFinancialCreditCardsOverviewUseCase: {
       execute: jest.fn(),
       uniqueName: "overview",
@@ -92,7 +94,7 @@ const spies = {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  ["owners", "cards", "recurrences"].forEach((key) => {
+  ["owners", "cards", "recurrences", "accounts"].forEach((key) => {
     queries[key] = new UseQueryFixture<unknown>();
   });
   ["create", "update", "delete"].forEach((key) => {
@@ -106,10 +108,15 @@ beforeEach(() => {
 });
 
 function givenLoaded(
-  data: { cards?: CreditCardDTO[]; params?: Record<string, string> } = {},
+  data: {
+    accounts?: AccountDTO[];
+    cards?: CreditCardDTO[];
+    params?: Record<string, string>;
+  } = {},
 ) {
   queries.owners.withData(owners);
   queries.cards.withData(data.cards ?? []);
+  queries.accounts.withData(data.accounts ?? []);
   spies.params.mockReturnValue(data.params ?? {});
 }
 
