@@ -11,12 +11,16 @@ async function run(overrides, { argv = [], env = enabledEnv } = {}) {
 describe("parseArgs AND buildMaestroArgs", () => {
   it("SHOULD parse --tags and --failed", () => {
     expect(parseArgs(["--tags", "auth,smoke", "--failed"])).toEqual({
+      changed: false,
+      dryRun: false,
       failedOnly: true,
       headless: false,
       listTags: false,
       tags: ["auth", "smoke"],
     });
     expect(parseArgs([])).toEqual({
+      changed: false,
+      dryRun: false,
       failedOnly: false,
       headless: false,
       listTags: false,
@@ -386,5 +390,100 @@ describe("runE2e --list-tags", () => {
 
     expect(exitCode).toBe(0);
     expect(printed).toEqual(["No tags found in e2e/flows"]);
+  });
+});
+
+describe("runE2e --changed", () => {
+  const flowFiles = ["financial/a.yaml", "stock/b.yaml"];
+  function flowYaml(tag) {
+    return `name: x\ntags:\n  - ${tag}\n  - smoke\n---\n`;
+  }
+
+  function changedDeps(front, back, extra = {}) {
+    return {
+      changedFiles: jest.fn((dir) => (dir === "." ? front : back)),
+      listFiles: jest.fn((dir) => (dir === "e2e/flows" ? flowFiles : [])),
+      readFile: jest.fn((path) => {
+        const flows = {
+          "e2e-report/junit.xml": junit([{ name: "financial/a" }]),
+          "e2e/flows/financial/a.yaml": flowYaml("financial"),
+          "e2e/flows/stock/b.yaml": flowYaml("stock"),
+        };
+        return flows[path] ?? null;
+      }),
+      ...extra,
+    };
+  }
+
+  it("SHOULD print the selected tags AND run nothing on --dry-run", async () => {
+    const { deps, exitCode, printed } = await run(
+      { deps: changedDeps([], ["src/modules/finance/x.ts"]) },
+      { argv: ["--changed", "--dry-run"] },
+    );
+
+    expect(exitCode).toBe(0);
+    expect(deps.exec).not.toHaveBeenCalled();
+    expect(printed.join("\n")).toContain("tags financial, smoke, 2 flows");
+  });
+
+  it("SHOULD skip with exit 0 WHEN only docs changed", async () => {
+    const { deps, exitCode, printed } = await run(
+      { deps: changedDeps(["docs/a.md"], []) },
+      { argv: ["--changed"] },
+    );
+
+    expect(exitCode).toBe(0);
+    expect(deps.exec).not.toHaveBeenCalled();
+    expect(printed).toContain("E2E SKIPPED: docs-only change");
+  });
+
+  it("SHOULD run the selected tags AND label the summary as partial", async () => {
+    const { deps, exitCode, printed } = await run(
+      { deps: changedDeps([], ["src/modules/finance/x.ts"]) },
+      { argv: ["--changed"] },
+    );
+
+    expect(exitCode).toBe(0);
+    expect(deps.exec.mock.calls[0][0].args).toEqual(
+      expect.arrayContaining(["--include-tags", "financial,smoke"]),
+    );
+    expect(printed.join("\n")).toContain(
+      "E2E PASSED (changed: financial, smoke):",
+    );
+  });
+
+  it("SHOULD run the full suite WHEN a shared file changed", async () => {
+    const { deps } = await run(
+      { deps: changedDeps(["src/presentation/components/A.tsx"], []) },
+      { argv: ["--changed"] },
+    );
+
+    expect(deps.exec.mock.calls[0][0].args).not.toContain("--include-tags");
+  });
+
+  it("SHOULD exit 2 WHEN the backend folder is missing", async () => {
+    const { exitCode, printed } = await run(
+      {
+        deps: changedDeps([], [], {
+          exists: jest.fn((path) => path !== "../life-planner-back"),
+        }),
+      },
+      { argv: ["--changed"] },
+    );
+
+    expect(exitCode).toBe(2);
+    expect(printed.join("\n")).toContain("not found");
+  });
+
+  it("SHOULD let --tags win over --changed", async () => {
+    const { deps } = await run(
+      { deps: changedDeps([], ["src/modules/finance/x.ts"]) },
+      { argv: ["--changed", "--tags", "stock"] },
+    );
+
+    expect(deps.changedFiles).not.toHaveBeenCalled();
+    expect(deps.exec.mock.calls[0][0].args).toEqual(
+      expect.arrayContaining(["--include-tags", "stock"]),
+    );
   });
 });

@@ -1,7 +1,9 @@
+import { selectImpact } from "./impact.mjs";
 import { flowNameFromFile } from "./progress.mjs";
 import { buildSummary, parseJUnit } from "./summarize.mjs";
 import { buildTagList, parseFlowTags } from "./tags.mjs";
 
+const MAX_REASONS = 10;
 const REPORT_DIR = "e2e-report";
 const DEFAULT_API_URL = "http://localhost:3000/api";
 const DEFAULT_WEB_URL = "http://localhost:8081";
@@ -54,6 +56,8 @@ export function buildMaestroArgs({
 
 export function parseArgs(argv) {
   const options = {
+    changed: false,
+    dryRun: false,
     failedOnly: false,
     headless: false,
     listTags: false,
@@ -62,6 +66,10 @@ export function parseArgs(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     if (argv[index] === "--failed") {
       options.failedOnly = true;
+    } else if (argv[index] === "--changed") {
+      options.changed = true;
+    } else if (argv[index] === "--dry-run") {
+      options.dryRun = true;
     } else if (argv[index] === "--list-tags") {
       options.listTags = true;
     } else if (argv[index] === "--headless") {
@@ -99,6 +107,43 @@ export async function runE2e({ argv, env }, deps) {
     return finish(`E2E NOT RUN: ${reason}`, 2);
   }
 
+  // --changed picks the flows from the files changed in both repos; an explicit --tags wins.
+  let partialLabel;
+  let extraFlowFiles = [];
+  if (options.changed && options.tags.length === 0 && !options.failedOnly) {
+    const backendDir = nonEmpty(env.E2E_BACKEND_DIR, "../life-planner-back");
+    if (!deps.exists(backendDir)) {
+      return notRun(`${backendDir} not found`);
+    }
+    const impact = selectImpact({
+      back: deps.changedFiles(backendDir),
+      front: deps.changedFiles("."),
+    });
+    if (impact.skip) {
+      return finish("E2E SKIPPED: docs-only change", 0);
+    }
+    if (impact.tags !== "all") {
+      options.tags = impact.tags;
+      extraFlowFiles = impact.flowFiles;
+      partialLabel = `changed: ${impact.tags.join(", ")}`;
+    }
+    if (options.dryRun) {
+      const selection =
+        impact.tags === "all" ? "full suite" : `tags ${impact.tags.join(", ")}`;
+      const count = plannedFlows(options, ["e2e/flows"], deps).length;
+      return finish(
+        [
+          `E2E DRY RUN: ${selection}, ${count} flows`,
+          ...impact.reasons.slice(0, MAX_REASONS),
+          ...(impact.reasons.length > MAX_REASONS
+            ? [`+${impact.reasons.length - MAX_REASONS} more changed files`]
+            : []),
+        ].join("\n"),
+        0,
+      );
+    }
+  }
+
   if (env.E2E_ENABLED !== "true") {
     return notRun("E2E runs only on the owner's Mac");
   }
@@ -127,12 +172,24 @@ export async function runE2e({ argv, env }, deps) {
   }
 
   deps.removeReportFiles();
-  const expected = plannedFlows(options, targets, deps);
+  const tagged = plannedFlows(options, targets, deps);
+  // A changed flow already selected by the tags does not run twice.
+  const extraFiles = extraFlowFiles.filter(
+    (file) => !tagged.includes(flowNameFromFile(file)),
+  );
+  const expected = [
+    ...tagged,
+    ...extraFiles.map((file) => flowNameFromFile(file)),
+  ];
   const started = deps.now();
   const junitPaths = [];
-  for (const [index, target] of targets.entries()) {
+  const runs = [
+    ...targets.map((target) => ({ tags: options.tags, target })),
+    ...extraFiles.map((target) => ({ tags: [], target })),
+  ];
+  for (const [index, { tags, target }] of runs.entries()) {
     const junitPath =
-      targets.length === 1
+      runs.length === 1
         ? `${REPORT_DIR}/junit.xml`
         : `${REPORT_DIR}/junit-${index}.xml`;
     // All Maestro output goes to the log file, never to the terminal: this is the token saving.
@@ -142,7 +199,7 @@ export async function runE2e({ argv, env }, deps) {
         failedOnly: options.failedOnly,
         headless: options.headless,
         junitPath,
-        tags: options.tags,
+        tags,
         target,
         webUrl,
       }),
@@ -184,6 +241,7 @@ export async function runE2e({ argv, env }, deps) {
       .map((file) => `${REPORT_DIR}/artifacts/${file}`),
     durationSeconds,
     flows,
+    partialLabel,
     readFlowFile: (path) => deps.readFile(path),
     revisions: deps.revisions(),
   });

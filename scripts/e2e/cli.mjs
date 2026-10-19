@@ -21,6 +21,23 @@ try {
   // No .env (CI or a fresh clone): rely on the real environment.
 }
 
+// Files changed against the merge base with origin/main, plus uncommitted and untracked ones.
+function changedFiles(dir) {
+  const base = git(dir, ["merge-base", "origin/main", "HEAD"]);
+  const lists = [
+    base ? git(dir, ["diff", "--name-only", base]) : null,
+    git(dir, ["diff", "--name-only", "HEAD"]),
+    git(dir, ["ls-files", "--others", "--exclude-standard"]),
+  ];
+  return [
+    ...new Set(
+      lists
+        .flatMap((list) => (list ?? "").split("\n"))
+        .filter((line) => line !== ""),
+    ),
+  ];
+}
+
 function describeRepo(label, dir) {
   const branch = git(dir, ["rev-parse", "--abbrev-ref", "HEAD"]);
   const sha = git(dir, ["rev-parse", "--short", "HEAD"]);
@@ -86,6 +103,7 @@ function startProgress({ expected, logFile, started }) {
 }
 
 const deps = {
+  changedFiles,
   async exec({ args, command, expected, logFile, started }) {
     mkdirSync(REPORT_DIR, { recursive: true });
     const fd = openSync(logFile, "a");
