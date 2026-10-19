@@ -261,6 +261,7 @@ onFlowComplete:
     timeout: 20000
 - tapOn:
     id: "financial.layout.segments-transactions"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.row-title"

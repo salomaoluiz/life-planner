@@ -35,14 +35,17 @@ onFlowComplete:
       EMAIL: ${output.EMAIL}
       PASSWORD: ${output.PASSWORD}
 - runFlow: ../../../subflows/financial/open-transactions.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.empty-month"
     timeout: 20000
 - assertNotVisible:
     id: "financial.transactions.row-title"
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
 - tapOn:
     id: "financial.transactions.month-previous"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.row-title"
@@ -50,6 +53,7 @@ onFlowComplete:
     timeout: 20000
 - assertNotVisible:
     id: "financial.transactions.empty-month"
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
 - tapOn:
     id: "financial.transactions.month-next"
 - extendedWaitUntil:

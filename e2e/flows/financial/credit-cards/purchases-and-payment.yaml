@@ -84,13 +84,15 @@ onFlowComplete:
 - runFlow: ../../../subflows/financial/open-transactions.yaml
 - extendedWaitUntil:
     visible:
+      id: "financial.transactions.summary-expense"
+      text: ".*250[.,]00.*"
+    timeout: 20000
+# The month summary and the last-day balance header (spec 035) push the invoice line below the fold
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
       id: "financial.transactions.cardInvoice.row"
     timeout: 20000
-- assertVisible:
-    id: "financial.transactions.summary-expense"
-    text: ".*250[.,]00.*"
-# The month summary got a "to pay" line (spec 033): scroll to the invoice line
-- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - assertVisible:
     id: "financial.transactions.cardInvoice.amount"
     text: ".*250[.,]00.*"
@@ -148,11 +150,11 @@ onFlowComplete:
 # Undo the payment: the invoice is payable again
 - tapOn:
     id: "financial.layout.segments-transactions"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.cardInvoice.row"
     timeout: 20000
-- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - tapOn:
     id: "financial.transactions.cardInvoice.toggle"
 - runFlow: ../../../subflows/financial/scroll-list-down.yaml

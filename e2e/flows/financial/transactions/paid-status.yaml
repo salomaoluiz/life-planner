@@ -49,16 +49,18 @@ onFlowComplete:
       EMAIL: ${output.EMAIL}
       PASSWORD: ${output.PASSWORD}
 - runFlow: ../../../subflows/financial/open-transactions.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 # The unpaid bill sits in last month: overdue badge, pay button and "To pay" in the summary
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
 - tapOn:
     id: "financial.transactions.month-previous"
+# The summary makes the header taller: scroll the list to reach the row's badge and button
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.row-title"
       text: ${output.BILL_NAME}
     timeout: 20000
-# The summary makes the header taller: scroll the list to reach the row's badge and button
-- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - assertVisible:
     id: "financial.transactions.row.overdue"
 - assertVisible:
@@ -85,12 +87,12 @@ onFlowComplete:
 # It is now a paid row of the current month: no badge, no button
 - tapOn:
     id: "financial.transactions.month-next"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.row-title"
       text: ${output.BILL_NAME}
     timeout: 20000
-- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - assertNotVisible:
     id: "financial.transactions.row.overdue"
 - assertNotVisible:
@@ -112,6 +114,7 @@ onFlowComplete:
     visible:
       id: "financial.transactions.screen"
     timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - tapOn:
     id: "financial.transactions.row-title"
     text: ${output.BILL_NAME}

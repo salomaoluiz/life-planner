@@ -49,6 +49,7 @@ onFlowComplete:
 # the adjustment is listed as a transaction with a delete-only sheet
 - tapOn:
     id: "financial.layout.segments-transactions"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.adjustment-row-title"

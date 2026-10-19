@@ -36,6 +36,7 @@ onFlowComplete:
       EMAIL: ${output.EMAIL}
       PASSWORD: ${output.PASSWORD}
 - runFlow: ../../../subflows/financial/open-transactions.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.row-recurring-title"
@@ -63,6 +64,7 @@ onFlowComplete:
       text: ".*20[.,]00.*"
     timeout: 20000
 # Last month keeps the old value
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
 - tapOn:
     id: "financial.transactions.month-previous"
 - extendedWaitUntil:

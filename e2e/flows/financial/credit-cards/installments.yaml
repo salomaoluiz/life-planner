@@ -97,11 +97,11 @@ onFlowComplete:
 - runFlow: ../../../subflows/financial/open-transactions.yaml
 - tapOn:
     id: "financial.transactions.month-next"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.cardInvoice.row"
     timeout: 20000
-- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - tapOn:
     id: "financial.transactions.cardInvoice.toggle"
 - runFlow: ../../../subflows/financial/scroll-list-down.yaml
@@ -111,11 +111,11 @@ onFlowComplete:
 - runFlow: ../../../subflows/financial/scroll-list-up.yaml
 - tapOn:
     id: "financial.transactions.month-next"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.cardInvoice.row"
     timeout: 20000
-- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - tapOn:
     id: "financial.transactions.cardInvoice.toggle"
 - runFlow: ../../../subflows/financial/scroll-list-down.yaml
