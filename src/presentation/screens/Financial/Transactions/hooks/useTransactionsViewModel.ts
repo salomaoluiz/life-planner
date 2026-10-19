@@ -308,8 +308,9 @@ function useTransactionsViewModel() {
       buildEntries(visible, new Date(), visibleInvoices, {
         balances: balanceViews,
         expandedDateKey: expandedDayKey,
+        month,
       }),
-    [visible, visibleInvoices, balanceViews, expandedDayKey],
+    [visible, visibleInvoices, balanceViews, expandedDayKey, month],
   );
 
   function onMonthSelect(monthIndex: string) {

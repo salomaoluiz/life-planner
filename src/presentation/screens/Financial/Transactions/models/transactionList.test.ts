@@ -440,4 +440,46 @@ describe("day balances (spec 035)", () => {
 
     expect(entries.some((entry) => entry.kind === "balanceLine")).toBe(false);
   });
+
+  it("SHOULD add a header with the balance on the first and last day of the month even without rows", () => {
+    const edge = {
+      accounts: [],
+      cardsDueCents: 0,
+      projected: false,
+      totalCents: 1000,
+    };
+    const all = new Map(
+      ["2026-10-01", "2026-10-05", "2026-10-31"].map((key) => [key, edge]),
+    );
+    const entries = buildEntries([tx("a", new Date(2026, 9, 5, 10))], now, [], {
+      balances: all,
+      month: new Date(2026, 9, 1),
+    });
+    const headers = entries.filter((entry) => entry.kind === "header");
+
+    expect(headers.map((h) => h.dateKey)).toEqual([
+      "2026-10-31",
+      "2026-10-05",
+      "2026-10-01",
+    ]);
+    expect(headers[0]).toMatchObject({ balanceCents: 1000, netCents: 0 });
+  });
+
+  it("SHOULD not add edge headers to an empty month OR without balance data", () => {
+    const all = new Map([
+      [
+        "2026-10-01",
+        { accounts: [], cardsDueCents: 0, projected: false, totalCents: 1 },
+      ],
+    ]);
+
+    expect(
+      buildEntries([], now, [], { balances: all, month: new Date(2026, 9, 1) }),
+    ).toEqual([]);
+    expect(
+      buildEntries([tx("a", new Date(2026, 9, 5, 10))], now, [], {
+        month: new Date(2026, 9, 1),
+      }).filter((entry) => entry.kind === "header"),
+    ).toHaveLength(1);
+  });
 });

@@ -1,5 +1,5 @@
 // Maestro runScript (GraalJS). Outputs the device-local calendar days the balance flows use as test ids (spec 035):
-// TODAY_KEY, YESTERDAY_KEY (`YYYY-MM-DD`), YESTERDAY_IN_PREVIOUS_MONTH ("true" on the 1st) and
+// TODAY_KEY, FIRST_OF_MONTH_KEY, LAST_OF_MONTH_KEY (always listed, spec 035), YESTERDAY_KEY (`YYYY-MM-DD`), YESTERDAY_IN_PREVIOUS_MONTH ("true" on the 1st) and
 // NEXT_MONTH_SAME_DAY_KEY: the day a monthly series started today occurs next month (clamped to its last day).
 function pad(value) {
   return value < 10 ? "0" + value : String(value);
@@ -22,6 +22,10 @@ var next = new Date(
   Math.min(now.getDate(), lastNext),
 );
 output.TODAY_KEY = key(now);
+output.FIRST_OF_MONTH_KEY = key(new Date(now.getFullYear(), now.getMonth(), 1));
+output.LAST_OF_MONTH_KEY = key(
+  new Date(now.getFullYear(), now.getMonth() + 1, 0),
+);
 output.YESTERDAY_KEY = key(yesterday);
 output.YESTERDAY_IN_PREVIOUS_MONTH = String(
   yesterday.getMonth() !== now.getMonth(),

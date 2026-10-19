@@ -92,6 +92,18 @@ onFlowComplete:
           text: "(?s).*900[.,]00.*"
           childOf:
             id: "financial.transactions.day-balance-${output.YESTERDAY_KEY}"
+# The first and last day of the month always have a header with the balance, even without rows
+- assertVisible:
+    text: "(?s).*650[.,]00.*"
+    childOf:
+      id: "financial.transactions.day-balance-${output.LAST_OF_MONTH_KEY}"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.day-balance-${output.FIRST_OF_MONTH_KEY}"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 # Tap: one line per account (the basics account and the one under test); tap again hides them
 - tapOn:
     id: "financial.transactions.day-balance-${output.TODAY_KEY}"

@@ -113,9 +113,16 @@ function buildEntries(
   options: {
     balances?: Map<string, DayBalanceView>;
     expandedDateKey?: string;
+    // The month on screen: its first and last day always get a header with the balance (spec 035).
+    month?: Date;
   } = {},
 ): ListEntry[] {
-  const rows = [
+  const rows: {
+    date: Date;
+    dateKey: string;
+    entry?: ListEntry;
+    signedCents: number;
+  }[] = [
     ...items.map((item) => ({
       date: item.date,
       dateKey: item.dateKey,
@@ -133,7 +140,27 @@ function buildEntries(
       } as const,
       signedCents: invoice.signedCents,
     })),
-  ].sort((a, b) => b.date.getTime() - a.date.getTime());
+  ];
+
+  if (rows.length > 0 && options.month && options.balances) {
+    const known = new Set(rows.map((row) => row.dateKey));
+    const year = options.month.getFullYear();
+    const monthIndex = options.month.getMonth();
+    const edges = [
+      new Date(year, monthIndex, 1),
+      new Date(year, monthIndex + 1, 0),
+    ];
+
+    edges.forEach((date) => {
+      const dateKey = toDateKey(date);
+
+      if (!known.has(dateKey) && options.balances?.has(dateKey)) {
+        rows.push({ date, dateKey, entry: undefined, signedCents: 0 });
+      }
+    });
+  }
+
+  rows.sort((a, b) => b.date.getTime() - a.date.getTime());
   const entries: ListEntry[] = [];
   let currentKey: string | undefined;
   let headerIndex = -1;
@@ -164,7 +191,9 @@ function buildEntries(
     if (header.kind === "header") {
       header.netCents += row.signedCents;
     }
-    entries.push(row.entry);
+    if (row.entry) {
+      entries.push(row.entry);
+    }
   });
 
   return entries;
@@ -289,6 +318,10 @@ function netAmount(netCents: number): {
   };
 }
 
+function pad2(value: number) {
+  return String(value).padStart(2, "0");
+}
+
 // A projected-only invoice: no real purchases yet, so the line only carries the projected ones.
 function projectedOnlyInvoice(group: ProjectedInvoiceGroup) {
   const dto = new CardInvoiceDTO({
@@ -351,6 +384,10 @@ function stickyIndices(entries: ListEntry[]) {
   return entries.flatMap((entry, index) =>
     entry.kind === "header" ? [index] : [],
   );
+}
+
+function toDateKey(date: Date) {
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
 }
 
 // The API days by `YYYY-MM-DD`, with the account names joined in.
