@@ -52,10 +52,10 @@ onFlowComplete:
       TITLE: ${output.FAMILY_CARD}
 # B sees the family card but never A's personal card
 - runFlow:
-    file: ../../subflows/login.yaml
+    file: ../../subflows/login-by-token.yaml
     env:
-      EMAIL: ${output.MEMBER_EMAIL}
-      PASSWORD: ${output.MEMBER_PASSWORD}
+      TOKEN: ${output.MEMBER_TOKEN}
+      REFRESH_TOKEN: ${output.MEMBER_REFRESH_TOKEN}
 - runFlow: ../../subflows/financial/open-cards.yaml
 - extendedWaitUntil:
     visible:

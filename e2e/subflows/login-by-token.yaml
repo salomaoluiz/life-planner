@@ -1,0 +1,9 @@
+url: ${E2E_WEB_URL}
+---
+# Caller env: TOKEN, REFRESH_TOKEN. Logs in through the dev-only /e2e-login route (spec 036); needs
+# EXPO_PUBLIC_E2E_LOGIN=true. Flows that test the login screen use login.yaml instead.
+- openLink: ${E2E_WEB_URL}/e2e-login#token=${TOKEN}&refresh=${REFRESH_TOKEN}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000

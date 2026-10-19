@@ -39,10 +39,10 @@ onFlowComplete:
       DESCRIPTION: ${output.PURCHASE_NAME}
       VALUE_CENTS: "25000"
 - runFlow:
-    file: ../../../subflows/login.yaml
+    file: ../../../subflows/login-by-token.yaml
     env:
-      EMAIL: ${output.EMAIL}
-      PASSWORD: ${output.PASSWORD}
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - runFlow: ../../../subflows/financial/open-transactions.yaml
 - runFlow: ../../../subflows/financial/scroll-list-down.yaml
 # Not linked: the invoice is the separate "card invoices" line, the account keeps 0,00

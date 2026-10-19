@@ -29,10 +29,10 @@ onFlowComplete:
       TOKEN: ${output.TOKEN}
       OWNER_ID: ${output.USER_ID}
 - runFlow:
-    file: ../../subflows/login.yaml
+    file: ../../subflows/login-by-token.yaml
     env:
-      EMAIL: ${output.EMAIL}
-      PASSWORD: ${output.PASSWORD}
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - runFlow: ../../subflows/account/open-settings.yaml
 - tapOn:
     id: "settings.delete-account.button"

@@ -87,10 +87,10 @@ onFlowComplete:
       DESCRIPTION: ${output.ITEM_NAME}
 # B sees all three records
 - runFlow:
-    file: ../../subflows/login.yaml
+    file: ../../subflows/login-by-token.yaml
     env:
-      EMAIL: ${output.MEMBER_EMAIL}
-      PASSWORD: ${output.MEMBER_PASSWORD}
+      TOKEN: ${output.MEMBER_TOKEN}
+      REFRESH_TOKEN: ${output.MEMBER_REFRESH_TOKEN}
 - runFlow: ../../subflows/financial/open-transactions.yaml
 - runFlow: ../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
@@ -116,10 +116,10 @@ onFlowComplete:
 - launchApp:
     clearState: true
 - runFlow:
-    file: ../../subflows/login.yaml
+    file: ../../subflows/login-by-token.yaml
     env:
-      EMAIL: ${output.STRANGER_EMAIL}
-      PASSWORD: ${output.STRANGER_PASSWORD}
+      TOKEN: ${output.STRANGER_TOKEN}
+      REFRESH_TOKEN: ${output.STRANGER_REFRESH_TOKEN}
 # C sees none of them (each module shows its empty state, never the records)
 - runFlow: ../../subflows/financial/open-transactions.yaml
 - runFlow: ../../subflows/financial/scroll-list-down.yaml

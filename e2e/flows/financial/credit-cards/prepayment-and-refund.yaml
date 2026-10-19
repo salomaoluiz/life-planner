@@ -42,10 +42,10 @@ onFlowComplete:
       PURCHASE_NAME: ${output.PURCHASE_NAME}
       PLAN_NAME: ${output.PLAN_NAME}
 - runFlow:
-    file: ../../../subflows/login.yaml
+    file: ../../../subflows/login-by-token.yaml
     env:
-      EMAIL: ${output.EMAIL}
-      PASSWORD: ${output.PASSWORD}
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - runFlow: ../../../subflows/financial/open-cards.yaml
 # The open invoice is selected by default: open its detail and the installment sheet
 - runFlow: ../../../subflows/financial/scroll-list-down.yaml

@@ -32,10 +32,10 @@ onFlowComplete:
       OWNER: USER
       TITLE: ${output.CARD_TITLE}
 - runFlow:
-    file: ../../../subflows/login.yaml
+    file: ../../../subflows/login-by-token.yaml
     env:
-      EMAIL: ${output.EMAIL}
-      PASSWORD: ${output.PASSWORD}
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - runFlow: ../../../subflows/financial/open-transactions.yaml
 - tapOn:
     id: "quick-add-button|navigation-rail-add"

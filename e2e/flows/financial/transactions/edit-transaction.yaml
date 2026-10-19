@@ -35,10 +35,10 @@ onFlowComplete:
       DESCRIPTION: ${output.TRANSACTION_NAME}
       VALUE_CENTS: "11100"
 - runFlow:
-    file: ../../../subflows/login.yaml
+    file: ../../../subflows/login-by-token.yaml
     env:
-      EMAIL: ${output.EMAIL}
-      PASSWORD: ${output.PASSWORD}
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - runFlow: ../../../subflows/financial/open-transactions.yaml
 - runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:

@@ -32,10 +32,10 @@ onFlowComplete:
       MONTHS_AGO: "0"
       END_MONTHS_AFTER_START: "3"
 - runFlow:
-    file: ../../../subflows/login.yaml
+    file: ../../../subflows/login-by-token.yaml
     env:
-      EMAIL: ${output.EMAIL}
-      PASSWORD: ${output.PASSWORD}
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - runFlow: ../../../subflows/financial/open-transactions.yaml
 - runFlow: ../../../subflows/financial/scroll-list-down.yaml
 # The real occurrence shows the repeat icon and the counter "1/4"; the current month has no projected line

@@ -15,10 +15,10 @@ onFlowComplete:
       PREFIX: E2E Quick Rice
       KEY: ITEM_NAME
 - runFlow:
-    file: ../../subflows/login.yaml
+    file: ../../subflows/login-by-token.yaml
     env:
-      EMAIL: ${output.EMAIL}
-      PASSWORD: ${output.PASSWORD}
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - extendedWaitUntil:
     visible:
       id: "home.home.screen"
