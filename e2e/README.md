@@ -9,6 +9,7 @@ Prerequisites: Maestro installed, `E2E_ENABLED=true` in the gitignored `.env`, t
 ```bash
 yarn e2e                # whole suite
 yarn e2e --tags auth    # one module (or any tag)
+yarn e2e --changed      # only the flows the changed files (both repos) can break; add --dry-run to just print the selection
 yarn e2e --headless     # no browser window (default: the Chromium window is visible)
 yarn e2e --list-tags    # list every tag and its flow count (also: yarn e2e:tags); needs no Maestro
 yarn e2e:smoke          # fast critical-path subset
@@ -16,6 +17,10 @@ yarn e2e:failed         # only the flows that failed in the previous run
 ```
 
 In a terminal the run also shows live progress (what passed, what is running, what is pending); non-TTY shells (AI sessions, CI) only get `e2e-report/summary.md`, which is what the terminal prints at the end. Exit code: 0 passed, 1 a flow failed, 2 could not run (nothing was validated). From the backend repo, `yarn e2e` runs the same suite.
+
+### Token login (spec 036)
+
+Flows outside `flows/auth/` log in with `subflows/login-by-token.yaml`, which opens the dev-only route `/e2e-login#token=…&refresh=…` (tokens come from `signup-via-api.yaml`: `TOKEN`, `REFRESH_TOKEN`). The route works only in development builds with `EXPO_PUBLIC_E2E_LOGIN=true` in `.env`; restart `yarn web` after adding it. Otherwise it redirects to `/login`.
 
 ## Layout
 
