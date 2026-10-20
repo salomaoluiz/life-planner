@@ -258,7 +258,7 @@ Categories:
     - index.tsx, styles.ts
     - hooks/useNewCategoryViewModel.ts
     - models/{categoryFormState.ts,NewCategoryUIModel.ts}
-    - components/{CustomColorSheet,IconPickerSheet,PendingItemsDialog}/index.tsx # PendingItemsDialog lists what blocks an archive (spec 041); the archive / reactivate action sits at the end of the form body
+    - components/{CustomColorSheet,IconPickerSheet}/index.tsx # the archive / reactivate action sits at the end of the form body; the blockers use the shared `@components` PendingItemsDialog (spec 041, reused by families in spec 042)
 
 Accounts:
   view: Accounts/index.tsx (+ styles.ts) # total, owner chips, active list, collapsible archived section
@@ -442,3 +442,9 @@ On `medium`/`expanded` these modals are `BottomSheet size="form"` with `FormColu
 - E2E: `financial/transactions/save-and-new` (tag `spec-039`): save and add another, notice, cleared amount, empty-amount validation, second entry with the kept category, both rows in the list.
 
 - **Currency per resource** (spec 040): every account, card, transaction, recurrence, installment plan, projection and invoice entity/model/DTO has `currency` (`CurrencyCode`, `toCurrencyCode` fallback `BRL`). `formatAmount(cents, localeTag, currency, type?)`, `AmountText` and `AmountInput` take the currency explicitly; screens pass the row's/card's/invoice's currency, view models expose `currency` (`useNewTransactionViewModel`: the chosen account/card; early payment, prepayment, refund, installment edit: the card/plan), aggregates pass `DEFAULT_CURRENCY`. No form field and no i18n key: requests never send `currency`.
+
+## Archived families (spec 042)
+
+- The owner filter of Transactions, Accounts, Cards and Categories (and Stock / Home) lists archived families last with the `archive-outline` marker; `ownerOptions.buildOwnerChoices` (creation pickers) leaves them out and `activeOwners`/`activeOwnerIds`/`archivedOwnerIds`/`isArchivedOwner` are the helpers. The forms read their owners through `models/activeOwners.ts` (`fetchActiveOwners`, cache key `[getOwnersUseCase.uniqueName, "active"]`).
+- "All" leaves the archived families out: the list filters (`filterByOwner`, `filterInvoicesByOwner`, `filterSummariesByOwner`, `filterCardsByOwner`, `categoryInActiveScope`) take the archived owner ids, the month summary and the daily balances use `activeOwnerIds`.
+- Read-only: selecting an archived family sets `vm.readOnly` (`hooks/useReadOnlyScope.ts`): no add / edit / refund / early payment buttons, a `ReadOnlyNotice` banner (`<screen>.readonly-banner`) and a `Toast` (`<screen>.readonly-toast`, `family.archived.readOnly`) instead of opening a form (`guard()` wraps the row, invoice and add handlers). A 422 "Family is archived" maps to `FamilyArchived` (`financialApiError`, copy `family.errors.archived`).

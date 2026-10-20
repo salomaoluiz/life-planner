@@ -147,3 +147,11 @@ Notes:
 ## E2E flows (spec 022)
 
 testIDs: `Family/testIds.ts` (`family.list.*`; per-record ids append `-<familyId>`: `family.card.container|title|toggle|options|invite-button|menu|confirm|notice-<familyId>`; member rows `family.card.member-<memberId>` with `-badge` / `-options`; the owner is the member row with a badge, and only owners see `invite-button`) and `Family/modals/AddNewFamily/testIds.ts` (`family.new-family.sheet|name-input|save-button`, error `name-input-error`). Flows in `e2e/flows/family/` (tags `family` + spec): `create-family` (smoke), `create-family-validation`, `delete-empty-family`, `delete-family-with-records`, `family-account`, `family-category`, `family-transaction`, `family-stock-item`, `member-sees-family-data` (owner A, joined member B, stranger C; set up through the API). No flow drives the member invite UI yet.
+
+## Archived families (spec 042)
+
+- `FamilyEntity.status` (`FamilyStatus` ACTIVE | ARCHIVED, a missing value reads as ACTIVE), `FamilyDTO.isArchived`, `OwnerDTO.archived` (set by `getOwnersUseCase`).
+- `setFamilyStatusUseCase` (`family.set_family_status_use_case`, `{ id, status }`) calls `PATCH /v1/families/:id` with only `status`; `updateFamily` maps 409 with `blockers` to `FamilyHasPendingItems` (a 409 without them stays generic) and 422 to `FamilyArchived`.
+- Families screen: active families first, then a collapsed `Archived (N)` group (`family.list.archived-toggle`); an archived card has the `Archived` chip (`family.card.archived-chip-<id>`), the note, no invite and no member actions. The owner of an active family archives from the card menu (`family.card.menu-<id>-archive-action`, then the confirm dialog); the owner of an archived one has inline Reactivate / Delete buttons (`family.card.reactivate-button-<id>`, `family.card.delete-button-<id>`); a member keeps Leave.
+- A refused archive opens the shared `PendingItemsDialog` (`family.card.blockers-<id>`, OK `family.card.blockers-ok-<id>`) with a section per kind: recurrences, installment plans, unpaid invoices, unpaid transactions, pending invites (items are display-only).
+- E2E (spec 042): `family/archive-family`, `family/archive-family-blocked`.
