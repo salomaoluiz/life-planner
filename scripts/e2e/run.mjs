@@ -165,9 +165,9 @@ export async function runE2e({ argv, env }, deps) {
       partialLabel = `changed: ${impact.tags.join(", ")}`;
     }
     if (options.dryRun) {
-      let selection = `tags ${impact.tags.join(", ")}`;
-      if (impact.tags === "all") {
-        selection = "full suite";
+      let selection = "full suite";
+      if (impact.tags !== "all") {
+        selection = `tags ${impact.tags.join(", ")}`;
       }
       if (options.unchanged) {
         selection = `the flows --changed does not select (${selection})`;
