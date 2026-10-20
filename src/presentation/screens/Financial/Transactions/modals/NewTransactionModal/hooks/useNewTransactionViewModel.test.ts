@@ -558,6 +558,26 @@ describe("card mode (spec 029)", () => {
       expect(mutations.create.value.mutate).not.toHaveBeenCalled();
     });
 
+    it("SHOULD keep the card and turn installments off WHEN saving and adding another", () => {
+      const { rerender, result } = inCardMode();
+
+      act(() => result.current.onAmountChange(512000));
+      act(() => result.current.onDescriptionChange("Notebook"));
+      act(() => result.current.onCategorySelect("food"));
+      act(() => result.current.onInstallmentsToggle(true));
+      act(() => result.current.onInstallmentsCountChange("10"));
+      act(() => result.current.onSaveAndNew());
+      expect(mutations.create_plan.value.mutate).toHaveBeenCalledTimes(1);
+
+      mutations.create_plan.withStatus("success");
+      rerender({});
+
+      expect(result.current.payWith).toBe("CARD");
+      expect(result.current.selectedCardId).toBe("c1");
+      expect(result.current.installments.enabled).toBe(false);
+      expect(result.current.amountCents).toBe(0);
+    });
+
     it.each(["1", "49", ""])(
       "SHOULD NOT save with %s installments AND show the range error",
       (count) => {
@@ -1342,5 +1362,197 @@ describe("deleting a recurring occurrence (spec 034 FR 28-31)", () => {
     });
 
     expect(mutations.delete_occurrence.value.mutate).not.toHaveBeenCalled();
+  });
+});
+
+describe("save and add another (spec 039)", () => {
+  function filled() {
+    givenLoaded({ accounts: [acc("a1"), acc("a2")] });
+    const hook = setup();
+
+    act(() => hook.result.current.onAmountChange(31290));
+    act(() => hook.result.current.onDescriptionChange("Weekly shop"));
+    act(() => hook.result.current.onCategorySelect("food"));
+    act(() => hook.result.current.onAccountChange("a2"));
+    act(() => hook.result.current.onDateChange(new Date(2026, 9, 4)));
+
+    return hook;
+  }
+
+  function succeed(
+    rerender: (props: object) => void,
+    key: "create" | "create_recurrence" = "create",
+  ) {
+    mutations[key].withStatus("success");
+    rerender({});
+  }
+
+  it("SHOULD stay open, reset the form, keep the rest and show the notice WHEN it succeeds", () => {
+    const { rerender, result } = filled();
+
+    act(() => result.current.onSaveAndNew());
+    expect(mutations.create.value.mutate).toHaveBeenCalledTimes(1);
+    succeed(rerender);
+
+    expect(spies.back).not.toHaveBeenCalled();
+    expect(result.current.amountCents).toBe(0);
+    expect(result.current.description).toBe("");
+    expect(result.current.selectedCategoryId).toBe("food");
+    expect(result.current.selectedAccountId).toBe("a2");
+    expect(result.current.date).toEqual(new Date(2026, 9, 4));
+    expect(result.current.ownerId).toBe("user-id");
+    expect(result.current.type).toBe("EXPENSE");
+    expect(result.current.isSaved).toBe(true);
+    expect(mutations.create.value.reset).toHaveBeenCalled();
+  });
+
+  it("SHOULD turn repeat off WHEN a recurrence was saved and added another", () => {
+    const { rerender, result } = filled();
+
+    act(() => result.current.onRepeatToggle(true));
+    act(() => result.current.onSaveAndNew());
+    expect(mutations.create_recurrence.value.mutate).toHaveBeenCalledTimes(1);
+    succeed(rerender, "create_recurrence");
+
+    expect(result.current.repeatOn).toBe(false);
+    expect(result.current.repeatFrequency).toBe("MONTHLY");
+    expect(result.current.repeatEnd).toBeUndefined();
+  });
+
+  it("SHOULD detect a second save and add another WHEN the status went back to idle", () => {
+    const { rerender, result } = filled();
+
+    act(() => result.current.onSaveAndNew());
+    succeed(rerender);
+    mutations.create.withStatus("idle");
+    rerender({});
+    act(() => result.current.onAmountChange(500));
+    act(() => result.current.onDescriptionChange("Bread"));
+    act(() => result.current.onSaveAndNew());
+    succeed(rerender);
+
+    expect(spies.back).not.toHaveBeenCalled();
+    expect(result.current.amountCents).toBe(0);
+    expect(mutations.create.value.mutate).toHaveBeenCalledTimes(2);
+  });
+
+  it("SHOULD still go back WHEN a plain save follows a save and add another", () => {
+    const { rerender, result } = filled();
+
+    act(() => result.current.onSaveAndNew());
+    succeed(rerender);
+    mutations.create.withStatus("idle");
+    rerender({});
+    act(() => result.current.onAmountChange(500));
+    act(() => result.current.onDescriptionChange("Bread"));
+    act(() => result.current.onSave());
+    succeed(rerender);
+
+    expect(spies.back).toHaveBeenCalledTimes(1);
+  });
+
+  it("SHOULD NOT be dirty right after it, and be dirty again after typing", () => {
+    const { rerender, result } = filled();
+
+    act(() => result.current.onSaveAndNew());
+    succeed(rerender);
+    act(() => result.current.onClose());
+    expect(result.current.isDiscardDialogOpen).toBe(false);
+    expect(spies.back).toHaveBeenCalledTimes(1);
+
+    act(() => result.current.onAmountChange(100));
+    act(() => result.current.onClose());
+    expect(result.current.isDiscardDialogOpen).toBe(true);
+  });
+
+  it("SHOULD clear the field errors WHEN it succeeds", () => {
+    const { rerender, result } = filled();
+
+    act(() => result.current.onSaveAndNew());
+    succeed(rerender);
+
+    expect(result.current.amountError).toBeUndefined();
+    expect(result.current.descriptionError).toBeUndefined();
+  });
+
+  it("SHOULD make Paid follow the date again WHEN it succeeds", () => {
+    const { rerender, result } = filled();
+
+    act(() => result.current.onPaidChange(false));
+    act(() => result.current.onSaveAndNew());
+    succeed(rerender);
+
+    expect(result.current.paid).toBe(true);
+  });
+
+  it("SHOULD NOT save and SHOULD show errors WHEN the form is invalid", () => {
+    givenLoaded();
+    const { result } = setup();
+
+    act(() => result.current.onSaveAndNew());
+
+    expect(mutations.create.value.mutate).not.toHaveBeenCalled();
+    expect(result.current.amountError).toBe(
+      "financial.transactions.form.errors.amountRequired",
+    );
+  });
+
+  it("SHOULD keep the values, show the error, no notice and close on a later plain save WHEN the mutation fails", () => {
+    const { rerender, result } = filled();
+
+    act(() => result.current.onSaveAndNew());
+    mutations.create.withError(new FinancialNotFound());
+    rerender({});
+
+    expect(result.current.formErrorKey).toBe("financial.errors.notFound");
+    expect(result.current.amountCents).toBe(31290);
+    expect(result.current.isSaved).toBe(false);
+    expect(spies.back).not.toHaveBeenCalled();
+
+    mutations.create.value.error = null;
+    act(() => result.current.onSave());
+    succeed(rerender);
+    expect(spies.back).toHaveBeenCalledTimes(1);
+  });
+
+  it("SHOULD hide the notice on onSavedHide", () => {
+    const { rerender, result } = filled();
+
+    act(() => result.current.onSaveAndNew());
+    succeed(rerender);
+    act(() => result.current.onSavedHide());
+
+    expect(result.current.isSaved).toBe(false);
+  });
+
+  it("SHOULD offer it only when creating", () => {
+    givenLoaded();
+    expect(setup().result.current.canSaveAndNew).toBe(true);
+
+    givenLoaded({ params: { id: "tx-1" }, transactions: [tx("tx-1")] });
+    const { result } = setup();
+
+    expect(result.current.canSaveAndNew).toBe(false);
+    act(() => result.current.onSaveAndNew());
+    expect(mutations.update.value.mutate).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD report the pressed intent while saving", () => {
+    const { rerender, result } = filled();
+
+    act(() => result.current.onSaveAndNew());
+    mutations.create.withIsFetching(true);
+    rerender({});
+
+    expect(result.current.isSaving).toBe(true);
+    expect(result.current.isSavingNext).toBe(true);
+
+    mutations.create.withIsFetching(false);
+    rerender({});
+    act(() => result.current.onSave());
+    mutations.create.withIsFetching(true);
+    rerender({});
+
+    expect(result.current.isSavingNext).toBe(false);
   });
 });
