@@ -17,6 +17,7 @@ import {
   Divider,
   EmptyState,
   ErrorState,
+  FormColumns,
   Icon,
   IconTile,
   ListItem,
@@ -315,11 +316,18 @@ function ComponentGallery() {
           <Button.Primary fullWidth label="Save" onPress={noop} size="lg" />
         }
         onClose={() => setSheetOpen(false)}
+        size="form"
         testID="gallery-sheet"
         title="Sheet"
         visible={sheetOpen}
       >
-        <Text.Body value="Sheet body" />
+        <FormColumns
+          left={<TextField label="Left column" onChangeText={noop} value="" />}
+          right={
+            <TextField label="Right column" onChangeText={noop} value="" />
+          }
+          testID="gallery-sheet"
+        />
       </BottomSheet>
       <ConfirmDialog
         cancelLabel="Cancel"
