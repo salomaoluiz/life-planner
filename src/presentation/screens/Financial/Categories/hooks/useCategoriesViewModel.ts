@@ -7,12 +7,15 @@ import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
 import { useQuery } from "@infrastructure/fetcher";
 import { TranslationKeys } from "@presentation/i18n/types";
+import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
 import {
   buildCategoryRows,
+  categoryInActiveScope,
   categoryInScope,
 } from "@screens/Financial/models/categoryTree";
 import {
   ALL_OWNERS,
+  archivedOwnerIds,
   buildOwnerFilterChoices,
 } from "@screens/Financial/models/ownerOptions";
 import { listQueryKey } from "@screens/Financial/models/queryKeys";
@@ -62,11 +65,19 @@ function useCategoriesViewModel() {
     }
   }, [isFocused]);
 
+  const archivedIds = useMemo(
+    () => archivedOwnerIds(query.data?.owners ?? []),
+    [query.data],
+  );
+  const scope = useReadOnlyScope(query.data?.owners, ownerFilter);
+
   const { archivedRows, rows } = useMemo(() => {
     const visible = (query.data?.categories ?? []).filter(
       (category) =>
         category.type === type &&
-        (ownerFilter === ALL_OWNERS || categoryInScope(category, ownerFilter)),
+        (ownerFilter === ALL_OWNERS
+          ? categoryInActiveScope(category, archivedIds)
+          : categoryInScope(category, ownerFilter)),
     );
     return {
       archivedRows: toRows(
@@ -76,7 +87,7 @@ function useCategoriesViewModel() {
         visible.filter((category) => category.status !== "ARCHIVED"),
       ),
     };
-  }, [query.data, type, ownerFilter]);
+  }, [query.data, type, ownerFilter, archivedIds]);
   const entries = useMemo(
     () => buildCategoryEntries(rows, archivedRows, archivedExpanded),
     [rows, archivedRows, archivedExpanded],
@@ -95,21 +106,26 @@ function useCategoriesViewModel() {
     isEmpty: rows.length === 0 && archivedRows.length === 0,
     isLoading: query.isFetching && !query.data,
     isRefreshing: query.isFetching && !!query.data,
-    onAddPress: () =>
+    onAddPress: scope.guard(() =>
       router.push("/financial/category/add_new_category" as never),
+    ),
     onArchivedToggle: () => setArchivedExpanded((expanded) => !expanded),
     onOwnerFilterChange: setOwnerFilter,
     onRefresh: async () => query.refetch(),
     onRetry: async () => query.refetch(),
-    onRowPress: (id: string) =>
+    onRowPress: scope.guard((id: string) =>
       router.push({
         params: { id },
         pathname: "/financial/category/add_new_category",
       } as never),
+    ),
+    onToastHide: scope.onToastHide,
     onTypeChange: setType,
     ownerChoices: buildOwnerFilterChoices(query.data?.owners ?? []),
     ownerFilter,
+    readOnly: scope.readOnly,
     rows,
+    toastVisible: scope.toastVisible,
     type,
     typeOptions: TYPE_OPTIONS,
   };

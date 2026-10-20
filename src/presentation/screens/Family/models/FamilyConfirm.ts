@@ -4,8 +4,8 @@ import FamilyMemberUIModel from "./FamilyMemberUIModel";
 import FamilyViewModel from "./FamilyViewModel";
 
 export type FamilyConfirm =
-  | { kind: "CANCEL_INVITE" | "REMOVE_MEMBER"; member: FamilyMemberUIModel }
-  | { kind: "DELETE_FAMILY" | "LEAVE_FAMILY" };
+  | { kind: "ARCHIVE_FAMILY" | "DELETE_FAMILY" | "LEAVE_FAMILY" }
+  | { kind: "CANCEL_INVITE" | "REMOVE_MEMBER"; member: FamilyMemberUIModel };
 
 export function getConfirmCopy(
   confirm: FamilyConfirm,
@@ -17,6 +17,13 @@ export function getConfirmCopy(
   titleKey: TranslationKeys;
 } {
   switch (confirm.kind) {
+    case "ARCHIVE_FAMILY":
+      return {
+        confirmLabelKey: "family.archive.confirm",
+        messageKey: "family.archive.message",
+        params: {},
+        titleKey: "family.archive.title",
+      };
     case "CANCEL_INVITE":
       return {
         confirmLabelKey: "family.member.cancelInvite",

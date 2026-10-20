@@ -114,3 +114,7 @@ notes: E2E flows in `e2e/flows/stock/` (spec 021) and `e2e/flows/family/family-s
 ## Responsive modal layout (spec 037)
 
 `NewStockItemModal` is a `BottomSheet size="form"` with `FormColumns`: main fields left, the "More details" toggle and fields right. `useNewStockItemViewModel` opens `isMoreOpen` by default on `medium`/`expanded` (read once on mount). `StockItemDetails` and Quick add stay `dialog`.
+
+## Archived families (spec 042)
+
+`StockListUIModel` keeps the archived families' items out of All, Personal, Expiring / Expired, the counters and the Home attention count; the owner chip of an archived family is listed last with the archive marker and shows its items read-only (`vm.readOnly`: no add button, `stock.list.readonly-banner`, tapping a row shows `stock.list.readonly-toast` instead of the details sheet). The new-item form only offers active owners.

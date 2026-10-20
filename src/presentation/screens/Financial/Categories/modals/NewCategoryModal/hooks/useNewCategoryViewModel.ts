@@ -12,6 +12,7 @@ import {
 import { isHexColor } from "@presentation/constants/categoryColors";
 import { useLocaleTag } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
+import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
 import {
   ALL_OWNERS,
   personalOwnerId,
@@ -56,10 +57,7 @@ function useNewCategoryViewModel() {
   }>();
   const isEditing = !!params.id;
 
-  const owners = useQuery({
-    cacheKey: [useCases.getOwnersUseCase.uniqueName],
-    fetch: useCases.getOwnersUseCase.execute,
-  });
+  const owners = useActiveOwners();
   const categories = useQuery({
     cacheKey: [useCases.getFinancialCategoriesUseCase.uniqueName],
     enabled: !!owners.data,

@@ -1,4 +1,34 @@
 const family = {
+  archive: {
+    action: "Archive family",
+    confirm: "Archive",
+    message:
+      "It becomes read-only for every member and stops appearing when creating records. Its history stays.",
+    title: "Archive this family?",
+  },
+  archived: {
+    banner: "Archived family. Its data is read-only.",
+    chip: "Archived",
+    group: "Archived ({{count}})",
+    note: "Read-only for every member. It does not appear when creating records or in All.",
+    reactivate: "Reactivate family",
+    readOnly: "This family is archived. Its data is read-only.",
+  },
+  blockers: {
+    body: "Resolve these items first:",
+    close: "OK",
+    installments: "Installment plans in progress",
+    installmentsItem_one: "{{description}} · 1 installment left",
+    installmentsItem_other: "{{description}} · {{count}} installments left",
+    invites: "Pending invites",
+    invoices: "Unpaid invoices",
+    invoicesItem: "{{name}} · {{month}} · {{amount}}",
+    recurrences: "Active recurrences",
+    recurrencesItem: "{{description}} · next on {{date}}",
+    title: "This family can't be archived yet",
+    unpaid: "Unpaid transactions",
+    unpaidItem: "{{description}} · {{date}} · {{amount}}",
+  },
   cancelInvite: {
     message: "The link stops working.",
     title: "Cancel invite for {{email}}?",
@@ -33,6 +63,9 @@ const family = {
     action: "Create family",
     message: "Share stock and finances with the people you live with.",
     title: "Create your family",
+  },
+  errors: {
+    archived: "This family is archived",
   },
   form: {
     counter: "{{count}}/{{max}}",

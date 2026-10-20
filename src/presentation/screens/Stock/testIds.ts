@@ -4,6 +4,8 @@ const stockTestIds = {
   emptyState: "stock.list.empty-state",
   filter: "stock.list.filter",
   noResults: "stock.list.no-results",
+  readOnlyBanner: "stock.list.readonly-banner",
+  readOnlyToast: "stock.list.readonly-toast",
   row: "stock.list.row",
   rowQuantity: "stock.list.row-quantity",
   screen: "stock.list.screen",

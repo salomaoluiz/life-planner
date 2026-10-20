@@ -1,6 +1,7 @@
 import { act } from "@tests";
 
 import {
+  archivedFamily,
   card,
   cardsQuery,
   givenData,
@@ -212,4 +213,36 @@ it("SHOULD NOT open them WHEN no card is selected", () => {
   result.current.onEarlyPaymentPress();
 
   expect(spies.push).not.toHaveBeenCalled();
+});
+
+describe("archived family (spec 042)", () => {
+  it("SHOULD leave it out of All AND show it read-only when selected", () => {
+    givenData(
+      [
+        card("a", 500000, "ACTIVE", "user-id"),
+        card("b", 300000, "ACTIVE", "family-1"),
+      ],
+      0,
+      [owners[0], archivedFamily("family-1")],
+    );
+    const { result } = setup();
+
+    expect(result.current.aggregate.totalLimit).toBe(500000);
+    expect(result.current.readOnly).toBe(false);
+
+    act(() => {
+      result.current.onOwnerFilterChange("family-1");
+    });
+
+    expect(result.current.readOnly).toBe(true);
+    expect(result.current.aggregate.totalLimit).toBe(300000);
+
+    act(() => {
+      result.current.onAddPress();
+      result.current.onInvoicePress("b", "2026-10");
+    });
+
+    expect(spies.push).not.toHaveBeenCalled();
+    expect(result.current.toastVisible).toBe(true);
+  });
 });

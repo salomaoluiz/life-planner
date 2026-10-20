@@ -71,12 +71,31 @@ beforeEach(() => {
   spies.useQuery.mockImplementation((() => accountsQuery.build()) as never);
 });
 
-function givenData(accounts: AccountDTO[]) {
-  accountsQuery.withData({ accounts, owners });
+function archivedFamilyOwner(id: string) {
+  return new OwnerDTO({
+    archived: true,
+    id,
+    name: "Old Family",
+    type: OwnerType.FAMILY,
+  });
+}
+
+function givenData(accounts: AccountDTO[], withOwners: OwnerDTO[] = owners) {
+  accountsQuery.withData({ accounts, owners: withOwners });
 }
 
 function setup() {
   return renderHook(() => useAccountsViewModel());
 }
+const userOwner = owners[0];
 
-export { acc, accountsQuery, givenData, owners, setup, spies };
+export {
+  acc,
+  accountsQuery,
+  archivedFamilyOwner,
+  givenData,
+  owners,
+  setup,
+  spies,
+  userOwner,
+};

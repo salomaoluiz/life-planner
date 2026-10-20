@@ -61,6 +61,7 @@ const useCases = {
   refreshFinancialCategoriesUseCase: expect.any(Function),
   refreshFinancialTransactionsUseCase: expect.any(Function),
   saveUserConfigsUseCase: expect.any(Function),
+  setFamilyStatusUseCase: expect.any(Function),
   signUpWithEmailUseCase: expect.any(Function),
   splitFinancialRecurrenceUseCase: expect.any(Function),
   undoFinancialInvoicePaymentUseCase: expect.any(Function),

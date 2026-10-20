@@ -160,8 +160,20 @@ beforeEach(() => {
   }) as never);
 });
 
-function givenData(items: TransactionUIModel[]) {
-  transactionsQuery.withData({ items, owners });
+function archivedFamily(id: string) {
+  return new OwnerDTO({
+    archived: true,
+    id,
+    name: "Old Family",
+    type: OwnerType.FAMILY,
+  });
+}
+
+function givenData(
+  items: TransactionUIModel[],
+  withOwners: OwnerDTO[] = owners,
+) {
+  transactionsQuery.withData({ items, owners: withOwners });
   summaryQuery.withData({
     balance: 4000,
     expense: 1000,
@@ -186,6 +198,7 @@ function ui(
 }
 
 export {
+  archivedFamily,
   balancesQuery,
   dto,
   givenData,

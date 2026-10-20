@@ -7,8 +7,10 @@ import CreditCardOverviewDTO from "@application/dto/financial/CreditCardOverview
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
 import { useQuery } from "@infrastructure/fetcher";
+import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
 import {
   ALL_OWNERS,
+  archivedOwnerIds,
   buildOwnerFilterChoices,
 } from "@screens/Financial/models/ownerOptions";
 import { listQueryKey } from "@screens/Financial/models/queryKeys";
@@ -65,17 +67,28 @@ function useCardsViewModel() {
     }
   }, [isFocused]);
 
+  const archivedIds = useMemo(
+    () => archivedOwnerIds(query.data?.owners ?? []),
+    [query.data],
+  );
+  const scope = useReadOnlyScope(query.data?.owners, ownerFilter);
   const summaries = useMemo(
-    () => filterSummariesByOwner(query.data?.overview.cards ?? [], ownerFilter),
-    [query.data, ownerFilter],
+    () =>
+      filterSummariesByOwner(
+        query.data?.overview.cards ?? [],
+        ownerFilter,
+        archivedIds,
+      ),
+    [query.data, ownerFilter, archivedIds],
   );
   const archived = useMemo(
     () =>
       filterCardsByOwner(
         (query.data?.cards ?? []).filter((card) => card.status === "ARCHIVED"),
         ownerFilter,
+        archivedIds,
       ),
-    [query.data, ownerFilter],
+    [query.data, ownerFilter, archivedIds],
   );
   const aggregate = useMemo(() => aggregateOf(summaries), [summaries]);
   const resolvedId = resolveSelectedId(summaries, selectedId);
@@ -98,9 +111,10 @@ function useCardsViewModel() {
     invoiceTab,
     isLoading: query.isFetching && !query.data,
     isRefreshing: query.isFetching && !!query.data,
-    onAddPress: () => router.push(FORM_ROUTE as never),
-    onArchivedCardPress: (id: string) =>
+    onAddPress: scope.guard(() => router.push(FORM_ROUTE as never)),
+    onArchivedCardPress: scope.guard((id: string) =>
       router.push({ params: { id }, pathname: FORM_ROUTE } as never),
+    ),
     onArchivedToggle: () => setArchivedExpanded((expanded) => !expanded),
     onCardSelect: (id: string) => setSelectedId(id),
     onEarlyPaymentPress: () => {
@@ -119,11 +133,12 @@ function useCardsViewModel() {
         } as never);
       }
     },
-    onInvoicePress: (cardId: string, month: string) =>
+    onInvoicePress: scope.guard((cardId: string, month: string) =>
       router.push({
         params: { cardId, month },
         pathname: INVOICE_ROUTE,
       } as never),
+    ),
     onInvoiceTabChange: (value: string) =>
       setInvoiceTab(
         value === "closed" || value === "upcoming" ? value : "open",
@@ -139,12 +154,15 @@ function useCardsViewModel() {
       }
     },
     onRetry: async () => query.refetch(),
+    onToastHide: scope.onToastHide,
     ownerChoices: buildOwnerFilterChoices(query.data?.owners ?? []),
     ownerFilter,
     ownerName,
+    readOnly: scope.readOnly,
     selected,
     selectedId: resolvedId,
     summaries,
+    toastVisible: scope.toastVisible,
     usedProgress: usedProgress(aggregate),
   };
 }

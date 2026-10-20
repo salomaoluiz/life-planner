@@ -101,6 +101,8 @@ function givenViewModel(overrides: Record<string, unknown> = {}) {
     onRetry: jest.fn(),
     onSearchChange: jest.fn(),
     onSortChange: jest.fn(),
+    onToastHide: jest.fn(),
+    readOnly: false,
     rows: view.rows,
     search: "",
     selectedItem: undefined,
@@ -111,6 +113,7 @@ function givenViewModel(overrides: Record<string, unknown> = {}) {
       { labelKey: "stock.list.sort.recent", value: "RECENT" },
     ],
     subtitle: { attention: list.attentionCount, total: list.total },
+    toastVisible: false,
     ...overrides,
   };
   jest.mocked(useStockViewModel).mockReturnValue(vm as never);

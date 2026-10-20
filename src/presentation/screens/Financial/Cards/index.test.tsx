@@ -212,3 +212,14 @@ it("SHOULD open the refund and the early payment sheets from the card header (sp
   expect(onRefundPress).toHaveBeenCalledTimes(1);
   expect(onEarlyPaymentPress).toHaveBeenCalledTimes(1);
 });
+
+it("SHOULD show the read-only banner AND toast, and hide the card actions WHEN an archived family is selected", () => {
+  setup({ ...withCards(), readOnly: true, toastVisible: true });
+
+  expect(screen.getByTestId(cardsTestIds.readOnlyBanner)).toBeTruthy();
+  expect(screen.getByTestId(cardsTestIds.readOnlyToast)).toBeTruthy();
+  expect(screen.queryByTestId(cardsTestIds.addButton)).toBeNull();
+  expect(screen.queryByTestId(cardsTestIds.editButton)).toBeNull();
+  expect(screen.queryByTestId(cardsTestIds.refundButton)).toBeNull();
+  expect(screen.queryByTestId(cardsTestIds.earlyPaymentButton)).toBeNull();
+});

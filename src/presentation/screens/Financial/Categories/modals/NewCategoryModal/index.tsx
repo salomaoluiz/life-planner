@@ -11,6 +11,7 @@ import {
   FormColumns,
   IconChoiceGroup,
   IconTile,
+  PendingItemsDialog,
   SegmentedControl,
   SelectField,
   Text,
@@ -24,7 +25,6 @@ import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
 import CustomColorSheet from "./components/CustomColorSheet";
 import IconPickerSheet from "./components/IconPickerSheet";
-import PendingItemsDialog from "./components/PendingItemsDialog";
 import { useNewCategoryViewModel } from "./hooks";
 import useStyles from "./styles";
 import categoryFormTestIds from "./testIds";
@@ -296,7 +296,7 @@ function NewCategoryModal() {
         <PendingItemsDialog
           bodyLabel={t("financial.categories.archive.pendingBody")}
           closeLabel={t("common.actions.close")}
-          hiddenLabel={
+          footnote={
             vm.pendingItems.hiddenCount > 0
               ? t("financial.categories.archive.pendingHidden", {
                   count: vm.pendingItems.hiddenCount,
@@ -305,27 +305,31 @@ function NewCategoryModal() {
           }
           okLabel={t("financial.categories.archive.pendingOk")}
           onClose={vm.onPendingClose}
-          plans={vm.pendingItems.plans.map((plan) => ({
-            id: plan.id,
-            label: t(
-              pluralKey(
-                "financial.categories.archive.pendingPlanLine",
-                plan.count,
-              ),
-              { count: plan.count, description: plan.description },
-            ),
-          }))}
-          plansTitle={t("financial.categories.archive.pendingPlans")}
-          recurrences={vm.pendingItems.recurrences.map((recurrence) => ({
-            id: recurrence.id,
-            label: t("financial.categories.archive.pendingRecurrenceLine", {
-              date: recurrence.date,
-              description: recurrence.description,
-            }),
-          }))}
-          recurrencesTitle={t(
-            "financial.categories.archive.pendingRecurrences",
-          )}
+          sections={[
+            {
+              items: vm.pendingItems.recurrences.map((recurrence) => ({
+                id: recurrence.id,
+                label: t("financial.categories.archive.pendingRecurrenceLine", {
+                  date: recurrence.date,
+                  description: recurrence.description,
+                }),
+              })),
+              title: t("financial.categories.archive.pendingRecurrences"),
+            },
+            {
+              items: vm.pendingItems.plans.map((plan) => ({
+                id: plan.id,
+                label: t(
+                  pluralKey(
+                    "financial.categories.archive.pendingPlanLine",
+                    plan.count,
+                  ),
+                  { count: plan.count, description: plan.description },
+                ),
+              })),
+              title: t("financial.categories.archive.pendingPlans"),
+            },
+          ]}
           testIDs={{
             dialog: categoryFormTestIds.pendingDialog,
             ok: categoryFormTestIds.pendingOk,

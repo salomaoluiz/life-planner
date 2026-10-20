@@ -3,8 +3,13 @@ import {
   FamilyMemberRole,
   FamilyMemberStatus,
 } from "@domain/entities/familyMember/FamilyMemberEnums";
-import { memberDTO } from "@screens/Family/mocks/index.mocks";
+import {
+  makeArchivedFamilyViewModel,
+  makeFamilyViewModel,
+  memberDTO,
+} from "@screens/Family/mocks/index.mocks";
 
+import { getConfirmCopy } from "./FamilyConfirm";
 import FamilyMemberUIModel from "./FamilyMemberUIModel";
 import FamilyViewModel from "./FamilyViewModel";
 
@@ -118,4 +123,47 @@ it.each([
   expect(new FamilyViewModel(family(name), [], ownerViewer).initial).toBe(
     initial,
   );
+});
+
+describe("archived family (spec 042)", () => {
+  it("SHOULD give the owner Reactivate / Delete inline AND no menu or invite", () => {
+    const archived = makeArchivedFamilyViewModel(ownerViewer);
+
+    expect(archived.isArchived).toBe(true);
+    expect(archived.canReactivate).toBe(true);
+    expect(archived.canArchive).toBe(false);
+    expect(archived.canInvite).toBe(false);
+    expect(archived.menuAction).toBeUndefined();
+    expect(archived.menuSecondaryLabelKey).toBeUndefined();
+    expect(archived.familyMembers.every((member) => !member.action)).toBe(true);
+  });
+
+  it("SHOULD keep Leave for a member of an archived family", () => {
+    const archived = makeArchivedFamilyViewModel(memberViewer);
+
+    expect(archived.canReactivate).toBe(false);
+    expect(archived.menuAction).toBe("LEAVE");
+  });
+
+  it("SHOULD let the owner of an active family archive from the menu", () => {
+    const active = makeFamilyViewModel(ownerViewer);
+
+    expect(active.canArchive).toBe(true);
+    expect(active.canInvite).toBe(true);
+    expect(active.menuAction).toBe("DELETE");
+    expect(active.menuSecondaryLabelKey).toBe("family.archive.action");
+  });
+
+  it("SHOULD give the archive confirmation copy", () => {
+    expect(
+      getConfirmCopy(
+        { kind: "ARCHIVE_FAMILY" },
+        makeFamilyViewModel(ownerViewer),
+      ),
+    ).toMatchObject({
+      confirmLabelKey: "family.archive.confirm",
+      messageKey: "family.archive.message",
+      titleKey: "family.archive.title",
+    });
+  });
 });

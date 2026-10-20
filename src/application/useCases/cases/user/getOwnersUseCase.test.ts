@@ -1,5 +1,6 @@
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { BusinessError } from "@domain/entities/errors";
+import { FamilyStatus } from "@domain/entities/family/FamilyStatus";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import {
@@ -34,6 +35,17 @@ it("SHOULD return the correct owners", async () => {
   ].map((owner) => new OwnerDTO(owner));
 
   expect(result).toEqual(expected);
+});
+
+it("SHOULD flag the archived families (spec 042)", async () => {
+  spies.familyRepository.getFamilies.mockResolvedValueOnce([
+    mocks.families[0],
+    { ...mocks.families[1], status: FamilyStatus.ARCHIVED },
+  ]);
+
+  const result = await setup();
+
+  expect(result.map((owner) => owner.archived)).toEqual([false, true, false]);
 });
 
 it("SHOULD throw an error if the repository throws an error", async () => {

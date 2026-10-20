@@ -1,0 +1,68 @@
+url: ${E2E_WEB_URL}
+name: family/archive-family-blocked
+tags:
+  - family
+  - spec-042
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Family
+      KEY: FAMILY_NAME
+- runFlow:
+    file: ../../subflows/setup/create-family.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      NAME: ${output.FAMILY_NAME}
+- runFlow:
+    file: ../../subflows/setup/create-family-invite.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      FAMILY_ID: ${output.FAMILY_ID}
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/family/open-family.yaml
+- extendedWaitUntil:
+    visible:
+      id: "family.card.title-${output.FAMILY_ID}"
+      text: ${output.FAMILY_NAME}
+    timeout: 20000
+- tapOn:
+    id: "family.card.options-${output.FAMILY_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "family.card.menu-${output.FAMILY_ID}-archive-action"
+    timeout: 20000
+- tapOn:
+    id: "family.card.menu-${output.FAMILY_ID}-archive-action"
+- extendedWaitUntil:
+    visible:
+      id: "family.card.confirm-${output.FAMILY_ID}-confirm"
+    timeout: 20000
+- tapOn:
+    id: "family.card.confirm-${output.FAMILY_ID}-confirm"
+# Refused: the dialog lists the pending invite
+- extendedWaitUntil:
+    visible:
+      id: "family.card.blockers-${output.FAMILY_ID}"
+    timeout: 20000
+- assertVisible:
+    id: "pending-item-.*"
+- tapOn:
+    id: "family.card.blockers-ok-${output.FAMILY_ID}"
+# The family stays active
+- extendedWaitUntil:
+    visible:
+      id: "family.card.title-${output.FAMILY_ID}"
+      text: ${output.FAMILY_NAME}
+    timeout: 20000
+- assertNotVisible:
+    id: "family.list.archived-toggle"

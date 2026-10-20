@@ -2,8 +2,9 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
 import { useCases } from "@application/useCases";
-import { useMutation, useQuery } from "@infrastructure/fetcher";
+import { useMutation } from "@infrastructure/fetcher";
 import { useBreakpoint } from "@presentation/theme";
+import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
 import NewStockItemUIModel from "@screens/Stock/modals/NewStockItemModal/models/NewStockItemUIModel";
 
 import useForm from "./useForm";
@@ -16,10 +17,7 @@ function useNewStockItemViewModel() {
   const [isMoreOpen, setIsMoreOpen] = useState(isWide);
   const [isDiscardOpen, setIsDiscardOpen] = useState(false);
 
-  const owners = useQuery({
-    cacheKey: [useCases.getOwnersUseCase.uniqueName],
-    fetch: useCases.getOwnersUseCase.execute,
-  });
+  const owners = useActiveOwners();
   const addStock = useMutation({
     cacheKey: [useCases.createStockItemUseCase.uniqueName],
     fetch: useCases.createStockItemUseCase.execute,

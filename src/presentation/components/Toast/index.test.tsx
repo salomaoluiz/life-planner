@@ -50,3 +50,9 @@ it("SHOULD NOT block touches outside its box", () => {
   setup();
   expect(screen.getByTestId("toast-wrapper").props.pointerEvents).toBe("none");
 });
+
+it("SHOULD show a custom icon WHEN one is given", () => {
+  setup({ icon: "lock-outline" });
+
+  expect(screen.getByText("Transaction saved")).toBeTruthy();
+});

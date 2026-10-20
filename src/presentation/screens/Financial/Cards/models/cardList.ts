@@ -97,9 +97,16 @@ function buildCardEntries(params: {
   return entries;
 }
 
-function filterCardsByOwner(cards: CreditCardDTO[], ownerFilter: string) {
+// "All" leaves out the archived families (spec 042); selecting one shows its data.
+function filterCardsByOwner(
+  cards: CreditCardDTO[],
+  ownerFilter: string,
+  archivedOwnerIds: ReadonlySet<string> = new Set(),
+) {
   if (ownerFilter === ALL_OWNERS) {
-    return cards;
+    return archivedOwnerIds.size === 0
+      ? cards
+      : cards.filter((card) => !archivedOwnerIds.has(card.ownerId));
   }
 
   return cards.filter((card) => card.ownerId === ownerFilter);
@@ -108,9 +115,12 @@ function filterCardsByOwner(cards: CreditCardDTO[], ownerFilter: string) {
 function filterSummariesByOwner(
   summaries: CreditCardSummaryDTO[],
   ownerFilter: string,
+  archivedOwnerIds: ReadonlySet<string> = new Set(),
 ) {
   if (ownerFilter === ALL_OWNERS) {
-    return summaries;
+    return archivedOwnerIds.size === 0
+      ? summaries
+      : summaries.filter((item) => !archivedOwnerIds.has(item.card.ownerId));
   }
 
   return summaries.filter((item) => item.card.ownerId === ownerFilter);

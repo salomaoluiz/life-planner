@@ -5,6 +5,9 @@ export interface Props {
   closeLabel: string;
   onAction: () => void;
   onClose: () => void;
+  onSecondaryAction?: () => void;
+  /** Optional non-destructive action shown above the destructive one (archive family). */
+  secondaryLabel?: string;
   subtitle: string;
   testID: string;
   title: string;
@@ -21,6 +24,14 @@ function ActionSheet(props: Props) {
       title={props.title}
       visible={props.visible}
     >
+      {props.secondaryLabel && props.onSecondaryAction ? (
+        <Button.Secondary
+          fullWidth
+          label={props.secondaryLabel}
+          onPress={props.onSecondaryAction}
+          testID={`${props.testID}-archive-action`}
+        />
+      ) : null}
       <Button.Destructive
         fullWidth
         label={props.actionLabel}

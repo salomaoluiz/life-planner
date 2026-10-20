@@ -11,10 +11,12 @@ import {
   IconButton,
   IconTile,
   ListItem,
+  ReadOnlyNotice,
   Screen,
   ScreenHeader,
   SearchField,
   Text,
+  Toast,
 } from "@components";
 import Skeleton from "@components/Skeleton";
 import { StockExpirationStatus } from "@domain/entities/stock/stockExpiration";
@@ -114,9 +116,9 @@ function Stock() {
     if (vm.isEmpty) {
       return (
         <EmptyState
-          actionLabel={t("stock.list.add")}
+          actionLabel={vm.readOnly ? undefined : t("stock.list.add")}
           message={t("stock.list.emptyMessage")}
-          onAction={vm.onAddPress}
+          onAction={vm.readOnly ? undefined : vm.onAddPress}
           testID={stockTestIds.emptyState}
           title={t("stock.list.emptyTitle")}
         />
@@ -165,12 +167,14 @@ function Stock() {
                   testID={stockTestIds.sortButton}
                 />
               ) : null}
-              <IconButton
-                accessibilityLabel={t("stock.list.add")}
-                name="plus"
-                onPress={vm.onAddPress}
-                testID={stockTestIds.addButton}
-              />
+              {vm.readOnly ? null : (
+                <IconButton
+                  accessibilityLabel={t("stock.list.add")}
+                  name="plus"
+                  onPress={vm.onAddPress}
+                  testID={stockTestIds.addButton}
+                />
+              )}
             </>
           }
           subtitle={subtitle}
@@ -191,6 +195,7 @@ function Stock() {
               onChange={vm.onFilterChange}
               options={vm.filterOptions.map((option) => ({
                 count: option.count,
+                icon: option.archived ? "archive-outline" : undefined,
                 label: option.labelKey
                   ? t(option.labelKey)
                   : (option.label ?? ""),
@@ -199,6 +204,12 @@ function Stock() {
               testID={stockTestIds.filter}
               value={vm.activeFilter}
             />
+            {vm.readOnly ? (
+              <ReadOnlyNotice
+                message={t("family.archived.banner")}
+                testID={stockTestIds.readOnlyBanner}
+              />
+            ) : null}
           </>
         ) : null}
       </View>
@@ -227,6 +238,13 @@ function Stock() {
           />
         ))}
       </BottomSheet>
+      <Toast
+        icon={"lock-outline"}
+        message={t("family.archived.readOnly")}
+        onHide={vm.onToastHide}
+        testID={stockTestIds.readOnlyToast}
+        visible={vm.toastVisible}
+      />
       {vm.selectedItem ? (
         <StockItemDetails
           item={vm.selectedItem}

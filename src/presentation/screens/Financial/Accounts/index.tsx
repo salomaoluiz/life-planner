@@ -12,7 +12,9 @@ import {
   IconButton,
   IconTile,
   ListItem,
+  ReadOnlyNotice,
   Text,
+  Toast,
 } from "@components";
 import Skeleton from "@components/Skeleton";
 import { useKitTheme } from "@components/utils/useKitTheme";
@@ -61,12 +63,14 @@ function FinancialAccounts() {
             />
           </Card>
         </View>
-        <IconButton
-          accessibilityLabel={t("financial.accounts.new")}
-          name={"plus"}
-          onPress={vm.onAddPress}
-          testID={accountsTestIds.addButton}
-        />
+        {vm.readOnly ? null : (
+          <IconButton
+            accessibilityLabel={t("financial.accounts.new")}
+            name={"plus"}
+            onPress={vm.onAddPress}
+            testID={accountsTestIds.addButton}
+          />
+        )}
       </View>
       <ChipGroup
         layout={"scroll"}
@@ -76,6 +80,12 @@ function FinancialAccounts() {
         testID={accountsTestIds.ownerFilter}
         value={vm.ownerFilter}
       />
+      {vm.readOnly ? (
+        <ReadOnlyNotice
+          message={t("family.archived.banner")}
+          testID={accountsTestIds.readOnlyBanner}
+        />
+      ) : null}
     </View>
   );
 
@@ -165,9 +175,9 @@ function FinancialAccounts() {
         keyExtractor={(entry) => entry.key}
         ListEmptyComponent={
           <EmptyState
-            actionLabel={t("financial.accounts.new")}
+            actionLabel={vm.readOnly ? undefined : t("financial.accounts.new")}
             message={t("financial.accounts.emptyMessage")}
-            onAction={vm.onAddPress}
+            onAction={vm.readOnly ? undefined : vm.onAddPress}
             testID={accountsTestIds.emptyState}
             title={t("financial.accounts.emptyTitle")}
           />
@@ -177,6 +187,13 @@ function FinancialAccounts() {
         refreshing={vm.isRefreshing}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
+      />
+      <Toast
+        icon={"lock-outline"}
+        message={t("family.archived.readOnly")}
+        onHide={vm.onToastHide}
+        testID={accountsTestIds.readOnlyToast}
+        visible={vm.toastVisible}
       />
     </View>
   );

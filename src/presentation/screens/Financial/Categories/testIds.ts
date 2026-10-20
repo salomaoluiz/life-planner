@@ -5,6 +5,8 @@ const categoriesTestIds = {
   emptyState: "financial.categories.empty-state",
   ownerBadge: "financial.categories.owner-badge",
   ownerFilter: "financial.categories.owner-filter",
+  readOnlyBanner: "financial.categories.readonly-banner",
+  readOnlyToast: "financial.categories.readonly-toast",
   row: "financial.categories.row",
   scopeAll: "financial.categories.scope-all",
   screen: "financial.categories.screen",

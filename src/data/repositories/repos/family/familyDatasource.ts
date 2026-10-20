@@ -1,4 +1,5 @@
 import FamilyModel from "@data/models/family/FamilyModel";
+import { FamilyStatus } from "@domain/entities/family/FamilyStatus";
 
 export interface FamilyDatasource {
   createFamily(params: CreateFamilyDatasourceParams): Promise<FamilyModel>;
@@ -15,7 +16,8 @@ interface CreateFamilyDatasourceParams {
 
 interface UpdateFamilyDatasourceParams {
   id: string;
-  name: string;
+  name?: string;
+  status?: FamilyStatus;
 }
 
 export { CreateFamilyDatasourceParams, UpdateFamilyDatasourceParams };

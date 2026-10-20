@@ -46,8 +46,11 @@ const defaultViewModel: ReturnType<typeof useAccountsViewModel> = {
   onRefresh: jest.fn(),
   onRetry: jest.fn(),
   onRowPress: jest.fn(),
+  onToastHide: jest.fn(),
   ownerChoices: [{ labelKey: "financial.common.all", value: "ALL" }],
   ownerFilter: "ALL",
+  readOnly: false,
+  toastVisible: false,
   totalAmount: { value: 0 },
   totalProjectedAmount: { value: 0 },
 };

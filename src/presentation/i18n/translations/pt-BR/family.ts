@@ -1,4 +1,34 @@
 const family = {
+  archive: {
+    action: "Arquivar família",
+    confirm: "Arquivar",
+    message:
+      "Ela fica somente leitura para todos os membros e deixa de aparecer ao criar registros. O histórico continua.",
+    title: "Arquivar esta família?",
+  },
+  archived: {
+    banner: "Família arquivada. Os dados são somente leitura.",
+    chip: "Arquivada",
+    group: "Arquivadas ({{count}})",
+    note: "Somente leitura para todos os membros. Não aparece ao criar registros nem no filtro Tudo.",
+    reactivate: "Reativar família",
+    readOnly: "Esta família está arquivada. Os dados são somente leitura.",
+  },
+  blockers: {
+    body: "Resolva estes itens antes:",
+    close: "Entendi",
+    installments: "Parcelamentos em andamento",
+    installmentsItem_one: "{{description}} · falta 1 parcela",
+    installmentsItem_other: "{{description}} · faltam {{count}} parcelas",
+    invites: "Convites pendentes",
+    invoices: "Faturas em aberto",
+    invoicesItem: "{{name}} · {{month}} · {{amount}}",
+    recurrences: "Recorrências ativas",
+    recurrencesItem: "{{description}} · próxima em {{date}}",
+    title: "Ainda não dá para arquivar esta família",
+    unpaid: "Transações não pagas",
+    unpaidItem: "{{description}} · {{date}} · {{amount}}",
+  },
   cancelInvite: {
     message: "O link deixa de funcionar.",
     title: "Cancelar convite para {{email}}?",
@@ -34,6 +64,9 @@ const family = {
     action: "Criar família",
     message: "Compartilhe estoque e finanças com quem mora com você.",
     title: "Crie sua família",
+  },
+  errors: {
+    archived: "Esta família está arquivada",
   },
   form: {
     counter: "{{count}}/{{max}}",

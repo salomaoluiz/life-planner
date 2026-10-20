@@ -199,9 +199,16 @@ function buildEntries(
   return entries;
 }
 
-function filterByOwner(items: TransactionUIModel[], ownerFilter: string) {
+// "All" leaves out the archived families (spec 042); selecting one shows its data.
+function filterByOwner(
+  items: TransactionUIModel[],
+  ownerFilter: string,
+  archivedOwnerIds: ReadonlySet<string> = new Set(),
+) {
   if (ownerFilter === ALL_FILTER) {
-    return items;
+    return archivedOwnerIds.size === 0
+      ? items
+      : items.filter((item) => !archivedOwnerIds.has(item.ownerId));
   }
 
   return items.filter((item) => item.ownerId === ownerFilter);
@@ -221,9 +228,12 @@ function filterByType(items: TransactionUIModel[], typeFilter: TypeFilter) {
 function filterInvoicesByOwner(
   invoices: CardInvoiceUIModel[],
   ownerFilter: string,
+  archivedOwnerIds: ReadonlySet<string> = new Set(),
 ) {
   if (ownerFilter === ALL_FILTER) {
-    return invoices;
+    return archivedOwnerIds.size === 0
+      ? invoices
+      : invoices.filter((invoice) => !archivedOwnerIds.has(invoice.ownerId));
   }
 
   return invoices.filter((invoice) => invoice.ownerId === ownerFilter);

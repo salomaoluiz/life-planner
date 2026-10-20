@@ -10,7 +10,9 @@ import {
   IconButton,
   IconTile,
   ListItem,
+  ReadOnlyNotice,
   SegmentedControl,
+  Toast,
   TreeItem,
 } from "@components";
 import Skeleton from "@components/Skeleton";
@@ -53,12 +55,14 @@ function FinancialCategories() {
             value={vm.type}
           />
         </View>
-        <IconButton
-          accessibilityLabel={t("financial.categories.new")}
-          name={"plus"}
-          onPress={vm.onAddPress}
-          testID={categoriesTestIds.addButton}
-        />
+        {vm.readOnly ? null : (
+          <IconButton
+            accessibilityLabel={t("financial.categories.new")}
+            name={"plus"}
+            onPress={vm.onAddPress}
+            testID={categoriesTestIds.addButton}
+          />
+        )}
       </View>
       <ChipGroup
         layout={"scroll"}
@@ -68,6 +72,12 @@ function FinancialCategories() {
         testID={categoriesTestIds.ownerFilter}
         value={vm.ownerFilter}
       />
+      {vm.readOnly ? (
+        <ReadOnlyNotice
+          message={t("family.archived.banner")}
+          testID={categoriesTestIds.readOnlyBanner}
+        />
+      ) : null}
     </View>
   );
 
@@ -173,9 +183,11 @@ function FinancialCategories() {
         keyExtractor={(entry) => entry.key}
         ListEmptyComponent={
           <EmptyState
-            actionLabel={t("financial.categories.new")}
+            actionLabel={
+              vm.readOnly ? undefined : t("financial.categories.new")
+            }
             message={t("financial.categories.emptyMessage")}
-            onAction={vm.onAddPress}
+            onAction={vm.readOnly ? undefined : vm.onAddPress}
             testID={categoriesTestIds.emptyState}
             title={t(vm.emptyTitleKey)}
           />
@@ -185,6 +197,13 @@ function FinancialCategories() {
         refreshing={vm.isRefreshing}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
+      />
+      <Toast
+        icon={"lock-outline"}
+        message={t("family.archived.readOnly")}
+        onHide={vm.onToastHide}
+        testID={categoriesTestIds.readOnlyToast}
+        visible={vm.toastVisible}
       />
     </View>
   );

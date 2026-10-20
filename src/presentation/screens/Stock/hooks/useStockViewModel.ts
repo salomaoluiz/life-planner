@@ -7,6 +7,7 @@ import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
 import { useQuery } from "@infrastructure/fetcher";
 import { useTranslationLocale } from "@presentation/i18n";
+import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
 import StockListUIModel, {
   StockFilters,
   StockSort,
@@ -89,7 +90,9 @@ function useStockViewModel() {
   const selectedItem = list?.items.find((item) => item.id === selectedId);
   const activeFilter = view?.activeFilter ?? StockFilters.ALL;
 
-  function onAddPress() {
+  const scope = useReadOnlyScope(data?.owners, activeFilter);
+
+  const onAddPress = scope.guard(() => {
     const isOwnerFilter = !(Object.values(StockFilters) as string[]).includes(
       activeFilter,
     );
@@ -102,7 +105,7 @@ function useStockViewModel() {
           }
         : { pathname: "/stock/add_new_stock_item" },
     );
-  }
+  });
 
   function onClearFilters() {
     setSearch("");
@@ -126,7 +129,7 @@ function useStockViewModel() {
       error && !data ? ("common.errors.generic" as const) : undefined,
     filterOptions: view?.filterOptions ?? [],
     hasNoResults: view?.hasNoResults ?? false,
-    isEmpty: !!list && list.total === 0,
+    isEmpty: !!list && list.items.length === 0,
     isLoading: isFetching && !data,
     isRefreshing: isFetching && !!data,
     isSortOpen,
@@ -136,12 +139,14 @@ function useStockViewModel() {
     onCloseSort: () => setIsSortOpen(false),
     onFilterChange: setFilter,
     onItemDeleted,
-    onItemPress: setSelectedId,
+    onItemPress: scope.guard(setSelectedId),
     onOpenSort: () => setIsSortOpen(true),
     onRefresh: async () => refetch(),
     onRetry: async () => refetch(),
     onSearchChange: setSearch,
     onSortChange,
+    onToastHide: scope.onToastHide,
+    readOnly: scope.readOnly,
     rows: view?.rows ?? [],
     search,
     selectedItem,
@@ -161,6 +166,7 @@ function useStockViewModel() {
       attention: list?.attentionCount ?? 0,
       total: list?.total ?? 0,
     },
+    toastVisible: scope.toastVisible,
   };
 }
 

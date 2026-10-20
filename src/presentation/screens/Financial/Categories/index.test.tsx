@@ -162,3 +162,11 @@ it("SHOULD render the archived toggle with its count AND report the press", () =
   expect(onArchivedToggle).toHaveBeenCalled();
   expect(screen.getByText(/1/)).toBeOnTheScreen();
 });
+
+it("SHOULD show the read-only banner AND toast, without the add button, WHEN an archived family is selected", () => {
+  setup({ readOnly: true, toastVisible: true });
+
+  expect(screen.getByTestId(categoriesTestIds.readOnlyBanner)).toBeTruthy();
+  expect(screen.getByTestId(categoriesTestIds.readOnlyToast)).toBeTruthy();
+  expect(screen.queryByTestId(categoriesTestIds.addButton)).toBeNull();
+});

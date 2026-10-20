@@ -46,6 +46,17 @@ function categoriesOf(
   );
 }
 
+// "All" skips a category that only lives in archived families (spec 042); an All category stays through its other scopes.
+function categoryInActiveScope(
+  category: CategoryDTO,
+  archivedOwnerIds: ReadonlySet<string>,
+) {
+  return (
+    category.scopeOwnerIds.length === 0 ||
+    category.scopeOwnerIds.some((id) => !archivedOwnerIds.has(id))
+  );
+}
+
 // An All category (spec 038) belongs to several scopes: the Personal one and each family of its creator.
 function categoryInScope(category: CategoryDTO, ownerId: string) {
   return category.scopeOwnerIds.includes(ownerId);
@@ -115,6 +126,7 @@ function selectableCategories(categories: CategoryDTO[], selectedId?: string) {
 export {
   buildCategoryRows,
   categoriesOf,
+  categoryInActiveScope,
   categoryInScope,
   descendantIds,
   filterRowsByQuery,

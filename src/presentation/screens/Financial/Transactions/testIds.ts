@@ -25,6 +25,8 @@ const transactionsTestIds = {
   monthNext: "financial.transactions.month-next",
   monthPrevious: "financial.transactions.month-previous",
   monthSummary: "financial.transactions.month-summary",
+  readOnlyBanner: "financial.transactions.readonly-banner",
+  readOnlyToast: "financial.transactions.readonly-toast",
   row: "financial.transactions.row",
   rowOverdue: "financial.transactions.row.overdue",
   rowPay: "financial.transactions.row.pay",

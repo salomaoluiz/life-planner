@@ -5,9 +5,11 @@ import AccountDTO from "@application/dto/financial/AccountDTO";
 import {
   acc,
   accountsQuery,
+  archivedFamilyOwner,
   givenData,
   setup,
   spies,
+  userOwner,
 } from "./mocks/useAccountsViewModel.mocks";
 import { fetchAccounts } from "./useAccountsViewModel";
 
@@ -151,4 +153,37 @@ it("SHOULD total the end-of-month balance of the active accounts of the selected
     result.current.onOwnerFilterChange("family-1");
   });
   expect(result.current.totalProjectedAmount).toEqual({ value: 1000 });
+});
+
+describe("archived family (spec 042)", () => {
+  it("SHOULD leave the archived family out of All AND show it read-only when selected", () => {
+    givenData(
+      [acc("a", 100, "ACTIVE", "user-id"), acc("b", 40, "ACTIVE", "family-1")],
+      [archivedFamilyOwner("family-1"), userOwner],
+    );
+    const { result } = setup();
+
+    expect(result.current.entries.filter((e) => e.kind === "row")).toHaveLength(
+      1,
+    );
+    expect(result.current.totalAmount).toEqual({ value: 10000 });
+    expect(result.current.readOnly).toBe(false);
+
+    act(() => {
+      result.current.onOwnerFilterChange("family-1");
+    });
+
+    expect(result.current.readOnly).toBe(true);
+    expect(result.current.entries.filter((e) => e.kind === "row")).toHaveLength(
+      1,
+    );
+
+    act(() => {
+      result.current.onAddPress();
+      result.current.onRowPress("b");
+    });
+
+    expect(spies.push).not.toHaveBeenCalled();
+    expect(result.current.toastVisible).toBe(true);
+  });
 });

@@ -114,8 +114,21 @@ beforeEach(() => {
   spies.useQuery.mockImplementation((() => cardsQuery.build()) as never);
 });
 
+function archivedFamily(id: string) {
+  return new OwnerDTO({
+    archived: true,
+    id,
+    name: "Old Family",
+    type: OwnerType.FAMILY,
+  });
+}
+
 // Active cards feed the overview, ARCHIVED ones only the list (like the API).
-function givenData(cards: CreditCardDTO[], used = 0) {
+function givenData(
+  cards: CreditCardDTO[],
+  used = 0,
+  withOwners: OwnerDTO[] = owners,
+) {
   const overview = new CreditCardOverviewDTO({
     aggregate: { available: 0, totalLimit: 0, used: 0 },
     cards: cards
@@ -123,11 +136,21 @@ function givenData(cards: CreditCardDTO[], used = 0) {
       .map((item) => summary(item, used)),
   });
 
-  cardsQuery.withData({ cards, overview, owners });
+  cardsQuery.withData({ cards, overview, owners: withOwners });
 }
 
 function setup() {
   return renderHook(() => useCardsViewModel());
 }
 
-export { card, cardsQuery, givenData, invoice, owners, setup, spies, summary };
+export {
+  archivedFamily,
+  card,
+  cardsQuery,
+  givenData,
+  invoice,
+  owners,
+  setup,
+  spies,
+  summary,
+};

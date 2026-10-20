@@ -14,6 +14,7 @@ import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
 import { normalizeCategoryColor } from "@presentation/constants/categoryColors";
 import { TranslationKeys } from "@presentation/i18n/types";
+import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
 import { filterRowsByQuery } from "@screens/Financial/models/categoryTree";
 import {
   installmentInvoiceRange,
@@ -185,10 +186,7 @@ function useNewTransactionViewModel() {
   const isEditing = !!params.id || isProjected;
   const isFocused = useIsFocused();
 
-  const owners = useQuery({
-    cacheKey: [useCases.getOwnersUseCase.uniqueName],
-    fetch: useCases.getOwnersUseCase.execute,
-  });
+  const owners = useActiveOwners();
   const accounts = useQuery({
     cacheKey: [useCases.getFinancialAccountsUseCase.uniqueName],
     enabled: !!owners.data,

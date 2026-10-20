@@ -48,9 +48,16 @@ function byName(a: AccountUIModel, b: AccountUIModel) {
   return a.name.localeCompare(b.name);
 }
 
-function filterByOwner(accounts: AccountUIModel[], ownerFilter: string) {
+// "All" leaves out the archived families (spec 042); selecting one shows its data.
+function filterByOwner(
+  accounts: AccountUIModel[],
+  ownerFilter: string,
+  archivedOwnerIds: ReadonlySet<string> = new Set(),
+) {
   if (ownerFilter === ALL_OWNERS) {
-    return accounts;
+    return archivedOwnerIds.size === 0
+      ? accounts
+      : accounts.filter((account) => !archivedOwnerIds.has(account.ownerId));
   }
 
   return accounts.filter((account) => account.ownerId === ownerFilter);

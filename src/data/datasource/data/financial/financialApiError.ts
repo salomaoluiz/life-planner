@@ -1,11 +1,14 @@
 import {
   ApiBusinessError,
   BusinessError,
+  FamilyArchived,
   FieldInvalid,
   FinancialNotFound,
   FinancialOwnerNotAllowed,
   GenericError,
 } from "@domain/entities/errors";
+
+const ARCHIVED_FAMILY_MESSAGE = "Family is archived";
 
 interface Options {
   conflict?: (
@@ -59,7 +62,11 @@ function mapStatus(
     case 409:
       return options.conflict?.(details, body);
     case 422:
-      return options.unprocessable?.(message);
+      // Any write on an archived family (spec 042); a datasource mapping wins for its own messages.
+      return (
+        options.unprocessable?.(message) ??
+        (message === ARCHIVED_FAMILY_MESSAGE ? new FamilyArchived() : undefined)
+      );
     default:
       return undefined;
   }

@@ -326,3 +326,19 @@ describe("day balance header (spec 035)", () => {
     expect(hasText("financial.transactions.dayBalance.cardsDue")).toBe(true);
   });
 });
+
+describe("archived family selected (spec 042)", () => {
+  it("SHOULD show the read-only banner AND the toast, and no add action in the empty month", () => {
+    setup({ isEmptyMonth: true, readOnly: true, toastVisible: true });
+
+    expect(screen.getByTestId(transactionsTestIds.readOnlyBanner)).toBeTruthy();
+    expect(screen.getByTestId(transactionsTestIds.readOnlyToast)).toBeTruthy();
+    expect(hasText("financial.transactions.add")).toBe(false);
+  });
+
+  it("SHOULD not show the banner for a writable scope", () => {
+    setup();
+
+    expect(screen.queryByTestId(transactionsTestIds.readOnlyBanner)).toBeNull();
+  });
+});

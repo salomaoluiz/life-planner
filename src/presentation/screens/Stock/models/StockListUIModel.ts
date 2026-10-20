@@ -15,6 +15,8 @@ export const StockFilters = {
 } as const;
 
 export interface StockFilterOption {
+  // An archived family: listed last with the archive marker (spec 042).
+  archived?: boolean;
   count?: number;
   label?: string;
   labelKey?: TranslationKeys;
@@ -36,15 +38,22 @@ interface ViewParams {
 class StockListUIModel {
   readonly items: StockItemUIModel[];
 
+  // The counters (Home attention, subtitle) leave out the archived families (spec 042).
   get attentionCount() {
-    return this.items.filter((item) => item.isAttention).length;
+    return this.activeItems.filter((item) => item.isAttention).length;
   }
 
   get total() {
-    return this.items.length;
+    return this.activeItems.length;
   }
 
+  private readonly archivedIds: ReadonlySet<string>;
+
   private readonly families: OwnerDTO[];
+
+  private get activeItems() {
+    return this.items.filter((item) => !this.archivedIds.has(item.ownerId));
+  }
 
   constructor(
     dtos: StockDTO[],
@@ -56,6 +65,9 @@ class StockListUIModel {
       (dto) => new StockItemUIModel(dto, owners, now, locale),
     );
     this.families = owners.filter((owner) => owner.type === OwnerType.FAMILY);
+    this.archivedIds = new Set(
+      this.families.filter((family) => family.archived).map((f) => f.id),
+    );
   }
 
   view(params: ViewParams) {
@@ -72,7 +84,7 @@ class StockListUIModel {
       : StockFilters.ALL;
 
     const filtered = searched.filter((item) =>
-      matchesFilter(item, activeFilter),
+      this.matches(item, activeFilter),
     );
 
     return {
@@ -86,13 +98,16 @@ class StockListUIModel {
   private buildFilterOptions(
     searched: StockItemUIModel[],
   ): StockFilterOption[] {
+    const matches = (item: StockItemUIModel, filter: string) =>
+      this.matches(item, filter);
+
     function count(filter: string) {
-      return searched.filter((item) => matchesFilter(item, filter)).length;
+      return searched.filter((item) => matches(item, filter)).length;
     }
 
     return [
       {
-        count: searched.length,
+        count: count(StockFilters.ALL),
         labelKey: "stock.list.filter.all",
         value: StockFilters.ALL,
       },
@@ -107,10 +122,16 @@ class StockListUIModel {
         value: StockFilters.EXPIRED,
       },
       { labelKey: "stock.list.filter.personal", value: StockFilters.PERSONAL },
-      ...this.families.map((family) => ({
-        label: family.name,
-        value: family.id,
-      })),
+      ...this.families
+        .filter((family) => !family.archived)
+        .map((family) => ({ label: family.name, value: family.id })),
+      ...this.families
+        .filter((family) => family.archived)
+        .map((family) => ({
+          archived: true,
+          label: family.name,
+          value: family.id,
+        })),
     ];
   }
 
@@ -151,6 +172,19 @@ class StockListUIModel {
     }
 
     return rows;
+  }
+
+  // Every view but an archived family's own leaves its items out (spec 042 FR 6).
+  private matches(item: StockItemUIModel, filter: string) {
+    const isScopeFilter = (Object.values(StockFilters) as string[]).includes(
+      filter,
+    );
+
+    if (isScopeFilter && this.archivedIds.has(item.ownerId)) {
+      return false;
+    }
+
+    return matchesFilter(item, filter);
   }
 }
 

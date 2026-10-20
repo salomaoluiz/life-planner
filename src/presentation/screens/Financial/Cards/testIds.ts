@@ -10,6 +10,8 @@ const cardsTestIds = {
   noClosed: "financial.cards.no-closed",
   noUpcoming: "financial.cards.no-upcoming",
   ownerFilter: "financial.cards.owner-filter",
+  readOnlyBanner: "financial.cards.readonly-banner",
+  readOnlyToast: "financial.cards.readonly-toast",
   refundButton: "financial.cards.refund-button",
   row: "financial.cards.row",
   screen: "financial.cards.screen",

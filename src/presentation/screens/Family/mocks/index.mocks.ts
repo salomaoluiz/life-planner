@@ -3,6 +3,7 @@ import FamilyMemberDTO, {
   IFamilyMemberDTO,
 } from "@application/dto/familyMember/FamilyMemberDTO";
 import UserDTO from "@application/dto/user/UserDTO";
+import { FamilyStatus } from "@domain/entities/family/FamilyStatus";
 import {
   FamilyMemberRole,
   FamilyMemberStatus,
@@ -73,6 +74,25 @@ function familyNamed(id: string, name: string) {
   );
 }
 
+function makeArchivedFamilyViewModel(viewer: FamilyMemberViewer = ownerViewer) {
+  const archivedViewer = { ...viewer, isFamilyArchived: true };
+
+  return new FamilyViewModel(
+    new FamilyDTO({
+      id: "family-1",
+      name: "Test Family",
+      ownerId: "user-1",
+      status: FamilyStatus.ARCHIVED,
+    }),
+    [
+      new FamilyMemberUIModel(ownerMemberDTO, archivedViewer),
+      new FamilyMemberUIModel(joinedMemberDTO, archivedViewer),
+      new FamilyMemberUIModel(invitedMemberDTO, archivedViewer),
+    ],
+    archivedViewer,
+  );
+}
+
 function makeFamilyViewModel(viewer: FamilyMemberViewer = ownerViewer) {
   return new FamilyViewModel(
     familyDTO,
@@ -90,6 +110,7 @@ export {
   familyNamed,
   invitedMemberDTO,
   joinedMemberDTO,
+  makeArchivedFamilyViewModel,
   makeFamilyViewModel,
   memberDTO,
   ownerMemberDTO,

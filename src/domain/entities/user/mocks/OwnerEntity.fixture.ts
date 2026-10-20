@@ -14,6 +14,7 @@ class OwnerEntityFixture {
 
   withDefault() {
     this.value = {
+      archived: false,
       name: "Owner Name",
       ownerId: "c6d76166-e7f3-4823-bd5b-f8bbd33912ac",
       type: OwnerType.USER,

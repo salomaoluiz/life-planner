@@ -41,6 +41,7 @@ function Home() {
         mode="single"
         onChange={vm.filter.onChange}
         options={vm.filter.options.map((option) => ({
+          icon: option.archived ? "archive-outline" : undefined,
           label: option.labelKey ? t(option.labelKey) : (option.label ?? ""),
           value: option.value,
         }))}
