@@ -303,6 +303,44 @@ it("SHOULD align only the footer to the end WHEN there is no footerStart", () =>
   ).toBe("flex-end");
 });
 
+it("SHOULD stack the footer and footerSecondary, footer first, WHEN compact", () => {
+  setup(
+    {
+      footer: <Text>save</Text>,
+      footerSecondary: <Text>save and new</Text>,
+      size: "form",
+    },
+    "compact",
+  );
+  const footer = screen.getByTestId("sheet-footer");
+  const texts = within(footer)
+    .getAllByText(/save/)
+    .map((node) => node.props.children);
+
+  expect(texts).toEqual(["save", "save and new"]);
+  expect(StyleSheet.flatten(footer.props.style).flexDirection).not.toBe("row");
+});
+
+it("SHOULD put footerSecondary before the footer on one end-aligned row on a wide form", () => {
+  setup(
+    {
+      footer: <Text>save</Text>,
+      footerSecondary: <Text>save and new</Text>,
+      size: "form",
+    },
+    "expanded",
+  );
+  const footer = screen.getByTestId("sheet-footer");
+  const texts = within(footer)
+    .getAllByText(/save/)
+    .map((node) => node.props.children);
+
+  expect(texts).toEqual(["save and new", "save"]);
+  expect(StyleSheet.flatten(footer.props.style).justifyContent).toBe(
+    "flex-end",
+  );
+});
+
 it.each([
   ["compact", "form"],
   ["expanded", "dialog"],

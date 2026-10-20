@@ -70,6 +70,7 @@ export { default as TabBar, TabBarItem, TabBarProps } from "./TabBar";
 export { default as Text, TextProps } from "./Text";
 export { default as TextField, TextFieldProps } from "./TextField";
 export { default as TextInput, TextInputProps } from "./TextInput";
+export { default as Toast, ToastProps } from "./Toast";
 export { default as Tooltip, TooltipProps } from "./Tooltip";
 export { default as Touchable, TouchableProps } from "./Touchable";
 export { default as TreeItem, TreeItemProps } from "./TreeItem";

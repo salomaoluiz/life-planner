@@ -31,7 +31,9 @@ const transactionFormTestIds = {
   repeatEnd: "financial.transaction-form.repeat-end",
   repeatFrequency: "financial.transaction-form.repeat-frequency",
   repeatPreview: "financial.transaction-form.repeat-preview",
+  saveAndNewButton: "financial.transaction-form.save-and-new-button",
   saveButton: "financial.transaction-form.save-button",
+  savedToast: "financial.transaction-form.saved-toast",
   sheet: "financial.transaction-form.sheet",
   type: "financial.transaction-form.type",
 } as const;

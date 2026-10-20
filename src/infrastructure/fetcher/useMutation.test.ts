@@ -132,3 +132,16 @@ it("SHOULD call useMutation with custom params", async () => {
     retryDelay: 1000,
   });
 });
+
+it("SHOULD expose reset from the underlying mutation", () => {
+  spies.useReactMutation.mockReturnValueOnce(mocks.successResponse as never);
+
+  const { result } = setup({
+    cacheKey: ["cache-key-1"],
+    fetch: spies.fetch,
+  });
+
+  result.current.reset();
+
+  expect(mocks.successResponse.reset).toHaveBeenCalledTimes(1);
+});

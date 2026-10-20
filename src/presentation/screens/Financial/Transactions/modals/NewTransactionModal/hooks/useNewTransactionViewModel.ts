@@ -1,6 +1,7 @@
 import { useIsFocused } from "@react-navigation/native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { TextInput } from "react-native";
 
 import CreditCardOverviewDTO from "@application/dto/financial/CreditCardOverviewDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
@@ -50,6 +51,7 @@ import {
   isSameState,
   normalizeDate,
   pickNewRecordId,
+  resetForNext,
   stateFromDto,
   toCreateInstallmentParams,
   toCreateParams,
@@ -347,6 +349,12 @@ function useNewTransactionViewModel() {
   ]);
 
   const [edited, setEdited] = useState<TransactionFormState>();
+  // Spec 039: after "Save and add another" the reset form is the new baseline, so closing it untouched is not "dirty".
+  const [baseline, setBaseline] = useState<TransactionFormState>();
+  const [isSaved, setSaved] = useState(false);
+  // What the success of the running save does: leave the modal, or reset it for the next transaction.
+  const saveIntent = useRef<"close" | "next">("close");
+  const amountInputRef = useRef<TextInput>(null);
   // Which occurrences an edit of a recurring row reaches (spec 034 FR 19); changing it starts from the stored values.
   const [scope, setScope] = useState<RecurrenceScope>("ONLY_THIS");
   const [deleteScope, setDeleteScope] = useState<RecurrenceScope>("ONLY_THIS");
@@ -361,7 +369,8 @@ function useNewTransactionViewModel() {
   const knownIds = useRef<string[]>([]);
 
   const state = edited ?? initial;
-  const isDirty = !!edited && !!initial && !isSameState(edited, initial);
+  const reference = baseline ?? initial;
+  const isDirty = !!edited && !!reference && !isSameState(edited, reference);
 
   const mostUsed = useQuery({
     cacheKey: [
@@ -431,9 +440,24 @@ function useNewTransactionViewModel() {
   ];
 
   useEffect(() => {
-    if (mutations.some((mutation) => mutation.status === "success")) {
-      router.back();
+    if (!mutations.some((mutation) => mutation.status === "success")) {
+      return;
     }
+    if (saveIntent.current === "next" && state) {
+      const next = resetForNext(state);
+
+      saveIntent.current = "close";
+      setEdited(next);
+      setBaseline(next);
+      setSubmitted(false);
+      setSaved(true);
+      // Back to idle, so the next success is detected again.
+      mutations.forEach((mutation) => mutation.reset());
+      amountInputRef.current?.focus();
+
+      return;
+    }
+    router.back();
   }, [mutations.map((mutation) => mutation.status).join(",")]);
 
   // Records created in the stacked create sheet appear on return: refetch on focus.
@@ -486,6 +510,22 @@ function useNewTransactionViewModel() {
   }
 
   function onSave() {
+    saveIntent.current = "close";
+    submit();
+  }
+
+  function onSaveAndNew() {
+    if (isEditing || isProjected) {
+      return;
+    }
+    saveIntent.current = "next";
+    if (!submit()) {
+      saveIntent.current = "close";
+    }
+  }
+
+  // Returns false when nothing was sent (invalid form).
+  function submit() {
     setSubmitted(true);
     if (
       !state ||
@@ -493,7 +533,7 @@ function useNewTransactionViewModel() {
       cardHints.isInvoicePaid ||
       Object.keys(validate(state)).length
     ) {
-      return;
+      return false;
     }
     const owner = uiModel.owner(state.ownerId);
     const categoryName = uiModel.categoryName(state.categoryId);
@@ -511,6 +551,8 @@ function useNewTransactionViewModel() {
     } else {
       createMutation.mutate(toCreateParams(state, owner, categoryName));
     }
+
+    return true;
   }
 
   // Spec 034 FR 19-23: the scope decides which endpoint takes the change.
@@ -648,12 +690,23 @@ function useNewTransactionViewModel() {
         : "financial.transactions.form.saveIncome";
   }
 
+  const isSaving =
+    createMutation.isFetching ||
+    createPlanMutation.isFetching ||
+    updateMutation.isFetching ||
+    createRecurrenceMutation.isFetching ||
+    updateRecurrenceMutation.isFetching ||
+    splitRecurrenceMutation.isFetching ||
+    materializeMutation.isFetching;
+
   return {
     accountError: errors.accountId,
     accountOptions: uiModel?.accountOptions(ownerId, state?.accountId) ?? [],
     amountCents: state?.amountCents ?? 0,
     amountError: errors.amount,
+    amountInputRef,
     canRefund,
+    canSaveAndNew: !isEditing && !isProjected,
     cardError: errors.creditCardId,
     cardOptions: uiModel?.cardOptions(ownerId, state?.creditCardId) ?? [],
     categoryChips,
@@ -690,15 +743,10 @@ function useNewTransactionViewModel() {
     isInvoicePaid: cardHints.isInvoicePaid,
     isLoading: (!state && !isNotFound) || isInstallment || !!earlyPayment,
     isNotFound,
+    isSaved,
     isSaveDisabled: cardHints.isInvoicePaid,
-    isSaving:
-      createMutation.isFetching ||
-      createPlanMutation.isFetching ||
-      updateMutation.isFetching ||
-      createRecurrenceMutation.isFetching ||
-      updateRecurrenceMutation.isFetching ||
-      splitRecurrenceMutation.isFetching ||
-      materializeMutation.isFetching,
+    isSaving,
+    isSavingNext: isSaving && saveIntent.current === "next",
     onAccountChange: (id: string) => {
       if (state) {
         update({ ...state, accountId: id });
@@ -825,6 +873,8 @@ function useNewTransactionViewModel() {
       }
     },
     onSave,
+    onSaveAndNew,
+    onSavedHide: () => setSaved(false),
     onScopeChange,
     onTypeChange: (next: TransactionType) => {
       if (state) {

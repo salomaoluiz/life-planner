@@ -1,4 +1,5 @@
-import { StyleSheet } from "react-native";
+import { createRef } from "react";
+import { StyleSheet, TextInput } from "react-native";
 
 import { fireEvent, screen } from "@tests";
 
@@ -66,4 +67,11 @@ it("SHOULD show label and error", () => {
   expect(screen.getByTestId("amount-label").props.children).toBe("Amount");
   expect(screen.getByTestId("amount-error").props.children).toBe("Required");
   expect(input().props.keyboardType).toBe("number-pad");
+});
+
+it("SHOULD forward inputRef to the text input", () => {
+  const ref = createRef<TextInput>();
+
+  setup({ inputRef: ref });
+  expect(ref.current).toBeTruthy();
 });

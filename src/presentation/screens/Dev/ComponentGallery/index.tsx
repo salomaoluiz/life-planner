@@ -31,6 +31,7 @@ import {
   Switch,
   Text,
   TextField,
+  Toast,
 } from "@components";
 import { IconButton } from "@components/Icon";
 import Skeleton from "@components/Skeleton";
@@ -73,6 +74,7 @@ function ComponentGallery() {
   const [segment, setSegment] = useState("expense");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [toastOpen, setToastOpen] = useState(false);
 
   function onToggleTheme(dark: boolean) {
     setThemeMode(dark ? ThemeMode.DARK : ThemeMode.LIGHT);
@@ -148,6 +150,11 @@ function ComponentGallery() {
           label="Open confirm"
           onPress={() => setConfirmOpen(true)}
           testID="gallery-open-confirm"
+        />
+        <Button.Secondary
+          label="Show toast"
+          onPress={() => setToastOpen(true)}
+          testID="gallery-open-toast"
         />
       </Section>
 
@@ -329,6 +336,12 @@ function ComponentGallery() {
           testID="gallery-sheet"
         />
       </BottomSheet>
+      <Toast
+        message="Transaction saved"
+        onHide={() => setToastOpen(false)}
+        testID="gallery-toast"
+        visible={toastOpen}
+      />
       <ConfirmDialog
         cancelLabel="Cancel"
         closeLabel="Close"
