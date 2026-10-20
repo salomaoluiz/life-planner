@@ -3,7 +3,7 @@ env:
   ICON: tag
   ICON_COLOR: "#336699"
 ---
-# Optional caller-scoped params read by the script: OWNER (USER default, or FAMILY), TYPE, PARENT_ID.
+# Optional caller-scoped params read by the script: OWNER (USER default, FAMILY or ALL), TYPE, PARENT_ID.
 - runScript:
     file: ../../scripts/setup/create-category.js
     env:
