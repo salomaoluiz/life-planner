@@ -10,6 +10,9 @@ export type CategoryOwner = "ALL" | OwnerType;
 // Spec 038: "ALL" belongs to the Personal scope and every family of its creator.
 export type CategoryScope = "ALL" | "FAMILY" | "PERSONAL";
 
+// Spec 041: an ARCHIVED category leaves the pickers that create or change records but keeps its history.
+export type CategoryStatus = "ACTIVE" | "ARCHIVED";
+
 interface ICategoryEntity {
   depthLevel?: number;
   icon: string;
@@ -21,6 +24,7 @@ interface ICategoryEntity {
   parentId?: string;
   scope?: CategoryScope;
   scopeOwnerIds?: string[];
+  status?: CategoryStatus;
   type: CategoryType;
 }
 
@@ -36,6 +40,7 @@ class CategoryEntity {
   scope: CategoryScope;
   // Owner ids (Personal user id, family ids) the category belongs to; one entry unless the scope is ALL.
   scopeOwnerIds: string[];
+  status: CategoryStatus;
   type: CategoryType;
 
   constructor(params: ICategoryEntity) {
@@ -51,6 +56,7 @@ class CategoryEntity {
       params.scope ??
       (params.owner === OwnerType.FAMILY ? "FAMILY" : "PERSONAL");
     this.scopeOwnerIds = params.scopeOwnerIds ?? [params.ownerId];
+    this.status = params.status ?? "ACTIVE";
     this.type = params.type;
   }
 }

@@ -1,5 +1,8 @@
 import {
   ApiBusinessError,
+  CategoryArchived,
+  CategoryHasPendingItems,
+  CategoryParentArchived,
   FieldInvalid,
   GenericError,
 } from "@domain/entities/errors";
@@ -59,11 +62,70 @@ it("SHOULD map a 400 (cycle / mismatch) to FieldInvalid", async () => {
   expect(await setupThrowable()).toBeInstanceOf(FieldInvalid);
 });
 
-it("SHOULD wrap a 409 (type change not allowed) in GenericError", async () => {
+it("SHOULD map a 409 with the blockers body to CategoryHasPendingItems", async () => {
+  const recurrence = {
+    categoryId: "c1",
+    description: "Gym",
+    id: "r1",
+    nextOccurrenceDate: "2026-11-05",
+  };
+  spies.patch.mockRejectedValueOnce(
+    new ApiBusinessError(
+      "Category has pending items",
+      409,
+      { hiddenCount: 1 },
+      {
+        blockers: { installmentPlans: [], recurrences: [recurrence] },
+        hiddenCount: 1,
+      },
+    ),
+  );
+
+  const error = await setupThrowable({ ...mocks.onlyId, status: "ARCHIVED" });
+
+  expect(error).toBeInstanceOf(CategoryHasPendingItems);
+  expect(error).toMatchObject({
+    hiddenCount: 1,
+    installmentPlans: [],
+    recurrences: [recurrence],
+  });
+});
+
+it("SHOULD map a 409 without a blockers body to CategoryHasPendingItems with empty lists", async () => {
   spies.patch.mockRejectedValueOnce(
     new ApiBusinessError("Category type cannot be changed", 409),
   );
 
+  expect(await setupThrowable()).toMatchObject({
+    hiddenCount: 0,
+    installmentPlans: [],
+    recurrences: [],
+  });
+});
+
+it("SHOULD send status to archive or reactivate", async () => {
+  spies.patch.mockResolvedValueOnce({});
+
+  await setup({ ...mocks.onlyId, status: "ARCHIVED" });
+
+  const [, body] = spies.patch.mock.calls[0];
+  expect(JSON.parse(JSON.stringify(body))).toEqual({ status: "ARCHIVED" });
+});
+
+it("SHOULD map the 422 archived messages to their errors AND wrap any other 422", async () => {
+  spies.patch.mockRejectedValueOnce(
+    new ApiBusinessError("Parent category is archived", 422),
+  );
+  expect(await setupThrowable()).toBeInstanceOf(CategoryParentArchived);
+
+  spies.patch.mockRejectedValueOnce(
+    new ApiBusinessError("Category is archived", 422),
+  );
+  expect(await setupThrowable()).toBeInstanceOf(CategoryArchived);
+
+  spies.patch.mockRejectedValueOnce(
+    new ApiBusinessError("System categories cannot be changed", 422),
+  );
   expect(await setupThrowable()).toBeInstanceOf(GenericError);
 });
 

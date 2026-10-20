@@ -8,9 +8,12 @@ import {
 } from "@domain/entities/errors";
 
 interface Options {
-  conflict?: (details: Record<string, number>) => BusinessError;
+  conflict?: (
+    details: Record<string, number>,
+    body: Record<string, unknown>,
+  ) => BusinessError;
   fields?: Record<string, unknown>;
-  unprocessable?: (message: string) => BusinessError;
+  unprocessable?: (message: string) => BusinessError | undefined;
 }
 
 function handleFinancialApiError(
@@ -23,6 +26,7 @@ function handleFinancialApiError(
       error.statusCode,
       error.message,
       error.details,
+      error.body,
       options,
     );
 
@@ -42,6 +46,7 @@ function mapStatus(
   statusCode: number,
   message: string,
   details: Record<string, number>,
+  body: Record<string, unknown>,
   options: Options,
 ): BusinessError | undefined {
   switch (statusCode) {
@@ -52,7 +57,7 @@ function mapStatus(
     case 404:
       return new FinancialNotFound();
     case 409:
-      return options.conflict?.(details);
+      return options.conflict?.(details, body);
     case 422:
       return options.unprocessable?.(message);
     default:

@@ -28,6 +28,7 @@ const onlyId = {
   owner: undefined,
   ownerId: undefined,
   parentId: undefined,
+  status: undefined,
   type: undefined,
 };
 // endregion mocks

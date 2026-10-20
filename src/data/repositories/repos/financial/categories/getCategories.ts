@@ -42,6 +42,7 @@ async function getCategories(ownerIds: Params, datasources: Datasources) {
         parentId: category.parentId,
         scope: category.scope,
         scopeOwnerIds: category.scopes.map((scope) => scope.ownerId),
+        status: category.status,
         type: CategoryType[category.type as keyof typeof CategoryType],
       }),
   );

@@ -40,6 +40,7 @@ interface UpdateCategoryDatasourceParams {
   parentId?: null | string;
   // Turns a single-scope main category into an All category (no way back).
   scope?: "ALL";
+  status?: "ACTIVE" | "ARCHIVED";
   type?: string;
 }
 

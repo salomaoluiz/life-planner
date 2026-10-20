@@ -1,5 +1,6 @@
 import CategoryEntity, {
   CategoryOwner,
+  CategoryStatus,
   CategoryType,
 } from "@domain/entities/financial/CategoryEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
@@ -39,6 +40,8 @@ interface UpdateCategoryRepositoryParams {
   ownerId?: string;
   parentId?: null | string;
   scope?: "ALL";
+  // Archives / reactivates the category with its whole subtree (spec 041).
+  status?: CategoryStatus;
   type?: CategoryType;
 }
 

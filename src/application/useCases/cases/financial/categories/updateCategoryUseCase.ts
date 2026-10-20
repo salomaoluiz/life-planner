@@ -14,6 +14,7 @@ export interface UpdateCategoryUseCaseParams {
   ownerId?: string;
   parentId?: null | string;
   scope?: "ALL";
+  status?: "ACTIVE" | "ARCHIVED";
   type?: string;
 }
 
@@ -45,6 +46,7 @@ function updateCategoryUseCase(
           ownerId: params.ownerId,
           parentId: params.parentId,
           scope: params.scope,
+          status: params.status,
           type,
         });
       } catch (error) {
