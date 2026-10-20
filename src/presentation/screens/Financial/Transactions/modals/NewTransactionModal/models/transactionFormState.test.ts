@@ -22,6 +22,7 @@ import {
   isSameState,
   normalizeDate,
   pickNewRecordId,
+  resetForNext,
   stateFromDto,
   toCreateInstallmentParams,
   toCreateParams,
@@ -822,4 +823,77 @@ it("SHOULD keep an All category WHEN the new owner is one of its scopes", () => 
     changeOwner(state({ categoryId: "all" }), "family-2", withAll, accounts)
       .categoryId,
   ).toBeUndefined();
+});
+
+describe("resetForNext", () => {
+  const filled = state({
+    accountId: "active",
+    categoryId: "food",
+    date: new Date(2026, 9, 1),
+    installmentsCount: 6,
+    installmentsOn: true,
+    ownerId: "family-1",
+    paid: false,
+    paidTouched: true,
+    repeatEnd: new Date(2027, 0, 1),
+    repeatFrequency: "WEEKLY",
+    repeatOn: true,
+    type: TransactionType.INCOME,
+  });
+
+  it("SHOULD keep type, category, account, card, pay with, date and owner", () => {
+    const card = state({
+      accountId: undefined,
+      creditCardId: "c1",
+      payWith: "CARD",
+    });
+
+    expect(resetForNext(filled)).toMatchObject({
+      accountId: "active",
+      categoryId: "food",
+      date: new Date(2026, 9, 1),
+      ownerId: "family-1",
+      payWith: "ACCOUNT",
+      type: TransactionType.INCOME,
+    });
+    expect(resetForNext(card)).toMatchObject({
+      creditCardId: "c1",
+      payWith: "CARD",
+    });
+  });
+
+  it("SHOULD clear amount and description", () => {
+    expect(resetForNext(filled)).toMatchObject({
+      amountCents: 0,
+      description: "",
+    });
+  });
+
+  it("SHOULD turn repeat and installments off with the create defaults", () => {
+    const initial = createInitialState({ accounts, now, ownerId: "user-id" });
+
+    expect(resetForNext(filled)).toMatchObject({
+      installmentsCount: initial.installmentsCount,
+      installmentsOn: false,
+      repeatEnd: initial.repeatEnd,
+      repeatFrequency: initial.repeatFrequency,
+      repeatOn: false,
+    });
+  });
+
+  it("SHOULD make Paid follow a past date again", () => {
+    expect(resetForNext(filled)).toMatchObject({
+      paid: true,
+      paidTouched: false,
+    });
+  });
+
+  it("SHOULD make Paid off again for a future date", () => {
+    const future = new Date();
+    future.setDate(future.getDate() + 5);
+
+    expect(
+      resetForNext(state({ date: future, paid: true, paidTouched: true })),
+    ).toMatchObject({ paid: false, paidTouched: false });
+  });
 });

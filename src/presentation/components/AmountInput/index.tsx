@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Ref, useState } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
 
 import { formatAmount, parseCents } from "@components/AmountText/formatAmount";
@@ -9,6 +9,8 @@ import { useLocaleTag } from "@presentation/i18n";
 
 export interface AmountInputProps {
   error?: string;
+  /** Lets the screen focus the field */
+  inputRef?: Ref<TextInput>;
   label: string;
   onChange: (cents: number) => void;
   testID?: string;
@@ -47,6 +49,7 @@ function AmountInput(props: AmountInputProps) {
           onBlur={() => setFocused(false)}
           onChangeText={(text) => props.onChange(parseCents(text))}
           onFocus={() => setFocused(true)}
+          ref={props.inputRef}
           selection={{ end: display.length, start: display.length }}
           style={styles.input}
           testID={props.testID}

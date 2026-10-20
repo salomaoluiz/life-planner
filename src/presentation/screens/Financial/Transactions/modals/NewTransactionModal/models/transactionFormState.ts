@@ -199,6 +199,22 @@ function chipCategories(
     : top;
 }
 
+// What a new transaction starts with for Repeat and Installments; shared with resetForNext.
+const REPEAT_AND_INSTALLMENTS_DEFAULTS = {
+  installmentsCount: 2,
+  installmentsOn: false,
+  repeatEnd: undefined,
+  repeatFrequency: "MONTHLY",
+  repeatOn: false,
+} as const satisfies Pick<
+  TransactionFormState,
+  | "installmentsCount"
+  | "installmentsOn"
+  | "repeatEnd"
+  | "repeatFrequency"
+  | "repeatOn"
+>;
+
 function createInitialState(params: {
   accounts: AccountDTO[];
   // A card to start on ("Add purchase" from an invoice): opens in Card mode with the card's owner.
@@ -215,15 +231,11 @@ function createInitialState(params: {
     creditCardId: params.card?.id,
     date: normalizeDate(params.now),
     description: "",
-    installmentsCount: 2,
-    installmentsOn: false,
+    ...REPEAT_AND_INSTALLMENTS_DEFAULTS,
     ownerId,
     paid: true,
     paidTouched: false,
     payWith: params.card ? "CARD" : "ACCOUNT",
-    repeatEnd: undefined,
-    repeatFrequency: "MONTHLY",
-    repeatOn: false,
     type: TransactionType.EXPENSE,
   };
 }
@@ -270,6 +282,20 @@ function normalizeDate(date: Date) {
 
 function pickNewRecordId(previousIds: string[], current: { id: string }[]) {
   return current.find((record) => !previousIds.includes(record.id))?.id;
+}
+
+// "Save and add another" (spec 039): keeps what repeats from one entry to the next
+// (type, category, account/card, date, owner) and clears what changes every time.
+function resetForNext(state: TransactionFormState): TransactionFormState {
+  return {
+    ...state,
+    ...REPEAT_AND_INSTALLMENTS_DEFAULTS,
+    amountCents: 0,
+    description: "",
+    originalPaid: undefined,
+    paid: !isAfterToday(state.date),
+    paidTouched: false,
+  };
 }
 
 function stateFromDto(
@@ -438,6 +464,7 @@ export {
   isSameState,
   normalizeDate,
   pickNewRecordId,
+  resetForNext,
   stateFromDto,
   toCreateInstallmentParams,
   toCreateParams,
