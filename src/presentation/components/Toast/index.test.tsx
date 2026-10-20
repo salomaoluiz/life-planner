@@ -1,3 +1,5 @@
+import { StyleSheet } from "react-native";
+
 import { act, screen } from "@tests";
 
 import { setup, spies } from "./mocks/index.mocks";
@@ -35,6 +37,13 @@ it("SHOULD NOT call onHide after unmount", () => {
   screen.unmount();
   act(() => jest.advanceTimersByTime(5000));
   expect(spies.onHide).not.toHaveBeenCalled();
+});
+
+it("SHOULD sit at the given bottom offset", () => {
+  setup({ bottom: 176 });
+  expect(
+    StyleSheet.flatten(screen.getByTestId("toast-wrapper").props.style).bottom,
+  ).toBe(176);
 });
 
 it("SHOULD NOT block touches outside its box", () => {

@@ -16,11 +16,13 @@ import {
   SwitchRow,
   Text,
   TextField,
+  Toast,
 } from "@components";
 import { formatAmount } from "@components/AmountText/formatAmount";
 import Skeleton from "@components/Skeleton";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
+import { useBreakpoint } from "@presentation/theme";
 import { formatDayMonth } from "@screens/Financial/Cards/models/cardList";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 import { RECURRENCE_FREQUENCIES } from "@screens/Financial/models/recurrence";
@@ -34,6 +36,8 @@ import useStyles from "./styles";
 import transactionFormTestIds from "./testIds";
 
 const SKELETON_ROWS = [0, 1, 2];
+// Compact: the notice floats just above the two stacked footer buttons; wide: near the bottom of the window.
+const TOAST_BOTTOM = { compact: 176, wide: 32 };
 
 function monthDateOf(month: string) {
   const [year, value] = month.split("-").map(Number);
@@ -58,6 +62,8 @@ function NewTransactionModal() {
   const vm = useNewTransactionViewModel();
   const localeTag = useLocaleTag();
   const isCard = vm.payWith === "CARD";
+  const toastBottom =
+    useBreakpoint() === "compact" ? TOAST_BOTTOM.compact : TOAST_BOTTOM.wide;
 
   function renderPreview(installments: NonNullable<typeof vm.installments>) {
     const { first, hasRemainder, others } = installments.preview!;
@@ -192,6 +198,7 @@ function NewTransactionModal() {
               )}
               <AmountInput
                 error={err(vm.amountError)}
+                inputRef={vm.amountInputRef}
                 label={t(
                   vm.installments.enabled
                     ? "financial.transactions.form.totalValue"
@@ -529,14 +536,27 @@ function NewTransactionModal() {
         closeLabel={t("common.actions.close")}
         footer={
           <Button.Primary
-            disabled={vm.isSaveDisabled}
+            disabled={vm.isSaveDisabled || vm.isSaving}
             fullWidth
             label={t(vm.saveLabelKey)}
-            loading={vm.isSaving}
+            loading={vm.isSaving && !vm.isSavingNext}
             onPress={vm.onSave}
             size={"lg"}
             testID={transactionFormTestIds.saveButton}
           />
+        }
+        footerSecondary={
+          vm.canSaveAndNew && (
+            <Button.Secondary
+              disabled={vm.isSaveDisabled || vm.isSaving}
+              fullWidth
+              label={t("financial.transactions.form.saveAndNew")}
+              loading={vm.isSavingNext}
+              onPress={vm.onSaveAndNew}
+              size={"lg"}
+              testID={transactionFormTestIds.saveAndNewButton}
+            />
+          )
         }
         footerStart={
           vm.isEditing && (
@@ -557,6 +577,13 @@ function NewTransactionModal() {
       >
         {renderBody()}
       </BottomSheet>
+      <Toast
+        bottom={toastBottom}
+        message={t("financial.transactions.form.saved")}
+        onHide={vm.onSavedHide}
+        testID={transactionFormTestIds.savedToast}
+        visible={vm.isSaved}
+      />
       {vm.isCategoryPickerOpen && (
         <CategoryPickerSheet
           closeLabel={t("common.actions.close")}

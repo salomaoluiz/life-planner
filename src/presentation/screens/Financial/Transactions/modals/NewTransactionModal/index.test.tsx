@@ -650,3 +650,68 @@ describe("wide layout (spec 037)", () => {
     expect(vm.onDeletePress).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("save and add another (spec 039)", () => {
+  it("SHOULD show Save and Save and add another in create mode", () => {
+    setup();
+
+    expect(
+      screen.getByTestId(transactionFormTestIds.saveButton),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(transactionFormTestIds.saveAndNewButton),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByText("financial.transactions.form.saveAndNew"),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD hide Save and add another WHEN it is not offered (editing)", () => {
+    setup({ canSaveAndNew: false, isEditing: true });
+
+    expect(
+      screen.queryByTestId(transactionFormTestIds.saveAndNewButton),
+    ).toBeNull();
+  });
+
+  it("SHOULD call onSaveAndNew, not onSave, WHEN it is pressed", () => {
+    const vm = setup();
+
+    fireEvent.press(
+      screen.getByTestId(transactionFormTestIds.saveAndNewButton),
+    );
+
+    expect(vm.onSaveAndNew).toHaveBeenCalledTimes(1);
+    expect(vm.onSave).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD disable both buttons while saving", () => {
+    setup({ isSaving: true, isSavingNext: true });
+
+    expect(
+      screen.getByTestId(transactionFormTestIds.saveButton).props
+        .accessibilityState?.disabled,
+    ).toBe(true);
+    expect(
+      screen.getByTestId(transactionFormTestIds.saveAndNewButton).props
+        .accessibilityState?.disabled,
+    ).toBe(true);
+  });
+
+  it("SHOULD show the notice WHEN isSaved", () => {
+    setup({ isSaved: true });
+
+    expect(
+      screen.getByTestId(transactionFormTestIds.savedToast),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByText("financial.transactions.form.saved"),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD NOT show the notice by default", () => {
+    setup();
+
+    expect(screen.queryByTestId(transactionFormTestIds.savedToast)).toBeNull();
+  });
+});

@@ -27,6 +27,8 @@ export interface BottomSheetProps {
   children: React.ReactNode;
   closeLabel: string;
   footer?: React.ReactNode;
+  /** Second action next to the footer: below it on compact, before it (to its left) on a wide form */
+  footerSecondary?: React.ReactNode;
   footerStart?: React.ReactNode;
   onClose: () => void;
   presentation?: "inline" | "modal";
@@ -118,6 +120,7 @@ function BottomSheet(props: BottomSheetProps) {
       return props.footer ? (
         <View style={styles.footer} testID={testID && `${testID}-footer`}>
           {props.footer}
+          {props.footerSecondary}
         </View>
       ) : null;
     }
@@ -131,7 +134,12 @@ function BottomSheet(props: BottomSheetProps) {
         testID={testID && `${testID}-footer`}
       >
         {props.footerStart}
-        <View style={styles.footerEnd}>{props.footer}</View>
+        <View style={styles.footerEnd}>
+          {props.footerSecondary && (
+            <View style={styles.footerAction}>{props.footerSecondary}</View>
+          )}
+          <View style={styles.footerAction}>{props.footer}</View>
+        </View>
       </View>
     );
   }

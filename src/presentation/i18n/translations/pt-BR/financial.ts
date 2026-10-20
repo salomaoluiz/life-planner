@@ -462,6 +462,8 @@ const financial = {
       repeatForever: "Repete {{frequency}}, sem data para terminar",
       repeatFrequency: "Frequência",
       repeatPreview: "{{n}} vezes, última em {{date}}",
+      saveAndNew: "Salvar e criar nova",
+      saved: "Transação salva",
       saveExpense: "Salvar despesa",
       saveIncome: "Salvar receita",
       totalValue: "Valor total",

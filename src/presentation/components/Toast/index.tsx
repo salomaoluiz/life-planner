@@ -5,6 +5,8 @@ import Icon from "@components/Icon";
 import { useKitTheme } from "@components/utils/useKitTheme";
 
 export interface ToastProps {
+  /** Distance from the bottom of the parent. @default spacing.md */
+  bottom?: number;
   /** @default 3000 */
   durationMs?: number;
   message: string;
@@ -48,7 +50,7 @@ function Toast(props: ToastProps) {
       paddingVertical: spacing.sm,
     },
     wrapper: {
-      bottom: spacing.md,
+      bottom: props.bottom ?? spacing.md,
       left: spacing.md,
       position: "absolute",
       right: spacing.md,

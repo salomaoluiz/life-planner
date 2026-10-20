@@ -37,9 +37,10 @@ function useStyles(wide: boolean, form: boolean, medium: boolean) {
           paddingHorizontal: spacing.xxl,
           paddingVertical: spacing.lg,
         }
-      : { padding: spacing.lg },
+      : { gap: spacing.xs, padding: spacing.lg },
+    footerAction: { minWidth: FOOTER_BUTTON_MIN_WIDTH },
     // A fullWidth primary button is not stretched on a wide form.
-    footerEnd: { minWidth: FOOTER_BUTTON_MIN_WIDTH },
+    footerEnd: { flexDirection: "row", gap: spacing.md },
     grabber: {
       alignSelf: "center",
       backgroundColor: colors.border,
