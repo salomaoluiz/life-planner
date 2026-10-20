@@ -9,7 +9,7 @@ jest.mock("react-native-safe-area-context", () => ({
 }));
 
 jest.mock("expo-router", () => ({
-  router: { replace: jest.fn() },
+  router: { push: jest.fn(), replace: jest.fn() },
   Stack: Object.assign(
     jest.fn(() => null),
     { Screen: jest.fn(() => null) },
@@ -18,13 +18,23 @@ jest.mock("expo-router", () => ({
 }));
 
 export const spies = {
+  push: router.push as jest.Mock,
   replace: router.replace as jest.Mock,
   usePathname: usePathname as jest.Mock,
 };
 
-export function setup(pathname = "/financial") {
+export function setup(
+  pathname = "/financial",
+  breakpoint: "compact" | "expanded" | "medium" = "compact",
+) {
+  spies.push.mockClear();
   spies.replace.mockClear();
   spies.usePathname.mockReturnValue(pathname);
+  setBreakpoint(breakpoint);
 
   return render(<FinancialLayout />);
+}
+
+function setBreakpoint(value: "compact" | "expanded" | "medium") {
+  jest.requireMock("@presentation/theme").useBreakpoint.mockReturnValue(value);
 }

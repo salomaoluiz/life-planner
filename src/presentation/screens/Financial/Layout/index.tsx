@@ -1,7 +1,7 @@
 import { Stack } from "expo-router";
 import { View } from "react-native";
 
-import { Screen, ScreenHeader, SegmentedControl } from "@components";
+import { Screen, ScreenHeader } from "@components";
 
 import { useFinancialLayoutViewModel } from "./hooks";
 import useStyles from "./styles";
@@ -13,13 +13,12 @@ function FinancialLayout() {
 
   return (
     <Screen testID={"financial-layout"}>
-      <ScreenHeader title={vm.title} />
-      <SegmentedControl
-        accessibilityLabel={vm.title}
-        onChange={vm.onSectionChange}
-        options={vm.options}
-        testID={layoutTestIds.segments}
-        value={vm.section}
+      <ScreenHeader
+        onTitlePress={vm.onTitlePress}
+        overline={vm.overline}
+        testID={layoutTestIds.sectionPicker}
+        title={vm.title}
+        titleAccessibilityLabel={vm.titleA11yLabel}
       />
       <View style={styles.content}>
         <Stack screenOptions={{ animation: "none", headerShown: false }}>
