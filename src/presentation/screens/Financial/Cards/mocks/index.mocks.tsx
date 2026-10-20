@@ -110,12 +110,15 @@ const defaultViewModel: ReturnType<typeof useCardsViewModel> = {
   onRefresh: jest.fn(),
   onRefundPress: jest.fn(),
   onRetry: jest.fn(),
+  onToastHide: jest.fn(),
   ownerChoices: [{ labelKey: "financial.common.all", value: "ALL" }],
   ownerFilter: "ALL",
   ownerName: () => "Alice Test",
+  readOnly: false,
   selected: undefined,
   selectedId: undefined,
   summaries: [],
+  toastVisible: false,
   usedProgress: 0,
 };
 

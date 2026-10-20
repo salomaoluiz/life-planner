@@ -14,8 +14,10 @@ import {
   ListItem,
   MetricBlock,
   ProgressBar,
+  ReadOnlyNotice,
   SegmentedControl,
   Text,
+  Toast,
 } from "@components";
 import { formatAmount } from "@components/AmountText/formatAmount";
 import Skeleton from "@components/Skeleton";
@@ -61,12 +63,14 @@ function FinancialCards() {
                 value={vm.aggregate.totalLimit}
               />
             </View>
-            <IconButton
-              accessibilityLabel={t("financial.cardForm.titleNew")}
-              name="plus"
-              onPress={vm.onAddPress}
-              testID={cardsTestIds.addButton}
-            />
+            {vm.readOnly ? null : (
+              <IconButton
+                accessibilityLabel={t("financial.cardForm.titleNew")}
+                name="plus"
+                onPress={vm.onAddPress}
+                testID={cardsTestIds.addButton}
+              />
+            )}
           </View>
           <ProgressBar
             accessibilityLabel={t("financial.cards.usedPercent", {
@@ -106,6 +110,12 @@ function FinancialCards() {
         testID={cardsTestIds.ownerFilter}
         value={vm.ownerFilter}
       />
+      {vm.readOnly ? (
+        <ReadOnlyNotice
+          message={t("family.archived.banner")}
+          testID={cardsTestIds.readOnlyBanner}
+        />
+      ) : null}
       {vm.summaries.length > 0 && (
         <ScrollView
           contentContainerStyle={styles.carousel}
@@ -147,24 +157,28 @@ function FinancialCards() {
           <View style={styles.selectedHeader}>
             <GroupHeader title={vm.selected.card.title} />
             <View style={styles.headerActions}>
-              <IconButton
-                accessibilityLabel={t("financial.refund.new")}
-                name="cash-refund"
-                onPress={vm.onRefundPress}
-                testID={cardsTestIds.refundButton}
-              />
-              <IconButton
-                accessibilityLabel={t("financial.earlyPayment.action")}
-                name="cash-fast"
-                onPress={vm.onEarlyPaymentPress}
-                testID={cardsTestIds.earlyPaymentButton}
-              />
-              <IconButton
-                accessibilityLabel={t("financial.cards.edit")}
-                name="pencil-outline"
-                onPress={vm.onEditPress}
-                testID={cardsTestIds.editButton}
-              />
+              {vm.readOnly ? null : (
+                <>
+                  <IconButton
+                    accessibilityLabel={t("financial.refund.new")}
+                    name="cash-refund"
+                    onPress={vm.onRefundPress}
+                    testID={cardsTestIds.refundButton}
+                  />
+                  <IconButton
+                    accessibilityLabel={t("financial.earlyPayment.action")}
+                    name="cash-fast"
+                    onPress={vm.onEarlyPaymentPress}
+                    testID={cardsTestIds.earlyPaymentButton}
+                  />
+                  <IconButton
+                    accessibilityLabel={t("financial.cards.edit")}
+                    name="pencil-outline"
+                    onPress={vm.onEditPress}
+                    testID={cardsTestIds.editButton}
+                  />
+                </>
+              )}
             </View>
           </View>
           <SegmentedControl
@@ -274,9 +288,11 @@ function FinancialCards() {
         ListEmptyComponent={
           vm.hasCards ? null : (
             <EmptyState
-              actionLabel={t("financial.cards.empty.action")}
+              actionLabel={
+                vm.readOnly ? undefined : t("financial.cards.empty.action")
+              }
               message={t("financial.cards.empty.message")}
-              onAction={vm.onAddPress}
+              onAction={vm.readOnly ? undefined : vm.onAddPress}
               testID={cardsTestIds.emptyState}
               title={t("financial.cards.empty.title")}
             />
@@ -287,6 +303,13 @@ function FinancialCards() {
         refreshing={vm.isRefreshing}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
+      />
+      <Toast
+        icon={"lock-outline"}
+        message={t("family.archived.readOnly")}
+        onHide={vm.onToastHide}
+        testID={cardsTestIds.readOnlyToast}
+        visible={vm.toastVisible}
       />
     </View>
   );
