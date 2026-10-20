@@ -111,6 +111,7 @@ const financial = {
     usedPercent: "{{percent}}% do limite usado",
   },
   categories: {
+    archived: "Arquivadas ({{count}})",
     delete: "Excluir categoria",
     deleteAlertMsg: "Tem certeza de que deseja excluir esta categoria?",
     deleteConfirm: {

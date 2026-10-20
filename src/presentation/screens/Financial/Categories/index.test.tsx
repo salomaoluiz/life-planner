@@ -5,6 +5,7 @@ import { hasText } from "@tests";
 
 import { makeCategoryDTO } from "./mocks/index.mocks";
 import { makeRows, setup } from "./mocks/screen.mocks";
+import { buildCategoryEntries } from "./models/categoryEntries";
 import CategoryRowUIModel from "./models/CategoryRowUIModel";
 import categoriesTestIds from "./testIds";
 
@@ -144,4 +145,20 @@ it("SHOULD show the All marker on an All row AND the owner badge on the others",
   expect(hasText("financial.categories.scopeAll")).toBe(true);
   expect(screen.getAllByTestId(categoriesTestIds.ownerBadge)).toHaveLength(1);
   expect(hasText("Test Family")).toBe(true);
+});
+
+it("SHOULD render the archived toggle with its count AND report the press", () => {
+  const { entries, onArchivedToggle } = (() => {
+    const handler = jest.fn();
+    return {
+      entries: buildCategoryEntries(makeRows(), [makeRows()[0]], false),
+      onArchivedToggle: handler,
+    };
+  })();
+  setup({ entries, onArchivedToggle });
+
+  fireEvent.press(screen.getByTestId(categoriesTestIds.archivedToggle));
+
+  expect(onArchivedToggle).toHaveBeenCalled();
+  expect(screen.getByText(/1/)).toBeOnTheScreen();
 });

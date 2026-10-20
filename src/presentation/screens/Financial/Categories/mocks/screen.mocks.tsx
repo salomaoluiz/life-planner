@@ -2,6 +2,7 @@ import { render } from "@tests";
 
 import FinancialCategories from "../";
 import { useCategoriesViewModel } from "../hooks";
+import { buildCategoryEntries } from "../models/categoryEntries";
 import CategoryRowUIModel from "../models/CategoryRowUIModel";
 import { makeCategoryDTO } from "./index.mocks";
 
@@ -33,12 +34,15 @@ jest.mock("@shopify/flash-list", () => {
 });
 
 const defaultViewModel: ReturnType<typeof useCategoriesViewModel> = {
+  archivedCount: 0,
   emptyTitleKey: "financial.categories.emptyExpense",
+  entries: [],
   errorMessage: undefined,
   isEmpty: false,
   isLoading: false,
   isRefreshing: false,
   onAddPress: jest.fn(),
+  onArchivedToggle: jest.fn(),
   onOwnerFilterChange: jest.fn(),
   onRefresh: jest.fn(),
   onRetry: jest.fn(),
@@ -70,9 +74,11 @@ function makeRows() {
 }
 
 function setup(overrides: Partial<typeof defaultViewModel> = {}) {
-  jest
-    .mocked(useCategoriesViewModel)
-    .mockReturnValue({ ...defaultViewModel, ...overrides });
+  jest.mocked(useCategoriesViewModel).mockReturnValue({
+    ...defaultViewModel,
+    entries: buildCategoryEntries(overrides.rows ?? [], [], false),
+    ...overrides,
+  });
 
   return render(<FinancialCategories />);
 }

@@ -17,6 +17,7 @@ import {
 } from "@screens/Financial/models/ownerOptions";
 import { listQueryKey } from "@screens/Financial/models/queryKeys";
 
+import { buildCategoryEntries } from "../models/categoryEntries";
 import CategoryRowUIModel from "../models/CategoryRowUIModel";
 
 interface CategoriesData {
@@ -38,10 +39,17 @@ async function fetchCategories(): Promise<CategoriesData> {
   return { categories, owners };
 }
 
+function toRows(categories: CategoryDTO[]) {
+  return buildCategoryRows(categories).map(
+    (row) => new CategoryRowUIModel(row),
+  );
+}
+
 function useCategoriesViewModel() {
   const isFocused = useIsFocused();
   const [type, setType] = useState("EXPENSE");
   const [ownerFilter, setOwnerFilter] = useState(ALL_OWNERS);
+  const [archivedExpanded, setArchivedExpanded] = useState(false);
 
   const query = useQuery<CategoriesData>({
     cacheKey: listQueryKey(useCases.getFinancialCategoriesUseCase.uniqueName),
@@ -54,17 +62,24 @@ function useCategoriesViewModel() {
     }
   }, [isFocused]);
 
-  const rows = useMemo(
-    () =>
-      buildCategoryRows(
-        (query.data?.categories ?? []).filter(
-          (category) =>
-            category.type === type &&
-            (ownerFilter === ALL_OWNERS ||
-              categoryInScope(category, ownerFilter)),
-        ),
-      ).map((row) => new CategoryRowUIModel(row)),
-    [query.data, type, ownerFilter],
+  const { archivedRows, rows } = useMemo(() => {
+    const visible = (query.data?.categories ?? []).filter(
+      (category) =>
+        category.type === type &&
+        (ownerFilter === ALL_OWNERS || categoryInScope(category, ownerFilter)),
+    );
+    return {
+      archivedRows: toRows(
+        visible.filter((category) => category.status === "ARCHIVED"),
+      ),
+      rows: toRows(
+        visible.filter((category) => category.status !== "ARCHIVED"),
+      ),
+    };
+  }, [query.data, type, ownerFilter]);
+  const entries = useMemo(
+    () => buildCategoryEntries(rows, archivedRows, archivedExpanded),
+    [rows, archivedRows, archivedExpanded],
   );
 
   let emptyTitleKey: TranslationKeys = "financial.categories.emptyIncome";
@@ -73,13 +88,16 @@ function useCategoriesViewModel() {
   }
 
   return {
+    archivedCount: archivedRows.length,
     emptyTitleKey,
+    entries,
     errorMessage: query.error?.message,
-    isEmpty: rows.length === 0,
+    isEmpty: rows.length === 0 && archivedRows.length === 0,
     isLoading: query.isFetching && !query.data,
     isRefreshing: query.isFetching && !!query.data,
     onAddPress: () =>
       router.push("/financial/category/add_new_category" as never),
+    onArchivedToggle: () => setArchivedExpanded((expanded) => !expanded),
     onOwnerFilterChange: setOwnerFilter,
     onRefresh: async () => query.refetch(),
     onRetry: async () => query.refetch(),

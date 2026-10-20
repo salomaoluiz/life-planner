@@ -113,6 +113,7 @@ const financial = {
     usedPercent: "{{percent}}% of the limit used",
   },
   categories: {
+    archived: "Archived ({{count}})",
     delete: "Delete category",
     deleteAlertMsg: "Are you sure you want to delete this category?",
     deleteConfirm: {
