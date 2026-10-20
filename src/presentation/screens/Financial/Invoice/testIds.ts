@@ -1,4 +1,5 @@
 const invoiceTestIds = {
+  actions: "financial.invoice.actions",
   addPurchase: "financial.invoice.add-purchase",
   amount: "financial.invoice.amount",
   carryIn: "financial.invoice.carry-in",

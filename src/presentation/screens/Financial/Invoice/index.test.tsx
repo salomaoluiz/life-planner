@@ -1,4 +1,6 @@
-import { fireEvent, screen } from "@tests";
+import { StyleSheet } from "react-native";
+
+import { fireEvent, screen, within } from "@tests";
 
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import TransactionUIModel from "@screens/Financial/Transactions/models/TransactionUIModel";
@@ -291,5 +293,46 @@ describe("projected purchases (spec 034)", () => {
     setup();
 
     expect(screen.queryByTestId(invoiceTestIds.projected)).toBeNull();
+  });
+});
+
+describe("wide layout (spec 037)", () => {
+  const sheet = invoiceTestIds.screen;
+
+  it("SHOULD show the summary in a fixed 320 px left column and the purchases on the right", () => {
+    setup({}, "expanded");
+
+    const left = screen.getByTestId(`${sheet}-column-left`);
+    expect(StyleSheet.flatten(left.props.style).width).toBe(320);
+    expect(within(left).getByTestId(invoiceTestIds.amount)).toBeOnTheScreen();
+    expect(within(left).getByTestId(invoiceTestIds.status)).toBeOnTheScreen();
+    expect(
+      within(screen.getByTestId(`${sheet}-column-right`)).getAllByTestId(
+        invoiceTestIds.purchase,
+      ).length,
+    ).toBeGreaterThan(0);
+  });
+
+  it("SHOULD lay the actions out after the columns as a wrapping row with Pay first in the tree and last on screen", () => {
+    setup({}, "expanded");
+
+    expect(
+      within(screen.getByTestId(`${sheet}-column-right`)).queryByTestId(
+        invoiceTestIds.pay,
+      ),
+    ).toBeNull();
+    const actions = screen.getByTestId(invoiceTestIds.actions);
+    const style = StyleSheet.flatten(actions.props.style);
+    expect(style.flexDirection).toBe("row-reverse");
+    expect(style.flexWrap).toBe("wrap");
+  });
+
+  it("SHOULD keep the actions as a vertical stack on compact", () => {
+    setup();
+
+    const actions = screen.getByTestId(invoiceTestIds.actions);
+    expect(
+      StyleSheet.flatten(actions.props.style).flexDirection,
+    ).toBeUndefined();
   });
 });

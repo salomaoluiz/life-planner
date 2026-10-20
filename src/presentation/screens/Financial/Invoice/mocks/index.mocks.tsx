@@ -1,5 +1,6 @@
-import { render } from "@tests";
+import { render, within } from "@tests";
 
+import { useBreakpoint } from "@presentation/theme";
 import TransactionUIModel from "@screens/Financial/Transactions/models/TransactionUIModel";
 
 import { InvoiceModal } from "../";
@@ -42,7 +43,11 @@ const defaultViewModel: ReturnType<typeof useInvoiceViewModel> = {
   projected: [] as TransactionUIModel[],
 };
 
-function setup(overrides: Partial<typeof defaultViewModel> = {}) {
+function setup(
+  overrides: Partial<typeof defaultViewModel> = {},
+  breakpoint: "compact" | "expanded" | "medium" = "compact",
+) {
+  jest.mocked(useBreakpoint).mockReturnValue(breakpoint);
   const viewModel = { ...defaultViewModel, ...overrides };
   jest.mocked(useInvoiceViewModel).mockReturnValue(viewModel);
   render(<InvoiceModal />);
@@ -54,4 +59,4 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-export { defaultViewModel, setup };
+export { defaultViewModel, setup, within };
