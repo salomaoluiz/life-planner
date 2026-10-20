@@ -298,7 +298,21 @@ function useTransactionsViewModel() {
       ),
     [itemsOfMonth, ownerFilter, archivedIds, typeFilter],
   );
-  const invoicesOfMonth = allInvoices;
+  // The month is empty when no data is left once the archived families are out of "All" (spec 042):
+  // the owner and type chips never change it.
+  const countedArchivedIds = useMemo(
+    () => (ownerFilter === ALL_FILTER ? archivedIds : new Set<string>()),
+    [ownerFilter, archivedIds],
+  );
+  const scopedItemsOfMonth = useMemo(
+    () => itemsOfMonth.filter((item) => !countedArchivedIds.has(item.ownerId)),
+    [itemsOfMonth, countedArchivedIds],
+  );
+  const invoicesOfMonth = useMemo(
+    () =>
+      allInvoices.filter((invoice) => !countedArchivedIds.has(invoice.ownerId)),
+    [allInvoices, countedArchivedIds],
+  );
   const visibleInvoices = useMemo(
     () =>
       filterInvoicesByType(
@@ -350,9 +364,11 @@ function useTransactionsViewModel() {
     expandedDayKey,
     expandedInvoiceId,
     invoicesError: !!invoices.error,
-    isEmptyMonth: itemsOfMonth.length === 0 && invoicesOfMonth.length === 0,
+    isEmptyMonth:
+      scopedItemsOfMonth.length === 0 && invoicesOfMonth.length === 0,
     isFilteredEmpty:
-      itemsOfMonth.length + invoicesOfMonth.length > 0 && entries.length === 0,
+      scopedItemsOfMonth.length + invoicesOfMonth.length > 0 &&
+      entries.length === 0,
     isLoading: transactions.isFetching && !transactions.data,
     isMonthPickerOpen,
     isRefreshing: transactions.isFetching && !!transactions.data,

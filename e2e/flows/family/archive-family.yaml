@@ -60,6 +60,12 @@ onFlowComplete:
 - runFlow: ../../subflows/financial/open-transactions.yaml
 - extendedWaitUntil:
     visible:
+      id: "financial.transactions.month-summary"
+    timeout: 20000
+# The header is tall: the row sits below the fold
+- runFlow: ../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
       id: "financial.transactions.row-title"
       text: ${output.TRANSACTION_NAME}
     timeout: 20000
@@ -111,8 +117,10 @@ onFlowComplete:
 - assertNotVisible:
     id: "financial.transactions.row-title"
     text: ${output.TRANSACTION_NAME}
+- runFlow: ../../subflows/financial/scroll-list-up.yaml
 - tapOn:
     id: "financial.transactions.scope-filter-${output.FAMILY_ID}"
+- runFlow: ../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.row-title"
@@ -131,6 +139,7 @@ onFlowComplete:
 - assertNotVisible:
     id: "financial.transaction-form.amount-input"
 # The owner picker of a new transaction no longer offers the archived family
+- runFlow: ../../subflows/financial/scroll-list-up.yaml
 - tapOn:
     id: "financial.transactions.scope-filter-ALL"
 - extendedWaitUntil:

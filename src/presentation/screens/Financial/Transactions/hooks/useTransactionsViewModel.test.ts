@@ -735,4 +735,16 @@ describe("archived family (spec 042)", () => {
     expect(spies.push).not.toHaveBeenCalled();
     expect(result.current.toastVisible).toBe(true);
   });
+
+  it("SHOULD report an empty month (not a filtered one) WHEN only the archived family has data in All", () => {
+    givenData([items()[2]], withArchived);
+    const { result } = setup();
+
+    expect(result.current.isEmptyMonth).toBe(true);
+    expect(result.current.isFilteredEmpty).toBe(false);
+
+    act(() => result.current.onOwnerFilterChange("family-1"));
+
+    expect(result.current.isEmptyMonth).toBe(false);
+  });
 });
