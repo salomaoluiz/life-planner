@@ -1,0 +1,149 @@
+url: ${E2E_WEB_URL}
+name: family/archive-family
+tags:
+  - family
+  - spec-042
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Family
+      KEY: FAMILY_NAME
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Archived Transaction
+      KEY: TRANSACTION_NAME
+- runFlow:
+    file: ../../subflows/setup/create-family.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      NAME: ${output.FAMILY_NAME}
+- runFlow:
+    file: ../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.FAMILY_ID}
+      OWNER: FAMILY
+      NAME: E2E Family Account
+- evalScript: ${output.FAMILY_ACCOUNT_ID = output.ACCOUNT_ID}
+- runFlow:
+    file: ../../subflows/setup/create-category.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.FAMILY_ID}
+      OWNER: FAMILY
+      NAME: E2E Family Category
+      TYPE: EXPENSE
+- evalScript: ${output.FAMILY_CATEGORY_ID = output.CATEGORY_ID}
+- runFlow:
+    file: ../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.FAMILY_ID}
+      OWNER: FAMILY
+      ACCOUNT_ID: ${output.FAMILY_ACCOUNT_ID}
+      CATEGORY_ID: ${output.FAMILY_CATEGORY_ID}
+      DESCRIPTION: ${output.TRANSACTION_NAME}
+      PAID: "true"
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+# Before: the family's transaction is in "All"
+- runFlow: ../../subflows/financial/open-transactions.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.TRANSACTION_NAME}
+    timeout: 20000
+# Archive the family from its card menu
+- tapOn:
+    id: "tab-family"
+- extendedWaitUntil:
+    visible:
+      id: "family.card.title-${output.FAMILY_ID}"
+      text: ${output.FAMILY_NAME}
+    timeout: 20000
+- tapOn:
+    id: "family.card.options-${output.FAMILY_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "family.card.menu-${output.FAMILY_ID}-archive-action"
+    timeout: 20000
+- tapOn:
+    id: "family.card.menu-${output.FAMILY_ID}-archive-action"
+- extendedWaitUntil:
+    visible:
+      id: "family.card.confirm-${output.FAMILY_ID}-confirm"
+    timeout: 20000
+- tapOn:
+    id: "family.card.confirm-${output.FAMILY_ID}-confirm"
+# It moves to the collapsed Archived group, with the chip once expanded
+- extendedWaitUntil:
+    visible:
+      id: "family.list.archived-toggle"
+    timeout: 20000
+- assertNotVisible:
+    id: "family.card.title-${output.FAMILY_ID}"
+- tapOn:
+    id: "family.list.archived-toggle"
+- extendedWaitUntil:
+    visible:
+      id: "family.card.archived-chip-${output.FAMILY_ID}"
+    timeout: 20000
+- assertVisible:
+    id: "family.card.reactivate-button-${output.FAMILY_ID}"
+- assertNotVisible:
+    id: "family.card.invite-button-${output.FAMILY_ID}"
+# Transactions: gone from "All", viewable (read-only) on its own filter
+- runFlow: ../../subflows/financial/open-transactions.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.empty-month"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.transactions.row-title"
+    text: ${output.TRANSACTION_NAME}
+- tapOn:
+    id: "financial.transactions.scope-filter-${output.FAMILY_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.TRANSACTION_NAME}
+    timeout: 20000
+- assertVisible:
+    id: "financial.transactions.readonly-banner"
+# Tapping a row shows the notice instead of the form
+- tapOn:
+    id: "financial.transactions.row-title"
+    text: ${output.TRANSACTION_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.readonly-toast"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.transaction-form.amount-input"
+# The owner picker of a new transaction no longer offers the archived family
+- tapOn:
+    id: "financial.transactions.scope-filter-ALL"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.empty-month"
+    timeout: 20000
+- runFlow: ../../subflows/financial/scroll-list-down.yaml
+- tapOn:
+    id: "financial.transactions.empty-month-action"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.amount-input"
+    timeout: 20000
+- runFlow: ../../subflows/financial/scroll-form-down.yaml
+- assertNotVisible:
+    id: "financial.transaction-form.owner-${output.FAMILY_ID}"

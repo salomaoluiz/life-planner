@@ -1,0 +1,9 @@
+url: ${E2E_WEB_URL}
+---
+# Caller env: TOKEN (the family owner), FAMILY_ID. Leaves a pending invite to a fake address.
+- runScript:
+    file: ../../scripts/setup/create-family-invite.js
+    env:
+      TOKEN: ${TOKEN}
+      FAMILY_ID: ${FAMILY_ID}
+      EMAIL: pending-invite@example.com
