@@ -96,3 +96,56 @@ it.each(["compact", "expanded"] as const)(
     ).toBe(false);
   },
 );
+
+describe("WHEN the Finances tab is pressed", () => {
+  it("SHOULD open Transactions on the rail even when already inside Finances", () => {
+    setBreakpoint("expanded");
+    setup(1, "/financial/cards");
+
+    fireEvent.press(screen.getByTestId("tab-finances"));
+
+    expect(spies.navigate).toHaveBeenCalledWith("/financial");
+    expect(spies.dispatch).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD open Transactions on the bottom bar WHEN coming from another tab", () => {
+    setup(0);
+
+    fireEvent.press(screen.getByTestId("tab-finances"));
+
+    expect(spies.navigate).toHaveBeenCalledWith("/financial");
+    expect(spies.push).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD open the section picker WHEN Finances is already active on the bottom bar", () => {
+    setup(1);
+
+    fireEvent.press(screen.getByTestId("tab-finances"));
+
+    expect(spies.push).toHaveBeenCalledWith("/financial/section_picker");
+    expect(spies.navigate).not.toHaveBeenCalled();
+  });
+});
+
+it("SHOULD highlight the section of the pathname AND replace the route WHEN a child is pressed", () => {
+  setBreakpoint("expanded");
+  setup(1, "/financial/accounts");
+
+  expect(
+    screen.getByTestId("navigation-rail-financial-accounts").props
+      .accessibilityState,
+  ).toMatchObject({ selected: true });
+
+  fireEvent.press(screen.getByTestId("navigation-rail-financial-categories"));
+
+  expect(spies.replace).toHaveBeenCalledWith("/financial/categories");
+});
+
+it("SHOULD hide the Finances children WHEN another tab is active", () => {
+  setBreakpoint("expanded");
+  setup(2);
+
+  expect(
+    screen.queryByTestId("navigation-rail-financial-categories"),
+  ).toBeNull();
+});

@@ -51,6 +51,7 @@ export { default as MetricBlock, MetricBlockProps } from "./MetricBlock";
 export {
   default as NavigationRail,
   NavigationRailChild,
+  NavigationRailItem,
   NavigationRailProps,
 } from "./NavigationRail";
 export {
