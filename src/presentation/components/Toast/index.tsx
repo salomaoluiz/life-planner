@@ -9,6 +9,8 @@ export interface ToastProps {
   bottom?: number;
   /** @default 3000 */
   durationMs?: number;
+  /** Leading icon; the default check marks a success, any other one is neutral. @default "check" */
+  icon?: string;
   message: string;
   onHide: () => void;
   testID?: string;
@@ -73,7 +75,11 @@ function Toast(props: ToastProps) {
         style={styles.root}
         testID={props.testID}
       >
-        <Icon color={colors.income} name="check" size={CHECK} />
+        <Icon
+          color={props.icon ? colors.surface : colors.income}
+          name={props.icon ?? "check"}
+          size={CHECK}
+        />
         <RNText style={styles.message}>{props.message}</RNText>
       </View>
     </View>

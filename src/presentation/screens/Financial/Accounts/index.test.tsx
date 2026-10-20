@@ -144,3 +144,24 @@ it("SHOULD show the end-of-month line ONLY on rows whose projected balance diffe
     screen.getByTestId(`${accountsTestIds.row}-projected`),
   ).toBeOnTheScreen();
 });
+
+describe("archived family selected (spec 042)", () => {
+  it("SHOULD hide the new button AND show the read-only banner", () => {
+    setup({ readOnly: true });
+
+    expect(screen.queryByTestId(accountsTestIds.addButton)).toBeNull();
+    expect(screen.getByTestId(accountsTestIds.readOnlyBanner)).toBeTruthy();
+  });
+
+  it("SHOULD show the read-only toast WHEN requested", () => {
+    setup({ readOnly: true, toastVisible: true });
+
+    expect(screen.getByTestId(accountsTestIds.readOnlyToast)).toBeTruthy();
+  });
+
+  it("SHOULD offer no add action in the empty state", () => {
+    setup({ isEmpty: true, readOnly: true });
+
+    expect(hasText("financial.accounts.new")).toBe(false);
+  });
+});

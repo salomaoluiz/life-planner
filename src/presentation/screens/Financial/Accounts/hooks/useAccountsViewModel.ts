@@ -6,8 +6,10 @@ import AccountDTO from "@application/dto/financial/AccountDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
 import { useQuery } from "@infrastructure/fetcher";
+import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
 import {
   ALL_OWNERS,
+  archivedOwnerIds,
   buildOwnerFilterChoices,
 } from "@screens/Financial/models/ownerOptions";
 import { listQueryKey } from "@screens/Financial/models/queryKeys";
@@ -57,8 +59,9 @@ function useAccountsViewModel() {
       (dto) => new AccountUIModel(dto, owners),
     );
 
-    return filterByOwner(models, ownerFilter);
+    return filterByOwner(models, ownerFilter, archivedOwnerIds(owners));
   }, [query.data, ownerFilter]);
+  const scope = useReadOnlyScope(query.data?.owners, ownerFilter);
 
   const entries = useMemo(
     () => buildAccountEntries(filtered, archivedExpanded),
@@ -72,19 +75,24 @@ function useAccountsViewModel() {
     isEmpty: filtered.length === 0,
     isLoading: query.isFetching && !query.data,
     isRefreshing: query.isFetching && !!query.data,
-    onAddPress: () =>
+    onAddPress: scope.guard(() =>
       router.push("/financial/account/add_new_account" as never),
+    ),
     onArchivedToggle: () => setArchivedExpanded((expanded) => !expanded),
     onOwnerFilterChange: setOwnerFilter,
     onRefresh: async () => query.refetch(),
     onRetry: async () => query.refetch(),
-    onRowPress: (id: string) =>
+    onRowPress: scope.guard((id: string) =>
       router.push({
         params: { id },
         pathname: "/financial/account/add_new_account",
       } as never),
+    ),
+    onToastHide: scope.onToastHide,
     ownerChoices: buildOwnerFilterChoices(query.data?.owners ?? []),
     ownerFilter,
+    readOnly: scope.readOnly,
+    toastVisible: scope.toastVisible,
     totalAmount: totalAmount(totalActiveCents(filtered)),
     totalProjectedAmount: totalAmount(totalProjectedCents(filtered)),
   };

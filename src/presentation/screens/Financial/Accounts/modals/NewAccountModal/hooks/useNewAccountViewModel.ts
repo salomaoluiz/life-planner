@@ -9,6 +9,10 @@ import {
   useQuery,
 } from "@infrastructure/fetcher";
 import { TranslationKeys } from "@presentation/i18n/types";
+import {
+  ACTIVE_OWNERS_CACHE_KEY,
+  fetchActiveOwners,
+} from "@screens/Financial/models/activeOwners";
 import { personalOwnerId } from "@screens/Financial/models/ownerOptions";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
 
@@ -65,8 +69,8 @@ function useNewAccountViewModel() {
   const isEditing = !!params.id;
 
   const owners = useQuery({
-    cacheKey: [useCases.getOwnersUseCase.uniqueName],
-    fetch: useCases.getOwnersUseCase.execute,
+    cacheKey: ACTIVE_OWNERS_CACHE_KEY,
+    fetch: fetchActiveOwners,
   });
   const accounts = useQuery({
     cacheKey: [useCases.getFinancialAccountsUseCase.uniqueName],

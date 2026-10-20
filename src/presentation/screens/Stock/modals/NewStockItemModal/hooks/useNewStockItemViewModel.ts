@@ -4,6 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useCases } from "@application/useCases";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
 import { useBreakpoint } from "@presentation/theme";
+import {
+  ACTIVE_OWNERS_CACHE_KEY,
+  fetchActiveOwners,
+} from "@screens/Financial/models/activeOwners";
 import NewStockItemUIModel from "@screens/Stock/modals/NewStockItemModal/models/NewStockItemUIModel";
 
 import useForm from "./useForm";
@@ -17,8 +21,8 @@ function useNewStockItemViewModel() {
   const [isDiscardOpen, setIsDiscardOpen] = useState(false);
 
   const owners = useQuery({
-    cacheKey: [useCases.getOwnersUseCase.uniqueName],
-    fetch: useCases.getOwnersUseCase.execute,
+    cacheKey: ACTIVE_OWNERS_CACHE_KEY,
+    fetch: fetchActiveOwners,
   });
   const addStock = useMutation({
     cacheKey: [useCases.createStockItemUseCase.uniqueName],
