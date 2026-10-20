@@ -1,0 +1,109 @@
+url: ${E2E_WEB_URL}
+name: financial/tags
+tags:
+  - financial
+  - spec-043
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Family
+      KEY: FAMILY_NAME
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Tag
+      KEY: TAG_NAME
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Renamed Tag
+      KEY: RENAMED_NAME
+- runFlow:
+    file: ../../subflows/setup/create-family.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      NAME: ${output.FAMILY_NAME}
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/financial/open-tags.yaml
+# Empty state
+- extendedWaitUntil:
+    visible:
+      id: "financial.tags.empty-state"
+    timeout: 20000
+# Create an All tag: one row with the All marker under every filter
+- tapOn:
+    id: "financial.tags.add-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.tag-form.name-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.tag-form.name-input"
+- inputText: ${output.TAG_NAME}
+- tapOn:
+    id: "financial.tag-form.owner-ALL"
+- tapOn:
+    id: "financial.tag-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.tags.row-.*-title"
+      text: ${output.TAG_NAME}
+    timeout: 20000
+- assertVisible:
+    id: "financial.tags.scope-all"
+- tapOn:
+    id: "financial.tags.scope-filter-${output.FAMILY_ID}"
+- assertVisible:
+    id: "financial.tags.row-.*-title"
+    text: ${output.TAG_NAME}
+- tapOn:
+    id: "financial.tags.scope-filter-ALL"
+# Rename it
+- tapOn:
+    id: "financial.tags.row-.*-title"
+    text: ${output.TAG_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.tag-form.name-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.tag-form.name-input"
+- eraseText: 40
+- inputText: ${output.RENAMED_NAME}
+- tapOn:
+    id: "financial.tag-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.tags.row-.*-title"
+      text: ${output.RENAMED_NAME}
+    timeout: 20000
+# Delete it (unused): the confirmation says so AND the row is gone
+- tapOn:
+    id: "financial.tags.row-.*-title"
+    text: ${output.RENAMED_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.tag-form.delete-button"
+    timeout: 20000
+- tapOn:
+    id: "financial.tag-form.delete-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.tag-form.delete-dialog-confirm"
+    timeout: 20000
+- tapOn:
+    id: "financial.tag-form.delete-dialog-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "financial.tags.empty-state"
+    timeout: 20000

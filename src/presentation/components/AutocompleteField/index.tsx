@@ -88,6 +88,8 @@ function AutocompleteField(props: AutocompleteFieldProps) {
   const [query, setQuery] = useState("");
   const [highlight, setHighlight] = useState(-1);
   const closeTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  // A press that started inside the list: the blur it causes must not close the list before the tap lands.
+  const pressingMenu = useRef(false);
   const { styles, theme } = useStyles();
   const { testID } = props;
   const isChips = props.mode === "chips";
@@ -118,6 +120,7 @@ function AutocompleteField(props: AutocompleteFieldProps) {
   }
 
   function pick(option: Option) {
+    pressingMenu.current = false;
     setHighlight(-1);
 
     if (props.mode === "text") {
@@ -240,6 +243,9 @@ function AutocompleteField(props: AutocompleteFieldProps) {
           editable={!props.disabled && !atMax}
           nativeID={testID && `${testID}-input`}
           onBlur={() => {
+            if (pressingMenu.current) {
+              return;
+            }
             closeTimer.current = setTimeout(
               () => setFocused(false),
               BLUR_CLOSE_DELAY,
@@ -263,7 +269,16 @@ function AutocompleteField(props: AutocompleteFieldProps) {
         <FocusRing radius={theme.radius.md} visible={focused} />
       </View>
       {open ? (
-        <View style={styles.menu} testID={testID && `${testID}-menu`}>
+        <View
+          onStartShouldSetResponderCapture={() => {
+            pressingMenu.current = true;
+
+            return false;
+          }}
+          ref={scrollIntoView}
+          style={styles.menu}
+          testID={testID && `${testID}-menu`}
+        >
           {options.map((option, index) => (
             <Touchable
               accessibilityLabel={option.label}
@@ -362,4 +377,12 @@ function sameText(a: string, b: string) {
   return a.trim().toLowerCase() === b.trim().toLowerCase();
 }
 
+// On the web a list that opens below the visible part of a scrolling sheet is brought into view (no-op on native).
+function scrollIntoView(node: unknown) {
+  const element = node as null | { scrollIntoView?: (options: object) => void };
+
+  element?.scrollIntoView?.({ block: "nearest" });
+}
+
 export default AutocompleteField;
+export { scrollIntoView };

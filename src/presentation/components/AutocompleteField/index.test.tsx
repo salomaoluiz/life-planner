@@ -1,5 +1,6 @@
 import { act, fireEvent, screen } from "@tests";
 
+import { scrollIntoView } from "./";
 import { chipsProps, setup, textProps } from "./mocks/index.mocks";
 
 function input() {
@@ -140,6 +141,22 @@ describe("chips mode", () => {
     expect(screen.queryByTestId("ac-menu")).toBeNull();
   });
 
+  it("SHOULD NOT close on blur WHEN a press started inside the list (the tap still lands)", () => {
+    setup();
+    open();
+    const menu = screen.getByTestId("ac-menu");
+
+    fireEvent(menu, "startShouldSetResponderCapture");
+    fireEvent(input(), "blur");
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+    expect(screen.getByTestId("ac-menu")).toBeTruthy();
+
+    fireEvent.press(screen.getByTestId("ac-suggestion-viagem"));
+    expect(chipsProps.onChange).toHaveBeenCalledWith(["viagem"]);
+  });
+
   it("SHOULD keep the list open WHEN focus returns before the delay ends", () => {
     setup();
     open();
@@ -202,5 +219,20 @@ describe("text mode", () => {
     setup({ mode: "text", value: "" } as never);
     key("Backspace");
     expect(textProps.onChangeText).not.toHaveBeenCalled();
+  });
+});
+
+describe("scrollIntoView", () => {
+  it("SHOULD bring the node into view WHEN the platform can", () => {
+    const node = { scrollIntoView: jest.fn() };
+
+    scrollIntoView(node);
+
+    expect(node.scrollIntoView).toHaveBeenCalledWith({ block: "nearest" });
+  });
+
+  it("SHOULD do nothing for a node that cannot scroll (native) or no node", () => {
+    expect(() => scrollIntoView({})).not.toThrow();
+    expect(() => scrollIntoView(null)).not.toThrow();
   });
 });

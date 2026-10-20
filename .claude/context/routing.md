@@ -12,8 +12,9 @@ app/
   (app)/(tabs)/_layout.tsx       Tabs with custom tabBar (AppTabBar): index/index, financial, stock/index, family/index; backBehavior "initialRoute"; tabBarPosition "left" + rail on expanded (>= 1024 px)
   (app)/(tabs)/index/index.tsx   Home
   (app)/(tabs)/stock/index.tsx, family/index.tsx
-  (app)/(tabs)/financial/_layout.tsx   FinancialLayout: ScreenHeader + SegmentedControl + nested Stack (index, categories, accounts, cards); switching uses router.replace
-  (app)/(tabs)/financial/{index,categories,accounts,cards}.tsx
+  (app)/(tabs)/financial/_layout.tsx   FinancialLayout: ScreenHeader + SegmentedControl + nested Stack (index, categories, tags, accounts, cards); switching uses router.replace
+  (app)/(tabs)/financial/{index,categories,tags,accounts,cards}.tsx
+  (app)/(modals)/financial/tag/add_new_tag.tsx   NewTagModal (spec 043)
   (app)/(modals)/_layout.tsx     Stack, presentation "transparentModal", headerShown false
   (app)/(modals)/quick_add.tsx   quick-add BottomSheet (Transaction / Stock item); options router.replace to the add forms
   (app)/(modals)/family/..., financial/..., stock/add_new_stock_item.tsx, business_feedback.tsx, invite.tsx
