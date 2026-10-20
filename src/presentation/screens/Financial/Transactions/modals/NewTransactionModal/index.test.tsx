@@ -1,6 +1,8 @@
+import { StyleSheet } from "react-native";
+
 import { RecurrenceHasPaidOccurrences } from "@domain/entities/errors";
 
-import { fireEvent, screen, setup } from "./mocks/index.mocks";
+import { fireEvent, screen, setup, within } from "./mocks/index.mocks";
 import transactionFormTestIds from "./testIds";
 
 it("SHOULD show the create title and the save expense footer", () => {
@@ -566,5 +568,85 @@ describe("repeat and recurring occurrences (spec 034)", () => {
     });
 
     expect(screen.queryByText(/detachedWarning/)).toBeNull();
+  });
+});
+
+describe("wide layout (spec 037)", () => {
+  const sheet = transactionFormTestIds.sheet;
+
+  function column(side: "left" | "right") {
+    return within(screen.getByTestId(`${sheet}-column-${side}`));
+  }
+
+  it("SHOULD be a form dialog with the type, amount and description on the left", () => {
+    setup({}, "expanded");
+
+    expect(
+      StyleSheet.flatten(screen.getByTestId(sheet).props.style).maxWidth,
+    ).toBe(880);
+    expect(
+      column("left").getByTestId(transactionFormTestIds.type),
+    ).toBeOnTheScreen();
+    expect(
+      column("left").getByTestId(transactionFormTestIds.amountInput),
+    ).toBeOnTheScreen();
+    expect(
+      column("left").getByTestId(transactionFormTestIds.descriptionInput),
+    ).toBeOnTheScreen();
+    expect(
+      column("right").getByTestId(transactionFormTestIds.dateField),
+    ).toBeOnTheScreen();
+  });
+
+  it.each([false, true])(
+    "SHOULD render the paid row once, in the right column (editing: %s)",
+    (isEditing) => {
+      setup(
+        {
+          isEditing,
+          paidLabelKey: "financial.transactions.form.paid",
+          showPaid: true,
+        },
+        "expanded",
+      );
+
+      expect(screen.getAllByTestId(transactionFormTestIds.paid)).toHaveLength(
+        1,
+      );
+      expect(
+        column("right").getByTestId(transactionFormTestIds.paid),
+      ).toBeOnTheScreen();
+    },
+  );
+
+  it("SHOULD show the form error full width, after the columns", () => {
+    setup({ formErrorKey: "financial.errors.notFound" }, "expanded");
+
+    expect(
+      within(screen.getByTestId(`${sheet}-column-left`)).queryByTestId(
+        transactionFormTestIds.formError,
+      ),
+    ).toBeNull();
+    expect(
+      screen.getByTestId(transactionFormTestIds.formError),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD put Delete in the footer when editing on wide and in the body on compact", () => {
+    setup({ isEditing: true }, "expanded");
+    expect(
+      within(screen.getByTestId(`${sheet}-footer`)).getByTestId(
+        transactionFormTestIds.deleteButton,
+      ),
+    ).toBeOnTheScreen();
+    screen.unmount();
+
+    const vm = setup({ isEditing: true });
+    fireEvent.press(
+      within(screen.getByTestId(`${sheet}-body`)).getByTestId(
+        transactionFormTestIds.deleteButton,
+      ),
+    );
+    expect(vm.onDeletePress).toHaveBeenCalledTimes(1);
   });
 });
