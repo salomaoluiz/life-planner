@@ -25,6 +25,7 @@ export { default as Divider, DividerProps } from "./Divider";
 export { default as EmptyState, EmptyStateProps } from "./EmptyState";
 export { default as ErrorState, ErrorStateProps } from "./ErrorState";
 export { default as FieldShell, FieldShellProps } from "./FieldShell";
+export { default as FormColumns, FormColumnsProps } from "./FormColumns";
 export { default as GroupBodyRow, GroupBodyRowProps } from "./GroupBodyRow";
 export { default as GroupHeader, GroupHeaderProps } from "./GroupHeader";
 export { default as HelperText, HelperTextProps } from "./HelperText";
