@@ -8,6 +8,7 @@ import { useNewCategoryViewModel } from "../hooks";
 jest.mock("../hooks");
 
 const defaultViewModel: ReturnType<typeof useNewCategoryViewModel> = {
+  archiveBodyKeys: ["financial.categories.archive.confirmBody"],
   colorOptions: [
     { labelKey: "financial.colors.amber", value: "#F59E0B" },
     { labelKey: "financial.colors.indigo", value: "#6366F1" },
@@ -26,6 +27,8 @@ const defaultViewModel: ReturnType<typeof useNewCategoryViewModel> = {
     { label: "Folder", value: "folder" },
     { label: "Car", value: "car" },
   ],
+  isArchived: false,
+  isArchiveDialogOpen: false,
   isCustomColorOpen: false,
   isDeleteDialogOpen: false,
   isDeleting: false,
@@ -37,8 +40,12 @@ const defaultViewModel: ReturnType<typeof useNewCategoryViewModel> = {
   isOwnerLocked: false,
   isSaving: false,
   isTypeLocked: false,
+  isUpdating: false,
   name: "",
   nameError: undefined,
+  onArchiveCancel: jest.fn(),
+  onArchiveConfirm: jest.fn(),
+  onArchivePress: jest.fn(),
   onClose: jest.fn(),
   onColorChange: jest.fn(),
   onCustomColorApply: jest.fn(),
@@ -57,6 +64,8 @@ const defaultViewModel: ReturnType<typeof useNewCategoryViewModel> = {
   onNameChange: jest.fn(),
   onOwnerChange: jest.fn(),
   onParentChange: jest.fn(),
+  onPendingClose: jest.fn(),
+  onReactivatePress: jest.fn(),
   onSave: jest.fn(),
   onTypeChange: jest.fn(),
   ownerChoices: [{ label: "Personal", labelKey: undefined, value: "user-id" }],
@@ -65,6 +74,7 @@ const defaultViewModel: ReturnType<typeof useNewCategoryViewModel> = {
   parentHelperKey: undefined,
   parentId: "",
   parentOptions: [{ depth: 0, label: "Housing", value: "housing" }],
+  pendingItems: undefined,
   pickerIcons: [{ label: "Heart", value: "heart" }],
   saveLabelKey: "financial.categories.form.save",
   titleKey: "financial.categories.new",

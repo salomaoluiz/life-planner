@@ -3,6 +3,7 @@ import { View } from "react-native";
 import {
   BottomSheet,
   Button,
+  Card,
   ChipGroup,
   ColorSwatchGroup,
   ConfirmDialog,
@@ -17,11 +18,13 @@ import {
 } from "@components";
 import Skeleton from "@components/Skeleton";
 import { useTranslation } from "@presentation/i18n";
+import pluralKey from "@presentation/i18n/pluralKey";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
 import CustomColorSheet from "./components/CustomColorSheet";
 import IconPickerSheet from "./components/IconPickerSheet";
+import PendingItemsDialog from "./components/PendingItemsDialog";
 import { useNewCategoryViewModel } from "./hooks";
 import useStyles from "./styles";
 import categoryFormTestIds from "./testIds";
@@ -170,6 +173,32 @@ function NewCategoryModal() {
           }
           testID={categoryFormTestIds.sheet}
         />
+        {vm.isEditing && (
+          <Card>
+            <View style={styles.archiveRow}>
+              <View style={styles.archiveHint}>
+                <Text.Caption
+                  tone={"secondary"}
+                  value={t("financial.categories.archive.hint")}
+                />
+              </View>
+              {vm.isArchived ? (
+                <Button.Secondary
+                  label={t("financial.categories.archive.reactivate")}
+                  loading={vm.isUpdating}
+                  onPress={vm.onReactivatePress}
+                  testID={categoryFormTestIds.reactivateButton}
+                />
+              ) : (
+                <Button.Secondary
+                  label={t("financial.categories.archive.action")}
+                  onPress={vm.onArchivePress}
+                  testID={categoryFormTestIds.archiveButton}
+                />
+              )}
+            </View>
+          </Card>
+        )}
         {vm.formErrorKey && (
           <Text.Body
             testID={categoryFormTestIds.formError}
@@ -251,6 +280,59 @@ function NewCategoryModal() {
         title={t("common.form.discardTitle")}
         visible={vm.isDiscardDialogOpen}
       />
+      <ConfirmDialog
+        cancelLabel={t("common.actions.cancel")}
+        closeLabel={t("common.actions.close")}
+        confirmLabel={t("financial.categories.archive.action")}
+        loading={vm.isUpdating}
+        message={vm.archiveBodyKeys.map((key) => t(key)).join(" ")}
+        onCancel={vm.onArchiveCancel}
+        onConfirm={vm.onArchiveConfirm}
+        testID={categoryFormTestIds.archiveDialog}
+        title={t("financial.categories.archive.confirmTitle")}
+        visible={vm.isArchiveDialogOpen}
+      />
+      {vm.pendingItems && (
+        <PendingItemsDialog
+          bodyLabel={t("financial.categories.archive.pendingBody")}
+          closeLabel={t("common.actions.close")}
+          hiddenLabel={
+            vm.pendingItems.hiddenCount > 0
+              ? t("financial.categories.archive.pendingHidden", {
+                  count: vm.pendingItems.hiddenCount,
+                })
+              : undefined
+          }
+          okLabel={t("financial.categories.archive.pendingOk")}
+          onClose={vm.onPendingClose}
+          plans={vm.pendingItems.plans.map((plan) => ({
+            id: plan.id,
+            label: t(
+              pluralKey(
+                "financial.categories.archive.pendingPlanLine",
+                plan.count,
+              ),
+              { count: plan.count, description: plan.description },
+            ),
+          }))}
+          plansTitle={t("financial.categories.archive.pendingPlans")}
+          recurrences={vm.pendingItems.recurrences.map((recurrence) => ({
+            id: recurrence.id,
+            label: t("financial.categories.archive.pendingRecurrenceLine", {
+              date: recurrence.date,
+              description: recurrence.description,
+            }),
+          }))}
+          recurrencesTitle={t(
+            "financial.categories.archive.pendingRecurrences",
+          )}
+          testIDs={{
+            dialog: categoryFormTestIds.pendingDialog,
+            ok: categoryFormTestIds.pendingOk,
+          }}
+          title={t("financial.categories.archive.pendingTitle")}
+        />
+      )}
       <ConfirmDialog
         cancelLabel={t("common.actions.cancel")}
         closeLabel={t("common.actions.close")}

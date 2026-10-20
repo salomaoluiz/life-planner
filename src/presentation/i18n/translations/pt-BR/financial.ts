@@ -111,6 +111,24 @@ const financial = {
     usedPercent: "{{percent}}% do limite usado",
   },
   categories: {
+    archive: {
+      action: "Arquivar categoria",
+      confirmBody:
+        "Ela não vai mais aparecer ao criar transações. O histórico continua.",
+      confirmBodyWithChildren: "As subcategorias dela também serão arquivadas.",
+      confirmTitle: "Arquivar esta categoria?",
+      hint: "Arquivar tira a categoria dos seletores de transação. O histórico continua.",
+      pendingBody: "Resolva estes itens antes:",
+      pendingHidden: "Mais {{count}} em famílias que você não vê",
+      pendingOk: "Entendi",
+      pendingPlanLine_one: "{{description}} · falta {{count}} parcela",
+      pendingPlanLine_other: "{{description}} · faltam {{count}} parcelas",
+      pendingPlans: "Parcelamentos em andamento",
+      pendingRecurrenceLine: "{{description}} · próxima em {{date}}",
+      pendingRecurrences: "Recorrências ativas",
+      pendingTitle: "Ainda não dá para arquivar esta categoria",
+      reactivate: "Reativar categoria",
+    },
     archived: "Arquivadas ({{count}})",
     delete: "Excluir categoria",
     deleteAlertMsg: "Tem certeza de que deseja excluir esta categoria?",
@@ -218,6 +236,8 @@ const financial = {
   errors: {
     accountArchived: "Esta conta está arquivada.",
     cardArchived: "Este cartão está arquivado.",
+    categoryArchived: "Esta categoria está arquivada.",
+    categoryParentArchived: "A categoria mãe está arquivada.",
     close: "OK",
     deleteRefundsFirst: "Exclua os estornos dela antes.",
     installmentPaid: "Uma parcela está numa fatura paga.",
