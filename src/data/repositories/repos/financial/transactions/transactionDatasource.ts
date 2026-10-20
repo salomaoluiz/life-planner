@@ -3,12 +3,16 @@ import TransactionModel, {
   TransactionType,
 } from "@data/models/financial/TransactionModel";
 import { InstallmentScope } from "@domain/entities/financial/InstallmentPlanEntity";
+import { TransactionQueryFilter } from "@domain/entities/financial/TransactionQueryFilter";
 
 export interface TransactionDatasource {
   createTransaction(
     params: CreateTransactionDatasourceParams,
   ): Promise<TransactionModel>;
   deleteTransaction(params: DeleteTransactionDatasourceParams): Promise<void>;
+  getFilteredTransactions(
+    params: GetFilteredTransactionsDatasourceParams,
+  ): Promise<TransactionModel[]>;
   getTransactions(ownerIds: string[]): Promise<TransactionModel[]>;
   updateTransaction(params: UpdateTransactionDatasourceParams): Promise<void>;
 }
@@ -34,6 +38,11 @@ interface DeleteTransactionDatasourceParams {
   id: string;
   ownerId: string;
   scope?: InstallmentScope;
+}
+
+interface GetFilteredTransactionsDatasourceParams {
+  filter: TransactionQueryFilter;
+  ownerIds: string[];
 }
 
 interface UpdateTransactionDatasourceParams {

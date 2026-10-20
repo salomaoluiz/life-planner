@@ -47,6 +47,39 @@ describe("getCardInvoicesForMonth", () => {
     expect(result[0].invoice.amount).toBe(45000);
   });
 
+  it("SHOULD GET the invoices of a period with the filters and parse the filtered totals (spec 045)", async () => {
+    jest.mocked(api.get).mockResolvedValueOnce([
+      {
+        ...apiCardInvoice,
+        filteredTotal: 41230,
+        matchedCount: 3,
+        purchaseCount: 14,
+      },
+    ]);
+
+    const result = await getCardInvoicesForMonth({
+      filter: {
+        categoryIds: ["c1"],
+        creditCardIds: ["k1"],
+        from: "2025-01-01",
+        paid: true,
+        q: "mercado",
+        tagIds: ["t1"],
+        to: "2025-02-28",
+      },
+      ownerIds: ["a"],
+    });
+
+    expect(api.get).toHaveBeenCalledWith(
+      "/v1/finance/credit-cards/invoices?ownerId=a&today=2026-11-02&categoryId=c1&creditCardId=k1&tagId=t1&from=2025-01-01&to=2025-02-28&paid=true&q=mercado",
+    );
+    expect(result[0].filtered).toEqual({
+      filteredTotal: 41230,
+      matchedCount: 3,
+      purchaseCount: 14,
+    });
+  });
+
   it("SHOULD NOT call the API WITHOUT owners", async () => {
     expect(
       await getCardInvoicesForMonth({ month: "2026-11", ownerIds: [] }),

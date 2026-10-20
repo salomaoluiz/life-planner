@@ -30,6 +30,13 @@ export type InvoiceCreditKind =
   | "PREPAYMENT_DISCOUNT"
   | "REFUND";
 
+// What a filtered invoice keeps: the signed sum (cents) and how many rows matched out of all its rows.
+export interface InvoiceFilteredEntity {
+  filteredTotal: number;
+  matchedCount: number;
+  purchaseCount: number;
+}
+
 export interface InvoicePurchaseEntity {
   category: string;
   categoryIcon?: string;
@@ -51,17 +58,21 @@ export interface InvoicePurchaseEntity {
 class CardInvoiceEntity {
   card: CardInvoiceCardEntity;
   credits: InvoiceCreditEntity[];
+  // Spec 045: set when the list was filtered; `purchases`/`credits` then hold only the matching rows.
+  filtered?: InvoiceFilteredEntity;
   invoice: InvoiceEntity;
   purchases: InvoicePurchaseEntity[];
 
   constructor(params: {
     card: CardInvoiceCardEntity;
     credits?: InvoiceCreditEntity[];
+    filtered?: InvoiceFilteredEntity;
     invoice: InvoiceEntity;
     purchases: InvoicePurchaseEntity[];
   }) {
     this.card = params.card;
     this.credits = params.credits ?? [];
+    this.filtered = params.filtered;
     this.invoice = params.invoice;
     this.purchases = params.purchases;
   }

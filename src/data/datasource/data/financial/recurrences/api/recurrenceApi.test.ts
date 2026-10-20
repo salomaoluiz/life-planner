@@ -235,6 +235,29 @@ describe("reads", () => {
     expect(result[0].occurrenceNumber).toBe(2);
   });
 
+  it("SHOULD send only the filters projections understand (spec 045)", async () => {
+    jest.mocked(api.get).mockResolvedValueOnce([apiProjected]);
+
+    await getProjections({
+      filter: {
+        accountIds: ["a1"],
+        categoryIds: ["c1"],
+        from: "2025-01-01",
+        paid: false,
+        q: "gym",
+        tagIds: ["t1"],
+        to: "2025-02-28",
+      },
+      from: "2026-11",
+      ownerIds: ["user-id"],
+      to: "2027-01",
+    });
+
+    expect(api.get).toHaveBeenCalledWith(
+      "/v1/finance/recurrences/projections?from=2026-11&to=2027-01&today=2026-10-17&ownerId=user-id&accountId=a1&categoryId=c1&tagId=t1&q=gym",
+    );
+  });
+
   it("SHOULD NOT call the API WITHOUT owners", async () => {
     expect(
       await getProjections({ from: "2026-11", ownerIds: [], to: "2026-11" }),

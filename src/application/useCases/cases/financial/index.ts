@@ -69,6 +69,7 @@ export {
 export {
   createTransactionUseCase as createFinancialTransactionUseCase,
   deleteTransactionUseCase as deleteFinancialTransactionUseCase,
+  getFilteredTransactionsUseCase as getFinancialFilteredTransactionsUseCase,
   getTransactionsUseCase as getFinancialTransactionsUseCase,
   refreshTransactionsUseCase as refreshFinancialTransactionsUseCase,
   updateTransactionUseCase as updateFinancialTransactionUseCase,

@@ -4,6 +4,7 @@ import CreditCardEntity, {
 } from "@domain/entities/financial/CreditCardEntity";
 import CreditCardOverviewEntity from "@domain/entities/financial/CreditCardOverviewEntity";
 import { InvoicePaymentMethod } from "@domain/entities/financial/InvoiceEntity";
+import { TransactionQueryFilter } from "@domain/entities/financial/TransactionQueryFilter";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 export type FinancialCreditCardRepository = {
@@ -12,8 +13,10 @@ export type FinancialCreditCardRepository = {
   ): Promise<CreditCardEntity>;
   deleteCreditCard(params: DeleteCreditCardRepositoryParams): Promise<void>;
   getCardInvoice(params: CardInvoiceKey): Promise<CardInvoiceEntity>;
+  // `month` or the period of `filter` selects the invoices by their list date (spec 045).
   getCardInvoicesForMonth(params: {
-    month: string;
+    filter?: TransactionQueryFilter;
+    month?: string;
     ownerIds: string[];
   }): Promise<CardInvoiceEntity[]>;
   getCreditCards(ownerIds: string[]): Promise<CreditCardEntity[]>;

@@ -1,9 +1,11 @@
 import ProjectedOccurrenceDTO from "@application/dto/financial/ProjectedOccurrenceDTO";
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import { DefaultError } from "@domain/entities/errors";
+import { TransactionQueryFilter } from "@domain/entities/financial/TransactionQueryFilter";
 import Repositories from "@domain/repositories";
 
 export interface GetProjectionsUseCaseParams {
+  filter?: TransactionQueryFilter;
   // `YYYY-MM`, at most 12 months from `from` to `to`.
   from: string;
   ownerIds: string[];

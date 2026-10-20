@@ -76,6 +76,7 @@ const datasourcesMocks: jest.MockedObjectDeep<Datasources> = {
   financialTransactionDatasource: {
     createTransaction: jest.fn(),
     deleteTransaction: jest.fn(),
+    getFilteredTransactions: jest.fn(),
     getTransactions: jest.fn(),
     updateTransaction: jest.fn(),
   },
