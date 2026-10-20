@@ -15,6 +15,7 @@ const successResponse = {
   },
   error: null,
   mutate: jest.fn(),
+  reset: jest.fn(),
   status: "success",
   variables: {
     var1: "variable1",
@@ -28,6 +29,7 @@ const errorResponse = {
   data: null,
   error,
   mutate: jest.fn(),
+  reset: jest.fn(),
   status: "error",
   variables: {
     var1: "variable1",
@@ -38,6 +40,7 @@ const businessErrorResponse = {
   data: null,
   error: new BusinessError(),
   mutate: jest.fn(),
+  reset: jest.fn(),
   status: "error",
   variables: {
     var1: "variable1",
@@ -48,6 +51,7 @@ const errorWithoutMessageResponse = {
   data: null,
   error: {},
   mutate: jest.fn(),
+  reset: jest.fn(),
   status: "error",
   variables: {
     var1: "variable1",
@@ -58,6 +62,7 @@ const pendingResponse = {
   data: null,
   error: null,
   mutate: jest.fn(),
+  reset: jest.fn(),
   status: "pending",
   variables: {
     var1: "variable1",
@@ -68,6 +73,7 @@ const idleResponse = {
   data: null,
   error: null,
   mutate: jest.fn(),
+  reset: jest.fn(),
   status: "idle",
   variables: {
     var1: "variable1",

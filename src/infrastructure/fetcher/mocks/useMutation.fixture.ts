@@ -11,6 +11,7 @@ class UseMutationFixture<Params, Response> {
     error: null,
     isFetching: false,
     mutate: jest.fn<Response, [Params]>(),
+    reset: jest.fn(),
     status: "idle",
   };
 
@@ -26,6 +27,7 @@ class UseMutationFixture<Params, Response> {
       error: null,
       isFetching: false,
       mutate: jest.fn<Response, [Params]>(),
+      reset: jest.fn(),
       status: "idle",
     };
     return this;

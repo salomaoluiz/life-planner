@@ -30,6 +30,8 @@ interface MutationResponse<P = void, R = void> {
   error: Errors;
   isFetching: boolean;
   mutate: (params: P) => void;
+  // Back to idle, so the next success is detected again
+  reset: () => void;
   status: MutationStatus;
 }
 

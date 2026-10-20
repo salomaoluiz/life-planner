@@ -5,7 +5,7 @@ import { UseMutation } from "@infrastructure/fetcher/types";
 function useMutation<Params, Response>(
   props: Parameters<UseMutation<Params, Response>>[0],
 ): ReturnType<UseMutation<Params, Response>> {
-  const { data, error, mutate, status, variables } = useReactMutation<
+  const { data, error, mutate, reset, status, variables } = useReactMutation<
     Response,
     BusinessError | GenericError,
     Params
@@ -46,6 +46,7 @@ function useMutation<Params, Response>(
     error: getError(),
     isFetching: status === "pending",
     mutate,
+    reset,
     status,
   };
 }
