@@ -47,6 +47,11 @@ export {
   default as NavigationRail,
   NavigationRailProps,
 } from "./NavigationRail";
+export {
+  default as PendingItemsDialog,
+  PendingItemsDialogProps,
+  PendingItemsSection,
+} from "./PendingItemsDialog";
 export { default as Picker } from "./Picker";
 export { default as ProgressBar, ProgressBarProps } from "./ProgressBar";
 export {

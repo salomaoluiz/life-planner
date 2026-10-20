@@ -7,6 +7,19 @@ import FamilyMemberUIModel, { FamilyMemberViewer } from "./FamilyMemberUIModel";
 export type FamilyMenuAction = "DELETE" | "LEAVE";
 
 class FamilyViewModel {
+  // Archived: read-only for everyone, history stays viewable (spec 042).
+  get canArchive() {
+    return this.isOwner && !this.isArchived;
+  }
+
+  get canInvite() {
+    return this.isOwner && !this.isArchived;
+  }
+
+  get canReactivate() {
+    return this.isOwner && this.isArchived;
+  }
+
   get currentMember() {
     return this.familyMembers.find((member) => member.isCurrentUser);
   }
@@ -24,6 +37,10 @@ class FamilyViewModel {
     return Array.from(this.dto.name.trim())[0]?.toUpperCase() ?? "";
   }
 
+  get isArchived() {
+    return this.dto.isArchived;
+  }
+
   get isOwner() {
     return this.viewer.isFamilyOwner;
   }
@@ -32,10 +49,11 @@ class FamilyViewModel {
     return this.familyMembers.filter((member) => !member.isPending).length;
   }
 
-  // Owner: delete the family. Member: leave (needs their own row to delete).
+  // Owner: delete the family (an archived one shows Reactivate / Delete inline instead of the menu).
+  // Member: leave (needs their own row to delete).
   get menuAction(): FamilyMenuAction | undefined {
     if (this.isOwner) {
-      return "DELETE";
+      return this.isArchived ? undefined : "DELETE";
     }
 
     return this.currentMember ? "LEAVE" : undefined;
@@ -50,6 +68,11 @@ class FamilyViewModel {
       default:
         return undefined;
     }
+  }
+
+  // The owner of an active family can archive it from the same menu.
+  get menuSecondaryLabelKey(): TranslationKeys | undefined {
+    return this.canArchive ? "family.archive.action" : undefined;
   }
 
   get ownerName() {

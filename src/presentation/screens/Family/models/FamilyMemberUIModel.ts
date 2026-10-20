@@ -8,6 +8,8 @@ import { TranslationKeys } from "@presentation/i18n/types";
 export type FamilyMemberAction = "CANCEL_INVITE" | "REMOVE";
 
 export interface FamilyMemberViewer {
+  // An archived family is read-only: no member row actions (spec 042).
+  isFamilyArchived?: boolean;
   isFamilyOwner: boolean;
   userId: string;
 }
@@ -15,7 +17,11 @@ export interface FamilyMemberViewer {
 class FamilyMemberUIModel {
   // Only the owner acts on rows, never on the owner's own row. Leaving is a card-menu action.
   get action(): FamilyMemberAction | undefined {
-    if (this.isOwner || !this.viewer.isFamilyOwner) {
+    if (
+      this.isOwner ||
+      !this.viewer.isFamilyOwner ||
+      this.viewer.isFamilyArchived
+    ) {
       return undefined;
     }
 

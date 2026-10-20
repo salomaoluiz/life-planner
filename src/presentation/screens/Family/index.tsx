@@ -1,6 +1,14 @@
-import { EmptyState, ErrorState, Screen, ScreenHeader } from "@components";
+import {
+  EmptyState,
+  ErrorState,
+  Icon,
+  ListItem,
+  Screen,
+  ScreenHeader,
+} from "@components";
 import { IconButton } from "@components/Icon";
 import Skeleton from "@components/Skeleton";
+import { useKitTheme } from "@components/utils/useKitTheme";
 import { useTranslation } from "@presentation/i18n";
 import { useFamilyViewModel } from "@screens/Family/hooks";
 import familyTestIds from "@screens/Family/testIds";
@@ -10,6 +18,7 @@ import * as Containers from "./containers";
 function Family() {
   const { t } = useTranslation();
   const vm = useFamilyViewModel();
+  const { sizes } = useKitTheme();
 
   return (
     <Screen
@@ -72,6 +81,35 @@ function Family() {
             />
           ))
         : null}
+
+      {vm.status === "ready" && vm.archivedFamilies.length > 0 ? (
+        <>
+          <ListItem
+            inset
+            onPress={vm.onArchivedToggle}
+            testID={familyTestIds.archivedToggle}
+            title={t("family.archived.group", {
+              count: vm.archivedFamilies.length,
+            })}
+            trailing={
+              <Icon
+                name={vm.archivedExpanded ? "chevron-up" : "chevron-down"}
+                size={sizes.iconMd}
+              />
+            }
+          />
+          {vm.archivedExpanded
+            ? vm.archivedFamilies.map((family) => (
+                <Containers.FamilyCard
+                  expanded={vm.isExpanded(family.familyId)}
+                  family={family}
+                  key={family.familyId}
+                  onToggle={() => vm.onToggle(family.familyId)}
+                />
+              ))
+            : null}
+        </>
+      ) : null}
     </Screen>
   );
 }

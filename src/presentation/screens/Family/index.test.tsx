@@ -34,9 +34,12 @@ type Vm = ReturnType<typeof useFamilyViewModel>;
 
 function setup(overrides: Partial<Vm> = {}) {
   const vm = {
+    archivedExpanded: false,
+    archivedFamilies: [],
     count: 2,
     families: [familyNamed("1", "Alpha"), familyNamed("2", "Beta")],
     isExpanded: jest.fn((id: string) => id === "1"),
+    onArchivedToggle: jest.fn(),
     onNewFamily: jest.fn(),
     onRefresh: jest.fn(),
     onRetry: jest.fn(),
@@ -101,4 +104,33 @@ it("SHOULD render the empty state WITHOUT subtitle AND create from its action", 
   fireEvent.press(screen.getByText("family.empty.action"));
 
   expect(vm.onNewFamily).toHaveBeenCalledTimes(1);
+});
+
+describe("archived group (spec 042)", () => {
+  const archived = [familyNamed("3", "Old House")];
+
+  it("SHOULD show the collapsed group with its count AND no archived card", () => {
+    setup({ archivedFamilies: archived });
+
+    expect(
+      screen.getByText('family.archived.group {"count":1}'),
+    ).toBeOnTheScreen();
+    expect(screen.queryByTestId("card-3")).toBeNull();
+  });
+
+  it("SHOULD expand the group on press AND list the archived cards", () => {
+    const vm = setup({ archivedExpanded: true, archivedFamilies: archived });
+
+    expect(screen.getByTestId("card-3")).toBeOnTheScreen();
+
+    fireEvent.press(screen.getByTestId("family.list.archived-toggle"));
+
+    expect(vm.onArchivedToggle).toHaveBeenCalledTimes(1);
+  });
+
+  it("SHOULD hide the group WHEN nothing is archived", () => {
+    setup();
+
+    expect(screen.queryByTestId("family.list.archived-toggle")).toBeNull();
+  });
 });

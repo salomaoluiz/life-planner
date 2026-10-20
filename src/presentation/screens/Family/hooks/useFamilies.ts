@@ -18,6 +18,7 @@ async function queryFamilies() {
 
   return families.map((family, index) => {
     const viewer = {
+      isFamilyArchived: family.isArchived,
       isFamilyOwner: family.ownerId === user.id,
       userId: user.id,
     };

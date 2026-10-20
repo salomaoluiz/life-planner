@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import { act, renderHook } from "@tests";
 
 import {
+  FamilyHasPendingItems,
   FamilyHasRecords,
   FamilyNotFound,
   GenericError,
@@ -25,6 +26,7 @@ jest.mock("@application/useCases", () => ({
       uniqueName: "delete_member",
     },
     deleteFamilyUseCase: { execute: jest.fn(), uniqueName: "delete_family" },
+    setFamilyStatusUseCase: { execute: jest.fn(), uniqueName: "set_status" },
   },
 }));
 
@@ -33,6 +35,7 @@ const memberViewer = { isFamilyOwner: false, userId: "user-2" };
 // region mocks
 const deleteFamily = new UseMutationFixture<unknown, void>();
 const deleteMember = new UseMutationFixture<unknown, void>();
+const setStatus = new UseMutationFixture<unknown, void>();
 // endregion mocks
 
 // region spies
@@ -54,6 +57,9 @@ function setup(options?: {
   familyStatus?: "idle" | "success";
   memberError?: GenericError;
   memberStatus?: "idle" | "success";
+  statusError?: Error;
+  statusFetching?: boolean;
+  statusStatus?: "idle" | "success";
 }) {
   const family = options?.family ?? makeFamilyViewModel(ownerViewer);
   const familyMutation = deleteFamily
@@ -71,17 +77,32 @@ function setup(options?: {
     memberMutation.withError(options.memberError);
   }
 
+  const statusMutation = setStatus
+    .reset()
+    .withStatus(options?.statusStatus ?? "idle")
+    .withIsFetching(!!options?.statusFetching);
+
+  if (options?.statusError) {
+    statusMutation.withError(options.statusError as never);
+  }
+
+  const builtStatus = statusMutation.build();
   const builtFamily = familyMutation.build();
   const builtMember = memberMutation.build();
 
+  const byCacheKey: Record<string, unknown> = {
+    delete_family: builtFamily,
+    set_status: builtStatus,
+  };
+
   spies.useMutation.mockImplementation(
     ({ cacheKey }: { cacheKey: string[] }) =>
-      (cacheKey[0] === "delete_family" ? builtFamily : builtMember) as never,
+      (byCacheKey[cacheKey[0]] ?? builtMember) as never,
   );
 
   const hook = renderHook(() => useFamilyCardViewModel({ family }));
 
-  return { ...hook, builtFamily, builtMember, family };
+  return { ...hook, builtFamily, builtMember, builtStatus, family };
 }
 
 it("SHOULD open the owner menu with Delete family AND move to the confirmation", () => {
@@ -91,6 +112,7 @@ it("SHOULD open the owner menu with Delete family AND move to the confirmation",
   expect(result.current.menu).toEqual({
     actionLabelKey: "family.delete.confirm",
     kind: "FAMILY",
+    secondaryLabelKey: "family.archive.action",
     subtitle: "Test Family",
     titleKey: "family.card.options",
   });
@@ -222,4 +244,80 @@ it("SHOULD cancel the confirmation AND the menu without side effects", () => {
   act(() => result.current.onCancelConfirm());
   expect(result.current.confirm).toBeUndefined();
   expect(builtFamily.mutate).not.toHaveBeenCalled();
+});
+
+describe("archive and reactivate (spec 042)", () => {
+  it("SHOULD archive from the menu after confirming", () => {
+    const { builtStatus, result } = setup();
+
+    act(() => result.current.onFamilyOptions());
+    act(() => result.current.onMenuSecondaryAction());
+
+    expect(result.current.menu).toBeUndefined();
+    expect(result.current.confirm).toEqual({ kind: "ARCHIVE_FAMILY" });
+    expect(result.current.confirmCopy?.titleKey).toBe("family.archive.title");
+
+    act(() => result.current.onConfirm());
+
+    expect(builtStatus.mutate).toHaveBeenCalledWith({
+      id: "family-1",
+      status: "ARCHIVED",
+    });
+  });
+
+  it("SHOULD reactivate straight from the button", () => {
+    const { builtStatus, result } = setup();
+
+    act(() => result.current.onReactivate());
+
+    expect(builtStatus.mutate).toHaveBeenCalledWith({
+      id: "family-1",
+      status: "ACTIVE",
+    });
+  });
+
+  it("SHOULD NOT reactivate again WHILE the request is pending", () => {
+    const { builtStatus, result } = setup({ statusFetching: true });
+
+    act(() => result.current.onReactivate());
+
+    expect(builtStatus.mutate).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD ask to delete from the inline Delete button", () => {
+    const { result } = setup();
+
+    act(() => result.current.onDeleteInline());
+
+    expect(result.current.confirm).toEqual({ kind: "DELETE_FAMILY" });
+  });
+
+  it("SHOULD expose the blockers (and close the confirmation) WHEN the archive is refused", () => {
+    const { result } = setup({
+      statusError: new FamilyHasPendingItems({
+        pendingInvites: [{ email: "test@example.com", id: "invite-1" }],
+      }),
+    });
+
+    expect(result.current.blockers?.pendingInvites).toEqual([
+      { email: "test@example.com", id: "invite-1" },
+    ]);
+    expect(result.current.notice).toBeUndefined();
+
+    act(() => result.current.onCloseBlockers());
+
+    expect(result.current.blockers).toBeUndefined();
+  });
+
+  it("SHOULD show the generic notice FOR any other status error", () => {
+    const { result } = setup({ statusError: new GenericError() });
+
+    expect(result.current.notice).toBe("GENERIC");
+  });
+
+  it("SHOULD refetch everything WHEN the status changed", () => {
+    setup({ statusStatus: "success" });
+
+    expect(spies.invalidate).toHaveBeenCalledTimes(1);
+  });
 });

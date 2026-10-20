@@ -15,6 +15,11 @@ function useStyles() {
         minHeight: 56,
       },
       headerText: { flex: 1 },
+      inlineAction: { flex: 1 },
+      inlineActions: {
+        flexDirection: "row",
+        gap: theme.sizes.spacing.sm,
+      },
     }),
     theme,
   };

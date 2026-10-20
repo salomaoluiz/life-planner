@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@tests";
 
 import {
+  makeArchivedFamilyViewModel,
   makeFamilyViewModel,
   ownerViewer,
 } from "@screens/Family/mocks/index.mocks";
@@ -18,19 +19,24 @@ function makeVm(
   overrides: Partial<ReturnType<typeof useFamilyCardViewModel>> = {},
 ) {
   return {
+    blockers: undefined,
     confirm: undefined,
     confirmCopy: undefined,
     isBusy: false,
     menu: undefined,
     notice: undefined,
     onCancelConfirm: jest.fn(),
+    onCloseBlockers: jest.fn(),
     onCloseMenu: jest.fn(),
     onCloseNotice: jest.fn(),
     onConfirm: jest.fn(),
+    onDeleteInline: jest.fn(),
     onFamilyOptions: jest.fn(),
     onInviteMember: jest.fn(),
     onMemberOptions: jest.fn(),
     onMenuAction: jest.fn(),
+    onMenuSecondaryAction: jest.fn(),
+    onReactivate: jest.fn(),
     ...overrides,
   } as ReturnType<typeof useFamilyCardViewModel>;
 }
@@ -172,4 +178,102 @@ it("SHOULD title the current user row with the You key", () => {
     screen.UNSAFE_getByProps({ testID: "family.card.member-member-2" }).props
       .title,
   ).toBe("family.card.you");
+});
+
+describe("archived family (spec 042)", () => {
+  it("SHOULD show the chip, no invite, AND Reactivate / Delete for the owner", () => {
+    const { vm } = setup({ family: makeArchivedFamilyViewModel(ownerViewer) });
+
+    expect(
+      screen.getByTestId("family.card.archived-chip-family-1"),
+    ).toBeOnTheScreen();
+    expect(
+      screen.queryByTestId("family.card.invite-button-family-1"),
+    ).toBeNull();
+    expect(screen.queryByTestId("family.card.options-family-1")).toBeNull();
+    expect(
+      screen.queryByTestId("family.card.member-member-2-options"),
+    ).toBeNull();
+
+    fireEvent.press(
+      screen.getByTestId("family.card.reactivate-button-family-1"),
+    );
+    fireEvent.press(screen.getByTestId("family.card.delete-button-family-1"));
+
+    expect(vm.onReactivate).toHaveBeenCalledTimes(1);
+    expect(vm.onDeleteInline).toHaveBeenCalledTimes(1);
+  });
+
+  it("SHOULD show no owner actions to a member, keeping the options menu to leave", () => {
+    setup({ family: makeArchivedFamilyViewModel(memberViewer) });
+
+    expect(
+      screen.queryByTestId("family.card.reactivate-button-family-1"),
+    ).toBeNull();
+    expect(
+      screen.getByTestId("family.card.options-family-1"),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD offer Archive in the action sheet", () => {
+    const { vm } = setup({
+      vm: {
+        menu: {
+          actionLabelKey: "family.delete.confirm",
+          kind: "FAMILY",
+          secondaryLabelKey: "family.archive.action",
+          subtitle: "Test Family",
+          titleKey: "family.card.options",
+        },
+      },
+    });
+
+    fireEvent.press(
+      screen.getByTestId("family.card.menu-family-1-archive-action"),
+    );
+
+    expect(vm.onMenuSecondaryAction).toHaveBeenCalledTimes(1);
+  });
+
+  it("SHOULD list every kind of blocker in the dialog", () => {
+    setup({
+      vm: {
+        blockers: {
+          installmentPlans: [
+            { description: "Fridge", id: "plan-1", remainingInstallments: 3 },
+          ],
+          invoices: [
+            {
+              amountDue: 15000,
+              creditCardId: "card-1",
+              creditCardName: "House card",
+              month: "2026-10",
+            },
+          ],
+          pendingInvites: [{ email: "test@example.com", id: "invite-1" }],
+          recurrences: [
+            {
+              description: "Rent",
+              id: "rec-1",
+              nextOccurrenceDate: "2026-11-05",
+            },
+          ],
+          unpaidTransactions: [
+            {
+              date: "2026-10-10",
+              description: "Power",
+              id: "tx-1",
+              value: 23000,
+            },
+          ],
+        },
+      },
+    });
+
+    expect(screen.getByTestId("pending-item-rec-1")).toBeOnTheScreen();
+    expect(screen.getByTestId("pending-item-plan-1")).toBeOnTheScreen();
+    expect(screen.getByTestId("pending-item-card-1-2026-10")).toBeOnTheScreen();
+    expect(screen.getByTestId("pending-item-tx-1")).toBeOnTheScreen();
+    expect(screen.getByTestId("pending-item-invite-1")).toBeOnTheScreen();
+  });
 });

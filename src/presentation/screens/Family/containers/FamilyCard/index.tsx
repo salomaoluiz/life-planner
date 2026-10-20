@@ -1,15 +1,20 @@
 import { Pressable, View } from "react-native";
 
 import {
+  Badge,
   Button,
   Card,
   ConfirmDialog,
   getAvatarTone,
   IconTile,
+  PendingItemsDialog,
   Text,
 } from "@components";
+import { formatAmount } from "@components/AmountText/formatAmount";
 import { IconButton } from "@components/Icon";
-import { useTranslation } from "@presentation/i18n";
+import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
+import { useLocaleTag, useTranslation } from "@presentation/i18n";
+import pluralKey from "@presentation/i18n/pluralKey";
 import * as Components from "@screens/Family/components";
 import FamilyViewModel from "@screens/Family/models/FamilyViewModel";
 import familyTestIds from "@screens/Family/testIds";
@@ -29,6 +34,76 @@ function FamilyCard(props: Props) {
   const { styles } = useStyles();
   const vm = useFamilyCardViewModel({ family });
   const subtitle = family.subtitle;
+  const localeTag = useLocaleTag();
+
+  // What blocks the archive, one section per kind (empty ones are hidden by the dialog).
+  function blockerSections() {
+    const blockers = vm.blockers;
+
+    if (!blockers) {
+      return [];
+    }
+
+    return [
+      {
+        items: blockers.recurrences.map((item) => ({
+          id: item.id,
+          label: t("family.blockers.recurrencesItem", {
+            date: item.nextOccurrenceDate
+              ? formatShortDate(item.nextOccurrenceDate, localeTag)
+              : "-",
+            description: item.description,
+          }),
+        })),
+        title: t("family.blockers.recurrences"),
+      },
+      {
+        items: blockers.installmentPlans.map((item) => ({
+          id: item.id,
+          label: t(
+            pluralKey(
+              "family.blockers.installmentsItem",
+              item.remainingInstallments,
+            ),
+            {
+              count: item.remainingInstallments,
+              description: item.description,
+            },
+          ),
+        })),
+        title: t("family.blockers.installments"),
+      },
+      {
+        items: blockers.invoices.map((item) => ({
+          id: `${item.creditCardId}-${item.month}`,
+          label: t("family.blockers.invoicesItem", {
+            amount: formatAmount(item.amountDue, localeTag, DEFAULT_CURRENCY),
+            month: item.month,
+            name: item.creditCardName,
+          }),
+        })),
+        title: t("family.blockers.invoices"),
+      },
+      {
+        items: blockers.unpaidTransactions.map((item) => ({
+          id: item.id,
+          label: t("family.blockers.unpaidItem", {
+            amount: formatAmount(item.value, localeTag, DEFAULT_CURRENCY),
+            date: formatShortDate(item.date, localeTag),
+            description: item.description,
+          }),
+        })),
+        title: t("family.blockers.unpaid"),
+      },
+      {
+        items: blockers.pendingInvites.map((item) => ({
+          id: item.id,
+          label: item.email,
+        })),
+        title: t("family.blockers.invites"),
+      },
+    ];
+  }
 
   return (
     <Card testID={`${familyTestIds.card}-${family.familyId}`}>
@@ -56,6 +131,13 @@ function FamilyCard(props: Props) {
               value={t(subtitle.key, subtitle.params)}
             />
           </View>
+          {family.isArchived ? (
+            <Badge
+              label={t("family.archived.chip")}
+              testID={`${familyTestIds.archivedChip}-${family.familyId}`}
+              tone="neutral"
+            />
+          ) : null}
           {family.menuAction ? (
             <IconButton
               accessibilityLabel={t("family.card.optionsFor", {
@@ -103,7 +185,7 @@ function FamilyCard(props: Props) {
                 />
               ))}
             </View>
-            {family.isOwner ? (
+            {family.canInvite ? (
               <Button.Secondary
                 fullWidth
                 icon="account-plus-outline"
@@ -114,6 +196,31 @@ function FamilyCard(props: Props) {
             ) : null}
           </>
         ) : null}
+        {family.isArchived ? (
+          <Text.Caption tone="secondary" value={t("family.archived.note")} />
+        ) : null}
+        {family.canReactivate ? (
+          <View style={styles.inlineActions}>
+            <View style={styles.inlineAction}>
+              <Button.Primary
+                disabled={vm.isBusy}
+                fullWidth
+                label={t("family.archived.reactivate")}
+                onPress={vm.onReactivate}
+                testID={`${familyTestIds.reactivateButton}-${family.familyId}`}
+              />
+            </View>
+            <View style={styles.inlineAction}>
+              <Button.Destructive
+                disabled={vm.isBusy}
+                fullWidth
+                label={t("family.delete.confirm")}
+                onPress={vm.onDeleteInline}
+                testID={`${familyTestIds.deleteButton}-${family.familyId}`}
+              />
+            </View>
+          </View>
+        ) : null}
       </View>
 
       <Components.ActionSheet
@@ -121,6 +228,10 @@ function FamilyCard(props: Props) {
         closeLabel={t("common.actions.close")}
         onAction={vm.onMenuAction}
         onClose={vm.onCloseMenu}
+        onSecondaryAction={vm.onMenuSecondaryAction}
+        secondaryLabel={
+          vm.menu?.secondaryLabelKey ? t(vm.menu.secondaryLabelKey) : undefined
+        }
         subtitle={vm.menu?.subtitle ?? ""}
         testID={`${familyTestIds.menu}-${family.familyId}`}
         title={vm.menu ? t(vm.menu.titleKey) : ""}
@@ -163,8 +274,32 @@ function FamilyCard(props: Props) {
         }
         visible={!!vm.notice}
       />
+      {vm.blockers ? (
+        <PendingItemsDialog
+          bodyLabel={t("family.blockers.body")}
+          closeLabel={t("common.actions.close")}
+          okLabel={t("family.blockers.close")}
+          onClose={vm.onCloseBlockers}
+          sections={blockerSections()}
+          testIDs={{
+            dialog: `${familyTestIds.blockers}-${family.familyId}`,
+            ok: `${familyTestIds.blockersOk}-${family.familyId}`,
+          }}
+          title={t("family.blockers.title")}
+        />
+      ) : null}
     </Card>
   );
+}
+
+// "2026-11-05" -> "05/11" (parsed from the string, never through a time zone).
+function formatShortDate(isoDate: string, localeTag: string) {
+  const [year, month, day] = isoDate.split("-").map(Number);
+
+  return new Date(year, month - 1, day).toLocaleDateString(localeTag, {
+    day: "2-digit",
+    month: "2-digit",
+  });
 }
 
 export default FamilyCard;
