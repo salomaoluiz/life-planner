@@ -235,7 +235,8 @@ All paths below are under `src/presentation/screens/Financial/` unless noted. Fi
 
 ```yaml
 layout:
-  Layout: Layout/index.tsx # FinancialLayout: Screen, header, section segments, 720 column; sections render plain Views
+  SectionPicker: SectionPicker/index.tsx (+ hooks/useSectionPickerViewModel.ts, testIds.ts) # BottomSheet (modal route financial/section_picker) with one ListItem per FINANCIAL_SECTIONS entry (spec 044)
+  Layout: Layout/index.tsx # FinancialLayout: Screen, header (overline + section title, pressable below `expanded`), 720 column; sections render plain Views
   files: [Layout/hooks/useFinancialLayoutViewModel.ts, Layout/models/financialSections.ts, Layout/styles.ts]
 
 Transactions:

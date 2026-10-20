@@ -12,7 +12,8 @@ app/
   (app)/(tabs)/_layout.tsx       Tabs with custom tabBar (AppTabBar): index/index, financial, stock/index, family/index; backBehavior "initialRoute"; tabBarPosition "left" + rail on expanded (>= 1024 px)
   (app)/(tabs)/index/index.tsx   Home
   (app)/(tabs)/stock/index.tsx, family/index.tsx
-  (app)/(tabs)/financial/_layout.tsx   FinancialLayout: ScreenHeader + SegmentedControl + nested Stack (index, categories, tags, accounts, cards); switching uses router.replace
+  (app)/(tabs)/financial/_layout.tsx   FinancialLayout: ScreenHeader (overline "Finances" + section title; below `expanded` the title opens the section picker) + nested Stack (index, categories, tags, accounts, cards); sections come from `FINANCIAL_SECTIONS` and switching uses router.replace (spec 044)
+  (app)/(modals)/financial/section_picker.tsx   FinancialSectionPicker: BottomSheet listing the sections; opened by the title or by re-pressing the active Finances tab on the bottom bar. On `expanded` the side menu (NavigationRail children) lists the sections instead
   (app)/(tabs)/financial/{index,categories,tags,accounts,cards}.tsx
   (app)/(modals)/financial/tag/add_new_tag.tsx   NewTagModal (spec 043)
   (app)/(modals)/_layout.tsx     Stack, presentation "transparentModal", headerShown false
