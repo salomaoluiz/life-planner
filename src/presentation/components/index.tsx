@@ -50,6 +50,7 @@ export { default as Menu, MenuProps } from "./Menu";
 export { default as MetricBlock, MetricBlockProps } from "./MetricBlock";
 export {
   default as NavigationRail,
+  NavigationRailChild,
   NavigationRailProps,
 } from "./NavigationRail";
 export {

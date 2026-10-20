@@ -30,6 +30,19 @@ const items = [
   },
 ];
 
+const financeChildren = [
+  {
+    label: "Transactions",
+    path: "/financial",
+    testID: "navigation-rail-financial-transactions",
+  },
+  {
+    label: "Categories",
+    path: "/financial/categories",
+    testID: "navigation-rail-financial-categories",
+  },
+];
+
 const defaultProps: NavigationRailProps = {
   activeRouteName: "index/index",
   addLabel: "Add",
@@ -50,6 +63,6 @@ function setup(props?: Partial<NavigationRailProps>) {
   render(<NavigationRail {...defaultProps} {...props} />);
 }
 
-const mocks = { defaultProps, items };
+const mocks = { defaultProps, financeChildren, items };
 
 export { mocks, setup };
