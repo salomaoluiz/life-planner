@@ -1,4 +1,5 @@
 import {
+  FINANCIAL_SECTIONS,
   getFinancialSection,
   getFinancialSectionPath,
 } from "./financialSections";
@@ -25,4 +26,25 @@ it("SHOULD give each section its route path", () => {
   expect(getFinancialSectionPath("tags")).toBe("/financial/tags");
   expect(getFinancialSectionPath("accounts")).toBe("/financial/accounts");
   expect(getFinancialSectionPath("cards")).toBe("/financial/cards");
+});
+
+it("SHOULD list the sections in menu order with icons AND rail testIDs", () => {
+  expect(FINANCIAL_SECTIONS.map((item) => item.section)).toEqual([
+    "transactions",
+    "categories",
+    "tags",
+    "accounts",
+    "cards",
+  ]);
+  expect(FINANCIAL_SECTIONS.map((item) => item.icon)).toEqual([
+    "swap-vertical",
+    "shape-outline",
+    "tag-outline",
+    "bank-outline",
+    "credit-card-outline",
+  ]);
+  FINANCIAL_SECTIONS.forEach((item) => {
+    expect(item.testID).toBe(`navigation-rail-financial-${item.section}`);
+    expect(getFinancialSectionPath(item.section)).toBe(item.path);
+  });
 });
