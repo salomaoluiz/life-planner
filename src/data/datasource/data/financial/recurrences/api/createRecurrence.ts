@@ -30,6 +30,7 @@ async function createRecurrence(params: Params): Response {
     owner: params.owner,
     ownerId: params.ownerId,
     paid: params.paid,
+    tags: params.tags,
     type: params.type,
     value: decimalStringToCents(params.value),
   };

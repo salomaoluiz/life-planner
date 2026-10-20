@@ -8,6 +8,11 @@ const common = {
     seeAll: "Ver tudo",
     tryAgain: "Tentar novamente",
   },
+  autocompleteField: {
+    remove: "Remover {{label}}",
+    results_one: "1 sugestão",
+    results_other: "{{count}} sugestões",
+  },
   date: {
     today: "Hoje",
     yesterday: "Ontem",

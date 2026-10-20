@@ -2,6 +2,7 @@ import { View } from "react-native";
 
 import {
   AmountInput,
+  AutocompleteField,
   BottomSheet,
   Button,
   ChipGroup,
@@ -21,6 +22,7 @@ import {
 import { formatAmount } from "@components/AmountText/formatAmount";
 import Skeleton from "@components/Skeleton";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
+import pluralKey from "@presentation/i18n/pluralKey";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { useBreakpoint } from "@presentation/theme";
 import { formatDayMonth } from "@screens/Financial/Cards/models/cardList";
@@ -32,6 +34,7 @@ import CategoryPickerSheet from "./components/CategoryPickerSheet";
 import MissingRecordHint from "./components/MissingRecordHint";
 import RecurrenceDeleteSheet from "./components/RecurrenceDeleteSheet";
 import { useNewTransactionViewModel } from "./hooks";
+import { MAX_TAG_NAME, MAX_TAGS } from "./models/transactionFormState";
 import useStyles from "./styles";
 import transactionFormTestIds from "./testIds";
 
@@ -239,6 +242,31 @@ function NewTransactionModal() {
                   selected={vm.selectedCategoryId}
                 />
               )}
+              <AutocompleteField
+                allowCreate
+                createLabel={(name) =>
+                  t("financial.transactions.form.tagsCreate", { name })
+                }
+                label={t("financial.transactions.form.tags")}
+                maxLabel={t("financial.transactions.form.tagsMax")}
+                maxLength={MAX_TAG_NAME}
+                maxValues={MAX_TAGS}
+                mode={"chips"}
+                onChange={vm.onTagsChange}
+                placeholder={t("financial.transactions.form.tagsPlaceholder")}
+                removeLabel={(label) =>
+                  t("common.autocompleteField.remove", { label })
+                }
+                resultsLabel={(count) =>
+                  t(pluralKey("common.autocompleteField.results", count), {
+                    count,
+                  })
+                }
+                suggestions={vm.tagSuggestions}
+                testID={transactionFormTestIds.tags}
+                tooLongLabel={t("financial.transactions.form.tagsTooLong")}
+                values={vm.tags}
+              />
             </>
           }
           right={

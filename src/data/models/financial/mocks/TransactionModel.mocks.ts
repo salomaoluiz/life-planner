@@ -32,6 +32,7 @@ const jsonMock = {
   paid: true,
   recurrenceFrequency: null,
   recurrenceId: null,
+  tags: [],
   type: "EXPENSE",
   value: 10000,
 };

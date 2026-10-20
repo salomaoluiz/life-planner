@@ -18,6 +18,7 @@ export interface CreateRecurrenceDatasourceParams {
   owner: OwnerType;
   ownerId: string;
   paid?: boolean;
+  tags?: string[];
   type: TransactionType;
   value: string;
 }
@@ -54,6 +55,7 @@ export interface MaterializeOccurrenceDatasourceParams {
   occurrenceNumber: number;
   paid?: boolean;
   recurrenceId: string;
+  tags?: string[];
   value?: string;
 }
 
@@ -98,6 +100,7 @@ export interface SplitRecurrenceDatasourceParams {
   frequency?: RecurrenceFrequency;
   occurrenceNumber: number;
   recurrenceId: string;
+  tags?: string[];
   value?: string;
 }
 
@@ -106,5 +109,6 @@ export interface UpdateRecurrenceDatasourceParams {
   description?: string;
   endDate?: null | string;
   id: string;
+  tags?: string[];
   value?: string;
 }

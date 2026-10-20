@@ -3,6 +3,7 @@ import {
   DEFAULT_CURRENCY,
 } from "@domain/entities/financial/Currency";
 import { RecurrenceFrequency } from "@domain/entities/financial/RecurrenceEntity";
+import { TagRefEntity } from "@domain/entities/financial/TagEntity";
 import TransactionEntity, {
   EarlyPaymentRefEntity,
 } from "@domain/entities/financial/TransactionEntity";
@@ -34,6 +35,7 @@ export interface ITransactionDTO {
   recurrenceFrequency?: RecurrenceFrequency;
   recurrenceId?: string;
   systemKey?: string;
+  tags?: TagRefEntity[];
   type: string;
   value: string;
 }
@@ -64,6 +66,7 @@ class TransactionDTO {
   recurrenceFrequency?: RecurrenceFrequency;
   recurrenceId?: string;
   systemKey?: string;
+  tags: TagRefEntity[];
   type: string;
   value: string;
 
@@ -93,6 +96,7 @@ class TransactionDTO {
     this.paid = params.paid ?? true;
     this.excludeFromTotals = params.excludeFromTotals ?? false;
     this.systemKey = params.systemKey;
+    this.tags = params.tags ?? [];
     this.type = params.type;
     this.value = params.value;
   }
@@ -127,6 +131,7 @@ class TransactionDTO {
       recurrenceFrequency: entity.recurrenceFrequency,
       recurrenceId: entity.recurrenceId,
       systemKey: entity.systemKey,
+      tags: entity.tags,
       type: entity.type,
       value: entity.value,
     });

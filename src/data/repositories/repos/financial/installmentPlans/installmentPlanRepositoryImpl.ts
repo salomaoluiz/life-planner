@@ -61,6 +61,7 @@ function installmentPlanRepositoryImpl(
 function invalidateFinancialCaches() {
   cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA);
   cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_ACCOUNT_DATA);
+  cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_TAG_DATA);
 }
 
 function toInstallmentPlanEntity(

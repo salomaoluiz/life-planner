@@ -24,6 +24,8 @@ interface CreateTransactionRepositoryParams {
   ownerId: string;
   // Account rows only; omitted → the API decides from the date (spec 033).
   paid?: boolean;
+  // Spec 043: tag names, resolved (or created) by the API in the owner.
+  tags?: string[];
   type: TransactionType;
   value: string;
 }
@@ -46,6 +48,8 @@ interface UpdateTransactionRepositoryParams {
   ownerId?: string;
   paid?: boolean;
   scope?: InstallmentScope;
+  // `[]` removes every tag; omitted leaves them.
+  tags?: string[];
   type?: TransactionType;
   value?: string;
 }

@@ -25,6 +25,7 @@ async function updateTransaction(params: Params): Response {
     ownerId: params.ownerId,
     paid: params.paid,
     scope: params.scope,
+    tags: params.tags,
     type: params.type,
     value:
       params.value === undefined

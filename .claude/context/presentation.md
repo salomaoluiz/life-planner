@@ -217,3 +217,7 @@ Screens compose kit components (`components.md`) and never style visual details 
 
 - Never import `@tanstack/react-query` or `react-i18next` directly (lint-enforced).
 - Components are `function X() {}` declarations (`func-style: declaration`) with a default export.
+
+## Modal layout rule (owner, 2026-10-20)
+
+Every new modal is flexible: on `medium`/`expanded` the larger two-column `BottomSheet size="form"` with `FormColumns` (Delete in `footerStart`), on `compact` the bottom sheet. Only confirmations and pickers stay `dialog` size. `NewTagModal` (spec 043) follows it.

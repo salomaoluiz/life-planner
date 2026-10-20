@@ -29,6 +29,7 @@ interface CreateInstallmentPlanRepositoryParams {
   installments: number;
   owner: OwnerType;
   ownerId: string;
+  tags?: string[];
   // The TOTAL, decimal string.
   value: string;
 }
@@ -55,6 +56,7 @@ interface UpdateInstallmentPlanRepositoryParams {
   description?: string;
   id: string;
   installments?: number;
+  tags?: string[];
   value?: string;
 }
 

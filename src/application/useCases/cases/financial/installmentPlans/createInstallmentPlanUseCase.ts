@@ -15,6 +15,7 @@ export interface CreateInstallmentPlanUseCaseParams {
   installments: number;
   owner: string;
   ownerId: string;
+  tags?: string[];
   // The TOTAL, decimal string.
   value: string;
 }
@@ -52,6 +53,7 @@ function createInstallmentPlanUseCase(
               installments: params.installments,
               owner,
               ownerId: params.ownerId,
+              tags: params.tags,
               value: params.value,
             },
           );

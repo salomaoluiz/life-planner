@@ -15,6 +15,7 @@ export interface UpdateInstallmentPlanUseCaseParams {
   description?: string;
   id: string;
   installments?: number;
+  tags?: string[];
   // The new TOTAL, decimal string.
   value?: string;
 }
@@ -46,6 +47,7 @@ function updateInstallmentPlanUseCase(
               description: params.description,
               id: params.id,
               installments: params.installments,
+              tags: params.tags,
               value: params.value,
             },
           );

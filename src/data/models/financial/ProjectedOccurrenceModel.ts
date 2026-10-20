@@ -6,6 +6,7 @@ import {
 
 import { calendarDateToIso } from "./calendarDate";
 import { centsToDecimalString } from "./money";
+import { TagRefModel, tagRefsFromJSON } from "./TagModel";
 import {
   OwnerType,
   RecurrenceFrequency,
@@ -32,6 +33,7 @@ interface IProjectedOccurrenceModel {
   owner: OwnerType;
   ownerId: string;
   recurrenceId: string;
+  tags?: TagRefModel[];
   type: TransactionType;
   value: string;
 }
@@ -57,6 +59,7 @@ class ProjectedOccurrenceModel implements IProjectedOccurrenceModel {
   owner: OwnerType;
   ownerId: string;
   recurrenceId: string;
+  tags: TagRefModel[];
   type: TransactionType;
   value: string;
 
@@ -80,6 +83,7 @@ class ProjectedOccurrenceModel implements IProjectedOccurrenceModel {
     this.owner = params.owner;
     this.ownerId = params.ownerId;
     this.recurrenceId = params.recurrenceId;
+    this.tags = params.tags ?? [];
     this.type = params.type;
     this.value = params.value;
   }
@@ -117,6 +121,7 @@ class ProjectedOccurrenceModel implements IProjectedOccurrenceModel {
       owner: data.owner as OwnerType,
       ownerId: data.ownerId as string,
       recurrenceId: data.recurrenceId as string,
+      tags: tagRefsFromJSON(data.tags),
       type: data.type as TransactionType,
       value: centsToDecimalString(Number(data.value)),
     });

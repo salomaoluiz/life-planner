@@ -45,7 +45,11 @@ onFlowComplete:
 - inputText: ${output.SERIES_NAME}
 - tapOn:
     id: "financial.transaction-form.category-${output.EXPENSE_CATEGORY_ID}"
-- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+# Spec 043: the Tags field made the form taller, so the account is picked first (while in view) and Repeat needs no scroll
+- tapOn:
+    id: "financial.transaction-form.account-select"
+- tapOn:
+    id: "financial.transaction-form.account-select-option-${output.ACCOUNT_ID}"
 # Repeat weekly with no end date: the preview says it repeats forever
 - tapOn:
     id: "financial.transaction-form.repeat"
@@ -53,11 +57,6 @@ onFlowComplete:
     id: "financial.transaction-form.repeat-frequency-WEEKLY"
 - assertVisible:
     id: "financial.transaction-form.repeat-preview"
-- runFlow: ../../../subflows/financial/scroll-form-down.yaml
-- tapOn:
-    id: "financial.transaction-form.account-select"
-- tapOn:
-    id: "financial.transaction-form.account-select-option-${output.ACCOUNT_ID}"
 - tapOn:
     id: "financial.transaction-form.save-button"
 # The rows show the repeat icon and no counter: the title is exactly the description

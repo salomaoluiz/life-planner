@@ -28,6 +28,7 @@ interface CreateInstallmentPlanDatasourceParams {
   installments: number;
   owner: OwnerType;
   ownerId: string;
+  tags?: string[];
   value: string;
 }
 
@@ -53,6 +54,8 @@ interface UpdateInstallmentPlanDatasourceParams {
   description?: string;
   id: string;
   installments?: number;
+  // `[]` removes every tag; omitted keeps them (also across a recalculation).
+  tags?: string[];
   value?: string;
 }
 

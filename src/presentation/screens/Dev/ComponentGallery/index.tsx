@@ -5,6 +5,7 @@ import { View } from "react-native";
 import {
   AmountInput,
   AmountText,
+  AutocompleteField,
   Avatar,
   Badge,
   BottomSheet,
@@ -66,6 +67,8 @@ const SEGMENTS = [
 function ComponentGallery() {
   const { isDark, setThemeMode, theme } = useTheme();
   const [text, setText] = useState("");
+  const [tags, setTags] = useState<string[]>(["gasto-fixo"]);
+  const [described, setDescribed] = useState("");
   const [search, setSearch] = useState("");
   const [select, setSelect] = useState<string | undefined>(undefined);
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -247,6 +250,30 @@ function ComponentGallery() {
           onChange={setSegment}
           options={SEGMENTS}
           value={segment}
+        />
+        <AutocompleteField
+          allowCreate
+          createLabel={(query) => `Create "${query}"`}
+          label="Tags (chips)"
+          maxValues={10}
+          mode="chips"
+          onChange={setTags}
+          placeholder="Add tag"
+          removeLabel={(label) => `Remove ${label}`}
+          suggestions={[
+            { id: "1", label: "gasto-fixo", meta: "24" },
+            { id: "2", label: "viagem", meta: "3" },
+          ]}
+          testID="gallery-autocomplete-chips"
+          values={tags}
+        />
+        <AutocompleteField
+          label="Description (text)"
+          mode="text"
+          onChangeText={setDescribed}
+          suggestions={[{ id: "1", label: "Monthly groceries" }]}
+          testID="gallery-autocomplete-text"
+          value={described}
         />
       </Section>
 

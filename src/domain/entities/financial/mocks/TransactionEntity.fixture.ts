@@ -69,6 +69,7 @@ class TransactionEntityFixture {
       owner: OwnerType.FAMILY,
       ownerId: "b11923e6-bfbb-4965-b3f6-a075249d1e63",
       paid: true,
+      tags: [],
       type: TransactionType.EXPENSE,
       value: "100.00",
     };

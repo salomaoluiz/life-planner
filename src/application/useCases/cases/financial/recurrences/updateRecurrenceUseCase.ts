@@ -9,6 +9,7 @@ export interface UpdateRecurrenceUseCaseParams {
   // `null` removes the end date; omitted keeps it.
   endDate?: null | string;
   id: string;
+  tags?: string[];
   value?: string;
 }
 

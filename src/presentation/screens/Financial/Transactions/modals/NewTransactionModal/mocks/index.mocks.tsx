@@ -93,6 +93,7 @@ const defaultViewModel: ReturnType<typeof useNewTransactionViewModel> = {
   onSaveAndNew: jest.fn(),
   onSavedHide: jest.fn(),
   onScopeChange: jest.fn(),
+  onTagsChange: jest.fn(),
   onTypeChange: jest.fn(),
   overLimitCents: 0,
   ownerChoices: [{ label: "Personal", labelKey: undefined, value: "user-id" }],
@@ -137,6 +138,8 @@ const defaultViewModel: ReturnType<typeof useNewTransactionViewModel> = {
   selectedCardId: undefined,
   selectedCategoryId: undefined,
   showPaid: true,
+  tags: [],
+  tagSuggestions: [],
   titleKey: "financial.transactions.form.newTitle",
   type: TransactionType.EXPENSE,
   typeOptions: [

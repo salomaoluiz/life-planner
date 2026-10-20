@@ -8,6 +8,8 @@ it.each([
   ["/financial/", "transactions"],
   ["/financial/categories", "categories"],
   ["/financial/categories/", "categories"],
+  ["/financial/tags", "tags"],
+  ["/financial/tags/", "tags"],
   ["/financial/accounts", "accounts"],
   ["/financial/cards", "cards"],
   ["/financial/cards/", "cards"],
@@ -20,6 +22,7 @@ it.each([
 it("SHOULD give each section its route path", () => {
   expect(getFinancialSectionPath("transactions")).toBe("/financial");
   expect(getFinancialSectionPath("categories")).toBe("/financial/categories");
+  expect(getFinancialSectionPath("tags")).toBe("/financial/tags");
   expect(getFinancialSectionPath("accounts")).toBe("/financial/accounts");
   expect(getFinancialSectionPath("cards")).toBe("/financial/cards");
 });

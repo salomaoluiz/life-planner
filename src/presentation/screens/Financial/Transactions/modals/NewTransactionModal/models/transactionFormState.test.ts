@@ -89,6 +89,7 @@ function state(
     repeatEnd: undefined,
     repeatFrequency: "MONTHLY",
     repeatOn: false,
+    tags: [],
     type: TransactionType.EXPENSE,
     ...overrides,
   };
@@ -118,6 +119,7 @@ it("SHOULD create an expense form for today with the default account", () => {
     payWith: "ACCOUNT",
     repeatFrequency: "MONTHLY",
     repeatOn: false,
+    tags: [],
     type: TransactionType.EXPENSE,
   });
 });
@@ -152,6 +154,7 @@ it("SHOULD build the state of an existing transaction from its DTO", () => {
     payWith: "ACCOUNT",
     repeatFrequency: "MONTHLY",
     repeatOn: false,
+    tags: [],
     type: TransactionType.INCOME,
   });
 });
@@ -271,6 +274,7 @@ it("SHOULD build create params with the decimal string value and trimmed descrip
     owner: "USER",
     ownerId: "user-id",
     paid: true,
+    tags: [],
     type: "EXPENSE",
     value: "312.90",
   });
@@ -523,6 +527,7 @@ describe("installments (spec 030)", () => {
       installments: 10,
       owner: user.type,
       ownerId: "user-id",
+      tags: [],
       value: "5120.00",
     });
   });
@@ -538,6 +543,7 @@ describe("installments (spec 030)", () => {
       installmentCount: 10,
       owner: "USER",
       ownerId: "user-id",
+      tags: [],
       type: "EXPENSE",
       value: "10.00",
     });
@@ -709,6 +715,7 @@ describe("repeat (spec 034)", () => {
       owner: user.type,
       ownerId: "user-id",
       paid: true,
+      tags: [],
       type: TransactionType.EXPENSE,
       value: "312.90",
     });
@@ -895,5 +902,53 @@ describe("resetForNext", () => {
     expect(
       resetForNext(state({ date: future, paid: true, paidTouched: true })),
     ).toMatchObject({ paid: false, paidTouched: false });
+  });
+});
+
+describe("tags (spec 043)", () => {
+  it("SHOULD keep the tags WHEN resetting for the next transaction", () => {
+    const next = resetForNext(state({ tags: ["fixo", "viagem"] }));
+
+    expect(next.tags).toEqual(["fixo", "viagem"]);
+    expect(next.amountCents).toBe(0);
+  });
+
+  it("SHOULD count the tags (and their order) as a change", () => {
+    expect(isSameState(state({ tags: ["a"] }), state({ tags: ["a"] }))).toBe(
+      true,
+    );
+    expect(isSameState(state({ tags: ["a"] }), state({ tags: ["b"] }))).toBe(
+      false,
+    );
+    expect(
+      isSameState(state({ tags: ["a", "b"] }), state({ tags: ["b", "a"] })),
+    ).toBe(false);
+    expect(isSameState(state({ tags: ["a"] }), state())).toBe(false);
+  });
+
+  it("SHOULD send the tag names on every create and update request", () => {
+    const tagged = state({ tags: ["fixo"] });
+
+    expect(toCreateParams(tagged, user, "Food").tags).toEqual(["fixo"]);
+    expect(toUpdateParams("tx-1", tagged, user, "Food").tags).toEqual(["fixo"]);
+    expect(toCreateInstallmentParams(tagged, user).tags).toEqual(["fixo"]);
+    expect(toCreateRecurrenceParams(tagged, user).tags).toEqual(["fixo"]);
+  });
+
+  it("SHOULD load the names of the tags of an existing transaction", () => {
+    const dto = new TransactionDTO({
+      category: "Food",
+      categoryId: "food",
+      date: new Date(2026, 8, 30).toISOString(),
+      description: "Shop",
+      id: "tx-1",
+      owner: "USER",
+      ownerId: "user-id",
+      tags: [{ id: "t1", name: "viagem" }],
+      type: "EXPENSE",
+      value: "1.00",
+    });
+
+    expect(stateFromDto(dto).tags).toEqual(["viagem"]);
   });
 });

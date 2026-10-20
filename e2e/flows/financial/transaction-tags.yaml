@@ -1,0 +1,123 @@
+url: ${E2E_WEB_URL}
+name: financial/transaction-tags
+tags:
+  - financial
+  - spec-043
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E All Tag
+      KEY: ALL_TAG_NAME
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E New Tag
+      KEY: NEW_TAG_NAME
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E First
+      KEY: FIRST_NAME
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Second
+      KEY: SECOND_NAME
+# One All tag exists already
+- runFlow:
+    file: ../../subflows/setup/create-tag.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER: ALL
+      NAME: ${output.ALL_TAG_NAME}
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/financial/open-transactions.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.empty-month"
+    timeout: 20000
+- runFlow: ../../subflows/financial/scroll-list-down.yaml
+- tapOn:
+    id: "financial.transactions.empty-month-action"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.amount-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.transaction-form.amount-input"
+- eraseText
+- inputText: "1000"
+- tapOn:
+    id: "financial.transaction-form.description-input"
+- inputText: ${output.FIRST_NAME}
+- tapOn:
+    id: "financial.transaction-form.category-${output.EXPENSE_CATEGORY_ID}"
+# Pick the All tag from the suggestions, create a new one by typing
+- runFlow: ../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.transaction-form.tags-input"
+- tapOn:
+    id: "financial.transaction-form.tags-suggestion-${output.ALL_TAG_NAME}"
+- assertVisible:
+    id: "financial.transaction-form.tags-chip-${output.ALL_TAG_NAME}"
+- tapOn:
+    id: "financial.transaction-form.tags-input"
+- inputText: ${output.NEW_TAG_NAME}
+- tapOn:
+    id: "financial.transaction-form.tags-create"
+- assertVisible:
+    id: "financial.transaction-form.tags-chip-${output.NEW_TAG_NAME}"
+# Save and add another: the tags stay AND amount/description are cleared
+- tapOn:
+    id: "financial.transaction-form.save-and-new-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.saved-toast"
+    timeout: 20000
+- assertVisible:
+    id: "financial.transaction-form.tags-chip-${output.ALL_TAG_NAME}"
+- assertVisible:
+    id: "financial.transaction-form.tags-chip-${output.NEW_TAG_NAME}"
+- runFlow: ../../subflows/financial/scroll-form-up.yaml
+- tapOn:
+    id: "financial.transaction-form.amount-input"
+- eraseText
+- inputText: "2000"
+- tapOn:
+    id: "financial.transaction-form.description-input"
+- inputText: ${output.SECOND_NAME}
+- tapOn:
+    id: "financial.transaction-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.SECOND_NAME}
+    timeout: 20000
+# Reopen the second one: its tags are loaded
+- tapOn:
+    id: "financial.transactions.row-title"
+    text: ${output.SECOND_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.description-input"
+    timeout: 20000
+- runFlow: ../../subflows/financial/scroll-form-down.yaml
+- assertVisible:
+    id: "financial.transaction-form.tags-chip-${output.ALL_TAG_NAME}"
+- assertVisible:
+    id: "financial.transaction-form.tags-chip-${output.NEW_TAG_NAME}"

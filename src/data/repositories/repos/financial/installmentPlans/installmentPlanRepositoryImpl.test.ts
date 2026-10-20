@@ -62,7 +62,7 @@ it("SHOULD update and delete a plan AND invalidate the caches", async () => {
   await repository.deleteInstallmentPlan("plan-1");
 
   expect(datasource.deleteInstallmentPlan).toHaveBeenCalledWith("plan-1");
-  expect(cache.invalidate).toHaveBeenCalledTimes(4);
+  expect(cache.invalidate).toHaveBeenCalledTimes(6);
 });
 
 it("SHOULD preview a prepayment WITHOUT touching the caches", async () => {
@@ -112,5 +112,5 @@ it("SHOULD prepay AND undo, invalidating the transaction and account caches", as
     targetInvoiceMonth: "2026-10",
   });
   expect(datasource.undoPrepayment).toHaveBeenCalledWith("plan-1");
-  expect(cache.invalidate).toHaveBeenCalledTimes(4);
+  expect(cache.invalidate).toHaveBeenCalledTimes(6);
 });

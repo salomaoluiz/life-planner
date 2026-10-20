@@ -11,6 +11,7 @@ import {
   FinancialCreditCardRepository,
   FinancialInstallmentPlanRepository,
   FinancialRecurrenceRepository,
+  FinancialTagRepository,
   FinancialTransactionRepository,
 } from "./financial";
 import { StockRepository } from "./stock";
@@ -28,6 +29,7 @@ interface Repositories {
     creditCard: FinancialCreditCardRepository;
     installmentPlan: FinancialInstallmentPlanRepository;
     recurrence: FinancialRecurrenceRepository;
+    tag: FinancialTagRepository;
     transaction: FinancialTransactionRepository;
   };
   loginRepository: LoginRepository;

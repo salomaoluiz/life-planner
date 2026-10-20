@@ -19,6 +19,7 @@ import {
   RecurrenceFrequencyBlocked,
   RecurrencePaidAfterEnd,
   RefundOverPurchase,
+  TagNameInUse,
 } from "@domain/entities/errors";
 import { TranslationKeys } from "@presentation/i18n/types";
 
@@ -45,6 +46,10 @@ function getFinancialErrorMessageKey(
 
   if (error instanceof CategoryArchived) {
     return "financial.errors.categoryArchived";
+  }
+
+  if (error instanceof TagNameInUse) {
+    return "financial.tagForm.nameInUse";
   }
 
   if (error instanceof CategoryParentArchived) {

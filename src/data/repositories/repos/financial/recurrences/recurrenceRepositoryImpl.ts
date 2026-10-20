@@ -17,6 +17,7 @@ import cache, { CacheStringKeys } from "@infrastructure/cache";
 function invalidateFinancialCaches() {
   cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA);
   cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_ACCOUNT_DATA);
+  cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_TAG_DATA);
 }
 
 function recurrenceRepositoryImpl(
@@ -102,6 +103,7 @@ function toProjectedEntity(
     owner: OwnerType[model.owner],
     ownerId: model.ownerId,
     recurrenceId: model.recurrenceId,
+    tags: model.tags,
     type: TransactionType[model.type],
     value: model.value,
   });
@@ -163,6 +165,7 @@ function toTransactionEntity(model: TransactionModel): TransactionEntity {
     recurrenceFrequency: model.recurrenceFrequency,
     recurrenceId: model.recurrenceId,
     systemKey: model.systemKey,
+    tags: model.tags,
     type: TransactionType[model.type],
     value: model.value,
   });

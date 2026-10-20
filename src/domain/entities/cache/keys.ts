@@ -4,6 +4,7 @@ export enum CacheStringKeys {
   CACHE_FAMILY_MEMBERS_DATA = "@cache_family_members_data",
   CACHE_FINANCIAL_ACCOUNT_DATA = "@cache_financial_account_data_v2",
   CACHE_FINANCIAL_CATEGORY_DATA = "@cache_financial_category_data_v2",
+  CACHE_FINANCIAL_TAG_DATA = "@cache_financial_tag_data",
   CACHE_FINANCIAL_TRANSACTION_DATA = "@cache_financial_transaction_data_v2",
   CACHE_STOCK_DATA = "@cache_stock_data_v2",
   CACHE_USER_BY_ID_DATA = "@cache_user_by_id_data",
