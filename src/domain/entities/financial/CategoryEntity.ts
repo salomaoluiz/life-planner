@@ -4,6 +4,11 @@ export enum CategoryType {
   EXPENSE = "EXPENSE",
   INCOME = "INCOME",
 }
+// What a category is created for: one owner or every scope.
+export type CategoryOwner = "ALL" | OwnerType;
+
+// Spec 038: "ALL" belongs to the Personal scope and every family of its creator.
+export type CategoryScope = "ALL" | "FAMILY" | "PERSONAL";
 
 interface ICategoryEntity {
   depthLevel?: number;
@@ -14,6 +19,8 @@ interface ICategoryEntity {
   owner: OwnerType;
   ownerId: string;
   parentId?: string;
+  scope?: CategoryScope;
+  scopeOwnerIds?: string[];
   type: CategoryType;
 }
 
@@ -26,6 +33,9 @@ class CategoryEntity {
   owner: OwnerType;
   ownerId: string;
   parentId?: string;
+  scope: CategoryScope;
+  // Owner ids (Personal user id, family ids) the category belongs to; one entry unless the scope is ALL.
+  scopeOwnerIds: string[];
   type: CategoryType;
 
   constructor(params: ICategoryEntity) {
@@ -37,6 +47,10 @@ class CategoryEntity {
     this.iconColor = params.iconColor ?? "black";
     this.parentId = params.parentId;
     this.depthLevel = params.depthLevel;
+    this.scope =
+      params.scope ??
+      (params.owner === OwnerType.FAMILY ? "FAMILY" : "PERSONAL");
+    this.scopeOwnerIds = params.scopeOwnerIds ?? [params.ownerId];
     this.type = params.type;
   }
 }

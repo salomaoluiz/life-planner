@@ -99,3 +99,11 @@ describe("type fallback and error handling", () => {
     ).rejects.toBe(error);
   });
 });
+
+it("SHOULD pass owner ALL through without an ownerId", async () => {
+  await setup({ owner: "ALL", ownerId: undefined });
+
+  expect(spies.financialRepositoryCategory.createCategory).toHaveBeenCalledWith(
+    expect.objectContaining({ owner: "ALL", ownerId: undefined }),
+  );
+});

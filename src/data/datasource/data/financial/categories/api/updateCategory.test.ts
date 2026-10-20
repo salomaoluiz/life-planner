@@ -79,3 +79,12 @@ it("SHOULD wrap unknown errors in GenericError with the category id only", async
     id: mocks.id,
   });
 });
+
+it("SHOULD send scope ALL to turn the category into an All category", async () => {
+  spies.patch.mockResolvedValueOnce({});
+
+  await setup({ ...mocks.onlyId, scope: "ALL" });
+
+  const [, body] = spies.patch.mock.calls[0];
+  expect(JSON.parse(JSON.stringify(body))).toEqual({ scope: "ALL" });
+});

@@ -9,8 +9,9 @@ export interface CreateCategoryUseCaseParams {
   icon: string;
   iconColor?: string;
   name: string;
+  // "ALL" creates one category for the Personal scope and every family (no ownerId).
   owner: string;
-  ownerId: string;
+  ownerId?: string;
   parentId?: string;
   type: string;
 }
@@ -20,7 +21,10 @@ function createCategoryUseCase(
 ): IUseCaseFactoryWithParamResponse<CreateCategoryUseCaseParams, void> {
   return {
     execute: async (params: CreateCategoryUseCaseParams) => {
-      const owner = OwnerType[params.owner as keyof typeof OwnerType];
+      const owner =
+        params.owner === "ALL"
+          ? "ALL"
+          : OwnerType[params.owner as keyof typeof OwnerType];
 
       if (!owner) {
         throw new FieldInvalid({ owner });

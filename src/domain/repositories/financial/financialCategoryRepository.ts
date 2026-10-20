@@ -1,4 +1,5 @@
 import CategoryEntity, {
+  CategoryOwner,
   CategoryType,
 } from "@domain/entities/financial/CategoryEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
@@ -17,8 +18,8 @@ interface CreateCategoryRepositoryParams {
   icon: string;
   iconColor?: string;
   name: string;
-  owner: OwnerType;
-  ownerId: string;
+  owner: CategoryOwner;
+  ownerId?: string;
   parentId?: string;
   type: CategoryType;
 }
@@ -37,6 +38,7 @@ interface UpdateCategoryRepositoryParams {
   owner?: OwnerType;
   ownerId?: string;
   parentId?: null | string;
+  scope?: "ALL";
   type?: CategoryType;
 }
 

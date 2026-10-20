@@ -89,3 +89,43 @@ it("SHOULD round-trip toJSON and fromJSON (repository cache)", () => {
 
   expect(CategoryModel.fromJSON(model.toJSON())).toStrictEqual(model);
 });
+
+it("SHOULD read scope ALL with the scopes the API lets the caller see", () => {
+  const model = CategoryModel.fromJSON({
+    ...mocks.json,
+    owner: "USER",
+    scope: "ALL",
+    scopes: [
+      { owner: "USER", ownerId: "user-1" },
+      { owner: "FAMILY", ownerId: "family-1" },
+    ],
+  });
+
+  expect(model.scope).toBe("ALL");
+  expect(model.scopes).toEqual([
+    { owner: "USER", ownerId: "user-1" },
+    { owner: "FAMILY", ownerId: "family-1" },
+  ]);
+  expect(CategoryModel.fromJSON(model.toJSON())).toStrictEqual(model);
+});
+
+it("SHOULD derive the scope from the owner WHEN the API sends none (old API)", () => {
+  const family = CategoryModel.fromJSON({
+    icon: "x",
+    id: "c1",
+    name: "n",
+    owner: "FAMILY",
+    ownerId: "f1",
+  });
+  const personal = CategoryModel.fromJSON({
+    icon: "x",
+    id: "c2",
+    name: "n",
+    owner: "USER",
+    ownerId: "u1",
+  });
+
+  expect(family.scope).toBe("FAMILY");
+  expect(family.scopes).toEqual([{ owner: "FAMILY", ownerId: "f1" }]);
+  expect(personal.scope).toBe("PERSONAL");
+});

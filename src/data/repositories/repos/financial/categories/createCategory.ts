@@ -35,6 +35,8 @@ async function createCategory(params: Params, datasources: Datasources) {
     owner: OwnerType[category.owner],
     ownerId: category.ownerId,
     parentId: category.parentId,
+    scope: category.scope,
+    scopeOwnerIds: category.scopes.map((scope) => scope.ownerId),
     type: CategoryType[category.type as keyof typeof CategoryType],
   });
 }

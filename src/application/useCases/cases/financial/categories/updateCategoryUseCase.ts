@@ -13,6 +13,7 @@ export interface UpdateCategoryUseCaseParams {
   owner?: string;
   ownerId?: string;
   parentId?: null | string;
+  scope?: "ALL";
   type?: string;
 }
 
@@ -43,6 +44,7 @@ function updateCategoryUseCase(
           owner,
           ownerId: params.ownerId,
           parentId: params.parentId,
+          scope: params.scope,
           type,
         });
       } catch (error) {

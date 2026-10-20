@@ -1,6 +1,13 @@
 import { fromApiColor, toApiColor } from "./iconColor";
 import { OwnerType } from "./TransactionModel";
 
+type CategoryScope = "ALL" | "FAMILY" | "PERSONAL";
+
+interface CategoryScopeModel {
+  owner: OwnerType;
+  ownerId: string;
+}
+
 interface ICategoryModel {
   depthLevel?: number;
   icon: string;
@@ -10,6 +17,8 @@ interface ICategoryModel {
   owner: OwnerType;
   ownerId: string;
   parentId?: string;
+  scope?: CategoryScope;
+  scopes?: CategoryScopeModel[];
   type: string;
 }
 
@@ -22,6 +31,8 @@ class CategoryModel implements ICategoryModel {
   owner: OwnerType;
   ownerId: string;
   parentId?: string;
+  scope: CategoryScope;
+  scopes: CategoryScopeModel[];
   type: string;
 
   constructor(params: ICategoryModel) {
@@ -33,6 +44,11 @@ class CategoryModel implements ICategoryModel {
     this.iconColor = params.iconColor ?? "black";
     this.parentId = params.parentId;
     this.depthLevel = params.depthLevel;
+    this.scope =
+      params.scope ?? (params.owner === "FAMILY" ? "FAMILY" : "PERSONAL");
+    this.scopes = params.scopes ?? [
+      { owner: params.owner, ownerId: params.ownerId },
+    ];
     this.type = params.type;
   }
 
@@ -52,6 +68,13 @@ class CategoryModel implements ICategoryModel {
         data.parentId !== undefined && data.parentId !== null
           ? String(data.parentId)
           : undefined,
+      scope: data.scope as CategoryScope | undefined,
+      scopes: Array.isArray(data.scopes)
+        ? (data.scopes as CategoryScopeModel[]).map((scope) => ({
+            owner: scope.owner,
+            ownerId: scope.ownerId,
+          }))
+        : undefined,
       type: (data.type as string) ?? "EXPENSE",
     });
   }
@@ -67,9 +90,12 @@ class CategoryModel implements ICategoryModel {
       owner: this.owner,
       ownerId: this.ownerId,
       parentId: this.parentId ?? null,
+      scope: this.scope,
+      scopes: this.scopes,
       type: this.type,
     };
   }
 }
 
+export type { CategoryScope, CategoryScopeModel };
 export default CategoryModel;
