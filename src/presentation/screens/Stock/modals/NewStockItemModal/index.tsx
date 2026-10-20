@@ -6,6 +6,7 @@ import {
   ChipGroup,
   ConfirmDialog,
   DateField,
+  FormColumns,
   SelectField,
   Text,
   TextField,
@@ -57,6 +58,7 @@ function NewStockItemModal() {
       }
       onClose={vm.onClose}
       presentation="inline"
+      size="form"
       testID={stockItemFormTestIds.sheet}
       title={t("stock.form.title")}
       visible
@@ -65,113 +67,126 @@ function NewStockItemModal() {
         <Skeleton.ListItem />
       ) : (
         <View style={styles.fields}>
-          <TextField
-            error={errors.description ? t(errors.description) : undefined}
-            label={t("stock.form.description")}
-            onChangeText={(value) => vm.setField("description", value)}
-            placeholder={t("stock.form.descriptionPlaceholder")}
-            testID={stockItemFormTestIds.descriptionInput}
-            value={values.description}
-          />
-          <View style={styles.pair}>
-            <View style={styles.pairItem}>
-              <TextField
-                error={errors.quantity ? t(errors.quantity) : undefined}
-                keyboardType="number-pad"
-                label={t("stock.form.quantity")}
-                onChangeText={onQuantityChange}
-                testID={stockItemFormTestIds.quantityInput}
-                value={values.quantity}
-              />
-            </View>
-            <View style={styles.pairItem}>
-              <SelectField
-                closeLabel={t("common.actions.close")}
-                label={t("stock.form.unit")}
-                onChange={onUnitChange}
-                options={model.unitOptions.map((option) => ({
-                  label: t(option.labelKey),
-                  value: option.value,
-                }))}
-                sheetTitle={t("stock.form.unit")}
-                testID={stockItemFormTestIds.unitSelect}
-                value={values.unit}
-              />
-            </View>
-          </View>
-          <ChipGroup
-            label={t("stock.form.owner")}
-            mode="single"
-            onChange={(value) => vm.setField("ownerId", value)}
-            options={model.ownerOptions.map((option) => ({
-              label: option.labelKey ? t(option.labelKey) : option.label,
-              value: option.value,
-            }))}
-            testID={stockItemFormTestIds.owner}
-            value={values.ownerId ?? model.defaultOwnerId}
-          />
-          <DateField
-            clearable
-            {...dateLabels}
-            label={t("stock.form.expiration")}
-            onChange={(date) => vm.setField("expirationDate", date)}
-            testID={stockItemFormTestIds.expirationField}
-            value={values.expirationDate}
-          />
-          <Button.Ghost
-            icon={vm.isMoreOpen ? "chevron-up" : "chevron-down"}
-            inline
-            label={t("stock.form.moreDetails")}
-            onPress={vm.onToggleMore}
-            testID={stockItemFormTestIds.moreToggle}
-          />
-          {vm.isMoreOpen ? (
-            <>
-              <View style={styles.moreRow}>
-                <View style={styles.pairItem}>
-                  <DateField
-                    clearable
-                    {...dateLabels}
-                    label={t("stock.form.purchase")}
-                    onChange={(date) => vm.setField("purchaseDate", date)}
-                    value={values.purchaseDate}
-                  />
+          <FormColumns
+            left={
+              <>
+                <TextField
+                  error={errors.description ? t(errors.description) : undefined}
+                  label={t("stock.form.description")}
+                  onChangeText={(value) => vm.setField("description", value)}
+                  placeholder={t("stock.form.descriptionPlaceholder")}
+                  testID={stockItemFormTestIds.descriptionInput}
+                  value={values.description}
+                />
+                <View style={styles.pair}>
+                  <View style={styles.pairItem}>
+                    <TextField
+                      error={errors.quantity ? t(errors.quantity) : undefined}
+                      keyboardType="number-pad"
+                      label={t("stock.form.quantity")}
+                      onChangeText={onQuantityChange}
+                      testID={stockItemFormTestIds.quantityInput}
+                      value={values.quantity}
+                    />
+                  </View>
+                  <View style={styles.pairItem}>
+                    <SelectField
+                      closeLabel={t("common.actions.close")}
+                      label={t("stock.form.unit")}
+                      onChange={onUnitChange}
+                      options={model.unitOptions.map((option) => ({
+                        label: t(option.labelKey),
+                        value: option.value,
+                      }))}
+                      sheetTitle={t("stock.form.unit")}
+                      testID={stockItemFormTestIds.unitSelect}
+                      value={values.unit}
+                    />
+                  </View>
                 </View>
-                <View style={styles.pairItem}>
-                  <DateField
-                    clearable
-                    {...dateLabels}
-                    label={t("stock.form.opening")}
-                    onChange={(date) => vm.setField("openingDate", date)}
-                    value={values.openingDate}
-                  />
-                </View>
-              </View>
-              <View style={styles.moreRow}>
-                <View style={styles.pairItem}>
-                  <TextField
-                    label={t("stock.form.brand")}
-                    onChangeText={(value) => vm.setField("brand", value)}
-                    testID={stockItemFormTestIds.brandInput}
-                    value={values.brand}
-                  />
-                </View>
-                <View style={styles.pairItem}>
-                  <TextField
-                    label={t("stock.form.barcode")}
-                    onChangeText={(value) => vm.setField("barcode", value)}
-                    value={values.barcode}
-                  />
-                </View>
-              </View>
-              <TextField
-                label={t("stock.form.notes")}
-                multiline
-                onChangeText={(value) => vm.setField("notes", value)}
-                value={values.notes}
-              />
-            </>
-          ) : null}
+                <ChipGroup
+                  label={t("stock.form.owner")}
+                  mode="single"
+                  onChange={(value) => vm.setField("ownerId", value)}
+                  options={model.ownerOptions.map((option) => ({
+                    label: option.labelKey ? t(option.labelKey) : option.label,
+                    value: option.value,
+                  }))}
+                  testID={stockItemFormTestIds.owner}
+                  value={values.ownerId ?? model.defaultOwnerId}
+                />
+                <DateField
+                  clearable
+                  {...dateLabels}
+                  label={t("stock.form.expiration")}
+                  onChange={(date) => vm.setField("expirationDate", date)}
+                  testID={stockItemFormTestIds.expirationField}
+                  value={values.expirationDate}
+                />
+              </>
+            }
+            right={
+              <>
+                <Button.Ghost
+                  icon={vm.isMoreOpen ? "chevron-up" : "chevron-down"}
+                  inline
+                  label={t("stock.form.moreDetails")}
+                  onPress={vm.onToggleMore}
+                  testID={stockItemFormTestIds.moreToggle}
+                />
+                {vm.isMoreOpen ? (
+                  <>
+                    <View style={styles.moreRow}>
+                      <View style={styles.pairItem}>
+                        <DateField
+                          clearable
+                          {...dateLabels}
+                          label={t("stock.form.purchase")}
+                          onChange={(date) => vm.setField("purchaseDate", date)}
+                          value={values.purchaseDate}
+                        />
+                      </View>
+                      <View style={styles.pairItem}>
+                        <DateField
+                          clearable
+                          {...dateLabels}
+                          label={t("stock.form.opening")}
+                          onChange={(date) => vm.setField("openingDate", date)}
+                          value={values.openingDate}
+                        />
+                      </View>
+                    </View>
+                    <View style={styles.moreRow}>
+                      <View style={styles.pairItem}>
+                        <TextField
+                          label={t("stock.form.brand")}
+                          onChangeText={(value) => vm.setField("brand", value)}
+                          testID={stockItemFormTestIds.brandInput}
+                          value={values.brand}
+                        />
+                      </View>
+                      <View style={styles.pairItem}>
+                        <TextField
+                          label={t("stock.form.barcode")}
+                          onChangeText={(value) =>
+                            vm.setField("barcode", value)
+                          }
+                          value={values.barcode}
+                        />
+                      </View>
+                    </View>
+                    <TextField
+                      label={t("stock.form.notes")}
+                      multiline
+                      onChangeText={(value) => vm.setField("notes", value)}
+                      value={values.notes}
+                    />
+                  </>
+                ) : null}
+              </>
+            }
+            testID={stockItemFormTestIds.sheet}
+          />
           {vm.formErrorKey ? (
             <Text.Caption tone="expense" value={t(vm.formErrorKey)} />
           ) : null}

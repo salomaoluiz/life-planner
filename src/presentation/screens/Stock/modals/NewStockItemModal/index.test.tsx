@@ -1,6 +1,7 @@
 import { act } from "@testing-library/react-native";
+import { StyleSheet } from "react-native";
 
-import { fireEvent, screen, setup } from "./mocks/index.mocks";
+import { fireEvent, screen, setup, within } from "./mocks/index.mocks";
 import stockItemFormTestIds from "./testIds";
 
 it("SHOULD render the sheet title and the main fields", () => {
@@ -183,4 +184,41 @@ it("SHOULD give every owner chip an id from its owner id", () => {
   expect(
     screen.getByTestId(`${stockItemFormTestIds.owner}-family-id`),
   ).toBeOnTheScreen();
+});
+
+describe("wide layout (spec 037)", () => {
+  const sheet = stockItemFormTestIds.sheet;
+
+  it("SHOULD split the fields: main ones left, the more details toggle and fields right", () => {
+    setup({ isMoreOpen: true }, "expanded");
+
+    expect(
+      StyleSheet.flatten(screen.getByTestId(sheet).props.style).maxWidth,
+    ).toBe(880);
+    const left = within(screen.getByTestId(`${sheet}-column-left`));
+    const right = within(screen.getByTestId(`${sheet}-column-right`));
+    expect(
+      left.getByTestId(stockItemFormTestIds.descriptionInput),
+    ).toBeOnTheScreen();
+    expect(
+      left.getByTestId(stockItemFormTestIds.expirationField),
+    ).toBeOnTheScreen();
+    expect(
+      right.getByTestId(stockItemFormTestIds.moreToggle),
+    ).toBeOnTheScreen();
+    expect(
+      right.getByTestId(stockItemFormTestIds.brandInput),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD show the form error after the columns", () => {
+    setup({ formErrorKey: "stock.errors.generic" }, "expanded");
+
+    expect(screen.getByText("stock.errors.generic")).toBeOnTheScreen();
+    expect(
+      within(screen.getByTestId(`${sheet}-column-left`)).queryByText(
+        "stock.errors.generic",
+      ),
+    ).toBeNull();
+  });
 });

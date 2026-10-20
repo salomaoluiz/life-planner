@@ -6,6 +6,7 @@ import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
 import UseMutationFixture from "@infrastructure/fetcher/mocks/useMutation.fixture";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
+import { useBreakpoint } from "@presentation/theme";
 
 import useNewStockItemViewModel from "./useNewStockItemViewModel";
 
@@ -59,6 +60,7 @@ function setup(
 
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.mocked(useBreakpoint).mockReturnValue("compact");
 });
 
 it("SHOULD be loading while the owners fetch", () => {
@@ -172,5 +174,24 @@ it("SHOULD toggle the more details section", () => {
   act(() => {
     result.current.onToggleMore();
   });
+  expect(result.current.isMoreOpen).toBe(true);
+});
+
+it.each(["medium", "expanded"] as const)(
+  "SHOULD open the more details section on %s",
+  (breakpoint) => {
+    jest.mocked(useBreakpoint).mockReturnValue(breakpoint);
+    const { result } = setup();
+
+    expect(result.current.isMoreOpen).toBe(true);
+  },
+);
+
+it("SHOULD read the breakpoint only once, on mount", () => {
+  jest.mocked(useBreakpoint).mockReturnValue("expanded");
+  const { rerender, result } = setup();
+  jest.mocked(useBreakpoint).mockReturnValue("compact");
+  rerender({});
+
   expect(result.current.isMoreOpen).toBe(true);
 });

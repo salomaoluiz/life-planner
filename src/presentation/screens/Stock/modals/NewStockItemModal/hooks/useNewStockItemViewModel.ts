@@ -3,13 +3,17 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useCases } from "@application/useCases";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
+import { useBreakpoint } from "@presentation/theme";
 import NewStockItemUIModel from "@screens/Stock/modals/NewStockItemModal/models/NewStockItemUIModel";
 
 import useForm from "./useForm";
 
 function useNewStockItemViewModel() {
   const params = useLocalSearchParams<{ ownerId?: string }>();
-  const [isMoreOpen, setIsMoreOpen] = useState(false);
+  // Spec 037 FR 13b: the extra fields sit in the right column on wide, so they
+  // start open there. Read once on mount; a later resize does not toggle it.
+  const isWide = useBreakpoint() !== "compact";
+  const [isMoreOpen, setIsMoreOpen] = useState(isWide);
   const [isDiscardOpen, setIsDiscardOpen] = useState(false);
 
   const owners = useQuery({
