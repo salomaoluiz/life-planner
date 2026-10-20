@@ -50,6 +50,12 @@ it("SHOULD show the toast instead of running the action WHEN the archived family
   expect(result.current.toastVisible).toBe(true);
 
   act(() => result.current.onToastHide());
+  expect(result.current.toastVisible).toBe(false);
+
+  act(() => result.current.notifyReadOnly());
+  expect(result.current.toastVisible).toBe(true);
+
+  act(() => result.current.onToastHide());
 
   expect(result.current.toastVisible).toBe(false);
 });

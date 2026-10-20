@@ -7,6 +7,7 @@ import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import { makeInvoice } from "../mocks/invoice.mocks";
 import TransactionUIModel from "../models/TransactionUIModel";
 import {
+  archivedFamily,
   balancesQuery,
   dto,
   givenData,
@@ -699,5 +700,39 @@ describe("day balances (spec 035)", () => {
       month: "2026-10",
       ownerIds: ["user-id", "family-1"],
     });
+  });
+});
+
+describe("archived family (spec 042)", () => {
+  const withArchived = [owners[0], archivedFamily("family-1")];
+
+  it("SHOULD leave the archived family out of All AND of the summary", () => {
+    givenData(items(), withArchived);
+    const { result } = setup();
+
+    expect(itemIds(result.current.entries)).toEqual(["item-inc", "item-exp"]);
+    expect(lastSummaryKey()).toEqual(["summary", "2026-9", "user-id"]);
+    expect(result.current.readOnly).toBe(false);
+  });
+
+  it("SHOULD show its data read-only WHEN it is selected, replacing the actions by the toast", () => {
+    givenData(items(), withArchived);
+    const { result } = setup();
+
+    act(() => result.current.onOwnerFilterChange("family-1"));
+
+    expect(itemIds(result.current.entries)).toEqual([
+      "item-fam-inc",
+      "item-fam-exp",
+    ]);
+    expect(result.current.readOnly).toBe(true);
+
+    act(() => {
+      result.current.onAddPress();
+      result.current.onRowPress("item-fam-exp");
+    });
+
+    expect(spies.push).not.toHaveBeenCalled();
+    expect(result.current.toastVisible).toBe(true);
   });
 });

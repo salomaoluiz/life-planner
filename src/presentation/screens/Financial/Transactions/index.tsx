@@ -8,8 +8,10 @@ import {
   ErrorState,
   GroupHeader,
   Icon,
+  ReadOnlyNotice,
   SegmentedControl,
   Text,
+  Toast,
 } from "@components";
 import { formatAmount } from "@components/AmountText/formatAmount";
 import Skeleton from "@components/Skeleton";
@@ -77,10 +79,13 @@ function FinancialTransactions() {
         <TransactionRow
           isPaying={pay.payingId === transaction.id}
           item={transaction}
-          onPay={pay.onPay}
+          onPay={vm.readOnly ? vm.onReadOnlyAttempt : pay.onPay}
           onPress={
             transaction.isAdjustment
-              ? () => adjustment.onOpen(transaction)
+              ? () =>
+                  vm.readOnly
+                    ? vm.onReadOnlyAttempt()
+                    : adjustment.onOpen(transaction)
               : vm.onRowPress
           }
           onProjectedPress={vm.onProjectedPress}
@@ -220,7 +225,7 @@ function FinancialTransactions() {
 
   const scopeOptions = translateChoices(vm.scopeChoices, t).map((option) => ({
     ...option,
-    icon: scopeIcon(option.value, vm.personalOwnerId),
+    icon: option.icon ?? scopeIcon(option.value, vm.personalOwnerId),
   }));
   const scopeLabel =
     vm.ownerFilter === ALL_FILTER
@@ -304,6 +309,12 @@ function FinancialTransactions() {
           testID={transactionsTestIds.cardInvoiceError}
         />
       ) : null}
+      {vm.readOnly ? (
+        <ReadOnlyNotice
+          message={t("family.archived.banner")}
+          testID={transactionsTestIds.readOnlyBanner}
+        />
+      ) : null}
       <SegmentedControl
         accessibilityLabel={t("financial.transactions.typeFilter.label")}
         onChange={vm.onTypeFilterChange}
@@ -339,9 +350,9 @@ function FinancialTransactions() {
   if (vm.isEmptyMonth) {
     empty = (
       <EmptyState
-        actionLabel={t("financial.transactions.add")}
+        actionLabel={vm.readOnly ? undefined : t("financial.transactions.add")}
         message={t("financial.transactions.emptyMessage")}
-        onAction={vm.onAddPress}
+        onAction={vm.readOnly ? undefined : vm.onAddPress}
         testID={transactionsTestIds.emptyMonth}
         title={t("financial.transactions.emptyTitle", { month: vm.monthLabel })}
       />
@@ -391,6 +402,13 @@ function FinancialTransactions() {
           year={vm.pickerYear}
         />
       )}
+      <Toast
+        icon={"lock-outline"}
+        message={t("family.archived.readOnly")}
+        onHide={vm.onToastHide}
+        testID={transactionsTestIds.readOnlyToast}
+        visible={vm.toastVisible}
+      />
       {adjustment.item && (
         <AdjustmentSheet
           accountName={adjustment.item.accountName}

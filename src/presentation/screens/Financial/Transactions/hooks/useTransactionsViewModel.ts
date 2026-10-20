@@ -7,8 +7,11 @@ import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
 import { useQuery } from "@infrastructure/fetcher";
 import useTranslationLocale from "@presentation/i18n/useTranslationLocale";
+import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
 import { addMonthsTo } from "@screens/Financial/models/invoiceMonth";
 import {
+  activeOwnerIds,
+  archivedOwnerIds,
   buildOwnerFilterChoices,
   personalOwnerId as findPersonalOwnerId,
 } from "@screens/Financial/models/ownerOptions";
@@ -161,11 +164,12 @@ function useTransactionsViewModel() {
       : ALL_FILTER;
   const summaryOwnerIds = useMemo(
     () =>
-      ownerFilter === ALL_FILTER
-        ? (owners ?? []).map((owner) => owner.id)
-        : [ownerFilter],
+      ownerFilter === ALL_FILTER ? activeOwnerIds(owners ?? []) : [ownerFilter],
     [ownerFilter, owners],
   );
+
+  const archivedIds = useMemo(() => archivedOwnerIds(owners ?? []), [owners]);
+  const scope = useReadOnlyScope(owners, ownerFilter);
 
   const monthKey = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, "0")}`;
   const allOwnerIds = useMemo(
@@ -287,17 +291,21 @@ function useTransactionsViewModel() {
     [invoices.data, projections.data, monthKey, isFutureMonth],
   );
   const visible = useMemo(
-    () => filterByType(filterByOwner(itemsOfMonth, ownerFilter), typeFilter),
-    [itemsOfMonth, ownerFilter, typeFilter],
+    () =>
+      filterByType(
+        filterByOwner(itemsOfMonth, ownerFilter, archivedIds),
+        typeFilter,
+      ),
+    [itemsOfMonth, ownerFilter, archivedIds, typeFilter],
   );
   const invoicesOfMonth = allInvoices;
   const visibleInvoices = useMemo(
     () =>
       filterInvoicesByType(
-        filterInvoicesByOwner(allInvoices, ownerFilter),
+        filterInvoicesByOwner(allInvoices, ownerFilter, archivedIds),
         typeFilter,
       ),
-    [allInvoices, ownerFilter, typeFilter],
+    [allInvoices, ownerFilter, archivedIds, typeFilter],
   );
   const balanceViews = useMemo(
     () => (balances.error ? undefined : balances.data),
@@ -352,8 +360,9 @@ function useTransactionsViewModel() {
     monthChoices: monthChoices(languageTag),
     monthLabel: formatMonthLabel(month, languageTag),
     monthName: formatMonthName(month, languageTag),
-    onAddPress: () =>
+    onAddPress: scope.guard(() =>
       router.push({ pathname: "/financial/transaction/add_new_transaction" }),
+    ),
     onClearFilters: () => {
       setOwnerSelection(ALL_FILTER);
       setTypeFilter("ALL");
@@ -362,11 +371,12 @@ function useTransactionsViewModel() {
       setExpandedDayKey((current) =>
         current === dateKey ? undefined : dateKey,
       ),
-    onInvoiceOpen: (invoice: CardInvoiceUIModel) =>
+    onInvoiceOpen: scope.guard((invoice: CardInvoiceUIModel) =>
       router.push({
         params: { cardId: invoice.cardId, month: invoice.referenceMonth },
         pathname: "/financial/invoice/invoice_detail",
       } as never),
+    ),
     onInvoiceRetry: async () => invoices.refetch(),
     onInvoiceToggle: (id: string) =>
       setExpandedInvoiceId((current) => (current === id ? undefined : id)),
@@ -378,7 +388,7 @@ function useTransactionsViewModel() {
     onPickerYearChange: (delta: number) =>
       setPickerYear((year) => year + delta),
     onPreviousMonth: () => setMonth((current) => shiftMonth(current, -1)),
-    onProjectedPress: (item: TransactionUIModel) =>
+    onProjectedPress: scope.guard((item: TransactionUIModel) =>
       router.push({
         params: {
           month: item.monthKey,
@@ -387,18 +397,23 @@ function useTransactionsViewModel() {
         },
         pathname: "/financial/transaction/add_new_transaction",
       } as never),
+    ),
+    onReadOnlyAttempt: scope.notifyReadOnly,
     onRefresh,
     onRetry: async () => transactions.refetch(),
-    onRowPress: (id: string) =>
+    onRowPress: scope.guard((id: string) =>
       router.push({
         params: { id },
         pathname: "/financial/transaction/add_new_transaction",
       }),
+    ),
     onSummaryRetry: async () => summary.refetch(),
+    onToastHide: scope.onToastHide,
     onTypeFilterChange: (value: string) => setTypeFilter(value as TypeFilter),
     ownerFilter,
     personalOwnerId: findPersonalOwnerId(owners ?? []),
     pickerYear,
+    readOnly: scope.readOnly,
     scopeChoices: buildOwnerFilterChoices(owners ?? []),
     selectedMonthIndex:
       pickerYear === month.getFullYear() ? String(month.getMonth()) : undefined,
@@ -415,6 +430,7 @@ function useTransactionsViewModel() {
         }
       : undefined,
     summaryError: !!summary.error,
+    toastVisible: scope.toastVisible,
     typeFilter,
   };
 }

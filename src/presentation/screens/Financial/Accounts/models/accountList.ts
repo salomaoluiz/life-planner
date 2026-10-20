@@ -55,7 +55,9 @@ function filterByOwner(
   archivedOwnerIds: ReadonlySet<string> = new Set(),
 ) {
   if (ownerFilter === ALL_OWNERS) {
-    return accounts.filter((account) => !archivedOwnerIds.has(account.ownerId));
+    return archivedOwnerIds.size === 0
+      ? accounts
+      : accounts.filter((account) => !archivedOwnerIds.has(account.ownerId));
   }
 
   return accounts.filter((account) => account.ownerId === ownerFilter);

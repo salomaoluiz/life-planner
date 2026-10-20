@@ -9,10 +9,14 @@ function useReadOnlyScope(owners: OwnerDTO[] | undefined, ownerFilter: string) {
   const [toastVisible, setToastVisible] = useState(false);
   const readOnly = !!owners && isArchivedOwner(owners, ownerFilter);
 
+  function notifyReadOnly() {
+    setToastVisible(true);
+  }
+
   function guard<Args extends unknown[]>(action: (...args: Args) => void) {
     return (...args: Args) => {
       if (readOnly) {
-        setToastVisible(true);
+        notifyReadOnly();
         return;
       }
 
@@ -22,6 +26,7 @@ function useReadOnlyScope(owners: OwnerDTO[] | undefined, ownerFilter: string) {
 
   return {
     guard,
+    notifyReadOnly,
     onToastHide: () => setToastVisible(false),
     readOnly,
     toastVisible,
