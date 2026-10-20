@@ -1,4 +1,5 @@
 import FamilyEntity from "@domain/entities/family/FamilyEntity";
+import { FamilyStatus } from "@domain/entities/family/FamilyStatus";
 
 export type FamilyRepository = {
   createFamily(params: CreateFamilyRepositoryParams): Promise<FamilyEntity>;
@@ -15,7 +16,8 @@ interface CreateFamilyRepositoryParams {
 
 interface UpdateFamilyRepositoryParams {
   id: string;
-  name: string;
+  name?: string;
+  status?: FamilyStatus;
 }
 
 export { CreateFamilyRepositoryParams, UpdateFamilyRepositoryParams };

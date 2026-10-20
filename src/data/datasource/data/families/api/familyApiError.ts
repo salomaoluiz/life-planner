@@ -4,7 +4,9 @@ import {
   GenericError,
 } from "@domain/entities/errors";
 
-type ErrorMap = Partial<Record<number, () => BusinessError>>;
+type ErrorMap = Partial<
+  Record<number, (error: ApiBusinessError) => BusinessError | undefined>
+>;
 
 function handleFamilyApiError(
   error: unknown,
@@ -12,7 +14,7 @@ function handleFamilyApiError(
   errorMap: ErrorMap = {},
 ): never {
   if (error instanceof ApiBusinessError) {
-    const mapped = errorMap[error.statusCode]?.();
+    const mapped = errorMap[error.statusCode]?.(error);
 
     if (mapped) {
       throw mapped;

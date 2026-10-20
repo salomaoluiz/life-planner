@@ -12,6 +12,7 @@ async function updateFamily(
   await datasources.familyDatasource.updateFamily({
     id: params.id,
     name: params.name,
+    status: params.status,
   });
 
   cache.invalidate(CacheStringKeys.CACHE_FAMILIES_DATA);

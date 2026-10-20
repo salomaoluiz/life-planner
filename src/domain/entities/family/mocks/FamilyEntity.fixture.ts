@@ -1,4 +1,5 @@
 import FamilyEntity from "@domain/entities/family/FamilyEntity";
+import { FamilyStatus } from "@domain/entities/family/FamilyStatus";
 
 class FamilyEntityFixture {
   value = {} as FamilyEntity;
@@ -16,6 +17,7 @@ class FamilyEntityFixture {
       id: "c6d76166-e7f3-4823-bd5b-f8bbd33912ac",
       name: "Family Name",
       ownerId: "c6d76166-e7f3-4823-bd5b-f8bbd33912ac",
+      status: FamilyStatus.ACTIVE,
     };
     return this;
   }
@@ -32,6 +34,11 @@ class FamilyEntityFixture {
 
   withOwnerId(ownerId: string) {
     this.value.ownerId = ownerId;
+    return this;
+  }
+
+  withStatus(status: FamilyStatus) {
+    this.value.status = status;
     return this;
   }
 }

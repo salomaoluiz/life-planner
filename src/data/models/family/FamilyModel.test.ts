@@ -1,3 +1,5 @@
+import { FamilyStatus } from "@domain/entities/family/FamilyStatus";
+
 import FamilyModel from "./FamilyModel";
 import { mocks, setup } from "./mocks/FamilyModel.mocks";
 
@@ -31,4 +33,15 @@ it("SHOULD round-trip toJSON and fromJSON (local cache)", () => {
   const model = setup();
 
   expect(FamilyModel.fromJSON(model.toJSON())).toStrictEqual(model);
+});
+
+it("SHOULD read the archived status from the API AND default to active when it is missing", () => {
+  expect(
+    FamilyModel.fromJSON({ ...mocks.json, status: "ARCHIVED" }).status,
+  ).toBe(FamilyStatus.ARCHIVED);
+
+  const withoutStatus: Record<string, unknown> = { ...mocks.json };
+  delete withoutStatus.status;
+
+  expect(FamilyModel.fromJSON(withoutStatus).status).toBe(FamilyStatus.ACTIVE);
 });

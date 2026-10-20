@@ -1,6 +1,7 @@
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { IUseCaseFactoryWithoutParamResponse } from "@application/useCases/types";
 import { DefaultError } from "@domain/entities/errors";
+import { FamilyStatus } from "@domain/entities/family/FamilyStatus";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import Repositories from "@domain/repositories";
 
@@ -16,12 +17,18 @@ function getOwnersUseCase(
         );
 
         const ownerIds = families.map((family) => ({
+          archived: family.status === FamilyStatus.ARCHIVED,
           id: family.id,
           name: family.name,
           type: OwnerType.FAMILY,
         }));
 
-        ownerIds.push({ id: user.id, name: user.name, type: OwnerType.USER });
+        ownerIds.push({
+          archived: false,
+          id: user.id,
+          name: user.name,
+          type: OwnerType.USER,
+        });
 
         return ownerIds.map((owner) => new OwnerDTO(owner));
       } catch (error) {

@@ -7,6 +7,7 @@ import {
   CategoryParentArchived,
   CreditCardArchived,
   CreditCardHasTransactions,
+  FamilyArchived,
   FinancialNotFound,
   FinancialOwnerNotAllowed,
   HasRefunds,
@@ -28,6 +29,10 @@ function getFinancialErrorMessageKey(
 ): TranslationKeys | undefined {
   if (!error) {
     return undefined;
+  }
+
+  if (error instanceof FamilyArchived) {
+    return "family.errors.archived";
   }
 
   if (error instanceof AccountArchived) {

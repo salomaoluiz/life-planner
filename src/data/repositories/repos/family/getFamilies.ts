@@ -30,6 +30,7 @@ async function getFamilies(userId: Params, datasources: Datasources): Response {
         id: family.id,
         name: family.name,
         ownerId: family.ownerId,
+        status: family.status,
       }),
   );
 }

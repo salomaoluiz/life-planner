@@ -34,6 +34,7 @@ async function getFamilyById(
     id: familyModel.id,
     name: familyModel.name,
     ownerId: familyModel.ownerId,
+    status: familyModel.status,
   });
 }
 
