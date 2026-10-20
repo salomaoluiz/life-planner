@@ -417,6 +417,7 @@ const financial = {
     editTitle: "Editar tag",
     name: "Nome",
     nameInUse: "Já existe uma tag com esse nome",
+    nameRequired: "O nome é obrigatório.",
     newTitle: "Nova tag",
     owner: "Pertence a",
     save: "Salvar tag",

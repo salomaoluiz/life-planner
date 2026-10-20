@@ -20,6 +20,9 @@ import {
 } from "@utils/money";
 
 const MAX_DESCRIPTION = 200;
+// Spec 043 FR 4 / 18.
+const MAX_TAGS = 10;
+const MAX_TAG_NAME = 30;
 
 type PayWith = "ACCOUNT" | "CARD";
 
@@ -58,6 +61,8 @@ interface TransactionFormState {
   repeatEnd?: Date;
   repeatFrequency: RecurrenceFrequency;
   repeatOn: boolean;
+  // Spec 043: tag names (at most 10); the API resolves or creates them in the owner on save.
+  tags: string[];
   type: TransactionType;
 }
 
@@ -236,6 +241,7 @@ function createInitialState(params: {
     paid: true,
     paidTouched: false,
     payWith: params.card ? "CARD" : "ACCOUNT",
+    tags: [],
     type: TransactionType.EXPENSE,
   };
 }
@@ -272,6 +278,8 @@ function isSameState(a: TransactionFormState, b: TransactionFormState) {
     a.repeatEnd?.getTime() === b.repeatEnd?.getTime() &&
     a.repeatFrequency === b.repeatFrequency &&
     a.repeatOn === b.repeatOn &&
+    a.tags.length === b.tags.length &&
+    a.tags.every((tag, index) => tag === b.tags[index]) &&
     a.type === b.type
   );
 }
@@ -321,6 +329,7 @@ function stateFromDto(
       : undefined,
     repeatFrequency: dto.recurrenceFrequency ?? series?.frequency ?? "MONTHLY",
     repeatOn: !!dto.recurrenceId,
+    tags: dto.tags.map((tag) => tag.name),
     type: dto.type as TransactionType,
   };
 }
@@ -338,6 +347,7 @@ function toCreateInstallmentParams(
     installments: state.installmentsCount,
     owner: owner.type,
     ownerId: owner.id,
+    tags: state.tags,
     value: centsToDecimalString(state.amountCents),
   };
 }
@@ -360,6 +370,7 @@ function toCreateParams(
     ownerId: owner.id,
     // A card purchase follows its invoice: no status is sent (spec 033 FR 2).
     paid: isCard ? undefined : state.paid,
+    tags: state.tags,
     type: state.type,
     value: centsToDecimalString(state.amountCents),
   };
@@ -383,6 +394,7 @@ function toCreateRecurrenceParams(
     owner: owner.type,
     ownerId: owner.id,
     paid: isCard ? undefined : state.paid,
+    tags: state.tags,
     type: state.type,
     value: centsToDecimalString(state.amountCents),
   };
@@ -462,6 +474,8 @@ export {
   defaultAccountId,
   defaultCardId,
   isSameState,
+  MAX_TAG_NAME,
+  MAX_TAGS,
   normalizeDate,
   pickNewRecordId,
   resetForNext,

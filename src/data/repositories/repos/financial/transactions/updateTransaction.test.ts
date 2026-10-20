@@ -22,7 +22,7 @@ it("SHOULD update transaction AND invalidate cache WHEN called", async () => {
     value: mocks.defaultParams.value,
   });
 
-  expect(spies.cache.invalidate).toHaveBeenCalledTimes(2);
+  expect(spies.cache.invalidate).toHaveBeenCalledTimes(3);
   expect(spies.cache.invalidate).toHaveBeenCalledWith(
     CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA,
   );
@@ -33,5 +33,13 @@ it("SHOULD also invalidate the accounts cache (their balances changed)", async (
 
   expect(spies.cache.invalidate).toHaveBeenCalledWith(
     CacheStringKeys.CACHE_FINANCIAL_ACCOUNT_DATA,
+  );
+});
+
+it("SHOULD also invalidate the tags cache (usage counts moved, tags may have been created)", async () => {
+  await setup();
+
+  expect(spies.cache.invalidate).toHaveBeenCalledWith(
+    CacheStringKeys.CACHE_FINANCIAL_TAG_DATA,
   );
 });

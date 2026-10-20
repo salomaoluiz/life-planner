@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { TextInput } from "react-native";
 
 import CreditCardOverviewDTO from "@application/dto/financial/CreditCardOverviewDTO";
+import TagDTO from "@application/dto/financial/TagDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
@@ -173,6 +174,22 @@ function repeatPreviewOf(state: TransactionFormState | undefined) {
     : { kind: "none" as const };
 }
 
+// Tags of the chosen owner by usage, then name (spec 043 FR 14/15).
+function suggestTags(tags: TagDTO[], ownerId?: string) {
+  return tags
+    .filter((tag) => !!ownerId && tag.scopeOwnerIds.includes(ownerId))
+    .sort(
+      (a, b) =>
+        b.usageCount - a.usageCount ||
+        a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
+    )
+    .map((tag) => ({
+      id: tag.id,
+      label: tag.name,
+      meta: tag.usageCount > 0 ? String(tag.usageCount) : undefined,
+    }));
+}
+
 function useNewTransactionViewModel() {
   const params = useLocalSearchParams<{
     creditCardId?: string;
@@ -220,6 +237,13 @@ function useNewTransactionViewModel() {
         owners.data!,
         useCases.getFinancialCategoriesUseCase.execute,
       ),
+  });
+  // Suggestions of the Tags field. A failed load is not an error: the field still creates tags (FR 20).
+  const tags = useQuery({
+    cacheKey: [useCases.getFinancialTagsUseCase.uniqueName],
+    enabled: !!owners.data,
+    fetch: async () =>
+      fetchByOwners(owners.data!, useCases.getFinancialTagsUseCase.execute),
   });
   const transactions = useQuery({
     cacheKey: [useCases.getFinancialTransactionsUseCase.uniqueName],
@@ -453,6 +477,8 @@ function useNewTransactionViewModel() {
       // Back to idle, so the next success is detected again.
       mutations.forEach((mutation) => mutation.reset());
       amountInputRef.current?.focus();
+      // Tags created by the save show up as suggestions for the next entry.
+      tags.refetch();
 
       return;
     }
@@ -707,6 +733,9 @@ function useNewTransactionViewModel() {
       : accounts.data?.find((account) => account.id === state?.accountId)
           ?.currency) ?? DEFAULT_CURRENCY;
 
+  // Tags usable in the chosen owner, most used first (the order the API gives for one owner).
+  const tagSuggestions = suggestTags(tags.data ?? [], state?.ownerId);
+
   return {
     accountError: errors.accountId,
     accountOptions: uiModel?.accountOptions(ownerId, state?.accountId) ?? [],
@@ -888,6 +917,11 @@ function useNewTransactionViewModel() {
     onSaveAndNew,
     onSavedHide: () => setSaved(false),
     onScopeChange,
+    onTagsChange: (next: string[]) => {
+      if (state) {
+        setEdited({ ...state, tags: next });
+      }
+    },
     onTypeChange: (next: TransactionType) => {
       if (state) {
         update(changeType(state, next, categories.data ?? []));
@@ -952,6 +986,8 @@ function useNewTransactionViewModel() {
     selectedCategoryId: state?.categoryId,
     // Card purchases follow their invoice: no switch (spec 033 FR 19).
     showPaid: state?.payWith !== "CARD",
+    tags: state?.tags ?? [],
+    tagSuggestions,
     titleKey: (isEditing
       ? "financial.transactions.form.editTitle"
       : "financial.transactions.form.newTitle") as TranslationKeys,

@@ -6,6 +6,8 @@ import CreditCardOverviewDTO, {
 } from "@application/dto/financial/CreditCardOverviewDTO";
 import ProjectedOccurrenceDTO from "@application/dto/financial/ProjectedOccurrenceDTO";
 import RecurrenceDTO from "@application/dto/financial/RecurrenceDTO";
+import TagDTO from "@application/dto/financial/TagDTO";
+import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import {
   AccountHasTransactions,
   FinancialNotFound,
@@ -161,6 +163,7 @@ it("SHOULD call create with a decimal-string value and the category name WHEN va
     owner: "USER",
     ownerId: "user-id",
     paid: true,
+    tags: [],
     type: "EXPENSE",
     value: "312.90",
   });
@@ -1554,5 +1557,94 @@ describe("save and add another (spec 039)", () => {
     rerender({});
 
     expect(result.current.isSavingNext).toBe(false);
+  });
+});
+
+describe("tags (spec 043)", () => {
+  function tagDto(
+    id: string,
+    name: string,
+    usageCount: number,
+    ownerId = "user-id",
+  ) {
+    return new TagDTO({
+      id,
+      name,
+      owner: "USER",
+      ownerId,
+      scopeOwnerIds: [ownerId],
+      usageCount,
+    });
+  }
+
+  it("SHOULD suggest only the tags of the chosen owner, most used first AND with the count", () => {
+    givenLoaded({
+      tags: [
+        tagDto("a", "beta", 0),
+        tagDto("b", "alpha", 0),
+        tagDto("c", "popular", 24),
+        tagDto("d", "other-owner", 9, "family-1"),
+      ],
+    });
+    const { result } = setup();
+
+    expect(result.current.tagSuggestions).toEqual([
+      { id: "c", label: "popular", meta: "24" },
+      { id: "b", label: "alpha", meta: undefined },
+      { id: "a", label: "beta", meta: undefined },
+    ]);
+    expect(result.current.tags).toEqual([]);
+  });
+
+  it("SHOULD keep the chips WHEN the owner changes AND show the new owner's suggestions", () => {
+    givenLoaded({
+      tags: [tagDto("a", "mine", 1), tagDto("d", "shared", 2, "family-1")],
+    });
+    const { result } = setup();
+
+    act(() => result.current.onTagsChange(["presente"]));
+    act(() => result.current.onOwnerChange("family-1"));
+
+    expect(result.current.tags).toEqual(["presente"]);
+    expect(result.current.tagSuggestions.map((tag) => tag.label)).toEqual([
+      "shared",
+    ]);
+  });
+
+  it("SHOULD send the tag names on create", () => {
+    givenLoaded();
+    const { result } = setup();
+
+    act(() => result.current.onAmountChange(1000));
+    act(() => result.current.onDescriptionChange("Lunch"));
+    act(() => result.current.onCategorySelect("food"));
+    act(() => result.current.onTagsChange(["a", "b"]));
+    act(() => result.current.onSave());
+
+    expect(mutations.create.value.mutate).toHaveBeenCalledWith(
+      expect.objectContaining({ tags: ["a", "b"] }),
+    );
+  });
+
+  it("SHOULD load the tags of the transaction being edited AND send [] WHEN they are removed", () => {
+    givenLoaded({
+      params: { id: "tx-1" },
+      transactions: [
+        new TransactionDTO({
+          ...tx("tx-1"),
+          tags: [{ id: "t1", name: "viagem" }],
+        }),
+      ],
+    });
+    const { result } = setup();
+
+    expect(result.current.tags).toEqual(["viagem"]);
+
+    act(() => result.current.onTagsChange([]));
+    act(() => result.current.onSave());
+
+    expect(mutations.update.value.mutate).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "tx-1", tags: [] }),
+    );
   });
 });

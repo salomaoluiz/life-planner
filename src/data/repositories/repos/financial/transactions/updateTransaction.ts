@@ -27,6 +27,8 @@ async function updateTransaction(params: Params, datasources: Datasources) {
   cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA);
   // Every transaction write moves an account balance.
   cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_ACCOUNT_DATA);
+  // Writes create tags and move the usage counts.
+  cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_TAG_DATA);
 }
 
 export default updateTransaction;

@@ -35,6 +35,7 @@ const transactionFormTestIds = {
   saveButton: "financial.transaction-form.save-button",
   savedToast: "financial.transaction-form.saved-toast",
   sheet: "financial.transaction-form.sheet",
+  tags: "financial.transaction-form.tags",
   type: "financial.transaction-form.type",
 } as const;
 

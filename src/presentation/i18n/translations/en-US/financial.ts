@@ -420,6 +420,7 @@ const financial = {
     editTitle: "Edit tag",
     name: "Name",
     nameInUse: "A tag with this name already exists",
+    nameRequired: "Name is required.",
     newTitle: "New tag",
     owner: "Belongs to",
     save: "Save tag",

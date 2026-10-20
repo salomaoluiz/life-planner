@@ -24,6 +24,7 @@ const initial: TransactionFormState = {
   repeatEnd: new Date(2027, 8, 5),
   repeatFrequency: "MONTHLY",
   repeatOn: true,
+  tags: [],
   type: TransactionType.EXPENSE,
 };
 const real: RecurringContext = {

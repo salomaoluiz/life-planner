@@ -49,6 +49,8 @@ function buildRecurringSave(
       state.description.trim() !== initial.description.trim()
         ? state.description.trim()
         : undefined,
+    // The whole list travels when it changed (`[]` removes every tag).
+    tags: isSameTags(state.tags, initial.tags) ? undefined : state.tags,
     value:
       state.amountCents !== initial.amountCents
         ? centsToDecimalString(state.amountCents)
@@ -109,6 +111,10 @@ function hasChanges(params: object) {
   return Object.values(params).some((value) => value !== undefined);
 }
 
+function isSameTags(a: string[], b: string[]) {
+  return a.length === b.length && a.every((tag, index) => tag === b[index]);
+}
+
 function lockedHelperKey(locked: boolean, field: keyof RecurrenceLocks) {
   if (!locked) {
     return undefined;
@@ -137,6 +143,7 @@ function onlyThis(
   common: {
     categoryId?: string;
     description?: string;
+    tags?: string[];
     value?: string;
   },
 ): RecurringSave {

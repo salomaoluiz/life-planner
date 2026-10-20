@@ -715,3 +715,58 @@ describe("save and add another (spec 039)", () => {
     expect(screen.queryByTestId(transactionFormTestIds.savedToast)).toBeNull();
   });
 });
+
+describe("tags field (spec 043)", () => {
+  function input() {
+    return screen.getByTestId(`${transactionFormTestIds.tags}-input`);
+  }
+
+  it("SHOULD show the chosen tags as chips AND remove one", () => {
+    const vm = setup({ tags: ["fixo", "viagem"] });
+
+    expect(
+      screen.getByTestId(`${transactionFormTestIds.tags}-chip-fixo`),
+    ).toBeOnTheScreen();
+    fireEvent.press(
+      screen.getByTestId(`${transactionFormTestIds.tags}-chip-remove-fixo`),
+    );
+
+    expect(vm.onTagsChange).toHaveBeenCalledWith(["viagem"]);
+  });
+
+  it("SHOULD suggest the tags of the owner WHEN focused AND add one", () => {
+    const vm = setup({
+      tagSuggestions: [{ id: "1", label: "gasto-fixo", meta: "24" }],
+    });
+
+    fireEvent(input(), "focus");
+    fireEvent.press(
+      screen.getByTestId(
+        `${transactionFormTestIds.tags}-suggestion-gasto-fixo`,
+      ),
+    );
+
+    expect(vm.onTagsChange).toHaveBeenCalledWith(["gasto-fixo"]);
+  });
+
+  it("SHOULD offer to create a new tag from what is typed", () => {
+    const vm = setup();
+
+    fireEvent(input(), "focus");
+    fireEvent.changeText(input(), "presente");
+    fireEvent.press(
+      screen.getByTestId(`${transactionFormTestIds.tags}-create`),
+    );
+
+    expect(vm.onTagsChange).toHaveBeenCalledWith(["presente"]);
+  });
+
+  it("SHOULD stop at 10 tags AND explain it", () => {
+    setup({ tags: Array.from({ length: 10 }, (_, index) => `t${index}`) });
+
+    expect(input().props.editable).toBe(false);
+    expect(
+      screen.getByText("financial.transactions.form.tagsMax"),
+    ).toBeOnTheScreen();
+  });
+});

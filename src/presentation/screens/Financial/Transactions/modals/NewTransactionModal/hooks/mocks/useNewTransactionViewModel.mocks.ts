@@ -9,6 +9,7 @@ import CreditCardDTO from "@application/dto/financial/CreditCardDTO";
 import CreditCardOverviewDTO from "@application/dto/financial/CreditCardOverviewDTO";
 import ProjectedOccurrenceDTO from "@application/dto/financial/ProjectedOccurrenceDTO";
 import RecurrenceDTO from "@application/dto/financial/RecurrenceDTO";
+import TagDTO from "@application/dto/financial/TagDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
@@ -68,6 +69,7 @@ jest.mock("@application/useCases", () => ({
       execute: jest.fn(),
       uniqueName: "recurrences",
     },
+    getFinancialTagsUseCase: { execute: jest.fn(), uniqueName: "tags" },
     getFinancialTransactionsUseCase: {
       execute: jest.fn(),
       uniqueName: "transactions",
@@ -193,6 +195,7 @@ beforeEach(() => {
     "cards",
     "overview",
     "categories",
+    "tags",
     "transactions",
     "most_used",
     "projections",
@@ -231,6 +234,7 @@ function givenLoaded(
     params?: Record<string, string>;
     projected?: ProjectedOccurrenceDTO[];
     series?: RecurrenceDTO[];
+    tags?: TagDTO[];
     top?: CategoryDTO[];
     transactions?: TransactionDTO[];
   } = {},
@@ -248,6 +252,7 @@ function givenLoaded(
   queries.categories.withData(
     data.categories ?? [cat("food"), cat("salary", "user-id", "INCOME")],
   );
+  queries.tags.withData(data.tags ?? []);
   queries.transactions.withData(data.transactions ?? []);
   queries.projections.withData(data.projected ?? []);
   queries.recurrences.withData(data.series ?? []);
