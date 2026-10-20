@@ -1,5 +1,6 @@
 import CategoryEntity, {
   CategoryScope,
+  CategoryStatus,
 } from "@domain/entities/financial/CategoryEntity";
 
 export interface ICategoryDTO {
@@ -13,6 +14,7 @@ export interface ICategoryDTO {
   parentId?: string;
   scope?: CategoryScope;
   scopeOwnerIds?: string[];
+  status?: CategoryStatus;
   type: string;
 }
 
@@ -27,6 +29,7 @@ class CategoryDTO {
   parentId?: string;
   scope: CategoryScope;
   scopeOwnerIds: string[];
+  status: CategoryStatus;
   type: string;
 
   constructor(params: ICategoryDTO) {
@@ -40,6 +43,7 @@ class CategoryDTO {
     this.parentId = params.parentId;
     this.scope = params.scope ?? "PERSONAL";
     this.scopeOwnerIds = params.scopeOwnerIds ?? [params.ownerId];
+    this.status = params.status ?? "ACTIVE";
     this.type = params.type;
   }
 
@@ -55,6 +59,7 @@ class CategoryDTO {
       parentId: entity.parentId,
       scope: entity.scope,
       scopeOwnerIds: entity.scopeOwnerIds,
+      status: entity.status,
       type: entity.type,
     });
   }

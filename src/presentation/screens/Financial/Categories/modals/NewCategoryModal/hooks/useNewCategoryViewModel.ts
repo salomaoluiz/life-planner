@@ -3,8 +3,14 @@ import { useEffect, useMemo, useState } from "react";
 
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
-import { useMutation, useQuery } from "@infrastructure/fetcher";
+import { CategoryHasPendingItems } from "@domain/entities/errors";
+import {
+  invalidateFetcherData,
+  useMutation,
+  useQuery,
+} from "@infrastructure/fetcher";
 import { isHexColor } from "@presentation/constants/categoryColors";
+import { useLocaleTag } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
 import {
   ALL_OWNERS,
@@ -30,6 +36,16 @@ async function fetchByOwners<T>(
   execute: (ownerIds: string[]) => Promise<T>,
 ) {
   return execute(owners.map((owner) => owner.id));
+}
+
+// "05/11" / "11/05" style day and month of a `YYYY-MM-DD` calendar date, in the language of the app.
+function formatShortDate(calendarDate: string, localeTag: string) {
+  const [year, month, day] = calendarDate.split("-").map(Number);
+
+  return new Intl.DateTimeFormat(localeTag, {
+    day: "2-digit",
+    month: "2-digit",
+  }).format(new Date(year, month - 1, day));
 }
 
 function useNewCategoryViewModel() {
@@ -105,6 +121,9 @@ function useNewCategoryViewModel() {
   const [submitted, setSubmitted] = useState(false);
   const [isDiscardDialogOpen, setDiscardDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isArchiveDialogOpen, setArchiveDialogOpen] = useState(false);
+  const [isPendingDismissed, setPendingDismissed] = useState(false);
+  const localeTag = useLocaleTag();
   const [isCustomColorOpen, setCustomColorOpen] = useState(false);
   const [customColorDraft, setCustomColorDraft] = useState("");
   const [isIconPickerOpen, setIconPickerOpen] = useState(false);
@@ -132,6 +151,10 @@ function useNewCategoryViewModel() {
       updateMutation.status === "success" ||
       deleteMutation.status === "success"
     ) {
+      // The list (and a reopened form) must not show the old status.
+      invalidateFetcherData([
+        useCases.getFinancialCategoriesUseCase.uniqueName,
+      ]);
       router.back();
     }
   }, [createMutation.status, updateMutation.status, deleteMutation.status]);
@@ -227,6 +250,17 @@ function useNewCategoryViewModel() {
     });
   }
 
+  // Spec 041: archive / reactivate patch only the status (with the subtree), independent of the form fields.
+  function onArchiveConfirm() {
+    setArchiveDialogOpen(false);
+    setPendingDismissed(false);
+    updateMutation.mutate({ id: params.id!, status: "ARCHIVED" });
+  }
+
+  function onReactivatePress() {
+    updateMutation.mutate({ id: params.id!, status: "ACTIVE" });
+  }
+
   function onCustomColorOpen() {
     setCustomColorDraft(state?.iconColor ?? "");
     setCustomColorOpen(true);
@@ -253,7 +287,35 @@ function useNewCategoryViewModel() {
     ];
   }
 
+  const isArchived = existing?.status === "ARCHIVED";
+  const pendingError =
+    updateMutation.error instanceof CategoryHasPendingItems &&
+    !isPendingDismissed
+      ? updateMutation.error
+      : undefined;
+  const pendingItems = pendingError && {
+    hiddenCount: pendingError.hiddenCount,
+    plans: pendingError.installmentPlans.map((plan) => ({
+      count: plan.remainingInstallments,
+      description: plan.description,
+      id: plan.id,
+    })),
+    recurrences: pendingError.recurrences.map((recurrence) => ({
+      date: recurrence.nextOccurrenceDate
+        ? formatShortDate(recurrence.nextOccurrenceDate, localeTag)
+        : "",
+      description: recurrence.description,
+      id: recurrence.id,
+    })),
+  };
+
   return {
+    archiveBodyKeys: (hasChildren
+      ? [
+          "financial.categories.archive.confirmBody",
+          "financial.categories.archive.confirmBodyWithChildren",
+        ]
+      : ["financial.categories.archive.confirmBody"]) as TranslationKeys[],
     colorOptions: uiModel?.colorOptions ?? [],
     customColorDraft,
     customColorError,
@@ -268,6 +330,8 @@ function useNewCategoryViewModel() {
     iconColor: state?.iconColor ?? "",
     iconQuery,
     inlineIcons: uiModel?.iconOptions("", false) ?? [],
+    isArchived,
+    isArchiveDialogOpen,
     isCustomColorOpen,
     isDeleteDialogOpen,
     isDeleting: deleteMutation.isFetching,
@@ -279,8 +343,12 @@ function useNewCategoryViewModel() {
     isOwnerLocked,
     isSaving: createMutation.isFetching || updateMutation.isFetching,
     isTypeLocked,
+    isUpdating: updateMutation.isFetching,
     name: state?.name ?? "",
     nameError: errors.name,
+    onArchiveCancel: () => setArchiveDialogOpen(false),
+    onArchiveConfirm,
+    onArchivePress: () => setArchiveDialogOpen(true),
     onClose,
     onColorChange: (value: string) => {
       if (state) {
@@ -323,6 +391,8 @@ function useNewCategoryViewModel() {
         update({ ...state, parentId: value || undefined });
       }
     },
+    onPendingClose: () => setPendingDismissed(true),
+    onReactivatePress,
     onSave,
     onTypeChange: (value: string) => {
       if (state) {
@@ -338,6 +408,7 @@ function useNewCategoryViewModel() {
     parentId: state?.parentId ?? "",
     parentOptions:
       uiModel && state ? uiModel.parentOptions(state, params.id) : [],
+    pendingItems,
     pickerIcons: uiModel?.iconOptions(iconQuery, true) ?? [],
     saveLabelKey: (isEditing
       ? "financial.common.saveChanges"

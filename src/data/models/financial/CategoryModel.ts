@@ -2,11 +2,12 @@ import { fromApiColor, toApiColor } from "./iconColor";
 import { OwnerType } from "./TransactionModel";
 
 type CategoryScope = "ALL" | "FAMILY" | "PERSONAL";
-
 interface CategoryScopeModel {
   owner: OwnerType;
   ownerId: string;
 }
+
+type CategoryStatus = "ACTIVE" | "ARCHIVED";
 
 interface ICategoryModel {
   depthLevel?: number;
@@ -19,6 +20,7 @@ interface ICategoryModel {
   parentId?: string;
   scope?: CategoryScope;
   scopes?: CategoryScopeModel[];
+  status?: CategoryStatus;
   type: string;
 }
 
@@ -33,6 +35,7 @@ class CategoryModel implements ICategoryModel {
   parentId?: string;
   scope: CategoryScope;
   scopes: CategoryScopeModel[];
+  status: CategoryStatus;
   type: string;
 
   constructor(params: ICategoryModel) {
@@ -49,6 +52,7 @@ class CategoryModel implements ICategoryModel {
     this.scopes = params.scopes ?? [
       { owner: params.owner, ownerId: params.ownerId },
     ];
+    this.status = params.status ?? "ACTIVE";
     this.type = params.type;
   }
 
@@ -75,6 +79,7 @@ class CategoryModel implements ICategoryModel {
             ownerId: scope.ownerId,
           }))
         : undefined,
+      status: data.status === "ARCHIVED" ? "ARCHIVED" : "ACTIVE",
       type: (data.type as string) ?? "EXPENSE",
     });
   }
@@ -92,6 +97,7 @@ class CategoryModel implements ICategoryModel {
       parentId: this.parentId ?? null,
       scope: this.scope,
       scopes: this.scopes,
+      status: this.status,
       type: this.type,
     };
   }

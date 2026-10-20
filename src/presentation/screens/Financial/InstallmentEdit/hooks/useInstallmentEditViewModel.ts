@@ -9,7 +9,10 @@ import {
   useQuery,
 } from "@infrastructure/fetcher";
 import { TranslationKeys } from "@presentation/i18n/types";
-import { categoryInScope } from "@screens/Financial/models/categoryTree";
+import {
+  categoryInScope,
+  selectableCategories,
+} from "@screens/Financial/models/categoryTree";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
 
 import {
@@ -190,7 +193,10 @@ function useInstallmentEditViewModel() {
           : card.title,
         value: card.id,
       })),
-    categoryOptions: (categories.data ?? [])
+    categoryOptions: selectableCategories(
+      categories.data ?? [],
+      state?.categoryId,
+    )
       .filter(
         (category) =>
           ownerId !== undefined &&

@@ -59,7 +59,7 @@ async function request<T>(
 
   const message =
     typeof json?.message === "string" ? json.message : "Request failed";
-  throw new ApiBusinessError(message, status, numericDetails(json));
+  throw new ApiBusinessError(message, status, numericDetails(json), json ?? {});
 }
 
 const api = {

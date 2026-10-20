@@ -13,6 +13,7 @@ import {
   buildCategoryRows,
   categoriesOf,
   descendantIds,
+  selectableCategories,
 } from "@screens/Financial/models/categoryTree";
 import {
   ALL_OWNERS,
@@ -95,7 +96,7 @@ class NewCategoryUIModel {
 
   // Same owner and type as the form, in tree order, without the edited category and its descendants.
   parentOptions(
-    state: Pick<CategoryFormState, "ownerId" | "type">,
+    state: Pick<CategoryFormState, "ownerId" | "type"> & { parentId?: string },
     editingId?: string,
   ): { depth: number; label: string; value: string }[] {
     const excluded = new Set<string>(
@@ -115,7 +116,7 @@ class NewCategoryUIModel {
           (category) => category.scope !== "ALL",
         );
 
-    return buildCategoryRows(candidates)
+    return buildCategoryRows(selectableCategories(candidates, state.parentId))
       .filter((row) => !excluded.has(row.category.id))
       .map((row) => ({
         depth: row.depth,

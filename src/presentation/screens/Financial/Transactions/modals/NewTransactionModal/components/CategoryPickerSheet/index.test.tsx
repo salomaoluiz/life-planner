@@ -50,3 +50,12 @@ it("SHOULD show a check on the selected row only", () => {
   expect(screen.getByTestId("category-option-rent-selected")).toBeOnTheScreen();
   expect(screen.queryByTestId("category-option-food-selected")).toBeNull();
 });
+
+it("SHOULD label an archived category with the Archived badge only", () => {
+  setup();
+
+  expect(
+    screen.getByTestId("category-option-old-rent-archived"),
+  ).toBeOnTheScreen();
+  expect(screen.queryByTestId("category-option-rent-archived")).toBeNull();
+});

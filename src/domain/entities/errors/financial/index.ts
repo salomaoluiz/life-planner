@@ -1,6 +1,9 @@
 export { default as AccountArchived } from "./AccountArchived";
 export { default as AccountHasTransactions } from "./AccountHasTransactions";
+export { default as CategoryArchived } from "./CategoryArchived";
+export { default as CategoryHasPendingItems } from "./CategoryHasPendingItems";
 export { default as CategoryHasTransactions } from "./CategoryHasTransactions";
+export { default as CategoryParentArchived } from "./CategoryParentArchived";
 export { default as CreditCardArchived } from "./CreditCardArchived";
 export { default as CreditCardHasTransactions } from "./CreditCardHasTransactions";
 export { default as FinancialNotFound } from "./FinancialNotFound";

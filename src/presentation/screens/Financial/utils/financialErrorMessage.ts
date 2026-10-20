@@ -1,7 +1,10 @@
 import {
   AccountArchived,
   AccountHasTransactions,
+  CategoryArchived,
+  CategoryHasPendingItems,
   CategoryHasTransactions,
+  CategoryParentArchived,
   CreditCardArchived,
   CreditCardHasTransactions,
   FinancialNotFound,
@@ -33,6 +36,19 @@ function getFinancialErrorMessageKey(
 
   if (error instanceof CreditCardArchived) {
     return "financial.errors.cardArchived";
+  }
+
+  if (error instanceof CategoryArchived) {
+    return "financial.errors.categoryArchived";
+  }
+
+  if (error instanceof CategoryParentArchived) {
+    return "financial.errors.categoryParentArchived";
+  }
+
+  // Shown by its own dialog (the list of what blocks the archive), not as a form error.
+  if (error instanceof CategoryHasPendingItems) {
+    return undefined;
   }
 
   if (error instanceof InstallmentPaid) {

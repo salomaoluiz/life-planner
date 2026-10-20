@@ -129,3 +129,13 @@ it("SHOULD derive the scope from the owner WHEN the API sends none (old API)", (
   expect(family.scopes).toEqual([{ owner: "FAMILY", ownerId: "f1" }]);
   expect(personal.scope).toBe("PERSONAL");
 });
+
+it("SHOULD read status ARCHIVED AND treat a missing status as ACTIVE", () => {
+  const withoutStatus: Record<string, unknown> = { ...mocks.json };
+  delete withoutStatus.status;
+
+  expect(
+    CategoryModel.fromJSON({ ...mocks.json, status: "ARCHIVED" }).status,
+  ).toBe("ARCHIVED");
+  expect(CategoryModel.fromJSON(withoutStatus).status).toBe("ACTIVE");
+});

@@ -26,6 +26,7 @@ entities:
       - owner
       - ownerId
       - parentId
+      - status # ACTIVE | ARCHIVED (spec 041)
   CreditCardEntity:
     path: src/domain/entities/financial/CreditCardEntity.ts
     properties:
@@ -138,7 +139,7 @@ use_cases:
 
   updateCategoryUseCase:
     path: src/application/useCases/cases/financial/categories/updateCategoryUseCase.ts
-    behavior: Updates an existing category; forwards name, icon, iconColor, type and parentId (null removes the parent); scope "ALL" turns a single-scope main category into an All one (no way back); never owner/ownerId/depthLevel.
+    behavior: Updates an existing category; forwards name, icon, iconColor, type and parentId (null removes the parent); scope "ALL" turns a single-scope main category into an All one (no way back); status "ARCHIVED" / "ACTIVE" archives or reactivates it with its subtree (spec 041; 409 -> CategoryHasPendingItems, 422 -> CategoryArchived / CategoryParentArchived); never owner/ownerId/depthLevel.
 
   getMostUsedFinancialCategoriesUseCase:
     path: src/application/useCases/cases/financial/categories/getMostUsedCategoriesUseCase.ts
@@ -252,12 +253,12 @@ Transactions:
 Categories:
   view: Categories/index.tsx (+ styles.ts) # type SegmentedControl, owner ChipGroup, FlashList of TreeItem rows
   hooks: Categories/hooks/useCategoriesViewModel.ts (+ index.ts, fetchCategories)
-  models: Categories/models/CategoryRowUIModel.ts
+  models: [Categories/models/CategoryRowUIModel.ts, Categories/models/categoryEntries.ts] # entries = active tree, then the collapsed "Archived (N)" group (spec 041)
   form: Categories/modals/NewCategoryModal/
     - index.tsx, styles.ts
     - hooks/useNewCategoryViewModel.ts
     - models/{categoryFormState.ts,NewCategoryUIModel.ts}
-    - components/{CustomColorSheet,IconPickerSheet}/index.tsx
+    - components/{CustomColorSheet,IconPickerSheet,PendingItemsDialog}/index.tsx # PendingItemsDialog lists what blocks an archive (spec 041); the archive / reactivate action sits at the end of the form body
 
 Accounts:
   view: Accounts/index.tsx (+ styles.ts) # total, owner chips, active list, collapsible archived section

@@ -11,7 +11,7 @@ const handlers = {
   onSelect: jest.fn(),
 };
 
-function category(id: string, parentId?: string) {
+function category(id: string, parentId?: string, status?: "ARCHIVED") {
   return new CategoryDTO({
     icon: "food",
     iconColor: "#F59E0B",
@@ -20,6 +20,7 @@ function category(id: string, parentId?: string) {
     owner: "USER",
     ownerId: "user-id",
     parentId,
+    status,
     type: "EXPENSE",
   } as never);
 }
@@ -28,6 +29,7 @@ const rows = buildCategoryRows([
   category("food"),
   category("market", "food"),
   category("rent"),
+  category("old-rent", undefined, "ARCHIVED"),
 ]);
 
 function setup(
@@ -35,6 +37,7 @@ function setup(
 ) {
   render(
     <CategoryPickerSheet
+      archivedLabel={"Archived"}
       closeLabel={"Close"}
       query={""}
       rows={rows}

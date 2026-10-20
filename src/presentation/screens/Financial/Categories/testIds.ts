@@ -1,5 +1,6 @@
 const categoriesTestIds = {
   addButton: "financial.categories.add-button",
+  archivedToggle: "financial.categories.archived-toggle",
   childRow: "financial.categories.child-row",
   emptyState: "financial.categories.empty-state",
   ownerBadge: "financial.categories.owner-badge",

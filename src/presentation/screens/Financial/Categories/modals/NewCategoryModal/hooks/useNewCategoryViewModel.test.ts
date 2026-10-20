@@ -1,6 +1,10 @@
 import { act } from "@tests";
 
-import { CategoryHasTransactions } from "@domain/entities/errors";
+import {
+  CategoryHasPendingItems,
+  CategoryHasTransactions,
+  CategoryParentArchived,
+} from "@domain/entities/errors";
 
 import {
   cat,
@@ -476,5 +480,102 @@ it("SHOULD confirm delete with the subcategories message WHEN it has children, t
   expect(mutations.delete.value.mutate).toHaveBeenCalledWith({
     id: "p",
     ownerId: "user-id",
+  });
+});
+
+describe("archive and reactivate (spec 041)", () => {
+  it("SHOULD ask for confirmation, mentioning subcategories only when there are some", () => {
+    givenLoaded({
+      categories: [cat("parent"), cat("child", { parentId: "parent" })],
+      params: { id: "parent" },
+    });
+    const { result } = setup();
+
+    act(() => result.current.onArchivePress());
+
+    expect(result.current.isArchiveDialogOpen).toBe(true);
+    expect(result.current.archiveBodyKeys).toEqual([
+      "financial.categories.archive.confirmBody",
+      "financial.categories.archive.confirmBodyWithChildren",
+    ]);
+  });
+
+  it("SHOULD patch only the status WHEN the archive is confirmed", () => {
+    givenLoaded({ categories: [cat("c1")], params: { id: "c1" } });
+    const { result } = setup();
+
+    act(() => result.current.onArchivePress());
+    act(() => result.current.onArchiveConfirm());
+
+    expect(result.current.isArchiveDialogOpen).toBe(false);
+    expect(mutations.update.value.mutate).toHaveBeenCalledWith({
+      id: "c1",
+      status: "ARCHIVED",
+    });
+  });
+
+  it("SHOULD reactivate right away AND flag an archived category", () => {
+    givenLoaded({
+      categories: [cat("c1", { status: "ARCHIVED" })],
+      params: { id: "c1" },
+    });
+    const { result } = setup();
+
+    expect(result.current.isArchived).toBe(true);
+
+    act(() => result.current.onReactivatePress());
+
+    expect(mutations.update.value.mutate).toHaveBeenCalledWith({
+      id: "c1",
+      status: "ACTIVE",
+    });
+  });
+
+  it("SHOULD expose the pending items (no form error) AND dismiss them", () => {
+    givenLoaded({ categories: [cat("c1")], params: { id: "c1" } });
+    mutations.update.withError(
+      new CategoryHasPendingItems({
+        hiddenCount: 1,
+        installmentPlans: [
+          {
+            categoryId: "c1",
+            description: "TV",
+            id: "p1",
+            lastInvoiceMonth: "2027-02",
+            remainingInstallments: 4,
+          },
+        ],
+        recurrences: [
+          {
+            categoryId: "c1",
+            description: "Gym",
+            id: "r1",
+            nextOccurrenceDate: "2026-11-05",
+          },
+        ],
+      }),
+    );
+    const { result } = setup();
+
+    expect(result.current.formErrorKey).toBeUndefined();
+    expect(result.current.pendingItems).toMatchObject({
+      hiddenCount: 1,
+      plans: [{ count: 4, description: "TV", id: "p1" }],
+      recurrences: [{ description: "Gym", id: "r1" }],
+    });
+
+    act(() => result.current.onPendingClose());
+
+    expect(result.current.pendingItems).toBeUndefined();
+  });
+
+  it("SHOULD show the parent-archived message as the form error", () => {
+    givenLoaded({ categories: [cat("c1")], params: { id: "c1" } });
+    mutations.update.withError(new CategoryParentArchived());
+    const { result } = setup();
+
+    expect(result.current.formErrorKey).toBe(
+      "financial.errors.categoryParentArchived",
+    );
   });
 });

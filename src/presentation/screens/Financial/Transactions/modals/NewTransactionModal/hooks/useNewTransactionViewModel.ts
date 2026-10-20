@@ -673,9 +673,11 @@ function useNewTransactionViewModel() {
   const type = state?.type ?? TransactionType.EXPENSE;
   const categoryChips = uiModel
     ? chipCategories(
-        mostUsed.data ?? [],
+        (mostUsed.data ?? []).filter(
+          (category) => category.status !== "ARCHIVED",
+        ),
         state?.categoryId,
-        uiModel.categoriesFor(ownerId, type),
+        uiModel.categoriesFor(ownerId, type, state?.categoryId),
       ).map((category) => ({
         colorDot: normalizeCategoryColor(category.iconColor),
         label: category.name,
@@ -720,7 +722,10 @@ function useNewTransactionViewModel() {
     categoryChips,
     categoryError: errors.categoryId,
     categoryPickerRows: uiModel
-      ? filterRowsByQuery(uiModel.categoryRows(ownerId, type), categoryQuery)
+      ? filterRowsByQuery(
+          uiModel.categoryRows(ownerId, type, state?.categoryId),
+          categoryQuery,
+        )
       : [],
     categoryQuery,
     currency,

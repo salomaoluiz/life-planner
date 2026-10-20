@@ -9,6 +9,7 @@ import {
   Icon,
   IconButton,
   IconTile,
+  ListItem,
   SegmentedControl,
   TreeItem,
 } from "@components";
@@ -19,7 +20,7 @@ import pluralKey from "@presentation/i18n/pluralKey";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
 import { useCategoriesViewModel } from "./hooks";
-import CategoryRowUIModel from "./models/CategoryRowUIModel";
+import { CategoryEntry } from "./models/categoryEntries";
 import useStyles from "./styles";
 import categoriesTestIds from "./testIds";
 
@@ -70,13 +71,25 @@ function FinancialCategories() {
     </View>
   );
 
-  function renderItem({
-    index,
-    item,
-  }: {
-    index: number;
-    item: CategoryRowUIModel;
-  }) {
+  function renderItem({ item: entry }: { item: CategoryEntry }) {
+    if (entry.kind === "archivedToggle") {
+      return (
+        <ListItem
+          inset
+          onPress={vm.onArchivedToggle}
+          testID={categoriesTestIds.archivedToggle}
+          title={t("financial.categories.archived", { count: entry.count })}
+          trailing={
+            <Icon
+              name={entry.expanded ? "chevron-up" : "chevron-down"}
+              size={sizes.iconMd}
+            />
+          }
+        />
+      );
+    }
+
+    const { row: item } = entry;
     const rowTestID =
       item.depth > 0 ? categoriesTestIds.childRow : categoriesTestIds.row;
     let subtitle: string | undefined;
@@ -103,8 +116,14 @@ function FinancialCategories() {
     return (
       <TreeItem
         depth={item.depth}
-        divider={index < vm.rows.length - 1}
-        leading={<IconTile color={item.color} name={item.icon} />}
+        divider={!entry.isLast}
+        leading={
+          item.isArchived ? (
+            <IconTile name={item.icon} tone={"neutral"} />
+          ) : (
+            <IconTile color={item.color} name={item.icon} />
+          )
+        }
         onPress={() => vm.onRowPress(item.id)}
         subtitle={subtitle}
         testID={rowTestID}
@@ -149,9 +168,9 @@ function FinancialCategories() {
   return (
     <View style={styles.root} testID={categoriesTestIds.screen}>
       <FlashList
-        data={vm.rows}
+        data={vm.entries}
         estimatedItemSize={64}
-        keyExtractor={(row) => row.id}
+        keyExtractor={(entry) => entry.key}
         ListEmptyComponent={
           <EmptyState
             actionLabel={t("financial.categories.new")}

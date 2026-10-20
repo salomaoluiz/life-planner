@@ -253,3 +253,55 @@ describe("wide layout (spec 037)", () => {
     expect(vm.onDeletePress).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("archive (spec 041)", () => {
+  it("SHOULD show Archive on an active category AND Reactivate on an archived one, only when editing", () => {
+    const vm = setup({ isEditing: true });
+    fireEvent.press(screen.getByTestId(categoryFormTestIds.archiveButton));
+    expect(vm.onArchivePress).toHaveBeenCalledTimes(1);
+    expect(
+      screen.queryByTestId(categoryFormTestIds.reactivateButton),
+    ).toBeNull();
+    screen.unmount();
+
+    const archived = setup({ isArchived: true, isEditing: true });
+    fireEvent.press(screen.getByTestId(categoryFormTestIds.reactivateButton));
+    expect(archived.onReactivatePress).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId(categoryFormTestIds.archiveButton)).toBeNull();
+    screen.unmount();
+
+    setup();
+    expect(screen.queryByTestId(categoryFormTestIds.archiveButton)).toBeNull();
+  });
+
+  it("SHOULD confirm the archive from its dialog", () => {
+    const vm = setup({ isArchiveDialogOpen: true, isEditing: true });
+
+    fireEvent.press(
+      screen.getByTestId(`${categoryFormTestIds.archiveDialog}-confirm`),
+    );
+
+    expect(vm.onArchiveConfirm).toHaveBeenCalledTimes(1);
+  });
+
+  it("SHOULD list the pending items AND close with the OK button", () => {
+    const vm = setup({
+      isEditing: true,
+      pendingItems: {
+        hiddenCount: 2,
+        plans: [{ count: 4, description: "TV", id: "p1" }],
+        recurrences: [{ date: "05/11", description: "Gym", id: "r1" }],
+      },
+    });
+
+    expect(
+      screen.getByTestId(categoryFormTestIds.pendingDialog),
+    ).toBeOnTheScreen();
+    expect(screen.getByTestId("pending-item-r1")).toBeOnTheScreen();
+    expect(screen.getByTestId("pending-item-p1")).toBeOnTheScreen();
+
+    fireEvent.press(screen.getByTestId(categoryFormTestIds.pendingOk));
+
+    expect(vm.onPendingClose).toHaveBeenCalledTimes(1);
+  });
+});

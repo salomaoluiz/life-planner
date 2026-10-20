@@ -1,6 +1,7 @@
 import { ScrollView } from "react-native";
 
 import {
+  Badge,
   BottomSheet,
   Icon,
   IconTile,
@@ -15,6 +16,7 @@ import {
 } from "@screens/Financial/models/categoryTree";
 
 interface Props {
+  archivedLabel: string;
   closeLabel: string;
   onClose: () => void;
   onQueryChange: (text: string) => void;
@@ -62,13 +64,21 @@ function CategoryPickerSheet(props: Props) {
             testID={`category-option-${row.category.id}`}
             title={row.category.name}
             trailing={
-              props.selected === row.category.id ? (
-                <Icon
-                  name={"check"}
-                  size={sizes.iconMd}
-                  testID={`category-option-${row.category.id}-selected`}
-                />
-              ) : undefined
+              <>
+                {row.category.status === "ARCHIVED" && (
+                  <Badge
+                    label={props.archivedLabel}
+                    testID={`category-option-${row.category.id}-archived`}
+                  />
+                )}
+                {props.selected === row.category.id && (
+                  <Icon
+                    name={"check"}
+                    size={sizes.iconMd}
+                    testID={`category-option-${row.category.id}-selected`}
+                  />
+                )}
+              </>
             }
           />
         ))}

@@ -50,6 +50,15 @@ const categories = [
   category("snacks", "user-id", "EXPENSE", "food"),
   category("salary", "user-id", "INCOME"),
   category("rent", "family-1", "EXPENSE"),
+  new CategoryDTO({
+    icon: "food",
+    id: "old",
+    name: "old",
+    owner: "USER",
+    ownerId: "user-id",
+    status: "ARCHIVED",
+    type: "EXPENSE",
+  }),
 ];
 
 const model = new NewTransactionUIModel({ accounts, categories, owners });
@@ -88,6 +97,18 @@ it("SHOULD build the category tree for the owner and type only", () => {
   expect(rows.map((row) => row.category.id)).toEqual(["food", "snacks"]);
   expect(rows.map((row) => row.depth)).toEqual([0, 1]);
   expect(model.categoryIds("user-id", "INCOME")).toEqual(["salary"]);
+});
+
+it("SHOULD hide archived categories BUT keep the selected one (spec 041)", () => {
+  expect(model.categoryIds("user-id", "EXPENSE")).toEqual(["food", "snacks"]);
+  expect(
+    model.categoriesFor("user-id", "EXPENSE", "old").map((item) => item.id),
+  ).toContain("old");
+  expect(
+    model
+      .categoryRows("user-id", "EXPENSE", "old")
+      .map((row) => row.category.id),
+  ).toContain("old");
 });
 
 it("SHOULD tell whether the owner has accounts and categories", () => {

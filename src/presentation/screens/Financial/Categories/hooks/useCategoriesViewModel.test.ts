@@ -157,3 +157,28 @@ it("SHOULD list an All category once under every filter that covers it", () => {
   });
   expect(result.current.rows.map((row) => row.id)).toEqual(["all"]);
 });
+
+describe("archived categories (spec 041)", () => {
+  it("SHOULD keep archived categories out of the active rows AND group them behind a toggle", () => {
+    givenData([
+      cat("food", "Food", "EXPENSE"),
+      { ...cat("old", "Old", "EXPENSE"), status: "ARCHIVED" } as CategoryDTO,
+    ]);
+    const { result } = setup();
+
+    expect(result.current.rows.map((row) => row.id)).toEqual(["food"]);
+    expect(result.current.archivedCount).toBe(1);
+    expect(result.current.entries.map((entry) => entry.key)).toEqual([
+      "row-food",
+      "archived-toggle",
+    ]);
+
+    act(() => result.current.onArchivedToggle());
+
+    expect(result.current.entries.map((entry) => entry.key)).toEqual([
+      "row-food",
+      "archived-toggle",
+      "row-old",
+    ]);
+  });
+});

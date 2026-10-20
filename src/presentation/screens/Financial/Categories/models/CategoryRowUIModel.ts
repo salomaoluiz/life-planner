@@ -26,6 +26,10 @@ class CategoryRowUIModel {
     return this.row.category.scope === "ALL";
   }
 
+  get isArchived() {
+    return this.row.category.status === "ARCHIVED";
+  }
+
   get name() {
     return this.row.category.name;
   }

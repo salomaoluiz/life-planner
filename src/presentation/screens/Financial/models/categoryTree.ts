@@ -104,10 +104,19 @@ function normalize(text: string) {
   return text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 }
 
+// Archived categories (spec 041) are not offered for new records; the one already selected stays so an old
+// record can still be edited (and shows its category).
+function selectableCategories(categories: CategoryDTO[], selectedId?: string) {
+  return categories.filter(
+    (category) => category.status !== "ARCHIVED" || category.id === selectedId,
+  );
+}
+
 export {
   buildCategoryRows,
   categoriesOf,
   categoryInScope,
   descendantIds,
   filterRowsByQuery,
+  selectableCategories,
 };

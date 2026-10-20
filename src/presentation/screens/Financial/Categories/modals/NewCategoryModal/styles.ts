@@ -7,6 +7,12 @@ function useStyles() {
 
   return {
     styles: StyleSheet.create({
+      archiveHint: { flex: 1 },
+      archiveRow: {
+        alignItems: "center",
+        flexDirection: "row",
+        gap: theme.sizes.spacing.md,
+      },
       form: { gap: theme.sizes.spacing.md },
       helper: { gap: theme.sizes.spacing.xs },
       preview: {

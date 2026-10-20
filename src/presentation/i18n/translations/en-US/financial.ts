@@ -113,6 +113,25 @@ const financial = {
     usedPercent: "{{percent}}% of the limit used",
   },
   categories: {
+    archive: {
+      action: "Archive category",
+      confirmBody:
+        "It will no longer appear when you create transactions. Your history stays.",
+      confirmBodyWithChildren: "Its subcategories will be archived too.",
+      confirmTitle: "Archive this category?",
+      hint: "Archiving removes the category from the transaction pickers. Your history stays.",
+      pendingBody: "Resolve these items first:",
+      pendingHidden: "{{count}} more in families you can't see",
+      pendingOk: "Got it",
+      pendingPlanLine_one: "{{description}} · {{count}} installment left",
+      pendingPlanLine_other: "{{description}} · {{count}} installments left",
+      pendingPlans: "Installments in progress",
+      pendingRecurrenceLine: "{{description}} · next on {{date}}",
+      pendingRecurrences: "Active recurrences",
+      pendingTitle: "This category can't be archived yet",
+      reactivate: "Reactivate category",
+    },
+    archived: "Archived ({{count}})",
     delete: "Delete category",
     deleteAlertMsg: "Are you sure you want to delete this category?",
     deleteConfirm: {
@@ -219,6 +238,8 @@ const financial = {
   errors: {
     accountArchived: "This account is archived.",
     cardArchived: "This card is archived.",
+    categoryArchived: "This category is archived.",
+    categoryParentArchived: "The parent category is archived.",
     close: "OK",
     deleteRefundsFirst: "Delete its refunds first.",
     installmentPaid: "An installment is in a paid invoice.",
