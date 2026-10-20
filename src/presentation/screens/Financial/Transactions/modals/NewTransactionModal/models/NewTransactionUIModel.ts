@@ -7,6 +7,7 @@ import { TranslationKeys } from "@presentation/i18n/types";
 import {
   buildCategoryRows,
   categoriesOf,
+  selectableCategories,
 } from "@screens/Financial/models/categoryTree";
 import { buildOwnerChoices } from "@screens/Financial/models/ownerOptions";
 
@@ -96,8 +97,12 @@ class NewTransactionUIModel {
     );
   }
 
-  categoriesFor(ownerId: string, type: string) {
-    return categoriesOf(this.props.categories, ownerId, type);
+  // Archived categories are only kept when they are the selected one (spec 041 FR 10).
+  categoriesFor(ownerId: string, type: string, selectedId?: string) {
+    return selectableCategories(
+      categoriesOf(this.props.categories, ownerId, type),
+      selectedId,
+    );
   }
 
   categoryIds(ownerId: string, type: string) {
@@ -111,8 +116,8 @@ class NewTransactionUIModel {
     );
   }
 
-  categoryRows(ownerId: string, type: string) {
-    return buildCategoryRows(this.categoriesFor(ownerId, type));
+  categoryRows(ownerId: string, type: string, selectedId?: string) {
+    return buildCategoryRows(this.categoriesFor(ownerId, type, selectedId));
   }
 
   hasAccounts(ownerId: string) {

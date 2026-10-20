@@ -591,6 +591,7 @@ function NewTransactionModal() {
       />
       {vm.isCategoryPickerOpen && (
         <CategoryPickerSheet
+          archivedLabel={t("financial.accounts.archivedLabel")}
           closeLabel={t("common.actions.close")}
           onClose={vm.onCategoryPickerClose}
           onQueryChange={vm.onCategoryQueryChange}

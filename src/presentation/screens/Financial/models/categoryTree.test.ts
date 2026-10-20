@@ -6,6 +6,7 @@ import {
   categoryInScope,
   descendantIds,
   filterRowsByQuery,
+  selectableCategories,
 } from "./categoryTree";
 
 function category(
@@ -138,4 +139,16 @@ describe("scope ALL", () => {
     expect(categoryInScope(all, "family-1")).toBe(true);
     expect(categoryInScope(all, "family-2")).toBe(false);
   });
+});
+
+it("SHOULD hide archived categories from pickers BUT keep the selected one", () => {
+  const active = category("a", "Active");
+  const archived = category("b", "Old", { status: "ARCHIVED" });
+  const other = category("c", "Other archived", { status: "ARCHIVED" });
+
+  expect(selectableCategories([active, archived, other])).toEqual([active]);
+  expect(selectableCategories([active, archived, other], "b")).toEqual([
+    active,
+    archived,
+  ]);
 });
