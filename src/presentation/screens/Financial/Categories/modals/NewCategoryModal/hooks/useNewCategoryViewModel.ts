@@ -4,7 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
 import { CategoryHasPendingItems } from "@domain/entities/errors";
-import { useMutation, useQuery } from "@infrastructure/fetcher";
+import {
+  invalidateFetcherData,
+  useMutation,
+  useQuery,
+} from "@infrastructure/fetcher";
 import { isHexColor } from "@presentation/constants/categoryColors";
 import { useLocaleTag } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
@@ -147,6 +151,10 @@ function useNewCategoryViewModel() {
       updateMutation.status === "success" ||
       deleteMutation.status === "success"
     ) {
+      // The list (and a reopened form) must not show the old status.
+      invalidateFetcherData([
+        useCases.getFinancialCategoriesUseCase.uniqueName,
+      ]);
       router.back();
     }
   }, [createMutation.status, updateMutation.status, deleteMutation.status]);

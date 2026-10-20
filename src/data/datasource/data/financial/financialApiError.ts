@@ -11,7 +11,7 @@ interface Options {
   conflict?: (
     details: Record<string, number>,
     body: Record<string, unknown>,
-  ) => BusinessError;
+  ) => BusinessError | undefined;
   fields?: Record<string, unknown>;
   unprocessable?: (message: string) => BusinessError | undefined;
 }

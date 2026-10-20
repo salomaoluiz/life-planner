@@ -12,9 +12,13 @@ import handleFinancialApiError from "../../financialApiError";
 export type Params = Parameters<CategoryDatasource["updateCategory"]>[0];
 export type Response = ReturnType<CategoryDatasource["updateCategory"]>;
 
-// The 409 body lists what blocks the archive; tolerate a body without any of the keys.
+// The 409 body lists what blocks the archive. Any other 409 (no blockers) stays a generic failure instead of
+// an empty "resolve these items" dialog.
 function pendingItemsOf(body: Record<string, unknown>) {
-  const blockers = (body.blockers ?? {}) as Record<string, unknown>;
+  if (typeof body.blockers !== "object" || body.blockers === null) {
+    return undefined;
+  }
+  const blockers = body.blockers as Record<string, unknown>;
 
   return new CategoryHasPendingItems({
     hiddenCount: typeof body.hiddenCount === "number" ? body.hiddenCount : 0,

@@ -91,16 +91,12 @@ it("SHOULD map a 409 with the blockers body to CategoryHasPendingItems", async (
   });
 });
 
-it("SHOULD map a 409 without a blockers body to CategoryHasPendingItems with empty lists", async () => {
+it("SHOULD wrap a 409 without a blockers body in GenericError (never an empty pending dialog)", async () => {
   spies.patch.mockRejectedValueOnce(
     new ApiBusinessError("Category type cannot be changed", 409),
   );
 
-  expect(await setupThrowable()).toMatchObject({
-    hiddenCount: 0,
-    installmentPlans: [],
-    recurrences: [],
-  });
+  expect(await setupThrowable()).toBeInstanceOf(GenericError);
 });
 
 it("SHOULD send status to archive or reactivate", async () => {

@@ -1,0 +1,66 @@
+url: ${E2E_WEB_URL}
+name: financial/categories/archive-category-blocked
+tags:
+  - financial
+  - spec-041
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Series
+      KEY: SERIES_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-recurrence.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: ${output.SERIES_NAME}
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../../subflows/financial/open-categories.yaml
+- tapOn:
+    id: "financial.categories.row-title"
+    text: ${output.EXPENSE_CATEGORY_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.category-form.name-input"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.category-form.archive-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.category-form.archive-dialog-confirm"
+    timeout: 20000
+- tapOn:
+    id: "financial.category-form.archive-dialog-confirm"
+# An active recurrence blocks the archive: the dialog lists it
+- extendedWaitUntil:
+    visible:
+      id: "financial.category-form.pending-dialog"
+    timeout: 20000
+# The list names the series (not an empty dialog)
+- assertVisible:
+    id: "pending-item-.*"
+    text: ".*${output.SERIES_NAME}.*"
+- tapOn:
+    id: "financial.category-form.pending-ok"
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.category-form.pending-dialog"
+    timeout: 20000
