@@ -1,3 +1,7 @@
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
 import InstallmentPlanEntity, {
   InstallmentEntity,
   PrepaymentEntity,
@@ -6,6 +10,7 @@ import InstallmentPlanEntity, {
 class InstallmentPlanDTO {
   categoryId: string;
   creditCardId: string;
+  currency: CurrencyCode;
   date: string;
   description: string;
   id: string;
@@ -20,6 +25,7 @@ class InstallmentPlanDTO {
   constructor(params: {
     categoryId: string;
     creditCardId: string;
+    currency?: CurrencyCode;
     date: string;
     description: string;
     id: string;
@@ -33,6 +39,7 @@ class InstallmentPlanDTO {
   }) {
     this.categoryId = params.categoryId;
     this.creditCardId = params.creditCardId;
+    this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.date = params.date;
     this.description = params.description;
     this.id = params.id;
@@ -49,6 +56,7 @@ class InstallmentPlanDTO {
     return new InstallmentPlanDTO({
       categoryId: entity.categoryId,
       creditCardId: entity.creditCardId,
+      currency: entity.currency,
       date: entity.date,
       description: entity.description,
       id: entity.id,

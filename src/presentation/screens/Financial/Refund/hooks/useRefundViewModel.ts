@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import CreditCardOverviewDTO from "@application/dto/financial/CreditCardOverviewDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import { useCases } from "@application/useCases";
+import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import {
   invalidateFetcherData,
   useMutation,
@@ -196,6 +197,7 @@ function useRefundViewModel() {
     card: summary?.card,
     carryCents,
     carryMonth: invoiceMonth ? addMonthsTo(invoiceMonth, 1) : undefined,
+    currency: summary?.card.currency ?? DEFAULT_CURRENCY,
     date,
     description,
     errors: submitted ? errorsOf((description ?? "x").trim()) : {},

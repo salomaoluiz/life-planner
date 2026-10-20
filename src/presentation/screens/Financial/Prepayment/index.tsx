@@ -77,6 +77,7 @@ function PrepaymentModal() {
                     value={t("financial.prepayment.total")}
                   />
                   <AmountText
+                    currency={vm.currency}
                     size="heading"
                     testID={prepaymentTestIds.total}
                     type="EXPENSE"
@@ -108,6 +109,7 @@ function PrepaymentModal() {
               </View>
               {vm.hasDiscount ? (
                 <AmountInput
+                  currency={vm.currency}
                   error={vm.errors.discount ? t(vm.errors.discount) : undefined}
                   label={t("financial.prepayment.discount")}
                   onChange={vm.onDiscountChange}
@@ -130,7 +132,11 @@ function PrepaymentModal() {
                   tone="secondary"
                   value={t("financial.prepayment.hint", {
                     month: formatReferenceMonth(vm.targetMonth, localeTag),
-                    value: formatAmount(vm.resultingTotalCents, localeTag),
+                    value: formatAmount(
+                      vm.resultingTotalCents,
+                      localeTag,
+                      vm.currency,
+                    ),
                   })}
                 />
               ) : null}

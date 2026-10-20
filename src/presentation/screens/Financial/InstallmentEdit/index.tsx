@@ -85,6 +85,7 @@ function InstallmentEditModal() {
               />
               {vm.fields.amount ? (
                 <AmountInput
+                  currency={vm.currency}
                   error={err(vm.errors.amount)}
                   label={t(
                     isAll
@@ -103,7 +104,11 @@ function InstallmentEditModal() {
                   label={t("financial.transactions.form.amount")}
                   onChangeText={() => undefined}
                   testID={installmentEditTestIds.amount}
-                  value={formatAmount(state.amountCents, localeTag)}
+                  value={formatAmount(
+                    state.amountCents,
+                    localeTag,
+                    vm.currency,
+                  )}
                 />
               )}
               <TextField

@@ -16,6 +16,7 @@ import {
   TextField,
 } from "@components";
 import Skeleton from "@components/Skeleton";
+import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
 import { TranslationKeys } from "@presentation/i18n/types";
@@ -90,6 +91,7 @@ function NewAccountModal() {
             <>
               <View style={styles.helper}>
                 <AmountInput
+                  currency={DEFAULT_CURRENCY}
                   error={err(vm.amountError)}
                   label={t(vm.balanceLabelKey)}
                   onChange={vm.onAmountChange}

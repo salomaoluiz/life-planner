@@ -24,6 +24,7 @@ const defaultViewModel: ReturnType<typeof useNewTransactionViewModel> = {
   categoryError: undefined,
   categoryPickerRows: [],
   categoryQuery: "",
+  currency: "BRL",
   date: new Date(2026, 9, 5),
   dateError: undefined,
   dateLabelKey: "financial.transactions.form.date" as TranslationKeys,

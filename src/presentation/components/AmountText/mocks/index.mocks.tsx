@@ -8,7 +8,9 @@ function setup(
   locale = "pt-BR",
 ) {
   jest.mocked(i18n.useLocaleTag).mockReturnValue(locale);
-  render(<AmountText testID="amount" value={31290} {...props} />);
+  render(
+    <AmountText currency="BRL" testID="amount" value={31290} {...props} />,
+  );
 }
 
 export { setup };

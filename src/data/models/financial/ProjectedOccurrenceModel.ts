@@ -1,3 +1,9 @@
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+  toCurrencyCode,
+} from "@domain/entities/financial/Currency";
+
 import { calendarDateToIso } from "./calendarDate";
 import { centsToDecimalString } from "./money";
 import {
@@ -15,6 +21,7 @@ interface IProjectedOccurrenceModel {
   creditCardId?: string;
   creditCardLastDigits?: string;
   creditCardTitle?: string;
+  currency?: CurrencyCode;
   date: string;
   description: string;
   frequency: RecurrenceFrequency;
@@ -39,6 +46,7 @@ class ProjectedOccurrenceModel implements IProjectedOccurrenceModel {
   creditCardId?: string;
   creditCardLastDigits?: string;
   creditCardTitle?: string;
+  currency: CurrencyCode;
   date: string;
   description: string;
   frequency: RecurrenceFrequency;
@@ -61,6 +69,7 @@ class ProjectedOccurrenceModel implements IProjectedOccurrenceModel {
     this.creditCardId = params.creditCardId;
     this.creditCardLastDigits = params.creditCardLastDigits;
     this.creditCardTitle = params.creditCardTitle;
+    this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.date = params.date;
     this.description = params.description;
     this.frequency = params.frequency;
@@ -97,6 +106,7 @@ class ProjectedOccurrenceModel implements IProjectedOccurrenceModel {
       creditCardId: card?.id,
       creditCardLastDigits: card?.lastDigits,
       creditCardTitle: card?.title,
+      currency: toCurrencyCode(data.currency),
       date: calendarDateToIso(data.date as string),
       description: data.description as string,
       frequency: data.frequency as RecurrenceFrequency,

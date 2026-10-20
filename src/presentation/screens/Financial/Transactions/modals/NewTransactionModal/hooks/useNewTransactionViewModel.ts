@@ -8,6 +8,7 @@ import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
 import { RecurrenceHasPaidOccurrences } from "@domain/entities/errors";
+import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { RecurrenceScope } from "@domain/entities/financial/RecurrenceEntity";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
@@ -699,6 +700,13 @@ function useNewTransactionViewModel() {
     splitRecurrenceMutation.isFetching ||
     materializeMutation.isFetching;
 
+  // The amount is in the currency of the chosen account or card (spec 040); it is never typed.
+  const currency =
+    (state?.payWith === "CARD"
+      ? cards.data?.find((card) => card.id === state.creditCardId)?.currency
+      : accounts.data?.find((account) => account.id === state?.accountId)
+          ?.currency) ?? DEFAULT_CURRENCY;
+
   return {
     accountError: errors.accountId,
     accountOptions: uiModel?.accountOptions(ownerId, state?.accountId) ?? [],
@@ -715,6 +723,7 @@ function useNewTransactionViewModel() {
       ? filterRowsByQuery(uiModel.categoryRows(ownerId, type), categoryQuery)
       : [],
     categoryQuery,
+    currency,
     date: state?.date ?? normalizeDate(new Date()),
     dateError: errors.date,
     dateLabelKey: (isEditing && state?.payWith !== "CARD" && state?.paid

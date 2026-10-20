@@ -17,6 +17,10 @@ class AccountUIModel {
     return decimalToCents(this.dto.balance);
   }
 
+  get currency() {
+    return this.dto.currency;
+  }
+
   get hasProjectedDifference() {
     return this.projectedBalanceCents !== this.balanceCents;
   }

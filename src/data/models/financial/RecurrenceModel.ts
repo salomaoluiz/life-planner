@@ -1,3 +1,9 @@
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+  toCurrencyCode,
+} from "@domain/entities/financial/Currency";
+
 import { calendarDateToIso } from "./calendarDate";
 import { centsToDecimalString } from "./money";
 import {
@@ -13,6 +19,7 @@ interface IRecurrenceModel {
   category: string;
   categoryId: string;
   creditCardId?: string;
+  currency?: CurrencyCode;
   description: string;
   endDate?: string;
   firstNumber: number;
@@ -34,6 +41,7 @@ class RecurrenceModel implements IRecurrenceModel {
   category: string;
   categoryId: string;
   creditCardId?: string;
+  currency: CurrencyCode;
   description: string;
   endDate?: string;
   firstNumber: number;
@@ -53,6 +61,7 @@ class RecurrenceModel implements IRecurrenceModel {
     this.category = params.category;
     this.categoryId = params.categoryId;
     this.creditCardId = params.creditCardId;
+    this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.description = params.description;
     this.endDate = params.endDate;
     this.firstNumber = params.firstNumber;
@@ -76,6 +85,7 @@ class RecurrenceModel implements IRecurrenceModel {
       category: category?.name ?? "",
       categoryId: data.categoryId as string,
       creditCardId: (data.creditCardId as null | string) ?? undefined,
+      currency: toCurrencyCode(data.currency),
       description: data.description as string,
       endDate: data.endDate
         ? calendarDateToIso(data.endDate as string)

@@ -66,7 +66,7 @@ function EarlyPaymentModal() {
               />
               <Text.Body
                 testID={earlyPaymentTestIds.leftToPay}
-                value={`${t("financial.earlyPayment.leftToPay")}: ${formatAmount(vm.leftCents, localeTag)}`}
+                value={`${t("financial.earlyPayment.leftToPay")}: ${formatAmount(vm.leftCents, localeTag, vm.currency)}`}
               />
               {vm.isLocked ? (
                 <TextField
@@ -75,10 +75,11 @@ function EarlyPaymentModal() {
                   label={t("financial.earlyPayment.amount")}
                   onChangeText={() => undefined}
                   testID={earlyPaymentTestIds.amount}
-                  value={formatAmount(vm.amountCents, localeTag)}
+                  value={formatAmount(vm.amountCents, localeTag, vm.currency)}
                 />
               ) : (
                 <AmountInput
+                  currency={vm.currency}
                   error={err(vm.errors.amount)}
                   label={t("financial.earlyPayment.amount")}
                   onChange={vm.onAmountChange}
@@ -152,7 +153,11 @@ function EarlyPaymentModal() {
                   tone="secondary"
                   value={t("financial.earlyPayment.hint", {
                     month: formatReferenceMonth(vm.invoiceMonth, localeTag),
-                    value: formatAmount(vm.remainingCents, localeTag),
+                    value: formatAmount(
+                      vm.remainingCents,
+                      localeTag,
+                      vm.currency,
+                    ),
                   })}
                 />
               ) : null}

@@ -1,5 +1,9 @@
 import CreditCardDTO from "@application/dto/financial/CreditCardDTO";
 import CreditCardOverviewEntity from "@domain/entities/financial/CreditCardOverviewEntity";
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
 import InvoiceEntity, {
   InvoicePaymentEntity,
 } from "@domain/entities/financial/InvoiceEntity";
@@ -9,6 +13,7 @@ export interface IInvoiceDTO {
   amountDue: number;
   carryIn: number;
   closingDate: string;
+  currency?: CurrencyCode;
   dueDate: string;
   earlyPaid: number;
   listDate: string;
@@ -87,6 +92,7 @@ export class InvoiceDTO implements IInvoiceDTO {
   amountDue: number;
   carryIn: number;
   closingDate: string;
+  currency: CurrencyCode;
   dueDate: string;
   earlyPaid: number;
   listDate: string;
@@ -105,6 +111,7 @@ export class InvoiceDTO implements IInvoiceDTO {
     this.amountDue = params.amountDue;
     this.carryIn = params.carryIn;
     this.closingDate = params.closingDate;
+    this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.dueDate = params.dueDate;
     this.earlyPaid = params.earlyPaid;
     this.listDate = params.listDate;
@@ -125,6 +132,7 @@ export class InvoiceDTO implements IInvoiceDTO {
       amountDue: entity.amountDue,
       carryIn: entity.carryIn,
       closingDate: entity.closingDate,
+      currency: entity.currency,
       dueDate: entity.dueDate,
       earlyPaid: entity.earlyPaid,
       listDate: entity.listDate,

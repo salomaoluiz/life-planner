@@ -2,11 +2,13 @@ import { Text as RNText } from "react-native";
 
 import { useTextStyle } from "@components/Text/styles";
 import { TextMode } from "@components/Text/types";
+import { CurrencyCode } from "@domain/entities/financial/Currency";
 import { useLocaleTag } from "@presentation/i18n";
 
 import { AmountType, formatAmount } from "./formatAmount";
 
 export interface AmountTextProps {
+  currency: CurrencyCode;
   size?: "body" | "caption" | "display" | "heading";
   testID?: string;
   tone?: "expense" | "income" | "primary" | "secondary";
@@ -34,7 +36,7 @@ function AmountText(props: AmountTextProps) {
 
   return (
     <RNText numberOfLines={1} style={style} testID={props.testID}>
-      {formatAmount(props.value, localeTag, props.type)}
+      {formatAmount(props.value, localeTag, props.currency, props.type)}
     </RNText>
   );
 }

@@ -1,3 +1,9 @@
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+  toCurrencyCode,
+} from "@domain/entities/financial/Currency";
+
 import { calendarDateToIso } from "./calendarDate";
 import { centsToDecimalString } from "./money";
 import { OwnerType } from "./TransactionModel";
@@ -24,6 +30,7 @@ export interface PrepaymentModel {
 class InstallmentPlanModel {
   categoryId: string;
   creditCardId: string;
+  currency: CurrencyCode;
   date: string;
   description: string;
   id: string;
@@ -38,6 +45,7 @@ class InstallmentPlanModel {
   constructor(params: {
     categoryId: string;
     creditCardId: string;
+    currency?: CurrencyCode;
     date: string;
     description: string;
     id: string;
@@ -51,6 +59,7 @@ class InstallmentPlanModel {
   }) {
     this.categoryId = params.categoryId;
     this.creditCardId = params.creditCardId;
+    this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.date = params.date;
     this.description = params.description;
     this.id = params.id;
@@ -70,6 +79,7 @@ class InstallmentPlanModel {
     return new InstallmentPlanModel({
       categoryId: plan.categoryId as string,
       creditCardId: plan.creditCardId as string,
+      currency: toCurrencyCode(plan.currency),
       date: calendarDateToIso(plan.date as string),
       description: plan.description as string,
       id: plan.id as string,

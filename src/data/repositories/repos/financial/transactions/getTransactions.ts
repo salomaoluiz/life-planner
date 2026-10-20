@@ -38,6 +38,7 @@ async function getTransactions(ownerIds: Params, datasources: Datasources) {
         category: transaction.category,
         categoryId: transaction.categoryId,
         creditCardId: transaction.creditCardId,
+        currency: transaction.currency,
         date: transaction.date,
         description: transaction.description,
         earlyPayment: transaction.earlyPayment,

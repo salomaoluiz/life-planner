@@ -1,11 +1,16 @@
 import CreditCardEntity, {
   PaymentAccountSummary,
 } from "@domain/entities/financial/CreditCardEntity";
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
 
 export interface ICreditCardDTO {
   brand: string;
   closingDay: number;
   color: string;
+  currency?: CurrencyCode;
   dueDay: number;
   id: string;
   lastDigits?: string;
@@ -23,6 +28,7 @@ class CreditCardDTO implements ICreditCardDTO {
   brand: string;
   closingDay: number;
   color: string;
+  currency: CurrencyCode;
   dueDay: number;
   id: string;
   lastDigits?: string;
@@ -39,6 +45,7 @@ class CreditCardDTO implements ICreditCardDTO {
     this.brand = params.brand;
     this.closingDay = params.closingDay;
     this.color = params.color;
+    this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.dueDay = params.dueDay;
     this.id = params.id;
     this.lastDigits = params.lastDigits;
@@ -57,6 +64,7 @@ class CreditCardDTO implements ICreditCardDTO {
       brand: entity.brand,
       closingDay: entity.closingDay,
       color: entity.color,
+      currency: entity.currency,
       dueDay: entity.dueDay,
       id: entity.id,
       lastDigits: entity.lastDigits,

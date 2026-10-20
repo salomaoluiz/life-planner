@@ -67,7 +67,14 @@ it.each([
   );
 });
 
-it("SHOULD format with USD in en-US", () => {
+it("SHOULD format the data currency with the language number format (BRL in en-US keeps R$)", () => {
   setup({}, "en-US");
+  expect(text().props.children).toBe("R$312.90");
+});
+
+it("SHOULD format USD in en-US AND pt-BR", () => {
+  setup({ currency: "USD" }, "en-US");
   expect(text().props.children).toBe("$312.90");
+  setup({ currency: "USD" }, "pt-BR");
+  expect(text().props.children).toBe("US$ 312,90");
 });

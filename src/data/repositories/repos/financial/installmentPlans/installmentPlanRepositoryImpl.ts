@@ -69,6 +69,7 @@ function toInstallmentPlanEntity(
   return new InstallmentPlanEntity({
     categoryId: model.categoryId,
     creditCardId: model.creditCardId,
+    currency: model.currency,
     date: model.date,
     description: model.description,
     id: model.id,

@@ -13,6 +13,7 @@ import {
 } from "@components";
 import { formatAmount } from "@components/AmountText/formatAmount";
 import Skeleton from "@components/Skeleton";
+import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
@@ -108,7 +109,12 @@ function FinancialTransactions() {
           testID={`day-header-${item.key}`}
           title={dayTitle(item)}
           trailing={
-            <AmountText size={"body"} type={net.type} value={net.value} />
+            <AmountText
+              currency={DEFAULT_CURRENCY}
+              size={"body"}
+              type={net.type}
+              value={net.value}
+            />
           }
         />
       );
@@ -126,13 +132,19 @@ function FinancialTransactions() {
           value: formatAmount(
             Math.abs(item.balanceCents),
             localeTag,
+            DEFAULT_CURRENCY,
             balanceNegative ? "EXPENSE" : undefined,
           ),
         })}
         expanded={expanded}
         meta={
           <View style={styles.net}>
-            <AmountText size={"caption"} type={net.type} value={net.value} />
+            <AmountText
+              currency={DEFAULT_CURRENCY}
+              size={"caption"}
+              type={net.type}
+              value={net.value}
+            />
             <Text.Caption
               tone={"secondary"}
               value={t("financial.transactions.dayBalance.netSuffix")}
@@ -193,6 +205,7 @@ function FinancialTransactions() {
                 />
               </View>
               <AmountText
+                currency={DEFAULT_CURRENCY}
                 size={"body"}
                 type={balanceNegative ? "EXPENSE" : undefined}
                 value={Math.abs(item.balanceCents)}
@@ -386,6 +399,7 @@ function FinancialTransactions() {
           cancelLabel={t("common.actions.cancel")}
           closeLabel={t("common.actions.close")}
           confirmLabel={t("common.actions.delete")}
+          currency={adjustment.item.currency}
           deleteLabel={t("financial.transactions.delete")}
           deleteMessage={t("financial.transactions.adjustmentDeleteMessage")}
           deleteTitle={t("financial.transactions.deleteTitle")}

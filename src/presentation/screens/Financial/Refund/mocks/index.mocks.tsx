@@ -12,6 +12,7 @@ const defaultViewModel: ReturnType<typeof useRefundViewModel> = {
   card: { id: "card-1", title: "Main card" } as never,
   carryCents: 0,
   carryMonth: "2026-11",
+  currency: "BRL",
   date: new Date(2026, 9, 16),
   description: undefined,
   errors: {},

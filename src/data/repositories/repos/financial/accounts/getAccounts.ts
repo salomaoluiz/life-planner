@@ -26,6 +26,7 @@ async function getAccounts(ownerIds: string[], datasources: Datasources) {
     (account) =>
       new AccountEntity({
         balance: account.balance,
+        currency: account.currency,
         icon: account.icon,
         id: account.id,
         name: account.name,

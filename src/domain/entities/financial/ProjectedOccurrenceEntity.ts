@@ -1,3 +1,7 @@
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import { RecurrenceFrequency } from "./RecurrenceEntity";
@@ -12,6 +16,7 @@ interface IProjectedOccurrenceEntity {
   creditCardId?: string;
   creditCardLastDigits?: string;
   creditCardTitle?: string;
+  currency?: CurrencyCode;
   // ISO date-time of the local day.
   date: string;
   description: string;
@@ -39,6 +44,7 @@ class ProjectedOccurrenceEntity {
   creditCardId?: string;
   creditCardLastDigits?: string;
   creditCardTitle?: string;
+  currency: CurrencyCode;
   date: string;
   description: string;
   frequency: RecurrenceFrequency;
@@ -61,6 +67,7 @@ class ProjectedOccurrenceEntity {
     this.creditCardId = params.creditCardId;
     this.creditCardLastDigits = params.creditCardLastDigits;
     this.creditCardTitle = params.creditCardTitle;
+    this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.date = params.date;
     this.description = params.description;
     this.frequency = params.frequency;

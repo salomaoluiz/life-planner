@@ -16,6 +16,7 @@ import {
 } from "@components";
 import Skeleton from "@components/Skeleton";
 import { useKitTheme } from "@components/utils/useKitTheme";
+import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useTranslation } from "@presentation/i18n";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
@@ -43,6 +44,7 @@ function FinancialAccounts() {
               value={t("financial.accounts.total")}
             />
             <AmountText
+              currency={DEFAULT_CURRENCY}
               size={"heading"}
               testID={"accounts-total"}
               {...vm.totalAmount}
@@ -52,6 +54,7 @@ function FinancialAccounts() {
               value={t("financial.accounts.totalProjected")}
             />
             <AmountText
+              currency={DEFAULT_CURRENCY}
               size={"body"}
               testID={accountsTestIds.totalProjected}
               {...vm.totalProjectedAmount}
@@ -115,12 +118,14 @@ function FinancialAccounts() {
         trailing={
           <View style={styles.balanceColumn}>
             <AmountText
+              currency={account.currency}
               {...account.balanceAmount}
               testID={`${accountsTestIds.row}-balance`}
             />
             {account.hasProjectedDifference && (
               <ProjectedBalance
                 cents={account.projectedBalanceCents}
+                currency={account.currency}
                 testID={`${accountsTestIds.row}-projected`}
               />
             )}

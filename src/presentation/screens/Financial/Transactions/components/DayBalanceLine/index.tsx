@@ -1,6 +1,7 @@
 import { View } from "react-native";
 
 import { AmountText, GroupBodyRow, IconTile, Text } from "@components";
+import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useTranslation } from "@presentation/i18n";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
@@ -51,6 +52,7 @@ function DayBalanceLine(props: Props) {
           />
         </View>
         <AmountText
+          currency={DEFAULT_CURRENCY}
           size="body"
           type={negative ? "EXPENSE" : undefined}
           value={Math.abs(props.balanceCents)}

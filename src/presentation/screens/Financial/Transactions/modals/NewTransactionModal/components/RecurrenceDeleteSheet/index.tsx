@@ -3,11 +3,13 @@ import { View } from "react-native";
 import { BottomSheet, Button, ConfirmDialog, RadioGroup } from "@components";
 import { formatAmount } from "@components/AmountText/formatAmount";
 import { RecurrenceHasPaidOccurrences } from "@domain/entities/errors";
+import { CurrencyCode } from "@domain/entities/financial/Currency";
 import { RecurrenceScope } from "@domain/entities/financial/RecurrenceEntity";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import transactionFormTestIds from "@screens/Financial/Transactions/modals/NewTransactionModal/testIds";
 
 interface Props {
+  currency: CurrencyCode;
   isAllConfirmOpen: boolean;
   isDeleting: boolean;
   onAllCancel: () => void;
@@ -90,7 +92,11 @@ function RecurrenceDeleteSheet(props: Props) {
             ? [
                 t("financial.recurrence.deletePaidWarning", {
                   count: conflict.paidCount,
-                  total: formatAmount(conflict.paidTotal, localeTag),
+                  total: formatAmount(
+                    conflict.paidTotal,
+                    localeTag,
+                    props.currency,
+                  ),
                 }),
                 conflict.detachedCount > 0
                   ? t("financial.recurrence.detachedWarning", {

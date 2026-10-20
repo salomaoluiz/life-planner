@@ -6,6 +6,7 @@ import AccountModel from "../AccountModel";
 // API / cache shape: camelCase, balance in cents.
 const jsonMock = {
   balance: 152075,
+  currency: "BRL",
   icon: "bank-icon",
   id: "2be16cb6-b9e4-47bb-99cb-eb62ff6576c3",
   name: "Savings Account",

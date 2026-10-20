@@ -3,12 +3,18 @@ import {
   CreditCardBrand,
   PaymentAccountSummary,
 } from "@domain/entities/financial/CreditCardEntity";
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+  toCurrencyCode,
+} from "@domain/entities/financial/Currency";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 interface ICreditCardModel {
   brand: CreditCardBrand;
   closingDay: number;
   color: string;
+  currency?: CurrencyCode;
   dueDay: number;
   id: string;
   lastDigits?: string;
@@ -26,6 +32,7 @@ class CreditCardModel implements ICreditCardModel {
   brand: CreditCardBrand;
   closingDay: number;
   color: string;
+  currency: CurrencyCode;
   dueDay: number;
   id: string;
   lastDigits?: string;
@@ -42,6 +49,7 @@ class CreditCardModel implements ICreditCardModel {
     this.brand = params.brand;
     this.closingDay = params.closingDay;
     this.color = params.color;
+    this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.dueDay = params.dueDay;
     this.id = params.id;
     this.lastDigits = params.lastDigits;
@@ -61,6 +69,7 @@ class CreditCardModel implements ICreditCardModel {
       brand: data.brand as CreditCardBrand,
       closingDay: Number(data.closingDay),
       color: data.color as string,
+      currency: toCurrencyCode(data.currency),
       dueDay: Number(data.dueDay),
       id: data.id as string,
       lastDigits: (data.lastDigits as string | undefined) ?? undefined,

@@ -9,6 +9,7 @@ function setup(props: Partial<React.ComponentProps<typeof AmountInput>> = {}) {
   jest.mocked(i18n.useLocaleTag).mockReturnValue("pt-BR");
   render(
     <AmountInput
+      currency="BRL"
       label="Amount"
       onChange={onChange}
       testID="amount"

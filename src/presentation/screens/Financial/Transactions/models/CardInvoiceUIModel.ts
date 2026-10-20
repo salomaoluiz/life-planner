@@ -98,6 +98,10 @@ class CardInvoiceUIModel {
     }));
   }
 
+  get currency() {
+    return this.dto.invoice.currency;
+  }
+
   get dateKey() {
     return this.dto.invoice.listDate;
   }

@@ -36,6 +36,7 @@ import {
 import { IconButton } from "@components/Icon";
 import Skeleton from "@components/Skeleton";
 import { ThemeMode } from "@domain/entities/configs/ConfigsEntity";
+import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useTheme } from "@presentation/theme";
 
 const TONES = ["accent", "expense", "income", "neutral", "warning"] as const;
@@ -215,6 +216,7 @@ function ComponentGallery() {
         />
         {(["income", "expense", "neutral"] as const).map((tone) => (
           <AmountInput
+            currency={DEFAULT_CURRENCY}
             key={tone}
             label={`Amount ${tone}`}
             onChange={setCents}
@@ -254,7 +256,13 @@ function ComponentGallery() {
           leading={<IconTile name="cart" tone="expense" />}
           subtitle="Subtitle"
           title="With tile"
-          trailing={<AmountText type="EXPENSE" value={31290} />}
+          trailing={
+            <AmountText
+              currency={DEFAULT_CURRENCY}
+              type="EXPENSE"
+              value={31290}
+            />
+          }
         />
         <ListItem
           leading={<Avatar name="Jane Doe" />}
@@ -274,9 +282,15 @@ function ComponentGallery() {
         <Avatar name="No Photo" />
         <Avatar name="Pending" pending />
         {(["body", "caption", "heading", "display"] as const).map((size) => (
-          <AmountText key={size} size={size} type="INCOME" value={125000} />
+          <AmountText
+            currency={DEFAULT_CURRENCY}
+            key={size}
+            size={size}
+            type="INCOME"
+            value={125000}
+          />
         ))}
-        <AmountText type="EXPENSE" value={31290} />
+        <AmountText currency={DEFAULT_CURRENCY} type="EXPENSE" value={31290} />
         <MetricBlock label="Income" trend="income" value="R$ 1.000,00" />
         <MetricBlock label="Expense" trend="expense" value="R$ 500,00" />
         <EmptyState

@@ -1,4 +1,8 @@
 import { CardInvoiceCardEntity } from "@domain/entities/financial/CardInvoiceEntity";
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
 import ProjectedOccurrenceEntity from "@domain/entities/financial/ProjectedOccurrenceEntity";
 import { RecurrenceFrequency } from "@domain/entities/financial/RecurrenceEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
@@ -14,6 +18,7 @@ class ProjectedOccurrenceDTO {
   creditCardId?: string;
   creditCardLastDigits?: string;
   creditCardTitle?: string;
+  currency: CurrencyCode;
   date: string;
   description: string;
   frequency: RecurrenceFrequency;
@@ -36,6 +41,7 @@ class ProjectedOccurrenceDTO {
     creditCardId?: string;
     creditCardLastDigits?: string;
     creditCardTitle?: string;
+    currency?: CurrencyCode;
     date: string;
     description: string;
     frequency: RecurrenceFrequency;
@@ -57,6 +63,7 @@ class ProjectedOccurrenceDTO {
     this.creditCardId = params.creditCardId;
     this.creditCardLastDigits = params.creditCardLastDigits;
     this.creditCardTitle = params.creditCardTitle;
+    this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.date = params.date;
     this.description = params.description;
     this.frequency = params.frequency;

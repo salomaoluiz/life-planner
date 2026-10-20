@@ -8,6 +8,7 @@ import { usePrepaymentViewModel } from "../hooks";
 jest.mock("../hooks");
 
 const defaultViewModel: ReturnType<typeof usePrepaymentViewModel> = {
+  currency: "BRL",
   date: new Date(2026, 9, 16),
   discountCents: 0,
   errors: {},

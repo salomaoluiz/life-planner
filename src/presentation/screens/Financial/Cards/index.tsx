@@ -20,6 +20,7 @@ import {
 import { formatAmount } from "@components/AmountText/formatAmount";
 import Skeleton from "@components/Skeleton";
 import { useKitTheme } from "@components/utils/useKitTheme";
+import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
@@ -54,6 +55,7 @@ function FinancialCards() {
                 value={t("financial.cards.totalLimit")}
               />
               <AmountText
+                currency={DEFAULT_CURRENCY}
                 size="heading"
                 testID={cardsTestIds.totalLimit}
                 value={vm.aggregate.totalLimit}
@@ -77,11 +79,21 @@ function FinancialCards() {
           <View style={styles.metrics}>
             <MetricBlock
               label={t("financial.cards.used")}
-              value={<AmountText {...amountProps(vm.aggregate.used)} />}
+              value={
+                <AmountText
+                  currency={DEFAULT_CURRENCY}
+                  {...amountProps(vm.aggregate.used)}
+                />
+              }
             />
             <MetricBlock
               label={t("financial.cards.available")}
-              value={<AmountText {...amountProps(vm.aggregate.available)} />}
+              value={
+                <AmountText
+                  currency={DEFAULT_CURRENCY}
+                  {...amountProps(vm.aggregate.available)}
+                />
+              }
             />
           </View>
         </View>
@@ -103,11 +115,20 @@ function FinancialCards() {
           {vm.summaries.map((summary) => (
             <CreditCardTile
               accessibilityLabel={t("financial.cards.tileLabel", {
-                amount: formatAmount(summary.available, localeTag),
+                amount: formatAmount(
+                  summary.available,
+                  localeTag,
+                  summary.card.currency,
+                ),
                 brand: brandLabel(summary.card.brand),
                 title: summary.card.title,
               })}
-              available={<AmountText {...amountProps(summary.available)} />}
+              available={
+                <AmountText
+                  currency={summary.card.currency}
+                  {...amountProps(summary.available)}
+                />
+              }
               availableLabel={t("financial.cards.available")}
               brandLabel={brandLabel(summary.card.brand)}
               key={summary.card.id}

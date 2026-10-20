@@ -14,6 +14,7 @@ function setup(
     cancelLabel: "Cancel",
     closeLabel: "Close",
     confirmLabel: "Delete",
+    currency: "BRL" as const,
     deleteLabel: "Delete transaction",
     deleteMessage: "Deleting it reverses its effect on the account balance.",
     deleteTitle: "Delete this transaction?",

@@ -99,6 +99,7 @@ function CardInvoiceRow(props: Props) {
             ) : null}
           </View>
           <AmountText
+            currency={invoice.currency}
             testID={transactionsTestIds.cardInvoiceAmount}
             type="EXPENSE"
             value={invoice.amountCents}
@@ -126,7 +127,11 @@ function CardInvoiceRow(props: Props) {
                 (params) => t("financial.installment.label", params),
               )}
               trailing={
-                <AmountText type="EXPENSE" value={purchase.amountCents} />
+                <AmountText
+                  currency={invoice.currency}
+                  type="EXPENSE"
+                  value={purchase.amountCents}
+                />
               }
             />
           ))}
@@ -150,7 +155,13 @@ function CardInvoiceRow(props: Props) {
                   ? `${item.description} ${item.counter}`
                   : item.description
               }
-              trailing={<AmountText type="EXPENSE" value={item.amountCents} />}
+              trailing={
+                <AmountText
+                  currency={invoice.currency}
+                  type="EXPENSE"
+                  value={item.amountCents}
+                />
+              }
             />
           ))}
           {invoice.canOpen ? (

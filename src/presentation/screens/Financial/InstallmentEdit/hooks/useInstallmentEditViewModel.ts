@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
 import { useCases } from "@application/useCases";
+import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import {
   invalidateFetcherData,
   useMutation,
@@ -197,6 +198,7 @@ function useInstallmentEditViewModel() {
           category.type === "EXPENSE",
       )
       .map((category) => ({ label: category.name, value: category.id })),
+    currency: plan.data?.currency ?? DEFAULT_CURRENCY,
     errors,
     fields,
     formErrorKey: formErrorKey as TranslationKeys | undefined,

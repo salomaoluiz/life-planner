@@ -5,9 +5,11 @@ import { formatAmount, parseCents } from "@components/AmountText/formatAmount";
 import FieldShell from "@components/FieldShell";
 import FocusRing from "@components/FocusRing";
 import { useKitTheme } from "@components/utils/useKitTheme";
+import { CurrencyCode } from "@domain/entities/financial/Currency";
 import { useLocaleTag } from "@presentation/i18n";
 
 export interface AmountInputProps {
+  currency: CurrencyCode;
   error?: string;
   /** Lets the screen focus the field */
   inputRef?: Ref<TextInput>;
@@ -22,7 +24,7 @@ function AmountInput(props: AmountInputProps) {
   const { colors, radius, spacing, typography } = useKitTheme();
   const localeTag = useLocaleTag();
   const [focused, setFocused] = useState(false);
-  const display = formatAmount(props.value, localeTag);
+  const display = formatAmount(props.value, localeTag, props.currency);
   const color = {
     expense: colors.expense,
     income: colors.income,

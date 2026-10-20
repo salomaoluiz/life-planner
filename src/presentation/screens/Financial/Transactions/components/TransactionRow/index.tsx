@@ -90,7 +90,11 @@ function TransactionRow(props: Props) {
       title={item.isAdjustment ? t("financial.transactions.adjustment") : title}
       trailing={
         <View style={styles.trailing}>
-          <AmountText type={item.amountType} value={item.amountCents} />
+          <AmountText
+            currency={item.currency}
+            type={item.amountType}
+            value={item.amountCents}
+          />
           {item.canPay && props.onPay ? (
             <IconButton
               accessibilityLabel={t("financial.transactions.pay")}

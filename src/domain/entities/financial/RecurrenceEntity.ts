@@ -1,3 +1,7 @@
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import { TransactionType } from "./TransactionEntity";
@@ -14,6 +18,7 @@ interface IRecurrenceEntity {
   category: string;
   categoryId: string;
   creditCardId?: string;
+  currency?: CurrencyCode;
   description: string;
   // ISO date-time of the last day; absent = no end date.
   endDate?: string;
@@ -37,6 +42,7 @@ class RecurrenceEntity {
   category: string;
   categoryId: string;
   creditCardId?: string;
+  currency: CurrencyCode;
   description: string;
   endDate?: string;
   firstNumber: number;
@@ -56,6 +62,7 @@ class RecurrenceEntity {
     this.category = params.category;
     this.categoryId = params.categoryId;
     this.creditCardId = params.creditCardId;
+    this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.description = params.description;
     this.endDate = params.endDate;
     this.firstNumber = params.firstNumber;

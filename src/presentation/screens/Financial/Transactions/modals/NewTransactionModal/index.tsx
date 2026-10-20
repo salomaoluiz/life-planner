@@ -71,15 +71,15 @@ function NewTransactionModal() {
     if (!hasRemainder) {
       return t("financial.transactions.form.installmentsPreview", {
         n: installments.count,
-        value: formatAmount(first, localeTag),
+        value: formatAmount(first, localeTag, vm.currency),
       });
     }
 
     return `${t("financial.transactions.form.installmentsPreviewFirst", {
-      value: formatAmount(first, localeTag),
+      value: formatAmount(first, localeTag, vm.currency),
     })} + ${t("financial.transactions.form.installmentsPreview", {
       n: installments.count - 1,
-      value: formatAmount(others, localeTag),
+      value: formatAmount(others, localeTag, vm.currency),
     })}`;
   }
 
@@ -197,6 +197,7 @@ function NewTransactionModal() {
                 />
               )}
               <AmountInput
+                currency={vm.currency}
                 error={err(vm.amountError)}
                 inputRef={vm.amountInputRef}
                 label={t(
@@ -284,7 +285,11 @@ function NewTransactionModal() {
                       testID={transactionFormTestIds.overLimit}
                       tone={"expense"}
                       value={t("financial.transactions.form.overLimit", {
-                        amount: formatAmount(vm.overLimitCents, localeTag),
+                        amount: formatAmount(
+                          vm.overLimitCents,
+                          localeTag,
+                          vm.currency,
+                        ),
                       })}
                     />
                   ) : null}
@@ -608,6 +613,7 @@ function NewTransactionModal() {
         visible={vm.isDiscardDialogOpen}
       />
       <RecurrenceDeleteSheet
+        currency={vm.currency}
         isAllConfirmOpen={vm.recurrence.isAllDeleteOpen}
         isDeleting={vm.isDeleting}
         onAllCancel={vm.onRecurrenceDeleteCancel}

@@ -1,3 +1,7 @@
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 export interface InstallmentEntity {
@@ -30,6 +34,7 @@ export interface PrepaymentEntity {
 interface IInstallmentPlanEntity {
   categoryId: string;
   creditCardId: string;
+  currency?: CurrencyCode;
   date: string;
   description: string;
   id: string;
@@ -45,6 +50,7 @@ interface IInstallmentPlanEntity {
 class InstallmentPlanEntity {
   categoryId: string;
   creditCardId: string;
+  currency: CurrencyCode;
   date: string;
   description: string;
   id: string;
@@ -60,6 +66,7 @@ class InstallmentPlanEntity {
   constructor(params: IInstallmentPlanEntity) {
     this.categoryId = params.categoryId;
     this.creditCardId = params.creditCardId;
+    this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.date = params.date;
     this.description = params.description;
     this.id = params.id;

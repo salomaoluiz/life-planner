@@ -1,3 +1,9 @@
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+  toCurrencyCode,
+} from "@domain/entities/financial/Currency";
+
 import { calendarDateToIso, isoToCalendarDate } from "./calendarDate";
 import { centsToDecimalString, decimalStringToCents } from "./money";
 
@@ -18,6 +24,7 @@ interface ITransactionModel {
   category: string;
   categoryId: string;
   creditCardId?: string;
+  currency?: CurrencyCode;
   date: string;
   description: string;
   earlyPayment?: EarlyPaymentRefModel;
@@ -44,6 +51,7 @@ class TransactionModel implements ITransactionModel {
   category: string;
   categoryId: string;
   creditCardId?: string;
+  currency: CurrencyCode;
   date: string;
   description: string;
   earlyPayment?: EarlyPaymentRefModel;
@@ -66,6 +74,7 @@ class TransactionModel implements ITransactionModel {
 
   constructor(params: ITransactionModel) {
     this.accountId = params.accountId;
+    this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.date = params.date;
     this.category = params.category;
     this.categoryId = params.categoryId;
@@ -104,6 +113,7 @@ class TransactionModel implements ITransactionModel {
       category: category?.name ?? "",
       categoryId: data.categoryId as string,
       creditCardId: (data.creditCardId as null | string) ?? undefined,
+      currency: toCurrencyCode(data.currency),
       date: calendarDateToIso(data.date as string),
       description: data.description as string,
       earlyPayment:
@@ -140,6 +150,7 @@ class TransactionModel implements ITransactionModel {
       },
       categoryId: this.categoryId,
       creditCardId: this.creditCardId ?? null,
+      currency: this.currency,
       date: isoToCalendarDate(this.date),
       description: this.description,
       earlyPayment: this.earlyPayment ?? null,

@@ -55,3 +55,20 @@ it("SHOULD default the projected balance to the balance WHEN the payload has non
 
   expect(model.projectedBalance).toBe(1520.75);
 });
+
+it("SHOULD read the currency of the API AND fall back to BRL WHEN it is missing or unknown", () => {
+  const withoutCurrency: Record<string, unknown> = { ...mocks.json };
+
+  delete withoutCurrency.currency;
+
+  expect(
+    AccountModel.fromJSON({ ...mocks.json, currency: "USD" }).currency,
+  ).toBe("USD");
+  expect(AccountModel.fromJSON(withoutCurrency).currency).toBe("BRL");
+  expect(
+    AccountModel.fromJSON({ ...mocks.json, currency: "XYZ" }).currency,
+  ).toBe("BRL");
+  expect(
+    AccountModel.fromJSON({ ...mocks.json, currency: "EUR" }).toJSON().currency,
+  ).toBe("EUR");
+});

@@ -1,3 +1,7 @@
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
 import { RecurrenceFrequency } from "@domain/entities/financial/RecurrenceEntity";
 import TransactionEntity, {
   EarlyPaymentRefEntity,
@@ -10,6 +14,7 @@ export interface ITransactionDTO {
   categoryId: string;
   categoryName?: string;
   creditCardId?: string;
+  currency?: CurrencyCode;
   date: string;
   description: string;
   earlyPayment?: EarlyPaymentRefEntity;
@@ -40,6 +45,7 @@ class TransactionDTO {
   categoryId: string;
   categoryName?: string;
   creditCardId?: string;
+  currency: CurrencyCode;
   date: string;
   description: string;
   earlyPayment?: EarlyPaymentRefEntity;
@@ -63,6 +69,7 @@ class TransactionDTO {
 
   constructor(params: ITransactionDTO) {
     this.accountId = params.accountId;
+    this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.date = params.date;
     this.category = params.category;
     this.categoryId = params.categoryId;
@@ -102,6 +109,7 @@ class TransactionDTO {
       categoryId: entity.categoryId,
       categoryName: categoryName,
       creditCardId: entity.creditCardId,
+      currency: entity.currency,
       date: entity.date,
       description: entity.description,
       earlyPayment: entity.earlyPayment,

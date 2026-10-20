@@ -1,7 +1,12 @@
 import AccountEntity from "@domain/entities/financial/AccountEntity";
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
 
 export interface IAccountDTO {
   balance: number;
+  currency?: CurrencyCode;
   icon: string;
   id: string;
   name: string;
@@ -13,6 +18,7 @@ export interface IAccountDTO {
 
 class AccountDTO {
   balance: number;
+  currency: CurrencyCode;
   icon: string;
   id: string;
   name: string;
@@ -23,6 +29,7 @@ class AccountDTO {
 
   constructor(params: IAccountDTO) {
     this.balance = params.balance;
+    this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.icon = params.icon;
     this.id = params.id;
     this.name = params.name;
@@ -35,6 +42,7 @@ class AccountDTO {
   static fromEntity(entity: AccountEntity) {
     return new AccountDTO({
       balance: entity.balance,
+      currency: entity.currency,
       icon: entity.icon,
       id: entity.id,
       name: entity.name,
