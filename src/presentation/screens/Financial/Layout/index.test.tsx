@@ -3,47 +3,44 @@ import { fireEvent, screen } from "@tests";
 import { setup, spies } from "./mocks/index.mocks";
 import layoutTestIds from "./testIds";
 
-it("SHOULD render the Finances title AND the 5 segments", () => {
-  setup();
+it("SHOULD show the Finances overline AND the current section as title", () => {
+  setup("/financial/categories");
 
   expect(screen.getByText("navigation.tabs.finances")).toBeOnTheScreen();
-  expect(screen.getByTestId(layoutTestIds.segments)).toBeOnTheScreen();
-  [
-    "financial.sections.transactions",
-    "financial.sections.categories",
-    "financial.sections.tags",
-    "financial.sections.accounts",
-    "financial.sections.cards",
-  ].forEach((label) => expect(screen.getByText(label)).toBeOnTheScreen());
+  expect(screen.getByText("financial.sections.categories")).toBeOnTheScreen();
 });
 
-it("SHOULD wrap the header, the segments and the stack in the Screen", () => {
+it("SHOULD NOT render the segmented control", () => {
+  setup();
+
+  expect(screen.queryByTestId("financial.layout.segments")).toBeNull();
+});
+
+it("SHOULD wrap the header and the stack in the Screen", () => {
   setup();
 
   expect(screen.getByTestId("financial-layout")).toBeOnTheScreen();
 });
 
-it("SHOULD select the segment that matches the current route", () => {
+it("SHOULD open the section picker WHEN the title is pressed on a narrow layout", () => {
   setup("/financial/accounts");
 
+  const button = screen.getByTestId(
+    `${layoutTestIds.sectionPicker}-title-button`,
+  );
+  expect(button.props.accessibilityLabel).toBe(
+    'financial.sections.pickerA11yLabel {"section":"financial.sections.accounts"}',
+  );
+  fireEvent.press(button);
+
+  expect(spies.push).toHaveBeenCalledWith("/financial/section_picker");
+});
+
+it("SHOULD render a plain title WHEN the layout is expanded", () => {
+  setup("/financial/cards", "expanded");
+
+  expect(screen.getByText("financial.sections.cards")).toBeOnTheScreen();
   expect(
-    screen.getByTestId(`${layoutTestIds.segments}-accounts`).props
-      .accessibilityState,
-  ).toEqual(expect.objectContaining({ selected: true }));
-});
-
-it("SHOULD router.replace to the section path WHEN another segment is chosen", () => {
-  setup("/financial");
-
-  fireEvent.press(screen.getByText("financial.sections.categories"));
-
-  expect(spies.replace).toHaveBeenCalledWith("/financial/categories");
-});
-
-it("SHOULD NOT navigate WHEN the selected segment is pressed again", () => {
-  setup("/financial/categories");
-
-  fireEvent.press(screen.getByText("financial.sections.categories"));
-
-  expect(spies.replace).not.toHaveBeenCalled();
+    screen.queryByTestId(`${layoutTestIds.sectionPicker}-title-button`),
+  ).toBeNull();
 });

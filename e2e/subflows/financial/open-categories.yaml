@@ -8,10 +8,10 @@ url: ${E2E_WEB_URL}
     id: "tab-finances"
 - extendedWaitUntil:
     visible:
-      id: "financial.layout.segments"
+      id: "navigation-rail-financial-transactions"
     timeout: 20000
 - tapOn:
-    id: "financial.layout.segments-categories"
+    id: "navigation-rail-financial-categories"
 - extendedWaitUntil:
     visible:
       id: "financial.categories.screen"

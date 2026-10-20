@@ -118,7 +118,7 @@ onFlowComplete:
     timeout: 20000
 # Use it in a personal transaction
 - tapOn:
-    id: "financial.layout.segments-transactions"
+    id: "navigation-rail-financial-transactions"
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.screen"
@@ -195,7 +195,7 @@ onFlowComplete:
     timeout: 20000
 # Still one row in the categories list, and it cannot be deleted while transactions use it
 - tapOn:
-    id: "financial.layout.segments-categories"
+    id: "navigation-rail-financial-categories"
 - extendedWaitUntil:
     visible:
       id: "financial.categories.screen"

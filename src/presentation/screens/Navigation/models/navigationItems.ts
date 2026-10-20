@@ -1,6 +1,16 @@
 import { TranslationKeys } from "@presentation/i18n/types";
+import { FINANCIAL_SECTIONS } from "@screens/Financial/Layout/models/financialSections";
+
+export interface NavigationChild {
+  icon: string;
+  labelKey: TranslationKeys;
+  path: string;
+  section: string;
+  testID: string;
+}
 
 export interface NavigationItem {
+  children?: NavigationChild[];
   icon: string;
   labelKey: TranslationKeys;
   routeName: TabRouteName;
@@ -13,6 +23,7 @@ export type TabRouteName =
   | "index/index"
   | "stock/index";
 
+export const SECTION_PICKER_PATH = "/financial/section_picker";
 export const QUICK_ADD_PATH = "/quick_add";
 export const SETTINGS_PATH = "/settings";
 export const STOCK_ITEM_ADD_PATH = "/stock/add_new_stock_item";
@@ -28,6 +39,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     testID: "tab-home",
   },
   {
+    children: FINANCIAL_SECTIONS.map((item) => ({ ...item })),
     icon: "wallet-outline",
     labelKey: "navigation.tabs.finances",
     routeName: "financial",

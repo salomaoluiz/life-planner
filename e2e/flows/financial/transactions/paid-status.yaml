@@ -109,7 +109,7 @@ onFlowComplete:
     text: ".*50[.,]00.*"
 # Opening the paid row and turning "Paid" off makes it unpaid again; only the form can unpay
 - tapOn:
-    id: "financial.layout.segments-transactions"
+    id: "navigation-rail-financial-transactions"
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.screen"

@@ -3,6 +3,8 @@ import { StyleSheet } from "react-native";
 import { useTheme } from "@presentation/theme";
 
 const RAIL_WIDTH = 240;
+const ROW_ICON_SIZE = 22;
+const CHILD_MIN_HEIGHT = 40;
 
 function useStyles() {
   const { theme } = useTheme();
@@ -10,6 +12,16 @@ function useStyles() {
 
   return {
     styles: StyleSheet.create({
+      chevron: { marginLeft: "auto" },
+      child: {
+        alignItems: "center",
+        borderRadius: borderRadius.md,
+        flexDirection: "row",
+        minHeight: CHILD_MIN_HEIGHT,
+        // aligned with the parent's label: row padding + icon + gap
+        paddingLeft: spacing.sm + ROW_ICON_SIZE + spacing.sm,
+        paddingRight: spacing.sm,
+      },
       header: { gap: spacing.md },
       rail: {
         backgroundColor: theme.colors.surface,

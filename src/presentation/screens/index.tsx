@@ -4,6 +4,7 @@ export { default as FinancialAccounts } from "./Financial/Accounts";
 export { default as FinancialCards } from "./Financial/Cards";
 export { default as FinancialCategories } from "./Financial/Categories";
 export { default as FinancialLayout } from "./Financial/Layout";
+export { default as FinancialSectionPicker } from "./Financial/SectionPicker";
 export { default as FinancialTags } from "./Financial/Tags";
 export { default as FinancialTransaction } from "./Financial/Transactions";
 export { default as Home } from "./Home";

@@ -10,11 +10,13 @@ function AppTabBar(props: BottomTabBarProps) {
   if (vm.isWide) {
     return (
       <NavigationRail
+        activeChildPath={vm.activeChildPath}
         activeRouteName={vm.activeRouteName}
         addLabel={vm.texts.addLabel}
         appName={vm.texts.appName}
         items={vm.items}
         onAddPress={vm.onAddPress}
+        onChildPress={vm.onChildPress}
         onProfilePress={vm.onProfilePress}
         onTabPress={vm.onTabPress}
         profileLabel={vm.texts.profileLabel}

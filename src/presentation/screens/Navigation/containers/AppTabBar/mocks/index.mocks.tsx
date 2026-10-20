@@ -1,11 +1,14 @@
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { router } from "expo-router";
+import { router, usePathname } from "expo-router";
 
 import { render } from "@tests";
 
 import AppTabBar from "../";
 
-jest.mock("expo-router", () => ({ router: { push: jest.fn() } }));
+jest.mock("expo-router", () => ({
+  router: { navigate: jest.fn(), push: jest.fn(), replace: jest.fn() },
+  usePathname: jest.fn(() => "/financial"),
+}));
 jest.mock("react-native-safe-area-context", () => ({
   useSafeAreaInsets: jest.fn(() => ({ bottom: 0, left: 0, right: 0, top: 0 })),
 }));
@@ -41,10 +44,17 @@ beforeEach(() => {
   setBreakpoint("compact");
 });
 
-function setup(activeIndex = 0) {
+function setup(activeIndex = 0, pathname = "/financial") {
+  jest.mocked(usePathname).mockReturnValue(pathname);
   render(<AppTabBar {...buildProps(activeIndex)} />);
 }
 
-const spies = { dispatch, emit, push: jest.mocked(router.push) };
+const spies = {
+  dispatch,
+  emit,
+  navigate: jest.mocked(router.navigate),
+  push: jest.mocked(router.push),
+  replace: jest.mocked(router.replace),
+};
 
 export { setBreakpoint, setup, spies };

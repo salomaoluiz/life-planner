@@ -8,8 +8,16 @@ import Touchable from "@components/Touchable";
 import useStyles from "./styles";
 
 const ROW_ICON_SIZE = 22;
+const CHEVRON_SIZE = 16;
+
+export interface NavigationRailChild {
+  label: string;
+  path: string;
+  testID: string;
+}
 
 export interface NavigationRailItem {
+  children?: NavigationRailChild[];
   icon: string;
   label: string;
   routeName: string;
@@ -17,11 +25,13 @@ export interface NavigationRailItem {
 }
 
 export interface NavigationRailProps {
+  activeChildPath?: string;
   activeRouteName: string;
   addLabel: string;
   appName: string;
   items: NavigationRailItem[];
   onAddPress: () => void;
+  onChildPress?: (path: string) => void;
   onProfilePress: () => void;
   onTabPress: (routeName: string) => void;
   profileLabel: string;
@@ -31,25 +41,63 @@ export interface NavigationRailProps {
 function NavigationRail(props: NavigationRailProps) {
   const { styles, theme } = useStyles();
 
-  function renderItem(item: NavigationRailItem) {
-    const selected = item.routeName === props.activeRouteName;
-    const color = selected
-      ? theme.colors.accentText
-      : theme.colors.textSecondary;
+  function renderChild(child: NavigationRailChild) {
+    const selected = child.path === props.activeChildPath;
 
     return (
       <Touchable
-        accessibilityLabel={item.label}
+        accessibilityLabel={child.label}
         accessibilityRole={"tab"}
-        key={item.routeName}
-        onPress={() => props.onTabPress(item.routeName)}
+        key={child.path}
+        onPress={() => props.onChildPress?.(child.path)}
         selected={selected}
-        style={[styles.row, selected && styles.rowActive]}
-        testID={item.testID}
+        style={[styles.child, selected && styles.rowActive]}
+        testID={child.testID}
       >
-        <Icon color={color} name={item.icon} size={ROW_ICON_SIZE} />
-        <Text.Body color={color} value={item.label} />
+        {selected ? (
+          <Text.BodyStrong
+            color={theme.colors.accentText}
+            value={child.label}
+          />
+        ) : (
+          <Text.Body color={theme.colors.textSecondary} value={child.label} />
+        )}
       </Touchable>
+    );
+  }
+
+  function renderItem(item: NavigationRailItem) {
+    const active = item.routeName === props.activeRouteName;
+    const expandable = !!item.children?.length;
+    const expanded = expandable && active;
+    const highlighted = active && !expandable;
+    const color = active ? theme.colors.accentText : theme.colors.textSecondary;
+
+    return (
+      <View key={item.routeName}>
+        <Touchable
+          accessibilityLabel={item.label}
+          accessibilityRole={"tab"}
+          expanded={expandable ? expanded : undefined}
+          onPress={() => props.onTabPress(item.routeName)}
+          selected={highlighted}
+          style={[styles.row, highlighted && styles.rowActive]}
+          testID={item.testID}
+        >
+          <Icon color={color} name={item.icon} size={ROW_ICON_SIZE} />
+          <Text.Body color={color} value={item.label} />
+          {expandable ? (
+            <View style={styles.chevron}>
+              <Icon
+                color={theme.colors.textSecondary}
+                name={expanded ? "chevron-up" : "chevron-down"}
+                size={CHEVRON_SIZE}
+              />
+            </View>
+          ) : null}
+        </Touchable>
+        {expanded ? item.children?.map(renderChild) : null}
+      </View>
     );
   }
 

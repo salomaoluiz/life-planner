@@ -99,7 +99,7 @@ onFlowComplete:
       text: ${output.TRANSACTION_NAME}
     timeout: 20000
 - tapOn:
-    id: "financial.layout.segments-accounts"
+    id: "navigation-rail-financial-accounts"
 - extendedWaitUntil:
     visible:
       id: "financial.accounts.row-title"
@@ -131,7 +131,7 @@ onFlowComplete:
     id: "financial.transactions.row-title"
     text: ${output.TRANSACTION_NAME}
 - tapOn:
-    id: "financial.layout.segments-accounts"
+    id: "navigation-rail-financial-accounts"
 - extendedWaitUntil:
     visible:
       id: "financial.accounts.empty-state"

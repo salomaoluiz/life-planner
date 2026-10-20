@@ -1,37 +1,32 @@
 import { router, usePathname } from "expo-router";
 
 import { useTranslation } from "@presentation/i18n";
+import { useBreakpoint } from "@presentation/theme";
+import { SECTION_PICKER_PATH } from "@screens/Navigation/models/navigationItems";
 
 import {
-  FinancialSection,
+  FINANCIAL_SECTIONS,
   getFinancialSection,
-  getFinancialSectionPath,
 } from "../models/financialSections";
 
 function useFinancialLayoutViewModel() {
   const { t } = useTranslation();
+  const breakpoint = useBreakpoint();
   const section = getFinancialSection(usePathname());
+  const current = FINANCIAL_SECTIONS.find((item) => item.section === section);
+  const title = current ? t(current.labelKey) : t("navigation.tabs.finances");
 
-  function onSectionChange(next: string) {
-    if (next === section) {
-      return;
-    }
-
-    // replace: switching segments must not grow the back stack
-    router.replace(getFinancialSectionPath(next as FinancialSection) as never);
+  function onTitlePress() {
+    router.push(SECTION_PICKER_PATH as never);
   }
 
   return {
-    onSectionChange,
-    options: [
-      { label: t("financial.sections.transactions"), value: "transactions" },
-      { label: t("financial.sections.categories"), value: "categories" },
-      { label: t("financial.sections.tags"), value: "tags" },
-      { label: t("financial.sections.accounts"), value: "accounts" },
-      { label: t("financial.sections.cards"), value: "cards" },
-    ],
+    // On the wide layout the side menu is the picker, the title is plain text.
+    onTitlePress: breakpoint === "expanded" ? undefined : onTitlePress,
+    overline: t("navigation.tabs.finances"),
     section,
-    title: t("navigation.tabs.finances"),
+    title,
+    titleA11yLabel: t("financial.sections.pickerA11yLabel", { section: title }),
   };
 }
 

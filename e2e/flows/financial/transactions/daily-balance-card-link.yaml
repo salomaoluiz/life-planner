@@ -84,7 +84,7 @@ onFlowComplete:
     timeout: 20000
 # Linked: the invoice leaves the cards line and lowers the account line
 - tapOn:
-    id: "financial.layout.segments-transactions"
+    id: "navigation-rail-financial-transactions"
 - runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:

@@ -1,5 +1,5 @@
 const layoutTestIds = {
-  segments: "financial.layout.segments",
+  sectionPicker: "financial.layout.section-picker",
 } as const;
 
 export default layoutTestIds;

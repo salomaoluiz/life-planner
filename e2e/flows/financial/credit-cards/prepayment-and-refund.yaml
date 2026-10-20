@@ -307,14 +307,14 @@ onFlowComplete:
     id: "financial.invoice.screen-close"
 # The account lost 50,00 and shows the debit row
 - tapOn:
-    id: "financial.layout.segments-accounts"
+    id: "navigation-rail-financial-accounts"
 - extendedWaitUntil:
     visible:
       id: "financial.accounts.row-balance"
       text: ".*50[.,]00.*"
     timeout: 20000
 - tapOn:
-    id: "financial.layout.segments-transactions"
+    id: "navigation-rail-financial-transactions"
 - runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:

@@ -1,3 +1,5 @@
+import { TranslationKeys } from "@presentation/i18n/types";
+
 export type FinancialSection =
   | "accounts"
   | "cards"
@@ -5,13 +7,52 @@ export type FinancialSection =
   | "tags"
   | "transactions";
 
-const SECTION_PATHS: Record<FinancialSection, string> = {
-  accounts: "/financial/accounts",
-  cards: "/financial/cards",
-  categories: "/financial/categories",
-  tags: "/financial/tags",
-  transactions: "/financial",
-};
+export interface FinancialSectionItem {
+  icon: string;
+  labelKey: TranslationKeys;
+  path: string;
+  section: FinancialSection;
+  testID: string;
+}
+
+// Order matters: it is the order of the side menu and of the section picker.
+export const FINANCIAL_SECTIONS: readonly FinancialSectionItem[] = [
+  {
+    icon: "swap-vertical",
+    labelKey: "financial.sections.transactions",
+    path: "/financial",
+    section: "transactions",
+    testID: "navigation-rail-financial-transactions",
+  },
+  {
+    icon: "shape-outline",
+    labelKey: "financial.sections.categories",
+    path: "/financial/categories",
+    section: "categories",
+    testID: "navigation-rail-financial-categories",
+  },
+  {
+    icon: "tag-outline",
+    labelKey: "financial.sections.tags",
+    path: "/financial/tags",
+    section: "tags",
+    testID: "navigation-rail-financial-tags",
+  },
+  {
+    icon: "bank-outline",
+    labelKey: "financial.sections.accounts",
+    path: "/financial/accounts",
+    section: "accounts",
+    testID: "navigation-rail-financial-accounts",
+  },
+  {
+    icon: "credit-card-outline",
+    labelKey: "financial.sections.cards",
+    path: "/financial/cards",
+    section: "cards",
+    testID: "navigation-rail-financial-cards",
+  },
+];
 
 export function getFinancialSection(pathname: string): FinancialSection {
   const normalized = pathname.replace(/\/+$/, "");
@@ -33,5 +74,9 @@ export function getFinancialSection(pathname: string): FinancialSection {
 }
 
 export function getFinancialSectionPath(section: FinancialSection): string {
-  return SECTION_PATHS[section];
+  const item = FINANCIAL_SECTIONS.find(
+    (candidate) => candidate.section === section,
+  );
+
+  return item ? item.path : "/financial";
 }

@@ -141,7 +141,7 @@ onFlowComplete:
     timeout: 20000
 # The account balance dropped by the invoice amount (0,00 - 250,00)
 - tapOn:
-    id: "financial.layout.segments-accounts"
+    id: "navigation-rail-financial-accounts"
 - extendedWaitUntil:
     visible:
       id: "financial.accounts.row-balance"
@@ -149,7 +149,7 @@ onFlowComplete:
     timeout: 20000
 # Undo the payment: the invoice is payable again
 - tapOn:
-    id: "financial.layout.segments-transactions"
+    id: "navigation-rail-financial-transactions"
 - runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:

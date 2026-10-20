@@ -48,7 +48,7 @@ onFlowComplete:
     timeout: 20000
 # the adjustment is listed as a transaction with a delete-only sheet
 - tapOn:
-    id: "financial.layout.segments-transactions"
+    id: "navigation-rail-financial-transactions"
 - runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:
@@ -76,7 +76,7 @@ onFlowComplete:
     timeout: 20000
 # deleting it reverses its effect: back to the initial 50,00
 - tapOn:
-    id: "financial.layout.segments-accounts"
+    id: "navigation-rail-financial-accounts"
 - extendedWaitUntil:
     visible:
       id: "financial.accounts.row-balance"

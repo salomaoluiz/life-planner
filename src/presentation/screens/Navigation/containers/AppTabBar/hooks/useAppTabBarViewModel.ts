@@ -1,23 +1,43 @@
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { CommonActions } from "@react-navigation/native";
-import { router } from "expo-router";
+import { router, usePathname } from "expo-router";
 
-import { TabBarItem } from "@components";
+import { NavigationRailItem } from "@components";
 import { useTranslation } from "@presentation/i18n";
 import { useBreakpoint } from "@presentation/theme";
 import {
+  getFinancialSection,
+  getFinancialSectionPath,
+} from "@screens/Financial/Layout/models/financialSections";
+import {
   NAVIGATION_ITEMS,
   QUICK_ADD_PATH,
+  SECTION_PICKER_PATH,
   SETTINGS_PATH,
 } from "@screens/Navigation/models/navigationItems";
+
+const FINANCES_ROUTE = "financial";
+const FINANCES_PATH = "/financial";
 
 function useAppTabBarViewModel({ navigation, state }: BottomTabBarProps) {
   const { t } = useTranslation();
   const breakpoint = useBreakpoint();
 
-  const activeRouteName = state.routes[state.index].name;
+  const pathname = usePathname();
+  const isWide = breakpoint === "expanded";
 
-  const items: TabBarItem[] = NAVIGATION_ITEMS.map((item) => ({
+  const activeRouteName = state.routes[state.index].name;
+  const activeChildPath =
+    activeRouteName === FINANCES_ROUTE
+      ? getFinancialSectionPath(getFinancialSection(pathname))
+      : undefined;
+
+  const items: NavigationRailItem[] = NAVIGATION_ITEMS.map((item) => ({
+    children: item.children?.map((child) => ({
+      label: t(child.labelKey),
+      path: child.path,
+      testID: child.testID,
+    })),
     icon: item.icon,
     label: t(item.labelKey),
     routeName: item.routeName,
@@ -25,6 +45,17 @@ function useAppTabBarViewModel({ navigation, state }: BottomTabBarProps) {
   }));
 
   function onTabPress(routeName: string) {
+    if (routeName === FINANCES_ROUTE) {
+      // Finances always opens Transactions; a re-press on the bottom bar opens the section picker.
+      if (!isWide && activeRouteName === FINANCES_ROUTE) {
+        router.push(SECTION_PICKER_PATH as never);
+      } else {
+        router.navigate(FINANCES_PATH as never);
+      }
+
+      return;
+    }
+
     const route = state.routes.find(
       (candidate) => candidate.name === routeName,
     );
@@ -46,6 +77,11 @@ function useAppTabBarViewModel({ navigation, state }: BottomTabBarProps) {
     }
   }
 
+  function onChildPress(path: string) {
+    // replace: switching sections must not grow the back stack
+    router.replace(path as never);
+  }
+
   function onAddPress() {
     router.push(QUICK_ADD_PATH as never);
   }
@@ -55,10 +91,12 @@ function useAppTabBarViewModel({ navigation, state }: BottomTabBarProps) {
   }
 
   return {
+    activeChildPath,
     activeRouteName,
-    isWide: breakpoint === "expanded",
+    isWide,
     items,
     onAddPress,
+    onChildPress,
     onProfilePress,
     onTabPress,
     texts: {
