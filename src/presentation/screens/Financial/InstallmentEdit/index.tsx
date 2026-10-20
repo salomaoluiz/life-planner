@@ -7,6 +7,7 @@ import {
   ConfirmDialog,
   DateField,
   ErrorState,
+  FormColumns,
   HelperText,
   RadioGroup,
   SelectField,
@@ -61,104 +62,115 @@ function InstallmentEditModal() {
 
     return (
       <View style={styles.form}>
-        <RadioGroup
-          accessibilityLabel={t("financial.installmentEdit.scope")}
-          disabled={vm.isSaving}
-          onChange={vm.onScopeChange}
-          options={[
-            {
-              label: t("financial.installmentEdit.onlyThis"),
-              value: "ONLY_THIS",
-            },
-            {
-              label: t("financial.installmentEdit.thisAndNext"),
-              value: "THIS_AND_NEXT",
-            },
-            { label: t("financial.installmentEdit.all"), value: "ALL" },
-          ]}
-          testID={installmentEditTestIds.scope}
-          value={state.scope}
+        <FormColumns
+          left={
+            <>
+              <RadioGroup
+                accessibilityLabel={t("financial.installmentEdit.scope")}
+                disabled={vm.isSaving}
+                onChange={vm.onScopeChange}
+                options={[
+                  {
+                    label: t("financial.installmentEdit.onlyThis"),
+                    value: "ONLY_THIS",
+                  },
+                  {
+                    label: t("financial.installmentEdit.thisAndNext"),
+                    value: "THIS_AND_NEXT",
+                  },
+                  { label: t("financial.installmentEdit.all"), value: "ALL" },
+                ]}
+                testID={installmentEditTestIds.scope}
+                value={state.scope}
+              />
+              {vm.fields.amount ? (
+                <AmountInput
+                  error={err(vm.errors.amount)}
+                  label={t(
+                    isAll
+                      ? "financial.transactions.form.totalValue"
+                      : "financial.transactions.form.amount",
+                  )}
+                  onChange={vm.onAmountChange}
+                  testID={installmentEditTestIds.amount}
+                  tone="expense"
+                  value={state.amountCents}
+                />
+              ) : (
+                <TextField
+                  disabled
+                  helper={lockedHelper()}
+                  label={t("financial.transactions.form.amount")}
+                  onChangeText={() => undefined}
+                  testID={installmentEditTestIds.amount}
+                  value={formatAmount(state.amountCents, localeTag)}
+                />
+              )}
+              <TextField
+                error={err(vm.errors.description)}
+                label={t("financial.transactions.form.description")}
+                maxLength={200}
+                onChangeText={vm.onDescriptionChange}
+                testID={installmentEditTestIds.description}
+                value={state.description}
+              />
+              <SelectField
+                closeLabel={t("common.actions.close")}
+                error={err(vm.errors.categoryId)}
+                label={t("financial.transactions.form.category")}
+                onChange={vm.onCategoryChange}
+                options={vm.categoryOptions}
+                sheetTitle={t("financial.transactions.form.category")}
+                testID={installmentEditTestIds.category}
+                value={state.categoryId}
+              />
+            </>
+          }
+          right={
+            <>
+              <TextField
+                disabled={!vm.fields.count}
+                error={err(vm.errors.count)}
+                helper={vm.fields.count ? undefined : lockedHelper()}
+                keyboardType="number-pad"
+                label={t("financial.installmentEdit.count")}
+                maxLength={2}
+                onChangeText={vm.onCountChange}
+                testID={installmentEditTestIds.count}
+                value={state.count > 0 ? String(state.count) : ""}
+              />
+              <SelectField
+                closeLabel={t("common.actions.close")}
+                disabled={!vm.fields.card}
+                helper={vm.fields.card ? undefined : lockedHelper()}
+                label={t("financial.transactions.form.card")}
+                onChange={vm.onCardChange}
+                options={vm.cardOptions}
+                sheetTitle={t("financial.transactions.form.card")}
+                testID={installmentEditTestIds.card}
+                value={state.creditCardId}
+              />
+              <DateField
+                disabled={!vm.fields.date}
+                label={t("financial.transactions.form.date")}
+                onChange={(date) => date && vm.onDateChange(date)}
+                testID={installmentEditTestIds.date}
+                todayLabel={t("common.date.today")}
+                value={state.date}
+                yesterdayLabel={t("common.date.yesterday")}
+              />
+              {vm.isPaid ? (
+                <HelperText
+                  label={t("financial.installmentEdit.paidHelper")}
+                  testID={installmentEditTestIds.paidHelper}
+                  type="info"
+                  visible
+                />
+              ) : null}
+            </>
+          }
+          testID={installmentEditTestIds.sheet}
         />
-        {vm.fields.amount ? (
-          <AmountInput
-            error={err(vm.errors.amount)}
-            label={t(
-              isAll
-                ? "financial.transactions.form.totalValue"
-                : "financial.transactions.form.amount",
-            )}
-            onChange={vm.onAmountChange}
-            testID={installmentEditTestIds.amount}
-            tone="expense"
-            value={state.amountCents}
-          />
-        ) : (
-          <TextField
-            disabled
-            helper={lockedHelper()}
-            label={t("financial.transactions.form.amount")}
-            onChangeText={() => undefined}
-            testID={installmentEditTestIds.amount}
-            value={formatAmount(state.amountCents, localeTag)}
-          />
-        )}
-        <TextField
-          error={err(vm.errors.description)}
-          label={t("financial.transactions.form.description")}
-          maxLength={200}
-          onChangeText={vm.onDescriptionChange}
-          testID={installmentEditTestIds.description}
-          value={state.description}
-        />
-        <SelectField
-          closeLabel={t("common.actions.close")}
-          error={err(vm.errors.categoryId)}
-          label={t("financial.transactions.form.category")}
-          onChange={vm.onCategoryChange}
-          options={vm.categoryOptions}
-          sheetTitle={t("financial.transactions.form.category")}
-          testID={installmentEditTestIds.category}
-          value={state.categoryId}
-        />
-        <TextField
-          disabled={!vm.fields.count}
-          error={err(vm.errors.count)}
-          helper={vm.fields.count ? undefined : lockedHelper()}
-          keyboardType="number-pad"
-          label={t("financial.installmentEdit.count")}
-          maxLength={2}
-          onChangeText={vm.onCountChange}
-          testID={installmentEditTestIds.count}
-          value={state.count > 0 ? String(state.count) : ""}
-        />
-        <SelectField
-          closeLabel={t("common.actions.close")}
-          disabled={!vm.fields.card}
-          helper={vm.fields.card ? undefined : lockedHelper()}
-          label={t("financial.transactions.form.card")}
-          onChange={vm.onCardChange}
-          options={vm.cardOptions}
-          sheetTitle={t("financial.transactions.form.card")}
-          testID={installmentEditTestIds.card}
-          value={state.creditCardId}
-        />
-        <DateField
-          disabled={!vm.fields.date}
-          label={t("financial.transactions.form.date")}
-          onChange={(date) => date && vm.onDateChange(date)}
-          testID={installmentEditTestIds.date}
-          todayLabel={t("common.date.today")}
-          value={state.date}
-          yesterdayLabel={t("common.date.yesterday")}
-        />
-        {vm.isPaid ? (
-          <HelperText
-            label={t("financial.installmentEdit.paidHelper")}
-            testID={installmentEditTestIds.paidHelper}
-            type="info"
-            visible
-          />
-        ) : null}
         {vm.formErrorKey ? (
           <HelperText
             label={t(vm.formErrorKey)}
@@ -179,12 +191,6 @@ function InstallmentEditModal() {
             label={t("financial.refund.ofPurchase")}
             onPress={vm.onRefundPress}
             testID={installmentEditTestIds.refund}
-          />
-          <Button.Ghost
-            label={t("financial.installmentPlan.delete")}
-            onPress={vm.onDeletePress}
-            testID={installmentPlanTestIds.delete}
-            tone="expense"
           />
         </View>
       </View>
@@ -211,8 +217,19 @@ function InstallmentEditModal() {
             />
           ) : undefined
         }
+        footerStart={
+          state && vm.plan ? (
+            <Button.Ghost
+              label={t("financial.installmentPlan.delete")}
+              onPress={vm.onDeletePress}
+              testID={installmentPlanTestIds.delete}
+              tone="expense"
+            />
+          ) : undefined
+        }
         onClose={vm.onClose}
         presentation="inline"
+        size="form"
         testID={installmentEditTestIds.sheet}
         title={
           state

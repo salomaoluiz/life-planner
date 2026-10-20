@@ -7,6 +7,7 @@ import {
   Button,
   DateField,
   ErrorState,
+  FormColumns,
   HelperText,
   RadioGroup,
   Switch,
@@ -46,84 +47,97 @@ function PrepaymentModal() {
 
     return (
       <View style={styles.form}>
-        <RadioGroup
-          accessibilityLabel={t("financial.prepayment.target")}
-          disabled={vm.isSaving}
-          onChange={vm.onTargetChange}
-          options={vm.invoices.map((invoice) => ({
-            label: t("financial.prepayment.invoiceOption", {
-              month: formatReferenceMonth(invoice.month, localeTag),
-              status: t(
-                `financial.cards.invoice.status.${invoice.status}` as TranslationKeys,
-              ),
-            }),
-            value: invoice.month,
-          }))}
-          testID={prepaymentTestIds.target}
-          value={vm.targetMonth}
+        <FormColumns
+          left={
+            <>
+              <RadioGroup
+                accessibilityLabel={t("financial.prepayment.target")}
+                disabled={vm.isSaving}
+                onChange={vm.onTargetChange}
+                options={vm.invoices.map((invoice) => ({
+                  label: t("financial.prepayment.invoiceOption", {
+                    month: formatReferenceMonth(invoice.month, localeTag),
+                    status: t(
+                      `financial.cards.invoice.status.${invoice.status}` as TranslationKeys,
+                    ),
+                  }),
+                  value: invoice.month,
+                }))}
+                testID={prepaymentTestIds.target}
+                value={vm.targetMonth}
+              />
+              {vm.summary ? (
+                <View style={styles.summary}>
+                  <Text.Body
+                    testID={prepaymentTestIds.summary}
+                    value={t("financial.prepayment.summary", vm.summary)}
+                  />
+                  <Text.Caption
+                    tone="secondary"
+                    value={t("financial.prepayment.total")}
+                  />
+                  <AmountText
+                    size="heading"
+                    testID={prepaymentTestIds.total}
+                    type="EXPENSE"
+                    value={vm.movedCents}
+                  />
+                </View>
+              ) : null}
+              {vm.isEmpty ? (
+                <HelperText
+                  label={t("financial.prepayment.empty")}
+                  testID={prepaymentTestIds.empty}
+                  type="info"
+                  visible
+                />
+              ) : null}
+            </>
+          }
+          right={
+            <>
+              <View style={styles.switchRow}>
+                <Text.BodyStrong
+                  value={t("financial.prepayment.hasDiscount")}
+                />
+                <Switch
+                  initialStatus={vm.hasDiscount}
+                  onToggle={vm.onHasDiscountChange}
+                  testID={prepaymentTestIds.hasDiscount}
+                />
+              </View>
+              {vm.hasDiscount ? (
+                <AmountInput
+                  error={vm.errors.discount ? t(vm.errors.discount) : undefined}
+                  label={t("financial.prepayment.discount")}
+                  onChange={vm.onDiscountChange}
+                  testID={prepaymentTestIds.discount}
+                  tone="income"
+                  value={vm.discountCents}
+                />
+              ) : null}
+              <DateField
+                label={t("financial.prepayment.date")}
+                onChange={vm.onDateChange}
+                testID={prepaymentTestIds.date}
+                todayLabel={t("common.date.today")}
+                value={vm.date}
+                yesterdayLabel={t("common.date.yesterday")}
+              />
+              {vm.summary ? (
+                <Text.Caption
+                  testID={prepaymentTestIds.hint}
+                  tone="secondary"
+                  value={t("financial.prepayment.hint", {
+                    month: formatReferenceMonth(vm.targetMonth, localeTag),
+                    value: formatAmount(vm.resultingTotalCents, localeTag),
+                  })}
+                />
+              ) : null}
+            </>
+          }
+          testID={prepaymentTestIds.sheet}
         />
-        {vm.summary ? (
-          <View style={styles.summary}>
-            <Text.Body
-              testID={prepaymentTestIds.summary}
-              value={t("financial.prepayment.summary", vm.summary)}
-            />
-            <Text.Caption
-              tone="secondary"
-              value={t("financial.prepayment.total")}
-            />
-            <AmountText
-              size="heading"
-              testID={prepaymentTestIds.total}
-              type="EXPENSE"
-              value={vm.movedCents}
-            />
-          </View>
-        ) : null}
-        {vm.isEmpty ? (
-          <HelperText
-            label={t("financial.prepayment.empty")}
-            testID={prepaymentTestIds.empty}
-            type="info"
-            visible
-          />
-        ) : null}
-        <View style={styles.switchRow}>
-          <Text.BodyStrong value={t("financial.prepayment.hasDiscount")} />
-          <Switch
-            initialStatus={vm.hasDiscount}
-            onToggle={vm.onHasDiscountChange}
-            testID={prepaymentTestIds.hasDiscount}
-          />
-        </View>
-        {vm.hasDiscount ? (
-          <AmountInput
-            error={vm.errors.discount ? t(vm.errors.discount) : undefined}
-            label={t("financial.prepayment.discount")}
-            onChange={vm.onDiscountChange}
-            testID={prepaymentTestIds.discount}
-            tone="income"
-            value={vm.discountCents}
-          />
-        ) : null}
-        <DateField
-          label={t("financial.prepayment.date")}
-          onChange={vm.onDateChange}
-          testID={prepaymentTestIds.date}
-          todayLabel={t("common.date.today")}
-          value={vm.date}
-          yesterdayLabel={t("common.date.yesterday")}
-        />
-        {vm.summary ? (
-          <Text.Caption
-            testID={prepaymentTestIds.hint}
-            tone="secondary"
-            value={t("financial.prepayment.hint", {
-              month: formatReferenceMonth(vm.targetMonth, localeTag),
-              value: formatAmount(vm.resultingTotalCents, localeTag),
-            })}
-          />
-        ) : null}
         {vm.formErrorKey ? (
           <HelperText
             label={t(vm.formErrorKey)}
@@ -154,6 +168,7 @@ function PrepaymentModal() {
       }
       onClose={vm.onClose}
       presentation="inline"
+      size="form"
       testID={prepaymentTestIds.sheet}
       title={t("financial.prepayment.title", { plan: vm.planDescription })}
       visible

@@ -1,5 +1,7 @@
 import { render } from "@tests";
 
+import { useBreakpoint } from "@presentation/theme";
+
 import { RefundModal } from "../";
 import { useRefundViewModel } from "../hooks";
 
@@ -44,7 +46,11 @@ const defaultViewModel: ReturnType<typeof useRefundViewModel> = {
   onSave: jest.fn(),
 };
 
-function setup(overrides: Partial<typeof defaultViewModel> = {}) {
+function setup(
+  overrides: Partial<typeof defaultViewModel> = {},
+  breakpoint: "compact" | "expanded" | "medium" = "compact",
+) {
+  jest.mocked(useBreakpoint).mockReturnValue(breakpoint);
   const viewModel = { ...defaultViewModel, ...overrides };
   jest.mocked(useRefundViewModel).mockReturnValue(viewModel);
   render(<RefundModal />);

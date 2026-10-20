@@ -1,4 +1,6 @@
-import { fireEvent, screen } from "@tests";
+import { StyleSheet } from "react-native";
+
+import { fireEvent, screen, within } from "@tests";
 
 import { setup } from "./mocks/index.mocks";
 import earlyPaymentTestIds from "./testIds";
@@ -91,4 +93,41 @@ it("SHOULD show a skeleton while loading", () => {
   setup({ isLoading: true });
 
   expect(screen.getByTestId("early-payment-skeleton")).toBeOnTheScreen();
+});
+
+describe("wide layout (spec 037)", () => {
+  const sheet = earlyPaymentTestIds.sheet;
+
+  it("SHOULD be a form dialog with the fields split in two columns", () => {
+    setup({ isEdit: true }, "expanded");
+
+    expect(
+      StyleSheet.flatten(screen.getByTestId(sheet).props.style).maxWidth,
+    ).toBe(880);
+    const left = within(screen.getByTestId(`${sheet}-column-left`));
+    const right = within(screen.getByTestId(`${sheet}-column-right`));
+    expect(left.getByTestId(earlyPaymentTestIds.invoice)).toBeOnTheScreen();
+    expect(left.getByTestId(earlyPaymentTestIds.amount)).toBeOnTheScreen();
+    expect(right.getByTestId(earlyPaymentTestIds.method)).toBeOnTheScreen();
+    expect(
+      right.getByTestId(earlyPaymentTestIds.description),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD put Delete in the footer on wide and keep it in the body on compact", () => {
+    setup({ isEdit: true }, "expanded");
+    expect(
+      within(screen.getByTestId(`${sheet}-footer`)).getByTestId(
+        earlyPaymentTestIds.delete,
+      ),
+    ).toBeOnTheScreen();
+    screen.unmount();
+
+    setup({ isEdit: true });
+    expect(
+      within(screen.getByTestId(`${sheet}-body`)).getByTestId(
+        earlyPaymentTestIds.delete,
+      ),
+    ).toBeOnTheScreen();
+  });
 });
