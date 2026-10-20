@@ -67,15 +67,19 @@ export function parseArgs(argv) {
     changed: false,
     dryRun: false,
     failedOnly: false,
+    fileList: false,
     headless: false,
     listTags: false,
     tags: [],
+    unchanged: false,
   };
   for (let index = 0; index < argv.length; index += 1) {
     if (argv[index] === "--failed") {
       options.failedOnly = true;
     } else if (argv[index] === "--changed") {
       options.changed = true;
+    } else if (argv[index] === "--unchanged") {
+      options.unchanged = true;
     } else if (argv[index] === "--dry-run") {
       options.dryRun = true;
     } else if (argv[index] === "--workers") {
@@ -121,7 +125,9 @@ export async function runE2e({ argv, env }, deps) {
   // --changed picks the flows from the files changed in both repos; an explicit --tags wins.
   let partialLabel;
   let extraFlowFiles = [];
-  if (options.changed && options.tags.length === 0 && !options.failedOnly) {
+  let unchangedFiles;
+  const selectsByImpact = options.changed || options.unchanged;
+  if (selectsByImpact && options.tags.length === 0 && !options.failedOnly) {
     const backendDir = nonEmpty(env.E2E_BACKEND_DIR, "../life-planner-back");
     if (!deps.exists(backendDir)) {
       return notRun(`${backendDir} not found`);
@@ -133,15 +139,42 @@ export async function runE2e({ argv, env }, deps) {
     if (impact.skip) {
       return finish("E2E SKIPPED: docs-only change", 0);
     }
-    if (impact.tags !== "all") {
+    if (options.unchanged) {
+      // The complement of --changed: the flows it did not select, so a green --changed is never run twice.
+      if (impact.tags === "all") {
+        return finish(
+          "E2E SKIPPED: --changed already selected the full suite",
+          0,
+        );
+      }
+      const covered = new Set([
+        ...impact.flowFiles.map((file) => flowNameFromFile(file)),
+        ...plannedFlows({ ...options, tags: impact.tags }, [], deps),
+      ]);
+      unchangedFiles = plannedFlows({ ...options, tags: [] }, [], deps)
+        .filter((name) => !covered.has(name))
+        .map((name) => `e2e/flows/${name}.yaml`);
+      options.fileList = true;
+      partialLabel = `unchanged: not covered by changed (${impact.tags.join(", ")})`;
+      if (unchangedFiles.length === 0) {
+        return finish("E2E SKIPPED: --changed already covered every flow", 0);
+      }
+    } else if (impact.tags !== "all") {
       options.tags = impact.tags;
       extraFlowFiles = impact.flowFiles;
       partialLabel = `changed: ${impact.tags.join(", ")}`;
     }
     if (options.dryRun) {
-      const selection =
-        impact.tags === "all" ? "full suite" : `tags ${impact.tags.join(", ")}`;
-      const count = plannedFlows(options, ["e2e/flows"], deps).length;
+      let selection = `tags ${impact.tags.join(", ")}`;
+      if (impact.tags === "all") {
+        selection = "full suite";
+      }
+      if (options.unchanged) {
+        selection = `the flows --changed does not select (${selection})`;
+      }
+      const count = options.unchanged
+        ? unchangedFiles.length
+        : plannedFlows(options, ["e2e/flows"], deps).length;
       return finish(
         [
           `E2E DRY RUN: ${selection}, ${count} flows`,
@@ -175,7 +208,9 @@ export async function runE2e({ argv, env }, deps) {
   }
 
   let targets = ["e2e/flows"];
-  if (options.failedOnly) {
+  if (unchangedFiles) {
+    targets = unchangedFiles;
+  } else if (options.failedOnly) {
     targets = readFailedTargets(deps);
     if (targets.length === 0) {
       return notRun("no failed flows from the previous run");
@@ -194,11 +229,12 @@ export async function runE2e({ argv, env }, deps) {
   ];
   const started = deps.now();
   const workerCount = resolveWorkers({ env, option: options.workers });
-  const allFiles = options.failedOnly
-    ? targets
-    : [...tagged, ...extraFiles.map(flowNameFromFile)].map(
-        (name) => `e2e/flows/${name}.yaml`,
-      );
+  const allFiles =
+    options.fileList || options.failedOnly
+      ? targets
+      : [...tagged, ...extraFiles.map(flowNameFromFile)].map(
+          (name) => `e2e/flows/${name}.yaml`,
+        );
   const parallel = workerCount > 1 && allFiles.length > 1;
   const runs = parallel
     ? splitFlows(allFiles, readDurations(deps), workerCount).map(
@@ -211,7 +247,9 @@ export async function runE2e({ argv, env }, deps) {
         }),
       )
     : [
-        ...targets.map((target) => ({ tags: options.tags, target })),
+        ...(unchangedFiles
+          ? [{ tags: [], target: unchangedFiles }]
+          : targets.map((target) => ({ tags: options.tags, target }))),
         ...extraFiles.map((target) => ({ tags: [], target })),
       ].map((run, index, list) => ({
         ...run,
@@ -228,7 +266,7 @@ export async function runE2e({ argv, env }, deps) {
       args: buildMaestroArgs({
         apiUrl,
         artifactsDir: run.artifactsDir,
-        failedOnly: options.failedOnly || parallel,
+        failedOnly: options.failedOnly || options.fileList || parallel,
         headless: options.headless,
         junitPath: run.junitPath,
         tags: run.tags,
@@ -379,7 +417,7 @@ function nonEmpty(value, fallback) {
 
 // Names of the flows this run will execute, in file order; the CLI uses them to show live progress.
 function plannedFlows(options, targets, deps) {
-  if (options.failedOnly) {
+  if (options.failedOnly || options.fileList) {
     return targets.map(flowNameFromFile);
   }
   return deps
