@@ -1,0 +1,227 @@
+url: ${E2E_WEB_URL}
+name: financial/categories/all-scope-category
+tags:
+  - financial
+  - spec-038
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Family
+      KEY: FAMILY_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Personal Account
+      KEY: PERSONAL_ACCOUNT_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Family Account
+      KEY: FAMILY_ACCOUNT_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E All Category
+      KEY: ALL_CATEGORY_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Form All
+      KEY: FORM_CATEGORY_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Personal Transaction
+      KEY: PERSONAL_TRANSACTION_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Family Transaction
+      KEY: FAMILY_TRANSACTION_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-family.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      NAME: ${output.FAMILY_NAME}
+- runFlow:
+    file: ../../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: ${output.PERSONAL_ACCOUNT_NAME}
+- evalScript: ${output.PERSONAL_ACCOUNT_ID = output.ACCOUNT_ID}
+- runFlow:
+    file: ../../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.FAMILY_ID}
+      OWNER: FAMILY
+      NAME: ${output.FAMILY_ACCOUNT_NAME}
+- evalScript: ${output.FAMILY_ACCOUNT_ID = output.ACCOUNT_ID}
+# One category for Personal and the family
+- runFlow:
+    file: ../../../subflows/setup/create-category.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER: ALL
+      NAME: ${output.ALL_CATEGORY_NAME}
+      TYPE: EXPENSE
+- evalScript: ${output.ALL_CATEGORY_ID = output.CATEGORY_ID}
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../../subflows/financial/open-categories.yaml
+# It is one row with the All marker under every filter
+- extendedWaitUntil:
+    visible:
+      id: "financial.categories.row-title"
+      text: ${output.ALL_CATEGORY_NAME}
+    timeout: 20000
+- assertVisible:
+    id: "financial.categories.scope-all"
+- tapOn:
+    id: "financial.categories.owner-filter-${output.FAMILY_ID}"
+- assertVisible:
+    id: "financial.categories.row-title"
+    text: ${output.ALL_CATEGORY_NAME}
+- tapOn:
+    id: "financial.categories.owner-filter-${output.USER_ID}"
+- assertVisible:
+    id: "financial.categories.row-title"
+    text: ${output.ALL_CATEGORY_NAME}
+# Create another one from the form with the All option
+- tapOn:
+    id: "financial.categories.add-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.category-form.name-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.category-form.name-input"
+- inputText: ${output.FORM_CATEGORY_NAME}
+- tapOn:
+    id: "financial.category-form.owner-ALL"
+- tapOn:
+    id: "financial.category-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.categories.row-title"
+      text: ${output.FORM_CATEGORY_NAME}
+    timeout: 20000
+# Use it in a personal transaction
+- tapOn:
+    id: "financial.layout.segments-transactions"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.screen"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.empty-month"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- tapOn:
+    id: "financial.transactions.empty-month-action"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.amount-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.transaction-form.amount-input"
+- eraseText
+- inputText: "1500"
+- tapOn:
+    id: "financial.transaction-form.description-input"
+- inputText: ${output.PERSONAL_TRANSACTION_NAME}
+- tapOn:
+    id: "financial.transaction-form.category-${output.ALL_CATEGORY_ID}"
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.transaction-form.account-select"
+- tapOn:
+    id: "financial.transaction-form.account-select-option-${output.PERSONAL_ACCOUNT_ID}"
+- tapOn:
+    id: "financial.transaction-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.PERSONAL_TRANSACTION_NAME}
+    timeout: 20000
+# And in a family transaction: the same category is offered for the family owner
+- tapOn:
+    id: "quick-add-button|navigation-rail-add"
+- extendedWaitUntil:
+    visible:
+      id: "quick-add-transaction"
+    timeout: 20000
+- tapOn:
+    id: "quick-add-transaction"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.amount-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.transaction-form.amount-input"
+- eraseText
+- inputText: "2500"
+- tapOn:
+    id: "financial.transaction-form.description-input"
+- inputText: ${output.FAMILY_TRANSACTION_NAME}
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.transaction-form.owner-${output.FAMILY_ID}"
+- runFlow: ../../../subflows/financial/scroll-form-up.yaml
+- tapOn:
+    id: "financial.transaction-form.category-${output.ALL_CATEGORY_ID}"
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.transaction-form.account-select"
+- tapOn:
+    id: "financial.transaction-form.account-select-option-${output.FAMILY_ACCOUNT_ID}"
+- tapOn:
+    id: "financial.transaction-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.FAMILY_TRANSACTION_NAME}
+    timeout: 20000
+# Still one row in the categories list, and it cannot be deleted while transactions use it
+- tapOn:
+    id: "financial.layout.segments-categories"
+- extendedWaitUntil:
+    visible:
+      id: "financial.categories.screen"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "financial.categories.row-title"
+      text: ${output.ALL_CATEGORY_NAME}
+    timeout: 20000
+- tapOn:
+    id: "financial.categories.row-title"
+    text: ${output.ALL_CATEGORY_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.category-form.name-input"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.category-form.delete-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.category-form.delete-dialog-confirm"
+    timeout: 20000
+- tapOn:
+    id: "financial.category-form.delete-dialog-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "financial.category-form.form-error"
+    timeout: 20000

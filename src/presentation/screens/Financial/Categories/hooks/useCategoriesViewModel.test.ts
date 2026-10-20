@@ -1,5 +1,7 @@
 import { act } from "@tests";
 
+import CategoryDTO from "@application/dto/financial/CategoryDTO";
+
 import {
   cat,
   categoriesQuery,
@@ -124,4 +126,34 @@ it("SHOULD expose the loading and error states", () => {
 
   categoriesQuery.reset().withError();
   expect(setup().result.current.errorMessage).toBeDefined();
+});
+
+it("SHOULD list an All category once under every filter that covers it", () => {
+  const all = new CategoryDTO({
+    icon: "food",
+    id: "all",
+    name: "Mercado",
+    owner: "USER",
+    ownerId: "user-id",
+    scope: "ALL",
+    scopeOwnerIds: ["user-id", "family-1"],
+    type: "EXPENSE",
+  });
+  givenData([all, cat("only-family", "Family only", "EXPENSE", "family-2")]);
+  const { result } = setup();
+
+  expect(result.current.rows.map((row) => row.id)).toEqual([
+    "only-family",
+    "all",
+  ]);
+
+  act(() => {
+    result.current.onOwnerFilterChange("family-1");
+  });
+  expect(result.current.rows.map((row) => row.id)).toEqual(["all"]);
+
+  act(() => {
+    result.current.onOwnerFilterChange("user-id");
+  });
+  expect(result.current.rows.map((row) => row.id)).toEqual(["all"]);
 });

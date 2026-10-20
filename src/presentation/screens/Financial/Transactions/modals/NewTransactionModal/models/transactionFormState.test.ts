@@ -800,3 +800,26 @@ describe("repeat (spec 034)", () => {
     expect(isSameState(state(), state())).toBe(true);
   });
 });
+
+it("SHOULD keep an All category WHEN the new owner is one of its scopes", () => {
+  const all = new CategoryDTO({
+    icon: "food",
+    id: "all",
+    name: "Mercado",
+    owner: "USER",
+    ownerId: "user-id",
+    scope: "ALL",
+    scopeOwnerIds: ["user-id", "family-1"],
+    type: "EXPENSE",
+  });
+  const withAll = [...categories, all];
+
+  expect(
+    changeOwner(state({ categoryId: "all" }), "family-1", withAll, accounts)
+      .categoryId,
+  ).toBe("all");
+  expect(
+    changeOwner(state({ categoryId: "all" }), "family-2", withAll, accounts)
+      .categoryId,
+  ).toBeUndefined();
+});

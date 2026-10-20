@@ -2,6 +2,7 @@ import { FlashList } from "@shopify/flash-list";
 import { View } from "react-native";
 
 import {
+  Badge,
   ChipGroup,
   EmptyState,
   ErrorState,
@@ -30,6 +31,11 @@ function FinancialCategories() {
   const { sizes } = useKitTheme();
   const vm = useCategoriesViewModel();
 
+  const ownerChoices = translateChoices(vm.ownerChoices, t);
+  const ownerLabels = new Map(
+    ownerChoices.map((choice) => [choice.value, choice.label]),
+  );
+
   const toolbar = (
     <View style={styles.toolbar} testID="categories-toolbar">
       <View style={styles.typeRow}>
@@ -57,7 +63,7 @@ function FinancialCategories() {
         layout={"scroll"}
         mode={"single"}
         onChange={vm.onOwnerFilterChange}
-        options={translateChoices(vm.ownerChoices, t)}
+        options={ownerChoices}
         testID={categoriesTestIds.ownerFilter}
         value={vm.ownerFilter}
       />
@@ -80,6 +86,20 @@ function FinancialCategories() {
       });
     }
 
+    // Spec 038: an All category shows one "All" marker, any other row its owner.
+    const ownerLabel = ownerLabels.get(item.ownerId);
+    const scopeBadge = item.isAll ? (
+      <Badge
+        label={t("financial.categories.scopeAll")}
+        testID={categoriesTestIds.scopeAll}
+        tone={"accent"}
+      />
+    ) : (
+      ownerLabel && (
+        <Badge label={ownerLabel} testID={categoriesTestIds.ownerBadge} />
+      )
+    );
+
     return (
       <TreeItem
         depth={item.depth}
@@ -90,13 +110,16 @@ function FinancialCategories() {
         testID={rowTestID}
         title={item.name}
         trailing={
-          item.hasChildren ? (
-            <Icon
-              name={"chevron-down"}
-              size={sizes.iconMd}
-              testID={"category-row-chevron"}
-            />
-          ) : undefined
+          <View style={styles.trailing}>
+            {scopeBadge}
+            {item.hasChildren && (
+              <Icon
+                name={"chevron-down"}
+                size={sizes.iconMd}
+                testID={"category-row-chevron"}
+              />
+            )}
+          </View>
         }
       />
     );

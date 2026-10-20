@@ -11,6 +11,7 @@ yarn e2e                # whole suite
 yarn e2e --tags auth    # one module (or any tag)
 yarn e2e --workers 2   # parallel Maestro processes (default 6; --workers 1 = one process)
 yarn e2e --changed      # only the flows the changed files (both repos) can break; add --dry-run to just print the selection
+yarn e2e --unchanged    # the complement of --changed: run it after a green --changed to finish the suite without repeating flows
 yarn e2e --headless     # no browser window (default: the Chromium window is visible)
 yarn e2e --list-tags    # list every tag and its flow count (also: yarn e2e:tags); needs no Maestro
 yarn e2e:smoke          # fast critical-path subset

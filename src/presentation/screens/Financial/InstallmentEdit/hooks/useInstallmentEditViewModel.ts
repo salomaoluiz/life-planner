@@ -8,6 +8,7 @@ import {
   useQuery,
 } from "@infrastructure/fetcher";
 import { TranslationKeys } from "@presentation/i18n/types";
+import { categoryInScope } from "@screens/Financial/models/categoryTree";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
 
 import {
@@ -191,7 +192,9 @@ function useInstallmentEditViewModel() {
     categoryOptions: (categories.data ?? [])
       .filter(
         (category) =>
-          category.ownerId === ownerId && category.type === "EXPENSE",
+          ownerId !== undefined &&
+          categoryInScope(category, ownerId) &&
+          category.type === "EXPENSE",
       )
       .map((category) => ({ label: category.name, value: category.id })),
     errors,

@@ -137,3 +137,11 @@ describe("type fallback and error handling", () => {
     ).rejects.toBe(error);
   });
 });
+
+it("SHOULD forward scope ALL to the repository", async () => {
+  await setup({ scope: "ALL" });
+
+  expect(spies.financialRepositoryCategory.updateCategory).toHaveBeenCalledWith(
+    expect.objectContaining({ scope: "ALL" }),
+  );
+});

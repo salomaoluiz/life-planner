@@ -1,4 +1,6 @@
-import CategoryEntity from "@domain/entities/financial/CategoryEntity";
+import CategoryEntity, {
+  CategoryScope,
+} from "@domain/entities/financial/CategoryEntity";
 
 export interface ICategoryDTO {
   depthLevel?: number;
@@ -9,6 +11,8 @@ export interface ICategoryDTO {
   owner: string;
   ownerId: string;
   parentId?: string;
+  scope?: CategoryScope;
+  scopeOwnerIds?: string[];
   type: string;
 }
 
@@ -21,6 +25,8 @@ class CategoryDTO {
   owner: string;
   ownerId: string;
   parentId?: string;
+  scope: CategoryScope;
+  scopeOwnerIds: string[];
   type: string;
 
   constructor(params: ICategoryDTO) {
@@ -32,6 +38,8 @@ class CategoryDTO {
     this.owner = params.owner;
     this.ownerId = params.ownerId;
     this.parentId = params.parentId;
+    this.scope = params.scope ?? "PERSONAL";
+    this.scopeOwnerIds = params.scopeOwnerIds ?? [params.ownerId];
     this.type = params.type;
   }
 
@@ -45,6 +53,8 @@ class CategoryDTO {
       owner: entity.owner,
       ownerId: entity.ownerId,
       parentId: entity.parentId,
+      scope: entity.scope,
+      scopeOwnerIds: entity.scopeOwnerIds,
       type: entity.type,
     });
   }

@@ -122,7 +122,7 @@ use_cases:
 
   createCategoryUseCase:
     path: src/application/useCases/cases/financial/categories/createCategoryUseCase.ts
-    behavior: Creates a new financial category.
+    behavior: Creates a new financial category; owner "ALL" (no ownerId) creates one All category for Personal and every family (spec 038).
 
   deleteCategoryUseCase:
     path: src/application/useCases/cases/financial/categories/deleteCategoryUseCase.ts
@@ -138,7 +138,7 @@ use_cases:
 
   updateCategoryUseCase:
     path: src/application/useCases/cases/financial/categories/updateCategoryUseCase.ts
-    behavior: Updates an existing category; forwards name, icon, iconColor, type and parentId (null removes the parent); never owner/ownerId/depthLevel.
+    behavior: Updates an existing category; forwards name, icon, iconColor, type and parentId (null removes the parent); scope "ALL" turns a single-scope main category into an All one (no way back); never owner/ownerId/depthLevel.
 
   getMostUsedFinancialCategoriesUseCase:
     path: src/application/useCases/cases/financial/categories/getMostUsedCategoriesUseCase.ts
@@ -428,3 +428,7 @@ A series repeats a transaction weekly, every 2 weeks, monthly or yearly, optiona
 ## Responsive modal layout (spec 037)
 
 On `medium`/`expanded` these modals are `BottomSheet size="form"` with `FormColumns` (two columns) and Delete in the footer (`footerStart`): `NewTransactionModal`, `NewAccountModal`, `NewCreditCardModal`, `NewCategoryModal`, `InstallmentEdit`, `Invoice` (320 px summary column + purchases, actions as one wrapping row), `Prepayment`, `Refund`, `EarlyPayment`. Compact is unchanged. Pickers, sheets and confirmations stay `dialog` (480 px).
+
+## Category scopes (spec 038)
+
+`CategoryEntity`/`CategoryModel`/`CategoryDTO` carry `scope` (`PERSONAL | FAMILY | ALL`) and the owner ids it covers (`scopeOwnerIds`; the model keeps the API `scopes`). An All category is ONE record that every list and picker shows once. Always test membership with `categoryInScope(category, ownerId)` (`screens/Financial/models/categoryTree.ts`), never `category.ownerId === ownerId`. In the category form the owner choice `ALL` (`ALL_OWNERS`) is the All option; Categories rows show a "Todas"/"All" badge (`financial.categories.scope-all`) or the owner badge (`financial.categories.owner-badge`). Flow: `e2e/flows/financial/categories/all-scope-category.yaml`.

@@ -3,7 +3,9 @@ import { StyleSheet } from "react-native";
 
 import { hasText } from "@tests";
 
+import { makeCategoryDTO } from "./mocks/index.mocks";
 import { makeRows, setup } from "./mocks/screen.mocks";
+import CategoryRowUIModel from "./models/CategoryRowUIModel";
 import categoriesTestIds from "./testIds";
 
 it("SHOULD render skeletons WHEN loading", () => {
@@ -106,4 +108,40 @@ it("SHOULD give every owner filter chip an id from its owner id", () => {
   expect(
     screen.getByTestId(`${categoriesTestIds.ownerFilter}-owner-2`),
   ).toBeOnTheScreen();
+});
+
+it("SHOULD show the All marker on an All row AND the owner badge on the others", () => {
+  setup({
+    ownerChoices: [
+      { labelKey: "financial.common.all", value: "ALL" },
+      { label: "Test Family", value: "family-1" },
+    ],
+    rows: [
+      new CategoryRowUIModel({
+        category: makeCategoryDTO({
+          id: "mercado",
+          name: "Mercado",
+          scope: "ALL",
+          scopeOwnerIds: ["user-id", "family-1"],
+        }),
+        childCount: 0,
+        depth: 0,
+      }),
+      new CategoryRowUIModel({
+        category: makeCategoryDTO({
+          id: "rent",
+          name: "Rent",
+          owner: "FAMILY",
+          ownerId: "family-1",
+        }),
+        childCount: 0,
+        depth: 0,
+      }),
+    ],
+  });
+
+  expect(screen.getAllByTestId(categoriesTestIds.scopeAll)).toHaveLength(1);
+  expect(hasText("financial.categories.scopeAll")).toBe(true);
+  expect(screen.getAllByTestId(categoriesTestIds.ownerBadge)).toHaveLength(1);
+  expect(hasText("Test Family")).toBe(true);
 });

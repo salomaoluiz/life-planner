@@ -123,3 +123,48 @@ it("SHOULD expose type options, owner choices and owner lookup", () => {
   expect(model.ownerName("family-1")).toBe("Family");
   expect(model.owner("missing").id).toBe("user-id");
 });
+
+describe("scope ALL", () => {
+  const all = cat("all", {
+    scope: "ALL",
+    scopeOwnerIds: ["user-id", "family-1"],
+  });
+  const plain = cat("plain");
+
+  it("SHOULD add the All choice last", () => {
+    const values = build().ownerChoices.map((choice) => choice.value);
+
+    expect(values).toEqual(["user-id", "family-1", "ALL"]);
+  });
+
+  it("SHOULD offer only the current owner and All WHEN editing a single-scope category", () => {
+    expect(
+      build()
+        .ownerChoicesFor("family-1")
+        .map((choice) => choice.value),
+    ).toEqual(["family-1", "ALL"]);
+    expect(
+      build()
+        .ownerChoicesFor("ALL")
+        .map((choice) => choice.value),
+    ).toEqual(["ALL"]);
+  });
+
+  it("SHOULD list only All categories as parents of an All category", () => {
+    const options = build([all, plain]).parentOptions({
+      ownerId: "ALL",
+      type: "EXPENSE",
+    });
+
+    expect(options.map((option) => option.value)).toEqual(["all"]);
+  });
+
+  it("SHOULD NOT list an All category as parent of a single-scope category", () => {
+    const options = build([all, plain]).parentOptions({
+      ownerId: "user-id",
+      type: "EXPENSE",
+    });
+
+    expect(options.map((option) => option.value)).toEqual(["plain"]);
+  });
+});

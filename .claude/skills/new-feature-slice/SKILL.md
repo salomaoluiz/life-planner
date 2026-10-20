@@ -63,5 +63,5 @@ Placeholders: `<module>` (e.g. `financial`), `<sub>` (e.g. `accounts`, optional)
 ## 8. Docs & commit → `.claude/context/conventions.md`
 
 - [ ] Update/create `docs/ai/modules/<module>.md` (and add module to `docs/ai/INDEX.md` if new)
-- [ ] Run the E2E stages: own flows (`--tags spec-NNN`), `--changed`, then the full suite once (`yarn e2e`); read only `e2e-report/summary.md` (CLAUDE.md rule 12)
+- [ ] Run the E2E stages: own flows (`--tags spec-NNN`), `--changed`, then `--unchanged` (the rest of the suite, no repeats); read only `e2e-report/summary.md` (CLAUDE.md rule 12)
 - [ ] Commit (conventional message); fix Husky failures (lint, type-check, tests). Don't run them manually before.

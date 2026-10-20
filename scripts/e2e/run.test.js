@@ -14,17 +14,21 @@ describe("parseArgs AND buildMaestroArgs", () => {
       changed: false,
       dryRun: false,
       failedOnly: true,
+      fileList: false,
       headless: false,
       listTags: false,
       tags: ["auth", "smoke"],
+      unchanged: false,
     });
     expect(parseArgs([])).toEqual({
       changed: false,
       dryRun: false,
       failedOnly: false,
+      fileList: false,
       headless: false,
       listTags: false,
       tags: [],
+      unchanged: false,
     });
   });
 
@@ -629,5 +633,81 @@ describe("runE2e --changed", () => {
     expect(deps.exec.mock.calls[0][0].args).toEqual(
       expect.arrayContaining(["--include-tags", "stock"]),
     );
+  });
+});
+
+describe("runE2e --unchanged", () => {
+  const flowFiles = ["auth/c.yaml", "financial/a.yaml", "stock/b.yaml"];
+  function flowYaml(tag, extra = "") {
+    return `name: x\ntags:\n  - ${tag}\n${extra}---\n`;
+  }
+
+  function unchangedDeps(front, back) {
+    return {
+      changedFiles: jest.fn((dir) => (dir === "." ? front : back)),
+      listFiles: jest.fn((dir) => (dir === "e2e/flows" ? flowFiles : [])),
+      readFile: jest.fn((path) => {
+        const files = {
+          "e2e-report/junit.xml": junit([{ name: "auth/c" }]),
+          "e2e/flows/auth/c.yaml": flowYaml("auth"),
+          "e2e/flows/financial/a.yaml": flowYaml("financial"),
+          "e2e/flows/stock/b.yaml": flowYaml("stock"),
+        };
+        return files[path] ?? null;
+      }),
+    };
+  }
+
+  it("SHOULD run only the flows --changed does not select", async () => {
+    const { deps, exitCode, printed } = await run(
+      { deps: unchangedDeps([], ["src/modules/finance/x.ts"]) },
+      { argv: ["--unchanged", "--workers", "1"] },
+    );
+
+    expect(exitCode).toBe(0);
+    expect(deps.exec.mock.calls[0][0].args).toEqual(
+      expect.arrayContaining([
+        "e2e/flows/auth/c.yaml",
+        "e2e/flows/stock/b.yaml",
+      ]),
+    );
+    expect(deps.exec.mock.calls[0][0].args).not.toContain(
+      "e2e/flows/financial/a.yaml",
+    );
+    expect(printed.join("\n")).toContain("E2E PASSED (unchanged:");
+  });
+
+  it("SHOULD list the remaining flows on --dry-run without running", async () => {
+    const { deps, printed } = await run(
+      { deps: unchangedDeps([], ["src/modules/finance/x.ts"]) },
+      { argv: ["--unchanged", "--dry-run"] },
+    );
+
+    expect(deps.exec).not.toHaveBeenCalled();
+    expect(printed.join("\n")).toContain("the flows --changed does not select");
+    expect(printed.join("\n")).toContain("2 flows");
+  });
+
+  it("SHOULD skip WHEN --changed already selected the full suite", async () => {
+    const { deps, exitCode, printed } = await run(
+      { deps: unchangedDeps(["src/presentation/components/A.tsx"], []) },
+      { argv: ["--unchanged"] },
+    );
+
+    expect(exitCode).toBe(0);
+    expect(deps.exec).not.toHaveBeenCalled();
+    expect(printed.join("\n")).toContain(
+      "E2E SKIPPED: --changed already selected",
+    );
+  });
+
+  it("SHOULD skip WHEN only docs changed", async () => {
+    const { deps, printed } = await run(
+      { deps: unchangedDeps(["docs/a.md"], []) },
+      { argv: ["--unchanged"] },
+    );
+
+    expect(deps.exec).not.toHaveBeenCalled();
+    expect(printed).toContain("E2E SKIPPED: docs-only change");
   });
 });

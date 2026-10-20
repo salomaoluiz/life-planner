@@ -16,6 +16,7 @@ async function updateCategory(params: Params, datasources: Datasources) {
     owner: params.owner,
     ownerId: params.ownerId,
     parentId: params.parentId,
+    scope: params.scope,
     type: params.type,
   });
 

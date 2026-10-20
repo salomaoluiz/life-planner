@@ -7,7 +7,10 @@ import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
 import { useQuery } from "@infrastructure/fetcher";
 import { TranslationKeys } from "@presentation/i18n/types";
-import { buildCategoryRows } from "@screens/Financial/models/categoryTree";
+import {
+  buildCategoryRows,
+  categoryInScope,
+} from "@screens/Financial/models/categoryTree";
 import {
   ALL_OWNERS,
   buildOwnerFilterChoices,
@@ -57,7 +60,8 @@ function useCategoriesViewModel() {
         (query.data?.categories ?? []).filter(
           (category) =>
             category.type === type &&
-            (ownerFilter === ALL_OWNERS || category.ownerId === ownerFilter),
+            (ownerFilter === ALL_OWNERS ||
+              categoryInScope(category, ownerFilter)),
         ),
       ).map((row) => new CategoryRowUIModel(row)),
     [query.data, type, ownerFilter],

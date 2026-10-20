@@ -15,6 +15,7 @@ async function updateCategory(params: Params): Response {
       params.iconColor === undefined ? undefined : toApiColor(params.iconColor),
     name: params.name,
     parentId: params.parentId,
+    scope: params.scope,
     type: params.type,
   };
 

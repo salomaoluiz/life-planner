@@ -81,3 +81,26 @@ it("SHOULD wrap unknown errors in GenericError with the owner id only", async ()
     ownerId: mocks.params.ownerId,
   });
 });
+
+it("SHOULD send owner ALL WITHOUT ownerId for an All category", async () => {
+  spies.post.mockResolvedValueOnce({
+    ...mocks.apiCategory,
+    owner: "USER",
+    scope: "ALL",
+  });
+
+  await setup({
+    owner: "ALL" as never,
+    ownerId: undefined,
+    parentId: undefined,
+  });
+
+  const [, body] = spies.post.mock.calls[0];
+  expect(JSON.parse(JSON.stringify(body))).toEqual({
+    icon: "store",
+    iconColor: "#000000",
+    name: "Supermarket",
+    owner: "ALL",
+    type: "EXPENSE",
+  });
+});

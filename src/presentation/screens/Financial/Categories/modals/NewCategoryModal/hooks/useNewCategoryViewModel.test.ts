@@ -72,23 +72,117 @@ it("SHOULD lock the type in edit WHEN it has a parent, children or transactions"
   expect(setup().result.current.isTypeLocked).toBe(false);
 });
 
-it("SHOULD always lock the owner in edit and use the tree helper WHEN it has a parent or children", () => {
+it("SHOULD lock the owner in edit WHEN the category has a parent AND offer only All otherwise", () => {
   givenLoaded({ categories: [cat("solo")], params: { id: "solo" } });
-  expect(setup().result.current.isOwnerLocked).toBe(true);
+  expect(setup().result.current.isOwnerLocked).toBe(false);
   expect(setup().result.current.ownerHelperKey).toBe(
     "financial.common.ownerLocked",
   );
+  expect(
+    setup().result.current.ownerChoices.map((choice) => choice.value),
+  ).toEqual(["user-id", "ALL"]);
 
   givenLoaded({
     categories: [cat("p"), cat("c", { parentId: "p" })],
     params: { id: "c" },
   });
+  expect(setup().result.current.isOwnerLocked).toBe(true);
   expect(setup().result.current.ownerHelperKey).toBe(
     "financial.categories.form.ownerLocked",
   );
 
   givenLoaded();
   expect(setup().result.current.isOwnerLocked).toBe(false);
+});
+
+describe("scope ALL", () => {
+  function all(overrides = {}) {
+    return cat("all", {
+      scope: "ALL",
+      scopeOwnerIds: ["user-id", "family-1"],
+      ...overrides,
+    });
+  }
+
+  it("SHOULD create with owner ALL and no ownerId, listing only All parents", () => {
+    givenLoaded({ categories: [all(), cat("plain")] });
+    const { result } = setup();
+
+    act(() => {
+      result.current.onOwnerChange("ALL");
+    });
+    act(() => {
+      result.current.onNameChange("Mercado");
+    });
+
+    expect(result.current.ownerHelperKey).toBe(
+      "financial.categories.form.ownerAllHint",
+    );
+    expect(result.current.parentHelperKey).toBe(
+      "financial.categories.form.parentAllHint",
+    );
+    expect(result.current.parentOptions.map((option) => option.value)).toEqual([
+      "all",
+    ]);
+
+    act(() => {
+      result.current.onSave();
+    });
+
+    expect(mutations.create.value.mutate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "Mercado",
+        owner: "ALL",
+        ownerId: undefined,
+      }),
+    );
+  });
+
+  it("SHOULD switch a single-scope category to All with scope ALL", () => {
+    givenLoaded({ categories: [cat("solo")], params: { id: "solo" } });
+    const { result } = setup();
+
+    act(() => {
+      result.current.onOwnerChange("ALL");
+    });
+    act(() => {
+      result.current.onSave();
+    });
+
+    expect(mutations.update.value.mutate).toHaveBeenCalledWith({
+      id: "solo",
+      scope: "ALL",
+    });
+  });
+
+  it("SHOULD lock an All category in edit AND use the All delete copy", () => {
+    givenLoaded({ categories: [all()], params: { id: "all" } });
+    const { result } = setup();
+
+    expect(result.current.ownerId).toBe("ALL");
+    expect(result.current.isOwnerLocked).toBe(true);
+    expect(result.current.ownerHelperKey).toBe(
+      "financial.categories.form.ownerLockedAll",
+    );
+    expect(result.current.deleteMessageKeys).toEqual([
+      "financial.categories.deleteConfirm.allScopes",
+    ]);
+    expect(result.current.deleteConfirmLabelKey).toBe(
+      "financial.categories.deleteAllConfirm",
+    );
+
+    act(() => {
+      result.current.onDeletePress();
+    });
+    act(() => {
+      result.current.onDeleteConfirm();
+    });
+
+    expect(mutations.delete.value.mutate).toHaveBeenCalledWith({
+      id: "all",
+      ownerId: "user-id",
+    });
+  });
 });
 
 it("SHOULD exclude itself and its descendants from the parent options in edit", () => {

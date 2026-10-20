@@ -60,6 +60,8 @@ const category = {
   name: "Food",
   owner: "USER",
   ownerId: "user-id",
+  scope: "PERSONAL",
+  scopeOwnerIds: ["user-id"],
   type: "EXPENSE",
 };
 const account = {
