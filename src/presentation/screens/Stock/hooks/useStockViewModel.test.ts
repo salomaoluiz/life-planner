@@ -422,3 +422,37 @@ describe("onAddPress", () => {
     });
   });
 });
+
+describe("archived family (spec 042)", () => {
+  const archivedOwners = [
+    owners[0],
+    new OwnerDTO({
+      archived: true,
+      id: "family-1",
+      name: "Silva",
+      type: OwnerType.FAMILY,
+    }),
+  ];
+
+  it("SHOULD be writable on All AND read-only on the archived family, replacing the actions by the toast", () => {
+    const { result } = setup((q) =>
+      q.withData({ items, owners: archivedOwners }),
+    );
+
+    expect(result.current.readOnly).toBe(false);
+    expect(result.current.subtitle.total).toBe(1);
+
+    act(() => result.current.onFilterChange("family-1"));
+
+    expect(result.current.readOnly).toBe(true);
+
+    act(() => {
+      result.current.onAddPress();
+      result.current.onItemPress("stock-2");
+    });
+
+    expect(spies.push).not.toHaveBeenCalled();
+    expect(result.current.selectedItem).toBeUndefined();
+    expect(result.current.toastVisible).toBe(true);
+  });
+});

@@ -56,3 +56,32 @@ it("SHOULD keep a valid selection", () => {
   expect(normalizeSelection(owners, "family-1")).toBe("family-1");
   expect(normalizeSelection(owners, PERSONAL_FILTER)).toBe(PERSONAL_FILTER);
 });
+
+describe("archived family (spec 042)", () => {
+  const withArchived = [
+    user,
+    family,
+    new OwnerDTO({
+      archived: true,
+      id: "family-old",
+      name: "Old House",
+      type: OwnerType.FAMILY,
+    }),
+  ];
+
+  it("SHOULD list it last with the marker", () => {
+    const options = buildOwnerFilterOptions(withArchived);
+
+    expect(options[options.length - 1]).toEqual({
+      archived: true,
+      label: "Old House",
+      value: "family-old",
+    });
+  });
+
+  it("SHOULD leave it out of All but resolve it when selected", () => {
+    expect(resolveOwnerIds(withArchived, "ALL")).not.toContain("family-old");
+    expect(resolveOwnerIds(withArchived, "family-old")).toEqual(["family-old"]);
+    expect(normalizeSelection(withArchived, "family-old")).toBe("family-old");
+  });
+});

@@ -228,3 +228,39 @@ describe("StockListUIModel", () => {
     expect(ids({}, list)).toEqual(["header-ok", "a", "b"]);
   });
 });
+
+describe("archived family (spec 042)", () => {
+  const withArchived = [
+    owners[0],
+    new OwnerDTO({
+      archived: true,
+      id: "family-id",
+      name: "Test Family",
+      type: OwnerType.FAMILY,
+    }),
+  ];
+
+  it("SHOULD leave its items out of All, the counters AND the other filters", () => {
+    const list = new StockListUIModel(fixture(), withArchived, now);
+    const view = list.view({ filter: "ALL", search: "", sort: "NAME" });
+    const ids = view.rows.flatMap((row) =>
+      row.kind === "item" ? [row.id] : [],
+    );
+
+    expect(ids).not.toContain("powder");
+    expect(ids).not.toContain("beans");
+    expect(list.total).toBe(list.items.length - 2);
+  });
+
+  it("SHOULD list the archived family last with the marker AND show its items when selected", () => {
+    const list = new StockListUIModel(fixture(), withArchived, now);
+    const view = list.view({ filter: "family-id", search: "", sort: "NAME" });
+    const last = view.filterOptions[view.filterOptions.length - 1];
+
+    expect(last).toMatchObject({ archived: true, value: "family-id" });
+    expect(view.activeFilter).toBe("family-id");
+    expect(
+      view.rows.flatMap((row) => (row.kind === "item" ? [row.id] : [])),
+    ).toEqual(["beans", "powder"]);
+  });
+});

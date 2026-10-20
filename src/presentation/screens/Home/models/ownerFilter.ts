@@ -6,6 +6,8 @@ export const ALL_FILTER = "ALL";
 export const PERSONAL_FILTER = "PERSONAL";
 
 export interface OwnerFilterOption {
+  // An archived family: listed last with the archive marker (spec 042).
+  archived?: boolean;
   label?: string;
   labelKey?: TranslationKeys;
   value: string;
@@ -18,8 +20,11 @@ export function buildOwnerFilterOptions(
     { labelKey: "home.filter.all", value: ALL_FILTER },
     { labelKey: "home.filter.personal", value: PERSONAL_FILTER },
     ...owners
-      .filter((owner) => owner.type === OwnerType.FAMILY)
+      .filter((owner) => owner.type === OwnerType.FAMILY && !owner.archived)
       .map((owner) => ({ label: owner.name, value: owner.id })),
+    ...owners
+      .filter((owner) => owner.type === OwnerType.FAMILY && owner.archived)
+      .map((owner) => ({ archived: true, label: owner.name, value: owner.id })),
   ];
 }
 
@@ -42,8 +47,9 @@ export function resolveOwnerIds(
   owners: OwnerDTO[],
   selection: string,
 ): string[] {
+  // "All" leaves out the archived families (spec 042).
   if (selection === ALL_FILTER) {
-    return owners.map((owner) => owner.id);
+    return owners.filter((owner) => !owner.archived).map((owner) => owner.id);
   }
 
   if (selection === PERSONAL_FILTER) {

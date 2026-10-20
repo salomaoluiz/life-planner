@@ -225,3 +225,11 @@ describe("test ids", () => {
     expect(screen.getByTestId(stockTestIds.sortButton)).toBeOnTheScreen();
   });
 });
+
+it("SHOULD show the read-only banner AND toast, without the add button, WHEN an archived family is selected", () => {
+  setup({ readOnly: true, toastVisible: true });
+
+  expect(screen.getByTestId(stockTestIds.readOnlyBanner)).toBeTruthy();
+  expect(screen.getByTestId(stockTestIds.readOnlyToast)).toBeTruthy();
+  expect(screen.queryByTestId(stockTestIds.addButton)).toBeNull();
+});
