@@ -1,6 +1,7 @@
 import { render } from "@tests";
 
 import InstallmentPlanDTO from "@application/dto/financial/InstallmentPlanDTO";
+import { useBreakpoint } from "@presentation/theme";
 
 import { InstallmentEditModal } from "../";
 import { useInstallmentEditViewModel } from "../hooks";
@@ -90,7 +91,11 @@ const defaultViewModel: ReturnType<typeof useInstallmentEditViewModel> = {
   } as never),
 };
 
-function setup(overrides: Partial<typeof defaultViewModel> = {}) {
+function setup(
+  overrides: Partial<typeof defaultViewModel> = {},
+  breakpoint: "compact" | "expanded" | "medium" = "compact",
+) {
+  jest.mocked(useBreakpoint).mockReturnValue(breakpoint);
   const viewModel = { ...defaultViewModel, ...overrides };
   jest.mocked(useInstallmentEditViewModel).mockReturnValue(viewModel);
   render(<InstallmentEditModal />);

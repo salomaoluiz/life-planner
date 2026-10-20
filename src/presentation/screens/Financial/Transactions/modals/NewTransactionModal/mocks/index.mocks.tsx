@@ -1,8 +1,9 @@
-import { fireEvent, render, screen } from "@tests";
+import { fireEvent, render, screen, within } from "@tests";
 
 import { RecurrenceHasPaidOccurrences } from "@domain/entities/errors";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { TranslationKeys } from "@presentation/i18n/types";
+import { useBreakpoint } from "@presentation/theme";
 
 import NewTransactionModal from "../";
 import { useNewTransactionViewModel } from "../hooks";
@@ -138,7 +139,11 @@ const defaultViewModel: ReturnType<typeof useNewTransactionViewModel> = {
   typeTone: "expense",
 };
 
-function setup(overrides: Partial<typeof defaultViewModel> = {}) {
+function setup(
+  overrides: Partial<typeof defaultViewModel> = {},
+  breakpoint: "compact" | "expanded" | "medium" = "compact",
+) {
+  jest.mocked(useBreakpoint).mockReturnValue(breakpoint);
   const viewModel = { ...defaultViewModel, ...overrides };
   jest.mocked(useNewTransactionViewModel).mockReturnValue(viewModel);
   render(<NewTransactionModal />);
@@ -150,4 +155,4 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-export { defaultViewModel, fireEvent, screen, setup };
+export { defaultViewModel, fireEvent, screen, setup, within };

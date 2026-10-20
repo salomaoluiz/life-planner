@@ -6,6 +6,7 @@ import {
   Button,
   ConfirmDialog,
   DateField,
+  FormColumns,
   HelperText,
   SelectField,
   TextField,
@@ -42,99 +43,104 @@ function RefundModal() {
 
     return (
       <View style={styles.form}>
-        {vm.linked ? (
-          <TextField
-            disabled
-            label={t("financial.refund.linked")}
-            onChangeText={() => undefined}
-            testID={refundTestIds.linked}
-            value={
-              vm.linkedIsPlan
-                ? t("financial.refund.linkedPlan", { name: vm.linkedName })
-                : (vm.linkedName ?? "")
-            }
-          />
-        ) : null}
-        <TextField
-          error={err(vm.errors.description)}
-          label={t("financial.refund.description")}
-          maxLength={200}
-          onChangeText={vm.onDescriptionChange}
-          testID={refundTestIds.description}
-          value={vm.description ?? defaultDescription}
+        <FormColumns
+          left={
+            <>
+              {vm.linked ? (
+                <TextField
+                  disabled
+                  label={t("financial.refund.linked")}
+                  onChangeText={() => undefined}
+                  testID={refundTestIds.linked}
+                  value={
+                    vm.linkedIsPlan
+                      ? t("financial.refund.linkedPlan", {
+                          name: vm.linkedName,
+                        })
+                      : (vm.linkedName ?? "")
+                  }
+                />
+              ) : null}
+              <TextField
+                error={err(vm.errors.description)}
+                label={t("financial.refund.description")}
+                maxLength={200}
+                onChangeText={vm.onDescriptionChange}
+                testID={refundTestIds.description}
+                value={vm.description ?? defaultDescription}
+              />
+              {vm.isLocked ? (
+                <TextField
+                  disabled
+                  helper={t("financial.errors.invoicePaid")}
+                  label={t("financial.refund.amount")}
+                  onChangeText={() => undefined}
+                  testID={refundTestIds.amount}
+                  value={formatAmount(vm.amountCents, localeTag)}
+                />
+              ) : (
+                <AmountInput
+                  error={err(vm.errors.amount)}
+                  label={t("financial.refund.amount")}
+                  onChange={vm.onAmountChange}
+                  testID={refundTestIds.amount}
+                  tone="income"
+                  value={vm.amountCents}
+                />
+              )}
+            </>
+          }
+          right={
+            <>
+              <DateField
+                disabled={vm.isLocked}
+                label={t("financial.refund.date")}
+                onChange={vm.onDateChange}
+                testID={refundTestIds.date}
+                todayLabel={t("common.date.today")}
+                value={vm.date}
+                yesterdayLabel={t("common.date.yesterday")}
+              />
+              <SelectField
+                closeLabel={t("common.actions.close")}
+                disabled={vm.isLocked}
+                error={err(vm.errors.invoice)}
+                label={t("financial.refund.invoice")}
+                onChange={vm.onInvoiceChange}
+                options={vm.invoices.map((invoice) => ({
+                  label: t("financial.prepayment.invoiceOption", {
+                    month: formatReferenceMonth(invoice.month, localeTag),
+                    status: t(
+                      `financial.cards.invoice.status.${invoice.status}` as TranslationKeys,
+                    ),
+                  }),
+                  value: invoice.month,
+                }))}
+                sheetTitle={t("financial.refund.invoice")}
+                testID={refundTestIds.invoice}
+                value={vm.invoiceMonth}
+              />
+              {vm.carryCents > 0 && vm.carryMonth ? (
+                <HelperText
+                  label={t("financial.refund.hint", {
+                    month: formatReferenceMonth(vm.carryMonth, localeTag),
+                    value: formatAmount(vm.carryCents, localeTag),
+                  })}
+                  testID={refundTestIds.hint}
+                  type="info"
+                  visible
+                />
+              ) : null}
+            </>
+          }
+          testID={refundTestIds.sheet}
         />
-        {vm.isLocked ? (
-          <TextField
-            disabled
-            helper={t("financial.errors.invoicePaid")}
-            label={t("financial.refund.amount")}
-            onChangeText={() => undefined}
-            testID={refundTestIds.amount}
-            value={formatAmount(vm.amountCents, localeTag)}
-          />
-        ) : (
-          <AmountInput
-            error={err(vm.errors.amount)}
-            label={t("financial.refund.amount")}
-            onChange={vm.onAmountChange}
-            testID={refundTestIds.amount}
-            tone="income"
-            value={vm.amountCents}
-          />
-        )}
-        <DateField
-          disabled={vm.isLocked}
-          label={t("financial.refund.date")}
-          onChange={vm.onDateChange}
-          testID={refundTestIds.date}
-          todayLabel={t("common.date.today")}
-          value={vm.date}
-          yesterdayLabel={t("common.date.yesterday")}
-        />
-        <SelectField
-          closeLabel={t("common.actions.close")}
-          disabled={vm.isLocked}
-          error={err(vm.errors.invoice)}
-          label={t("financial.refund.invoice")}
-          onChange={vm.onInvoiceChange}
-          options={vm.invoices.map((invoice) => ({
-            label: t("financial.prepayment.invoiceOption", {
-              month: formatReferenceMonth(invoice.month, localeTag),
-              status: t(
-                `financial.cards.invoice.status.${invoice.status}` as TranslationKeys,
-              ),
-            }),
-            value: invoice.month,
-          }))}
-          sheetTitle={t("financial.refund.invoice")}
-          testID={refundTestIds.invoice}
-          value={vm.invoiceMonth}
-        />
-        {vm.carryCents > 0 && vm.carryMonth ? (
-          <HelperText
-            label={t("financial.refund.hint", {
-              month: formatReferenceMonth(vm.carryMonth, localeTag),
-              value: formatAmount(vm.carryCents, localeTag),
-            })}
-            testID={refundTestIds.hint}
-            type="info"
-            visible
-          />
-        ) : null}
         {vm.formErrorKey ? (
           <HelperText
             label={t(vm.formErrorKey)}
             testID={refundTestIds.formError}
             type="error"
             visible
-          />
-        ) : null}
-        {vm.isEdit ? (
-          <Button.Ghost
-            label={t("financial.refund.delete")}
-            onPress={vm.onDeletePress}
-            testID={refundTestIds.delete}
-            tone="expense"
           />
         ) : null}
       </View>
@@ -157,8 +163,19 @@ function RefundModal() {
             />
           )
         }
+        footerStart={
+          vm.isEdit && !vm.isLoading ? (
+            <Button.Ghost
+              label={t("financial.refund.delete")}
+              onPress={vm.onDeletePress}
+              testID={refundTestIds.delete}
+              tone="expense"
+            />
+          ) : undefined
+        }
         onClose={vm.onClose}
         presentation="inline"
+        size="form"
         testID={refundTestIds.sheet}
         title={t("financial.refund.titleCard", {
           card: vm.card?.title ?? "",

@@ -7,10 +7,12 @@ import {
   Button,
   ConfirmDialog,
   ErrorState,
+  FormColumns,
   GroupHeader,
   IconTile,
   ListItem,
   Text,
+  useSheetLayout,
 } from "@components";
 import { formatAmount } from "@components/AmountText/formatAmount";
 import Skeleton from "@components/Skeleton";
@@ -34,7 +36,22 @@ const CREDIT_ICONS = {
   REFUND: "cash-refund",
 } as const;
 // The API stores the English description of the discount row; the screen translates it.
+// Fixed width of the summary column on a wide sheet (spec 037 FR 11).
+const INVOICE_SUMMARY_WIDTH = 320;
 const DISCOUNT_PREFIX = "Prepayment discount · ";
+
+// Reads the sheet layout, so it must render inside the BottomSheet: on a wide
+// sheet the actions become one wrapping row.
+function InvoiceActions({ children }: { children: React.ReactNode }) {
+  const { columns } = useSheetLayout();
+  const { styles } = useStyles(columns);
+
+  return (
+    <View style={styles.actions} testID={invoiceTestIds.actions}>
+      {children}
+    </View>
+  );
+}
 
 function InvoiceModal() {
   const { styles } = useStyles();
@@ -64,194 +81,219 @@ function InvoiceModal() {
 
     return (
       <View style={styles.body}>
-        <View style={styles.header}>
-          <View style={styles.headerRow}>
-            <AmountText
-              size="heading"
-              testID={invoiceTestIds.amount}
-              type="EXPENSE"
-              value={invoice.amountCents}
-            />
-            <Badge
-              label={t(
-                `financial.cards.invoice.status.${invoice.status}` as TranslationKeys,
-              )}
-              testID={invoiceTestIds.status}
-              tone={isPaid ? "income" : "accent"}
-            />
-          </View>
-          <Text.Caption
-            tone="secondary"
-            value={t("financial.invoice.dates", {
-              closing: formatDayMonth(dates.closingDate),
-              due: formatDayMonth(dates.dueDate),
-              pay: formatDayMonth(dates.paymentDate),
-            })}
-          />
-          {invoice.earlyPaidCents > 0 ? (
-            <View>
-              <Text.Body
-                testID={invoiceTestIds.paidEarly}
-                tone="income"
-                value={t("financial.earlyPayment.paidEarly", {
-                  value: formatAmount(invoice.earlyPaidCents, localeTag),
+        <FormColumns
+          compactGap="lg"
+          left={
+            <View style={styles.header}>
+              <View style={styles.headerRow}>
+                <AmountText
+                  size="heading"
+                  testID={invoiceTestIds.amount}
+                  type="EXPENSE"
+                  value={invoice.amountCents}
+                />
+                <Badge
+                  label={t(
+                    `financial.cards.invoice.status.${invoice.status}` as TranslationKeys,
+                  )}
+                  testID={invoiceTestIds.status}
+                  tone={isPaid ? "income" : "accent"}
+                />
+              </View>
+              <Text.Caption
+                tone="secondary"
+                value={t("financial.invoice.dates", {
+                  closing: formatDayMonth(dates.closingDate),
+                  due: formatDayMonth(dates.dueDate),
+                  pay: formatDayMonth(dates.paymentDate),
                 })}
               />
-              <Text.Body
-                testID={invoiceTestIds.leftToPay}
-                value={`${t("financial.earlyPayment.leftToPay")}: ${formatAmount(invoice.amountCents, localeTag)}`}
-              />
-            </View>
-          ) : null}
-          {invoice.creditCarryCents > 0 ? (
-            <Text.Body
-              testID={invoiceTestIds.creditCarry}
-              tone="income"
-              value={t("financial.invoice.creditCarry", {
-                month: formatReferenceMonth(
-                  invoice.creditCarryMonth,
-                  localeTag,
-                ),
-                value: formatAmount(invoice.creditCarryCents, localeTag),
-              })}
-            />
-          ) : null}
-          {isPaid && invoice.paidOn ? (
-            <Text.Body
-              testID={invoiceTestIds.paidInfo}
-              value={
-                invoice.paidExternal || !invoice.paidAccountName
-                  ? t("financial.invoice.paidInfoExternal", {
-                      date: formatDayMonth(invoice.paidOn),
-                    })
-                  : t("financial.invoice.paidInfo", {
-                      account: invoice.paidAccountName,
-                      date: formatDayMonth(invoice.paidOn),
-                    })
-              }
-            />
-          ) : null}
-        </View>
-        <View>
-          <GroupHeader
-            title={t("financial.invoice.purchases", {
-              count: invoice.purchases.length,
-            })}
-          />
-          {invoice.purchases.map((purchase) => (
-            <ListItem
-              inset
-              key={purchase.id}
-              leading={
-                <IconTile
-                  color={purchase.categoryColor}
-                  name={purchase.categoryIcon}
+              {invoice.earlyPaidCents > 0 ? (
+                <View>
+                  <Text.Body
+                    testID={invoiceTestIds.paidEarly}
+                    tone="income"
+                    value={t("financial.earlyPayment.paidEarly", {
+                      value: formatAmount(invoice.earlyPaidCents, localeTag),
+                    })}
+                  />
+                  <Text.Body
+                    testID={invoiceTestIds.leftToPay}
+                    value={`${t("financial.earlyPayment.leftToPay")}: ${formatAmount(invoice.amountCents, localeTag)}`}
+                  />
+                </View>
+              ) : null}
+              {invoice.creditCarryCents > 0 ? (
+                <Text.Body
+                  testID={invoiceTestIds.creditCarry}
+                  tone="income"
+                  value={t("financial.invoice.creditCarry", {
+                    month: formatReferenceMonth(
+                      invoice.creditCarryMonth,
+                      localeTag,
+                    ),
+                    value: formatAmount(invoice.creditCarryCents, localeTag),
+                  })}
                 />
-              }
-              onPress={() => vm.onPurchasePress(purchase.id)}
-              subtitle={`${purchase.categoryName} · ${formatDayMonth(toIsoDate(purchase.date))}`}
-              testID={invoiceTestIds.purchase}
-              title={installmentTitle(
-                purchase.description,
-                purchase.installment,
-                (params) => t("financial.installment.label", params),
-              )}
-              trailing={
-                <View style={styles.trailing}>
-                  <AmountText type="EXPENSE" value={purchase.amountCents} />
-                  {purchase.prepaid ? (
-                    <Badge
-                      label={t("financial.prepayment.prepaidBadge")}
-                      testID={invoiceTestIds.prepaid}
-                      tone="accent"
+              ) : null}
+              {isPaid && invoice.paidOn ? (
+                <Text.Body
+                  testID={invoiceTestIds.paidInfo}
+                  value={
+                    invoice.paidExternal || !invoice.paidAccountName
+                      ? t("financial.invoice.paidInfoExternal", {
+                          date: formatDayMonth(invoice.paidOn),
+                        })
+                      : t("financial.invoice.paidInfo", {
+                          account: invoice.paidAccountName,
+                          date: formatDayMonth(invoice.paidOn),
+                        })
+                  }
+                />
+              ) : null}
+            </View>
+          }
+          leftWidth={INVOICE_SUMMARY_WIDTH}
+          right={
+            <>
+              <View>
+                <GroupHeader
+                  title={t("financial.invoice.purchases", {
+                    count: invoice.purchases.length,
+                  })}
+                />
+                {invoice.purchases.map((purchase) => (
+                  <ListItem
+                    inset
+                    key={purchase.id}
+                    leading={
+                      <IconTile
+                        color={purchase.categoryColor}
+                        name={purchase.categoryIcon}
+                      />
+                    }
+                    onPress={() => vm.onPurchasePress(purchase.id)}
+                    subtitle={`${purchase.categoryName} · ${formatDayMonth(toIsoDate(purchase.date))}`}
+                    testID={invoiceTestIds.purchase}
+                    title={installmentTitle(
+                      purchase.description,
+                      purchase.installment,
+                      (params) => t("financial.installment.label", params),
+                    )}
+                    trailing={
+                      <View style={styles.trailing}>
+                        <AmountText
+                          type="EXPENSE"
+                          value={purchase.amountCents}
+                        />
+                        {purchase.prepaid ? (
+                          <Badge
+                            label={t("financial.prepayment.prepaidBadge")}
+                            testID={invoiceTestIds.prepaid}
+                            tone="accent"
+                          />
+                        ) : null}
+                      </View>
+                    }
+                  />
+                ))}
+              </View>
+              {vm.projected.length > 0 ? (
+                <View>
+                  <GroupHeader
+                    title={t("financial.invoice.projectedTitle", {
+                      count: vm.projected.length,
+                    })}
+                  />
+                  {vm.projected.map((item) => (
+                    <ListItem
+                      inset
+                      key={item.id}
+                      leading={
+                        <IconTile
+                          color={item.categoryColor}
+                          name={item.categoryIcon}
+                        />
+                      }
+                      meta={
+                        <Badge
+                          label={t("financial.recurrence.projected")}
+                          tone="accent"
+                        />
+                      }
+                      onPress={() => vm.onProjectedPress(item)}
+                      subtitle={`${item.categoryName} · ${formatDayMonth(toIsoDate(item.date))}`}
+                      testID={invoiceTestIds.projected}
+                      title={
+                        item.counter
+                          ? `${item.description} ${item.counter}`
+                          : item.description
+                      }
+                      trailing={
+                        <AmountText type="EXPENSE" value={item.amountCents} />
+                      }
+                    />
+                  ))}
+                </View>
+              ) : null}
+              {invoice.credits.length > 0 || invoice.carryInCents < 0 ? (
+                <View>
+                  <GroupHeader
+                    title={t("financial.invoice.credits", {
+                      count: invoice.credits.length,
+                    })}
+                  />
+                  {invoice.carryInCents < 0 ? (
+                    <ListItem
+                      inset
+                      leading={
+                        <IconTile name="swap-horizontal" tone="income" />
+                      }
+                      testID={invoiceTestIds.carryIn}
+                      title={t("financial.invoice.creditFrom", {
+                        month: formatReferenceMonth(
+                          invoice.previousMonth,
+                          localeTag,
+                        ),
+                      })}
+                      trailing={
+                        <AmountText
+                          type="INCOME"
+                          value={-invoice.carryInCents}
+                        />
+                      }
                     />
                   ) : null}
+                  {invoice.credits.map((credit) => (
+                    <ListItem
+                      inset
+                      key={credit.id}
+                      leading={
+                        <IconTile
+                          name={CREDIT_ICONS[credit.kind]}
+                          tone="income"
+                        />
+                      }
+                      onPress={
+                        credit.kind === "PREPAYMENT_DISCOUNT"
+                          ? undefined
+                          : () => vm.onCreditPress(credit)
+                      }
+                      subtitle={creditSubtitle(credit)}
+                      testID={invoiceTestIds.credit}
+                      title={creditTitle(credit)}
+                      trailing={
+                        <AmountText type="INCOME" value={credit.amountCents} />
+                      }
+                    />
+                  ))}
                 </View>
-              }
-            />
-          ))}
-        </View>
-        {vm.projected.length > 0 ? (
-          <View>
-            <GroupHeader
-              title={t("financial.invoice.projectedTitle", {
-                count: vm.projected.length,
-              })}
-            />
-            {vm.projected.map((item) => (
-              <ListItem
-                inset
-                key={item.id}
-                leading={
-                  <IconTile
-                    color={item.categoryColor}
-                    name={item.categoryIcon}
-                  />
-                }
-                meta={
-                  <Badge
-                    label={t("financial.recurrence.projected")}
-                    tone="accent"
-                  />
-                }
-                onPress={() => vm.onProjectedPress(item)}
-                subtitle={`${item.categoryName} · ${formatDayMonth(toIsoDate(item.date))}`}
-                testID={invoiceTestIds.projected}
-                title={
-                  item.counter
-                    ? `${item.description} ${item.counter}`
-                    : item.description
-                }
-                trailing={
-                  <AmountText type="EXPENSE" value={item.amountCents} />
-                }
-              />
-            ))}
-          </View>
-        ) : null}
-        {invoice.credits.length > 0 || invoice.carryInCents < 0 ? (
-          <View>
-            <GroupHeader
-              title={t("financial.invoice.credits", {
-                count: invoice.credits.length,
-              })}
-            />
-            {invoice.carryInCents < 0 ? (
-              <ListItem
-                inset
-                leading={<IconTile name="swap-horizontal" tone="income" />}
-                testID={invoiceTestIds.carryIn}
-                title={t("financial.invoice.creditFrom", {
-                  month: formatReferenceMonth(invoice.previousMonth, localeTag),
-                })}
-                trailing={
-                  <AmountText type="INCOME" value={-invoice.carryInCents} />
-                }
-              />
-            ) : null}
-            {invoice.credits.map((credit) => (
-              <ListItem
-                inset
-                key={credit.id}
-                leading={
-                  <IconTile name={CREDIT_ICONS[credit.kind]} tone="income" />
-                }
-                onPress={
-                  credit.kind === "PREPAYMENT_DISCOUNT"
-                    ? undefined
-                    : () => vm.onCreditPress(credit)
-                }
-                subtitle={creditSubtitle(credit)}
-                testID={invoiceTestIds.credit}
-                title={creditTitle(credit)}
-                trailing={
-                  <AmountText type="INCOME" value={credit.amountCents} />
-                }
-              />
-            ))}
-          </View>
-        ) : null}
-        <View style={styles.actions}>
+              ) : null}
+            </>
+          }
+          testID={invoiceTestIds.screen}
+        />
+        <InvoiceActions>
           {isClosed ? (
             <Button.Primary
               fullWidth
@@ -293,7 +335,7 @@ function InvoiceModal() {
               testID={invoiceTestIds.addPurchase}
             />
           ) : null}
-        </View>
+        </InvoiceActions>
       </View>
     );
   }
@@ -334,6 +376,7 @@ function InvoiceModal() {
         closeLabel={t("common.actions.close")}
         onClose={vm.onClose}
         presentation="inline"
+        size="form"
         testID={invoiceTestIds.screen}
         title={
           invoice

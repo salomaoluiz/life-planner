@@ -205,7 +205,7 @@ A modal also needs a route file and a `Stack.Screen` entry (see `routing.md`).
 
 ## Composition with the kit
 
-Screens compose kit components (`components.md`) and never style visual details themselves (no color literals, no Paper imports; lint-enforced outside the temporary migration allow-list). Forms and selects open in a `BottomSheet`. Legacy snippets above that mention `Button.Text`/`Button.Filled`/`Card customStyles` describe unmigrated screens; new code uses `Button.Secondary`/`Button.Primary` and `BottomSheet`.
+Screens compose kit components (`components.md`) and never style visual details themselves (no color literals, no Paper imports; lint-enforced outside the temporary migration allow-list). Forms and selects open in a `BottomSheet`. Large forms use `size="form"` + `FormColumns` (two columns on web/tablet, see `components.md`); screens never read the breakpoint for this layout (the one exception is the stock form's initial `isMoreOpen`). Legacy snippets above that mention `Button.Text`/`Button.Filled`/`Card customStyles` describe unmigrated screens; new code uses `Button.Secondary`/`Button.Primary` and `BottomSheet`.
 
 ## Testing (see `testing.md`)
 

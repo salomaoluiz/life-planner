@@ -1,7 +1,8 @@
-import { fireEvent, render, screen } from "@tests";
+import { fireEvent, render, screen, within } from "@tests";
 
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
+import { useBreakpoint } from "@presentation/theme";
 
 import NewStockItemModal from "../";
 import { useNewStockItemViewModel } from "../hooks";
@@ -18,7 +19,11 @@ const owners = [
   new OwnerDTO({ id: "family-id", name: "Silva", type: OwnerType.FAMILY }),
 ];
 
-function setup(overrides: Record<string, unknown> = {}) {
+function setup(
+  overrides: Record<string, unknown> = {},
+  breakpoint: "compact" | "expanded" | "medium" = "compact",
+) {
+  jest.mocked(useBreakpoint).mockReturnValue(breakpoint);
   const vm = {
     errors: {},
     formErrorKey: undefined,
@@ -50,4 +55,4 @@ function setup(overrides: Record<string, unknown> = {}) {
   return { vm };
 }
 
-export { fireEvent, screen, setup };
+export { fireEvent, screen, setup, within };

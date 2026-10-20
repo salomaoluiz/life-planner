@@ -110,3 +110,7 @@ ui_models:
 
 notes: E2E flows in `e2e/flows/stock/` (spec 021) and `e2e/flows/family/family-stock-item.yaml` (spec 022; owner chips `stock.item-form.owner-<ownerId>`, filter chips `stock.list.filter-<ownerId|PERSONAL>`); status badges expose `stock.list.status-expired|expiring`, there is no out-of-stock status; no edit flow (spec 011 out of scope); i18n namespace `stock` (units shown via common.units.*)
 ```
+
+## Responsive modal layout (spec 037)
+
+`NewStockItemModal` is a `BottomSheet size="form"` with `FormColumns`: main fields left, the "More details" toggle and fields right. `useNewStockItemViewModel` opens `isMoreOpen` by default on `medium`/`expanded` (read once on mount). `StockItemDetails` and Quick add stay `dialog`.

@@ -1,4 +1,6 @@
-import { fireEvent, screen } from "@tests";
+import { StyleSheet } from "react-native";
+
+import { fireEvent, screen, within } from "@tests";
 
 import { setup } from "./mocks/index.mocks";
 import prepaymentTestIds from "./testIds";
@@ -95,4 +97,21 @@ it("SHOULD offer closing WHEN no invoice can take the installments", () => {
   fireEvent.press(screen.getByText("common.actions.close"));
 
   expect(vm.onClose).toHaveBeenCalledTimes(1);
+});
+
+describe("wide layout (spec 037)", () => {
+  const sheet = prepaymentTestIds.sheet;
+
+  it("SHOULD be a form dialog with the fields split in two columns", () => {
+    setup({}, "expanded");
+
+    expect(
+      StyleSheet.flatten(screen.getByTestId(sheet).props.style).maxWidth,
+    ).toBe(880);
+    const left = within(screen.getByTestId(`${sheet}-column-left`));
+    const right = within(screen.getByTestId(`${sheet}-column-right`));
+    expect(left.getByTestId(prepaymentTestIds.target)).toBeOnTheScreen();
+    expect(right.getByTestId(prepaymentTestIds.hasDiscount)).toBeOnTheScreen();
+    expect(right.getByTestId(prepaymentTestIds.date)).toBeOnTheScreen();
+  });
 });

@@ -3,6 +3,7 @@ name: stock/add-item-with-details
 tags:
   - stock
   - spec-011
+  - spec-037
 onFlowComplete:
   - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
 ---
@@ -34,9 +35,11 @@ onFlowComplete:
 - tapOn:
     id: "stock.item-form.description-input"
 - inputText: ${output.ITEM_NAME}
-- tapOn:
-    id: "stock.item-form.more-toggle"
-- runFlow: ../../subflows/financial/scroll-form-down.yaml
+# spec 037: on the wide web layout the more-details fields start open (right column)
+- extendedWaitUntil:
+    visible:
+      id: "stock.item-form.more-toggle"
+    timeout: 20000
 - extendedWaitUntil:
     visible:
       id: "stock.item-form.brand-input"

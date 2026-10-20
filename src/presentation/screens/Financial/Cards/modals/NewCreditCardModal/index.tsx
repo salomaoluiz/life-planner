@@ -10,6 +10,7 @@ import {
   ConfirmDialog,
   CreditCardTile,
   ErrorState,
+  FormColumns,
   HelperText,
   SelectField,
   TextField,
@@ -73,132 +74,144 @@ function NewCreditCardModal() {
 
     return (
       <View style={styles.form}>
-        <CreditCardTile
-          accessibilityLabel={vm.title || t("financial.cardForm.title")}
-          available={<AmountText value={vm.limitCents} />}
-          availableLabel={t("financial.cardForm.limit")}
-          brandLabel={brandLabel()}
-          lastDigits={vm.lastDigits || undefined}
-          onPress={() => undefined}
-          testID={cardFormTestIds.preview}
-          tint={vm.tint}
-          title={vm.title || t("financial.cardForm.title")}
+        <FormColumns
+          compactGap="lg"
+          left={
+            <>
+              <CreditCardTile
+                accessibilityLabel={vm.title || t("financial.cardForm.title")}
+                available={<AmountText value={vm.limitCents} />}
+                availableLabel={t("financial.cardForm.limit")}
+                brandLabel={brandLabel()}
+                lastDigits={vm.lastDigits || undefined}
+                onPress={() => undefined}
+                testID={cardFormTestIds.preview}
+                tint={vm.tint}
+                title={vm.title || t("financial.cardForm.title")}
+              />
+              <TextField
+                error={err(vm.titleError)}
+                label={t("financial.cardForm.title")}
+                maxLength={80}
+                onChangeText={vm.onTitleChange}
+                testID={cardFormTestIds.titleInput}
+                value={vm.title}
+              />
+              <AmountInput
+                error={err(vm.limitError)}
+                label={t("financial.cardForm.limit")}
+                onChange={vm.onLimitChange}
+                testID={cardFormTestIds.limitInput}
+                value={vm.limitCents}
+              />
+              <SelectField
+                closeLabel={t("common.actions.close")}
+                label={t("financial.cardForm.brand")}
+                onChange={vm.onBrandChange}
+                options={translateChoices(vm.brandOptions, t)}
+                sheetTitle={t("financial.cardForm.brand")}
+                testID={cardFormTestIds.brand}
+                value={vm.brand}
+              />
+              <ChipGroup
+                label={t("financial.cardForm.owner")}
+                layout="wrap"
+                mode="single"
+                onChange={vm.onOwnerChange}
+                options={translateChoices(vm.ownerChoices, t)}
+                testID={cardFormTestIds.owner}
+                value={vm.ownerId}
+              />
+            </>
+          }
+          right={
+            <>
+              <TextField
+                error={err(vm.lastDigitsError)}
+                keyboardType="number-pad"
+                label={t("financial.cardForm.lastDigits")}
+                maxLength={4}
+                onChangeText={vm.onLastDigitsChange}
+                testID={cardFormTestIds.lastDigitsInput}
+                value={vm.lastDigits}
+              />
+              <ColorSwatchGroup
+                label={t("financial.cardForm.color")}
+                onChange={vm.onTintChange}
+                options={vm.colorOptions.map((option) => ({
+                  label: t(option.labelKey),
+                  value: option.value,
+                }))}
+                testID={cardFormTestIds.swatches}
+                value={vm.tint}
+              />
+              <View style={styles.row}>
+                <View style={styles.column}>
+                  <SelectField
+                    closeLabel={t("common.actions.close")}
+                    error={err(vm.closingDayError)}
+                    label={t("financial.cardForm.closingDay")}
+                    onChange={vm.onClosingDayChange}
+                    options={translateChoices(vm.dayOptions, t)}
+                    placeholder={t("financial.cardForm.pickDay")}
+                    sheetTitle={t("financial.cardForm.closingDay")}
+                    testID={cardFormTestIds.closingDay}
+                    value={vm.closingDay || undefined}
+                  />
+                </View>
+                <View style={styles.column}>
+                  <SelectField
+                    closeLabel={t("common.actions.close")}
+                    error={err(vm.dueDayError)}
+                    label={t("financial.cardForm.dueDay")}
+                    onChange={vm.onDueDayChange}
+                    options={translateChoices(vm.dayOptions, t)}
+                    placeholder={t("financial.cardForm.pickDay")}
+                    sheetTitle={t("financial.cardForm.dueDay")}
+                    testID={cardFormTestIds.dueDay}
+                    value={vm.dueDay || undefined}
+                  />
+                </View>
+              </View>
+              <SelectField
+                closeLabel={t("common.actions.close")}
+                helper={t("financial.cardForm.paymentAccountHelper")}
+                label={t("financial.cardForm.paymentAccount")}
+                onChange={vm.onPaymentAccountChange}
+                options={vm.paymentAccountOptions.map((option) => ({
+                  label: paymentAccountLabel(option),
+                  value: option.value,
+                }))}
+                sheetTitle={t("financial.cardForm.paymentAccount")}
+                testID={cardFormTestIds.paymentAccount}
+                value={vm.paymentAccountId}
+              />
+              <SelectField
+                closeLabel={t("common.actions.close")}
+                label={t("financial.cardForm.paymentDay")}
+                onChange={vm.onPaymentDayChange}
+                options={translateChoices(vm.paymentDayOptions, t)}
+                sheetTitle={t("financial.cardForm.paymentDay")}
+                testID={cardFormTestIds.paymentDay}
+                value={vm.paymentDay}
+              />
+              <View style={styles.helper}>
+                <HelperText
+                  label={t("financial.cardForm.paymentAfterDue")}
+                  testID={cardFormTestIds.paymentAfterDueWarning}
+                  type="error"
+                  visible={vm.paymentWarning}
+                />
+                <HelperText
+                  label={t("financial.cardForm.lastDayHint")}
+                  type="info"
+                  visible
+                />
+              </View>
+            </>
+          }
+          testID={cardFormTestIds.sheet}
         />
-        <TextField
-          error={err(vm.titleError)}
-          label={t("financial.cardForm.title")}
-          maxLength={80}
-          onChangeText={vm.onTitleChange}
-          testID={cardFormTestIds.titleInput}
-          value={vm.title}
-        />
-        <AmountInput
-          error={err(vm.limitError)}
-          label={t("financial.cardForm.limit")}
-          onChange={vm.onLimitChange}
-          testID={cardFormTestIds.limitInput}
-          value={vm.limitCents}
-        />
-        <SelectField
-          closeLabel={t("common.actions.close")}
-          label={t("financial.cardForm.brand")}
-          onChange={vm.onBrandChange}
-          options={translateChoices(vm.brandOptions, t)}
-          sheetTitle={t("financial.cardForm.brand")}
-          testID={cardFormTestIds.brand}
-          value={vm.brand}
-        />
-        <ChipGroup
-          label={t("financial.cardForm.owner")}
-          layout="wrap"
-          mode="single"
-          onChange={vm.onOwnerChange}
-          options={translateChoices(vm.ownerChoices, t)}
-          testID={cardFormTestIds.owner}
-          value={vm.ownerId}
-        />
-        <TextField
-          error={err(vm.lastDigitsError)}
-          keyboardType="number-pad"
-          label={t("financial.cardForm.lastDigits")}
-          maxLength={4}
-          onChangeText={vm.onLastDigitsChange}
-          testID={cardFormTestIds.lastDigitsInput}
-          value={vm.lastDigits}
-        />
-        <ColorSwatchGroup
-          label={t("financial.cardForm.color")}
-          onChange={vm.onTintChange}
-          options={vm.colorOptions.map((option) => ({
-            label: t(option.labelKey),
-            value: option.value,
-          }))}
-          testID={cardFormTestIds.swatches}
-          value={vm.tint}
-        />
-        <View style={styles.row}>
-          <View style={styles.column}>
-            <SelectField
-              closeLabel={t("common.actions.close")}
-              error={err(vm.closingDayError)}
-              label={t("financial.cardForm.closingDay")}
-              onChange={vm.onClosingDayChange}
-              options={translateChoices(vm.dayOptions, t)}
-              placeholder={t("financial.cardForm.pickDay")}
-              sheetTitle={t("financial.cardForm.closingDay")}
-              testID={cardFormTestIds.closingDay}
-              value={vm.closingDay || undefined}
-            />
-          </View>
-          <View style={styles.column}>
-            <SelectField
-              closeLabel={t("common.actions.close")}
-              error={err(vm.dueDayError)}
-              label={t("financial.cardForm.dueDay")}
-              onChange={vm.onDueDayChange}
-              options={translateChoices(vm.dayOptions, t)}
-              placeholder={t("financial.cardForm.pickDay")}
-              sheetTitle={t("financial.cardForm.dueDay")}
-              testID={cardFormTestIds.dueDay}
-              value={vm.dueDay || undefined}
-            />
-          </View>
-        </View>
-        <SelectField
-          closeLabel={t("common.actions.close")}
-          helper={t("financial.cardForm.paymentAccountHelper")}
-          label={t("financial.cardForm.paymentAccount")}
-          onChange={vm.onPaymentAccountChange}
-          options={vm.paymentAccountOptions.map((option) => ({
-            label: paymentAccountLabel(option),
-            value: option.value,
-          }))}
-          sheetTitle={t("financial.cardForm.paymentAccount")}
-          testID={cardFormTestIds.paymentAccount}
-          value={vm.paymentAccountId}
-        />
-        <SelectField
-          closeLabel={t("common.actions.close")}
-          label={t("financial.cardForm.paymentDay")}
-          onChange={vm.onPaymentDayChange}
-          options={translateChoices(vm.paymentDayOptions, t)}
-          sheetTitle={t("financial.cardForm.paymentDay")}
-          testID={cardFormTestIds.paymentDay}
-          value={vm.paymentDay}
-        />
-        <View style={styles.helper}>
-          <HelperText
-            label={t("financial.cardForm.paymentAfterDue")}
-            testID={cardFormTestIds.paymentAfterDueWarning}
-            type="error"
-            visible={vm.paymentWarning}
-          />
-          <HelperText
-            label={t("financial.cardForm.lastDayHint")}
-            type="info"
-            visible
-          />
-        </View>
         {vm.formErrorKey && (
           <HelperText
             label={t(vm.formErrorKey)}
@@ -230,14 +243,6 @@ function NewCreditCardModal() {
             testID={cardFormTestIds.archiveButton}
           />
         )}
-        {vm.isEditing && (
-          <Button.Ghost
-            label={t("financial.cardForm.delete")}
-            onPress={vm.onDeletePress}
-            testID={cardFormTestIds.deleteButton}
-            tone="expense"
-          />
-        )}
       </View>
     );
   }
@@ -256,8 +261,19 @@ function NewCreditCardModal() {
             testID={cardFormTestIds.saveButton}
           />
         }
+        footerStart={
+          vm.isEditing && (
+            <Button.Ghost
+              label={t("financial.cardForm.delete")}
+              onPress={vm.onDeletePress}
+              testID={cardFormTestIds.deleteButton}
+              tone="expense"
+            />
+          )
+        }
         onClose={vm.onClose}
         presentation="inline"
+        size="form"
         testID={cardFormTestIds.sheet}
         title={t(vm.titleKey)}
         visible

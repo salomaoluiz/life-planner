@@ -1,4 +1,6 @@
-import { fireEvent, screen } from "@tests";
+import { StyleSheet } from "react-native";
+
+import { fireEvent, screen, within } from "@tests";
 
 import InstallmentPlanDTO from "@application/dto/financial/InstallmentPlanDTO";
 
@@ -204,4 +206,39 @@ it("SHOULD refund the whole plan from its sheet", () => {
   fireEvent.press(screen.getByTestId(installmentEditTestIds.refund));
 
   expect(vm.onRefundPress).toHaveBeenCalledTimes(1);
+});
+
+describe("wide layout (spec 037)", () => {
+  const sheet = installmentEditTestIds.sheet;
+
+  it("SHOULD be a form dialog with the fields split in two columns", () => {
+    setup({}, "expanded");
+
+    expect(
+      StyleSheet.flatten(screen.getByTestId(sheet).props.style).maxWidth,
+    ).toBe(880);
+    const left = within(screen.getByTestId(`${sheet}-column-left`));
+    const right = within(screen.getByTestId(`${sheet}-column-right`));
+    expect(left.getByTestId(installmentEditTestIds.scope)).toBeOnTheScreen();
+    expect(left.getByTestId(installmentEditTestIds.amount)).toBeOnTheScreen();
+    expect(right.getByTestId(installmentEditTestIds.count)).toBeOnTheScreen();
+    expect(right.getByTestId(installmentEditTestIds.card)).toBeOnTheScreen();
+  });
+
+  it("SHOULD put Delete in the footer on wide and keep it in the body on compact", () => {
+    setup({}, "expanded");
+    expect(
+      within(screen.getByTestId(`${sheet}-footer`)).getByTestId(
+        installmentPlanTestIds.delete,
+      ),
+    ).toBeOnTheScreen();
+    screen.unmount();
+
+    setup({});
+    expect(
+      within(screen.getByTestId(`${sheet}-body`)).getByTestId(
+        installmentPlanTestIds.delete,
+      ),
+    ).toBeOnTheScreen();
+  });
 });

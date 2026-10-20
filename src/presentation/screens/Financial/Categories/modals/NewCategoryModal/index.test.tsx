@@ -1,4 +1,6 @@
-import { fireEvent, screen, setup } from "./mocks/index.mocks";
+import { StyleSheet } from "react-native";
+
+import { fireEvent, screen, setup, within } from "./mocks/index.mocks";
 import categoryFormTestIds from "./testIds";
 
 it("SHOULD show the create title, the save footer and no delete or cancel", () => {
@@ -203,4 +205,51 @@ it("SHOULD give every owner chip an id from its owner id", () => {
   expect(
     screen.getByTestId(`${categoryFormTestIds.owner}-owner-2`),
   ).toBeOnTheScreen();
+});
+
+describe("wide layout (spec 037)", () => {
+  const sheet = categoryFormTestIds.sheet;
+
+  it("SHOULD be a form dialog split into two columns, in field order", () => {
+    setup({}, "expanded");
+
+    expect(
+      StyleSheet.flatten(screen.getByTestId(sheet).props.style).maxWidth,
+    ).toBe(880);
+    const left = within(screen.getByTestId(`${sheet}-column-left`));
+    const right = within(screen.getByTestId(`${sheet}-column-right`));
+    expect(left.getByTestId(categoryFormTestIds.nameInput)).toBeOnTheScreen();
+    expect(
+      left.getByTestId(categoryFormTestIds.parentSelect),
+    ).toBeOnTheScreen();
+    expect(right.getByTestId(categoryFormTestIds.swatches)).toBeOnTheScreen();
+    expect(right.getByTestId(categoryFormTestIds.icon)).toBeOnTheScreen();
+  });
+
+  it("SHOULD keep Delete in the footer on edit and out of it on create", () => {
+    setup({ isEditing: true }, "expanded");
+    expect(
+      within(screen.getByTestId(`${sheet}-footer`)).getByTestId(
+        categoryFormTestIds.deleteButton,
+      ),
+    ).toBeOnTheScreen();
+    screen.unmount();
+
+    setup({}, "expanded");
+    expect(
+      within(screen.getByTestId(`${sheet}-footer`)).queryByTestId(
+        categoryFormTestIds.deleteButton,
+      ),
+    ).toBeNull();
+  });
+
+  it("SHOULD keep Delete as the last item of the body on compact", () => {
+    const vm = setup({ isEditing: true });
+    fireEvent.press(
+      within(screen.getByTestId(`${sheet}-body`)).getByTestId(
+        categoryFormTestIds.deleteButton,
+      ),
+    );
+    expect(vm.onDeletePress).toHaveBeenCalledTimes(1);
+  });
 });

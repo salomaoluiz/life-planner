@@ -1,5 +1,7 @@
 import { render } from "@tests";
 
+import { useBreakpoint } from "@presentation/theme";
+
 import { EarlyPaymentModal } from "../";
 import { useEarlyPaymentViewModel } from "../hooks";
 
@@ -45,7 +47,11 @@ const defaultViewModel: ReturnType<typeof useEarlyPaymentViewModel> = {
   remainingCents: 40000,
 };
 
-function setup(overrides: Partial<typeof defaultViewModel> = {}) {
+function setup(
+  overrides: Partial<typeof defaultViewModel> = {},
+  breakpoint: "compact" | "expanded" | "medium" = "compact",
+) {
+  jest.mocked(useBreakpoint).mockReturnValue(breakpoint);
   const viewModel = { ...defaultViewModel, ...overrides };
   jest.mocked(useEarlyPaymentViewModel).mockReturnValue(viewModel);
   render(<EarlyPaymentModal />);

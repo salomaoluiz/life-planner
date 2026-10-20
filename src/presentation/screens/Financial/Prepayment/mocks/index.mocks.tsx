@@ -1,5 +1,7 @@
 import { render } from "@tests";
 
+import { useBreakpoint } from "@presentation/theme";
+
 import { PrepaymentModal } from "../";
 import { usePrepaymentViewModel } from "../hooks";
 
@@ -37,7 +39,11 @@ const defaultViewModel: ReturnType<typeof usePrepaymentViewModel> = {
   targetMonth: "2026-10",
 };
 
-function setup(overrides: Partial<typeof defaultViewModel> = {}) {
+function setup(
+  overrides: Partial<typeof defaultViewModel> = {},
+  breakpoint: "compact" | "expanded" | "medium" = "compact",
+) {
+  jest.mocked(useBreakpoint).mockReturnValue(breakpoint);
   const viewModel = { ...defaultViewModel, ...overrides };
   jest.mocked(usePrepaymentViewModel).mockReturnValue(viewModel);
   render(<PrepaymentModal />);

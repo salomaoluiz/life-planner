@@ -47,6 +47,8 @@ Open only `e2e-report/summary.md` (it is also what the command prints):
 
 Format `<module>.<screen>.<element>` in kebab-case, defined in the screen folder's `testIds.ts` (for example `Login/testIds.ts`) and used by the View, its Jest tests and the flows. `@components` that wrap RN elements forward `testID` (and derive `-error`, `-toggle`, `-frame` suffixes for `TextField`).
 
+Forms on the web suite are two-column (spec 037): `FormColumns` derives `<sheet testID>-column-left` / `-column-right`, and the Delete button of edit forms sits in the sheet footer (`<sheet testID>-footer`) with its id unchanged.
+
 A wrapped component that takes an `accessibilityLabel` must also set `nativeID={testID}` (Maestro web resolves `id` before `data-testid`; `Touchable` and `TextField` already do).
 
 Maestro facts verified on this Mac (flags, JUnit mapping, `id` matching on web) are recorded in `e2e/README.md`.

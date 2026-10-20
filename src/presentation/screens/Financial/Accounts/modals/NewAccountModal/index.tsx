@@ -7,6 +7,7 @@ import {
   ChipGroup,
   ConfirmDialog,
   ErrorState,
+  FormColumns,
   IconChoiceGroup,
   IconTile,
   SegmentedControl,
@@ -58,108 +59,117 @@ function NewAccountModal() {
 
     return (
       <View style={styles.form}>
-        <View style={styles.preview}>
-          <IconTile name={vm.icon} size={"lg"} tone={"accent"} />
-          <Text.Heading
-            tone={vm.name ? "primary" : "secondary"}
-            value={vm.name || t("financial.accounts.form.name")}
-          />
-        </View>
-        <TextField
-          error={err(vm.nameError)}
-          label={t("financial.accounts.form.name")}
-          maxLength={80}
-          onChangeText={vm.onNameChange}
-          testID={accountFormTestIds.nameInput}
-          value={vm.name}
-        />
-        <IconChoiceGroup
-          label={t("financial.accounts.form.icon")}
-          onChange={vm.onIconChange}
-          options={vm.iconOptions}
-          testID={accountFormTestIds.icon}
-          value={vm.icon}
-        />
-        <View style={styles.helper}>
-          <AmountInput
-            error={err(vm.amountError)}
-            label={t(vm.balanceLabelKey)}
-            onChange={vm.onAmountChange}
-            testID={accountFormTestIds.balanceInput}
-            tone={vm.sign === "NEGATIVE" ? "expense" : "neutral"}
-            value={vm.amountCents}
-          />
-          <SegmentedControl
-            accessibilityLabel={t(vm.balanceLabelKey)}
-            onChange={vm.onSignChange}
-            options={vm.signOptions.map((option) => ({
-              label: t(option.labelKey),
-              tone: option.value === "NEGATIVE" ? "expense" : "income",
-              value: option.value,
-            }))}
-            value={vm.sign}
-          />
-          <Text.Caption tone={"secondary"} value={t(vm.balanceHelperKey)} />
-        </View>
-        {vm.isEditing && (
-          <View style={styles.helper}>
-            <View style={styles.preview}>
-              <Text.Body value={t("financial.accounts.form.archived")} />
-              <Switch
-                initialStatus={vm.isArchived}
-                onToggle={vm.onArchivedChange}
-                testID={accountFormTestIds.archivedSwitch}
+        <FormColumns
+          left={
+            <>
+              <View style={styles.preview}>
+                <IconTile name={vm.icon} size={"lg"} tone={"accent"} />
+                <Text.Heading
+                  tone={vm.name ? "primary" : "secondary"}
+                  value={vm.name || t("financial.accounts.form.name")}
+                />
+              </View>
+              <TextField
+                error={err(vm.nameError)}
+                label={t("financial.accounts.form.name")}
+                maxLength={80}
+                onChangeText={vm.onNameChange}
+                testID={accountFormTestIds.nameInput}
+                value={vm.name}
               />
-            </View>
-            <Text.Caption
-              tone={"secondary"}
-              value={t("financial.accounts.form.archivedHelper")}
-            />
-            {vm.archiveWarningCount > 0 ? (
-              <Text.Caption
-                testID={accountFormTestIds.archiveWarning}
-                tone={"expense"}
-                value={t(
-                  pluralKey(
-                    "financial.recurrence.archiveWarning",
-                    vm.archiveWarningCount,
-                  ),
-                  {
-                    count: vm.archiveWarningCount,
-                  },
+              <IconChoiceGroup
+                label={t("financial.accounts.form.icon")}
+                onChange={vm.onIconChange}
+                options={vm.iconOptions}
+                testID={accountFormTestIds.icon}
+                value={vm.icon}
+              />
+            </>
+          }
+          right={
+            <>
+              <View style={styles.helper}>
+                <AmountInput
+                  error={err(vm.amountError)}
+                  label={t(vm.balanceLabelKey)}
+                  onChange={vm.onAmountChange}
+                  testID={accountFormTestIds.balanceInput}
+                  tone={vm.sign === "NEGATIVE" ? "expense" : "neutral"}
+                  value={vm.amountCents}
+                />
+                <SegmentedControl
+                  accessibilityLabel={t(vm.balanceLabelKey)}
+                  onChange={vm.onSignChange}
+                  options={vm.signOptions.map((option) => ({
+                    label: t(option.labelKey),
+                    tone: option.value === "NEGATIVE" ? "expense" : "income",
+                    value: option.value,
+                  }))}
+                  value={vm.sign}
+                />
+                <Text.Caption
+                  tone={"secondary"}
+                  value={t(vm.balanceHelperKey)}
+                />
+              </View>
+              {vm.isEditing && (
+                <View style={styles.helper}>
+                  <View style={styles.preview}>
+                    <Text.Body value={t("financial.accounts.form.archived")} />
+                    <Switch
+                      initialStatus={vm.isArchived}
+                      onToggle={vm.onArchivedChange}
+                      testID={accountFormTestIds.archivedSwitch}
+                    />
+                  </View>
+                  <Text.Caption
+                    tone={"secondary"}
+                    value={t("financial.accounts.form.archivedHelper")}
+                  />
+                  {vm.archiveWarningCount > 0 ? (
+                    <Text.Caption
+                      testID={accountFormTestIds.archiveWarning}
+                      tone={"expense"}
+                      value={t(
+                        pluralKey(
+                          "financial.recurrence.archiveWarning",
+                          vm.archiveWarningCount,
+                        ),
+                        {
+                          count: vm.archiveWarningCount,
+                        },
+                      )}
+                    />
+                  ) : null}
+                </View>
+              )}
+              <View style={styles.helper}>
+                <ChipGroup
+                  disabled={vm.isOwnerLocked}
+                  label={t("financial.common.belongsTo")}
+                  layout={"wrap"}
+                  mode={"single"}
+                  onChange={vm.onOwnerChange}
+                  options={translateChoices(vm.ownerChoices, t)}
+                  testID={accountFormTestIds.owner}
+                  value={vm.ownerId}
+                />
+                {vm.ownerHelperKey && (
+                  <Text.Caption
+                    tone={"secondary"}
+                    value={t(vm.ownerHelperKey)}
+                  />
                 )}
-              />
-            ) : null}
-          </View>
-        )}
-        <View style={styles.helper}>
-          <ChipGroup
-            disabled={vm.isOwnerLocked}
-            label={t("financial.common.belongsTo")}
-            layout={"wrap"}
-            mode={"single"}
-            onChange={vm.onOwnerChange}
-            options={translateChoices(vm.ownerChoices, t)}
-            testID={accountFormTestIds.owner}
-            value={vm.ownerId}
-          />
-          {vm.ownerHelperKey && (
-            <Text.Caption tone={"secondary"} value={t(vm.ownerHelperKey)} />
-          )}
-        </View>
+              </View>
+            </>
+          }
+          testID={accountFormTestIds.sheet}
+        />
         {vm.formErrorKey && (
           <Text.Body
             testID={accountFormTestIds.formError}
             tone={"expense"}
             value={t(vm.formErrorKey)}
-          />
-        )}
-        {vm.isEditing && (
-          <Button.Ghost
-            label={t("financial.accounts.delete")}
-            onPress={vm.onDeletePress}
-            testID={accountFormTestIds.deleteButton}
-            tone={"expense"}
           />
         )}
       </View>
@@ -180,8 +190,19 @@ function NewAccountModal() {
             testID={accountFormTestIds.saveButton}
           />
         }
+        footerStart={
+          vm.isEditing && (
+            <Button.Ghost
+              label={t("financial.accounts.delete")}
+              onPress={vm.onDeletePress}
+              testID={accountFormTestIds.deleteButton}
+              tone={"expense"}
+            />
+          )
+        }
         onClose={vm.onClose}
         presentation={"inline"}
+        size={"form"}
         testID={accountFormTestIds.sheet}
         title={t(vm.titleKey)}
         visible

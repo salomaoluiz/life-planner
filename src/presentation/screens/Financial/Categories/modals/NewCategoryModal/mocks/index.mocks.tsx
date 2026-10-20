@@ -1,4 +1,6 @@
-import { fireEvent, render, screen } from "@tests";
+import { fireEvent, render, screen, within } from "@tests";
+
+import { useBreakpoint } from "@presentation/theme";
 
 import NewCategoryModal from "../";
 import { useNewCategoryViewModel } from "../hooks";
@@ -72,7 +74,11 @@ const defaultViewModel: ReturnType<typeof useNewCategoryViewModel> = {
   ],
 };
 
-function setup(overrides: Partial<typeof defaultViewModel> = {}) {
+function setup(
+  overrides: Partial<typeof defaultViewModel> = {},
+  breakpoint: "compact" | "expanded" | "medium" = "compact",
+) {
+  jest.mocked(useBreakpoint).mockReturnValue(breakpoint);
   const viewModel = { ...defaultViewModel, ...overrides };
   jest.mocked(useNewCategoryViewModel).mockReturnValue(viewModel);
   render(<NewCategoryModal />);
@@ -84,4 +90,4 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-export { defaultViewModel, fireEvent, screen, setup };
+export { defaultViewModel, fireEvent, screen, setup, within };
