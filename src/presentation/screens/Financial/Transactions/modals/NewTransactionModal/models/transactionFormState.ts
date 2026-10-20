@@ -11,6 +11,7 @@ import { UpdateTransactionUseCaseParams } from "@application/useCases/cases/fina
 import { RecurrenceFrequency } from "@domain/entities/financial/RecurrenceEntity";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { TranslationKeys } from "@presentation/i18n/types";
+import { categoryInScope } from "@screens/Financial/models/categoryTree";
 import { isValidInstallmentCount } from "@screens/Financial/models/installments";
 import {
   centsToDecimalString,
@@ -103,7 +104,9 @@ function changeOwner(
         ? state.accountId
         : defaultAccountId(accounts, ownerId),
     categoryId:
-      category && category.ownerId === ownerId ? state.categoryId : undefined,
+      category && categoryInScope(category, ownerId)
+        ? state.categoryId
+        : undefined,
     creditCardId:
       card && card.ownerId === ownerId
         ? state.creditCardId

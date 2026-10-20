@@ -3,6 +3,7 @@ import CategoryDTO from "@application/dto/financial/CategoryDTO";
 import {
   buildCategoryRows,
   categoriesOf,
+  categoryInScope,
   descendantIds,
   filterRowsByQuery,
 } from "./categoryTree";
@@ -116,4 +117,25 @@ it("SHOULD filter rows by name ignoring case and accents", () => {
   ).toEqual(["a"]);
   expect(filterRowsByQuery(rows, "").length).toBe(2);
   expect(filterRowsByQuery(rows, "zzz")).toEqual([]);
+});
+
+describe("scope ALL", () => {
+  const all = category("all", "Mercado", {
+    scope: "ALL",
+    scopeOwnerIds: ["user-id", "family-1"],
+  });
+
+  it("SHOULD include an All category for the Personal scope and for each of its families", () => {
+    expect(categoriesOf([all], "user-id", "EXPENSE")).toEqual([all]);
+    expect(categoriesOf([all], "family-1", "EXPENSE")).toEqual([all]);
+  });
+
+  it("SHOULD NOT include an All category for a family outside its scopes", () => {
+    expect(categoriesOf([all], "family-2", "EXPENSE")).toEqual([]);
+  });
+
+  it("SHOULD tell whether a category is in a scope", () => {
+    expect(categoryInScope(all, "family-1")).toBe(true);
+    expect(categoryInScope(all, "family-2")).toBe(false);
+  });
 });

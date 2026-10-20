@@ -56,7 +56,7 @@ function getMostUsedCategoriesUseCase(
           .filter(
             (category) =>
               category.type === params.type &&
-              category.ownerId === params.ownerId,
+              category.scopeOwnerIds.includes(params.ownerId),
           )
           .sort(
             (a, b) =>

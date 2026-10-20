@@ -42,8 +42,13 @@ function categoriesOf(
   type: string,
 ) {
   return categories.filter(
-    (category) => category.ownerId === ownerId && category.type === type,
+    (category) => categoryInScope(category, ownerId) && category.type === type,
   );
+}
+
+// An All category (spec 038) belongs to several scopes: the Personal one and each family of its creator.
+function categoryInScope(category: CategoryDTO, ownerId: string) {
+  return category.scopeOwnerIds.includes(ownerId);
 }
 
 function descendantIds(categories: CategoryDTO[], id: string): Set<string> {
@@ -99,4 +104,10 @@ function normalize(text: string) {
   return text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 }
 
-export { buildCategoryRows, categoriesOf, descendantIds, filterRowsByQuery };
+export {
+  buildCategoryRows,
+  categoriesOf,
+  categoryInScope,
+  descendantIds,
+  filterRowsByQuery,
+};

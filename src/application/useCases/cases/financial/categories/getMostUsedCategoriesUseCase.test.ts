@@ -137,3 +137,20 @@ it("SHOULD rethrow unknown errors untouched", async () => {
 
   expect(await setupThrowable()).toBe(mocks.unknownError);
 });
+
+it("SHOULD rank an All category by the transactions of the requested owner", async () => {
+  given(
+    [
+      makeCategory("all", "Mercado", {
+        scope: "ALL",
+        scopeOwnerIds: ["user-id", "family-1"],
+      }),
+      makeCategory("plain", "Alpha", { ownerId: "family-1" }),
+    ],
+    [makeTransaction("all", daysAgo(1), { ownerId: "family-1" })],
+  );
+
+  const result = await setup({ ownerId: "family-1" });
+
+  expect(result.map((category) => category.id)).toEqual(["all", "plain"]);
+});
