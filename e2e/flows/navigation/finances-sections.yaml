@@ -1,0 +1,61 @@
+url: ${E2E_WEB_URL}
+name: navigation/finances-sections
+tags:
+  - navigation
+  - spec-044
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+# Collapsed outside Finances
+- assertNotVisible:
+    id: "navigation-rail-financial-categories"
+# Entering Finances opens Transactions with every section listed
+- tapOn:
+    id: "tab-finances"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.screen"
+    timeout: 20000
+- assertVisible:
+    id: "navigation-rail-financial-categories"
+- assertVisible:
+    id: "navigation-rail-financial-tags"
+- assertVisible:
+    id: "navigation-rail-financial-accounts"
+- assertVisible:
+    id: "navigation-rail-financial-cards"
+- assertNotVisible:
+    id: "financial.layout.segments"
+# A child switches the section
+- tapOn:
+    id: "navigation-rail-financial-cards"
+- extendedWaitUntil:
+    visible:
+      id: "financial.cards.screen"
+    timeout: 20000
+# Finances always goes back to Transactions
+- tapOn:
+    id: "tab-finances"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.screen"
+    timeout: 20000
+# Leaving Finances collapses it again
+- tapOn:
+    id: "tab-stock"
+- extendedWaitUntil:
+    notVisible:
+      id: "navigation-rail-financial-categories"
+    timeout: 20000

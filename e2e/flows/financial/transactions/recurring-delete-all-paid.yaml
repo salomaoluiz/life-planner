@@ -43,7 +43,7 @@ onFlowComplete:
       text: ".*50[.,]00.*"
     timeout: 20000
 - tapOn:
-    id: "financial.layout.segments-transactions"
+    id: "navigation-rail-financial-transactions"
 - runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:

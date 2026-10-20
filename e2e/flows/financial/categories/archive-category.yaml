@@ -53,7 +53,7 @@ onFlowComplete:
     timeout: 20000
 # The only expense category is archived: a new expense has none to pick
 - tapOn:
-    id: "financial.layout.segments-transactions"
+    id: "navigation-rail-financial-transactions"
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.empty-month"
@@ -71,7 +71,7 @@ onFlowComplete:
     id: "financial.transaction-form.sheet-close"
 # Reactivate it: back in the active list, and the group is gone
 - tapOn:
-    id: "financial.layout.segments-categories"
+    id: "navigation-rail-financial-categories"
 - extendedWaitUntil:
     visible:
       id: "financial.categories.archived-toggle"

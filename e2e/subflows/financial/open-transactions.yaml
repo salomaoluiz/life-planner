@@ -8,7 +8,7 @@ url: ${E2E_WEB_URL}
     id: "tab-finances"
 - extendedWaitUntil:
     visible:
-      id: "financial.layout.segments"
+      id: "navigation-rail-financial-transactions"
     timeout: 20000
 - extendedWaitUntil:
     visible:
