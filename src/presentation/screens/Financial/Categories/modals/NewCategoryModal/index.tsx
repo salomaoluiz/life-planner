@@ -7,6 +7,7 @@ import {
   ColorSwatchGroup,
   ConfirmDialog,
   ErrorState,
+  FormColumns,
   IconChoiceGroup,
   IconTile,
   SegmentedControl,
@@ -59,104 +60,115 @@ function NewCategoryModal() {
 
     return (
       <View style={styles.form}>
-        <View style={styles.preview}>
-          <IconTile color={vm.iconColor} name={vm.icon} size={"lg"} />
-          <Text.Heading
-            testID={categoryFormTestIds.namePreview}
-            tone={vm.name ? "primary" : "secondary"}
-            value={vm.name || t("financial.categories.form.namePlaceholder")}
-          />
-        </View>
-        <TextField
-          error={err(vm.nameError)}
-          label={t("financial.categories.form.name")}
-          maxLength={80}
-          onChangeText={vm.onNameChange}
-          placeholder={t("financial.categories.form.namePlaceholder")}
-          testID={categoryFormTestIds.nameInput}
-          value={vm.name}
+        <FormColumns
+          left={
+            <>
+              <View style={styles.preview}>
+                <IconTile color={vm.iconColor} name={vm.icon} size={"lg"} />
+                <Text.Heading
+                  testID={categoryFormTestIds.namePreview}
+                  tone={vm.name ? "primary" : "secondary"}
+                  value={
+                    vm.name || t("financial.categories.form.namePlaceholder")
+                  }
+                />
+              </View>
+              <TextField
+                error={err(vm.nameError)}
+                label={t("financial.categories.form.name")}
+                maxLength={80}
+                onChangeText={vm.onNameChange}
+                placeholder={t("financial.categories.form.namePlaceholder")}
+                testID={categoryFormTestIds.nameInput}
+                value={vm.name}
+              />
+              <View style={styles.helper}>
+                <SegmentedControl
+                  accessibilityLabel={t("financial.categories.form.type")}
+                  disabled={vm.isTypeLocked}
+                  onChange={vm.onTypeChange}
+                  options={vm.typeOptions.map((option) => ({
+                    label: t(option.labelKey),
+                    tone: option.value === "EXPENSE" ? "expense" : "income",
+                    value: option.value,
+                  }))}
+                  testID={categoryFormTestIds.type}
+                  value={vm.type}
+                />
+                {vm.typeHelperKey && (
+                  <Text.Caption
+                    tone={"secondary"}
+                    value={t(vm.typeHelperKey)}
+                  />
+                )}
+              </View>
+              <SelectField
+                closeLabel={t("common.actions.close")}
+                label={t("financial.categories.form.parent")}
+                onChange={vm.onParentChange}
+                options={[
+                  { label: t("financial.categories.form.noParent"), value: "" },
+                  ...vm.parentOptions.map((option) => ({
+                    label: `${"– ".repeat(option.depth)}${option.label}`,
+                    value: option.value,
+                  })),
+                ]}
+                sheetTitle={t("financial.categories.form.parent")}
+                testID={categoryFormTestIds.parentSelect}
+                value={vm.parentId}
+              />
+            </>
+          }
+          right={
+            <>
+              <ColorSwatchGroup
+                customLabel={t("financial.categories.form.customColor")}
+                label={t("financial.categories.form.color")}
+                onChange={vm.onColorChange}
+                onCustomPress={vm.onCustomColorOpen}
+                options={vm.colorOptions.map((option) => ({
+                  label: t(option.labelKey),
+                  value: option.value,
+                }))}
+                testID={categoryFormTestIds.swatches}
+                value={vm.iconColor}
+              />
+              <IconChoiceGroup
+                label={t("financial.categories.form.icon")}
+                moreLabel={t("financial.categories.form.moreIcons")}
+                onChange={vm.onIconChange}
+                onMorePress={vm.onIconPickerOpen}
+                options={vm.inlineIcons}
+                testID={categoryFormTestIds.icon}
+                value={vm.icon}
+              />
+              <View style={styles.helper}>
+                <ChipGroup
+                  disabled={vm.isOwnerLocked}
+                  label={t("financial.common.belongsTo")}
+                  layout={"wrap"}
+                  mode={"single"}
+                  onChange={vm.onOwnerChange}
+                  options={translateChoices(vm.ownerChoices, t)}
+                  testID={categoryFormTestIds.owner}
+                  value={vm.ownerId}
+                />
+                {vm.ownerHelperKey && (
+                  <Text.Caption
+                    tone={"secondary"}
+                    value={t(vm.ownerHelperKey)}
+                  />
+                )}
+              </View>
+            </>
+          }
+          testID={categoryFormTestIds.sheet}
         />
-        <View style={styles.helper}>
-          <SegmentedControl
-            accessibilityLabel={t("financial.categories.form.type")}
-            disabled={vm.isTypeLocked}
-            onChange={vm.onTypeChange}
-            options={vm.typeOptions.map((option) => ({
-              label: t(option.labelKey),
-              tone: option.value === "EXPENSE" ? "expense" : "income",
-              value: option.value,
-            }))}
-            testID={categoryFormTestIds.type}
-            value={vm.type}
-          />
-          {vm.typeHelperKey && (
-            <Text.Caption tone={"secondary"} value={t(vm.typeHelperKey)} />
-          )}
-        </View>
-        <SelectField
-          closeLabel={t("common.actions.close")}
-          label={t("financial.categories.form.parent")}
-          onChange={vm.onParentChange}
-          options={[
-            { label: t("financial.categories.form.noParent"), value: "" },
-            ...vm.parentOptions.map((option) => ({
-              label: `${"– ".repeat(option.depth)}${option.label}`,
-              value: option.value,
-            })),
-          ]}
-          sheetTitle={t("financial.categories.form.parent")}
-          testID={categoryFormTestIds.parentSelect}
-          value={vm.parentId}
-        />
-        <ColorSwatchGroup
-          customLabel={t("financial.categories.form.customColor")}
-          label={t("financial.categories.form.color")}
-          onChange={vm.onColorChange}
-          onCustomPress={vm.onCustomColorOpen}
-          options={vm.colorOptions.map((option) => ({
-            label: t(option.labelKey),
-            value: option.value,
-          }))}
-          testID={categoryFormTestIds.swatches}
-          value={vm.iconColor}
-        />
-        <IconChoiceGroup
-          label={t("financial.categories.form.icon")}
-          moreLabel={t("financial.categories.form.moreIcons")}
-          onChange={vm.onIconChange}
-          onMorePress={vm.onIconPickerOpen}
-          options={vm.inlineIcons}
-          testID={categoryFormTestIds.icon}
-          value={vm.icon}
-        />
-        <View style={styles.helper}>
-          <ChipGroup
-            disabled={vm.isOwnerLocked}
-            label={t("financial.common.belongsTo")}
-            layout={"wrap"}
-            mode={"single"}
-            onChange={vm.onOwnerChange}
-            options={translateChoices(vm.ownerChoices, t)}
-            testID={categoryFormTestIds.owner}
-            value={vm.ownerId}
-          />
-          {vm.ownerHelperKey && (
-            <Text.Caption tone={"secondary"} value={t(vm.ownerHelperKey)} />
-          )}
-        </View>
         {vm.formErrorKey && (
           <Text.Body
             testID={categoryFormTestIds.formError}
             tone={"expense"}
             value={t(vm.formErrorKey)}
-          />
-        )}
-        {vm.isEditing && (
-          <Button.Ghost
-            label={t("financial.categories.delete")}
-            onPress={vm.onDeletePress}
-            testID={categoryFormTestIds.deleteButton}
-            tone={"expense"}
           />
         )}
       </View>
@@ -177,8 +189,19 @@ function NewCategoryModal() {
             testID={categoryFormTestIds.saveButton}
           />
         }
+        footerStart={
+          vm.isEditing && (
+            <Button.Ghost
+              label={t("financial.categories.delete")}
+              onPress={vm.onDeletePress}
+              testID={categoryFormTestIds.deleteButton}
+              tone={"expense"}
+            />
+          )
+        }
         onClose={vm.onClose}
         presentation={"inline"}
+        size={"form"}
         testID={categoryFormTestIds.sheet}
         title={t(vm.titleKey)}
         visible

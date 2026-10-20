@@ -1,4 +1,6 @@
-import { fireEvent, render, screen } from "@tests";
+import { fireEvent, render, screen, within } from "@tests";
+
+import { useBreakpoint } from "@presentation/theme";
 
 import NewCreditCardModal from "../";
 import { useNewCreditCardViewModel } from "../hooks";
@@ -65,7 +67,11 @@ const defaultViewModel: ReturnType<typeof useNewCreditCardViewModel> = {
   titleKey: "financial.cardForm.titleNew",
 };
 
-function setup(overrides: Partial<typeof defaultViewModel> = {}) {
+function setup(
+  overrides: Partial<typeof defaultViewModel> = {},
+  breakpoint: "compact" | "expanded" | "medium" = "compact",
+) {
+  jest.mocked(useBreakpoint).mockReturnValue(breakpoint);
   const viewModel = { ...defaultViewModel, ...overrides };
   jest.mocked(useNewCreditCardViewModel).mockReturnValue(viewModel);
   render(<NewCreditCardModal />);
@@ -77,4 +83,4 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-export { defaultViewModel, fireEvent, screen, setup };
+export { defaultViewModel, fireEvent, screen, setup, within };

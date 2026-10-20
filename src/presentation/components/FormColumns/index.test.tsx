@@ -7,7 +7,9 @@ import * as theme from "@presentation/theme";
 import { lightTheme } from "@presentation/theme/provider";
 
 function rootStyle() {
-  return StyleSheet.flatten(screen.getByTestId("cols").props.style);
+  return StyleSheet.flatten(
+    screen.getByTestId("cols-column-left").parent?.parent?.props.style,
+  );
 }
 
 function setup(
@@ -42,8 +44,8 @@ it("SHOULD render one stack on compact, left before right", () => {
   expect(rootStyle().flexDirection).not.toBe("row");
   expect(screen.getByTestId("cols-column-left")).toBeTruthy();
   const order = screen
-    .getByTestId("cols")
-    .children.map((child) =>
+    .getByTestId("cols-column-left")
+    .parent?.parent?.children.map((child) =>
       typeof child === "string" ? child : child.props.testID,
     );
   expect(order).toEqual(["cols-column-left", "cols-column-right"]);
@@ -59,7 +61,9 @@ it("SHOULD render one stack outside any sheet", () => {
     <FormColumns left={<Text>l</Text>} right={<Text>r</Text>} testID="c" />,
   );
   expect(
-    StyleSheet.flatten(screen.getByTestId("c").props.style).flexDirection,
+    StyleSheet.flatten(
+      screen.getByTestId("c-column-left").parent?.parent?.props.style,
+    ).flexDirection,
   ).not.toBe("row");
 });
 

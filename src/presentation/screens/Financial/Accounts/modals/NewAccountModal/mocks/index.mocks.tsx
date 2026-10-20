@@ -1,4 +1,6 @@
-import { fireEvent, render, screen } from "@tests";
+import { fireEvent, render, screen, within } from "@tests";
+
+import { useBreakpoint } from "@presentation/theme";
 
 import NewAccountModal from "../";
 import { useNewAccountViewModel } from "../hooks";
@@ -54,7 +56,11 @@ const defaultViewModel: ReturnType<typeof useNewAccountViewModel> = {
   titleKey: "financial.accounts.new",
 };
 
-function setup(overrides: Partial<typeof defaultViewModel> = {}) {
+function setup(
+  overrides: Partial<typeof defaultViewModel> = {},
+  breakpoint: "compact" | "expanded" | "medium" = "compact",
+) {
+  jest.mocked(useBreakpoint).mockReturnValue(breakpoint);
   const viewModel = { ...defaultViewModel, ...overrides };
   jest.mocked(useNewAccountViewModel).mockReturnValue(viewModel);
   render(<NewAccountModal />);
@@ -66,4 +72,4 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-export { defaultViewModel, fireEvent, screen, setup };
+export { defaultViewModel, fireEvent, screen, setup, within };

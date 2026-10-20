@@ -2,7 +2,11 @@ import { StyleSheet } from "react-native";
 
 import { useKitTheme } from "@components/utils/useKitTheme";
 
-function useStyles(columns: 1 | 2, leftWidth?: number) {
+function useStyles(
+  columns: 1 | 2,
+  leftWidth?: number,
+  compactGap: "lg" | "md" = "md",
+) {
   const { colors, spacing } = useKitTheme();
   const wide = columns === 2;
 
@@ -12,7 +16,7 @@ function useStyles(columns: 1 | 2, leftWidth?: number) {
           gap: spacing.lg,
           ...(leftWidth ? { width: leftWidth } : { flex: 1, minWidth: 0 }),
         }
-      : { gap: spacing.md },
+      : { gap: spacing[compactGap] },
     right: wide
       ? {
           borderLeftColor: colors.border,
@@ -22,10 +26,10 @@ function useStyles(columns: 1 | 2, leftWidth?: number) {
           minWidth: 0,
           paddingLeft: spacing.xxl,
         }
-      : { gap: spacing.md },
+      : { gap: spacing[compactGap] },
     root: wide
       ? { columnGap: spacing.xxl, flexDirection: "row" }
-      : { gap: spacing.md },
+      : { gap: spacing[compactGap] },
   });
 }
 
