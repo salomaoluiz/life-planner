@@ -3,19 +3,43 @@ import { StyleSheet, ViewStyle } from "react-native";
 import { useKitTheme } from "@components/utils/useKitTheme";
 import { isWeb } from "@utils/platform";
 
+const FOOTER_BUTTON_MIN_WIDTH = 200;
 const GRABBER = { height: 4, width: 40 };
-const DIALOG_MAX_WIDTH = 480;
 
-function useStyles(wide: boolean) {
-  const { colors, radius, spacing } = useKitTheme();
+function useStyles(wide: boolean, form: boolean, medium: boolean) {
+  const { colors, radius, sizes, spacing } = useKitTheme();
+  const wideForm = wide && form;
+  let maxWidth = sizes.formMaxWidth;
+  if (wideForm) {
+    maxWidth = medium
+      ? sizes.formDialogMaxWidthMedium
+      : sizes.formDialogMaxWidth;
+  }
 
   return StyleSheet.create({
     backdrop: {
       ...StyleSheet.absoluteFillObject,
       backgroundColor: colors.scrim,
     },
-    body: { gap: spacing.md, padding: spacing.lg },
-    footer: { padding: spacing.lg },
+    body: wideForm
+      ? {
+          gap: spacing.md,
+          paddingHorizontal: spacing.xxl,
+          paddingVertical: spacing.xl,
+        }
+      : { gap: spacing.md, padding: spacing.lg },
+    footer: wideForm
+      ? {
+          alignItems: "center",
+          borderTopColor: colors.border,
+          borderTopWidth: 1,
+          flexDirection: "row",
+          paddingHorizontal: spacing.xxl,
+          paddingVertical: spacing.lg,
+        }
+      : { padding: spacing.lg },
+    // A fullWidth primary button is not stretched on a wide form.
+    footerEnd: { minWidth: FOOTER_BUTTON_MIN_WIDTH },
     grabber: {
       alignSelf: "center",
       backgroundColor: colors.border,
@@ -32,7 +56,18 @@ function useStyles(wide: boolean) {
       paddingHorizontal: spacing.lg,
       paddingTop: spacing.sm,
     },
-    overlay: { flex: 1, justifyContent: wide ? "center" : "flex-end" },
+    headerForm: {
+      alignItems: "center",
+      flexDirection: "row",
+      justifyContent: "space-between",
+      paddingLeft: spacing.xxl,
+      paddingRight: spacing.lg,
+      paddingTop: spacing.lg,
+    },
+    // Wide: the dialog keeps `spacing.xl` of air on both sides of a narrow window.
+    overlay: wide
+      ? { flex: 1, justifyContent: "center", paddingHorizontal: spacing.xl }
+      : { flex: 1, justifyContent: "flex-end" },
     // react-native-web passes scrollbarColor through; RN's ViewStyle does not declare it.
     scroll: isWeb()
       ? ({ scrollbarColor: `${colors.border} transparent` } as ViewStyle)
@@ -43,7 +78,7 @@ function useStyles(wide: boolean) {
           backgroundColor: colors.surface,
           borderRadius: radius.lg,
           maxHeight: "90%",
-          maxWidth: DIALOG_MAX_WIDTH,
+          maxWidth,
           // Outer breathing room: the close button never touches the dialog border.
           paddingTop: spacing.xs,
           width: "100%",

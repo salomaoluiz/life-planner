@@ -55,5 +55,6 @@ export {
   renderHook,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react-native";
 export { hasText, mockDarkTheme, customRender as render, suppressConsoleError };

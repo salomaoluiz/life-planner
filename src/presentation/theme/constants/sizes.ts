@@ -15,6 +15,8 @@ const size = {
   buttonHeight: 48,
   buttonHeightSheet: 54,
   contentMaxWidth: 720,
+  formDialogMaxWidth: 880,
+  formDialogMaxWidthMedium: 720,
   formMaxWidth: 480,
   iconLg: 24,
   iconMd: 20,

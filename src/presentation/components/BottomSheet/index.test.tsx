@@ -1,8 +1,8 @@
 import { AccessibilityInfo, Modal, StyleSheet, Text } from "react-native";
 
-import { act, fireEvent, render, screen, waitFor } from "@tests";
+import { act, fireEvent, render, screen, waitFor, within } from "@tests";
 
-import { BottomSheet } from "@components";
+import { BottomSheet, useSheetLayout } from "@components";
 import { lightTheme } from "@presentation/theme/provider";
 import { isWeb } from "@utils/platform";
 
@@ -233,3 +233,104 @@ it("SHOULD respect reduce motion by not animating", async () => {
   setup();
   await waitFor(() => expect(screen.getByTestId("sheet")).toBeTruthy());
 });
+
+function LayoutProbe() {
+  return <Text testID="probe">{useSheetLayout().columns}</Text>;
+}
+
+it.each([
+  ["medium", 720],
+  ["expanded", 880],
+] as const)("SHOULD be a %s wide form dialog of %i px", (breakpoint, width) => {
+  setup({ size: "form" }, breakpoint);
+  const style = StyleSheet.flatten(screen.getByTestId("sheet").props.style);
+  expect(style.maxWidth).toBe(width);
+});
+
+it("SHOULD keep a dialog at 480 px even next to a form", () => {
+  setup({ size: "dialog" }, "expanded");
+  expect(
+    StyleSheet.flatten(screen.getByTestId("sheet").props.style).maxWidth,
+  ).toBe(480);
+});
+
+it("SHOULD render a form like a dialog on compact", () => {
+  setup({ size: "form" });
+  const style = StyleSheet.flatten(screen.getByTestId("sheet").props.style);
+  expect(style.maxWidth).toBeUndefined();
+  expect(style.borderTopLeftRadius).toBe(lightTheme.sizes.borderRadius.sheet);
+  expect(
+    StyleSheet.flatten(
+      screen.getByTestId("sheet-body").props.contentContainerStyle,
+    ).padding,
+  ).toBe(20);
+});
+
+it("SHOULD use roomier body paddings on a wide form", () => {
+  setup({ size: "form" }, "expanded");
+  const body = StyleSheet.flatten(
+    screen.getByTestId("sheet-body").props.contentContainerStyle,
+  );
+  expect(body.paddingHorizontal).toBe(32);
+  expect(body.paddingVertical).toBe(24);
+});
+
+it("SHOULD put footerStart and the footer on one bordered row on a wide form", () => {
+  setup(
+    {
+      footer: <Text>save</Text>,
+      footerStart: <Text>delete</Text>,
+      size: "form",
+    },
+    "expanded",
+  );
+  const footer = screen.getByTestId("sheet-footer");
+  const style = StyleSheet.flatten(footer.props.style);
+  expect(style.borderTopWidth).toBe(1);
+  expect(style.justifyContent).toBe("space-between");
+  expect(within(footer).getByText("delete")).toBeTruthy();
+  expect(within(footer).getByText("save")).toBeTruthy();
+  expect(
+    within(screen.getByTestId("sheet-body")).queryByText("delete"),
+  ).toBeNull();
+});
+
+it("SHOULD align only the footer to the end WHEN there is no footerStart", () => {
+  setup({ footer: <Text>save</Text>, size: "form" }, "expanded");
+  expect(
+    StyleSheet.flatten(screen.getByTestId("sheet-footer").props.style)
+      .justifyContent,
+  ).toBe("flex-end");
+});
+
+it.each([
+  ["compact", "form"],
+  ["expanded", "dialog"],
+] as const)(
+  "SHOULD keep footerStart in the body on %s %s",
+  (breakpoint, size) => {
+    setup(
+      { footer: <Text>save</Text>, footerStart: <Text>delete</Text>, size },
+      breakpoint,
+    );
+    expect(
+      within(screen.getByTestId("sheet-body")).getByText("delete"),
+    ).toBeTruthy();
+    expect(
+      within(screen.getByTestId("sheet-footer")).queryByText("delete"),
+    ).toBeNull();
+  },
+);
+
+it.each([
+  ["compact", "form", "1"],
+  ["expanded", "dialog", "1"],
+  ["expanded", "form", "2"],
+  ["medium", "form", "2"],
+] as const)(
+  "SHOULD report the sheet layout on %s %s as %s columns",
+  (breakpoint, size, columns) => {
+    setup({ children: <LayoutProbe />, size }, breakpoint);
+    expect(screen.getByTestId("probe").props.children).toBe(Number(columns));
+  },
+);

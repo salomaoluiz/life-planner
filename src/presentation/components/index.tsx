@@ -5,6 +5,7 @@ export { default as Avatar, AvatarProps, AvatarViewProps } from "./Avatar";
 export { getAvatarTone } from "./Avatar/getAvatarTone";
 export { default as Badge, BadgeProps } from "./Badge";
 export { default as BottomSheet, BottomSheetProps } from "./BottomSheet";
+export { useSheetLayout } from "./BottomSheet/SheetLayoutContext";
 export { default as Button, ButtonProps } from "./Button";
 export { default as Card, CardProps } from "./Card";
 export { default as Chip, ChipProps } from "./Chip";

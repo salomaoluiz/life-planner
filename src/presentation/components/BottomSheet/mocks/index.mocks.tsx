@@ -21,7 +21,7 @@ function setup(
       visible
       {...props}
     >
-      <Text>body</Text>
+      {props.children ?? <Text>body</Text>}
     </BottomSheet>,
   );
 }
