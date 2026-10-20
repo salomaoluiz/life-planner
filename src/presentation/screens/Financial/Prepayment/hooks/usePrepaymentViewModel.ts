@@ -5,6 +5,7 @@ import CreditCardOverviewDTO from "@application/dto/financial/CreditCardOverview
 import InstallmentPlanDTO from "@application/dto/financial/InstallmentPlanDTO";
 import PrepaymentPreviewDTO from "@application/dto/financial/PrepaymentPreviewDTO";
 import { useCases } from "@application/useCases";
+import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import {
   invalidateFetcherData,
   useMutation,
@@ -116,6 +117,7 @@ function usePrepaymentViewModel() {
   }
 
   return {
+    currency: plan.data?.currency ?? DEFAULT_CURRENCY,
     date,
     discountCents,
     errors: submitted ? errors : {},

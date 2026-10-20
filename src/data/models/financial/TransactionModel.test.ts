@@ -142,3 +142,14 @@ it("SHOULD leave the series fields empty outside a recurring series", () => {
     recurrenceId: null,
   });
 });
+
+it("SHOULD read the currency of the API AND fall back to BRL WHEN it is missing", () => {
+  const withoutCurrency: Record<string, unknown> = { ...mocks.json };
+
+  delete withoutCurrency.currency;
+
+  expect(
+    TransactionModel.fromJSON({ ...mocks.json, currency: "USD" }).currency,
+  ).toBe("USD");
+  expect(TransactionModel.fromJSON(withoutCurrency).currency).toBe("BRL");
+});

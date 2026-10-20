@@ -87,6 +87,7 @@ function InvoiceModal() {
             <View style={styles.header}>
               <View style={styles.headerRow}>
                 <AmountText
+                  currency={invoice.currency}
                   size="heading"
                   testID={invoiceTestIds.amount}
                   type="EXPENSE"
@@ -114,12 +115,16 @@ function InvoiceModal() {
                     testID={invoiceTestIds.paidEarly}
                     tone="income"
                     value={t("financial.earlyPayment.paidEarly", {
-                      value: formatAmount(invoice.earlyPaidCents, localeTag),
+                      value: formatAmount(
+                        invoice.earlyPaidCents,
+                        localeTag,
+                        invoice.currency,
+                      ),
                     })}
                   />
                   <Text.Body
                     testID={invoiceTestIds.leftToPay}
-                    value={`${t("financial.earlyPayment.leftToPay")}: ${formatAmount(invoice.amountCents, localeTag)}`}
+                    value={`${t("financial.earlyPayment.leftToPay")}: ${formatAmount(invoice.amountCents, localeTag, invoice.currency)}`}
                   />
                 </View>
               ) : null}
@@ -132,7 +137,11 @@ function InvoiceModal() {
                       invoice.creditCarryMonth,
                       localeTag,
                     ),
-                    value: formatAmount(invoice.creditCarryCents, localeTag),
+                    value: formatAmount(
+                      invoice.creditCarryCents,
+                      localeTag,
+                      invoice.currency,
+                    ),
                   })}
                 />
               ) : null}
@@ -183,6 +192,7 @@ function InvoiceModal() {
                     trailing={
                       <View style={styles.trailing}>
                         <AmountText
+                          currency={invoice.currency}
                           type="EXPENSE"
                           value={purchase.amountCents}
                         />
@@ -230,7 +240,11 @@ function InvoiceModal() {
                           : item.description
                       }
                       trailing={
-                        <AmountText type="EXPENSE" value={item.amountCents} />
+                        <AmountText
+                          currency={invoice.currency}
+                          type="EXPENSE"
+                          value={item.amountCents}
+                        />
                       }
                     />
                   ))}
@@ -258,6 +272,7 @@ function InvoiceModal() {
                       })}
                       trailing={
                         <AmountText
+                          currency={invoice.currency}
                           type="INCOME"
                           value={-invoice.carryInCents}
                         />
@@ -283,7 +298,11 @@ function InvoiceModal() {
                       testID={invoiceTestIds.credit}
                       title={creditTitle(credit)}
                       trailing={
-                        <AmountText type="INCOME" value={credit.amountCents} />
+                        <AmountText
+                          currency={invoice.currency}
+                          type="INCOME"
+                          value={credit.amountCents}
+                        />
                       }
                     />
                   ))}
@@ -392,6 +411,7 @@ function InvoiceModal() {
           accountId={vm.accountId}
           accountOptions={vm.accountOptions}
           amountCents={invoice.amountCents}
+          currency={invoice.currency}
           errorKey={vm.formErrorKey}
           isPaying={vm.isPaying}
           isSubmitDisabled={vm.isSubmitDisabled}

@@ -1,4 +1,8 @@
 import { AccountStatus } from "@domain/entities/financial/AccountEntity";
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 export enum CreditCardBrand {
@@ -21,6 +25,7 @@ interface ICreditCardEntity {
   brand: CreditCardBrand;
   closingDay: number;
   color: string;
+  currency?: CurrencyCode;
   dueDay: number;
   id: string;
   lastDigits?: string;
@@ -38,6 +43,7 @@ class CreditCardEntity implements ICreditCardEntity {
   brand: CreditCardBrand;
   closingDay: number;
   color: string;
+  currency: CurrencyCode;
   dueDay: number;
   id: string;
   lastDigits?: string;
@@ -54,6 +60,7 @@ class CreditCardEntity implements ICreditCardEntity {
     this.brand = params.brand;
     this.closingDay = params.closingDay;
     this.color = params.color;
+    this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.dueDay = params.dueDay;
     this.id = params.id;
     this.lastDigits = params.lastDigits;

@@ -23,6 +23,7 @@ function toCreditCardEntity(model: CreditCardModel): CreditCardEntity {
     brand: model.brand,
     closingDay: model.closingDay,
     color: model.color,
+    currency: model.currency,
     dueDay: model.dueDay,
     id: model.id,
     lastDigits: model.lastDigits,

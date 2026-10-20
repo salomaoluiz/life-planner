@@ -61,6 +61,10 @@ class TransactionUIModel {
       : undefined;
   }
 
+  get currency() {
+    return this.dto.currency;
+  }
+
   get date() {
     return new Date(this.dto.date);
   }

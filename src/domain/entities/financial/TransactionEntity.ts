@@ -1,3 +1,7 @@
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import type { RecurrenceFrequency } from "./RecurrenceEntity";
@@ -23,6 +27,7 @@ interface ITransactionEntity {
   category: string;
   categoryId: string;
   creditCardId?: string;
+  currency?: CurrencyCode;
   date: string;
   description: string;
   earlyPayment?: EarlyPaymentRefEntity;
@@ -51,6 +56,7 @@ class TransactionEntity {
   category: string;
   categoryId: string;
   creditCardId?: string;
+  currency: CurrencyCode;
   date: string;
   description: string;
   earlyPayment?: EarlyPaymentRefEntity;
@@ -76,6 +82,7 @@ class TransactionEntity {
     this.category = params.category;
     this.categoryId = params.categoryId;
     this.creditCardId = params.creditCardId;
+    this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.installmentCount = params.installmentCount;
     this.installmentNumber = params.installmentNumber;
     this.installmentPlanId = params.installmentPlanId;

@@ -16,6 +16,7 @@ import {
   TextField,
 } from "@components";
 import Skeleton from "@components/Skeleton";
+import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
 import { TranslationKeys } from "@presentation/i18n/types";
@@ -80,7 +81,12 @@ function NewCreditCardModal() {
             <>
               <CreditCardTile
                 accessibilityLabel={vm.title || t("financial.cardForm.title")}
-                available={<AmountText value={vm.limitCents} />}
+                available={
+                  <AmountText
+                    currency={DEFAULT_CURRENCY}
+                    value={vm.limitCents}
+                  />
+                }
                 availableLabel={t("financial.cardForm.limit")}
                 brandLabel={brandLabel()}
                 lastDigits={vm.lastDigits || undefined}
@@ -98,6 +104,7 @@ function NewCreditCardModal() {
                 value={vm.title}
               />
               <AmountInput
+                currency={DEFAULT_CURRENCY}
                 error={err(vm.limitError)}
                 label={t("financial.cardForm.limit")}
                 onChange={vm.onLimitChange}

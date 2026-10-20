@@ -10,6 +10,7 @@ import {
   Text,
 } from "@components";
 import { formatAmount } from "@components/AmountText/formatAmount";
+import { CurrencyCode } from "@domain/entities/financial/Currency";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
 import invoiceTestIds from "@screens/Financial/Invoice/testIds";
@@ -20,6 +21,7 @@ interface Props {
   accountId?: string;
   accountOptions: { label: string; value: string }[];
   amountCents: number;
+  currency: CurrencyCode;
   errorKey?: TranslationKeys;
   isPaying: boolean;
   isSubmitDisabled: boolean;
@@ -56,12 +58,17 @@ function PayInvoiceSheet(props: Props) {
       onClose={props.onClose}
       testID={invoiceTestIds.paySheet}
       title={t("financial.invoice.payment.title", {
-        amount: formatAmount(props.amountCents, localeTag),
+        amount: formatAmount(props.amountCents, localeTag, props.currency),
       })}
       visible
     >
       <View style={styles.form}>
-        <AmountText size="heading" type="EXPENSE" value={props.amountCents} />
+        <AmountText
+          currency={props.currency}
+          size="heading"
+          type="EXPENSE"
+          value={props.amountCents}
+        />
         <SegmentedControl
           accessibilityLabel={t("financial.invoice.payInvoice")}
           onChange={props.onMethodChange}

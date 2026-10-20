@@ -16,6 +16,7 @@ const jsonMock = {
   },
   categoryId: "7820cfbb-f1aa-4254-8e42-7a0fe1ee981f",
   creditCardId: null,
+  currency: "BRL",
   date: "2023-10-01",
   description: "Some Description",
   earlyPayment: null,

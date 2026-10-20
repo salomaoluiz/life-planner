@@ -1,10 +1,16 @@
 import { AccountStatus } from "@domain/entities/financial/AccountEntity";
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+  toCurrencyCode,
+} from "@domain/entities/financial/Currency";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import { centsToDecimal, decimalToCents } from "./money";
 
 interface IAccountModel {
   balance: number;
+  currency?: CurrencyCode;
   icon: string;
   id: string;
   name: string;
@@ -16,6 +22,7 @@ interface IAccountModel {
 
 class AccountModel implements IAccountModel {
   balance: number;
+  currency: CurrencyCode;
   icon: string;
   id: string;
   name: string;
@@ -25,6 +32,7 @@ class AccountModel implements IAccountModel {
   status: AccountStatus;
 
   constructor(params: IAccountModel) {
+    this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.id = params.id;
     this.balance = params.balance;
     this.icon = params.icon;
@@ -40,6 +48,7 @@ class AccountModel implements IAccountModel {
 
     return new AccountModel({
       balance,
+      currency: toCurrencyCode(data.currency),
       icon: data.icon as string,
       id: data.id as string,
       name: data.name as string,
@@ -57,6 +66,7 @@ class AccountModel implements IAccountModel {
   toJSON() {
     return {
       balance: decimalToCents(this.balance),
+      currency: this.currency,
       icon: this.icon,
       id: this.id,
       name: this.name,

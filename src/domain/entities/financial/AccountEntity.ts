@@ -1,3 +1,7 @@
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 export enum AccountStatus {
@@ -7,6 +11,7 @@ export enum AccountStatus {
 
 interface IAccountEntity {
   balance: number;
+  currency?: CurrencyCode;
   icon: string;
   id: string;
   name: string;
@@ -18,6 +23,7 @@ interface IAccountEntity {
 
 class AccountEntity implements IAccountEntity {
   balance: number;
+  currency: CurrencyCode;
   icon: string;
   id: string;
   name: string;
@@ -28,6 +34,7 @@ class AccountEntity implements IAccountEntity {
   status: AccountStatus;
 
   constructor(params: IAccountEntity) {
+    this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.id = params.id;
     this.balance = params.balance;
     this.icon = params.icon;

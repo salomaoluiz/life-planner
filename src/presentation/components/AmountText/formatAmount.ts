@@ -1,3 +1,5 @@
+import type { CurrencyCode } from "@domain/entities/financial/Currency";
+
 const MINUS = "−";
 const MAX_DIGITS = 12;
 
@@ -6,9 +8,10 @@ export type AmountType = "EXPENSE" | "INCOME";
 export function formatAmount(
   cents: number,
   localeTag: string,
+  currency: CurrencyCode,
   type?: AmountType,
 ): string {
-  const { currency, locale } = getCurrencyConfig(localeTag);
+  const locale = numberLocale(localeTag);
   const absolute = type ? Math.abs(cents) : cents;
   const formatted = new Intl.NumberFormat(locale, {
     currency,
@@ -24,10 +27,9 @@ export function formatAmount(
   return `${type === "EXPENSE" ? MINUS : "+"} ${formatted}`;
 }
 
-export function getCurrencyConfig(localeTag: string) {
-  return localeTag.toLowerCase().startsWith("pt")
-    ? ({ currency: "BRL", locale: "pt-BR" } as const)
-    : ({ currency: "USD", locale: "en-US" } as const);
+// The language only picks the number format; the currency is data (spec 040).
+export function numberLocale(localeTag: string): "en-US" | "pt-BR" {
+  return localeTag.toLowerCase().startsWith("pt") ? "pt-BR" : "en-US";
 }
 
 export function parseCents(text: string): number {

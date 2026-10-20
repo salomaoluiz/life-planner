@@ -39,6 +39,7 @@ function InvoiceRow({ invoice, onPress }: InvoiceRowProps) {
               />
             </View>
             <AmountText
+              currency={invoice.currency}
               testID={`${cardsTestIds.invoiceRow}-amount`}
               value={invoice.amount}
             />

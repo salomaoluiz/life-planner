@@ -1,3 +1,7 @@
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
 import RecurrenceEntity, {
   RecurrenceFrequency,
   RecurrenceStatus,
@@ -8,6 +12,7 @@ class RecurrenceDTO {
   category: string;
   categoryId: string;
   creditCardId?: string;
+  currency: CurrencyCode;
   description: string;
   endDate?: string;
   firstNumber: number;
@@ -26,6 +31,7 @@ class RecurrenceDTO {
     category: string;
     categoryId: string;
     creditCardId?: string;
+    currency?: CurrencyCode;
     description: string;
     endDate?: string;
     firstNumber: number;
@@ -43,6 +49,7 @@ class RecurrenceDTO {
     this.category = params.category;
     this.categoryId = params.categoryId;
     this.creditCardId = params.creditCardId;
+    this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.description = params.description;
     this.endDate = params.endDate;
     this.firstNumber = params.firstNumber;
@@ -63,6 +70,7 @@ class RecurrenceDTO {
       category: entity.category,
       categoryId: entity.categoryId,
       creditCardId: entity.creditCardId,
+      currency: entity.currency,
       description: entity.description,
       endDate: entity.endDate,
       firstNumber: entity.firstNumber,

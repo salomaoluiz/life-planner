@@ -12,6 +12,7 @@ const defaultViewModel: ReturnType<typeof useEarlyPaymentViewModel> = {
   accountOptions: [{ label: "Checking", value: "a1" }],
   amountCents: 60000,
   card: { id: "card-1", title: "Main card" } as never,
+  currency: "BRL",
   date: new Date(2026, 9, 16),
   description: undefined,
   errors: {},

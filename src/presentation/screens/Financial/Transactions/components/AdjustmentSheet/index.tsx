@@ -8,6 +8,7 @@ import {
   ConfirmDialog,
   Text,
 } from "@components";
+import { CurrencyCode } from "@domain/entities/financial/Currency";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
 interface Props {
@@ -17,6 +18,7 @@ interface Props {
   cancelLabel: string;
   closeLabel: string;
   confirmLabel: string;
+  currency: CurrencyCode;
   deleteLabel: string;
   deleteMessage: string;
   deleteTitle: string;
@@ -50,6 +52,7 @@ function AdjustmentSheet(props: Props) {
       >
         <View>
           <AmountText
+            currency={props.currency}
             size={"heading"}
             type={props.amountType}
             value={props.amountCents}

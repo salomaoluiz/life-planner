@@ -20,6 +20,7 @@ async function createAccount(params: Params, datasources: Datasources) {
 
   return new AccountEntity({
     balance: account.balance,
+    currency: account.currency,
     icon: account.icon,
     id: account.id,
     name: account.name,

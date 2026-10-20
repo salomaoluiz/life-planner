@@ -71,3 +71,7 @@ New business error: `class XNotFound extends BusinessError { constructor(){ supe
 ## Cache keys (`entities/cache/keys.ts`)
 
 `CacheStringKeys` enum, format `CACHE_<MODULE>_<THING>_DATA = "@cache_<module>_<thing>_data"`, keep alphabetical. Also re-exported from `@infrastructure/cache`.
+
+## Currency (spec 040)
+
+`CurrencyCode` (`"BRL" | "USD" | "EUR"`), `SUPPORTED_CURRENCIES`, `DEFAULT_CURRENCY` and `toCurrencyCode(value)` live in `entities/financial/Currency.ts` (mirror of the backend list). Account, credit card, transaction, recurrence, installment plan, projected occurrence and invoice entities (and their models/DTOs) carry `currency: CurrencyCode`; the constructors default it to `BRL`. Aggregates (month totals, daily and projected balances, cards totals, home) are formatted with `DEFAULT_CURRENCY` until travel mode decides conversion.

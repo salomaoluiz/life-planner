@@ -76,10 +76,11 @@ function RefundModal() {
                   label={t("financial.refund.amount")}
                   onChangeText={() => undefined}
                   testID={refundTestIds.amount}
-                  value={formatAmount(vm.amountCents, localeTag)}
+                  value={formatAmount(vm.amountCents, localeTag, vm.currency)}
                 />
               ) : (
                 <AmountInput
+                  currency={vm.currency}
                   error={err(vm.errors.amount)}
                   label={t("financial.refund.amount")}
                   onChange={vm.onAmountChange}
@@ -124,7 +125,7 @@ function RefundModal() {
                 <HelperText
                   label={t("financial.refund.hint", {
                     month: formatReferenceMonth(vm.carryMonth, localeTag),
-                    value: formatAmount(vm.carryCents, localeTag),
+                    value: formatAmount(vm.carryCents, localeTag, vm.currency),
                   })}
                   testID={refundTestIds.hint}
                   type="info"

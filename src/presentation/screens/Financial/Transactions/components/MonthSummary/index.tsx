@@ -3,6 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { AmountText, Button, Card, Divider, Text } from "@components";
 import Skeleton from "@components/Skeleton";
 import { useKitTheme } from "@components/utils/useKitTheme";
+import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 
 interface Props {
   balanceCents: number;
@@ -76,6 +77,7 @@ function MonthSummary(props: Props) {
       <View style={styles.top}>
         <Text.Overline tone={"secondary"} value={props.balanceLabel} />
         <AmountText
+          currency={DEFAULT_CURRENCY}
           size={"heading"}
           type={negative ? "EXPENSE" : undefined}
           value={Math.abs(props.balanceCents)}
@@ -91,6 +93,7 @@ function MonthSummary(props: Props) {
         <View style={[styles.column, styles.columnLeft]}>
           <Text.Overline tone={"secondary"} value={props.incomesLabel} />
           <AmountText
+            currency={DEFAULT_CURRENCY}
             testID={props.incomeTestID}
             tone={"income"}
             value={props.incomeCents}
@@ -99,6 +102,7 @@ function MonthSummary(props: Props) {
             <View style={styles.pending}>
               <Text.Caption tone={"secondary"} value={props.toReceiveLabel} />
               <AmountText
+                currency={DEFAULT_CURRENCY}
                 size={"caption"}
                 testID={props.toReceiveTestID}
                 tone={"income"}
@@ -111,6 +115,7 @@ function MonthSummary(props: Props) {
         <View style={[styles.column, styles.columnRight]}>
           <Text.Overline tone={"secondary"} value={props.expensesLabel} />
           <AmountText
+            currency={DEFAULT_CURRENCY}
             testID={props.expenseTestID}
             tone={"expense"}
             value={props.expenseCents}
@@ -119,6 +124,7 @@ function MonthSummary(props: Props) {
             <View style={styles.pending}>
               <Text.Caption tone={"secondary"} value={props.toPayLabel} />
               <AmountText
+                currency={DEFAULT_CURRENCY}
                 size={"caption"}
                 testID={props.toPayTestID}
                 tone={"expense"}
@@ -137,6 +143,7 @@ function MonthSummary(props: Props) {
             <View style={styles.pending}>
               {props.projectedIncomeCents ? (
                 <AmountText
+                  currency={DEFAULT_CURRENCY}
                   size={"caption"}
                   tone={"income"}
                   value={props.projectedIncomeCents}
@@ -144,6 +151,7 @@ function MonthSummary(props: Props) {
               ) : null}
               {props.projectedExpenseCents ? (
                 <AmountText
+                  currency={DEFAULT_CURRENCY}
                   size={"caption"}
                   tone={"expense"}
                   value={props.projectedExpenseCents}

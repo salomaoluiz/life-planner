@@ -5,6 +5,7 @@ import AccountDTO from "@application/dto/financial/AccountDTO";
 import CardInvoiceDTO from "@application/dto/financial/CardInvoiceDTO";
 import CreditCardOverviewDTO from "@application/dto/financial/CreditCardOverviewDTO";
 import { useCases } from "@application/useCases";
+import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import {
   invalidateFetcherData,
   useMutation,
@@ -217,6 +218,7 @@ function useEarlyPaymentViewModel() {
     })),
     amountCents,
     card: summary?.card,
+    currency: summary?.card.currency ?? DEFAULT_CURRENCY,
     date,
     description,
     errors: submitted ? errorsOf((description ?? "x").trim()) : {},

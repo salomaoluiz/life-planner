@@ -2,6 +2,7 @@ import { View } from "react-native";
 
 import { AmountText, Card, ErrorState, MetricBlock, Text } from "@components";
 import Skeleton from "@components/Skeleton";
+import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useTranslation } from "@presentation/i18n";
 import { BlockState } from "@screens/Home/hooks/useHomeViewModel";
 import MonthSummaryUIModel from "@screens/Home/models/MonthSummaryUIModel";
@@ -41,6 +42,7 @@ function MonthSummaryCard({ fill, onPress, state }: Props) {
         value={t("home.summary.title", { month: data.monthName })}
       />
       <AmountText
+        currency={DEFAULT_CURRENCY}
         size="display"
         testID="home-summary-balance"
         type={data.balanceType}
@@ -51,7 +53,14 @@ function MonthSummaryCard({ fill, onPress, state }: Props) {
           <MetricBlock
             label={t("home.summary.income")}
             trend="income"
-            value={<AmountText size="body" tone="income" value={data.income} />}
+            value={
+              <AmountText
+                currency={DEFAULT_CURRENCY}
+                size="body"
+                tone="income"
+                value={data.income}
+              />
+            }
           />
         </View>
         <View style={styles.metric}>
@@ -59,7 +68,12 @@ function MonthSummaryCard({ fill, onPress, state }: Props) {
             label={t("home.summary.expenses")}
             trend="expense"
             value={
-              <AmountText size="body" tone="expense" value={data.expense} />
+              <AmountText
+                currency={DEFAULT_CURRENCY}
+                size="body"
+                tone="expense"
+                value={data.expense}
+              />
             }
           />
         </View>

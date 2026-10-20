@@ -1,5 +1,10 @@
 import CreditCardModel from "@data/models/financial/CreditCardModel";
 import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+  toCurrencyCode,
+} from "@domain/entities/financial/Currency";
+import {
   InvoicePaymentEntity,
   InvoiceStatus,
 } from "@domain/entities/financial/InvoiceEntity";
@@ -86,6 +91,7 @@ export class InvoiceModel {
   amountDue: number;
   carryIn: number;
   closingDate: string;
+  currency: CurrencyCode;
   dueDate: string;
   earlyPaid: number;
   listDate: string;
@@ -104,6 +110,7 @@ export class InvoiceModel {
     amountDue: number;
     carryIn: number;
     closingDate: string;
+    currency?: CurrencyCode;
     dueDate: string;
     earlyPaid: number;
     listDate: string;
@@ -121,6 +128,7 @@ export class InvoiceModel {
     this.amountDue = params.amountDue;
     this.carryIn = params.carryIn;
     this.closingDate = params.closingDate;
+    this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.dueDate = params.dueDate;
     this.earlyPaid = params.earlyPaid;
     this.listDate = params.listDate;
@@ -141,6 +149,7 @@ export class InvoiceModel {
       amountDue: Number(data.amountDue ?? data.amount),
       carryIn: Number(data.carryIn ?? 0),
       closingDate: data.closingDate as string,
+      currency: toCurrencyCode(data.currency),
       dueDate: data.dueDate as string,
       earlyPaid: Number(data.earlyPaid ?? 0),
       listDate:

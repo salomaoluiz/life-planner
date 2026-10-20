@@ -8,6 +8,7 @@ it("SHOULD copy every field of the entity", () => {
     brand: "VISA",
     closingDay: 31,
     color: "#6366F1",
+    currency: "BRL",
     dueDay: 10,
     id: "card-id",
     lastDigits: "1234",

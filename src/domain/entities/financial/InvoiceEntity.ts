@@ -1,3 +1,7 @@
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
 export enum InvoiceStatus {
   CLOSED = "CLOSED",
   OPEN = "OPEN",
@@ -20,6 +24,7 @@ interface IInvoiceEntity {
   amountDue: number;
   carryIn: number;
   closingDate: string;
+  currency?: CurrencyCode;
   dueDate: string;
   earlyPaid: number;
   listDate: string;
@@ -42,6 +47,7 @@ class InvoiceEntity implements IInvoiceEntity {
   // Negative credit coming from the previous invoice (cents, <= 0).
   carryIn: number;
   closingDate: string;
+  currency: CurrencyCode;
   dueDate: string;
   // Σ of the early payments of the invoice.
   earlyPaid: number;
@@ -64,6 +70,7 @@ class InvoiceEntity implements IInvoiceEntity {
     this.amountDue = params.amountDue;
     this.carryIn = params.carryIn;
     this.closingDate = params.closingDate;
+    this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.dueDate = params.dueDate;
     this.earlyPaid = params.earlyPaid;
     this.listDate = params.listDate;

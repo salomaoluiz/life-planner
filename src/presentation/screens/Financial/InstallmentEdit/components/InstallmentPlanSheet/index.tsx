@@ -67,6 +67,7 @@ function InstallmentPlanSheet(props: Props) {
             value={`${t("financial.installmentPlan.count")}: ${plan.installmentCount}`}
           />
           <AmountText
+            currency={plan.currency}
             size="heading"
             testID={installmentPlanTestIds.total}
             type="EXPENSE"
@@ -78,7 +79,11 @@ function InstallmentPlanSheet(props: Props) {
             testID={installmentPlanTestIds.prepayment}
             tone="secondary"
             value={t("financial.installmentPlan.prepaidInto", {
-              discount: formatAmount(prepayment.discount, localeTag),
+              discount: formatAmount(
+                prepayment.discount,
+                localeTag,
+                plan.currency,
+              ),
               month: formatReferenceMonth(
                 prepayment.targetInvoiceMonth,
                 localeTag,
@@ -96,6 +101,7 @@ function InstallmentPlanSheet(props: Props) {
               trailing={
                 <View style={styles.planRowTrailing}>
                   <AmountText
+                    currency={plan.currency}
                     type="EXPENSE"
                     value={decimalStringToCents(row.value)}
                   />

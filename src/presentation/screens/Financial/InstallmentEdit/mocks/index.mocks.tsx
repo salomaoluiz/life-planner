@@ -40,6 +40,7 @@ const plan = new InstallmentPlanDTO({
 const defaultViewModel: ReturnType<typeof useInstallmentEditViewModel> = {
   cardOptions: [{ label: "Main ••1234", value: "card-1" }],
   categoryOptions: [{ label: "Tech", value: "cat-1" }],
+  currency: "BRL",
   errors: {},
   fields: {
     amount: true,

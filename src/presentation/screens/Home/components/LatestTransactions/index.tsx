@@ -10,6 +10,7 @@ import {
   Section,
 } from "@components";
 import Skeleton from "@components/Skeleton";
+import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useTranslation } from "@presentation/i18n";
 import { BlockState } from "@screens/Home/hooks/useHomeViewModel";
 import RecentTransactionUIModel from "@screens/Home/models/RecentTransactionUIModel";
@@ -85,6 +86,7 @@ function LatestTransactions({ onAddPress, onSeeAllPress, state }: Props) {
         title={row.title}
         trailing={
           <AmountText
+            currency={DEFAULT_CURRENCY}
             size="body"
             type={row.amount.type}
             value={row.amount.value}

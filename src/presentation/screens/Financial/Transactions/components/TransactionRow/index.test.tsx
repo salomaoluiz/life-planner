@@ -222,3 +222,13 @@ describe("recurring series (spec 034)", () => {
     expect(onPress).toHaveBeenCalledWith("tx-r");
   });
 });
+
+it("SHOULD format the amount with the currency of the transaction (spec 040)", () => {
+  const usd = new TransactionUIModel(
+    makeTransactionDTO({ currency: "USD", value: "12.50" }),
+  );
+
+  render(<TransactionRow item={usd} onPress={jest.fn()} />);
+
+  expect(screen.UNSAFE_getByType(AmountText).props.currency).toBe("USD");
+});
