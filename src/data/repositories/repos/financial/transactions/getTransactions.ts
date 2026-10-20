@@ -56,6 +56,7 @@ async function getTransactions(ownerIds: Params, datasources: Datasources) {
         recurrenceFrequency: transaction.recurrenceFrequency,
         recurrenceId: transaction.recurrenceId,
         systemKey: transaction.systemKey,
+        tags: transaction.tags,
         type: TransactionType[transaction.type],
         value: transaction.value,
       }),

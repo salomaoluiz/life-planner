@@ -27,6 +27,7 @@ async function createInstallmentPlan(params: Params): Response {
     installments: params.installments,
     owner: params.owner,
     ownerId: params.ownerId,
+    tags: params.tags,
     today: todayCalendarDate(),
     value: decimalStringToCents(params.value),
   };

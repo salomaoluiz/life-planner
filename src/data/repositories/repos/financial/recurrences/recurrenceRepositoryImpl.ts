@@ -102,6 +102,7 @@ function toProjectedEntity(
     owner: OwnerType[model.owner],
     ownerId: model.ownerId,
     recurrenceId: model.recurrenceId,
+    tags: model.tags,
     type: TransactionType[model.type],
     value: model.value,
   });
@@ -163,6 +164,7 @@ function toTransactionEntity(model: TransactionModel): TransactionEntity {
     recurrenceFrequency: model.recurrenceFrequency,
     recurrenceId: model.recurrenceId,
     systemKey: model.systemKey,
+    tags: model.tags,
     type: TransactionType[model.type],
     value: model.value,
   });

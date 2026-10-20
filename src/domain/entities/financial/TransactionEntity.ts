@@ -5,6 +5,7 @@ import {
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import type { RecurrenceFrequency } from "./RecurrenceEntity";
+import type { TagRefEntity } from "./TagEntity";
 
 export enum TransactionType {
   EXPENSE = "EXPENSE",
@@ -47,6 +48,7 @@ interface ITransactionEntity {
   recurrenceFrequency?: RecurrenceFrequency;
   recurrenceId?: string;
   systemKey?: string;
+  tags?: TagRefEntity[];
   type: TransactionType;
   value: string;
 }
@@ -74,6 +76,7 @@ class TransactionEntity {
   recurrenceFrequency?: RecurrenceFrequency;
   recurrenceId?: string;
   systemKey?: string;
+  tags: TagRefEntity[];
   type: TransactionType;
   value: string;
 
@@ -100,6 +103,7 @@ class TransactionEntity {
     this.recurrenceId = params.recurrenceId;
     this.excludeFromTotals = params.excludeFromTotals ?? false;
     this.systemKey = params.systemKey;
+    this.tags = params.tags ?? [];
     this.type = params.type;
     this.value = params.value;
   }

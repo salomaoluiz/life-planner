@@ -24,6 +24,8 @@ interface CreateTransactionDatasourceParams {
   ownerId: string;
   // Account rows only; omitted → the API decides from the date (spec 033).
   paid?: boolean;
+  // Spec 043: tag names, resolved (or created) by the API in the owner.
+  tags?: string[];
   type: TransactionType;
   value: string;
 }
@@ -47,6 +49,8 @@ interface UpdateTransactionDatasourceParams {
   paid?: boolean;
   // Required by the API when the transaction is an installment (spec 030).
   scope?: InstallmentScope;
+  // `[]` removes every tag; omitted leaves them.
+  tags?: string[];
   type?: TransactionType;
   value?: string;
 }

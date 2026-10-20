@@ -6,6 +6,7 @@ import {
 
 import { calendarDateToIso, isoToCalendarDate } from "./calendarDate";
 import { centsToDecimalString, decimalStringToCents } from "./money";
+import { TagRefModel, tagRefsFromJSON } from "./TagModel";
 
 export interface EarlyPaymentRefModel {
   creditCardId: string;
@@ -42,6 +43,7 @@ interface ITransactionModel {
   recurrenceFrequency?: RecurrenceFrequency;
   recurrenceId?: string;
   systemKey?: string;
+  tags?: TagRefModel[];
   type: TransactionType;
   value: string;
 }
@@ -69,6 +71,7 @@ class TransactionModel implements ITransactionModel {
   recurrenceFrequency?: RecurrenceFrequency;
   recurrenceId?: string;
   systemKey?: string;
+  tags: TagRefModel[];
   type: TransactionType;
   value: string;
 
@@ -95,6 +98,7 @@ class TransactionModel implements ITransactionModel {
     this.recurrenceId = params.recurrenceId;
     this.excludeFromTotals = params.excludeFromTotals ?? false;
     this.systemKey = params.systemKey;
+    this.tags = params.tags ?? [];
     this.type = params.type;
     this.value = params.value;
   }
@@ -134,6 +138,7 @@ class TransactionModel implements ITransactionModel {
         (data.recurrenceFrequency as null | RecurrenceFrequency) ?? undefined,
       recurrenceId: (data.recurrenceId as null | string) ?? undefined,
       systemKey: category?.systemKey ?? undefined,
+      tags: tagRefsFromJSON(data.tags),
       type: data.type as TransactionType,
       value: centsToDecimalString(Number(data.value)),
     });
@@ -166,6 +171,7 @@ class TransactionModel implements ITransactionModel {
       paid: this.paid,
       recurrenceFrequency: this.recurrenceFrequency ?? null,
       recurrenceId: this.recurrenceId ?? null,
+      tags: this.tags,
       type: this.type,
       value: decimalStringToCents(this.value),
     };

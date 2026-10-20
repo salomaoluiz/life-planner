@@ -16,6 +16,7 @@ export interface SplitRecurrenceUseCaseParams {
   frequency?: string;
   occurrenceNumber: number;
   recurrenceId: string;
+  tags?: string[];
   value?: string;
 }
 

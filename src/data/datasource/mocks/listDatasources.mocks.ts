@@ -67,6 +67,12 @@ const datasourcesMocks: jest.MockedObjectDeep<Datasources> = {
     splitRecurrence: jest.fn(),
     updateRecurrence: jest.fn(),
   },
+  financialTagDatasource: {
+    createTag: jest.fn(),
+    deleteTag: jest.fn(),
+    getTags: jest.fn(),
+    updateTag: jest.fn(),
+  },
   financialTransactionDatasource: {
     createTransaction: jest.fn(),
     deleteTransaction: jest.fn(),

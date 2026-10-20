@@ -1,6 +1,11 @@
 export { default as Accordion, AccordionProps } from "./Accordion";
 export { default as AmountInput, AmountInputProps } from "./AmountInput";
 export { default as AmountText, AmountTextProps } from "./AmountText";
+export {
+  default as AutocompleteField,
+  AutocompleteFieldProps,
+  AutocompleteSuggestion,
+} from "./AutocompleteField";
 export { default as Avatar, AvatarProps, AvatarViewProps } from "./Avatar";
 export { getAvatarTone } from "./Avatar/getAvatarTone";
 export { default as Badge, BadgeProps } from "./Badge";

@@ -18,3 +18,4 @@ export { default as RecurrenceFrequencyBlocked } from "./RecurrenceFrequencyBloc
 export { default as RecurrenceHasPaidOccurrences } from "./RecurrenceHasPaidOccurrences";
 export { default as RecurrencePaidAfterEnd } from "./RecurrencePaidAfterEnd";
 export { default as RefundOverPurchase } from "./RefundOverPurchase";
+export { default as TagNameInUse } from "./TagNameInUse";

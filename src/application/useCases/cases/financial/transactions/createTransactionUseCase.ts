@@ -15,6 +15,7 @@ export interface CreateTransactionUseCaseParams {
   owner: string;
   ownerId: string;
   paid?: boolean;
+  tags?: string[];
   type: string;
   value: string;
 }
@@ -46,6 +47,7 @@ function createTransactionUseCase(
           owner,
           ownerId: params.ownerId,
           paid: params.paid,
+          tags: params.tags,
           type,
           value: params.value,
         });

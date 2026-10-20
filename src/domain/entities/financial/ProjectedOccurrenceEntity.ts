@@ -5,6 +5,7 @@ import {
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import { RecurrenceFrequency } from "./RecurrenceEntity";
+import { TagRefEntity } from "./TagEntity";
 import { TransactionType } from "./TransactionEntity";
 
 interface IProjectedOccurrenceEntity {
@@ -30,6 +31,7 @@ interface IProjectedOccurrenceEntity {
   owner: OwnerType;
   ownerId: string;
   recurrenceId: string;
+  tags?: TagRefEntity[];
   type: TransactionType;
   value: string;
 }
@@ -55,6 +57,7 @@ class ProjectedOccurrenceEntity {
   owner: OwnerType;
   ownerId: string;
   recurrenceId: string;
+  tags: TagRefEntity[];
   type: TransactionType;
   value: string;
 
@@ -78,6 +81,7 @@ class ProjectedOccurrenceEntity {
     this.owner = params.owner;
     this.ownerId = params.ownerId;
     this.recurrenceId = params.recurrenceId;
+    this.tags = params.tags ?? [];
     this.type = params.type;
     this.value = params.value;
   }

@@ -5,6 +5,7 @@ import {
 } from "@domain/entities/financial/Currency";
 import ProjectedOccurrenceEntity from "@domain/entities/financial/ProjectedOccurrenceEntity";
 import { RecurrenceFrequency } from "@domain/entities/financial/RecurrenceEntity";
+import { TagRefEntity } from "@domain/entities/financial/TagEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import TransactionDTO from "./TransactionDTO";
@@ -29,6 +30,7 @@ class ProjectedOccurrenceDTO {
   owner: string;
   ownerId: string;
   recurrenceId: string;
+  tags: TagRefEntity[];
   type: string;
   value: string;
 
@@ -52,6 +54,7 @@ class ProjectedOccurrenceDTO {
     owner: string;
     ownerId: string;
     recurrenceId: string;
+    tags?: TagRefEntity[];
     type: string;
     value: string;
   }) {
@@ -74,6 +77,7 @@ class ProjectedOccurrenceDTO {
     this.owner = params.owner;
     this.ownerId = params.ownerId;
     this.recurrenceId = params.recurrenceId;
+    this.tags = params.tags ?? [];
     this.type = params.type;
     this.value = params.value;
   }
@@ -117,6 +121,7 @@ class ProjectedOccurrenceDTO {
       paid: false,
       recurrenceFrequency: this.frequency,
       recurrenceId: this.recurrenceId,
+      tags: this.tags,
       type: this.type,
       value: this.value,
     });

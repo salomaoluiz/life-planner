@@ -26,6 +26,7 @@ async function updateInstallmentPlan(params: Params): Response {
       params.date === undefined ? undefined : isoToCalendarDate(params.date),
     description: params.description,
     installments: params.installments,
+    tags: params.tags,
     value:
       params.value === undefined
         ? undefined

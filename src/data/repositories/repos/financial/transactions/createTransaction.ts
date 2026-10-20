@@ -22,6 +22,7 @@ async function createTransaction(params: Params, datasources: Datasources) {
       owner: params.owner,
       ownerId: params.ownerId,
       paid: params.paid,
+      tags: params.tags,
       type: params.type,
       value: params.value,
     });
@@ -53,6 +54,7 @@ async function createTransaction(params: Params, datasources: Datasources) {
     recurrenceFrequency: transaction.recurrenceFrequency,
     recurrenceId: transaction.recurrenceId,
     systemKey: transaction.systemKey,
+    tags: transaction.tags,
     type: TransactionType[transaction.type],
     value: transaction.value,
   });

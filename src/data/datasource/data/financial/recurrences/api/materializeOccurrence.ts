@@ -25,6 +25,7 @@ async function materializeOccurrence(params: Params): Response {
     description: params.description,
     paid: params.paid,
     scope: "ONLY_THIS",
+    tags: params.tags,
     value:
       params.value === undefined
         ? undefined

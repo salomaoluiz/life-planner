@@ -48,6 +48,7 @@ interface CreateRecurrenceRepositoryParams {
   ownerId: string;
   // Occurrence 1 of an account series only.
   paid?: boolean;
+  tags?: string[];
   type: TransactionType;
   value: string;
 }
@@ -90,6 +91,7 @@ interface MaterializeOccurrenceRepositoryParams {
   occurrenceNumber: number;
   paid?: boolean;
   recurrenceId: string;
+  tags?: string[];
   value?: string;
 }
 
@@ -103,6 +105,7 @@ interface SplitRecurrenceRepositoryParams {
   frequency?: RecurrenceFrequency;
   occurrenceNumber: number;
   recurrenceId: string;
+  tags?: string[];
   value?: string;
 }
 
@@ -111,6 +114,7 @@ interface UpdateRecurrenceRepositoryParams {
   description?: string;
   endDate?: null | string;
   id: string;
+  tags?: string[];
   value?: string;
 }
 

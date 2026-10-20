@@ -6,6 +6,7 @@ import categoryRepository from "./categories/categoryRepositoryImpl";
 import creditCardRepository from "./creditCards/creditCardRepositoryImpl";
 import installmentPlanRepository from "./installmentPlans/installmentPlanRepositoryImpl";
 import recurrenceRepository from "./recurrences/recurrenceRepositoryImpl";
+import tagRepository from "./tags/tagRepositoryImpl";
 import transactionRepository from "./transactions/transactionRepositoryImpl";
 
 export function financialRepository(datasources: Datasources) {
@@ -16,6 +17,7 @@ export function financialRepository(datasources: Datasources) {
     creditCard: creditCardRepository(datasources),
     installmentPlan: installmentPlanRepository(datasources),
     recurrence: recurrenceRepository(datasources),
+    tag: tagRepository(datasources),
     transaction: transactionRepository(datasources),
   };
 }

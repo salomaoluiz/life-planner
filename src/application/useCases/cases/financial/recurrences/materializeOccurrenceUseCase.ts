@@ -10,6 +10,7 @@ export interface MaterializeOccurrenceUseCaseParams {
   occurrenceNumber: number;
   paid?: boolean;
   recurrenceId: string;
+  tags?: string[];
   value?: string;
 }
 

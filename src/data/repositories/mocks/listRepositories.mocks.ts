@@ -75,6 +75,12 @@ const repositoriesMocks: Repositories = {
       splitRecurrence: jest.fn(),
       updateRecurrence: jest.fn(),
     },
+    tag: {
+      createTag: jest.fn(),
+      deleteTag: jest.fn(),
+      getTags: jest.fn(),
+      updateTag: jest.fn(),
+    },
     transaction: {
       createTransaction: jest.fn(),
       deleteTransaction: jest.fn(),

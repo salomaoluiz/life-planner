@@ -60,6 +60,13 @@ export {
 } from "./recurrences";
 
 export {
+  createTagUseCase as createFinancialTagUseCase,
+  deleteTagUseCase as deleteFinancialTagUseCase,
+  getTagsUseCase as getFinancialTagsUseCase,
+  updateTagUseCase as updateFinancialTagUseCase,
+} from "./tags";
+
+export {
   createTransactionUseCase as createFinancialTransactionUseCase,
   deleteTransactionUseCase as deleteFinancialTransactionUseCase,
   getTransactionsUseCase as getFinancialTransactionsUseCase,
