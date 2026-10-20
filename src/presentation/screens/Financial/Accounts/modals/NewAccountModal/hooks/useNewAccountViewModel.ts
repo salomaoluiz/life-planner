@@ -9,10 +9,7 @@ import {
   useQuery,
 } from "@infrastructure/fetcher";
 import { TranslationKeys } from "@presentation/i18n/types";
-import {
-  ACTIVE_OWNERS_CACHE_KEY,
-  fetchActiveOwners,
-} from "@screens/Financial/models/activeOwners";
+import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
 import { personalOwnerId } from "@screens/Financial/models/ownerOptions";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
 
@@ -68,10 +65,7 @@ function useNewAccountViewModel() {
   const params = useLocalSearchParams<{ id?: string; ownerId?: string }>();
   const isEditing = !!params.id;
 
-  const owners = useQuery({
-    cacheKey: ACTIVE_OWNERS_CACHE_KEY,
-    fetch: fetchActiveOwners,
-  });
+  const owners = useActiveOwners();
   const accounts = useQuery({
     cacheKey: [useCases.getFinancialAccountsUseCase.uniqueName],
     enabled: !!owners.data,

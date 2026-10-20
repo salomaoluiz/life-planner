@@ -9,10 +9,7 @@ import {
   useQuery,
 } from "@infrastructure/fetcher";
 import { TranslationKeys } from "@presentation/i18n/types";
-import {
-  ACTIVE_OWNERS_CACHE_KEY,
-  fetchActiveOwners,
-} from "@screens/Financial/models/activeOwners";
+import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
 import { personalOwnerId } from "@screens/Financial/models/ownerOptions";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
 
@@ -33,10 +30,7 @@ function useNewCreditCardViewModel() {
   const params = useLocalSearchParams<{ id?: string }>();
   const isEditing = !!params.id;
 
-  const owners = useQuery({
-    cacheKey: ACTIVE_OWNERS_CACHE_KEY,
-    fetch: fetchActiveOwners,
-  });
+  const owners = useActiveOwners();
   const cards = useQuery({
     cacheKey: [useCases.getFinancialCreditCardsUseCase.uniqueName],
     enabled: !!owners.data,
