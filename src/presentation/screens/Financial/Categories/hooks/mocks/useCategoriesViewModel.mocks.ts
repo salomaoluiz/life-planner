@@ -73,12 +73,29 @@ beforeEach(() => {
   spies.useQuery.mockImplementation((() => categoriesQuery.build()) as never);
 });
 
-function givenData(categories: CategoryDTO[]) {
-  categoriesQuery.withData({ categories, owners });
+function archivedFamily(id: string) {
+  return new OwnerDTO({
+    archived: true,
+    id,
+    name: "Old Family",
+    type: OwnerType.FAMILY,
+  });
+}
+
+function givenData(categories: CategoryDTO[], withOwners: OwnerDTO[] = owners) {
+  categoriesQuery.withData({ categories, owners: withOwners });
 }
 
 function setup() {
   return renderHook(() => useCategoriesViewModel());
 }
 
-export { cat, categoriesQuery, givenData, owners, setup, spies };
+export {
+  archivedFamily,
+  cat,
+  categoriesQuery,
+  givenData,
+  owners,
+  setup,
+  spies,
+};

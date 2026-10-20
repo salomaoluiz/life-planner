@@ -3,9 +3,11 @@ import { act } from "@tests";
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
 
 import {
+  archivedFamily,
   cat,
   categoriesQuery,
   givenData,
+  owners,
   setup,
   spies,
 } from "./mocks/useCategoriesViewModel.mocks";
@@ -180,5 +182,36 @@ describe("archived categories (spec 041)", () => {
       "archived-toggle",
       "row-old",
     ]);
+  });
+});
+
+describe("archived family (spec 042)", () => {
+  it("SHOULD hide its categories from All, show them read-only when selected", () => {
+    givenData(
+      [
+        cat("mine", "Mine", "EXPENSE", "user-id"),
+        cat("old", "Old", "EXPENSE", "family-1"),
+      ],
+      [owners[0], archivedFamily("family-1")],
+    );
+    const { result } = setup();
+
+    expect(result.current.rows.map((row) => row.id)).toEqual(["mine"]);
+    expect(result.current.readOnly).toBe(false);
+
+    act(() => {
+      result.current.onOwnerFilterChange("family-1");
+    });
+
+    expect(result.current.readOnly).toBe(true);
+    expect(result.current.rows.map((row) => row.id)).toEqual(["old"]);
+
+    act(() => {
+      result.current.onAddPress();
+      result.current.onRowPress("old");
+    });
+
+    expect(spies.push).not.toHaveBeenCalled();
+    expect(result.current.toastVisible).toBe(true);
   });
 });

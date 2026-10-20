@@ -47,10 +47,13 @@ const defaultViewModel: ReturnType<typeof useCategoriesViewModel> = {
   onRefresh: jest.fn(),
   onRetry: jest.fn(),
   onRowPress: jest.fn(),
+  onToastHide: jest.fn(),
   onTypeChange: jest.fn(),
   ownerChoices: [{ labelKey: "financial.common.all", value: "ALL" }],
   ownerFilter: "ALL",
+  readOnly: false,
   rows: [],
+  toastVisible: false,
   type: "EXPENSE",
   typeOptions: [
     { labelKey: "financial.common.expense", value: "EXPENSE" },
