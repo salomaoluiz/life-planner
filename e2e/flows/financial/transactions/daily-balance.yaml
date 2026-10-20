@@ -71,10 +71,10 @@ onFlowComplete:
       TYPE: INCOME
       PAID: "true"
 - runFlow:
-    file: ../../../subflows/login.yaml
+    file: ../../../subflows/login-by-token.yaml
     env:
-      EMAIL: ${output.EMAIL}
-      PASSWORD: ${output.PASSWORD}
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - runFlow: ../../../subflows/financial/open-transactions.yaml
 - runFlow: ../../../subflows/financial/scroll-list-down.yaml
 # Today ends with 1.000 - 100 - 300 + 50 = 650,00; yesterday with 900,00

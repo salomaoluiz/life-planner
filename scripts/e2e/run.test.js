@@ -11,12 +11,16 @@ async function run(overrides, { argv = [], env = enabledEnv } = {}) {
 describe("parseArgs AND buildMaestroArgs", () => {
   it("SHOULD parse --tags and --failed", () => {
     expect(parseArgs(["--tags", "auth,smoke", "--failed"])).toEqual({
+      changed: false,
+      dryRun: false,
       failedOnly: true,
       headless: false,
       listTags: false,
       tags: ["auth", "smoke"],
     });
     expect(parseArgs([])).toEqual({
+      changed: false,
+      dryRun: false,
       failedOnly: false,
       headless: false,
       listTags: false,
@@ -289,7 +293,7 @@ describe("runE2e progress plan", () => {
       {},
     );
 
-    expect(deps.exec.mock.calls[0][0].expected).toEqual([
+    expect(deps.startProgress.mock.calls[0][0].expected).toEqual([
       "auth/login",
       "auth/signup",
     ]);
@@ -301,7 +305,9 @@ describe("runE2e progress plan", () => {
       { argv: ["--tags", "smoke"] },
     );
 
-    expect(deps.exec.mock.calls[0][0].expected).toEqual(["auth/signup"]);
+    expect(deps.startProgress.mock.calls[0][0].expected).toEqual([
+      "auth/signup",
+    ]);
   });
 });
 
@@ -386,5 +392,242 @@ describe("runE2e --list-tags", () => {
 
     expect(exitCode).toBe(0);
     expect(printed).toEqual(["No tags found in e2e/flows"]);
+  });
+});
+
+describe("runE2e with workers", () => {
+  const files = ["auth/a.yaml", "auth/b.yaml", "auth/c.yaml"];
+  const workerReports = {
+    "e2e-report/junit-w0.xml": junit([{ name: "auth/a" }, { name: "auth/c" }]),
+    "e2e-report/junit-w1.xml": junit([{ name: "auth/b" }]),
+  };
+
+  function workerDeps(extraFiles = {}) {
+    return {
+      deps: {
+        listFiles: jest.fn((dir) => (dir === "e2e/flows" ? files : [])),
+      },
+      files: { ...workerReports, ...extraFiles },
+    };
+  }
+
+  it("SHOULD split the flows into one maestro call per worker AND merge the reports", async () => {
+    const { deps, exitCode, printed, written } = await run(workerDeps(), {
+      argv: ["--workers", "2"],
+    });
+
+    expect(exitCode).toBe(0);
+    expect(deps.exec).toHaveBeenCalledTimes(2);
+    const calls = deps.exec.mock.calls.map(([call]) => call);
+    expect(calls[0].args).toEqual(
+      expect.arrayContaining([
+        "e2e/flows/auth/a.yaml",
+        "--output",
+        "e2e-report/junit-w0.xml",
+        "--test-output-dir",
+        "e2e-report/artifacts/w0",
+      ]),
+    );
+    expect(calls.map((call) => call.logFile)).toEqual([
+      "e2e-report/maestro-w0.log",
+      "e2e-report/maestro-w1.log",
+    ]);
+    expect(printed.join("\n")).toContain("E2E PASSED: 3/3 flows");
+    expect(printed.join("\n")).toContain("2 workers");
+    expect(written["e2e/.durations.json"]).toBeDefined();
+  });
+
+  it("SHOULD exit 2 WHEN a worker produced no report", async () => {
+    const { exitCode } = await run(
+      {
+        ...workerDeps(),
+        files: {
+          "e2e-report/junit-w0.xml": workerReports["e2e-report/junit-w0.xml"],
+        },
+      },
+      { argv: ["--workers", "2"] },
+    );
+
+    expect(exitCode).toBe(2);
+  });
+
+  it("SHOULD re-run the failed flows at 3 workers AND report the retry", async () => {
+    const { deps, exitCode, printed, written } = await run(
+      {
+        deps: {
+          listFiles: jest.fn((dir) =>
+            dir === "e2e/flows"
+              ? ["auth/a.yaml", "auth/b.yaml", "auth/c.yaml", "auth/d.yaml"]
+              : [],
+          ),
+        },
+        files: {
+          "e2e-report/junit-w0.xml": junit([
+            { failure: "boom", name: "auth/a" },
+            { name: "auth/b" },
+          ]),
+          "e2e-report/junit-w1.xml": junit([{ name: "auth/c" }]),
+          "e2e-report/junit-w2.xml": junit([{ name: "auth/d" }]),
+          "e2e-report/junit-w3.xml": junit([]),
+          "e2e-report/junit-x0.xml": junit([{ name: "auth/a" }]),
+        },
+      },
+      { argv: ["--workers", "4"] },
+    );
+
+    expect(exitCode).toBe(0);
+    const retryCall = deps.exec.mock.calls
+      .map(([call]) => call)
+      .find((call) => call.logFile === "e2e-report/maestro-x0.log");
+    expect(retryCall.args).toEqual(
+      expect.arrayContaining(["e2e/flows/auth/a.yaml"]),
+    );
+    expect(printed.join("\n")).toContain("retry at 3 workers: 1/1 passed");
+    expect(written["e2e-report/failed.txt"]).toBe("");
+  });
+
+  it("SHOULD keep the failure WHEN the retry fails too", async () => {
+    const { exitCode } = await run(
+      {
+        deps: {
+          listFiles: jest.fn((dir) =>
+            dir === "e2e/flows"
+              ? ["auth/a.yaml", "auth/b.yaml", "auth/c.yaml", "auth/d.yaml"]
+              : [],
+          ),
+        },
+        files: {
+          "e2e-report/junit-w0.xml": junit([
+            { failure: "boom", name: "auth/a" },
+          ]),
+          "e2e-report/junit-w1.xml": junit([{ name: "auth/b" }]),
+          "e2e-report/junit-w2.xml": junit([{ name: "auth/c" }]),
+          "e2e-report/junit-w3.xml": junit([{ name: "auth/d" }]),
+          "e2e-report/junit-x0.xml": junit([
+            { failure: "boom", name: "auth/a" },
+          ]),
+        },
+      },
+      { argv: ["--workers", "4"] },
+    );
+
+    expect(exitCode).toBe(1);
+  });
+
+  it("SHOULD not retry WHEN the workers are 3 or fewer", async () => {
+    const { deps } = await run(
+      {
+        ...workerDeps({
+          "e2e-report/junit-w0.xml": junit([
+            { failure: "boom", name: "auth/a" },
+            { name: "auth/c" },
+          ]),
+        }),
+      },
+      { argv: ["--workers", "2"] },
+    );
+
+    expect(deps.exec).toHaveBeenCalledTimes(2);
+  });
+
+  it("SHOULD keep one maestro call with --workers 1", async () => {
+    const { deps } = await run(workerDeps(), { argv: ["--workers", "1"] });
+
+    expect(deps.exec).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("runE2e --changed", () => {
+  const flowFiles = ["financial/a.yaml", "stock/b.yaml"];
+  function flowYaml(tag) {
+    return `name: x\ntags:\n  - ${tag}\n  - smoke\n---\n`;
+  }
+
+  function changedDeps(front, back, extra = {}) {
+    return {
+      changedFiles: jest.fn((dir) => (dir === "." ? front : back)),
+      listFiles: jest.fn((dir) => (dir === "e2e/flows" ? flowFiles : [])),
+      readFile: jest.fn((path) => {
+        const flows = {
+          "e2e-report/junit.xml": junit([{ name: "financial/a" }]),
+          "e2e/flows/financial/a.yaml": flowYaml("financial"),
+          "e2e/flows/stock/b.yaml": flowYaml("stock"),
+        };
+        return flows[path] ?? null;
+      }),
+      ...extra,
+    };
+  }
+
+  it("SHOULD print the selected tags AND run nothing on --dry-run", async () => {
+    const { deps, exitCode, printed } = await run(
+      { deps: changedDeps([], ["src/modules/finance/x.ts"]) },
+      { argv: ["--changed", "--dry-run"] },
+    );
+
+    expect(exitCode).toBe(0);
+    expect(deps.exec).not.toHaveBeenCalled();
+    expect(printed.join("\n")).toContain("tags financial, smoke, 2 flows");
+  });
+
+  it("SHOULD skip with exit 0 WHEN only docs changed", async () => {
+    const { deps, exitCode, printed } = await run(
+      { deps: changedDeps(["docs/a.md"], []) },
+      { argv: ["--changed"] },
+    );
+
+    expect(exitCode).toBe(0);
+    expect(deps.exec).not.toHaveBeenCalled();
+    expect(printed).toContain("E2E SKIPPED: docs-only change");
+  });
+
+  it("SHOULD run the selected tags AND label the summary as partial", async () => {
+    const { deps, exitCode, printed } = await run(
+      { deps: changedDeps([], ["src/modules/finance/x.ts"]) },
+      { argv: ["--changed"] },
+    );
+
+    expect(exitCode).toBe(0);
+    expect(deps.exec.mock.calls[0][0].args).toEqual(
+      expect.arrayContaining(["--include-tags", "financial,smoke"]),
+    );
+    expect(printed.join("\n")).toContain(
+      "E2E PASSED (changed: financial, smoke):",
+    );
+  });
+
+  it("SHOULD run the full suite WHEN a shared file changed", async () => {
+    const { deps } = await run(
+      { deps: changedDeps(["src/presentation/components/A.tsx"], []) },
+      { argv: ["--changed"] },
+    );
+
+    expect(deps.exec.mock.calls[0][0].args).not.toContain("--include-tags");
+  });
+
+  it("SHOULD exit 2 WHEN the backend folder is missing", async () => {
+    const { exitCode, printed } = await run(
+      {
+        deps: changedDeps([], [], {
+          exists: jest.fn((path) => path !== "../life-planner-back"),
+        }),
+      },
+      { argv: ["--changed"] },
+    );
+
+    expect(exitCode).toBe(2);
+    expect(printed.join("\n")).toContain("not found");
+  });
+
+  it("SHOULD let --tags win over --changed", async () => {
+    const { deps } = await run(
+      { deps: changedDeps([], ["src/modules/finance/x.ts"]) },
+      { argv: ["--changed", "--tags", "stock"] },
+    );
+
+    expect(deps.changedFiles).not.toHaveBeenCalled();
+    expect(deps.exec.mock.calls[0][0].args).toEqual(
+      expect.arrayContaining(["--include-tags", "stock"]),
+    );
   });
 });

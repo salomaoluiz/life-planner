@@ -30,10 +30,10 @@ onFlowComplete:
       DESCRIPTION: ${output.TRANSACTION_NAME}
       VALUE_CENTS: "5500"
 - runFlow:
-    file: ../../../subflows/login.yaml
+    file: ../../../subflows/login-by-token.yaml
     env:
-      EMAIL: ${output.EMAIL}
-      PASSWORD: ${output.PASSWORD}
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - extendedWaitUntil:
     visible:
       id: "home.home.screen"

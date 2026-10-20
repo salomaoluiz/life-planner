@@ -32,10 +32,10 @@ onFlowComplete:
       OWNER_ID: ${output.USER_ID}
       DESCRIPTION: ${output.BEANS_NAME}
 - runFlow:
-    file: ../../subflows/login.yaml
+    file: ../../subflows/login-by-token.yaml
     env:
-      EMAIL: ${output.EMAIL}
-      PASSWORD: ${output.PASSWORD}
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - runFlow: ../../subflows/stock/open-stock.yaml
 - extendedWaitUntil:
     visible:

@@ -6,14 +6,19 @@ const FAILED_FILE = "e2e-report/failed.txt";
 export function buildSummary(input) {
   const total = input.flows.length;
   const failed = input.flows.filter((flow) => flow.failed);
-  const duration = formatDuration(input.durationSeconds);
-  const suffix = input.revisions ? ` · ${input.revisions}` : "";
+  const workerText = input.workers > 1 ? `, ${input.workers} workers` : "";
+  const duration = `${formatDuration(input.durationSeconds)}${workerText}`;
+  const retryText = input.retried
+    ? ` · retry at ${input.retried.workers} workers: ${input.retried.passed}/${input.retried.total} passed`
+    : "";
+  const suffix = `${retryText}${input.revisions ? ` · ${input.revisions}` : ""}`;
+  const partial = input.partialLabel ? ` (${input.partialLabel})` : "";
 
   if (failed.length === 0) {
     return {
       exitCode: 0,
       failedFiles: [],
-      text: `E2E PASSED: ${total}/${total} flows (${duration})${suffix}`,
+      text: `E2E PASSED${partial}: ${total}/${total} flows (${duration})${suffix}`,
     };
   }
 
@@ -22,7 +27,7 @@ export function buildSummary(input) {
   const counts = `${failed.length} of ${total} flows failed (${duration})${suffix}`;
   const header = environment
     ? `LIKELY ENVIRONMENT FAILURE: ${counts}. Check the app, the API and login first; showing the first ${limit}. Re-run failures only: yarn e2e:failed`
-    : `E2E FAILED: ${counts}. Re-run failures only: yarn e2e:failed`;
+    : `E2E FAILED${partial}: ${counts}. Re-run failures only: yarn e2e:failed`;
   const blocks = failed
     .slice(0, limit)
     .map((flow, index) => buildBlock(index + 1, flow, input));

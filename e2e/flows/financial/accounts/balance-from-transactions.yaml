@@ -68,10 +68,10 @@ onFlowComplete:
       VALUE_CENTS: "2000"
       DATE: ${output.LATER_THIS_MONTH_DATE}
 - runFlow:
-    file: ../../../subflows/login.yaml
+    file: ../../../subflows/login-by-token.yaml
     env:
-      EMAIL: ${output.EMAIL}
-      PASSWORD: ${output.PASSWORD}
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - runFlow: ../../../subflows/financial/open-accounts.yaml
 - extendedWaitUntil:
     visible:

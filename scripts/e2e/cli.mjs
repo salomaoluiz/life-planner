@@ -21,6 +21,23 @@ try {
   // No .env (CI or a fresh clone): rely on the real environment.
 }
 
+// Files changed against the merge base with origin/main, plus uncommitted and untracked ones.
+function changedFiles(dir) {
+  const base = git(dir, ["merge-base", "origin/main", "HEAD"]);
+  const lists = [
+    base ? git(dir, ["diff", "--name-only", base]) : null,
+    git(dir, ["diff", "--name-only", "HEAD"]),
+    git(dir, ["ls-files", "--others", "--exclude-standard"]),
+  ];
+  return [
+    ...new Set(
+      lists
+        .flatMap((list) => (list ?? "").split("\n"))
+        .filter((line) => line !== ""),
+    ),
+  ];
+}
+
 function describeRepo(label, dir) {
   const branch = git(dir, ["rev-parse", "--abbrev-ref", "HEAD"]);
   const sha = git(dir, ["rev-parse", "--short", "HEAD"]);
@@ -38,9 +55,8 @@ function git(dir, args) {
 }
 
 // Maestro creates one folder per flow (path with / as _) inside a timestamped folder when the flow starts.
-function latestArtifactDirs() {
+function latestArtifactDirs(root) {
   try {
-    const root = `${REPORT_DIR}/artifacts`;
     const runs = readdirSync(root).sort();
     return runs.length > 0
       ? readdirSync(`${root}/${runs[runs.length - 1]}`)
@@ -58,12 +74,23 @@ function readText(path) {
   }
 }
 
-function startProgress({ expected, logFile, started }) {
+function startProgress({ artifactRoots, expected, logFiles, started }) {
+  // Humans (a terminal) get a live list of passed / running / pending flows; AI shells and CI are not a TTY
+  // and keep the quiet path, so nothing but the final summary reaches their context.
+  if (!process.stdout.isTTY || expected.length === 0) {
+    return () => {};
+  }
   let previousLines = 0;
 
   function draw() {
-    const finished = parseFinished(readText(logFile));
-    const running = findRunning(expected, finished, latestArtifactDirs());
+    const finished = parseFinished(
+      logFiles.map((file) => readText(file)).join("\n"),
+    );
+    const running = findRunning(
+      expected,
+      finished,
+      artifactRoots.flatMap((root) => latestArtifactDirs(root)),
+    );
     const lines = renderProgress({
       elapsedSeconds: (Date.now() - started) / 1000,
       expected,
@@ -86,28 +113,16 @@ function startProgress({ expected, logFile, started }) {
 }
 
 const deps = {
-  async exec({ args, command, expected, logFile, started }) {
+  changedFiles,
+  async exec({ args, command, logFile }) {
     mkdirSync(REPORT_DIR, { recursive: true });
     const fd = openSync(logFile, "a");
-    // Humans (a terminal) get a live list of passed / running / pending flows; AI shells and CI are not a TTY
-    // and keep the quiet path, so nothing but the final summary reaches their context.
-    const live = process.stdout.isTTY && expected.length > 0;
     try {
-      if (!live) {
-        const result = spawnSync(command, args, { stdio: ["ignore", fd, fd] });
-        return { status: result.status ?? 1 };
-      }
       const child = spawn(command, args, { stdio: ["ignore", fd, fd] });
-      const exited = new Promise((resolve) => {
+      return await new Promise((resolve) => {
         child.on("close", (status) => resolve({ status: status ?? 1 }));
         child.on("error", () => resolve({ status: 1 }));
       });
-      const stopProgress = startProgress({ expected, logFile, started });
-      try {
-        return await exited;
-      } finally {
-        stopProgress();
-      }
     } finally {
       closeSync(fd);
     }
@@ -150,6 +165,7 @@ const deps = {
   },
   revisions: () =>
     `${describeRepo("app", ".")} · ${describeRepo("api", "../life-planner-back")}`,
+  startProgress,
   writeFile: (path, content) => writeFileSync(path, content),
 };
 

@@ -29,3 +29,4 @@ if (!me.ok) {
 
 output.TOKEN = token;
 output.USER_ID = json(me.body).id;
+output.REFRESH_TOKEN = json(login.body).refreshToken;

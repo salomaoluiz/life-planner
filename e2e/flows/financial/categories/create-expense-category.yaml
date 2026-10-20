@@ -17,10 +17,10 @@ onFlowComplete:
       PREFIX: E2E Category
       KEY: CATEGORY_NAME
 - runFlow:
-    file: ../../../subflows/login.yaml
+    file: ../../../subflows/login-by-token.yaml
     env:
-      EMAIL: ${output.EMAIL}
-      PASSWORD: ${output.PASSWORD}
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - runFlow: ../../../subflows/financial/open-categories.yaml
 - tapOn:
     id: "financial.categories.type-EXPENSE"

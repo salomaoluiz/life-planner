@@ -22,10 +22,10 @@ onFlowComplete:
       OWNER_ID: ${output.USER_ID}
       NAME: ${output.ACCOUNT_NAME}
 - runFlow:
-    file: ../../../subflows/login.yaml
+    file: ../../../subflows/login-by-token.yaml
     env:
-      EMAIL: ${output.EMAIL}
-      PASSWORD: ${output.PASSWORD}
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - runFlow: ../../../subflows/financial/open-accounts.yaml
 - tapOn:
     id: "financial.accounts.row-title"

@@ -71,10 +71,10 @@ onFlowComplete:
       CATEGORY_ID: ${output.FAMILY_CATEGORY_ID}
       VALUE_CENTS: "4200"
 - runFlow:
-    file: ../../../subflows/login.yaml
+    file: ../../../subflows/login-by-token.yaml
     env:
-      EMAIL: ${output.EMAIL}
-      PASSWORD: ${output.PASSWORD}
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - runFlow: ../../../subflows/financial/open-transactions.yaml
 # Everything: 10,00 + 42,00
 - extendedWaitUntil:

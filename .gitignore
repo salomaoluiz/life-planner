@@ -45,6 +45,7 @@ ios
 .idea
 docs/superpowers
 e2e-report
+e2e/.durations.json
 
 # Production build (never committed)
 .env.production

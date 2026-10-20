@@ -26,10 +26,10 @@ onFlowComplete:
       OWNER_ID: ${output.FAMILY_ID}
       OWNER: FAMILY
 - runFlow:
-    file: ../../subflows/login.yaml
+    file: ../../subflows/login-by-token.yaml
     env:
-      EMAIL: ${output.EMAIL}
-      PASSWORD: ${output.PASSWORD}
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - runFlow: ../../subflows/family/open-family.yaml
 - extendedWaitUntil:
     visible:

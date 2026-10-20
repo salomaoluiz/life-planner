@@ -37,10 +37,10 @@ onFlowComplete:
       OWNER: FAMILY
       DESCRIPTION: ${output.ITEM_NAME}
 - runFlow:
-    file: ../../subflows/login.yaml
+    file: ../../subflows/login-by-token.yaml
     env:
-      EMAIL: ${output.MEMBER_EMAIL}
-      PASSWORD: ${output.MEMBER_PASSWORD}
+      TOKEN: ${output.MEMBER_TOKEN}
+      REFRESH_TOKEN: ${output.MEMBER_REFRESH_TOKEN}
 - runFlow: ../../subflows/account/open-settings.yaml
 - tapOn:
     id: "settings.delete-account.button"
@@ -72,10 +72,10 @@ onFlowComplete:
 - launchApp:
     clearState: true
 - runFlow:
-    file: ../../subflows/login.yaml
+    file: ../../subflows/login-by-token.yaml
     env:
-      EMAIL: ${output.EMAIL}
-      PASSWORD: ${output.PASSWORD}
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - runFlow: ../../subflows/stock/open-stock.yaml
 - extendedWaitUntil:
     visible:

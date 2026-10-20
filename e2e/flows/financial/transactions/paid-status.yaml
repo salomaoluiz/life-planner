@@ -44,10 +44,10 @@ onFlowComplete:
       MONTHS_AGO: "1"
       PAID: "false"
 - runFlow:
-    file: ../../../subflows/login.yaml
+    file: ../../../subflows/login-by-token.yaml
     env:
-      EMAIL: ${output.EMAIL}
-      PASSWORD: ${output.PASSWORD}
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - runFlow: ../../../subflows/financial/open-transactions.yaml
 - runFlow: ../../../subflows/financial/scroll-list-down.yaml
 # The unpaid bill sits in last month: overdue badge, pay button and "To pay" in the summary

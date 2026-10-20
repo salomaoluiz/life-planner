@@ -22,10 +22,10 @@ onFlowComplete:
       NAME: ${output.ACCOUNT_NAME}
       BALANCE_CENTS: "5000"
 - runFlow:
-    file: ../../../subflows/login.yaml
+    file: ../../../subflows/login-by-token.yaml
     env:
-      EMAIL: ${output.EMAIL}
-      PASSWORD: ${output.PASSWORD}
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - runFlow: ../../../subflows/financial/open-accounts.yaml
 # edit the current balance: the app records an adjustment
 - tapOn:
