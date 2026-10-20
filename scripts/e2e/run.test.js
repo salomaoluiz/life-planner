@@ -451,6 +451,85 @@ describe("runE2e with workers", () => {
     expect(exitCode).toBe(2);
   });
 
+  it("SHOULD re-run the failed flows at 3 workers AND report the retry", async () => {
+    const { deps, exitCode, printed, written } = await run(
+      {
+        deps: {
+          listFiles: jest.fn((dir) =>
+            dir === "e2e/flows"
+              ? ["auth/a.yaml", "auth/b.yaml", "auth/c.yaml", "auth/d.yaml"]
+              : [],
+          ),
+        },
+        files: {
+          "e2e-report/junit-w0.xml": junit([
+            { failure: "boom", name: "auth/a" },
+            { name: "auth/b" },
+          ]),
+          "e2e-report/junit-w1.xml": junit([{ name: "auth/c" }]),
+          "e2e-report/junit-w2.xml": junit([{ name: "auth/d" }]),
+          "e2e-report/junit-w3.xml": junit([]),
+          "e2e-report/junit-x0.xml": junit([{ name: "auth/a" }]),
+        },
+      },
+      { argv: ["--workers", "4"] },
+    );
+
+    expect(exitCode).toBe(0);
+    const retryCall = deps.exec.mock.calls
+      .map(([call]) => call)
+      .find((call) => call.logFile === "e2e-report/maestro-x0.log");
+    expect(retryCall.args).toEqual(
+      expect.arrayContaining(["e2e/flows/auth/a.yaml"]),
+    );
+    expect(printed.join("\n")).toContain("retry at 3 workers: 1/1 passed");
+    expect(written["e2e-report/failed.txt"]).toBe("");
+  });
+
+  it("SHOULD keep the failure WHEN the retry fails too", async () => {
+    const { exitCode } = await run(
+      {
+        deps: {
+          listFiles: jest.fn((dir) =>
+            dir === "e2e/flows"
+              ? ["auth/a.yaml", "auth/b.yaml", "auth/c.yaml", "auth/d.yaml"]
+              : [],
+          ),
+        },
+        files: {
+          "e2e-report/junit-w0.xml": junit([
+            { failure: "boom", name: "auth/a" },
+          ]),
+          "e2e-report/junit-w1.xml": junit([{ name: "auth/b" }]),
+          "e2e-report/junit-w2.xml": junit([{ name: "auth/c" }]),
+          "e2e-report/junit-w3.xml": junit([{ name: "auth/d" }]),
+          "e2e-report/junit-x0.xml": junit([
+            { failure: "boom", name: "auth/a" },
+          ]),
+        },
+      },
+      { argv: ["--workers", "4"] },
+    );
+
+    expect(exitCode).toBe(1);
+  });
+
+  it("SHOULD not retry WHEN the workers are 3 or fewer", async () => {
+    const { deps } = await run(
+      {
+        ...workerDeps({
+          "e2e-report/junit-w0.xml": junit([
+            { failure: "boom", name: "auth/a" },
+            { name: "auth/c" },
+          ]),
+        }),
+      },
+      { argv: ["--workers", "2"] },
+    );
+
+    expect(deps.exec).toHaveBeenCalledTimes(2);
+  });
+
   it("SHOULD keep one maestro call with --workers 1", async () => {
     const { deps } = await run(workerDeps(), { argv: ["--workers", "1"] });
 

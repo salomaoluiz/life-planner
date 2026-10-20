@@ -1,4 +1,6 @@
 const DEFAULT_SECONDS = 40;
+const DEFAULT_WORKERS = 6;
+export const RETRY_WORKERS = 3;
 
 // Last known duration (seconds) per flow file, read from a Maestro JUnit report.
 export function parseDurations(xml) {
@@ -15,7 +17,7 @@ export function parseDurations(xml) {
 
 export function resolveWorkers({ env, option }) {
   const value = Number(option ?? env.E2E_WORKERS);
-  return Number.isInteger(value) && value >= 1 ? value : 2;
+  return Number.isInteger(value) && value >= 1 ? value : DEFAULT_WORKERS;
 }
 
 // Greedy, longest first, onto the worker with the smallest total, so heavy flows land on different workers.

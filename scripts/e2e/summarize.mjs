@@ -8,7 +8,10 @@ export function buildSummary(input) {
   const failed = input.flows.filter((flow) => flow.failed);
   const workerText = input.workers > 1 ? `, ${input.workers} workers` : "";
   const duration = `${formatDuration(input.durationSeconds)}${workerText}`;
-  const suffix = input.revisions ? ` · ${input.revisions}` : "";
+  const retryText = input.retried
+    ? ` · retry at ${input.retried.workers} workers: ${input.retried.passed}/${input.retried.total} passed`
+    : "";
+  const suffix = `${retryText}${input.revisions ? ` · ${input.revisions}` : ""}`;
   const partial = input.partialLabel ? ` (${input.partialLabel})` : "";
 
   if (failed.length === 0) {

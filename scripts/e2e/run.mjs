@@ -2,7 +2,12 @@ import { selectImpact } from "./impact.mjs";
 import { flowNameFromFile } from "./progress.mjs";
 import { buildSummary, parseJUnit } from "./summarize.mjs";
 import { buildTagList, parseFlowTags } from "./tags.mjs";
-import { parseDurations, resolveWorkers, splitFlows } from "./workers.mjs";
+import {
+  parseDurations,
+  resolveWorkers,
+  RETRY_WORKERS,
+  splitFlows,
+} from "./workers.mjs";
 
 const DURATIONS_FILE = "e2e/.durations.json";
 const MAX_REASONS = 10;
@@ -217,15 +222,6 @@ export async function runE2e({ argv, env }, deps) {
             : `${REPORT_DIR}/junit-${index}.xml`,
         logFile: `${REPORT_DIR}/maestro.log`,
       }));
-  const junitPaths = runs.map((run) => run.junitPath);
-  const stopProgress =
-    deps.startProgress?.({
-      artifactRoots: [...new Set(runs.map((run) => run.artifactsDir))],
-      expected,
-      logFiles: [...new Set(runs.map((run) => run.logFile))],
-      started,
-    }) ?? (() => {});
-
   function execRun(run) {
     // All Maestro output goes to the log file, never to the terminal: this is the token saving.
     return deps.exec({
@@ -244,22 +240,35 @@ export async function runE2e({ argv, env }, deps) {
     });
   }
 
-  try {
-    if (parallel) {
-      await Promise.all(runs.map(execRun));
-    } else {
-      for (const run of runs) {
-        await execRun(run);
+  async function execAll(batch, names) {
+    const stopProgress =
+      deps.startProgress?.({
+        artifactRoots: [...new Set(batch.map((run) => run.artifactsDir))],
+        expected: names,
+        logFiles: [...new Set(batch.map((run) => run.logFile))],
+        started,
+      }) ?? (() => {});
+    try {
+      if (parallel) {
+        await Promise.all(batch.map(execRun));
+      } else {
+        for (const run of batch) {
+          await execRun(run);
+        }
       }
+    } finally {
+      stopProgress();
     }
-  } finally {
-    stopProgress();
   }
-  const durationSeconds = (deps.now() - started) / 1000;
 
-  const reports = junitPaths
-    .map((path) => deps.readFile(path))
-    .filter((xml) => xml !== null);
+  await execAll(runs, expected);
+
+  function readReports(batch) {
+    return batch
+      .map((run) => deps.readFile(run.junitPath))
+      .filter((xml) => xml !== null);
+  }
+  const reports = readReports(runs);
   if (parallel && reports.length < runs.length) {
     return notRun(
       "a worker produced no report, see e2e-report/maestro-w*.log (try --workers 1)",
@@ -271,14 +280,53 @@ export async function runE2e({ argv, env }, deps) {
     );
   }
 
-  let flows;
+  // Later reports win: a flow re-run in the retry pass replaces its first result.
+  const flowsByName = new Map();
   try {
-    ({ flows } = parseJUnit(reports.join("\n")));
+    for (const xml of reports) {
+      parseJUnit(xml).flows.forEach((flow) => flowsByName.set(flow.name, flow));
+    }
   } catch (error) {
     return notRun(
       `could not read the Maestro report (${error.message}), see e2e-report/maestro.log`,
     );
   }
+
+  // More workers means more load on the Mac and the dev servers: failed flows get one more try at fewer workers.
+  let retriedPassed = 0;
+  const failedFirst = [...flowsByName.values()]
+    .filter((flow) => flow.failed)
+    .map((flow) => flow.name);
+  if (parallel && workerCount > RETRY_WORKERS && failedFirst.length > 0) {
+    const retryRuns = splitFlows(
+      failedFirst.map((name) => `e2e/flows/${name}.yaml`),
+      readDurations(deps),
+      RETRY_WORKERS,
+    ).map((files, index) => ({
+      artifactsDir: `${REPORT_DIR}/artifacts/x${index}`,
+      junitPath: `${REPORT_DIR}/junit-x${index}.xml`,
+      logFile: `${REPORT_DIR}/maestro-x${index}.log`,
+      tags: options.tags.includes("wip") ? ["wip"] : [],
+      target: files,
+    }));
+    await execAll(retryRuns, failedFirst);
+    const retryReports = readReports(retryRuns);
+    reports.push(...retryReports);
+    try {
+      for (const xml of retryReports) {
+        parseJUnit(xml).flows.forEach((flow) =>
+          flowsByName.set(flow.name, flow),
+        );
+      }
+    } catch {
+      // An unreadable retry report keeps the first-pass failures.
+    }
+    retriedPassed = failedFirst.filter(
+      (name) => !flowsByName.get(name)?.failed,
+    ).length;
+  }
+  const durationSeconds = (deps.now() - started) / 1000;
+  const flows = [...flowsByName.values()];
   if (flows.length === 0) {
     const tagText =
       options.tags.length > 0 ? ` the tags ${options.tags.join(",")}` : "";
@@ -293,6 +341,14 @@ export async function runE2e({ argv, env }, deps) {
     flows,
     partialLabel,
     readFlowFile: (path) => deps.readFile(path),
+    retried:
+      failedFirst.length > 0 && parallel && workerCount > RETRY_WORKERS
+        ? {
+            passed: retriedPassed,
+            total: failedFirst.length,
+            workers: RETRY_WORKERS,
+          }
+        : undefined,
     revisions: deps.revisions(),
     workers: runs.length,
   });

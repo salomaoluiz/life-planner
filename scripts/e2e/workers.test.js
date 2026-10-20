@@ -39,10 +39,10 @@ describe("parseDurations", () => {
 });
 
 describe("resolveWorkers", () => {
-  it("SHOULD prefer the option, then E2E_WORKERS, then 2", () => {
+  it("SHOULD prefer the option, then E2E_WORKERS, then 6", () => {
     expect(resolveWorkers({ env: { E2E_WORKERS: "3" }, option: "4" })).toBe(4);
     expect(resolveWorkers({ env: { E2E_WORKERS: "3" } })).toBe(3);
-    expect(resolveWorkers({ env: {} })).toBe(2);
-    expect(resolveWorkers({ env: { E2E_WORKERS: "x" }, option: "0" })).toBe(2);
+    expect(resolveWorkers({ env: {} })).toBe(6);
+    expect(resolveWorkers({ env: { E2E_WORKERS: "x" }, option: "0" })).toBe(6);
   });
 });
