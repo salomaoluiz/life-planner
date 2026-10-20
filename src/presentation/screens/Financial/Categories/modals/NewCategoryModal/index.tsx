@@ -117,6 +117,12 @@ function NewCategoryModal() {
                 testID={categoryFormTestIds.parentSelect}
                 value={vm.parentId}
               />
+              {vm.parentHelperKey && (
+                <Text.Caption
+                  tone={"secondary"}
+                  value={t(vm.parentHelperKey)}
+                />
+              )}
             </>
           }
           right={
@@ -248,7 +254,7 @@ function NewCategoryModal() {
       <ConfirmDialog
         cancelLabel={t("common.actions.cancel")}
         closeLabel={t("common.actions.close")}
-        confirmLabel={t("common.actions.delete")}
+        confirmLabel={t(vm.deleteConfirmLabelKey)}
         loading={vm.isDeleting}
         message={vm.deleteMessageKeys.map((key) => t(key)).join(" ")}
         onCancel={vm.onDeleteCancel}

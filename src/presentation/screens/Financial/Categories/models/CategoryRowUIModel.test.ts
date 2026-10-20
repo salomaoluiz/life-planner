@@ -51,3 +51,24 @@ it("SHOULD normalize the legacy stored color", () => {
   expect(model.color).toBe("#000000");
   expect(model.hasChildren).toBe(false);
 });
+
+it("SHOULD flag an All category", () => {
+  const all = new CategoryDTO({
+    icon: "food",
+    id: "all",
+    name: "Mercado",
+    owner: "USER",
+    ownerId: "user-id",
+    scope: "ALL",
+    scopeOwnerIds: ["user-id", "family-1"],
+    type: "EXPENSE",
+  });
+
+  expect(
+    new CategoryRowUIModel({ category: all, childCount: 0, depth: 0 }).isAll,
+  ).toBe(true);
+  expect(
+    new CategoryRowUIModel({ category: dto("a"), childCount: 0, depth: 0 })
+      .isAll,
+  ).toBe(false);
+});

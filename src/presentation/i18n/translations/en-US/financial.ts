@@ -5,6 +5,7 @@ const financial = {
     archivedLabel: "Archived",
     delete: "Delete account",
     deleteAlertMsg: "Are you sure you want to delete this account?",
+    deleteAllConfirm: "Delete from all",
     deleteTitle: "Delete {{name}}?",
     edit: "Edit account",
     emptyMessage:
@@ -115,6 +116,8 @@ const financial = {
     delete: "Delete category",
     deleteAlertMsg: "Are you sure you want to delete this category?",
     deleteConfirm: {
+      allScopes:
+        "This is an All category. It and its subcategories are removed from Personal and every family.",
       withSubcategories: "Its subcategories will also be deleted.",
     },
     deleteTitle: "Delete {{name}}?",
@@ -140,8 +143,12 @@ const financial = {
       name: "Name",
       namePlaceholder: "Category name",
       noParent: "None (main category)",
+      ownerAllHint:
+        "Applies to Personal and all your families, including the ones you join later.",
       ownerLocked: "Categories in the same tree must belong to the same owner.",
+      ownerLockedAll: "An All category stays All.",
       parent: "Parent category",
+      parentAllHint: "Only All categories can be the parent.",
       save: "Save category",
       type: "Type",
       typeLocked:
@@ -149,6 +156,7 @@ const financial = {
     },
     nameRequired: "Name is required",
     new: "New category",
+    scopeAll: "All",
     subcount_one: "1 subcategory",
     subcount_other: "{{count}} subcategories",
     type: "Category Type",

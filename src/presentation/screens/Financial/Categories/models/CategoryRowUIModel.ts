@@ -22,6 +22,10 @@ class CategoryRowUIModel {
     return this.row.category.id;
   }
 
+  get isAll() {
+    return this.row.category.scope === "ALL";
+  }
+
   get name() {
     return this.row.category.name;
   }

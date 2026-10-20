@@ -6,7 +6,10 @@ import { useCases } from "@application/useCases";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
 import { isHexColor } from "@presentation/constants/categoryColors";
 import { TranslationKeys } from "@presentation/i18n/types";
-import { personalOwnerId } from "@screens/Financial/models/ownerOptions";
+import {
+  ALL_OWNERS,
+  personalOwnerId,
+} from "@screens/Financial/models/ownerOptions";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
 
 import {
@@ -139,11 +142,19 @@ function useNewCategoryViewModel() {
   const hasTransactions = isEditing && !!uiModel?.hasTransactions(id);
   const isTypeLocked =
     isEditing && (hasParent || hasChildren || hasTransactions);
-  // Owner is immutable on the API (edit) and fixed when opened from the transaction form (create).
-  const isOwnerLocked = isEditing || !!params.ownerId;
+  const isAll = state?.ownerId === ALL_OWNERS;
+  const wasAll = initial?.ownerId === ALL_OWNERS;
+  // Owner is immutable on the API (edit) and fixed when opened from the transaction form (create). The one change
+  // allowed is turning a single-scope main category into an All one (spec 038); an All category stays All.
+  const isOwnerLocked = isEditing ? wasAll || hasParent : !!params.ownerId;
 
   let ownerHelperKey: TranslationKeys | undefined;
-  if (isEditing) {
+  if (isAll) {
+    ownerHelperKey =
+      isEditing && wasAll
+        ? "financial.categories.form.ownerLockedAll"
+        : "financial.categories.form.ownerAllHint";
+  } else if (isEditing) {
     ownerHelperKey =
       hasParent || hasChildren
         ? "financial.categories.form.ownerLocked"
@@ -158,6 +169,16 @@ function useNewCategoryViewModel() {
   const formErrorKey = getFinancialErrorMessageKey(
     createMutation.error ?? updateMutation.error ?? deleteMutation.error,
   );
+
+  function ownerChoices() {
+    if (!uiModel) {
+      return [];
+    }
+
+    return isEditing && initial
+      ? uiModel.ownerChoicesFor(initial.ownerId)
+      : uiModel.ownerChoices;
+  }
 
   function update(next: CategoryFormState) {
     setEdited(next);
@@ -200,7 +221,10 @@ function useNewCategoryViewModel() {
 
   function onDeleteConfirm() {
     setDeleteDialogOpen(false);
-    deleteMutation.mutate({ id: params.id!, ownerId: state!.ownerId });
+    deleteMutation.mutate({
+      id: params.id!,
+      ownerId: existing?.ownerId ?? state!.ownerId,
+    });
   }
 
   function onCustomColorOpen() {
@@ -216,17 +240,26 @@ function useNewCategoryViewModel() {
     setCustomColorOpen(false);
   }
 
-  const deleteMessageKeys: TranslationKeys[] = hasChildren
-    ? [
-        "financial.categories.deleteAlertMsg",
-        "financial.categories.deleteConfirm.withSubcategories",
-      ]
-    : ["financial.categories.deleteAlertMsg"];
+  const isExistingAll = existing?.scope === "ALL";
+  let deleteMessageKeys: TranslationKeys[] = [
+    "financial.categories.deleteAlertMsg",
+  ];
+  if (isExistingAll) {
+    deleteMessageKeys = ["financial.categories.deleteConfirm.allScopes"];
+  } else if (hasChildren) {
+    deleteMessageKeys = [
+      "financial.categories.deleteAlertMsg",
+      "financial.categories.deleteConfirm.withSubcategories",
+    ];
+  }
 
   return {
     colorOptions: uiModel?.colorOptions ?? [],
     customColorDraft,
     customColorError,
+    deleteConfirmLabelKey: (isExistingAll
+      ? "financial.categories.deleteAllConfirm"
+      : "common.actions.delete") as TranslationKeys,
     deleteMessageKeys,
     deleteTitleParams: { name: state?.name ?? "" },
     formErrorKey,
@@ -296,9 +329,12 @@ function useNewCategoryViewModel() {
         update(changeType(state, value, categories.data ?? []));
       }
     },
-    ownerChoices: uiModel?.ownerChoices ?? [],
+    ownerChoices: ownerChoices(),
     ownerHelperKey,
     ownerId: state?.ownerId ?? "",
+    parentHelperKey: (isAll
+      ? "financial.categories.form.parentAllHint"
+      : undefined) as TranslationKeys | undefined,
     parentId: state?.parentId ?? "",
     parentOptions:
       uiModel && state ? uiModel.parentOptions(state, params.id) : [],

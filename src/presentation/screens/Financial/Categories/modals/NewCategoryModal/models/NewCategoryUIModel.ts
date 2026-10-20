@@ -15,6 +15,7 @@ import {
   descendantIds,
 } from "@screens/Financial/models/categoryTree";
 import {
+  ALL_OWNERS,
   buildOwnerChoices,
   ChoiceOption,
 } from "@screens/Financial/models/ownerOptions";
@@ -32,8 +33,12 @@ class NewCategoryUIModel {
     return CATEGORY_COLORS;
   }
 
+  // Personal, the families, then "All" (spec 038).
   get ownerChoices(): ChoiceOption[] {
-    return buildOwnerChoices(this.params.owners);
+    return [
+      ...buildOwnerChoices(this.params.owners),
+      { labelKey: "financial.categories.scopeAll", value: ALL_OWNERS },
+    ];
   }
 
   get typeOptions(): { labelKey: TranslationKeys; value: string }[] {
@@ -76,6 +81,14 @@ class NewCategoryUIModel {
     );
   }
 
+  // Editing: the owner cannot change, but a single-scope category can become All; an All one stays All.
+  ownerChoicesFor(currentOwnerId: string): ChoiceOption[] {
+    return this.ownerChoices.filter(
+      (choice) =>
+        choice.value === ALL_OWNERS || choice.value === currentOwnerId,
+    );
+  }
+
   ownerName(ownerId: string): string {
     return this.owner(ownerId).name;
   }
@@ -91,9 +104,18 @@ class NewCategoryUIModel {
         : [],
     );
 
-    return buildCategoryRows(
-      categoriesOf(this.params.categories, state.ownerId, state.type),
-    )
+    // An All category only has All parents; a single-scope one never has an All parent.
+    const isAll = state.ownerId === ALL_OWNERS;
+    const candidates = isAll
+      ? this.params.categories.filter(
+          (category) =>
+            category.scope === "ALL" && category.type === state.type,
+        )
+      : categoriesOf(this.params.categories, state.ownerId, state.type).filter(
+          (category) => category.scope !== "ALL",
+        );
+
+    return buildCategoryRows(candidates)
       .filter((row) => !excluded.has(row.category.id))
       .map((row) => ({
         depth: row.depth,

@@ -5,6 +5,7 @@ const financial = {
     archivedLabel: "Arquivada",
     delete: "Excluir conta",
     deleteAlertMsg: "Tem certeza que deseja excluir esta conta?",
+    deleteAllConfirm: "Excluir de todas",
     deleteTitle: "Excluir {{name}}?",
     edit: "Editar conta",
     emptyMessage:
@@ -113,6 +114,8 @@ const financial = {
     delete: "Excluir categoria",
     deleteAlertMsg: "Tem certeza de que deseja excluir esta categoria?",
     deleteConfirm: {
+      allScopes:
+        "Esta categoria é Todas. Ela e as subcategorias saem do Pessoal e de todas as famílias.",
       withSubcategories: "As subcategorias dela também serão excluídas.",
     },
     deleteTitle: "Excluir {{name}}?",
@@ -138,8 +141,12 @@ const financial = {
       name: "Nome",
       namePlaceholder: "Nome da categoria",
       noParent: "Nenhuma (categoria principal)",
+      ownerAllHint:
+        "Vale para o Pessoal e para todas as suas famílias, inclusive as que você entrar depois.",
       ownerLocked: "Categorias da mesma árvore precisam ter o mesmo dono.",
+      ownerLockedAll: "Uma categoria Todas continua Todas.",
       parent: "Categoria pai",
+      parentAllHint: "Só aparecem categorias Todas como mãe.",
       save: "Salvar categoria",
       type: "Tipo",
       typeLocked:
@@ -147,6 +154,7 @@ const financial = {
     },
     nameRequired: "Nome é obrigatório",
     new: "Nova categoria",
+    scopeAll: "Todas",
     subcount_one: "1 subcategoria",
     subcount_other: "{{count}} subcategorias",
     type: "Tipo da Categoria",

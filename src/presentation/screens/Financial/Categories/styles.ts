@@ -12,6 +12,11 @@ function useStyles() {
         gap: theme.sizes.spacing.lg,
         paddingBottom: theme.sizes.spacing.lg,
       },
+      trailing: {
+        alignItems: "center",
+        flexDirection: "row",
+        gap: theme.sizes.spacing.sm,
+      },
       typeControl: { flex: 1 },
       typeRow: {
         alignItems: "center",

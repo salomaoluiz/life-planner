@@ -144,3 +144,39 @@ it("SHOULD send parentId null WHEN the parent is removed and the id WHEN it chan
 it("SHOULD send nothing but the id WHEN nothing changed", () => {
   expect(toUpdateParams("c1", base, base)).toEqual({ id: "c1" });
 });
+
+describe("scope ALL", () => {
+  const all = category("all", {
+    scope: "ALL",
+    scopeOwnerIds: ["user-id", "family-1"],
+  });
+
+  it("SHOULD create with owner ALL and NO ownerId", () => {
+    const params = toCreateParams({ ...base, ownerId: "ALL" }, user, []);
+
+    expect(params.owner).toBe("ALL");
+    expect(params.ownerId).toBeUndefined();
+  });
+
+  it("SHOULD keep creating with the owner type and id for a single scope", () => {
+    const params = toCreateParams(base, user, []);
+
+    expect(params.owner).toBe("USER");
+    expect(params.ownerId).toBe("user-id");
+  });
+
+  it("SHOULD read an All category as the ALL owner in the form", () => {
+    expect(stateFromDto(all).ownerId).toBe("ALL");
+    expect(stateFromDto(category("plain")).ownerId).toBe("user-id");
+  });
+
+  it("SHOULD send scope ALL only WHEN a single-scope category is switched", () => {
+    const switched = { ...base, ownerId: "ALL" };
+
+    expect(toUpdateParams("c1", switched, base)).toEqual({
+      id: "c1",
+      scope: "ALL",
+    });
+    expect(toUpdateParams("c1", switched, switched)).toEqual({ id: "c1" });
+  });
+});

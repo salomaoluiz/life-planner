@@ -7,6 +7,7 @@ import {
   normalizeCategoryColor,
 } from "@presentation/constants/categoryColors";
 import { TranslationKeys } from "@presentation/i18n/types";
+import { ALL_OWNERS } from "@screens/Financial/models/ownerOptions";
 
 const MAX_NAME = 60;
 
@@ -72,7 +73,8 @@ function stateFromDto(dto: CategoryDTO): CategoryFormState {
     icon: dto.icon,
     iconColor: normalizeCategoryColor(dto.iconColor),
     name: dto.name,
-    ownerId: dto.ownerId,
+    // An All category has no single owner: the form shows the "All" choice.
+    ownerId: dto.scope === "ALL" ? ALL_OWNERS : dto.ownerId,
     parentId: dto.parentId,
     type: dto.type,
   };
@@ -84,20 +86,22 @@ function toCreateParams(
   categories: CategoryDTO[],
 ): CreateCategoryUseCaseParams {
   const parent = categories.find((category) => category.id === state.parentId);
+  const isAll = state.ownerId === ALL_OWNERS;
 
   return {
     depthLevel: parent ? (parent.depthLevel ?? 0) + 1 : 0,
     icon: state.icon,
     iconColor: state.iconColor,
     name: state.name.trim(),
-    owner: owner.type,
-    ownerId: owner.id,
+    owner: isAll ? ALL_OWNERS : owner.type,
+    ownerId: isAll ? undefined : owner.id,
     parentId: state.parentId,
     type: state.type,
   };
 }
 
-// Only changed fields travel; owner/ownerId are immutable (the API answers 400 otherwise).
+// Only changed fields travel; owner/ownerId are immutable (the API answers 400 otherwise). The one exception is
+// switching a single-scope category to All, sent as `scope`.
 function toUpdateParams(
   id: string,
   state: CategoryFormState,
@@ -119,6 +123,9 @@ function toUpdateParams(
   }
   if (state.parentId !== initial.parentId) {
     params.parentId = state.parentId ?? null;
+  }
+  if (state.ownerId === ALL_OWNERS && initial.ownerId !== ALL_OWNERS) {
+    params.scope = "ALL";
   }
 
   return params;
