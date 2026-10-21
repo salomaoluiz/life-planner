@@ -2,7 +2,7 @@ import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system";
 import { Platform } from "react-native";
 
-import { pickCsvFile } from "./";
+import { pickCsvFile, setE2eCsvFixture } from "./";
 
 jest.mock("expo-document-picker", () => ({ getDocumentAsync: jest.fn() }));
 jest.mock("expo-file-system", () => ({
@@ -54,4 +54,18 @@ it("SHOULD read a web file through its File object", async () => {
 
   expect(file?.bytes).toEqual(new Uint8Array([97, 98]));
   expect(file?.size).toBe(2);
+});
+
+it("SHOULD return the E2E fixture once, without opening the picker", async () => {
+  const fixture = { bytes: new Uint8Array([97]), name: "e2e.csv", size: 1 };
+
+  setE2eCsvFixture(fixture);
+
+  await expect(pickCsvFile()).resolves.toBe(fixture);
+  expect(DocumentPicker.getDocumentAsync).not.toHaveBeenCalled();
+
+  jest
+    .mocked(DocumentPicker.getDocumentAsync)
+    .mockResolvedValue({ assets: null, canceled: true });
+  await expect(pickCsvFile()).resolves.toBeUndefined();
 });

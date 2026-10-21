@@ -461,6 +461,7 @@ const financial = {
       noMatch: "Nenhuma linha neste filtro.",
       rowCheck: "Importar a linha {{line}}",
       rowError: "A linha {{line}} tem um erro",
+      showMore: "Ver mais ({{count}})",
       submit_one: "Importar {{count}} transação",
       submit_other: "Importar {{count}} transações",
       summary: {

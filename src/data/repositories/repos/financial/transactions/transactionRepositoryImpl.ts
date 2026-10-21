@@ -10,6 +10,7 @@ import createTransaction from "./createTransaction";
 import deleteTransaction from "./deleteTransaction";
 import getFilteredTransactions from "./getFilteredTransactions";
 import getTransactions from "./getTransactions";
+import importTransactions from "./importTransactions";
 import updateTransaction from "./updateTransaction";
 
 function transactionRepositoryImpl(
@@ -37,9 +38,7 @@ function transactionRepositoryImpl(
       return getTransactions(ownerIds, datasources);
     },
     async importTransactions(params): Promise<number> {
-      return datasources.financialTransactionDatasource.importTransactions(
-        params,
-      );
+      return importTransactions(params, datasources);
     },
     async updateTransaction(params): Promise<void> {
       return updateTransaction(params, datasources);

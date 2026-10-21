@@ -15,8 +15,20 @@ const CSV_TYPES = [
   "application/vnd.ms-excel",
 ];
 
+// E2E only (spec 047): the dev route `/e2e-csv` leaves a file here and the next pick returns it, because the browser
+// file chooser cannot be driven by Maestro. Never set outside `__DEV__` with `EXPO_PUBLIC_E2E_LOGIN=true`.
+let e2eFixture: PickedFile | undefined;
+
 // `undefined` when the user cancels the picker.
 async function pickCsvFile(): Promise<PickedFile | undefined> {
+  if (e2eFixture) {
+    const fixture = e2eFixture;
+
+    e2eFixture = undefined;
+
+    return fixture;
+  }
+
   const result = await DocumentPicker.getDocumentAsync({
     copyToCacheDirectory: true,
     type: CSV_TYPES,
@@ -44,5 +56,9 @@ async function readBytes(asset: DocumentPicker.DocumentPickerAsset) {
   return Uint8Array.from(globalThis.atob(base64), (char) => char.charCodeAt(0));
 }
 
+function setE2eCsvFixture(file: PickedFile | undefined) {
+  e2eFixture = file;
+}
+
 export type { PickedFile };
-export { pickCsvFile };
+export { pickCsvFile, setE2eCsvFixture };

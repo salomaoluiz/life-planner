@@ -205,10 +205,12 @@ function ExportModal(props: ExportModalParams) {
     );
   }
 
+  // The count texts carry the id themselves (Maestro web matches the text of the element that has the id).
   function countContent() {
     if (vm.periodError || vm.count === undefined) {
       return (
         <Text.Body
+          testID={ids.exportCount}
           tone={"secondary"}
           value={
             vm.periodError
@@ -220,13 +222,23 @@ function ExportModal(props: ExportModalParams) {
     }
 
     if (vm.count === 0) {
-      return <Text.Body value={t("financial.export.countNone")} />;
+      return (
+        <Text.Body
+          testID={ids.exportCount}
+          value={t("financial.export.countNone")}
+        />
+      );
     }
 
     return (
       <View style={styles.count}>
-        <Text.Heading tabular value={String(vm.count)} />
+        <Text.Heading
+          tabular
+          testID={ids.exportCount}
+          value={String(vm.count)}
+        />
         <Text.Body
+          testID={`${ids.exportCount}-label`}
           value={t(pluralKey("financial.export.count", vm.count), {
             count: vm.count,
           })}
@@ -236,11 +248,7 @@ function ExportModal(props: ExportModalParams) {
   }
 
   function countBox() {
-    return (
-      <Card padding={"md"} testID={ids.exportCount}>
-        {countContent()}
-      </Card>
-    );
+    return <Card padding={"md"}>{countContent()}</Card>;
   }
 
   return (

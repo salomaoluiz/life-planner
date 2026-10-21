@@ -146,7 +146,9 @@ function ReviewStep(props: { wizard: ImportWizardState }) {
         </View>
         {vm.hasMore ? (
           <Button.Secondary
-            label={`${t("financial.import.values.choose")} +${vm.remaining}`}
+            label={t("financial.import.review.showMore", {
+              count: vm.remaining,
+            })}
             onPress={vm.onShowMore}
             testID={ids.importShowMore}
           />

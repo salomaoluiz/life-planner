@@ -1,0 +1,115 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/import-csv
+tags:
+  - financial
+  - spec-047
+  - smoke
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Happy path: file, automatic column mapping, one category matched by name and one created in the wizard, review, import.
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Import Row A
+      KEY: ROW_A
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Import Row B
+      KEY: ROW_B
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Import Category
+      KEY: NEW_CATEGORY_NAME
+- runScript:
+    file: ../../../scripts/csv-import-fixture.js
+    env:
+      DESCRIPTION_1: ${output.ROW_A}
+      DESCRIPTION_2: ${output.ROW_B}
+      CATEGORY_1: ${output.EXPENSE_CATEGORY_NAME}
+      CATEGORY_2: ${output.NEW_CATEGORY_NAME}
+      ACCOUNT_NAME: ${output.ACCOUNT_NAME}
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow:
+    file: ../../../subflows/financial/load-csv-fixture.yaml
+    env:
+      CSV_FRAGMENT: ${output.CSV_FRAGMENT}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- tapOn:
+    id: "financial.transactions.importButton"
+# Step 1: the file, with the owner defaulting to Personal.
+- tapOn:
+    id: "financial.import.file.pick"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.file.name"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+# Step 2: every column was recognized by its header, nothing is missing.
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.column.0"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+# Step 3: the category of the second row has no match: create it here.
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.value.category.1"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.value.category.1"
+- tapOn:
+    id: "financial.import.value.category.1-option-__create__"
+# The new category form is on the right: its buttons are below the fold of the wizard.
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.import.create.submit"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.value.category.1-value"
+      text: ${output.NEW_CATEGORY_NAME}
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+# Step 4: both rows are ready, nothing to fix.
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.row.2"
+    timeout: 20000
+- assertVisible:
+    id: "financial.import.row.3"
+- tapOn:
+    id: "financial.import.submit"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.toast"
+    timeout: 20000
+# The imported rows are in the list and the month total follows (312,40 + 39,90).
+- assertVisible:
+    id: "financial.transactions.summary-expense"
+    text: ".*352[.,]30.*"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.ROW_A}
+    timeout: 20000
+- assertVisible:
+    id: "financial.transactions.row-title"
+    text: ${output.ROW_B}

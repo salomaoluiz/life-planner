@@ -1,0 +1,85 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/import-csv-missing-column
+tags:
+  - financial
+  - spec-047
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Error state: a file without an account or card column cannot pass step 2 until one account is chosen for every row.
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Import Row A
+      KEY: ROW_A
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Import Row B
+      KEY: ROW_B
+- runScript:
+    file: ../../../scripts/csv-import-fixture.js
+    env:
+      DESCRIPTION_1: ${output.ROW_A}
+      DESCRIPTION_2: ${output.ROW_B}
+      CATEGORY_1: ${output.EXPENSE_CATEGORY_NAME}
+      CATEGORY_2: ${output.EXPENSE_CATEGORY_NAME}
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow:
+    file: ../../../subflows/financial/load-csv-fixture.yaml
+    env:
+      CSV_FRAGMENT: ${output.CSV_FRAGMENT}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- tapOn:
+    id: "financial.transactions.importButton"
+- tapOn:
+    id: "financial.import.file.pick"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.file.name"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.column.0"
+    timeout: 20000
+# The fields panel is below the fold of the wizard.
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.required.accountOrCard"
+    timeout: 20000
+# The error is on the "Account or card" line and Continue changes nothing.
+- assertVisible:
+    id: "financial.import.required.accountOrCard"
+    text: ".*(Choose a column or a value|Escolha uma coluna ou um valor).*"
+- tapOn:
+    id: "financial.import.continue"
+- assertVisible:
+    id: "financial.import.required.accountOrCard"
+- assertNotVisible:
+    id: "financial.import.value-tab-category"
+# One account for every row clears the error.
+- tapOn:
+    id: "financial.import.fixed.accountOrCard"
+- tapOn:
+    id: "financial.import.fixed.accountOrCard-option-account:${output.ACCOUNT_ID}"
+- tapOn:
+    id: "financial.import.continue"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.value-tab-category"
+    timeout: 20000

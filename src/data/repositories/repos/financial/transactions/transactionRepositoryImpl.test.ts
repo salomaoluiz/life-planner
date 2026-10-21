@@ -107,7 +107,7 @@ describe("CSV import and export (spec 047)", () => {
     jest
       .mocked(datasource.validateImport)
       .mockResolvedValueOnce({ duplicates: [2], errors: [] });
-    jest.mocked(datasource.importTransactions).mockResolvedValueOnce(3);
+    jest.mocked(datasource.importTransactions).mockResolvedValue(3);
 
     expect(await validateImport(importRequest)).toEqual({
       duplicates: [2],

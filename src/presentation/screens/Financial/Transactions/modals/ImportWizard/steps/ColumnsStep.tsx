@@ -59,10 +59,7 @@ function ColumnsStep(props: { wizard: ImportWizardState }) {
 
     return (
       <View key={status.field}>
-        <View
-          style={styles.required}
-          testID={`${ids.importRequired}.${status.field}`}
-        >
+        <View style={styles.required}>
           <Icon
             name={status.ok ? "check-circle-outline" : "alert-circle-outline"}
             size={20}
@@ -71,12 +68,14 @@ function ColumnsStep(props: { wizard: ImportWizardState }) {
             <Text.BodyStrong value={label} />
             {status.ok ? (
               <Text.Caption
+                testID={`${ids.importRequired}.${status.field}`}
                 tone={"secondary"}
                 value={t(`financial.import.columns.source.${status.source}`)}
               />
             ) : (
               <>
                 <Text.Caption
+                  testID={`${ids.importRequired}.${status.field}`}
                   tone={"expense"}
                   value={t("financial.import.columns.missingError")}
                 />
