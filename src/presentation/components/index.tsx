@@ -112,3 +112,4 @@ export { default as Toast, ToastProps } from "./Toast";
 export { default as Tooltip, TooltipProps } from "./Tooltip";
 export { default as Touchable, TouchableProps } from "./Touchable";
 export { default as TreeItem, TreeItemProps } from "./TreeItem";
+export { default as TruncatedText, TruncatedTextProps } from "./TruncatedText";

@@ -11,6 +11,7 @@ function useStyles(
   form: boolean,
   medium: boolean,
   wizard = false,
+  fluid?: { height: number; width: number },
 ) {
   const { colors, radius, sizes, spacing } = useKitTheme();
   const wideForm = wide && form;
@@ -25,6 +26,38 @@ function useStyles(
     maxWidth = sizes.wizardDialogMaxWidth;
   }
 
+  const fluidSheet = {
+    alignSelf: "center",
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    height: fluid?.height,
+    paddingTop: spacing.xs,
+    width: fluid?.width,
+  } as const;
+  const wideSheet = {
+    alignSelf: "center",
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    maxHeight: "90%",
+    maxWidth,
+    // Outer breathing room: the close button never touches the dialog border.
+    paddingTop: spacing.xs,
+    width: "100%",
+  } as const;
+  const compactSheet = {
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radius.sheet,
+    borderTopRightRadius: radius.sheet,
+    maxHeight: "90%",
+  } as const;
+  let sheetStyle: ViewStyle = compactSheet;
+
+  if (fluid) {
+    sheetStyle = fluidSheet;
+  } else if (wide) {
+    sheetStyle = wideSheet;
+  }
+
   return StyleSheet.create({
     backdrop: {
       ...StyleSheet.absoluteFillObject,
@@ -37,6 +70,8 @@ function useStyles(
           paddingVertical: spacing.xl,
         }
       : { gap: spacing.md, padding: spacing.lg },
+    // Spec 048: a fluid sheet is as tall as the window allows; the header and the footer never scroll.
+    fluidBody: { flex: 1, minHeight: 0 },
     footer: wideForm
       ? {
           alignItems: "center",
@@ -82,23 +117,7 @@ function useStyles(
     scroll: isWeb()
       ? ({ scrollbarColor: `${colors.border} transparent` } as ViewStyle)
       : {},
-    sheet: wide
-      ? {
-          alignSelf: "center",
-          backgroundColor: colors.surface,
-          borderRadius: radius.lg,
-          maxHeight: "90%",
-          maxWidth,
-          // Outer breathing room: the close button never touches the dialog border.
-          paddingTop: spacing.xs,
-          width: "100%",
-        }
-      : {
-          backgroundColor: colors.surface,
-          borderTopLeftRadius: radius.sheet,
-          borderTopRightRadius: radius.sheet,
-          maxHeight: "90%",
-        },
+    sheet: sheetStyle,
     title: { flex: 1 },
   });
 }

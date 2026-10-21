@@ -212,7 +212,11 @@ function FileStep(props: { wizard: ImportWizardState }) {
           {owner()}
         </>
       }
+      leftFlex={1}
+      leftPaneTestID={ids.importLeftPane}
       right={preview()}
+      rightFlex={1}
+      rightPaneTestID={ids.importRightPane}
       testID={ids.importStep}
     />
   );

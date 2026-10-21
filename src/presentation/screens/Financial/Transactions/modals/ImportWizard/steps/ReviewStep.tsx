@@ -9,6 +9,7 @@ import {
   Divider,
   FormColumns,
   Text,
+  TruncatedText,
 } from "@components";
 import { formatAmount } from "@components/AmountText/formatAmount";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
@@ -82,7 +83,11 @@ function ReviewStep(props: { wizard: ImportWizardState }) {
               onChange={() => vm.onRowToggle(row.line, !row.checked)}
               testID={`${ids.importRow}.${row.line}.check`}
             />
-            <Text.Caption tone={"secondary"} value={details(row)} />
+            <TruncatedText
+              tone={"secondary"}
+              value={details(row)}
+              variant={"caption"}
+            />
             {row.duplicate ? (
               <Badge
                 label={t("financial.import.review.duplicateBadge")}
@@ -305,7 +310,17 @@ function ReviewStep(props: { wizard: ImportWizardState }) {
     );
   }
 
-  return <FormColumns left={left()} right={right()} testID={ids.importStep} />;
+  return (
+    <FormColumns
+      left={left()}
+      leftFlex={5}
+      leftPaneTestID={ids.importLeftPane}
+      right={right()}
+      rightFlex={2}
+      rightPaneTestID={ids.importRightPane}
+      testID={ids.importStep}
+    />
+  );
 }
 
 export default ReviewStep;

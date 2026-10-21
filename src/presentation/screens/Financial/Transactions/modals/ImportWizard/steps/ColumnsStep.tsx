@@ -1,6 +1,13 @@
 import { View } from "react-native";
 
-import { Divider, FormColumns, Icon, SelectField, Text } from "@components";
+import {
+  Divider,
+  FormColumns,
+  Icon,
+  SelectField,
+  Text,
+  TruncatedText,
+} from "@components";
 import { useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
@@ -24,15 +31,15 @@ function ColumnsStep(props: { wizard: ImportWizardState }) {
         {vm.columns.map((column) => (
           <View key={column.index}>
             <View style={styles.columnRow}>
-              <Text.BodyStrong numberOfLines={1} value={column.header} />
-              <Text.Caption
-                numberOfLines={1}
+              <TruncatedText value={column.header} variant={"strong"} />
+              <TruncatedText
                 tone={"secondary"}
                 value={
                   column.examples.length > 0
                     ? column.examples.join(", ")
                     : t("financial.import.columns.empty")
                 }
+                variant={"caption"}
               />
               <SelectField
                 closeLabel={closeLabel}
@@ -221,7 +228,15 @@ function ColumnsStep(props: { wizard: ImportWizardState }) {
   );
 
   return (
-    <FormColumns left={columnList()} right={panel} testID={ids.importStep} />
+    <FormColumns
+      left={columnList()}
+      leftFlex={3}
+      leftPaneTestID={ids.importLeftPane}
+      right={panel}
+      rightFlex={2}
+      rightPaneTestID={ids.importRightPane}
+      testID={ids.importStep}
+    />
   );
 }
 

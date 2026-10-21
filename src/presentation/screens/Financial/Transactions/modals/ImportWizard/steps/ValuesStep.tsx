@@ -11,6 +11,7 @@ import {
   SelectField,
   Text,
   TextField,
+  TruncatedText,
 } from "@components";
 import { useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
@@ -95,7 +96,7 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
           <View key={entry.key}>
             <View style={styles.tableRow}>
               <View style={styles.grow}>
-                <Text.Body numberOfLines={1} value={entry.value} />
+                <TruncatedText value={entry.value} />
                 <Text.Caption
                   tone={"secondary"}
                   value={`${t("financial.import.values.rows")}: ${entry.rows}${entry.type ? ` · ${t(entry.type === "INCOME" ? "financial.import.values.type.income" : "financial.import.values.type.expense")}` : ""}${vm.multiOwner && entry.ownerId ? ` · ${t("financial.import.values.inOwner", { name: vm.ownerNames[entry.ownerId] ?? "" })}` : ""}`}
@@ -313,7 +314,15 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
   }
 
   return (
-    <FormColumns left={left()} right={createForm()} testID={ids.importStep} />
+    <FormColumns
+      left={left()}
+      leftFlex={3}
+      leftPaneTestID={ids.importLeftPane}
+      right={createForm()}
+      rightFlex={2}
+      rightPaneTestID={ids.importRightPane}
+      testID={ids.importStep}
+    />
   );
 }
 
