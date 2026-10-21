@@ -12,6 +12,10 @@ import { categories, makeTransactionDTO } from "./index.mocks";
 jest.mock("../hooks");
 jest.mock("../hooks/useAdjustmentSheet");
 jest.mock("../hooks/usePayTransaction");
+jest.mock("../hooks/useFilterOptions", () => ({
+  __esModule: true,
+  default: () => ({ categories: [], categoryDtos: [], sources: [], tags: [] }),
+}));
 jest.mock("@shopify/flash-list", () => {
   const { View: MockView } = jest.requireActual("react-native");
   return {
@@ -39,6 +43,8 @@ jest.mock("@shopify/flash-list", () => {
 });
 
 const defaultViewModel: ReturnType<typeof useTransactionsViewModel> = {
+  allOwnerIds: ["user-id"],
+  archivedOwnerIds: new Set<string>(),
   balances: new Map(),
   entries: [],
   errorMessage: undefined,
@@ -92,6 +98,7 @@ const defaultViewModel: ReturnType<typeof useTransactionsViewModel> = {
   pickerYear: 2026,
   readOnly: false,
   scopeChoices: [],
+  scopeOwnerIds: ["user-id"],
   selectedMonthIndex: undefined,
   stickyIndices: [],
   summary: {

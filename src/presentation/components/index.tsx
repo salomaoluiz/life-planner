@@ -31,6 +31,7 @@ export { default as Divider, DividerProps } from "./Divider";
 export { default as EmptyState, EmptyStateProps } from "./EmptyState";
 export { default as ErrorState, ErrorStateProps } from "./ErrorState";
 export { default as FieldShell, FieldShellProps } from "./FieldShell";
+export { default as FilterButton, FilterButtonProps } from "./FilterButton";
 export { default as FormColumns, FormColumnsProps } from "./FormColumns";
 export { default as GroupBodyRow, GroupBodyRowProps } from "./GroupBodyRow";
 export { default as GroupHeader, GroupHeaderProps } from "./GroupHeader";
@@ -71,6 +72,7 @@ export {
   default as ReadOnlyNotice,
   ReadOnlyNoticeProps,
 } from "./ReadOnlyNotice";
+export { default as RemovableChip, RemovableChipProps } from "./RemovableChip";
 export { default as Screen, ScreenProps } from "./Screen";
 export { default as ScreenHeader, ScreenHeaderProps } from "./ScreenHeader";
 export { default as SearchField, SearchFieldProps } from "./SearchField";

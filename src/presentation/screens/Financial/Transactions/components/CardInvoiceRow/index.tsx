@@ -11,6 +11,7 @@ import {
   Text,
   Touchable,
 } from "@components";
+import { formatAmount } from "@components/AmountText/formatAmount";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { installmentTitle } from "@screens/Financial/models/installments";
@@ -62,6 +63,21 @@ function CardInvoiceRow(props: Props) {
               tone="secondary"
               value={t("financial.transactions.cardInvoice.title", { month })}
             />
+            {invoice.isPartlyMatched ? (
+              <Text.Caption
+                testID={transactionsTestIds.cardInvoiceMatch}
+                tone="secondary"
+                value={t("financial.transactions.filters.invoiceMatch", {
+                  amount: formatAmount(
+                    invoice.invoiceTotalCents,
+                    localeTag,
+                    invoice.currency,
+                  ),
+                  matched: invoice.matchedCount,
+                  total: invoice.purchaseCount,
+                })}
+              />
+            ) : null}
             {invoice.includesProjected ? (
               <Text.Caption
                 testID={transactionsTestIds.cardInvoiceIncludesProjected}

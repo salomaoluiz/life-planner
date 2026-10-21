@@ -520,6 +520,7 @@ const financial = {
       },
       periodChipA11y: "Period {{range}}, change",
       remove: "Remove filter {{name}}",
+      result: "Result",
       resultOf: "result of the filters",
       searchPlaceholder: "Search description",
       situation: {

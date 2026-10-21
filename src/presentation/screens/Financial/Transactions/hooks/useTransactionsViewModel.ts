@@ -567,6 +567,8 @@ function useTransactionsViewModel() {
   }
 
   return {
+    allOwnerIds,
+    archivedOwnerIds: archivedIds,
     balances: balanceViews ?? new Map<string, DayBalanceView>(),
     entries,
     errorMessage: transactions.error?.message,
@@ -656,6 +658,7 @@ function useTransactionsViewModel() {
     pickerYear,
     readOnly: scope.readOnly,
     scopeChoices: buildOwnerFilterChoices(owners ?? []),
+    scopeOwnerIds: summaryOwnerIds,
     selectedMonthIndex:
       pickerYear === month.getFullYear() ? String(month.getMonth()) : undefined,
     stickyIndices: stickyIndices(entries),

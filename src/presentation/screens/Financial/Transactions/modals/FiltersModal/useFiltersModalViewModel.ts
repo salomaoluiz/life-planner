@@ -25,6 +25,8 @@ import {
 export interface FiltersModalParams {
   archivedOwnerIds: ReadonlySet<string>;
   filters: TransactionFilters;
+  // Compact only: the step the sheet opens on (the period chip opens it on "period").
+  initialStep?: FiltersStep;
   onApply: (filters: TransactionFilters) => void;
   onClose: () => void;
   ownerIds: string[];
@@ -84,7 +86,7 @@ function useFiltersModalViewModel(params: FiltersModalParams) {
   const localeTag = useLocaleTag();
   const wide = useBreakpoint() !== "compact";
   const [draft, setDraft] = useState(params.filters);
-  const [step, setStep] = useState<FiltersStep>("root");
+  const [step, setStep] = useState<FiltersStep>(params.initialStep ?? "root");
   const [categoryQuery, setCategoryQuery] = useState("");
   const [periodMode, setPeriodMode] = useState<PeriodMode>(
     modeOf(params.filters.period),

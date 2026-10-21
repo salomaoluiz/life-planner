@@ -516,6 +516,7 @@ const financial = {
       },
       periodChipA11y: "Período {{range}}, alterar",
       remove: "Remover filtro {{name}}",
+      result: "Resultado",
       resultOf: "resultado dos filtros",
       searchPlaceholder: "Buscar na descrição",
       situation: {

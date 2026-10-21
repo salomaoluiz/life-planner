@@ -1,0 +1,90 @@
+import { StyleSheet, View } from "react-native";
+
+import { Button, FilterButton, RemovableChip, SearchField } from "@components";
+import { useKitTheme } from "@components/utils/useKitTheme";
+import { ActiveFilterChip } from "@screens/Financial/Transactions/models/filterLabels";
+import { FilterGroup } from "@screens/Financial/Transactions/models/transactionFilters";
+import transactionsTestIds from "@screens/Financial/Transactions/testIds";
+
+interface Props {
+  chips: ActiveFilterChip[];
+  clearAllLabel: string;
+  count: number;
+  filtersA11y: string;
+  filtersLabel: string;
+  onChipRemove: (group: FilterGroup) => void;
+  onClearAll: () => void;
+  onFiltersPress: () => void;
+  onSearchChange: (text: string) => void;
+  removeLabel: (label: string) => string;
+  searchClearLabel: string;
+  searchPlaceholder: string;
+  searchValue: string;
+}
+
+// Search, the Filters button with the number of active groups, and one removable chip per group (spec 045 FR 10-11).
+function FilterToolbar(props: Props) {
+  const { breakpoint, spacing } = useKitTheme();
+  const wide = breakpoint !== "compact";
+  const styles = StyleSheet.create({
+    chips: {
+      alignItems: "center",
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: spacing.xs,
+    },
+    root: { gap: spacing.sm },
+    row: {
+      alignItems: "center",
+      flexDirection: "row",
+      gap: spacing.sm,
+      justifyContent: wide ? "flex-end" : "flex-start",
+    },
+    search: { flex: wide ? 0 : 1, width: wide ? 320 : undefined },
+  });
+
+  return (
+    <View style={styles.root}>
+      <View style={styles.row}>
+        <View style={styles.search}>
+          <SearchField
+            clearLabel={props.searchClearLabel}
+            onChangeText={props.onSearchChange}
+            placeholder={props.searchPlaceholder}
+            testID={transactionsTestIds.search}
+            value={props.searchValue}
+          />
+        </View>
+        <FilterButton
+          accessibilityLabel={props.filtersA11y}
+          count={props.count}
+          iconOnly={!wide}
+          label={props.filtersLabel}
+          onPress={props.onFiltersPress}
+          testID={transactionsTestIds.filtersButton}
+        />
+      </View>
+      {props.chips.length > 0 ? (
+        <View style={styles.chips}>
+          {props.chips.map((chip) => (
+            <RemovableChip
+              key={chip.group}
+              label={chip.label}
+              onRemove={() => props.onChipRemove(chip.group)}
+              removeLabel={props.removeLabel(chip.label)}
+              testID={`${transactionsTestIds.activeFilter}-${chip.group}`}
+            />
+          ))}
+          <Button.Ghost
+            inline
+            label={props.clearAllLabel}
+            onPress={props.onClearAll}
+            testID={transactionsTestIds.clearFilters}
+          />
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+export default FilterToolbar;

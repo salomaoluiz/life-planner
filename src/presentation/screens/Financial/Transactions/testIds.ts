@@ -8,6 +8,7 @@ const transactionsTestIds = {
   cardInvoiceError: "financial.transactions.cardInvoice.error",
   cardInvoiceIncludesProjected:
     "financial.transactions.cardInvoice.includes-projected",
+  cardInvoiceMatch: "financial.transactions.cardInvoice.match",
   cardInvoiceOpen: "financial.transactions.cardInvoice.open",
   cardInvoicePaidInfo: "financial.transactions.cardInvoice.paid-info",
   cardInvoiceProjectedPurchase:
@@ -27,7 +28,6 @@ const transactionsTestIds = {
   filteredSummary: "financial.transactions.filtered-summary",
   filtersApply: "financial.transactions.filters.apply",
   filtersBack: "financial.transactions.filters.back",
-  filtersBadge: "financial.transactions.filters-badge",
   filtersButton: "financial.transactions.filters-button",
   filtersCancel: "financial.transactions.filters.cancel",
   filtersCategory: "financial.transactions.filters.category",
