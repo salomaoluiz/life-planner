@@ -78,11 +78,11 @@ function BalanceBlock(props: { compact: boolean; vm: OverviewViewModel }) {
       errorText={t("financial.overview.blockError")}
       footnote={t("financial.overview.balance.filtersNote")}
       legend={[
-        { label: t("financial.overview.balance.realized"), tone: "accent" },
+        { label: t("financial.overview.balance.realized"), tone: "neutral" },
         {
           dashed: true,
           label: t("financial.overview.balance.projected"),
-          tone: "accent",
+          tone: "neutral",
         },
       ]}
       onRetry={vm.balance.refetch}

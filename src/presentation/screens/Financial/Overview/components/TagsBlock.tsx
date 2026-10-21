@@ -1,4 +1,4 @@
-import { BarList, ChartCard } from "@components";
+import { ChartCard, PieBreakdown } from "@components";
 import { formatAmount } from "@components/AmountText/formatAmount";
 import type { CurrencyCode } from "@domain/entities/financial/Currency";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
@@ -54,12 +54,11 @@ function TagsBlock(props: { vm: OverviewViewModel }) {
       testID={overviewTestIds.tags}
       title={t("financial.overview.tags.title")}
     >
-      <BarList
+      <PieBreakdown
         onPress={vm.onTagPress}
         openLabel={t("financial.overview.a11y.open")}
         rows={rows}
         testID="financial.overview.tag"
-        tone={vm.type === "INCOME" ? "income" : "expense"}
       />
     </ChartCard>
   );

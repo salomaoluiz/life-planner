@@ -25,13 +25,16 @@ export interface ChartLegendItem {
   /** Drawn dashed for projected values */
   dashed?: boolean;
   label: string;
-  tone: "accent" | "expense" | "income";
+  tone: "accent" | "expense" | "income" | "neutral";
 }
 
 // The frame of a dashboard block: title, actions, legend, footnote and the loading / error / empty states (spec 046 FR 19).
 function ChartCard(props: ChartCardProps) {
   const { colors, radius, spacing } = useKitTheme();
   const { testID } = props;
+  function legendColor(tone: ChartLegendItem["tone"]) {
+    return tone === "neutral" ? colors.textSecondary : colors[tone];
+  }
   const styles = StyleSheet.create({
     actions: { flexShrink: 0 },
     body: { minHeight: 120 },
@@ -81,8 +84,8 @@ function ChartCard(props: ChartCardProps) {
                 style={[
                   styles.swatch,
                   item.dashed
-                    ? { borderColor: colors[item.tone], borderWidth: 1 }
-                    : { backgroundColor: colors[item.tone] },
+                    ? { borderColor: legendColor(item.tone), borderWidth: 1 }
+                    : { backgroundColor: legendColor(item.tone) },
                 ]}
               />
               <Text.Caption tone="secondary" value={item.label} />

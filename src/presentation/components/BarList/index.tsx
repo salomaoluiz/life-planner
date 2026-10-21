@@ -6,6 +6,8 @@ import { useKitTheme } from "@components/utils/useKitTheme";
 import { isWeb } from "@utils/platform";
 
 export interface BarListProps {
+  /** Only label, amount and share (with the dot): the bars would repeat what a pie already shows */
+  hideBars?: boolean;
   /** The pressable rows open this; without it the list is read-only */
   onPress?: (id: string) => void;
   /** Used for the accessibility label of a pressable row */
@@ -16,6 +18,8 @@ export interface BarListProps {
 }
 
 export interface BarListRow {
+  /** A dot before the label that ties the row to a slice of a pie */
+  dotColor?: string;
   id: string;
   label: string;
   /** The rows that cannot be opened ("Other", "No tag") */
@@ -39,6 +43,7 @@ function BarList(props: BarListProps) {
       borderRadius: radius.sm / 2.5,
       height: barHeight,
     },
+    dot: { borderRadius: 5, height: 10, width: 10 },
     numbers: { alignItems: "center", flexDirection: "row", gap: spacing.xs },
     row: { gap: spacing.xxs, minHeight: 44, paddingVertical: spacing.xxs },
     text: { flex: 1 },
@@ -57,6 +62,9 @@ function BarList(props: BarListProps) {
         const content = (
           <View style={styles.row}>
             <View style={styles.top}>
+              {row.dotColor ? (
+                <View style={[styles.dot, { backgroundColor: row.dotColor }]} />
+              ) : null}
               <Text.Body
                 numberOfLines={1}
                 tone={row.muted ? "secondary" : "primary"}
@@ -68,14 +76,16 @@ function BarList(props: BarListProps) {
                 <Text.Caption tabular tone="secondary" value={row.percent} />
               </View>
             </View>
-            <View style={styles.track}>
-              <View
-                style={[
-                  styles.bar,
-                  { width: `${Math.max(0, Math.min(1, row.ratio)) * 100}%` },
-                ]}
-              />
-            </View>
+            {props.hideBars ? null : (
+              <View style={styles.track}>
+                <View
+                  style={[
+                    styles.bar,
+                    { width: `${Math.max(0, Math.min(1, row.ratio)) * 100}%` },
+                  ]}
+                />
+              </View>
+            )}
           </View>
         );
 

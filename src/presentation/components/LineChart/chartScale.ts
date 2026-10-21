@@ -1,7 +1,72 @@
+export interface LineSegment {
+  color: string;
+  dashed: boolean;
+  x1: number;
+  x2: number;
+  y1: number;
+  y2: number;
+}
+
 // Pure scale helpers of the dashboard charts (spec 046): ticks and paths that never produce NaN.
 export interface Tick {
   value: number;
   y: number;
+}
+
+// One segment per pair of points, split where the line crosses zero so each part takes the colour of its side;
+// the segments that lead to a projected point are dashed.
+export function buildSegments(
+  coords: { x: number; y: number }[],
+  points: { projected: boolean; value: number }[],
+  baseline: number,
+  positive: string,
+  negative: string,
+): LineSegment[] {
+  const segments: LineSegment[] = [];
+
+  function colorOf(value: number) {
+    return value < 0 ? negative : positive;
+  }
+
+  for (let index = 0; index < coords.length - 1; index += 1) {
+    const [a, b] = [coords[index], coords[index + 1]];
+    const [v1, v2] = [points[index].value, points[index + 1].value];
+    const dashed = points[index + 1].projected;
+
+    if (v1 * v2 < 0) {
+      const crossX = a.x + (v1 / (v1 - v2)) * (b.x - a.x);
+
+      segments.push(
+        {
+          color: colorOf(v1),
+          dashed,
+          x1: a.x,
+          x2: crossX,
+          y1: a.y,
+          y2: baseline,
+        },
+        {
+          color: colorOf(v2),
+          dashed,
+          x1: crossX,
+          x2: b.x,
+          y1: baseline,
+          y2: b.y,
+        },
+      );
+    } else {
+      segments.push({
+        color: colorOf(v1 === 0 ? v2 : v1),
+        dashed,
+        x1: a.x,
+        x2: b.x,
+        y1: a.y,
+        y2: b.y,
+      });
+    }
+  }
+
+  return segments;
 }
 
 // Round steps (1, 2, 5 × 10ⁿ) covering `min..max` with about `count` ticks.

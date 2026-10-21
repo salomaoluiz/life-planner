@@ -27,6 +27,7 @@ import {
   LineChart,
   ListItem,
   MetricBlock,
+  PieBreakdown,
   Screen,
   ScreenHeader,
   SearchField,
@@ -364,6 +365,25 @@ function ComponentGallery() {
                 expense: { projected: 800, realized: 3000 },
                 income: { projected: 1500, realized: 5000 },
                 label: "Dec",
+              },
+            ]}
+          />
+          <PieBreakdown
+            rows={[
+              {
+                id: "a",
+                label: "Groceries",
+                percent: "60%",
+                ratio: 1,
+                value: "R$ 600,00",
+              },
+              {
+                id: "o",
+                label: "Other",
+                muted: true,
+                percent: "40%",
+                ratio: 0.6,
+                value: "R$ 400,00",
               },
             ]}
           />

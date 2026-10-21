@@ -1,10 +1,10 @@
 import { View } from "react-native";
 
 import {
-  BarList,
   Button,
   ChartCard,
   IconButton,
+  PieBreakdown,
   SegmentedControl,
   Text,
 } from "@components";
@@ -32,7 +32,6 @@ function CategoriesBlock(props: { vm: OverviewViewModel }) {
   const data = vm.categoryTotals.data;
   const items = data?.groupBy === "CATEGORY" ? data.items : [];
   const total = data?.groupBy === "CATEGORY" ? data.total : 0;
-  const tone = vm.type === "INCOME" ? "income" : "expense";
   const typeLabel = t(
     vm.type === "INCOME"
       ? "financial.overview.categories.typeIncome"
@@ -128,12 +127,11 @@ function CategoriesBlock(props: { vm: OverviewViewModel }) {
           />
         </View>
       ) : null}
-      <BarList
+      <PieBreakdown
         onPress={onPress}
         openLabel={t("financial.overview.a11y.open")}
         rows={rows}
         testID="financial.overview.category"
-        tone={tone}
       />
     </ChartCard>
   );

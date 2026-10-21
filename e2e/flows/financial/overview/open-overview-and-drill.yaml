@@ -90,6 +90,7 @@ onFlowComplete:
     visible:
       id: "financial.overview.category-row-${output.EXPENSE_CATEGORY_ID}"
     timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 # Tapping the category opens Transactions already filtered by it
 - tapOn:
     id: "financial.overview.category-row-${output.EXPENSE_CATEGORY_ID}"

@@ -4,7 +4,7 @@ import Svg, { Circle, G, Line, Path, Text as SvgText } from "react-native-svg";
 
 import { useKitTheme } from "@components/utils/useKitTheme";
 
-import { niceTicks, scaleY, toPath } from "./chartScale";
+import { buildSegments, niceTicks, scaleY } from "./chartScale";
 
 export interface LineChartPoint {
   /** Read by screen readers instead of the axis label (which may be empty for repeated labels) */
@@ -31,7 +31,7 @@ const LEFT = 52;
 const BOTTOM = 24;
 const TOP = 8;
 
-// Balance over time (spec 046 FR 12): a line with a light area, the projected part dashed, a crosshair on the selected point.
+// Balance over time (spec 046 FR 12): a line that is green above zero and red below it, the projected part dashed, a crosshair on the selected point.
 function LineChart(props: LineChartProps) {
   const { colors, typography } = useKitTheme();
   const [width, setWidth] = useState(320);
@@ -51,12 +51,14 @@ function LineChart(props: LineChartProps) {
     x: xs[index],
     y: scaleY(point.value, domain, plotHeight, TOP),
   }));
-  const firstProjected = points.findIndex((point) => point.projected);
-  const realizedEnd = firstProjected === -1 ? points.length : firstProjected;
-  const realized = coords.slice(0, realizedEnd);
-  // The dashed part starts at the last realized point so the line is continuous.
-  const projected = coords.slice(Math.max(realizedEnd - 1, 0));
   const baseline = scaleY(0, domain, plotHeight, TOP);
+  const segments = buildSegments(
+    coords,
+    points,
+    baseline,
+    colors.income,
+    colors.expense,
+  );
   const step = Math.max(1, Math.ceil(points.length / (props.maxLabels ?? 6)));
   const selected = props.selectedIndex;
   const styles = StyleSheet.create({
@@ -112,28 +114,24 @@ function LineChart(props: LineChartProps) {
             </G>
           );
         })}
-        {realized.length > 1 ? (
-          <Path
-            d={`${toPath(realized)} L${realized[realized.length - 1].x} ${baseline} L${realized[0].x} ${baseline} Z`}
-            fill={colors.accent}
-            fillOpacity={0.08}
-          />
-        ) : null}
-        <Path
-          d={toPath(realized)}
-          fill="none"
-          stroke={colors.accent}
-          strokeWidth={2}
-        />
-        {projected.length > 1 && firstProjected !== -1 ? (
-          <Path
-            d={toPath(projected)}
-            fill="none"
-            stroke={colors.accent}
-            strokeDasharray="5 4"
-            strokeWidth={2}
-          />
-        ) : null}
+        {segments.map((segment, index) => (
+          <G key={index}>
+            {segment.dashed ? null : (
+              <Path
+                d={`M${segment.x1} ${segment.y1} L${segment.x2} ${segment.y2} L${segment.x2} ${baseline} L${segment.x1} ${baseline} Z`}
+                fill={segment.color}
+                fillOpacity={0.08}
+              />
+            )}
+            <Path
+              d={`M${segment.x1} ${segment.y1} L${segment.x2} ${segment.y2}`}
+              fill="none"
+              stroke={segment.color}
+              strokeDasharray={segment.dashed ? "5 4" : undefined}
+              strokeWidth={2}
+            />
+          </G>
+        ))}
         {points.map((point, index) =>
           index % step === 0 || index === points.length - 1 ? (
             <SvgText
@@ -164,7 +162,9 @@ function LineChart(props: LineChartProps) {
               cy={coords[selected].y}
               fill={colors.surface}
               r={5}
-              stroke={colors.accent}
+              stroke={
+                points[selected].value < 0 ? colors.expense : colors.income
+              }
               strokeWidth={2}
             />
           </>

@@ -1,4 +1,4 @@
-import { niceTicks, scaleY, toPath } from "./chartScale";
+import { buildSegments, niceTicks, scaleY, toPath } from "./chartScale";
 
 it("SHOULD build round ticks that cover the data and the zero line", () => {
   expect(niceTicks(0, 950)).toEqual([0, 500, 1000]);
@@ -23,4 +23,48 @@ it("SHOULD join the points in a path", () => {
     ]),
   ).toBe("M0 1 L2 3");
   expect(toPath([])).toBe("");
+});
+
+describe("buildSegments", () => {
+  const coords = [
+    { x: 0, y: 10 },
+    { x: 10, y: 30 },
+    { x: 20, y: 20 },
+  ];
+
+  it("SHOULD colour by side AND split the segment that crosses zero", () => {
+    const segments = buildSegments(
+      coords,
+      [
+        { projected: false, value: 100 },
+        { projected: false, value: -100 },
+        { projected: true, value: -50 },
+      ],
+      20,
+      "green",
+      "red",
+    );
+
+    expect(segments).toEqual([
+      { color: "green", dashed: false, x1: 0, x2: 5, y1: 10, y2: 20 },
+      { color: "red", dashed: false, x1: 5, x2: 10, y1: 20, y2: 30 },
+      { color: "red", dashed: true, x1: 10, x2: 20, y1: 30, y2: 20 },
+    ]);
+  });
+
+  it("SHOULD treat zero as positive AND return nothing for fewer than 2 points", () => {
+    expect(
+      buildSegments(
+        coords.slice(0, 2),
+        [
+          { projected: false, value: 0 },
+          { projected: false, value: 0 },
+        ],
+        20,
+        "green",
+        "red",
+      )[0].color,
+    ).toBe("green");
+    expect(buildSegments([], [], 0, "g", "r")).toEqual([]);
+  });
 });
