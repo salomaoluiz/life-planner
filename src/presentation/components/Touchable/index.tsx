@@ -20,6 +20,8 @@ export interface TouchableProps {
   accessibilityLabel?: string;
   accessibilityRole: AccessibilityRole;
   busy?: boolean;
+  /** Checkbox state for screen readers: `mixed` is a partly chosen group */
+  checked?: "mixed" | boolean;
   children: React.ReactNode;
   /** Set false when the caller paints its own disabled look (default: dim to 50%) */
   dimWhenDisabled?: boolean;
@@ -57,6 +59,7 @@ function Touchable(props: TouchableProps) {
       accessibilityRole={props.accessibilityRole}
       accessibilityState={{
         busy: !!props.busy,
+        checked: props.checked,
         disabled: !!props.disabled || !!props.busy,
         expanded: props.expanded,
         selected: !!props.selected,
