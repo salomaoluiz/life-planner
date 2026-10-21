@@ -141,3 +141,23 @@ describe("compact layout", () => {
     expect(screen.getByTestId(`${ids.filtersSource}-acc-1`)).toBeOnTheScreen();
   });
 });
+
+describe("hidePeriod (spec 046)", () => {
+  it("SHOULD leave the Period section out on wide layouts and keep the others", () => {
+    setup({ hidePeriod: true });
+
+    expect(screen.queryByTestId(`${ids.filtersSection}.period`)).toBeNull();
+    expect(
+      screen.getByTestId(`${ids.filtersSection}.origin`),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD leave the Period row out on compact layouts", () => {
+    setup({ hidePeriod: true }, "compact");
+
+    expect(screen.queryByTestId(`${ids.filtersSection}.period`)).toBeNull();
+    expect(
+      screen.getByTestId(`${ids.filtersSection}.categories`),
+    ).toBeOnTheScreen();
+  });
+});

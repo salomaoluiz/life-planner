@@ -30,9 +30,12 @@ function SegmentedControl(props: SegmentedControlProps) {
     segment: {
       alignItems: "center",
       borderRadius: radius.sm,
-      flex: 1,
+      flexBasis: "auto",
+      flexGrow: 1,
+      flexShrink: 0,
       justifyContent: "center",
       minHeight: sizes.touchTarget - spacing.xs,
+      paddingHorizontal: spacing.sm,
     },
     selected: {
       backgroundColor: isDark ? colors.surfaceRaised : colors.surface,

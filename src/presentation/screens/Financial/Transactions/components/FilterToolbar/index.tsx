@@ -12,6 +12,7 @@ interface Props {
   count: number;
   filtersA11y: string;
   filtersLabel: string;
+  filtersTestID?: string;
   // Wide layouts put it (the scope chips) at the start of the same row as the search.
   leading?: React.ReactNode;
   onChipRemove: (group: FilterGroup) => void;
@@ -21,6 +22,8 @@ interface Props {
   removeLabel: (label: string) => string;
   searchClearLabel: string;
   searchPlaceholder: string;
+  // The overview (spec 046) has its own ids.
+  searchTestID?: string;
   searchValue: string;
 }
 
@@ -58,7 +61,7 @@ function FilterToolbar(props: Props) {
             clearLabel={props.searchClearLabel}
             onChangeText={props.onSearchChange}
             placeholder={props.searchPlaceholder}
-            testID={transactionsTestIds.search}
+            testID={props.searchTestID ?? transactionsTestIds.search}
             value={props.searchValue}
           />
         </View>
@@ -68,7 +71,7 @@ function FilterToolbar(props: Props) {
           iconOnly={!wide}
           label={props.filtersLabel}
           onPress={props.onFiltersPress}
-          testID={transactionsTestIds.filtersButton}
+          testID={props.filtersTestID ?? transactionsTestIds.filtersButton}
         />
       </View>
       {props.chips.length > 0 ? (

@@ -9,6 +9,7 @@ import {
   FinancialCardCreditRepository,
   FinancialCategoryRepository,
   FinancialCreditCardRepository,
+  FinancialDashboardRepository,
   FinancialInstallmentPlanRepository,
   FinancialRecurrenceRepository,
   FinancialTagRepository,
@@ -27,6 +28,7 @@ interface Repositories {
     cardCredit: FinancialCardCreditRepository;
     category: FinancialCategoryRepository;
     creditCard: FinancialCreditCardRepository;
+    dashboard: FinancialDashboardRepository;
     installmentPlan: FinancialInstallmentPlanRepository;
     recurrence: FinancialRecurrenceRepository;
     tag: FinancialTagRepository;

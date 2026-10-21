@@ -3,6 +3,7 @@ name: navigation/finances-sections
 tags:
   - navigation
   - spec-044
+  - spec-046
 onFlowComplete:
   - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
 ---
@@ -29,6 +30,8 @@ onFlowComplete:
       id: "financial.transactions.screen"
     timeout: 20000
 - assertVisible:
+    id: "navigation-rail-financial-overview"
+- assertVisible:
     id: "navigation-rail-financial-categories"
 - assertVisible:
     id: "navigation-rail-financial-tags"
@@ -44,6 +47,19 @@ onFlowComplete:
 - extendedWaitUntil:
     visible:
       id: "financial.cards.screen"
+    timeout: 20000
+# The Overview (spec 046) is the first section; Finances still goes back to Transactions
+- tapOn:
+    id: "navigation-rail-financial-overview"
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.screen"
+    timeout: 20000
+- tapOn:
+    id: "tab-finances"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.screen"
     timeout: 20000
 # Finances always goes back to Transactions
 - tapOn:

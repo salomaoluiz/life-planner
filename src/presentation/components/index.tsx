@@ -9,10 +9,16 @@ export {
 export { default as Avatar, AvatarProps, AvatarViewProps } from "./Avatar";
 export { getAvatarTone } from "./Avatar/getAvatarTone";
 export { default as Badge, BadgeProps } from "./Badge";
+export { default as BarList, BarListProps, BarListRow } from "./BarList";
 export { default as BottomSheet, BottomSheetProps } from "./BottomSheet";
 export { useSheetLayout } from "./BottomSheet/SheetLayoutContext";
 export { default as Button, ButtonProps } from "./Button";
 export { default as Card, CardProps } from "./Card";
+export {
+  default as ChartCard,
+  ChartCardProps,
+  ChartLegendItem,
+} from "./ChartCard";
 export { default as Checkbox, CheckboxProps } from "./Checkbox";
 export { default as Chip, ChipProps } from "./Chip";
 export { default as ChipGroup, ChipGroupProps, ChipOption } from "./ChipGroup";
@@ -20,6 +26,11 @@ export {
   default as ColorSwatchGroup,
   ColorSwatchGroupProps,
 } from "./ColorSwatchGroup";
+export {
+  default as ColumnChart,
+  ColumnChartProps,
+  ColumnGroup,
+} from "./ColumnChart";
 export { default as ConfirmDialog, ConfirmDialogProps } from "./ConfirmDialog";
 export {
   default as CreditCardTile,
@@ -47,6 +58,11 @@ export {
   IconChoiceGroupProps,
 } from "./IconChoiceGroup";
 export { default as IconTile, IconTileProps } from "./IconTile";
+export {
+  default as LineChart,
+  LineChartPoint,
+  LineChartProps,
+} from "./LineChart";
 export { default as ListItem, ListItemProps } from "./ListItem";
 export { default as Menu, MenuProps } from "./Menu";
 export { default as MetricBlock, MetricBlockProps } from "./MetricBlock";
@@ -62,6 +78,7 @@ export {
   PendingItemsSection,
 } from "./PendingItemsDialog";
 export { default as Picker } from "./Picker";
+export { default as PieBreakdown, PieBreakdownProps } from "./PieBreakdown";
 export { default as ProgressBar, ProgressBarProps } from "./ProgressBar";
 export {
   default as QuickAddButton,
@@ -83,6 +100,7 @@ export {
 } from "./SegmentedControl";
 export { default as SelectField, SelectFieldProps } from "./SelectField";
 export { default as Spacer, SpacerProps } from "./Spacer";
+export { default as StatTile, StatTileProps } from "./StatTile";
 export { default as Switch, SwitchProps } from "./Switch";
 export { default as SwitchRow, SwitchRowProps } from "./SwitchRow";
 export { default as TabBar, TabBarItem, TabBarProps } from "./TabBar";

@@ -4,6 +4,7 @@ export type FinancialSection =
   | "accounts"
   | "cards"
   | "categories"
+  | "overview"
   | "tags"
   | "transactions";
 
@@ -17,6 +18,13 @@ export interface FinancialSectionItem {
 
 // Order matters: it is the order of the side menu and of the section picker.
 export const FINANCIAL_SECTIONS: readonly FinancialSectionItem[] = [
+  {
+    icon: "chart-box-outline",
+    labelKey: "financial.sections.overview",
+    path: "/financial/overview",
+    section: "overview",
+    testID: "navigation-rail-financial-overview",
+  },
   {
     icon: "swap-vertical",
     labelKey: "financial.sections.transactions",
@@ -57,6 +65,9 @@ export const FINANCIAL_SECTIONS: readonly FinancialSectionItem[] = [
 export function getFinancialSection(pathname: string): FinancialSection {
   const normalized = pathname.replace(/\/+$/, "");
 
+  if (normalized.endsWith("/financial/overview")) {
+    return "overview";
+  }
   if (normalized.endsWith("/financial/tags")) {
     return "tags";
   }

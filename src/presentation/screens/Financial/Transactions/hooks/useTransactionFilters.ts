@@ -27,6 +27,10 @@ function resetTransactionFilters() {
   emit(EMPTY_FILTERS);
 }
 
+function setTransactionFilters(next: TransactionFilters) {
+  emit(next);
+}
+
 function subscribe(listener: () => void) {
   listeners.add(listener);
 
@@ -69,5 +73,5 @@ function useTransactionFilters() {
   };
 }
 
-export { resetTransactionFilters };
+export { resetTransactionFilters, setTransactionFilters };
 export default useTransactionFilters;

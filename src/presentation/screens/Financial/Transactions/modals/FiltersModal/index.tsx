@@ -371,14 +371,16 @@ function FiltersModal(props: FiltersModalParams) {
   function compactRoot() {
     return (
       <View style={styles.stack}>
-        {pickerRow(
-          t("financial.transactions.filters.period.title"),
-          draft.period
-            ? formatPeriod(draft.period, localeTag)
-            : t("financial.transactions.filters.period.none"),
-          "period",
-          `${ids.filtersSection}.period`,
-        )}
+        {props.hidePeriod
+          ? null
+          : pickerRow(
+              t("financial.transactions.filters.period.title"),
+              draft.period
+                ? formatPeriod(draft.period, localeTag)
+                : t("financial.transactions.filters.period.none"),
+              "period",
+              `${ids.filtersSection}.period`,
+            )}
         {originSection()}
         {pickerRow(
           t("financial.transactions.filters.sources.title"),
@@ -453,7 +455,7 @@ function FiltersModal(props: FiltersModalParams) {
       <FormColumns
         left={
           <>
-            {periodSection()}
+            {props.hidePeriod ? null : periodSection()}
             {originSection()}
             {sourcesSection()}
             {situationSection()}
