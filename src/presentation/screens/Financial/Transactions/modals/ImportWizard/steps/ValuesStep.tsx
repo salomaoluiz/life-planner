@@ -13,6 +13,7 @@ import {
   Text,
   TextField,
   TruncatedText,
+  useSheetLayout,
 } from "@components";
 import { useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
@@ -33,6 +34,7 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
   const { styles } = useStyles();
   const { t } = useTranslation();
   const vm = useValuesStepViewModel(props.wizard);
+  const { fluid } = useSheetLayout();
   const closeLabel = t("financial.import.close");
   const tab = vm.activeTab;
 
@@ -145,32 +147,36 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
   function left() {
     return (
       <View style={styles.stack}>
-        <ChipGroup
-          layout={"wrap"}
-          mode={"single"}
-          onChange={vm.onTabChange}
-          options={vm.tabs.map((item) => ({
-            label: t(
-              item.unmatched > 0
-                ? "financial.import.values.tabUnmatched"
-                : "financial.import.values.tabOk",
-              {
-                count: item.unmatched,
-                label: t(`financial.import.values.tabs.${item.value}`),
-              },
-            ),
-            value: item.value,
-          }))}
-          testID={ids.importValueTab}
-          value={tab}
-        />
-        {vm.hasUnmatched ? (
-          <Button.Secondary
-            label={t("financial.import.values.nextUnmatched")}
-            onPress={vm.onNextUnmatched}
-            testID={ids.importValueNextUnmatched}
-          />
-        ) : null}
+        <View style={styles.row}>
+          <View style={styles.grow}>
+            <ChipGroup
+              layout={"wrap"}
+              mode={"single"}
+              onChange={vm.onTabChange}
+              options={vm.tabs.map((item) => ({
+                label: t(
+                  item.unmatched > 0
+                    ? "financial.import.values.tabUnmatched"
+                    : "financial.import.values.tabOk",
+                  {
+                    count: item.unmatched,
+                    label: t(`financial.import.values.tabs.${item.value}`),
+                  },
+                ),
+                value: item.value,
+              }))}
+              testID={ids.importValueTab}
+              value={tab}
+            />
+          </View>
+          {fluid && vm.hasUnmatched ? (
+            <Button.Secondary
+              label={t("financial.import.values.nextUnmatched")}
+              onPress={vm.onNextUnmatched}
+              testID={ids.importValueNextUnmatched}
+            />
+          ) : null}
+        </View>
         {entryRows()}
         <Text.Caption
           tone={"secondary"}
