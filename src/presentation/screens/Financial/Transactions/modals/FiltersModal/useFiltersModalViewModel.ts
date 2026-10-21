@@ -25,6 +25,8 @@ import {
 export interface FiltersModalParams {
   archivedOwnerIds: ReadonlySet<string>;
   filters: TransactionFilters;
+  // The overview (spec 046) has its own period: the Period section is left out.
+  hidePeriod?: boolean;
   // Compact only: the step the sheet opens on (the period chip opens it on "period").
   initialStep?: FiltersStep;
   onApply: (filters: TransactionFilters) => void;
