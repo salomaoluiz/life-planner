@@ -19,6 +19,7 @@ import { formatAmount } from "@components/AmountText/formatAmount";
 import Skeleton from "@components/Skeleton";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
+import { useBreakpoint } from "@presentation/theme";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
 import AdjustmentSheet from "./components/AdjustmentSheet";
@@ -51,6 +52,7 @@ function FinancialTransactions() {
   const { styles } = useStyles();
   const { t } = useTranslation();
   const localeTag = useLocaleTag();
+  const wide = useBreakpoint() !== "compact";
   const vm = useTransactionsViewModel();
   const adjustment = useAdjustmentSheet({ onDeleted: vm.onRefresh });
   const pay = usePayTransaction({ onPaid: vm.onRefresh });
@@ -274,10 +276,22 @@ function FinancialTransactions() {
     },
   ];
 
+  const scopeChips = (
+    <View accessibilityLabel={t("financial.transactions.scope.label")}>
+      <ChipGroup
+        layout={"scroll"}
+        mode={"single"}
+        onChange={vm.onOwnerFilterChange}
+        options={scopeOptions}
+        testID={transactionsTestIds.scopeFilter}
+        value={vm.ownerFilter}
+      />
+    </View>
+  );
   const toolbar = (
     <View style={styles.toolbar} testID="transactions-toolbar">
       {vm.filters.period ? (
-        <View>
+        <View style={styles.periodChip}>
           <Chip
             accessibilityLabel={t(
               "financial.transactions.filters.periodChipA11y",
@@ -304,16 +318,7 @@ function FinancialTransactions() {
           previousTestID={transactionsTestIds.monthPrevious}
         />
       )}
-      <View accessibilityLabel={t("financial.transactions.scope.label")}>
-        <ChipGroup
-          layout={"scroll"}
-          mode={"single"}
-          onChange={vm.onOwnerFilterChange}
-          options={scopeOptions}
-          testID={transactionsTestIds.scopeFilter}
-          value={vm.ownerFilter}
-        />
-      </View>
+      {wide ? null : scopeChips}
       <FilterToolbar
         chips={filterChips}
         clearAllLabel={t("financial.transactions.filters.clearAll")}
@@ -322,6 +327,7 @@ function FinancialTransactions() {
           count: vm.filterCount,
         })}
         filtersLabel={t("financial.transactions.filters.button")}
+        leading={scopeChips}
         onChipRemove={vm.onFilterRemove}
         onClearAll={vm.onFiltersClear}
         onFiltersPress={() => openFilters()}

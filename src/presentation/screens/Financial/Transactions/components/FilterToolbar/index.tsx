@@ -12,6 +12,8 @@ interface Props {
   count: number;
   filtersA11y: string;
   filtersLabel: string;
+  // Wide layouts put it (the scope chips) at the start of the same row as the search.
+  leading?: React.ReactNode;
   onChipRemove: (group: FilterGroup) => void;
   onClearAll: () => void;
   onFiltersPress: () => void;
@@ -33,19 +35,24 @@ function FilterToolbar(props: Props) {
       flexWrap: "wrap",
       gap: spacing.xs,
     },
+    grow: { flexGrow: 1 },
+    leading: { flexShrink: 1 },
     root: { gap: spacing.sm },
     row: {
       alignItems: "center",
       flexDirection: "row",
       gap: spacing.sm,
-      justifyContent: wide ? "flex-end" : "flex-start",
+      justifyContent: "flex-end",
     },
-    search: { flex: wide ? 0 : 1, width: wide ? 320 : undefined },
+    search: { flexGrow: 1, flexShrink: 1, maxWidth: 360 },
   });
 
   return (
     <View style={styles.root}>
       <View style={styles.row}>
+        {wide && props.leading ? (
+          <View style={[styles.leading, styles.grow]}>{props.leading}</View>
+        ) : null}
         <View style={styles.search}>
           <SearchField
             clearLabel={props.searchClearLabel}
