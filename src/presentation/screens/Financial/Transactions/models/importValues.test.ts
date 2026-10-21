@@ -3,6 +3,7 @@ import { ColumnMapping } from "@application/csvImport/types";
 import {
   EntryContext,
   ImportRecords,
+  misusedRows,
   tabsOf,
   toValueMaps,
   unmatchedCount,
@@ -229,5 +230,71 @@ describe("owner per row", () => {
     );
 
     expect(entries[0].selected).toBeUndefined();
+  });
+});
+
+describe("card credits (spec 048)", () => {
+  const REFUND = "00000000-0000-4000-8000-000000000004";
+  const INVOICE_PAYMENT = "00000000-0000-4000-8000-000000000002";
+  const creditMapping: ColumnMapping = {
+    0: "date",
+    1: "category",
+    2: "card",
+    3: "account",
+    4: "type",
+  };
+  const creditRows = [
+    ["02/10/2026", "Estorno", "Visa", "", "Receita"],
+    ["03/10/2026", "Estorno", "", "Corrente", "Receita"],
+    ["04/10/2026", "Pagamento de fatura", "Visa", "Corrente", "Despesa"],
+    ["05/10/2026", "Pagamento de fatura", "", "Corrente", "Despesa"],
+    ["06/10/2026", "Desconto de adiantamento", "", "Corrente", "Receita"],
+  ];
+
+  function categories() {
+    return valueEntries("category", creditRows, creditMapping, {}, typed);
+  }
+
+  it("SHOULD match a value used by a card row to the system category by name, in both languages", () => {
+    const [refund, payment] = categories();
+
+    expect(refund).toMatchObject({ auto: true, cardRows: 1, selected: REFUND });
+    expect(payment).toMatchObject({ cardRows: 1, selected: INVOICE_PAYMENT });
+  });
+
+  it("SHOULD not match a system category WHEN no row of the value is a card row", () => {
+    const discount = categories().find(
+      (entry) => entry.value === "Desconto de adiantamento",
+    );
+
+    expect(discount?.selected).toBeUndefined();
+    expect(discount?.cardRows).toBe(0);
+  });
+
+  it("SHOULD count the rows that can't use the chosen system category", () => {
+    const [refund, payment, discount] = categories();
+
+    expect(misusedRows(refund)).toBe(1);
+    expect(misusedRows(payment)).toBe(1);
+    expect(misusedRows({ ...discount, selected: "cat-2" })).toBe(0);
+  });
+
+  it("SHOULD not list the matched system values as unmatched", () => {
+    expect(unmatchedCount(categories())).toBe(1);
+  });
+
+  it("SHOULD match WHEN the first row of the value is an account row and a later one is a card row", () => {
+    const [refund] = valueEntries(
+      "category",
+      [
+        ["02/10/2026", "Estorno", "", "Corrente", "Receita"],
+        ["03/10/2026", "Estorno", "Visa", "", "Receita"],
+      ],
+      creditMapping,
+      {},
+      typed,
+    );
+
+    expect(refund.selected).toBe(REFUND);
   });
 });

@@ -135,6 +135,22 @@ function keptWithAmount(target: ColumnTarget): ColumnTarget[] {
     : [target];
 }
 
+// Spec 048 FR 3: rows with both a card and an account are payments from that account.
+function rowsWithCardAndAccount(
+  rows: string[][],
+  mapping: ColumnMapping,
+): number {
+  const accounts = columnsOf(mapping, "account");
+  const cards = columnsOf(mapping, "card");
+
+  function filled(row: string[], columns: number[]) {
+    return columns.some((column) => (row[column] ?? "").trim() !== "");
+  }
+
+  return rows.filter((row) => filled(row, accounts) && filled(row, cards))
+    .length;
+}
+
 // A column covers the field for the rows where it has a value; a fixed value covers the rest (FR 18, 19).
 function valueStatus(
   field: FieldName,
@@ -170,4 +186,10 @@ function valueStatus(
 }
 
 export type { FieldName, FieldStatus };
-export { applyTarget, canContinue, columnsOf, fieldStatuses };
+export {
+  applyTarget,
+  canContinue,
+  columnsOf,
+  fieldStatuses,
+  rowsWithCardAndAccount,
+};

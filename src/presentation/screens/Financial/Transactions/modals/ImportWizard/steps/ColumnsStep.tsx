@@ -46,6 +46,13 @@ function ColumnsStep(props: { wizard: ImportWizardState }) {
                 testID={`${ids.importColumn}.${column.index}`}
                 value={column.target}
               />
+              {column.target === "invoice" ? (
+                <Text.Caption
+                  testID={ids.importInvoiceCaption}
+                  tone={"secondary"}
+                  value={t("financial.import.invoiceCaption")}
+                />
+              ) : null}
             </View>
             <Divider />
           </View>
@@ -163,7 +170,7 @@ function ColumnsStep(props: { wizard: ImportWizardState }) {
   }
 
   function optionalLine(
-    field: "currency" | "owner" | "paid" | "tags",
+    field: "currency" | "invoice" | "owner" | "paid" | "tags",
     mapped: boolean,
   ) {
     return (
@@ -195,8 +202,16 @@ function ColumnsStep(props: { wizard: ImportWizardState }) {
     <View style={styles.stack}>
       <Text.BodyStrong value={t("financial.import.columns.fields.title")} />
       <View>{vm.statuses.map(statusLine)}</View>
+      {vm.cardAndAccountRows > 0 ? (
+        <Text.Caption
+          testID={ids.importPaymentsNote}
+          tone={"secondary"}
+          value={t("financial.import.paymentsWithAccount")}
+        />
+      ) : null}
       {fixedSelects()}
       <View>
+        {optionalLine("invoice", vm.mapped.invoice)}
         {optionalLine("owner", vm.mapped.owner)}
         {optionalLine("paid", vm.mapped.paid)}
         {optionalLine("currency", vm.mapped.currency)}

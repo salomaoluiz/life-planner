@@ -93,5 +93,34 @@ function parseDate(raw: string, format: DateFormat): string | undefined {
   return iso < MIN_DATE || iso > MAX_DATE ? undefined : iso;
 }
 
+// Spec 048 FR 6: `MM/YYYY`, `MM/YY` or `YYYY-MM`, with `-`, `.` or `/` between the parts.
+function parseInvoiceMonth(raw: string): string | undefined {
+  const text = raw.trim();
+  const monthFirst = /^(\d{1,2})[./-](\d{4}|\d{2})$/.exec(text);
+  const yearFirst = /^(\d{4})[./-](\d{1,2})$/.exec(text);
+  let month: string | undefined;
+  let year: string | undefined;
+
+  if (monthFirst) {
+    [, month, year] = monthFirst;
+  } else if (yearFirst) {
+    [, year, month] = yearFirst;
+  }
+
+  if (month === undefined || year === undefined) {
+    return undefined;
+  }
+
+  const number = Number(month);
+
+  if (number < 1 || number > 12) {
+    return undefined;
+  }
+
+  const fullYear = year.length === 2 ? `20${year}` : year;
+
+  return `${fullYear}-${String(number).padStart(2, "0")}`;
+}
+
 export type { ParsedAmount };
-export { parseAmountCents, parseDate };
+export { parseAmountCents, parseDate, parseInvoiceMonth };

@@ -1,4 +1,9 @@
-import { applyTarget, canContinue, fieldStatuses } from "./mapping";
+import {
+  applyTarget,
+  canContinue,
+  fieldStatuses,
+  rowsWithCardAndAccount,
+} from "./mapping";
 
 describe("applyTarget", () => {
   it("SHOULD move a target to the new column and ignore the old one", () => {
@@ -134,5 +139,27 @@ describe("fieldStatuses", () => {
       ok: true,
       source: "fixed",
     });
+  });
+});
+
+describe("rowsWithCardAndAccount", () => {
+  it("SHOULD count the rows that fill both the card and the account", () => {
+    const mapping = { 0: "account", 1: "card" } as const;
+
+    expect(
+      rowsWithCardAndAccount(
+        [
+          ["Corrente", "Visa"],
+          ["", "Visa"],
+          ["Corrente", " "],
+          ["Corrente", "Visa"],
+        ],
+        mapping,
+      ),
+    ).toBe(2);
+  });
+
+  it("SHOULD be zero WHEN a column is not mapped", () => {
+    expect(rowsWithCardAndAccount([["a", "b"]], { 0: "account" })).toBe(0);
   });
 });

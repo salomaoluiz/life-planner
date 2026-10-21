@@ -1,6 +1,9 @@
 import { useMemo } from "react";
 
-import { applyTarget } from "@application/csvImport/mapping";
+import {
+  applyTarget,
+  rowsWithCardAndAccount,
+} from "@application/csvImport/mapping";
 import {
   ColumnTarget,
   FixedValues,
@@ -23,6 +26,7 @@ const TARGETS: ColumnTarget[] = [
   "category",
   "account",
   "card",
+  "invoice",
   "owner",
   "paid",
   "tags",
@@ -78,6 +82,7 @@ function useColumnsStepViewModel(wizard: ImportWizardState) {
   const records = wizard.records;
 
   return {
+    cardAndAccountRows: rowsWithCardAndAccount(rows, mapping),
     columns,
     // The fixed selects only show for what the columns leave open (FR 18-19).
     fixedAccountOrCardOptions: [
@@ -101,6 +106,7 @@ function useColumnsStepViewModel(wizard: ImportWizardState) {
     fixedTypeValue: fixed.type ?? FIXED_NONE,
     mapped: {
       currency: has("currency"),
+      invoice: has("invoice"),
       owner: has("owner"),
       paid: has("paid"),
       tags: has("tags"),

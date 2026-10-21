@@ -27,9 +27,10 @@ const HEADER_TARGETS: [ColumnTarget, string[]][] = [
   ["incomeAmount", ["entrada", "credito", "receita", "income", "credit"]],
   ["expenseAmount", ["saida", "debito", "despesa", "expense", "debit"]],
   [
-    "ignore",
-    ["fatura", "invoice", "parcela", "installment", "recorrente", "recurring"],
+    "invoice",
+    ["fatura", "invoice", "mes da fatura", "mes fatura", "invoice month"],
   ],
+  ["ignore", ["parcela", "installment", "recorrente", "recurring"]],
 ];
 const AMOUNT_WORDS = ["valor", "amount", "value", "quantia"];
 

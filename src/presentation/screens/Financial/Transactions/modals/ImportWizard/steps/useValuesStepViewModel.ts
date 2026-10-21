@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
+import { matchCreditCategory } from "@application/csvImport/cardCredits";
 import { autoMatch } from "@application/csvImport/distinctValues";
 import { RowType } from "@application/csvImport/types";
 import { useCases } from "@application/useCases";
@@ -243,11 +244,16 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
     const records = recordsOf(entry.ownerId);
 
     if (activeTab === "category") {
-      return !!autoMatch(
-        entry.value,
-        records.categories
-          .filter((item) => !entry.type || item.type === entry.type)
-          .map((item) => ({ id: item.id, names: [item.name, item.path] })),
+      return (
+        !!autoMatch(
+          entry.value,
+          records.categories
+            .filter((item) => !entry.type || item.type === entry.type)
+            .map((item) => ({ id: item.id, names: [item.name, item.path] })),
+        ) ||
+        (!!entry.type &&
+          (entry.cardRows ?? 0) > 0 &&
+          !!matchCreditCategory(entry.value, entry.type))
       );
     }
 

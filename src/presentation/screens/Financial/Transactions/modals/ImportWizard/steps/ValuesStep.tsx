@@ -1,5 +1,6 @@
 import { View } from "react-native";
 
+import { CARD_CREDIT_CATEGORIES } from "@application/csvImport/cardCredits";
 import {
   AmountInput,
   Button,
@@ -12,7 +13,11 @@ import {
   TextField,
 } from "@components";
 import { useTranslation } from "@presentation/i18n";
-import { ValueEntry } from "@screens/Financial/Transactions/models/importValues";
+import pluralKey from "@presentation/i18n/pluralKey";
+import {
+  misusedRows,
+  ValueEntry,
+} from "@screens/Financial/Transactions/models/importValues";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
 import useStyles from "../styles";
@@ -64,7 +69,19 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
           ]
         : [];
 
-    return [...create, ...vm.optionsFor(entry)];
+    // Spec 048 FR 10: the card credits and payments, only for values used by card rows, of the type of the rows.
+    const credits =
+      tab === "category" && (entry.cardRows ?? 0) > 0
+        ? CARD_CREDIT_CATEGORIES.filter(
+            (item) => !entry.type || item.type === entry.type,
+          ).map((item) => ({
+            description: t("financial.import.creditGroup"),
+            label: t(`financial.import.values.creditNames.${item.key}`),
+            value: item.id,
+          }))
+        : [];
+
+    return [...create, ...credits, ...vm.optionsFor(entry)];
   }
 
   function entryRows() {
@@ -95,6 +112,19 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
                   testID={`${ids.importValue}.${tab}.${index}`}
                   value={entry.selected}
                 />
+                {misusedRows(entry) > 0 ? (
+                  <Text.Caption
+                    testID={`${ids.importValueMisused}.${index}`}
+                    tone={"expense"}
+                    value={t(
+                      pluralKey(
+                        "financial.import.categoryMisused",
+                        misusedRows(entry),
+                      ),
+                      { count: misusedRows(entry) },
+                    )}
+                  />
+                ) : null}
               </View>
             </View>
             <Divider />

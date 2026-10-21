@@ -83,8 +83,10 @@ describe("matchPaid", () => {
 describe("isSystemCategoryName", () => {
   it("SHOULD know the system category names in both languages", () => {
     expect(isSystemCategoryName("Ajuste de saldo")).toBe(true);
-    expect(isSystemCategoryName("INVOICE PAYMENT")).toBe(true);
-    expect(isSystemCategoryName("estorno no cartao")).toBe(true);
+    expect(isSystemCategoryName("Balance adjustment")).toBe(true);
+    // Spec 048: the card credits and the invoice payment are imported now, no longer skipped.
+    expect(isSystemCategoryName("INVOICE PAYMENT")).toBe(false);
+    expect(isSystemCategoryName("estorno no cartao")).toBe(false);
     expect(isSystemCategoryName("Mercado")).toBe(false);
   });
 });

@@ -1,4 +1,4 @@
-import { parseAmountCents, parseDate } from "./parseValues";
+import { parseAmountCents, parseDate, parseInvoiceMonth } from "./parseValues";
 
 describe("parseAmountCents", () => {
   it.each([
@@ -58,4 +58,24 @@ describe("parseDate", () => {
   ])("SHOULD refuse %s instead of rolling it over", (raw) => {
     expect(parseDate(raw, "dd/mm/yyyy")).toBeUndefined();
   });
+});
+
+describe("parseInvoiceMonth", () => {
+  it.each([
+    ["09/2026", "2026-09"],
+    ["9/26", "2026-09"],
+    ["2026-09", "2026-09"],
+    ["09.2026", "2026-09"],
+    ["09-26", "2026-09"],
+    ["2026/9", "2026-09"],
+  ])("SHOULD read %s as %s", (raw, expected) => {
+    expect(parseInvoiceMonth(raw)).toBe(expected);
+  });
+
+  it.each(["13/2026", "00/2026", "abc", "09", "2026-13"])(
+    "SHOULD refuse %s",
+    (raw) => {
+      expect(parseInvoiceMonth(raw)).toBeUndefined();
+    },
+  );
 });
