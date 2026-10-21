@@ -4,6 +4,7 @@ import {
   EntryContext,
   ImportRecords,
   misusedRows,
+  nextUnmatchedKey,
   tabsOf,
   toValueMaps,
   unmatchedCount,
@@ -296,5 +297,37 @@ describe("card credits (spec 048)", () => {
     );
 
     expect(refund.selected).toBe(REFUND);
+  });
+});
+
+describe("nextUnmatchedKey (spec 048 FR 29)", () => {
+  function entry(key: string, selected?: string) {
+    return { auto: false, key, rows: 1, selected, value: key };
+  }
+  const entries = [
+    entry("a", "x"),
+    entry("b"),
+    entry("c", "x"),
+    entry("d"),
+    entry("e"),
+  ];
+
+  it("SHOULD give the next value without a match below the given one", () => {
+    expect(nextUnmatchedKey(entries, "b")).toBe("d");
+    expect(nextUnmatchedKey(entries, "d")).toBe("e");
+  });
+
+  it("SHOULD wrap to the top WHEN none is left below", () => {
+    expect(nextUnmatchedKey(entries, "e")).toBe("b");
+  });
+
+  it("SHOULD start from the top WITHOUT a given value, and be undefined WHEN all are matched", () => {
+    expect(nextUnmatchedKey(entries)).toBe("b");
+    expect(nextUnmatchedKey([entry("a", "x")], "a")).toBeUndefined();
+  });
+
+  it("SHOULD skip the given value itself even while it is still unmatched", () => {
+    expect(nextUnmatchedKey([entry("a"), entry("b")], "a")).toBe("b");
+    expect(nextUnmatchedKey([entry("a")], "a")).toBeUndefined();
   });
 });

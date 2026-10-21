@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { ScrollView } from "react-native";
 
 import { matchCreditCategory } from "@application/csvImport/cardCredits";
 import { autoMatch } from "@application/csvImport/distinctValues";
@@ -12,15 +13,20 @@ import {
   splitCategoryPath,
 } from "@screens/Financial/Transactions/models/categoryChain";
 import {
+  nextUnmatchedKey,
   NO_RECORDS,
   unmatchedCount,
   ValueEntry,
   ValueTab,
 } from "@screens/Financial/Transactions/models/importValues";
+import { isWeb } from "@utils/platform";
 
 import { ImportWizardState } from "../useImportWizardViewModel";
 
 const CREATE = "__create__";
+const HIGHLIGHT_MS = 2000;
+const LIST_PADDING = 32;
+const ROW_AIR = 8;
 
 type CreatableTab = "account" | "card" | "category";
 
@@ -30,6 +36,8 @@ interface CreateForm {
   limitCents: number;
   name: string;
   parentId: string;
+  // Spec 048 FR 29b: categories only; "ALL" is valid for Personal and every family.
+  scope: "ALL" | "OWNER";
   type: RowType;
 }
 
@@ -54,6 +62,7 @@ function emptyForm(name: string, type: RowType): CreateForm {
     limitCents: 0,
     name,
     parentId: "",
+    scope: "OWNER",
     type,
   };
 }
@@ -81,6 +90,11 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
     tab: CreatableTab;
     type?: RowType;
   }>();
+  // Spec 048 FR 29: the value just matched blinks for 2 s; the left list keeps its place.
+  const [highlightKey, setHighlightKey] = useState<string>();
+  const leftScroll = useRef<ScrollView>(null);
+  const rowOffsets = useRef<Record<string, number>>({});
+  const listOffset = useRef(0);
   const activeTab = tab && wizard.tabs.includes(tab) ? tab : wizard.tabs[0];
   const entries: ValueEntry[] = activeTab
     ? (wizard.entries[activeTab] ?? [])
@@ -102,6 +116,7 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
         ownerId: request.ownerId,
       };
       const { form: values, tab: kind } = request;
+      const allScopes = kind === "category" && values.scope === "ALL";
 
       if (kind === "category") {
         // A path ("Finanças > Investimentos") creates every level that is missing, inside each other.
@@ -113,9 +128,9 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
             parentId: values.parentId || undefined,
           },
           {
-            create: async (level) =>
+            create: async ({ all, ...level }) =>
               useCases.createFinancialCategoryUseCase.execute({
-                ...base,
+                ...(all ? { owner: "ALL", ownerId: undefined } : base),
                 ...IMPORTED_CATEGORY_DEFAULTS,
                 ...level,
                 type: values.type,
@@ -126,6 +141,7 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
                 wizard.owners.map((item) => item.id),
               ),
           },
+          allScopes ? "ALL" : "OWNER",
         );
       } else if (kind === "account") {
         await useCases.createFinancialAccountUseCase.execute({
@@ -191,8 +207,46 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
 
     wizard.onCreated(COUNTED[creating.tab]);
     createMutation.reset();
-    setCreating(undefined);
+    setHighlightKey(creating.key);
+
+    // FR 29: the form moves on to the next value without a match, so the user keeps creating without scrolling.
+    const nextKey = nextUnmatchedKey(entries, creating.key);
+    const next = entries.find((entry) => entry.key === nextKey);
+
+    if (next) {
+      onCreateOpen(creating.tab, next);
+    } else {
+      setCreating(undefined);
+    }
   }, [created]);
+
+  useEffect(() => {
+    if (!highlightKey) {
+      return undefined;
+    }
+
+    const timer = setTimeout(() => setHighlightKey(undefined), HIGHLIGHT_MS);
+
+    return () => clearTimeout(timer);
+  }, [highlightKey]);
+
+  // FR 30 (web): Esc closes the form without creating; it must not reach the sheet, which would ask to discard.
+  useEffect(() => {
+    if (!creating || !isWeb() || typeof document === "undefined") {
+      return undefined;
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.stopImmediatePropagation();
+        setCreating(undefined);
+      }
+    }
+
+    document.addEventListener("keydown", onKeyDown, true);
+
+    return () => document.removeEventListener("keydown", onKeyDown, true);
+  }, [creating]);
 
   function onCreateOpen(kind: CreatableTab, entry: ValueEntry) {
     createMutation.reset();
@@ -269,7 +323,12 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
   const parentOptions =
     kind === "category"
       ? recordsOf(creating?.ownerId)
-          .categories.filter((item) => item.type === form.type)
+          .categories.filter(
+            (item) =>
+              item.type === form.type &&
+              // A child follows the scope of its parent (spec 038, FR 29b).
+              (item.scope === "ALL") === (form.scope === "ALL"),
+          )
           .map((item) => ({ label: item.path, value: item.id }))
       : [];
   const parent = recordsOf(creating?.ownerId).categories.find(
@@ -281,14 +340,18 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
 
   return {
     activeTab,
+    allMatched: entries.length > 0 && unmatchedCount(entries) === 0,
     create: CREATE,
     creating,
     entries,
     form,
     formValid,
     hasExactMatch,
+    hasUnmatched: unmatchedCount(entries) > 0,
+    highlightKey,
     isCreatable: activeTab ? isCreatable(activeTab) : false,
     isSaving: createMutation.isFetching,
+    leftScroll,
     multiOwner: wizard.owners.length > 1,
     onChoice: (entry: ValueEntry, selected: string) => {
       if (!activeTab) {
@@ -324,6 +387,25 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
       });
     },
     onFormChange: (next: Partial<CreateForm>) => setForm({ ...form, ...next }),
+    // Called by the list container and by each row with its position (the "Next without match" button scrolls to it).
+    onListLayout: (y: number) => {
+      listOffset.current = y;
+    },
+    onNextUnmatched: () => {
+      const key = nextUnmatchedKey(entries);
+      const y = key === undefined ? undefined : rowOffsets.current[key];
+
+      if (key !== undefined && y !== undefined) {
+        leftScroll.current?.scrollTo({
+          animated: true,
+          y: Math.max(LIST_PADDING + listOffset.current + y - ROW_AIR, 0),
+        });
+        setHighlightKey(key);
+      }
+    },
+    onRowLayout: (key: string, y: number) => {
+      rowOffsets.current[key] = y;
+    },
     onTabChange: (next: string) => {
       setCreating(undefined);
       setTab(next as ValueTab);

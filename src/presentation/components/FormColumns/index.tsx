@@ -1,3 +1,4 @@
+import { Ref } from "react";
 import { ScrollView, View } from "react-native";
 
 import { useSheetLayout } from "@components/BottomSheet/SheetLayoutContext";
@@ -10,6 +11,8 @@ export interface FormColumnsProps {
   left: React.ReactNode;
   leftFlex?: number;
   leftPaneTestID?: string;
+  // Fluid sheet only: lets the screen scroll the left pane (spec 048 FR 29).
+  leftScrollRef?: Ref<ScrollView>;
   leftWidth?: number;
   right: React.ReactNode;
   // Fluid sheet only (spec 048 FR 28): the proportion of the panes and their test ids.
@@ -37,6 +40,7 @@ function FormColumns(props: FormColumnsProps) {
         <ScrollView
           contentContainerStyle={styles.fluidContent}
           keyboardShouldPersistTaps="handled"
+          ref={props.leftScrollRef}
           showsVerticalScrollIndicator={false}
           style={styles.fluidLeft}
           testID={props.leftPaneTestID}

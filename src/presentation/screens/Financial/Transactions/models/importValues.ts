@@ -67,6 +67,8 @@ export interface ImportRecords {
     id: string;
     name: string;
     path: string;
+    // "ALL" for a category of Personal and every family (spec 038).
+    scope?: string;
     type: "EXPENSE" | "INCOME";
   }[];
 }
@@ -231,6 +233,22 @@ const EMPTY_MAPS: ValueMaps = {
   paid: {},
   type: {},
 };
+
+// Spec 048 FR 29: the first value without a match below `afterKey` (then from the top), never `afterKey` itself.
+function nextUnmatchedKey(
+  entries: ValueEntry[],
+  afterKey?: string,
+): string | undefined {
+  const start =
+    afterKey === undefined
+      ? -1
+      : entries.findIndex((item) => item.key === afterKey);
+  const ordered = [...entries.slice(start + 1), ...entries.slice(0, start + 1)];
+
+  return ordered.find(
+    (item) => item.selected === undefined && item.key !== afterKey,
+  )?.key;
+}
 
 function recordEntries(
   tab: "account" | "card" | "category",
@@ -400,4 +418,11 @@ function valueEntries(
   });
 }
 
-export { misusedRows, tabsOf, toValueMaps, unmatchedCount, valueEntries };
+export {
+  misusedRows,
+  nextUnmatchedKey,
+  tabsOf,
+  toValueMaps,
+  unmatchedCount,
+  valueEntries,
+};

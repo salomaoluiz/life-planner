@@ -7,6 +7,7 @@ import {
   ChipGroup,
   Divider,
   FormColumns,
+  Highlight,
   SegmentedControl,
   SelectField,
   Text,
@@ -91,9 +92,15 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
     }
 
     return (
-      <View>
+      <View onLayout={(event) => vm.onListLayout(event.nativeEvent.layout.y)}>
         {vm.entries.map((entry, index) => (
-          <View key={entry.key}>
+          <Highlight
+            active={entry.key === vm.highlightKey}
+            key={entry.key}
+            onLayout={(event) =>
+              vm.onRowLayout(entry.key, event.nativeEvent.layout.y)
+            }
+          >
             <View style={styles.tableRow}>
               <View style={styles.grow}>
                 <TruncatedText value={entry.value} />
@@ -129,7 +136,7 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
               </View>
             </View>
             <Divider />
-          </View>
+          </Highlight>
         ))}
       </View>
     );
@@ -157,6 +164,13 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
           testID={ids.importValueTab}
           value={tab}
         />
+        {vm.hasUnmatched ? (
+          <Button.Secondary
+            label={t("financial.import.values.nextUnmatched")}
+            onPress={vm.onNextUnmatched}
+            testID={ids.importValueNextUnmatched}
+          />
+        ) : null}
         {entryRows()}
         <Text.Caption
           tone={"secondary"}
@@ -170,7 +184,13 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
     const kind = vm.creating?.tab;
 
     if (!kind) {
-      return null;
+      return vm.allMatched ? (
+        <Text.Body
+          testID={ids.importValueAllMatched}
+          tone={"secondary"}
+          value={t("financial.import.values.allMatched")}
+        />
+      ) : null;
     }
 
     return (
@@ -181,6 +201,7 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
         <TextField
           label={t("financial.import.values.createForm.name")}
           onChangeText={(name) => vm.onFormChange({ name })}
+          onSubmitEditing={vm.onCreateSubmit}
           testID={ids.importCreateName}
           value={vm.form.name}
         />
@@ -274,11 +295,37 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
             tone={"secondary"}
             value={t("financial.import.values.createForm.owner")}
           />
-          <Text.Body
-            value={t("financial.import.values.createForm.ownerFromFile", {
-              name: vm.ownerName,
-            })}
-          />
+          {kind === "category" ? (
+            <SegmentedControl
+              accessibilityLabel={t("financial.import.values.createForm.owner")}
+              onChange={(scope) =>
+                vm.onFormChange({
+                  parentId: "",
+                  scope: scope as "ALL" | "OWNER",
+                })
+              }
+              options={[
+                {
+                  label: t("financial.import.values.createForm.ownerFromFile", {
+                    name: vm.ownerName,
+                  }),
+                  value: "OWNER",
+                },
+                {
+                  label: t("financial.import.values.scopeAll"),
+                  value: "ALL",
+                },
+              ]}
+              testID={ids.importCreateScope}
+              value={vm.form.scope}
+            />
+          ) : (
+            <Text.Body
+              value={t("financial.import.values.createForm.ownerFromFile", {
+                name: vm.ownerName,
+              })}
+            />
+          )}
         </View>
         {vm.saveFailed ? (
           <View accessibilityRole={"alert"}>
@@ -318,6 +365,7 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
       left={left()}
       leftFlex={3}
       leftPaneTestID={ids.importLeftPane}
+      leftScrollRef={vm.leftScroll}
       right={createForm()}
       rightFlex={2}
       rightPaneTestID={ids.importRightPane}
