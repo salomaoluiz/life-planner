@@ -243,20 +243,18 @@ function ReviewStep(props: { wizard: ImportWizardState }) {
           )}
         </View>
         <View testID={`${ids.importSummary}.kinds`}>
-          {statLine(
-            t("financial.import.review.summary.credits", {
+          <Text.Body
+            testID={`${ids.importSummary}.credits`}
+            value={t("financial.import.review.summary.credits", {
               count: vm.kinds.credits,
-            }),
-            vm.kinds.credits,
-            `${ids.importSummary}.credits`,
-          )}
-          {statLine(
-            t("financial.import.review.summary.payments", {
+            })}
+          />
+          <Text.Body
+            testID={`${ids.importSummary}.payments`}
+            value={t("financial.import.review.summary.payments", {
               count: vm.kinds.payments,
-            }),
-            vm.kinds.payments,
-            `${ids.importSummary}.payments`,
-          )}
+            })}
+          />
         </View>
         {vm.invoices.length > 0 ? (
           <View>

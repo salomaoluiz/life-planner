@@ -1,0 +1,88 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/import-card-credits-mismatch
+tags:
+  - financial
+  - spec-048
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Error state (spec 048): a payment one cent over the invoice blocks the import and names the amounts.
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Card
+      KEY: CARD_TITLE
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Credit Purchase
+      KEY: PURCHASE_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-credit-card.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      OWNER: USER
+      TITLE: ${output.CARD_TITLE}
+- runScript:
+    file: ../../../scripts/csv-import-credits-fixture.js
+    env:
+      DESCRIPTION: ${output.PURCHASE_NAME}
+      CATEGORY: ${output.EXPENSE_CATEGORY_NAME}
+      ACCOUNT_NAME: ${output.ACCOUNT_NAME}
+      CARD_TITLE: ${output.CARD_TITLE}
+      PAYMENT: "985,01"
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow:
+    file: ../../../subflows/financial/load-csv-fixture.yaml
+    env:
+      CSV_FRAGMENT: ${output.CSV_FRAGMENT}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- tapOn:
+    id: "financial.transactions.importButton"
+- tapOn:
+    id: "financial.import.file.pick"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.file.name"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.column.0"
+    timeout: 20000
+# The Invoice column is the last one of the list, below the fold of the wizard.
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.invoiceCaption"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.value.category.0"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+# Step 4: the payment row carries the error with the invoice and the payment amounts; the import is blocked.
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.row.5.error"
+    timeout: 20000
+- assertVisible:
+    id: "financial.import.footer-note"

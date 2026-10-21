@@ -1,0 +1,123 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/import-card-credits
+tags:
+  - financial
+  - spec-048
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Happy path (spec 048): a purchase, a refund, a prepayment discount and the payment of the invoice, all on the
+# invoice the file names. The imported invoice ends up paid and the account is debited.
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- evalScript: ${output.KEEP_ACCOUNT_ID = output.ACCOUNT_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Card
+      KEY: CARD_TITLE
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Credit Purchase
+      KEY: PURCHASE_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-credit-card.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      OWNER: USER
+      TITLE: ${output.CARD_TITLE}
+- evalScript: ${output.KEEP_CARD_ID = output.CARD_ID}
+- runScript:
+    file: ../../../scripts/csv-import-credits-fixture.js
+    env:
+      DESCRIPTION: ${output.PURCHASE_NAME}
+      CATEGORY: ${output.EXPENSE_CATEGORY_NAME}
+      ACCOUNT_NAME: ${output.ACCOUNT_NAME}
+      CARD_TITLE: ${output.CARD_TITLE}
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow:
+    file: ../../../subflows/financial/load-csv-fixture.yaml
+    env:
+      CSV_FRAGMENT: ${output.CSV_FRAGMENT}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- tapOn:
+    id: "financial.transactions.importButton"
+# Step 1: the file.
+- tapOn:
+    id: "financial.import.file.pick"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.file.name"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+# Step 2: the Invoice column is recognized by its header, with its caption.
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.column.0"
+    timeout: 20000
+# The Invoice column is the last one of the list, below the fold of the wizard.
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.invoiceCaption"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+# Step 3: the card credits and the payment are matched to the system categories by their names.
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.value.category.0"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+# Step 4: purchase, refund, discount and payment; the invoice of the file ends up paid.
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.row.2"
+    timeout: 20000
+- assertVisible:
+    id: "financial.import.row.3"
+- assertVisible:
+    id: "financial.import.row.4"
+- assertVisible:
+    id: "financial.import.row.5"
+- assertVisible:
+    id: "financial.import.summary.invoice.${output.KEEP_CARD_ID}.${output.INVOICE_MONTH}"
+    text: ".*985[.,]00.*"
+- tapOn:
+    id: "financial.import.submit"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.toast"
+    timeout: 20000
+# The invoice is paid today: it is one line of this month with its paid info.
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.cardInvoice.paid-info"
+    timeout: 20000
+- assertVisible:
+    id: "financial.transactions.cardInvoice.amount"
+    text: ".*985[.,]00.*"
+# The account was debited by the payment.
+- tapOn:
+    id: "navigation-rail-financial-accounts"
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.row-balance"
+      text: ".*985[.,]00.*"
+    timeout: 20000
