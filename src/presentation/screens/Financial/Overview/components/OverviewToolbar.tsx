@@ -59,16 +59,18 @@ function OverviewToolbar(props: { vm: OverviewViewModel }) {
         />
       </View>
       <View style={styles.period}>
-        <SegmentedControl
-          accessibilityLabel={t("financial.overview.period.custom")}
-          onChange={vm.onPresetChange}
-          options={PRESETS.map((value) => ({
-            label: t(PRESET_KEYS[value]),
-            value,
-          }))}
-          testID="financial.overview.period"
-          value={vm.preset}
-        />
+        <View style={styles.presets}>
+          <SegmentedControl
+            accessibilityLabel={t("financial.overview.period.custom")}
+            onChange={vm.onPresetChange}
+            options={PRESETS.map((value) => ({
+              label: t(PRESET_KEYS[value]),
+              value,
+            }))}
+            testID="financial.overview.period"
+            value={vm.preset}
+          />
+        </View>
         <Text.Caption
           tone="secondary"
           value={`${formatDay(vm.period.from, localeTag)} – ${formatDay(vm.period.to, localeTag)}`}

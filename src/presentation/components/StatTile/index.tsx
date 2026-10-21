@@ -54,6 +54,7 @@ function StatTile(props: StatTileProps) {
     <View
       accessibilityLabel={`${props.label}: ${props.value}${props.delta ? `, ${props.delta.text}${props.delta.note ? ` ${props.delta.note}` : ""}` : ""}`}
       accessible
+      nativeID={testID}
       style={styles.root}
       testID={testID}
     >

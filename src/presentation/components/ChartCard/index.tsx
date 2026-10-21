@@ -33,6 +33,7 @@ function ChartCard(props: ChartCardProps) {
   const { colors, radius, spacing } = useKitTheme();
   const { testID } = props;
   const styles = StyleSheet.create({
+    actions: { flexShrink: 0 },
     body: { minHeight: 120 },
     header: {
       alignItems: "center",
@@ -68,7 +69,9 @@ function ChartCard(props: ChartCardProps) {
             <Text.Caption tone="secondary" value={props.subtitle} />
           ) : null}
         </View>
-        {props.actions}
+        {props.actions ? (
+          <View style={styles.actions}>{props.actions}</View>
+        ) : null}
       </View>
       {props.legend && props.state === "ready" ? (
         <View style={styles.legend} testID={testID && `${testID}-legend`}>

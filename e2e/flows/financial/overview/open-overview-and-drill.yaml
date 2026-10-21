@@ -1,0 +1,105 @@
+url: ${E2E_WEB_URL}
+name: financial/overview/open-overview-and-drill
+tags:
+  - financial
+  - spec-046
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Overview Expense
+      KEY: EXPENSE_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Overview Income
+      KEY: INCOME_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: ${output.EXPENSE_NAME}
+      VALUE_CENTS: "2500"
+      PAID: "true"
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.INCOME_CATEGORY_ID}
+      DESCRIPTION: ${output.INCOME_NAME}
+      VALUE_CENTS: "9000"
+      TYPE: INCOME
+      PAID: "true"
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+# Finances still opens Transactions; the Overview is the first section of the menu
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+- tapOn:
+    id: "tab-finances"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.screen"
+    timeout: 20000
+- tapOn:
+    id: "navigation-rail-financial-overview"
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.screen"
+    timeout: 20000
+# The four tiles and the blocks render with the seeded data
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.tile-balance"
+    timeout: 20000
+- assertVisible:
+    id: "financial.overview.tile-income"
+- assertVisible:
+    id: "financial.overview.tile-expense"
+- assertVisible:
+    id: "financial.overview.tile-result"
+- assertVisible:
+    id: "financial.overview.balance-chart"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.income-expense-chart"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.category-row-${output.EXPENSE_CATEGORY_ID}"
+    timeout: 20000
+# Tapping the category opens Transactions already filtered by it
+- tapOn:
+    id: "financial.overview.category-row-${output.EXPENSE_CATEGORY_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.screen"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.period-chip"
+    timeout: 20000
+- assertVisible:
+    id: "financial.transactions.active-filter-categories-remove"

@@ -24,6 +24,7 @@ function useStyles() {
         flexWrap: "wrap",
         gap: spacing.sm,
       },
+      presets: { flexShrink: 1, minWidth: 300 },
       root: { flex: 1 },
       scopeRow: { gap: spacing.sm },
       tile: { flexBasis: 160, flexGrow: 1, flexShrink: 1 },

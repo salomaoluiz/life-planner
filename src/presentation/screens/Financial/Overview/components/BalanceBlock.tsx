@@ -113,11 +113,26 @@ function BalanceBlock(props: { compact: boolean; vm: OverviewViewModel }) {
         formatTick={(value) => formatTick(value, localeTag, currency, compact)}
         formatValue={money}
         onSelect={vm.setSelectedPoint}
-        points={points.map((item) => ({
-          label: formatBucketLabel(item.start, granularity, localeTag),
-          projected: item.projected,
-          value: item.balance,
-        }))}
+        points={points.map((item, index) => {
+          const label = formatBucketLabel(item.start, granularity, localeTag);
+
+          return {
+            accessibilityLabel: formatDay(item.end, localeTag),
+            // The projected rest of the current bucket repeats its label: the axis shows it once.
+            label:
+              index > 0 &&
+              label ===
+                formatBucketLabel(
+                  points[index - 1].start,
+                  granularity,
+                  localeTag,
+                )
+                ? ""
+                : label,
+            projected: item.projected,
+            value: item.balance,
+          };
+        })}
         selectedIndex={selected}
         testID="financial.overview.balance-line"
       />

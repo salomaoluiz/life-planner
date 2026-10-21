@@ -7,6 +7,8 @@ import { useKitTheme } from "@components/utils/useKitTheme";
 import { niceTicks, scaleY, toPath } from "./chartScale";
 
 export interface LineChartPoint {
+  /** Read by screen readers instead of the axis label (which may be empty for repeated labels) */
+  accessibilityLabel?: string;
   label: string;
   projected: boolean;
   value: number;
@@ -171,7 +173,7 @@ function LineChart(props: LineChartProps) {
       <View style={styles.overlay}>
         {points.map((point, index) => (
           <Pressable
-            accessibilityLabel={`${point.label}, ${props.formatValue(point.value)}`}
+            accessibilityLabel={`${point.accessibilityLabel ?? point.label}, ${props.formatValue(point.value)}`}
             accessibilityRole="button"
             key={`${point.label}-${index}`}
             onHoverIn={() => props.onSelect?.(index)}
