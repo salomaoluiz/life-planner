@@ -37,8 +37,13 @@ function continuationBytes(first: number): number | undefined {
   return undefined;
 }
 
-// Removes the BOM; falls back to Windows-1252 when the bytes are not valid UTF-8.
-function decodeCsv(bytes: Uint8Array): DecodedCsv {
+// Removes the BOM; falls back to Windows-1252 when the bytes are not valid UTF-8. `forced` picks the encoding instead
+// (the encoding select of the import wizard); bytes that are not valid UTF-8 are still read as Windows-1252.
+function decodeCsv(bytes: Uint8Array, forced?: CsvEncoding): DecodedCsv {
+  if (forced === "Windows-1252") {
+    return { encoding: "Windows-1252", text: decodeWindows1252(bytes) };
+  }
+
   const utf8 = decodeUtf8(bytes);
 
   if (utf8 !== undefined) {

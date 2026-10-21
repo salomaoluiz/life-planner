@@ -47,6 +47,20 @@ describe("decodeCsv", () => {
     });
   });
 
+  it("SHOULD read the bytes as Windows-1252 WHEN that encoding is forced", () => {
+    const bytes = new Uint8Array([0x43, 0x61, 0x66, 0xc3, 0xa9]);
+
+    // UTF-8 bytes read as Windows-1252 show as two characters: the user picks the right one in the select.
+    expect(decodeCsv(bytes, "Windows-1252")).toEqual({
+      encoding: "Windows-1252",
+      text: "CafÃ©",
+    });
+    expect(decodeCsv(bytes, "UTF-8")).toEqual({
+      encoding: "UTF-8",
+      text: "Café",
+    });
+  });
+
   it("SHOULD treat a truncated multi-byte sequence as not UTF-8", () => {
     expect(decodeCsv(new Uint8Array([0x61, 0xc3])).encoding).toBe(
       "Windows-1252",
