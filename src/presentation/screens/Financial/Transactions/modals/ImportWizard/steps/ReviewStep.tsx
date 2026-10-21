@@ -10,7 +10,8 @@ import {
   FormColumns,
   Text,
 } from "@components";
-import { useTranslation } from "@presentation/i18n";
+import { formatAmount } from "@components/AmountText/formatAmount";
+import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
@@ -26,14 +27,42 @@ const ids = transactionsTestIds;
 function ReviewStep(props: { wizard: ImportWizardState }) {
   const { styles } = useStyles();
   const { t } = useTranslation();
+  const localeTag = useLocaleTag();
   const vm = useReviewStepViewModel(props.wizard);
+
+  // `2026-08` → `08/26`, cents → the amount of the row's currency (spec 048).
+  function errorParams(row: ReviewRowView) {
+    const { due, month, value } = row.errorParams ?? {};
+    const currency = row.amount?.currency as "BRL" | undefined;
+
+    return {
+      due:
+        typeof due === "number" && currency
+          ? formatAmount(due, localeTag, currency)
+          : due,
+      month:
+        typeof month === "string"
+          ? `${month.slice(5, 7)}/${month.slice(2, 4)}`
+          : (row.invoice ?? ""),
+      value:
+        typeof value === "number" && currency
+          ? formatAmount(value, localeTag, currency)
+          : value,
+    };
+  }
 
   function details(row: ReviewRowView) {
     return [
       `${t("financial.import.review.columns.line")} ${row.line}`,
       row.date,
-      row.category,
+      row.creditKey
+        ? t(`financial.import.values.creditNames.${row.creditKey}`)
+        : row.category,
       row.source,
+      row.isPayment &&
+        (row.paidFrom
+          ? t("financial.import.review.paidFrom", { account: row.paidFrom })
+          : t("financial.import.review.boleto")),
       row.invoice &&
         t("financial.import.review.invoice", { month: row.invoice }),
     ]
@@ -63,7 +92,10 @@ function ReviewStep(props: { wizard: ImportWizardState }) {
             ) : null}
             {row.errorCode ? (
               <Badge
-                label={t(`financial.import.errors.${row.errorCode}`)}
+                label={t(
+                  `financial.import.errors.${row.errorCode}`,
+                  errorParams(row),
+                )}
                 testID={`${ids.importRow}.${row.line}.error`}
                 tone={"expense"}
               />
@@ -205,6 +237,46 @@ function ReviewStep(props: { wizard: ImportWizardState }) {
             `${ids.importSummary}.system`,
           )}
         </View>
+        <View testID={`${ids.importSummary}.kinds`}>
+          {statLine(
+            t("financial.import.review.summary.credits", {
+              count: vm.kinds.credits,
+            }),
+            vm.kinds.credits,
+            `${ids.importSummary}.credits`,
+          )}
+          {statLine(
+            t("financial.import.review.summary.payments", {
+              count: vm.kinds.payments,
+            }),
+            vm.kinds.payments,
+            `${ids.importSummary}.payments`,
+          )}
+        </View>
+        {vm.invoices.length > 0 ? (
+          <View>
+            <Text.BodyStrong
+              value={t("financial.import.review.summary.invoicesTitle")}
+            />
+            {vm.invoices.map((invoice) => (
+              <Text.Caption
+                key={invoice.id}
+                testID={`${ids.importSummary}.invoice.${invoice.id}`}
+                tone={invoice.paid ? "income" : "secondary"}
+                value={t(
+                  invoice.paid
+                    ? "financial.import.review.summary.invoicePaid"
+                    : "financial.import.review.summary.invoicePending",
+                  {
+                    card: invoice.card,
+                    month: invoice.month,
+                    value: formatAmount(invoice.cents, localeTag, "BRL"),
+                  },
+                )}
+              />
+            ))}
+          </View>
+        ) : null}
         {vm.summary.duplicates > 0 ? (
           <Text.Caption
             tone={"warning"}

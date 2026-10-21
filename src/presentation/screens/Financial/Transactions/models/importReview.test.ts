@@ -4,6 +4,8 @@ import {
   canImport,
   filterRows,
   importPayloads,
+  invoiceLines,
+  kindCounts,
   reviewRows,
   summarize,
 } from "./importReview";
@@ -121,5 +123,92 @@ describe("filters, summary and import", () => {
 
     // line 4 has a local error: never sent.
     expect(importPayloads(clean).map((row) => row.line)).toEqual([2, 5]);
+  });
+});
+
+describe("card credits and payments (spec 048)", () => {
+  const REFUND = "00000000-0000-4000-8000-000000000004";
+  const DISCOUNT = "00000000-0000-4000-8000-000000000003";
+  const INVOICE_PAYMENT = "00000000-0000-4000-8000-000000000002";
+  const rows = [
+    { ...payload(2), categoryId: REFUND, creditCardId: "card-1" },
+    { ...payload(3), categoryId: DISCOUNT, creditCardId: "card-1" },
+    { ...payload(4), categoryId: INVOICE_PAYMENT, creditCardId: "card-1" },
+    { ...payload(5), categoryId: INVOICE_PAYMENT, creditCardId: "card-1" },
+    payload(6),
+  ].map((item) => ({ display, line: item.line, payload: item }));
+
+  it("SHOULD keep the params the API sent with an error line", () => {
+    const review = reviewRows(
+      rows.slice(3, 4),
+      {
+        duplicates: [],
+        errors: [
+          {
+            code: "INVOICE_PAYMENT_MISMATCH",
+            line: 5,
+            message: "x",
+            params: { due: 123000, month: "2026-08", value: 125000 },
+          },
+        ],
+      },
+      {},
+    );
+
+    expect(review[0].errorParams).toEqual({
+      due: 123000,
+      month: "2026-08",
+      value: 125000,
+    });
+  });
+
+  it("SHOULD count the credits and the invoice payments that will be imported", () => {
+    const review = reviewRows(
+      rows,
+      {
+        duplicates: [],
+        errors: [{ code: "INVOICE_PAYMENT_MISMATCH", line: 5, message: "x" }],
+      },
+      {},
+    );
+
+    expect(kindCounts(review)).toEqual({ credits: 2, payments: 1 });
+  });
+
+  it("SHOULD name the invoices of the file with the card, the month and whether they end up paid", () => {
+    expect(
+      invoiceLines(
+        [
+          {
+            amountDue: 670024,
+            creditCardId: "card-1",
+            invoiceMonth: "2026-09",
+            paid: true,
+          },
+          {
+            amountDue: 40000,
+            creditCardId: "card-1",
+            invoiceMonth: "2026-10",
+            paid: false,
+          },
+        ],
+        (id) => (id === "card-1" ? "Visa" : ""),
+      ),
+    ).toEqual([
+      {
+        card: "Visa",
+        cents: 670024,
+        id: "card-1.2026-09",
+        month: "09/26",
+        paid: true,
+      },
+      {
+        card: "Visa",
+        cents: 40000,
+        id: "card-1.2026-10",
+        month: "10/26",
+        paid: false,
+      },
+    ]);
   });
 });

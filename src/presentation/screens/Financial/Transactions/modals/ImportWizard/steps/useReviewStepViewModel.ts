@@ -1,9 +1,15 @@
 import { useState } from "react";
 
+import {
+  CreditCategoryKey,
+  creditKeyOf,
+} from "@application/csvImport/cardCredits";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { invoiceMonthOf } from "@screens/Financial/models/invoiceMonth";
 import {
   filterRows,
+  invoiceLines,
+  kindCounts,
   ReviewFilter,
   ReviewRow,
 } from "@screens/Financial/Transactions/models/importReview";
@@ -50,15 +56,21 @@ export interface ReviewRowView {
   amountText: string;
   category: string;
   checked: boolean;
+  // The system category of a card credit or payment (spec 048).
+  creditKey?: CreditCategoryKey;
   date: string;
   description: string;
   duplicate: boolean;
   errorCode?: "unknown" | ErrorCode;
   errorMessage?: string;
+  errorParams?: Record<string, number | string>;
   // `MM/YY` of the invoice a card row lands on.
   invoice?: string;
+  // Early payments and invoice payments: the account they are paid from, or none (boleto).
+  isPayment: boolean;
   line: number;
   locked: boolean;
+  paidFrom?: string;
   source: string;
 }
 
@@ -80,6 +92,8 @@ function useReviewStepViewModel(wizard: ImportWizardState) {
   const [limit, setLimit] = useState(PAGE_SIZE);
   const { catalog } = wizard;
   const filtered = filterRows(wizard.review, filter);
+  const allAccounts = Object.values(catalog).flatMap((item) => item.accounts);
+  const allCards = Object.values(catalog).flatMap((item) => item.cards);
 
   function view(row: ReviewRow): ReviewRowView {
     const payload = row.payload;
@@ -93,10 +107,17 @@ function useReviewStepViewModel(wizard: ImportWizardState) {
     const category = records.categories.find(
       (item) => item.id === payload?.categoryId,
     );
+    const creditKey = payload && creditKeyOf(payload.categoryId);
+    const isPayment =
+      creditKey === "CARD_EARLY_PAYMENT" || creditKey === "INVOICE_PAYMENT";
     const invoice =
-      card?.closingDay !== undefined && payload
+      payload?.invoiceMonth ??
+      (card?.closingDay !== undefined && payload && !isPayment
         ? invoiceMonthOf(payload.date, card.closingDay)
-        : undefined;
+        : undefined);
+    const paidFrom = payload?.paidFromAccountId
+      ? allAccounts.find((item) => item.id === payload.paidFromAccountId)?.name
+      : undefined;
 
     return {
       amount: payload && {
@@ -108,14 +129,18 @@ function useReviewStepViewModel(wizard: ImportWizardState) {
       amountText: row.display.amount,
       category: category?.name ?? "",
       checked: row.checked,
+      creditKey,
       date: row.display.date,
       description: row.display.description,
       duplicate: row.duplicate,
       errorCode: knownCode(row.errorCode),
       errorMessage: row.errorMessage,
-      invoice: invoice && `${invoice.slice(5)}/${invoice.slice(2, 4)}`,
+      errorParams: row.errorParams,
+      invoice: invoice && `${invoice.slice(5, 7)}/${invoice.slice(2, 4)}`,
+      isPayment,
       line: row.line,
       locked: row.locked,
+      paidFrom,
       source: (card ?? account)?.name ?? "",
     };
   }
@@ -129,6 +154,11 @@ function useReviewStepViewModel(wizard: ImportWizardState) {
     filter,
     hasMore: filtered.length > limit,
     ignoredSystemRows: wizard.built.ignoredSystemRows,
+    invoices: invoiceLines(
+      wizard.invoices,
+      (id) => allCards.find((item) => item.id === id)?.name ?? "",
+    ),
+    kinds: kindCounts(wizard.review),
     onFilterChange: (value: string) => {
       setFilter(value as ReviewFilter);
       setLimit(PAGE_SIZE);

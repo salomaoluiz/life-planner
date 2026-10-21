@@ -344,6 +344,7 @@ function useImportWizardViewModel(params: ImportWizardParams) {
     headers,
     importError:
       importMutation.error && !refused ? importMutation.error : undefined,
+    invoices: validateMutation.data?.invoices ?? [],
     isImporting: importMutation.isFetching,
     isValidating: validateMutation.isFetching,
     mapping,

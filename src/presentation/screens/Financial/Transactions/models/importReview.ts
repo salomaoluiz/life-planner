@@ -1,6 +1,10 @@
 import { BuiltRow } from "@application/csvImport/buildRows";
+import { creditKeyOf } from "@application/csvImport/cardCredits";
 import { ImportRowPayload } from "@application/csvImport/types";
-import { ImportValidationEntity } from "@domain/entities/financial/TransactionCsv";
+import {
+  ImportInvoiceEntity,
+  ImportValidationEntity,
+} from "@domain/entities/financial/TransactionCsv";
 
 export type ReviewFilter = "ALL" | "DUPLICATES" | "ERRORS";
 
@@ -14,6 +18,8 @@ export interface ReviewRow {
   errorCode?: string;
   // The API's own message, when it sent one.
   errorMessage?: string;
+  // Spec 048: the months and amounts the API's message needs.
+  errorParams?: Record<string, number | string>;
   line: number;
   // FR 31: a row with an error is always checked and cannot be unchecked.
   locked: boolean;
@@ -47,6 +53,40 @@ function importPayloads(rows: ReviewRow[]): ImportRowPayload[] {
   );
 }
 
+// The invoices the file touches, as the summary lists them (`MM/YY`).
+function invoiceLines(
+  invoices: ImportInvoiceEntity[],
+  cardName: (creditCardId: string) => string,
+) {
+  return invoices.map((invoice) => ({
+    card: cardName(invoice.creditCardId),
+    cents: invoice.amountDue,
+    id: `${invoice.creditCardId}.${invoice.invoiceMonth}`,
+    month: `${invoice.invoiceMonth.slice(5)}/${invoice.invoiceMonth.slice(2, 4)}`,
+    paid: invoice.paid,
+  }));
+}
+
+// Spec 048 FR 24: the card credits and the invoice payments that will be imported.
+function kindCounts(rows: ReviewRow[]): { credits: number; payments: number } {
+  const counts = { credits: 0, payments: 0 };
+
+  for (const row of rows) {
+    const key =
+      row.checked && !row.errorCode && row.payload
+        ? creditKeyOf(row.payload.categoryId)
+        : undefined;
+
+    if (key === "INVOICE_PAYMENT") {
+      counts.payments += 1;
+    } else if (key) {
+      counts.credits += 1;
+    }
+  }
+
+  return counts;
+}
+
 // FR 27-31: the built rows with the dry-run answer and the user's check marks. A duplicate comes unchecked unless the
 // user checked it; an error row is locked on.
 function reviewRows(
@@ -70,6 +110,7 @@ function reviewRows(
       duplicate,
       errorCode,
       errorMessage: row.error ? undefined : server?.message,
+      errorParams: row.error ? undefined : server?.params,
       line: row.line,
       locked: !!errorCode,
       payload: row.payload,
@@ -85,4 +126,12 @@ function summarize(rows: ReviewRow[]): ReviewSummary {
   };
 }
 
-export { canImport, filterRows, importPayloads, reviewRows, summarize };
+export {
+  canImport,
+  filterRows,
+  importPayloads,
+  invoiceLines,
+  kindCounts,
+  reviewRows,
+  summarize,
+};
