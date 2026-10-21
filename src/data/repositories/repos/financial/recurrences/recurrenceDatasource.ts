@@ -6,6 +6,7 @@ import TransactionModel, {
   TransactionType,
 } from "@data/models/financial/TransactionModel";
 import { InstallmentScope } from "@domain/entities/financial/InstallmentPlanEntity";
+import { TransactionQueryFilter } from "@domain/entities/financial/TransactionQueryFilter";
 
 export interface CreateRecurrenceDatasourceParams {
   accountId?: string;
@@ -36,6 +37,7 @@ export interface DeleteRecurrenceDatasourceParams {
 }
 
 export interface GetProjectionsDatasourceParams {
+  filter?: TransactionQueryFilter;
   from: string;
   ownerIds: string[];
   to: string;

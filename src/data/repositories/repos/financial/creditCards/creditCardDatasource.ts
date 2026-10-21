@@ -3,6 +3,7 @@ import CreditCardModel from "@data/models/financial/CreditCardModel";
 import CreditCardOverviewModel from "@data/models/financial/CreditCardOverviewModel";
 import { CreditCardBrand } from "@domain/entities/financial/CreditCardEntity";
 import { InvoicePaymentMethod } from "@domain/entities/financial/InvoiceEntity";
+import { TransactionQueryFilter } from "@domain/entities/financial/TransactionQueryFilter";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 export interface CreditCardDatasource {
@@ -48,8 +49,9 @@ interface GetCardInvoiceDatasourceParams {
 }
 
 interface GetCardInvoicesForMonthDatasourceParams {
-  // `YYYY-MM`
-  month: string;
+  filter?: TransactionQueryFilter;
+  // `YYYY-MM`; absent when the period of `filter` selects the invoices.
+  month?: string;
   ownerIds: string[];
 }
 

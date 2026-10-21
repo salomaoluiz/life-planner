@@ -28,6 +28,7 @@ function useStyles() {
         flexDirection: "row",
         gap: theme.sizes.spacing.xxs,
       },
+      periodChip: { alignSelf: "flex-start" },
       root: { flex: 1 },
       toolbar: {
         gap: theme.sizes.spacing.lg,

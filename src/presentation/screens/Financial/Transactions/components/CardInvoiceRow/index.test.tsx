@@ -225,3 +225,52 @@ describe("projected purchases (spec 034 FR 14)", () => {
     ).not.toThrow();
   });
 });
+
+describe("filtered invoice (spec 045)", () => {
+  function filteredInvoice(matched: number, total: number, cents: number) {
+    const dto = makeInvoiceDTO();
+
+    dto.filtered = {
+      filteredTotal: cents,
+      matchedCount: matched,
+      purchaseCount: total,
+    };
+
+    return new CardInvoiceUIModel(dto);
+  }
+
+  it("SHOULD show the matching sum as the amount and say how many purchases match", () => {
+    render(
+      <CardInvoiceRow
+        expanded={false}
+        invoice={filteredInvoice(1, 2, 12000)}
+        onOpen={jest.fn()}
+        onPurchasePress={jest.fn()}
+        onToggle={jest.fn()}
+      />,
+    );
+
+    expect(
+      screen.getByTestId(transactionsTestIds.cardInvoiceMatch),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByText(/financial.transactions.filters.invoiceMatch/),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD not say anything when every purchase matches", () => {
+    render(
+      <CardInvoiceRow
+        expanded={false}
+        invoice={filteredInvoice(2, 2, 45000)}
+        onOpen={jest.fn()}
+        onPurchasePress={jest.fn()}
+        onToggle={jest.fn()}
+      />,
+    );
+
+    expect(
+      screen.queryByTestId(transactionsTestIds.cardInvoiceMatch),
+    ).toBeNull();
+  });
+});

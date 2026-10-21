@@ -1,11 +1,14 @@
 import CardInvoiceDTO from "@application/dto/financial/CardInvoiceDTO";
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import { DefaultError } from "@domain/entities/errors";
+import { TransactionQueryFilter } from "@domain/entities/financial/TransactionQueryFilter";
 import Repositories from "@domain/repositories";
 
 export interface GetCardInvoicesForMonthUseCaseParams {
+  // Spec 045: the period (`from`/`to`) of the filter replaces `month`; the rest narrows the rows.
+  filter?: TransactionQueryFilter;
   // `YYYY-MM`
-  month: string;
+  month?: string;
   ownerIds: string[];
 }
 

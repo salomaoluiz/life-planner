@@ -8,6 +8,7 @@ import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 import { makeTransactionDTO } from "./mocks/index.mocks";
 import { makeInvoice } from "./mocks/invoice.mocks";
 import { makeEntries, setup } from "./mocks/screen.mocks";
+import { EMPTY_FILTERS } from "./models/transactionFilters";
 import { ListEntry } from "./models/transactionList";
 import TransactionUIModel from "./models/TransactionUIModel";
 
@@ -117,7 +118,7 @@ it("SHOULD render the header with switcher, scope chips, summary and type contro
     transactionsTestIds.monthSummary,
     transactionsTestIds.typeFilter,
   ].forEach((id) => expect(screen.getByTestId(id)).toBeOnTheScreen());
-  expect(screen.getByTestId("transactions-toolbar").children).toHaveLength(4);
+  expect(screen.getByTestId("transactions-toolbar").children).toHaveLength(5);
 });
 
 it("SHOULD give every scope chip an id from its owner id and call onOwnerFilterChange", () => {
@@ -340,5 +341,139 @@ describe("archived family selected (spec 042)", () => {
     setup();
 
     expect(screen.queryByTestId(transactionsTestIds.readOnlyBanner)).toBeNull();
+  });
+});
+
+describe("filters (spec 045)", () => {
+  const filtering = {
+    filterCount: 2,
+    filtering: true,
+    filters: {
+      ...EMPTY_FILTERS,
+      categoryIds: ["c1"],
+      situation: "UNPAID" as const,
+    },
+  };
+
+  it("SHOULD show the search, the Filters button without a badge and no chips when nothing is filtered", () => {
+    setup();
+
+    expect(screen.getByTestId(transactionsTestIds.search)).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(transactionsTestIds.filtersButton),
+    ).toBeOnTheScreen();
+    expect(
+      screen.queryByTestId(`${transactionsTestIds.filtersButton}-badge`),
+    ).toBeNull();
+    expect(
+      screen.queryByTestId(`${transactionsTestIds.activeFilter}-categories`),
+    ).toBeNull();
+  });
+
+  it("SHOULD show the badge with the number of groups, one chip per group, and remove one by its chip", () => {
+    const onFilterRemove = jest.fn();
+
+    setup({ ...filtering, onFilterRemove });
+
+    expect(
+      within(
+        screen.getByTestId(`${transactionsTestIds.filtersButton}-badge`),
+      ).getByText("2"),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(`${transactionsTestIds.activeFilter}-categories`),
+    ).toBeOnTheScreen();
+    fireEvent.press(
+      screen.getByTestId(
+        `${transactionsTestIds.activeFilter}-situation-remove`,
+      ),
+    );
+    expect(onFilterRemove).toHaveBeenCalledWith("situation");
+  });
+
+  it("SHOULD clear every filter with Clear all and send the typed search", () => {
+    const onFiltersClear = jest.fn();
+    const onSearchChange = jest.fn();
+
+    setup({ ...filtering, onFiltersClear, onSearchChange });
+
+    fireEvent.press(screen.getByTestId(transactionsTestIds.clearFilters));
+    expect(onFiltersClear).toHaveBeenCalledTimes(1);
+    fireEvent.changeText(
+      screen.getByTestId(transactionsTestIds.search),
+      "mercado",
+    );
+    expect(onSearchChange).toHaveBeenCalledWith("mercado");
+  });
+
+  it("SHOULD replace the month switcher with the period chip, and the month summary with the filtered one", () => {
+    setup({
+      ...filtering,
+      filteredSummary: {
+        count: 37,
+        expenseCents: 348290,
+        incomeCents: 0,
+        resultCents: -348290,
+      },
+      filters: {
+        ...EMPTY_FILTERS,
+        period: { from: "2025-01-01", to: "2025-02-28" },
+      },
+      hasPeriod: true,
+    });
+
+    expect(
+      screen.getByTestId(transactionsTestIds.periodChip),
+    ).toBeOnTheScreen();
+    expect(screen.queryByTestId(transactionsTestIds.monthNext)).toBeNull();
+    expect(
+      screen.getByTestId(transactionsTestIds.filteredSummary),
+    ).toBeOnTheScreen();
+    expect(screen.queryByTestId(transactionsTestIds.monthSummary)).toBeNull();
+    expect(
+      hasText(
+        'financial.transactions.filters.count {"count":37} · financial.transactions.filters.resultOf',
+      ),
+    ).toBe(true);
+  });
+
+  it("SHOULD show the empty filters state and clear the filters from it", () => {
+    const onFiltersClear = jest.fn();
+
+    setup({
+      ...filtering,
+      entries: [],
+      filtersEmpty: true,
+      onFiltersClear,
+    });
+
+    expect(
+      screen.getByTestId(transactionsTestIds.filtersEmpty),
+    ).toBeOnTheScreen();
+    fireEvent.press(
+      screen.getByText("financial.transactions.filters.empty.action"),
+    );
+    expect(onFiltersClear).toHaveBeenCalledTimes(1);
+  });
+
+  it("SHOULD show skeleton rows on the first load of a filter and an error with retry", () => {
+    const onRefresh = jest.fn();
+
+    setup({ ...filtering, entries: [], filtersLoading: true });
+    expect(screen.getAllByTestId("transactions-skeleton")).toHaveLength(6);
+
+    setup({ ...filtering, entries: [], filtersError: "boom", onRefresh });
+    fireEvent.press(screen.getAllByText("common.actions.tryAgain").pop()!);
+    expect(onRefresh).toHaveBeenCalledTimes(1);
+  });
+
+  it("SHOULD open the Filters modal from the button", () => {
+    setup(filtering);
+
+    fireEvent.press(screen.getByTestId(transactionsTestIds.filtersButton));
+
+    expect(
+      screen.getByTestId(transactionsTestIds.filtersApply),
+    ).toBeOnTheScreen();
   });
 });

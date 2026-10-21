@@ -1,8 +1,10 @@
 import { FlashList } from "@shopify/flash-list";
+import { useState } from "react";
 import { View } from "react-native";
 
 import {
   AmountText,
+  Chip,
   ChipGroup,
   EmptyState,
   ErrorState,
@@ -17,18 +19,24 @@ import { formatAmount } from "@components/AmountText/formatAmount";
 import Skeleton from "@components/Skeleton";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
+import { useBreakpoint } from "@presentation/theme";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
 import AdjustmentSheet from "./components/AdjustmentSheet";
 import CardInvoiceRow from "./components/CardInvoiceRow";
 import DayBalanceLine from "./components/DayBalanceLine";
+import FilteredSummary from "./components/FilteredSummary";
+import FilterToolbar from "./components/FilterToolbar";
 import MonthPickerSheet from "./components/MonthPickerSheet";
 import MonthSummary from "./components/MonthSummary";
 import MonthSwitcher from "./components/MonthSwitcher";
 import TransactionRow from "./components/TransactionRow";
 import { useTransactionsViewModel } from "./hooks";
 import useAdjustmentSheet from "./hooks/useAdjustmentSheet";
+import useFilterOptions from "./hooks/useFilterOptions";
 import usePayTransaction from "./hooks/usePayTransaction";
+import { FiltersModal } from "./modals";
+import { buildActiveChips, formatPeriod } from "./models/filterLabels";
 import {
   ALL_FILTER,
   formatDayTitle,
@@ -44,9 +52,31 @@ function FinancialTransactions() {
   const { styles } = useStyles();
   const { t } = useTranslation();
   const localeTag = useLocaleTag();
+  const wide = useBreakpoint() !== "compact";
   const vm = useTransactionsViewModel();
   const adjustment = useAdjustmentSheet({ onDeleted: vm.onRefresh });
   const pay = usePayTransaction({ onPaid: vm.onRefresh });
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [filtersStep, setFiltersStep] = useState<"period" | "root">("root");
+  function openFilters(step: "period" | "root" = "root") {
+    setFiltersStep(step);
+    setFiltersOpen(true);
+  }
+  const filterOptions = useFilterOptions(vm.allOwnerIds, vm.filterCount > 0);
+  const filterChips = buildActiveChips(
+    vm.filters,
+    {
+      categories: new Map(
+        filterOptions.categoryDtos.map((item) => [item.id, item.name]),
+      ),
+      sources: new Map(
+        filterOptions.sources.map((item) => [item.id, item.name]),
+      ),
+      tags: new Map(filterOptions.tags.map((item) => [item.id, item.name])),
+    },
+    localeTag,
+    t,
+  );
 
   function dayTitle(entry: Extract<ListEntry, { kind: "header" }>) {
     if (entry.label.kind === "today") {
@@ -246,58 +276,113 @@ function FinancialTransactions() {
     },
   ];
 
+  const scopeChips = (
+    <View accessibilityLabel={t("financial.transactions.scope.label")}>
+      <ChipGroup
+        layout={"scroll"}
+        mode={"single"}
+        onChange={vm.onOwnerFilterChange}
+        options={scopeOptions}
+        testID={transactionsTestIds.scopeFilter}
+        value={vm.ownerFilter}
+      />
+    </View>
+  );
   const toolbar = (
     <View style={styles.toolbar} testID="transactions-toolbar">
-      <MonthSwitcher
-        monthLabel={vm.monthLabel}
-        nextLabel={t("financial.transactions.nextMonth")}
-        nextTestID={transactionsTestIds.monthNext}
-        onMonthPress={vm.onMonthPickerOpen}
-        onNext={vm.onNextMonth}
-        onPrevious={vm.onPreviousMonth}
-        previousLabel={t("financial.transactions.previousMonth")}
-        previousTestID={transactionsTestIds.monthPrevious}
-      />
-      <View accessibilityLabel={t("financial.transactions.scope.label")}>
-        <ChipGroup
-          layout={"scroll"}
-          mode={"single"}
-          onChange={vm.onOwnerFilterChange}
-          options={scopeOptions}
-          testID={transactionsTestIds.scopeFilter}
-          value={vm.ownerFilter}
+      {vm.filters.period ? (
+        <View style={styles.periodChip}>
+          <Chip
+            accessibilityLabel={t(
+              "financial.transactions.filters.periodChipA11y",
+              {
+                range: formatPeriod(vm.filters.period, localeTag),
+              },
+            )}
+            icon={"calendar-range"}
+            label={formatPeriod(vm.filters.period, localeTag)}
+            onPress={() => openFilters("period")}
+            selected
+            testID={transactionsTestIds.periodChip}
+          />
+        </View>
+      ) : (
+        <MonthSwitcher
+          monthLabel={vm.monthLabel}
+          nextLabel={t("financial.transactions.nextMonth")}
+          nextTestID={transactionsTestIds.monthNext}
+          onMonthPress={vm.onMonthPickerOpen}
+          onNext={vm.onNextMonth}
+          onPrevious={vm.onPreviousMonth}
+          previousLabel={t("financial.transactions.previousMonth")}
+          previousTestID={transactionsTestIds.monthPrevious}
         />
-      </View>
-      <MonthSummary
-        balanceCents={vm.summary?.balanceCents ?? 0}
-        balanceLabel={t("financial.transactions.balanceOf", {
-          month: vm.monthName,
+      )}
+      {wide ? null : scopeChips}
+      <FilterToolbar
+        chips={filterChips}
+        clearAllLabel={t("financial.transactions.filters.clearAll")}
+        count={vm.filterCount}
+        filtersA11y={t("financial.transactions.filters.a11y", {
+          count: vm.filterCount,
         })}
-        errorMessage={t("common.errors.generic")}
-        expenseCents={vm.summary?.expenseCents ?? 0}
-        expensesLabel={t("financial.common.expenses")}
-        expenseTestID={transactionsTestIds.summaryExpense}
-        incomeCents={vm.summary?.incomeCents ?? 0}
-        incomesLabel={t("financial.common.incomes")}
-        incomeTestID={transactionsTestIds.summaryIncome}
-        isError={vm.summaryError}
-        isLoading={!vm.summary && !vm.summaryError}
-        onRetry={vm.onSummaryRetry}
-        projectedExpenseCents={vm.summary?.projectedExpenseCents}
-        projectedIncomeCents={vm.summary?.projectedIncomeCents}
-        projectedLabel={t("financial.transactions.summary.projected")}
-        projectedTestID={transactionsTestIds.summaryProjected}
-        retryLabel={t("common.actions.tryAgain")}
-        scopeLabel={scopeLabel}
-        scopeTestID={transactionsTestIds.summaryScope}
-        testID={transactionsTestIds.monthSummary}
-        toPayCents={vm.summary?.toPayCents}
-        toPayLabel={t("financial.transactions.summary.toPay")}
-        toPayTestID={transactionsTestIds.summaryToPay}
-        toReceiveCents={vm.summary?.toReceiveCents}
-        toReceiveLabel={t("financial.transactions.summary.toReceive")}
-        toReceiveTestID={transactionsTestIds.summaryToReceive}
+        filtersLabel={t("financial.transactions.filters.button")}
+        leading={scopeChips}
+        onChipRemove={vm.onFilterRemove}
+        onClearAll={vm.onFiltersClear}
+        onFiltersPress={() => openFilters()}
+        onSearchChange={vm.onSearchChange}
+        removeLabel={(name) =>
+          t("financial.transactions.filters.remove", { name })
+        }
+        searchClearLabel={t("common.actions.clear")}
+        searchPlaceholder={t(
+          "financial.transactions.filters.searchPlaceholder",
+        )}
+        searchValue={vm.filters.search}
       />
+      {vm.filtering && vm.filteredSummary ? (
+        <FilteredSummary
+          caption={`${t("financial.transactions.filters.count", {
+            count: vm.filteredSummary.count,
+          })} · ${t("financial.transactions.filters.resultOf")}`}
+          expensesLabel={t("financial.common.expenses")}
+          incomesLabel={t("financial.common.incomes")}
+          resultLabel={t("financial.transactions.filters.result")}
+          summary={vm.filteredSummary}
+        />
+      ) : (
+        <MonthSummary
+          balanceCents={vm.summary?.balanceCents ?? 0}
+          balanceLabel={t("financial.transactions.balanceOf", {
+            month: vm.monthName,
+          })}
+          errorMessage={t("common.errors.generic")}
+          expenseCents={vm.summary?.expenseCents ?? 0}
+          expensesLabel={t("financial.common.expenses")}
+          expenseTestID={transactionsTestIds.summaryExpense}
+          incomeCents={vm.summary?.incomeCents ?? 0}
+          incomesLabel={t("financial.common.incomes")}
+          incomeTestID={transactionsTestIds.summaryIncome}
+          isError={vm.summaryError}
+          isLoading={!vm.summary && !vm.summaryError}
+          onRetry={vm.onSummaryRetry}
+          projectedExpenseCents={vm.summary?.projectedExpenseCents}
+          projectedIncomeCents={vm.summary?.projectedIncomeCents}
+          projectedLabel={t("financial.transactions.summary.projected")}
+          projectedTestID={transactionsTestIds.summaryProjected}
+          retryLabel={t("common.actions.tryAgain")}
+          scopeLabel={scopeLabel}
+          scopeTestID={transactionsTestIds.summaryScope}
+          testID={transactionsTestIds.monthSummary}
+          toPayCents={vm.summary?.toPayCents}
+          toPayLabel={t("financial.transactions.summary.toPay")}
+          toPayTestID={transactionsTestIds.summaryToPay}
+          toReceiveCents={vm.summary?.toReceiveCents}
+          toReceiveLabel={t("financial.transactions.summary.toReceive")}
+          toReceiveTestID={transactionsTestIds.summaryToReceive}
+        />
+      )}
       {pay.hasError ? (
         <Text.Body tone={"expense"} value={t("common.errors.generic")} />
       ) : null}
@@ -347,7 +432,33 @@ function FinancialTransactions() {
   }
 
   let empty = null;
-  if (vm.isEmptyMonth) {
+  if (vm.filtersError) {
+    empty = (
+      <ErrorState
+        message={vm.filtersError}
+        onRetry={async () => vm.onRefresh()}
+        retryLabel={t("common.actions.tryAgain")}
+      />
+    );
+  } else if (vm.filtersLoading) {
+    empty = (
+      <View>
+        {SKELETON_ROWS.map((row) => (
+          <Skeleton.ListItem key={row} testID={"transactions-skeleton"} />
+        ))}
+      </View>
+    );
+  } else if (vm.filtersEmpty) {
+    empty = (
+      <EmptyState
+        actionLabel={t("financial.transactions.filters.empty.action")}
+        message={t("financial.transactions.filters.empty.body")}
+        onAction={vm.onFiltersClear}
+        testID={transactionsTestIds.filtersEmpty}
+        title={t("financial.transactions.filters.empty.title")}
+      />
+    );
+  } else if (vm.isEmptyMonth) {
     empty = (
       <EmptyState
         actionLabel={vm.readOnly ? undefined : t("financial.transactions.add")}
@@ -400,6 +511,17 @@ function FinancialTransactions() {
           selected={vm.selectedMonthIndex}
           title={t("financial.transactions.monthPicker.title")}
           year={vm.pickerYear}
+        />
+      )}
+      {filtersOpen && (
+        <FiltersModal
+          archivedOwnerIds={vm.archivedOwnerIds}
+          filters={vm.filters}
+          initialStep={filtersStep}
+          onApply={vm.onFiltersApply}
+          onClose={() => setFiltersOpen(false)}
+          ownerIds={vm.allOwnerIds}
+          scopeOwnerIds={vm.scopeOwnerIds}
         />
       )}
       <Toast

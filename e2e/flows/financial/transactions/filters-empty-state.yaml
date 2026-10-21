@@ -1,0 +1,93 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/filters-empty-state
+tags:
+  - financial
+  - spec-045
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Filter Row
+      KEY: ROW_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: ${output.ROW_NAME}
+      VALUE_CENTS: "1500"
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.ROW_NAME}
+    timeout: 20000
+# Search finds the row
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
+- tapOn:
+    id: "financial.transactions.search"
+- inputText: ${output.ROW_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.filtered-summary"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- assertVisible:
+    id: "financial.transactions.row-title"
+    text: ${output.ROW_NAME}
+# Origin Card + Not paid: there are no cards, so nothing matches
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
+- tapOn:
+    id: "financial.transactions.filters-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.filters.apply"
+    timeout: 20000
+- tapOn:
+    id: "financial.transactions.filters.origin-option-CARD"
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.transactions.filters.situation-option-UNPAID"
+- tapOn:
+    id: "financial.transactions.filters.apply"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.active-filter-situation"
+    timeout: 20000
+- assertVisible:
+    id: "financial.transactions.active-filter-origin"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.filters-empty"
+    timeout: 20000
+# Clear filters from the empty state brings the month back
+- tapOn:
+    id: "financial.transactions.filters-empty-action"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.ROW_NAME}
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
+- assertNotVisible:
+    id: "financial.transactions.filters-button-badge"

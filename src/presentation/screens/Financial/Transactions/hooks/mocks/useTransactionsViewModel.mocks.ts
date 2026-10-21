@@ -17,6 +17,7 @@ import {
   ProjectedInvoiceGroup,
 } from "../../models/transactionList";
 import TransactionUIModel from "../../models/TransactionUIModel";
+import { resetTransactionFilters } from "../useTransactionFilters";
 import useTransactionsViewModel from "../useTransactionsViewModel";
 
 jest.mock("expo-router", () => ({ router: { push: jest.fn() } }));
@@ -39,6 +40,10 @@ jest.mock("@application/useCases", () => ({
     getFinancialDailyBalancesUseCase: {
       execute: jest.fn(),
       uniqueName: "dailyBalances",
+    },
+    getFinancialFilteredTransactionsUseCase: {
+      execute: jest.fn(),
+      uniqueName: "filteredTransactions",
     },
     getFinancialProjectionsUseCase: {
       execute: jest.fn(),
@@ -102,6 +107,12 @@ const projectionsQuery = new UseQueryFixture<{
   cardGroups: ProjectedInvoiceGroup[];
 }>();
 const balancesQuery = new UseQueryFixture<Map<string, DayBalanceView>>();
+const filteredTransactionsQuery = new UseQueryFixture<TransactionUIModel[]>();
+const filteredInvoicesQuery = new UseQueryFixture<CardInvoiceUIModel[]>();
+const filteredProjectionsQuery = new UseQueryFixture<{
+  accountItems: TransactionUIModel[];
+  cardGroups: ProjectedInvoiceGroup[];
+}>();
 const summaryQuery = new UseQueryFixture<{
   balance: number;
   expense: number;
@@ -117,6 +128,9 @@ const summaryQuery = new UseQueryFixture<{
 const spies = {
   getBalances: jest.mocked(useCases.getFinancialDailyBalancesUseCase.execute),
   getCategories: jest.mocked(useCases.getFinancialCategoriesUseCase.execute),
+  getFilteredTransactions: jest.mocked(
+    useCases.getFinancialFilteredTransactionsUseCase.execute,
+  ),
   getInvoices: jest.mocked(
     useCases.getFinancialCardInvoicesForMonthUseCase.execute,
   ),
@@ -141,6 +155,10 @@ beforeEach(() => {
   invoicesQuery.reset();
   invoicesQuery.withData([]);
   projectionsQuery.reset();
+  filteredTransactionsQuery.reset();
+  filteredInvoicesQuery.reset();
+  filteredProjectionsQuery.reset();
+  resetTransactionFilters();
   spies.isFocused.mockReturnValue(false);
   spies.useQuery.mockImplementation(((options: { cacheKey: string[] }) => {
     if (options.cacheKey[0] === "summary") {
@@ -149,11 +167,18 @@ beforeEach(() => {
     if (options.cacheKey[0] === "dailyBalances") {
       return balancesQuery.build();
     }
+    if (options.cacheKey[0] === "filteredTransactions") {
+      return filteredTransactionsQuery.build();
+    }
     if (options.cacheKey[0] === "projections") {
-      return projectionsQuery.build();
+      return options.cacheKey.includes("filtered")
+        ? filteredProjectionsQuery.build()
+        : projectionsQuery.build();
     }
     if (options.cacheKey[0] === "cardInvoices") {
-      return invoicesQuery.build();
+      return options.cacheKey.includes("filtered")
+        ? filteredInvoicesQuery.build()
+        : invoicesQuery.build();
     }
 
     return transactionsQuery.build();
@@ -201,6 +226,9 @@ export {
   archivedFamily,
   balancesQuery,
   dto,
+  filteredInvoicesQuery,
+  filteredProjectionsQuery,
+  filteredTransactionsQuery,
   givenData,
   invoicesQuery,
   owners,

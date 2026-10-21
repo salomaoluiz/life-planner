@@ -3,8 +3,8 @@ import CardInvoiceModel from "@data/models/financial/CardInvoiceModel";
 import { CreditCardDatasource } from "@data/repositories/repos/financial/creditCards/creditCardDatasource";
 import { api } from "@infrastructure/api";
 
+import appendFilterParams from "../../filterQuery";
 import handleFinancialApiError from "../../financialApiError";
-import toOwnerQuery from "../../ownerQuery";
 
 export type Params = Parameters<
   CreditCardDatasource["getCardInvoicesForMonth"]
@@ -20,8 +20,25 @@ async function getCardInvoicesForMonth(params: Params): Response {
   }
 
   try {
+    const query = new URLSearchParams();
+
+    params.ownerIds.forEach((id) => query.append("ownerId", id));
+    if (params.month) {
+      query.append("month", params.month);
+    }
+    query.append("today", todayCalendarDate());
+    // Spec 045: the period (instead of the month), search, categories, tags, cards and paid status.
+    appendFilterParams(query, params.filter, [
+      "categoryIds",
+      "creditCardIds",
+      "from",
+      "paid",
+      "q",
+      "tagIds",
+    ]);
+
     const data = await api.get<Record<string, unknown>[]>(
-      `/v1/finance/credit-cards/invoices${toOwnerQuery(params.ownerIds)}&month=${params.month}&today=${todayCalendarDate()}`,
+      `/v1/finance/credit-cards/invoices?${query.toString()}`,
     );
 
     return data.map((item) => CardInvoiceModel.fromJSON(item));
@@ -29,6 +46,7 @@ async function getCardInvoicesForMonth(params: Params): Response {
     return handleFinancialApiError(error, {
       datasource: "CreditCardDatasource - getCardInvoicesForMonth",
       month: params.month,
+      period: params.filter?.from,
     });
   }
 }

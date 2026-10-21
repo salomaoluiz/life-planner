@@ -31,36 +31,40 @@ async function getTransactions(ownerIds: Params, datasources: Datasources) {
     );
   }
 
-  return transactionsModel.map(
-    (transaction) =>
-      new TransactionEntity({
-        accountId: transaction.accountId,
-        category: transaction.category,
-        categoryId: transaction.categoryId,
-        creditCardId: transaction.creditCardId,
-        currency: transaction.currency,
-        date: transaction.date,
-        description: transaction.description,
-        earlyPayment: transaction.earlyPayment,
-        excludeFromTotals: transaction.excludeFromTotals,
-        id: transaction.id,
-        installmentCount: transaction.installmentCount,
-        installmentNumber: transaction.installmentNumber,
-        installmentPlanId: transaction.installmentPlanId,
-        invoiceMonth: transaction.invoiceMonth,
-        occurrenceCount: transaction.occurrenceCount,
-        occurrenceNumber: transaction.occurrenceNumber,
-        owner: OwnerType[transaction.owner],
-        ownerId: transaction.ownerId,
-        paid: transaction.paid,
-        recurrenceFrequency: transaction.recurrenceFrequency,
-        recurrenceId: transaction.recurrenceId,
-        systemKey: transaction.systemKey,
-        tags: transaction.tags,
-        type: TransactionType[transaction.type],
-        value: transaction.value,
-      }),
+  return transactionsModel.map((transaction) =>
+    toTransactionEntity(transaction),
   );
 }
 
+function toTransactionEntity(transaction: TransactionModel) {
+  return new TransactionEntity({
+    accountId: transaction.accountId,
+    category: transaction.category,
+    categoryId: transaction.categoryId,
+    creditCardId: transaction.creditCardId,
+    currency: transaction.currency,
+    date: transaction.date,
+    description: transaction.description,
+    earlyPayment: transaction.earlyPayment,
+    excludeFromTotals: transaction.excludeFromTotals,
+    id: transaction.id,
+    installmentCount: transaction.installmentCount,
+    installmentNumber: transaction.installmentNumber,
+    installmentPlanId: transaction.installmentPlanId,
+    invoiceMonth: transaction.invoiceMonth,
+    occurrenceCount: transaction.occurrenceCount,
+    occurrenceNumber: transaction.occurrenceNumber,
+    owner: OwnerType[transaction.owner],
+    ownerId: transaction.ownerId,
+    paid: transaction.paid,
+    recurrenceFrequency: transaction.recurrenceFrequency,
+    recurrenceId: transaction.recurrenceId,
+    systemKey: transaction.systemKey,
+    tags: transaction.tags,
+    type: TransactionType[transaction.type],
+    value: transaction.value,
+  });
+}
+
 export default getTransactions;
+export { toTransactionEntity };

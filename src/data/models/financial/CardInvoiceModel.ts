@@ -16,6 +16,12 @@ export interface InvoiceCreditModel {
   value: number;
 }
 
+export interface InvoiceFilteredModel {
+  filteredTotal: number;
+  matchedCount: number;
+  purchaseCount: number;
+}
+
 export interface InvoicePurchaseModel {
   category: string;
   categoryIcon?: string;
@@ -42,17 +48,20 @@ class CardInvoiceModel {
     title: string;
   };
   credits: InvoiceCreditModel[];
+  filtered?: InvoiceFilteredModel;
   invoice: InvoiceModel;
   purchases: InvoicePurchaseModel[];
 
   constructor(params: {
     card: CardInvoiceModel["card"];
     credits?: InvoiceCreditModel[];
+    filtered?: InvoiceFilteredModel;
     invoice: InvoiceModel;
     purchases: InvoicePurchaseModel[];
   }) {
     this.card = params.card;
     this.credits = params.credits ?? [];
+    this.filtered = params.filtered;
     this.invoice = params.invoice;
     this.purchases = params.purchases;
   }
@@ -85,6 +94,14 @@ class CardInvoiceModel {
           (credit.refundedTransactionId as null | string) ?? undefined,
         value: Number(credit.value),
       })),
+      filtered:
+        data.matchedCount === undefined
+          ? undefined
+          : {
+              filteredTotal: Number(data.filteredTotal),
+              matchedCount: Number(data.matchedCount),
+              purchaseCount: Number(data.purchaseCount),
+            },
       invoice: InvoiceModel.fromJSON(data.invoice as Record<string, unknown>),
       purchases: purchases.map((purchase) => ({
         category: purchase.category as string,

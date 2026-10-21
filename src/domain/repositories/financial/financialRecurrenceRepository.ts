@@ -7,6 +7,7 @@ import RecurrenceResultEntity from "@domain/entities/financial/RecurrenceResultE
 import TransactionEntity, {
   TransactionType,
 } from "@domain/entities/financial/TransactionEntity";
+import { TransactionQueryFilter } from "@domain/entities/financial/TransactionQueryFilter";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 export type FinancialRecurrenceRepository = {
@@ -71,6 +72,8 @@ interface DeleteRecurrenceResult {
 }
 
 interface GetProjectionsRepositoryParams {
+  // Spec 045: category, tag, account, card and text filters (the months stay in `from`/`to`).
+  filter?: TransactionQueryFilter;
   // `YYYY-MM`
   from: string;
   ownerIds: string[];

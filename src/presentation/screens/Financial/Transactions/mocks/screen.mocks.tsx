@@ -4,6 +4,7 @@ import FinancialTransactions from "../";
 import { useTransactionsViewModel } from "../hooks";
 import useAdjustmentSheet from "../hooks/useAdjustmentSheet";
 import usePayTransaction from "../hooks/usePayTransaction";
+import { EMPTY_FILTERS } from "../models/transactionFilters";
 import { ListEntry } from "../models/transactionList";
 import TransactionUIModel from "../models/TransactionUIModel";
 import { categories, makeTransactionDTO } from "./index.mocks";
@@ -11,6 +12,10 @@ import { categories, makeTransactionDTO } from "./index.mocks";
 jest.mock("../hooks");
 jest.mock("../hooks/useAdjustmentSheet");
 jest.mock("../hooks/usePayTransaction");
+jest.mock("../hooks/useFilterOptions", () => ({
+  __esModule: true,
+  default: () => ({ categories: [], categoryDtos: [], sources: [], tags: [] }),
+}));
 jest.mock("@shopify/flash-list", () => {
   const { View: MockView } = jest.requireActual("react-native");
   return {
@@ -38,11 +43,21 @@ jest.mock("@shopify/flash-list", () => {
 });
 
 const defaultViewModel: ReturnType<typeof useTransactionsViewModel> = {
+  allOwnerIds: ["user-id"],
+  archivedOwnerIds: new Set<string>(),
   balances: new Map(),
   entries: [],
   errorMessage: undefined,
   expandedDayKey: undefined,
   expandedInvoiceId: undefined,
+  filterCount: 0,
+  filteredSummary: undefined,
+  filtering: false,
+  filters: EMPTY_FILTERS,
+  filtersEmpty: false,
+  filtersError: undefined,
+  filtersLoading: false,
+  hasPeriod: false,
   invoicesError: false,
   isEmptyMonth: false,
   isFilteredEmpty: false,
@@ -56,6 +71,9 @@ const defaultViewModel: ReturnType<typeof useTransactionsViewModel> = {
   onAddPress: jest.fn(),
   onClearFilters: jest.fn(),
   onDayToggle: jest.fn(),
+  onFilterRemove: jest.fn(),
+  onFiltersApply: jest.fn(),
+  onFiltersClear: jest.fn(),
   onInvoiceOpen: jest.fn(),
   onInvoiceRetry: jest.fn(),
   onInvoiceToggle: jest.fn(),
@@ -71,6 +89,7 @@ const defaultViewModel: ReturnType<typeof useTransactionsViewModel> = {
   onRefresh: jest.fn(),
   onRetry: jest.fn(),
   onRowPress: jest.fn(),
+  onSearchChange: jest.fn(),
   onSummaryRetry: jest.fn(),
   onToastHide: jest.fn(),
   onTypeFilterChange: jest.fn(),
@@ -79,6 +98,7 @@ const defaultViewModel: ReturnType<typeof useTransactionsViewModel> = {
   pickerYear: 2026,
   readOnly: false,
   scopeChoices: [],
+  scopeOwnerIds: ["user-id"],
   selectedMonthIndex: undefined,
   stickyIndices: [],
   summary: {

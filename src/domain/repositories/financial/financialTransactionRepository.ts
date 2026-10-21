@@ -2,6 +2,7 @@ import { InstallmentScope } from "@domain/entities/financial/InstallmentPlanEnti
 import TransactionEntity, {
   TransactionType,
 } from "@domain/entities/financial/TransactionEntity";
+import { TransactionQueryFilter } from "@domain/entities/financial/TransactionQueryFilter";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 export type FinancialTransactionRepository = {
@@ -9,6 +10,10 @@ export type FinancialTransactionRepository = {
     params: CreateTransactionRepositoryParams,
   ): Promise<TransactionEntity>;
   deleteTransaction(params: DeleteTransactionRepositoryParams): Promise<void>;
+  // Spec 045: account rows that match the filters (no cache).
+  getFilteredTransactions(
+    params: GetFilteredTransactionsRepositoryParams,
+  ): Promise<TransactionEntity[]>;
   getTransactions(ownerIds: string[]): Promise<TransactionEntity[]>;
   updateTransaction(params: UpdateTransactionRepositoryParams): Promise<void>;
 };
@@ -35,6 +40,10 @@ interface DeleteTransactionRepositoryParams {
   // Required by the API on a recurring occurrence (spec 034 FR 29).
   scope?: InstallmentScope;
 }
+interface GetFilteredTransactionsRepositoryParams {
+  filter: TransactionQueryFilter;
+  ownerIds: string[];
+}
 
 interface UpdateTransactionRepositoryParams {
   accountId?: string;
@@ -54,4 +63,8 @@ interface UpdateTransactionRepositoryParams {
   value?: string;
 }
 
-export { CreateTransactionRepositoryParams, UpdateTransactionRepositoryParams };
+export {
+  CreateTransactionRepositoryParams,
+  GetFilteredTransactionsRepositoryParams,
+  UpdateTransactionRepositoryParams,
+};

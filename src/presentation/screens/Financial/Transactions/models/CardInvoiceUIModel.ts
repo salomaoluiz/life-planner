@@ -41,7 +41,10 @@ export interface InvoicePurchaseUIModel {
 class CardInvoiceUIModel {
   // What the line shows: the invoice plus the projected purchases that would land on it (spec 034 FR 14).
   get amountCents() {
-    return this.dto.invoice.amount + this.projectedCents;
+    return (
+      (this.dto.filtered?.filteredTotal ?? this.dto.invoice.amount) +
+      this.projectedCents
+    );
   }
 
   // Refunds and early payments can be added to an invoice that has started and has no payment record.
@@ -129,6 +132,16 @@ class CardInvoiceUIModel {
     return this.projectedItems.length > 0;
   }
 
+  // The whole invoice, also when the line only shows the matching rows (spec 045).
+  get invoiceTotalCents() {
+    return this.dto.invoice.amount;
+  }
+
+  // Some rows of the invoice are hidden by the filters: the line shows "N of M match".
+  get isPartlyMatched() {
+    return this.matchedCount < this.purchaseCount;
+  }
+
   // The invoice has no real purchases or credits: it only exists as a projection.
   get isProjectedOnly() {
     return (
@@ -145,6 +158,14 @@ class CardInvoiceUIModel {
 
   get listDate() {
     return parseCalendarDate(this.dto.invoice.listDate);
+  }
+
+  // Rows of the invoice that match the filters (spec 045); all of them when the list is not filtered.
+  get matchedCount() {
+    return (
+      this.dto.filtered?.matchedCount ??
+      this.dto.purchases.length + this.dto.credits.length
+    );
   }
 
   get ownerId() {
@@ -174,6 +195,14 @@ class CardInvoiceUIModel {
 
   get projectedCents() {
     return this.projectedItems.reduce((sum, item) => sum + item.amountCents, 0);
+  }
+
+  // Every row of the invoice, matching or not (spec 045).
+  get purchaseCount() {
+    return (
+      this.dto.filtered?.purchaseCount ??
+      this.dto.purchases.length + this.dto.credits.length
+    );
   }
 
   get purchases(): InvoicePurchaseUIModel[] {
@@ -212,7 +241,7 @@ class CardInvoiceUIModel {
 
   // Always an expense: negative in the day's net. Projections do not move the net.
   get signedCents() {
-    return -this.dto.invoice.amount;
+    return -(this.dto.filtered?.filteredTotal ?? this.dto.invoice.amount);
   }
 
   get status() {

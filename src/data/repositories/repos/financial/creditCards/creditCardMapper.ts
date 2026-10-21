@@ -13,6 +13,7 @@ function toCardInvoiceEntity(model: CardInvoiceModel): CardInvoiceEntity {
   return new CardInvoiceEntity({
     card: { ...model.card, owner: OwnerType[model.card.owner] },
     credits: model.credits.map((credit) => ({ ...credit })),
+    filtered: model.filtered && { ...model.filtered },
     invoice: new InvoiceEntity({ ...model.invoice }),
     purchases: model.purchases.map((purchase) => ({ ...purchase })),
   });

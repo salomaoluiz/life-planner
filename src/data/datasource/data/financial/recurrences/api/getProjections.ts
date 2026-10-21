@@ -3,6 +3,7 @@ import ProjectedOccurrenceModel from "@data/models/financial/ProjectedOccurrence
 import { RecurrenceDatasource } from "@data/repositories/repos/financial/recurrences/recurrenceDatasource";
 import { api } from "@infrastructure/api";
 
+import appendFilterParams from "../../filterQuery";
 import handleFinancialApiError from "../../financialApiError";
 
 export type Params = Parameters<RecurrenceDatasource["getProjections"]>[0];
@@ -21,6 +22,14 @@ async function getProjections(params: Params): Response {
   });
 
   params.ownerIds.forEach((id) => query.append("ownerId", id));
+  // Spec 045: the months stay in from/to, so the period and paid filters do not apply here.
+  appendFilterParams(query, params.filter, [
+    "accountIds",
+    "categoryIds",
+    "creditCardIds",
+    "q",
+    "tagIds",
+  ]);
 
   try {
     const data = await api.get<Record<string, unknown>[]>(
