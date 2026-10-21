@@ -32,7 +32,8 @@ export interface BottomSheetProps {
   footerStart?: React.ReactNode;
   onClose: () => void;
   presentation?: "inline" | "modal";
-  size?: "dialog" | "form";
+  /** `wizard` is a `form` that is wider on expanded screens (the import wizard, spec 047) */
+  size?: "dialog" | "form" | "wizard";
   subtitle?: string;
   testID?: string;
   title: string;
@@ -48,11 +49,13 @@ const SWIPE_CLOSE_DISTANCE = 80;
 function BottomSheet(props: BottomSheetProps) {
   const { breakpoint } = useKitTheme();
   const wide = breakpoint !== "compact";
-  const wideForm = wide && props.size === "form";
+  const isForm = props.size === "form" || props.size === "wizard";
+  const wideForm = wide && isForm;
   const styles = useStyles(
     wide,
-    props.size === "form",
+    isForm,
     breakpoint === "medium",
+    props.size === "wizard",
   );
   const layout = useMemo(
     () => ({ columns: wideForm ? (2 as const) : (1 as const) }),

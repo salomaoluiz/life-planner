@@ -14,6 +14,8 @@ export interface SourceOption {
   id: string;
   kind: "ACCOUNT" | "CARD";
   name: string;
+  // The owner (Personal or a family) the account or card belongs to.
+  ownerId: string;
 }
 
 // What the Filters modal and the active-filter chips need to name an id (spec 045 FR 11, 18): accounts,
@@ -61,6 +63,7 @@ function useFilterOptions(ownerIds: string[], enabled: boolean) {
             id: account.id,
             kind: "ACCOUNT",
             name: account.name,
+            ownerId: account.ownerId,
           }),
         ),
         ...(cards.data ?? []).map(
@@ -69,6 +72,7 @@ function useFilterOptions(ownerIds: string[], enabled: boolean) {
             id: card.id,
             kind: "CARD",
             name: card.title,
+            ownerId: card.ownerId,
           }),
         ),
       ],

@@ -16,6 +16,14 @@ jest.mock("../hooks/useFilterOptions", () => ({
   __esModule: true,
   default: () => ({ categories: [], categoryDtos: [], sources: [], tags: [] }),
 }));
+// The export modal runs its own queries (spec 047); its own tests cover it.
+jest.mock("../modals/ExportModal", () => {
+  const { View: MockView } = jest.requireActual("react-native");
+  return {
+    __esModule: true,
+    default: () => <MockView testID={"financial.export.sheet"} />,
+  };
+});
 jest.mock("@shopify/flash-list", () => {
   const { View: MockView } = jest.requireActual("react-native");
   return {
@@ -94,6 +102,7 @@ const defaultViewModel: ReturnType<typeof useTransactionsViewModel> = {
   onToastHide: jest.fn(),
   onTypeFilterChange: jest.fn(),
   ownerFilter: "ALL",
+  owners: [],
   personalOwnerId: "user-id",
   pickerYear: 2026,
   readOnly: false,

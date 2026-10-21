@@ -109,6 +109,19 @@ const scopeChoices = [
   { label: "Test Family", value: "family-1" },
 ] as const;
 
+it("SHOULD show Import CSV and Export CSV (spec 047) and open the export modal", () => {
+  setup({ scopeChoices: [...scopeChoices] });
+
+  // Compact: the actions are the items of the overflow menu.
+  fireEvent.press(screen.getByTestId(transactionsTestIds.moreActions));
+  expect(
+    screen.getByTestId(transactionsTestIds.importButton),
+  ).toBeOnTheScreen();
+  fireEvent.press(screen.getByTestId(transactionsTestIds.exportButton));
+
+  expect(screen.getByTestId(transactionsTestIds.exportSheet)).toBeOnTheScreen();
+});
+
 it("SHOULD render the header with switcher, scope chips, summary and type control", () => {
   setup({ scopeChoices: [...scopeChoices] });
 
@@ -118,7 +131,8 @@ it("SHOULD render the header with switcher, scope chips, summary and type contro
     transactionsTestIds.monthSummary,
     transactionsTestIds.typeFilter,
   ].forEach((id) => expect(screen.getByTestId(id)).toBeOnTheScreen());
-  expect(screen.getByTestId("transactions-toolbar").children).toHaveLength(5);
+  // The CSV actions (spec 047) lead the toolbar.
+  expect(screen.getByTestId("transactions-toolbar").children).toHaveLength(6);
 });
 
 it("SHOULD give every scope chip an id from its owner id and call onOwnerFilterChange", () => {

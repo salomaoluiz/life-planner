@@ -663,6 +663,7 @@ function useTransactionsViewModel() {
     onToastHide: scope.onToastHide,
     onTypeFilterChange: (value: string) => setTypeFilter(value as TypeFilter),
     ownerFilter,
+    owners: owners ?? [],
     personalOwnerId: findPersonalOwnerId(owners ?? []),
     pickerYear,
     readOnly: scope.readOnly,
