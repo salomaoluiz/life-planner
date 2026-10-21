@@ -1,10 +1,11 @@
 import { useIsFocused } from "@react-navigation/native";
 import { router } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { MonthSummary } from "@application/dto/home/MonthSummaryDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
+import { TransactionQueryFilter } from "@domain/entities/financial/TransactionQueryFilter";
 import { useQuery } from "@infrastructure/fetcher";
 import useTranslationLocale from "@presentation/i18n/useTranslationLocale";
 import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
@@ -18,6 +19,16 @@ import {
 import { listQueryKey } from "@screens/Financial/models/queryKeys";
 
 import CardInvoiceUIModel from "../models/CardInvoiceUIModel";
+import {
+  activeGroups,
+  effectiveRange,
+  isFiltering,
+  summarize,
+  toDateKey,
+  toQueryFilter,
+  wantsAccountRows,
+  wantsCards,
+} from "../models/transactionFilters";
 import {
   ALL_FILTER,
   buildEntries,
@@ -39,9 +50,12 @@ import {
   TypeFilter,
 } from "../models/transactionList";
 import TransactionUIModel from "../models/TransactionUIModel";
+import useTransactionFilters from "./useTransactionFilters";
 
 // Balances exist up to this many months after the current one (spec 035 FR 10).
 const MAX_BALANCE_MONTHS_AHEAD = 12;
+// The projections endpoint answers at most this many months.
+const MAX_PROJECTION_MONTHS = 12;
 
 // What the API projects for the months after the current one (spec 034 FR 14).
 interface ProjectedData {
@@ -54,13 +68,44 @@ interface TransactionsData {
   owners: OwnerDTO[];
 }
 
+// Spec 045: the account rows that match the filters in the range.
+async function fetchFilteredTransactions(
+  ownerIds: string[],
+  filter: TransactionQueryFilter,
+): Promise<TransactionUIModel[]> {
+  const [transactions, categories] = await Promise.all([
+    useCases.getFinancialFilteredTransactionsUseCase.execute({
+      filter,
+      ownerIds,
+    }),
+    useCases.getFinancialCategoriesUseCase.execute(ownerIds),
+  ]);
+  const categoryById = new Map(
+    categories.map((category) => [category.id, category]),
+  );
+
+  return transactions.map(
+    (transaction) =>
+      new TransactionUIModel(
+        transaction,
+        categoryById.get(transaction.categoryId),
+      ),
+  );
+}
+
 async function fetchProjections(
   from: string,
   to: string,
   ownerIds: string[],
+  filter?: TransactionQueryFilter,
 ): Promise<ProjectedData> {
   const [items, categories] = await Promise.all([
-    useCases.getFinancialProjectionsUseCase.execute({ from, ownerIds, to }),
+    useCases.getFinancialProjectionsUseCase.execute({
+      filter,
+      from,
+      ownerIds,
+      to,
+    }),
     useCases.getFinancialCategoriesUseCase.execute(ownerIds),
   ]);
   const categoryById = new Map(
@@ -137,6 +182,17 @@ function maxMonth(a: string, b: string) {
 // `YYYY-MM` of the local month.
 function toMonthKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+// Spec 045 FR 11 of the NFR: the previous result stays on screen while a new filter loads.
+function useKept<T>(data: T | undefined): T | undefined {
+  const ref = useRef<T>();
+
+  if (data !== undefined) {
+    ref.current = data;
+  }
+
+  return data ?? ref.current;
 }
 
 function useTransactionsViewModel() {
@@ -237,6 +293,85 @@ function useTransactionsViewModel() {
       ),
   });
 
+  // Spec 045: while a filter is active the list comes from the filtered queries, over the period
+  // (or the month on screen); the unfiltered queries above keep serving the plain month.
+  const filterStore = useTransactionFilters();
+  const { applied } = filterStore;
+  const filtering = isFiltering(applied);
+  const range = useMemo(() => effectiveRange(applied, month), [applied, month]);
+  const queryFilter = useMemo<TransactionQueryFilter>(
+    () => ({ ...toQueryFilter(applied), from: range.from, to: range.to }),
+    [applied, range],
+  );
+  const filterKey = JSON.stringify(queryFilter);
+  const showAccountRows = wantsAccountRows(applied);
+  const showCards = wantsCards(applied);
+  const filteredTransactions = useQuery<TransactionUIModel[]>({
+    cacheKey: [
+      ...listQueryKey(
+        useCases.getFinancialFilteredTransactionsUseCase.uniqueName,
+      ),
+      filterKey,
+      ...allOwnerIds,
+    ],
+    enabled: !!owners && filtering && showAccountRows,
+    fetch: async () => fetchFilteredTransactions(allOwnerIds, queryFilter),
+  });
+  const filteredInvoices = useQuery<CardInvoiceUIModel[]>({
+    cacheKey: [
+      ...listQueryKey(
+        useCases.getFinancialCardInvoicesForMonthUseCase.uniqueName,
+      ),
+      "filtered",
+      filterKey,
+      ...allOwnerIds,
+    ],
+    enabled: !!owners && filtering && showCards,
+    fetch: async () =>
+      (
+        await useCases.getFinancialCardInvoicesForMonthUseCase.execute({
+          filter: queryFilter,
+          ownerIds: allOwnerIds,
+        })
+      ).map((invoice) => new CardInvoiceUIModel(invoice)),
+  });
+  // Projections only exist after the current month, and are never paid.
+  const rangeFromMonth = range.from.slice(0, 7);
+  const rangeToMonth = range.to.slice(0, 7);
+  const filteredProjectionsFrom = maxMonth(
+    addMonthsTo(rangeFromMonth, -2),
+    addMonthsTo(currentMonthKey, 1),
+  );
+  const filteredProjectionsTo = [
+    rangeToMonth,
+    addMonthsTo(filteredProjectionsFrom, MAX_PROJECTION_MONTHS - 1),
+  ].sort()[0];
+  const filteredProjections = useQuery<ProjectedData>({
+    cacheKey: [
+      ...listQueryKey(useCases.getFinancialProjectionsUseCase.uniqueName),
+      "filtered",
+      filteredProjectionsFrom,
+      filteredProjectionsTo,
+      filterKey,
+      ...allOwnerIds,
+    ],
+    enabled:
+      !!owners &&
+      filtering &&
+      filteredProjectionsFrom <= filteredProjectionsTo &&
+      applied.situation !== "PAID",
+    fetch: async () =>
+      fetchProjections(
+        filteredProjectionsFrom,
+        filteredProjectionsTo,
+        allOwnerIds,
+        queryFilter,
+      ),
+  });
+  const keptFilteredItems = useKept(filteredTransactions.data);
+  const keptFilteredInvoices = useKept(filteredInvoices.data);
+  const keptFilteredProjections = useKept(filteredProjections.data);
+
   const summary = useQuery<MonthSummary>({
     cacheKey: [
       useCases.getMonthSummaryUseCase.uniqueName,
@@ -246,6 +381,16 @@ function useTransactionsViewModel() {
     enabled: !!owners,
     fetch: async () => fetchSummary(month, summaryOwnerIds),
   });
+
+  function refetchFiltered() {
+    if (showAccountRows) {
+      filteredTransactions.refetch();
+    }
+    if (showCards) {
+      filteredInvoices.refetch();
+    }
+    filteredProjections.refetch();
+  }
 
   // A new month or scope shows other days: nothing stays expanded.
   useEffect(() => {
@@ -263,32 +408,77 @@ function useTransactionsViewModel() {
       if (isFutureMonth) {
         projections.refetch();
       }
+      if (filtering) {
+        refetchFiltered();
+      }
     }
   }, [isFocused]);
 
+  function inRange(dateKey: string) {
+    return dateKey >= range.from && dateKey <= range.to;
+  }
   const itemsOfMonth = useMemo(
-    () => [
-      ...(transactions.data?.items ?? []).filter(
-        (item) => !item.isCardPurchase && isInMonth(item.date, month),
-      ),
-      ...(isFutureMonth ? (projections.data?.accountItems ?? []) : []).filter(
-        (item) => isInMonth(item.date, month),
-      ),
+    () =>
+      filtering
+        ? [
+            ...(showAccountRows ? (keptFilteredItems ?? []) : []),
+            ...(showAccountRows
+              ? (keptFilteredProjections?.accountItems ?? [])
+              : []
+            ).filter((item) => inRange(toDateKey(item.date))),
+          ]
+        : [
+            ...(transactions.data?.items ?? []).filter(
+              (item) => !item.isCardPurchase && isInMonth(item.date, month),
+            ),
+            ...(isFutureMonth
+              ? (projections.data?.accountItems ?? [])
+              : []
+            ).filter((item) => isInMonth(item.date, month)),
+          ],
+    [
+      transactions.data,
+      projections.data,
+      month,
+      isFutureMonth,
+      filtering,
+      showAccountRows,
+      keptFilteredItems,
+      keptFilteredProjections,
+      range,
     ],
-    [transactions.data, projections.data, month, isFutureMonth],
   );
   // Real invoices of the month carrying their projections, plus the invoices that only exist as projections.
   const allInvoices = useMemo(
     () =>
-      mergeProjectedInvoices(
-        invoices.data ?? [],
-        isFutureMonth
-          ? (projections.data?.cardGroups ?? []).filter(
-              (group) => group.listDate.slice(0, 7) === monthKey,
-            )
-          : [],
-      ),
-    [invoices.data, projections.data, monthKey, isFutureMonth],
+      filtering
+        ? mergeProjectedInvoices(
+            showCards ? (keptFilteredInvoices ?? []) : [],
+            showCards
+              ? (keptFilteredProjections?.cardGroups ?? []).filter((group) =>
+                  inRange(group.listDate),
+                )
+              : [],
+          )
+        : mergeProjectedInvoices(
+            invoices.data ?? [],
+            isFutureMonth
+              ? (projections.data?.cardGroups ?? []).filter(
+                  (group) => group.listDate.slice(0, 7) === monthKey,
+                )
+              : [],
+          ),
+    [
+      invoices.data,
+      projections.data,
+      monthKey,
+      isFutureMonth,
+      filtering,
+      showCards,
+      keptFilteredInvoices,
+      keptFilteredProjections,
+      range,
+    ],
   );
   const visible = useMemo(
     () =>
@@ -321,9 +511,14 @@ function useTransactionsViewModel() {
       ),
     [allInvoices, ownerFilter, archivedIds, typeFilter],
   );
+  // A balance of a filtered list has no meaning: the day lines go away while a filter is active (spec 045 FR 14).
   const balanceViews = useMemo(
-    () => (balances.error ? undefined : balances.data),
-    [balances.data, balances.error],
+    () => (balances.error || filtering ? undefined : balances.data),
+    [balances.data, balances.error, filtering],
+  );
+  const filteredSummary = useMemo(
+    () => (filtering ? summarize(visible, visibleInvoices) : undefined),
+    [filtering, visible, visibleInvoices],
   );
   const entries = useMemo(
     () =>
@@ -334,6 +529,17 @@ function useTransactionsViewModel() {
       }),
     [visible, visibleInvoices, balanceViews, expandedDayKey, month],
   );
+
+  // The first load of a filter shows skeleton rows; later loads keep the previous result visible.
+  const filtersLoading =
+    filtering &&
+    ((showAccountRows &&
+      filteredTransactions.isFetching &&
+      !keptFilteredItems) ||
+      (showCards && filteredInvoices.isFetching && !keptFilteredInvoices));
+  const filtersError = filtering
+    ? (filteredTransactions.error ?? filteredInvoices.error)
+    : null;
 
   function onMonthSelect(monthIndex: string) {
     setMonth(new Date(pickerYear, Number(monthIndex), 1));
@@ -346,6 +552,9 @@ function useTransactionsViewModel() {
   }
 
   function onRefresh() {
+    if (filtering) {
+      refetchFiltered();
+    }
     transactions.refetch();
     invoices.refetch();
     summary.refetch();
@@ -363,10 +572,21 @@ function useTransactionsViewModel() {
     errorMessage: transactions.error?.message,
     expandedDayKey,
     expandedInvoiceId,
+    filterCount: activeGroups(filterStore.filters).length,
+    filteredSummary,
+    filtering,
+    filters: filterStore.filters,
+    filtersEmpty: filtering && !filtersLoading && entries.length === 0,
+    filtersError: filtersError?.message,
+    filtersLoading,
+    hasPeriod: !!applied.period,
     invoicesError: !!invoices.error,
     isEmptyMonth:
-      scopedItemsOfMonth.length === 0 && invoicesOfMonth.length === 0,
+      !filtering &&
+      scopedItemsOfMonth.length === 0 &&
+      invoicesOfMonth.length === 0,
     isFilteredEmpty:
+      !filtering &&
       scopedItemsOfMonth.length + invoicesOfMonth.length > 0 &&
       entries.length === 0,
     isLoading: transactions.isFetching && !transactions.data,
@@ -382,11 +602,15 @@ function useTransactionsViewModel() {
     onClearFilters: () => {
       setOwnerSelection(ALL_FILTER);
       setTypeFilter("ALL");
+      filterStore.clearAll();
     },
     onDayToggle: (dateKey: string) =>
       setExpandedDayKey((current) =>
         current === dateKey ? undefined : dateKey,
       ),
+    onFilterRemove: filterStore.removeGroup,
+    onFiltersApply: filterStore.replace,
+    onFiltersClear: filterStore.clearAll,
     onInvoiceOpen: scope.guard((invoice: CardInvoiceUIModel) =>
       router.push({
         params: { cardId: invoice.cardId, month: invoice.referenceMonth },
@@ -423,6 +647,7 @@ function useTransactionsViewModel() {
         pathname: "/financial/transaction/add_new_transaction",
       }),
     ),
+    onSearchChange: filterStore.setSearch,
     onSummaryRetry: async () => summary.refetch(),
     onToastHide: scope.onToastHide,
     onTypeFilterChange: (value: string) => setTypeFilter(value as TypeFilter),
@@ -451,5 +676,10 @@ function useTransactionsViewModel() {
   };
 }
 
-export { fetchProjections, fetchSummary, fetchTransactions };
+export {
+  fetchFilteredTransactions,
+  fetchProjections,
+  fetchSummary,
+  fetchTransactions,
+};
 export default useTransactionsViewModel;
