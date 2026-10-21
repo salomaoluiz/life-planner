@@ -72,7 +72,10 @@ onFlowComplete:
     id: "financial.import.required.accountOrCard"
 - assertNotVisible:
     id: "financial.import.value-tab-category"
-# One account for every row clears the error.
+# One account for every row clears the error (the select sits a little above the optional lines: scroll back a bit).
+- swipe:
+    start: 50%, 30%
+    end: 50%, 60%
 - tapOn:
     id: "financial.import.fixed.accountOrCard"
 - tapOn:
