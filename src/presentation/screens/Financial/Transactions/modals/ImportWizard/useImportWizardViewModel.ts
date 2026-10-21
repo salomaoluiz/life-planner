@@ -85,16 +85,22 @@ function useImportWizardViewModel(params: ImportWizardParams) {
     [mapping, fixed, rows],
   );
   const tabs = useMemo(() => tabsOf(mapping), [mapping]);
-  const entries = useMemo(
-    () =>
-      Object.fromEntries(
-        tabs.map((tab) => [
-          tab,
-          valueEntries(tab, rows, mapping, records, choices),
-        ]),
-      ) as Partial<Record<ValueTab, ReturnType<typeof valueEntries>>>,
-    [tabs, rows, mapping, records, choices],
-  );
+  const entries = useMemo(() => {
+    // The matched answers of the Type column tell the type of each row, which the categories are matched by.
+    const typeEntries = valueEntries("type", rows, mapping, records, choices);
+    const context = {
+      decimal: parsed?.decimal ?? ",",
+      fixed,
+      typeMap: toValueMaps({ type: typeEntries }).type,
+    } as const;
+
+    return Object.fromEntries(
+      tabs.map((tab) => [
+        tab,
+        valueEntries(tab, rows, mapping, records, choices, context),
+      ]),
+    ) as Partial<Record<ValueTab, ReturnType<typeof valueEntries>>>;
+  }, [tabs, rows, mapping, records, choices, parsed, fixed]);
   const unmatched = tabs.reduce(
     (total, tab) => total + unmatchedCount(entries[tab] ?? []),
     0,

@@ -12,6 +12,7 @@ import {
   TextField,
 } from "@components";
 import { useTranslation } from "@presentation/i18n";
+import { ValueEntry } from "@screens/Financial/Transactions/models/importValues";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
 import useStyles from "../styles";
@@ -28,7 +29,7 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
   const closeLabel = t("financial.import.close");
   const tab = vm.activeTab;
 
-  function selectOptions(value: string) {
+  function selectOptions(entry: ValueEntry) {
     if (tab === "type") {
       return [
         { label: t("financial.import.values.type.expense"), value: "EXPENSE" },
@@ -48,16 +49,18 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
     }
 
     const create =
-      vm.isCreatable && !vm.hasExactMatch(value)
+      vm.isCreatable && !vm.hasExactMatch(entry)
         ? [
             {
-              label: t("financial.import.values.create", { value }),
+              label: t("financial.import.values.create", {
+                value: entry.value,
+              }),
               value: vm.create,
             },
           ]
         : [];
 
-    return [...create, ...vm.options];
+    return [...create, ...vm.optionsFor(entry)];
   }
 
   function entryRows() {
@@ -68,21 +71,21 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
     return (
       <View>
         {vm.entries.map((entry, index) => (
-          <View key={entry.value}>
+          <View key={entry.key}>
             <View style={styles.tableRow}>
               <View style={styles.grow}>
                 <Text.Body numberOfLines={1} value={entry.value} />
                 <Text.Caption
                   tone={"secondary"}
-                  value={`${t("financial.import.values.rows")}: ${entry.rows}`}
+                  value={`${t("financial.import.values.rows")}: ${entry.rows}${entry.type ? ` · ${t(entry.type === "INCOME" ? "financial.import.values.type.income" : "financial.import.values.type.expense")}` : ""}`}
                 />
               </View>
               <View style={styles.grow}>
                 <SelectField
                   closeLabel={closeLabel}
                   label={t(`financial.import.values.appValue.${tab}`)}
-                  onChange={(selected) => vm.onChoice(entry.value, selected)}
-                  options={selectOptions(entry.value)}
+                  onChange={(selected) => vm.onChoice(entry, selected)}
+                  options={selectOptions(entry)}
                   placeholder={t("financial.import.values.choose")}
                   sheetTitle={t(`financial.import.values.appValue.${tab}`)}
                   testID={`${ids.importValue}.${tab}.${index}`}

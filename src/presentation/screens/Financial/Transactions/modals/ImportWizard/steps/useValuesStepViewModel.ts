@@ -11,8 +11,6 @@ import {
   splitCategoryPath,
 } from "@screens/Financial/Transactions/models/categoryChain";
 import {
-  toValueMaps,
-  typeOfRows,
   unmatchedCount,
   ValueEntry,
   ValueTab,
@@ -66,11 +64,18 @@ function isCreatable(tab: ValueTab): tab is CreatableTab {
 function useValuesStepViewModel(wizard: ImportWizardState) {
   const [tab, setTab] = useState<ValueTab>();
   const [creating, setCreating] = useState<{
+    key: string;
     tab: CreatableTab;
+    type?: RowType;
     value: string;
   }>();
   const [form, setForm] = useState<CreateForm>(emptyForm("", "EXPENSE"));
-  const pending = useRef<{ name: string; tab: CreatableTab; value: string }>();
+  const pending = useRef<{
+    key: string;
+    name: string;
+    tab: CreatableTab;
+    type?: RowType;
+  }>();
   const activeTab = tab && wizard.tabs.includes(tab) ? tab : wizard.tabs[0];
   const entries: ValueEntry[] = activeTab
     ? (wizard.entries[activeTab] ?? [])
@@ -142,10 +147,12 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
 
     const list =
       waiting.tab === "category"
-        ? records.categories.map((item) => ({
-            id: item.id,
-            names: [item.path, item.name],
-          }))
+        ? records.categories
+            .filter((item) => !waiting.type || item.type === waiting.type)
+            .map((item) => ({
+              id: item.id,
+              names: [item.path, item.name],
+            }))
         : (waiting.tab === "account" ? records.accounts : records.cards).map(
             (item) => ({
               id: item.id,
@@ -155,7 +162,7 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
     const id = autoMatch(waiting.name, list);
 
     if (id) {
-      wizard.onValueChoice(waiting.tab, waiting.value, id);
+      wizard.onValueChoice(waiting.tab, waiting.key, id);
       pending.current = undefined;
     }
   }, [records]);
@@ -172,36 +179,27 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
     setCreating(undefined);
   }, [created]);
 
-  function onCreateOpen(kind: CreatableTab, value: string) {
-    const type =
-      kind === "category" && wizard.parsed
-        ? typeOfRows(
-            value,
-            wizard.rows,
-            wizard.mapping,
-            wizard.parsed.decimal,
-            {
-              fixed: wizard.fixed,
-              valueMaps: toValueMaps(wizard.entries),
-            },
-          )
-        : undefined;
-
+  function onCreateOpen(kind: CreatableTab, entry: ValueEntry) {
     createMutation.reset();
-    setForm(emptyForm(value, type ?? "EXPENSE"));
-    setCreating({ tab: kind, value });
+    setForm(emptyForm(entry.value, entry.type ?? "EXPENSE"));
+    setCreating({
+      key: entry.key,
+      tab: kind,
+      type: entry.type,
+      value: entry.value,
+    });
   }
 
-  function options(): { label: string; value: string }[] {
+  // The records a value can be matched to; a category only to categories of the type of its rows.
+  function optionsFor(entry: ValueEntry): { label: string; value: string }[] {
     if (!activeTab) {
       return [];
     }
 
     if (activeTab === "category") {
-      return records.categories.map((item) => ({
-        label: item.path,
-        value: item.id,
-      }));
+      return records.categories
+        .filter((item) => !entry.type || item.type === entry.type)
+        .map((item) => ({ label: item.path, value: item.id }));
     }
     if (activeTab === "account") {
       return records.accounts.map((item) => ({
@@ -219,21 +217,20 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
     return [];
   }
 
-  function hasExactMatch(value: string) {
+  function hasExactMatch(entry: ValueEntry) {
     if (activeTab === "category") {
       return !!autoMatch(
-        value,
-        records.categories.map((item) => ({
-          id: item.id,
-          names: [item.name, item.path],
-        })),
+        entry.value,
+        records.categories
+          .filter((item) => !entry.type || item.type === entry.type)
+          .map((item) => ({ id: item.id, names: [item.name, item.path] })),
       );
     }
 
     const list = activeTab === "account" ? records.accounts : records.cards;
 
     return !!autoMatch(
-      value,
+      entry.value,
       list.map((item) => ({ id: item.id, names: [item.name] })),
     );
   }
@@ -260,18 +257,18 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
     hasExactMatch,
     isCreatable: activeTab ? isCreatable(activeTab) : false,
     isSaving: createMutation.isFetching,
-    onChoice: (value: string, selected: string) => {
+    onChoice: (entry: ValueEntry, selected: string) => {
       if (!activeTab) {
         return;
       }
 
       if (selected === CREATE && isCreatable(activeTab)) {
-        onCreateOpen(activeTab, value);
+        onCreateOpen(activeTab, entry);
 
         return;
       }
 
-      wizard.onValueChoice(activeTab, value, selected);
+      wizard.onValueChoice(activeTab, entry.key, selected);
     },
     onCreateCancel: () => setCreating(undefined),
     onCreateSubmit: () => {
@@ -280,9 +277,10 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
       }
 
       pending.current = {
+        key: creating.key,
         name: form.name.trim(),
         tab: creating.tab,
-        value: creating.value,
+        type: creating.type,
       };
       createMutation.mutate({
         form,
@@ -295,7 +293,7 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
       setCreating(undefined);
       setTab(next as ValueTab);
     },
-    options: options(),
+    optionsFor,
     ownerName: owner?.name ?? "",
     parentOptions,
     saveFailed: !!createMutation.error,
@@ -303,19 +301,7 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
       unmatched: unmatchedCount(wizard.entries[value] ?? []),
       value,
     })),
-    typeFromRows:
-      creating?.tab === "category" && wizard.parsed
-        ? !!typeOfRows(
-            creating.value,
-            wizard.rows,
-            wizard.mapping,
-            wizard.parsed.decimal,
-            {
-              fixed: wizard.fixed,
-              valueMaps: toValueMaps(wizard.entries),
-            },
-          )
-        : false,
+    typeFromRows: !!creating?.type,
   };
 }
 

@@ -4,7 +4,6 @@ import {
   ImportRecords,
   tabsOf,
   toValueMaps,
-  typeOfRows,
   unmatchedCount,
   valueEntries,
 } from "./importValues";
@@ -129,63 +128,83 @@ describe("unmatchedCount / toValueMaps", () => {
   });
 });
 
-describe("typeOfRows", () => {
-  const signed: ColumnMapping = { 0: "category", 1: "signedAmount" };
-  const maps = {
-    fixed: {},
-    valueMaps: { account: {}, card: {}, category: {}, paid: {}, type: {} },
+describe("categories matched per type", () => {
+  const sameName: ImportRecords = {
+    ...records,
+    categories: [
+      {
+        depthLevel: 1,
+        id: "exp",
+        name: "Transferências entre contas",
+        path: "Finanças > Transferências entre contas",
+        type: "EXPENSE",
+      },
+      {
+        depthLevel: 0,
+        id: "inc",
+        name: "Transferências entre contas",
+        path: "Transferências entre contas",
+        type: "INCOME",
+      },
+    ],
   };
+  const signed: ColumnMapping = { 0: "category", 1: "signedAmount" };
+  const context = {
+    decimal: "," as const,
+    fixed: {},
+    typeMap: {},
+  };
+  const data = [
+    ["Transferências entre contas", "151,80"],
+    ["Transferências entre contas", "-20,00"],
+    ["Transferências entre contas", "-5,00"],
+  ];
 
-  it("SHOULD give the type WHEN every row that uses the value has the same sign", () => {
-    const rows = [
-      ["Esporte", "-10,00"],
-      ["Esporte", "(5,00)"],
-      ["Salário", "100,00"],
-    ];
+  it("SHOULD list one entry per type and match each to the category of its own type", () => {
+    const entries = valueEntries(
+      "category",
+      data,
+      signed,
+      sameName,
+      {},
+      context,
+    );
 
-    expect(typeOfRows("Esporte", rows, signed, ",", maps)).toBe("EXPENSE");
-    expect(typeOfRows("Salário", rows, signed, ",", maps)).toBe("INCOME");
+    expect(entries.map((e) => [e.type, e.rows, e.selected])).toEqual([
+      ["INCOME", 1, "inc"],
+      ["EXPENSE", 2, "exp"],
+    ]);
+    expect(toValueMaps({ category: entries }).category).toEqual({
+      "EXPENSE|Transferências entre contas": "exp",
+      "INCOME|Transferências entre contas": "inc",
+    });
   });
 
-  it("SHOULD leave it open WHEN the rows mix types or an amount is unreadable", () => {
-    expect(
-      typeOfRows(
-        "A",
-        [
-          ["A", "-1,00"],
-          ["A", "1,00"],
-        ],
-        signed,
-        ",",
-        maps,
-      ),
-    ).toBeUndefined();
-    expect(typeOfRows("A", [["A", "abc"]], signed, ",", maps)).toBeUndefined();
+  it("SHOULD read the type from the Type column through its matched answers", () => {
+    const entries = valueEntries(
+      "category",
+      [["Transferências entre contas", "10,00", "Receita"]],
+      { 0: "category", 1: "amount", 2: "type" },
+      sameName,
+      {},
+      { ...context, typeMap: { Receita: "INCOME" } },
+    );
+
+    expect(entries[0]).toMatchObject({ selected: "inc", type: "INCOME" });
   });
 
-  it("SHOULD read the type column, a fixed type and income/expense columns", () => {
-    const withType: ColumnMapping = { 0: "category", 1: "amount", 2: "type" };
+  it("SHOULD keep the choice of one type apart from the other", () => {
+    const entries = valueEntries(
+      "category",
+      data,
+      signed,
+      sameName,
+      {
+        category: { "EXPENSE|Transferências entre contas": "inc" },
+      },
+      context,
+    );
 
-    expect(
-      typeOfRows("A", [["A", "1,00", "Despesa"]], withType, ",", {
-        ...maps,
-        valueMaps: { ...maps.valueMaps, type: { Despesa: "EXPENSE" } },
-      }),
-    ).toBe("EXPENSE");
-    expect(
-      typeOfRows("A", [["A", "1,00", ""]], withType, ",", {
-        ...maps,
-        fixed: { type: "INCOME" },
-      }),
-    ).toBe("INCOME");
-    expect(
-      typeOfRows(
-        "A",
-        [["A", "", "2,00"]],
-        { 0: "category", 1: "incomeAmount", 2: "expenseAmount" },
-        ",",
-        maps,
-      ),
-    ).toBe("EXPENSE");
+    expect(entries.map((e) => e.selected)).toEqual(["inc", "inc"]);
   });
 });

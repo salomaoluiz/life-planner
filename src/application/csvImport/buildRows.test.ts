@@ -15,7 +15,11 @@ const base: BuildInput = {
   valueMaps: {
     account: {},
     card: { Visa: "card-1" },
-    category: { Mercado: "cat-1", Salário: "cat-2" },
+    category: {
+      "EXPENSE|Mercado": "cat-1",
+      "INCOME|Mercado": "cat-1",
+      "INCOME|Salário": "cat-2",
+    },
     paid: {},
     type: {},
   },

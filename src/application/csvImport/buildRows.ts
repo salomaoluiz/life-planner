@@ -111,7 +111,7 @@ function buildRow(
     return { display, error: amount.error, line };
   }
 
-  const categoryId = categoryOf(input, cell(row, "category"));
+  const categoryId = categoryOf(input, cell(row, "category"), amount.type);
 
   if (categoryId === undefined) {
     return { display, error: "CATEGORY_MISSING", line };
@@ -175,10 +175,15 @@ function buildRows(input: BuildInput): BuildResult {
   return { ignoredSystemRows, rows: built };
 }
 
-function categoryOf(input: BuildInput, text: string): string | undefined {
+// Categories are matched per type (`EXPENSE|Mercado`): income and expense can share a name.
+function categoryOf(
+  input: BuildInput,
+  text: string,
+  type: RowType,
+): string | undefined {
   return text === ""
     ? input.fixed.categoryId
-    : (input.valueMaps.category[text] ?? input.fixed.categoryId);
+    : (input.valueMaps.category[`${type}|${text}`] ?? input.fixed.categoryId);
 }
 
 // FR 16: Amount + Type, Signed amount, or Income + Expense columns.
