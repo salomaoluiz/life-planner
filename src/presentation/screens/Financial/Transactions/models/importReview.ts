@@ -51,7 +51,7 @@ function importPayloads(rows: ReviewRow[]): ImportRowPayload[] {
 // user checked it; an error row is locked on.
 function reviewRows(
   built: BuiltRow[],
-  validation: ImportValidationEntity | undefined,
+  validation: Pick<ImportValidationEntity, "duplicates" | "errors"> | undefined,
   selection: Record<number, boolean>,
 ): ReviewRow[] {
   const serverErrors = new Map(

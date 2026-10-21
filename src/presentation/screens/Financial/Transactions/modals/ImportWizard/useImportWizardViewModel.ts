@@ -215,6 +215,7 @@ function useImportWizardViewModel(params: ImportWizardParams) {
     ? {
         duplicates: validateMutation.data.duplicates,
         errors: refused ?? validateMutation.data.errors,
+        invoices: validateMutation.data.invoices,
       }
     : undefined;
   const review = reviewRows(built.rows, validation, selection);

@@ -106,12 +106,13 @@ describe("CSV import and export (spec 047)", () => {
 
     jest
       .mocked(datasource.validateImport)
-      .mockResolvedValueOnce({ duplicates: [2], errors: [] });
+      .mockResolvedValueOnce({ duplicates: [2], errors: [], invoices: [] });
     jest.mocked(datasource.importTransactions).mockResolvedValue(3);
 
     expect(await validateImport(importRequest)).toEqual({
       duplicates: [2],
       errors: [],
+      invoices: [],
     });
     expect(await importTransactions(importRequest)).toBe(3);
     expect(datasource.importTransactions).toHaveBeenCalledWith(importRequest);
