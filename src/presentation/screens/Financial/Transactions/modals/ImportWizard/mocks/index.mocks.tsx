@@ -31,6 +31,10 @@ jest.mock("@application/useCases", () => ({
       execute: jest.fn(),
       uniqueName: "createCard",
     },
+    getFinancialCategoriesUseCase: {
+      execute: jest.fn().mockResolvedValue([]),
+      uniqueName: "getCategories",
+    },
     importFinancialTransactionsUseCase: {
       execute: jest.fn(),
       uniqueName: "importTransactions",

@@ -7,6 +7,10 @@ import { invalidateFetcherData, useMutation } from "@infrastructure/fetcher";
 import { IMPORTED_CARD_DEFAULTS } from "@presentation/constants/cardColors";
 import { IMPORTED_CATEGORY_DEFAULTS } from "@presentation/constants/categoryColors";
 import {
+  createCategoryChain,
+  splitCategoryPath,
+} from "@screens/Financial/Transactions/models/categoryChain";
+import {
   toValueMaps,
   typeOfRows,
   unmatchedCount,
@@ -84,14 +88,26 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
       const { form: values, tab: kind } = request;
 
       if (kind === "category") {
-        await useCases.createFinancialCategoryUseCase.execute({
-          ...base,
-          depthLevel: request.parentDepth,
-          ...IMPORTED_CATEGORY_DEFAULTS,
-          name: values.name.trim(),
-          parentId: values.parentId || undefined,
-          type: values.type,
-        });
+        // A path ("Finanças > Investimentos") creates every level that is missing, inside each other.
+        await createCategoryChain(
+          splitCategoryPath(values.name),
+          wizard.ownerId,
+          {
+            depthLevel: request.parentDepth,
+            parentId: values.parentId || undefined,
+          },
+          {
+            create: async (level) =>
+              useCases.createFinancialCategoryUseCase.execute({
+                ...base,
+                ...IMPORTED_CATEGORY_DEFAULTS,
+                ...level,
+                type: values.type,
+              }),
+            list: async () =>
+              useCases.getFinancialCategoriesUseCase.execute([wizard.ownerId]),
+          },
+        );
       } else if (kind === "account") {
         await useCases.createFinancialAccountUseCase.execute({
           ...base,

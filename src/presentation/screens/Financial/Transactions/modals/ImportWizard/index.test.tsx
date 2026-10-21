@@ -294,6 +294,35 @@ describe("step 3: values", () => {
     expect(screen.getByTestId(ids.importContinue)).toBeEnabled();
   });
 
+  it("SHOULD create each level of a category path, parent first", async () => {
+    setup();
+    await toColumns();
+    await chooseOption(`${ids.importFixed}.accountOrCard`, "account:acc-1");
+    fireEvent.press(screen.getByTestId(ids.importContinue));
+
+    const create = spies.useMutation.mock.calls.find(
+      ([props]) => props.cacheKey[0] === "financial.import_create_record",
+    )?.[0];
+
+    await create?.fetch({
+      form: {
+        closingDay: "1",
+        dueDay: "10",
+        limitCents: 0,
+        name: "Finanças > Investimentos",
+        parentId: "",
+        type: "EXPENSE",
+      },
+      parentDepth: 0,
+      tab: "category",
+    });
+
+    expect(spies.create).toHaveBeenCalledTimes(1);
+    expect(spies.create).toHaveBeenCalledWith(
+      expect.objectContaining({ depthLevel: 0, name: "Finanças" }),
+    );
+  });
+
   it("SHOULD create an account and a card with their own fields", async () => {
     setup();
     await toColumns();
