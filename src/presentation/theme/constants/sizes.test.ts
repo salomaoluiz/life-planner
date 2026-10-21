@@ -57,6 +57,7 @@ it("SHOULD define the spacing, radius and size scales", () => {
     inputHeight: 50,
     tabBarHeight: 84,
     touchTarget: 44,
+    wizardDialogMaxWidth: 1040,
   });
 });
 
