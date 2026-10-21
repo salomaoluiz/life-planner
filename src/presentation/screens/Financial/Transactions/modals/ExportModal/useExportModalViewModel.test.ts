@@ -103,6 +103,7 @@ describe("owner and accounts", () => {
     act(() =>
       result.current.onSourceToggle({
         archived: true,
+        currency: "BRL",
         id: "acc-x",
         kind: "ACCOUNT",
         name: "X",

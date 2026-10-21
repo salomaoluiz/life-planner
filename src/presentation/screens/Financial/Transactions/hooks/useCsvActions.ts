@@ -6,9 +6,12 @@ function useCsvActions() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  // Set after an import: the toast "N transactions imported" (spec 047 FR 32).
+  const [importedCount, setImportedCount] = useState<number>();
 
   return {
     exportOpen,
+    importedCount,
     importOpen,
     menuOpen,
     onExportClose: () => setExportOpen(false),
@@ -17,6 +20,8 @@ function useCsvActions() {
       setExportOpen(true);
     },
     onImportClose: () => setImportOpen(false),
+    onImported: (count: number) => setImportedCount(count),
+    onImportedHide: () => setImportedCount(undefined),
     onImportOpen: () => {
       setMenuOpen(false);
       setImportOpen(true);

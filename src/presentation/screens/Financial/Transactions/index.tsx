@@ -19,6 +19,7 @@ import { formatAmount } from "@components/AmountText/formatAmount";
 import Skeleton from "@components/Skeleton";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
+import pluralKey from "@presentation/i18n/pluralKey";
 import { useBreakpoint } from "@presentation/theme";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
@@ -37,7 +38,7 @@ import useAdjustmentSheet from "./hooks/useAdjustmentSheet";
 import useCsvActions from "./hooks/useCsvActions";
 import useFilterOptions from "./hooks/useFilterOptions";
 import usePayTransaction from "./hooks/usePayTransaction";
-import { ExportModal, FiltersModal } from "./modals";
+import { ExportModal, FiltersModal, ImportWizard } from "./modals";
 import { buildActiveChips, formatPeriod } from "./models/filterLabels";
 import {
   ALL_FILTER,
@@ -531,6 +532,26 @@ function FinancialTransactions() {
       {csv.exportOpen && (
         <ExportModal onClose={csv.onExportClose} owners={vm.owners} />
       )}
+      {csv.importOpen && (
+        <ImportWizard
+          onClose={csv.onImportClose}
+          onImported={(count) => {
+            csv.onImported(count);
+            vm.onRefresh();
+          }}
+          owners={vm.owners}
+          screenOwner={vm.ownerFilter}
+        />
+      )}
+      <Toast
+        message={t(
+          pluralKey("financial.import.toast.imported", csv.importedCount ?? 0),
+          { count: csv.importedCount ?? 0 },
+        )}
+        onHide={csv.onImportedHide}
+        testID={transactionsTestIds.importToast}
+        visible={csv.importedCount !== undefined}
+      />
       {filtersOpen && (
         <FiltersModal
           archivedOwnerIds={vm.archivedOwnerIds}

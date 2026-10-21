@@ -47,6 +47,7 @@ const options = {
   sources: [
     {
       archived: false,
+      currency: "BRL" as const,
       id: "acc-1",
       kind: "ACCOUNT" as const,
       name: "Checking",
@@ -54,6 +55,7 @@ const options = {
     },
     {
       archived: false,
+      currency: "BRL" as const,
       id: "card-1",
       kind: "CARD" as const,
       name: "Visa",
@@ -61,6 +63,7 @@ const options = {
     },
     {
       archived: true,
+      currency: "BRL" as const,
       id: "acc-old",
       kind: "ACCOUNT" as const,
       name: "Old",

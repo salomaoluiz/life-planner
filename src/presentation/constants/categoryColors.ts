@@ -42,9 +42,16 @@ function normalizeCategoryColor(color: string): string {
 }
 
 export type { CategoryColorOption };
+// What a category created from the CSV import wizard starts with (spec 047 FR 25): the user can edit it later.
+const IMPORTED_CATEGORY_DEFAULTS = {
+  icon: "shape-outline",
+  iconColor: DEFAULT_CATEGORY_COLOR,
+};
+
 export {
   CATEGORY_COLORS,
   DEFAULT_CATEGORY_COLOR,
+  IMPORTED_CATEGORY_DEFAULTS,
   isHexColor,
   isPaletteColor,
   LEGACY_BLACK,

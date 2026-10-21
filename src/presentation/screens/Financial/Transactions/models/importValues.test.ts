@@ -4,16 +4,29 @@ import {
   ImportRecords,
   tabsOf,
   toValueMaps,
+  typeOfRows,
   unmatchedCount,
   valueEntries,
 } from "./importValues";
 
 const records: ImportRecords = {
-  accounts: [{ id: "acc-1", name: "Corrente" }],
-  cards: [{ id: "card-1", name: "Visa" }],
+  accounts: [{ currency: "BRL", id: "acc-1", name: "Corrente" }],
+  cards: [{ closingDay: 10, currency: "BRL", id: "card-1", name: "Visa" }],
   categories: [
-    { id: "cat-1", name: "Mercado", path: "Casa > Mercado" },
-    { id: "cat-2", name: "Salário", path: "Salário" },
+    {
+      depthLevel: 1,
+      id: "cat-1",
+      name: "Mercado",
+      path: "Casa > Mercado",
+      type: "EXPENSE",
+    },
+    {
+      depthLevel: 0,
+      id: "cat-2",
+      name: "Salário",
+      path: "Salário",
+      type: "INCOME",
+    },
   ],
 };
 const mapping: ColumnMapping = {
@@ -113,5 +126,66 @@ describe("unmatchedCount / toValueMaps", () => {
     expect(maps.type).toEqual({ Despesa: "EXPENSE", Receita: "INCOME" });
     expect(maps.paid).toEqual({ não: false, Sim: true });
     expect(maps.account).toEqual({});
+  });
+});
+
+describe("typeOfRows", () => {
+  const signed: ColumnMapping = { 0: "category", 1: "signedAmount" };
+  const maps = {
+    fixed: {},
+    valueMaps: { account: {}, card: {}, category: {}, paid: {}, type: {} },
+  };
+
+  it("SHOULD give the type WHEN every row that uses the value has the same sign", () => {
+    const rows = [
+      ["Esporte", "-10,00"],
+      ["Esporte", "(5,00)"],
+      ["Salário", "100,00"],
+    ];
+
+    expect(typeOfRows("Esporte", rows, signed, ",", maps)).toBe("EXPENSE");
+    expect(typeOfRows("Salário", rows, signed, ",", maps)).toBe("INCOME");
+  });
+
+  it("SHOULD leave it open WHEN the rows mix types or an amount is unreadable", () => {
+    expect(
+      typeOfRows(
+        "A",
+        [
+          ["A", "-1,00"],
+          ["A", "1,00"],
+        ],
+        signed,
+        ",",
+        maps,
+      ),
+    ).toBeUndefined();
+    expect(typeOfRows("A", [["A", "abc"]], signed, ",", maps)).toBeUndefined();
+  });
+
+  it("SHOULD read the type column, a fixed type and income/expense columns", () => {
+    const withType: ColumnMapping = { 0: "category", 1: "amount", 2: "type" };
+
+    expect(
+      typeOfRows("A", [["A", "1,00", "Despesa"]], withType, ",", {
+        ...maps,
+        valueMaps: { ...maps.valueMaps, type: { Despesa: "EXPENSE" } },
+      }),
+    ).toBe("EXPENSE");
+    expect(
+      typeOfRows("A", [["A", "1,00", ""]], withType, ",", {
+        ...maps,
+        fixed: { type: "INCOME" },
+      }),
+    ).toBe("INCOME");
+    expect(
+      typeOfRows(
+        "A",
+        [["A", "", "2,00"]],
+        { 0: "category", 1: "incomeAmount", 2: "expenseAmount" },
+        ",",
+        maps,
+      ),
+    ).toBe("EXPENSE");
   });
 });

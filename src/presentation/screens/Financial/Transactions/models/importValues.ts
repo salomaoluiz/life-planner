@@ -6,11 +6,16 @@ import {
   matchType,
 } from "@application/csvImport/distinctValues";
 import { columnsOf } from "@application/csvImport/mapping";
+import { parseAmountCents } from "@application/csvImport/parseValues";
 import {
   ColumnMapping,
   ColumnTarget,
+  DecimalSeparator,
+  FixedValues,
+  RowType,
   ValueMaps,
 } from "@application/csvImport/types";
+import { CurrencyCode } from "@domain/entities/financial/Currency";
 
 // Spec 047 FR 22: one tab per mapped column that points to records or to a fixed set of answers.
 export type ValueTab = "account" | "card" | "category" | "paid" | "type";
@@ -33,9 +38,20 @@ const TAB_TARGET: Record<ValueTab, ColumnTarget> = {
 
 // The records of the chosen owner the values can be matched to (active ones, system categories excluded).
 export interface ImportRecords {
-  accounts: { id: string; name: string }[];
-  cards: { id: string; name: string }[];
-  categories: { id: string; name: string; path: string }[];
+  accounts: { currency: CurrencyCode; id: string; name: string }[];
+  cards: {
+    closingDay?: number;
+    currency: CurrencyCode;
+    id: string;
+    name: string;
+  }[];
+  categories: {
+    depthLevel: number;
+    id: string;
+    name: string;
+    path: string;
+    type: "EXPENSE" | "INCOME";
+  }[];
 }
 
 // What the user chose: tab → file value → record id (or answer).
@@ -123,6 +139,73 @@ function toValueMaps(
   return maps;
 }
 
+function typeOfRow(
+  row: string[],
+  mapping: ColumnMapping,
+  decimal: DecimalSeparator,
+  maps: { fixed: FixedValues; valueMaps: ValueMaps },
+): RowType | undefined {
+  function cell(target: ColumnTarget): string {
+    const [column] = columnsOf(mapping, target);
+
+    return column === undefined ? "" : (row[column] ?? "").trim();
+  }
+
+  if (columnsOf(mapping, "signedAmount").length > 0) {
+    const parsed = parseAmountCents(cell("signedAmount"), decimal);
+
+    if (!parsed) {
+      return undefined;
+    }
+
+    return parsed.negative ? "EXPENSE" : "INCOME";
+  }
+
+  if (columnsOf(mapping, "incomeAmount").length > 0) {
+    const income = parseAmountCents(cell("incomeAmount"), decimal);
+    const expense = parseAmountCents(cell("expenseAmount"), decimal);
+
+    if (Boolean(income) === Boolean(expense)) {
+      return undefined;
+    }
+
+    return income ? "INCOME" : "EXPENSE";
+  }
+
+  const text = cell("type");
+
+  return text === ""
+    ? maps.fixed.type
+    : (maps.valueMaps.type[text] ?? maps.fixed.type);
+}
+
+// FR 25: the type of the new category when every row that uses the value is of one type (else the user chooses).
+function typeOfRows(
+  value: string,
+  rows: string[][],
+  mapping: ColumnMapping,
+  decimal: DecimalSeparator,
+  maps: { fixed: FixedValues; valueMaps: ValueMaps },
+): RowType | undefined {
+  const [categoryColumn] = columnsOf(mapping, "category");
+  const types = new Set<RowType>();
+
+  for (const row of rows) {
+    if ((row[categoryColumn] ?? "").trim() !== value) {
+      continue;
+    }
+
+    const type = typeOfRow(row, mapping, decimal, maps);
+
+    if (type === undefined) {
+      return undefined;
+    }
+    types.add(type);
+  }
+
+  return types.size === 1 ? [...types][0] : undefined;
+}
+
 function unmatchedCount(entries: ValueEntry[]): number {
   return entries.filter((entry) => entry.selected === undefined).length;
 }
@@ -156,4 +239,4 @@ function valueEntries(
     });
 }
 
-export { tabsOf, toValueMaps, unmatchedCount, valueEntries };
+export { tabsOf, toValueMaps, typeOfRows, unmatchedCount, valueEntries };
