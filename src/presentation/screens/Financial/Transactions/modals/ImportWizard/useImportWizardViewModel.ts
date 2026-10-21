@@ -252,7 +252,11 @@ function useImportWizardViewModel(params: ImportWizardParams) {
   const stepReady = {
     columns: canContinue(statuses),
     file: !!parsed && !parsed.problem && !!ownerId,
-    review: canImport(summary) && !importMutation.isFetching,
+    // The rows are checked again every time the review opens: no import on the answer of an earlier check.
+    review:
+      canImport(summary) &&
+      !importMutation.isFetching &&
+      !validateMutation.isFetching,
     values: unmatched === 0,
   }[step];
 

@@ -521,6 +521,15 @@ describe("step 4: review and import", () => {
     expect(params.onClose).toHaveBeenCalledTimes(1);
   });
 
+  it("SHOULD not allow the import while the rows are being checked again", async () => {
+    setup();
+    mutations.validate.value.data = NO_ISSUES;
+    mutations.validate.value.isFetching = true;
+    await toReview();
+
+    expect(screen.getByTestId(ids.importSubmit)).toBeDisabled();
+  });
+
   it("SHOULD go back to the earlier steps", async () => {
     setup();
     mutations.validate.value.data = NO_ISSUES;
