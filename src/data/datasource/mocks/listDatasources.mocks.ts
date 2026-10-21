@@ -48,6 +48,11 @@ const datasourcesMocks: jest.MockedObjectDeep<Datasources> = {
     undoInvoicePayment: jest.fn(),
     updateCreditCard: jest.fn(),
   },
+  financialDashboardDatasource: {
+    getBalanceSeries: jest.fn(),
+    getSummary: jest.fn(),
+    getTotals: jest.fn(),
+  },
   financialInstallmentPlanDatasource: {
     createInstallmentPlan: jest.fn(),
     deleteInstallmentPlan: jest.fn(),

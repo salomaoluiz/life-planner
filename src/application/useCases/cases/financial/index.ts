@@ -39,6 +39,12 @@ export {
 } from "./creditCards";
 
 export {
+  getBalanceSeriesUseCase as getFinancialBalanceSeriesUseCase,
+  getDashboardSummaryUseCase as getFinancialDashboardSummaryUseCase,
+  getFinanceTotalsUseCase as getFinancialTotalsUseCase,
+} from "./dashboard";
+
+export {
   createInstallmentPlanUseCase as createFinancialInstallmentPlanUseCase,
   deleteInstallmentPlanUseCase as deleteFinancialInstallmentPlanUseCase,
   getInstallmentPlanUseCase as getFinancialInstallmentPlanUseCase,
