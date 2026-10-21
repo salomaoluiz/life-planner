@@ -4,6 +4,8 @@
 // day), so a purchase dated yesterday sits on the invoice that closed yesterday and its planned payment
 // day is today, in the current month.
 // Reads E2E_API_URL, TOKEN, TITLE, OWNER_ID, CATEGORY_ID, DESCRIPTION, VALUE_CENTS from env. Never logs the token.
+// Optional caller-scoped params (spec 045): SECOND_CATEGORY_ID, SECOND_DESCRIPTION, SECOND_VALUE_CENTS add a second
+// purchase on the same invoice.
 function pad(value) {
   return value < 10 ? "0" + value : String(value);
 }
@@ -55,6 +57,32 @@ if (!purchase.ok) {
   throw new Error(
     "E2E setup: card purchase failed with status " + purchase.status,
   );
+}
+
+if (typeof SECOND_DESCRIPTION !== "undefined" && SECOND_DESCRIPTION) {
+  var second = http.post(E2E_API_URL + "/v1/finance/transactions", {
+    headers: headers,
+    body: JSON.stringify({
+      categoryId: SECOND_CATEGORY_ID,
+      creditCardId: cardId,
+      date:
+        yesterday.getFullYear() +
+        "-" +
+        pad(yesterday.getMonth() + 1) +
+        "-" +
+        pad(yesterday.getDate()),
+      description: SECOND_DESCRIPTION,
+      owner: "USER",
+      ownerId: OWNER_ID,
+      type: "EXPENSE",
+      value: Number(SECOND_VALUE_CENTS),
+    }),
+  });
+  if (!second.ok) {
+    throw new Error(
+      "E2E setup: second card purchase failed with status " + second.status,
+    );
+  }
 }
 
 output.CARD_ID = cardId;

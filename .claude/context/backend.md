@@ -50,3 +50,5 @@ Accounts, cards, transactions, recurrences, projections, installment plans and i
 ## Tags (spec 043)
 
 `/v1/finance/tags` (`GET ?ownerId`, `POST { name, owner: USER|FAMILY|ALL, ownerId? }`, `PATCH { name?, scope: "ALL" }`, `DELETE`; 409 = name in use, ignoring case). Transactions, installment plans and recurrences take `tags: string[]` (names, max 10 x 30 characters; omitted = unchanged, `[]` = remove all) and return `tags: [{ id, name }]`; the API resolves or creates the names in the owner of the record. The app reads the tags of all owners once (`CACHE_FINANCIAL_TAG_DATA`, invalidated by every transaction/plan/recurrence write) and filters them per owner for the suggestions.
+
+- **Transaction filters** (spec 045, additive): optional `from`+`to` (up to 2 years), `q`, `categoryId` (descendants included), `tagId`, `accountId`, `creditCardId`, `paid` on `GET /finance/transactions`; `/credit-cards/invoices` also takes `from`/`to` instead of `month` and returns `filteredTotal`/`matchedCount`/`purchaseCount` per invoice; `/recurrences/projections` takes `q`, `categoryId`, `tagId`, `accountId`, `creditCardId`. The app sends them through `appendFilterParams`.

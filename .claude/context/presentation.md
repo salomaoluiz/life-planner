@@ -221,3 +221,7 @@ Screens compose kit components (`components.md`) and never style visual details 
 ## Modal layout rule (owner, 2026-10-20)
 
 Every new modal is flexible: on `medium`/`expanded` the larger two-column `BottomSheet size="form"` with `FormColumns` (Delete in `footerStart`), on `compact` the bottom sheet. Only confirmations and pickers stay `dialog` size. `NewTagModal` (spec 043) follows it.
+
+## Filters on a list (spec 045)
+
+The Transactions filters live in a module-level store (`useTransactionFilters`, `useSyncExternalStore`): they survive leaving the screen and reset on reload. While `isFiltering`, the view model runs the filtered queries (keyed by the normalized filter, previous result kept with `useKept`) over `period ?? month`, hides the daily balances and the month summary, and builds a `FilteredSummary`. The modal edits a draft and commits on "Apply filters".
