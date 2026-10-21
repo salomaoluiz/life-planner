@@ -1,0 +1,72 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/export-csv
+tags:
+  - financial
+  - spec-047
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# The export modal has its own period and count: two transactions this month, then nothing in a period without any.
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: E2E Export Row 1
+      VALUE_CENTS: "1500"
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: E2E Export Row 2
+      VALUE_CENTS: "2500"
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- tapOn:
+    id: "financial.transactions.exportButton"
+- extendedWaitUntil:
+    visible:
+      id: "financial.export.sheet"
+    timeout: 20000
+# "This year" is the default period: both transactions are in it. The count sits below the fold of the sheet.
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.export.count"
+      text: ".*2.*"
+    timeout: 20000
+- assertVisible:
+    id: "financial.export.submit"
+- runFlow: ../../../subflows/financial/scroll-form-up.yaml
+- tapOn:
+    id: "financial.export.preset-THIS_MONTH"
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.export.count"
+      text: ".*2.*"
+    timeout: 20000
+# The modal has its own filters: closing it leaves the screen as it was.
+- tapOn:
+    id: "financial.export.cancel"
+- assertNotVisible:
+    id: "financial.export.sheet"
+- assertVisible:
+    id: "financial.transactions.screen"

@@ -26,4 +26,7 @@ function isCardColor(value: string): boolean {
   );
 }
 
-export { CARD_COLORS, DEFAULT_CARD_COLOR, isCardColor };
+// What a credit card created from the CSV import wizard starts with (spec 047 FR 25): the user can edit it later.
+const IMPORTED_CARD_DEFAULTS = { brand: "OTHER", color: DEFAULT_CARD_COLOR };
+
+export { CARD_COLORS, DEFAULT_CARD_COLOR, IMPORTED_CARD_DEFAULTS, isCardColor };

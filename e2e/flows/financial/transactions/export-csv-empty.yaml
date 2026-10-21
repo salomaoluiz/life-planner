@@ -1,0 +1,30 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/export-csv-empty
+tags:
+  - financial
+  - spec-047
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Empty state: a user without transactions sees that there is nothing to export in the period.
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- tapOn:
+    id: "financial.transactions.exportButton"
+- extendedWaitUntil:
+    visible:
+      id: "financial.export.sheet"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.export.count"
+      text: ".*(No transactions|Nenhuma transação).*"
+    timeout: 20000

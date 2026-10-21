@@ -19,11 +19,13 @@ import { formatAmount } from "@components/AmountText/formatAmount";
 import Skeleton from "@components/Skeleton";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
+import pluralKey from "@presentation/i18n/pluralKey";
 import { useBreakpoint } from "@presentation/theme";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
 import AdjustmentSheet from "./components/AdjustmentSheet";
 import CardInvoiceRow from "./components/CardInvoiceRow";
+import CsvActions from "./components/CsvActions";
 import DayBalanceLine from "./components/DayBalanceLine";
 import FilteredSummary from "./components/FilteredSummary";
 import FilterToolbar from "./components/FilterToolbar";
@@ -33,9 +35,10 @@ import MonthSwitcher from "./components/MonthSwitcher";
 import TransactionRow from "./components/TransactionRow";
 import { useTransactionsViewModel } from "./hooks";
 import useAdjustmentSheet from "./hooks/useAdjustmentSheet";
+import useCsvActions from "./hooks/useCsvActions";
 import useFilterOptions from "./hooks/useFilterOptions";
 import usePayTransaction from "./hooks/usePayTransaction";
-import { FiltersModal } from "./modals";
+import { ExportModal, FiltersModal, ImportWizard } from "./modals";
 import { buildActiveChips, formatPeriod } from "./models/filterLabels";
 import {
   ALL_FILTER,
@@ -56,6 +59,7 @@ function FinancialTransactions() {
   const vm = useTransactionsViewModel();
   const adjustment = useAdjustmentSheet({ onDeleted: vm.onRefresh });
   const pay = usePayTransaction({ onPaid: vm.onRefresh });
+  const csv = useCsvActions();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [filtersStep, setFiltersStep] = useState<"period" | "root">("root");
   function openFilters(step: "period" | "root" = "root") {
@@ -290,6 +294,18 @@ function FinancialTransactions() {
   );
   const toolbar = (
     <View style={styles.toolbar} testID="transactions-toolbar">
+      <CsvActions
+        closeLabel={t("common.actions.close")}
+        exportLabel={t("financial.export.action")}
+        importLabel={t("financial.import.action")}
+        menuLabel={t("financial.export.menu")}
+        menuOpen={csv.menuOpen}
+        onExport={csv.onExportOpen}
+        onImport={csv.onImportOpen}
+        onMenuClose={csv.onMenuClose}
+        onMenuOpen={csv.onMenuOpen}
+        wide={wide}
+      />
       {vm.filters.period ? (
         <View style={styles.periodChip}>
           <Chip
@@ -513,6 +529,29 @@ function FinancialTransactions() {
           year={vm.pickerYear}
         />
       )}
+      {csv.exportOpen && (
+        <ExportModal onClose={csv.onExportClose} owners={vm.owners} />
+      )}
+      {csv.importOpen && (
+        <ImportWizard
+          onClose={csv.onImportClose}
+          onImported={(count) => {
+            csv.onImported(count);
+            vm.onRefresh();
+          }}
+          owners={vm.owners}
+          screenOwner={vm.ownerFilter}
+        />
+      )}
+      <Toast
+        message={t(
+          pluralKey("financial.import.toast.imported", csv.importedCount ?? 0),
+          { count: csv.importedCount ?? 0 },
+        )}
+        onHide={csv.onImportedHide}
+        testID={transactionsTestIds.importToast}
+        visible={csv.importedCount !== undefined}
+      />
       {filtersOpen && (
         <FiltersModal
           archivedOwnerIds={vm.archivedOwnerIds}

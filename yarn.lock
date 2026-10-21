@@ -3429,6 +3429,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/papaparse@npm:^5.5.2":
+  version: 5.5.2
+  resolution: "@types/papaparse@npm:5.5.2"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/27b097b6f8f204b20ade1f2cbf4798eb38caa5fbfa3180fd0faa5e3f9aea371c1786ae180d56f3287556463eefe3100c953e316ea6ee99d7ae1d04111cfc9e50
+  languageName: node
+  linkType: hard
+
 "@types/prop-types@npm:*":
   version: 15.7.15
   resolution: "@types/prop-types@npm:15.7.15"
@@ -6521,6 +6530,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-document-picker@npm:~13.0.3":
+  version: 13.0.3
+  resolution: "expo-document-picker@npm:13.0.3"
+  peerDependencies:
+    expo: "*"
+  checksum: 10c0/333f8b6fe1a8bac0a19c660417c7878093739acdad308f78c370e4977e252b372d0671d35de478eaf2c071e0578d63a8c3bd97325ea2e505b9c22c6e1a39404b
+  languageName: node
+  linkType: hard
+
 "expo-file-system@npm:~18.0.12":
   version: 18.0.12
   resolution: "expo-file-system@npm:18.0.12"
@@ -6673,6 +6691,15 @@ __metadata:
   peerDependencies:
     expo: "*"
   checksum: 10c0/c2ad36f7ae8aea5b95ebc117f302974de6ad403f0b98b259f9dfcadc441f5c40c2170472e4e95832ad6cf8bcd37614dfb3757a4de1f7631ea9493c61cb7b2ab3
+  languageName: node
+  linkType: hard
+
+"expo-sharing@npm:~13.0.1":
+  version: 13.0.1
+  resolution: "expo-sharing@npm:13.0.1"
+  peerDependencies:
+    expo: "*"
+  checksum: 10c0/ecbd03c51fff90dc88dd06a7c8e8c5d5aeab564fc4c23893cef2734ca65e5525957cb700899a5a723e07e74b53056419ce5496b94442afaad35d7e62e42b4b12
   languageName: node
   linkType: hard
 
@@ -9186,6 +9213,7 @@ __metadata:
     "@tanstack/react-query": "npm:^5.67.2"
     "@testing-library/react-native": "npm:^13.0.1"
     "@types/jest": "npm:^29.5.12"
+    "@types/papaparse": "npm:^5.5.2"
     "@types/react": "npm:~18.3.12"
     "@types/react-test-renderer": "npm:^18.3.0"
     date-fns: "npm:^4.1.0"
@@ -9200,6 +9228,8 @@ __metadata:
     expo-blur: "npm:~14.0.3"
     expo-clipboard: "npm:~7.0.1"
     expo-constants: "npm:~17.0.6"
+    expo-document-picker: "npm:~13.0.3"
+    expo-file-system: "npm:~18.0.12"
     expo-font: "npm:~13.0.3"
     expo-haptics: "npm:~14.0.1"
     expo-image: "npm:^2.0.6"
@@ -9207,6 +9237,7 @@ __metadata:
     expo-localization: "npm:^16.0.1"
     expo-router: "npm:~4.0.17"
     expo-secure-store: "npm:~14.0.1"
+    expo-sharing: "npm:~13.0.1"
     expo-splash-screen: "npm:^0.29.22"
     expo-status-bar: "npm:~2.0.1"
     expo-symbols: "npm:~0.2.2"
@@ -9218,6 +9249,7 @@ __metadata:
     jest: "npm:^29.2.1"
     jest-expo: "npm:~52.0.4"
     lint-staged: "npm:^15.4.3"
+    papaparse: "npm:^5.7.0"
     prettier: "npm:^3.5.1"
     react: "npm:18.3.1"
     react-content-loader: "npm:^7.0.2"
@@ -10686,6 +10718,13 @@ __metadata:
   version: 1.0.1
   resolution: "package-json-from-dist@npm:1.0.1"
   checksum: 10c0/62ba2785eb655fec084a257af34dbe24292ab74516d6aecef97ef72d4897310bc6898f6c85b5cd22770eaa1ce60d55a0230e150fb6a966e3ecd6c511e23d164b
+  languageName: node
+  linkType: hard
+
+"papaparse@npm:^5.7.0":
+  version: 5.7.0
+  resolution: "papaparse@npm:5.7.0"
+  checksum: 10c0/aeea2122ffa7abf33206ab9465e1adcb678ca0e9b08fbd3cea53bf6dc07d5903e69f387dc4dde2498e2478130ba3db79d1fd3956bf638c00be802f0d275e006d
   languageName: node
   linkType: hard
 

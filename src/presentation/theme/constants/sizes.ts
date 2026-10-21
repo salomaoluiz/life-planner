@@ -24,6 +24,7 @@ const size = {
   inputHeight: 50,
   tabBarHeight: 84,
   touchTarget: 44,
+  wizardDialogMaxWidth: 1040,
 };
 
 export const defaultSizes = { borderRadius, size, spacing };

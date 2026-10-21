@@ -1,4 +1,11 @@
 import { InstallmentScope } from "@domain/entities/financial/InstallmentPlanEntity";
+import {
+  ExportFileEntity,
+  ExportQuery,
+  ExportRequest,
+  ImportRequest,
+  ImportValidationEntity,
+} from "@domain/entities/financial/TransactionCsv";
 import TransactionEntity, {
   TransactionType,
 } from "@domain/entities/financial/TransactionEntity";
@@ -10,12 +17,20 @@ export type FinancialTransactionRepository = {
     params: CreateTransactionRepositoryParams,
   ): Promise<TransactionEntity>;
   deleteTransaction(params: DeleteTransactionRepositoryParams): Promise<void>;
+  // Spec 047: the CSV of a period and scope.
+  exportTransactions(params: ExportRequest): Promise<ExportFileEntity>;
+  // Spec 047: how many rows an export of the query would write.
+  getExportCount(params: ExportQuery): Promise<number>;
   // Spec 045: account rows that match the filters (no cache).
   getFilteredTransactions(
     params: GetFilteredTransactionsRepositoryParams,
   ): Promise<TransactionEntity[]>;
   getTransactions(ownerIds: string[]): Promise<TransactionEntity[]>;
+  // Spec 047: writes every row or none; a 422 throws `ImportRowsInvalid`.
+  importTransactions(params: ImportRequest): Promise<number>;
   updateTransaction(params: UpdateTransactionRepositoryParams): Promise<void>;
+  // Spec 047: dry run, nothing is written.
+  validateImport(params: ImportRequest): Promise<ImportValidationEntity>;
 };
 
 interface CreateTransactionRepositoryParams {

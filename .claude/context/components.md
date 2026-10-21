@@ -104,3 +104,8 @@ Drawn with `react-native-svg` (works on iOS, Android and web), Grafite tokens on
 - `ColumnChart`: `groups: { label; income: { realized; projected }; expense: {...} }[]`, same formatters, `selectedIndex?`, `onSelect?(index)` (`-group-<i>`); shared axis from zero, the projected part stacked at 50 % opacity.
 - `PieBreakdown`: a pie with the ranked rows beside it (a `BarList` without bars and with a colour dot per row): `rows` (slice size = `ratio`), `onPress?(id)`, `openLabel?`, `size?`; slice colours come from `theme/constants/chartPalette`, a `muted` row is grey and not pressable.
 - `LineChart` is green (`income`) above zero and red (`expense`) below it, split where the line crosses zero (`buildSegments`); `ChartCard` legend tone `neutral` is for series that carry both colours. `BarList` takes `hideBars` and a row `dotColor`.
+
+## Import wizard pieces (spec 047)
+
+- `Stepper`: `steps: { label }[]`, `current` (0-based), `accessibilityLabel` ("Step 2 of 4: Columns"), `compact?` (four thin bars with `role="progressbar"` instead of numbered steps; done steps show a check); step ids `<testID>-step-<i>`.
+- `BottomSheet size="wizard"`: a `form` sheet that is 1040 px wide on `expanded` (720 px on `medium`, like `form`); used by the Import CSV wizard.

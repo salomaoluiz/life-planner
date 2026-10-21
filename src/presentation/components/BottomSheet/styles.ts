@@ -6,7 +6,12 @@ import { isWeb } from "@utils/platform";
 const FOOTER_BUTTON_MIN_WIDTH = 200;
 const GRABBER = { height: 4, width: 40 };
 
-function useStyles(wide: boolean, form: boolean, medium: boolean) {
+function useStyles(
+  wide: boolean,
+  form: boolean,
+  medium: boolean,
+  wizard = false,
+) {
   const { colors, radius, sizes, spacing } = useKitTheme();
   const wideForm = wide && form;
   let maxWidth = sizes.formMaxWidth;
@@ -14,6 +19,10 @@ function useStyles(wide: boolean, form: boolean, medium: boolean) {
     maxWidth = medium
       ? sizes.formDialogMaxWidthMedium
       : sizes.formDialogMaxWidth;
+  }
+  // Spec 047 FR 30: the import wizard is a wider form (about 1040 px on expanded).
+  if (wideForm && wizard && !medium) {
+    maxWidth = sizes.wizardDialogMaxWidth;
   }
 
   return StyleSheet.create({

@@ -1,0 +1,122 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/import-csv-owner-per-row
+tags:
+  - financial
+  - spec-047
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# One file, two owners: the "Pertence a" column sends each row to Personal or to the family, and the account and the
+# category (same names in both owners) are matched in the owner of the row.
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Family
+      KEY: FAMILY_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-family.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      NAME: ${output.FAMILY_NAME}
+- runFlow:
+    file: ../../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.FAMILY_ID}
+      OWNER: FAMILY
+      NAME: ${output.ACCOUNT_NAME}
+- runFlow:
+    file: ../../../subflows/setup/create-category.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.FAMILY_ID}
+      OWNER: FAMILY
+      NAME: ${output.EXPENSE_CATEGORY_NAME}
+      TYPE: EXPENSE
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Owner Row A
+      KEY: ROW_A
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Owner Row B
+      KEY: ROW_B
+- runScript:
+    file: ../../../scripts/csv-import-fixture.js
+    env:
+      DESCRIPTION_1: ${output.ROW_A}
+      DESCRIPTION_2: ${output.ROW_B}
+      CATEGORY_1: ${output.EXPENSE_CATEGORY_NAME}
+      CATEGORY_2: ${output.EXPENSE_CATEGORY_NAME}
+      ACCOUNT_NAME: ${output.ACCOUNT_NAME}
+      OWNER_1: Personal
+      OWNER_2: ${output.FAMILY_NAME}
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow:
+    file: ../../../subflows/financial/load-csv-fixture.yaml
+    env:
+      CSV_FRAGMENT: ${output.CSV_FRAGMENT}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- tapOn:
+    id: "financial.transactions.importButton"
+- tapOn:
+    id: "financial.import.file.pick"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.file.name"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+# Step 2: the "Pertence a" column is recognized by its header.
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.column.0"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+# Step 3: both owners were matched by name, and so were the accounts and categories of each one.
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.value-tab-owner"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.row.2"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.submit"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.toast"
+    timeout: 20000
+# Each row went to its owner: the family scope shows only the second one (39,90), Personal only the first (312,40).
+- tapOn:
+    id: "financial.transactions.scope-filter-${output.FAMILY_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.summary-expense"
+      text: ".*39[.,]90.*"
+    timeout: 20000
+- tapOn:
+    id: "financial.transactions.scope-filter-${output.USER_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.summary-expense"
+      text: ".*312[.,]40.*"
+    timeout: 20000

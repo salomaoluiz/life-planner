@@ -5,15 +5,21 @@ import CategoryDTO from "@application/dto/financial/CategoryDTO";
 import CreditCardDTO from "@application/dto/financial/CreditCardDTO";
 import TagDTO from "@application/dto/financial/TagDTO";
 import { useCases } from "@application/useCases";
+import { CurrencyCode } from "@domain/entities/financial/Currency";
 import { useQuery } from "@infrastructure/fetcher";
 
 import { PickerCategory } from "../models/categoryPicker";
 
 export interface SourceOption {
   archived: boolean;
+  // Cards only: the invoice a purchase lands on follows it (spec 047 FR 30).
+  closingDay?: number;
+  currency: CurrencyCode;
   id: string;
   kind: "ACCOUNT" | "CARD";
   name: string;
+  // The owner (Personal or a family) the account or card belongs to.
+  ownerId: string;
 }
 
 // What the Filters modal and the active-filter chips need to name an id (spec 045 FR 11, 18): accounts,
@@ -58,17 +64,22 @@ function useFilterOptions(ownerIds: string[], enabled: boolean) {
         ...(accounts.data ?? []).map(
           (account): SourceOption => ({
             archived: account.status === "ARCHIVED",
+            currency: account.currency,
             id: account.id,
             kind: "ACCOUNT",
             name: account.name,
+            ownerId: account.ownerId,
           }),
         ),
         ...(cards.data ?? []).map(
           (card): SourceOption => ({
             archived: card.status === "ARCHIVED",
+            closingDay: card.closingDay,
+            currency: card.currency,
             id: card.id,
             kind: "CARD",
             name: card.title,
+            ownerId: card.ownerId,
           }),
         ),
       ],

@@ -75,8 +75,12 @@ export {
 export {
   createTransactionUseCase as createFinancialTransactionUseCase,
   deleteTransactionUseCase as deleteFinancialTransactionUseCase,
+  exportTransactionsUseCase as exportFinancialTransactionsUseCase,
+  getExportCountUseCase as getFinancialExportCountUseCase,
   getFilteredTransactionsUseCase as getFinancialFilteredTransactionsUseCase,
   getTransactionsUseCase as getFinancialTransactionsUseCase,
+  importTransactionsUseCase as importFinancialTransactionsUseCase,
   refreshTransactionsUseCase as refreshFinancialTransactionsUseCase,
   updateTransactionUseCase as updateFinancialTransactionUseCase,
+  validateImportUseCase as validateFinancialImportUseCase,
 } from "./transactions";

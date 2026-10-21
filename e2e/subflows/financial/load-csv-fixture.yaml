@@ -1,0 +1,9 @@
+url: ${E2E_WEB_URL}
+---
+# Caller env: CSV_FRAGMENT (from scripts/csv-import-fixture.js). Leaves the CSV for the import wizard's next file
+# pick through the dev-only /e2e-csv route (needs EXPO_PUBLIC_E2E_LOGIN=true, like login-by-token) and lands on Home.
+- openLink: ${E2E_WEB_URL}/e2e-csv#${CSV_FRAGMENT}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000

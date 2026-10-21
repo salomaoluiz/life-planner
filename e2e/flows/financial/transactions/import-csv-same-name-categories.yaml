@@ -1,0 +1,107 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/import-csv-same-name-categories
+tags:
+  - financial
+  - spec-047
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# An income and an expense category can share a name: each row is matched to the category of its own type.
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runFlow:
+    file: ../../../subflows/setup/create-category.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: ${output.EXPENSE_CATEGORY_NAME}
+      TYPE: INCOME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Import Row A
+      KEY: ROW_A
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Import Row B
+      KEY: ROW_B
+- runScript:
+    file: ../../../scripts/csv-import-fixture.js
+    env:
+      DESCRIPTION_1: ${output.ROW_A}
+      DESCRIPTION_2: ${output.ROW_B}
+      CATEGORY_1: ${output.EXPENSE_CATEGORY_NAME}
+      CATEGORY_2: ${output.EXPENSE_CATEGORY_NAME}
+      AMOUNT_2: "500,00"
+      ACCOUNT_NAME: ${output.ACCOUNT_NAME}
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow:
+    file: ../../../subflows/financial/load-csv-fixture.yaml
+    env:
+      CSV_FRAGMENT: ${output.CSV_FRAGMENT}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- tapOn:
+    id: "financial.transactions.importButton"
+# Step 1: the file, with the owner defaulting to Personal.
+- tapOn:
+    id: "financial.import.file.pick"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.file.name"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+# Step 2: every column was recognized by its header, nothing is missing.
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.column.0"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+# Step 3: the same name is listed once per type and both match without creating anything.
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.value.category.1"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+# Step 4: both rows are ready, nothing to fix.
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.row.2"
+    timeout: 20000
+- assertVisible:
+    id: "financial.import.row.3"
+- tapOn:
+    id: "financial.import.submit"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.toast"
+    timeout: 20000
+# The imported rows are in the list and the month total follows (312,40 + 39,90).
+- assertVisible:
+    id: "financial.transactions.summary-expense"
+    text: ".*312[.,]40.*"
+- assertVisible:
+    id: "financial.transactions.summary-income"
+    text: ".*500[.,]00.*"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.ROW_A}
+    timeout: 20000
+- assertVisible:
+    id: "financial.transactions.row-title"
+    text: ${output.ROW_B}

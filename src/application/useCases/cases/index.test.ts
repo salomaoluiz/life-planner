@@ -27,6 +27,7 @@ const useCases = {
   deleteFinancialTagUseCase: expect.any(Function),
   deleteFinancialTransactionUseCase: expect.any(Function),
   deleteStockItemUseCase: expect.any(Function),
+  exportFinancialTransactionsUseCase: expect.any(Function),
   getFamiliesUseCase: expect.any(Function),
   getFamilyByIdUseCase: expect.any(Function),
   getFamilyInviteUseCase: expect.any(Function),
@@ -40,6 +41,7 @@ const useCases = {
   getFinancialCreditCardsUseCase: expect.any(Function),
   getFinancialDailyBalancesUseCase: expect.any(Function),
   getFinancialDashboardSummaryUseCase: expect.any(Function),
+  getFinancialExportCountUseCase: expect.any(Function),
   getFinancialFilteredTransactionsUseCase: expect.any(Function),
   getFinancialInstallmentPlanUseCase: expect.any(Function),
   getFinancialProjectionsUseCase: expect.any(Function),
@@ -56,6 +58,7 @@ const useCases = {
   getUserByUserIdUseCase: expect.any(Function),
   getUserConfigsUseCase: expect.any(Function),
   getUserUseCase: expect.any(Function),
+  importFinancialTransactionsUseCase: expect.any(Function),
   inviteFamilyMemberUseCase: expect.any(Function),
   joinFamilyMemberUseCase: expect.any(Function),
   loginWithEmailUseCase: expect.any(Function),
@@ -84,6 +87,7 @@ const useCases = {
   updateFinancialTagUseCase: expect.any(Function),
   updateFinancialTransactionUseCase: expect.any(Function),
   updateStockItemUseCase: expect.any(Function),
+  validateFinancialImportUseCase: expect.any(Function),
 };
 
 it("SHOULD return a list of use cases", () => {

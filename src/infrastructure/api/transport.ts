@@ -4,6 +4,19 @@ const REQUEST_TIMEOUT_MS = 15_000;
 
 type Method = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
 
+interface SendResult {
+  // The `filename` of a `Content-Disposition` attachment (the CSV export, spec 047).
+  filename?: string;
+  json?: Record<string, unknown>;
+  status: number;
+  // The raw body, for a text response.
+  text: string;
+}
+
+function filenameOf(disposition: null | string): string | undefined {
+  return /filename="?([^";]+)"?/.exec(disposition ?? "")?.[1];
+}
+
 function getBaseUrl() {
   // Direct read is inlined by Expo at build time; the alias keeps it readable at runtime (tests).
   const envs = process.env;
@@ -32,7 +45,7 @@ async function send(
   path: string,
   body: unknown,
   token: null | string,
-): Promise<{ json?: Record<string, unknown>; status: number }> {
+): Promise<SendResult> {
   const baseUrl = getBaseUrl();
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -49,7 +62,16 @@ async function send(
       signal: controller.signal,
     });
 
-    return { json: parseBody(await response.text()), status: response.status };
+    const text = await response.text();
+
+    return {
+      filename: filenameOf(
+        response.headers?.get("content-disposition") ?? null,
+      ),
+      json: parseBody(text),
+      status: response.status,
+      text,
+    };
   } catch {
     throw new ConnectivityError();
   } finally {
@@ -57,5 +79,5 @@ async function send(
   }
 }
 
-export type { Method };
+export type { Method, SendResult };
 export { getBaseUrl, send };

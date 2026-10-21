@@ -247,6 +247,18 @@ it.each([
   expect(style.maxWidth).toBe(width);
 });
 
+it.each([
+  ["medium", 720],
+  ["expanded", 1040],
+] as const)(
+  "SHOULD be a %s wide wizard dialog of %i px",
+  (breakpoint, width) => {
+    setup({ size: "wizard" }, breakpoint);
+    const style = StyleSheet.flatten(screen.getByTestId("sheet").props.style);
+    expect(style.maxWidth).toBe(width);
+  },
+);
+
 it("SHOULD keep a dialog at 480 px even next to a form", () => {
   setup({ size: "dialog" }, "expanded");
   expect(
