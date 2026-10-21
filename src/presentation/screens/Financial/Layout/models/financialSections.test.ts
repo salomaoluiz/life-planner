@@ -7,6 +7,8 @@ import {
 it.each([
   ["/financial", "transactions"],
   ["/financial/", "transactions"],
+  ["/financial/overview", "overview"],
+  ["/financial/overview/", "overview"],
   ["/financial/categories", "categories"],
   ["/financial/categories/", "categories"],
   ["/financial/tags", "tags"],
@@ -22,6 +24,7 @@ it.each([
 
 it("SHOULD give each section its route path", () => {
   expect(getFinancialSectionPath("transactions")).toBe("/financial");
+  expect(getFinancialSectionPath("overview")).toBe("/financial/overview");
   expect(getFinancialSectionPath("categories")).toBe("/financial/categories");
   expect(getFinancialSectionPath("tags")).toBe("/financial/tags");
   expect(getFinancialSectionPath("accounts")).toBe("/financial/accounts");
@@ -30,6 +33,7 @@ it("SHOULD give each section its route path", () => {
 
 it("SHOULD list the sections in menu order with icons AND rail testIDs", () => {
   expect(FINANCIAL_SECTIONS.map((item) => item.section)).toEqual([
+    "overview",
     "transactions",
     "categories",
     "tags",
@@ -37,6 +41,7 @@ it("SHOULD list the sections in menu order with icons AND rail testIDs", () => {
     "cards",
   ]);
   expect(FINANCIAL_SECTIONS.map((item) => item.icon)).toEqual([
+    "chart-box-outline",
     "swap-vertical",
     "shape-outline",
     "tag-outline",

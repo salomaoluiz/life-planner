@@ -6,7 +6,7 @@ import { useKitTheme } from "@components/utils/useKitTheme";
 
 export interface StatTileProps {
   /** The change against the previous period; `neutral` has no colour */
-  delta?: { text: string; tone: "bad" | "good" | "neutral" };
+  delta?: { note?: string; text: string; tone: "bad" | "good" | "neutral" };
   label: string;
   loading?: boolean;
   testID?: string;
@@ -24,6 +24,12 @@ function StatTile(props: StatTileProps) {
   const { colors, radius, spacing } = useKitTheme();
   const { testID } = props;
   const styles = StyleSheet.create({
+    delta: {
+      alignItems: "center",
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: spacing.xxs,
+    },
     root: {
       backgroundColor: colors.surface,
       borderColor: colors.border,
@@ -46,7 +52,7 @@ function StatTile(props: StatTileProps) {
 
   return (
     <View
-      accessibilityLabel={`${props.label}: ${props.value}${props.delta ? `, ${props.delta.text}` : ""}`}
+      accessibilityLabel={`${props.label}: ${props.value}${props.delta ? `, ${props.delta.text}${props.delta.note ? ` ${props.delta.note}` : ""}` : ""}`}
       accessible
       style={styles.root}
       testID={testID}
@@ -64,13 +70,22 @@ function StatTile(props: StatTileProps) {
         value={props.value}
       />
       {props.delta ? (
-        <Text.Caption
-          numberOfLines={1}
-          tabular
-          testID={testID && `${testID}-delta`}
-          tone={DELTA_TONE[props.delta.tone]}
-          value={props.delta.text}
-        />
+        <View style={styles.delta}>
+          <Text.Caption
+            numberOfLines={1}
+            tabular
+            testID={testID && `${testID}-delta`}
+            tone={DELTA_TONE[props.delta.tone]}
+            value={props.delta.text}
+          />
+          {props.delta.note ? (
+            <Text.Caption
+              numberOfLines={1}
+              tone="secondary"
+              value={props.delta.note}
+            />
+          ) : null}
+        </View>
       ) : null}
     </View>
   );

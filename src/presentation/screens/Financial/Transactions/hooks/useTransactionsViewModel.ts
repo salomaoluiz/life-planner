@@ -50,6 +50,7 @@ import {
   TypeFilter,
 } from "../models/transactionList";
 import TransactionUIModel from "../models/TransactionUIModel";
+import { consumePendingNavigation } from "./pendingNavigation";
 import useTransactionFilters from "./useTransactionFilters";
 
 // Balances exist up to this many months after the current one (spec 035 FR 10).
@@ -399,6 +400,14 @@ function useTransactionsViewModel() {
 
   useEffect(() => {
     if (isFocused) {
+      const pendingNavigation = consumePendingNavigation();
+
+      if (pendingNavigation?.scope) {
+        setOwnerSelection(pendingNavigation.scope);
+      }
+      if (pendingNavigation?.type) {
+        setTypeFilter(pendingNavigation.type);
+      }
       transactions.refetch();
       invoices.refetch();
       summary.refetch();
