@@ -3,6 +3,13 @@ import TransactionModel, {
   TransactionType,
 } from "@data/models/financial/TransactionModel";
 import { InstallmentScope } from "@domain/entities/financial/InstallmentPlanEntity";
+import {
+  ExportFileEntity,
+  ExportQuery,
+  ExportRequest,
+  ImportRequest,
+  ImportValidationEntity,
+} from "@domain/entities/financial/TransactionCsv";
 import { TransactionQueryFilter } from "@domain/entities/financial/TransactionQueryFilter";
 
 export interface TransactionDatasource {
@@ -10,11 +17,15 @@ export interface TransactionDatasource {
     params: CreateTransactionDatasourceParams,
   ): Promise<TransactionModel>;
   deleteTransaction(params: DeleteTransactionDatasourceParams): Promise<void>;
+  exportTransactions(params: ExportRequest): Promise<ExportFileEntity>;
+  getExportCount(params: ExportQuery): Promise<number>;
   getFilteredTransactions(
     params: GetFilteredTransactionsDatasourceParams,
   ): Promise<TransactionModel[]>;
   getTransactions(ownerIds: string[]): Promise<TransactionModel[]>;
+  importTransactions(params: ImportRequest): Promise<number>;
   updateTransaction(params: UpdateTransactionDatasourceParams): Promise<void>;
+  validateImport(params: ImportRequest): Promise<ImportValidationEntity>;
 }
 
 interface CreateTransactionDatasourceParams {

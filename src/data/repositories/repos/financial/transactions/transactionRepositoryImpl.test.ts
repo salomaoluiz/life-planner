@@ -76,3 +76,44 @@ it("SHOULD call updateTransaction correctly", async () => {
     mocks.datasources,
   );
 });
+
+describe("CSV import and export (spec 047)", () => {
+  const datasource = mocks.datasources.financialTransactionDatasource;
+  const query = { from: "2026-01-01", owner: "ALL" as const, to: "2026-12-31" };
+  const importRequest = {
+    owner: OwnerType.USER,
+    ownerId: "o1",
+    rows: [],
+  };
+
+  it("SHOULD hand the export and its count to the datasource", async () => {
+    const { exportTransactions, getExportCount } = setup();
+
+    jest.mocked(datasource.getExportCount).mockResolvedValueOnce(5);
+    jest
+      .mocked(datasource.exportTransactions)
+      .mockResolvedValueOnce({ csv: "a", filename: "f.csv" });
+
+    expect(await getExportCount(query)).toBe(5);
+    expect(
+      await exportTransactions({ ...query, format: "BR", lang: "pt-BR" }),
+    ).toEqual({ csv: "a", filename: "f.csv" });
+    expect(datasource.getExportCount).toHaveBeenCalledWith(query);
+  });
+
+  it("SHOULD hand the dry run and the import to the datasource", async () => {
+    const { importTransactions, validateImport } = setup();
+
+    jest
+      .mocked(datasource.validateImport)
+      .mockResolvedValueOnce({ duplicates: [2], errors: [] });
+    jest.mocked(datasource.importTransactions).mockResolvedValueOnce(3);
+
+    expect(await validateImport(importRequest)).toEqual({
+      duplicates: [2],
+      errors: [],
+    });
+    expect(await importTransactions(importRequest)).toBe(3);
+    expect(datasource.importTransactions).toHaveBeenCalledWith(importRequest);
+  });
+});

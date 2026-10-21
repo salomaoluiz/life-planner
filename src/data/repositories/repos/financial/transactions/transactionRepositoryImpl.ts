@@ -1,4 +1,8 @@
 import { Datasources } from "@data/datasource";
+import {
+  ExportFileEntity,
+  ImportValidationEntity,
+} from "@domain/entities/financial/TransactionCsv";
 import TransactionEntity from "@domain/entities/financial/TransactionEntity";
 import { FinancialTransactionRepository } from "@domain/repositories/financial";
 
@@ -18,14 +22,30 @@ function transactionRepositoryImpl(
     async deleteTransaction(params): Promise<void> {
       return deleteTransaction(params, datasources);
     },
+    async exportTransactions(params): Promise<ExportFileEntity> {
+      return datasources.financialTransactionDatasource.exportTransactions(
+        params,
+      );
+    },
+    async getExportCount(params): Promise<number> {
+      return datasources.financialTransactionDatasource.getExportCount(params);
+    },
     async getFilteredTransactions(params): Promise<TransactionEntity[]> {
       return getFilteredTransactions(params, datasources);
     },
     async getTransactions(ownerIds): Promise<TransactionEntity[]> {
       return getTransactions(ownerIds, datasources);
     },
+    async importTransactions(params): Promise<number> {
+      return datasources.financialTransactionDatasource.importTransactions(
+        params,
+      );
+    },
     async updateTransaction(params): Promise<void> {
       return updateTransaction(params, datasources);
+    },
+    async validateImport(params): Promise<ImportValidationEntity> {
+      return datasources.financialTransactionDatasource.validateImport(params);
     },
   };
 }

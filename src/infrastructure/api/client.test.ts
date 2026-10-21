@@ -394,3 +394,39 @@ it("SHOULD NOT try to refresh a 401 from /v1/auth/* (no token is sent, no loop)"
   ).toBeInstanceOf(ApiBusinessError);
   expect(spies.fetch).toHaveBeenCalledTimes(1);
 });
+
+describe("getText", () => {
+  it("SHOULD return the text and the attachment filename of a text response", async () => {
+    spies.fetch.mockResolvedValueOnce({
+      ...mocks.raw(200, "a;b"),
+      headers: {
+        get: (name: string) =>
+          name === "content-disposition"
+            ? 'attachment; filename="transacoes-x.csv"'
+            : null,
+      },
+    } as unknown as Response);
+
+    expect(await mocks.api.getText("/v1/finance/transactions/export")).toEqual({
+      filename: "transacoes-x.csv",
+      text: "a;b",
+    });
+  });
+
+  it("SHOULD leave the filename empty WHEN the response has no headers", async () => {
+    spies.fetch.mockResolvedValueOnce(mocks.raw(200, "a"));
+
+    expect(await mocks.api.getText("/v1/x")).toEqual({
+      filename: undefined,
+      text: "a",
+    });
+  });
+
+  it("SHOULD map an error status like every other call", async () => {
+    spies.fetch.mockResolvedValueOnce(mocks.json(400, { message: "Bad" }));
+
+    await expect(mocks.api.getText("/v1/x")).rejects.toBeInstanceOf(
+      ApiBusinessError,
+    );
+  });
+});

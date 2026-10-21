@@ -9,6 +9,7 @@ export { default as CreditCardHasTransactions } from "./CreditCardHasTransaction
 export { default as FinancialNotFound } from "./FinancialNotFound";
 export { default as FinancialOwnerNotAllowed } from "./FinancialOwnerNotAllowed";
 export { default as HasRefunds } from "./HasRefunds";
+export { default as ImportRowsInvalid } from "./ImportRowsInvalid";
 export { default as InstallmentPaid } from "./InstallmentPaid";
 export { default as InvoiceIsPaid } from "./InvoiceIsPaid";
 export { default as InvoiceNotPayable } from "./InvoiceNotPayable";
