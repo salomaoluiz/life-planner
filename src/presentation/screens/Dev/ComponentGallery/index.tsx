@@ -8,11 +8,14 @@ import {
   AutocompleteField,
   Avatar,
   Badge,
+  BarList,
   BottomSheet,
   Button,
   Card,
+  ChartCard,
   Chip,
   ChipGroup,
+  ColumnChart,
   ConfirmDialog,
   DateField,
   Divider,
@@ -21,6 +24,7 @@ import {
   FormColumns,
   Icon,
   IconTile,
+  LineChart,
   ListItem,
   MetricBlock,
   Screen,
@@ -29,6 +33,7 @@ import {
   Section,
   SegmentedControl,
   SelectField,
+  StatTile,
   Switch,
   Text,
   TextField,
@@ -318,6 +323,72 @@ function ComponentGallery() {
           />
         ))}
         <AmountText currency={DEFAULT_CURRENCY} type="EXPENSE" value={31290} />
+        <StatTile
+          delta={{ text: "▲ 8,4%", tone: "good" }}
+          label="Income"
+          value="R$ 12.400,00"
+        />
+        <ChartCard
+          errorText="Couldn't load this chart"
+          legend={[
+            { label: "Actual", tone: "accent" },
+            { dashed: true, label: "Expected", tone: "accent" },
+          ]}
+          onRetry={noop}
+          retryLabel="Try again"
+          state="ready"
+          title="Balance over time"
+        >
+          <LineChart
+            accessibilityLabel="Balance from Nov to Jan"
+            formatTick={(value) => `${value / 1000}k`}
+            formatValue={(value) => `R$ ${value}`}
+            points={[
+              { label: "Nov", projected: false, value: 8200 },
+              { label: "Dec", projected: false, value: 10400 },
+              { label: "Jan", projected: true, value: 9800 },
+            ]}
+            selectedIndex={1}
+          />
+          <ColumnChart
+            accessibilityLabel="Income and expenses"
+            formatTick={(value) => `${value / 1000}k`}
+            formatValue={(value) => `R$ ${value}`}
+            groups={[
+              {
+                expense: { projected: 0, realized: 4000 },
+                income: { projected: 0, realized: 9000 },
+                label: "Nov",
+              },
+              {
+                expense: { projected: 800, realized: 3000 },
+                income: { projected: 1500, realized: 5000 },
+                label: "Dec",
+              },
+            ]}
+          />
+          <BarList
+            onPress={noop}
+            rows={[
+              {
+                id: "a",
+                label: "Groceries",
+                percent: "60%",
+                ratio: 1,
+                value: "R$ 600,00",
+              },
+              {
+                id: "o",
+                label: "Other",
+                muted: true,
+                percent: "40%",
+                ratio: 0.6,
+                value: "R$ 400,00",
+              },
+            ]}
+            tone="expense"
+          />
+        </ChartCard>
         <MetricBlock label="Income" trend="income" value="R$ 1.000,00" />
         <MetricBlock label="Expense" trend="expense" value="R$ 500,00" />
         <EmptyState
