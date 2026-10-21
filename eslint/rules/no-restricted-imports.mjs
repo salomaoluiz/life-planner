@@ -37,6 +37,18 @@ const preventInfrastructureLibsImports = {
         name: "@react-native-async-storage/async-storage",
       },
       {
+        message: "Please, use `@infrastructure/csv` instead",
+        name: "papaparse",
+      },
+      {
+        message: "Please, use `@infrastructure/filePicker` instead",
+        name: "expo-document-picker",
+      },
+      {
+        message: "Please, use `@infrastructure/fileSave` instead",
+        name: "expo-sharing",
+      },
+      {
         message: "Please, use `@infrastructure/supabase` instead",
         name: "@supabase/supabase-js",
       },
