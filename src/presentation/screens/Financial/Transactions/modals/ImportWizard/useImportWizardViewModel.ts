@@ -12,6 +12,7 @@ import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
 import { ImportRowsInvalid } from "@domain/entities/errors";
 import { ImportValidationEntity } from "@domain/entities/financial/TransactionCsv";
+import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { invalidateFetcherData, useMutation } from "@infrastructure/fetcher";
 import { useBreakpoint } from "@presentation/theme";
 import useImportRecords from "@screens/Financial/Transactions/hooks/useImportRecords";
@@ -25,6 +26,8 @@ import {
   summarize,
 } from "@screens/Financial/Transactions/models/importReview";
 import {
+  EntryContext,
+  NO_RECORDS,
   tabsOf,
   toValueMaps,
   unmatchedCount,
@@ -56,6 +59,35 @@ interface CreatedCounts {
 
 type ImportDialog = "discard" | "owner";
 
+const EMPTY_CONTEXT: EntryContext = {
+  catalog: {},
+  decimal: ",",
+  defaultOwnerId: "",
+  fixed: {},
+  ownerMap: {},
+  owners: [],
+  typeMap: {},
+};
+
+// The names a "Belongs to" value can match an owner by: Personal also answers to "Pessoal"/"Personal".
+function ownerCandidates(owners: OwnerDTO[]) {
+  return owners
+    .filter((owner) => !owner.archived)
+    .map((owner) => ({
+      id: owner.id,
+      names:
+        owner.type === OwnerType.USER
+          ? ["Pessoal", "Personal", owner.name]
+          : [owner.name],
+    }));
+}
+
+function ownerTypesOf(owners: OwnerDTO[]) {
+  return Object.fromEntries(
+    owners.map((owner) => [owner.id, owner.type]),
+  ) as Record<string, "FAMILY" | "USER">;
+}
+
 const NO_CREATED: CreatedCounts = { accounts: 0, cards: 0, categories: 0 };
 
 // The import wizard (spec 047 FR 8-33): the state of the four steps and what the footer needs. Each step reads what it
@@ -75,7 +107,8 @@ function useImportWizardViewModel(params: ImportWizardParams) {
   const [created, setCreated] = useState<CreatedCounts>(NO_CREATED);
   const [dialog, setDialog] = useState<ImportDialog>();
   const [pendingOwner, setPendingOwner] = useState<string>();
-  const records = useImportRecords(ownerId, params.owners);
+  const catalog = useImportRecords(params.owners);
+  const records = catalog[ownerId] ?? NO_RECORDS;
 
   const table = parsed?.table ?? [];
   const headers = table[0] ?? [];
@@ -86,21 +119,50 @@ function useImportWizardViewModel(params: ImportWizardParams) {
   );
   const tabs = useMemo(() => tabsOf(mapping), [mapping]);
   const entries = useMemo(() => {
-    // The matched answers of the Type column tell the type of each row, which the categories are matched by.
-    const typeEntries = valueEntries("type", rows, mapping, records, choices);
-    const context = {
+    // The matched answers of the Type and "Belongs to" columns tell the type and the owner of each row, which the
+    // categories, accounts and cards are matched by.
+    const base = {
+      catalog,
       decimal: parsed?.decimal ?? ",",
+      defaultOwnerId: ownerId,
       fixed,
-      typeMap: toValueMaps({ type: typeEntries }).type,
-    } as const;
+      ownerMap: {},
+      owners: ownerCandidates(params.owners),
+      typeMap: toValueMaps({
+        type: valueEntries("type", rows, mapping, choices, {
+          ...EMPTY_CONTEXT,
+          catalog,
+        }),
+      }).type,
+    };
+    const ownerEntries = valueEntries("owner", rows, mapping, choices, {
+      ...EMPTY_CONTEXT,
+      ...base,
+    });
+    const context = {
+      ...base,
+      ownerMap: toValueMaps({ owner: ownerEntries }).owner,
+    };
 
     return Object.fromEntries(
       tabs.map((tab) => [
         tab,
-        valueEntries(tab, rows, mapping, records, choices, context),
+        tab === "owner"
+          ? ownerEntries
+          : valueEntries(tab, rows, mapping, choices, context),
       ]),
     ) as Partial<Record<ValueTab, ReturnType<typeof valueEntries>>>;
-  }, [tabs, rows, mapping, records, choices, parsed, fixed]);
+  }, [
+    tabs,
+    rows,
+    mapping,
+    catalog,
+    choices,
+    parsed,
+    fixed,
+    ownerId,
+    params.owners,
+  ]);
   const unmatched = tabs.reduce(
     (total, tab) => total + unmatchedCount(entries[tab] ?? []),
     0,
@@ -111,13 +173,15 @@ function useImportWizardViewModel(params: ImportWizardParams) {
         ? buildRows({
             dateFormat: parsed.dateFormat,
             decimal: parsed.decimal,
+            defaultOwnerId: ownerId,
             fixed,
             mapping,
+            ownerTypes: ownerTypesOf(params.owners),
             rows,
             valueMaps: toValueMaps(entries),
           })
         : { ignoredSystemRows: 0, rows: [] },
-    [parsed, step, fixed, mapping, rows, entries],
+    [parsed, step, fixed, mapping, rows, entries, ownerId, params.owners],
   );
 
   // The dry run (FR 27) and the real run (FR 32).
@@ -204,8 +268,10 @@ function useImportWizardViewModel(params: ImportWizardParams) {
         buildRows({
           dateFormat: parsed?.dateFormat ?? "dd/mm/yyyy",
           decimal: parsed?.decimal ?? ",",
+          defaultOwnerId: ownerId,
           fixed,
           mapping,
+          ownerTypes: ownerTypesOf(params.owners),
           rows,
           valueMaps: toValueMaps(entries),
         }).rows.flatMap((row) => (row.payload ? [row.payload] : [])),
@@ -268,6 +334,7 @@ function useImportWizardViewModel(params: ImportWizardParams) {
 
   return {
     built,
+    catalog,
     choices,
     created,
     dialog,

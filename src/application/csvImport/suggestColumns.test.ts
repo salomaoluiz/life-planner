@@ -79,7 +79,7 @@ describe("suggestMapping", () => {
       "ignore",
       "paid",
       "tags",
-      "ignore",
+      "owner",
       "ignore",
       "ignore",
     ];

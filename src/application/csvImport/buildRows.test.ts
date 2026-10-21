@@ -3,6 +3,7 @@ import { BuildInput, buildRows } from "./buildRows";
 const base: BuildInput = {
   dateFormat: "dd/mm/yyyy",
   decimal: ",",
+  defaultOwnerId: "u1",
   fixed: {},
   mapping: {
     0: "date",
@@ -11,15 +12,17 @@ const base: BuildInput = {
     3: "category",
     4: "card",
   },
+  ownerTypes: { f1: "FAMILY", u1: "USER" },
   rows: [],
   valueMaps: {
     account: {},
-    card: { Visa: "card-1" },
+    card: { "u1|Visa": "card-1" },
     category: {
-      "EXPENSE|Mercado": "cat-1",
-      "INCOME|Mercado": "cat-1",
-      "INCOME|Salário": "cat-2",
+      "u1|EXPENSE|Mercado": "cat-1",
+      "u1|INCOME|Mercado": "cat-1",
+      "u1|INCOME|Salário": "cat-2",
     },
+    owner: {},
     paid: {},
     type: {},
   },
@@ -47,6 +50,8 @@ describe("buildRows", () => {
       date: "2026-10-02",
       description: "Supermercado",
       line: 2,
+      owner: "USER",
+      ownerId: "u1",
       paid: undefined,
       tags: undefined,
       type: "EXPENSE",
@@ -211,5 +216,71 @@ describe("buildRows", () => {
     expect(result.ignoredSystemRows).toBe(2);
     expect(result.rows).toHaveLength(1);
     expect(result.rows[0].line).toBe(4);
+  });
+});
+
+describe("owner per row", () => {
+  const input = withRows(
+    [
+      ["02/10/2026", "a", "-1,00", "Mercado", "Rico", "Família"],
+      ["03/10/2026", "b", "-2,00", "Mercado", "Rico", ""],
+      ["04/10/2026", "c", "-3,00", "Mercado", "Rico", "Pessoal"],
+    ],
+    {
+      mapping: {
+        0: "date",
+        1: "description",
+        2: "signedAmount",
+        3: "category",
+        4: "account",
+        5: "owner",
+      },
+      valueMaps: {
+        account: { "f1|Rico": "acc-f", "u1|Rico": "acc-u" },
+        card: {},
+        category: {
+          "f1|EXPENSE|Mercado": "cat-f",
+          "u1|EXPENSE|Mercado": "cat-u",
+        },
+        owner: { Família: "f1", Pessoal: "u1" },
+        paid: {},
+        type: {},
+      },
+    },
+  );
+
+  it("SHOULD match the account and the category in the owner of each row, with the same names", () => {
+    const { rows } = buildRows(input);
+
+    expect(
+      rows.map((row) => [
+        row.payload?.ownerId,
+        row.payload?.accountId,
+        row.payload?.categoryId,
+      ]),
+    ).toEqual([
+      ["f1", "acc-f", "cat-f"],
+      ["u1", "acc-u", "cat-u"],
+      ["u1", "acc-u", "cat-u"],
+    ]);
+  });
+
+  it("SHOULD send the owner type, and the default owner for an empty cell", () => {
+    const { rows } = buildRows(input);
+
+    expect(rows.map((row) => row.payload?.owner)).toEqual([
+      "FAMILY",
+      "USER",
+      "USER",
+    ]);
+  });
+
+  it("SHOULD use the default owner for every row WHEN the file has no owner column", () => {
+    const { rows } = buildRows({
+      ...input,
+      mapping: { ...input.mapping, 5: "ignore" },
+    });
+
+    expect(rows.map((row) => row.payload?.ownerId)).toEqual(["u1", "u1", "u1"]);
   });
 });

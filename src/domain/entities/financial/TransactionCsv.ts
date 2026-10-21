@@ -40,6 +40,9 @@ export interface ImportRowEntity {
   date: string;
   description: string;
   line: number;
+  // The row's own owner (spec 047); the request's owner applies when absent.
+  owner?: "FAMILY" | "USER";
+  ownerId?: string;
   paid?: boolean;
   tags?: string[];
   type: "EXPENSE" | "INCOME";

@@ -267,6 +267,7 @@ describe("step 3: values", () => {
         parentId: "",
         type: "EXPENSE",
       },
+      ownerId: "user-id",
       parentDepth: 0,
       tab: "category",
     });
@@ -313,6 +314,7 @@ describe("step 3: values", () => {
         parentId: "",
         type: "EXPENSE",
       },
+      ownerId: "user-id",
       parentDepth: 0,
       tab: "category",
     });
@@ -343,6 +345,7 @@ describe("step 3: values", () => {
         parentId: "",
         type: "EXPENSE",
       },
+      ownerId: "user-id",
       parentDepth: 0,
       tab: "card",
     });
@@ -355,6 +358,7 @@ describe("step 3: values", () => {
         parentId: "",
         type: "EXPENSE",
       },
+      ownerId: "user-id",
       parentDepth: 0,
       tab: "account",
     });
@@ -609,5 +613,72 @@ describe("compact layout", () => {
     expect(screen.getByTestId(ids.importStepper).props.accessibilityRole).toBe(
       "progressbar",
     );
+  });
+});
+
+describe("owner per row", () => {
+  const OWNER_CSV = [
+    "Data;Descrição;Valor;Categoria;Conta;Pertence a",
+    "02/10/2026;Mercado A;-10,00;Mercado;Corrente;Família",
+    "03/10/2026;Mercado B;-20,00;Mercado;Corrente;Pessoal",
+    "",
+  ].join("\r\n");
+
+  function withFamilyRecords() {
+    jest.mocked(useFilterOptions).mockReturnValue({
+      ...options,
+      categoryDtos: [
+        ...options.categoryDtos,
+        {
+          ...category("cat-fam", "Mercado"),
+          ownerId: "family-1",
+          scopeOwnerIds: ["family-1"],
+        },
+      ],
+      sources: [
+        ...options.sources,
+        {
+          archived: false,
+          currency: "BRL" as const,
+          id: "acc-fam",
+          kind: "ACCOUNT" as const,
+          name: "Corrente",
+          ownerId: "family-1",
+        },
+      ],
+    } as never);
+  }
+
+  it("SHOULD map the Belongs to column, match the owners and import each row in its owner", async () => {
+    setup();
+    withFamilyRecords();
+    mutations.validate.value.data = { duplicates: [], errors: [] };
+
+    await pickFile(OWNER_CSV);
+    fireEvent.press(screen.getByTestId(ids.importContinue));
+    expect(screen.getByTestId(`${ids.importColumn}.5-value`)).toHaveTextContent(
+      /financial\.import\.columns\.targets\.owner/,
+    );
+    fireEvent.press(screen.getByTestId(ids.importContinue));
+
+    // Both owners are matched by name: nothing is left to choose.
+    expect(screen.getByTestId(`${ids.importValueTab}-owner`)).toBeOnTheScreen();
+    expect(screen.queryByTestId(ids.importFooterNote)).toBeNull();
+    fireEvent.press(screen.getByTestId(ids.importContinue));
+
+    expect(mutations.validate.value.mutate).toHaveBeenCalledWith([
+      expect.objectContaining({
+        accountId: "acc-fam",
+        categoryId: "cat-fam",
+        owner: "FAMILY",
+        ownerId: "family-1",
+      }),
+      expect.objectContaining({
+        accountId: "acc-1",
+        categoryId: "cat-market",
+        owner: "USER",
+        ownerId: "user-id",
+      }),
+    ]);
   });
 });

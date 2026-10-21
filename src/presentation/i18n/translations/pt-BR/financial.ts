@@ -303,6 +303,7 @@ const financial = {
     columns: {
       defaults: {
         currency: "padrão: a moeda da conta ou do cartão",
+        owner: "padrão: o dono escolhido no primeiro passo",
         paid: "padrão: a data já passou",
         tags: "nenhuma",
       },
@@ -315,6 +316,7 @@ const financial = {
         currency: "Moeda",
         date: "Data",
         description: "Descrição",
+        owner: "Pertence a",
         paid: "Pago",
         tags: "Tags",
         title: "Campos da transação",
@@ -350,6 +352,7 @@ const financial = {
         expenseAmount: "Despesa",
         ignore: "Ignorar",
         incomeAmount: "Receita",
+        owner: "Pertence a",
         paid: "Pago",
         signedAmount: "Valor com sinal",
         tags: "Tags",
@@ -493,6 +496,7 @@ const financial = {
         account: "Conta no app",
         card: "Cartão no app",
         category: "Categoria no app",
+        owner: "Dono no app",
         paid: "Pago",
         type: "Tipo",
       },
@@ -524,6 +528,7 @@ const financial = {
       },
       fileValue: "Valor no arquivo",
       help: "Pares sugeridos pelo nome, ignorando maiúsculas e acentos. Registros arquivados não aparecem. Cada valor do arquivo vira um só registro do app.",
+      inOwner: "em {{name}}",
       paid: {
         default: "Usar o padrão",
         paid: "Pago",
@@ -535,6 +540,7 @@ const financial = {
         account: "Conta",
         card: "Cartão",
         category: "Categoria",
+        owner: "Pertence a",
         paid: "Pago",
         type: "Tipo",
       },

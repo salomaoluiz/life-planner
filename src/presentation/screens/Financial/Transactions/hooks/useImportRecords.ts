@@ -19,55 +19,61 @@ function categoryPath(category: CategoryDTO, byId: Map<string, CategoryDTO>) {
   return names.join(" > ");
 }
 
-// The accounts, cards and categories the values of the file can be matched to (spec 047 FR 23): the ones of the chosen
-// owner that are still active. The queries are the ones of the transaction form (they share the cache).
-function useImportRecords(ownerId: string, owners: OwnerDTO[]) {
+// The accounts, cards and categories the values of the file can be matched to (spec 047 FR 23), per owner: the ones that
+// are still active. The queries are the ones of the transaction form (they share the cache).
+function useImportRecords(owners: OwnerDTO[]) {
   const allOwnerIds = useMemo(() => owners.map((owner) => owner.id), [owners]);
   const options = useFilterOptions(allOwnerIds, true);
 
-  return useMemo<ImportRecords>(() => {
+  return useMemo<Record<string, ImportRecords>>(() => {
     const byId = new Map(options.categoryDtos.map((item) => [item.id, item]));
 
-    return {
-      accounts: options.sources
-        .filter(
-          (source) =>
-            source.kind === "ACCOUNT" &&
-            !source.archived &&
-            source.ownerId === ownerId,
-        )
-        .map((source) => ({
-          currency: source.currency,
-          id: source.id,
-          name: source.name,
-        })),
-      cards: options.sources
-        .filter(
-          (source) =>
-            source.kind === "CARD" &&
-            !source.archived &&
-            source.ownerId === ownerId,
-        )
-        .map((source) => ({
-          closingDay: source.closingDay,
-          currency: source.currency,
-          id: source.id,
-          name: source.name,
-        })),
-      categories: options.categoryDtos
-        .filter(
-          (item) =>
-            item.status !== "ARCHIVED" && item.scopeOwnerIds.includes(ownerId),
-        )
-        .map((item) => ({
-          depthLevel: item.depthLevel ?? 0,
-          id: item.id,
-          name: item.name,
-          path: categoryPath(item, byId),
-          type: item.type as "EXPENSE" | "INCOME",
-        })),
-    };
-  }, [options, ownerId]);
+    return Object.fromEntries(
+      allOwnerIds.map((ownerId) => [
+        ownerId,
+        {
+          accounts: options.sources
+            .filter(
+              (source) =>
+                source.kind === "ACCOUNT" &&
+                !source.archived &&
+                source.ownerId === ownerId,
+            )
+            .map((source) => ({
+              currency: source.currency,
+              id: source.id,
+              name: source.name,
+            })),
+          cards: options.sources
+            .filter(
+              (source) =>
+                source.kind === "CARD" &&
+                !source.archived &&
+                source.ownerId === ownerId,
+            )
+            .map((source) => ({
+              closingDay: source.closingDay,
+              currency: source.currency,
+              id: source.id,
+              name: source.name,
+            })),
+          categories: options.categoryDtos
+            .filter(
+              (item) =>
+                item.status !== "ARCHIVED" &&
+                item.scopeOwnerIds.includes(ownerId),
+            )
+            .map((item) => ({
+              depthLevel: item.depthLevel ?? 0,
+              id: item.id,
+              name: item.name,
+              path: categoryPath(item, byId),
+              type: item.type as "EXPENSE" | "INCOME",
+            })),
+        },
+      ]),
+    );
+  }, [options, allOwnerIds]);
 }
 
 export { categoryPath };

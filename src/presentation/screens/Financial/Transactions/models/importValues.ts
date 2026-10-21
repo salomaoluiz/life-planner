@@ -6,6 +6,11 @@ import {
   matchType,
 } from "@application/csvImport/distinctValues";
 import { columnsOf } from "@application/csvImport/mapping";
+import {
+  accountKey,
+  categoryKey,
+  ownerOfRow,
+} from "@application/csvImport/owner";
 import { parseAmountCents } from "@application/csvImport/parseValues";
 import {
   ColumnMapping,
@@ -18,9 +23,16 @@ import {
 import { CurrencyCode } from "@domain/entities/financial/Currency";
 
 // Spec 047 FR 22: one tab per mapped column that points to records or to a fixed set of answers.
-export type ValueTab = "account" | "card" | "category" | "paid" | "type";
+export type ValueTab =
+  | "account"
+  | "card"
+  | "category"
+  | "owner"
+  | "paid"
+  | "type";
 
 export const VALUE_TABS: ValueTab[] = [
+  "owner",
   "category",
   "account",
   "card",
@@ -32,19 +44,12 @@ const TAB_TARGET: Record<ValueTab, ColumnTarget> = {
   account: "account",
   card: "card",
   category: "category",
+  owner: "owner",
   paid: "paid",
   type: "type",
 };
 
-// What the category entries need to know the type of each row.
-export interface EntryContext {
-  decimal: DecimalSeparator;
-  fixed: FixedValues;
-  // The matched answers of the Type column.
-  typeMap: Record<string, RowType>;
-}
-
-// The records of the chosen owner the values can be matched to (active ones, system categories excluded).
+// The records of an owner the values can be matched to (active ones, system categories excluded).
 export interface ImportRecords {
   accounts: { currency: CurrencyCode; id: string; name: string }[];
   cards: {
@@ -62,27 +67,46 @@ export interface ImportRecords {
   }[];
 }
 
-// What the user chose: tab → file value → record id (or answer).
+export const NO_RECORDS: ImportRecords = {
+  accounts: [],
+  cards: [],
+  categories: [],
+};
+
+// Spec 047: accounts, cards and categories are matched in the owner of each row (a family and Personal can have an
+// account of the same name), so the records come per owner.
+export interface EntryContext {
+  catalog: Record<string, ImportRecords>;
+  decimal: DecimalSeparator;
+  // The owner of the rows without a "Belongs to" value.
+  defaultOwnerId: string;
+  fixed: FixedValues;
+  // The matched answers of the "Belongs to" column (file value → owner id).
+  ownerMap: Record<string, string>;
+  // What the "Belongs to" values can be matched to: the owners and the names they go by in a file.
+  owners: { id: string; names: string[] }[];
+  // The matched answers of the Type column.
+  typeMap: Record<string, RowType>;
+}
+
+// What the user chose: tab → entry key → record id (or answer).
 export type ValueChoices = Partial<Record<ValueTab, Record<string, string>>>;
 
 export interface ValueEntry {
   // Matched by name by the app (FR 24), not chosen by the user.
   auto: boolean;
-  // Where the choice is kept and what the row builder looks up: the value, except for categories, which are matched per
-  // type (`EXPENSE|Transferências`): income and expense can have a category with the same name.
+  // Where the choice is kept and what the row builder looks up (see `ValueMaps`): the value for owner, type and paid;
+  // `<ownerId>|<value>` for accounts and cards; `<ownerId>|<type>|<value>` for categories.
   key: string;
+  // The owner the value is matched in (accounts, cards and categories).
+  ownerId?: string;
   // Number of rows that use the value.
   rows: number;
-  // A record id, `INCOME`/`EXPENSE`, or `true`/`false`/`default` for Paid; undefined while unmatched.
+  // A record id, an owner id, `INCOME`/`EXPENSE`, or `true`/`false`/`default` for Paid; undefined while unmatched.
   selected?: string;
   // Categories only: the type of the rows that use the value.
   type?: RowType;
   value: string;
-}
-
-// The key of a category value of a type (matches `buildRows`).
-export function categoryKey(type: RowType | undefined, value: string): string {
-  return `${type ?? ""}|${value}`;
 }
 
 export function typeOfRow(
@@ -136,10 +160,7 @@ function autoSelection(
       value,
       records.categories
         .filter((item) => type === undefined || item.type === type)
-        .map((item) => ({
-          id: item.id,
-          names: [item.name, item.path],
-        })),
+        .map((item) => ({ id: item.id, names: [item.name, item.path] })),
     );
   }
 
@@ -161,41 +182,68 @@ function autoSelection(
   return paid === undefined ? undefined : String(paid);
 }
 
-function categoryEntries(
+const EMPTY_MAPS: ValueMaps = {
+  account: {},
+  card: {},
+  category: {},
+  owner: {},
+  paid: {},
+  type: {},
+};
+
+function recordEntries(
+  tab: "account" | "card" | "category",
   column: number,
   rows: string[][],
   mapping: ColumnMapping,
-  records: ImportRecords,
   choices: ValueChoices,
   context: EntryContext,
 ): ValueEntry[] {
-  const counts = new Map<string, ValueEntry>();
+  const entries = new Map<string, ValueEntry>();
 
   for (const row of rows) {
     const value = (row[column] ?? "").trim();
 
-    if (value === "" || isSystemCategoryName(value)) {
+    if (value === "" || (tab === "category" && isSystemCategoryName(value))) {
       continue;
     }
 
-    const type = typeOfRow(row, mapping, context.decimal, {
-      fixed: context.fixed,
-      valueMaps: { ...EMPTY_MAPS, type: context.typeMap },
-    });
-    const key = categoryKey(type, value);
-    const known = counts.get(key);
+    const ownerId = ownerOfRow(
+      row,
+      mapping,
+      context.ownerMap,
+      context.defaultOwnerId,
+    );
+    const type =
+      tab === "category"
+        ? typeOfRow(row, mapping, context.decimal, {
+            fixed: context.fixed,
+            valueMaps: { ...EMPTY_MAPS, type: context.typeMap },
+          })
+        : undefined;
+    const key =
+      tab === "category"
+        ? categoryKey(ownerId, type ?? "", value)
+        : accountKey(ownerId, value);
+    const known = entries.get(key);
 
     if (known) {
       known.rows += 1;
       continue;
     }
 
-    const auto = autoSelection("category", value, records, type);
-    const chosen = choices.category?.[key];
+    const auto = autoSelection(
+      tab,
+      value,
+      context.catalog[ownerId] ?? NO_RECORDS,
+      type,
+    );
+    const chosen = choices[tab]?.[key];
 
-    counts.set(key, {
+    entries.set(key, {
       auto: chosen === undefined && auto !== undefined,
       key,
+      ownerId,
       rows: 1,
       selected: chosen ?? auto,
       type,
@@ -203,7 +251,7 @@ function categoryEntries(
     });
   }
 
-  return [...counts.values()];
+  return [...entries.values()];
 }
 
 // The tabs a mapping needs, in tab order.
@@ -221,6 +269,7 @@ function toValueMaps(
     account: {},
     card: {},
     category: {},
+    owner: {},
     paid: {},
     type: {},
   };
@@ -249,15 +298,15 @@ function unmatchedCount(entries: ValueEntry[]): number {
   return entries.filter((entry) => entry.selected === undefined).length;
 }
 
-// FR 22-24: the distinct values of the column with the app match (or the user's choice). Categories are listed once per
-// type of the rows that use them and matched only to categories of that type.
+// FR 22-24: the distinct values of the column with the app match (or the user's choice). Accounts, cards and
+// categories are listed once per owner of the rows that use them (and categories once per type too) and matched only to
+// the records of that owner (and type).
 function valueEntries(
   tab: ValueTab,
   rows: string[][],
   mapping: ColumnMapping,
-  records: ImportRecords,
   choices: ValueChoices,
-  context?: EntryContext,
+  context: EntryContext,
 ): ValueEntry[] {
   const [column] = columnsOf(mapping, TAB_TARGET[tab]);
 
@@ -265,32 +314,25 @@ function valueEntries(
     return [];
   }
 
-  if (tab === "category" && context) {
-    return categoryEntries(column, rows, mapping, records, choices, context);
+  if (tab === "account" || tab === "card" || tab === "category") {
+    return recordEntries(tab, column, rows, mapping, choices, context);
   }
 
-  return distinctValues(rows, column)
-    .filter((item) => tab !== "category" || !isSystemCategoryName(item.value))
-    .map((item) => {
-      const auto = autoSelection(tab, item.value, records);
-      const chosen = choices[tab]?.[item.value];
+  return distinctValues(rows, column).map((item) => {
+    const auto =
+      tab === "owner"
+        ? autoMatch(item.value, context.owners)
+        : autoSelection(tab, item.value, NO_RECORDS);
+    const chosen = choices[tab]?.[item.value];
 
-      return {
-        auto: chosen === undefined && auto !== undefined,
-        key: item.value,
-        rows: item.rows,
-        selected: chosen ?? auto,
-        value: item.value,
-      };
-    });
+    return {
+      auto: chosen === undefined && auto !== undefined,
+      key: item.value,
+      rows: item.rows,
+      selected: chosen ?? auto,
+      value: item.value,
+    };
+  });
 }
-
-const EMPTY_MAPS: ValueMaps = {
-  account: {},
-  card: {},
-  category: {},
-  paid: {},
-  type: {},
-};
 
 export { tabsOf, toValueMaps, unmatchedCount, valueEntries };

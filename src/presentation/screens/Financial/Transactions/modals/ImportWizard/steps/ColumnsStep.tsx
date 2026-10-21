@@ -162,7 +162,10 @@ function ColumnsStep(props: { wizard: ImportWizardState }) {
     );
   }
 
-  function optionalLine(field: "currency" | "paid" | "tags", mapped: boolean) {
+  function optionalLine(
+    field: "currency" | "owner" | "paid" | "tags",
+    mapped: boolean,
+  ) {
     return (
       <View
         key={field}
@@ -194,6 +197,7 @@ function ColumnsStep(props: { wizard: ImportWizardState }) {
       <View>{vm.statuses.map(statusLine)}</View>
       {fixedSelects()}
       <View>
+        {optionalLine("owner", vm.mapped.owner)}
         {optionalLine("paid", vm.mapped.paid)}
         {optionalLine("currency", vm.mapped.currency)}
         {optionalLine("tags", vm.mapped.tags)}

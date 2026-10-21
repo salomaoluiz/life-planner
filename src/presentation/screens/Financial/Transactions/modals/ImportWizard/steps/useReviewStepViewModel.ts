@@ -7,6 +7,7 @@ import {
   ReviewFilter,
   ReviewRow,
 } from "@screens/Financial/Transactions/models/importReview";
+import { NO_RECORDS } from "@screens/Financial/Transactions/models/importValues";
 
 import { ImportWizardState } from "../useImportWizardViewModel";
 
@@ -68,11 +69,12 @@ function knownCode(code?: string): "unknown" | ErrorCode | undefined {
 function useReviewStepViewModel(wizard: ImportWizardState) {
   const [filter, setFilter] = useState<ReviewFilter>("ALL");
   const [limit, setLimit] = useState(PAGE_SIZE);
-  const { records } = wizard;
+  const { catalog } = wizard;
   const filtered = filterRows(wizard.review, filter);
 
   function view(row: ReviewRow): ReviewRowView {
     const payload = row.payload;
+    const records = catalog[payload?.ownerId ?? wizard.ownerId] ?? NO_RECORDS;
     const card = records.cards.find(
       (item) => item.id === payload?.creditCardId,
     );

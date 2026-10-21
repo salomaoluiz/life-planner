@@ -1,6 +1,7 @@
 import { ColumnMapping } from "@application/csvImport/types";
 
 import {
+  EntryContext,
   ImportRecords,
   tabsOf,
   toValueMaps,
@@ -28,6 +29,31 @@ const records: ImportRecords = {
     },
   ],
 };
+const familyRecords: ImportRecords = {
+  accounts: [{ currency: "BRL", id: "acc-f", name: "Corrente" }],
+  cards: [],
+  categories: [
+    {
+      depthLevel: 0,
+      id: "cat-f",
+      name: "Mercado",
+      path: "Mercado",
+      type: "EXPENSE",
+    },
+  ],
+};
+const context: EntryContext = {
+  catalog: { f1: familyRecords, u1: records },
+  decimal: ",",
+  defaultOwnerId: "u1",
+  fixed: {},
+  ownerMap: {},
+  owners: [
+    { id: "u1", names: ["Pessoal", "Personal", "Me"] },
+    { id: "f1", names: ["Família"] },
+  ],
+  typeMap: {},
+};
 const mapping: ColumnMapping = {
   0: "date",
   1: "category",
@@ -41,33 +67,42 @@ const rows = [
   ["04/10/2026", "Esporte", "", "x", "talvez"],
   ["05/10/2026", "Ajuste de saldo", "Master", "Despesa", "não"],
 ];
+const typed = {
+  ...context,
+  typeMap: { Despesa: "EXPENSE", Receita: "INCOME" } as const,
+};
 
 describe("tabsOf", () => {
   it("SHOULD give a tab per mapped record or fixed-set column, in tab order", () => {
     expect(tabsOf(mapping)).toEqual(["category", "card", "type", "paid"]);
     expect(tabsOf({ 0: "date", 1: "account" })).toEqual(["account"]);
     expect(tabsOf({ 0: "date", 1: "description" })).toEqual([]);
+    expect(tabsOf({ 0: "owner", 1: "category" })).toEqual([
+      "owner",
+      "category",
+    ]);
   });
 });
 
 describe("valueEntries", () => {
-  it("SHOULD match categories by name ignoring case, count rows, and leave unknown ones unmatched", () => {
-    const entries = valueEntries("category", rows, mapping, records, {});
+  it("SHOULD match categories of the type of their rows, ignoring case, and leave unknown ones unmatched", () => {
+    const entries = valueEntries("category", rows, mapping, {}, typed);
 
-    expect(entries.map((entry) => entry.value)).toEqual([
-      "Mercado",
-      "mercado",
-      "Esporte",
+    expect(entries.map((entry) => [entry.value, entry.type])).toEqual([
+      ["Mercado", "EXPENSE"],
+      ["mercado", "INCOME"],
+      ["Esporte", undefined],
     ]);
+    // "mercado" is an INCOME row: the only Mercado is an expense category.
     expect(entries.map((entry) => entry.selected)).toEqual([
       "cat-1",
-      "cat-1",
+      undefined,
       undefined,
     ]);
   });
 
   it("SHOULD leave out the system category names", () => {
-    const values = valueEntries("category", rows, mapping, records, {}).map(
+    const values = valueEntries("category", rows, mapping, {}, typed).map(
       (entry) => entry.value,
     );
 
@@ -75,24 +110,28 @@ describe("valueEntries", () => {
   });
 
   it("SHOULD prefer the user's choice to the automatic match", () => {
-    const [first] = valueEntries("category", rows, mapping, records, {
-      category: { Mercado: "cat-2" },
-    });
+    const [first] = valueEntries(
+      "category",
+      rows,
+      mapping,
+      { category: { "u1|EXPENSE|Mercado": "cat-2" } },
+      typed,
+    );
 
     expect(first).toMatchObject({ auto: false, selected: "cat-2" });
   });
 
-  it("SHOULD match type and paid words, and the default for an empty paid cell never becomes a value", () => {
+  it("SHOULD match type and paid words, and keep the default for an empty paid cell out of the values", () => {
     expect(
-      valueEntries("type", rows, mapping, records, {}).map((e) => e.selected),
+      valueEntries("type", rows, mapping, {}, context).map((e) => e.selected),
     ).toEqual(["EXPENSE", "INCOME", undefined]);
     expect(
-      valueEntries("paid", rows, mapping, records, {}).map((e) => e.selected),
+      valueEntries("paid", rows, mapping, {}, context).map((e) => e.selected),
     ).toEqual(["true", undefined, "false"]);
   });
 
-  it("SHOULD match a card by title and flag the one that does not exist", () => {
-    const entries = valueEntries("card", rows, mapping, records, {});
+  it("SHOULD match a card by title in the owner and flag the one that does not exist", () => {
+    const entries = valueEntries("card", rows, mapping, {}, context);
 
     expect(entries.map((entry) => [entry.value, entry.selected])).toEqual([
       ["Visa", "card-1"],
@@ -101,110 +140,94 @@ describe("valueEntries", () => {
   });
 
   it("SHOULD return nothing for an unmapped tab", () => {
-    expect(valueEntries("account", rows, mapping, records, {})).toEqual([]);
+    expect(valueEntries("account", rows, mapping, {}, context)).toEqual([]);
   });
 });
 
 describe("unmatchedCount / toValueMaps", () => {
   it("SHOULD count the values without a match", () => {
     expect(
-      unmatchedCount(valueEntries("category", rows, mapping, records, {})),
-    ).toBe(1);
+      unmatchedCount(valueEntries("category", rows, mapping, {}, typed)),
+    ).toBe(2);
   });
 
-  it("SHOULD build the maps the row builder reads", () => {
+  it("SHOULD build the maps the row builder reads, keyed by owner", () => {
     const maps = toValueMaps({
-      card: valueEntries("card", rows, mapping, records, {}),
-      category: valueEntries("category", rows, mapping, records, {}),
-      paid: valueEntries("paid", rows, mapping, records, {}),
-      type: valueEntries("type", rows, mapping, records, {}),
+      card: valueEntries("card", rows, mapping, {}, typed),
+      category: valueEntries("category", rows, mapping, {}, typed),
+      paid: valueEntries("paid", rows, mapping, {}, typed),
+      type: valueEntries("type", rows, mapping, {}, typed),
     });
 
-    expect(maps.category).toEqual({ Mercado: "cat-1", mercado: "cat-1" });
-    expect(maps.card).toEqual({ Visa: "card-1" });
+    expect(maps.category).toEqual({ "u1|EXPENSE|Mercado": "cat-1" });
+    expect(maps.card).toEqual({ "u1|Visa": "card-1" });
     expect(maps.type).toEqual({ Despesa: "EXPENSE", Receita: "INCOME" });
     expect(maps.paid).toEqual({ não: false, Sim: true });
     expect(maps.account).toEqual({});
   });
 });
 
-describe("categories matched per type", () => {
-  const sameName: ImportRecords = {
-    ...records,
-    categories: [
-      {
-        depthLevel: 1,
-        id: "exp",
-        name: "Transferências entre contas",
-        path: "Finanças > Transferências entre contas",
-        type: "EXPENSE",
-      },
-      {
-        depthLevel: 0,
-        id: "inc",
-        name: "Transferências entre contas",
-        path: "Transferências entre contas",
-        type: "INCOME",
-      },
-    ],
-  };
-  const signed: ColumnMapping = { 0: "category", 1: "signedAmount" };
-  const context = {
-    decimal: "," as const,
-    fixed: {},
-    typeMap: {},
+describe("owner per row", () => {
+  const withOwner: ColumnMapping = {
+    0: "category",
+    1: "account",
+    2: "owner",
+    3: "signedAmount",
   };
   const data = [
-    ["Transferências entre contas", "151,80"],
-    ["Transferências entre contas", "-20,00"],
-    ["Transferências entre contas", "-5,00"],
+    ["Mercado", "Corrente", "Família", "-10,00"],
+    ["Mercado", "Corrente", "Pessoal", "-10,00"],
+    ["Mercado", "Corrente", "", "-10,00"],
   ];
 
-  it("SHOULD list one entry per type and match each to the category of its own type", () => {
-    const entries = valueEntries(
-      "category",
-      data,
-      signed,
-      sameName,
-      {},
-      context,
-    );
+  it("SHOULD match each value of the owner column to an owner by name", () => {
+    const entries = valueEntries("owner", data, withOwner, {}, context);
 
-    expect(entries.map((e) => [e.type, e.rows, e.selected])).toEqual([
-      ["INCOME", 1, "inc"],
-      ["EXPENSE", 2, "exp"],
+    expect(entries.map((e) => [e.value, e.selected])).toEqual([
+      ["Família", "f1"],
+      ["Pessoal", "u1"],
     ]);
-    expect(toValueMaps({ category: entries }).category).toEqual({
-      "EXPENSE|Transferências entre contas": "exp",
-      "INCOME|Transferências entre contas": "inc",
+  });
+
+  it("SHOULD list accounts and categories once per owner and match them in the owner of the rows", () => {
+    const ctx = { ...context, ownerMap: { Família: "f1", Pessoal: "u1" } };
+    const accounts = valueEntries("account", data, withOwner, {}, ctx);
+    const categories = valueEntries("category", data, withOwner, {}, ctx);
+
+    expect(accounts.map((e) => [e.ownerId, e.rows, e.selected])).toEqual([
+      ["f1", 1, "acc-f"],
+      // Personal and the empty cell (default owner) are the same owner.
+      ["u1", 2, "acc-1"],
+    ]);
+    expect(categories.map((e) => [e.ownerId, e.selected])).toEqual([
+      ["f1", "cat-f"],
+      ["u1", "cat-1"],
+    ]);
+  });
+
+  it("SHOULD key the maps by owner so the same name keeps two answers", () => {
+    const ctx = { ...context, ownerMap: { Família: "f1", Pessoal: "u1" } };
+    const maps = toValueMaps({
+      account: valueEntries("account", data, withOwner, {}, ctx),
+      owner: valueEntries("owner", data, withOwner, {}, context),
     });
+
+    expect(maps.account).toEqual({
+      "f1|Corrente": "acc-f",
+      "u1|Corrente": "acc-1",
+    });
+    expect(maps.owner).toEqual({ Família: "f1", Pessoal: "u1" });
   });
 
-  it("SHOULD read the type from the Type column through its matched answers", () => {
+  it("SHOULD leave an owner value without a match unmatched", () => {
     const entries = valueEntries(
-      "category",
-      [["Transferências entre contas", "10,00", "Receita"]],
-      { 0: "category", 1: "amount", 2: "type" },
-      sameName,
+      "owner",
+      [["x", "y", "Outra", "1,00"]],
+      withOwner,
       {},
-      { ...context, typeMap: { Receita: "INCOME" } },
-    );
-
-    expect(entries[0]).toMatchObject({ selected: "inc", type: "INCOME" });
-  });
-
-  it("SHOULD keep the choice of one type apart from the other", () => {
-    const entries = valueEntries(
-      "category",
-      data,
-      signed,
-      sameName,
-      {
-        category: { "EXPENSE|Transferências entre contas": "inc" },
-      },
       context,
     );
 
-    expect(entries.map((e) => e.selected)).toEqual(["inc", "inc"]);
+    expect(entries[0].selected).toBeUndefined();
   });
 });

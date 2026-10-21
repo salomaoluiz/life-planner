@@ -23,6 +23,7 @@ const TARGETS: ColumnTarget[] = [
   "category",
   "account",
   "card",
+  "owner",
   "paid",
   "tags",
   "currency",
@@ -100,6 +101,7 @@ function useColumnsStepViewModel(wizard: ImportWizardState) {
     fixedTypeValue: fixed.type ?? FIXED_NONE,
     mapped: {
       currency: has("currency"),
+      owner: has("owner"),
       paid: has("paid"),
       tags: has("tags"),
     },

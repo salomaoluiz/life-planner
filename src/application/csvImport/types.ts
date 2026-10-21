@@ -12,6 +12,7 @@ type ColumnTarget =
   | "expenseAmount"
   | "ignore"
   | "incomeAmount"
+  | "owner"
   | "paid"
   | "signedAmount"
   | "tags"
@@ -39,6 +40,9 @@ interface ImportRowPayload {
   date: string;
   description: string;
   line: number;
+  // The row's owner (spec 047); the request's owner applies when absent.
+  owner?: "FAMILY" | "USER";
+  ownerId?: string;
   paid?: boolean;
   tags?: string[];
   type: RowType;
@@ -48,10 +52,14 @@ interface ImportRowPayload {
 type RowType = "EXPENSE" | "INCOME";
 
 // FR 23-24: the app record (or fixed answer) chosen for each distinct value of a column.
+// Accounts, cards and categories are matched per owner: their keys are `<ownerId>|<value>` and, for categories,
+// `<ownerId>|<type>|<value>` (a family and Personal can have an account of the same name, income and expense a category).
 interface ValueMaps {
   account: Record<string, string>;
   card: Record<string, string>;
   category: Record<string, string>;
+  // File value of the "Belongs to" column → owner id.
+  owner: Record<string, string>;
   paid: Record<string, "default" | boolean>;
   type: Record<string, RowType>;
 }

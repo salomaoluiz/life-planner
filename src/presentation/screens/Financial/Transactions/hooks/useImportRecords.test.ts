@@ -79,34 +79,36 @@ beforeEach(() => {
 });
 
 describe("useImportRecords", () => {
-  it("SHOULD list the active accounts, cards and categories of the chosen owner, with category paths", () => {
-    const { result } = renderHook(() => useImportRecords("u1", owners));
+  it("SHOULD list the active accounts, cards and categories of each owner, with category paths", () => {
+    const { result } = renderHook(() => useImportRecords(owners));
 
-    expect(result.current.accounts).toEqual([
+    expect(result.current.u1.accounts).toEqual([
       { currency: "BRL", id: "a1", name: "Corrente" },
     ]);
-    expect(result.current.cards).toEqual([
+    expect(result.current.u1.cards).toEqual([
       { closingDay: 5, currency: "BRL", id: "c1", name: "Visa" },
     ]);
     expect(
-      result.current.categories.map((item) => [item.id, item.path]),
+      result.current.u1.categories.map((item) => [item.id, item.path]),
     ).toEqual([
       ["home", "Casa"],
       ["market", "Casa > Mercado"],
     ]);
-    expect(result.current.categories[0]).toMatchObject({
+    expect(result.current.u1.categories[0]).toMatchObject({
       depthLevel: 0,
       type: "EXPENSE",
     });
   });
 
-  it("SHOULD follow the owner", () => {
-    const { result } = renderHook(() => useImportRecords("f1", owners));
+  it("SHOULD keep the records of another owner apart", () => {
+    const { result } = renderHook(() => useImportRecords(owners));
 
-    expect(result.current.accounts).toEqual([
+    expect(result.current.f1.accounts).toEqual([
       { currency: "BRL", id: "a3", name: "Da família" },
     ]);
-    expect(result.current.cards).toEqual([]);
-    expect(result.current.categories.map((item) => item.id)).toEqual(["fam"]);
+    expect(result.current.f1.cards).toEqual([]);
+    expect(result.current.f1.categories.map((item) => item.id)).toEqual([
+      "fam",
+    ]);
   });
 });

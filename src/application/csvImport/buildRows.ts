@@ -1,5 +1,6 @@
 import { isSystemCategoryName } from "./distinctValues";
 import { columnsOf } from "./mapping";
+import { accountKey, categoryKey, ownerOfRow } from "./owner";
 import { parseAmountCents, parseDate } from "./parseValues";
 import {
   ColumnMapping,
@@ -15,8 +16,11 @@ import {
 interface BuildInput {
   dateFormat: DateFormat;
   decimal: DecimalSeparator;
+  // The owner of the rows without a "Belongs to" value (step 1), and the type of every owner.
+  defaultOwnerId: string;
   fixed: FixedValues;
   mapping: ColumnMapping;
+  ownerTypes: Record<string, "FAMILY" | "USER">;
   // The data rows, without the header line.
   rows: string[][];
   valueMaps: ValueMaps;
@@ -52,11 +56,12 @@ type LocalRowErrorCode =
 // A column value wins; the fixed account or card covers the rows the columns leave empty (FR 18, 19).
 function accountOrCardOf(
   input: BuildInput,
+  ownerId: string,
   accountText: string,
   cardText: string,
 ): undefined | { accountId?: string; creditCardId?: string } {
-  const accountId = input.valueMaps.account[accountText];
-  const creditCardId = input.valueMaps.card[cardText];
+  const accountId = input.valueMaps.account[accountKey(ownerId, accountText)];
+  const creditCardId = input.valueMaps.card[accountKey(ownerId, cardText)];
 
   if (accountId !== undefined || creditCardId !== undefined) {
     return { accountId, creditCardId };
@@ -111,7 +116,18 @@ function buildRow(
     return { display, error: amount.error, line };
   }
 
-  const categoryId = categoryOf(input, cell(row, "category"), amount.type);
+  const ownerId = ownerOfRow(
+    row,
+    input.mapping,
+    input.valueMaps.owner,
+    input.defaultOwnerId,
+  );
+  const categoryId = categoryOf(
+    input,
+    ownerId,
+    cell(row, "category"),
+    amount.type,
+  );
 
   if (categoryId === undefined) {
     return { display, error: "CATEGORY_MISSING", line };
@@ -119,6 +135,7 @@ function buildRow(
 
   const target = accountOrCardOf(
     input,
+    ownerId,
     cell(row, "account"),
     cell(row, "card"),
   );
@@ -141,6 +158,8 @@ function buildRow(
       date,
       description,
       line,
+      owner: input.ownerTypes[ownerId],
+      ownerId,
       paid: typeof paidValue === "boolean" ? paidValue : undefined,
       tags: tags.length > 0 ? tags : undefined,
       type: amount.type,
@@ -178,12 +197,14 @@ function buildRows(input: BuildInput): BuildResult {
 // Categories are matched per type (`EXPENSE|Mercado`): income and expense can share a name.
 function categoryOf(
   input: BuildInput,
+  ownerId: string,
   text: string,
   type: RowType,
 ): string | undefined {
   return text === ""
     ? input.fixed.categoryId
-    : (input.valueMaps.category[`${type}|${text}`] ?? input.fixed.categoryId);
+    : (input.valueMaps.category[categoryKey(ownerId, type, text)] ??
+        input.fixed.categoryId);
 }
 
 // FR 16: Amount + Type, Signed amount, or Income + Expense columns.

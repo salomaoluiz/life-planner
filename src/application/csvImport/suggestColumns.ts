@@ -23,20 +23,12 @@ const HEADER_TARGETS: [ColumnTarget, string[]][] = [
   ["paid", ["pago", "paid", "status", "situacao"]],
   ["tags", ["tags", "etiquetas", "marcadores"]],
   ["currency", ["moeda", "currency"]],
+  ["owner", ["pertence a", "belongs to", "dono", "owner"]],
   ["incomeAmount", ["entrada", "credito", "receita", "income", "credit"]],
   ["expenseAmount", ["saida", "debito", "despesa", "expense", "debit"]],
   [
     "ignore",
-    [
-      "fatura",
-      "invoice",
-      "pertence a",
-      "belongs to",
-      "parcela",
-      "installment",
-      "recorrente",
-      "recurring",
-    ],
+    ["fatura", "invoice", "parcela", "installment", "recorrente", "recurring"],
   ],
 ];
 const AMOUNT_WORDS = ["valor", "amount", "value", "quantia"];

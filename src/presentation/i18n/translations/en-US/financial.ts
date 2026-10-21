@@ -305,6 +305,7 @@ const financial = {
     columns: {
       defaults: {
         currency: "default: the account or card currency",
+        owner: "default: the owner chosen in the first step",
         paid: "default: the date has passed",
         tags: "none",
       },
@@ -317,6 +318,7 @@ const financial = {
         currency: "Currency",
         date: "Date",
         description: "Description",
+        owner: "Belongs to",
         paid: "Paid",
         tags: "Tags",
         title: "Transaction fields",
@@ -352,6 +354,7 @@ const financial = {
         expenseAmount: "Expense amount",
         ignore: "Ignore",
         incomeAmount: "Income amount",
+        owner: "Belongs to",
         paid: "Paid",
         signedAmount: "Signed amount",
         tags: "Tags",
@@ -493,6 +496,7 @@ const financial = {
         account: "Account in the app",
         card: "Card in the app",
         category: "Category in the app",
+        owner: "Owner in the app",
         paid: "Paid",
         type: "Type",
       },
@@ -524,6 +528,7 @@ const financial = {
       },
       fileValue: "Value in the file",
       help: "Matched by name, ignoring case and accents. Archived records are not listed. Each value of the file becomes one record of the app.",
+      inOwner: "in {{name}}",
       paid: {
         default: "Use the default",
         paid: "Paid",
@@ -535,6 +540,7 @@ const financial = {
         account: "Account",
         card: "Card",
         category: "Category",
+        owner: "Belongs to",
         paid: "Paid",
         type: "Type",
       },

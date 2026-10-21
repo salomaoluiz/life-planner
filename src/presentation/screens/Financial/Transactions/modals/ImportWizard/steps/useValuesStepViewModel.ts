@@ -11,6 +11,7 @@ import {
   splitCategoryPath,
 } from "@screens/Financial/Transactions/models/categoryChain";
 import {
+  NO_RECORDS,
   unmatchedCount,
   ValueEntry,
   ValueTab,
@@ -33,6 +34,7 @@ interface CreateForm {
 
 interface CreateRequest {
   form: CreateForm;
+  ownerId: string;
   parentDepth: number;
   tab: CreatableTab;
 }
@@ -65,6 +67,7 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
   const [tab, setTab] = useState<ValueTab>();
   const [creating, setCreating] = useState<{
     key: string;
+    ownerId: string;
     tab: CreatableTab;
     type?: RowType;
     value: string;
@@ -73,6 +76,7 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
   const pending = useRef<{
     key: string;
     name: string;
+    ownerId: string;
     tab: CreatableTab;
     type?: RowType;
   }>();
@@ -80,15 +84,21 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
   const entries: ValueEntry[] = activeTab
     ? (wizard.entries[activeTab] ?? [])
     : [];
-  const owner = wizard.owners.find((item) => item.id === wizard.ownerId);
-  const { records } = wizard;
+  const { catalog } = wizard;
+
+  // The records of the owner an entry is matched in (Personal and families can be mixed in one file).
+  function recordsOf(ownerId?: string) {
+    return catalog[ownerId ?? wizard.ownerId] ?? NO_RECORDS;
+  }
 
   const createMutation = useMutation<CreateRequest, void>({
     cacheKey: ["financial.import_create_record"],
     fetch: async (request) => {
       const base = {
-        owner: owner?.type ?? "USER",
-        ownerId: wizard.ownerId,
+        owner:
+          wizard.owners.find((item) => item.id === request.ownerId)?.type ??
+          "USER",
+        ownerId: request.ownerId,
       };
       const { form: values, tab: kind } = request;
 
@@ -96,7 +106,7 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
         // A path ("Finanças > Investimentos") creates every level that is missing, inside each other.
         await createCategoryChain(
           splitCategoryPath(values.name),
-          wizard.ownerId,
+          request.ownerId,
           {
             depthLevel: request.parentDepth,
             parentId: values.parentId || undefined,
@@ -109,8 +119,11 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
                 ...level,
                 type: values.type,
               }),
+            // Every owner: the category lists share one cache entry, a narrower read would leave the others out of it.
             list: async () =>
-              useCases.getFinancialCategoriesUseCase.execute([wizard.ownerId]),
+              useCases.getFinancialCategoriesUseCase.execute(
+                wizard.owners.map((item) => item.id),
+              ),
           },
         );
       } else if (kind === "account") {
@@ -145,6 +158,7 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
       return;
     }
 
+    const records = recordsOf(waiting.ownerId);
     const list =
       waiting.tab === "category"
         ? records.categories
@@ -165,7 +179,7 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
       wizard.onValueChoice(waiting.tab, waiting.key, id);
       pending.current = undefined;
     }
-  }, [records]);
+  }, [catalog]);
 
   const created = createMutation.status === "success";
 
@@ -184,6 +198,7 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
     setForm(emptyForm(entry.value, entry.type ?? "EXPENSE"));
     setCreating({
       key: entry.key,
+      ownerId: entry.ownerId ?? wizard.ownerId,
       tab: kind,
       type: entry.type,
       value: entry.value,
@@ -195,6 +210,13 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
     if (!activeTab) {
       return [];
     }
+
+    if (activeTab === "owner") {
+      return wizard.owners
+        .filter((item) => !item.archived)
+        .map((item) => ({ label: item.name, value: item.id }));
+    }
+    const records = recordsOf(entry.ownerId);
 
     if (activeTab === "category") {
       return records.categories
@@ -218,6 +240,8 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
   }
 
   function hasExactMatch(entry: ValueEntry) {
+    const records = recordsOf(entry.ownerId);
+
     if (activeTab === "category") {
       return !!autoMatch(
         entry.value,
@@ -238,11 +262,13 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
   const kind = creating?.tab;
   const parentOptions =
     kind === "category"
-      ? records.categories
-          .filter((item) => item.type === form.type)
+      ? recordsOf(creating?.ownerId)
+          .categories.filter((item) => item.type === form.type)
           .map((item) => ({ label: item.path, value: item.id }))
       : [];
-  const parent = records.categories.find((item) => item.id === form.parentId);
+  const parent = recordsOf(creating?.ownerId).categories.find(
+    (item) => item.id === form.parentId,
+  );
   const formValid =
     form.name.trim() !== "" &&
     (kind !== "card" || (validDay(form.closingDay) && validDay(form.dueDay)));
@@ -257,6 +283,7 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
     hasExactMatch,
     isCreatable: activeTab ? isCreatable(activeTab) : false,
     isSaving: createMutation.isFetching,
+    multiOwner: wizard.owners.length > 1,
     onChoice: (entry: ValueEntry, selected: string) => {
       if (!activeTab) {
         return;
@@ -279,11 +306,13 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
       pending.current = {
         key: creating.key,
         name: form.name.trim(),
+        ownerId: creating.ownerId,
         tab: creating.tab,
         type: creating.type,
       };
       createMutation.mutate({
         form,
+        ownerId: creating.ownerId,
         parentDepth: parent ? parent.depthLevel + 1 : 0,
         tab: creating.tab,
       });
@@ -294,7 +323,11 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
       setTab(next as ValueTab);
     },
     optionsFor,
-    ownerName: owner?.name ?? "",
+    ownerName:
+      wizard.owners.find((item) => item.id === creating?.ownerId)?.name ?? "",
+    ownerNames: Object.fromEntries(
+      wizard.owners.map((item) => [item.id, item.name]),
+    ),
     parentOptions,
     saveFailed: !!createMutation.error,
     tabs: wizard.tabs.map((value) => ({
