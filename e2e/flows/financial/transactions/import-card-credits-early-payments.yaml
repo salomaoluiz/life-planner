@@ -1,0 +1,106 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/import-card-credits-early-payments
+tags:
+  - financial
+  - spec-048
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Two identical early payments: the second looks like a duplicate and comes unchecked, so the payment of the invoice
+# does not match. Checking it counts it again and the import goes on (spec 048).
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Card
+      KEY: CARD_TITLE
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Credit Purchase
+      KEY: PURCHASE_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-credit-card.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      OWNER: USER
+      TITLE: ${output.CARD_TITLE}
+- runScript:
+    file: ../../../scripts/csv-import-credits-fixture.js
+    env:
+      DESCRIPTION: ${output.PURCHASE_NAME}
+      CATEGORY: ${output.EXPENSE_CATEGORY_NAME}
+      ACCOUNT_NAME: ${output.ACCOUNT_NAME}
+      CARD_TITLE: ${output.CARD_TITLE}
+      EARLY: "true"
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow:
+    file: ../../../subflows/financial/load-csv-fixture.yaml
+    env:
+      CSV_FRAGMENT: ${output.CSV_FRAGMENT}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- tapOn:
+    id: "financial.transactions.importButton"
+- tapOn:
+    id: "financial.import.file.pick"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.file.name"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.column.0"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.value.category.0"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+# Step 4: the repeated early payment comes unchecked, so the payment (400,00) does not match the invoice (700,00).
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.filter-ERRORS"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.filter-ERRORS"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.row.5.error"
+    timeout: 20000
+# Checking the duplicate checks the invoices again with it: the invoice is 400,00 and the error goes away.
+- tapOn:
+    id: "financial.import.filter-DUPLICATES"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.row.4.duplicate"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.row.4.check"
+# The footer no longer asks to fix an error.
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.import.footer-note"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.submit"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.toast"
+    timeout: 20000
