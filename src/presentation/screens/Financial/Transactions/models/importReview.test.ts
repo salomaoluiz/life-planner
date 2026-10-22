@@ -6,6 +6,8 @@ import {
   importPayloads,
   invoiceLines,
   kindCounts,
+  mergeValidation,
+  revalidationRequest,
   reviewRows,
   summarize,
 } from "./importReview";
@@ -209,6 +211,53 @@ describe("card credits and payments (spec 048)", () => {
         month: "10/26",
         paid: false,
       },
+    ]);
+  });
+});
+
+describe("revalidation (spec 048)", () => {
+  it("SHOULD send only the checked rows and name the checked duplicates", () => {
+    const review = reviewRows(built, validation, { 3: true, 5: false });
+    const request = revalidationRequest(review);
+
+    // 2 ready, 3 duplicate checked by the user, 4 local error (no payload), 5 API error (locked on), 6 duplicate left unchecked
+    expect(request.rows.map((row) => row.line)).toEqual([2, 3, 5]);
+    expect(request.includeDuplicates).toEqual([3]);
+  });
+
+  it("SHOULD keep the duplicates found on the first check and take the rest from the latest one", () => {
+    const merged = mergeValidation([3, 6], {
+      duplicates: [3],
+      errors: [{ code: "INVOICE_PAYMENT_MISMATCH", line: 5, message: "x" }],
+      invoices: [],
+    });
+
+    expect(merged.duplicates).toEqual([3, 6]);
+    expect(merged.errors).toHaveLength(1);
+  });
+
+  it("SHOULD recompute the review WITHOUT the error WHEN the new check has none", () => {
+    const first = reviewRows(built, validation, {});
+    const next = reviewRows(
+      built,
+      mergeValidation(validation.duplicates, {
+        duplicates: [3],
+        errors: [],
+        invoices: [],
+      }),
+      { 3: true, 6: true },
+    );
+
+    expect(first.find((row) => row.line === 5)?.errorCode).toBe(
+      "CURRENCY_MISMATCH",
+    );
+    expect(next.find((row) => row.line === 5)?.errorCode).toBeUndefined();
+    // The duplicates it remembers are still duplicates, now checked on purpose.
+    expect(
+      next.filter((row) => row.duplicate).map((row) => [row.line, row.checked]),
+    ).toEqual([
+      [3, true],
+      [6, true],
     ]);
   });
 });

@@ -34,6 +34,8 @@ export interface ImportInvoiceEntity {
 }
 
 export interface ImportRequest {
+  // Spec 048: duplicate lines the user chose to import (the dry run counts them in the invoices).
+  includeDuplicates?: number[];
   owner: OwnerType;
   ownerId: string;
   rows: ImportRowEntity[];

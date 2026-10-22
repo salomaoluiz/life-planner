@@ -87,6 +87,35 @@ function kindCounts(rows: ReviewRow[]): { credits: number; payments: number } {
   return counts;
 }
 
+// The duplicates are found once, on the full file; a later check only sees the checked rows, so it keeps them.
+function mergeValidation(
+  knownDuplicates: number[],
+  latest: ImportValidationEntity,
+): ImportValidationEntity {
+  return {
+    ...latest,
+    duplicates: [...new Set([...knownDuplicates, ...latest.duplicates])].sort(
+      (a, b) => a - b,
+    ),
+  };
+}
+
+// Spec 048: what a new dry run sends after the user checks or unchecks rows: only the checked ones, and which of
+// them are duplicates the user wants anyway (the API counts those in the invoice math).
+function revalidationRequest(rows: ReviewRow[]): {
+  includeDuplicates: number[];
+  rows: ImportRowPayload[];
+} {
+  const checked = rows.filter((row) => row.checked && row.payload);
+
+  return {
+    includeDuplicates: checked
+      .filter((row) => row.duplicate)
+      .map((row) => row.line),
+    rows: checked.flatMap((row) => (row.payload ? [row.payload] : [])),
+  };
+}
+
 // FR 27-31: the built rows with the dry-run answer and the user's check marks. A duplicate comes unchecked unless the
 // user checked it; an error row is locked on.
 function reviewRows(
@@ -132,6 +161,8 @@ export {
   importPayloads,
   invoiceLines,
   kindCounts,
+  mergeValidation,
+  revalidationRequest,
   reviewRows,
   summarize,
 };
