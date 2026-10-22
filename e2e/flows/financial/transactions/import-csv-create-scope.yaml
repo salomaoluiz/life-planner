@@ -1,0 +1,99 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/import-csv-create-scope
+tags:
+  - financial
+  - spec-048
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Two categories that do not exist yet: the first is created in All (Personal and families) and "Create and use" moves
+# on to the next value with Belongs to still on All (spec 048).
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Import Row A
+      KEY: ROW_A
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Import Row B
+      KEY: ROW_B
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Scope Cat A
+      KEY: CATEGORY_A
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Scope Cat B
+      KEY: CATEGORY_B
+- runScript:
+    file: ../../../scripts/csv-import-fixture.js
+    env:
+      DESCRIPTION_1: ${output.ROW_A}
+      DESCRIPTION_2: ${output.ROW_B}
+      CATEGORY_1: ${output.CATEGORY_A}
+      CATEGORY_2: ${output.CATEGORY_B}
+      ACCOUNT_NAME: ${output.ACCOUNT_NAME}
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow:
+    file: ../../../subflows/financial/load-csv-fixture.yaml
+    env:
+      CSV_FRAGMENT: ${output.CSV_FRAGMENT}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- tapOn:
+    id: "financial.transactions.importButton"
+- tapOn:
+    id: "financial.import.file.pick"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.file.name"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.column.0"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+# Step 3: create the first category in All.
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.value.category.0"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.value.category.0"
+- tapOn:
+    id: "financial.import.value.category.0-option-__create__"
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.import.value.create.scope-ALL"
+- tapOn:
+    id: "financial.import.create.submit"
+# The form moved on to the second category and Belongs to is still All.
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.create.name"
+      text: ${output.CATEGORY_B}
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+# With Belongs to on All, "Inside" lists the All categories: the one just created is there.
+- tapOn:
+    id: "financial.import.create.parent"
+- extendedWaitUntil:
+    visible: ${output.CATEGORY_A}
+    timeout: 20000

@@ -295,6 +295,26 @@ describe("step 3: values", () => {
     expect(screen.getByTestId(ids.importContinue)).toBeEnabled();
   });
 
+  it("SHOULD keep the last Belongs to chosen WHEN the form opens for another value (spec 048)", async () => {
+    setup();
+    await toValues();
+
+    await chooseOption(`${ids.importValue}.category.2`, "__create__");
+    fireEvent.press(screen.getByTestId(`${ids.importCreateScope}-ALL`));
+    expect(
+      screen.getByTestId(`${ids.importCreateScope}-ALL`).props
+        .accessibilityState.selected,
+    ).toBe(true);
+
+    fireEvent.press(screen.getByTestId(ids.importCreateCancel));
+    await chooseOption(`${ids.importValue}.category.2`, "__create__");
+
+    expect(
+      screen.getByTestId(`${ids.importCreateScope}-ALL`).props
+        .accessibilityState.selected,
+    ).toBe(true);
+  });
+
   it("SHOULD create each level of a category path, parent first", async () => {
     setup();
     await toColumns();

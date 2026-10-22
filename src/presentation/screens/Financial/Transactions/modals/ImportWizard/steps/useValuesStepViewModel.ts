@@ -83,6 +83,8 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
     value: string;
   }>();
   const [form, setForm] = useState<CreateForm>(emptyForm("", "EXPENSE"));
+  // The last Belongs to chosen stays for the next values ("Create and use" moves on to them, spec 048).
+  const lastScope = useRef<CreateForm["scope"]>("OWNER");
   const pending = useRef<{
     key: string;
     name: string;
@@ -250,7 +252,10 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
 
   function onCreateOpen(kind: CreatableTab, entry: ValueEntry) {
     createMutation.reset();
-    setForm(emptyForm(entry.value, entry.type ?? "EXPENSE"));
+    setForm({
+      ...emptyForm(entry.value, entry.type ?? "EXPENSE"),
+      scope: lastScope.current,
+    });
     setCreating({
       key: entry.key,
       ownerId: entry.ownerId ?? wizard.ownerId,
@@ -386,7 +391,13 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
         tab: creating.tab,
       });
     },
-    onFormChange: (next: Partial<CreateForm>) => setForm({ ...form, ...next }),
+    onFormChange: (next: Partial<CreateForm>) => {
+      if (next.scope) {
+        lastScope.current = next.scope;
+      }
+
+      setForm({ ...form, ...next });
+    },
     // Called by the list container and by each row with its position (the "Next without match" button scrolls to it).
     onListLayout: (y: number) => {
       listOffset.current = y;

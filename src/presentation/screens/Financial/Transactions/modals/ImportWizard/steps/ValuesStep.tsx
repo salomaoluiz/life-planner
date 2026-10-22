@@ -302,8 +302,9 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
             value={t("financial.import.values.createForm.owner")}
           />
           {kind === "category" ? (
-            <SegmentedControl
-              accessibilityLabel={t("financial.import.values.createForm.owner")}
+            <ChipGroup
+              layout={"wrap"}
+              mode={"single"}
               onChange={(scope) =>
                 vm.onFormChange({
                   parentId: "",
