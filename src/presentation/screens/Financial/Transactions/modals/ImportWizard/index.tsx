@@ -63,10 +63,31 @@ function ImportWizard(props: ImportWizardParams) {
       );
     }
 
+    // Spec 049 FR 20: the import waits for a check of the current selection.
+    if (step === "review" && wizard.stale) {
+      return t("financial.import.review.refresh.blocked");
+    }
+
     return undefined;
   }
 
+  const compactReview = step === "review" && !wizard.wide;
   const footerNote = note();
+  const noteTone = wizard.summary.errors > 0 ? "expense" : "warning";
+  const compactErrors =
+    wizard.summary.errors > 0
+      ? t(
+          pluralKey(
+            "financial.import.review.footerErrors",
+            wizard.summary.errors,
+          ),
+          { count: wizard.summary.errors },
+        )
+      : undefined;
+  const compactNotice =
+    compactReview &&
+    (compactErrors ??
+      (wizard.stale ? t("financial.import.review.refresh.stale") : undefined));
   const primaryLabel =
     step === "review"
       ? t(pluralKey("financial.import.review.submit", wizard.summary.ready), {
@@ -74,39 +95,80 @@ function ImportWizard(props: ImportWizardParams) {
         })
       : t("financial.import.continue");
 
+  function primary(size: "lg" | "md" = "lg") {
+    return (
+      <Button.Primary
+        disabled={!wizard.stepReady}
+        fullWidth
+        label={primaryLabel}
+        loading={wizard.isImporting}
+        onPress={wizard.onContinue}
+        size={size}
+        testID={step === "review" ? ids.importSubmit : ids.importContinue}
+      />
+    );
+  }
+
+  function compactFooter() {
+    return (
+      <View style={styles.footer}>
+        {compactNotice ? (
+          <Text.Caption
+            testID={
+              compactNotice === footerNote
+                ? ids.importFooterNote
+                : ids.importStale
+            }
+            tone={compactNotice === footerNote ? noteTone : "warning"}
+            value={compactNotice}
+          />
+        ) : null}
+        <View style={styles.footerRow}>
+          <View style={styles.footerAction}>
+            <Button.Secondary
+              disabled={!wizard.review.length || wizard.isRefreshing}
+              fullWidth
+              label={t(
+                wizard.isRefreshing
+                  ? "financial.import.review.refresh.refreshing"
+                  : "financial.import.review.refresh.short",
+              )}
+              loading={wizard.isRefreshing}
+              onPress={wizard.onRefresh}
+              testID={ids.importRefresh}
+            />
+          </View>
+          <View style={styles.footerAction}>{primary("md")}</View>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <>
       <BottomSheet
         closeLabel={t("financial.import.close")}
-        footer={
-          <Button.Primary
-            disabled={!wizard.stepReady}
-            fullWidth
-            label={primaryLabel}
-            loading={wizard.isImporting}
-            onPress={wizard.onContinue}
-            size={"lg"}
-            testID={step === "review" ? ids.importSubmit : ids.importContinue}
-          />
-        }
+        footer={compactReview ? compactFooter() : primary()}
         footerSecondary={
-          <Button.Secondary
-            fullWidth
-            label={t(
-              step === "file"
-                ? "financial.import.cancel"
-                : "financial.import.back",
-            )}
-            onPress={step === "file" ? wizard.onRequestClose : wizard.onBack}
-            size={"lg"}
-            testID={step === "file" ? ids.importCancel : ids.importBack}
-          />
+          compactReview ? undefined : (
+            <Button.Secondary
+              fullWidth
+              label={t(
+                step === "file"
+                  ? "financial.import.cancel"
+                  : "financial.import.back",
+              )}
+              onPress={step === "file" ? wizard.onRequestClose : wizard.onBack}
+              size={"lg"}
+              testID={step === "file" ? ids.importCancel : ids.importBack}
+            />
+          )
         }
         footerStart={
-          footerNote ? (
+          footerNote && !compactReview ? (
             <Text.Caption
               testID={ids.importFooterNote}
-              tone={"expense"}
+              tone={noteTone}
               value={footerNote}
             />
           ) : undefined

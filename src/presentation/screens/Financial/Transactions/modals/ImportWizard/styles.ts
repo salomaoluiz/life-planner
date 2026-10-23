@@ -17,7 +17,10 @@ function useStyles() {
       column: { alignItems: "center", flexDirection: "row", gap: spacing.sm },
       columnRow: { gap: spacing.xs, paddingVertical: spacing.sm },
       fileRow: { alignItems: "center", flexDirection: "row", gap: spacing.md },
+      footer: { gap: spacing.xs },
+      footerAction: { flex: 1 },
       footerNote: { flexShrink: 1 },
+      footerRow: { flexDirection: "row", gap: spacing.sm },
       groupHeader: {
         alignItems: "center",
         flexDirection: "row",

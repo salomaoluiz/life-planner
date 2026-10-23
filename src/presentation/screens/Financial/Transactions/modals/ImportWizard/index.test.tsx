@@ -794,6 +794,60 @@ describe("step 4: review and import", () => {
     ).toBeOnTheScreen();
   });
 
+  it("SHOULD say to refresh WHEN the selection changed on wide (spec 049)", async () => {
+    setup();
+    mutations.validate.value.data = NO_ISSUES;
+    await toReview();
+
+    fireEvent.press(screen.getByTestId(`${ids.importRow}.3.check`));
+
+    expect(screen.getByTestId(ids.importFooterNote)).toHaveTextContent(
+      /financial.import.review.refresh.blocked/,
+    );
+    expect(screen.getByTestId(ids.importSubmit)).toBeDisabled();
+  });
+
+  it("SHOULD say to fix the errors before refreshing WHEN the file has errors (spec 049)", async () => {
+    setup();
+    mutations.validate.value.data = {
+      duplicates: [],
+      errors: [{ code: "CURRENCY_MISMATCH", line: 4, message: "x" }],
+    };
+    await toReview();
+
+    fireEvent.press(screen.getByTestId(`${ids.importRow}.2.check`));
+
+    expect(screen.getByTestId(ids.importFooterNote)).toHaveTextContent(
+      /financial\.import\.review\.footerErrors_one/,
+    );
+  });
+
+  it("SHOULD show the stale notice and Refresh/Import in the footer on compact (spec 049)", async () => {
+    const view = setup({}, "compact");
+    mutations.validate.value.data = NO_ISSUES;
+    await toReview();
+
+    fireEvent.press(screen.getByTestId(`${ids.importRow}.3.check`));
+
+    expect(screen.getByTestId(ids.importStale)).toHaveTextContent(
+      /financial\.import\.review\.refresh\.stale/,
+    );
+    expect(screen.getByTestId(ids.importRefresh)).toBeOnTheScreen();
+    expect(screen.getByTestId(ids.importSubmit)).toBeDisabled();
+    expect(screen.queryByTestId(ids.importBack)).toBeNull();
+
+    fireEvent.press(screen.getByTestId(ids.importRefresh));
+    mutations.validate.value.data = {
+      duplicates: [],
+      errors: [],
+      invoices: [],
+    };
+    view.rerender(<ImportWizard {...params} />);
+
+    expect(screen.queryByTestId(ids.importStale)).toBeNull();
+    expect(screen.getByTestId(ids.importSubmit)).toBeEnabled();
+  });
+
   it("SHOULD block the import WHEN a row has an error, and say how many to fix", async () => {
     setup();
     mutations.validate.value.data = {
