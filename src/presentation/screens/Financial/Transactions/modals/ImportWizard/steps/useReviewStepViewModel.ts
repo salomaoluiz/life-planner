@@ -9,8 +9,11 @@ import { invoiceMonthOf } from "@screens/Financial/models/invoiceMonth";
 import {
   filterRows,
   invoiceLines,
-  kindCounts,
+  ReviewBlock,
   ReviewFilter,
+  ReviewGroup,
+  reviewGroups,
+  ReviewRecords,
   ReviewRow,
 } from "@screens/Financial/Transactions/models/importReview";
 import { NO_RECORDS } from "@screens/Financial/Transactions/models/importValues";
@@ -51,6 +54,16 @@ const ERROR_CODES = [
   "UNSUPPORTED_CURRENCY",
 ] as const;
 
+export interface ReviewBlockView extends Omit<ReviewBlock, "groups"> {
+  groups: ReviewGroupView[];
+}
+
+// Spec 049: a group as the review renders it — its totals and only the rows of the current page.
+export interface ReviewGroupView extends Omit<ReviewGroup, "rows"> {
+  emptyInFilter: boolean;
+  rows: ReviewRowView[];
+}
+
 export interface ReviewRowView {
   amount?: { cents: number; currency: string; type: "EXPENSE" | "INCOME" };
   amountText: string;
@@ -86,7 +99,8 @@ function knownCode(code?: string): "unknown" | ErrorCode | undefined {
     : "unknown";
 }
 
-// Step 4 (spec 047 FR 27-32): the rows with their problems, the duplicates unchecked and the summary.
+// Step 4 (spec 047 FR 27-32, spec 049): the rows in blocks and groups with their subtotals, the summary and the
+// manual refresh state.
 function useReviewStepViewModel(wizard: ImportWizardState) {
   const [filter, setFilter] = useState<ReviewFilter>("ALL");
   const [limit, setLimit] = useState(PAGE_SIZE);
@@ -94,17 +108,21 @@ function useReviewStepViewModel(wizard: ImportWizardState) {
   const filtered = filterRows(wizard.review, filter);
   const allAccounts = Object.values(catalog).flatMap((item) => item.accounts);
   const allCards = Object.values(catalog).flatMap((item) => item.cards);
+  const records: ReviewRecords = { accounts: allAccounts, cards: allCards };
+  const inFilter = new Set(filtered.map((row) => row.line));
+  const onPage = new Set(filtered.slice(0, limit).map((row) => row.line));
 
   function view(row: ReviewRow): ReviewRowView {
     const payload = row.payload;
-    const records = catalog[payload?.ownerId ?? wizard.ownerId] ?? NO_RECORDS;
-    const card = records.cards.find(
+    const rowRecords =
+      catalog[payload?.ownerId ?? wizard.ownerId] ?? NO_RECORDS;
+    const card = rowRecords.cards.find(
       (item) => item.id === payload?.creditCardId,
     );
-    const account = records.accounts.find(
+    const account = rowRecords.accounts.find(
       (item) => item.id === payload?.accountId,
     );
-    const category = records.categories.find(
+    const category = rowRecords.categories.find(
       (item) => item.id === payload?.categoryId,
     );
     const creditKey = payload && creditKeyOf(payload.categoryId);
@@ -145,33 +163,52 @@ function useReviewStepViewModel(wizard: ImportWizardState) {
     };
   }
 
+  const blocks: ReviewBlockView[] = reviewGroups(wizard.review, records).map(
+    (block) => ({
+      ...block,
+      groups: block.groups.map((group) => ({
+        ...group,
+        emptyInFilter: !group.rows.some((row) => inFilter.has(row.line)),
+        rows: group.rows
+          .filter((row) => onPage.has(row.line))
+          .map((row) => view(row)),
+      })),
+    }),
+  );
   const { summary } = wizard;
   const created =
     wizard.created.accounts + wizard.created.cards + wizard.created.categories;
 
   return {
+    blocks,
+    canRefresh: wizard.review.length > 0 && !wizard.isValidating,
     created,
     filter,
+    filteredCount: filtered.length,
     hasMore: filtered.length > limit,
     ignoredSystemRows: wizard.built.ignoredSystemRows,
     invoices: invoiceLines(
       wizard.invoices,
       (id) => allCards.find((item) => item.id === id)?.name ?? "",
     ),
-    kinds: kindCounts(wizard.review),
+    kinds: wizard.kinds,
     onFilterChange: (value: string) => {
       setFilter(value as ReviewFilter);
       setLimit(PAGE_SIZE);
     },
+    onRefresh: wizard.onRefresh,
     onRowToggle: (line: number, checked: boolean) =>
       wizard.onSelectionChange(line, checked),
     onShowMore: () => setLimit(limit + PAGE_SIZE),
+    refreshFailed: wizard.refreshFailed,
+    refreshing: wizard.isRefreshing,
     remaining: Math.max(filtered.length - limit, 0),
-    rows: filtered.slice(0, limit).map(view),
+    stale: wizard.stale,
     summary,
     total: wizard.review.length,
     validateFailed: !wizard.validated && !wizard.isValidating,
-    validating: wizard.isValidating,
+    validating: wizard.isValidating && !wizard.validated,
+    wide: wizard.wide,
   };
 }
 

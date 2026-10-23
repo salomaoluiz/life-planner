@@ -4,6 +4,7 @@ import {
   AmountText,
   Badge,
   Button,
+  Card,
   Checkbox,
   ChipGroup,
   Divider,
@@ -12,24 +13,36 @@ import {
   TruncatedText,
 } from "@components";
 import { formatAmount } from "@components/AmountText/formatAmount";
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
+import {
+  CurrencyTotal,
+  ReviewBlockKey,
+} from "@screens/Financial/Transactions/models/importReview";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
 import useStyles from "../styles";
 import { ImportWizardState } from "../useImportWizardViewModel";
 import useReviewStepViewModel, {
+  ReviewBlockView,
+  ReviewGroupView,
   ReviewRowView,
 } from "./useReviewStepViewModel";
 
 const ids = transactionsTestIds;
 
-// Step 4 of the import wizard (artboard "Importar 4/4, revisar (erros bloqueiam, duplicadas desmarcadas)").
+// Step 4 of the import wizard (spec 047 FR 27-32, spec 049): the rows in an Account and a Card block, grouped by
+// account/card with income and expense subtotals, and the manual Refresh of the dry run.
 function ReviewStep(props: { wizard: ImportWizardState }) {
   const { styles } = useStyles();
   const { t } = useTranslation();
   const localeTag = useLocaleTag();
   const vm = useReviewStepViewModel(props.wizard);
+  const { wide } = vm;
 
   // `2026-08` → `08/26`, cents → the amount of the row's currency (spec 048).
   function errorParams(row: ReviewRowView) {
@@ -121,6 +134,183 @@ function ReviewStep(props: { wizard: ImportWizardState }) {
     );
   }
 
+  function meta(selected: number, total: number) {
+    const unchecked = total - selected;
+
+    return [
+      t("financial.import.review.groups.selectedOf", { selected, total }),
+      unchecked > 0
+        ? t("financial.import.review.groups.unchecked", { count: unchecked })
+        : undefined,
+    ]
+      .filter(Boolean)
+      .join(" · ");
+  }
+
+  function amountOf(totals: CurrencyTotal[], currency: CurrencyCode) {
+    return totals.find((total) => total.currency === currency)?.cents ?? 0;
+  }
+
+  function currenciesOf(income: CurrencyTotal[], expenses: CurrencyTotal[]) {
+    const codes = [
+      ...new Set([...income, ...expenses].map((total) => total.currency)),
+    ].sort((a, b) => {
+      if (a === b) {
+        return 0;
+      }
+
+      if (a === DEFAULT_CURRENCY) {
+        return -1;
+      }
+
+      return b === DEFAULT_CURRENCY ? 1 : a.localeCompare(b);
+    });
+
+    return codes.length > 0 ? codes : [DEFAULT_CURRENCY];
+  }
+
+  function totalsLabel(
+    income: CurrencyTotal[],
+    expenses: CurrencyTotal[],
+    currencies: CurrencyCode[],
+  ) {
+    function list(totals: CurrencyTotal[], type: "EXPENSE" | "INCOME") {
+      return currencies
+        .map((currency) =>
+          formatAmount(amountOf(totals, currency), localeTag, currency, type),
+        )
+        .join(" · ");
+    }
+
+    return `${t("financial.import.review.groups.income")} ${list(income, "INCOME")}, ${t(
+      "financial.import.review.groups.expenses",
+    )} ${list(expenses, "EXPENSE")}`;
+  }
+
+  // Spec 049 FR 8-9: both totals always shown, one pair per currency, never converted.
+  function totals(
+    income: CurrencyTotal[],
+    expenses: CurrencyTotal[],
+    prefix: string,
+    withLabels: boolean,
+  ) {
+    const currencies = currenciesOf(income, expenses);
+
+    return (
+      <View
+        accessibilityLabel={totalsLabel(income, expenses, currencies)}
+        style={[styles.totals, !wide && styles.totalsStack]}
+      >
+        <View style={styles.totalsColumn} testID={`${prefix}.income`}>
+          {withLabels ? (
+            <Text.Caption
+              tone={"secondary"}
+              value={t("financial.import.review.groups.income")}
+            />
+          ) : null}
+          {currencies.map((currency) => (
+            <AmountText
+              currency={currency}
+              key={currency}
+              size={"caption"}
+              type={"INCOME"}
+              value={amountOf(income, currency)}
+            />
+          ))}
+        </View>
+        <View style={styles.totalsColumn} testID={`${prefix}.expenses`}>
+          {withLabels ? (
+            <Text.Caption
+              tone={"secondary"}
+              value={t("financial.import.review.groups.expenses")}
+            />
+          ) : null}
+          {currencies.map((currency) => (
+            <AmountText
+              currency={currency}
+              key={currency}
+              size={"caption"}
+              type={"EXPENSE"}
+              value={amountOf(expenses, currency)}
+            />
+          ))}
+        </View>
+      </View>
+    );
+  }
+
+  function groupView(
+    block: ReviewBlockKey,
+    group: ReviewGroupView,
+    index: number,
+  ) {
+    // FR 11: only groups with a row on the current page get a heading.
+    if (!group.emptyInFilter && group.rows.length === 0) {
+      return null;
+    }
+
+    const prefix = `${ids.importGroup}.${block}.${index}`;
+
+    return (
+      <View key={group.key} testID={prefix}>
+        <View style={[styles.groupHeader, !wide && styles.groupStack]}>
+          <View style={styles.heading}>
+            <Text.BodyStrong
+              accessibilityRole={"header"}
+              value={group.nameKey ? t(group.nameKey) : (group.name ?? "")}
+            />
+            <Text.Caption value={meta(group.selected, group.total)} />
+          </View>
+          {totals(group.income, group.expenses, prefix, false)}
+        </View>
+        {group.emptyInFilter && group.rows.length === 0 ? (
+          <Text.Caption
+            tone={"secondary"}
+            value={t("financial.import.review.groups.noRowsInFilter")}
+          />
+        ) : null}
+        {group.rows.map(rowView)}
+      </View>
+    );
+  }
+
+  function blockView(block: ReviewBlockView) {
+    return (
+      <View key={block.block} testID={`${ids.importGroup}.${block.block}`}>
+        <Card padding={"sm"}>
+          <View style={[styles.blockHeaderRow, !wide && styles.blockStack]}>
+            <View style={styles.heading}>
+              <Text.Overline
+                accessibilityRole={"header"}
+                value={t(
+                  block.block === "account"
+                    ? "financial.import.review.groups.account"
+                    : "financial.import.review.groups.card",
+                )}
+              />
+              <Text.Caption value={meta(block.selected, block.total)} />
+            </View>
+            {totals(
+              block.income,
+              block.expenses,
+              `${ids.importGroup}.${block.block}`,
+              wide,
+            )}
+          </View>
+          {block.total === 0 ? (
+            <Text.Caption
+              tone={"secondary"}
+              value={t("financial.import.review.groups.noRows")}
+            />
+          ) : null}
+        </Card>
+        {block.groups.map((group, index) =>
+          groupView(block.block, group, index),
+        )}
+      </View>
+    );
+  }
+
   function left() {
     if (vm.validating) {
       return (
@@ -171,25 +361,29 @@ function ReviewStep(props: { wizard: ImportWizardState }) {
           testID={ids.importFilter}
           value={vm.filter}
         />
-        <View>
-          {vm.rows.length === 0 ? (
-            <Text.Caption
-              tone={"secondary"}
-              value={t("financial.import.review.noMatch")}
-            />
-          ) : (
-            vm.rows.map(rowView)
-          )}
-        </View>
-        {vm.hasMore ? (
-          <Button.Secondary
-            label={t("financial.import.review.showMore", {
-              count: vm.remaining,
-            })}
-            onPress={vm.onShowMore}
-            testID={ids.importShowMore}
+        <Text.Caption
+          tone={"secondary"}
+          value={t("financial.import.review.groups.subtotalsNote")}
+        />
+        {vm.filteredCount === 0 ? (
+          <Text.Caption
+            tone={"secondary"}
+            value={t("financial.import.review.noMatch")}
           />
-        ) : null}
+        ) : (
+          <>
+            {vm.blocks.map(blockView)}
+            {vm.hasMore ? (
+              <Button.Secondary
+                label={t("financial.import.review.showMore", {
+                  count: vm.remaining,
+                })}
+                onPress={vm.onShowMore}
+                testID={ids.importShowMore}
+              />
+            ) : null}
+          </>
+        )}
       </View>
     );
   }
@@ -278,7 +472,45 @@ function ReviewStep(props: { wizard: ImportWizardState }) {
                 )}
               />
             ))}
+            {vm.stale ? (
+              <Text.Caption
+                testID={`${ids.importSummary}.invoices-stale`}
+                tone={"secondary"}
+                value={t("financial.import.review.summary.invoicesStale")}
+              />
+            ) : null}
           </View>
+        ) : null}
+        {vm.stale && wide ? (
+          <View accessibilityRole={"alert"} testID={ids.importStale}>
+            <Text.Caption
+              tone={"warning"}
+              value={t("financial.import.review.refresh.stale")}
+            />
+          </View>
+        ) : null}
+        {vm.refreshFailed ? (
+          <View accessibilityRole={"alert"}>
+            <Text.Caption
+              tone={"expense"}
+              value={t("financial.import.review.refresh.failed")}
+            />
+          </View>
+        ) : null}
+        {wide ? (
+          <Button.Secondary
+            disabled={!vm.canRefresh}
+            fullWidth
+            icon={vm.refreshing ? undefined : "refresh"}
+            label={t(
+              vm.refreshing
+                ? "financial.import.review.refresh.refreshing"
+                : "financial.import.review.refresh.action",
+            )}
+            loading={vm.refreshing}
+            onPress={vm.onRefresh}
+            testID={ids.importRefresh}
+          />
         ) : null}
         {vm.summary.duplicates > 0 ? (
           <Text.Caption

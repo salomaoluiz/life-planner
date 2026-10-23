@@ -22,9 +22,11 @@ import {
 } from "@screens/Financial/Transactions/models/importFile";
 import {
   canImport,
+  kindCounts,
   mergeValidation,
   revalidationRequest,
   reviewRows,
+  selectionKey,
   summarize,
 } from "@screens/Financial/Transactions/models/importReview";
 import {
@@ -61,7 +63,27 @@ interface CreatedCounts {
 
 type ImportDialog = "discard" | "owner";
 
-const REVALIDATE_MS = 300;
+interface PendingCheck {
+  id: number;
+  // The checked lines sent; absent on the first check, where they come from the answer.
+  key?: string;
+  selection: Record<number, boolean>;
+}
+
+interface ValidatedSnapshot {
+  key: string;
+  kinds: { credits: number; payments: number };
+}
+
+// Spec 049: every dry run carries an id so a late answer cannot clear a newer check.
+interface ValidateRequest {
+  includeDuplicates?: number[];
+  requestId: number;
+  rows: ImportRowPayload[];
+}
+
+type ValidateResult = ImportValidationEntity & { requestId?: number };
+
 const EMPTY_CONTEXT: EntryContext = {
   catalog: {},
   decimal: ",",
@@ -189,23 +211,27 @@ function useImportWizardViewModel(params: ImportWizardParams) {
 
   // The dry run (FR 27) and the real run (FR 32).
   const ownerType = params.owners.find((owner) => owner.id === ownerId)?.type;
-  const validateMutation = useMutation<
-    { includeDuplicates?: number[]; rows: ImportRowPayload[] },
-    ImportValidationEntity
-  >({
+  const validateMutation = useMutation<ValidateRequest, ValidateResult>({
     cacheKey: [useCases.validateFinancialImportUseCase.uniqueName],
-    fetch: async (request) =>
-      useCases.validateFinancialImportUseCase.execute({
+    fetch: async (request) => ({
+      ...(await useCases.validateFinancialImportUseCase.execute({
         includeDuplicates: request.includeDuplicates,
         owner: ownerType ?? "USER",
         ownerId,
         rows: request.rows,
-      }),
+      })),
+      requestId: request.requestId,
+    }),
   });
   // Spec 048: the duplicates are found on the full file (first check); a later check only sees the checked rows.
   const [knownDuplicates, setKnownDuplicates] = useState<number[]>([]);
   const firstCheck = useRef(false);
-  const revalidateTimer = useRef<ReturnType<typeof setTimeout>>();
+  // Spec 049: the last successful check (its answer and the selection it checked) gates the import.
+  const [applied, setApplied] = useState<ValidateResult>();
+  const [snapshot, setSnapshot] = useState<ValidatedSnapshot>();
+  const appliedData = useRef<ValidateResult>();
+  const pending = useRef<PendingCheck>();
+  const requestSeq = useRef(0);
   const importMutation = useMutation<ImportRowPayload[], number>({
     cacheKey: [useCases.importFinancialTransactionsUseCase.uniqueName],
     fetch: async (payloads) =>
@@ -219,11 +245,11 @@ function useImportWizardViewModel(params: ImportWizardParams) {
     importMutation.error instanceof ImportRowsInvalid
       ? importMutation.error.errors
       : undefined;
-  const validation: ImportValidationEntity | undefined = validateMutation.data
+  const validation: ImportValidationEntity | undefined = applied
     ? mergeValidation(knownDuplicates, {
-        duplicates: validateMutation.data.duplicates,
-        errors: refused ?? validateMutation.data.errors,
-        invoices: validateMutation.data.invoices,
+        duplicates: applied.duplicates,
+        errors: refused ?? applied.errors,
+        invoices: applied.invoices,
       })
     : undefined;
   const review = reviewRows(built.rows, validation, selection);
@@ -231,13 +257,37 @@ function useImportWizardViewModel(params: ImportWizardParams) {
   const importDone = importMutation.status === "success";
 
   useEffect(() => {
-    if (firstCheck.current && validateMutation.data) {
-      firstCheck.current = false;
-      setKnownDuplicates(validateMutation.data.duplicates);
-    }
-  }, [validateMutation.data]);
+    const result = validateMutation.data;
+    const check = pending.current;
 
-  useEffect(() => () => clearTimeout(revalidateTimer.current), []);
+    if (
+      !result ||
+      !check ||
+      step !== "review" ||
+      appliedData.current === result
+    ) {
+      return;
+    }
+
+    if (result.requestId !== undefined && result.requestId !== check.id) {
+      return;
+    }
+
+    appliedData.current = result;
+    const merged = mergeValidation(knownDuplicates, result);
+    const checked = reviewRows(built.rows, merged, check.selection);
+
+    setApplied(result);
+    setSnapshot({
+      key: check.key ?? selectionKey(checked),
+      kinds: kindCounts(checked),
+    });
+
+    if (firstCheck.current) {
+      firstCheck.current = false;
+      setKnownDuplicates(result.duplicates);
+    }
+  }, [validateMutation.data, step, built.rows]);
 
   useEffect(() => {
     if (!importDone || importMutation.data === undefined) {
@@ -282,9 +332,16 @@ function useImportWizardViewModel(params: ImportWizardParams) {
     const target = nextStep(step);
 
     if (target === "review") {
+      // FR 16: the first check runs once, on the full file; a later check only sees the checked rows.
+      requestSeq.current += 1;
+      pending.current = { id: requestSeq.current, selection: {} };
       firstCheck.current = true;
+      appliedData.current = undefined;
+      setApplied(undefined);
+      setSnapshot(undefined);
       setKnownDuplicates([]);
       validateMutation.mutate({
+        requestId: requestSeq.current,
         rows: buildRows({
           dateFormat: parsed?.dateFormat ?? "dd/mm/yyyy",
           decimal: parsed?.decimal ?? ",",
@@ -341,12 +398,17 @@ function useImportWizardViewModel(params: ImportWizardParams) {
     params.onClose();
   }
 
+  const stale = !!snapshot && snapshot.key !== selectionKey(review);
+  const refreshFailed = validateMutation.status === "error" && !!applied;
   const stepReady = {
     columns: canContinue(statuses),
     file: !!parsed && !parsed.problem && !!ownerId,
-    // The rows are checked again every time the review opens: no import on the answer of an earlier check.
+    // The rows are checked again every time the review opens, and the selection must have been checked since.
     review:
       canImport(summary) &&
+      !!applied &&
+      !stale &&
+      !refreshFailed &&
       !importMutation.isFetching &&
       !validateMutation.isFetching,
     values: unmatched === 0,
@@ -363,9 +425,11 @@ function useImportWizardViewModel(params: ImportWizardParams) {
     headers,
     importError:
       importMutation.error && !refused ? importMutation.error : undefined,
-    invoices: validateMutation.data?.invoices ?? [],
+    invoices: applied?.invoices ?? [],
     isImporting: importMutation.isFetching,
+    isRefreshing: validateMutation.isFetching && !!applied,
     isValidating: validateMutation.isFetching,
+    kinds: snapshot?.kinds ?? { credits: 0, payments: 0 },
     mapping,
     onBack: () => goTo(previousStep(step)),
     onContinue,
@@ -381,19 +445,25 @@ function useImportWizardViewModel(params: ImportWizardParams) {
     onMappingChange: setMapping,
     onOwnerChange,
     onOwnerConfirm,
-    onRequestClose,
-    // Spec 048: checking or unchecking a row changes the invoices, so the dry run is made again for the checked rows.
-    onSelectionChange: (line: number, checked: boolean) => {
-      const next = { ...selection, [line]: checked };
+    onRefresh: () => {
+      // FR 18: only the checked rows; FR 19: their key is what the answer makes fresh.
+      requestSeq.current += 1;
+      const check: PendingCheck = {
+        id: requestSeq.current,
+        key: selectionKey(review),
+        selection,
+      };
 
-      setSelection(next);
-      clearTimeout(revalidateTimer.current);
-      revalidateTimer.current = setTimeout(() => {
-        validateMutation.mutate(
-          revalidationRequest(reviewRows(built.rows, validation, next)),
-        );
-      }, REVALIDATE_MS);
+      pending.current = check;
+      validateMutation.mutate({
+        ...revalidationRequest(review),
+        requestId: check.id,
+      });
     },
+    onRequestClose,
+    // FR 15: checking or unchecking a row only changes local state — the dry run waits for Refresh.
+    onSelectionChange: (line: number, checked: boolean) =>
+      setSelection((current) => ({ ...current, [line]: checked })),
     onValueChoice: (tab: ValueTab, value: string, selected: string) =>
       setChoices((current) => ({
         ...current,
@@ -403,16 +473,18 @@ function useImportWizardViewModel(params: ImportWizardParams) {
     owners: params.owners,
     parsed,
     records,
+    refreshFailed,
     review,
     rows,
     selection,
+    stale,
     statuses,
     step,
     stepReady,
     summary,
     tabs,
     unmatched,
-    validated: !!validateMutation.data,
+    validated: !!applied,
     wide,
   };
 }

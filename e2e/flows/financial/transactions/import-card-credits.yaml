@@ -84,7 +84,29 @@ onFlowComplete:
     timeout: 20000
 - tapOn:
     id: "financial.import.continue"
-# Step 4: purchase, refund, discount and payment; the invoice of the file ends up paid.
+# Step 4 (spec 049): the Account block comes first; back to the top from step 2, then the Card block below.
+- swipe:
+    start: 45%, 30%
+    end: 45%, 70%
+- swipe:
+    start: 45%, 30%
+    end: 45%, 70%
+- swipe:
+    start: 45%, 30%
+    end: 45%, 70%
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.row.5"
+    timeout: 20000
+- assertVisible:
+    id: "financial.import.summary.invoice.${output.KEEP_CARD_ID}.${output.INVOICE_MONTH}"
+    text: ".*985[.,]00.*"
+- swipe:
+    start: 45%, 70%
+    end: 45%, 30%
+- swipe:
+    start: 45%, 70%
+    end: 45%, 30%
 - extendedWaitUntil:
     visible:
       id: "financial.import.row.2"
@@ -93,11 +115,6 @@ onFlowComplete:
     id: "financial.import.row.3"
 - assertVisible:
     id: "financial.import.row.4"
-- assertVisible:
-    id: "financial.import.row.5"
-- assertVisible:
-    id: "financial.import.summary.invoice.${output.KEEP_CARD_ID}.${output.INVOICE_MONTH}"
-    text: ".*985[.,]00.*"
 - tapOn:
     id: "financial.import.submit"
 - extendedWaitUntil:
