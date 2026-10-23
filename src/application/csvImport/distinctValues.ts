@@ -1,19 +1,11 @@
 import { normalizeText } from "./suggestColumns";
 import { RowType } from "./types";
 
-// FR 28: the names the app gives to the rows it creates itself, in both languages.
-const SYSTEM_CATEGORY_NAMES = [
-  "Balance adjustment",
-  "Ajuste de saldo",
-  "Invoice payment",
-  "Pagamento de fatura",
-  "Card refund",
-  "Estorno no cartão",
-  "Prepayment discount",
-  "Desconto de antecipação",
-  "Early payment",
-  "Pagamento antecipado",
-].map((name) => normalizeText(name));
+// FR 28 / spec 048 FR 4: the names of the rows the app writes itself and the import leaves out. Card credits and invoice
+// payments are imported now.
+const SYSTEM_CATEGORY_NAMES = ["Balance adjustment", "Ajuste de saldo"].map(
+  (name) => normalizeText(name),
+);
 
 interface Candidate {
   id: string;

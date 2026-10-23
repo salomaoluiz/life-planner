@@ -3,8 +3,14 @@ import { StyleSheet, Text, TextInput } from "react-native";
 import { fireEvent, render, screen } from "@tests";
 
 import { BottomSheet, FormColumns } from "@components";
+import useWindowSize from "@components/utils/useWindowSize";
 import * as theme from "@presentation/theme";
 import { lightTheme } from "@presentation/theme/provider";
+
+jest.mock("@components/utils/useWindowSize", () => ({
+  __esModule: true,
+  default: jest.fn(() => ({ height: 800, width: 400 })),
+}));
 
 function rootStyle() {
   return StyleSheet.flatten(
@@ -98,4 +104,53 @@ it("SHOULD keep typed values WHEN the breakpoint changes", () => {
   rerender(tree);
   expect(screen.getByTestId("left-input").props.value ?? "hello").toBe("hello");
   expect(screen.getByTestId("cols-column-left")).toBeTruthy();
+});
+
+describe("fluid sheet (spec 048 FR 26-28)", () => {
+  function fluid() {
+    jest.mocked(theme.useBreakpoint).mockReturnValue("expanded");
+    jest.mocked(useWindowSize).mockReturnValue({ height: 1080, width: 1920 });
+
+    return render(
+      <BottomSheet
+        closeLabel="Close"
+        onClose={jest.fn()}
+        size="fluid"
+        testID="sheet"
+        title="Title"
+        visible
+      >
+        <FormColumns
+          left={<Text>left</Text>}
+          leftFlex={3}
+          leftPaneTestID="left-pane"
+          right={<Text>right</Text>}
+          rightFlex={2}
+          rightPaneTestID="right-pane"
+        />
+      </BottomSheet>,
+    );
+  }
+
+  it("SHOULD size the sheet from the window: 1440 x 960 on 1920 x 1080", () => {
+    fluid();
+
+    expect(
+      StyleSheet.flatten(screen.getByTestId("sheet").props.style),
+    ).toMatchObject({
+      height: 960,
+      width: 1440,
+    });
+  });
+
+  it("SHOULD give each column its own scroll area with the 3fr / 2fr proportions", () => {
+    fluid();
+
+    expect(
+      StyleSheet.flatten(screen.getByTestId("left-pane").props.style).flex,
+    ).toBe(3);
+    expect(
+      StyleSheet.flatten(screen.getByTestId("right-pane").props.style).flex,
+    ).toBe(2);
+  });
 });

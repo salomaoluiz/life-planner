@@ -12,6 +12,7 @@ type ColumnTarget =
   | "expenseAmount"
   | "ignore"
   | "incomeAmount"
+  | "invoice"
   | "owner"
   | "paid"
   | "signedAmount"
@@ -39,11 +40,15 @@ interface ImportRowPayload {
   currency?: string;
   date: string;
   description: string;
+  // Spec 048: `YYYY-MM`, card rows only.
+  invoiceMonth?: string;
   line: number;
   // The row's owner (spec 047); the request's owner applies when absent.
   owner?: "FAMILY" | "USER";
   ownerId?: string;
   paid?: boolean;
+  // Spec 048: the account an early payment or an invoice payment is paid from.
+  paidFromAccountId?: string;
   tags?: string[];
   type: RowType;
   value: number;

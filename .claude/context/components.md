@@ -108,4 +108,5 @@ Drawn with `react-native-svg` (works on iOS, Android and web), Grafite tokens on
 ## Import wizard pieces (spec 047)
 
 - `Stepper`: `steps: { label }[]`, `current` (0-based), `accessibilityLabel` ("Step 2 of 4: Columns"), `compact?` (four thin bars with `role="progressbar"` instead of numbered steps; done steps show a check); step ids `<testID>-step-<i>`.
+- `BottomSheet size="fluid"` (spec 048): the wizard sheet that grows with the window (`fluidSheetSize`: window − 64 px, 1040-1440 × up to 960; the `wizard` sheet below 1040 px). Header and footer never scroll; the body is not a `ScrollView`, so `FormColumns` (with `leftFlex`, `rightFlex`, `leftPaneTestID`, `rightPaneTestID`, `leftScrollRef`) renders two panes and only the left one scrolls. `TruncatedText` (2 lines, then "…", full text in a web tooltip) and `Highlight` (soft income tint while `active`) serve it.
 - `BottomSheet size="wizard"`: a `form` sheet that is 1040 px wide on `expanded` (720 px on `medium`, like `form`); used by the Import CSV wizard.

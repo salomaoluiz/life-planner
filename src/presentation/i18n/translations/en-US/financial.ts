@@ -301,10 +301,13 @@ const financial = {
     action: "Import CSV",
     back: "Back",
     cancel: "Cancel",
+    categoryMisused_one: "{{count}} row can't use this category",
+    categoryMisused_other: "{{count}} rows can't use this category",
     close: "Close",
     columns: {
       defaults: {
         currency: "default: the account or card currency",
+        invoice: "default: by the purchase date and the closing day",
         owner: "default: the owner chosen in the first step",
         paid: "default: the date has passed",
         tags: "none",
@@ -318,6 +321,7 @@ const financial = {
         currency: "Currency",
         date: "Date",
         description: "Description",
+        invoice: "Invoice",
         owner: "Belongs to",
         paid: "Paid",
         tags: "Tags",
@@ -354,6 +358,7 @@ const financial = {
         expenseAmount: "Expense amount",
         ignore: "Ignore",
         incomeAmount: "Income amount",
+        invoice: "Invoice",
         owner: "Belongs to",
         paid: "Paid",
         signedAmount: "Signed amount",
@@ -362,6 +367,7 @@ const financial = {
       },
     },
     continue: "Continue",
+    creditGroup: "Card credits and payments",
     discard: {
       confirm: "Discard",
       keep: "Keep editing",
@@ -374,15 +380,29 @@ const financial = {
       ACCOUNT_NOT_FOUND: "Account not found",
       ACCOUNT_OR_CARD_MISSING: "No account or card",
       AMOUNT_BOTH_OR_NONE: "Fill the income or the expense, not both",
-      CARD_CREDIT_NOT_SUPPORTED: "Card credits can't be imported",
+      CARD_CREDIT_CATEGORY_MISUSED: "This category only works for card income",
+      CARD_INCOME_CATEGORY:
+        "Card income must be a refund, a discount or an early payment",
       CARD_NOT_FOUND: "Card not found",
       CATEGORY_ARCHIVED: "The category is archived",
       CATEGORY_MISSING: "No category",
       CATEGORY_NOT_FOUND: "Category not found for this type",
       CURRENCY_MISMATCH: "Currency differs from the account or card",
       DESCRIPTION_INVALID: "Invalid description",
+      DUPLICATE_INVOICE_PAYMENT: "Invoice {{month}} has more than one payment",
+      EARLY_PAYMENT_OVER_DUE:
+        "Early payments of invoice {{month}} exceed what is due by {{value}}",
       INVALID_DATE: "Invalid date",
       INVALID_VALUE: "Invalid amount",
+      INVOICE_ALREADY_PAID: "Invoice {{month}} is already paid",
+      INVOICE_MONTH_INVALID: "Invalid invoice month",
+      INVOICE_NOT_CLOSED:
+        "Invoice {{month}} is still open; use an early payment",
+      INVOICE_PAID: "Invoice {{month}} is already paid",
+      INVOICE_PAYMENT_MISMATCH:
+        "Invoice {{month}} is {{due}}; the payment is {{value}}",
+      PAID_FROM_ACCOUNT_INVALID:
+        "The paying account must be active, yours and in the card currency",
       SYSTEM_CATEGORY: "System category",
       TAG_TOO_LONG: "A tag has over 30 characters",
       TOO_MANY_TAGS: "More than 10 tags",
@@ -429,13 +449,17 @@ const financial = {
       summary: "{{rows}} rows, {{columns}} columns",
       title: "CSV file",
     },
+    invoiceCaption: "Month the invoice closes, as in the app export",
     ownerChange: {
       cancel: "Cancel",
       confirm: "Continue",
       message: "Changing the owner clears the values you matched. Continue?",
       title: "Change the owner?",
     },
+    paymentsWithAccount:
+      "Rows with card and account are payments from that account",
     review: {
+      boleto: "Boleto",
       columns: {
         amount: "Amount",
         date: "Date",
@@ -463,6 +487,7 @@ const financial = {
       invoice: "invoice {{month}}",
       newRecord: "new",
       noMatch: "No rows in this filter.",
+      paidFrom: "paid from {{account}}",
       rowCheck: "Import line {{line}}",
       rowError: "Line {{line}} has an error",
       showMore: "Show more ({{count}})",
@@ -470,8 +495,13 @@ const financial = {
       submit_other: "Import {{count}} transactions",
       summary: {
         created: "New records created",
+        credits: "Card credits: {{count}}",
         duplicates: "Duplicates (unchecked)",
         errors: "With errors",
+        invoicePaid: "{{card}} · {{month}}: {{value}} → paid",
+        invoicePending: "{{card}} · {{month}}: {{value}} pending",
+        invoicesTitle: "Invoices in the file",
+        payments: "Invoice payments: {{count}}",
         ready: "Ready",
         system: "System rows ignored",
         title: "Summary",
@@ -492,6 +522,7 @@ const financial = {
       imported_other: "{{count}} transactions imported",
     },
     values: {
+      allMatched: "All values matched",
       appValue: {
         account: "Account in the app",
         card: "Card in the app",
@@ -526,15 +557,24 @@ const financial = {
         ownerFromFile: "{{name}} (from the file)",
         submit: "Create and use",
       },
+      creditNames: {
+        CARD_EARLY_PAYMENT: "Early payment",
+        CARD_REFUND: "Refund",
+        INSTALLMENT_PREPAYMENT_DISCOUNT: "Prepayment discount",
+        INVOICE_PAYMENT: "Invoice payment",
+      },
+      creditTag: "card",
       fileValue: "Value in the file",
       help: "Matched by name, ignoring case and accents. Archived records are not listed. Each value of the file becomes one record of the app.",
       inOwner: "in {{name}}",
+      nextUnmatched: "Next without match",
       paid: {
         default: "Use the default",
         paid: "Paid",
         unpaid: "Not paid",
       },
       rows: "Rows",
+      scopeAll: "All (Personal and families)",
       tabOk: "{{label}} · ok",
       tabs: {
         account: "Account",

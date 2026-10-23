@@ -68,6 +68,7 @@ function useImportRecords(owners: OwnerDTO[]) {
               id: item.id,
               name: item.name,
               path: categoryPath(item, byId),
+              scope: item.scope,
               type: item.type as "EXPENSE" | "INCOME",
             })),
         },

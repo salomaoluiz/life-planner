@@ -9,12 +9,14 @@ function cat(
   name: string,
   parentId?: string,
   depthLevel = 0,
+  scope?: "ALL",
 ): ChainCategory {
   return {
     depthLevel,
     id,
     name,
     parentId,
+    scope,
     scopeOwnerIds: ["o1"],
     status: "ACTIVE",
   };
@@ -23,12 +25,18 @@ function cat(
 // A fake store: create adds the category, list returns them.
 function store(initial: ChainCategory[]) {
   const items = [...initial];
-  const calls: { depthLevel: number; name: string; parentId?: string }[] = [];
+  const calls: {
+    all?: boolean;
+    depthLevel: number;
+    name: string;
+    parentId?: string;
+  }[] = [];
 
   return {
     calls,
     deps: {
       create: async (params: {
+        all?: boolean;
         depthLevel: number;
         name: string;
         parentId?: string;
@@ -40,6 +48,7 @@ function store(initial: ChainCategory[]) {
             params.name,
             params.parentId,
             params.depthLevel,
+            params.all ? "ALL" : undefined,
           ),
         );
       },
@@ -132,5 +141,60 @@ describe("createCategoryChain", () => {
     );
 
     expect(calls).toEqual([{ depthLevel: 1, name: "Mercado", parentId: "p" }]);
+  });
+
+  describe("All scope (spec 048 FR 29b)", () => {
+    it("SHOULD create every level as an All category", async () => {
+      const { calls, deps } = store([]);
+
+      await createCategoryChain(
+        ["Mercado", "Limpeza"],
+        "o1",
+        { depthLevel: 0 },
+        deps,
+        "ALL",
+      );
+
+      expect(calls).toEqual([
+        { all: true, depthLevel: 0, name: "Mercado", parentId: undefined },
+        { all: true, depthLevel: 1, name: "Limpeza", parentId: "new-0" },
+      ]);
+    });
+
+    it("SHOULD reuse only All categories and create the rest as All", async () => {
+      const { calls, deps } = store([
+        cat("own", "Mercado"),
+        cat("all", "Mercado", undefined, 0, "ALL"),
+      ]);
+
+      await createCategoryChain(
+        ["Mercado", "Limpeza"],
+        "o1",
+        { depthLevel: 0 },
+        deps,
+        "ALL",
+      );
+
+      expect(calls).toEqual([
+        { all: true, depthLevel: 1, name: "Limpeza", parentId: "all" },
+      ]);
+    });
+
+    it("SHOULD follow an All parent it reuses, even when the owner scope was chosen", async () => {
+      const { calls, deps } = store([
+        cat("all", "Mercado", undefined, 0, "ALL"),
+      ]);
+
+      await createCategoryChain(
+        ["Mercado", "Limpeza"],
+        "o1",
+        { depthLevel: 0 },
+        deps,
+      );
+
+      expect(calls).toEqual([
+        { all: true, depthLevel: 1, name: "Limpeza", parentId: "all" },
+      ]);
+    });
   });
 });

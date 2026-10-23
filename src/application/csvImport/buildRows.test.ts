@@ -204,18 +204,17 @@ describe("buildRows", () => {
     });
   });
 
-  it("SHOULD skip and count system category rows", () => {
+  it("SHOULD skip and count balance adjustments only (spec 048 FR 4)", () => {
     const result = buildRows(
       withRows([
         ["02/10/2026", "Ajuste", "-1,00", "Ajuste de saldo", ""],
-        ["02/10/2026", "Fatura", "-1,00", "Invoice payment", ""],
         ["02/10/2026", "Ok", "-1,00", "Mercado", "Visa"],
       ]),
     );
 
-    expect(result.ignoredSystemRows).toBe(2);
+    expect(result.ignoredSystemRows).toBe(1);
     expect(result.rows).toHaveLength(1);
-    expect(result.rows[0].line).toBe(4);
+    expect(result.rows[0].line).toBe(3);
   });
 });
 
@@ -282,5 +281,173 @@ describe("owner per row", () => {
     });
 
     expect(rows.map((row) => row.payload?.ownerId)).toEqual(["u1", "u1", "u1"]);
+  });
+
+  describe("spec 048 card credits and payments", () => {
+    const REFUND = "00000000-0000-4000-8000-000000000004";
+    const INVOICE_PAYMENT = "00000000-0000-4000-8000-000000000002";
+    const credits = {
+      mapping: {
+        0: "date",
+        1: "description",
+        2: "signedAmount",
+        3: "category",
+        4: "card",
+        5: "account",
+        6: "invoice",
+      } as BuildInput["mapping"],
+      valueMaps: {
+        ...base.valueMaps,
+        account: { "u1|Corrente": "acc-1" },
+        category: {
+          ...base.valueMaps.category,
+          "u1|EXPENSE|Pagamento de fatura": INVOICE_PAYMENT,
+          "u1|INCOME|Estorno": REFUND,
+        },
+      },
+    };
+
+    it("SHOULD send the invoice month of a card row, accepting the app export format", () => {
+      const { rows } = buildRows(
+        withRows(
+          [
+            [
+              "02/10/2026",
+              "Estorno loja",
+              "12,00",
+              "Estorno",
+              "Visa",
+              "",
+              "09/2026",
+            ],
+          ],
+          credits,
+        ),
+      );
+
+      expect(rows[0].payload).toMatchObject({
+        categoryId: REFUND,
+        creditCardId: "card-1",
+        invoiceMonth: "2026-09",
+        type: "INCOME",
+      });
+    });
+
+    it("SHOULD not send an invoice month on an account row", () => {
+      const { rows } = buildRows(
+        withRows(
+          [
+            [
+              "02/10/2026",
+              "Mercado",
+              "-312,40",
+              "Mercado",
+              "",
+              "Corrente",
+              "09/2026",
+            ],
+          ],
+          credits,
+        ),
+      );
+
+      expect(rows[0].payload?.invoiceMonth).toBeUndefined();
+      expect(rows[0].error).toBeUndefined();
+    });
+
+    it("SHOULD flag an invoice month it cannot read on a card row", () => {
+      const { rows } = buildRows(
+        withRows(
+          [
+            [
+              "02/10/2026",
+              "Mercado",
+              "-312,40",
+              "Mercado",
+              "Visa",
+              "",
+              "setembro",
+            ],
+          ],
+          credits,
+        ),
+      );
+
+      expect(rows[0].error).toBe("INVOICE_MONTH_INVALID");
+    });
+
+    it("SHOULD send the account of an invoice payment as paidFromAccountId", () => {
+      const { rows } = buildRows(
+        withRows(
+          [
+            [
+              "02/10/2026",
+              "Pagamento fatura",
+              "-6.700,24",
+              "Pagamento de fatura",
+              "Visa",
+              "Corrente",
+              "09/2026",
+            ],
+          ],
+          credits,
+        ),
+      );
+
+      expect(rows[0].payload).toMatchObject({
+        categoryId: INVOICE_PAYMENT,
+        creditCardId: "card-1",
+        invoiceMonth: "2026-09",
+        paidFromAccountId: "acc-1",
+        value: 670024,
+      });
+      expect(rows[0].payload?.accountId).toBeUndefined();
+    });
+
+    it("SHOULD skip an invoice payment on an account without a card and count it", () => {
+      const result = buildRows(
+        withRows(
+          [
+            [
+              "02/10/2026",
+              "Pagamento fatura",
+              "-6.700,24",
+              "Pagamento de fatura",
+              "",
+              "Corrente",
+              "",
+            ],
+          ],
+          credits,
+        ),
+      );
+
+      expect(result.rows).toEqual([]);
+      expect(result.ignoredSystemRows).toBe(1);
+    });
+
+    it("SHOULD keep card and account on a row that is not a payment, for the server to refuse", () => {
+      const { rows } = buildRows(
+        withRows(
+          [
+            [
+              "02/10/2026",
+              "Mercado",
+              "-312,40",
+              "Mercado",
+              "Visa",
+              "Corrente",
+              "",
+            ],
+          ],
+          credits,
+        ),
+      );
+
+      expect(rows[0].payload).toMatchObject({
+        accountId: "acc-1",
+        creditCardId: "card-1",
+      });
+    });
   });
 });

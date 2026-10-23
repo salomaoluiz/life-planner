@@ -23,6 +23,7 @@ function useStyles() {
       select: { flex: 1, minWidth: 140 },
       selects: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
       stack: { gap: spacing.md },
+      stepBody: { flex: 1, minHeight: 0 },
       tableRow: {
         alignItems: "center",
         flexDirection: "row",

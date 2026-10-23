@@ -295,6 +295,26 @@ describe("step 3: values", () => {
     expect(screen.getByTestId(ids.importContinue)).toBeEnabled();
   });
 
+  it("SHOULD keep the last Belongs to chosen WHEN the form opens for another value (spec 048)", async () => {
+    setup();
+    await toValues();
+
+    await chooseOption(`${ids.importValue}.category.2`, "__create__");
+    fireEvent.press(screen.getByTestId(`${ids.importCreateScope}-ALL`));
+    expect(
+      screen.getByTestId(`${ids.importCreateScope}-ALL`).props
+        .accessibilityState.selected,
+    ).toBe(true);
+
+    fireEvent.press(screen.getByTestId(ids.importCreateCancel));
+    await chooseOption(`${ids.importValue}.category.2`, "__create__");
+
+    expect(
+      screen.getByTestId(`${ids.importCreateScope}-ALL`).props
+        .accessibilityState.selected,
+    ).toBe(true);
+  });
+
   it("SHOULD create each level of a category path, parent first", async () => {
     setup();
     await toColumns();
@@ -382,6 +402,11 @@ describe("step 3: values", () => {
   });
 });
 
+interface DryRun {
+  includeDuplicates?: number[];
+  rows: { line: number }[];
+}
+
 async function toReview(withChoice = true) {
   await toValues();
   if (withChoice) {
@@ -399,30 +424,32 @@ describe("step 4: review and import", () => {
     await toReview();
 
     expect(mutations.validate.value.mutate).toHaveBeenCalledTimes(1);
-    expect(mutations.validate.value.mutate).toHaveBeenCalledWith([
-      expect.objectContaining({
-        accountId: "acc-1",
-        categoryId: "cat-market",
-        date: "2026-10-02",
-        description: "Supermercado",
-        line: 2,
-        type: "EXPENSE",
-        value: 31240,
-      }),
-      expect.objectContaining({
-        categoryId: "cat-salary",
-        line: 3,
-        type: "INCOME",
-        value: 520000,
-      }),
-      expect.objectContaining({
-        accountId: undefined,
-        creditCardId: "card-1",
-        line: 4,
-        type: "EXPENSE",
-        value: 3990,
-      }),
-    ]);
+    expect(mutations.validate.value.mutate).toHaveBeenCalledWith({
+      rows: [
+        expect.objectContaining({
+          accountId: "acc-1",
+          categoryId: "cat-market",
+          date: "2026-10-02",
+          description: "Supermercado",
+          line: 2,
+          type: "EXPENSE",
+          value: 31240,
+        }),
+        expect.objectContaining({
+          categoryId: "cat-salary",
+          line: 3,
+          type: "INCOME",
+          value: 520000,
+        }),
+        expect.objectContaining({
+          accountId: undefined,
+          creditCardId: "card-1",
+          line: 4,
+          type: "EXPENSE",
+          value: 3990,
+        }),
+      ],
+    });
   });
 
   it("SHOULD list the rows with the summary and import the checked ones", async () => {
@@ -470,6 +497,37 @@ describe("step 4: review and import", () => {
     expect(
       jest.mocked(mutations.import.value.mutate).mock.calls[0][0],
     ).toHaveLength(3);
+  });
+
+  it("SHOULD check again with the checked rows WHEN a row is unchecked or a duplicate is checked (spec 048)", async () => {
+    setup();
+    mutations.validate.value.data = {
+      duplicates: [3],
+      errors: [],
+      invoices: [],
+    };
+    await toReview();
+    jest.mocked(mutations.validate.value.mutate).mockClear();
+
+    // Checking the duplicate: it is sent and named, the API counts it in the invoices.
+    fireEvent.press(screen.getByTestId(`${ids.importRow}.3.check`));
+    jest.advanceTimersByTime(400);
+
+    expect(mutations.validate.value.mutate).toHaveBeenCalledTimes(1);
+    const first = jest.mocked(mutations.validate.value.mutate).mock
+      .calls[0][0] as unknown as DryRun;
+
+    expect(first.includeDuplicates).toEqual([3]);
+    expect(first.rows.map((row) => row.line)).toEqual([2, 3, 4]);
+
+    // Unchecking a ready row: it leaves the check.
+    fireEvent.press(screen.getByTestId(`${ids.importRow}.2.check`));
+    jest.advanceTimersByTime(400);
+
+    const second = jest.mocked(mutations.validate.value.mutate).mock
+      .calls[1][0] as unknown as DryRun;
+
+    expect(second.rows.map((row) => row.line)).toEqual([3, 4]);
   });
 
   it("SHOULD block the import WHEN a row has an error, and say how many to fix", async () => {
@@ -523,7 +581,10 @@ describe("step 4: review and import", () => {
     );
     expect(screen.getByTestId(ids.importSubmit)).toBeDisabled();
     expect(
-      jest.mocked(mutations.validate.value.mutate).mock.calls[0][0],
+      (
+        jest.mocked(mutations.validate.value.mutate).mock
+          .calls[0][0] as unknown as DryRun
+      ).rows,
     ).toHaveLength(2);
   });
 
@@ -666,19 +727,21 @@ describe("owner per row", () => {
     expect(screen.queryByTestId(ids.importFooterNote)).toBeNull();
     fireEvent.press(screen.getByTestId(ids.importContinue));
 
-    expect(mutations.validate.value.mutate).toHaveBeenCalledWith([
-      expect.objectContaining({
-        accountId: "acc-fam",
-        categoryId: "cat-fam",
-        owner: "FAMILY",
-        ownerId: "family-1",
-      }),
-      expect.objectContaining({
-        accountId: "acc-1",
-        categoryId: "cat-market",
-        owner: "USER",
-        ownerId: "user-id",
-      }),
-    ]);
+    expect(mutations.validate.value.mutate).toHaveBeenCalledWith({
+      rows: [
+        expect.objectContaining({
+          accountId: "acc-fam",
+          categoryId: "cat-fam",
+          owner: "FAMILY",
+          ownerId: "family-1",
+        }),
+        expect.objectContaining({
+          accountId: "acc-1",
+          categoryId: "cat-market",
+          owner: "USER",
+          ownerId: "user-id",
+        }),
+      ],
+    });
   });
 });

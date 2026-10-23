@@ -1,7 +1,10 @@
 import { todayCalendarDate } from "@data/models/financial/calendarDate";
 import { TransactionDatasource } from "@data/repositories/repos/financial/transactions/transactionDatasource";
 import { ApiBusinessError, ImportRowsInvalid } from "@domain/entities/errors";
-import { ImportRowErrorEntity } from "@domain/entities/financial/TransactionCsv";
+import {
+  ImportInvoiceEntity,
+  ImportRowErrorEntity,
+} from "@domain/entities/financial/TransactionCsv";
 import { api } from "@infrastructure/api";
 
 import handleFinancialApiError from "../../financialApiError";
@@ -48,7 +51,7 @@ function rowErrorsOf(error: unknown): ImportRowErrorEntity[] | undefined {
   return undefined;
 }
 
-// Spec 047 §7: a dry run (200 `{ errors, duplicates }`, nothing written) ...
+// Spec 047 §7: a dry run (200 `{ errors, duplicates, invoices }`, nothing written) ...
 async function validateImport(
   params: Params,
 ): ReturnType<TransactionDatasource["validateImport"]> {
@@ -56,9 +59,14 @@ async function validateImport(
     const data = await api.post<{
       duplicates: number[];
       errors: ImportRowErrorEntity[];
+      invoices?: ImportInvoiceEntity[];
     }>(path(), { ...params, dryRun: true });
 
-    return { duplicates: data.duplicates, errors: data.errors };
+    return {
+      duplicates: data.duplicates,
+      errors: data.errors,
+      invoices: data.invoices ?? [],
+    };
   } catch (error) {
     return handleFinancialApiError(error, {
       datasource: "TransactionDatasource - validateImport",

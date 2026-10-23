@@ -1,4 +1,8 @@
 import {
+  CARD_CREDIT_CATEGORIES,
+  matchCreditCategory,
+} from "@application/csvImport/cardCredits";
+import {
   autoMatch,
   distinctValues,
   isSystemCategoryName,
@@ -63,6 +67,8 @@ export interface ImportRecords {
     id: string;
     name: string;
     path: string;
+    // "ALL" for a category of Personal and every family (spec 038).
+    scope?: string;
     type: "EXPENSE" | "INCOME";
   }[];
 }
@@ -95,6 +101,8 @@ export type ValueChoices = Partial<Record<ValueTab, Record<string, string>>>;
 export interface ValueEntry {
   // Matched by name by the app (FR 24), not chosen by the user.
   auto: boolean;
+  // Categories only (spec 048): how many of the rows are card rows, the only ones the card credit categories fit.
+  cardRows?: number;
   // Where the choice is kept and what the row builder looks up (see `ValueMaps`): the value for owner, type and paid;
   // `<ownerId>|<value>` for accounts and cards; `<ownerId>|<type>|<value>` for categories.
   key: string;
@@ -154,13 +162,20 @@ function autoSelection(
   value: string,
   records: ImportRecords,
   type?: RowType,
+  cardRows = 0,
 ): string | undefined {
   if (tab === "category") {
-    return autoMatch(
-      value,
-      records.categories
-        .filter((item) => type === undefined || item.type === type)
-        .map((item) => ({ id: item.id, names: [item.name, item.path] })),
+    return (
+      autoMatch(
+        value,
+        records.categories
+          .filter((item) => type === undefined || item.type === type)
+          .map((item) => ({ id: item.id, names: [item.name, item.path] })),
+      ) ??
+      // Spec 048 FR 11: a value of card rows can name a card credit category.
+      (type !== undefined && cardRows > 0
+        ? matchCreditCategory(value, type)
+        : undefined)
     );
   }
 
@@ -182,6 +197,34 @@ function autoSelection(
   return paid === undefined ? undefined : String(paid);
 }
 
+// A row is a card row when its card cell is filled, or when it has no account and the card is fixed (spec 048).
+function isCardRow(
+  row: string[],
+  mapping: ColumnMapping,
+  fixed: FixedValues,
+): boolean {
+  function filled(target: ColumnTarget) {
+    return columnsOf(mapping, target).some(
+      (column) => (row[column] ?? "").trim() !== "",
+    );
+  }
+
+  if (filled("card")) {
+    return true;
+  }
+
+  return !filled("account") && fixed.accountOrCard?.kind === "card";
+}
+
+// Spec 048 FR 12: the rows of a value mapped to a card credit category that can't use it (not card rows).
+function misusedRows(entry: ValueEntry): number {
+  const credit = CARD_CREDIT_CATEGORIES.some(
+    (item) => item.id === entry.selected,
+  );
+
+  return credit ? entry.rows - (entry.cardRows ?? 0) : 0;
+}
+
 const EMPTY_MAPS: ValueMaps = {
   account: {},
   card: {},
@@ -190,6 +233,22 @@ const EMPTY_MAPS: ValueMaps = {
   paid: {},
   type: {},
 };
+
+// Spec 048 FR 29: the first value without a match below `afterKey` (then from the top), never `afterKey` itself.
+function nextUnmatchedKey(
+  entries: ValueEntry[],
+  afterKey?: string,
+): string | undefined {
+  const start =
+    afterKey === undefined
+      ? -1
+      : entries.findIndex((item) => item.key === afterKey);
+  const ordered = [...entries.slice(start + 1), ...entries.slice(0, start + 1)];
+
+  return ordered.find(
+    (item) => item.selected === undefined && item.key !== afterKey,
+  )?.key;
+}
 
 function recordEntries(
   tab: "account" | "card" | "category",
@@ -226,9 +285,11 @@ function recordEntries(
         ? categoryKey(ownerId, type ?? "", value)
         : accountKey(ownerId, value);
     const known = entries.get(key);
+    const card = tab === "category" && isCardRow(row, mapping, context.fixed);
 
     if (known) {
       known.rows += 1;
+      known.cardRows = (known.cardRows ?? 0) + (card ? 1 : 0);
       continue;
     }
 
@@ -237,11 +298,13 @@ function recordEntries(
       value,
       context.catalog[ownerId] ?? NO_RECORDS,
       type,
+      card ? 1 : 0,
     );
     const chosen = choices[tab]?.[key];
 
     entries.set(key, {
       auto: chosen === undefined && auto !== undefined,
+      cardRows: tab === "category" ? Number(card) : undefined,
       key,
       ownerId,
       rows: 1,
@@ -249,6 +312,26 @@ function recordEntries(
       type,
       value,
     });
+  }
+
+  // A value whose first row is not a card row can still have card rows later on (spec 048 FR 11).
+  for (const entry of entries.values()) {
+    if (
+      tab === "category" &&
+      entry.selected === undefined &&
+      (entry.cardRows ?? 0) > 0
+    ) {
+      const auto = autoSelection(
+        tab,
+        entry.value,
+        context.catalog[entry.ownerId ?? ""] ?? NO_RECORDS,
+        entry.type,
+        entry.cardRows,
+      );
+
+      entry.auto = auto !== undefined;
+      entry.selected = auto;
+    }
   }
 
   return [...entries.values()];
@@ -335,4 +418,11 @@ function valueEntries(
   });
 }
 
-export { tabsOf, toValueMaps, unmatchedCount, valueEntries };
+export {
+  misusedRows,
+  nextUnmatchedKey,
+  tabsOf,
+  toValueMaps,
+  unmatchedCount,
+  valueEntries,
+};

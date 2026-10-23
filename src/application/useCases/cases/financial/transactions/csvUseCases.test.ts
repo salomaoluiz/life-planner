@@ -90,11 +90,11 @@ describe("validateImportUseCase", () => {
   it("SHOULD send the typed owner and return the dry run", async () => {
     jest
       .mocked(repository.validateImport)
-      .mockResolvedValueOnce({ duplicates: [2], errors: [] });
+      .mockResolvedValueOnce({ duplicates: [2], errors: [], invoices: [] });
 
     expect(
       await validateImportUseCase(repositoriesMocks).execute(importParams),
-    ).toEqual({ duplicates: [2], errors: [] });
+    ).toEqual({ duplicates: [2], errors: [], invoices: [] });
     expect(repository.validateImport).toHaveBeenCalledWith(
       expect.objectContaining({ owner: "USER", ownerId: "o1" }),
     );

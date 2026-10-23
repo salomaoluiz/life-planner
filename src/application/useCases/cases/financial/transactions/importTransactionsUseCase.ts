@@ -8,6 +8,7 @@ import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import Repositories from "@domain/repositories";
 
 export interface ImportTransactionsUseCaseParams {
+  includeDuplicates?: number[];
   owner: string;
   ownerId: string;
   rows: ImportRowEntity[];
@@ -44,7 +45,12 @@ function toRequest(params: ImportTransactionsUseCaseParams) {
     throw new FieldInvalid({ owner });
   }
 
-  return { owner, ownerId: params.ownerId, rows: params.rows };
+  return {
+    includeDuplicates: params.includeDuplicates,
+    owner,
+    ownerId: params.ownerId,
+    rows: params.rows,
+  };
 }
 
 // Spec 047 FR 27: the dry run. Nothing is written; the API answers the row errors and the possible duplicates.

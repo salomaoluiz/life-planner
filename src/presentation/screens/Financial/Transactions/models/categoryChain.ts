@@ -5,12 +5,16 @@ interface ChainCategory {
   id: string;
   name: string;
   parentId?: string;
+  // "ALL" for a category of Personal and every family (spec 038).
+  scope?: string;
   scopeOwnerIds: string[];
   status: string;
 }
 
 interface ChainDeps {
   create: (params: {
+    // Set for an All category (spec 048 FR 29b).
+    all?: boolean;
     depthLevel: number;
     name: string;
     parentId?: string;
@@ -27,7 +31,11 @@ async function createCategoryChain(
   ownerId: string,
   first: { depthLevel: number; parentId?: string },
   deps: ChainDeps,
+  // "ALL" (spec 048 FR 29b): every level is an All category and only All categories are reused. With "OWNER" a reused
+  // All parent still makes its children All: a child follows the scope of its parent (spec 038).
+  scope: "ALL" | "OWNER" = "OWNER",
 ): Promise<void> {
+  let all = scope === "ALL";
   let parentId = first.parentId;
   let depth = first.depthLevel;
   let categories = await deps.list();
@@ -39,16 +47,23 @@ async function createCategoryChain(
         item.status !== "ARCHIVED" &&
         item.parentId === parentId &&
         item.scopeOwnerIds.includes(ownerId) &&
+        (scope !== "ALL" || item.scope === "ALL") &&
         normalizeText(item.name) === wanted,
     );
 
     if (existing) {
+      all = existing.scope === "ALL";
       parentId = existing.id;
       depth = (existing.depthLevel ?? depth) + 1;
       continue;
     }
 
-    await deps.create({ depthLevel: depth, name, parentId });
+    await deps.create({
+      ...(all ? { all: true } : {}),
+      depthLevel: depth,
+      name,
+      parentId,
+    });
     categories = await deps.list();
 
     const created = categories.find(

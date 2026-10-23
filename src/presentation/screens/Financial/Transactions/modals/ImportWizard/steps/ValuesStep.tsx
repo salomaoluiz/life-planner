@@ -1,18 +1,26 @@
 import { View } from "react-native";
 
+import { CARD_CREDIT_CATEGORIES } from "@application/csvImport/cardCredits";
 import {
   AmountInput,
   Button,
   ChipGroup,
   Divider,
   FormColumns,
+  Highlight,
   SegmentedControl,
   SelectField,
   Text,
   TextField,
+  TruncatedText,
+  useSheetLayout,
 } from "@components";
 import { useTranslation } from "@presentation/i18n";
-import { ValueEntry } from "@screens/Financial/Transactions/models/importValues";
+import pluralKey from "@presentation/i18n/pluralKey";
+import {
+  misusedRows,
+  ValueEntry,
+} from "@screens/Financial/Transactions/models/importValues";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
 import useStyles from "../styles";
@@ -26,6 +34,7 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
   const { styles } = useStyles();
   const { t } = useTranslation();
   const vm = useValuesStepViewModel(props.wizard);
+  const { fluid } = useSheetLayout();
   const closeLabel = t("financial.import.close");
   const tab = vm.activeTab;
 
@@ -64,7 +73,19 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
           ]
         : [];
 
-    return [...create, ...vm.optionsFor(entry)];
+    // Spec 048 FR 10: the card credits and payments, only for values used by card rows, of the type of the rows.
+    const credits =
+      tab === "category" && (entry.cardRows ?? 0) > 0
+        ? CARD_CREDIT_CATEGORIES.filter(
+            (item) => !entry.type || item.type === entry.type,
+          ).map((item) => ({
+            description: t("financial.import.creditGroup"),
+            label: t(`financial.import.values.creditNames.${item.key}`),
+            value: item.id,
+          }))
+        : [];
+
+    return [...create, ...credits, ...vm.optionsFor(entry)];
   }
 
   function entryRows() {
@@ -73,12 +94,18 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
     }
 
     return (
-      <View>
+      <View onLayout={(event) => vm.onListLayout(event.nativeEvent.layout.y)}>
         {vm.entries.map((entry, index) => (
-          <View key={entry.key}>
+          <Highlight
+            active={entry.key === vm.highlightKey}
+            key={entry.key}
+            onLayout={(event) =>
+              vm.onRowLayout(entry.key, event.nativeEvent.layout.y)
+            }
+          >
             <View style={styles.tableRow}>
               <View style={styles.grow}>
-                <Text.Body numberOfLines={1} value={entry.value} />
+                <TruncatedText value={entry.value} />
                 <Text.Caption
                   tone={"secondary"}
                   value={`${t("financial.import.values.rows")}: ${entry.rows}${entry.type ? ` · ${t(entry.type === "INCOME" ? "financial.import.values.type.income" : "financial.import.values.type.expense")}` : ""}${vm.multiOwner && entry.ownerId ? ` · ${t("financial.import.values.inOwner", { name: vm.ownerNames[entry.ownerId] ?? "" })}` : ""}`}
@@ -95,10 +122,23 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
                   testID={`${ids.importValue}.${tab}.${index}`}
                   value={entry.selected}
                 />
+                {misusedRows(entry) > 0 ? (
+                  <Text.Caption
+                    testID={`${ids.importValueMisused}.${index}`}
+                    tone={"expense"}
+                    value={t(
+                      pluralKey(
+                        "financial.import.categoryMisused",
+                        misusedRows(entry),
+                      ),
+                      { count: misusedRows(entry) },
+                    )}
+                  />
+                ) : null}
               </View>
             </View>
             <Divider />
-          </View>
+          </Highlight>
         ))}
       </View>
     );
@@ -107,25 +147,36 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
   function left() {
     return (
       <View style={styles.stack}>
-        <ChipGroup
-          layout={"wrap"}
-          mode={"single"}
-          onChange={vm.onTabChange}
-          options={vm.tabs.map((item) => ({
-            label: t(
-              item.unmatched > 0
-                ? "financial.import.values.tabUnmatched"
-                : "financial.import.values.tabOk",
-              {
-                count: item.unmatched,
-                label: t(`financial.import.values.tabs.${item.value}`),
-              },
-            ),
-            value: item.value,
-          }))}
-          testID={ids.importValueTab}
-          value={tab}
-        />
+        <View style={styles.row}>
+          <View style={styles.grow}>
+            <ChipGroup
+              layout={"wrap"}
+              mode={"single"}
+              onChange={vm.onTabChange}
+              options={vm.tabs.map((item) => ({
+                label: t(
+                  item.unmatched > 0
+                    ? "financial.import.values.tabUnmatched"
+                    : "financial.import.values.tabOk",
+                  {
+                    count: item.unmatched,
+                    label: t(`financial.import.values.tabs.${item.value}`),
+                  },
+                ),
+                value: item.value,
+              }))}
+              testID={ids.importValueTab}
+              value={tab}
+            />
+          </View>
+          {fluid && vm.hasUnmatched ? (
+            <Button.Secondary
+              label={t("financial.import.values.nextUnmatched")}
+              onPress={vm.onNextUnmatched}
+              testID={ids.importValueNextUnmatched}
+            />
+          ) : null}
+        </View>
         {entryRows()}
         <Text.Caption
           tone={"secondary"}
@@ -139,7 +190,13 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
     const kind = vm.creating?.tab;
 
     if (!kind) {
-      return null;
+      return vm.allMatched ? (
+        <Text.Body
+          testID={ids.importValueAllMatched}
+          tone={"secondary"}
+          value={t("financial.import.values.allMatched")}
+        />
+      ) : null;
     }
 
     return (
@@ -150,6 +207,7 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
         <TextField
           label={t("financial.import.values.createForm.name")}
           onChangeText={(name) => vm.onFormChange({ name })}
+          onSubmitEditing={vm.onCreateSubmit}
           testID={ids.importCreateName}
           value={vm.form.name}
         />
@@ -243,11 +301,38 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
             tone={"secondary"}
             value={t("financial.import.values.createForm.owner")}
           />
-          <Text.Body
-            value={t("financial.import.values.createForm.ownerFromFile", {
-              name: vm.ownerName,
-            })}
-          />
+          {kind === "category" ? (
+            <ChipGroup
+              layout={"wrap"}
+              mode={"single"}
+              onChange={(scope) =>
+                vm.onFormChange({
+                  parentId: "",
+                  scope: scope as "ALL" | "OWNER",
+                })
+              }
+              options={[
+                {
+                  label: t("financial.import.values.createForm.ownerFromFile", {
+                    name: vm.ownerName,
+                  }),
+                  value: "OWNER",
+                },
+                {
+                  label: t("financial.import.values.scopeAll"),
+                  value: "ALL",
+                },
+              ]}
+              testID={ids.importCreateScope}
+              value={vm.form.scope}
+            />
+          ) : (
+            <Text.Body
+              value={t("financial.import.values.createForm.ownerFromFile", {
+                name: vm.ownerName,
+              })}
+            />
+          )}
         </View>
         {vm.saveFailed ? (
           <View accessibilityRole={"alert"}>
@@ -283,7 +368,16 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
   }
 
   return (
-    <FormColumns left={left()} right={createForm()} testID={ids.importStep} />
+    <FormColumns
+      left={left()}
+      leftFlex={3}
+      leftPaneTestID={ids.importLeftPane}
+      leftScrollRef={vm.leftScroll}
+      right={createForm()}
+      rightFlex={2}
+      rightPaneTestID={ids.importRightPane}
+      testID={ids.importStep}
+    />
   );
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { buildRows } from "@application/csvImport/buildRows";
 import { canContinue, fieldStatuses } from "@application/csvImport/mapping";
@@ -22,6 +22,8 @@ import {
 } from "@screens/Financial/Transactions/models/importFile";
 import {
   canImport,
+  mergeValidation,
+  revalidationRequest,
   reviewRows,
   summarize,
 } from "@screens/Financial/Transactions/models/importReview";
@@ -59,6 +61,7 @@ interface CreatedCounts {
 
 type ImportDialog = "discard" | "owner";
 
+const REVALIDATE_MS = 300;
 const EMPTY_CONTEXT: EntryContext = {
   catalog: {},
   decimal: ",",
@@ -187,17 +190,22 @@ function useImportWizardViewModel(params: ImportWizardParams) {
   // The dry run (FR 27) and the real run (FR 32).
   const ownerType = params.owners.find((owner) => owner.id === ownerId)?.type;
   const validateMutation = useMutation<
-    ImportRowPayload[],
+    { includeDuplicates?: number[]; rows: ImportRowPayload[] },
     ImportValidationEntity
   >({
     cacheKey: [useCases.validateFinancialImportUseCase.uniqueName],
-    fetch: async (payloads) =>
+    fetch: async (request) =>
       useCases.validateFinancialImportUseCase.execute({
+        includeDuplicates: request.includeDuplicates,
         owner: ownerType ?? "USER",
         ownerId,
-        rows: payloads,
+        rows: request.rows,
       }),
   });
+  // Spec 048: the duplicates are found on the full file (first check); a later check only sees the checked rows.
+  const [knownDuplicates, setKnownDuplicates] = useState<number[]>([]);
+  const firstCheck = useRef(false);
+  const revalidateTimer = useRef<ReturnType<typeof setTimeout>>();
   const importMutation = useMutation<ImportRowPayload[], number>({
     cacheKey: [useCases.importFinancialTransactionsUseCase.uniqueName],
     fetch: async (payloads) =>
@@ -212,14 +220,24 @@ function useImportWizardViewModel(params: ImportWizardParams) {
       ? importMutation.error.errors
       : undefined;
   const validation: ImportValidationEntity | undefined = validateMutation.data
-    ? {
+    ? mergeValidation(knownDuplicates, {
         duplicates: validateMutation.data.duplicates,
         errors: refused ?? validateMutation.data.errors,
-      }
+        invoices: validateMutation.data.invoices,
+      })
     : undefined;
   const review = reviewRows(built.rows, validation, selection);
   const summary = summarize(review);
   const importDone = importMutation.status === "success";
+
+  useEffect(() => {
+    if (firstCheck.current && validateMutation.data) {
+      firstCheck.current = false;
+      setKnownDuplicates(validateMutation.data.duplicates);
+    }
+  }, [validateMutation.data]);
+
+  useEffect(() => () => clearTimeout(revalidateTimer.current), []);
 
   useEffect(() => {
     if (!importDone || importMutation.data === undefined) {
@@ -264,8 +282,10 @@ function useImportWizardViewModel(params: ImportWizardParams) {
     const target = nextStep(step);
 
     if (target === "review") {
-      validateMutation.mutate(
-        buildRows({
+      firstCheck.current = true;
+      setKnownDuplicates([]);
+      validateMutation.mutate({
+        rows: buildRows({
           dateFormat: parsed?.dateFormat ?? "dd/mm/yyyy",
           decimal: parsed?.decimal ?? ",",
           defaultOwnerId: ownerId,
@@ -275,7 +295,7 @@ function useImportWizardViewModel(params: ImportWizardParams) {
           rows,
           valueMaps: toValueMaps(entries),
         }).rows.flatMap((row) => (row.payload ? [row.payload] : [])),
-      );
+      });
       setSelection({});
     }
     goTo(target);
@@ -343,6 +363,7 @@ function useImportWizardViewModel(params: ImportWizardParams) {
     headers,
     importError:
       importMutation.error && !refused ? importMutation.error : undefined,
+    invoices: validateMutation.data?.invoices ?? [],
     isImporting: importMutation.isFetching,
     isValidating: validateMutation.isFetching,
     mapping,
@@ -361,8 +382,18 @@ function useImportWizardViewModel(params: ImportWizardParams) {
     onOwnerChange,
     onOwnerConfirm,
     onRequestClose,
-    onSelectionChange: (line: number, checked: boolean) =>
-      setSelection((current) => ({ ...current, [line]: checked })),
+    // Spec 048: checking or unchecking a row changes the invoices, so the dry run is made again for the checked rows.
+    onSelectionChange: (line: number, checked: boolean) => {
+      const next = { ...selection, [line]: checked };
+
+      setSelection(next);
+      clearTimeout(revalidateTimer.current);
+      revalidateTimer.current = setTimeout(() => {
+        validateMutation.mutate(
+          revalidationRequest(reviewRows(built.rows, validation, next)),
+        );
+      }, REVALIDATE_MS);
+    },
     onValueChoice: (tab: ValueTab, value: string, selected: string) =>
       setChoices((current) => ({
         ...current,

@@ -40,11 +40,29 @@ describe("validateImport", () => {
     expect(await validateImport(params)).toEqual({
       duplicates: [2],
       errors: [],
+      invoices: [],
     });
     expect(api.post).toHaveBeenCalledWith(
       "/v1/finance/transactions/import?today=2026-10-21",
       { ...params, dryRun: true },
     );
+  });
+
+  it("SHOULD return the invoices the file touches (spec 048)", async () => {
+    const invoices = [
+      {
+        amountDue: 98500,
+        creditCardId: "card-1",
+        invoiceMonth: "2026-09",
+        paid: true,
+      },
+    ];
+
+    jest
+      .mocked(api.post)
+      .mockResolvedValueOnce({ duplicates: [], errors: [], invoices });
+
+    expect((await validateImport(params)).invoices).toEqual(invoices);
   });
 
   it("SHOULD wrap an unknown failure in a GenericError", async () => {

@@ -4,6 +4,10 @@ import {
   canImport,
   filterRows,
   importPayloads,
+  invoiceLines,
+  kindCounts,
+  mergeValidation,
+  revalidationRequest,
   reviewRows,
   summarize,
 } from "./importReview";
@@ -121,5 +125,139 @@ describe("filters, summary and import", () => {
 
     // line 4 has a local error: never sent.
     expect(importPayloads(clean).map((row) => row.line)).toEqual([2, 5]);
+  });
+});
+
+describe("card credits and payments (spec 048)", () => {
+  const REFUND = "00000000-0000-4000-8000-000000000004";
+  const DISCOUNT = "00000000-0000-4000-8000-000000000003";
+  const INVOICE_PAYMENT = "00000000-0000-4000-8000-000000000002";
+  const rows = [
+    { ...payload(2), categoryId: REFUND, creditCardId: "card-1" },
+    { ...payload(3), categoryId: DISCOUNT, creditCardId: "card-1" },
+    { ...payload(4), categoryId: INVOICE_PAYMENT, creditCardId: "card-1" },
+    { ...payload(5), categoryId: INVOICE_PAYMENT, creditCardId: "card-1" },
+    payload(6),
+  ].map((item) => ({ display, line: item.line, payload: item }));
+
+  it("SHOULD keep the params the API sent with an error line", () => {
+    const review = reviewRows(
+      rows.slice(3, 4),
+      {
+        duplicates: [],
+        errors: [
+          {
+            code: "INVOICE_PAYMENT_MISMATCH",
+            line: 5,
+            message: "x",
+            params: { due: 123000, month: "2026-08", value: 125000 },
+          },
+        ],
+      },
+      {},
+    );
+
+    expect(review[0].errorParams).toEqual({
+      due: 123000,
+      month: "2026-08",
+      value: 125000,
+    });
+  });
+
+  it("SHOULD count the credits and the invoice payments that will be imported", () => {
+    const review = reviewRows(
+      rows,
+      {
+        duplicates: [],
+        errors: [{ code: "INVOICE_PAYMENT_MISMATCH", line: 5, message: "x" }],
+      },
+      {},
+    );
+
+    expect(kindCounts(review)).toEqual({ credits: 2, payments: 1 });
+  });
+
+  it("SHOULD name the invoices of the file with the card, the month and whether they end up paid", () => {
+    expect(
+      invoiceLines(
+        [
+          {
+            amountDue: 670024,
+            creditCardId: "card-1",
+            invoiceMonth: "2026-09",
+            paid: true,
+          },
+          {
+            amountDue: 40000,
+            creditCardId: "card-1",
+            invoiceMonth: "2026-10",
+            paid: false,
+          },
+        ],
+        (id) => (id === "card-1" ? "Visa" : ""),
+      ),
+    ).toEqual([
+      {
+        card: "Visa",
+        cents: 670024,
+        id: "card-1.2026-09",
+        month: "09/26",
+        paid: true,
+      },
+      {
+        card: "Visa",
+        cents: 40000,
+        id: "card-1.2026-10",
+        month: "10/26",
+        paid: false,
+      },
+    ]);
+  });
+});
+
+describe("revalidation (spec 048)", () => {
+  it("SHOULD send only the checked rows and name the checked duplicates", () => {
+    const review = reviewRows(built, validation, { 3: true, 5: false });
+    const request = revalidationRequest(review);
+
+    // 2 ready, 3 duplicate checked by the user, 4 local error (no payload), 5 API error (locked on), 6 duplicate left unchecked
+    expect(request.rows.map((row) => row.line)).toEqual([2, 3, 5]);
+    expect(request.includeDuplicates).toEqual([3]);
+  });
+
+  it("SHOULD keep the duplicates found on the first check and take the rest from the latest one", () => {
+    const merged = mergeValidation([3, 6], {
+      duplicates: [3],
+      errors: [{ code: "INVOICE_PAYMENT_MISMATCH", line: 5, message: "x" }],
+      invoices: [],
+    });
+
+    expect(merged.duplicates).toEqual([3, 6]);
+    expect(merged.errors).toHaveLength(1);
+  });
+
+  it("SHOULD recompute the review WITHOUT the error WHEN the new check has none", () => {
+    const first = reviewRows(built, validation, {});
+    const next = reviewRows(
+      built,
+      mergeValidation(validation.duplicates, {
+        duplicates: [3],
+        errors: [],
+        invoices: [],
+      }),
+      { 3: true, 6: true },
+    );
+
+    expect(first.find((row) => row.line === 5)?.errorCode).toBe(
+      "CURRENCY_MISMATCH",
+    );
+    expect(next.find((row) => row.line === 5)?.errorCode).toBeUndefined();
+    // The duplicates it remembers are still duplicates, now checked on purpose.
+    expect(
+      next.filter((row) => row.duplicate).map((row) => [row.line, row.checked]),
+    ).toEqual([
+      [3, true],
+      [6, true],
+    ]);
   });
 });

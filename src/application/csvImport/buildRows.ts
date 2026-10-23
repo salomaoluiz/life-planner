@@ -1,7 +1,8 @@
+import { creditKeyOf, isPaymentCategory } from "./cardCredits";
 import { isSystemCategoryName } from "./distinctValues";
 import { columnsOf } from "./mapping";
 import { accountKey, categoryKey, ownerOfRow } from "./owner";
-import { parseAmountCents, parseDate } from "./parseValues";
+import { parseAmountCents, parseDate, parseInvoiceMonth } from "./parseValues";
 import {
   ColumnMapping,
   ColumnTarget,
@@ -51,6 +52,7 @@ type LocalRowErrorCode =
   | "CATEGORY_MISSING"
   | "INVALID_DATE"
   | "INVALID_VALUE"
+  | "INVOICE_MONTH_INVALID"
   | "TYPE_MISSING";
 
 // A column value wins; the fixed account or card covers the rows the columns leave empty (FR 18, 19).
@@ -96,7 +98,7 @@ function buildRow(
   row: string[],
   line: number,
   cell: CellReader,
-): BuiltRow {
+): "IGNORED" | BuiltRow {
   const dateText = cell(row, "date");
   const description = cell(row, "description");
   const display = {
@@ -144,6 +146,30 @@ function buildRow(
     return { display, error: "ACCOUNT_OR_CARD_MISSING", line };
   }
 
+  // Spec 048 FR 4: an invoice payment on an account without a card is a debit row of an app export; its card row
+  // carries the data.
+  if (
+    creditKeyOf(categoryId) === "INVOICE_PAYMENT" &&
+    target.accountId !== undefined &&
+    target.creditCardId === undefined
+  ) {
+    return "IGNORED";
+  }
+
+  // FR 5-7: the Invoice column is read on card rows only.
+  const invoiceText = target.creditCardId ? cell(row, "invoice") : "";
+  const invoiceMonth =
+    invoiceText === "" ? undefined : parseInvoiceMonth(invoiceText);
+
+  if (invoiceText !== "" && invoiceMonth === undefined) {
+    return { display, error: "INVOICE_MONTH_INVALID", line };
+  }
+
+  // FR 3: card and account together are a payment made from that account.
+  const payment =
+    target.accountId !== undefined &&
+    target.creditCardId !== undefined &&
+    isPaymentCategory(categoryId);
   const paidValue = input.valueMaps.paid[cell(row, "paid")];
   const currency = cell(row, "currency").toUpperCase();
   const tags = splitTags(cell(row, "tags"));
@@ -152,15 +178,18 @@ function buildRow(
     display,
     line,
     payload: {
-      ...target,
+      accountId: payment ? undefined : target.accountId,
       categoryId,
+      creditCardId: target.creditCardId,
       currency: currency === "" ? undefined : currency,
       date,
       description,
+      invoiceMonth,
       line,
       owner: input.ownerTypes[ownerId],
       ownerId,
       paid: typeof paidValue === "boolean" ? paidValue : undefined,
+      paidFromAccountId: payment ? target.accountId : undefined,
       tags: tags.length > 0 ? tags : undefined,
       type: amount.type,
       value: amount.value,
@@ -188,7 +217,13 @@ function buildRows(input: BuildInput): BuildResult {
       return;
     }
 
-    built.push(buildRow(input, row, line, cell));
+    const result = buildRow(input, row, line, cell);
+
+    if (result === "IGNORED") {
+      ignoredSystemRows += 1;
+    } else {
+      built.push(result);
+    }
   });
 
   return { ignoredSystemRows, rows: built };

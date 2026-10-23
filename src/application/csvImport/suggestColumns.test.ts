@@ -1,5 +1,14 @@
 import { suggestMapping, suggestTarget } from "./suggestColumns";
 
+describe("spec 048 invoice headers", () => {
+  it.each(["Fatura", "invoice", "Mês da fatura", "Invoice month"])(
+    "SHOULD suggest Invoice for %s",
+    (header) => {
+      expect(suggestTarget(header, ["09/2026"])).toBe("invoice");
+    },
+  );
+});
+
 describe("suggestTarget", () => {
   it.each([
     ["Data", "date"],
@@ -76,7 +85,7 @@ describe("suggestMapping", () => {
       "category",
       "account",
       "card",
-      "ignore",
+      "invoice",
       "paid",
       "tags",
       "owner",

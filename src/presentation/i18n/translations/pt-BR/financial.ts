@@ -299,10 +299,13 @@ const financial = {
     action: "Importar CSV",
     back: "Voltar",
     cancel: "Cancelar",
+    categoryMisused_one: "{{count}} linha não pode usar esta categoria",
+    categoryMisused_other: "{{count}} linhas não podem usar esta categoria",
     close: "Fechar",
     columns: {
       defaults: {
         currency: "padrão: a moeda da conta ou do cartão",
+        invoice: "padrão: pela data da compra e o fechamento",
         owner: "padrão: o dono escolhido no primeiro passo",
         paid: "padrão: a data já passou",
         tags: "nenhuma",
@@ -316,6 +319,7 @@ const financial = {
         currency: "Moeda",
         date: "Data",
         description: "Descrição",
+        invoice: "Fatura",
         owner: "Pertence a",
         paid: "Pago",
         tags: "Tags",
@@ -352,6 +356,7 @@ const financial = {
         expenseAmount: "Despesa",
         ignore: "Ignorar",
         incomeAmount: "Receita",
+        invoice: "Fatura",
         owner: "Pertence a",
         paid: "Pago",
         signedAmount: "Valor com sinal",
@@ -360,6 +365,7 @@ const financial = {
       },
     },
     continue: "Continuar",
+    creditGroup: "Créditos e pagamentos do cartão",
     discard: {
       confirm: "Descartar",
       keep: "Continuar editando",
@@ -372,15 +378,31 @@ const financial = {
       ACCOUNT_NOT_FOUND: "Conta não encontrada",
       ACCOUNT_OR_CARD_MISSING: "Sem conta ou cartão",
       AMOUNT_BOTH_OR_NONE: "Preencha a receita ou a despesa, não as duas",
-      CARD_CREDIT_NOT_SUPPORTED: "Créditos no cartão não podem ser importados",
+      CARD_CREDIT_CATEGORY_MISUSED:
+        "Esta categoria só vale para receita no cartão",
+      CARD_INCOME_CATEGORY:
+        "Receita no cartão precisa ser estorno, desconto ou pagamento adiantado",
       CARD_NOT_FOUND: "Cartão não encontrado",
       CATEGORY_ARCHIVED: "A categoria está arquivada",
       CATEGORY_MISSING: "Sem categoria",
       CATEGORY_NOT_FOUND: "Categoria não encontrada para este tipo",
       CURRENCY_MISMATCH: "A moeda é diferente da conta ou do cartão",
       DESCRIPTION_INVALID: "Descrição inválida",
+      DUPLICATE_INVOICE_PAYMENT:
+        "A fatura de {{month}} tem mais de um pagamento",
+      EARLY_PAYMENT_OVER_DUE:
+        "Os pagamentos adiantados da fatura de {{month}} passam do valor devido em {{value}}",
       INVALID_DATE: "Data inválida",
       INVALID_VALUE: "Valor inválido",
+      INVOICE_ALREADY_PAID: "A fatura de {{month}} já está paga",
+      INVOICE_MONTH_INVALID: "Mês da fatura inválido",
+      INVOICE_NOT_CLOSED:
+        "A fatura de {{month}} ainda está aberta; use pagamento adiantado",
+      INVOICE_PAID: "A fatura de {{month}} já está paga",
+      INVOICE_PAYMENT_MISMATCH:
+        "A fatura de {{month}} é {{due}}; o pagamento é {{value}}",
+      PAID_FROM_ACCOUNT_INVALID:
+        "A conta do pagamento precisa estar ativa, ser sua e ter a moeda do cartão",
       SYSTEM_CATEGORY: "Categoria do sistema",
       TAG_TOO_LONG: "Uma tag tem mais de 30 caracteres",
       TOO_MANY_TAGS: "Mais de 10 tags",
@@ -428,13 +450,17 @@ const financial = {
       summary: "{{rows}} linhas, {{columns}} colunas",
       title: "Arquivo CSV",
     },
+    invoiceCaption: "Mês em que a fatura fecha, como no export do app",
     ownerChange: {
       cancel: "Cancelar",
       confirm: "Continuar",
       message: "Trocar o dono apaga os valores que você associou. Continuar?",
       title: "Trocar o dono?",
     },
+    paymentsWithAccount:
+      "Linhas com cartão e conta são pagamentos feitos com essa conta",
     review: {
+      boleto: "Boleto",
       columns: {
         amount: "Valor",
         date: "Data",
@@ -462,6 +488,7 @@ const financial = {
       invoice: "fatura {{month}}",
       newRecord: "nova",
       noMatch: "Nenhuma linha neste filtro.",
+      paidFrom: "paga com {{account}}",
       rowCheck: "Importar a linha {{line}}",
       rowError: "A linha {{line}} tem um erro",
       showMore: "Ver mais ({{count}})",
@@ -469,8 +496,13 @@ const financial = {
       submit_other: "Importar {{count}} transações",
       summary: {
         created: "Registros novos criados",
+        credits: "Créditos do cartão: {{count}}",
         duplicates: "Duplicadas (desmarcadas)",
         errors: "Com erro",
+        invoicePaid: "{{card}} · {{month}}: {{value}} → paga",
+        invoicePending: "{{card}} · {{month}}: {{value}} em aberto",
+        invoicesTitle: "Faturas do arquivo",
+        payments: "Pagamentos de fatura: {{count}}",
         ready: "Prontas",
         system: "Linhas do sistema ignoradas",
         title: "Resumo",
@@ -492,6 +524,7 @@ const financial = {
       imported_other: "{{count}} transações importadas",
     },
     values: {
+      allMatched: "Todos os valores têm par",
       appValue: {
         account: "Conta no app",
         card: "Cartão no app",
@@ -526,15 +559,24 @@ const financial = {
         ownerFromFile: "{{name}} (do arquivo)",
         submit: "Criar e usar",
       },
+      creditNames: {
+        CARD_EARLY_PAYMENT: "Pagamento adiantado",
+        CARD_REFUND: "Estorno",
+        INSTALLMENT_PREPAYMENT_DISCOUNT: "Desconto de adiantamento",
+        INVOICE_PAYMENT: "Pagamento de fatura",
+      },
+      creditTag: "cartão",
       fileValue: "Valor no arquivo",
       help: "Pares sugeridos pelo nome, ignorando maiúsculas e acentos. Registros arquivados não aparecem. Cada valor do arquivo vira um só registro do app.",
       inOwner: "em {{name}}",
+      nextUnmatched: "Próximo sem par",
       paid: {
         default: "Usar o padrão",
         paid: "Pago",
         unpaid: "Não pago",
       },
       rows: "Linhas",
+      scopeAll: "Todos (pessoal e famílias)",
       tabOk: "{{label}} · ok",
       tabs: {
         account: "Conta",

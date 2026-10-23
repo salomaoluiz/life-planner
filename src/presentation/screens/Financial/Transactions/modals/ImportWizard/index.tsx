@@ -1,3 +1,5 @@
+import { View } from "react-native";
+
 import { BottomSheet, Button, ConfirmDialog, Stepper, Text } from "@components";
 import { useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
@@ -11,6 +13,7 @@ import ColumnsStep from "./steps/ColumnsStep";
 import FileStep from "./steps/FileStep";
 import ReviewStep from "./steps/ReviewStep";
 import ValuesStep from "./steps/ValuesStep";
+import useStyles from "./styles";
 import useImportWizardViewModel, {
   ImportWizardParams,
 } from "./useImportWizardViewModel";
@@ -19,6 +22,7 @@ const ids = transactionsTestIds;
 
 // The Import CSV wizard (spec 047 FR 8-33): file, columns, values and review, in a sheet that is wider on web.
 function ImportWizard(props: ImportWizardParams) {
+  const { styles } = useStyles();
   const { t } = useTranslation();
   const wizard = useImportWizardViewModel(props);
   const { step } = wizard;
@@ -109,7 +113,7 @@ function ImportWizard(props: ImportWizardParams) {
         }
         onClose={wizard.onRequestClose}
         presentation={"inline"}
-        size={"wizard"}
+        size={"fluid"}
         testID={ids.importSheet}
         title={
           wizard.wide
@@ -131,7 +135,7 @@ function ImportWizard(props: ImportWizardParams) {
           }))}
           testID={ids.importStepper}
         />
-        {body()}
+        <View style={styles.stepBody}>{body()}</View>
         {wizard.importError ? (
           <Text.Caption
             tone={"expense"}

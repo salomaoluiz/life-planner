@@ -18,8 +18,10 @@ import Animated, {
 import { IconButton } from "@components/Icon";
 import Text from "@components/Text";
 import { useKitTheme } from "@components/utils/useKitTheme";
+import useWindowSize from "@components/utils/useWindowSize";
 import { isWeb } from "@utils/platform";
 
+import { fluidSheetSize } from "./fluidSize";
 import { SheetLayoutProvider } from "./SheetLayoutContext";
 import useStyles from "./styles";
 
@@ -32,8 +34,9 @@ export interface BottomSheetProps {
   footerStart?: React.ReactNode;
   onClose: () => void;
   presentation?: "inline" | "modal";
-  /** `wizard` is a `form` that is wider on expanded screens (the import wizard, spec 047) */
-  size?: "dialog" | "form" | "wizard";
+  /** `wizard` is a `form` that is wider on expanded screens (the import wizard, spec 047); `fluid` grows with the
+   *  window and its children scroll on their own (spec 048) */
+  size?: "dialog" | "fluid" | "form" | "wizard";
   subtitle?: string;
   testID?: string;
   title: string;
@@ -49,17 +52,25 @@ const SWIPE_CLOSE_DISTANCE = 80;
 function BottomSheet(props: BottomSheetProps) {
   const { breakpoint } = useKitTheme();
   const wide = breakpoint !== "compact";
-  const isForm = props.size === "form" || props.size === "wizard";
+  const window = useWindowSize();
+  const isForm =
+    props.size === "form" || props.size === "wizard" || props.size === "fluid";
   const wideForm = wide && isForm;
+  const fluid =
+    wideForm && props.size === "fluid" ? fluidSheetSize(window) : undefined;
   const styles = useStyles(
     wide,
     isForm,
     breakpoint === "medium",
-    props.size === "wizard",
+    props.size === "wizard" || props.size === "fluid",
+    fluid,
   );
   const layout = useMemo(
-    () => ({ columns: wideForm ? (2 as const) : (1 as const) }),
-    [wideForm],
+    () => ({
+      columns: wideForm ? (2 as const) : (1 as const),
+      fluid: !!fluid,
+    }),
+    [wideForm, fluid],
   );
   const offset = useSharedValue(wide ? 0 : SLIDE_OFFSET);
   const animatedStyle = useAnimatedStyle(() => ({
@@ -196,16 +207,22 @@ function BottomSheet(props: BottomSheetProps) {
               variant="plain"
             />
           </View>
-          <ScrollView
-            contentContainerStyle={styles.body}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-            style={styles.scroll}
-            testID={testID && `${testID}-body`}
-          >
-            {props.children}
-            {wideForm ? null : props.footerStart}
-          </ScrollView>
+          {fluid ? (
+            <View style={styles.fluidBody} testID={testID && `${testID}-body`}>
+              {props.children}
+            </View>
+          ) : (
+            <ScrollView
+              contentContainerStyle={styles.body}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              style={styles.scroll}
+              testID={testID && `${testID}-body`}
+            >
+              {props.children}
+              {wideForm ? null : props.footerStart}
+            </ScrollView>
+          )}
           {renderFooter()}
         </Animated.View>
       </KeyboardAvoidingView>

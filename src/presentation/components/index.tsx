@@ -47,6 +47,7 @@ export { default as FormColumns, FormColumnsProps } from "./FormColumns";
 export { default as GroupBodyRow, GroupBodyRowProps } from "./GroupBodyRow";
 export { default as GroupHeader, GroupHeaderProps } from "./GroupHeader";
 export { default as HelperText, HelperTextProps } from "./HelperText";
+export { default as Highlight, HighlightProps } from "./Highlight";
 export {
   default as Icon,
   IconButton,
@@ -112,3 +113,4 @@ export { default as Toast, ToastProps } from "./Toast";
 export { default as Tooltip, TooltipProps } from "./Tooltip";
 export { default as Touchable, TouchableProps } from "./Touchable";
 export { default as TreeItem, TreeItemProps } from "./TreeItem";
+export { default as TruncatedText, TruncatedTextProps } from "./TruncatedText";
