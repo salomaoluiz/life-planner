@@ -249,7 +249,7 @@ function ReviewStep(props: { wizard: ImportWizardState }) {
     return (
       <View key={group.key} testID={prefix}>
         <View style={[styles.groupHeader, !wide && styles.groupStack]}>
-          <View style={styles.grow}>
+          <View style={styles.heading}>
             <Text.BodyStrong
               accessibilityRole={"header"}
               value={group.nameKey ? t(group.nameKey) : (group.name ?? "")}
@@ -274,7 +274,7 @@ function ReviewStep(props: { wizard: ImportWizardState }) {
       <View key={block.block} testID={`${ids.importGroup}.${block.block}`}>
         <Card padding={"sm"}>
           <View style={[styles.blockHeaderRow, !wide && styles.blockStack]}>
-            <View style={styles.grow}>
+            <View style={styles.heading}>
               <Text.Overline
                 accessibilityRole={"header"}
                 value={t(

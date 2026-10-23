@@ -36,6 +36,12 @@ function useStyles() {
         gap: spacing.xs,
       },
       grow: { flex: 1, gap: spacing.xxs },
+      heading: {
+        flexBasis: 180,
+        flexGrow: 1,
+        flexShrink: 1,
+        gap: spacing.xxs,
+      },
       required: {
         alignItems: "center",
         flexDirection: "row",
