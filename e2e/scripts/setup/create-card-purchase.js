@@ -15,6 +15,12 @@ var headers = {
 };
 var now = new Date();
 var yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+var purchaseDate =
+  yesterday.getFullYear() +
+  "-" +
+  pad(yesterday.getMonth() + 1) +
+  "-" +
+  pad(yesterday.getDate());
 
 var card = http.post(E2E_API_URL + "/v1/finance/credit-cards", {
   headers: headers,
@@ -40,12 +46,7 @@ var purchase = http.post(E2E_API_URL + "/v1/finance/transactions", {
   body: JSON.stringify({
     categoryId: CATEGORY_ID,
     creditCardId: cardId,
-    date:
-      yesterday.getFullYear() +
-      "-" +
-      pad(yesterday.getMonth() + 1) +
-      "-" +
-      pad(yesterday.getDate()),
+    date: purchaseDate,
     description: DESCRIPTION,
     owner: "USER",
     ownerId: OWNER_ID,
@@ -65,12 +66,7 @@ if (typeof SECOND_DESCRIPTION !== "undefined" && SECOND_DESCRIPTION) {
     body: JSON.stringify({
       categoryId: SECOND_CATEGORY_ID,
       creditCardId: cardId,
-      date:
-        yesterday.getFullYear() +
-        "-" +
-        pad(yesterday.getMonth() + 1) +
-        "-" +
-        pad(yesterday.getDate()),
+      date: purchaseDate,
       description: SECOND_DESCRIPTION,
       owner: "USER",
       ownerId: OWNER_ID,
@@ -86,3 +82,6 @@ if (typeof SECOND_DESCRIPTION !== "undefined" && SECOND_DESCRIPTION) {
 }
 
 output.CARD_ID = cardId;
+// The invoice the purchase landed on: it closed yesterday and is listed in today's month.
+output.CLOSED_DATE = purchaseDate;
+output.CLOSED_MONTH = purchaseDate.slice(0, 7);

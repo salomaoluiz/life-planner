@@ -1,0 +1,131 @@
+url: ${E2E_WEB_URL}
+name: financial/credit-cards/pay-invoice-with-credits-after-undo
+tags:
+  - financial
+  - spec-029
+  - spec-032
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Regression: an invoice with an early payment used to compare the raw sum of its rows (purchases + credits)
+# with its net amount, so paying it failed with 409 "Invoice changed". Paying, undoing and paying it again
+# must work.
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- evalScript: ${output.KEEP_ACCOUNT_ID = output.ACCOUNT_ID}
+- evalScript: ${output.KEEP_CATEGORY_ID = output.EXPENSE_CATEGORY_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Card
+      KEY: CARD_TITLE
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Market
+      KEY: PURCHASE_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Early
+      KEY: EARLY_PAYMENT_NAME
+# A card that closed yesterday: the 250,00 purchase is on a CLOSED invoice listed in today's month.
+- runFlow:
+    file: ../../../subflows/setup/create-card-purchase.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      CATEGORY_ID: ${output.KEEP_CATEGORY_ID}
+      TITLE: ${output.CARD_TITLE}
+      DESCRIPTION: ${output.PURCHASE_NAME}
+      VALUE_CENTS: "25000"
+# A 100,00 early payment on the same invoice: the raw sum is 350,00, the net (what is due) is 150,00.
+- runFlow:
+    file: ../../../subflows/setup/create-card-early-payment.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      CARD_ID: ${output.CARD_ID}
+      ACCOUNT_ID: ${output.KEEP_ACCOUNT_ID}
+      INVOICE_MONTH: ${output.CLOSED_MONTH}
+      DATE: ${output.CLOSED_DATE}
+      DESCRIPTION: ${output.EARLY_PAYMENT_NAME}
+      VALUE_CENTS: "10000"
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.cardInvoice.row"
+    timeout: 20000
+- assertVisible:
+    id: "financial.transactions.cardInvoice.amount"
+    text: ".*150[.,]00.*"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- tapOn:
+    id: "financial.transactions.cardInvoice.toggle"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- tapOn:
+    id: "financial.transactions.cardInvoice.open"
+- extendedWaitUntil:
+    visible:
+      id: "financial.invoice.pay"
+    timeout: 20000
+- assertVisible:
+    id: "financial.invoice.amount"
+    text: ".*150[.,]00.*"
+# First payment: the invoice (net) is paid, not the raw sum.
+- tapOn:
+    id: "financial.invoice.pay"
+- extendedWaitUntil:
+    visible:
+      id: "financial.invoice.pay-account"
+    timeout: 20000
+- tapOn:
+    id: "financial.invoice.pay-account"
+- tapOn:
+    id: "financial.invoice.pay-account-option-${output.KEEP_ACCOUNT_ID}"
+- tapOn:
+    id: "financial.invoice.pay-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "financial.invoice.paid-info"
+    timeout: 20000
+# Undo it and pay the same invoice again: this is where the 409 used to happen.
+- tapOn:
+    id: "financial.invoice.undo"
+- tapOn:
+    id: "financial.invoice.undo-confirm-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "financial.invoice.pay"
+    timeout: 20000
+- tapOn:
+    id: "financial.invoice.pay"
+- extendedWaitUntil:
+    visible:
+      id: "financial.invoice.pay-account"
+    timeout: 20000
+- tapOn:
+    id: "financial.invoice.pay-account"
+- tapOn:
+    id: "financial.invoice.pay-account-option-${output.KEEP_ACCOUNT_ID}"
+- tapOn:
+    id: "financial.invoice.pay-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "financial.invoice.paid-info"
+    timeout: 20000
