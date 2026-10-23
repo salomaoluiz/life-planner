@@ -79,7 +79,19 @@ onFlowComplete:
     timeout: 20000
 - tapOn:
     id: "financial.import.continue"
-# Step 4: the payment row carries the error with the invoice and the payment amounts; the import is blocked.
+# Step 4 (spec 049): the payment row is in the Account block at the top; back to the top from step 2.
+- swipe:
+    start: 45%, 30%
+    end: 45%, 70%
+- swipe:
+    start: 45%, 30%
+    end: 45%, 70%
+- swipe:
+    start: 45%, 30%
+    end: 45%, 70%
+- swipe:
+    start: 45%, 70%
+    end: 45%, 30%
 - extendedWaitUntil:
     visible:
       id: "financial.import.row.5.error"

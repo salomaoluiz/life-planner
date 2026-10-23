@@ -1,0 +1,203 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/import-review-groups
+tags:
+  - financial
+  - spec-049
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Review by blocks with subtotals and the manual refresh (spec 049): the invoice payment is grouped in the Account
+# block and the purchase, the refund and the discount in the Card block. Unchecking the refund makes the review
+# stale; Refresh recalculates the invoice, the payment no longer matches, and checking it back fixes it.
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- evalScript: ${output.KEEP_ACCOUNT_ID = output.ACCOUNT_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Card
+      KEY: CARD_TITLE
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Credit Purchase
+      KEY: PURCHASE_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-credit-card.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      OWNER: USER
+      TITLE: ${output.CARD_TITLE}
+- evalScript: ${output.KEEP_CARD_ID = output.CARD_ID}
+- runScript:
+    file: ../../../scripts/csv-import-credits-fixture.js
+    env:
+      DESCRIPTION: ${output.PURCHASE_NAME}
+      CATEGORY: ${output.EXPENSE_CATEGORY_NAME}
+      ACCOUNT_NAME: ${output.ACCOUNT_NAME}
+      CARD_TITLE: ${output.CARD_TITLE}
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow:
+    file: ../../../subflows/financial/load-csv-fixture.yaml
+    env:
+      CSV_FRAGMENT: ${output.CSV_FRAGMENT}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- tapOn:
+    id: "financial.transactions.importButton"
+# Step 1: the file.
+- tapOn:
+    id: "financial.import.file.pick"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.file.name"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+# Step 2: the Invoice column is the last one, below the fold.
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.column.0"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.invoiceCaption"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+# Step 3: the card credits are matched by name.
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.value.category.0"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+# Step 4 keeps the scroll of step 2, so go back to the top: the Account block comes first with the invoice payment.
+- swipe:
+    start: 45%, 30%
+    end: 45%, 70%
+- swipe:
+    start: 45%, 30%
+    end: 45%, 70%
+- swipe:
+    start: 45%, 30%
+    end: 45%, 70%
+- assertVisible:
+    id: "financial.import.group.account"
+- assertVisible:
+    id: "financial.import.group.account.0"
+- assertVisible:
+    id: "financial.import.group.account.0.income"
+- assertVisible:
+    id: "financial.import.group.account.0.expenses"
+- swipe:
+    start: 45%, 70%
+    end: 45%, 30%
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.row.5"
+    timeout: 20000
+# One screen down: the Card block heading and its group with the subtotals.
+- swipe:
+    start: 45%, 70%
+    end: 45%, 30%
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.group.card"
+    timeout: 20000
+- assertVisible:
+    id: "financial.import.group.card.0"
+- assertVisible:
+    id: "financial.import.group.card.0.income"
+- assertVisible:
+    id: "financial.import.group.card.0.expenses"
+- assertVisible:
+    id: "financial.import.group.card.income"
+# Two screens down: the purchase, the refund and the discount.
+- swipe:
+    start: 45%, 70%
+    end: 45%, 30%
+- swipe:
+    start: 45%, 70%
+    end: 45%, 30%
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.row.2"
+    timeout: 20000
+- assertVisible:
+    id: "financial.import.row.3"
+- assertVisible:
+    id: "financial.import.row.4"
+# Unchecking the refund leaves the review out of date.
+- tapOn:
+    id: "financial.import.row.3.check"
+- swipe:
+    start: 45%, 30%
+    end: 45%, 70%
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.stale"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.submit"
+- assertVisible:
+    id: "financial.import.stale"
+- assertNotVisible:
+    id: "financial.import.toast"
+- tapOn:
+    id: "financial.import.refresh"
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.import.stale"
+    timeout: 20000
+# The invoice is 997,00 without the refund, so the 985,00 payment no longer matches: one error, Import blocked.
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.footer-note"
+    timeout: 20000
+# Check the refund again and refresh: the payment matches the invoice again.
+- swipe:
+    start: 45%, 70%
+    end: 45%, 30%
+- swipe:
+    start: 45%, 70%
+    end: 45%, 30%
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.row.3"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.row.3.check"
+- swipe:
+    start: 45%, 30%
+    end: 45%, 70%
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.stale"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.refresh"
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.import.stale"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.import.footer-note"
+- tapOn:
+    id: "financial.import.submit"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.toast"
+    timeout: 20000

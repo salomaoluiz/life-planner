@@ -76,7 +76,10 @@ onFlowComplete:
     timeout: 20000
 - tapOn:
     id: "financial.import.continue"
-# Step 4: both rows are ready, nothing to fix.
+# Step 4 (spec 049): the block heading sits above the rows, so scroll to them.
+- swipe:
+    start: 45%, 70%
+    end: 45%, 30%
 - extendedWaitUntil:
     visible:
       id: "financial.import.row.2"
