@@ -10,6 +10,7 @@ function useStyles() {
       blockHeaderRow: {
         alignItems: "center",
         flexDirection: "row",
+        flexWrap: "wrap",
         gap: spacing.sm,
         justifyContent: "space-between",
       },
@@ -24,6 +25,7 @@ function useStyles() {
       groupHeader: {
         alignItems: "center",
         flexDirection: "row",
+        flexWrap: "wrap",
         gap: spacing.sm,
         justifyContent: "space-between",
         paddingVertical: spacing.xs,
@@ -55,6 +57,7 @@ function useStyles() {
       totals: {
         alignItems: "baseline",
         flexDirection: "row",
+        flexShrink: 0,
         flexWrap: "wrap",
         gap: spacing.sm,
         justifyContent: "flex-end",
