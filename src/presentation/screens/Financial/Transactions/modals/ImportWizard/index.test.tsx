@@ -1,4 +1,4 @@
-import { ImportRowsInvalid } from "@domain/entities/errors";
+import { BusinessError, ImportRowsInvalid } from "@domain/entities/errors";
 
 import {
   category,
@@ -20,6 +20,23 @@ import {
 } from "./mocks/index.mocks";
 
 const MANY_ROWS = `Data;Desc;Valor\n${Array.from({ length: 2001 }, () => "02/10/2026;x;1,00").join("\n")}`;
+
+// Two card rows: a purchase and a refund (a card credit), all matched by name (spec 048/049).
+const CREDITS = [
+  "Data;Histórico;Valor;Categoria;Cartão",
+  "05/10/2026;Mercado;-10,00;Mercado;Visa",
+  "06/10/2026;Estorno;12,00;Estorno;Visa",
+  "",
+].join("\r\n");
+
+// One card, two currencies: the group has one income pair per currency, never converted (spec 049 FR 9).
+const MIXED = [
+  "Data;Histórico;Valor;Categoria;Cartão;Moeda",
+  "05/10/2026;Estorno;12,00;Estorno;Visa;BRL",
+  "06/10/2026;Estorno;20,00;Estorno;Visa;USD",
+  "07/10/2026;Mercado;-5,00;Mercado;Visa;BRL",
+  "",
+].join("\r\n");
 
 describe("step 1: file and owner", () => {
   it("SHOULD start without a file, with Personal and the family as owners and Continue disabled", () => {
@@ -425,6 +442,7 @@ describe("step 4: review and import", () => {
 
     expect(mutations.validate.value.mutate).toHaveBeenCalledTimes(1);
     expect(mutations.validate.value.mutate).toHaveBeenCalledWith({
+      requestId: 1,
       rows: [
         expect.objectContaining({
           accountId: "acc-1",
@@ -476,7 +494,7 @@ describe("step 4: review and import", () => {
   });
 
   it("SHOULD come with the duplicates unchecked and import them only when checked", async () => {
-    setup();
+    const view = setup();
     mutations.validate.value.data = { duplicates: [3], errors: [] };
     await toReview();
 
@@ -492,6 +510,10 @@ describe("step 4: review and import", () => {
     ).toHaveTextContent(/1/);
 
     fireEvent.press(screen.getByTestId(`${ids.importRow}.3.check`));
+    // Spec 049: the new selection is checked when the user asks for it.
+    fireEvent.press(screen.getByTestId(ids.importRefresh));
+    mutations.validate.value.data = { duplicates: [3], errors: [] };
+    view.rerender(<ImportWizard {...params} />);
     fireEvent.press(screen.getByTestId(ids.importSubmit));
 
     expect(
@@ -499,35 +521,277 @@ describe("step 4: review and import", () => {
     ).toHaveLength(3);
   });
 
-  it("SHOULD check again with the checked rows WHEN a row is unchecked or a duplicate is checked (spec 048)", async () => {
+  it("SHOULD not send a dry run WHEN a row is checked (spec 049)", async () => {
     setup();
-    mutations.validate.value.data = {
-      duplicates: [3],
-      errors: [],
-      invoices: [],
-    };
+    mutations.validate.value.data = NO_ISSUES;
     await toReview();
     jest.mocked(mutations.validate.value.mutate).mockClear();
 
-    // Checking the duplicate: it is sent and named, the API counts it in the invoices.
     fireEvent.press(screen.getByTestId(`${ids.importRow}.3.check`));
-    jest.advanceTimersByTime(400);
 
-    expect(mutations.validate.value.mutate).toHaveBeenCalledTimes(1);
-    const first = jest.mocked(mutations.validate.value.mutate).mock
-      .calls[0][0] as unknown as DryRun;
+    expect(mutations.validate.value.mutate).not.toHaveBeenCalled();
+    expect(screen.getByTestId(ids.importStale)).toBeOnTheScreen();
+    expect(screen.getByTestId(ids.importSubmit)).toBeDisabled();
+  });
 
-    expect(first.includeDuplicates).toEqual([3]);
-    expect(first.rows.map((row) => row.line)).toEqual([2, 3, 4]);
+  it("SHOULD be fresh again WHEN the same row is checked and unchecked (spec 049)", async () => {
+    setup();
+    mutations.validate.value.data = NO_ISSUES;
+    await toReview();
+    jest.mocked(mutations.validate.value.mutate).mockClear();
 
-    // Unchecking a ready row: it leaves the check.
+    fireEvent.press(screen.getByTestId(`${ids.importRow}.3.check`));
+    fireEvent.press(screen.getByTestId(`${ids.importRow}.3.check`));
+
+    expect(screen.queryByTestId(ids.importStale)).toBeNull();
+    expect(screen.getByTestId(ids.importSubmit)).toBeEnabled();
+    expect(mutations.validate.value.mutate).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD send the checked rows WHEN Refresh is pressed (spec 049)", async () => {
+    setup();
+    mutations.validate.value.data = NO_ISSUES;
+    await toReview();
+    jest.mocked(mutations.validate.value.mutate).mockClear();
+
+    fireEvent.press(screen.getByTestId(`${ids.importRow}.3.check`));
+    fireEvent.press(screen.getByTestId(ids.importRefresh));
+
+    const request = jest.mocked(mutations.validate.value.mutate).mock
+      .calls[0][0] as unknown as DryRun & { requestId: number };
+
+    expect(request.includeDuplicates).toEqual([]);
+    expect(request.rows.map((row) => row.line)).toEqual([2, 4]);
+    expect(request.requestId).toEqual(2);
+  });
+
+  it("SHOULD apply the refresh response and clear the stale state (spec 049)", async () => {
+    const view = setup();
+    mutations.validate.value.data = NO_ISSUES;
+    await toReview();
+
+    fireEvent.press(screen.getByTestId(`${ids.importRow}.3.check`));
+    expect(screen.getByTestId(ids.importStale)).toBeOnTheScreen();
+
+    fireEvent.press(screen.getByTestId(ids.importRefresh));
+    mutations.validate.value.data = {
+      duplicates: [],
+      errors: [],
+      invoices: [],
+    };
+    view.rerender(<ImportWizard {...params} />);
+
+    expect(screen.queryByTestId(ids.importStale)).toBeNull();
+    expect(screen.getByTestId(ids.importSubmit)).toBeEnabled();
+  });
+
+  it("SHOULD stay stale WHEN the selection changes during a refresh (spec 049)", async () => {
+    const view = setup();
+    mutations.validate.value.data = NO_ISSUES;
+    await toReview();
+
+    fireEvent.press(screen.getByTestId(`${ids.importRow}.3.check`));
+    fireEvent.press(screen.getByTestId(ids.importRefresh));
     fireEvent.press(screen.getByTestId(`${ids.importRow}.2.check`));
-    jest.advanceTimersByTime(400);
+    mutations.validate.value.data = {
+      duplicates: [],
+      errors: [],
+      invoices: [],
+    };
+    view.rerender(<ImportWizard {...params} />);
 
-    const second = jest.mocked(mutations.validate.value.mutate).mock
-      .calls[1][0] as unknown as DryRun;
+    expect(screen.getByTestId(ids.importStale)).toBeOnTheScreen();
+    expect(screen.getByTestId(ids.importSubmit)).toBeDisabled();
+  });
 
-    expect(second.rows.map((row) => row.line)).toEqual([3, 4]);
+  it("SHOULD keep the previous values and the failure WHEN the refresh fails (spec 049)", async () => {
+    const view = setup();
+    mutations.validate.value.data = NO_ISSUES;
+    await toReview();
+
+    fireEvent.press(screen.getByTestId(`${ids.importRow}.3.check`));
+    fireEvent.press(screen.getByTestId(ids.importRefresh));
+    mutations.validate.value.status = "error";
+    mutations.validate.value.error = new BusinessError();
+    view.rerender(<ImportWizard {...params} />);
+
+    expect(
+      screen.getByText(/financial.import.review.refresh.failed/),
+    ).toBeOnTheScreen();
+    expect(screen.getByTestId(ids.importStale)).toBeOnTheScreen();
+    expect(screen.getByTestId(ids.importSubmit)).toBeDisabled();
+  });
+
+  it("SHOULD block the import WHEN the first check fails (spec 049)", async () => {
+    setup();
+    mutations.validate.value.status = "error";
+    mutations.validate.value.error = new BusinessError();
+    await toReview();
+
+    expect(screen.getByTestId(ids.importSubmit)).toBeDisabled();
+  });
+
+  it("SHOULD keep the credit counts of the last check WHEN stale (spec 049)", async () => {
+    setup();
+    mutations.validate.value.data = NO_ISSUES;
+    await pickFile(CREDITS);
+    fireEvent.press(screen.getByTestId(ids.importContinue));
+    fireEvent.press(screen.getByTestId(ids.importContinue));
+    fireEvent.press(screen.getByTestId(ids.importContinue));
+
+    expect(
+      screen.getByTestId(`${ids.importSummary}.credits`),
+    ).toHaveTextContent(/1/);
+
+    fireEvent.press(screen.getByTestId(`${ids.importRow}.3.check`));
+
+    expect(
+      screen.getByTestId(`${ids.importSummary}.credits`),
+    ).toHaveTextContent(/1/);
+  });
+
+  it("SHOULD split the review into the Account and Card blocks (spec 049)", async () => {
+    setup();
+    mutations.validate.value.data = NO_ISSUES;
+    await toReview();
+
+    expect(screen.getByTestId(`${ids.importGroup}.account`)).toBeOnTheScreen();
+    expect(screen.getByTestId(`${ids.importGroup}.card`)).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(`${ids.importGroup}.account.0`),
+    ).toBeOnTheScreen();
+    expect(screen.getByTestId(`${ids.importGroup}.card.0`)).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(`${ids.importGroup}.account.income`),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(`${ids.importGroup}.card.expenses`),
+    ).toBeOnTheScreen();
+    expect(screen.getByTestId(`${ids.importRow}.2`)).toBeOnTheScreen();
+    expect(screen.getByTestId(`${ids.importRow}.4`)).toBeOnTheScreen();
+  });
+
+  it("SHOULD show No rows and zero subtotals WHEN a block has no rows (spec 049)", async () => {
+    setup();
+    mutations.validate.value.data = NO_ISSUES;
+    await pickFile(CREDITS);
+    fireEvent.press(screen.getByTestId(ids.importContinue));
+    fireEvent.press(screen.getByTestId(ids.importContinue));
+    fireEvent.press(screen.getByTestId(ids.importContinue));
+
+    expect(screen.getByTestId(`${ids.importGroup}.account`)).toBeOnTheScreen();
+    expect(
+      screen.getByText(/financial.import.review.groups.noRows/),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(`${ids.importGroup}.account.income`),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD keep the groups with their subtotals WHEN the filter hides them (spec 049)", async () => {
+    setup();
+    mutations.validate.value.data = {
+      duplicates: [],
+      errors: [{ code: "CURRENCY_MISMATCH", line: 4, message: "x" }],
+    };
+    await toReview();
+
+    fireEvent.press(screen.getByTestId(`${ids.importFilter}-ERRORS`));
+
+    expect(
+      screen.getByTestId(`${ids.importGroup}.account.0`),
+    ).toBeOnTheScreen();
+    expect(screen.getByTestId(`${ids.importGroup}.card.0`)).toBeOnTheScreen();
+    expect(screen.getByTestId(`${ids.importRow}.4`)).toBeOnTheScreen();
+    expect(screen.queryByTestId(`${ids.importRow}.2`)).toBeNull();
+  });
+
+  it("SHOULD put a row without a record in its own group (spec 049)", async () => {
+    setup();
+    mutations.validate.value.data = NO_ISSUES;
+    await pickFile(CSV.replace("02/10/2026", "31/09/2026"));
+    fireEvent.press(screen.getByTestId(ids.importContinue));
+    await chooseOption(`${ids.importFixed}.accountOrCard`, "account:acc-1");
+    fireEvent.press(screen.getByTestId(ids.importContinue));
+    await chooseOption(`${ids.importValue}.category.2`, "cat-market");
+    fireEvent.press(screen.getByTestId(ids.importContinue));
+
+    expect(
+      screen.getByText(/financial.import.review.groups.noRecord/),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(`${ids.importGroup}.account.0`),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD show the invoices caption WHEN the review is stale (spec 049)", async () => {
+    setup();
+    mutations.validate.value.data = {
+      duplicates: [],
+      errors: [],
+      invoices: [
+        {
+          amountDue: 10000,
+          creditCardId: "card-1",
+          invoiceMonth: "2026-10",
+          paid: false,
+        },
+      ],
+    };
+    await toReview();
+
+    expect(
+      screen.queryByTestId(`${ids.importSummary}.invoices-stale`),
+    ).toBeNull();
+
+    fireEvent.press(screen.getByTestId(`${ids.importRow}.3.check`));
+
+    expect(
+      screen.getByTestId(`${ids.importSummary}.invoices-stale`),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD not hide the list while refreshing (spec 049)", async () => {
+    const view = setup();
+    mutations.validate.value.data = NO_ISSUES;
+    await toReview();
+
+    fireEvent.press(screen.getByTestId(ids.importRefresh));
+    mutations.validate.value.isFetching = true;
+    view.rerender(<ImportWizard {...params} />);
+
+    expect(screen.getByTestId(`${ids.importRow}.2`)).toBeOnTheScreen();
+    expect(screen.getByTestId(ids.importRefresh)).toHaveTextContent(
+      /financial.import.review.refresh.refreshing/,
+    );
+  });
+
+  it("SHOULD render one total pair per currency (spec 049)", async () => {
+    setup();
+    mutations.validate.value.data = NO_ISSUES;
+    await pickFile(MIXED);
+    fireEvent.press(screen.getByTestId(ids.importContinue));
+    fireEvent.press(screen.getByTestId(ids.importContinue));
+    fireEvent.press(screen.getByTestId(ids.importContinue));
+
+    const income = screen.getByTestId(`${ids.importGroup}.card.0.income`);
+
+    // The en-US mock renders BRL as R$ and USD as $ (no conversion, one line each).
+    expect(income).toHaveTextContent(/R\$12[.,]00/);
+    expect(income).toHaveTextContent(/\$20[.,]00/);
+  });
+
+  it("SHOULD show the group totals on compact (spec 049)", async () => {
+    setup({}, "compact");
+    mutations.validate.value.data = NO_ISSUES;
+    await toReview();
+
+    expect(
+      screen.getByTestId(`${ids.importGroup}.card.0.income`),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(`${ids.importGroup}.card.0.expenses`),
+    ).toBeOnTheScreen();
   });
 
   it("SHOULD block the import WHEN a row has an error, and say how many to fix", async () => {
@@ -728,6 +992,7 @@ describe("owner per row", () => {
     fireEvent.press(screen.getByTestId(ids.importContinue));
 
     expect(mutations.validate.value.mutate).toHaveBeenCalledWith({
+      requestId: 1,
       rows: [
         expect.objectContaining({
           accountId: "acc-fam",
