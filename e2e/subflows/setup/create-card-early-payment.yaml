@@ -1,0 +1,13 @@
+url: ${E2E_WEB_URL}
+---
+# Needs TOKEN, CARD_ID, ACCOUNT_ID, INVOICE_MONTH, DATE, DESCRIPTION and VALUE_CENTS from the caller.
+- runScript:
+    file: ../../scripts/setup/create-card-early-payment.js
+    env:
+      TOKEN: ${TOKEN}
+      CARD_ID: ${CARD_ID}
+      ACCOUNT_ID: ${ACCOUNT_ID}
+      INVOICE_MONTH: ${INVOICE_MONTH}
+      DATE: ${DATE}
+      DESCRIPTION: ${DESCRIPTION}
+      VALUE_CENTS: ${VALUE_CENTS}
