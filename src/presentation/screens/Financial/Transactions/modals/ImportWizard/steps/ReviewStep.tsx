@@ -244,6 +244,11 @@ function ReviewStep(props: { wizard: ImportWizardState }) {
     group: ReviewGroupView,
     index: number,
   ) {
+    // FR 11: only groups with a row on the current page get a heading.
+    if (!group.emptyInFilter && group.rows.length === 0) {
+      return null;
+    }
+
     const prefix = `${ids.importGroup}.${block}.${index}`;
 
     return (

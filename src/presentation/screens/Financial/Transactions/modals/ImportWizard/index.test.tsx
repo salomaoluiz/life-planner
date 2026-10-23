@@ -1,4 +1,5 @@
 import { BusinessError, ImportRowsInvalid } from "@domain/entities/errors";
+import { lightTheme } from "@presentation/theme/provider";
 
 import {
   category,
@@ -792,6 +793,97 @@ describe("step 4: review and import", () => {
     expect(
       screen.getByTestId(`${ids.importGroup}.card.0.expenses`),
     ).toBeOnTheScreen();
+  });
+
+  it("SHOULD show the stale notice and the error note together on compact (spec 049)", async () => {
+    setup({}, "compact");
+    mutations.validate.value.data = {
+      duplicates: [],
+      errors: [{ code: "CURRENCY_MISMATCH", line: 4, message: "x" }],
+    };
+    await toReview();
+
+    fireEvent.press(screen.getByTestId(`${ids.importRow}.2.check`));
+
+    expect(
+      screen.getByTestId(`${ids.importRow}.2.check`).props.accessibilityState
+        .checked,
+    ).toBe(false);
+    expect(screen.getByTestId(ids.importStale)).toHaveTextContent(
+      /financial\.import\.review\.refresh\.stale/,
+    );
+    expect(screen.getByTestId(ids.importStale).props.accessibilityRole).toBe(
+      "alert",
+    );
+    expect(screen.getByTestId(ids.importFooterNote)).toHaveTextContent(
+      /financial\.import\.review\.footerErrors_one/,
+    );
+  });
+
+  it("SHOULD disable the compact Refresh while the first check runs (spec 049)", async () => {
+    setup({}, "compact");
+    mutations.validate.value.isFetching = true;
+    await toReview();
+
+    expect(screen.getByTestId(ids.importRefresh)).toBeDisabled();
+  });
+
+  it("SHOULD explain the failed refresh in the footer WHEN the selection is fresh (spec 049)", async () => {
+    const view = setup();
+    mutations.validate.value.data = NO_ISSUES;
+    await toReview();
+
+    fireEvent.press(screen.getByTestId(ids.importRefresh));
+    mutations.validate.value.status = "error";
+    mutations.validate.value.error = new BusinessError();
+    view.rerender(<ImportWizard {...params} />);
+
+    expect(screen.getByTestId(ids.importFooterNote)).toHaveTextContent(
+      /financial\.import\.review\.refresh\.blocked/,
+    );
+    expect(screen.getByTestId(ids.importSubmit)).toBeDisabled();
+  });
+
+  it("SHOULD keep the unmatched values note red on step 3 (spec 049)", async () => {
+    setup();
+    await toValues();
+
+    expect(screen.getByTestId(ids.importFooterNote)).toHaveStyle({
+      color: lightTheme.colors.expense,
+    });
+  });
+
+  it("SHOULD hide a group heading WHILE none of its rows is on the page (spec 049)", async () => {
+    setup();
+    mutations.validate.value.data = NO_ISSUES;
+    const many = [
+      "Data;Histórico;Valor;Categoria;Cartão",
+      ...Array.from(
+        { length: 150 },
+        (_, index) => `02/10/2026;Conta ${index};-1,00;Mercado;`,
+      ),
+      ...Array.from(
+        { length: 5 },
+        (_, index) => `03/10/2026;Cartão ${index};-1,00;Mercado;Visa`,
+      ),
+      "",
+    ].join("\r\n");
+
+    await pickFile(many);
+    fireEvent.press(screen.getByTestId(ids.importContinue));
+    await chooseOption(`${ids.importFixed}.accountOrCard`, "account:acc-1");
+    fireEvent.press(screen.getByTestId(ids.importContinue));
+    fireEvent.press(screen.getByTestId(ids.importContinue));
+
+    // The first 100 rows are all account rows: the card group has no visible row yet.
+    expect(
+      screen.getByTestId(`${ids.importGroup}.account.0`),
+    ).toBeOnTheScreen();
+    expect(screen.queryByTestId(`${ids.importGroup}.card.0`)).toBeNull();
+
+    fireEvent.press(screen.getByTestId(ids.importShowMore));
+
+    expect(screen.getByTestId(`${ids.importGroup}.card.0`)).toBeOnTheScreen();
   });
 
   it("SHOULD say to refresh WHEN the selection changed on wide (spec 049)", async () => {
