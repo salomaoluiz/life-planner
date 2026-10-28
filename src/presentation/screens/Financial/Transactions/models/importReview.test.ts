@@ -2,13 +2,18 @@ import { BuiltRow } from "@application/csvImport/buildRows";
 
 import {
   canImport,
+  currencyTotals,
   filterRows,
+  groupKeyOf,
   importPayloads,
   invoiceLines,
   kindCounts,
   mergeValidation,
   revalidationRequest,
+  reviewBlockOf,
+  reviewGroups,
   reviewRows,
+  selectionKey,
   summarize,
 } from "./importReview";
 
@@ -259,5 +264,318 @@ describe("revalidation (spec 048)", () => {
       [3, true],
       [6, true],
     ]);
+  });
+});
+
+describe("review groups (spec 049)", () => {
+  const REFUND = "00000000-0000-4000-8000-000000000004";
+  const DISCOUNT = "00000000-0000-4000-8000-000000000003";
+  const EARLY = "00000000-0000-4000-8000-000000000005";
+  const PAYMENT = "00000000-0000-4000-8000-000000000002";
+  const NO_ISSUES = { duplicates: [], errors: [] };
+  const records = {
+    accounts: [
+      { currency: "BRL" as const, id: "a1", name: "Conta Corrente" },
+      { currency: "USD" as const, id: "a2", name: "Dólar" },
+    ],
+    cards: [
+      { currency: "BRL" as const, id: "card-1", name: "Nubank" },
+      { currency: "USD" as const, id: "card-2", name: "Inter" },
+    ],
+  };
+
+  // A built row of line `line`; the account/card is always explicit.
+  function row(line: number, overrides = {}): BuiltRow {
+    return {
+      display,
+      line,
+      payload: { ...payload(line), accountId: undefined, ...overrides },
+    };
+  }
+
+  it("SHOULD assign each row kind to its block", () => {
+    const rows = reviewRows(
+      [
+        row(2, { accountId: "a1" }),
+        row(3, { creditCardId: "card-1" }),
+        row(4, { categoryId: REFUND, creditCardId: "card-1", type: "INCOME" }),
+        row(5, {
+          categoryId: DISCOUNT,
+          creditCardId: "card-1",
+          type: "INCOME",
+        }),
+        row(6, {
+          categoryId: EARLY,
+          creditCardId: "card-1",
+          paidFromAccountId: "a1",
+          type: "INCOME",
+        }),
+        row(7, {
+          categoryId: PAYMENT,
+          creditCardId: "card-1",
+          paidFromAccountId: "a1",
+        }),
+        row(8, { accountId: "a1", creditCardId: "card-1" }),
+        { display, error: "INVALID_DATE", line: 9 },
+      ],
+      NO_ISSUES,
+      {},
+    );
+
+    expect(rows.map(reviewBlockOf)).toEqual([
+      "account",
+      "card",
+      "card",
+      "card",
+      "card",
+      "account",
+      "card",
+      "account",
+    ]);
+  });
+
+  it("SHOULD group the account rows and the card rows by their record, in file order", () => {
+    const rows = reviewRows(
+      [
+        row(2, { accountId: "a1" }),
+        row(3, { accountId: "a1", type: "INCOME" }),
+        row(4, { creditCardId: "card-1" }),
+      ],
+      NO_ISSUES,
+      {},
+    );
+    const [account, card] = reviewGroups(rows, records);
+
+    expect([account.block, card.block]).toEqual(["account", "card"]);
+    expect(account.groups).toHaveLength(1);
+    expect(account.groups[0]).toMatchObject({
+      key: "account:a1",
+      name: "Conta Corrente",
+      total: 2,
+    });
+    expect(account.groups[0].rows.map((item) => item.line)).toEqual([2, 3]);
+    expect(card.groups[0]).toMatchObject({
+      key: "card:card-1",
+      name: "Nubank",
+      total: 1,
+    });
+    expect(groupKeyOf(rows[0], records)).toBe("account:a1");
+    expect(groupKeyOf(rows[2], records)).toBe("card:card-1");
+  });
+
+  it("SHOULD group an invoice payment under the paying account, or under Boleto", () => {
+    const rows = reviewRows(
+      [
+        row(2, {
+          categoryId: PAYMENT,
+          creditCardId: "card-1",
+          paidFromAccountId: "a1",
+        }),
+        row(3, { categoryId: PAYMENT, creditCardId: "card-1" }),
+      ],
+      NO_ISSUES,
+      {},
+    );
+    const [account] = reviewGroups(rows, records);
+
+    expect(account.groups.map((group) => group.key)).toEqual([
+      "account:a1",
+      "boleto",
+    ]);
+    expect(account.groups[1].nameKey).toBe("financial.import.review.boleto");
+  });
+
+  it("SHOULD put unresolved records and rows without a record in their own groups", () => {
+    const rows = reviewRows(
+      [
+        row(2, { accountId: "gone" }),
+        row(3, { creditCardId: "card-gone" }),
+        row(4, { accountId: "a1" }),
+        row(5, { categoryId: PAYMENT, creditCardId: "card-1" }),
+        { display, error: "ACCOUNT_OR_CARD_MISSING", line: 6 },
+      ],
+      NO_ISSUES,
+      {},
+    );
+    const [account, card] = reviewGroups(rows, records);
+
+    expect(account.groups.map((group) => group.key)).toEqual([
+      "account:a1",
+      "missing-account",
+      "boleto",
+      "none",
+    ]);
+    expect(account.groups[3].nameKey).toBe(
+      "financial.import.review.groups.noRecord",
+    );
+    expect(card.groups[0]).toMatchObject({
+      key: "missing-card",
+      nameKey: "financial.import.review.groups.noCard",
+    });
+  });
+
+  it("SHOULD order the records case- and accent-insensitively", () => {
+    const named = {
+      accounts: [
+        { currency: "BRL" as const, id: "a1", name: "álcool" },
+        { currency: "BRL" as const, id: "a2", name: "Banco" },
+        { currency: "BRL" as const, id: "a3", name: "zebra" },
+      ],
+      cards: [],
+    };
+    const rows = reviewRows(
+      [
+        row(2, { accountId: "a3" }),
+        row(3, { accountId: "a1" }),
+        row(4, { accountId: "a2" }),
+      ],
+      NO_ISSUES,
+      {},
+    );
+
+    expect(
+      reviewGroups(rows, named)[0].groups.map((group) => group.name),
+    ).toEqual(["álcool", "Banco", "zebra"]);
+  });
+
+  it("SHOULD subtotal only the checked rows without an error, per currency", () => {
+    const rows = reviewRows(
+      [
+        row(2, { accountId: "a1", type: "EXPENSE", value: 1000 }),
+        row(3, { accountId: "a1", type: "INCOME", value: 1200 }),
+        row(4, { accountId: "a1", type: "EXPENSE", value: 500 }),
+        row(5, { accountId: "a1", type: "INCOME", value: 700 }),
+      ],
+      {
+        duplicates: [],
+        errors: [{ code: "CURRENCY_MISMATCH", line: 5, message: "x" }],
+      },
+      { 4: false },
+    );
+    const [account] = reviewGroups(rows, records);
+    const group = account.groups[0];
+
+    expect(group.selected).toBe(3);
+    expect(group.total).toBe(4);
+    expect(group.unchecked).toBe(1);
+    expect(group.income).toEqual([{ cents: 1200, currency: "BRL" }]);
+    expect(group.expenses).toEqual([{ cents: 1000, currency: "BRL" }]);
+    expect(account).toMatchObject({ selected: 3, total: 4 });
+  });
+
+  it("SHOULD count a checked duplicate and leave an unchecked one out", () => {
+    const builtRows = [
+      row(2, { accountId: "a1", type: "EXPENSE", value: 1000 }),
+      row(3, { accountId: "a1", type: "EXPENSE", value: 500 }),
+    ];
+    const duplicate = { duplicates: [3], errors: [] };
+    const unchecked = reviewGroups(
+      reviewRows(builtRows, duplicate, {}),
+      records,
+    );
+    const checked = reviewGroups(
+      reviewRows(builtRows, duplicate, { 3: true }),
+      records,
+    );
+
+    expect(unchecked[0].groups[0].expenses).toEqual([
+      { cents: 1000, currency: "BRL" },
+    ]);
+    expect(checked[0].groups[0].expenses).toEqual([
+      { cents: 1500, currency: "BRL" },
+    ]);
+  });
+
+  it("SHOULD keep one pair per currency, BRL first, without converting", () => {
+    const rows = reviewRows(
+      [
+        row(2, {
+          categoryId: REFUND,
+          creditCardId: "card-1",
+          type: "INCOME",
+          value: 34500,
+        }),
+        row(3, {
+          categoryId: REFUND,
+          creditCardId: "card-1",
+          currency: "USD",
+          type: "INCOME",
+          value: 2000,
+        }),
+        row(4, {
+          creditCardId: "card-1",
+          currency: "USD",
+          type: "EXPENSE",
+          value: 8715,
+        }),
+      ],
+      NO_ISSUES,
+      {},
+    );
+    const [, card] = reviewGroups(rows, records);
+    const group = card.groups[0];
+
+    expect(group.income.map((total) => total.currency)).toEqual(["BRL", "USD"]);
+    expect(group.expenses).toEqual([{ cents: 8715, currency: "USD" }]);
+    expect(card.income.map((total) => total.currency)).toEqual(["BRL", "USD"]);
+  });
+
+  it("SHOULD use the record currency WHEN the row has none", () => {
+    const rows = reviewRows(
+      [
+        row(2, {
+          categoryId: REFUND,
+          creditCardId: "card-2",
+          type: "INCOME",
+          value: 2000,
+        }),
+      ],
+      NO_ISSUES,
+      {},
+    );
+
+    expect(reviewGroups(rows, records)[1].groups[0].income).toEqual([
+      { cents: 2000, currency: "USD" },
+    ]);
+    expect(reviewGroups([], records)).toEqual([
+      {
+        block: "account",
+        expenses: [],
+        groups: [],
+        income: [],
+        selected: 0,
+        total: 0,
+      },
+      {
+        block: "card",
+        expenses: [],
+        groups: [],
+        income: [],
+        selected: 0,
+        total: 0,
+      },
+    ]);
+  });
+
+  it("SHOULD name the checked lines WHEN the selection changes", () => {
+    const first = reviewRows(built, validation, {});
+    const changed = reviewRows(built, validation, { 2: false, 3: true });
+
+    expect(selectionKey(changed)).toBe("3,4,5");
+    expect(
+      selectionKey(reviewRows(built, validation, { 3: false, 6: false })),
+    ).toBe(selectionKey(first));
+  });
+
+  it("SHOULD total income and expenses per currency", () => {
+    const rows = reviewRows(
+      [row(2, { accountId: "a1", type: "EXPENSE", value: 1000 })],
+      NO_ISSUES,
+      {},
+    );
+
+    expect(currencyTotals(rows, records)).toEqual({
+      BRL: { expenses: 1000, income: 0 },
+    });
   });
 });

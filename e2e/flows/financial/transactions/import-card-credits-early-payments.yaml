@@ -80,23 +80,44 @@ onFlowComplete:
     timeout: 20000
 - tapOn:
     id: "financial.import.filter-ERRORS"
+# Spec 049: the rows sit under the block heading; the filters stay above.
+- swipe:
+    start: 45%, 70%
+    end: 45%, 30%
 - extendedWaitUntil:
     visible:
       id: "financial.import.row.5.error"
     timeout: 20000
-# Checking the duplicate checks the invoices again with it: the invoice is 400,00 and the error goes away.
+- swipe:
+    start: 45%, 30%
+    end: 45%, 70%
+- swipe:
+    start: 45%, 30%
+    end: 45%, 70%
 - tapOn:
     id: "financial.import.filter-DUPLICATES"
+- swipe:
+    start: 45%, 70%
+    end: 45%, 30%
+- swipe:
+    start: 45%, 70%
+    end: 45%, 30%
 - extendedWaitUntil:
     visible:
       id: "financial.import.row.4.duplicate"
     timeout: 20000
 - tapOn:
     id: "financial.import.row.4.check"
-# The footer no longer asks to fix an error.
+# Spec 049: the check no longer recalculates by itself; the user asks for it.
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.stale"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.refresh"
 - extendedWaitUntil:
     notVisible:
-      id: "financial.import.footer-note"
+      id: "financial.import.stale"
     timeout: 20000
 - tapOn:
     id: "financial.import.submit"
