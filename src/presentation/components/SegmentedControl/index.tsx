@@ -8,6 +8,8 @@ export interface SegmentedControlProps {
   accessibilityLabel: string;
   disabled?: boolean;
   onChange: (value: string) => void;
+  // Called when the already selected segment is pressed again (e.g. to reopen the Custom period sheet)
+  onSelectedPress?: (value: string) => void;
   options: { label: string; tone?: SegmentTone; value: string }[];
   testID?: string;
   value: string;
@@ -73,7 +75,11 @@ function SegmentedControl(props: SegmentedControlProps) {
             focusRadius={radius.sm}
             key={option.value}
             minTouchTarget={false}
-            onPress={() => !selected && props.onChange(option.value)}
+            onPress={() =>
+              selected
+                ? props.onSelectedPress?.(option.value)
+                : props.onChange(option.value)
+            }
             selected={selected}
             style={[styles.segment, selected && styles.selected]}
             testID={testID && `${testID}-${option.value}`}

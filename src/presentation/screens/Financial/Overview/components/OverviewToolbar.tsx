@@ -52,6 +52,7 @@ function OverviewToolbar(props: { vm: OverviewViewModel }) {
     <SegmentedControl
       accessibilityLabel={t("financial.overview.period.custom")}
       onChange={vm.onPresetChange}
+      onSelectedPress={vm.onPresetReselect}
       options={PRESETS.map((value) => ({
         label: t(PRESET_KEYS[value]),
         value,

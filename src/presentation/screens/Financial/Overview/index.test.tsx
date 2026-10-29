@@ -223,3 +223,11 @@ it("SHOULD list income, expense and result one per line for the focused month", 
   );
   expect(screen.getByTestId(`${id}-result`).props.children).toMatch(/5[.,]00/);
 });
+
+it("SHOULD reopen the custom period WHEN Custom is pressed while selected", () => {
+  setup({ preset: "CUSTOM" });
+
+  fireEvent.press(screen.getByTestId("financial.overview.period-CUSTOM"));
+  expect(vmStub.onPresetReselect).toHaveBeenCalledWith("CUSTOM");
+  expect(vmStub.onPresetChange).not.toHaveBeenCalled();
+});

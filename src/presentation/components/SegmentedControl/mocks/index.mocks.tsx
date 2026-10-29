@@ -7,13 +7,15 @@ const options = [
   { label: "Income", tone: "income" as const, value: "income" },
 ];
 const onChange = jest.fn();
+const onSelectedPress = jest.fn();
 
-function setup(value = "expense", disabled = false) {
+function setup(value = "expense", disabled = false, withSelectedPress = false) {
   render(
     <SegmentedControl
       accessibilityLabel="Type"
       disabled={disabled}
       onChange={onChange}
+      onSelectedPress={withSelectedPress ? onSelectedPress : undefined}
       options={options}
       testID="seg"
       value={value}
@@ -40,4 +42,4 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-export { onChange, setup, setupAccent };
+export { onChange, onSelectedPress, setup, setupAccent };
