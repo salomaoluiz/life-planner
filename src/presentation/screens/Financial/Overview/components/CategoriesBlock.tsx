@@ -11,11 +11,13 @@ import {
 import { formatAmount } from "@components/AmountText/formatAmount";
 import type { CurrencyCode } from "@domain/entities/financial/Currency";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
+import { useBreakpoint } from "@presentation/theme";
 
 import { OverviewViewModel } from "../hooks/useOverviewViewModel";
 import foldBars from "../models/barRows";
 import blockState from "../models/blockState";
-import { percentOf } from "../models/overviewFormat";
+import { averagePerMonth, percentOf } from "../models/overviewFormat";
+import { monthsInPeriod } from "../models/overviewPeriod";
 import useStyles from "../styles";
 import overviewTestIds from "../testIds";
 
@@ -26,6 +28,8 @@ function CategoriesBlock(props: { vm: OverviewViewModel }) {
   const { t } = useTranslation();
   const localeTag = useLocaleTag();
   const currency = vm.currency as CurrencyCode;
+  const wide = useBreakpoint() !== "compact";
+  const months = monthsInPeriod(vm.period);
   function money(cents: number) {
     return formatAmount(cents, localeTag, currency);
   }
@@ -37,8 +41,27 @@ function CategoriesBlock(props: { vm: OverviewViewModel }) {
       ? "financial.overview.categories.typeIncome"
       : "financial.overview.categories.typeExpense",
   );
+  // Spec 052 FR 17-19: a column on the wide layout, a second line under the name on mobile.
+  function averageOf(value: number): string | undefined {
+    const average = averagePerMonth(value, months);
+
+    if (average === undefined) {
+      return undefined;
+    }
+
+    return wide
+      ? money(average)
+      : t("financial.overview.legend.average", { value: money(average) });
+  }
+  const columns = {
+    average: t("financial.overview.legend.averagePerMonth"),
+    category: t("financial.overview.legend.category"),
+    percent: t("financial.overview.legend.percent"),
+    total: t("financial.overview.legend.total"),
+  };
   const rows = foldBars({
     archivedSuffix: t("financial.overview.categories.archived"),
+    averageOf,
     format: money,
     items: items.map((item) => ({
       archived: item.archived,
@@ -67,6 +90,12 @@ function CategoriesBlock(props: { vm: OverviewViewModel }) {
     }
   }
 
+  const note = t("financial.overview.categories.cardNote");
+  const footnote =
+    months > 1
+      ? `${note} ${t("financial.overview.legend.note", { months })}`
+      : note;
+
   return (
     <ChartCard
       actions={
@@ -91,7 +120,7 @@ function CategoriesBlock(props: { vm: OverviewViewModel }) {
       }
       emptyText={t("financial.overview.empty.title")}
       errorText={t("financial.overview.blockError")}
-      footnote={t("financial.overview.categories.cardNote")}
+      footnote={footnote}
       onRetry={vm.categoryTotals.refetch}
       retryLabel={t("financial.overview.retry")}
       state={vm.noTransactions ? "empty" : blockState(vm.categoryTotals)}
@@ -128,6 +157,7 @@ function CategoriesBlock(props: { vm: OverviewViewModel }) {
         </View>
       ) : null}
       <PieBreakdown
+        columns={wide && months > 1 ? columns : undefined}
         onPress={onPress}
         openLabel={t("financial.overview.a11y.open")}
         rows={rows}
