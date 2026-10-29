@@ -3,6 +3,7 @@ import { EMPTY_FILTERS } from "@screens/Financial/Transactions/models/transactio
 import foldBars, { OTHER_ID } from "./barRows";
 import toDrillThroughFilters from "./drillThrough";
 import {
+  averagePerMonth,
   defaultCurrency,
   deltaOf,
   formatTick,
@@ -12,6 +13,7 @@ import {
 import {
   defaultGranularity,
   granularityOptions,
+  monthsInPeriod,
   periodForPreset,
   validateCustomPeriod,
 } from "./overviewPeriod";
@@ -209,5 +211,23 @@ describe("toDrillThroughFilters", () => {
     );
 
     expect(result.tagIds).toEqual(["t1"]);
+  });
+});
+
+describe("monthsInPeriod", () => {
+  it("SHOULD count the calendar months the period touches", () => {
+    expect(monthsInPeriod(periodForPreset("12M", "2026-10-20"))).toBe(12);
+    expect(monthsInPeriod(periodForPreset("3M", "2026-10-20"))).toBe(3);
+    expect(monthsInPeriod({ from: "2026-01-15", to: "2026-03-10" })).toBe(3);
+    expect(monthsInPeriod({ from: "2025-12-20", to: "2026-01-05" })).toBe(2);
+    expect(monthsInPeriod({ from: "2026-10-01", to: "2026-10-31" })).toBe(1);
+  });
+});
+
+describe("averagePerMonth", () => {
+  it("SHOULD be undefined for one month AND round the cents otherwise", () => {
+    expect(averagePerMonth(1000, 1)).toBeUndefined();
+    expect(averagePerMonth(1000, 3)).toBe(333);
+    expect(averagePerMonth(85121_50, 12)).toBe(709346);
   });
 });

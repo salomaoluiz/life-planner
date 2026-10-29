@@ -7,6 +7,11 @@ export interface Delta {
   tone: "bad" | "good" | "neutral";
 }
 
+// Average per month in cents (spec 052 FR 17/18); one month → no average (it would equal the total).
+function averagePerMonth(total: number, months: number): number | undefined {
+  return months <= 1 ? undefined : Math.round(total / months);
+}
+
 const SUPPORTED_ORDER = ["BRL", "USD", "EUR"];
 
 // Most accounts wins; a tie goes to the first in the supported order (spec 046 FR 3).
@@ -139,6 +144,7 @@ function percentOf(part: number, total: number, localeTag: string): string {
 }
 
 export {
+  averagePerMonth,
   defaultCurrency,
   deltaOf,
   formatBucketLabel,
