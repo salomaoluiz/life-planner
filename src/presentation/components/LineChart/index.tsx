@@ -4,7 +4,7 @@ import Svg, { Circle, G, Line, Path, Text as SvgText } from "react-native-svg";
 
 import { useKitTheme } from "@components/utils/useKitTheme";
 
-import { buildSegments, niceTicks, scaleY } from "./chartScale";
+import { axisWidth, buildSegments, niceTicks, scaleY } from "./chartScale";
 
 export interface LineChartPoint {
   /** Read by screen readers instead of the axis label (which may be empty for repeated labels) */
@@ -27,7 +27,8 @@ export interface LineChartProps {
   testID?: string;
 }
 
-const LEFT = 52;
+const MIN_LEFT = 52;
+const TICK_FONT = 11;
 const BOTTOM = 24;
 const TOP = 8;
 
@@ -37,15 +38,16 @@ function LineChart(props: LineChartProps) {
   const [width, setWidth] = useState(320);
   const height = props.height ?? 220;
   const { points } = props;
-  const plotWidth = Math.max(width - LEFT - 8, 1);
   const plotHeight = height - TOP - BOTTOM;
   const values = points.map((point) => point.value);
   const ticks = niceTicks(Math.min(0, ...values, 0), Math.max(0, ...values, 0));
+  const left = axisWidth(ticks.map(props.formatTick), TICK_FONT, MIN_LEFT);
+  const plotWidth = Math.max(width - left - 8, 1);
   const domain = { max: ticks[ticks.length - 1], min: ticks[0] };
   const xs = points.map((_, index) =>
     points.length <= 1
-      ? LEFT + plotWidth / 2
-      : LEFT + (index / (points.length - 1)) * plotWidth,
+      ? left + plotWidth / 2
+      : left + (index / (points.length - 1)) * plotWidth,
   );
   const coords = points.map((point, index) => ({
     x: xs[index],
@@ -65,7 +67,7 @@ function LineChart(props: LineChartProps) {
     overlay: {
       bottom: BOTTOM,
       flexDirection: "row",
-      left: LEFT,
+      left,
       position: "absolute",
       right: 8,
       top: TOP,
@@ -96,7 +98,7 @@ function LineChart(props: LineChartProps) {
               <Line
                 stroke={colors.surfaceRaised}
                 strokeWidth={1}
-                x1={LEFT}
+                x1={left}
                 x2={width - 8}
                 y1={y}
                 y2={y}
@@ -104,9 +106,9 @@ function LineChart(props: LineChartProps) {
               <SvgText
                 fill={colors.textSecondary}
                 fontFamily={fontFamily}
-                fontSize={11}
+                fontSize={TICK_FONT}
                 textAnchor="end"
-                x={LEFT - 6}
+                x={left - 6}
                 y={y + 4}
               >
                 {props.formatTick(tick)}
@@ -137,7 +139,7 @@ function LineChart(props: LineChartProps) {
             <SvgText
               fill={colors.textSecondary}
               fontFamily={fontFamily}
-              fontSize={11}
+              fontSize={TICK_FONT}
               key={`${point.label}-${index}`}
               textAnchor="middle"
               x={xs[index]}

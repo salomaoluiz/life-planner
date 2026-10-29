@@ -1,4 +1,10 @@
-import { buildSegments, niceTicks, scaleY, toPath } from "./chartScale";
+import {
+  axisWidth,
+  buildSegments,
+  niceTicks,
+  scaleY,
+  toPath,
+} from "./chartScale";
 
 it("SHOULD build round ticks that cover the data and the zero line", () => {
   expect(niceTicks(0, 950)).toEqual([0, 500, 1000]);
@@ -66,5 +72,16 @@ describe("buildSegments", () => {
       )[0].color,
     ).toBe("green");
     expect(buildSegments([], [], 0, "g", "r")).toEqual([]);
+  });
+});
+
+describe("axisWidth", () => {
+  it("SHOULD reserve the width of the longest label AND never go under the minimum", () => {
+    expect(axisWidth(["R$ 150 mil", "R$ 0"], 11, 52)).toBeGreaterThanOrEqual(
+      10 * 11 * 0.6,
+    );
+    expect(axisWidth(["R$ 150 mil"], 11, 52)).toBe(74);
+    expect(axisWidth(["0"], 11, 52)).toBe(52);
+    expect(axisWidth([], 11, 52)).toBe(52);
   });
 });
