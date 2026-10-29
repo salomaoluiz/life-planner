@@ -12,6 +12,7 @@ function useStyles(
   medium: boolean,
   wizard = false,
   fluid?: { height: number; width: number },
+  paneHeight?: number,
 ) {
   const { colors, radius, sizes, spacing } = useKitTheme();
   const wideForm = wide && form;
@@ -38,6 +39,7 @@ function useStyles(
     alignSelf: "center",
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
+    height: paneHeight,
     maxHeight: "90%",
     maxWidth,
     // Outer breathing room: the close button never touches the dialog border.

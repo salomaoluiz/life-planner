@@ -380,12 +380,14 @@ function FiltersModal(props: FiltersModalParams) {
             {situationSection()}
           </>
         }
+        leftPaneTestID={`${ids.filtersSheet}-pane-left`}
         right={
           <>
             {categoriesSection()}
             {tagsSection()}
           </>
         }
+        rightPaneTestID={`${ids.filtersSheet}-pane-right`}
         testID={ids.filtersSheet}
       />
     );
@@ -439,7 +441,7 @@ function FiltersModal(props: FiltersModalParams) {
       }
       footerStart={vm.wide ? clearButton : undefined}
       onClose={props.onClose}
-      presentation={"inline"}
+      paneScroll
       size={"form"}
       testID={ids.filtersSheet}
       title={t(
