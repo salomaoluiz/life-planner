@@ -105,3 +105,27 @@ it("SHOULD keep the system category key and excludeFromTotals from the model", a
   expect(result.systemKey).toBe("BALANCE_ADJUSTMENT");
   expect(result.excludeFromTotals).toBe(true);
 });
+
+it("SHOULD ignore an empty cache AND read the datasource (an empty list must never hide the transactions)", async () => {
+  spies.cache.get.mockReturnValue([]);
+  spies.financialTransactionDatasource.getTransactions.mockResolvedValueOnce([
+    mocks.firstTransaction,
+  ]);
+
+  const result = await setup();
+
+  expect(
+    spies.financialTransactionDatasource.getTransactions,
+  ).toHaveBeenCalledTimes(1);
+  expect(result).toHaveLength(1);
+});
+
+it("SHOULD NOT cache an empty result", async () => {
+  spies.cache.get.mockReturnValue(null);
+  spies.financialTransactionDatasource.getTransactions.mockResolvedValueOnce(
+    [],
+  );
+
+  expect(await setup()).toEqual([]);
+  expect(spies.cache.set).not.toHaveBeenCalled();
+});

@@ -3,15 +3,19 @@ import { EMPTY_FILTERS } from "@screens/Financial/Transactions/models/transactio
 import foldBars, { OTHER_ID } from "./barRows";
 import toDrillThroughFilters from "./drillThrough";
 import {
+  averagePerMonth,
+  compactAmount,
   defaultCurrency,
   deltaOf,
   formatTick,
   keepOrDefault,
   percentOf,
+  tileColumns,
 } from "./overviewFormat";
 import {
   defaultGranularity,
   granularityOptions,
+  monthsInPeriod,
   periodForPreset,
   validateCustomPeriod,
 } from "./overviewPeriod";
@@ -173,6 +177,22 @@ describe("foldBars", () => {
     expect(rows[1]).toMatchObject({ id: "untagged", muted: true });
   });
 
+  it("SHOULD add the average to every row, Other included, AND none WHEN the callback returns undefined", () => {
+    const rows = foldBars({
+      ...base,
+      averageOf: (value) => `avg ${value / 3}`,
+      extra: [{ id: "untagged", name: "No tag", value: 300 }],
+      items,
+    });
+
+    expect(rows[0].average).toBe("avg 300");
+    expect(rows[8]).toMatchObject({ average: "avg 33.333333333333336" });
+    expect(rows[9].average).toBe("avg 100");
+    expect(
+      foldBars({ ...base, averageOf: () => undefined, items })[0].average,
+    ).toBeUndefined();
+  });
+
   it("SHOULD drop zero items", () => {
     expect(
       foldBars({ ...base, items: [{ id: "z", name: "Zero", value: 0 }] }),
@@ -209,5 +229,41 @@ describe("toDrillThroughFilters", () => {
     );
 
     expect(result.tagIds).toEqual(["t1"]);
+  });
+});
+
+describe("monthsInPeriod", () => {
+  it("SHOULD count the calendar months the period touches", () => {
+    expect(monthsInPeriod(periodForPreset("12M", "2026-10-20"))).toBe(12);
+    expect(monthsInPeriod(periodForPreset("3M", "2026-10-20"))).toBe(3);
+    expect(monthsInPeriod({ from: "2026-01-15", to: "2026-03-10" })).toBe(3);
+    expect(monthsInPeriod({ from: "2025-12-20", to: "2026-01-05" })).toBe(2);
+    expect(monthsInPeriod({ from: "2026-10-01", to: "2026-10-31" })).toBe(1);
+  });
+});
+
+describe("averagePerMonth", () => {
+  it("SHOULD be undefined for one month AND round the cents otherwise", () => {
+    expect(averagePerMonth(1000, 1)).toBeUndefined();
+    expect(averagePerMonth(1000, 3)).toBe(333);
+    expect(averagePerMonth(85121_50, 12)).toBe(709346);
+  });
+});
+
+describe("tileColumns", () => {
+  it("SHOULD give 4 columns only WHEN each tile gets 220 px, otherwise 2 (never 3 + 1)", () => {
+    expect(tileColumns(1000, 12)).toBe(4);
+    expect(tileColumns(4 * 220 + 3 * 12, 12)).toBe(4);
+    expect(tileColumns(4 * 220 + 3 * 12 - 1, 12)).toBe(2);
+    expect(tileColumns(700, 12)).toBe(2);
+    expect(tileColumns(260, 12)).toBe(2);
+  });
+});
+
+describe("compactAmount", () => {
+  it("SHOULD use the compact notation of the locale", () => {
+    expect(compactAmount(31248055, "pt-BR", "BRL")).toMatch(/mil/);
+    expect(compactAmount(31248055, "en-US", "BRL")).toMatch(/K/);
+    expect(compactAmount(123456789, "pt-BR", "BRL")).toMatch(/mi/);
   });
 });

@@ -114,3 +114,41 @@ it("SHOULD open the filters modal WITHOUT the period section AND the custom peri
     screen.getByTestId("financial.overview.custom-sheet"),
   ).toBeOnTheScreen();
 });
+
+it("SHOULD show the monthly average of every category and tag row WHEN the period spans months", () => {
+  setup();
+
+  expect(
+    screen.getByTestId("financial.overview.category-row-food-average"),
+  ).toBeOnTheScreen();
+  expect(
+    screen.getByTestId("financial.overview.tag-row-t1-average"),
+  ).toBeOnTheScreen();
+  expect(
+    screen.getByTestId("financial.overview.tag-row-untagged-average"),
+  ).toBeOnTheScreen();
+  expect(screen.getAllByText("financial.overview.legend.total")).toHaveLength(
+    2,
+  );
+});
+
+it("SHOULD show the average as a second line on mobile instead of a column", () => {
+  setup({}, "compact");
+
+  expect(
+    screen.getByTestId("financial.overview.category-row-food-average").props
+      .children,
+  ).toContain("financial.overview.legend.average");
+  expect(screen.queryByText("financial.overview.legend.total")).toBeNull();
+});
+
+it("SHOULD show no average WHEN the period touches a single month", () => {
+  setup({ period: { from: "2026-10-01", to: "2026-10-31" } });
+
+  expect(
+    screen.queryByTestId("financial.overview.category-row-food-average"),
+  ).toBeNull();
+  expect(
+    screen.queryByTestId("financial.overview.tag-row-t1-average"),
+  ).toBeNull();
+});

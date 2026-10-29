@@ -726,6 +726,14 @@ const financial = {
         "{{label}}: income {{income}}, expenses {{expense}}, result {{result}}",
       title: "Income × expenses",
     },
+    legend: {
+      average: "Avg {{value}}/mo",
+      averagePerMonth: "Avg/month",
+      category: "Category",
+      note: "Average per month = total ÷ {{months}} months of the period.",
+      percent: "%",
+      total: "Total",
+    },
     period: {
       "3m": "3M",
       "6m": "6M",

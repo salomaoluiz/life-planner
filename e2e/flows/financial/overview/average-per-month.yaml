@@ -1,0 +1,66 @@
+url: ${E2E_WEB_URL}
+name: financial/overview/average-per-month
+tags:
+  - financial
+  - spec-052
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Overview Expense
+      KEY: EXPENSE_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: ${output.EXPENSE_NAME}
+      VALUE_CENTS: "2500"
+      PAID: "true"
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+- tapOn:
+    id: "tab-finances"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.screen"
+    timeout: 20000
+- tapOn:
+    id: "navigation-rail-financial-overview"
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.screen"
+    timeout: 20000
+# A 3-month period shows the average per month next to the category total (spec 052)
+- tapOn:
+    id: "financial.overview.period-3M"
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.tile-balance"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.category-row-${output.EXPENSE_CATEGORY_ID}-average"
+    timeout: 20000

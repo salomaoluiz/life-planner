@@ -62,6 +62,18 @@ function granularityOptions(from: string, to: string): GranularityOption[] {
   ];
 }
 
+// The calendar months the period touches (spec 052 FR 17): a partial month counts as one.
+function monthsInPeriod(period: OverviewPeriod): number {
+  const from = parse(period.from);
+  const to = parse(period.to);
+
+  return (
+    (to.getFullYear() - from.getFullYear()) * 12 +
+    (to.getMonth() - from.getMonth()) +
+    1
+  );
+}
+
 function parse(key: string): Date {
   const [year, month, day] = key.split("-").map(Number);
 
@@ -113,6 +125,7 @@ export {
   defaultGranularity,
   endOfCurrentMonth,
   granularityOptions,
+  monthsInPeriod,
   periodForPreset,
   validateCustomPeriod,
 };

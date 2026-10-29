@@ -726,6 +726,14 @@ const financial = {
         "{{label}}: receitas {{income}}, despesas {{expense}}, resultado {{result}}",
       title: "Receitas × despesas",
     },
+    legend: {
+      average: "Média {{value}}/mês",
+      averagePerMonth: "Média/mês",
+      category: "Categoria",
+      note: "Média por mês = total ÷ {{months}} meses do período.",
+      percent: "%",
+      total: "Total",
+    },
     period: {
       "3m": "3M",
       "6m": "6M",

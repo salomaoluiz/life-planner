@@ -18,17 +18,20 @@ async function getTransactions(ownerIds: Params, datasources: Datasources) {
 
   let transactionsModel: TransactionModel[] = [];
 
-  if (cached) {
+  // An empty list is never trusted: it is what a call without owners (or a failed write) leaves behind, and it hid every transaction for an hour.
+  if (cached && cached.length > 0) {
     transactionsModel = cached.map((cache) => TransactionModel.fromJSON(cache));
   } else {
     transactionsModel =
       await datasources.financialTransactionDatasource.getTransactions(
         ownerIds,
       );
-    cache.set<Record<string, unknown>[]>(
-      CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA,
-      transactionsModel.map((financial) => financial.toJSON()),
-    );
+    if (transactionsModel.length > 0) {
+      cache.set<Record<string, unknown>[]>(
+        CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA,
+        transactionsModel.map((financial) => financial.toJSON()),
+      );
+    }
   }
 
   return transactionsModel.map((transaction) =>

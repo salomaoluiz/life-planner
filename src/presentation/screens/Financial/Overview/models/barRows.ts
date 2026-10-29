@@ -16,6 +16,8 @@ export const UNTAGGED_ID = "untagged";
 // `extra` rows (for example "No tag") stay after the folded ones and are never pressable.
 function foldBars(params: {
   archivedSuffix?: string;
+  // The average per month of a row total, already formatted; `undefined` → no average (spec 052)
+  averageOf?: (value: number) => string | undefined;
   extra?: { id: string; name: string; value: number }[];
   format: (value: number) => string;
   items: BarItem[];
@@ -39,6 +41,7 @@ function foldBars(params: {
     muted = false,
   ): BarListRow {
     return {
+      average: params.averageOf?.(item.value),
       id: item.id,
       label: item.name,
       muted,

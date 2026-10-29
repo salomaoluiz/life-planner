@@ -13,6 +13,17 @@ export interface Tick {
   y: number;
 }
 
+// The left margin of the chart: the width of the longest axis label (about 0.6 em per character) plus a gap, so no label is clipped.
+export function axisWidth(
+  labels: string[],
+  fontSize: number,
+  min: number,
+): number {
+  const longest = Math.max(0, ...labels.map((label) => label.length));
+
+  return Math.max(min, Math.ceil(longest * fontSize * 0.6 + 8));
+}
+
 // One segment per pair of points, split where the line crosses zero so each part takes the colour of its side;
 // the segments that lead to a projected point are dashed.
 export function buildSegments(
