@@ -25,7 +25,7 @@ function FinancialLayoutContent() {
   const actions = useFinancialHeaderActionsNode();
 
   return (
-    <Screen testID={"financial-layout"}>
+    <Screen maxWidth={vm.maxWidth} testID={"financial-layout"}>
       <ScreenHeader
         actions={actions}
         onTitlePress={vm.onTitlePress}

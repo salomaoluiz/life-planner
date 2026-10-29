@@ -2,7 +2,7 @@ import { StyleSheet } from "react-native";
 
 import { useTheme } from "@presentation/theme";
 
-const RAIL_WIDTH = 240;
+export const RAIL_WIDTH = 240;
 const ROW_ICON_SIZE = 22;
 const CHILD_MIN_HEIGHT = 40;
 
