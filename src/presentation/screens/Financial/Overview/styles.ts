@@ -11,7 +11,6 @@ function useStyles() {
       actions: { alignItems: "center", flexDirection: "row", gap: spacing.sm },
       blocks: { gap: spacing.md },
       center: { width: "100%" },
-      column: { flexBasis: 420, flexGrow: 1, flexShrink: 1 },
       content: { gap: spacing.md, paddingBottom: spacing.xxl },
       dates: { gap: spacing.sm },
       detail: { gap: spacing.xxs },
@@ -36,7 +35,6 @@ function useStyles() {
       tiles: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
       tileTwo: { flexBasis: "48%", flexGrow: 1, minWidth: 200 },
       toolbar: { gap: spacing.sm },
-      twoColumns: { flexDirection: "row", flexWrap: "wrap", gap: spacing.md },
     }),
   };
 }

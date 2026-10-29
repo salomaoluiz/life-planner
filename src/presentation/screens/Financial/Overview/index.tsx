@@ -30,7 +30,6 @@ function FinancialOverview() {
   const localeTag = useLocaleTag();
   const breakpoint = useBreakpoint();
   const compact = breakpoint === "compact";
-  const wide = breakpoint === "expanded";
   const { theme } = useTheme();
   const [tilesWidth, setTilesWidth] = useState(0);
   const columns = tileColumns(tilesWidth, theme.sizes.spacing.sm);
@@ -155,14 +154,8 @@ function FinancialOverview() {
             ) : (
               <>
                 <BalanceBlock compact={compact} vm={vm} />
-                <View style={wide ? styles.twoColumns : styles.blocks}>
-                  <View style={wide ? styles.column : undefined}>
-                    <IncomeExpenseBlock compact={compact} vm={vm} />
-                  </View>
-                  <View style={wide ? styles.column : undefined}>
-                    <CategoriesBlock vm={vm} />
-                  </View>
-                </View>
+                <IncomeExpenseBlock compact={compact} vm={vm} />
+                <CategoriesBlock vm={vm} />
                 <TagsBlock vm={vm} />
               </>
             )}

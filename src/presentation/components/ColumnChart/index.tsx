@@ -35,13 +35,14 @@ const LEFT = 52;
 const BOTTOM = 24;
 const TOP = 8;
 // Room above the plot for the "Today" label, so it never covers a column
-const TODAY_ROOM = 22;
+const TODAY_ROOM = 30;
 
 // Income × expenses per bucket (spec 046 FR 13): two columns per group on one axis from zero; the projected part is lighter.
 function ColumnChart(props: ColumnChartProps) {
   const { colors, typography } = useKitTheme();
   const [width, setWidth] = useState(320);
-  const height = props.height ?? 220;
+  // The Today label needs its own strip, so the chart grows instead of squeezing the plot
+  const height = (props.height ?? 220) + (props.today ? TODAY_ROOM : 0);
   const plotWidth = Math.max(width - LEFT - 8, 1);
   const top = props.today ? TOP + TODAY_ROOM : TOP;
   const plotHeight = height - top - BOTTOM;
@@ -190,7 +191,7 @@ function ColumnChart(props: ColumnChartProps) {
         <TodayMarker
           bottom={BOTTOM}
           label={props.today.label}
-          labelTop={TOP}
+          labelTop={2}
           testID={props.testID && `${props.testID}-today`}
           top={top}
           x={LEFT + slot * props.today.index + slot / 2}
