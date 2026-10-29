@@ -131,8 +131,8 @@ it("SHOULD render the header with switcher, scope chips, summary and type contro
     transactionsTestIds.monthSummary,
     transactionsTestIds.typeFilter,
   ].forEach((id) => expect(screen.getByTestId(id)).toBeOnTheScreen());
-  // The CSV actions (spec 047) lead the toolbar.
-  expect(screen.getByTestId("transactions-toolbar").children).toHaveLength(6);
+  // The CSV actions moved to the page header (spec 050): the toolbar starts with the month switcher.
+  expect(screen.getByTestId("transactions-toolbar").children).toHaveLength(5);
 });
 
 it("SHOULD give every scope chip an id from its owner id and call onOwnerFilterChange", () => {
@@ -489,5 +489,72 @@ describe("filters (spec 045)", () => {
     expect(
       screen.getByTestId(transactionsTestIds.filtersApply),
     ).toBeOnTheScreen();
+  });
+});
+
+describe("floating new transaction button (spec 050)", () => {
+  it("SHOULD call onAddPress WHEN pressed, with the label as accessibility label", () => {
+    const onAddPress = jest.fn();
+    setup({ entries: makeEntries(), onAddPress });
+
+    const fab = screen.getByTestId(transactionsTestIds.fab);
+    expect(fab.props.accessibilityLabel).toBe("financial.transactions.fab");
+    fireEvent.press(fab);
+
+    expect(onAddPress).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ["loaded", { entries: makeEntries() }],
+    ["empty month", { entries: [], isEmptyMonth: true }],
+    ["filtered empty", { entries: [], isFilteredEmpty: true }],
+    ["error", { errorMessage: "boom" }],
+  ])("SHOULD show the FAB WHEN %s", (_name, overrides) => {
+    setup(overrides);
+
+    expect(screen.getByTestId(transactionsTestIds.fab)).toBeOnTheScreen();
+  });
+
+  it("SHOULD hide the FAB WHILE the first load skeleton shows", () => {
+    setup({ isLoading: true });
+
+    expect(screen.queryByTestId(transactionsTestIds.fab)).toBeNull();
+  });
+
+  it("SHOULD reserve 88 px at the end of the list on compact", () => {
+    setup({ entries: makeEntries() });
+
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId("flashList").props.contentContainerStyle,
+      ).paddingBottom,
+    ).toBe(88);
+  });
+
+  it("SHOULD reserve 120 px at the end of the list AND extend the FAB on wide", () => {
+    jest
+      .requireMock("@presentation/theme")
+      .useBreakpoint.mockReturnValue("expanded");
+    setup({ entries: makeEntries() });
+
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId("flashList").props.contentContainerStyle,
+      ).paddingBottom,
+    ).toBe(120);
+    expect(screen.getByText("financial.transactions.fab")).toBeOnTheScreen();
+    jest
+      .requireMock("@presentation/theme")
+      .useBreakpoint.mockReturnValue("compact");
+  });
+
+  it("SHOULD keep Import/Export out of the toolbar", () => {
+    setup({ entries: makeEntries() });
+
+    expect(
+      within(screen.getByTestId("transactions-toolbar")).queryByTestId(
+        transactionsTestIds.moreActions,
+      ),
+    ).toBeNull();
   });
 });

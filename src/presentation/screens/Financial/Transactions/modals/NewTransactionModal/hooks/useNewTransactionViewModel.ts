@@ -197,6 +197,8 @@ function useNewTransactionViewModel() {
     // A PROJECTED occurrence of a series is opened by series + number + its month (spec 034 FR 16).
     month?: string;
     occurrenceNumber?: string;
+    // The scope owner the form was opened from (spec 050); ignored when it is not a known owner.
+    ownerId?: string;
     recurrenceId?: string;
   }>();
   const isProjected = !!params.recurrenceId && !params.id;
@@ -359,7 +361,10 @@ function useNewTransactionViewModel() {
       accounts: accounts.data,
       card: uiModel.card(params.creditCardId),
       now: new Date(),
-      ownerId: personalOwnerId(owners.data) ?? owners.data[0].id,
+      ownerId:
+        owners.data.find((owner) => owner.id === params.ownerId)?.id ??
+        personalOwnerId(owners.data) ??
+        owners.data[0].id,
     });
   }, [
     uiModel,
@@ -369,6 +374,7 @@ function useNewTransactionViewModel() {
     existing,
     series,
     params.creditCardId,
+    params.ownerId,
   ]);
 
   const [edited, setEdited] = useState<TransactionFormState>();

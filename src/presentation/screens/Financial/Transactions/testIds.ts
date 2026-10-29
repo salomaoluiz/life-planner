@@ -37,6 +37,7 @@ const transactionsTestIds = {
   exportSources: "financial.export.sources",
   exportSubmit: "financial.export.submit",
   exportTo: "financial.export.period.to",
+  fab: "financial.transactions.fab",
   filteredEmpty: "financial.transactions.filtered-empty",
   filteredSummary: "financial.transactions.filtered-summary",
   filtersApply: "financial.transactions.filters.apply",

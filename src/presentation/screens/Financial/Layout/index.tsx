@@ -3,17 +3,31 @@ import { View } from "react-native";
 
 import { Screen, ScreenHeader } from "@components";
 
+import {
+  FinancialHeaderActionsProvider,
+  useFinancialHeaderActionsNode,
+} from "./headerActions";
 import { useFinancialLayoutViewModel } from "./hooks";
 import useStyles from "./styles";
 import layoutTestIds from "./testIds";
 
 function FinancialLayout() {
+  return (
+    <FinancialHeaderActionsProvider>
+      <FinancialLayoutContent />
+    </FinancialHeaderActionsProvider>
+  );
+}
+
+function FinancialLayoutContent() {
   const { styles } = useStyles();
   const vm = useFinancialLayoutViewModel();
+  const actions = useFinancialHeaderActionsNode();
 
   return (
     <Screen testID={"financial-layout"}>
       <ScreenHeader
+        actions={actions}
         onTitlePress={vm.onTitlePress}
         overline={vm.overline}
         testID={layoutTestIds.sectionPicker}

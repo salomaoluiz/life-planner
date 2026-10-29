@@ -8,6 +8,7 @@ import {
   ChipGroup,
   EmptyState,
   ErrorState,
+  Fab,
   GroupHeader,
   Icon,
   ReadOnlyNotice,
@@ -21,6 +22,7 @@ import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
 import { useBreakpoint } from "@presentation/theme";
+import { useFinancialHeaderActions } from "@screens/Financial/Layout/headerActions";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
 import AdjustmentSheet from "./components/AdjustmentSheet";
@@ -52,10 +54,10 @@ import transactionsTestIds from "./testIds";
 const SKELETON_ROWS = [0, 1, 2, 3, 4, 5];
 
 function FinancialTransactions() {
-  const { styles } = useStyles();
+  const wide = useBreakpoint() !== "compact";
+  const { styles } = useStyles(wide);
   const { t } = useTranslation();
   const localeTag = useLocaleTag();
-  const wide = useBreakpoint() !== "compact";
   const vm = useTransactionsViewModel();
   const adjustment = useAdjustmentSheet({ onDeleted: vm.onRefresh });
   const pay = usePayTransaction({ onPaid: vm.onRefresh });
@@ -66,6 +68,22 @@ function FinancialTransactions() {
     setFiltersStep(step);
     setFiltersOpen(true);
   }
+  // Spec 050: Import/Export CSV live in the ⋮ button of the Finances header (slot owned by the layout).
+  useFinancialHeaderActions(
+    <CsvActions
+      closeLabel={t("common.actions.close")}
+      exportLabel={t("financial.export.action")}
+      importLabel={t("financial.import.action")}
+      menuLabel={t("financial.export.menu")}
+      menuOpen={csv.menuOpen}
+      onExport={csv.onExportOpen}
+      onImport={csv.onImportOpen}
+      onMenuClose={csv.onMenuClose}
+      onMenuOpen={csv.onMenuOpen}
+      wide={wide}
+    />,
+    `${csv.menuOpen}|${wide}|${localeTag}`,
+  );
   const filterOptions = useFilterOptions(vm.allOwnerIds, vm.filterCount > 0);
   const filterChips = buildActiveChips(
     vm.filters,
@@ -294,18 +312,6 @@ function FinancialTransactions() {
   );
   const toolbar = (
     <View style={styles.toolbar} testID="transactions-toolbar">
-      <CsvActions
-        closeLabel={t("common.actions.close")}
-        exportLabel={t("financial.export.action")}
-        importLabel={t("financial.import.action")}
-        menuLabel={t("financial.export.menu")}
-        menuOpen={csv.menuOpen}
-        onExport={csv.onExportOpen}
-        onImport={csv.onImportOpen}
-        onMenuClose={csv.onMenuClose}
-        onMenuOpen={csv.onMenuOpen}
-        wide={wide}
-      />
       {vm.filters.period ? (
         <View style={styles.periodChip}>
           <Chip
@@ -426,13 +432,27 @@ function FinancialTransactions() {
     </View>
   );
 
+  const fab = (
+    <View pointerEvents={"box-none"} style={styles.fab}>
+      <Fab
+        extended={wide}
+        label={t("financial.transactions.fab")}
+        onPress={vm.onAddPress}
+        testID={transactionsTestIds.fab}
+      />
+    </View>
+  );
+
   if (vm.errorMessage) {
     return (
-      <ErrorState
-        message={vm.errorMessage}
-        onRetry={vm.onRetry}
-        retryLabel={t("common.actions.tryAgain")}
-      />
+      <View style={styles.root}>
+        <ErrorState
+          message={vm.errorMessage}
+          onRetry={vm.onRetry}
+          retryLabel={t("common.actions.tryAgain")}
+        />
+        {fab}
+      </View>
     );
   }
 
@@ -499,6 +519,7 @@ function FinancialTransactions() {
   return (
     <View style={styles.root} testID={transactionsTestIds.screen}>
       <FlashList
+        contentContainerStyle={styles.listContent}
         data={vm.entries}
         estimatedItemSize={64}
         // Expanding an invoice only changes this id: without it the virtualized row keeps its old render.
@@ -513,6 +534,7 @@ function FinancialTransactions() {
         showsVerticalScrollIndicator={false}
         stickyHeaderIndices={vm.stickyIndices}
       />
+      {fab}
       {vm.isMonthPickerOpen && (
         <MonthPickerSheet
           closeLabel={t("common.actions.close")}

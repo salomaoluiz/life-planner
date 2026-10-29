@@ -41,6 +41,7 @@ export { default as DatePicker, DatePickerProps } from "./DatePicker";
 export { default as Divider, DividerProps } from "./Divider";
 export { default as EmptyState, EmptyStateProps } from "./EmptyState";
 export { default as ErrorState, ErrorStateProps } from "./ErrorState";
+export { default as Fab, FabProps } from "./Fab";
 export { default as FieldShell, FieldShellProps } from "./FieldShell";
 export { default as FilterButton, FilterButtonProps } from "./FilterButton";
 export { default as FormColumns, FormColumnsProps } from "./FormColumns";

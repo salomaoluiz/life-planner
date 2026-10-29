@@ -2,8 +2,12 @@ import { StyleSheet } from "react-native";
 
 import { useTheme } from "@presentation/theme";
 
-function useStyles() {
+const FAB_SIZE = 56; // same as the Fab component
+
+function useStyles(wide = false) {
   const { theme } = useTheme();
+  // Spec 050: 16 px from the edges on mobile, 32 px on web/tablet; the list reserves FAB + 2 margins at its end.
+  const fabMargin = wide ? theme.sizes.spacing.xxl : theme.sizes.spacing.md;
 
   return {
     styles: StyleSheet.create({
@@ -18,6 +22,8 @@ function useStyles() {
         flexDirection: "row",
         gap: theme.sizes.spacing.xs,
       },
+      fab: { bottom: fabMargin, position: "absolute", right: fabMargin },
+      listContent: { paddingBottom: FAB_SIZE + 2 * fabMargin },
       monthSwitcher: {
         alignItems: "center",
         flexDirection: "row",

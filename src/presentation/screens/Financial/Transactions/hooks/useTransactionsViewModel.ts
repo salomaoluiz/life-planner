@@ -608,7 +608,13 @@ function useTransactionsViewModel() {
     monthLabel: formatMonthLabel(month, languageTag),
     monthName: formatMonthName(month, languageTag),
     onAddPress: scope.guard(() =>
-      router.push({ pathname: "/financial/transaction/add_new_transaction" }),
+      router.push({
+        // Spec 050: the form starts with the scope owner (All leaves its default).
+        ...(ownerFilter === ALL_FILTER
+          ? {}
+          : { params: { ownerId: ownerFilter } }),
+        pathname: "/financial/transaction/add_new_transaction",
+      }),
     ),
     onClearFilters: () => {
       setOwnerSelection(ALL_FILTER);
