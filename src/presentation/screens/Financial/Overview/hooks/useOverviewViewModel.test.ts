@@ -22,7 +22,7 @@ jest.mock(
 );
 
 const summary = {
-  balance: { current: 1000, previous: 500 },
+  balance: { current: 1000, previous: 500, projectedEnd: null },
   currencies: [
     { accounts: 1, cards: 0, code: "BRL" },
     { accounts: 3, cards: 1, code: "USD" },
@@ -33,15 +33,15 @@ const summary = {
 };
 
 describe("defaults", () => {
-  it("SHOULD open on 12M, all scopes AND the default granularity of the period", () => {
+  it("SHOULD open on 1M, all scopes AND the default granularity of the period", () => {
     const { result } = setup();
 
-    expect(result.current.preset).toBe("12M");
+    expect(result.current.preset).toBe("1M");
     expect(result.current.period).toEqual({
-      from: "2025-11-01",
-      to: "2026-10-31",
+      from: "2026-10-01",
+      to: "2026-11-30",
     });
-    expect(result.current.effectiveGranularity).toBe("MONTH");
+    expect(result.current.effectiveGranularity).toBe("WEEK");
     expect(result.current.ownerFilter).toBe("ALL");
     expect(result.current.type).toBe("EXPENSE");
     // "All" leaves the archived family out.
@@ -61,9 +61,9 @@ describe("defaults", () => {
     ).toHaveBeenCalledWith(
       expect.objectContaining({
         currency: "BRL",
-        from: "2025-11-01",
+        from: "2026-10-01",
         ownerIds: ["user-id", "family-1"],
-        to: "2026-10-31",
+        to: "2026-11-30",
       }),
     );
     await queryProps("CATEGORY").fetch();
@@ -116,9 +116,10 @@ describe("controls", () => {
   it("SHOULD drop a granularity the period does not allow", () => {
     const { result } = setup();
 
+    act(() => result.current.onPresetChange("12M"));
     act(() => result.current.onGranularityChange("DAY"));
     expect(result.current.effectiveGranularity).toBe("MONTH");
-    act(() => result.current.onPresetChange("3M"));
+    act(() => result.current.onPresetChange("1M"));
     expect(result.current.effectiveGranularity).toBe("DAY");
   });
 });
@@ -185,7 +186,7 @@ describe("categories and drill-through", () => {
     expect(setTransactionFilters).toHaveBeenCalledWith({
       ...EMPTY_FILTERS,
       categoryIds: ["food"],
-      period: { from: "2025-11-01", to: "2026-10-31" },
+      period: { from: "2026-10-01", to: "2026-11-30" },
     });
     expect(consumePendingNavigation()).toEqual({
       scope: "family-1",

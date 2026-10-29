@@ -36,6 +36,10 @@ class DashboardModel {
       balance: {
         current: Number(balance.current ?? 0),
         previous: Number(balance.previous ?? 0),
+        projectedEnd:
+          balance.projectedEnd === null || balance.projectedEnd === undefined
+            ? null
+            : Number(balance.projectedEnd),
       },
       currencies: list(data.currencies).map((item) => ({
         accounts: Number(item.accounts),

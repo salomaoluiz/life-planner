@@ -42,7 +42,7 @@ function queryOf(): URLSearchParams {
 
 it("SHOULD GET the summary with the period, owners, source and filters (never the filter period)", async () => {
   jest.mocked(api.get).mockResolvedValueOnce({
-    balance: { current: 10, previous: 5 },
+    balance: { current: 10, previous: 5, projectedEnd: 12 },
     currencies: [{ accounts: 1, cards: 0, code: "BRL" }],
     currency: "BRL",
     expense: { previous: 3, projected: 1, realized: 2 },
@@ -67,7 +67,11 @@ it("SHOULD GET the summary with the period, owners, source and filters (never th
   expect(query.get("paid")).toBe("true");
   expect(query.get("q")).toBe("market");
   expect(result.expense).toEqual({ previous: 3, projected: 1, realized: 2 });
-  expect(result.balance).toEqual({ current: 10, previous: 5 });
+  expect(result.balance).toEqual({
+    current: 10,
+    previous: 5,
+    projectedEnd: 12,
+  });
 });
 
 it("SHOULD GET the balance series with the granularity", async () => {
@@ -173,4 +177,16 @@ it("SHOULD map a 400 to FieldInvalid AND re-throw connectivity errors", async ()
 
   jest.mocked(api.get).mockRejectedValueOnce(error);
   await expect(getSummary(base)).rejects.toBe(error);
+});
+
+it("SHOULD read a null or missing projected end as null (older API)", async () => {
+  jest
+    .mocked(api.get)
+    .mockResolvedValueOnce({
+      balance: { current: 1, previous: 0, projectedEnd: null },
+    })
+    .mockResolvedValueOnce({ balance: { current: 1, previous: 0 } });
+
+  expect((await getSummary(base)).balance.projectedEnd).toBeNull();
+  expect((await getSummary(base)).balance.projectedEnd).toBeNull();
 });

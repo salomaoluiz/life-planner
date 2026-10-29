@@ -123,7 +123,7 @@ const vmStub = {
   setSelectedGroup: jest.fn(),
   setSelectedPoint: jest.fn(),
   summary: query({
-    balance: { current: 6000, previous: 5000 },
+    balance: { current: 6000, previous: 5000, projectedEnd: null },
     currencies: [],
     currency: "BRL",
     expense: { previous: 200, projected: 0, realized: 400 },

@@ -58,7 +58,7 @@ function useOverviewViewModel() {
   const [ownerSelection, setOwnerSelection] = useState(ALL_OWNERS);
   const [preset, setPreset] = useState<
     "CUSTOM" | Exclude<OverviewPreset, "CUSTOM">
-  >("12M");
+  >("1M");
   const [customPeriod, setCustomPeriod] = useState<OverviewPeriod>();
   const [currencyChoice, setCurrencyChoice] = useState<string>();
   const [currency, setCurrency] = useState("BRL");
@@ -96,7 +96,7 @@ function useOverviewViewModel() {
   const period: OverviewPeriod =
     preset === "CUSTOM" && customPeriod
       ? customPeriod
-      : periodForPreset(preset === "CUSTOM" ? "12M" : preset, today);
+      : periodForPreset(preset === "CUSTOM" ? "1M" : preset, today);
   const granularity =
     granularityChoice ?? defaultGranularity(period.from, period.to);
   const options = granularityOptions(period.from, period.to);
