@@ -491,6 +491,12 @@ function useImportWizardViewModel(params: ImportWizardParams) {
       });
     },
     onRequestClose,
+    // Spec 054 FR 19: one change for many rows, so the review goes stale once and needs one Refresh.
+    onSelectionBulkChange: (lines: number[], checked: boolean) =>
+      setSelection((current) => ({
+        ...current,
+        ...Object.fromEntries(lines.map((line) => [line, checked])),
+      })),
     // FR 15: checking or unchecking a row only changes local state — the dry run waits for Refresh.
     onSelectionChange: (line: number, checked: boolean) =>
       setSelection((current) => ({ ...current, [line]: checked })),

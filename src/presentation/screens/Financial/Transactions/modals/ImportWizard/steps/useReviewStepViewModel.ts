@@ -7,6 +7,7 @@ import {
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { invoiceMonthOf } from "@screens/Financial/models/invoiceMonth";
 import {
+  bulkSelection,
   filterRows,
   invoiceLines,
   ReviewBlock,
@@ -175,12 +176,20 @@ function useReviewStepViewModel(wizard: ImportWizardState) {
       })),
     }),
   );
+  // Spec 054 FR 16-20: select / unselect every row without error of the filter; hidden on Errors.
+  const bulk = bulkSelection(filtered);
+  const bulkVisible = filter !== "ERRORS" && bulk.lines.length > 0;
   const { summary } = wizard;
   const created =
     wizard.created.accounts + wizard.created.cards + wizard.created.categories;
 
   return {
     blocks,
+    bulk: {
+      count: bulk.uncheckedCount,
+      mode: bulk.allChecked ? ("unselect" as const) : ("select" as const),
+      visible: bulkVisible,
+    },
     canRefresh: wizard.review.length > 0 && !wizard.isValidating,
     created,
     filter,
@@ -192,6 +201,8 @@ function useReviewStepViewModel(wizard: ImportWizardState) {
       (id) => allCards.find((item) => item.id === id)?.name ?? "",
     ),
     kinds: wizard.kinds,
+    onBulkToggle: () =>
+      wizard.onSelectionBulkChange(bulk.lines, !bulk.allChecked),
     onFilterChange: (value: string) => {
       setFilter(value as ReviewFilter);
       setLimit(PAGE_SIZE);

@@ -97,6 +97,7 @@ const transactionsTestIds = {
   importRequired: "financial.import.required",
   importRightPane: "financial.import.rightPane",
   importRow: "financial.import.row",
+  importSelectAll: "financial.import.review.selectAll",
   importSeparator: "financial.import.separator",
   importSheet: "financial.import.sheet",
   importShowMore: "financial.import.show-more",

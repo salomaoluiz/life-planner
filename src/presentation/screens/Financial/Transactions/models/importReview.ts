@@ -77,6 +77,23 @@ export interface ReviewSummary {
   ready: number;
 }
 
+// Spec 054 FR 16-18: what the "Select all / Unselect all" action of the review changes — the rows without an error,
+// which are the only ones the user can toggle.
+function bulkSelection(rows: ReviewRow[]): {
+  allChecked: boolean;
+  lines: number[];
+  uncheckedCount: number;
+} {
+  const eligible = rows.filter((row) => !row.errorCode && !row.locked);
+  const uncheckedCount = eligible.filter((row) => !row.checked).length;
+
+  return {
+    allChecked: eligible.length > 0 && uncheckedCount === 0,
+    lines: eligible.map((row) => row.line),
+    uncheckedCount,
+  };
+}
+
 // FR 31: any error blocks the whole import; nothing checked means nothing to import.
 function canImport(summary: ReviewSummary): boolean {
   return summary.errors === 0 && summary.ready > 0;
@@ -469,6 +486,7 @@ function totalsOf(
 }
 
 export {
+  bulkSelection,
   canImport,
   currencyTotals,
   filterRows,

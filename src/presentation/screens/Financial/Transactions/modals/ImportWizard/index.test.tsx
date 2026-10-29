@@ -618,6 +618,68 @@ describe("step 4: review and import", () => {
     ).toHaveLength(3);
   });
 
+  describe("select all (spec 054)", () => {
+    function checked(line: number) {
+      return screen.getByTestId(`${ids.importRow}.${line}.check`).props
+        .accessibilityState.checked;
+    }
+
+    it("SHOULD check every duplicate in one go with the Duplicates filter and ask for one Refresh", async () => {
+      setup();
+      mutations.validate.value.data = { duplicates: [2, 3], errors: [] };
+      await toReview();
+      jest.mocked(mutations.validate.value.mutate).mockClear();
+
+      fireEvent.press(screen.getByTestId(`${ids.importFilter}-DUPLICATES`));
+      expect(screen.getByTestId(ids.importSelectAll)).toHaveTextContent(
+        /review\.selectAll/,
+      );
+
+      fireEvent.press(screen.getByTestId(ids.importSelectAll));
+
+      expect(checked(2)).toBe(true);
+      expect(checked(3)).toBe(true);
+      expect(screen.getByTestId(ids.importSelectAll)).toHaveTextContent(
+        /review\.unselectAll/,
+      );
+      // No dry run per row: it waits for the Refresh.
+      expect(mutations.validate.value.mutate).not.toHaveBeenCalled();
+      expect(screen.getByTestId(ids.importSubmit)).toBeDisabled();
+    });
+
+    it("SHOULD uncheck the rows without error and keep the error rows checked with the All filter", async () => {
+      setup();
+      mutations.validate.value.data = {
+        duplicates: [],
+        errors: [{ code: "CURRENCY_MISMATCH", line: 4, message: "x" }],
+      };
+      await toReview();
+
+      // Everything starts checked: the action offers to unselect.
+      expect(screen.getByTestId(ids.importSelectAll)).toHaveTextContent(
+        /review\.unselectAll/,
+      );
+      fireEvent.press(screen.getByTestId(ids.importSelectAll));
+
+      expect(checked(2)).toBe(false);
+      expect(checked(3)).toBe(false);
+      expect(checked(4)).toBe(true);
+    });
+
+    it("SHOULD hide the action on the Errors filter", async () => {
+      setup();
+      mutations.validate.value.data = {
+        duplicates: [],
+        errors: [{ code: "CURRENCY_MISMATCH", line: 4, message: "x" }],
+      };
+      await toReview();
+
+      fireEvent.press(screen.getByTestId(`${ids.importFilter}-ERRORS`));
+
+      expect(screen.queryByTestId(ids.importSelectAll)).toBeNull();
+    });
+  });
+
   it("SHOULD not send a dry run WHEN a row is checked (spec 049)", async () => {
     setup();
     mutations.validate.value.data = NO_ISSUES;

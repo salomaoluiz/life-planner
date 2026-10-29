@@ -522,6 +522,7 @@ const financial = {
       },
       rowCheck: "Importar a linha {{line}}",
       rowError: "A linha {{line}} tem um erro",
+      selectAll: "Selecionar todas ({{count}})",
       showMore: "Ver mais ({{count}})",
       submit_one: "Importar {{count}} transação",
       submit_other: "Importar {{count}} transações",
@@ -539,6 +540,7 @@ const financial = {
         system: "Linhas do sistema ignoradas",
         title: "Resumo",
       },
+      unselectAll: "Desmarcar todas",
       validateFailed:
         "Não foi possível verificar as linhas. Volte e tente novamente.",
       validating: "Verificando as linhas…",
