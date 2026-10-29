@@ -11,15 +11,39 @@ export interface CategoryNode {
   depth: number;
 }
 
+export interface CategoryResult {
+  // Name of the selected ancestor that already includes this category (spec 051 FR 9).
+  coveredBy?: string;
+  entry: CategorySearchEntry;
+}
+
+// One searchable row, normalized once per categories load (spec 051 §11).
+export interface CategorySearchEntry {
+  category: PickerCategory;
+  childCount: number;
+  descendantCount: number;
+  haystack: string;
+  path: string;
+  pathNames: string[];
+}
+
 // The category tree of the Filters modal (spec 045 FR 1/18). Choosing a category includes its subcategories,
 // so the selection keeps only the ids the user chose and the state of a row is derived from them.
 export interface PickerCategory {
   archived: boolean;
+  color?: string;
   id: string;
   name: string;
   parentId?: string;
   type: string;
 }
+
+export interface SearchOptions {
+  selected: ReadonlySet<string>;
+  typeFirst?: "EXPENSE" | "INCOME";
+}
+
+const MAX_RESULTS = 8;
 
 const GROUP_ORDER: CategoryGroup["kind"][] = ["EXPENSE", "INCOME", "ARCHIVED"];
 
@@ -75,6 +99,44 @@ function buildCategoryGroups(
   return groups.filter((group) => group.nodes.length > 0);
 }
 
+// The search index: the path is "Parent › Name" for a child and the name for a root.
+function buildCategoryIndex(
+  categories: PickerCategory[],
+): CategorySearchEntry[] {
+  const byId = new Map(categories.map((category) => [category.id, category]));
+  const children = new Map<string, string[]>();
+
+  categories.forEach((category) => {
+    if (category.parentId && byId.has(category.parentId)) {
+      children.set(category.parentId, [
+        ...(children.get(category.parentId) ?? []),
+        category.id,
+      ]);
+    }
+  });
+
+  function countBelow(id: string): number {
+    return (children.get(id) ?? []).reduce(
+      (total, child) => total + 1 + countBelow(child),
+      0,
+    );
+  }
+
+  return categories.map((category) => {
+    const parent = category.parentId ? byId.get(category.parentId) : undefined;
+    const pathNames = parent ? [parent.name, category.name] : [category.name];
+
+    return {
+      category,
+      childCount: children.get(category.id)?.length ?? 0,
+      descendantCount: countBelow(category.id),
+      haystack: normalize(pathNames.join(" ")),
+      path: pathNames.join(" › "),
+      pathNames,
+    };
+  });
+}
+
 function checkState(
   node: CategoryNode,
   selected: ReadonlySet<string>,
@@ -85,6 +147,30 @@ function checkState(
   }
 
   return descendantIds(node).some((id) => selected.has(id)) ? "mixed" : false;
+}
+
+// The selected ancestor (any level) that already includes the category.
+function coveringAncestorName(
+  index: CategorySearchEntry[],
+  selected: ReadonlySet<string>,
+  id: string,
+): string | undefined {
+  const byId = new Map(index.map((entry) => [entry.category.id, entry]));
+  let parentId = byId.get(id)?.category.parentId;
+
+  while (parentId) {
+    const parent = byId.get(parentId);
+
+    if (!parent) {
+      return undefined;
+    }
+    if (selected.has(parentId)) {
+      return parent.category.name;
+    }
+    parentId = parent.category.parentId;
+  }
+
+  return undefined;
 }
 
 // Every descendant id of a node.
@@ -134,6 +220,42 @@ function normalize(value: string) {
     .trim();
 }
 
+// Contains-match on the name and the parent's name; the type of the screen first, then by name; at most 8.
+function searchCategories(
+  index: CategorySearchEntry[],
+  query: string,
+  options: SearchOptions,
+): CategoryResult[] {
+  const needle = normalize(query);
+
+  if (!needle) {
+    return [];
+  }
+
+  const first = options.typeFirst ?? "EXPENSE";
+
+  return index
+    .filter(
+      (entry) =>
+        !options.selected.has(entry.category.id) &&
+        entry.haystack.includes(needle),
+    )
+    .sort(
+      (a, b) =>
+        Number(b.category.type === first) - Number(a.category.type === first) ||
+        a.category.name.localeCompare(b.category.name),
+    )
+    .slice(0, MAX_RESULTS)
+    .map((entry) => ({
+      coveredBy: coveringAncestorName(
+        index,
+        options.selected,
+        entry.category.id,
+      ),
+      entry,
+    }));
+}
+
 // Adding a row drops the redundant ids under it; removing a row that is covered by a chosen ancestor
 // swaps that ancestor for the siblings along the path.
 function toggleCategory(
@@ -175,8 +297,11 @@ function toggleCategory(
 
 export {
   buildCategoryGroups,
+  buildCategoryIndex,
   checkState,
+  coveringAncestorName,
   descendantIds,
   normalize,
+  searchCategories,
   toggleCategory,
 };
