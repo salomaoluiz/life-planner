@@ -11,8 +11,10 @@ import fitValue from "./fitValue";
 export interface StatTileProps {
   /** The value in the compact format ("R$ 312 mil"), the last resort when the full one does not fit */
   compactValue?: string;
-  /** The change against the previous period; `neutral` has no colour */
   delta?: { note?: string; text: string; tone: "bad" | "good" | "neutral" };
+  /** The change against the previous period; `neutral` has no colour */
+  /** A second line under the value, in the accent colour (the projected end balance, spec 053) */
+  extra?: { testID?: string; text: string };
   label: string;
   loading?: boolean;
   testID?: string;
@@ -68,7 +70,7 @@ function StatTile(props: StatTileProps) {
 
   return (
     <View
-      accessibilityLabel={`${props.label}: ${props.value}${props.delta ? `, ${props.delta.text}${props.delta.note ? ` ${props.delta.note}` : ""}` : ""}`}
+      accessibilityLabel={`${props.label}: ${props.value}${props.extra ? `, ${props.extra.text}` : ""}${props.delta ? `, ${props.delta.text}${props.delta.note ? ` ${props.delta.note}` : ""}` : ""}`}
       accessible
       nativeID={testID}
       style={styles.root}
@@ -102,6 +104,15 @@ function StatTile(props: StatTileProps) {
           )}
         </View>
       </Tooltip>
+      {props.extra ? (
+        <Text.Caption
+          numberOfLines={2}
+          tabular
+          testID={props.extra.testID}
+          tone="accent"
+          value={props.extra.text}
+        />
+      ) : null}
       {props.delta ? (
         <View style={styles.delta}>
           <Text.Caption

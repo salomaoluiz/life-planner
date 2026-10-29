@@ -3,6 +3,7 @@ import { LayoutChangeEvent, Pressable, StyleSheet, View } from "react-native";
 import Svg, { G, Line, Rect, Text as SvgText } from "react-native-svg";
 
 import { niceTicks, scaleY } from "@components/LineChart/chartScale";
+import TodayMarker from "@components/LineChart/TodayMarker";
 import { useKitTheme } from "@components/utils/useKitTheme";
 
 export interface ColumnAmounts {
@@ -20,6 +21,8 @@ export interface ColumnChartProps {
   onSelect?: (index: number) => void;
   selectedIndex?: number;
   testID?: string;
+  /** Draws the "Today" line in this group (spec 053 FR 18) */
+  today?: { index: number; label: string };
 }
 
 export interface ColumnGroup {
@@ -180,6 +183,15 @@ function ColumnChart(props: ColumnChartProps) {
           );
         })}
       </Svg>
+      {props.today && props.today.index < props.groups.length ? (
+        <TodayMarker
+          bottom={BOTTOM}
+          label={props.today.label}
+          testID={props.testID && `${props.testID}-today`}
+          top={TOP}
+          x={LEFT + slot * props.today.index + slot / 2}
+        />
+      ) : null}
       <View style={styles.overlay}>
         {props.groups.map((group, index) => (
           <Pressable

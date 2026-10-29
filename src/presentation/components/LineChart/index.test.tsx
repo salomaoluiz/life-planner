@@ -48,3 +48,11 @@ it("SHOULD reserve the width of the longest y-axis label so it is not clipped", 
     Math.min(...labels.map((node) => Number(node.props.x))),
   ).toBeGreaterThanOrEqual("R$ 160000 mil mil mil".length * 11 * 0.6);
 });
+
+it("SHOULD draw the Today marker only WHEN asked (spec 053)", () => {
+  setup();
+  expect(screen.queryByTestId("line-today")).toBeNull();
+  setup({ today: { index: 1, label: "Today" } });
+  expect(screen.getByTestId("line-today")).toBeTruthy();
+  expect(screen.getByText("Today")).toBeTruthy();
+});
