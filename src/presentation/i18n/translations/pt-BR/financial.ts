@@ -686,7 +686,7 @@ const financial = {
     balance: {
       detailTitle: "{{label}} · {{total}}",
       filtersNote: "O saldo segue escopo, moeda e contas",
-      projected: "Previsto (até o fim do mês)",
+      projected: "Previsto (depois de hoje)",
       projectedEnd: "Previsto em {{date}}",
       realized: "Realizado",
       subtitle: "Saldo das contas do filtro ao fim de cada {{bucket}}",

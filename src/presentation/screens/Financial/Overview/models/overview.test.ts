@@ -18,6 +18,7 @@ import {
   maxFutureDate,
   monthsInPeriod,
   periodForPreset,
+  todayIndex,
   validateCustomPeriod,
 } from "./overviewPeriod";
 
@@ -303,5 +304,52 @@ describe("compactAmount", () => {
     expect(compactAmount(31248055, "pt-BR", "BRL")).toMatch(/mil/);
     expect(compactAmount(31248055, "en-US", "BRL")).toMatch(/K/);
     expect(compactAmount(123456789, "pt-BR", "BRL")).toMatch(/mi/);
+  });
+});
+
+describe("todayIndex (spec 053 FR 18)", () => {
+  const months = [
+    { end: "2026-09-30", start: "2026-09-01" },
+    { end: "2026-10-31", start: "2026-10-01" },
+    { end: "2026-11-30", start: "2026-11-01" },
+  ];
+
+  it("SHOULD find the bucket that holds today", () => {
+    expect(todayIndex(months, "2026-10-20")).toBe(1);
+    expect(todayIndex(months, "2026-09-01")).toBe(0);
+  });
+
+  it("SHOULD be undefined WHEN today is before or after the period", () => {
+    expect(todayIndex(months, "2026-08-31")).toBeUndefined();
+    expect(todayIndex(months, "2026-12-01")).toBeUndefined();
+    expect(todayIndex([], "2026-10-20")).toBeUndefined();
+  });
+});
+
+describe("foldBars projected (spec 053)", () => {
+  const base = {
+    format: (value: number) => `${value}`,
+    localeTag: "en-US",
+    otherLabel: "Other",
+    projectedOf: (value: number) => `p${value}`,
+    top: 1,
+    total: 600,
+  };
+
+  it("SHOULD carry the projected part AND sum it in the Other row, none WHEN zero", () => {
+    const rows = foldBars({
+      ...base,
+      items: [
+        { id: "a", name: "A", projected: 100, value: 300 },
+        { id: "b", name: "B", projected: 40, value: 200 },
+        { id: "c", name: "C", projected: 10, value: 100 },
+      ],
+    });
+
+    expect(rows.map((row) => row.projected)).toEqual(["p100", "p50"]);
+    expect(
+      foldBars({ ...base, items: [{ id: "a", name: "A", value: 300 }] })[0]
+        .projected,
+    ).toBeUndefined();
   });
 });

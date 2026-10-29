@@ -685,7 +685,7 @@ const financial = {
     balance: {
       detailTitle: "{{label}} · {{total}}",
       filtersNote: "Balance follows scope, currency and accounts",
-      projected: "Expected (to the end of the month)",
+      projected: "Expected (after today)",
       projectedEnd: "Projected on {{date}}",
       realized: "Actual",
       subtitle:

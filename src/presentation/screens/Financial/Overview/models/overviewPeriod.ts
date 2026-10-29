@@ -112,6 +112,17 @@ function periodForPreset(
   };
 }
 
+// Spec 053 FR 18: the index of the bucket that holds today (the first one ending on or after it), or `undefined`
+// when today is outside the period.
+function todayIndex(
+  items: { end: string; start: string }[],
+  today: string,
+): number | undefined {
+  const index = items.findIndex((item) => item.end >= today);
+
+  return index >= 0 && items[index].start <= today ? index : undefined;
+}
+
 // The custom range: at most 2 years (the 045 rule) and an end no later than `maxFutureDate`.
 function validateCustomPeriod(
   from: string,
@@ -137,5 +148,6 @@ export {
   maxFutureDate,
   monthsInPeriod,
   periodForPreset,
+  todayIndex,
   validateCustomPeriod,
 };

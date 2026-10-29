@@ -12,6 +12,7 @@ import {
   formatDay,
   formatTick,
 } from "../models/overviewFormat";
+import { todayIndex } from "../models/overviewPeriod";
 import useStyles from "../styles";
 import overviewTestIds from "../testIds";
 
@@ -34,6 +35,7 @@ function IncomeExpenseBlock(props: {
   function sum(amounts: { projected: number; realized: number }) {
     return amounts.projected + amounts.realized;
   }
+  const marker = todayIndex(items, vm.today);
   const picked =
     vm.selectedGroup === undefined ? undefined : items[vm.selectedGroup];
 
@@ -69,6 +71,11 @@ function IncomeExpenseBlock(props: {
         onSelect={vm.setSelectedGroup}
         selectedIndex={vm.selectedGroup}
         testID="financial.overview.income-expense-columns"
+        today={
+          marker === undefined
+            ? undefined
+            : { index: marker, label: t("financial.overview.today") }
+        }
       />
       {picked ? (
         <View

@@ -37,10 +37,16 @@ function TagsBlock(props: { vm: OverviewViewModel }) {
       ? money(average)
       : t("financial.overview.legend.average", { value: money(average) });
   }
+  function projectedOf(value: number): string {
+    return wide
+      ? money(value)
+      : t("financial.overview.legend.projected", { value: money(value) });
+  }
   const columns = {
     average: t("financial.overview.legend.averagePerMonth"),
     category: t("financial.overview.tags.title"),
     percent: t("financial.overview.legend.percent"),
+    projected: t("financial.overview.legend.projectedColumn"),
     total: t("financial.overview.legend.total"),
   };
   const note = t("financial.overview.tags.note");
@@ -51,6 +57,7 @@ function TagsBlock(props: { vm: OverviewViewModel }) {
           {
             id: UNTAGGED_ID,
             name: t("financial.overview.tags.untagged"),
+            projected: untagged.projected,
             value: untagged.realized + untagged.projected,
           },
         ]
@@ -59,10 +66,12 @@ function TagsBlock(props: { vm: OverviewViewModel }) {
     items: items.map((item) => ({
       id: item.tagId,
       name: item.name,
+      projected: item.projected,
       value: item.realized + item.projected,
     })),
     localeTag,
     otherLabel: t("financial.overview.categories.other"),
+    projectedOf,
     top: 10,
     total,
   });

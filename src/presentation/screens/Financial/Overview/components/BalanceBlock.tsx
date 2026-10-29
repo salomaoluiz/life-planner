@@ -12,6 +12,7 @@ import {
   formatDay,
   formatTick,
 } from "../models/overviewFormat";
+import { todayIndex } from "../models/overviewPeriod";
 import useStyles from "../styles";
 import overviewTestIds from "../testIds";
 
@@ -56,6 +57,8 @@ function BalanceBlock(props: { compact: boolean; vm: OverviewViewModel }) {
   const first = points[0];
   const last = points[points.length - 1];
   const bucketName = t(BUCKET_KEYS[granularity]);
+  // The realized point of today (the line goes dashed from there), only when today is inside the period.
+  const marker = todayIndex(points, vm.today);
 
   return (
     <ChartCard
@@ -135,6 +138,11 @@ function BalanceBlock(props: { compact: boolean; vm: OverviewViewModel }) {
         })}
         selectedIndex={selected}
         testID="financial.overview.balance-line"
+        today={
+          marker === undefined
+            ? undefined
+            : { index: marker, label: t("financial.overview.today") }
+        }
       />
       {hints.length > 0 ? (
         <Text.Caption tone="secondary" value={hints.join(" · ")} />

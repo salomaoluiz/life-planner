@@ -53,10 +53,17 @@ function CategoriesBlock(props: { vm: OverviewViewModel }) {
       ? money(average)
       : t("financial.overview.legend.average", { value: money(average) });
   }
+  // Spec 053 FR 20: a Projected column on the wide layout, "… projected" on the second line on mobile.
+  function projectedOf(value: number): string {
+    return wide
+      ? money(value)
+      : t("financial.overview.legend.projected", { value: money(value) });
+  }
   const columns = {
     average: t("financial.overview.legend.averagePerMonth"),
     category: t("financial.overview.legend.category"),
     percent: t("financial.overview.legend.percent"),
+    projected: t("financial.overview.legend.projectedColumn"),
     total: t("financial.overview.legend.total"),
   };
   const rows = foldBars({
@@ -71,10 +78,12 @@ function CategoriesBlock(props: { vm: OverviewViewModel }) {
             name: vm.parent?.name ?? item.name,
           })
         : item.name,
+      projected: item.projected,
       value: item.realized + item.projected,
     })),
     localeTag,
     otherLabel: t("financial.overview.categories.other"),
+    projectedOf,
     top: vm.parent ? 50 : 8,
     total,
   });
