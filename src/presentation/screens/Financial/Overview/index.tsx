@@ -1,10 +1,11 @@
-import { ScrollView, View } from "react-native";
+import { useState } from "react";
+import { LayoutChangeEvent, ScrollView, View } from "react-native";
 
 import { EmptyState, StatTile } from "@components";
 import { formatAmount } from "@components/AmountText/formatAmount";
 import type { CurrencyCode } from "@domain/entities/financial/Currency";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
-import { useBreakpoint } from "@presentation/theme";
+import { useBreakpoint, useTheme } from "@presentation/theme";
 import { FiltersModal } from "@screens/Financial/Transactions/modals";
 
 import BalanceBlock from "./components/BalanceBlock";
@@ -14,7 +15,7 @@ import IncomeExpenseBlock from "./components/IncomeExpenseBlock";
 import OverviewToolbar from "./components/OverviewToolbar";
 import TagsBlock from "./components/TagsBlock";
 import { useOverviewViewModel } from "./hooks";
-import { deltaOf } from "./models/overviewFormat";
+import { compactAmount, deltaOf, tileColumns } from "./models/overviewFormat";
 import useStyles from "./styles";
 import overviewTestIds from "./testIds";
 
@@ -25,6 +26,9 @@ function FinancialOverview() {
   const breakpoint = useBreakpoint();
   const compact = breakpoint === "compact";
   const wide = breakpoint === "expanded";
+  const { theme } = useTheme();
+  const [tilesWidth, setTilesWidth] = useState(0);
+  const columns = tileColumns(tilesWidth, theme.sizes.spacing.sm);
   const vm = useOverviewViewModel();
   const currency = vm.currency as CurrencyCode;
   const summary = vm.summary.data;
@@ -47,8 +51,9 @@ function FinancialOverview() {
     direction: "upIsBad" | "upIsGood",
   ) {
     return (
-      <View style={styles.tile}>
+      <View style={columns === 4 ? styles.tileFour : styles.tileTwo}>
         <StatTile
+          compactValue={compactAmount(value, localeTag, currency)}
           delta={{ ...deltaOf(value, previous, direction, localeTag), note }}
           label={label}
           loading={loading}
@@ -76,7 +81,12 @@ function FinancialOverview() {
         <View style={styles.center}>
           <View style={styles.blocks}>
             <OverviewToolbar vm={vm} />
-            <View style={styles.tiles}>
+            <View
+              onLayout={(event: LayoutChangeEvent) =>
+                setTilesWidth(event.nativeEvent.layout.width)
+              }
+              style={styles.tiles}
+            >
               {tile(
                 "balance",
                 t("financial.overview.tiles.balance"),

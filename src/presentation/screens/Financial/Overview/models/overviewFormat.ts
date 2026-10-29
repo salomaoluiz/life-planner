@@ -12,6 +12,29 @@ function averagePerMonth(total: number, months: number): number | undefined {
   return months <= 1 ? undefined : Math.round(total / months);
 }
 
+const TILE_BASIS = 220;
+
+// "R$ 312 mil" / "R$ 1,2 mi": the last resort for a value that does not fit its tile (spec 052 FR 14).
+function compactAmount(
+  cents: number,
+  localeTag: string,
+  currency: CurrencyCode,
+): string {
+  return new Intl.NumberFormat(numberLocale(localeTag), {
+    currency,
+    maximumFractionDigits: 1,
+    notation: "compact",
+    style: "currency",
+  })
+    .format(cents / 100)
+    .replace(/\s/g, " ");
+}
+
+// Four tiles in a row when each gets at least 220 px, otherwise 2 × 2 (spec 052 FR 13).
+function tileColumns(width: number, gap: number): 2 | 4 {
+  return width >= 4 * TILE_BASIS + 3 * gap ? 4 : 2;
+}
+
 const SUPPORTED_ORDER = ["BRL", "USD", "EUR"];
 
 // Most accounts wins; a tie goes to the first in the supported order (spec 046 FR 3).
@@ -145,6 +168,7 @@ function percentOf(part: number, total: number, localeTag: string): string {
 
 export {
   averagePerMonth,
+  compactAmount,
   defaultCurrency,
   deltaOf,
   formatBucketLabel,
@@ -152,4 +176,5 @@ export {
   formatTick,
   keepOrDefault,
   percentOf,
+  tileColumns,
 };

@@ -1,10 +1,16 @@
-import { StyleSheet, View } from "react-native";
+import { useState } from "react";
+import { LayoutChangeEvent, StyleSheet, View } from "react-native";
 
 import Skeleton from "@components/Skeleton";
 import Text from "@components/Text";
+import Tooltip from "@components/Tooltip";
 import { useKitTheme } from "@components/utils/useKitTheme";
 
+import fitValue from "./fitValue";
+
 export interface StatTileProps {
+  /** The value in the compact format ("R$ 312 mil"), the last resort when the full one does not fit */
+  compactValue?: string;
   /** The change against the previous period; `neutral` has no colour */
   delta?: { note?: string; text: string; tone: "bad" | "good" | "neutral" };
   label: string;
@@ -21,8 +27,18 @@ const DELTA_TONE = {
 
 // A summary figure with its change against the previous period (spec 046).
 function StatTile(props: StatTileProps) {
-  const { colors, radius, spacing } = useKitTheme();
+  const { colors, radius, spacing, typography } = useKitTheme();
   const { testID } = props;
+  const [valueWidth, setValueWidth] = useState<number>();
+  const fitted = fitValue({
+    compact: props.compactValue,
+    full: props.value,
+    sizes: {
+      full: typography.title.fontSize,
+      small: typography.bodyStrong.fontSize,
+    },
+    width: valueWidth,
+  });
   const styles = StyleSheet.create({
     delta: {
       alignItems: "center",
@@ -64,16 +80,32 @@ function StatTile(props: StatTileProps) {
         tone="secondary"
         value={props.label}
       />
-      <Text.Title
-        numberOfLines={1}
-        tabular
-        testID={testID && `${testID}-value`}
-        value={props.value}
-      />
+      <Tooltip content={<Text.Caption value={props.value} />}>
+        <View
+          onLayout={(event: LayoutChangeEvent) =>
+            setValueWidth(event.nativeEvent.layout.width)
+          }
+          testID={testID && `${testID}-value-area`}
+        >
+          {fitted.fit === "small" ? (
+            <Text.BodyStrong
+              tabular
+              testID={testID && `${testID}-value`}
+              value={fitted.text}
+            />
+          ) : (
+            <Text.Title
+              tabular
+              testID={testID && `${testID}-value`}
+              value={fitted.text}
+            />
+          )}
+        </View>
+      </Tooltip>
       {props.delta ? (
         <View style={styles.delta}>
           <Text.Caption
-            numberOfLines={1}
+            numberOfLines={2}
             tabular
             testID={testID && `${testID}-delta`}
             tone={DELTA_TONE[props.delta.tone]}
@@ -81,7 +113,7 @@ function StatTile(props: StatTileProps) {
           />
           {props.delta.note ? (
             <Text.Caption
-              numberOfLines={1}
+              numberOfLines={2}
               tone="secondary"
               value={props.delta.note}
             />

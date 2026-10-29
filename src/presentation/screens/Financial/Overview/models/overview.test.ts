@@ -4,11 +4,13 @@ import foldBars, { OTHER_ID } from "./barRows";
 import toDrillThroughFilters from "./drillThrough";
 import {
   averagePerMonth,
+  compactAmount,
   defaultCurrency,
   deltaOf,
   formatTick,
   keepOrDefault,
   percentOf,
+  tileColumns,
 } from "./overviewFormat";
 import {
   defaultGranularity,
@@ -245,5 +247,23 @@ describe("averagePerMonth", () => {
     expect(averagePerMonth(1000, 1)).toBeUndefined();
     expect(averagePerMonth(1000, 3)).toBe(333);
     expect(averagePerMonth(85121_50, 12)).toBe(709346);
+  });
+});
+
+describe("tileColumns", () => {
+  it("SHOULD give 4 columns only WHEN each tile gets 220 px, otherwise 2 (never 3 + 1)", () => {
+    expect(tileColumns(1000, 12)).toBe(4);
+    expect(tileColumns(4 * 220 + 3 * 12, 12)).toBe(4);
+    expect(tileColumns(4 * 220 + 3 * 12 - 1, 12)).toBe(2);
+    expect(tileColumns(700, 12)).toBe(2);
+    expect(tileColumns(260, 12)).toBe(2);
+  });
+});
+
+describe("compactAmount", () => {
+  it("SHOULD use the compact notation of the locale", () => {
+    expect(compactAmount(31248055, "pt-BR", "BRL")).toMatch(/mil/);
+    expect(compactAmount(31248055, "en-US", "BRL")).toMatch(/K/);
+    expect(compactAmount(123456789, "pt-BR", "BRL")).toMatch(/mi/);
   });
 });
