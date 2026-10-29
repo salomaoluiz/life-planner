@@ -1,7 +1,8 @@
-import { View } from "react-native";
+import { ScrollView, View } from "react-native";
 
 import { ChipGroup, SegmentedControl, SelectField, Text } from "@components";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
+import { useBreakpoint } from "@presentation/theme";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 import FilterToolbar from "@screens/Financial/Transactions/components/FilterToolbar";
 import useFilterOptions from "@screens/Financial/Transactions/hooks/useFilterOptions";
@@ -12,8 +13,9 @@ import { formatDay } from "../models/overviewFormat";
 import useStyles from "../styles";
 import overviewTestIds from "../testIds";
 
-const PRESETS = ["3M", "6M", "12M", "YEAR", "CUSTOM"] as const;
+const PRESETS = ["1M", "3M", "6M", "12M", "YEAR", "CUSTOM"] as const;
 const PRESET_KEYS = {
+  "1M": "financial.overview.period.1m",
   "3M": "financial.overview.period.3m",
   "6M": "financial.overview.period.6m",
   "12M": "financial.overview.period.12m",
@@ -45,6 +47,19 @@ function OverviewToolbar(props: { vm: OverviewViewModel }) {
   const count = chips.length;
   const scopeOptions = translateChoices(vm.ownerChoices, t);
   const showCurrency = vm.currencies.length > 1;
+  const compact = useBreakpoint() === "compact";
+  const presets = (
+    <SegmentedControl
+      accessibilityLabel={t("financial.overview.period.custom")}
+      onChange={vm.onPresetChange}
+      options={PRESETS.map((value) => ({
+        label: t(PRESET_KEYS[value]),
+        value,
+      }))}
+      testID="financial.overview.period"
+      value={vm.preset}
+    />
+  );
 
   return (
     <View style={styles.toolbar}>
@@ -60,16 +75,17 @@ function OverviewToolbar(props: { vm: OverviewViewModel }) {
       </View>
       <View style={styles.period}>
         <View style={styles.presets}>
-          <SegmentedControl
-            accessibilityLabel={t("financial.overview.period.custom")}
-            onChange={vm.onPresetChange}
-            options={PRESETS.map((value) => ({
-              label: t(PRESET_KEYS[value]),
-              value,
-            }))}
-            testID="financial.overview.period"
-            value={vm.preset}
-          />
+          {compact ? (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              testID="financial.overview.period-scroll"
+            >
+              {presets}
+            </ScrollView>
+          ) : (
+            presets
+          )}
         </View>
         <Text.Caption
           tone="secondary"

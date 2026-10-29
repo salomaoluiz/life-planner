@@ -1,11 +1,18 @@
 import { useState } from "react";
 import { View } from "react-native";
 
-import { BottomSheet, Button, DateField, Text } from "@components";
-import { useTranslation } from "@presentation/i18n";
+import { BottomSheet, Button, DateField, FormColumns, Text } from "@components";
+import { useLocaleTag, useTranslation } from "@presentation/i18n";
+import { useBreakpoint } from "@presentation/theme";
 import { toDateKey } from "@screens/Financial/Transactions/models/transactionFilters";
 
-import { OverviewPeriod, validateCustomPeriod } from "../models/overviewPeriod";
+import { formatDay } from "../models/overviewFormat";
+import {
+  maxFutureDate,
+  monthsInPeriod,
+  OverviewPeriod,
+  validateCustomPeriod,
+} from "../models/overviewPeriod";
 import useStyles from "../styles";
 
 interface Props {
@@ -15,10 +22,13 @@ interface Props {
   today: string;
 }
 
-// The exact range of the dashboard: the 045 period rule (up to 2 years) and never past the end of the current month.
+// The exact range of the dashboard: the 045 period rule (up to 2 years), an end up to 24 months after the current
+// month (spec 053). Two columns on wide layouts (From | To), the compact sheet on phones.
 function CustomPeriodSheet(props: Props) {
   const { styles } = useStyles();
   const { t } = useTranslation();
+  const localeTag = useLocaleTag();
+  const wide = useBreakpoint() !== "compact";
   const [from, setFrom] = useState<Date | undefined>(
     toDate(props.initial.from),
   );
@@ -34,6 +44,42 @@ function CustomPeriodSheet(props: Props) {
     }
   }
 
+  const fromField = (
+    <DateField
+      label={t("financial.transactions.filters.period.from")}
+      maxDate={to}
+      onChange={setFrom}
+      testID="financial.overview.custom-from"
+      value={from}
+    />
+  );
+  const toField = (
+    <DateField
+      label={t("financial.transactions.filters.period.to")}
+      maxDate={toDate(maxFutureDate(props.today))}
+      minDate={from}
+      onChange={setTo}
+      testID="financial.overview.custom-to"
+      value={to}
+    />
+  );
+  const error =
+    validation && !validation.ok ? (
+      <Text.Caption
+        testID="financial.overview.custom-error"
+        tone="expense"
+        value={t("financial.transactions.filters.period.error", {
+          date: validation.maxTo,
+        })}
+      />
+    ) : null;
+  const hint = (
+    <Text.Caption
+      tone="secondary"
+      value={t("financial.overview.period.customHint")}
+    />
+  );
+
   return (
     <BottomSheet
       closeLabel={t("common.actions.close")}
@@ -46,37 +92,56 @@ function CustomPeriodSheet(props: Props) {
           testID="financial.overview.custom-apply"
         />
       }
+      footerSecondary={
+        wide ? (
+          <Button.Secondary
+            fullWidth
+            label={t("common.actions.cancel")}
+            onPress={props.onClose}
+            testID="financial.overview.custom-cancel"
+          />
+        ) : undefined
+      }
+      footerStart={
+        wide && from && to && validation?.ok ? (
+          <Text.Caption
+            tone="secondary"
+            value={t("financial.overview.period.customSummary", {
+              from: formatDay(toDateKey(from), localeTag),
+              months: monthsInPeriod({
+                from: toDateKey(from),
+                to: toDateKey(to),
+              }),
+              to: formatDay(toDateKey(to), localeTag),
+            })}
+          />
+        ) : undefined
+      }
       onClose={props.onClose}
-      size="dialog"
+      size={wide ? "form" : "dialog"}
       testID="financial.overview.custom-sheet"
       title={t("financial.overview.period.customTitle")}
       visible
     >
-      <View style={styles.dates}>
-        <DateField
-          label={t("financial.transactions.filters.period.from")}
-          maxDate={to}
-          onChange={setFrom}
-          testID="financial.overview.custom-from"
-          value={from}
+      {wide ? (
+        <FormColumns
+          left={fromField}
+          right={
+            <View style={styles.dates}>
+              {toField}
+              {error}
+            </View>
+          }
+          testID="financial.overview.custom-sheet"
         />
-        <DateField
-          label={t("financial.transactions.filters.period.to")}
-          minDate={from}
-          onChange={setTo}
-          testID="financial.overview.custom-to"
-          value={to}
-        />
-        {validation && !validation.ok ? (
-          <Text.Caption
-            testID="financial.overview.custom-error"
-            tone="expense"
-            value={t("financial.transactions.filters.period.error", {
-              date: validation.maxTo,
-            })}
-          />
-        ) : null}
-      </View>
+      ) : (
+        <View style={styles.dates}>
+          {fromField}
+          {toField}
+          {error}
+        </View>
+      )}
+      {hint}
     </BottomSheet>
   );
 }
