@@ -39,6 +39,9 @@ onFlowComplete:
       TOKEN: ${output.TOKEN}
       REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - runFlow: ../../../subflows/financial/open-transactions.yaml
+# Spec 050: the CSV actions live in the ⋮ menu
+- tapOn:
+    id: "financial.transactions.moreActions"
 - tapOn:
     id: "financial.transactions.exportButton"
 - extendedWaitUntil:

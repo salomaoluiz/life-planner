@@ -1,0 +1,73 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/transactions-fab
+tags:
+  - financial
+  - spec-050
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Transaction
+      KEY: TRANSACTION_NAME
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.empty-month"
+    timeout: 20000
+# Spec 050: the FAB is there in the empty month and opens the form in one tap
+- assertVisible:
+    id: "financial.transactions.fab"
+- tapOn:
+    id: "financial.transactions.fab"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.amount-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.transaction-form.amount-input"
+- eraseText
+- inputText: "23490"
+- tapOn:
+    id: "financial.transaction-form.description-input"
+- inputText: ${output.TRANSACTION_NAME}
+- tapOn:
+    id: "financial.transaction-form.category-${output.EXPENSE_CATEGORY_ID}"
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.transaction-form.account-select"
+- tapOn:
+    id: "financial.transaction-form.account-select-option-${output.ACCOUNT_ID}"
+- tapOn:
+    id: "financial.transaction-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.summary-expense"
+      text: ".*234[.,]90.*"
+    timeout: 20000
+# The row is below the fold of the 1024x625 viewport
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.TRANSACTION_NAME}
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.transactions.empty-month"
+- assertVisible:
+    id: "financial.transactions.summary-expense"
+    text: ".*234[.,]90.*"
