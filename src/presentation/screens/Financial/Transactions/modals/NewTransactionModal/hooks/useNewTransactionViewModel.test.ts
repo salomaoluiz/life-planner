@@ -89,6 +89,18 @@ it("SHOULD clear a category of the other type, and switch the label and tone WHE
   expect(result.current.typeTone).toBe("income");
 });
 
+it("SHOULD start with the owner of the scope the form was opened from (spec 050)", () => {
+  givenLoaded({ params: { ownerId: "family-1" } });
+
+  expect(setup().result.current.ownerId).toBe("family-1");
+});
+
+it("SHOULD ignore an owner param that is not a known owner (spec 050)", () => {
+  givenLoaded({ params: { ownerId: "stranger" } });
+
+  expect(setup().result.current.ownerId).toBe("user-id");
+});
+
 it("SHOULD clear category and swap the account WHEN the owner changes", () => {
   givenLoaded({ accounts: [acc("a1"), acc("a2", "family-1")] });
   const { result } = setup();

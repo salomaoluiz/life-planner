@@ -280,6 +280,19 @@ it("SHOULD expose the summary in cents and the loading and error states", () => 
   expect(setup().result.current.summaryError).toBe(true);
 });
 
+it("SHOULD open the form with the scope owner WHEN one owner is selected (spec 050)", () => {
+  givenData([]);
+  const { result } = setup();
+
+  act(() => result.current.onOwnerFilterChange("family-1"));
+  act(() => result.current.onAddPress());
+
+  expect(spies.push).toHaveBeenCalledWith({
+    params: { ownerId: "family-1" },
+    pathname: "/financial/transaction/add_new_transaction",
+  });
+});
+
 it("SHOULD open the form to add and the edit sheet for a row", () => {
   givenData([]);
   const { result } = setup();
