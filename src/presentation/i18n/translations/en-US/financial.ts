@@ -686,6 +686,7 @@ const financial = {
       detailTitle: "{{label}} · {{total}}",
       filtersNote: "Balance follows scope, currency and accounts",
       projected: "Expected (to the end of the month)",
+      projectedEnd: "Projected on {{date}}",
       realized: "Actual",
       subtitle:
         "Balance of the accounts in the filter at the end of each {{bucket}}",
@@ -708,6 +709,7 @@ const financial = {
     },
     currency: "Currency",
     currencyOption: "{{accounts}} accounts, {{cards}} cards",
+    delta: { inclProjected: "vs. previous period (incl. projected)" },
     empty: {
       body: "Choose another period or clear the filters to see the charts.",
       clear: "Clear filters",
@@ -730,17 +732,23 @@ const financial = {
       average: "Avg {{value}}/mo",
       averagePerMonth: "Avg/month",
       category: "Category",
-      note: "Average per month = total ÷ {{months}} months of the period.",
+      note: "Average per month = total ÷ {{months}} months of the period, future months included.",
       percent: "%",
+      projected: "{{value}} projected",
+      projectedColumn: "Projected",
       total: "Total",
     },
     period: {
+      "1m": "1M",
       "3m": "3M",
       "6m": "6M",
       "12m": "12M",
       apply: "Apply",
       custom: "Custom",
       customA11y: "Custom period",
+      customHint:
+        "Up to 2 years, any date. Dates after today appear as projected.",
+      customSummary: "{{months}} months · {{from}} – {{to}}",
       customTitle: "Custom period",
       year: "Year",
     },
@@ -757,6 +765,7 @@ const financial = {
       result: "Result",
       vsPrevious: "vs. previous period",
     },
+    today: "Today",
   },
   prepayment: {
     action: "Prepay installments",
