@@ -117,9 +117,11 @@ onFlowComplete:
       id: "financial.transactions.row-title"
       text: ${output.TRANSACTION_NAME}
     timeout: 20000
-# Filter by the family: still visible
+# Filter by the family: still visible (the list is scrolled down; the scope chips are in the header)
+- runFlow: ../../subflows/financial/scroll-list-up.yaml
 - tapOn:
     id: "financial.transactions.scope-filter-${output.FAMILY_ID}"
+- runFlow: ../../subflows/financial/scroll-list-down.yaml
 - assertVisible:
     id: "financial.transactions.row-title"
     text: ${output.TRANSACTION_NAME}
