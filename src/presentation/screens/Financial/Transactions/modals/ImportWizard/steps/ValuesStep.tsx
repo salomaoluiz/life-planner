@@ -8,6 +8,7 @@ import {
   Divider,
   FormColumns,
   Highlight,
+  IconTile,
   SegmentedControl,
   SelectField,
   Text,
@@ -15,6 +16,7 @@ import {
   TruncatedText,
   useSheetLayout,
 } from "@components";
+import { IconButton } from "@components/Icon";
 import { useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
 import {
@@ -25,6 +27,7 @@ import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
 import useStyles from "../styles";
 import { ImportWizardState } from "../useImportWizardViewModel";
+import CreatedCategoriesDialog from "./CreatedCategoriesDialog";
 import useValuesStepViewModel from "./useValuesStepViewModel";
 
 const ids = transactionsTestIds;
@@ -112,16 +115,30 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
                 />
               </View>
               <View style={styles.grow}>
-                <SelectField
-                  closeLabel={closeLabel}
-                  label={t(`financial.import.values.appValue.${tab}`)}
-                  onChange={(selected) => vm.onChoice(entry, selected)}
-                  options={selectOptions(entry)}
-                  placeholder={t("financial.import.values.choose")}
-                  sheetTitle={t(`financial.import.values.appValue.${tab}`)}
-                  testID={`${ids.importValue}.${tab}.${index}`}
-                  value={entry.selected}
-                />
+                <View style={styles.row}>
+                  <View style={styles.grow}>
+                    <SelectField
+                      closeLabel={closeLabel}
+                      label={t(`financial.import.values.appValue.${tab}`)}
+                      onChange={(selected) => vm.onChoice(entry, selected)}
+                      options={selectOptions(entry)}
+                      placeholder={t("financial.import.values.choose")}
+                      sheetTitle={t(`financial.import.values.appValue.${tab}`)}
+                      testID={`${ids.importValue}.${tab}.${index}`}
+                      value={entry.selected}
+                    />
+                  </View>
+                  {vm.isCreatedMatch(entry) ? (
+                    <IconButton
+                      accessibilityLabel={t(
+                        "financial.import.values.created.delete",
+                      )}
+                      name={"trash-can-outline"}
+                      onPress={() => vm.onDeleteOpen(entry.selected ?? "")}
+                      testID={`${ids.importValueDelete}.${index}`}
+                    />
+                  ) : null}
+                </View>
                 {misusedRows(entry) > 0 ? (
                   <Text.Caption
                     testID={`${ids.importValueMisused}.${index}`}
@@ -169,6 +186,15 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
               value={tab}
             />
           </View>
+          {vm.createdItems.length > 0 ? (
+            <Button.Ghost
+              label={t("financial.import.values.created.title", {
+                count: vm.createdItems.length,
+              })}
+              onPress={vm.onCreatedOpen}
+              testID={ids.importCreatedOpen}
+            />
+          ) : null}
           {fluid && vm.hasUnmatched ? (
             <Button.Secondary
               label={t("financial.import.values.nextUnmatched")}
@@ -261,7 +287,15 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
                   ),
                   value: "",
                 },
-                ...vm.parentOptions,
+                ...vm.parentOptions.map((option) => ({
+                  description: t(
+                    option.type === "INCOME"
+                      ? "financial.import.values.type.income"
+                      : "financial.import.values.type.expense",
+                  ),
+                  label: option.label,
+                  value: option.value,
+                })),
               ]}
               sheetTitle={t(
                 "financial.import.values.createForm.category.parent",
@@ -269,6 +303,20 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
               testID={ids.importCreateParent}
               value={vm.form.parentId}
             />
+            <View style={styles.row}>
+              <IconTile
+                color={vm.previewColor}
+                name={"shape-outline"}
+                size={"sm"}
+              />
+              <Text.Body
+                testID={ids.importCreateColor}
+                value={t(
+                  `financial.import.values.createForm.category.${vm.previewLabel.key}`,
+                  { name: vm.previewLabel.name },
+                )}
+              />
+            </View>
           </>
         ) : null}
         {kind === "card" ? (
@@ -368,16 +416,19 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
   }
 
   return (
-    <FormColumns
-      left={left()}
-      leftFlex={3}
-      leftPaneTestID={ids.importLeftPane}
-      leftScrollRef={vm.leftScroll}
-      right={createForm()}
-      rightFlex={2}
-      rightPaneTestID={ids.importRightPane}
-      testID={ids.importStep}
-    />
+    <>
+      <CreatedCategoriesDialog vm={vm} />
+      <FormColumns
+        left={left()}
+        leftFlex={3}
+        leftPaneTestID={ids.importLeftPane}
+        leftScrollRef={vm.leftScroll}
+        right={createForm()}
+        rightFlex={2}
+        rightPaneTestID={ids.importRightPane}
+        testID={ids.importStep}
+      />
+    </>
   );
 }
 

@@ -361,10 +361,27 @@ function ReviewStep(props: { wizard: ImportWizardState }) {
           testID={ids.importFilter}
           value={vm.filter}
         />
-        <Text.Caption
-          tone={"secondary"}
-          value={t("financial.import.review.groups.subtotalsNote")}
-        />
+        <View style={styles.row}>
+          <View style={styles.grow}>
+            <Text.Caption
+              tone={"secondary"}
+              value={t("financial.import.review.groups.subtotalsNote")}
+            />
+          </View>
+          {vm.bulk.visible ? (
+            <Button.Ghost
+              label={
+                vm.bulk.mode === "select"
+                  ? t("financial.import.review.selectAll", {
+                      count: vm.bulk.count,
+                    })
+                  : t("financial.import.review.unselectAll")
+              }
+              onPress={vm.onBulkToggle}
+              testID={ids.importSelectAll}
+            />
+          ) : null}
+        </View>
         {vm.filteredCount === 0 ? (
           <Text.Caption
             tone={"secondary"}

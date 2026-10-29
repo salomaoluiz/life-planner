@@ -9,16 +9,23 @@ interface CategoryColorOption {
 
 const CATEGORY_COLORS: CategoryColorOption[] = [
   { labelKey: "financial.colors.amber", value: "#F59E0B" },
+  { labelKey: "financial.colors.yellow", value: "#EAB308" },
   { labelKey: "financial.colors.orange", value: "#F97316" },
   { labelKey: "financial.colors.red", value: "#EF4444" },
+  { labelKey: "financial.colors.rose", value: "#F43F5E" },
   { labelKey: "financial.colors.pink", value: "#EC4899" },
+  { labelKey: "financial.colors.fuchsia", value: "#D946EF" },
+  { labelKey: "financial.colors.purple", value: "#A855F7" },
   { labelKey: "financial.colors.violet", value: "#8B5CF6" },
   { labelKey: "financial.colors.indigo", value: "#6366F1" },
   { labelKey: "financial.colors.blue", value: "#3B82F6" },
+  { labelKey: "financial.colors.sky", value: "#0EA5E9" },
   { labelKey: "financial.colors.cyan", value: "#06B6D4" },
   { labelKey: "financial.colors.teal", value: "#14B8A6" },
+  { labelKey: "financial.colors.emerald", value: "#10B981" },
   { labelKey: "financial.colors.green", value: "#22C55E" },
   { labelKey: "financial.colors.lime", value: "#84CC16" },
+  { labelKey: "financial.colors.brown", value: "#A16207" },
   { labelKey: "financial.colors.slate", value: "#64748B" },
 ];
 
@@ -42,10 +49,9 @@ function normalizeCategoryColor(color: string): string {
 }
 
 export type { CategoryColorOption };
-// What a category created from the CSV import wizard starts with (spec 047 FR 25): the user can edit it later.
+// What a category created from the CSV import wizard starts with (spec 047 FR 25, color: spec 054): the user can edit it later.
 const IMPORTED_CATEGORY_DEFAULTS = {
   icon: "shape-outline",
-  iconColor: DEFAULT_CATEGORY_COLOR,
 };
 
 export {

@@ -142,6 +142,17 @@ function NewCategoryModal() {
                 testID={categoryFormTestIds.swatches}
                 value={vm.iconColor}
               />
+              {vm.toneOptions.length > 0 ? (
+                <ColorSwatchGroup
+                  label={t("financial.categories.form.toneRow", {
+                    name: vm.parentName,
+                  })}
+                  onChange={vm.onColorChange}
+                  options={vm.toneOptions}
+                  testID={categoryFormTestIds.tones}
+                  value={vm.iconColor}
+                />
+              ) : null}
               <IconChoiceGroup
                 label={t("financial.categories.form.icon")}
                 moreLabel={t("financial.categories.form.moreIcons")}

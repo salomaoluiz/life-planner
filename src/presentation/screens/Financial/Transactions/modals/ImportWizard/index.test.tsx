@@ -313,6 +313,102 @@ describe("step 3: values", () => {
     expect(screen.getByTestId(ids.importContinue)).toBeEnabled();
   });
 
+  describe("delete a category created in this import (spec 054)", () => {
+    async function createdAssinaturas() {
+      const view = setup();
+
+      await toValues();
+      await chooseOption(`${ids.importValue}.category.2`, "__create__");
+      fireEvent.press(screen.getByTestId(ids.importCreateSubmit));
+      jest.mocked(useFilterOptions).mockReturnValue({
+        ...options,
+        categoryDtos: [
+          ...options.categoryDtos,
+          category("cat-subs", "Assinaturas"),
+        ],
+      } as never);
+      mutations.create.withStatus("success").withData(["cat-subs"]);
+      view.rerender(<ImportWizard {...params} />);
+
+      return view;
+    }
+
+    it("SHOULD show the trash only for a category created in this run", async () => {
+      await createdAssinaturas();
+
+      expect(
+        screen.getByTestId(`${ids.importValueDelete}.2`),
+      ).toBeOnTheScreen();
+      expect(screen.queryByTestId(`${ids.importValueDelete}.0`)).toBeNull();
+      expect(screen.getByTestId(ids.importCreatedOpen)).toBeOnTheScreen();
+    });
+
+    it("SHOULD delete the category after the confirmation and send its value back to no match", async () => {
+      const view = await createdAssinaturas();
+
+      fireEvent.press(screen.getByTestId(`${ids.importValueDelete}.2`));
+      fireEvent.press(screen.getByTestId(ids.importDeleteConfirm));
+
+      expect(mutations.delete.value.mutate).toHaveBeenCalledWith({
+        id: "cat-subs",
+        ownerId: "user-id",
+      });
+
+      // The refreshed lists no longer have it.
+      jest.mocked(useFilterOptions).mockReturnValue(options as never);
+      mutations.delete.withStatus("success");
+      view.rerender(<ImportWizard {...params} />);
+
+      expect(screen.queryByTestId(`${ids.importValueDelete}.2`)).toBeNull();
+      expect(screen.queryByTestId(ids.importCreatedOpen)).toBeNull();
+      expect(screen.getByTestId(ids.importContinue)).toBeDisabled();
+    });
+
+    it("SHOULD keep the category and show the error WHEN the delete fails", async () => {
+      const view = await createdAssinaturas();
+
+      fireEvent.press(screen.getByTestId(`${ids.importValueDelete}.2`));
+      mutations.delete.withError();
+      view.rerender(<ImportWizard {...params} />);
+
+      expect(screen.getByTestId(ids.importDeleteError)).toBeOnTheScreen();
+      expect(
+        screen.getByTestId(`${ids.importValueDelete}.2`),
+      ).toBeOnTheScreen();
+    });
+
+    it("SHOULD not delete twice WHEN confirm is pressed while the delete is running", async () => {
+      const view = await createdAssinaturas();
+
+      fireEvent.press(screen.getByTestId(`${ids.importValueDelete}.2`));
+      mutations.delete.withIsFetching(true);
+      view.rerender(<ImportWizard {...params} />);
+      fireEvent.press(screen.getByTestId(ids.importDeleteConfirm));
+
+      expect(mutations.delete.value.mutate).not.toHaveBeenCalled();
+    });
+  });
+
+  it("SHOULD show the automatic color and then the tone of the chosen parent (spec 054)", async () => {
+    setup();
+    await toValues();
+
+    await chooseOption(`${ids.importValue}.category.2`, "__create__");
+    expect(screen.getByTestId(ids.importCreateColor)).toHaveTextContent(
+      /createForm\.category\.colorAuto/,
+    );
+
+    await chooseOption(ids.importCreateParent, "cat-market");
+    expect(screen.getByTestId(ids.importCreateColor)).toHaveTextContent(
+      /createForm\.category\.colorToneOf/,
+    );
+
+    await chooseOption(ids.importCreateParent, "");
+    expect(screen.getByTestId(ids.importCreateColor)).toHaveTextContent(
+      /createForm\.category\.colorAuto/,
+    );
+  });
+
   it("SHOULD keep the last Belongs to chosen WHEN the form opens for another value (spec 048)", async () => {
     setup();
     await toValues();
@@ -520,6 +616,68 @@ describe("step 4: review and import", () => {
     expect(
       jest.mocked(mutations.import.value.mutate).mock.calls[0][0],
     ).toHaveLength(3);
+  });
+
+  describe("select all (spec 054)", () => {
+    function checked(line: number) {
+      return screen.getByTestId(`${ids.importRow}.${line}.check`).props
+        .accessibilityState.checked;
+    }
+
+    it("SHOULD check every duplicate in one go with the Duplicates filter and ask for one Refresh", async () => {
+      setup();
+      mutations.validate.value.data = { duplicates: [2, 3], errors: [] };
+      await toReview();
+      jest.mocked(mutations.validate.value.mutate).mockClear();
+
+      fireEvent.press(screen.getByTestId(`${ids.importFilter}-DUPLICATES`));
+      expect(screen.getByTestId(ids.importSelectAll)).toHaveTextContent(
+        /review\.selectAll/,
+      );
+
+      fireEvent.press(screen.getByTestId(ids.importSelectAll));
+
+      expect(checked(2)).toBe(true);
+      expect(checked(3)).toBe(true);
+      expect(screen.getByTestId(ids.importSelectAll)).toHaveTextContent(
+        /review\.unselectAll/,
+      );
+      // No dry run per row: it waits for the Refresh.
+      expect(mutations.validate.value.mutate).not.toHaveBeenCalled();
+      expect(screen.getByTestId(ids.importSubmit)).toBeDisabled();
+    });
+
+    it("SHOULD uncheck the rows without error and keep the error rows checked with the All filter", async () => {
+      setup();
+      mutations.validate.value.data = {
+        duplicates: [],
+        errors: [{ code: "CURRENCY_MISMATCH", line: 4, message: "x" }],
+      };
+      await toReview();
+
+      // Everything starts checked: the action offers to unselect.
+      expect(screen.getByTestId(ids.importSelectAll)).toHaveTextContent(
+        /review\.unselectAll/,
+      );
+      fireEvent.press(screen.getByTestId(ids.importSelectAll));
+
+      expect(checked(2)).toBe(false);
+      expect(checked(3)).toBe(false);
+      expect(checked(4)).toBe(true);
+    });
+
+    it("SHOULD hide the action on the Errors filter", async () => {
+      setup();
+      mutations.validate.value.data = {
+        duplicates: [],
+        errors: [{ code: "CURRENCY_MISMATCH", line: 4, message: "x" }],
+      };
+      await toReview();
+
+      fireEvent.press(screen.getByTestId(`${ids.importFilter}-ERRORS`));
+
+      expect(screen.queryByTestId(ids.importSelectAll)).toBeNull();
+    });
   });
 
   it("SHOULD not send a dry run WHEN a row is checked (spec 049)", async () => {

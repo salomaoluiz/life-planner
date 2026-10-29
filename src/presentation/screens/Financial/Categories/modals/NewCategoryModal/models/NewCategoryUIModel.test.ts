@@ -92,10 +92,10 @@ it("SHOULD report children, parent and transactions", () => {
   expect(model.hasTransactions("p")).toBe(false);
 });
 
-it("SHOULD expose the 12 palette colors with financial.colors keys", () => {
+it("SHOULD expose the 19 palette colors with financial.colors keys", () => {
   const options = build().colorOptions;
 
-  expect(options).toHaveLength(12);
+  expect(options).toHaveLength(19);
   options.forEach((option) =>
     expect(option.labelKey).toMatch(/^financial\.colors\./),
   );

@@ -1,6 +1,7 @@
 import { BuiltRow } from "@application/csvImport/buildRows";
 
 import {
+  bulkSelection,
   canImport,
   currencyTotals,
   filterRows,
@@ -577,5 +578,50 @@ describe("review groups (spec 049)", () => {
     expect(currencyTotals(rows, records)).toEqual({
       BRL: { expenses: 1000, income: 0 },
     });
+  });
+});
+
+describe("bulkSelection (spec 054)", () => {
+  function reviewRow(line: number, overrides = {}) {
+    return {
+      checked: false,
+      display,
+      duplicate: true,
+      line,
+      locked: false,
+      ...overrides,
+    };
+  }
+
+  it("SHOULD list the rows without error and count the unchecked ones", () => {
+    const result = bulkSelection([
+      reviewRow(2),
+      reviewRow(3, { checked: true }),
+      reviewRow(4, { checked: true, errorCode: "INVALID_DATE", locked: true }),
+    ]);
+
+    expect(result).toEqual({
+      allChecked: false,
+      lines: [2, 3],
+      uncheckedCount: 1,
+    });
+  });
+
+  it("SHOULD report all checked and ignore error rows WHEN every other row is checked", () => {
+    const result = bulkSelection([
+      reviewRow(2, { checked: true }),
+      reviewRow(4, { errorCode: "INVALID_DATE", locked: true }),
+    ]);
+
+    expect(result.allChecked).toBe(true);
+    expect(result.lines).toEqual([2]);
+  });
+
+  it("SHOULD have nothing to toggle WHEN every row has an error", () => {
+    const result = bulkSelection([
+      reviewRow(4, { errorCode: "INVALID_DATE", locked: true }),
+    ]);
+
+    expect(result).toEqual({ allChecked: false, lines: [], uncheckedCount: 0 });
   });
 });

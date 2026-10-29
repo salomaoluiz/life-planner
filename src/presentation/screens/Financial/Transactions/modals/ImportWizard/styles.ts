@@ -17,6 +17,13 @@ function useStyles() {
       blockStack: { alignItems: "flex-start", flexDirection: "column" },
       column: { alignItems: "center", flexDirection: "row", gap: spacing.sm },
       columnRow: { gap: spacing.xs, paddingVertical: spacing.sm },
+      createdMeta: { flex: 1, gap: spacing.xxs },
+      createdRow: {
+        alignItems: "center",
+        flexDirection: "row",
+        gap: spacing.sm,
+        paddingVertical: spacing.xs,
+      },
       fileRow: { alignItems: "center", flexDirection: "row", gap: spacing.md },
       footer: { gap: spacing.xs },
       footerAction: { flex: 1 },

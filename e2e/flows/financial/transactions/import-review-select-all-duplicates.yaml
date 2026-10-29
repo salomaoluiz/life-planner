@@ -1,0 +1,121 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/import-review-select-all-duplicates
+tags:
+  - financial
+  - spec-054
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Spec 054 FR 16-19: both rows look like transactions that already exist; "Select all" checks them in one go and the
+# review asks for one Refresh.
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Import Row A
+      KEY: ROW_A
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Import Row B
+      KEY: ROW_B
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: ${output.ROW_A}
+      VALUE_CENTS: "31240"
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: ${output.ROW_B}
+      VALUE_CENTS: "3990"
+- runScript:
+    file: ../../../scripts/csv-import-fixture.js
+    env:
+      DESCRIPTION_1: ${output.ROW_A}
+      DESCRIPTION_2: ${output.ROW_B}
+      CATEGORY_1: ${output.EXPENSE_CATEGORY_NAME}
+      CATEGORY_2: ${output.EXPENSE_CATEGORY_NAME}
+      ACCOUNT_NAME: ${output.ACCOUNT_NAME}
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow:
+    file: ../../../subflows/financial/load-csv-fixture.yaml
+    env:
+      CSV_FRAGMENT: ${output.CSV_FRAGMENT}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+# Spec 050: the CSV actions live in the ⋮ menu
+- tapOn:
+    id: "financial.transactions.moreActions"
+- tapOn:
+    id: "financial.transactions.importButton"
+- tapOn:
+    id: "financial.import.file.pick"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.file.name"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.column.0"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+# Step 3: everything matches by name.
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.value.category.0"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+# Step 4: the duplicates come unchecked, so the action offers to select them.
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.review.selectAll"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.filter-DUPLICATES"
+- tapOn:
+    id: "financial.import.review.selectAll"
+# The selection changed, so the review needs one Refresh before importing.
+- assertVisible:
+    id: "financial.import.stale"
+- swipe:
+    start: 45%, 70%
+    end: 45%, 30%
+- tapOn:
+    id: "financial.import.refresh"
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.import.stale"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.submit"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.toast"
+    timeout: 20000
+# 312,40 + 39,90 existed already and the two imported ones doubled them.
+- assertVisible:
+    id: "financial.transactions.summary-expense"
+    text: ".*704[.,]60.*"

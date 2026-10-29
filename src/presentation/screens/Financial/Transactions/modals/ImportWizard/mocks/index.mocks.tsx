@@ -31,6 +31,10 @@ jest.mock("@application/useCases", () => ({
       execute: jest.fn(),
       uniqueName: "createCard",
     },
+    deleteFinancialCategoryUseCase: {
+      execute: jest.fn(),
+      uniqueName: "deleteCategory",
+    },
     getFinancialCategoriesUseCase: {
       execute: jest.fn().mockResolvedValue([]),
       uniqueName: "getCategories",
@@ -107,7 +111,8 @@ function file(text: string, name = "extrato.csv") {
 }
 
 const mutations = {
-  create: new UseMutationFixture<unknown, void>(),
+  create: new UseMutationFixture<unknown, string[]>(),
+  delete: new UseMutationFixture<unknown, void>(),
   import: new UseMutationFixture<unknown, number>(),
   validate: new UseMutationFixture<unknown, unknown>(),
 };
@@ -145,6 +150,7 @@ function setup(
   breakpoint: "compact" | "expanded" = "expanded",
 ) {
   mutations.create.reset();
+  mutations.delete.reset();
   mutations.import.reset();
   mutations.validate.reset();
   jest.mocked(theme.useBreakpoint).mockReturnValue(breakpoint);
@@ -154,6 +160,10 @@ function setup(
 
     if (key === "validateImport") {
       return mutations.validate.build();
+    }
+
+    if (key === "financial.import_delete_category") {
+      return mutations.delete.build();
     }
 
     return key === "importTransactions"

@@ -7,19 +7,26 @@ import {
   normalizeCategoryColor,
 } from "./categoryColors";
 
-it("SHOULD have the 12 palette colors of the spec in order", () => {
+it("SHOULD have the 19 palette colors of spec 054 in order", () => {
   expect(CATEGORY_COLORS.map((color) => color.value)).toEqual([
     "#F59E0B",
+    "#EAB308",
     "#F97316",
     "#EF4444",
+    "#F43F5E",
     "#EC4899",
+    "#D946EF",
+    "#A855F7",
     "#8B5CF6",
     "#6366F1",
     "#3B82F6",
+    "#0EA5E9",
     "#06B6D4",
     "#14B8A6",
+    "#10B981",
     "#22C55E",
     "#84CC16",
+    "#A16207",
     "#64748B",
   ]);
 });

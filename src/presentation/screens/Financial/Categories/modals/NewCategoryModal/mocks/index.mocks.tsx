@@ -73,11 +73,13 @@ const defaultViewModel: ReturnType<typeof useNewCategoryViewModel> = {
   ownerId: "user-id",
   parentHelperKey: undefined,
   parentId: "",
+  parentName: "",
   parentOptions: [{ depth: 0, label: "Housing", value: "housing" }],
   pendingItems: undefined,
   pickerIcons: [{ label: "Heart", value: "heart" }],
   saveLabelKey: "financial.categories.form.save",
   titleKey: "financial.categories.new",
+  toneOptions: [],
   type: "EXPENSE",
   typeHelperKey: undefined,
   typeOptions: [

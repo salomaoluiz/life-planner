@@ -1,0 +1,106 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/import-csv-delete-created-category
+tags:
+  - financial
+  - spec-054
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Spec 054 FR 4-9: a category created in the import can be deleted from the Values step; its value goes back to no match.
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Import Row A
+      KEY: ROW_A
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Import Row B
+      KEY: ROW_B
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Import Parent
+      KEY: NEW_PARENT_NAME
+- evalScript: ${output.NEW_CATEGORY_NAME = output.NEW_PARENT_NAME + ' > E2E Import Child'}
+- runScript:
+    file: ../../../scripts/csv-import-fixture.js
+    env:
+      DESCRIPTION_1: ${output.ROW_A}
+      DESCRIPTION_2: ${output.ROW_B}
+      CATEGORY_1: ${output.EXPENSE_CATEGORY_NAME}
+      CATEGORY_2: ${output.NEW_CATEGORY_NAME}
+      ACCOUNT_NAME: ${output.ACCOUNT_NAME}
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow:
+    file: ../../../subflows/financial/load-csv-fixture.yaml
+    env:
+      CSV_FRAGMENT: ${output.CSV_FRAGMENT}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+# Spec 050: the CSV actions live in the ⋮ menu
+- tapOn:
+    id: "financial.transactions.moreActions"
+- tapOn:
+    id: "financial.transactions.importButton"
+- tapOn:
+    id: "financial.import.file.pick"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.file.name"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.column.0"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.continue"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.value.category.1"
+    timeout: 20000
+- tapOn:
+    id: "financial.import.value.category.1"
+- tapOn:
+    id: "financial.import.value.category.1-option-__create__"
+# The new category form is on the right: its buttons are below the fold of the wizard.
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.import.create.submit"
+- extendedWaitUntil:
+    visible:
+      id: "financial.import.value.category.1-value"
+      text: ${output.NEW_CATEGORY_NAME}
+    timeout: 20000
+# A category created here has the trash button; the one that existed before does not.
+- assertVisible:
+    id: "financial.import.value.delete.1"
+- assertNotVisible:
+    id: "financial.import.value.delete.0"
+- tapOn:
+    id: "financial.import.value.delete.1"
+- tapOn:
+    id: "financial.import.created.deleteConfirm"
+# The value is unmatched again; the parent level of the path was created too and stays in the created list.
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.import.value.delete.1"
+    timeout: 20000
+- assertVisible:
+    id: "financial.import.created.open"
+- assertNotVisible:
+    id: "financial.import.value.category.1-value"
+    text: ${output.NEW_CATEGORY_NAME}

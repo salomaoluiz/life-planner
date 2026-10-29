@@ -15,6 +15,7 @@ const categoryFormTestIds = {
   saveButton: "financial.category-form.save-button",
   sheet: "financial.category-form.sheet",
   swatches: "financial.category-form.color",
+  tones: "financial.category-form.tones",
   type: "financial.category-form.type",
 } as const;
 
