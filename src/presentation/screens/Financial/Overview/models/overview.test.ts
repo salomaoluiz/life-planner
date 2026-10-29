@@ -175,6 +175,22 @@ describe("foldBars", () => {
     expect(rows[1]).toMatchObject({ id: "untagged", muted: true });
   });
 
+  it("SHOULD add the average to every row, Other included, AND none WHEN the callback returns undefined", () => {
+    const rows = foldBars({
+      ...base,
+      averageOf: (value) => `avg ${value / 3}`,
+      extra: [{ id: "untagged", name: "No tag", value: 300 }],
+      items,
+    });
+
+    expect(rows[0].average).toBe("avg 300");
+    expect(rows[8]).toMatchObject({ average: "avg 33.333333333333336" });
+    expect(rows[9].average).toBe("avg 100");
+    expect(
+      foldBars({ ...base, averageOf: () => undefined, items })[0].average,
+    ).toBeUndefined();
+  });
+
   it("SHOULD drop zero items", () => {
     expect(
       foldBars({ ...base, items: [{ id: "z", name: "Zero", value: 0 }] }),

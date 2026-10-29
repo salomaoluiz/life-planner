@@ -1,11 +1,13 @@
 import { StyleSheet, View } from "react-native";
 import Svg, { Circle, G, Path } from "react-native-svg";
 
-import BarList, { BarListRow } from "@components/BarList";
+import BarList, { BarListColumns, BarListRow } from "@components/BarList";
 import { useKitTheme } from "@components/utils/useKitTheme";
 import { chartPalette } from "@presentation/theme/constants/chartPalette";
 
 export interface PieBreakdownProps {
+  /** Wide layout: the legend as a table with these headers (spec 052) */
+  columns?: BarListColumns;
   onPress?: (id: string) => void;
   openLabel?: string;
   /** The rows (largest first); each slice is as big as its `ratio`. A `muted` row is grey and not pressable */
@@ -32,7 +34,11 @@ function PieBreakdown(props: PieBreakdownProps) {
       : chartPalette[index % chartPalette.length],
   }));
   const styles = StyleSheet.create({
-    list: { flexBasis: 240, flexGrow: 1, flexShrink: 1 },
+    list: {
+      flexBasis: props.columns ? 420 : 240,
+      flexGrow: 1,
+      flexShrink: 1,
+    },
     pie: { alignSelf: "center" },
     root: {
       alignItems: "center",
@@ -98,6 +104,7 @@ function PieBreakdown(props: PieBreakdownProps) {
       </View>
       <View style={styles.list}>
         <BarList
+          columns={props.columns}
           hideBars
           onPress={props.onPress}
           openLabel={props.openLabel}
