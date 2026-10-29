@@ -1,0 +1,94 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/filters-category-search
+tags:
+  - financial
+  - spec-051
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Archived Account
+      KEY: ARCHIVED_ACCOUNT_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Row
+      KEY: ROW_NAME
+- evalScript: ${output.ACTIVE_ACCOUNT_ID = output.ACCOUNT_ID}
+- runFlow:
+    file: ../../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: ${output.ARCHIVED_ACCOUNT_NAME}
+      STATUS: ARCHIVED
+- evalScript: ${output.ARCHIVED_ACCOUNT_ID = output.ACCOUNT_ID}
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACTIVE_ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: ${output.ROW_NAME}
+      VALUE_CENTS: "1100"
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- tapOn:
+    id: "financial.transactions.filters-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.filters.apply"
+    timeout: 20000
+# No category is listed before typing; the archived account is not offered
+- assertVisible:
+    id: "financial.transactions.filters.categories-search"
+- assertNotVisible:
+    id: "financial.transactions.filters.category-${output.EXPENSE_CATEGORY_ID}"
+- assertVisible:
+    id: "financial.transactions.filters.source-${output.ACTIVE_ACCOUNT_ID}"
+- assertNotVisible:
+    id: "financial.transactions.filters.source-${output.ARCHIVED_ACCOUNT_ID}"
+# Search, pick: a chip appears and the search is cleared
+- tapOn:
+    id: "financial.transactions.filters.categories-search"
+- inputText: ${output.EXPENSE_CATEGORY_NAME}
+- tapOn:
+    id: "financial.transactions.filters.category-${output.EXPENSE_CATEGORY_ID}"
+- assertVisible:
+    id: "financial.transactions.filters.category-chip-${output.EXPENSE_CATEGORY_ID}"
+- assertNotVisible:
+    id: "financial.transactions.filters.category-${output.EXPENSE_CATEGORY_ID}"
+- tapOn:
+    id: "financial.transactions.filters.apply"
+- assertVisible:
+    id: "financial.transactions.filters-button-badge"
+# Remove the chip and apply: the filter is gone
+- tapOn:
+    id: "financial.transactions.filters-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.filters.category-chip-${output.EXPENSE_CATEGORY_ID}"
+    timeout: 20000
+- tapOn:
+    id: "financial.transactions.filters.category-chip-${output.EXPENSE_CATEGORY_ID}-remove"
+- assertNotVisible:
+    id: "financial.transactions.filters.category-chip-${output.EXPENSE_CATEGORY_ID}"
+- tapOn:
+    id: "financial.transactions.filters.apply"
+- assertNotVisible:
+    id: "financial.transactions.filters-button-badge"

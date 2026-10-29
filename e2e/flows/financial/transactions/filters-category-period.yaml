@@ -105,6 +105,10 @@ onFlowComplete:
     timeout: 20000
 - tapOn:
     id: "financial.transactions.filters.period-mode-THIS_YEAR"
+# Spec 051: the category is found by search, not listed in a tree
+- tapOn:
+    id: "financial.transactions.filters.categories-search"
+- inputText: ${output.EXPENSE_CATEGORY_NAME}
 - tapOn:
     id: "financial.transactions.filters.category-${output.EXPENSE_CATEGORY_ID}"
 - tapOn:
