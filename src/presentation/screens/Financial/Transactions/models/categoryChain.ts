@@ -9,6 +9,7 @@ interface ChainCategory {
   scope?: string;
   scopeOwnerIds: string[];
   status: string;
+  type: string;
 }
 
 interface ChainDeps {
@@ -34,6 +35,8 @@ async function createCategoryChain(
   // "ALL" (spec 048 FR 29b): every level is an All category and only All categories are reused. With "OWNER" a reused
   // All parent still makes its children All: a child follows the scope of its parent (spec 038).
   scope: "ALL" | "OWNER" = "OWNER",
+  // Spec 054 FR 1-2: an income and an expense category can share a name, so levels are matched inside the same type.
+  type: string,
 ): Promise<void> {
   let all = scope === "ALL";
   let parentId = first.parentId;
@@ -46,6 +49,7 @@ async function createCategoryChain(
       (item) =>
         item.status !== "ARCHIVED" &&
         item.parentId === parentId &&
+        item.type === type &&
         item.scopeOwnerIds.includes(ownerId) &&
         (scope !== "ALL" || item.scope === "ALL") &&
         normalizeText(item.name) === wanted,
@@ -69,6 +73,7 @@ async function createCategoryChain(
     const created = categories.find(
       (item) =>
         item.parentId === parentId &&
+        item.type === type &&
         item.scopeOwnerIds.includes(ownerId) &&
         normalizeText(item.name) === wanted,
     );

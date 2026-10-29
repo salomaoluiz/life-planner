@@ -144,6 +144,7 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
               ),
           },
           allScopes ? "ALL" : "OWNER",
+          values.type,
         );
       } else if (kind === "account") {
         await useCases.createFinancialAccountUseCase.execute({

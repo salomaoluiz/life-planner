@@ -10,6 +10,7 @@ function cat(
   parentId?: string,
   depthLevel = 0,
   scope?: "ALL",
+  type = "EXPENSE",
 ): ChainCategory {
   return {
     depthLevel,
@@ -19,11 +20,12 @@ function cat(
     scope,
     scopeOwnerIds: ["o1"],
     status: "ACTIVE",
+    type,
   };
 }
 
 // A fake store: create adds the category, list returns them.
-function store(initial: ChainCategory[]) {
+function store(initial: ChainCategory[], type = "EXPENSE") {
   const items = [...initial];
   const calls: {
     all?: boolean;
@@ -49,6 +51,7 @@ function store(initial: ChainCategory[]) {
             params.parentId,
             params.depthLevel,
             params.all ? "ALL" : undefined,
+            type,
           ),
         );
       },
@@ -76,6 +79,8 @@ describe("createCategoryChain", () => {
       "o1",
       { depthLevel: 0 },
       deps,
+      "OWNER",
+      "EXPENSE",
     );
 
     expect(calls).toEqual([
@@ -92,6 +97,8 @@ describe("createCategoryChain", () => {
       "o1",
       { depthLevel: 0 },
       deps,
+      "OWNER",
+      "EXPENSE",
     );
 
     expect(calls.map((call) => [call.name, call.depthLevel])).toEqual([
@@ -112,6 +119,8 @@ describe("createCategoryChain", () => {
       "o1",
       { depthLevel: 0 },
       deps,
+      "OWNER",
+      "EXPENSE",
     );
 
     expect(calls).toEqual([
@@ -125,7 +134,14 @@ describe("createCategoryChain", () => {
       { ...cat("other", "Finanças"), scopeOwnerIds: ["o2"] },
     ]);
 
-    await createCategoryChain(["Finanças"], "o1", { depthLevel: 0 }, deps);
+    await createCategoryChain(
+      ["Finanças"],
+      "o1",
+      { depthLevel: 0 },
+      deps,
+      "OWNER",
+      "EXPENSE",
+    );
 
     expect(calls).toHaveLength(1);
   });
@@ -138,6 +154,8 @@ describe("createCategoryChain", () => {
       "o1",
       { depthLevel: 1, parentId: "p" },
       deps,
+      "OWNER",
+      "EXPENSE",
     );
 
     expect(calls).toEqual([{ depthLevel: 1, name: "Mercado", parentId: "p" }]);
@@ -153,6 +171,7 @@ describe("createCategoryChain", () => {
         { depthLevel: 0 },
         deps,
         "ALL",
+        "EXPENSE",
       );
 
       expect(calls).toEqual([
@@ -173,6 +192,7 @@ describe("createCategoryChain", () => {
         { depthLevel: 0 },
         deps,
         "ALL",
+        "EXPENSE",
       );
 
       expect(calls).toEqual([
@@ -190,10 +210,76 @@ describe("createCategoryChain", () => {
         "o1",
         { depthLevel: 0 },
         deps,
+        "OWNER",
+        "EXPENSE",
       );
 
       expect(calls).toEqual([
         { all: true, depthLevel: 1, name: "Limpeza", parentId: "all" },
+      ]);
+    });
+  });
+
+  describe("type (spec 054 FR 1-3)", () => {
+    const incomeCasa = cat(
+      "casa-in",
+      "Casa",
+      undefined,
+      0,
+      undefined,
+      "INCOME",
+    );
+    const expenseCasa = cat("casa-ex", "Casa");
+
+    it("SHOULD create the child under the income Casa WHEN both exist, expense first", async () => {
+      const { calls, deps } = store([expenseCasa, incomeCasa], "INCOME");
+
+      await createCategoryChain(
+        ["Casa", "Aluguel recebido"],
+        "o1",
+        { depthLevel: 0 },
+        deps,
+        "OWNER",
+        "INCOME",
+      );
+
+      expect(calls).toEqual([
+        { depthLevel: 1, name: "Aluguel recebido", parentId: "casa-in" },
+      ]);
+    });
+
+    it("SHOULD create the child under the income Casa WHEN the income one is listed first", async () => {
+      const { calls, deps } = store([incomeCasa, expenseCasa], "INCOME");
+
+      await createCategoryChain(
+        ["Casa", "Aluguel recebido"],
+        "o1",
+        { depthLevel: 0 },
+        deps,
+        "OWNER",
+        "INCOME",
+      );
+
+      expect(calls).toEqual([
+        { depthLevel: 1, name: "Aluguel recebido", parentId: "casa-in" },
+      ]);
+    });
+
+    it("SHOULD create an income Casa and its child WHEN only the expense Casa exists", async () => {
+      const { calls, deps } = store([expenseCasa], "INCOME");
+
+      await createCategoryChain(
+        ["Casa", "Aluguel recebido"],
+        "o1",
+        { depthLevel: 0 },
+        deps,
+        "OWNER",
+        "INCOME",
+      );
+
+      expect(calls).toEqual([
+        { depthLevel: 0, name: "Casa", parentId: undefined },
+        { depthLevel: 1, name: "Aluguel recebido", parentId: "new-1" },
       ]);
     });
   });
