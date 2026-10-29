@@ -125,6 +125,7 @@ function CategorySearchField(props: CategorySearchFieldProps) {
         subtitle={secondLine(item)}
         testID={`${ids.filtersCategory}-${entry.category.id}`}
         title={entry.category.name}
+        typeDot={entry.category.type === "INCOME" ? "income" : "expense"}
       />
     );
   }

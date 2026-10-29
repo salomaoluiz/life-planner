@@ -1,3 +1,4 @@
+import { lightTheme } from "@presentation/theme/provider";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
 import {
@@ -102,4 +103,21 @@ it("SHOULD hide results on Escape and pick the highlighted one with the arrows a
 
   fireEvent(input, "keyPress", { nativeEvent: { key: "Escape" } });
   expect(screen.queryByTestId(`${ids.filtersCategory}-market`)).toBeNull();
+});
+
+it("SHOULD end each result with a fixed bullet for expense or income", () => {
+  setup({ query: "s", results: [result("market"), result("sales")] });
+
+  function dot(id: string) {
+    return screen.getByTestId(`${ids.filtersCategory}-${id}-type-dot`, {
+      includeHiddenElements: true,
+    });
+  }
+
+  expect(dot("market")).toHaveStyle({
+    backgroundColor: lightTheme.colors.expense,
+  });
+  expect(dot("sales")).toHaveStyle({
+    backgroundColor: lightTheme.colors.income,
+  });
 });

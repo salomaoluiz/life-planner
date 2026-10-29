@@ -17,6 +17,8 @@ export interface OptionRowProps {
   subtitle?: string;
   testID?: string;
   title: string;
+  // A fixed-color bullet at the opposite end: expense or income.
+  typeDot?: "expense" | "income";
 }
 
 const BULLET = 10;
@@ -55,6 +57,12 @@ function OptionRow(props: OptionRowProps) {
       padding: spacing.sm,
     },
     text: { flex: 1 },
+    typeDot: {
+      backgroundColor: props.typeDot ? colors[props.typeDot] : undefined,
+      borderRadius: radius.full,
+      height: BULLET,
+      width: BULLET,
+    },
   });
 
   return (
@@ -83,6 +91,13 @@ function OptionRow(props: OptionRowProps) {
         <View style={styles.badge}>
           <Text.Caption color={tone.text} value={props.badge.label} />
         </View>
+      ) : null}
+      {props.typeDot ? (
+        <View
+          accessibilityElementsHidden
+          style={styles.typeDot}
+          testID={props.testID && `${props.testID}-type-dot`}
+        />
       ) : null}
     </Touchable>
   );
