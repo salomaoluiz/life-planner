@@ -151,15 +151,27 @@ function BalanceBlock(props: { compact: boolean; vm: OverviewViewModel }) {
         <View style={styles.detail} testID={overviewTestIds.balanceDetail}>
           <Text.Caption
             tone="secondary"
-            value={t("financial.overview.balance.detailTitle", {
-              label: `${formatDay(point.start, localeTag)}${point.start === point.end ? "" : ` – ${formatDay(point.end, localeTag)}`}`,
-              total: money(point.balance),
-            })}
+            value={`${formatDay(point.start, localeTag)}${point.start === point.end ? "" : ` – ${formatDay(point.end, localeTag)}`}`}
           />
+          <View style={styles.detailRow}>
+            <Text.Caption
+              tone={point.balance >= 0 ? "income" : "expense"}
+              value={t("financial.overview.balance.total")}
+            />
+            <Text.BodyStrong
+              tabular
+              tone={point.balance >= 0 ? "income" : "expense"}
+              value={money(point.balance)}
+            />
+          </View>
           {point.accounts.map((account) => (
             <View key={account.id} style={styles.detailRow}>
               <Text.Caption tone="secondary" value={account.name} />
-              <Text.Caption tabular value={money(account.balance)} />
+              <Text.Caption
+                tabular
+                tone={account.balance >= 0 ? "income" : "expense"}
+                value={money(account.balance)}
+              />
             </View>
           ))}
         </View>

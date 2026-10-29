@@ -683,7 +683,6 @@ const financial = {
       open: "Open in Transactions",
     },
     balance: {
-      detailTitle: "{{label}} · {{total}}",
       filtersNote: "Balance follows scope, currency and accounts",
       projected: "Expected (after today)",
       projectedEnd: "Projected on {{date}}",
@@ -691,6 +690,7 @@ const financial = {
       subtitle:
         "Balance of the accounts in the filter at the end of each {{bucket}}",
       title: "Balance over time",
+      total: "Total",
     },
     blockError: "Couldn't load this chart",
     bucket: { day: "day", month: "month", week: "week" },
