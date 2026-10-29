@@ -12,6 +12,8 @@ export interface RemovableChipProps {
   onRemove: () => void;
   removeLabel: string;
   testID?: string;
+  // A fixed-color bullet after the label: expense or income (spec 051).
+  typeDot?: "expense" | "income";
 }
 
 const CHIP_HEIGHT = 32;
@@ -38,6 +40,12 @@ function RemovableChip(props: RemovableChipProps) {
       height: CHIP_HEIGHT,
       paddingHorizontal: spacing.sm,
     },
+    typeDot: {
+      backgroundColor: props.typeDot ? colors[props.typeDot] : undefined,
+      borderRadius: radius.full,
+      height: DOT_SIZE,
+      width: DOT_SIZE,
+    },
   });
 
   return (
@@ -54,6 +62,13 @@ function RemovableChip(props: RemovableChipProps) {
         numberOfLines={1}
         value={props.label}
       />
+      {props.typeDot ? (
+        <View
+          accessibilityElementsHidden
+          style={styles.typeDot}
+          testID={testID && `${testID}-type-dot`}
+        />
+      ) : null}
       <Touchable
         accessibilityLabel={props.removeLabel}
         accessibilityRole="button"

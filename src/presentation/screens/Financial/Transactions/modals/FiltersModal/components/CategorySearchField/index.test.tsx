@@ -13,7 +13,11 @@ const ids = transactionsTestIds;
 const search = `${ids.filtersSection}.categories-search`;
 
 it("SHOULD list nothing for an empty query but keep the chips", () => {
-  setup({ chips: [{ iconColor: "#112233", id: "food", label: "Food" }] });
+  setup({
+    chips: [
+      { iconColor: "#112233", id: "food", label: "Food", type: "INCOME" },
+    ],
+  });
 
   expect(screen.queryByTestId(`${ids.filtersCategory}-food`)).toBeNull();
   expect(
@@ -74,8 +78,8 @@ it("SHOULD say when nothing matches", () => {
 it("SHOULD remove a chip by id, even when two chips share a label", () => {
   setup({
     chips: [
-      { iconColor: "#112233", id: "a", label: "Misc" },
-      { id: "b", label: "Misc" },
+      { iconColor: "#112233", id: "a", label: "Misc", type: "EXPENSE" },
+      { id: "b", label: "Misc", type: "EXPENSE" },
     ],
   });
 
@@ -120,4 +124,22 @@ it("SHOULD end each result with a fixed bullet for expense or income", () => {
   expect(dot("sales")).toHaveStyle({
     backgroundColor: lightTheme.colors.income,
   });
+});
+
+it("SHOULD end a chip with the expense or income bullet", () => {
+  setup({
+    chips: [
+      { id: "a", label: "Rent", type: "EXPENSE" },
+      { id: "b", label: "Pay", type: "INCOME" },
+    ],
+  });
+
+  function dot(id: string) {
+    return screen.getByTestId(`${ids.filtersCategoryChip}-${id}-type-dot`, {
+      includeHiddenElements: true,
+    });
+  }
+
+  expect(dot("a")).toHaveStyle({ backgroundColor: lightTheme.colors.expense });
+  expect(dot("b")).toHaveStyle({ backgroundColor: lightTheme.colors.income });
 });

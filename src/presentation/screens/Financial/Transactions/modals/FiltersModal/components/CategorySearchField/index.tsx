@@ -20,7 +20,7 @@ import useStyles from "./styles";
 const ROW_HEIGHT = 56;
 
 export interface CategorySearchFieldProps {
-  chips: { iconColor?: string; id: string; label: string }[];
+  chips: { iconColor?: string; id: string; label: string; type: string }[];
   // Wide: the results float under the field; compact: they sit inline.
   dropdown: boolean;
   onPick: (id: string) => void;
@@ -182,6 +182,7 @@ function CategorySearchField(props: CategorySearchFieldProps) {
                 label: chip.label,
               })}
               testID={`${ids.filtersCategoryChip}-${chip.id}`}
+              typeDot={chip.type === "INCOME" ? "income" : "expense"}
             />
           ))}
         </View>

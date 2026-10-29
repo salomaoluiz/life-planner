@@ -147,7 +147,14 @@ function useFiltersModalViewModel(params: FiltersModalParams) {
         const entry = categoryIndex.find((item) => item.category.id === id);
 
         return entry
-          ? [{ iconColor: entry.category.iconColor, id, label: entry.path }]
+          ? [
+              {
+                iconColor: entry.category.iconColor,
+                id,
+                label: entry.path,
+                type: entry.category.type,
+              },
+            ]
           : [];
       }),
     [draft.categoryIds, categoryIndex],
