@@ -39,7 +39,11 @@ function TodayMarker(props: TodayMarkerProps) {
   });
 
   return (
-    <View pointerEvents="none" testID={props.testID}>
+    <View
+      pointerEvents="none"
+      style={StyleSheet.absoluteFill}
+      testID={props.testID}
+    >
       <View style={styles.line} />
       <View style={styles.label}>
         <Text.Caption tone="accent" value={props.label} />

@@ -1,4 +1,4 @@
-import { render } from "@tests";
+import { fireEvent, render } from "@tests";
 
 import Skeleton from "./";
 import { screen, setup } from "./mocks/index.mocks";
@@ -83,4 +83,12 @@ it("SHOULD render the Card preset", () => {
   render(<Skeleton.Card testID="skeleton-card" />);
   expect(screen.getByTestId("skeleton-card")).toBeTruthy();
   expect(screen.getAllByTestId("skeleton-rect")).toHaveLength(1);
+});
+
+it("SHOULD size a percentage box from its container, not from the window", () => {
+  render(<Skeleton.Box height={20} width="100%" />);
+  fireEvent(screen.getByTestId("skeleton-box-container"), "layout", {
+    nativeEvent: { layout: { height: 20, width: 123 } },
+  });
+  expect(screen.getByTestId("skeleton-rect").props.width).toBe(123);
 });
