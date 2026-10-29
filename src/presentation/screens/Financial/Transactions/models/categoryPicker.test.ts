@@ -1,7 +1,6 @@
 import {
   buildCategoryGroups,
   buildCategoryIndex,
-  checkState,
   PickerCategory,
   searchCategories,
   SearchOptions,
@@ -43,37 +42,10 @@ describe("buildCategoryGroups", () => {
       "butcher",
     ]);
   });
-
-  it("SHOULD keep the matching rows and their parents when searching, ignoring accents", () => {
-    const groups = buildCategoryGroups(
-      [...categories, category("cafe", "Café", { parentId: "market" })],
-      "cafe",
-    );
-
-    expect(groups).toHaveLength(1);
-    expect(groups[0].nodes[0].category.id).toBe("market");
-    expect(groups[0].nodes[0].children.map((n) => n.category.id)).toEqual([
-      "cafe",
-    ]);
-  });
 });
 
-describe("checkState / toggleCategory", () => {
+describe("toggleCategory", () => {
   const groups = buildCategoryGroups(categories);
-  const market = groups[0].nodes[0];
-
-  it("SHOULD show a chosen parent and its children as checked", () => {
-    const selected = new Set(["market"]);
-
-    expect(checkState(market, selected)).toBe(true);
-    expect(checkState(market.children[0], selected, true)).toBe(true);
-  });
-
-  it("SHOULD show a parent as mixed WHEN only some children are chosen, and not chosen even when all are", () => {
-    expect(checkState(market, new Set(["greens"]))).toBe("mixed");
-    expect(checkState(market, new Set(["butcher", "greens"]))).toBe("mixed");
-    expect(checkState(market, new Set())).toBe(false);
-  });
 
   it("SHOULD choose a parent and drop the ids under it", () => {
     expect(

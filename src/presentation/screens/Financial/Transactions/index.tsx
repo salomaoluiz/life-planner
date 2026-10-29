@@ -583,6 +583,7 @@ function FinancialTransactions() {
           onClose={() => setFiltersOpen(false)}
           ownerIds={vm.allOwnerIds}
           scopeOwnerIds={vm.scopeOwnerIds}
+          typeFirst={vm.typeFilter === "ALL" ? undefined : vm.typeFilter}
         />
       )}
       <Toast

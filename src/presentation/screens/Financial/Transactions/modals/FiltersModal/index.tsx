@@ -10,7 +10,6 @@ import {
   FormColumns,
   Icon,
   ListItem,
-  SearchField,
   Text,
   Touchable,
 } from "@components";
@@ -18,15 +17,12 @@ import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
 import { SourceOption } from "@screens/Financial/Transactions/hooks/useFilterOptions";
 import {
-  CategoryNode,
-  checkState,
-} from "@screens/Financial/Transactions/models/categoryPicker";
-import {
   formatPeriod,
   namesLabel,
 } from "@screens/Financial/Transactions/models/filterLabels";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
+import CategorySearchField from "./components/CategorySearchField";
 import useStyles from "./styles";
 import useFiltersModalViewModel, {
   FiltersModalParams,
@@ -48,7 +44,6 @@ const MODES: PeriodMode[] = [
   "CUSTOM",
 ];
 const STEP_TITLES = {
-  categories: "financial.transactions.filters.categories.title",
   period: "financial.transactions.filters.period.title",
   sources: "financial.transactions.filters.sources.title",
 } as const;
@@ -176,7 +171,7 @@ function FiltersModal(props: FiltersModalParams) {
   }
 
   function sourceList() {
-    const { accounts, archived, cards } = vm.sourceGroups;
+    const { accounts, cards } = vm.sourceGroups;
 
     return (
       <View>
@@ -198,15 +193,10 @@ function FiltersModal(props: FiltersModalParams) {
             {cards.map(sourceRow)}
           </>
         ) : null}
-        {archived.length > 0 ? (
-          <>
-            <Text.Overline
-              tone={"secondary"}
-              value={t("financial.transactions.filters.archived")}
-            />
-            {archived.map(sourceRow)}
-          </>
-        ) : null}
+        <Text.Caption
+          tone={"secondary"}
+          value={t("financial.transactions.filters.sources.archivedHidden")}
+        />
       </View>
     );
   }
@@ -220,63 +210,19 @@ function FiltersModal(props: FiltersModalParams) {
     );
   }
 
-  function categoryRows(node: CategoryNode, ancestorChosen = false) {
-    const state = checkState(node, new Set(draft.categoryIds), ancestorChosen);
-
-    return (
-      <View key={node.category.id}>
-        <Checkbox
-          checked={state}
-          indent={node.depth * 24}
-          label={node.category.name}
-          onChange={() => vm.onCategoryToggle(node.category.id)}
-          testID={`${ids.filtersCategory}-${node.category.id}`}
-        />
-        {node.children.map((child) => categoryRows(child, state === true))}
-      </View>
-    );
-  }
-
-  function categoryList() {
-    return (
-      <View>
-        <SearchField
-          clearLabel={t("common.actions.clear")}
-          onChangeText={vm.onCategoryQueryChange}
-          placeholder={t("financial.transactions.filters.categories.search")}
-          testID={`${ids.filtersSection}.categories-search`}
-          value={vm.categoryQuery}
-        />
-        {vm.categoryGroups.map((group) => (
-          <View key={group.kind}>
-            <Text.Overline
-              tone={"secondary"}
-              value={
-                group.kind === "ARCHIVED"
-                  ? t("financial.transactions.filters.archived")
-                  : t(
-                      group.kind === "EXPENSE"
-                        ? "financial.transactions.filters.categories.expenses"
-                        : "financial.transactions.filters.categories.income",
-                    )
-              }
-            />
-            {group.nodes.map((node) => categoryRows(node))}
-          </View>
-        ))}
-        <Text.Caption
-          tone={"secondary"}
-          value={t("financial.transactions.filters.categories.help")}
-        />
-      </View>
-    );
-  }
-
   function categoriesSection() {
     return (
       <View style={styles.section} testID={`${ids.filtersSection}.categories`}>
         {sectionTitle(t("financial.transactions.filters.categories.title"))}
-        {categoryList()}
+        <CategorySearchField
+          chips={vm.selectedCategoryChips}
+          dropdown={vm.wide}
+          onPick={vm.onCategoryPick}
+          onQueryChange={vm.onCategoryQueryChange}
+          onRemove={vm.onCategoryRemove}
+          query={vm.categoryQuery}
+          results={vm.categoryResults}
+        />
       </View>
     );
   }
@@ -350,24 +296,13 @@ function FiltersModal(props: FiltersModalParams) {
     );
   }
 
-  const sourceNames = [
-    ...vm.sourceGroups.accounts,
-    ...vm.sourceGroups.cards,
-    ...vm.sourceGroups.archived,
-  ]
+  const sourceNames = [...vm.sourceGroups.accounts, ...vm.sourceGroups.cards]
     .filter((source) =>
       source.kind === "ACCOUNT"
         ? draft.accountIds.includes(source.id)
         : draft.cardIds.includes(source.id),
     )
     .map((source) => source.name);
-  const categoryNames = namesLabel(
-    vm.categoryGroups
-      .flatMap((group) => flatten(group.nodes))
-      .filter((node) => draft.categoryIds.includes(node.category.id))
-      .map((node) => node.category.name),
-  );
-
   function compactRoot() {
     return (
       <View style={styles.stack}>
@@ -390,12 +325,7 @@ function FiltersModal(props: FiltersModalParams) {
           "sources",
           `${ids.filtersSection}.sources`,
         )}
-        {pickerRow(
-          t("financial.transactions.filters.categories.title"),
-          categoryNames || t("financial.transactions.filters.sources.all"),
-          "categories",
-          `${ids.filtersSection}.categories`,
-        )}
+        {categoriesSection()}
         {tagsSection()}
         {situationSection()}
       </View>
@@ -417,17 +347,6 @@ function FiltersModal(props: FiltersModalParams) {
         </Touchable>
         {vm.step === "period" ? periodStep() : null}
         {vm.step === "sources" ? sourceList() : null}
-        {vm.step === "categories" ? (
-          <>
-            <Text.Caption
-              tone={"secondary"}
-              value={t("financial.transactions.filters.categories.selected", {
-                count: vm.selectedCategoryCount,
-              })}
-            />
-            {categoryList()}
-          </>
-        ) : null}
       </View>
     );
   }
@@ -479,7 +398,6 @@ function FiltersModal(props: FiltersModalParams) {
       testID={ids.filtersClear}
     />
   );
-  const stepDone = inStep && vm.step === "categories";
 
   function renderBody() {
     if (vm.wide) {
@@ -497,7 +415,7 @@ function FiltersModal(props: FiltersModalParams) {
           disabled={!vm.canApply}
           fullWidth
           label={t(
-            stepDone || (inStep && vm.step !== "root")
+            inStep
               ? "financial.transactions.filters.done"
               : "financial.transactions.filters.apply",
           )}
@@ -534,10 +452,6 @@ function FiltersModal(props: FiltersModalParams) {
       {renderBody()}
     </BottomSheet>
   );
-}
-
-function flatten(nodes: CategoryNode[]): CategoryNode[] {
-  return nodes.flatMap((node) => [node, ...flatten(node.children)]);
 }
 
 export default FiltersModal;

@@ -17,8 +17,8 @@ function category(
 }
 
 const index = buildCategoryIndex([
-  category("food", "Food", { color: "#F5A524" }),
-  category("market", "Market", { color: "#F5A524", parentId: "food" }),
+  category("food", "Food", { iconColor: "#F5A524" }),
+  category("market", "Market", { iconColor: "#F5A524", parentId: "food" }),
   category("old", "Market old", { archived: true }),
   category("sales", "Sales", { type: "INCOME" }),
 ]);

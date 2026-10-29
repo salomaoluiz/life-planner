@@ -7,8 +7,9 @@ import useFilterOptions, {
 } from "@screens/Financial/Transactions/hooks/useFilterOptions";
 import {
   buildCategoryGroups,
-  CategoryGroup,
+  buildCategoryIndex,
   PickerCategory,
+  searchCategories,
   toggleCategory,
 } from "@screens/Financial/Transactions/models/categoryPicker";
 import {
@@ -34,8 +35,10 @@ export interface FiltersModalParams {
   ownerIds: string[];
   // The ids of the scope chip on screen: pickers list what belongs to it.
   scopeOwnerIds: string[];
+  // The type of the screen: its categories are listed first in the search (spec 051 FR 3).
+  typeFirst?: "EXPENSE" | "INCOME";
 }
-export type FiltersStep = "categories" | "period" | "root" | "sources";
+export type FiltersStep = "period" | "root" | "sources";
 
 export type PeriodMode = "CUSTOM" | "NONE" | PeriodPreset;
 
@@ -113,6 +116,7 @@ function useFiltersModalViewModel(params: FiltersModalParams) {
         )
         .map((category) => ({
           archived: category.status === "ARCHIVED",
+          iconColor: category.iconColor,
           id: category.id,
           name: category.name,
           parentId: category.parentId,
@@ -120,18 +124,47 @@ function useFiltersModalViewModel(params: FiltersModalParams) {
         })),
     [options.categoryDtos, params.scopeOwnerIds, params.archivedOwnerIds],
   );
-  const categoryGroups = useMemo<CategoryGroup[]>(
-    () => buildCategoryGroups(pickerCategories, categoryQuery),
-    [pickerCategories, categoryQuery],
-  );
-  // Toggling works over the whole tree, not over the rows the search left on screen.
+  // Toggling works over the whole tree; the search index is computed once per categories load (spec 051 §11).
   const fullGroups = useMemo(
     () => buildCategoryGroups(pickerCategories),
     [pickerCategories],
   );
+  const categoryIndex = useMemo(
+    () => buildCategoryIndex(pickerCategories),
+    [pickerCategories],
+  );
+  const categoryResults = useMemo(
+    () =>
+      searchCategories(categoryIndex, categoryQuery, {
+        selected: new Set(draft.categoryIds),
+        typeFirst: params.typeFirst,
+      }),
+    [categoryIndex, categoryQuery, draft.categoryIds, params.typeFirst],
+  );
+  const selectedCategoryChips = useMemo(
+    () =>
+      draft.categoryIds.flatMap((id) => {
+        const entry = categoryIndex.find((item) => item.category.id === id);
 
+        return entry
+          ? [{ iconColor: entry.category.iconColor, id, label: entry.path }]
+          : [];
+      }),
+    [draft.categoryIds, categoryIndex],
+  );
+
+  // Archived accounts and cards are not offered, unless one is already in the filter applied when the modal opened (FR 13-14).
   const sourceGroups = useMemo(() => {
     const visible = options.sources.filter((source) => {
+      const kept = (
+        source.kind === "ACCOUNT"
+          ? params.filters.accountIds
+          : params.filters.cardIds
+      ).includes(source.id);
+
+      if (source.archived && !kept) {
+        return false;
+      }
       if (draft.origin === "ACCOUNT") {
         return source.kind === "ACCOUNT";
       }
@@ -140,15 +173,15 @@ function useFiltersModalViewModel(params: FiltersModalParams) {
     });
 
     return {
-      accounts: visible.filter(
-        (source) => source.kind === "ACCOUNT" && !source.archived,
-      ),
-      archived: visible.filter((source) => source.archived),
-      cards: visible.filter(
-        (source) => source.kind === "CARD" && !source.archived,
-      ),
+      accounts: visible.filter((source) => source.kind === "ACCOUNT"),
+      cards: visible.filter((source) => source.kind === "CARD"),
     };
-  }, [options.sources, draft.origin]);
+  }, [
+    options.sources,
+    draft.origin,
+    params.filters.accountIds,
+    params.filters.cardIds,
+  ]);
 
   const tagsInScope = useMemo(
     () =>
@@ -265,8 +298,8 @@ function useFiltersModalViewModel(params: FiltersModalParams) {
 
   return {
     canApply,
-    categoryGroups,
     categoryQuery,
+    categoryResults,
     customFrom,
     customTo,
     draft,
@@ -274,11 +307,18 @@ function useFiltersModalViewModel(params: FiltersModalParams) {
       params.onApply(applied());
       params.onClose();
     },
-    onCategoryQueryChange: setCategoryQuery,
-    onCategoryToggle: (id: string) =>
+    onCategoryPick: (id: string) => {
       setDraft({
         ...draft,
         categoryIds: toggleCategory(fullGroups, new Set(draft.categoryIds), id),
+      });
+      setCategoryQuery("");
+    },
+    onCategoryQueryChange: setCategoryQuery,
+    onCategoryRemove: (id: string) =>
+      setDraft({
+        ...draft,
+        categoryIds: draft.categoryIds.filter((item) => item !== id),
       }),
     onClearAll: () => {
       setDraft({ ...draft, ...clearedDraft() });
@@ -300,7 +340,7 @@ function useFiltersModalViewModel(params: FiltersModalParams) {
     onTagsChange: setTagNames,
     periodError,
     periodMode,
-    selectedCategoryCount: draft.categoryIds.length,
+    selectedCategoryChips,
     sourceGroups,
     step,
     tagNames,

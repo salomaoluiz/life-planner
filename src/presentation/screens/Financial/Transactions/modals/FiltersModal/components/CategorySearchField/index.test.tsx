@@ -12,7 +12,7 @@ const ids = transactionsTestIds;
 const search = `${ids.filtersSection}.categories-search`;
 
 it("SHOULD list nothing for an empty query but keep the chips", () => {
-  setup({ chips: [{ color: "#112233", id: "food", label: "Food" }] });
+  setup({ chips: [{ iconColor: "#112233", id: "food", label: "Food" }] });
 
   expect(screen.queryByTestId(`${ids.filtersCategory}-food`)).toBeNull();
   expect(
@@ -73,7 +73,7 @@ it("SHOULD say when nothing matches", () => {
 it("SHOULD remove a chip by id, even when two chips share a label", () => {
   setup({
     chips: [
-      { color: "#112233", id: "a", label: "Misc" },
+      { iconColor: "#112233", id: "a", label: "Misc" },
       { id: "b", label: "Misc" },
     ],
   });

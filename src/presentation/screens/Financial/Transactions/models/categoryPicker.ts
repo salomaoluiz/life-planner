@@ -1,5 +1,3 @@
-export type CategoryCheckState = "mixed" | boolean;
-
 export interface CategoryGroup {
   kind: "ARCHIVED" | "EXPENSE" | "INCOME";
   nodes: CategoryNode[];
@@ -31,7 +29,7 @@ export interface CategorySearchEntry {
 // so the selection keeps only the ids the user chose and the state of a row is derived from them.
 export interface PickerCategory {
   archived: boolean;
-  color?: string;
+  iconColor?: string;
   id: string;
   name: string;
   parentId?: string;
@@ -48,13 +46,8 @@ const MAX_RESULTS = 8;
 const GROUP_ORDER: CategoryGroup["kind"][] = ["EXPENSE", "INCOME", "ARCHIVED"];
 
 // Expenses, then Income, then the archived ones; roots whose parent is missing are shown as roots.
-// With a query only the matching rows and the parents that lead to them stay.
-function buildCategoryGroups(
-  categories: PickerCategory[],
-  query = "",
-): CategoryGroup[] {
+function buildCategoryGroups(categories: PickerCategory[]): CategoryGroup[] {
   const ids = new Set(categories.map((category) => category.id));
-  const needle = normalize(query);
   const childrenOf = new Map<string, PickerCategory[]>();
   const roots: PickerCategory[] = [];
 
@@ -69,18 +62,14 @@ function buildCategoryGroups(
     }
   });
 
-  function toNode(
-    category: PickerCategory,
-    depth: number,
-  ): CategoryNode | null {
-    const children = (childrenOf.get(category.id) ?? [])
-      .map((child) => toNode(child, depth + 1))
-      .filter((node): node is CategoryNode => node !== null);
-    const matches = !needle || normalize(category.name).includes(needle);
-
-    return matches || children.length > 0
-      ? { category, children, depth }
-      : null;
+  function toNode(category: PickerCategory, depth: number): CategoryNode {
+    return {
+      category,
+      children: (childrenOf.get(category.id) ?? []).map((child) =>
+        toNode(child, depth + 1),
+      ),
+      depth,
+    };
   }
 
   const groups = GROUP_ORDER.map((kind) => ({
@@ -92,8 +81,7 @@ function buildCategoryGroups(
           : !root.archived && root.type === kind,
       )
       .sort((a, b) => a.name.localeCompare(b.name))
-      .map((root) => toNode(root, 0))
-      .filter((node): node is CategoryNode => node !== null),
+      .map((root) => toNode(root, 0)),
   }));
 
   return groups.filter((group) => group.nodes.length > 0);
@@ -135,18 +123,6 @@ function buildCategoryIndex(
       pathNames,
     };
   });
-}
-
-function checkState(
-  node: CategoryNode,
-  selected: ReadonlySet<string>,
-  ancestorChosen = false,
-): CategoryCheckState {
-  if (ancestorChosen || selected.has(node.category.id)) {
-    return true;
-  }
-
-  return descendantIds(node).some((id) => selected.has(id)) ? "mixed" : false;
 }
 
 // The selected ancestor (any level) that already includes the category.
@@ -298,7 +274,6 @@ function toggleCategory(
 export {
   buildCategoryGroups,
   buildCategoryIndex,
-  checkState,
   coveringAncestorName,
   descendantIds,
   normalize,

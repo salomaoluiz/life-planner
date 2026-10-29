@@ -20,7 +20,7 @@ import useStyles from "./styles";
 const ROW_HEIGHT = 56;
 
 export interface CategorySearchFieldProps {
-  chips: { color?: string; id: string; label: string }[];
+  chips: { iconColor?: string; id: string; label: string }[];
   // Wide: the results float under the field; compact: they sit inline.
   dropdown: boolean;
   onPick: (id: string) => void;
@@ -117,7 +117,7 @@ function CategorySearchField(props: CategorySearchFieldProps) {
         accessibilityLabel={entry.path}
         active={!item.coveredBy && enabled[highlight] === item}
         badge={badge(entry)}
-        bullet={entry.category.color}
+        bullet={entry.category.iconColor}
         disabled={!!item.coveredBy}
         key={entry.category.id}
         muted={entry.category.archived}
@@ -173,7 +173,7 @@ function CategorySearchField(props: CategorySearchFieldProps) {
         <View style={styles.chips}>
           {props.chips.map((chip) => (
             <RemovableChip
-              dotColor={chip.color}
+              dotColor={chip.iconColor}
               key={chip.id}
               label={chip.label}
               onRemove={() => props.onRemove(chip.id)}

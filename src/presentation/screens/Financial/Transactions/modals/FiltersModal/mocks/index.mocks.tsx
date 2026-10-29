@@ -14,6 +14,7 @@ jest.mock("@screens/Financial/Transactions/hooks/useFilterOptions");
 function category(id: string, name: string, parentId?: string, extra = {}) {
   return new CategoryDTO({
     icon: "cart",
+    iconColor: "#F5A524",
     id,
     name,
     owner: "USER",
@@ -31,6 +32,8 @@ const options = {
     category("greens", "Greens", "market"),
     category("butcher", "Butcher", "market"),
     category("gym", "Gym", undefined, { status: "ARCHIVED" }),
+    category("salary", "Salary", undefined, { type: "INCOME" }),
+    category("salary-bonus", "Yearly bonus", "salary", { type: "INCOME" }),
   ],
   sources: [
     {
