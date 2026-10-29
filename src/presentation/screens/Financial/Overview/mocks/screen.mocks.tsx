@@ -110,6 +110,7 @@ const vmStub = {
   onOpenParentTransactions: jest.fn(),
   onOwnerFilterChange: jest.fn(),
   onPresetChange: jest.fn(),
+  onPresetReselect: jest.fn(),
   onTagPress: jest.fn(),
   onTypeChange: jest.fn(),
   ownerChoices: [{ label: "financial.common.all", value: "ALL" }],

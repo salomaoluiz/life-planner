@@ -93,6 +93,12 @@ describe("controls", () => {
       to: "2026-03-31",
     });
     expect(result.current.customOpen).toBe(false);
+    // Pressing Custom again reopens the sheet; reselecting a fixed preset does nothing
+    act(() => result.current.onPresetReselect("CUSTOM"));
+    expect(result.current.customOpen).toBe(true);
+    act(() => result.current.onCustomClose());
+    act(() => result.current.onPresetReselect("1M"));
+    expect(result.current.customOpen).toBe(false);
   });
 
   it("SHOULD pick the currency with most accounts until the user chooses one", () => {

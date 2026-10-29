@@ -92,3 +92,16 @@ onFlowComplete:
     visible:
       id: "financial.overview.tile-balance"
     timeout: 20000
+# Pressing Custom again, while it is selected, reopens the dialog to change the dates
+- tapOn:
+    id: "financial.overview.period-CUSTOM"
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.custom-sheet-column-left"
+    timeout: 20000
+- tapOn:
+    id: "financial.overview.custom-apply"
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.tile-balance"
+    timeout: 20000

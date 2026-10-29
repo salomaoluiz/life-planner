@@ -5,7 +5,12 @@ import { fireEvent, mockDarkTheme, screen } from "@tests";
 import colors from "@presentation/theme/constants/colors";
 import { lightTheme } from "@presentation/theme/provider";
 
-import { onChange, setup, setupAccent } from "./mocks/index.mocks";
+import {
+  onChange,
+  onSelectedPress,
+  setup,
+  setupAccent,
+} from "./mocks/index.mocks";
 
 it("SHOULD expose the testID as nativeID for web selectors", () => {
   setup();
@@ -38,6 +43,13 @@ it("SHOULD not call onChange WHEN disabled AND keep the selected state", () => {
 it("SHOULD not call onChange for the already selected segment", () => {
   setup();
   fireEvent.press(screen.getByTestId("seg-expense"));
+  expect(onChange).not.toHaveBeenCalled();
+});
+
+it("SHOULD call onSelectedPress (not onChange) WHEN the selected segment is pressed again", () => {
+  setup("expense", false, true);
+  fireEvent.press(screen.getByTestId("seg-expense"));
+  expect(onSelectedPress).toHaveBeenCalledWith("expense");
   expect(onChange).not.toHaveBeenCalled();
 });
 

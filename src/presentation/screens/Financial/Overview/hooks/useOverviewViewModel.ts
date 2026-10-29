@@ -313,6 +313,12 @@ function useOverviewViewModel() {
       }
       setPreset(value as Exclude<OverviewPreset, "CUSTOM">);
     },
+    // Pressing Custom again reopens its sheet to change the dates.
+    onPresetReselect(value: string) {
+      if (value === "CUSTOM") {
+        setCustomOpen(true);
+      }
+    },
     onTagPress: (id: string) => openTransactions({ tagId: id }),
     onTypeChange: (value: DashboardType) => setType(value),
     ownerChoices: buildOwnerFilterChoices(owners ?? []),
