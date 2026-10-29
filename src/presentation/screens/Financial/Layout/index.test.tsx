@@ -1,5 +1,8 @@
+import { Text } from "react-native";
+
 import { fireEvent, screen } from "@tests";
 
+import { useFinancialHeaderActions } from "./headerActions";
 import { setup, spies } from "./mocks/index.mocks";
 import layoutTestIds from "./testIds";
 
@@ -43,4 +46,18 @@ it("SHOULD render a plain title WHEN the layout is expanded", () => {
   expect(
     screen.queryByTestId(`${layoutTestIds.sectionPicker}-title-button`),
   ).toBeNull();
+});
+
+it("SHOULD show the actions a section registers in the header (spec 050)", () => {
+  function Section() {
+    useFinancialHeaderActions(<Text testID={"slot"}>actions</Text>, "v1");
+
+    return null;
+  }
+  const { Stack } = jest.requireMock("expo-router");
+  Stack.mockImplementation(() => <Section />);
+  setup();
+
+  expect(screen.getByTestId("slot")).toBeOnTheScreen();
+  Stack.mockImplementation(() => null);
 });
