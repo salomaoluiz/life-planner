@@ -3,6 +3,7 @@ name: financial/overview/average-per-month
 tags:
   - financial
   - spec-052
+  - spec-053
 onFlowComplete:
   - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
 ---
@@ -50,7 +51,7 @@ onFlowComplete:
     visible:
       id: "financial.overview.screen"
     timeout: 20000
-# A 3-month period shows the average per month next to the category total (spec 052)
+# A 3M period (3 months back and 3 ahead since spec 053) shows the average per month next to the category total (spec 052)
 - tapOn:
     id: "financial.overview.period-3M"
 - extendedWaitUntil:

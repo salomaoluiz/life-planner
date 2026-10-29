@@ -1,0 +1,94 @@
+url: ${E2E_WEB_URL}
+name: financial/overview/future-periods
+tags:
+  - financial
+  - spec-053
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Overview Series
+      KEY: SERIES_NAME
+# A monthly bill that starts today: its later occurrences exist only as projections
+- runFlow:
+    file: ../../../subflows/setup/create-recurrence.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: ${output.SERIES_NAME}
+      VALUE_CENTS: "10000"
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+- tapOn:
+    id: "tab-finances"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.screen"
+    timeout: 20000
+- tapOn:
+    id: "navigation-rail-financial-overview"
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.screen"
+    timeout: 20000
+# 1M is the default and 3M reaches into the future
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.period-1M"
+    timeout: 20000
+- tapOn:
+    id: "financial.overview.period-3M"
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.tile-balance-projected-end"
+    timeout: 20000
+- assertVisible:
+    id: "financial.overview.balance-line-today"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.category-row-${output.EXPENSE_CATEGORY_ID}-projected"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
+# The Custom period opens as a two-column dialog and applies the current range
+- tapOn:
+    id: "financial.overview.period-CUSTOM"
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.custom-sheet-column-left"
+    timeout: 20000
+- assertVisible:
+    id: "financial.overview.custom-sheet-column-right"
+- assertVisible:
+    id: "financial.overview.custom-from"
+- assertVisible:
+    id: "financial.overview.custom-to"
+- tapOn:
+    id: "financial.overview.custom-apply"
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.tile-balance"
+    timeout: 20000

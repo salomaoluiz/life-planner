@@ -5,6 +5,7 @@ import Svg, { Circle, G, Line, Path, Text as SvgText } from "react-native-svg";
 import { useKitTheme } from "@components/utils/useKitTheme";
 
 import { axisWidth, buildSegments, niceTicks, scaleY } from "./chartScale";
+import TodayMarker from "./TodayMarker";
 
 export interface LineChartPoint {
   /** Read by screen readers instead of the axis label (which may be empty for repeated labels) */
@@ -25,6 +26,8 @@ export interface LineChartProps {
   points: LineChartPoint[];
   selectedIndex?: number;
   testID?: string;
+  /** Draws the "Today" line at this point (spec 053 FR 18) */
+  today?: { index: number; label: string };
 }
 
 const MIN_LEFT = 52;
@@ -172,6 +175,15 @@ function LineChart(props: LineChartProps) {
           </>
         ) : null}
       </Svg>
+      {props.today && xs[props.today.index] !== undefined ? (
+        <TodayMarker
+          bottom={BOTTOM}
+          label={props.today.label}
+          testID={props.testID && `${props.testID}-today`}
+          top={TOP}
+          x={xs[props.today.index]}
+        />
+      ) : null}
       <View style={styles.overlay}>
         {points.map((point, index) => (
           <Pressable

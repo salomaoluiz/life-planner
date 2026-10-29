@@ -83,3 +83,47 @@ it("SHOULD render a header AND an average cell per row in table mode, none for r
   expect(screen.getByTestId("bars-row-a-average")).toBeTruthy();
   expect(screen.queryByTestId("bars-row-b-average")).toBeNull();
 });
+
+it("SHOULD show a Projected column in table mode AND the projected text on the second line otherwise (spec 053)", () => {
+  const row = {
+    id: "a",
+    label: "Groceries",
+    percent: "60%",
+    projected: "R$ 100,00",
+    ratio: 1,
+    value: "R$ 600,00",
+  };
+
+  setup({
+    columns: {
+      average: "Avg/month",
+      category: "Category",
+      percent: "%",
+      projected: "Projected",
+      total: "Total",
+    },
+    rows: [row, { ...row, id: "b", projected: undefined }],
+  });
+  expect(screen.getByText("Projected")).toBeTruthy();
+  expect(screen.getByTestId("bars-row-a-projected")).toBeTruthy();
+  expect(screen.queryByTestId("bars-row-b-projected")).toBeNull();
+});
+
+it("SHOULD join average and projected on the second line WHEN there is no table (spec 053)", () => {
+  setup({
+    rows: [
+      {
+        average: "Avg R$ 50,00/mo",
+        id: "a",
+        label: "Groceries",
+        percent: "60%",
+        projected: "R$ 100,00 projected",
+        ratio: 1,
+        value: "R$ 600,00",
+      },
+    ],
+  });
+  expect(screen.getByTestId("bars-row-a-average").props.children).toBe(
+    "Avg R$ 50,00/mo · R$ 100,00 projected",
+  );
+});

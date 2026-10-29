@@ -25,3 +25,10 @@ it("SHOULD draw empty and all-zero data without NaN", () => {
   });
   expect(JSON.stringify(screen.toJSON())).not.toContain("NaN");
 });
+
+it("SHOULD draw the Today marker only WHEN asked (spec 053)", () => {
+  setup();
+  expect(screen.queryByTestId("columns-today")).toBeNull();
+  setup({ today: { index: 0, label: "Today" } });
+  expect(screen.getByTestId("columns-today")).toBeTruthy();
+});

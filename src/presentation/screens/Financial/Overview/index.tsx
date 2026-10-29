@@ -15,7 +15,12 @@ import IncomeExpenseBlock from "./components/IncomeExpenseBlock";
 import OverviewToolbar from "./components/OverviewToolbar";
 import TagsBlock from "./components/TagsBlock";
 import { useOverviewViewModel } from "./hooks";
-import { compactAmount, deltaOf, tileColumns } from "./models/overviewFormat";
+import {
+  compactAmount,
+  deltaOf,
+  formatDay,
+  tileColumns,
+} from "./models/overviewFormat";
 import useStyles from "./styles";
 import overviewTestIds from "./testIds";
 
@@ -25,7 +30,6 @@ function FinancialOverview() {
   const localeTag = useLocaleTag();
   const breakpoint = useBreakpoint();
   const compact = breakpoint === "compact";
-  const wide = breakpoint === "expanded";
   const { theme } = useTheme();
   const [tilesWidth, setTilesWidth] = useState(0);
   const columns = tileColumns(tilesWidth, theme.sizes.spacing.sm);
@@ -35,7 +39,16 @@ function FinancialOverview() {
   function money(cents: number) {
     return formatAmount(cents, localeTag, currency);
   }
-  const note = t("financial.overview.tiles.vsPrevious");
+  // Spec 053 FR 16: the deltas always include the projected amounts, and say so when there are any.
+  const hasProjected =
+    !!summary && summary.income.projected + summary.expense.projected > 0;
+  const baseNote = t("financial.overview.tiles.vsPrevious");
+  const projectedNote = t(
+    hasProjected
+      ? "financial.overview.delta.inclProjected"
+      : "financial.overview.tiles.vsPrevious",
+  );
+  const projectedEnd = summary?.balance.projectedEnd;
   const loading = !summary;
   const income = summary
     ? summary.income.realized + summary.income.projected
@@ -49,12 +62,17 @@ function FinancialOverview() {
     value: number,
     previous: number | undefined,
     direction: "upIsBad" | "upIsGood",
+    extra?: { testID: string; text: string },
   ) {
     return (
       <View style={columns === 4 ? styles.tileFour : styles.tileTwo}>
         <StatTile
           compactValue={compactAmount(value, localeTag, currency)}
-          delta={{ ...deltaOf(value, previous, direction, localeTag), note }}
+          delta={{
+            ...deltaOf(value, previous, direction, localeTag),
+            note: name === "balance" ? baseNote : projectedNote,
+          }}
+          extra={extra}
           label={label}
           loading={loading}
           testID={overviewTestIds.tile(name)}
@@ -93,6 +111,12 @@ function FinancialOverview() {
                 summary?.balance.current ?? 0,
                 summary?.balance.previous,
                 "upIsGood",
+                projectedEnd === null || projectedEnd === undefined
+                  ? undefined
+                  : {
+                      testID: overviewTestIds.balanceProjectedEnd,
+                      text: `${t("financial.overview.balance.projectedEnd", { date: formatDay(vm.period.to, localeTag) })}: ${money(projectedEnd)}`,
+                    },
               )}
               {tile(
                 "income",
@@ -130,14 +154,8 @@ function FinancialOverview() {
             ) : (
               <>
                 <BalanceBlock compact={compact} vm={vm} />
-                <View style={wide ? styles.twoColumns : styles.blocks}>
-                  <View style={wide ? styles.column : undefined}>
-                    <IncomeExpenseBlock compact={compact} vm={vm} />
-                  </View>
-                  <View style={wide ? styles.column : undefined}>
-                    <CategoriesBlock vm={vm} />
-                  </View>
-                </View>
+                <IncomeExpenseBlock compact={compact} vm={vm} />
+                <CategoriesBlock vm={vm} />
                 <TagsBlock vm={vm} />
               </>
             )}

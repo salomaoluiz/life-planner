@@ -152,3 +152,74 @@ it("SHOULD show no average WHEN the period touches a single month", () => {
     screen.queryByTestId("financial.overview.tag-row-t1-average"),
   ).toBeNull();
 });
+
+describe("future periods (spec 053)", () => {
+  const withProjected = query({
+    balance: { current: 6000, previous: 5000, projectedEnd: 7500 },
+    currencies: [],
+    currency: "BRL",
+    expense: { previous: 200, projected: 100, realized: 400 },
+    income: { previous: 0, projected: 50, realized: 900 },
+  });
+
+  it("SHOULD show the projected end balance AND the incl. projected note on the other tiles", () => {
+    setup({ summary: withProjected });
+
+    expect(
+      screen.getByTestId(overviewTestIds.balanceProjectedEnd).props.children,
+    ).toContain("financial.overview.balance.projectedEnd");
+    expect(
+      screen.getByTestId(overviewTestIds.balanceProjectedEnd).props.children,
+    ).toMatch(/75[.,]00/);
+    expect(
+      screen.getByTestId(overviewTestIds.tile("income")).props
+        .accessibilityLabel,
+    ).toContain("financial.overview.delta.inclProjected");
+    expect(
+      screen.getByTestId(overviewTestIds.tile("balance")).props
+        .accessibilityLabel,
+    ).toContain("financial.overview.tiles.vsPrevious");
+  });
+
+  it("SHOULD show neither the second line nor the incl. projected note WHEN nothing is projected", () => {
+    setup();
+
+    expect(
+      screen.queryByTestId(overviewTestIds.balanceProjectedEnd),
+    ).toBeNull();
+    expect(
+      screen.getByTestId(overviewTestIds.tile("income")).props
+        .accessibilityLabel,
+    ).toContain("financial.overview.tiles.vsPrevious");
+  });
+
+  it("SHOULD draw the Today marker in both charts WHEN today is inside the period", () => {
+    setup();
+
+    expect(
+      screen.getByTestId("financial.overview.balance-line-today"),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD not draw the Today marker WHEN the period is entirely in the past", () => {
+    setup({ today: "2027-03-01" });
+
+    expect(
+      screen.queryByTestId("financial.overview.balance-line-today"),
+    ).toBeNull();
+    expect(
+      screen.queryByTestId("financial.overview.income-expense-columns-today"),
+    ).toBeNull();
+  });
+});
+
+it("SHOULD list income, expense and result one per line for the focused month", () => {
+  setup({ selectedGroup: 0 });
+
+  const id = overviewTestIds.incomeExpenseDetail;
+
+  ["income", "expense", "result"].forEach((row) =>
+    expect(screen.getByTestId(`${id}-${row}`)).toBeOnTheScreen(),
+  );
+  expect(screen.getByTestId(`${id}-result`).props.children).toMatch(/5[.,]00/);
+});

@@ -3,6 +3,7 @@ import { LayoutChangeEvent, Pressable, StyleSheet, View } from "react-native";
 import Svg, { G, Line, Rect, Text as SvgText } from "react-native-svg";
 
 import { niceTicks, scaleY } from "@components/LineChart/chartScale";
+import TodayMarker from "@components/LineChart/TodayMarker";
 import { useKitTheme } from "@components/utils/useKitTheme";
 
 export interface ColumnAmounts {
@@ -20,6 +21,8 @@ export interface ColumnChartProps {
   onSelect?: (index: number) => void;
   selectedIndex?: number;
   testID?: string;
+  /** Draws the "Today" line in this group (spec 053 FR 18) */
+  today?: { index: number; label: string };
 }
 
 export interface ColumnGroup {
@@ -31,14 +34,18 @@ export interface ColumnGroup {
 const LEFT = 52;
 const BOTTOM = 24;
 const TOP = 8;
+// Room above the plot for the "Today" label, so it never covers a column
+const TODAY_ROOM = 30;
 
 // Income × expenses per bucket (spec 046 FR 13): two columns per group on one axis from zero; the projected part is lighter.
 function ColumnChart(props: ColumnChartProps) {
   const { colors, typography } = useKitTheme();
   const [width, setWidth] = useState(320);
-  const height = props.height ?? 220;
+  // The Today label needs its own strip, so the chart grows instead of squeezing the plot
+  const height = (props.height ?? 220) + (props.today ? TODAY_ROOM : 0);
   const plotWidth = Math.max(width - LEFT - 8, 1);
-  const plotHeight = height - TOP - BOTTOM;
+  const top = props.today ? TOP + TODAY_ROOM : TOP;
+  const plotHeight = height - top - BOTTOM;
   const max = Math.max(
     0,
     ...props.groups.flatMap((group) => [
@@ -54,7 +61,7 @@ function ColumnChart(props: ColumnChartProps) {
     1,
     Math.ceil(props.groups.length / (props.maxLabels ?? 6)),
   );
-  const base = scaleY(0, domain, plotHeight, TOP);
+  const base = scaleY(0, domain, plotHeight, top);
   const styles = StyleSheet.create({
     overlay: {
       bottom: BOTTOM,
@@ -62,7 +69,7 @@ function ColumnChart(props: ColumnChartProps) {
       left: LEFT,
       position: "absolute",
       right: 8,
-      top: TOP,
+      top,
     },
     root: { height },
     slot: { flex: 1 },
@@ -80,8 +87,8 @@ function ColumnChart(props: ColumnChartProps) {
     color: string,
     key: string,
   ) {
-    const realizedY = scaleY(amounts.realized, domain, plotHeight, TOP);
-    const topY = scaleY(total(amounts), domain, plotHeight, TOP);
+    const realizedY = scaleY(amounts.realized, domain, plotHeight, top);
+    const topY = scaleY(total(amounts), domain, plotHeight, top);
 
     return (
       <G key={key}>
@@ -118,7 +125,7 @@ function ColumnChart(props: ColumnChartProps) {
     >
       <Svg height={height} width={width}>
         {ticks.map((tick) => {
-          const y = scaleY(tick, domain, plotHeight, TOP);
+          const y = scaleY(tick, domain, plotHeight, top);
 
           return (
             <G key={tick}>
@@ -154,7 +161,7 @@ function ColumnChart(props: ColumnChartProps) {
                   height={plotHeight}
                   width={slot}
                   x={LEFT + slot * index}
-                  y={TOP}
+                  y={top}
                 />
               ) : null}
               {column(
@@ -180,6 +187,16 @@ function ColumnChart(props: ColumnChartProps) {
           );
         })}
       </Svg>
+      {props.today && props.today.index < props.groups.length ? (
+        <TodayMarker
+          bottom={BOTTOM}
+          label={props.today.label}
+          labelTop={2}
+          testID={props.testID && `${props.testID}-today`}
+          top={top}
+          x={LEFT + slot * props.today.index + slot / 2}
+        />
+      ) : null}
       <View style={styles.overlay}>
         {props.groups.map((group, index) => (
           <Pressable

@@ -37,7 +37,7 @@ export type DashboardGranularity = "DAY" | "MONTH" | "WEEK";
 export type DashboardSource = "ACCOUNT" | "CARD";
 
 export interface DashboardSummaryEntity {
-  balance: { current: number; previous: number };
+  balance: { current: number; previous: number; projectedEnd: null | number };
   currencies: DashboardCurrencyOption[];
   currency: string;
   expense: DashboardAmounts & { previous: number };

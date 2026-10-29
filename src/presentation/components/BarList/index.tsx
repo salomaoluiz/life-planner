@@ -9,6 +9,8 @@ export interface BarListColumns {
   average: string;
   category: string;
   percent: string;
+  /** Wide layout: a Projected column between Total and % (spec 053) */
+  projected?: string;
   total: string;
 }
 
@@ -36,6 +38,8 @@ export interface BarListRow {
   /** The rows that cannot be opened ("Other", "No tag") */
   muted?: boolean;
   percent: string;
+  /** Part of the value that is projected, already formatted; empty when nothing is projected (spec 053) */
+  projected?: string;
   /** `0..1`: the bar length against the longest row */
   ratio: number;
   /** Shown after the label, for example "Archived" */
@@ -61,10 +65,17 @@ function BarList(props: BarListProps) {
       flexDirection: "row",
       gap: spacing.xs,
       paddingBottom: spacing.xxs,
+      paddingHorizontal: spacing.xs,
     },
     numbers: { alignItems: "center", flexDirection: "row", gap: spacing.xs },
     percent: { minWidth: 44 },
-    row: { gap: spacing.xxs, minHeight: 44, paddingVertical: spacing.xxs },
+    row: {
+      gap: spacing.xxs,
+      justifyContent: "center",
+      minHeight: 44,
+      paddingHorizontal: spacing.xs,
+      paddingVertical: spacing.xxs,
+    },
     text: { flex: 1 },
     top: { alignItems: "center", flexDirection: "row", gap: spacing.xs },
     total: { minWidth: 104 },
@@ -90,6 +101,15 @@ function BarList(props: BarListProps) {
               value={props.columns.total}
             />
           </View>
+          {props.columns.projected ? (
+            <View style={styles.total}>
+              <Text.Overline
+                align="right"
+                tone="secondary"
+                value={props.columns.projected}
+              />
+            </View>
+          ) : null}
           <View style={styles.percent}>
             <Text.Overline
               align="right"
@@ -124,6 +144,19 @@ function BarList(props: BarListProps) {
                   <View style={styles.total}>
                     <Text.BodyStrong align="right" tabular value={row.value} />
                   </View>
+                  {props.columns.projected ? (
+                    <View style={styles.total}>
+                      {row.projected ? (
+                        <Text.Body
+                          align="right"
+                          tabular
+                          testID={testID && `${testID}-row-${row.id}-projected`}
+                          tone="secondary"
+                          value={row.projected}
+                        />
+                      ) : null}
+                    </View>
+                  ) : null}
                   <View style={styles.percent}>
                     <Text.Caption
                       align="right"
@@ -151,11 +184,11 @@ function BarList(props: BarListProps) {
                 </View>
               )}
             </View>
-            {row.average && !props.columns ? (
+            {!props.columns && (row.average || row.projected) ? (
               <Text.Caption
                 testID={testID && `${testID}-row-${row.id}-average`}
                 tone="secondary"
-                value={row.average}
+                value={[row.average, row.projected].filter(Boolean).join(" · ")}
               />
             ) : null}
             {props.hideBars ? null : (
@@ -204,7 +237,7 @@ function BarList(props: BarListProps) {
 function labelOf(row: BarListRow): string {
   const base = `${row.label}, ${row.value}, ${row.percent}`;
 
-  return row.average ? `${base}, ${row.average}` : base;
+  return [base, row.average, row.projected].filter(Boolean).join(", ");
 }
 
 export default BarList;

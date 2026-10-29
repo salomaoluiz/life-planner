@@ -6,6 +6,8 @@ export interface BarItem {
   archived?: boolean;
   id: string;
   name: string;
+  // The part of `value` that is projected (spec 053)
+  projected?: number;
   value: number;
 }
 
@@ -18,11 +20,13 @@ function foldBars(params: {
   archivedSuffix?: string;
   // The average per month of a row total, already formatted; `undefined` → no average (spec 052)
   averageOf?: (value: number) => string | undefined;
-  extra?: { id: string; name: string; value: number }[];
+  extra?: { id: string; name: string; projected?: number; value: number }[];
   format: (value: number) => string;
   items: BarItem[];
   localeTag: string;
   otherLabel: string;
+  // The projected part of a row, already formatted; `undefined` → none (spec 053)
+  projectedOf?: (value: number) => string | undefined;
   top: number;
   total: number;
 }): BarListRow[] {
@@ -30,6 +34,10 @@ function foldBars(params: {
   const shown = visible.slice(0, params.top);
   const rest = visible.slice(params.top);
   const restValue = rest.reduce((sum, item) => sum + item.value, 0);
+  const restProjected = rest.reduce(
+    (sum, item) => sum + (item.projected ?? 0),
+    0,
+  );
   const max = Math.max(
     1,
     ...shown.map((item) => item.value),
@@ -37,7 +45,9 @@ function foldBars(params: {
     ...(params.extra ?? []).map((item) => item.value),
   );
   function toRow(
-    item: BarItem | { id: string; name: string; value: number },
+    item:
+      | BarItem
+      | { id: string; name: string; projected?: number; value: number },
     muted = false,
   ): BarListRow {
     return {
@@ -46,6 +56,9 @@ function foldBars(params: {
       label: item.name,
       muted,
       percent: percentOf(item.value, params.total, params.localeTag),
+      projected: item.projected
+        ? params.projectedOf?.(item.projected)
+        : undefined,
       ratio: item.value / max,
       suffix:
         "archived" in item && item.archived ? params.archivedSuffix : undefined,
@@ -58,7 +71,12 @@ function foldBars(params: {
     ...(restValue > 0
       ? [
           toRow(
-            { id: OTHER_ID, name: params.otherLabel, value: restValue },
+            {
+              id: OTHER_ID,
+              name: params.otherLabel,
+              projected: restProjected,
+              value: restValue,
+            },
             true,
           ),
         ]

@@ -15,26 +15,55 @@ import {
 import {
   defaultGranularity,
   granularityOptions,
+  maxFutureDate,
   monthsInPeriod,
   periodForPreset,
+  todayIndex,
   validateCustomPeriod,
 } from "./overviewPeriod";
 
 describe("periodForPreset", () => {
-  it("SHOULD end on the last day of the current month", () => {
-    expect(periodForPreset("12M", "2026-10-20")).toEqual({
-      from: "2025-11-01",
-      to: "2026-10-31",
+  it("SHOULD cover N months back (current included) and N ahead (spec 053 FR 2-3)", () => {
+    const today = "2026-10-29";
+
+    expect(periodForPreset("1M", today)).toEqual({
+      from: "2026-10-01",
+      to: "2026-11-30",
     });
-    expect(periodForPreset("3M", "2026-10-20")).toEqual({
+    expect(periodForPreset("3M", today)).toEqual({
       from: "2026-08-01",
-      to: "2026-10-31",
+      to: "2027-01-31",
     });
-    expect(periodForPreset("6M", "2026-10-20").from).toBe("2026-05-01");
-    expect(periodForPreset("YEAR", "2026-10-20")).toEqual({
+    expect(periodForPreset("6M", today)).toEqual({
+      from: "2026-05-01",
+      to: "2027-04-30",
+    });
+    expect(periodForPreset("12M", today)).toEqual({
+      from: "2025-11-01",
+      to: "2027-10-31",
+    });
+    expect(periodForPreset("YEAR", today)).toEqual({
       from: "2026-01-01",
-      to: "2026-10-31",
+      to: "2026-12-31",
     });
+  });
+
+  it("SHOULD handle the edges of the year", () => {
+    expect(periodForPreset("1M", "2026-01-15")).toEqual({
+      from: "2026-01-01",
+      to: "2026-02-28",
+    });
+    expect(periodForPreset("12M", "2026-12-31")).toEqual({
+      from: "2026-01-01",
+      to: "2027-12-31",
+    });
+  });
+});
+
+describe("maxFutureDate", () => {
+  it("SHOULD be the last day of the month 24 months after the current one", () => {
+    expect(maxFutureDate("2026-10-29")).toBe("2028-10-31");
+    expect(maxFutureDate("2027-12-31")).toBe("2029-12-31");
   });
 });
 
@@ -43,6 +72,11 @@ describe("granularity", () => {
     expect(defaultGranularity("2026-10-01", "2026-10-31")).toBe("DAY");
     expect(defaultGranularity("2026-08-01", "2026-10-31")).toBe("WEEK");
     expect(defaultGranularity("2025-11-01", "2026-10-31")).toBe("MONTH");
+  });
+
+  it("SHOULD open 1M in week and 3M in month (spec 053 FR 21)", () => {
+    expect(defaultGranularity("2026-10-01", "2026-11-30")).toBe("WEEK");
+    expect(defaultGranularity("2026-08-01", "2027-01-31")).toBe("MONTH");
   });
 
   it("SHOULD disable day above 92 days and week above a year, with a hint", () => {
@@ -60,27 +94,32 @@ describe("granularity", () => {
 });
 
 describe("validateCustomPeriod", () => {
-  it("SHOULD accept a range inside 2 years that ends by the end of the month", () => {
-    expect(
-      validateCustomPeriod("2025-01-01", "2026-10-31", "2026-10-20"),
-    ).toEqual({
+  const today = "2026-10-29";
+
+  it("SHOULD accept past, future and mixed ranges up to the 24-month limit", () => {
+    expect(validateCustomPeriod("2025-01-01", "2026-10-31", today)).toEqual({
+      ok: true,
+    });
+    expect(validateCustomPeriod("2027-01-01", "2028-10-31", today)).toEqual({
       ok: true,
     });
   });
 
-  it("SHOULD refuse a `to` after the end of the current month or over 2 years", () => {
-    expect(
-      validateCustomPeriod("2026-01-01", "2026-11-01", "2026-10-20"),
-    ).toEqual({
-      maxTo: "2026-10-31",
+  it("SHOULD refuse a `to` past the limit with the limit as maxTo", () => {
+    expect(validateCustomPeriod("2027-01-01", "2028-11-30", today)).toEqual({
+      maxTo: "2028-10-31",
+      ok: false,
+    });
+  });
+
+  it("SHOULD refuse more than 2 years and a reversed range", () => {
+    expect(validateCustomPeriod("2026-01-01", "2028-06-01", today)).toEqual({
+      maxTo: "2027-12-31",
       ok: false,
     });
     expect(
-      validateCustomPeriod("2024-01-01", "2026-01-01", "2026-10-20"),
-    ).toMatchObject({
-      maxTo: "2025-12-31",
-      ok: false,
-    });
+      validateCustomPeriod("2026-11-01", "2026-10-01", today),
+    ).toMatchObject({ ok: false });
   });
 });
 
@@ -234,8 +273,8 @@ describe("toDrillThroughFilters", () => {
 
 describe("monthsInPeriod", () => {
   it("SHOULD count the calendar months the period touches", () => {
-    expect(monthsInPeriod(periodForPreset("12M", "2026-10-20"))).toBe(12);
-    expect(monthsInPeriod(periodForPreset("3M", "2026-10-20"))).toBe(3);
+    expect(monthsInPeriod(periodForPreset("12M", "2026-10-20"))).toBe(24);
+    expect(monthsInPeriod(periodForPreset("3M", "2026-10-20"))).toBe(6);
     expect(monthsInPeriod({ from: "2026-01-15", to: "2026-03-10" })).toBe(3);
     expect(monthsInPeriod({ from: "2025-12-20", to: "2026-01-05" })).toBe(2);
     expect(monthsInPeriod({ from: "2026-10-01", to: "2026-10-31" })).toBe(1);
@@ -265,5 +304,52 @@ describe("compactAmount", () => {
     expect(compactAmount(31248055, "pt-BR", "BRL")).toMatch(/mil/);
     expect(compactAmount(31248055, "en-US", "BRL")).toMatch(/K/);
     expect(compactAmount(123456789, "pt-BR", "BRL")).toMatch(/mi/);
+  });
+});
+
+describe("todayIndex (spec 053 FR 18)", () => {
+  const months = [
+    { end: "2026-09-30", start: "2026-09-01" },
+    { end: "2026-10-31", start: "2026-10-01" },
+    { end: "2026-11-30", start: "2026-11-01" },
+  ];
+
+  it("SHOULD find the bucket that holds today", () => {
+    expect(todayIndex(months, "2026-10-20")).toBe(1);
+    expect(todayIndex(months, "2026-09-01")).toBe(0);
+  });
+
+  it("SHOULD be undefined WHEN today is before or after the period", () => {
+    expect(todayIndex(months, "2026-08-31")).toBeUndefined();
+    expect(todayIndex(months, "2026-12-01")).toBeUndefined();
+    expect(todayIndex([], "2026-10-20")).toBeUndefined();
+  });
+});
+
+describe("foldBars projected (spec 053)", () => {
+  const base = {
+    format: (value: number) => `${value}`,
+    localeTag: "en-US",
+    otherLabel: "Other",
+    projectedOf: (value: number) => `p${value}`,
+    top: 1,
+    total: 600,
+  };
+
+  it("SHOULD carry the projected part AND sum it in the Other row, none WHEN zero", () => {
+    const rows = foldBars({
+      ...base,
+      items: [
+        { id: "a", name: "A", projected: 100, value: 300 },
+        { id: "b", name: "B", projected: 40, value: 200 },
+        { id: "c", name: "C", projected: 10, value: 100 },
+      ],
+    });
+
+    expect(rows.map((row) => row.projected)).toEqual(["p100", "p50"]);
+    expect(
+      foldBars({ ...base, items: [{ id: "a", name: "A", value: 300 }] })[0]
+        .projected,
+    ).toBeUndefined();
   });
 });
