@@ -33,6 +33,8 @@ export interface BottomSheetProps {
   footerSecondary?: React.ReactNode;
   footerStart?: React.ReactNode;
   onClose: () => void;
+  /** Wide `form` only: the sheet has a fixed height and each column of `FormColumns` scrolls on its own (spec 051) */
+  paneScroll?: boolean;
   presentation?: "inline" | "modal";
   /** `wizard` is a `form` that is wider on expanded screens (the import wizard, spec 047); `fluid` grows with the
    *  window and its children scroll on their own (spec 048) */
@@ -45,6 +47,8 @@ export interface BottomSheetProps {
 
 // Visible sheets on web, oldest first; Esc closes the last one only.
 const openSheets: symbol[] = [];
+const PANE_HEIGHT_RATIO = 0.9;
+const PANE_MAX_HEIGHT = 720;
 const SLIDE_MS = 250;
 const SLIDE_OFFSET = 600;
 const SWIPE_CLOSE_DISTANCE = 80;
@@ -58,19 +62,23 @@ function BottomSheet(props: BottomSheetProps) {
   const wideForm = wide && isForm;
   const fluid =
     wideForm && props.size === "fluid" ? fluidSheetSize(window) : undefined;
+  const panes = wideForm && !fluid && !!props.paneScroll;
   const styles = useStyles(
     wide,
     isForm,
     breakpoint === "medium",
     props.size === "wizard" || props.size === "fluid",
     fluid,
+    panes
+      ? Math.min(window.height * PANE_HEIGHT_RATIO, PANE_MAX_HEIGHT)
+      : undefined,
   );
   const layout = useMemo(
     () => ({
       columns: wideForm ? (2 as const) : (1 as const),
-      fluid: !!fluid,
+      fluid: !!fluid || panes,
     }),
-    [wideForm, fluid],
+    [wideForm, fluid, panes],
   );
   const offset = useSharedValue(wide ? 0 : SLIDE_OFFSET);
   const animatedStyle = useAnimatedStyle(() => ({
@@ -207,7 +215,7 @@ function BottomSheet(props: BottomSheetProps) {
               variant="plain"
             />
           </View>
-          {fluid ? (
+          {fluid || panes ? (
             <View style={styles.fluidBody} testID={testID && `${testID}-body`}>
               {props.children}
             </View>

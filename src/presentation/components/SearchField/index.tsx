@@ -1,5 +1,10 @@
 import { useState } from "react";
-import { TextInput, View } from "react-native";
+import {
+  NativeSyntheticEvent,
+  TextInput,
+  TextInputKeyPressEventData,
+  View,
+} from "react-native";
 
 import FocusRing from "@components/FocusRing";
 import Icon, { IconButton } from "@components/Icon";
@@ -9,6 +14,8 @@ export interface SearchFieldProps {
   autoFocus?: boolean;
   clearLabel: string;
   onChangeText: (text: string) => void;
+  // Web keyboard: the key name ("ArrowDown", "Escape"...).
+  onKeyPress?: (key: string) => void;
   onSubmitEditing?: () => void;
   placeholder: string;
   testID?: string;
@@ -36,6 +43,9 @@ function SearchField(props: SearchFieldProps) {
         onBlur={() => setFocused(false)}
         onChangeText={props.onChangeText}
         onFocus={() => setFocused(true)}
+        onKeyPress={(event: NativeSyntheticEvent<TextInputKeyPressEventData>) =>
+          props.onKeyPress?.(event.nativeEvent.key)
+        }
         onSubmitEditing={props.onSubmitEditing}
         placeholder={props.placeholder}
         placeholderTextColor={theme.colors.textSecondary}

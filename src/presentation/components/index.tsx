@@ -74,6 +74,7 @@ export {
   NavigationRailItem,
   NavigationRailProps,
 } from "./NavigationRail";
+export { default as OptionRow, OptionRowProps } from "./OptionRow";
 export {
   default as PendingItemsDialog,
   PendingItemsDialogProps,
@@ -92,6 +93,7 @@ export {
   ReadOnlyNoticeProps,
 } from "./ReadOnlyNotice";
 export { default as RemovableChip, RemovableChipProps } from "./RemovableChip";
+export { default as ResultsPanel, ResultsPanelProps } from "./ResultsPanel";
 export { default as Screen, ScreenProps } from "./Screen";
 export { default as ScreenHeader, ScreenHeaderProps } from "./ScreenHeader";
 export { default as SearchField, SearchFieldProps } from "./SearchField";

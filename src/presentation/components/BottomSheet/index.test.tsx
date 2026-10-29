@@ -384,3 +384,31 @@ it.each([
     expect(screen.getByTestId("probe").props.children).toBe(Number(columns));
   },
 );
+
+function FluidProbe() {
+  return <Text testID="fluid-probe">{String(!!useSheetLayout().fluid)}</Text>;
+}
+
+it("SHOULD let the panes scroll and fix the height WHEN paneScroll on a wide form", () => {
+  setup(
+    { children: <FluidProbe />, paneScroll: true, size: "form" },
+    "expanded",
+  );
+
+  expect(screen.getByTestId("fluid-probe")).toHaveTextContent("true");
+  expect(screen.getByTestId("sheet-body").props.contentContainerStyle).toBe(
+    undefined,
+  );
+  expect(
+    StyleSheet.flatten(screen.getByTestId("sheet").props.style).height,
+  ).toBeGreaterThan(0);
+});
+
+it("SHOULD keep one scrolling body WHEN paneScroll on a compact window or without it", () => {
+  setup({ children: <FluidProbe />, paneScroll: true, size: "form" });
+
+  expect(screen.getByTestId("fluid-probe")).toHaveTextContent("false");
+  expect(
+    screen.getByTestId("sheet-body").props.contentContainerStyle,
+  ).toBeDefined();
+});

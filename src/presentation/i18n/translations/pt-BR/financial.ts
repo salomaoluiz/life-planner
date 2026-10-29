@@ -913,12 +913,15 @@ const financial = {
       button: "Filtros",
       cancel: "Cancelar",
       categories: {
-        expenses: "Despesas",
-        help: "Marcar uma categoria inclui as subcategorias.",
-        income: "Receitas",
+        archivedBadge: "Arquivada",
+        help: "Escolher uma categoria inclui as subcategorias dela.",
+        includedIn: "Incluída em {{name}}",
+        includes: "Inclui {{count}} subcategorias",
+        noResults: "Nenhuma categoria encontrada",
         search: "Buscar categoria",
-        selected: "{{count}} marcadas",
         title: "Categorias",
+        typeExpense: "Despesa",
+        typeIncome: "Receita",
       },
       chip: {
         categories: "Categorias: {{names}}",
@@ -968,6 +971,7 @@ const financial = {
       sources: {
         accounts: "Contas",
         all: "Todas",
+        archivedHidden: "Contas e cartões arquivados não aparecem aqui.",
         cards: "Cartões",
         title: "Contas e cartões",
       },

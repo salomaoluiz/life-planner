@@ -45,6 +45,7 @@ const transactionsTestIds = {
   filtersButton: "financial.transactions.filters-button",
   filtersCancel: "financial.transactions.filters.cancel",
   filtersCategory: "financial.transactions.filters.category",
+  filtersCategoryChip: "financial.transactions.filters.category-chip",
   filtersClear: "financial.transactions.filters.clear",
   filtersDone: "financial.transactions.filters.done",
   filtersEmpty: "financial.transactions.filters-empty",
