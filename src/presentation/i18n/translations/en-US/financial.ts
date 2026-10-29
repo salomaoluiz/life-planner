@@ -274,7 +274,7 @@ const financial = {
       intl: "International (, and decimal point)",
       title: "Format",
     },
-    menu: "CSV actions",
+    menu: "More actions",
     owner: { title: "Belongs to" },
     period: {
       from: "From",
@@ -905,6 +905,7 @@ const financial = {
     deleteTitle: "Delete this transaction?",
     emptyMessage: "Add an income or expense for this month.",
     emptyTitle: "No transactions in {{month}}",
+    fab: "New transaction",
     filters: {
       a11y: "Filters, {{count}} active",
       apply: "Apply filters",

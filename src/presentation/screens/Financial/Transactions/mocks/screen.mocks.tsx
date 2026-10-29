@@ -1,6 +1,10 @@
 import { render } from "@tests";
 
 import FinancialTransactions from "../";
+import {
+  FinancialHeaderActionsProvider,
+  useFinancialHeaderActionsNode,
+} from "../../Layout/headerActions";
 import { useTransactionsViewModel } from "../hooks";
 import useAdjustmentSheet from "../hooks/useAdjustmentSheet";
 import usePayTransaction from "../hooks/usePayTransaction";
@@ -139,6 +143,11 @@ const defaultPay: ReturnType<typeof usePayTransaction> = {
   payingId: undefined,
 };
 
+// What the Finances layout does with the header slot (spec 050).
+function HeaderSlot() {
+  return <>{useFinancialHeaderActionsNode()}</>;
+}
+
 function makeEntries(): ListEntry[] {
   const day = new Date(2026, 9, 5);
 
@@ -185,7 +194,12 @@ function setup(
     .mocked(usePayTransaction)
     .mockReturnValue({ ...defaultPay, ...payOverrides });
 
-  return render(<FinancialTransactions />);
+  return render(
+    <FinancialHeaderActionsProvider>
+      <HeaderSlot />
+      <FinancialTransactions />
+    </FinancialHeaderActionsProvider>,
+  );
 }
 
 export {

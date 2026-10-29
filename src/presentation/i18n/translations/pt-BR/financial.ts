@@ -272,7 +272,7 @@ const financial = {
       intl: "Internacional (, e ponto decimal)",
       title: "Formato",
     },
-    menu: "Ações de CSV",
+    menu: "Mais ações",
     owner: { title: "Pertence a" },
     period: {
       from: "De",
@@ -904,6 +904,7 @@ const financial = {
     deleteTitle: "Excluir esta transação?",
     emptyMessage: "Adicione uma receita ou despesa para este mês.",
     emptyTitle: "Nenhuma transação em {{month}}",
+    fab: "Nova transação",
     filters: {
       a11y: "Filtros, {{count}} ativos",
       apply: "Aplicar filtros",
