@@ -146,6 +146,11 @@ function pickRootColor(
   return pool[Math.min(Math.floor(random() * pool.length), pool.length - 1)];
 }
 
+// The color of the root of the tree a category belongs to (itself when it is a root).
+function rootColorOf(id: string, tree: ColorNode[]): string | undefined {
+  return rootOf(id, new Map(tree.map((item) => [item.id, item])))?.iconColor;
+}
+
 function rootOf(
   id: string,
   byId: Map<string, ColorNode>,
@@ -215,4 +220,4 @@ function toneSequence(rootColor: string): string[] {
 }
 
 export type { ColorNode };
-export { childColor, pickRootColor, toneSequence };
+export { childColor, pickRootColor, rootColorOf, toneSequence };

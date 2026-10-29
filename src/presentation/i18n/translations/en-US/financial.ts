@@ -169,6 +169,7 @@ const financial = {
       parent: "Parent category",
       parentAllHint: "Only All categories can be the parent.",
       save: "Save category",
+      toneRow: "Tones of {{name}}",
       type: "Type",
       typeLocked:
         "Type can't change while it has a parent, subcategories or transactions.",
@@ -591,6 +592,8 @@ const financial = {
           title: "New credit card",
         },
         category: {
+          colorAuto: "Color: automatic",
+          colorToneOf: "Color: tone of {{name}}",
           fromRows: "Taken from the rows that use the value.",
           noParent: "None (top level)",
           parent: "Inside",

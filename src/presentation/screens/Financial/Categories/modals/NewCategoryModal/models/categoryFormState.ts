@@ -7,6 +7,7 @@ import {
   normalizeCategoryColor,
 } from "@presentation/constants/categoryColors";
 import { TranslationKeys } from "@presentation/i18n/types";
+import { childColor } from "@screens/Financial/models/categoryColorPicker";
 import { ALL_OWNERS } from "@screens/Financial/models/ownerOptions";
 
 const MAX_NAME = 60;
@@ -14,12 +15,33 @@ const MAX_NAME = 60;
 type CategoryFormErrors = Partial<Record<"name", TranslationKeys>>;
 
 interface CategoryFormState {
+  // Spec 054 FR 14: true once the user picked a color by hand; the automatic color stops following the parent.
+  colorTouched?: boolean;
   icon: string;
   iconColor: string;
   name: string;
   ownerId: string;
   parentId?: string;
   type: string;
+}
+
+// Spec 054 FR 14: a root starts with a drawn palette color, a child with the tone of its siblings or a new tone of the
+// root. Once the user chose a color by hand it stays.
+function autoColor(
+  state: CategoryFormState,
+  categories: CategoryDTO[],
+  pickRoot: (usedColors: string[]) => string,
+): CategoryFormState {
+  if (state.colorTouched) {
+    return state;
+  }
+
+  return {
+    ...state,
+    iconColor: state.parentId
+      ? childColor(state.parentId, categories)
+      : pickRoot(rootColorsOf(categories, state.ownerId)),
+  };
 }
 
 function changeOwner(
@@ -45,11 +67,12 @@ function changeType(
 
 function createInitialState(params: {
   ownerId: string;
+  rootColor?: string;
   type?: string;
 }): CategoryFormState {
   return {
     icon: "folder",
-    iconColor: DEFAULT_CATEGORY_COLOR,
+    iconColor: params.rootColor ?? DEFAULT_CATEGORY_COLOR,
     name: "",
     ownerId: params.ownerId,
     parentId: undefined,
@@ -66,6 +89,18 @@ function isSameState(a: CategoryFormState, b: CategoryFormState) {
     a.parentId === b.parentId &&
     a.type === b.type
   );
+}
+
+// The colors of the active root categories an owner has (an All category counts for every owner).
+function rootColorsOf(categories: CategoryDTO[], ownerId: string): string[] {
+  return categories
+    .filter(
+      (item) =>
+        !item.parentId &&
+        item.status !== "ARCHIVED" &&
+        (ownerId === ALL_OWNERS || item.scopeOwnerIds.includes(ownerId)),
+    )
+    .map((item) => item.iconColor);
 }
 
 function stateFromDto(dto: CategoryDTO): CategoryFormState {
@@ -146,10 +181,12 @@ function validate(state: CategoryFormState): CategoryFormErrors {
 
 export type { CategoryFormErrors, CategoryFormState };
 export {
+  autoColor,
   changeOwner,
   changeType,
   createInitialState,
   isSameState,
+  rootColorsOf,
   stateFromDto,
   toCreateParams,
   toUpdateParams,

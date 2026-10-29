@@ -389,6 +389,26 @@ describe("step 3: values", () => {
     });
   });
 
+  it("SHOULD show the automatic color and then the tone of the chosen parent (spec 054)", async () => {
+    setup();
+    await toValues();
+
+    await chooseOption(`${ids.importValue}.category.2`, "__create__");
+    expect(screen.getByTestId(ids.importCreateColor)).toHaveTextContent(
+      /createForm\.category\.colorAuto/,
+    );
+
+    await chooseOption(ids.importCreateParent, "cat-market");
+    expect(screen.getByTestId(ids.importCreateColor)).toHaveTextContent(
+      /createForm\.category\.colorToneOf/,
+    );
+
+    await chooseOption(ids.importCreateParent, "");
+    expect(screen.getByTestId(ids.importCreateColor)).toHaveTextContent(
+      /createForm\.category\.colorAuto/,
+    );
+  });
+
   it("SHOULD keep the last Belongs to chosen WHEN the form opens for another value (spec 048)", async () => {
     setup();
     await toValues();

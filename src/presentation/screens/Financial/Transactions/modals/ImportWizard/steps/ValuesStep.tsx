@@ -8,6 +8,7 @@ import {
   Divider,
   FormColumns,
   Highlight,
+  IconTile,
   SegmentedControl,
   SelectField,
   Text,
@@ -286,7 +287,15 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
                   ),
                   value: "",
                 },
-                ...vm.parentOptions,
+                ...vm.parentOptions.map((option) => ({
+                  description: t(
+                    option.type === "INCOME"
+                      ? "financial.import.values.type.income"
+                      : "financial.import.values.type.expense",
+                  ),
+                  label: option.label,
+                  value: option.value,
+                })),
               ]}
               sheetTitle={t(
                 "financial.import.values.createForm.category.parent",
@@ -294,6 +303,20 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
               testID={ids.importCreateParent}
               value={vm.form.parentId}
             />
+            <View style={styles.row}>
+              <IconTile
+                color={vm.previewColor}
+                name={"shape-outline"}
+                size={"sm"}
+              />
+              <Text.Body
+                testID={ids.importCreateColor}
+                value={t(
+                  `financial.import.values.createForm.category.${vm.previewLabel.key}`,
+                  { name: vm.previewLabel.name },
+                )}
+              />
+            </View>
           </>
         ) : null}
         {kind === "card" ? (

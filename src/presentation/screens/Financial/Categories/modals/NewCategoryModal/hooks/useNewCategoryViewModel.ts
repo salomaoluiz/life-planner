@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
@@ -14,17 +14,24 @@ import { useLocaleTag } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
 import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
 import {
+  pickRootColor,
+  rootColorOf,
+  toneSequence,
+} from "@screens/Financial/models/categoryColorPicker";
+import {
   ALL_OWNERS,
   personalOwnerId,
 } from "@screens/Financial/models/ownerOptions";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
 
 import {
+  autoColor,
   CategoryFormState,
   changeOwner,
   changeType,
   createInitialState,
   isSameState,
+  rootColorsOf,
   stateFromDto,
   toCreateParams,
   toUpdateParams,
@@ -56,6 +63,8 @@ function useNewCategoryViewModel() {
     type?: string;
   }>();
   const isEditing = !!params.id;
+  // The draw of the root color is made once per opening, so a refetch of the lists does not change it.
+  const draw = useRef(Math.random());
 
   const owners = useActiveOwners();
   const categories = useQuery({
@@ -100,9 +109,15 @@ function useNewCategoryViewModel() {
       return existing && transactions.data ? stateFromDto(existing) : undefined;
     }
 
+    const ownerId =
+      params.ownerId ?? personalOwnerId(owners.data) ?? owners.data[0].id;
+
     return createInitialState({
-      ownerId:
-        params.ownerId ?? personalOwnerId(owners.data) ?? owners.data[0].id,
+      ownerId,
+      rootColor: pickRootColor(
+        rootColorsOf(categories.data, ownerId),
+        () => draw.current,
+      ),
       type: params.type,
     });
   }, [
@@ -205,6 +220,15 @@ function useNewCategoryViewModel() {
     setEdited(next);
   }
 
+  // Spec 054 FR 14: creating only; an edit never recolors the category.
+  function withAutoColor(next: CategoryFormState) {
+    return isEditing
+      ? next
+      : autoColor(next, categories.data ?? [], (used) =>
+          pickRootColor(used, () => draw.current),
+        );
+  }
+
   function onSave() {
     setSubmitted(true);
     if (!state || !initial || !uiModel || Object.keys(validate(state)).length) {
@@ -268,7 +292,11 @@ function useNewCategoryViewModel() {
     if (!state || !isHexColor(customColorDraft)) {
       return;
     }
-    update({ ...state, iconColor: customColorDraft.toUpperCase() });
+    update({
+      ...state,
+      colorTouched: true,
+      iconColor: customColorDraft.toUpperCase(),
+    });
     setCustomColorOpen(false);
   }
 
@@ -306,6 +334,21 @@ function useNewCategoryViewModel() {
       id: recurrence.id,
     })),
   };
+
+  const parentCategory = categories.data?.find(
+    (item) => item.id === state?.parentId,
+  );
+  const rootColor =
+    state?.parentId && categories.data
+      ? rootColorOf(state.parentId, categories.data)
+      : undefined;
+  const toneOptions =
+    parentCategory && rootColor
+      ? toneSequence(rootColor).map((value, index) => ({
+          label: String(index + 1),
+          value,
+        }))
+      : [];
 
   return {
     archiveBodyKeys: (hasChildren
@@ -350,7 +393,7 @@ function useNewCategoryViewModel() {
     onClose,
     onColorChange: (value: string) => {
       if (state) {
-        update({ ...state, iconColor: value });
+        update({ ...state, colorTouched: true, iconColor: value });
       }
     },
     onCustomColorApply,
@@ -381,12 +424,12 @@ function useNewCategoryViewModel() {
     },
     onOwnerChange: (value: string) => {
       if (state) {
-        update(changeOwner(state, value));
+        update(withAutoColor(changeOwner(state, value)));
       }
     },
     onParentChange: (value: string) => {
       if (state) {
-        update({ ...state, parentId: value || undefined });
+        update(withAutoColor({ ...state, parentId: value || undefined }));
       }
     },
     onPendingClose: () => setPendingDismissed(true),
@@ -394,7 +437,7 @@ function useNewCategoryViewModel() {
     onSave,
     onTypeChange: (value: string) => {
       if (state) {
-        update(changeType(state, value, categories.data ?? []));
+        update(withAutoColor(changeType(state, value, categories.data ?? [])));
       }
     },
     ownerChoices: ownerChoices(),
@@ -404,6 +447,7 @@ function useNewCategoryViewModel() {
       ? "financial.categories.form.parentAllHint"
       : undefined) as TranslationKeys | undefined,
     parentId: state?.parentId ?? "",
+    parentName: parentCategory?.name ?? "",
     parentOptions:
       uiModel && state ? uiModel.parentOptions(state, params.id) : [],
     pendingItems,
@@ -414,6 +458,7 @@ function useNewCategoryViewModel() {
     titleKey: (isEditing
       ? "financial.categories.edit"
       : "financial.categories.new") as TranslationKeys,
+    toneOptions,
     type: state?.type ?? "EXPENSE",
     typeHelperKey: (isTypeLocked
       ? "financial.categories.form.typeLocked"

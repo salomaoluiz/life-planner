@@ -9,6 +9,10 @@ import { invalidateFetcherData, useMutation } from "@infrastructure/fetcher";
 import { IMPORTED_CARD_DEFAULTS } from "@presentation/constants/cardColors";
 import { IMPORTED_CATEGORY_DEFAULTS } from "@presentation/constants/categoryColors";
 import {
+  childColor,
+  pickRootColor,
+} from "@screens/Financial/models/categoryColorPicker";
+import {
   createCategoryChain,
   splitCategoryPath,
 } from "@screens/Financial/Transactions/models/categoryChain";
@@ -102,6 +106,8 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
     list: boolean;
   }>();
   const deleting = useRef<string[]>([]);
+  // Spec 054 FR 15a: the color a new root category gets, drawn once when the form opens so it does not flicker.
+  const [rootColor, setRootColor] = useState("");
   // Spec 048 FR 29: the value just matched blinks for 2 s; the left list keeps its place.
   const [highlightKey, setHighlightKey] = useState<string>();
   const leftScroll = useRef<ScrollView>(null);
@@ -294,6 +300,13 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
 
   function onCreateOpen(kind: CreatableTab, entry: ValueEntry) {
     createMutation.reset();
+    setRootColor(
+      pickRootColor(
+        recordsOf(entry.ownerId)
+          .categories.filter((item) => !item.parentId)
+          .map((item) => item.iconColor),
+      ),
+    );
     setForm({
       ...emptyForm(entry.value, entry.type ?? "EXPENSE"),
       scope: lastScope.current,
@@ -392,11 +405,18 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
               // A child follows the scope of its parent (spec 038, FR 29b).
               (item.scope === "ALL") === (form.scope === "ALL"),
           )
-          .map((item) => ({ label: item.path, value: item.id }))
+          .map((item) => ({
+            label: item.path,
+            type: item.type,
+            value: item.id,
+          }))
       : [];
   const parent = recordsOf(creating?.ownerId).categories.find(
     (item) => item.id === form.parentId,
   );
+  const previewColor = form.parentId
+    ? childColor(form.parentId, recordsOf(creating?.ownerId).categories)
+    : rootColor;
   const formValid =
     form.name.trim() !== "" &&
     (kind !== "card" || (validDay(form.closingDay) && validDay(form.dueDay)));
@@ -519,6 +539,10 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
       wizard.owners.map((item) => [item.id, item.name]),
     ),
     parentOptions,
+    previewColor,
+    previewLabel: parent
+      ? { key: "colorToneOf" as const, name: parent.name }
+      : { key: "colorAuto" as const, name: "" },
     saveFailed: !!createMutation.error,
     tabs: wizard.tabs.map((value) => ({
       unmatched: unmatchedCount(wizard.entries[value] ?? []),

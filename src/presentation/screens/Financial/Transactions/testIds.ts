@@ -60,6 +60,7 @@ const transactionsTestIds = {
   importContinue: "financial.import.continue",
   importCreateCancel: "financial.import.create.cancel",
   importCreateClosingDay: "financial.import.create.closing-day",
+  importCreateColor: "financial.import.create.color",
   importCreatedDelete: "financial.import.created.delete",
   importCreatedDialog: "financial.import.created.dialog",
   importCreatedOpen: "financial.import.created.open",

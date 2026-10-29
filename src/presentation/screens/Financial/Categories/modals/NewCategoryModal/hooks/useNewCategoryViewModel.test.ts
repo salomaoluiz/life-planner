@@ -5,6 +5,7 @@ import {
   CategoryHasTransactions,
   CategoryParentArchived,
 } from "@domain/entities/errors";
+import { isPaletteColor } from "@presentation/constants/categoryColors";
 
 import {
   cat,
@@ -15,13 +16,14 @@ import {
   tx,
 } from "./mocks/useNewCategoryViewModel.mocks";
 
-it("SHOULD start a new category as expense, indigo, folder, Personal, without parent", () => {
+it("SHOULD start a new category as expense, with a palette color, folder, Personal, without parent", () => {
   givenLoaded();
   const { result } = setup();
 
   expect(result.current.isEditing).toBe(false);
   expect(result.current.type).toBe("EXPENSE");
-  expect(result.current.iconColor).toBe("#6366F1");
+  expect(isPaletteColor(result.current.iconColor)).toBe(true);
+  expect(result.current.iconColor).not.toBe("#64748B");
   expect(result.current.icon).toBe("folder");
   expect(result.current.ownerId).toBe("user-id");
   expect(result.current.parentId).toBe("");
@@ -269,6 +271,7 @@ it("SHOULD keep a stored color outside the palette and not send it WHEN saving u
 it("SHOULD apply a custom color only WHEN it is a valid #RRGGBB", () => {
   givenLoaded();
   const { result } = setup();
+  const start = result.current.iconColor;
 
   act(() => {
     result.current.onCustomColorOpen();
@@ -282,7 +285,7 @@ it("SHOULD apply a custom color only WHEN it is a valid #RRGGBB", () => {
   act(() => {
     result.current.onCustomColorApply();
   });
-  expect(result.current.iconColor).toBe("#6366F1");
+  expect(result.current.iconColor).toBe(start);
 
   act(() => {
     result.current.onCustomColorChange("#a1b2c3");
@@ -332,7 +335,7 @@ it("SHOULD NOT show the name error before the first save and show it live after"
   expect(result.current.nameError).toBeUndefined();
 });
 
-it("SHOULD create with depthLevel and the default color WHEN valid", () => {
+it("SHOULD create with depthLevel and the automatic tone of the parent WHEN valid", () => {
   givenLoaded({ categories: [cat("p", { depthLevel: 0 })] });
   const { result } = setup();
 
@@ -349,7 +352,7 @@ it("SHOULD create with depthLevel and the default color WHEN valid", () => {
   expect(mutations.create.value.mutate).toHaveBeenCalledWith({
     depthLevel: 1,
     icon: "folder",
-    iconColor: "#6366F1",
+    iconColor: expect.stringMatching(/^#[0-9A-F]{6}$/),
     name: "Child",
     owner: "USER",
     ownerId: "user-id",
@@ -577,5 +580,81 @@ describe("archive and reactivate (spec 041)", () => {
     expect(result.current.formErrorKey).toBe(
       "financial.errors.categoryParentArchived",
     );
+  });
+});
+
+describe("automatic colors (spec 054 FR 14)", () => {
+  it("SHOULD give a child the tone of its siblings WHEN a parent is picked", () => {
+    givenLoaded({
+      categories: [
+        cat("p", { iconColor: "#EF4444" }),
+        cat("k", { iconColor: "#E21313", parentId: "p" }),
+      ],
+    });
+    const { result } = setup();
+
+    act(() => {
+      result.current.onParentChange("p");
+    });
+
+    expect(result.current.iconColor).toBe("#E21313");
+    expect(result.current.toneOptions).toHaveLength(6);
+  });
+
+  it("SHOULD give the first child a new tone of the parent", () => {
+    givenLoaded({ categories: [cat("p", { iconColor: "#EF4444" })] });
+    const { result } = setup();
+
+    act(() => {
+      result.current.onParentChange("p");
+    });
+
+    expect(result.current.iconColor).not.toBe("#EF4444");
+    expect(result.current.iconColor).toMatch(/^#[0-9A-F]{6}$/);
+  });
+
+  it("SHOULD keep a hand-picked color WHEN the parent changes", () => {
+    givenLoaded({ categories: [cat("p", { iconColor: "#EF4444" })] });
+    const { result } = setup();
+
+    act(() => {
+      result.current.onColorChange("#123456");
+    });
+    act(() => {
+      result.current.onParentChange("p");
+    });
+
+    expect(result.current.iconColor).toBe("#123456");
+  });
+
+  it("SHOULD go back to a root palette color WHEN the parent is removed", () => {
+    givenLoaded({ categories: [cat("p", { iconColor: "#EF4444" })] });
+    const { result } = setup();
+
+    act(() => {
+      result.current.onParentChange("p");
+    });
+    act(() => {
+      result.current.onParentChange("");
+    });
+
+    expect(isPaletteColor(result.current.iconColor)).toBe(true);
+  });
+
+  it("SHOULD not recolor in edit mode WHEN the parent changes", () => {
+    givenLoaded({
+      categories: [
+        cat("p", { iconColor: "#EF4444" }),
+        cat("c", { iconColor: "#123456" }),
+      ],
+      params: { id: "c" },
+    });
+    const { result } = setup();
+
+    act(() => {
+      result.current.onParentChange("p");
+    });
+
+    expect(result.current.iconColor).toBe("#123456");
   });
 });
