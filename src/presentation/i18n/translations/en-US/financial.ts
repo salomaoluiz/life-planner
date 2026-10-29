@@ -724,8 +724,6 @@ const financial = {
       weekHint: "Week: periods up to 1 year",
     },
     incomeExpense: {
-      detail:
-        "{{label}}: income {{income}}, expenses {{expense}}, result {{result}}",
       title: "Income × expenses",
     },
     legend: {

@@ -38,6 +38,7 @@ function IncomeExpenseBlock(props: {
   const marker = todayIndex(items, vm.today);
   const picked =
     vm.selectedGroup === undefined ? undefined : items[vm.selectedGroup];
+  const result = picked ? sum(picked.income) - sum(picked.expense) : 0;
 
   return (
     <ChartCard
@@ -84,13 +85,38 @@ function IncomeExpenseBlock(props: {
         >
           <Text.Caption
             tone="secondary"
-            value={t("financial.overview.incomeExpense.detail", {
-              expense: money(sum(picked.expense)),
-              income: money(sum(picked.income)),
-              label: formatDay(picked.start, localeTag),
-              result: money(sum(picked.income) - sum(picked.expense)),
-            })}
+            value={`${formatDay(picked.start, localeTag)}${picked.start === picked.end ? "" : ` – ${formatDay(picked.end, localeTag)}`}`}
           />
+          {[
+            {
+              id: "income",
+              label: t("financial.overview.tiles.income"),
+              tone: "income" as const,
+              value: sum(picked.income),
+            },
+            {
+              id: "expense",
+              label: t("financial.overview.tiles.expense"),
+              tone: "expense" as const,
+              value: sum(picked.expense),
+            },
+            {
+              id: "result",
+              label: t("financial.overview.tiles.result"),
+              tone: result >= 0 ? ("income" as const) : ("expense" as const),
+              value: result,
+            },
+          ].map((row) => (
+            <View key={row.id} style={styles.detailRow}>
+              <Text.Caption tone={row.tone} value={row.label} />
+              <Text.BodyStrong
+                tabular
+                testID={`${overviewTestIds.incomeExpenseDetail}-${row.id}`}
+                tone={row.tone}
+                value={money(row.value)}
+              />
+            </View>
+          ))}
         </View>
       ) : null}
     </ChartCard>

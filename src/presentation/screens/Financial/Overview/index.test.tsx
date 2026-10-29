@@ -212,3 +212,14 @@ describe("future periods (spec 053)", () => {
     ).toBeNull();
   });
 });
+
+it("SHOULD list income, expense and result one per line for the focused month", () => {
+  setup({ selectedGroup: 0 });
+
+  const id = overviewTestIds.incomeExpenseDetail;
+
+  ["income", "expense", "result"].forEach((row) =>
+    expect(screen.getByTestId(`${id}-${row}`)).toBeOnTheScreen(),
+  );
+  expect(screen.getByTestId(`${id}-result`).props.children).toMatch(/5[.,]00/);
+});
