@@ -177,6 +177,11 @@ onFlowComplete:
 - swipe:
     start: 45%, 70%
     end: 45%, 30%
+# Spec 054: the select all action makes the review one line taller: one more small scroll down to the row, and a
+# slightly longer one back up to Refresh.
+- swipe:
+    start: 45%, 60%
+    end: 45%, 45%
 - extendedWaitUntil:
     visible:
       id: "financial.import.row.3"
@@ -185,7 +190,7 @@ onFlowComplete:
     id: "financial.import.row.3.check"
 - swipe:
     start: 45%, 30%
-    end: 45%, 70%
+    end: 45%, 73%
 - extendedWaitUntil:
     visible:
       id: "financial.import.stale"

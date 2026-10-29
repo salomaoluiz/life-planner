@@ -334,38 +334,42 @@ function ReviewStep(props: { wizard: ImportWizardState }) {
 
     return (
       <View style={styles.stack}>
+        <ChipGroup
+          layout={"wrap"}
+          mode={"single"}
+          onChange={vm.onFilterChange}
+          options={[
+            {
+              label: t("financial.import.review.filter.all", {
+                count: vm.total,
+              }),
+              value: "ALL",
+            },
+            {
+              label: t("financial.import.review.filter.errors", {
+                count: vm.summary.errors,
+              }),
+              value: "ERRORS",
+            },
+            {
+              label: t("financial.import.review.filter.duplicates", {
+                count: vm.summary.duplicates,
+              }),
+              value: "DUPLICATES",
+            },
+          ]}
+          testID={ids.importFilter}
+          value={vm.filter}
+        />
         <View style={styles.row}>
           <View style={styles.grow}>
-            <ChipGroup
-              layout={"wrap"}
-              mode={"single"}
-              onChange={vm.onFilterChange}
-              options={[
-                {
-                  label: t("financial.import.review.filter.all", {
-                    count: vm.total,
-                  }),
-                  value: "ALL",
-                },
-                {
-                  label: t("financial.import.review.filter.errors", {
-                    count: vm.summary.errors,
-                  }),
-                  value: "ERRORS",
-                },
-                {
-                  label: t("financial.import.review.filter.duplicates", {
-                    count: vm.summary.duplicates,
-                  }),
-                  value: "DUPLICATES",
-                },
-              ]}
-              testID={ids.importFilter}
-              value={vm.filter}
+            <Text.Caption
+              tone={"secondary"}
+              value={t("financial.import.review.groups.subtotalsNote")}
             />
           </View>
           {vm.bulk.visible ? (
-            <Button.Secondary
+            <Button.Ghost
               label={
                 vm.bulk.mode === "select"
                   ? t("financial.import.review.selectAll", {
@@ -378,10 +382,6 @@ function ReviewStep(props: { wizard: ImportWizardState }) {
             />
           ) : null}
         </View>
-        <Text.Caption
-          tone={"secondary"}
-          value={t("financial.import.review.groups.subtotalsNote")}
-        />
         {vm.filteredCount === 0 ? (
           <Text.Caption
             tone={"secondary"}
