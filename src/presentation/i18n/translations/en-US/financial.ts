@@ -914,12 +914,18 @@ const financial = {
       button: "Filters",
       cancel: "Cancel",
       categories: {
+        archivedBadge: "Archived",
         expenses: "Expenses",
-        help: "Selecting a category includes its subcategories.",
+        help: "Choosing a category includes its subcategories.",
+        includedIn: "Included in {{name}}",
+        includes: "Includes {{count}} subcategories",
         income: "Income",
+        noResults: "No category found",
         search: "Search category",
         selected: "{{count}} selected",
         title: "Categories",
+        typeExpense: "Expense",
+        typeIncome: "Income",
       },
       chip: {
         categories: "Categories: {{names}}",
@@ -969,6 +975,7 @@ const financial = {
       sources: {
         accounts: "Accounts",
         all: "All",
+        archivedHidden: "Archived accounts and cards are not listed here.",
         cards: "Cards",
         title: "Accounts and cards",
       },
