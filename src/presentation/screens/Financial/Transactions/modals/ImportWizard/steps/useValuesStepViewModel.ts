@@ -13,6 +13,10 @@ import {
   splitCategoryPath,
 } from "@screens/Financial/Transactions/models/categoryChain";
 import {
+  createdList,
+  deletionPlan,
+} from "@screens/Financial/Transactions/models/createdCategories";
+import {
   nextUnmatchedKey,
   NO_RECORDS,
   unmatchedCount,
@@ -92,6 +96,12 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
     tab: CreatableTab;
     type?: RowType;
   }>();
+  // Spec 054: the "Created in this import" dialog (`list`) and the category being deleted (`id`).
+  const [deleteDialog, setDeleteDialog] = useState<{
+    id?: string;
+    list: boolean;
+  }>();
+  const deleting = useRef<string[]>([]);
   // Spec 048 FR 29: the value just matched blinks for 2 s; the left list keeps its place.
   const [highlightKey, setHighlightKey] = useState<string>();
   const leftScroll = useRef<ScrollView>(null);
@@ -108,7 +118,7 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
     return catalog[ownerId ?? wizard.ownerId] ?? NO_RECORDS;
   }
 
-  const createMutation = useMutation<CreateRequest, void>({
+  const createMutation = useMutation<CreateRequest, string[]>({
     cacheKey: ["financial.import_create_record"],
     fetch: async (request) => {
       const base = {
@@ -122,7 +132,7 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
 
       if (kind === "category") {
         // A path ("Finanças > Investimentos") creates every level that is missing, inside each other.
-        await createCategoryChain(
+        const levels = await createCategoryChain(
           splitCategoryPath(values.name),
           request.ownerId,
           {
@@ -146,6 +156,10 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
           allScopes ? "ALL" : "OWNER",
           values.type,
         );
+
+        await invalidateFetcherData();
+
+        return levels.map((level) => level.id);
       } else if (kind === "account") {
         await useCases.createFinancialAccountUseCase.execute({
           ...base,
@@ -166,6 +180,16 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
       }
 
       // The lists of the wizard follow the cache: the new record shows up in `records` and is selected then.
+      await invalidateFetcherData();
+
+      return [];
+    },
+  });
+
+  const deleteMutation = useMutation<{ id: string; ownerId: string }, void>({
+    cacheKey: ["financial.import_delete_category"],
+    fetch: async (request) => {
+      await useCases.deleteFinancialCategoryUseCase.execute(request);
       await invalidateFetcherData();
     },
   });
@@ -202,13 +226,30 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
   }, [catalog]);
 
   const created = createMutation.status === "success";
+  const deleted = deleteMutation.status === "success";
+
+  // Spec 054 FR 8: after the delete the wizard drops the ids and unmatches their values.
+  useEffect(() => {
+    if (!deleted) {
+      return;
+    }
+
+    wizard.onCategoriesDeleted(deleting.current);
+    deleting.current = [];
+    deleteMutation.reset();
+    setDeleteDialog((current) => (current?.list ? { list: true } : undefined));
+  }, [deleted]);
 
   useEffect(() => {
     if (!created || !creating) {
       return;
     }
 
-    wizard.onCreated(COUNTED[creating.tab]);
+    if (creating.tab === "category") {
+      wizard.onCategoriesCreated(creating.ownerId, createMutation.data ?? []);
+    } else {
+      wizard.onCreated(COUNTED[creating.tab]);
+    }
     createMutation.reset();
     setHighlightKey(creating.key);
 
@@ -325,6 +366,22 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
     );
   }
 
+  const categoryEntries = wizard.entries.category ?? [];
+  const createdItems = createdList(
+    wizard.createdCategories,
+    catalog,
+    categoryEntries,
+  );
+  const createdIds = new Set(wizard.createdCategories.map((item) => item.id));
+  const deleteItem = createdItems.find((item) => item.id === deleteDialog?.id);
+  const plan = deleteItem
+    ? deletionPlan(
+        deleteItem.id,
+        recordsOf(deleteItem.ownerId).categories,
+        categoryEntries,
+      )
+    : undefined;
+
   const kind = creating?.tab;
   const parentOptions =
     kind === "category"
@@ -348,7 +405,12 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
     activeTab,
     allMatched: entries.length > 0 && unmatchedCount(entries) === 0,
     create: CREATE,
+    createdItems,
     creating,
+    deleteFailed: !!deleteMutation.error,
+    deleteItem,
+    deletePlan: plan,
+    dialog: deleteDialog,
     entries,
     form,
     formValid,
@@ -356,6 +418,11 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
     hasUnmatched: unmatchedCount(entries) > 0,
     highlightKey,
     isCreatable: activeTab ? isCreatable(activeTab) : false,
+    isCreatedMatch: (entry: ValueEntry) =>
+      activeTab === "category" &&
+      entry.selected !== undefined &&
+      createdIds.has(entry.selected),
+    isDeleting: deleteMutation.isFetching,
     isSaving: createMutation.isFetching,
     leftScroll,
     multiOwner: wizard.owners.length > 1,
@@ -373,6 +440,11 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
       wizard.onValueChoice(activeTab, entry.key, selected);
     },
     onCreateCancel: () => setCreating(undefined),
+    onCreatedClose: () => {
+      deleteMutation.reset();
+      setDeleteDialog(undefined);
+    },
+    onCreatedOpen: () => setDeleteDialog({ list: true }),
     onCreateSubmit: () => {
       if (!creating || !formValid) {
         return;
@@ -391,6 +463,24 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
         parentDepth: parent ? parent.depthLevel + 1 : 0,
         tab: creating.tab,
       });
+    },
+    onDeleteCancel: () => {
+      deleteMutation.reset();
+      setDeleteDialog((current) =>
+        current?.list ? { list: true } : undefined,
+      );
+    },
+    onDeleteConfirm: () => {
+      if (!deleteItem || !plan || deleteMutation.isFetching) {
+        return;
+      }
+
+      deleting.current = plan.ids;
+      deleteMutation.mutate({ id: deleteItem.id, ownerId: deleteItem.ownerId });
+    },
+    onDeleteOpen: (id: string) => {
+      deleteMutation.reset();
+      setDeleteDialog((current) => ({ id, list: current?.list ?? false }));
     },
     onFormChange: (next: Partial<CreateForm>) => {
       if (next.scope) {

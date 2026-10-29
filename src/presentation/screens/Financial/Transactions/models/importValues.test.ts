@@ -17,6 +17,7 @@ const records: ImportRecords = {
   categories: [
     {
       depthLevel: 1,
+      iconColor: "#EF4444",
       id: "cat-1",
       name: "Mercado",
       path: "Casa > Mercado",
@@ -24,6 +25,7 @@ const records: ImportRecords = {
     },
     {
       depthLevel: 0,
+      iconColor: "#EF4444",
       id: "cat-2",
       name: "Salário",
       path: "Salário",
@@ -37,6 +39,7 @@ const familyRecords: ImportRecords = {
   categories: [
     {
       depthLevel: 0,
+      iconColor: "#EF4444",
       id: "cat-f",
       name: "Mercado",
       path: "Mercado",

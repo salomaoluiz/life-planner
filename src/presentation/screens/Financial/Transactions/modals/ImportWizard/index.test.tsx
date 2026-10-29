@@ -313,6 +313,82 @@ describe("step 3: values", () => {
     expect(screen.getByTestId(ids.importContinue)).toBeEnabled();
   });
 
+  describe("delete a category created in this import (spec 054)", () => {
+    async function createdAssinaturas() {
+      const view = setup();
+
+      await toValues();
+      await chooseOption(`${ids.importValue}.category.2`, "__create__");
+      fireEvent.press(screen.getByTestId(ids.importCreateSubmit));
+      jest.mocked(useFilterOptions).mockReturnValue({
+        ...options,
+        categoryDtos: [
+          ...options.categoryDtos,
+          category("cat-subs", "Assinaturas"),
+        ],
+      } as never);
+      mutations.create.withStatus("success").withData(["cat-subs"]);
+      view.rerender(<ImportWizard {...params} />);
+
+      return view;
+    }
+
+    it("SHOULD show the trash only for a category created in this run", async () => {
+      await createdAssinaturas();
+
+      expect(
+        screen.getByTestId(`${ids.importValueDelete}.2`),
+      ).toBeOnTheScreen();
+      expect(screen.queryByTestId(`${ids.importValueDelete}.0`)).toBeNull();
+      expect(screen.getByTestId(ids.importCreatedOpen)).toBeOnTheScreen();
+    });
+
+    it("SHOULD delete the category after the confirmation and send its value back to no match", async () => {
+      const view = await createdAssinaturas();
+
+      fireEvent.press(screen.getByTestId(`${ids.importValueDelete}.2`));
+      fireEvent.press(screen.getByTestId(ids.importDeleteConfirm));
+
+      expect(mutations.delete.value.mutate).toHaveBeenCalledWith({
+        id: "cat-subs",
+        ownerId: "user-id",
+      });
+
+      // The refreshed lists no longer have it.
+      jest.mocked(useFilterOptions).mockReturnValue(options as never);
+      mutations.delete.withStatus("success");
+      view.rerender(<ImportWizard {...params} />);
+
+      expect(screen.queryByTestId(`${ids.importValueDelete}.2`)).toBeNull();
+      expect(screen.queryByTestId(ids.importCreatedOpen)).toBeNull();
+      expect(screen.getByTestId(ids.importContinue)).toBeDisabled();
+    });
+
+    it("SHOULD keep the category and show the error WHEN the delete fails", async () => {
+      const view = await createdAssinaturas();
+
+      fireEvent.press(screen.getByTestId(`${ids.importValueDelete}.2`));
+      mutations.delete.withError();
+      view.rerender(<ImportWizard {...params} />);
+
+      expect(screen.getByTestId(ids.importDeleteError)).toBeOnTheScreen();
+      expect(
+        screen.getByTestId(`${ids.importValueDelete}.2`),
+      ).toBeOnTheScreen();
+    });
+
+    it("SHOULD not delete twice WHEN confirm is pressed while the delete is running", async () => {
+      const view = await createdAssinaturas();
+
+      fireEvent.press(screen.getByTestId(`${ids.importValueDelete}.2`));
+      mutations.delete.withIsFetching(true);
+      view.rerender(<ImportWizard {...params} />);
+      fireEvent.press(screen.getByTestId(ids.importDeleteConfirm));
+
+      expect(mutations.delete.value.mutate).not.toHaveBeenCalled();
+    });
+  });
+
   it("SHOULD keep the last Belongs to chosen WHEN the form opens for another value (spec 048)", async () => {
     setup();
     await toValues();

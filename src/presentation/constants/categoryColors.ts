@@ -49,10 +49,9 @@ function normalizeCategoryColor(color: string): string {
 }
 
 export type { CategoryColorOption };
-// What a category created from the CSV import wizard starts with (spec 047 FR 25): the user can edit it later.
+// What a category created from the CSV import wizard starts with (spec 047 FR 25, color: spec 054): the user can edit it later.
 const IMPORTED_CATEGORY_DEFAULTS = {
   icon: "shape-outline",
-  iconColor: DEFAULT_CATEGORY_COLOR,
 };
 
 export {

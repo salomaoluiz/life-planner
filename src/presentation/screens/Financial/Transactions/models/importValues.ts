@@ -64,8 +64,10 @@ export interface ImportRecords {
   }[];
   categories: {
     depthLevel: number;
+    iconColor: string;
     id: string;
     name: string;
+    parentId?: string;
     path: string;
     // "ALL" for a category of Personal and every family (spec 038).
     scope?: string;

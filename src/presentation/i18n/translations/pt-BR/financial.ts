@@ -566,6 +566,22 @@ const financial = {
       },
       choose: "Escolher",
       create: "+ Criar “{{value}}”",
+      created: {
+        confirmAction_one: "Excluir {{count}} categoria",
+        confirmAction_other: "Excluir {{count}} categorias",
+        confirmBody:
+          "Os valores que usam esta categoria voltam para sem correspondência.",
+        confirmChildren: "As subcategorias também serão excluídas: {{names}}",
+        confirmTitle: "Excluir {{path}}?",
+        delete: "Excluir categoria",
+        deleteFailed: "Não foi possível excluir a categoria.",
+        hint: "Só aparecem as categorias criadas neste import. As que já existiam ficam em Categorias.",
+        meta: "{{children}} subcategorias · {{values}} valores",
+        new: "nova",
+        pick: "Escolha uma categoria à esquerda para excluí-la.",
+        title: "Criadas neste import ({{count}})",
+        unmatchedNote: "Voltam para sem correspondência",
+      },
       createForm: {
         account: {
           title: "Nova conta",

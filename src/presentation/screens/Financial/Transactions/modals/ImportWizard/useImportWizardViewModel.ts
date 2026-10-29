@@ -17,6 +17,12 @@ import { invalidateFetcherData, useMutation } from "@infrastructure/fetcher";
 import { useBreakpoint } from "@presentation/theme";
 import useImportRecords from "@screens/Financial/Transactions/hooks/useImportRecords";
 import {
+  addCreated,
+  CreatedCategory,
+  removeCreated,
+  unmatchCategories,
+} from "@screens/Financial/Transactions/models/createdCategories";
+import {
   headerKey,
   ParsedCsv,
 } from "@screens/Financial/Transactions/models/importFile";
@@ -130,6 +136,10 @@ function useImportWizardViewModel(params: ImportWizardParams) {
   const [choices, setChoices] = useState<ValueChoices>({});
   const [selection, setSelection] = useState<Record<number, boolean>>({});
   const [created, setCreated] = useState<CreatedCounts>(NO_CREATED);
+  // Spec 054 FR 4: the categories created in this run (every level of a chain); lost when the wizard closes.
+  const [createdCategories, setCreatedCategories] = useState<CreatedCategory[]>(
+    [],
+  );
   const [dialog, setDialog] = useState<ImportDialog>();
   const [pendingOwner, setPendingOwner] = useState<string>();
   const catalog = useImportRecords(params.owners);
@@ -419,6 +429,7 @@ function useImportWizardViewModel(params: ImportWizardParams) {
     catalog,
     choices,
     created,
+    createdCategories,
     dialog,
     entries,
     fixed,
@@ -432,6 +443,25 @@ function useImportWizardViewModel(params: ImportWizardParams) {
     kinds: snapshot?.kinds ?? { credits: 0, payments: 0 },
     mapping,
     onBack: () => goTo(previousStep(step)),
+    // Spec 054 FR 4: a chain adds every level it created to the summary counter too.
+    onCategoriesCreated: (ownerIdOfLevels: string, ids: string[]) => {
+      setCreatedCategories((current) =>
+        addCreated(current, ownerIdOfLevels, ids),
+      );
+      setCreated((current) => ({
+        ...current,
+        categories: current.categories + ids.length,
+      }));
+    },
+    // Spec 054 FR 8: the values matched to a deleted category go back to no match and the counter goes down.
+    onCategoriesDeleted: (ids: string[]) => {
+      setCreatedCategories((current) => removeCreated(current, ids));
+      setChoices((current) => unmatchCategories(current, ids));
+      setCreated((current) => ({
+        ...current,
+        categories: Math.max(current.categories - ids.length, 0),
+      }));
+    },
     onContinue,
     onCreated: (kind: keyof CreatedCounts) =>
       setCreated((current) => ({ ...current, [kind]: current[kind] + 1 })),

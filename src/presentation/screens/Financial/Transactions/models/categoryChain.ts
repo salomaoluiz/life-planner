@@ -1,7 +1,12 @@
 import { normalizeText } from "@application/csvImport/suggestColumns";
+import {
+  childColor,
+  pickRootColor,
+} from "@screens/Financial/models/categoryColorPicker";
 
 interface ChainCategory {
   depthLevel?: number;
+  iconColor: string;
   id: string;
   name: string;
   parentId?: string;
@@ -12,11 +17,19 @@ interface ChainCategory {
   type: string;
 }
 
+interface ChainCreated {
+  id: string;
+  name: string;
+  parentId?: string;
+}
+
 interface ChainDeps {
   create: (params: {
     // Set for an All category (spec 048 FR 29b).
     all?: boolean;
     depthLevel: number;
+    // Spec 054 FR 14: a root gets a palette color, a child the tone of its siblings or a new tone of the root.
+    iconColor: string;
     name: string;
     parentId?: string;
   }) => Promise<void>;
@@ -37,7 +50,8 @@ async function createCategoryChain(
   scope: "ALL" | "OWNER" = "OWNER",
   // Spec 054 FR 1-2: an income and an expense category can share a name, so levels are matched inside the same type.
   type: string,
-): Promise<void> {
+): Promise<ChainCreated[]> {
+  const createdLevels: ChainCreated[] = [];
   let all = scope === "ALL";
   let parentId = first.parentId;
   let depth = first.depthLevel;
@@ -62,9 +76,23 @@ async function createCategoryChain(
       continue;
     }
 
+    const iconColor = parentId
+      ? childColor(parentId, categories)
+      : pickRootColor(
+          categories
+            .filter(
+              (item) =>
+                !item.parentId &&
+                item.status !== "ARCHIVED" &&
+                item.scopeOwnerIds.includes(ownerId),
+            )
+            .map((item) => item.iconColor),
+        );
+
     await deps.create({
       ...(all ? { all: true } : {}),
       depthLevel: depth,
+      iconColor,
       name,
       parentId,
     });
@@ -79,11 +107,18 @@ async function createCategoryChain(
     );
 
     if (!created) {
-      return;
+      return createdLevels;
     }
+    createdLevels.push({
+      id: created.id,
+      name: created.name,
+      parentId: created.parentId,
+    });
     parentId = created.id;
     depth += 1;
   }
+
+  return createdLevels;
 }
 
 // "Finanças > Investimentos > Renda fixa" (also `/` and `:`) → its levels, trimmed, empty ones dropped.
@@ -94,5 +129,5 @@ function splitCategoryPath(text: string): string[] {
     .filter((part) => part !== "");
 }
 
-export type { ChainCategory };
+export type { ChainCategory, ChainCreated };
 export { createCategoryChain, splitCategoryPath };

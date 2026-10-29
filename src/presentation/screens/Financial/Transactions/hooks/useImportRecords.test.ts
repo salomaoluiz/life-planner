@@ -94,6 +94,10 @@ describe("useImportRecords", () => {
       ["home", "Casa"],
       ["market", "Casa > Mercado"],
     ]);
+    expect(result.current.u1.categories[1]).toMatchObject({
+      iconColor: expect.any(String),
+      parentId: "home",
+    });
     expect(result.current.u1.categories[0]).toMatchObject({
       depthLevel: 0,
       type: "EXPENSE",

@@ -11,9 +11,11 @@ function cat(
   depthLevel = 0,
   scope?: "ALL",
   type = "EXPENSE",
+  iconColor = "#EF4444",
 ): ChainCategory {
   return {
     depthLevel,
+    iconColor,
     id,
     name,
     parentId,
@@ -33,17 +35,23 @@ function store(initial: ChainCategory[], type = "EXPENSE") {
     name: string;
     parentId?: string;
   }[] = [];
+  const colors: string[] = [];
 
   return {
     calls,
+    colors,
     deps: {
       create: async (params: {
         all?: boolean;
         depthLevel: number;
+        iconColor: string;
         name: string;
         parentId?: string;
       }) => {
-        calls.push(params);
+        const { iconColor, ...call } = params;
+
+        calls.push(call);
+        colors.push(iconColor);
         items.push(
           cat(
             `new-${items.length}`,
@@ -52,6 +60,7 @@ function store(initial: ChainCategory[], type = "EXPENSE") {
             params.depthLevel,
             params.all ? "ALL" : undefined,
             type,
+            params.iconColor,
           ),
         );
       },
@@ -281,6 +290,88 @@ describe("createCategoryChain", () => {
         { depthLevel: 0, name: "Casa", parentId: undefined },
         { depthLevel: 1, name: "Aluguel recebido", parentId: "new-1" },
       ]);
+    });
+  });
+
+  describe("colors (spec 054 FR 14)", () => {
+    it("SHOULD give a new root the palette color least used by the roots of the owner", async () => {
+      const { colors, deps } = store([
+        cat("a", "A", undefined, 0, undefined, "EXPENSE", "#F59E0B"),
+      ]);
+
+      await createCategoryChain(
+        ["B"],
+        "o1",
+        { depthLevel: 0 },
+        deps,
+        "OWNER",
+        "EXPENSE",
+      );
+
+      expect(colors).toHaveLength(1);
+      expect(colors[0]).not.toBe("#F59E0B");
+      expect(colors[0]).not.toBe("#64748B");
+    });
+
+    it("SHOULD give B and C of a chain A > B > C different tones", async () => {
+      const { colors, deps } = store([]);
+
+      await createCategoryChain(
+        ["A", "B", "C"],
+        "o1",
+        { depthLevel: 0 },
+        deps,
+        "OWNER",
+        "EXPENSE",
+      );
+
+      expect(new Set(colors).size).toBe(3);
+    });
+
+    it("SHOULD reuse the color of the siblings WHEN the parent already has a child", async () => {
+      const { colors, deps } = store([
+        cat("p", "P", undefined, 0, undefined, "EXPENSE", "#EF4444"),
+        cat("k", "K", "p", 1, undefined, "EXPENSE", "#E21313"),
+      ]);
+
+      await createCategoryChain(
+        ["P", "New"],
+        "o1",
+        { depthLevel: 0 },
+        deps,
+        "OWNER",
+        "EXPENSE",
+      );
+
+      expect(colors).toEqual(["#E21313"]);
+    });
+
+    it("SHOULD return the levels it created, top-down, and none WHEN all exist", async () => {
+      const first = store([]);
+      const created = await createCategoryChain(
+        ["A", "B"],
+        "o1",
+        { depthLevel: 0 },
+        first.deps,
+        "OWNER",
+        "EXPENSE",
+      );
+
+      expect(created.map((item) => item.name)).toEqual(["A", "B"]);
+      expect(created[1].parentId).toBe(created[0].id);
+
+      const second = store([cat("a", "A")]);
+
+      expect(
+        await createCategoryChain(
+          ["A"],
+          "o1",
+          { depthLevel: 0 },
+          second.deps,
+          "OWNER",
+          "EXPENSE",
+        ),
+      ).toEqual([]);
     });
   });
 });

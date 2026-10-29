@@ -564,6 +564,21 @@ const financial = {
       },
       choose: "Choose",
       create: "+ Create “{{value}}”",
+      created: {
+        confirmAction_one: "Delete {{count}} category",
+        confirmAction_other: "Delete {{count}} categories",
+        confirmBody: "Values that use it go back to no match.",
+        confirmChildren: "Its subcategories will be deleted too: {{names}}",
+        confirmTitle: "Delete {{path}}?",
+        delete: "Delete category",
+        deleteFailed: "Could not delete the category.",
+        hint: "Only categories created in this import are listed. The ones that already existed stay in Categories.",
+        meta: "{{children}} subcategories · {{values}} values",
+        new: "new",
+        pick: "Choose a category on the left to delete it.",
+        title: "Created in this import ({{count}})",
+        unmatchedNote: "Back to no match",
+      },
       createForm: {
         account: {
           title: "New account",
