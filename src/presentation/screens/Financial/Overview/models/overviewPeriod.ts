@@ -15,7 +15,7 @@ export interface OverviewPeriod {
   from: string;
   to: string;
 }
-export type OverviewPreset = "3M" | "6M" | "12M" | "CUSTOM" | "YEAR";
+export type OverviewPreset = "1M" | "3M" | "6M" | "12M" | "CUSTOM" | "YEAR";
 
 const MS_PER_DAY = 86_400_000;
 const MAX_DAY_SPAN = 92;
@@ -38,10 +38,13 @@ function defaultGranularity(from: string, to: string): DashboardGranularity {
   return days <= MAX_DAY_SPAN ? "WEEK" : "MONTH";
 }
 
-function endOfCurrentMonth(today: string): string {
+// The last day of the month `months` after the month of `today`.
+function endOfMonthAfter(today: string, months: number): string {
   const date = parse(today);
 
-  return toDateKey(new Date(date.getFullYear(), date.getMonth() + 1, 0));
+  return toDateKey(
+    new Date(date.getFullYear(), date.getMonth() + months + 1, 0),
+  );
 }
 
 function granularityOptions(from: string, to: string): GranularityOption[] {
@@ -62,6 +65,11 @@ function granularityOptions(from: string, to: string): GranularityOption[] {
   ];
 }
 
+// Spec 053 FR 7: the latest end a period may have (the last day of the month 24 months after the current one).
+function maxFutureDate(today: string): string {
+  return endOfMonthAfter(today, 24);
+}
+
 // The calendar months the period touches (spec 052 FR 17): a partial month counts as one.
 function monthsInPeriod(period: OverviewPeriod): number {
   const from = parse(period.from);
@@ -80,51 +88,53 @@ function parse(key: string): Date {
   return new Date(year, month - 1, day);
 }
 
-// Presets end on the last day of the current month (spec 046 FR 3); 12M on 2026-10-20 = 2025-11-01 → 2026-10-31.
+// Spec 053 FR 2-3: NM = N months back (the current one counts) and N ahead; Year = January to December.
 function periodForPreset(
   preset: Exclude<OverviewPreset, "CUSTOM">,
   today: string,
 ): OverviewPeriod {
   const date = parse(today);
-  const to = endOfCurrentMonth(today);
 
   if (preset === "YEAR") {
-    return { from: toDateKey(new Date(date.getFullYear(), 0, 1)), to };
+    return {
+      from: toDateKey(new Date(date.getFullYear(), 0, 1)),
+      to: toDateKey(new Date(date.getFullYear(), 11, 31)),
+    };
   }
 
-  const months = { "3M": 3, "6M": 6, "12M": 12 }[preset];
+  const months = { "1M": 1, "3M": 3, "6M": 6, "12M": 12 }[preset];
 
   return {
     from: toDateKey(
       new Date(date.getFullYear(), date.getMonth() - (months - 1), 1),
     ),
-    to,
+    to: endOfMonthAfter(today, months),
   };
 }
 
-// The custom range: at most 2 years (the 045 rule) and never after the end of the current month.
+// The custom range: at most 2 years (the 045 rule) and an end no later than `maxFutureDate`.
 function validateCustomPeriod(
   from: string,
   to: string,
   today: string,
 ): { maxTo: string; ok: false } | { ok: true } {
-  const maxMonth = endOfCurrentMonth(today);
+  const limit = maxFutureDate(today);
   const validation = validatePeriod(from, to);
 
   if (!validation.ok) {
     return {
-      maxTo: validation.maxTo < maxMonth ? validation.maxTo : maxMonth,
+      maxTo: validation.maxTo < limit ? validation.maxTo : limit,
       ok: false,
     };
   }
 
-  return to <= maxMonth ? { ok: true } : { maxTo: maxMonth, ok: false };
+  return to <= limit ? { ok: true } : { maxTo: limit, ok: false };
 }
 
 export {
   defaultGranularity,
-  endOfCurrentMonth,
   granularityOptions,
+  maxFutureDate,
   monthsInPeriod,
   periodForPreset,
   validateCustomPeriod,
