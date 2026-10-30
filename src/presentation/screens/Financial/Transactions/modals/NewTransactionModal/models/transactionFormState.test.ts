@@ -8,6 +8,7 @@ import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import {
+  applySuggestion,
   changeDate,
   changeInstallmentsOn,
   changeOwner,
@@ -1011,5 +1012,136 @@ describe("notes (spec 059)", () => {
 
   it("SHOULD see a change of the notes as a different state", () => {
     expect(isSameState(state(), state({ notes: "x" }))).toBe(false);
+  });
+});
+
+describe("applySuggestion (spec 060)", () => {
+  const cards = [
+    new CreditCardDTO({
+      brand: "VISA",
+      closingDay: 31,
+      color: "#2B3A8C",
+      dueDay: 10,
+      id: "card-1",
+      limit: 100000,
+      owner: "USER",
+      ownerId: "user-id",
+      status: "ACTIVE",
+      title: "Main",
+    }),
+    new CreditCardDTO({
+      brand: "VISA",
+      closingDay: 31,
+      color: "#2B3A8C",
+      dueDay: 10,
+      id: "card-old",
+      limit: 100000,
+      owner: "USER",
+      ownerId: "user-id",
+      status: "ARCHIVED",
+      title: "Old",
+    }),
+  ];
+  const context = { accounts, cards, categories };
+
+  function template(
+    overrides: Partial<ConstructorParameters<typeof TransactionDTO>[0]> = {},
+  ) {
+    return new TransactionDTO({
+      accountId: "active",
+      category: "Food",
+      categoryId: "food",
+      date: new Date(2026, 8, 1).toISOString(),
+      description: "Uber",
+      id: "tx-1",
+      notes: "old note",
+      owner: "USER",
+      ownerId: "user-id",
+      tags: [{ id: "t1", name: "trip" }],
+      type: "EXPENSE",
+      value: "99.00",
+      ...overrides,
+    });
+  }
+
+  it("SHOULD fill description, type, source, category and tags AND keep the rest", () => {
+    const before = state({
+      amountCents: 500,
+      categoryId: undefined,
+      notes: "mine",
+      type: TransactionType.INCOME,
+    });
+    const result = applySuggestion(before, template(), context);
+
+    expect(result).toMatchObject({
+      accountId: "active",
+      amountCents: 500,
+      categoryId: "food",
+      date: before.date,
+      description: "Uber",
+      notes: "mine",
+      ownerId: "user-id",
+      payWith: "ACCOUNT",
+      tags: ["trip"],
+      type: TransactionType.EXPENSE,
+    });
+  });
+
+  it("SHOULD switch to Card with the template card", () => {
+    const result = applySuggestion(
+      state(),
+      template({ accountId: undefined, creditCardId: "card-1" }),
+      context,
+    );
+
+    expect(result).toMatchObject({ creditCardId: "card-1", payWith: "CARD" });
+  });
+
+  it("SHOULD switch Belongs to to the template's family", () => {
+    const result = applySuggestion(
+      state(),
+      template({
+        accountId: "family-acc",
+        categoryId: "rent",
+        ownerId: "family-1",
+      }),
+      context,
+    );
+
+    expect(result).toMatchObject({
+      accountId: "family-acc",
+      categoryId: "rent",
+      ownerId: "family-1",
+    });
+  });
+
+  it("SHOULD fall back to the owner's default when the account is archived", () => {
+    const result = applySuggestion(
+      state(),
+      template({ accountId: "archived" }),
+      context,
+    );
+
+    expect(result.accountId).toBe("active");
+  });
+
+  it("SHOULD fall back to the default card when the card is archived", () => {
+    const result = applySuggestion(
+      state(),
+      template({ accountId: undefined, creditCardId: "card-old" }),
+      context,
+    );
+
+    expect(result.creditCardId).toBe("card-1");
+  });
+
+  it("SHOULD leave Category empty when it is gone", () => {
+    const result = applySuggestion(
+      state(),
+      template({ categoryId: "deleted" }),
+      context,
+    );
+
+    expect(result.categoryId).toBeUndefined();
   });
 });

@@ -69,6 +69,58 @@ interface TransactionFormState {
   type: TransactionType;
 }
 
+// Spec 060: picking a description suggestion fills how that transaction was entered before; amount, date,
+// paid, repeat, installments and notes stay as they are.
+function applySuggestion(
+  state: TransactionFormState,
+  template: TransactionDTO,
+  context: {
+    accounts: AccountDTO[];
+    cards: CreditCardDTO[];
+    categories: CategoryDTO[];
+  },
+): TransactionFormState {
+  const { accounts, cards, categories } = context;
+  const type = template.type as TransactionType;
+  const isCard = !!template.creditCardId;
+  // An unknown, archived or foreign account/card keeps the owner's default that changeOwner picked.
+  let next = changeOwner(state, template.ownerId, categories, accounts, cards);
+
+  next = changeType(next, type, categories);
+  next = changePayWith(next, isCard ? "CARD" : "ACCOUNT", categories, cards);
+
+  const account = accounts.find((item) => item.id === template.accountId);
+  const card = cards.find((item) => item.id === template.creditCardId);
+  const category = categories.find((item) => item.id === template.categoryId);
+
+  return {
+    ...next,
+    accountId:
+      !isCard &&
+      account &&
+      account.status === "ACTIVE" &&
+      account.ownerId === template.ownerId
+        ? account.id
+        : next.accountId,
+    categoryId:
+      category &&
+      category.status === "ACTIVE" &&
+      category.type === next.type &&
+      categoryInScope(category, template.ownerId)
+        ? category.id
+        : undefined,
+    creditCardId:
+      isCard &&
+      card &&
+      card.status === "ACTIVE" &&
+      card.ownerId === template.ownerId
+        ? card.id
+        : next.creditCardId,
+    description: template.description,
+    tags: template.tags.map((tag) => tag.name),
+  };
+}
+
 // Create: the switch follows the date until the user touches it. Edit: it shows the stored status and never follows.
 function changeDate(
   state: TransactionFormState,
@@ -482,6 +534,7 @@ function validate(state: TransactionFormState): TransactionFormErrors {
 
 export type { PayWith, TransactionFormErrors, TransactionFormState };
 export {
+  applySuggestion,
   changeDate,
   changeInstallmentsOn,
   changeOwner,
