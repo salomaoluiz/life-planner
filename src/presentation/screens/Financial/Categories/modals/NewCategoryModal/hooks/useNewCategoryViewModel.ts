@@ -10,6 +10,7 @@ import {
   useQuery,
 } from "@infrastructure/fetcher";
 import { isHexColor } from "@presentation/constants/categoryColors";
+import { iconLabelFor } from "@presentation/constants/categoryIcons";
 import { useLocaleTag } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
 import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
@@ -40,6 +41,7 @@ import {
   validate,
 } from "../models/categoryFormState";
 import NewCategoryUIModel from "../models/NewCategoryUIModel";
+import useIconSearch from "./useIconSearch";
 
 async function fetchByOwners<T>(
   owners: OwnerDTO[],
@@ -148,6 +150,7 @@ function useNewCategoryViewModel() {
   const [applyColor, setApplyColor] = useState(false);
   const [applyIcon, setApplyIcon] = useState(false);
 
+  const iconSearch = useIconSearch(iconQuery, isIconPickerOpen);
   const state = edited ?? initial;
   const isDirty = !!edited && !!initial && !isSameState(edited, initial);
 
@@ -440,7 +443,7 @@ function useNewCategoryViewModel() {
     iconColor: state?.iconColor ?? "",
     iconQuery,
     iconSwitchVisible: apply?.iconSwitchVisible ?? false,
-    inlineIcons: uiModel?.iconOptions("", false) ?? [],
+    inlineIcons: uiModel?.iconOptions() ?? [],
     isApplyVisible: apply?.visible ?? false,
     isArchived,
     isArchiveDialogOpen,
@@ -492,6 +495,7 @@ function useNewCategoryViewModel() {
       setIconQuery("");
       setIconPickerOpen(true);
     },
+    onIconPickerRetry: iconSearch.retry,
     onIconQueryChange: setIconQuery,
     onNameChange: (value: string) => {
       if (state) {
@@ -527,7 +531,18 @@ function useNewCategoryViewModel() {
     parentOptions:
       uiModel && state ? uiModel.parentOptions(state, params.id) : [],
     pendingItems,
-    pickerIcons: uiModel?.iconOptions(iconQuery, true) ?? [],
+    pickerGroups: iconSearch.groups.map((entry) => ({
+      group: entry.group,
+      icons: entry.icons.map((icon) => ({
+        label: iconLabelFor(icon, localeTag),
+        value: icon.name,
+      })),
+    })),
+    pickerResults: iconSearch.icons.map((icon) => ({
+      label: iconLabelFor(icon, localeTag),
+      value: icon.name,
+    })),
+    pickerStatus: iconSearch.status,
     saveLabelKey,
     saveLabelParams: isApplying ? { count: apply.count } : undefined,
     titleKey: (isEditing

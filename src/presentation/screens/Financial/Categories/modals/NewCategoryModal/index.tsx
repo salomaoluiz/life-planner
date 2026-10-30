@@ -324,15 +324,37 @@ function NewCategoryModal() {
       )}
       {vm.isIconPickerOpen && (
         <IconPickerSheet
+          clearLabel={t("financial.categories.iconPicker.clear")}
           closeLabel={t("common.actions.close")}
-          icons={vm.pickerIcons}
+          emptyHint={t("financial.categories.iconPicker.emptyHint")}
+          emptyTitle={t("financial.categories.iconPicker.empty")}
+          errorHint={t("financial.categories.iconPicker.errorHint")}
+          errorTitle={t("financial.categories.iconPicker.errorTitle")}
+          groups={vm.pickerGroups.map((entry) => ({
+            icons: entry.icons,
+            title: t(`financial.categories.iconPicker.groups.${entry.group}`),
+          }))}
           onClose={vm.onIconPickerClose}
           onQueryChange={vm.onIconQueryChange}
+          onRetry={vm.onIconPickerRetry}
           onSelect={vm.onIconChange}
           query={vm.iconQuery}
+          resultLine={t(
+            pluralKey(
+              "financial.categories.iconPicker.resultLine",
+              vm.pickerResults.length,
+            ),
+            { count: vm.pickerResults.length, query: vm.iconQuery.trim() },
+          )}
+          results={vm.pickerResults}
+          retryLabel={t("financial.categories.iconPicker.retry")}
+          samples={t("financial.categories.iconPicker.samples").split(",")}
+          samplesLabel={t("financial.categories.iconPicker.samplesLabel")}
           searchPlaceholder={t("common.search.placeholder")}
           selected={vm.icon}
+          status={vm.pickerStatus}
           title={t("financial.categories.form.iconsTitle")}
+          wide={breakpoint !== "compact"}
         />
       )}
       <ConfirmDialog

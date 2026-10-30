@@ -1,6 +1,7 @@
 import { act } from "@tests";
 import { modalNavigation } from "@tests/modalNavigation";
 
+import CategoryIconDTO from "@application/dto/financial/CategoryIconDTO";
 import {
   CategoryHasPendingItems,
   CategoryHasTransactions,
@@ -13,6 +14,7 @@ import {
   cat,
   givenLoaded,
   mutations,
+  queries,
   setup,
   tx,
 } from "./mocks/useNewCategoryViewModel.mocks";
@@ -305,13 +307,26 @@ it("SHOULD pick an icon from the sheet and keep it in the form", () => {
   act(() => {
     result.current.onIconPickerOpen();
   });
-  expect(result.current.pickerIcons.length).toBe(18);
+  expect(result.current.pickerStatus).toBe("loading");
+  queries.icons.withStatus("success").withData([
+    new CategoryIconDTO({
+      common: false,
+      group: "HEALTH",
+      labelEn: "Heart",
+      labelPt: "Coração",
+      name: "heart",
+    }),
+  ]);
+  const loaded = setup().result.current;
+
+  expect(loaded.pickerResults).toEqual([{ label: "Heart", value: "heart" }]);
+  expect(loaded.pickerGroups).toEqual([
+    { group: "HEALTH", icons: [{ label: "Heart", value: "heart" }] },
+  ]);
   act(() => {
     result.current.onIconQueryChange("heart");
   });
-  expect(result.current.pickerIcons.map((icon) => icon.value)).toEqual([
-    "heart",
-  ]);
+  expect(result.current.iconQuery).toBe("heart");
   act(() => {
     result.current.onIconChange("heart");
   });

@@ -61,6 +61,10 @@ export {
 } from "./IconChoiceGroup";
 export { default as IconTile, IconTileProps } from "./IconTile";
 export {
+  default as IconTileButton,
+  IconTileButtonProps,
+} from "./IconTileButton";
+export {
   default as LineChart,
   LineChartPoint,
   LineChartProps,

@@ -27,6 +27,7 @@ jest.mock("@application/useCases", () => ({
       execute: jest.fn(),
       uniqueName: "delete",
     },
+    getCategoryIconsUseCase: { execute: jest.fn(), uniqueName: "icons" },
     getFinancialCategoriesUseCase: {
       execute: jest.fn(),
       uniqueName: "categories",
@@ -100,7 +101,7 @@ const spies = {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  ["owners", "categories", "transactions"].forEach((key) => {
+  ["owners", "categories", "transactions", "icons"].forEach((key) => {
     queries[key] = new UseQueryFixture<unknown>();
   });
   ["create", "update", "appearance", "delete"].forEach((key) => {
