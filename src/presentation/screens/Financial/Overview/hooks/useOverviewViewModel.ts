@@ -31,11 +31,15 @@ import {
 import toDrillThroughFilters from "../models/drillThrough";
 import { defaultCurrency, keepOrDefault } from "../models/overviewFormat";
 import {
+  canShiftForward,
   defaultGranularity,
   granularityOptions,
+  maxFutureDate,
   OverviewPeriod,
   OverviewPreset,
   periodForPreset,
+  shiftCustomPeriod,
+  shiftPresetPeriod,
 } from "../models/overviewPeriod";
 import useOverviewFilters from "./useOverviewFilters";
 
@@ -60,6 +64,8 @@ function useOverviewViewModel() {
     "CUSTOM" | Exclude<OverviewPreset, "CUSTOM">
   >("1M");
   const [customPeriod, setCustomPeriod] = useState<OverviewPeriod>();
+  // Steps from today for a fixed preset (spec 055 FR 4); the offset is not persisted.
+  const [offset, setOffset] = useState(0);
   const [currencyChoice, setCurrencyChoice] = useState<string>();
   const [currency, setCurrency] = useState("BRL");
   const [granularityChoice, setGranularityChoice] =
@@ -94,9 +100,14 @@ function useOverviewViewModel() {
   const readOnlyScope = useReadOnlyScope(owners, ownerFilter);
 
   const period: OverviewPeriod =
-    preset === "CUSTOM" && customPeriod
-      ? customPeriod
-      : periodForPreset(preset === "CUSTOM" ? "1M" : preset, today);
+    preset === "CUSTOM"
+      ? (customPeriod ?? periodForPreset("1M", today))
+      : shiftPresetPeriod(preset, today, offset);
+  const nextPeriod: OverviewPeriod =
+    preset === "CUSTOM"
+      ? shiftCustomPeriod(period, 1)
+      : shiftPresetPeriod(preset, today, offset + 1);
+  const canGoNext = canShiftForward(nextPeriod, today);
   const granularity =
     granularityChoice ?? defaultGranularity(period.from, period.to);
   const options = granularityOptions(period.from, period.to);
@@ -261,6 +272,7 @@ function useOverviewViewModel() {
     allOwnerIds,
     archivedOwnerIds: archivedIds,
     balance,
+    canGoNext,
     categoryTotals,
     currencies: currencies ?? [],
     currency,
@@ -271,13 +283,16 @@ function useOverviewViewModel() {
     filtersOpen,
     filterStore,
     granularityOptions: options,
+    limitDate: maxFutureDate(today),
     noTransactions,
     onApplyCustomPeriod(next: OverviewPeriod) {
       setCustomPeriod(next);
+      setOffset(0);
       setPreset("CUSTOM");
       setCustomOpen(false);
     },
     onBack: () => setParent(undefined),
+    onBackToToday: () => setOffset(0),
     onCategoryPress(
       id: string,
       name: string,
@@ -302,6 +317,17 @@ function useOverviewViewModel() {
       setGranularityChoice(value),
     onNewTransaction: () =>
       router.push("/financial/transaction/add_new_transaction" as never),
+    onNextPeriod() {
+      if (!canGoNext) {
+        return;
+      }
+      if (preset === "CUSTOM") {
+        setCustomPeriod(nextPeriod);
+
+        return;
+      }
+      setOffset(offset + 1);
+    },
     onOpenParentTransactions: () =>
       parent && openTransactions({ categoryId: parent.id }),
     onOwnerFilterChange: setOwnerSelection,
@@ -311,13 +337,25 @@ function useOverviewViewModel() {
 
         return;
       }
+      setOffset(0);
       setPreset(value as Exclude<OverviewPreset, "CUSTOM">);
     },
-    // Pressing Custom again reopens its sheet to change the dates.
+    // Pressing Custom again reopens its sheet; a fixed preset goes back to today (spec 055 FR 7).
     onPresetReselect(value: string) {
       if (value === "CUSTOM") {
         setCustomOpen(true);
+
+        return;
       }
+      setOffset(0);
+    },
+    onPreviousPeriod() {
+      if (preset === "CUSTOM") {
+        setCustomPeriod(shiftCustomPeriod(period, -1));
+
+        return;
+      }
+      setOffset(offset - 1);
     },
     onTagPress: (id: string) => openTransactions({ tagId: id }),
     onTypeChange: (value: DashboardType) => setType(value),
@@ -333,6 +371,7 @@ function useOverviewViewModel() {
     selectedPoint,
     setSelectedGroup,
     setSelectedPoint,
+    showToday: preset !== "CUSTOM" && offset !== 0,
     summary,
     tagTotals,
     today,
