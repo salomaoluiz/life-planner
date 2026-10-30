@@ -141,6 +141,9 @@ function AutocompleteField(props: AutocompleteFieldProps) {
       );
 
       if (suggestion) {
+        // A tap on an option keeps the input focused: close the list by hand.
+        clearTimeout(closeTimer.current);
+        setFocused(false);
         // The text first: an `onSelect` that sets the whole form afterwards has the last word.
         props.onChangeText(option.value);
         props.onSelect?.(suggestion);
@@ -252,6 +255,8 @@ function AutocompleteField(props: AutocompleteFieldProps) {
         <TextInput
           accessibilityLabel={props.label}
           autoCapitalize="none"
+          // The list is ours: the browser's own suggestions must not cover it.
+          autoComplete="off"
           autoCorrect={false}
           editable={!props.disabled && !atMax}
           maxLength={props.mode === "text" ? props.maxLength : undefined}

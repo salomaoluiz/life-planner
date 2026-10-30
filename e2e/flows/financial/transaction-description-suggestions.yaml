@@ -1,0 +1,80 @@
+url: ${E2E_WEB_URL}
+name: financial/transaction-description-suggestions
+tags:
+  - financial
+  - spec-060
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Suggest
+      KEY: PAST_NAME
+# A past transaction in the current month: it is what the suggestions come from
+- runFlow:
+    file: ../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: ${output.PAST_NAME}
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/financial/open-transactions.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.fab"
+    timeout: 20000
+- runFlow: ../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.PAST_NAME}
+    timeout: 20000
+- tapOn:
+    id: "financial.transactions.fab"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.amount-input"
+    timeout: 20000
+# Empty case: nothing resembles it, so no list opens
+- tapOn:
+    id: "financial.transaction-form.description-input"
+- inputText: "zzzzqq"
+- assertNotVisible:
+    id: "financial.transaction-form.description-menu"
+# The start of the past description lists it; picking it fills the form
+- eraseText
+- inputText: "E2E Sug"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.description-suggestion-${output.PAST_NAME}"
+    timeout: 20000
+- tapOn:
+    id: "financial.transaction-form.description-suggestion-${output.PAST_NAME}"
+- assertVisible:
+    id: "financial.transaction-form.description-input"
+    text: ${output.PAST_NAME}
+- assertNotVisible:
+    id: "financial.transaction-form.description-menu"
+# Focus is on Amount: type it and save
+- inputText: "5500"
+- tapOn:
+    id: "financial.transaction-form.save-button"
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.transaction-form.amount-input"
+    timeout: 20000

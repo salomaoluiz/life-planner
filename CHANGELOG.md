@@ -3,6 +3,12 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.4.0] - 2026-10-30
+
+### Added
+
+- While creating a transaction, typing 2+ characters in Description suggests past transactions (one per description, the most recent); picking one fills type, owner, account or card, category and tags (spec 060).
+
 ## [1.3.1] - 2026-10-30
 
 ### Fixed

@@ -280,6 +280,23 @@ describe("rich rows (spec 060)", () => {
     expect(calls).toEqual(["text", "select"]);
   });
 
+  it("SHOULD close the list WHEN an option is tapped", () => {
+    setup({
+      mode: "text",
+      prefiltered: true,
+      suggestions: rich,
+      value: "c",
+    } as never);
+    open();
+    fireEvent.press(screen.getByTestId("ac-suggestion-Café da manhã"));
+    expect(screen.queryByTestId("ac-menu")).toBeNull();
+  });
+
+  it("SHOULD turn the browser's own suggestions off", () => {
+    setup({ mode: "text" } as never);
+    expect(input().props.autoComplete).toBe("off");
+  });
+
   it("SHOULD cap the input length", () => {
     setup({ maxLength: 200, mode: "text" } as never);
     expect(input().props.maxLength).toBe(200);

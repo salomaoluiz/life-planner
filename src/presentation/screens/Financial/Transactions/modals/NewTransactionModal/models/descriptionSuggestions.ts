@@ -7,7 +7,7 @@ const MAX_SUGGESTIONS = 6;
 interface DescriptionSuggestion {
   categoryColor?: string;
   categoryIcon: string;
-  // The group key (description + type + category + source + owner).
+  // The group key (the normalized description).
   id: string;
   label: string;
   // Where the typed text sits in `label` (to show it in bold).
@@ -113,16 +113,9 @@ function findMatch(text: string, query: string): [number, number] | undefined {
   return [positions[at], positions[at + query.length - 1] + 1];
 }
 
+// One suggestion per description: the same text on other accounts, cards or categories is the same suggestion.
 function groupKey(item: TransactionUIModel) {
-  const { accountId, categoryId, creditCardId, ownerId, type } = item.dto;
-
-  return [
-    normalizeText(item.description.trim()),
-    type,
-    categoryId,
-    creditCardId ?? accountId ?? "",
-    ownerId,
-  ].join("|");
+  return normalizeText(item.description.trim());
 }
 
 // Lower case and without accents, character by character so positions map back to the original text.

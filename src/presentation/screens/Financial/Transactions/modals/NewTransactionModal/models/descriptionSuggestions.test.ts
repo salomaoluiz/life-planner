@@ -95,32 +95,42 @@ describe("buildDescriptionSuggestions", () => {
     expect(result[0].template.id).toBe("new");
   });
 
-  it("SHOULD keep card and account (and other categories) as separate rows", () => {
+  it("SHOULD show one row per description, the most recent one, whatever its account, card or category", () => {
     const result = run(
       [
-        item({ id: "a" }),
-        item({ accountId: undefined, creditCardId: "card-1", id: "b" }),
-        item({ categoryId: "cat-2", id: "c" }),
+        item({ date: new Date(2026, 7, 1).toISOString(), id: "a" }),
+        item({
+          accountId: undefined,
+          creditCardId: "card-1",
+          date: new Date(2026, 9, 9).toISOString(),
+          id: "b",
+        }),
+        item({
+          categoryId: "cat-2",
+          date: new Date(2026, 8, 1).toISOString(),
+          id: "c",
+        }),
       ],
       "ub",
     );
 
-    expect(result).toHaveLength(3);
+    expect(result).toHaveLength(1);
+    expect(result[0].template.id).toBe("b");
   });
 
   it("SHOULD order by usage, then recency, AND stop at 6", () => {
     const rows = [
-      item({ categoryId: "c1", description: "Uber" }),
-      item({ categoryId: "c2", description: "Uber" }),
-      item({ categoryId: "c2", description: "Uber" }),
-      ...["c3", "c4", "c5", "c6", "c7"].map((categoryId) =>
-        item({ categoryId, description: "Uber" }),
+      item({ description: "Uber A" }),
+      item({ description: "Uber B" }),
+      item({ description: "Uber B" }),
+      ...["C", "D", "E", "F", "G"].map((letter) =>
+        item({ description: `Uber ${letter}` }),
       ),
     ];
     const result = run(rows, "ub");
 
     expect(result).toHaveLength(6);
-    expect(result[0].template.dto.categoryId).toBe("c2");
+    expect(result[0].label).toBe("Uber B");
   });
 
   it("SHOULD give a neutral color when the category is gone", () => {
