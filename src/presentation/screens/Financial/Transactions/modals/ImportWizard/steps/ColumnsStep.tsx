@@ -177,7 +177,7 @@ function ColumnsStep(props: { wizard: ImportWizardState }) {
   }
 
   function optionalLine(
-    field: "currency" | "invoice" | "owner" | "paid" | "tags",
+    field: "currency" | "invoice" | "notes" | "owner" | "paid" | "tags",
     mapped: boolean,
   ) {
     return (
@@ -223,6 +223,7 @@ function ColumnsStep(props: { wizard: ImportWizardState }) {
         {optionalLine("paid", vm.mapped.paid)}
         {optionalLine("currency", vm.mapped.currency)}
         {optionalLine("tags", vm.mapped.tags)}
+        {optionalLine("notes", vm.mapped.notes)}
       </View>
     </View>
   );

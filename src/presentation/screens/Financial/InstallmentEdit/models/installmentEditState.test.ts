@@ -281,3 +281,53 @@ describe("validate", () => {
     ).toBe("financial.transactions.form.errors.descriptionTooLong");
   });
 });
+
+describe("notes (spec 059)", () => {
+  const noted = new TransactionDTO({
+    category: "Tech",
+    categoryId: "cat-1",
+    creditCardId: "card-1",
+    date: new Date(2026, 9, 20).toISOString(),
+    description: "Notebook",
+    id: "row-2",
+    installmentCount: 3,
+    installmentNumber: 2,
+    installmentPlanId: "plan-1",
+    notes: "Presente",
+    owner: "USER",
+    ownerId: "user-id",
+    type: "EXPENSE",
+    value: "33.33",
+  });
+
+  it("SHOULD start from the notes of the row, empty when it has none", () => {
+    expect(initialState(plan, noted).notes).toBe("Presente");
+    expect(initialState(plan, transaction).notes).toBe("");
+  });
+
+  it("SHOULD send the notes WHEN they changed AND null WHEN cleared, in both scopes", () => {
+    const edited = { ...initialState(plan, noted), notes: " Outro " };
+    const cleared = { ...initialState(plan, noted), notes: "  " };
+
+    expect(toTransactionUpdate(noted, edited, false).notes).toBe("Outro");
+    expect(toTransactionUpdate(noted, cleared, false).notes).toBeNull();
+    expect(toPlanUpdate(plan, { ...edited, scope: "ALL" }, false).notes).toBe(
+      "Outro",
+    );
+  });
+
+  it("SHOULD NOT send the notes WHEN they did not change, and still send them in a paid invoice", () => {
+    const same = initialState(plan, noted);
+
+    expect(toTransactionUpdate(noted, same, false).notes).toBeUndefined();
+    expect(
+      toTransactionUpdate(noted, { ...same, notes: "Novo" }, true).notes,
+    ).toBe("Novo");
+  });
+
+  it("SHOULD see a change of the notes as a different state", () => {
+    const same = initialState(plan, noted);
+
+    expect(isSameState(same, { ...same, notes: "x" })).toBe(false);
+  });
+});

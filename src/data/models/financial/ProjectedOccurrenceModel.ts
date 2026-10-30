@@ -28,6 +28,7 @@ interface IProjectedOccurrenceModel {
   frequency: RecurrenceFrequency;
   invoiceListDate?: string;
   invoiceMonth?: string;
+  notes?: string;
   occurrenceCount?: number;
   occurrenceNumber: number;
   owner: OwnerType;
@@ -54,6 +55,7 @@ class ProjectedOccurrenceModel implements IProjectedOccurrenceModel {
   frequency: RecurrenceFrequency;
   invoiceListDate?: string;
   invoiceMonth?: string;
+  notes?: string;
   occurrenceCount?: number;
   occurrenceNumber: number;
   owner: OwnerType;
@@ -75,6 +77,7 @@ class ProjectedOccurrenceModel implements IProjectedOccurrenceModel {
     this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.date = params.date;
     this.description = params.description;
+    this.notes = params.notes;
     this.frequency = params.frequency;
     this.invoiceListDate = params.invoiceListDate;
     this.invoiceMonth = params.invoiceMonth;
@@ -116,6 +119,7 @@ class ProjectedOccurrenceModel implements IProjectedOccurrenceModel {
       frequency: data.frequency as RecurrenceFrequency,
       invoiceListDate: (data.invoiceListDate as null | string) ?? undefined,
       invoiceMonth: (data.invoiceMonth as null | string) ?? undefined,
+      notes: (data.notes as null | string) ?? undefined,
       occurrenceCount: (data.occurrenceCount as null | number) ?? undefined,
       occurrenceNumber: Number(data.occurrenceNumber),
       owner: data.owner as OwnerType,

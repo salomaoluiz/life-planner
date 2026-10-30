@@ -17,6 +17,7 @@ const transactionFormTestIds = {
   missingAccountHint: "financial.transaction-form.missing-account-hint",
   missingCardHint: "financial.transaction-form.missing-card-hint",
   missingCategoryHint: "financial.transaction-form.missing-category-hint",
+  notesInput: "financial.transactionForm.notesInput",
   overLimit: "financial.transaction-form.over-limit",
   owner: "financial.transaction-form.owner",
   paid: "financial.transactionForm.paid",

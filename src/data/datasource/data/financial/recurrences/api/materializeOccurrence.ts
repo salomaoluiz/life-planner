@@ -23,6 +23,7 @@ async function materializeOccurrence(params: Params): Response {
     date:
       params.date === undefined ? undefined : isoToCalendarDate(params.date),
     description: params.description,
+    notes: params.notes,
     paid: params.paid,
     scope: "ONLY_THIS",
     tags: params.tags,

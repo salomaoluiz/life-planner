@@ -20,6 +20,7 @@ import { TranslationKeys } from "@presentation/i18n/types";
 
 import InstallmentPlanSheet from "./components/InstallmentPlanSheet";
 import { useInstallmentEditViewModel } from "./hooks";
+import { MAX_NOTES } from "./models/installmentEditState";
 import useStyles from "./styles";
 import { installmentEditTestIds, installmentPlanTestIds } from "./testIds";
 
@@ -118,6 +119,17 @@ function InstallmentEditModal() {
                 onChangeText={vm.onDescriptionChange}
                 testID={installmentEditTestIds.description}
                 value={state.description}
+              />
+              <TextField
+                counter={`${state.notes.length}/${MAX_NOTES}`}
+                helper={t("financial.transactions.form.notesHelper")}
+                label={t("financial.transactions.form.notes")}
+                maxLength={MAX_NOTES}
+                minLines={3}
+                multiline
+                onChangeText={vm.onNotesChange}
+                testID={installmentEditTestIds.notes}
+                value={state.notes}
               />
               <SelectField
                 closeLabel={t("common.actions.close")}

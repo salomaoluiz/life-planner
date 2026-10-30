@@ -16,6 +16,7 @@ class InstallmentPlanDTO {
   id: string;
   installmentCount: number;
   installments: InstallmentEntity[];
+  notes?: string;
   overLimit?: boolean;
   owner: string;
   ownerId: string;
@@ -31,6 +32,7 @@ class InstallmentPlanDTO {
     id: string;
     installmentCount: number;
     installments: InstallmentEntity[];
+    notes?: string;
     overLimit?: boolean;
     owner: string;
     ownerId: string;
@@ -42,6 +44,7 @@ class InstallmentPlanDTO {
     this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.date = params.date;
     this.description = params.description;
+    this.notes = params.notes;
     this.id = params.id;
     this.installmentCount = params.installmentCount;
     this.installments = params.installments;
@@ -62,6 +65,7 @@ class InstallmentPlanDTO {
       id: entity.id,
       installmentCount: entity.installmentCount,
       installments: entity.installments.map((row) => ({ ...row })),
+      notes: entity.notes,
       overLimit: entity.overLimit,
       owner: entity.owner,
       ownerId: entity.ownerId,

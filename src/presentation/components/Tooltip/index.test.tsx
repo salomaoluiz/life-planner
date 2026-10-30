@@ -1,5 +1,5 @@
-import { fireEvent, screen } from "@testing-library/react-native";
-import { Text } from "react-native";
+import { act, fireEvent, screen } from "@testing-library/react-native";
+import { Pressable, Text } from "react-native";
 
 import { render } from "@tests";
 
@@ -37,5 +37,18 @@ it("SHOULD render only the children on native or without content", () => {
 
   jest.mocked(isWeb).mockReturnValue(true);
   setup(undefined);
+  expect(screen.queryByTestId("bubble")).toBeNull();
+});
+
+// RN's Pressable does not forward onFocus to the host view under jest (react-native-web does).
+it("SHOULD show the content while a child has the keyboard focus (spec 059)", () => {
+  jest.mocked(isWeb).mockReturnValue(true);
+  setup(<Text>lines</Text>);
+  const anchor = screen.UNSAFE_getByType(Pressable);
+
+  act(() => anchor.props.onFocus());
+  expect(screen.getByTestId("bubble")).toBeTruthy();
+
+  act(() => anchor.props.onBlur());
   expect(screen.queryByTestId("bubble")).toBeNull();
 });

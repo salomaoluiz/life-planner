@@ -13,6 +13,7 @@ export interface CreateInstallmentPlanUseCaseParams {
   date: string;
   description: string;
   installments: number;
+  notes?: null | string;
   owner: string;
   ownerId: string;
   tags?: string[];
@@ -51,6 +52,7 @@ function createInstallmentPlanUseCase(
               date: params.date,
               description: params.description,
               installments: params.installments,
+              notes: params.notes,
               owner,
               ownerId: params.ownerId,
               tags: params.tags,

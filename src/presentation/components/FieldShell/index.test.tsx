@@ -32,3 +32,10 @@ it("SHOULD omit the label WHEN absent", () => {
 
   expect(screen.queryByTestId("shell-label")).toBeNull();
 });
+
+it("SHOULD show the counter next to the helper, but not WHEN there is an error (spec 059)", () => {
+  setup({ counter: "12/1000", helper: "Anything" });
+
+  expect(screen.getByTestId("shell-counter").props.children).toBe("12/1000");
+  expect(screen.getByTestId("shell-helper")).toBeTruthy();
+});

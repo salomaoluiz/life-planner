@@ -40,6 +40,7 @@ interface IInstallmentPlanEntity {
   id: string;
   installmentCount: number;
   installments: InstallmentEntity[];
+  notes?: string;
   overLimit?: boolean;
   owner: OwnerType;
   ownerId: string;
@@ -56,6 +57,7 @@ class InstallmentPlanEntity {
   id: string;
   installmentCount: number;
   installments: InstallmentEntity[];
+  notes?: string;
   overLimit?: boolean;
   owner: OwnerType;
   ownerId: string;
@@ -69,6 +71,7 @@ class InstallmentPlanEntity {
     this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.date = params.date;
     this.description = params.description;
+    this.notes = params.notes;
     this.id = params.id;
     this.installmentCount = params.installmentCount;
     this.installments = params.installments;

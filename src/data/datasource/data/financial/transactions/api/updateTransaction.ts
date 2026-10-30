@@ -21,6 +21,7 @@ async function updateTransaction(params: Params): Response {
     date:
       params.date === undefined ? undefined : isoToCalendarDate(params.date),
     description: params.description,
+    notes: params.notes,
     owner: params.owner,
     ownerId: params.ownerId,
     paid: params.paid,

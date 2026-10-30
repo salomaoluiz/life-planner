@@ -47,6 +47,7 @@ export interface InvoicePurchaseEntity {
   id: string;
   installmentCount?: number;
   installmentNumber?: number;
+  notes?: string;
   ownerId: string;
   // Moved into this invoice by a prepayment.
   prepaid?: boolean;

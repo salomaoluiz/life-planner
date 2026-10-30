@@ -76,6 +76,7 @@ function toInstallmentPlanEntity(
     id: model.id,
     installmentCount: model.installmentCount,
     installments: model.installments.map((row) => ({ ...row })),
+    notes: model.notes,
     overLimit: model.overLimit,
     owner: OwnerType[model.owner],
     ownerId: model.ownerId,

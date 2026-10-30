@@ -45,6 +45,7 @@ interface CreateRecurrenceRepositoryParams {
   // ISO date-time; omitted = no end date.
   endDate?: string;
   frequency: RecurrenceFrequency;
+  notes?: null | string;
   owner: OwnerType;
   ownerId: string;
   // Occurrence 1 of an account series only.
@@ -91,6 +92,7 @@ interface MaterializeOccurrenceRepositoryParams {
   categoryId?: string;
   date?: string;
   description?: string;
+  notes?: null | string;
   occurrenceNumber: number;
   paid?: boolean;
   recurrenceId: string;
@@ -106,6 +108,7 @@ interface SplitRecurrenceRepositoryParams {
   // `null` removes the end date; omitted keeps it.
   endDate?: null | string;
   frequency?: RecurrenceFrequency;
+  notes?: null | string;
   occurrenceNumber: number;
   recurrenceId: string;
   tags?: string[];
@@ -117,6 +120,7 @@ interface UpdateRecurrenceRepositoryParams {
   description?: string;
   endDate?: null | string;
   id: string;
+  notes?: null | string;
   tags?: string[];
   value?: string;
 }

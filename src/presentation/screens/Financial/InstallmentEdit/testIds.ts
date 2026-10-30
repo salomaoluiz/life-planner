@@ -6,6 +6,7 @@ const installmentEditTestIds = {
   date: "financial.installmentEdit.date",
   description: "financial.installmentEdit.description",
   formError: "financial.installmentEdit.form-error",
+  notes: "financial.installmentEdit.notes",
   paidHelper: "financial.installmentEdit.paid-helper",
   recalcConfirm: "financial.installmentEdit.recalc-confirm",
   refund: "financial.installmentEdit.refund",

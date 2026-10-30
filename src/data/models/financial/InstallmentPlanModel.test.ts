@@ -52,3 +52,17 @@ it("SHOULD map the prepayment and the prepaid rows (spec 032)", () => {
     InstallmentPlanModel.fromJSON(apiInstallmentPlan).prepayment,
   ).toBeUndefined();
 });
+
+it("SHOULD read the notes of the plan, null meaning none (spec 059)", () => {
+  function withNotes(notes: null | string) {
+    return {
+      ...apiInstallmentPlan,
+      plan: { ...apiInstallmentPlan.plan, notes },
+    };
+  }
+
+  expect(InstallmentPlanModel.fromJSON(withNotes("Presente")).notes).toBe(
+    "Presente",
+  );
+  expect(InstallmentPlanModel.fromJSON(withNotes(null)).notes).toBeUndefined();
+});

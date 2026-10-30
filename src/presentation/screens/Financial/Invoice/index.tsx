@@ -23,6 +23,7 @@ import {
   formatReferenceMonth,
 } from "@screens/Financial/Cards/models/cardList";
 import { installmentTitle } from "@screens/Financial/models/installments";
+import NoteIcon from "@screens/Financial/Transactions/components/NoteIcon";
 import { InvoiceCreditUIModel } from "@screens/Financial/Transactions/models/CardInvoiceUIModel";
 
 import PayInvoiceSheet from "./components/PayInvoiceSheet";
@@ -191,6 +192,9 @@ function InvoiceModal() {
                     )}
                     trailing={
                       <View style={styles.trailing}>
+                        {purchase.notes ? (
+                          <NoteIcon note={purchase.notes} />
+                        ) : null}
                         <AmountText
                           currency={invoice.currency}
                           type="EXPENSE"

@@ -15,6 +15,7 @@ import { formatAmount } from "@components/AmountText/formatAmount";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { installmentTitle } from "@screens/Financial/models/installments";
+import NoteIcon from "@screens/Financial/Transactions/components/NoteIcon";
 import CardInvoiceUIModel from "@screens/Financial/Transactions/models/CardInvoiceUIModel";
 import TransactionUIModel from "@screens/Financial/Transactions/models/TransactionUIModel";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
@@ -143,11 +144,14 @@ function CardInvoiceRow(props: Props) {
                 (params) => t("financial.installment.label", params),
               )}
               trailing={
-                <AmountText
-                  currency={invoice.currency}
-                  type="EXPENSE"
-                  value={purchase.amountCents}
-                />
+                <View style={styles.purchaseTrailing}>
+                  {purchase.notes ? <NoteIcon note={purchase.notes} /> : null}
+                  <AmountText
+                    currency={invoice.currency}
+                    type="EXPENSE"
+                    value={purchase.amountCents}
+                  />
+                </View>
               }
             />
           ))}
@@ -172,11 +176,14 @@ function CardInvoiceRow(props: Props) {
                   : item.description
               }
               trailing={
-                <AmountText
-                  currency={invoice.currency}
-                  type="EXPENSE"
-                  value={item.amountCents}
-                />
+                <View style={styles.purchaseTrailing}>
+                  {item.notes ? <NoteIcon note={item.notes} /> : null}
+                  <AmountText
+                    currency={invoice.currency}
+                    type="EXPENSE"
+                    value={item.amountCents}
+                  />
+                </View>
               }
             />
           ))}

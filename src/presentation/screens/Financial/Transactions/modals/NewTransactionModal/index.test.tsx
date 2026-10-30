@@ -770,3 +770,27 @@ describe("tags field (spec 043)", () => {
     ).toBeOnTheScreen();
   });
 });
+
+describe("notes (spec 059)", () => {
+  it.each(["compact", "expanded"] as const)(
+    "SHOULD show the notes field once WHEN the layout is %s, and report the typing",
+    (breakpoint) => {
+      const vm = setup({ notes: "Casa" }, breakpoint);
+
+      expect(
+        screen.getAllByTestId(transactionFormTestIds.notesInput),
+      ).toHaveLength(1);
+      fireEvent.changeText(
+        screen.getByTestId(transactionFormTestIds.notesInput),
+        "Casa → Aeroporto",
+      );
+      expect(vm.onNotesChange).toHaveBeenCalledWith("Casa → Aeroporto");
+    },
+  );
+
+  it("SHOULD hide the notes field WHEN the row is a system row", () => {
+    setup({ showNotes: false });
+
+    expect(screen.queryByTestId(transactionFormTestIds.notesInput)).toBeNull();
+  });
+});

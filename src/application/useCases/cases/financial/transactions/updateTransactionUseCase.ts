@@ -13,6 +13,7 @@ export interface UpdateTransactionUseCaseParams {
   date?: string;
   description?: string;
   id: string;
+  notes?: null | string;
   owner?: string;
   ownerId?: string;
   paid?: boolean;
@@ -53,6 +54,7 @@ function updateTransactionUseCase(
           date: params.date,
           description: params.description,
           id: params.id,
+          notes: params.notes,
           owner,
           ownerId: params.ownerId,
           paid: params.paid,

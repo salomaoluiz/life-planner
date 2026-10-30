@@ -26,6 +26,7 @@ interface IProjectedOccurrenceEntity {
   invoiceListDate?: string;
   // `YYYY-MM`; card series only.
   invoiceMonth?: string;
+  notes?: string;
   occurrenceCount?: number;
   occurrenceNumber: number;
   owner: OwnerType;
@@ -52,6 +53,7 @@ class ProjectedOccurrenceEntity {
   frequency: RecurrenceFrequency;
   invoiceListDate?: string;
   invoiceMonth?: string;
+  notes?: string;
   occurrenceCount?: number;
   occurrenceNumber: number;
   owner: OwnerType;
@@ -73,6 +75,7 @@ class ProjectedOccurrenceEntity {
     this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.date = params.date;
     this.description = params.description;
+    this.notes = params.notes;
     this.frequency = params.frequency;
     this.invoiceListDate = params.invoiceListDate;
     this.invoiceMonth = params.invoiceMonth;

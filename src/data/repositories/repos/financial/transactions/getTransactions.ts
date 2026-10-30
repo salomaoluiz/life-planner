@@ -55,6 +55,7 @@ function toTransactionEntity(transaction: TransactionModel) {
     installmentNumber: transaction.installmentNumber,
     installmentPlanId: transaction.installmentPlanId,
     invoiceMonth: transaction.invoiceMonth,
+    notes: transaction.notes,
     occurrenceCount: transaction.occurrenceCount,
     occurrenceNumber: transaction.occurrenceNumber,
     owner: OwnerType[transaction.owner],

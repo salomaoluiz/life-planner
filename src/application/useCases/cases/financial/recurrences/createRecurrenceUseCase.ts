@@ -23,6 +23,7 @@ export interface CreateRecurrenceUseCaseParams {
   // ISO date-time; omitted = no end date.
   endDate?: string;
   frequency: string;
+  notes?: null | string;
   owner: string;
   ownerId: string;
   // Occurrence 1 of an account series only.
@@ -69,6 +70,7 @@ function createRecurrenceUseCase(
             description: params.description,
             endDate: params.endDate,
             frequency,
+            notes: params.notes,
             owner,
             ownerId: params.ownerId,
             paid: params.paid,

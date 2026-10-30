@@ -25,6 +25,7 @@ async function splitRecurrence(params: Params): Response {
         ? params.endDate
         : isoToCalendarDate(params.endDate),
     frequency: params.frequency,
+    notes: params.notes,
     occurrenceNumber: params.occurrenceNumber,
     tags: params.tags,
     value:

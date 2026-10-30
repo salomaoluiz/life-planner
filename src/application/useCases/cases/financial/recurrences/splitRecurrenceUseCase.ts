@@ -14,6 +14,7 @@ export interface SplitRecurrenceUseCaseParams {
   // `null` removes the end date; omitted keeps it.
   endDate?: null | string;
   frequency?: string;
+  notes?: null | string;
   occurrenceNumber: number;
   recurrenceId: string;
   tags?: string[];

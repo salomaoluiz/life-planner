@@ -38,6 +38,7 @@ interface ITransactionEntity {
   installmentNumber?: number;
   installmentPlanId?: string;
   invoiceMonth?: string;
+  notes?: string;
   // Position in a recurring series, its total (absent without an end date), series id and frequency (spec 034).
   occurrenceCount?: number;
   occurrenceNumber?: number;
@@ -68,6 +69,7 @@ class TransactionEntity {
   installmentNumber?: number;
   installmentPlanId?: string;
   invoiceMonth?: string;
+  notes?: string;
   occurrenceCount?: number;
   occurrenceNumber?: number;
   owner: OwnerType;
@@ -96,6 +98,7 @@ class TransactionEntity {
     this.occurrenceNumber = params.occurrenceNumber;
     this.owner = params.owner;
     this.description = params.description;
+    this.notes = params.notes;
     this.earlyPayment = params.earlyPayment;
     this.ownerId = params.ownerId;
     this.paid = params.paid ?? true;

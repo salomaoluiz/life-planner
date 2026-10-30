@@ -82,6 +82,7 @@ function state(
     description: "Groceries",
     installmentsCount: 2,
     installmentsOn: false,
+    notes: "",
     ownerId: "user-id",
     paid: true,
     paidTouched: false,
@@ -113,6 +114,7 @@ it("SHOULD create an expense form for today with the default account", () => {
     description: "",
     installmentsCount: 2,
     installmentsOn: false,
+    notes: "",
     ownerId: "user-id",
     paid: true,
     paidTouched: false,
@@ -147,6 +149,7 @@ it("SHOULD build the state of an existing transaction from its DTO", () => {
     description: "Shop",
     installmentsCount: 2,
     installmentsOn: false,
+    notes: "",
     originalPaid: true,
     ownerId: "user-id",
     paid: true,
@@ -950,5 +953,63 @@ describe("tags (spec 043)", () => {
     });
 
     expect(stateFromDto(dto).tags).toEqual(["viagem"]);
+  });
+});
+
+describe("notes (spec 059)", () => {
+  const withNotes = state({ notes: "  Casa\nAeroporto  " });
+
+  it("SHOULD fill the notes from the stored transaction, null meaning empty", () => {
+    const dto = new TransactionDTO({
+      accountId: "active",
+      category: "Food",
+      categoryId: "food",
+      date: new Date(2026, 8, 30).toISOString(),
+      description: "Shop",
+      id: "tx-1",
+      notes: "Casa → Aeroporto",
+      owner: "USER",
+      ownerId: "user-id",
+      type: "EXPENSE",
+      value: "10.00",
+    });
+
+    expect(stateFromDto(dto).notes).toBe("Casa → Aeroporto");
+  });
+
+  it("SHOULD send trimmed notes on create AND nothing WHEN empty", () => {
+    expect(toCreateParams(withNotes, user, "Food").notes).toBe(
+      "Casa\nAeroporto",
+    );
+    expect(toCreateParams(state(), user, "Food").notes).toBeUndefined();
+    expect(
+      toCreateParams(state({ notes: "   " }), user, "Food").notes,
+    ).toBeUndefined();
+  });
+
+  it("SHOULD send null on update WHEN the notes were cleared (absent would keep them)", () => {
+    expect(toUpdateParams("tx-1", withNotes, user, "Food").notes).toBe(
+      "Casa\nAeroporto",
+    );
+    expect(
+      toUpdateParams("tx-1", state({ notes: "" }), user, "Food").notes,
+    ).toBeNull();
+  });
+
+  it("SHOULD send the notes in installments and repeat params", () => {
+    expect(toCreateInstallmentParams(withNotes, user).notes).toBe(
+      "Casa\nAeroporto",
+    );
+    expect(toCreateRecurrenceParams(withNotes, user).notes).toBe(
+      "Casa\nAeroporto",
+    );
+  });
+
+  it("SHOULD clear the notes WHEN resetting for the next transaction", () => {
+    expect(resetForNext(withNotes).notes).toBe("");
+  });
+
+  it("SHOULD see a change of the notes as a different state", () => {
+    expect(isSameState(state(), state({ notes: "x" }))).toBe(false);
   });
 });

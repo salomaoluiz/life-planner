@@ -31,6 +31,7 @@ import CsvActions from "./components/CsvActions";
 import DayBalanceLine from "./components/DayBalanceLine";
 import FilteredSummary from "./components/FilteredSummary";
 import FilterToolbar from "./components/FilterToolbar";
+import ListCell from "./components/ListCell";
 import MonthPickerSheet from "./components/MonthPickerSheet";
 import MonthSummary from "./components/MonthSummary";
 import MonthSwitcher from "./components/MonthSwitcher";
@@ -519,6 +520,7 @@ function FinancialTransactions() {
   return (
     <View style={styles.root} testID={transactionsTestIds.screen}>
       <FlashList
+        CellRendererComponent={ListCell}
         contentContainerStyle={styles.listContent}
         data={vm.entries}
         estimatedItemSize={64}

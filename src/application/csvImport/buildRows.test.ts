@@ -50,6 +50,7 @@ describe("buildRows", () => {
       date: "2026-10-02",
       description: "Supermercado",
       line: 2,
+      notes: undefined,
       owner: "USER",
       ownerId: "u1",
       paid: undefined,
@@ -449,5 +450,32 @@ describe("owner per row", () => {
         creditCardId: "card-1",
       });
     });
+  });
+});
+
+describe("notes (spec 059)", () => {
+  it("SHOULD carry the trimmed notes of the Notes column AND leave it out WHEN empty", () => {
+    const { rows } = buildRows(
+      withRows(
+        [
+          [
+            "02/10/2026",
+            "Uber",
+            "-38,70",
+            "Mercado",
+            "",
+            "  Casa → Aeroporto ",
+          ],
+          ["03/10/2026", "Padaria", "-5,00", "Mercado", "", ""],
+        ],
+        {
+          fixed: { accountOrCard: { id: "acc-1", kind: "account" } },
+          mapping: { ...base.mapping, 5: "notes" },
+        },
+      ),
+    );
+
+    expect(rows[0].payload?.notes).toBe("Casa → Aeroporto");
+    expect(rows[1].payload?.notes).toBeUndefined();
   });
 });

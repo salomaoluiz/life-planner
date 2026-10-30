@@ -35,6 +35,7 @@ interface ITransactionModel {
   installmentNumber?: number;
   installmentPlanId?: string;
   invoiceMonth?: string;
+  notes?: string;
   occurrenceCount?: number;
   occurrenceNumber?: number;
   owner: OwnerType;
@@ -63,6 +64,7 @@ class TransactionModel implements ITransactionModel {
   installmentNumber?: number;
   installmentPlanId?: string;
   invoiceMonth?: string;
+  notes?: string;
   occurrenceCount?: number;
   occurrenceNumber?: number;
   owner: OwnerType;
@@ -87,6 +89,7 @@ class TransactionModel implements ITransactionModel {
     this.installmentPlanId = params.installmentPlanId;
     this.invoiceMonth = params.invoiceMonth;
     this.description = params.description;
+    this.notes = params.notes;
     this.earlyPayment = params.earlyPayment;
     this.occurrenceCount = params.occurrenceCount;
     this.occurrenceNumber = params.occurrenceNumber;
@@ -128,6 +131,7 @@ class TransactionModel implements ITransactionModel {
       installmentNumber: (data.installmentNumber as null | number) ?? undefined,
       installmentPlanId: (data.installmentPlanId as null | string) ?? undefined,
       invoiceMonth: (data.invoiceMonth as null | string) ?? undefined,
+      notes: (data.notes as null | string) ?? undefined,
       occurrenceCount: (data.occurrenceCount as null | number) ?? undefined,
       occurrenceNumber: (data.occurrenceNumber as null | number) ?? undefined,
       owner: data.owner as OwnerType,
@@ -164,6 +168,7 @@ class TransactionModel implements ITransactionModel {
       installmentNumber: this.installmentNumber ?? null,
       installmentPlanId: this.installmentPlanId ?? null,
       invoiceMonth: this.invoiceMonth ?? null,
+      notes: this.notes ?? null,
       occurrenceCount: this.occurrenceCount ?? null,
       occurrenceNumber: this.occurrenceNumber ?? null,
       owner: this.owner,

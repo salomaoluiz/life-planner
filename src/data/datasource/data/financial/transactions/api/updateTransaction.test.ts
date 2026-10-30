@@ -83,3 +83,23 @@ it("SHOULD wrap unknown errors in GenericError with the transaction id only", as
     id: mocks.id,
   });
 });
+
+it("SHOULD send notes: null to clear the notes AND nothing else (spec 059)", async () => {
+  spies.patch.mockResolvedValueOnce({});
+
+  await setup({
+    accountId: undefined,
+    categoryId: undefined,
+    date: undefined,
+    description: undefined,
+    notes: null,
+    owner: undefined,
+    ownerId: undefined,
+    type: undefined,
+    value: undefined,
+  });
+
+  expect(spies.patch).toHaveBeenCalledWith(expect.any(String), {
+    notes: null,
+  });
+});

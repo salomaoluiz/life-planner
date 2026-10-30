@@ -787,6 +787,7 @@ function useNewTransactionViewModel() {
     isSaveDisabled: cardHints.isInvoicePaid,
     isSaving,
     isSavingNext: isSaving && saveIntent.current === "next",
+    notes: state?.notes ?? "",
     onAccountChange: (id: string) => {
       if (state) {
         update({ ...state, accountId: id });
@@ -843,6 +844,11 @@ function useNewTransactionViewModel() {
     onInstallmentsToggle: (on: boolean) => {
       if (state) {
         update(changeInstallmentsOn(state, on));
+      }
+    },
+    onNotesChange: (text: string) => {
+      if (state) {
+        update({ ...state, notes: text });
       }
     },
     onOwnerChange: (id: string) => {
@@ -981,6 +987,8 @@ function useNewTransactionViewModel() {
     selectedCardId: state?.creditCardId,
     selectedCategoryId: state?.categoryId,
     // Card purchases follow their invoice: no switch (spec 033 FR 19).
+    // System rows never have notes (spec 059 FR 8); they are not edited in this form anyway.
+    showNotes: !existing?.systemKey,
     showPaid: state?.payWith !== "CARD",
     tags: state?.tags ?? [],
     tagSuggestions,

@@ -105,3 +105,14 @@ it("SHOULD send paid WHEN the form chose it (spec 033)", async () => {
     expect.objectContaining({ paid: false }),
   );
 });
+
+it("SHOULD send the notes WHEN given (spec 059)", async () => {
+  spies.post.mockResolvedValueOnce(mocks.apiTransaction);
+
+  await setup({ notes: "Casa → Aeroporto" });
+
+  expect(spies.post).toHaveBeenCalledWith(
+    expect.stringMatching(TODAY_URL),
+    expect.objectContaining({ notes: "Casa → Aeroporto" }),
+  );
+});

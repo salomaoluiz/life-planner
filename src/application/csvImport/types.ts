@@ -13,6 +13,7 @@ type ColumnTarget =
   | "ignore"
   | "incomeAmount"
   | "invoice"
+  | "notes"
   | "owner"
   | "paid"
   | "signedAmount"
@@ -43,6 +44,8 @@ interface ImportRowPayload {
   // Spec 048: `YYYY-MM`, card rows only.
   invoiceMonth?: string;
   line: number;
+  // Spec 059: free text of a normal transaction (the API checks the 1000 characters).
+  notes?: string;
   // The row's owner (spec 047); the request's owner applies when absent.
   owner?: "FAMILY" | "USER";
   ownerId?: string;

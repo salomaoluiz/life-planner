@@ -35,6 +35,7 @@ interface CreateTransactionDatasourceParams {
   creditCardId?: string;
   date: string;
   description: string;
+  notes?: null | string;
   owner: OwnerType;
   ownerId: string;
   // Account rows only; omitted → the API decides from the date (spec 033).
@@ -64,6 +65,7 @@ interface UpdateTransactionDatasourceParams {
   date?: string;
   description?: string;
   id: string;
+  notes?: null | string;
   owner?: OwnerType;
   ownerId?: string;
   paid?: boolean;

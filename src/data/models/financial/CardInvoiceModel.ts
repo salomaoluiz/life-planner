@@ -32,6 +32,7 @@ export interface InvoicePurchaseModel {
   id: string;
   installmentCount?: number;
   installmentNumber?: number;
+  notes?: string;
   ownerId: string;
   prepaid: boolean;
   value: number;
@@ -115,6 +116,7 @@ class CardInvoiceModel {
           (purchase.installmentCount as null | number) ?? undefined,
         installmentNumber:
           (purchase.installmentNumber as null | number) ?? undefined,
+        notes: (purchase.notes as null | string) ?? undefined,
         ownerId: purchase.ownerId as string,
         prepaid: Boolean(purchase.prepaid),
         value: Number(purchase.value),

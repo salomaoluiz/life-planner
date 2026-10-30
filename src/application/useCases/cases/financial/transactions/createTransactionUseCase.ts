@@ -12,6 +12,7 @@ export interface CreateTransactionUseCaseParams {
   creditCardId?: string;
   date: string;
   description: string;
+  notes?: null | string;
   owner: string;
   ownerId: string;
   paid?: boolean;
@@ -44,6 +45,7 @@ function createTransactionUseCase(
           creditCardId: params.creditCardId,
           date: params.date,
           description: params.description,
+          notes: params.notes,
           owner,
           ownerId: params.ownerId,
           paid: params.paid,
