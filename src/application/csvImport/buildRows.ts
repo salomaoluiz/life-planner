@@ -173,6 +173,7 @@ function buildRow(
   const paidValue = input.valueMaps.paid[cell(row, "paid")];
   const currency = cell(row, "currency").toUpperCase();
   const tags = splitTags(cell(row, "tags"));
+  const notes = cell(row, "notes");
 
   return {
     display,
@@ -186,6 +187,7 @@ function buildRow(
       description,
       invoiceMonth,
       line,
+      notes: notes === "" ? undefined : notes,
       owner: input.ownerTypes[ownerId],
       ownerId,
       paid: typeof paidValue === "boolean" ? paidValue : undefined,

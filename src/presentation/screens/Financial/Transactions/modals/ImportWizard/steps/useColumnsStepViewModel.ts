@@ -27,6 +27,7 @@ const TARGETS: ColumnTarget[] = [
   "account",
   "card",
   "invoice",
+  "notes",
   "owner",
   "paid",
   "tags",
@@ -107,6 +108,7 @@ function useColumnsStepViewModel(wizard: ImportWizardState) {
     mapped: {
       currency: has("currency"),
       invoice: has("invoice"),
+      notes: has("notes"),
       owner: has("owner"),
       paid: has("paid"),
       tags: has("tags"),

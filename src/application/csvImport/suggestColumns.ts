@@ -23,6 +23,10 @@ const HEADER_TARGETS: [ColumnTarget, string[]][] = [
   ["paid", ["pago", "paid", "status", "situacao"]],
   ["tags", ["tags", "etiquetas", "marcadores"]],
   ["currency", ["moeda", "currency"]],
+  [
+    "notes",
+    ["notas", "notes", "note", "observacao", "observacoes", "observation"],
+  ],
   ["owner", ["pertence a", "belongs to", "dono", "owner"]],
   ["incomeAmount", ["entrada", "credito", "receita", "income", "credit"]],
   ["expenseAmount", ["saida", "debito", "despesa", "expense", "debit"]],

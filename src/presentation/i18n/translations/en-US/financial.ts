@@ -370,6 +370,7 @@ const financial = {
       defaults: {
         currency: "default: the account or card currency",
         invoice: "default: by the purchase date and the closing day",
+        notes: "none",
         owner: "default: the owner chosen in the first step",
         paid: "default: the date has passed",
         tags: "none",
@@ -384,6 +385,7 @@ const financial = {
         date: "Date",
         description: "Description",
         invoice: "Invoice",
+        notes: "Notes",
         owner: "Belongs to",
         paid: "Paid",
         tags: "Tags",
@@ -421,6 +423,7 @@ const financial = {
         ignore: "Ignore",
         incomeAmount: "Income amount",
         invoice: "Invoice",
+        notes: "Notes",
         owner: "Belongs to",
         paid: "Paid",
         signedAmount: "Signed amount",
@@ -463,6 +466,8 @@ const financial = {
       INVOICE_PAID: "Invoice {{month}} is already paid",
       INVOICE_PAYMENT_MISMATCH:
         "Invoice {{month}} is {{due}}; the payment is {{value}}",
+      NOTES_NOT_ALLOWED: "Notes are only allowed on normal transactions",
+      NOTES_TOO_LONG: "Notes have over 1000 characters",
       PAID_FROM_ACCOUNT_INVALID:
         "The paying account must be active, yours and in the card currency",
       SYSTEM_CATEGORY: "System category",

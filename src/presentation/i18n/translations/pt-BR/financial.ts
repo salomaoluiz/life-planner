@@ -368,6 +368,7 @@ const financial = {
       defaults: {
         currency: "padrão: a moeda da conta ou do cartão",
         invoice: "padrão: pela data da compra e o fechamento",
+        notes: "nenhuma",
         owner: "padrão: o dono escolhido no primeiro passo",
         paid: "padrão: a data já passou",
         tags: "nenhuma",
@@ -382,6 +383,7 @@ const financial = {
         date: "Data",
         description: "Descrição",
         invoice: "Fatura",
+        notes: "Notas",
         owner: "Pertence a",
         paid: "Pago",
         tags: "Tags",
@@ -419,6 +421,7 @@ const financial = {
         ignore: "Ignorar",
         incomeAmount: "Receita",
         invoice: "Fatura",
+        notes: "Notas",
         owner: "Pertence a",
         paid: "Pago",
         signedAmount: "Valor com sinal",
@@ -463,6 +466,8 @@ const financial = {
       INVOICE_PAID: "A fatura de {{month}} já está paga",
       INVOICE_PAYMENT_MISMATCH:
         "A fatura de {{month}} é {{due}}; o pagamento é {{value}}",
+      NOTES_NOT_ALLOWED: "Notas só são permitidas em transações normais",
+      NOTES_TOO_LONG: "As notas têm mais de 1000 caracteres",
       PAID_FROM_ACCOUNT_INVALID:
         "A conta do pagamento precisa estar ativa, ser sua e ter a moeda do cartão",
       SYSTEM_CATEGORY: "Categoria do sistema",
