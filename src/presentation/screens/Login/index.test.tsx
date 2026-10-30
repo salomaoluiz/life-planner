@@ -154,3 +154,9 @@ it("SHOULD NOT render the account deleted notice WHEN there is none", () => {
 
   expect(screen.queryByTestId(loginTestIds.accountDeletedNotice)).toBeNull();
 });
+
+it("SHOULD render the plain versions line", () => {
+  setup();
+
+  expect(screen.getByTestId("versions")).toBeOnTheScreen();
+});

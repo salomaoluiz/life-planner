@@ -7,6 +7,7 @@ const loginTestIds = {
   goToSignupButton: "auth.login.go-to-signup-button",
   passwordInput: "auth.login.password-input",
   submitButton: "auth.login.submit-button",
+  versions: "auth.login.versions",
   welcome: "auth.login.welcome",
 } as const;
 

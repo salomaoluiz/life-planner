@@ -14,6 +14,7 @@ jest.mock("./containers", () => {
     Language: () => <MockView testID="language" />,
     Logout: () => <MockView testID="logout" />,
     Theme: () => <MockView testID="theme" />,
+    Versions: () => <MockView testID="versions" />,
   };
 });
 
@@ -28,6 +29,12 @@ it("SHOULD render the title and every config container inside one full-width car
   expect(
     StyleSheet.flatten(screen.getByTestId("settings-card").props.style).width,
   ).toBeUndefined();
+});
+
+it("SHOULD render the versions footer below the actions", () => {
+  render(<Config />);
+
+  expect(screen.getByTestId("versions")).toBeOnTheScreen();
 });
 
 it("SHOULD render the delete account action below logout (and keep logout, theme and language)", () => {
