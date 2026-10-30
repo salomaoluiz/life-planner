@@ -14,7 +14,7 @@ export default {
     experiments: {
       typedRoutes: true,
     },
-    extra: { builtAt: new Date().toISOString() },
+    extra: { builtAt: process.env.BUILT_AT ?? new Date().toISOString() },
     icon: "./assets/images/icon.png",
     ios: {
       bundleIdentifier: "com.jacobysoftware.lifeplanner",

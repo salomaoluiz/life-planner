@@ -222,3 +222,40 @@ describe("resolveVersionStatus", () => {
     ).toMatchObject({ api: "UNAVAILABLE", app: "RELOAD", updates: 1 });
   });
 });
+
+describe("resolveVersionStatus web reload banner (spec 057)", () => {
+  it("SHOULD show no banner WHEN the served build is the same instant", () => {
+    const result = resolve();
+
+    expect(result.banner).toBeNull();
+    expect(result.app).not.toBe("RELOAD");
+  });
+
+  it("SHOULD reload WHEN the served builtAt is later with the same version", () => {
+    const result = resolve({
+      served: { builtAt: "2026-10-29T10:00:00Z", version: "1.5.0" },
+    });
+
+    expect(result.app).toBe("RELOAD");
+  });
+
+  it("SHOULD reload WHEN the served version is newer", () => {
+    const result = resolve({
+      served: { builtAt: "2026-10-28T18:12:00Z", version: "1.6.0" },
+    });
+
+    expect(result.app).toBe("RELOAD");
+  });
+
+  it("SHOULD show no banner WHEN the served builtAt is earlier", () => {
+    const result = resolve({
+      served: { builtAt: "2026-10-27T10:00:00Z", version: "1.5.0" },
+    });
+
+    expect(result.banner).toBeNull();
+  });
+
+  it("SHOULD show no banner WHEN nothing is served", () => {
+    expect(resolve({ served: null }).banner).toBeNull();
+  });
+});

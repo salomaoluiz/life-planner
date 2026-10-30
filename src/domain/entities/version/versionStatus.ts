@@ -82,6 +82,7 @@ function resolveAppStatus(input: ResolveVersionStatusInput): {
     const newerBuild =
       served.version === appVersion &&
       appBuiltAt !== null &&
+      served.builtAt !== appBuiltAt &&
       served.builtAt > appBuiltAt;
 
     if (isNewerVersion(served.version, appVersion) || newerBuild) {
