@@ -6,6 +6,7 @@ import * as financialUseCases from "./financial";
 import * as homeUseCases from "./home";
 import * as stockUseCases from "./stock";
 import * as userUseCases from "./user";
+import * as versionUseCases from "./version";
 
 const listUseCases = {
   ...authUseCases,
@@ -16,6 +17,7 @@ const listUseCases = {
   ...familyMemberUseCases,
   ...stockUseCases,
   ...financialUseCases,
+  ...versionUseCases,
 };
 
 export { listUseCases };

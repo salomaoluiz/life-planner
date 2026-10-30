@@ -114,6 +114,9 @@ const repositoriesMocks: Repositories = {
     getUser: jest.fn(),
     getUserById: jest.fn(),
   },
+  versionRepository: {
+    getVersionInfo: jest.fn(),
+  },
 };
 
 export { repositoriesMocks };

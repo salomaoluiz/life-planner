@@ -17,6 +17,7 @@ const useCases: Datasources = {
   loginDatasource: expect.any(Function),
   stockDatasource: expect.any(Function),
   userDatasource: expect.any(Function),
+  versionDatasource: expect.any(Function),
 };
 
 it("SHOULD return a list of use cases", () => {

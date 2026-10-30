@@ -6,3 +6,4 @@ export * from "./family";
 export * from "./familyMember";
 export * from "./financial";
 export * from "./form";
+export * from "./version";

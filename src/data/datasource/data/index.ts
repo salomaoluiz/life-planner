@@ -4,6 +4,7 @@ import * as familyMembers from "./familyMember";
 import * as financial from "./financial";
 import * as storage from "./storage";
 import * as user from "./user";
+import * as version from "./version";
 
 const listDatasources = {
   ...auth,
@@ -12,6 +13,7 @@ const listDatasources = {
   ...familyMembers,
   ...financial,
   ...storage,
+  ...version,
 };
 
 export { listDatasources };
