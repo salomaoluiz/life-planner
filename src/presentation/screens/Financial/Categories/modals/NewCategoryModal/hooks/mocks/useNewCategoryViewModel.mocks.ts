@@ -36,6 +36,10 @@ jest.mock("@application/useCases", () => ({
       uniqueName: "transactions",
     },
     getOwnersUseCase: { execute: jest.fn(), uniqueName: "owners" },
+    updateFinancialCategoryAppearanceUseCase: {
+      execute: jest.fn(),
+      uniqueName: "appearance",
+    },
     updateFinancialCategoryUseCase: {
       execute: jest.fn(),
       uniqueName: "update",
@@ -99,7 +103,7 @@ beforeEach(() => {
   ["owners", "categories", "transactions"].forEach((key) => {
     queries[key] = new UseQueryFixture<unknown>();
   });
-  ["create", "update", "delete"].forEach((key) => {
+  ["create", "update", "appearance", "delete"].forEach((key) => {
     mutations[key] = new UseMutationFixture<unknown, unknown>();
   });
   spies.params.mockReturnValue({});

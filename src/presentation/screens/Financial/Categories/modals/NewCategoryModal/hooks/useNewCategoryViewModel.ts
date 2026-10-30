@@ -25,6 +25,7 @@ import {
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
+import { buildApplyModel } from "../models/applyToSubcategories";
 import {
   autoColor,
   CategoryFormState,
@@ -143,6 +144,9 @@ function useNewCategoryViewModel() {
   const [customColorDraft, setCustomColorDraft] = useState("");
   const [isIconPickerOpen, setIconPickerOpen] = useState(false);
   const [iconQuery, setIconQuery] = useState("");
+  // Spec 058: opt-in switches, both off until the owner turns them on.
+  const [applyColor, setApplyColor] = useState(false);
+  const [applyIcon, setApplyIcon] = useState(false);
 
   const state = edited ?? initial;
   const isDirty = !!edited && !!initial && !isSameState(edited, initial);
@@ -155,6 +159,10 @@ function useNewCategoryViewModel() {
     cacheKey: [useCases.updateFinancialCategoryUseCase.uniqueName],
     fetch: useCases.updateFinancialCategoryUseCase.execute,
   });
+  const appearanceMutation = useMutation({
+    cacheKey: [useCases.updateFinancialCategoryAppearanceUseCase.uniqueName],
+    fetch: useCases.updateFinancialCategoryAppearanceUseCase.execute,
+  });
   const deleteMutation = useMutation({
     cacheKey: [useCases.deleteFinancialCategoryUseCase.uniqueName],
     fetch: useCases.deleteFinancialCategoryUseCase.execute,
@@ -164,6 +172,7 @@ function useNewCategoryViewModel() {
     if (
       createMutation.status === "success" ||
       updateMutation.status === "success" ||
+      appearanceMutation.status === "success" ||
       deleteMutation.status === "success"
     ) {
       // The list (and a reopened form) must not show the old status.
@@ -172,7 +181,12 @@ function useNewCategoryViewModel() {
       ]);
       closeModal();
     }
-  }, [createMutation.status, updateMutation.status, deleteMutation.status]);
+  }, [
+    createMutation.status,
+    updateMutation.status,
+    appearanceMutation.status,
+    deleteMutation.status,
+  ]);
 
   const id = params.id ?? "";
   const hasChildren = isEditing && !!uiModel?.hasChildren(id);
@@ -205,7 +219,10 @@ function useNewCategoryViewModel() {
       ? "financial.categories.form.customColorInvalid"
       : undefined;
   const formErrorKey = getFinancialErrorMessageKey(
-    createMutation.error ?? updateMutation.error ?? deleteMutation.error,
+    createMutation.error ??
+      updateMutation.error ??
+      appearanceMutation.error ??
+      deleteMutation.error,
   );
 
   function ownerChoices() {
@@ -220,6 +237,16 @@ function useNewCategoryViewModel() {
 
   function update(next: CategoryFormState) {
     setEdited(next);
+    // A reverted field drops its switch (spec 058 FR 2).
+    if (
+      initial &&
+      next.iconColor.toLowerCase() === initial.iconColor.toLowerCase()
+    ) {
+      setApplyColor(false);
+    }
+    if (initial && next.icon === initial.icon) {
+      setApplyIcon(false);
+    }
   }
 
   // Spec 054 FR 14: creating only; an edit never recolors the category.
@@ -231,6 +258,24 @@ function useNewCategoryViewModel() {
         );
   }
 
+  // Spec 058: the "apply to subcategories" block exists only when editing a category that has descendants.
+  const apply =
+    isEditing && state && initial && categories.data
+      ? buildApplyModel({
+          applyColor,
+          applyIcon,
+          categories: categories.data,
+          categoryId: id,
+          categoryName:
+            state.name.trim().length > 0
+              ? state.name.trim()
+              : (existing?.name ?? ""),
+          initial: { icon: initial.icon, iconColor: initial.iconColor },
+          next: { icon: state.icon, iconColor: state.iconColor },
+        })
+      : undefined;
+  const isApplying = !!apply && (apply.effectiveColor || apply.effectiveIcon);
+
   function onSave() {
     setSubmitted(true);
     if (!state || !initial || !uiModel || Object.keys(validate(state)).length) {
@@ -239,6 +284,15 @@ function useNewCategoryViewModel() {
 
     if (isEditing) {
       const changes = toUpdateParams(params.id!, state, initial);
+
+      // Spec 058: the category and its descendants go in one request, all or nothing.
+      if (apply && apply.descendants.length > 0) {
+        appearanceMutation.mutate({
+          ...changes,
+          descendants: apply.descendants,
+        });
+        return;
+      }
 
       // Only the id means nothing changed: close without a request.
       if (Object.keys(changes).length === 1) {
@@ -352,7 +406,19 @@ function useNewCategoryViewModel() {
         }))
       : [];
 
+  let saveLabelKey: TranslationKeys = "financial.categories.form.save";
+  if (isApplying) {
+    saveLabelKey = "financial.categories.form.saveAndApply";
+  } else if (isEditing) {
+    saveLabelKey = "financial.common.saveChanges";
+  }
+
   return {
+    applyColorOn: applyColor,
+    applyCount: apply?.count ?? 0,
+    applyIconOn: applyIcon,
+    applyName: apply?.preview[0]?.name ?? "",
+    applyPreview: apply?.preview ?? [],
     archiveBodyKeys: (hasChildren
       ? [
           "financial.categories.archive.confirmBody",
@@ -360,6 +426,7 @@ function useNewCategoryViewModel() {
         ]
       : ["financial.categories.archive.confirmBody"]) as TranslationKeys[],
     colorOptions: uiModel?.colorOptions ?? [],
+    colorSwitchVisible: apply?.colorSwitchVisible ?? false,
     customColorDraft,
     customColorError,
     deleteConfirmLabelKey: (isExistingAll
@@ -372,7 +439,9 @@ function useNewCategoryViewModel() {
     icon: state?.icon ?? "",
     iconColor: state?.iconColor ?? "",
     iconQuery,
+    iconSwitchVisible: apply?.iconSwitchVisible ?? false,
     inlineIcons: uiModel?.iconOptions("", false) ?? [],
+    isApplyVisible: apply?.visible ?? false,
     isArchived,
     isArchiveDialogOpen,
     isCustomColorOpen,
@@ -384,11 +453,16 @@ function useNewCategoryViewModel() {
     isLoading: !state && !isNotFound,
     isNotFound,
     isOwnerLocked,
-    isSaving: createMutation.isFetching || updateMutation.isFetching,
+    isSaving:
+      createMutation.isFetching ||
+      updateMutation.isFetching ||
+      appearanceMutation.isFetching,
     isTypeLocked,
     isUpdating: updateMutation.isFetching,
     name: state?.name ?? "",
     nameError: errors.name,
+    onApplyColorToggle: () => setApplyColor((value) => !value),
+    onApplyIconToggle: () => setApplyIcon((value) => !value),
     onArchiveCancel: () => setArchiveDialogOpen(false),
     onArchiveConfirm,
     onArchivePress: () => setArchiveDialogOpen(true),
@@ -454,9 +528,8 @@ function useNewCategoryViewModel() {
       uiModel && state ? uiModel.parentOptions(state, params.id) : [],
     pendingItems,
     pickerIcons: uiModel?.iconOptions(iconQuery, true) ?? [],
-    saveLabelKey: (isEditing
-      ? "financial.common.saveChanges"
-      : "financial.categories.form.save") as TranslationKeys,
+    saveLabelKey,
+    saveLabelParams: { count: apply?.count ?? 0 },
     titleKey: (isEditing
       ? "financial.categories.edit"
       : "financial.categories.new") as TranslationKeys,

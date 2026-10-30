@@ -5,6 +5,7 @@ import {
   CategoryHasPendingItems,
   CategoryHasTransactions,
   CategoryParentArchived,
+  GenericError,
 } from "@domain/entities/errors";
 import { isPaletteColor } from "@presentation/constants/categoryColors";
 
@@ -656,5 +657,110 @@ describe("automatic colors (spec 054 FR 14)", () => {
     });
 
     expect(result.current.iconColor).toBe("#123456");
+  });
+});
+
+describe("apply to subcategories (spec 058)", () => {
+  const family = [
+    cat("p", { iconColor: "#F97316", name: "Parent" }),
+    cat("k1", { name: "Kid one", parentId: "p" }),
+    cat("k2", { name: "Kid two", parentId: "p", status: "ARCHIVED" }),
+    cat("g", { name: "Grand", parentId: "k1" }),
+  ];
+
+  function open(id = "p") {
+    givenLoaded({ categories: family, params: { id } });
+    const hook = setup();
+
+    return hook;
+  }
+
+  it("SHOULD hide the block until the color or icon changes, and in create mode", () => {
+    const { result } = open();
+
+    expect(result.current.isApplyVisible).toBe(false);
+    act(() => result.current.onIconChange("food"));
+    expect(result.current.isApplyVisible).toBe(true);
+    expect(result.current.iconSwitchVisible).toBe(true);
+    expect(result.current.colorSwitchVisible).toBe(false);
+    expect(result.current.applyCount).toBe(3);
+
+    givenLoaded();
+    expect(setup().result.current.isApplyVisible).toBe(false);
+  });
+
+  it("SHOULD keep the switches off, save only the category and keep the plain label", () => {
+    const { result } = open();
+
+    act(() => result.current.onIconChange("food"));
+    expect(result.current.applyIconOn).toBe(false);
+    expect(result.current.saveLabelKey).toBe("financial.common.saveChanges");
+
+    act(() => result.current.onSave());
+    expect(mutations.update.value.mutate).toHaveBeenCalledWith({
+      icon: "food",
+      id: "p",
+    });
+    expect(mutations.appearance.value.mutate).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD save the category and every descendant in ONE request WHEN a switch is on", () => {
+    const { result } = open();
+
+    act(() => result.current.onIconChange("food"));
+    act(() => result.current.onApplyIconToggle());
+    expect(result.current.saveLabelKey).toBe(
+      "financial.categories.form.saveAndApply",
+    );
+    expect(result.current.saveLabelParams).toEqual({ count: 3 });
+
+    act(() => result.current.onSave());
+    expect(mutations.appearance.value.mutate).toHaveBeenCalledWith({
+      descendants: [
+        { icon: "food", id: "k1" },
+        { icon: "food", id: "g" },
+        { icon: "food", id: "k2" },
+      ],
+      icon: "food",
+      id: "p",
+    });
+    expect(mutations.update.value.mutate).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD drop a switch WHEN its field goes back to the saved value", () => {
+    const { result } = open();
+
+    act(() => result.current.onColorChange("#3B82F6"));
+    act(() => result.current.onApplyColorToggle());
+    expect(result.current.applyColorOn).toBe(true);
+
+    act(() => result.current.onColorChange("#F97316"));
+    expect(result.current.applyColorOn).toBe(false);
+    expect(result.current.isApplyVisible).toBe(false);
+  });
+
+  it("SHOULD recolor the whole subtree with tones of the new color", () => {
+    const { result } = open();
+
+    act(() => result.current.onColorChange("#3B82F6"));
+    act(() => result.current.onApplyColorToggle());
+    act(() => result.current.onSave());
+
+    const [payload] = jest.mocked(mutations.appearance.value.mutate).mock
+      .calls[0] as [
+      { descendants: { iconColor?: string }[]; iconColor: string },
+    ];
+
+    expect(payload.iconColor).toBe("#3B82F6");
+    expect(payload.descendants).toHaveLength(3);
+    expect(payload.descendants.every((d) => !!d.iconColor)).toBe(true);
+  });
+
+  it("SHOULD show an appearance error in the form and close WHEN it succeeds", () => {
+    const { result } = open();
+
+    mutations.appearance.withError(new GenericError());
+    expect(setup().result.current.formErrorKey).toBeDefined();
+    expect(result.current.isSaving).toBe(false);
   });
 });

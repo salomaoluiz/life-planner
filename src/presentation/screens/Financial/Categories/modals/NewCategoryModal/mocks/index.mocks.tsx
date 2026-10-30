@@ -8,11 +8,17 @@ import { useNewCategoryViewModel } from "../hooks";
 jest.mock("../hooks");
 
 const defaultViewModel: ReturnType<typeof useNewCategoryViewModel> = {
+  applyColorOn: false,
+  applyCount: 0,
+  applyIconOn: false,
+  applyName: "",
+  applyPreview: [],
   archiveBodyKeys: ["financial.categories.archive.confirmBody"],
   colorOptions: [
     { labelKey: "financial.colors.amber", value: "#F59E0B" },
     { labelKey: "financial.colors.indigo", value: "#6366F1" },
   ],
+  colorSwitchVisible: false,
   customColorDraft: "",
   customColorError: undefined,
   deleteConfirmLabelKey: "common.actions.delete",
@@ -23,10 +29,12 @@ const defaultViewModel: ReturnType<typeof useNewCategoryViewModel> = {
   icon: "folder",
   iconColor: "#6366F1",
   iconQuery: "",
+  iconSwitchVisible: false,
   inlineIcons: [
     { label: "Folder", value: "folder" },
     { label: "Car", value: "car" },
   ],
+  isApplyVisible: false,
   isArchived: false,
   isArchiveDialogOpen: false,
   isCustomColorOpen: false,
@@ -43,6 +51,8 @@ const defaultViewModel: ReturnType<typeof useNewCategoryViewModel> = {
   isUpdating: false,
   name: "",
   nameError: undefined,
+  onApplyColorToggle: jest.fn(),
+  onApplyIconToggle: jest.fn(),
   onArchiveCancel: jest.fn(),
   onArchiveConfirm: jest.fn(),
   onArchivePress: jest.fn(),
@@ -78,6 +88,7 @@ const defaultViewModel: ReturnType<typeof useNewCategoryViewModel> = {
   pendingItems: undefined,
   pickerIcons: [{ label: "Heart", value: "heart" }],
   saveLabelKey: "financial.categories.form.save",
+  saveLabelParams: { count: 0 },
   titleKey: "financial.categories.new",
   toneOptions: [],
   type: "EXPENSE",
