@@ -1,0 +1,106 @@
+url: ${E2E_WEB_URL}
+name: financial/overview/period-arrows
+tags:
+  - financial
+  - spec-055
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+- tapOn:
+    id: "tab-finances"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.screen"
+    timeout: 20000
+- tapOn:
+    id: "navigation-rail-financial-overview"
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.screen"
+    timeout: 20000
+# 3M: › moves the window, keeps 3M and shows Today; Today brings the default window back
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.period-1M"
+    timeout: 20000
+- tapOn:
+    id: "financial.overview.period-3M"
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.period-range"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.overview.period-today"
+- copyTextFrom:
+    id: "financial.overview.period-range"
+- evalScript: ${output.DEFAULT_RANGE = maestro.copiedText}
+- tapOn:
+    id: "financial.overview.period-next"
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.period-today"
+    timeout: 20000
+- copyTextFrom:
+    id: "financial.overview.period-range"
+- assertTrue: ${maestro.copiedText != output.DEFAULT_RANGE}
+- tapOn:
+    id: "financial.overview.period-previous"
+- tapOn:
+    id: "financial.overview.period-previous"
+- tapOn:
+    id: "financial.overview.period-today"
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.overview.period-today"
+    timeout: 20000
+- copyTextFrom:
+    id: "financial.overview.period-range"
+- assertTrue: ${maestro.copiedText == output.DEFAULT_RANGE}
+# Pressing the selected preset again also goes back to today
+- tapOn:
+    id: "financial.overview.period-next"
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.period-today"
+    timeout: 20000
+- tapOn:
+    id: "financial.overview.period-3M"
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.overview.period-today"
+    timeout: 20000
+# 12M: one › reaches the 24-month limit; › is disabled, so pressing it again changes nothing
+# (Maestro web does not read aria-disabled, so the check is that the range stays)
+- tapOn:
+    id: "financial.overview.period-12M"
+- tapOn:
+    id: "financial.overview.period-next"
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.period-today"
+    timeout: 20000
+- copyTextFrom:
+    id: "financial.overview.period-range"
+- evalScript: ${output.LIMIT_RANGE = maestro.copiedText}
+- tapOn:
+    id: "financial.overview.period-next"
+- copyTextFrom:
+    id: "financial.overview.period-range"
+- assertTrue: ${maestro.copiedText == output.LIMIT_RANGE}
