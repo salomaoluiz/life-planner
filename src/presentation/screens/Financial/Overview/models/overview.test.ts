@@ -13,11 +13,14 @@ import {
   tileColumns,
 } from "./overviewFormat";
 import {
+  canShiftForward,
   defaultGranularity,
   granularityOptions,
   maxFutureDate,
   monthsInPeriod,
   periodForPreset,
+  shiftCustomPeriod,
+  shiftPresetPeriod,
   todayIndex,
   validateCustomPeriod,
 } from "./overviewPeriod";
@@ -351,5 +354,114 @@ describe("foldBars projected (spec 053)", () => {
       foldBars({ ...base, items: [{ id: "a", name: "A", value: 300 }] })[0]
         .projected,
     ).toBeUndefined();
+  });
+});
+
+describe("shiftPresetPeriod", () => {
+  const today = "2026-10-29";
+
+  it("SHOULD move N months per step keeping the window length (spec 055 FR 1)", () => {
+    expect(shiftPresetPeriod("1M", today, 1)).toEqual({
+      from: "2026-11-01",
+      to: "2026-12-31",
+    });
+    expect(shiftPresetPeriod("3M", today, 1)).toEqual({
+      from: "2026-11-01",
+      to: "2027-04-30",
+    });
+    expect(shiftPresetPeriod("3M", today, -1)).toEqual({
+      from: "2026-05-01",
+      to: "2026-10-31",
+    });
+    expect(shiftPresetPeriod("6M", today, -1)).toEqual({
+      from: "2025-11-01",
+      to: "2026-10-31",
+    });
+    expect(shiftPresetPeriod("12M", today, 1)).toEqual({
+      from: "2026-11-01",
+      to: "2028-10-31",
+    });
+    expect(shiftPresetPeriod("12M", today, -1)).toEqual({
+      from: "2024-11-01",
+      to: "2026-10-31",
+    });
+  });
+
+  it("SHOULD move Year by one calendar year (FR 2)", () => {
+    expect(shiftPresetPeriod("YEAR", today, -1)).toEqual({
+      from: "2025-01-01",
+      to: "2025-12-31",
+    });
+    expect(shiftPresetPeriod("YEAR", today, 1)).toEqual({
+      from: "2027-01-01",
+      to: "2027-12-31",
+    });
+  });
+
+  it("SHOULD equal periodForPreset at offset 0", () => {
+    expect(shiftPresetPeriod("6M", today, 0)).toEqual(
+      periodForPreset("6M", today),
+    );
+  });
+
+  it("SHOULD respect month ends AND leap years", () => {
+    expect(shiftPresetPeriod("1M", "2027-01-31", 1)).toEqual({
+      from: "2027-02-01",
+      to: "2027-03-31",
+    });
+    expect(shiftPresetPeriod("1M", "2028-01-15", 1)).toEqual({
+      from: "2028-02-01",
+      to: "2028-03-31",
+    });
+    expect(shiftPresetPeriod("1M", "2027-03-31", -1)).toEqual({
+      from: "2027-02-01",
+      to: "2027-03-31",
+    });
+    expect(shiftPresetPeriod("1M", "2028-01-31", 0).to).toBe("2028-02-29");
+  });
+});
+
+describe("shiftCustomPeriod", () => {
+  it("SHOULD move whole-month ranges by their months (FR 3)", () => {
+    expect(
+      shiftCustomPeriod({ from: "2027-01-01", to: "2027-03-31" }, 1),
+    ).toEqual({ from: "2027-04-01", to: "2027-06-30" });
+    expect(
+      shiftCustomPeriod({ from: "2027-01-01", to: "2027-03-31" }, -1),
+    ).toEqual({ from: "2026-10-01", to: "2026-12-31" });
+    expect(
+      shiftCustomPeriod({ from: "2028-02-01", to: "2028-02-29" }, 1),
+    ).toEqual({ from: "2028-03-01", to: "2028-03-31" });
+  });
+
+  it("SHOULD move other ranges by their number of days", () => {
+    expect(
+      shiftCustomPeriod({ from: "2026-10-10", to: "2026-10-24" }, 1),
+    ).toEqual({ from: "2026-10-25", to: "2026-11-08" });
+    expect(
+      shiftCustomPeriod({ from: "2026-10-10", to: "2026-10-24" }, -1),
+    ).toEqual({ from: "2026-09-25", to: "2026-10-09" });
+  });
+});
+
+describe("canShiftForward", () => {
+  const today = "2026-10-29";
+
+  it("SHOULD allow a period that ends on or before the 24-month limit (FR 9)", () => {
+    expect(
+      canShiftForward({ from: "2026-11-01", to: "2028-10-31" }, today),
+    ).toBe(true);
+    expect(
+      canShiftForward({ from: "2028-05-01", to: "2028-10-31" }, today),
+    ).toBe(true);
+  });
+
+  it("SHOULD refuse a period that ends after the limit", () => {
+    expect(
+      canShiftForward({ from: "2027-01-01", to: "2028-12-31" }, today),
+    ).toBe(false);
+    expect(
+      canShiftForward({ from: "2028-06-01", to: "2028-11-30" }, today),
+    ).toBe(false);
   });
 });

@@ -226,3 +226,123 @@ describe("categories and drill-through", () => {
     );
   });
 });
+
+describe("period arrows", () => {
+  it("SHOULD move a fixed preset forward AND back keeping it selected (spec 055 FR 4-5)", () => {
+    const { result } = setup();
+
+    act(() => result.current.onPresetChange("3M"));
+    act(() => result.current.onNextPeriod());
+    expect(result.current.preset).toBe("3M");
+    expect(result.current.period).toEqual({
+      from: "2026-11-01",
+      to: "2027-04-30",
+    });
+    expect(result.current.showToday).toBe(true);
+    act(() => result.current.onPreviousPeriod());
+    act(() => result.current.onPreviousPeriod());
+    expect(result.current.period).toEqual({
+      from: "2026-05-01",
+      to: "2026-10-31",
+    });
+  });
+
+  it("SHOULD go back to today with the Today button AND with the selected preset (FR 7)", () => {
+    const { result } = setup();
+
+    act(() => result.current.onPresetChange("3M"));
+    act(() => result.current.onNextPeriod());
+    act(() => result.current.onBackToToday());
+    expect(result.current.period.from).toBe("2026-08-01");
+    expect(result.current.showToday).toBe(false);
+    act(() => result.current.onNextPeriod());
+    act(() => result.current.onPresetReselect("3M"));
+    expect(result.current.period.from).toBe("2026-08-01");
+    expect(result.current.showToday).toBe(false);
+  });
+
+  it("SHOULD reset the offset when another preset is chosen (FR 6)", () => {
+    const { result } = setup();
+
+    act(() => result.current.onPresetChange("3M"));
+    act(() => result.current.onNextPeriod());
+    act(() => result.current.onPresetChange("6M"));
+    expect(result.current.period).toEqual({
+      from: "2026-05-01",
+      to: "2027-04-30",
+    });
+  });
+
+  it("SHOULD disable next at the 24-month limit (FR 9)", () => {
+    const { result } = setup();
+
+    expect(result.current.canGoNext).toBe(true);
+    act(() => result.current.onPresetChange("12M"));
+    act(() => result.current.onNextPeriod());
+    expect(result.current.period.to).toBe("2028-10-31");
+    expect(result.current.canGoNext).toBe(false);
+    act(() => result.current.onNextPeriod());
+    expect(result.current.period.to).toBe("2028-10-31");
+    act(() => result.current.onPresetChange("YEAR"));
+    act(() => result.current.onNextPeriod());
+    expect(result.current.period.from).toBe("2027-01-01");
+    expect(result.current.canGoNext).toBe(false);
+  });
+
+  it("SHOULD move a custom range AND keep Custom selected without a Today button (FR 3)", () => {
+    const { result } = setup();
+
+    act(() =>
+      result.current.onApplyCustomPeriod({
+        from: "2027-01-01",
+        to: "2027-03-31",
+      }),
+    );
+    act(() => result.current.onNextPeriod());
+    expect(result.current.preset).toBe("CUSTOM");
+    expect(result.current.customPeriod).toEqual({
+      from: "2027-04-01",
+      to: "2027-06-30",
+    });
+    expect(result.current.showToday).toBe(false);
+    act(() =>
+      result.current.onApplyCustomPeriod({
+        from: "2026-10-10",
+        to: "2026-10-24",
+      }),
+    );
+    act(() => result.current.onNextPeriod());
+    expect(result.current.period).toEqual({
+      from: "2026-10-25",
+      to: "2026-11-08",
+    });
+    act(() => result.current.onPresetReselect("CUSTOM"));
+    expect(result.current.customOpen).toBe(true);
+    expect(result.current.customPeriod).toEqual(result.current.period);
+  });
+
+  it("SHOULD disable next on a custom range that would cross the limit", () => {
+    const { result } = setup();
+
+    act(() =>
+      result.current.onApplyCustomPeriod({
+        from: "2028-08-01",
+        to: "2028-10-31",
+      }),
+    );
+    expect(result.current.canGoNext).toBe(false);
+  });
+
+  it("SHOULD drill through with the moved period", () => {
+    const { result } = setup();
+
+    act(() => result.current.onPresetChange("3M"));
+    act(() => result.current.onNextPeriod());
+    act(() => result.current.onTagPress("tag-1"));
+    expect(setTransactionFilters).toHaveBeenCalledWith(
+      expect.objectContaining({
+        period: { from: "2026-11-01", to: "2027-04-30" },
+      }),
+    );
+  });
+});

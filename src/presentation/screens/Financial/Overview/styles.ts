@@ -9,6 +9,8 @@ function useStyles() {
   return {
     styles: StyleSheet.create({
       actions: { alignItems: "center", flexDirection: "row", gap: spacing.sm },
+      arrows: { alignItems: "center", flexDirection: "row", gap: spacing.xs },
+      arrowsCompact: { alignSelf: "stretch", gap: spacing.xs },
       blocks: { gap: spacing.md },
       center: { width: "100%" },
       content: { gap: spacing.md, paddingBottom: spacing.xxl },
@@ -20,6 +22,7 @@ function useStyles() {
         flexDirection: "row",
         gap: spacing.sm,
       },
+      limitHint: { textAlign: "center" },
       pair: { flexBasis: 420, flexGrow: 1, flexShrink: 1, minWidth: 280 },
       pairs: { flexDirection: "row", flexWrap: "wrap", gap: spacing.md },
       period: {
@@ -29,6 +32,8 @@ function useStyles() {
         gap: spacing.sm,
       },
       presets: { flexShrink: 1, minWidth: 300 },
+      range: { flexShrink: 1, minWidth: 250, paddingHorizontal: spacing.xs },
+      rangeCompact: { flex: 1, minWidth: 0 },
       root: { flex: 1 },
       scopeRow: { gap: spacing.sm },
       tileFour: { flexBasis: "24%", flexGrow: 1, minWidth: 200 },
