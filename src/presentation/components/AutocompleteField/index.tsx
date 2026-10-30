@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import {
   NativeSyntheticEvent,
   TextInput,
@@ -19,8 +19,14 @@ export type AutocompleteFieldProps = ChipsProps | TextProps;
 export interface AutocompleteSuggestion {
   id: string;
   label: string;
+  /** Before the label, e.g. a category tile */
+  leading?: ReactNode;
+  /** The part of `label` shown in bold, as [start, end) indexes (the typed text) */
+  matchRange?: [number, number];
   /** Shown at the end of the row, e.g. a usage count */
   meta?: string;
+  /** After everything else, e.g. a type bullet */
+  trailing?: ReactNode;
 }
 
 interface BaseProps {
@@ -32,6 +38,8 @@ interface BaseProps {
   maxSuggestions?: number;
   onQueryChange?: (query: string) => void;
   placeholder?: string;
+  /** The suggestions are already filtered by the caller: only the limit applies */
+  prefiltered?: boolean;
   /** Announced politely when the list changes, e.g. "3 suggestions" */
   resultsLabel?: (count: number) => string;
   suggestions: AutocompleteSuggestion[];
@@ -59,13 +67,17 @@ interface Option {
   id: string;
   // What the row shows
   label: string;
+  leading?: ReactNode;
+  matchRange?: [number, number];
   meta?: string;
+  trailing?: ReactNode;
   // What picking it adds or fills in
   value: string;
 }
 
 /** A free text; picking a suggestion fills it in. */
 interface TextProps extends BaseProps {
+  maxLength?: number;
   mode: "text";
   onChangeText: (text: string) => void;
   onSelect?: (suggestion: AutocompleteSuggestion) => void;
@@ -129,8 +141,9 @@ function AutocompleteField(props: AutocompleteFieldProps) {
       );
 
       if (suggestion) {
-        props.onSelect?.(suggestion);
+        // The text first: an `onSelect` that sets the whole form afterwards has the last word.
         props.onChangeText(option.value);
+        props.onSelect?.(suggestion);
       }
     } else {
       props.onChange(addValue(values, option.value));
@@ -241,6 +254,7 @@ function AutocompleteField(props: AutocompleteFieldProps) {
           autoCapitalize="none"
           autoCorrect={false}
           editable={!props.disabled && !atMax}
+          maxLength={props.mode === "text" ? props.maxLength : undefined}
           nativeID={testID && `${testID}-input`}
           onBlur={() => {
             if (pressingMenu.current) {
@@ -299,6 +313,7 @@ function AutocompleteField(props: AutocompleteFieldProps) {
                   : `${testID}-suggestion-${option.label}`)
               }
             >
+              {option.leading}
               {option.create ? (
                 <Text.BodyStrong
                   color={theme.colors.accentText}
@@ -306,9 +321,10 @@ function AutocompleteField(props: AutocompleteFieldProps) {
                   value={option.label}
                 />
               ) : (
-                <Text.Body numberOfLines={1} value={option.label} />
+                <OptionLabel option={option} />
               )}
               {option.meta ? <Text.Caption value={option.meta} /> : null}
+              {option.trailing}
             </Touchable>
           ))}
         </View>
@@ -337,7 +353,8 @@ function buildOptions(
     .filter(
       (suggestion) =>
         !values.some((value) => sameText(value, suggestion.label)) &&
-        suggestion.label.toLowerCase().includes(typed.toLowerCase()),
+        (props.prefiltered === true ||
+          suggestion.label.toLowerCase().includes(typed.toLowerCase())),
     )
     .slice(0, limit)
     .map((suggestion) => ({
@@ -367,6 +384,24 @@ function buildOptions(
       value: typed,
     },
   ];
+}
+
+// The label, with the matched part in bold when the suggestion says where it is.
+function OptionLabel({ option }: { option: Option }) {
+  const { styles } = useStyles();
+  const [start, end] = option.matchRange ?? [0, 0];
+
+  if (end <= start) {
+    return <Text.Body numberOfLines={1} value={option.label} />;
+  }
+
+  return (
+    <View style={styles.optionLabel}>
+      <Text.Body value={option.label.slice(0, start)} />
+      <Text.BodyStrong value={option.label.slice(start, end)} />
+      <Text.Body numberOfLines={1} value={option.label.slice(end)} />
+    </View>
+  );
 }
 
 function removeValue(values: string[], label: string) {

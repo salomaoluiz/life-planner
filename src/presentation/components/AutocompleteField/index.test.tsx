@@ -1,3 +1,5 @@
+import { Text } from "react-native";
+
 import { act, fireEvent, screen } from "@tests";
 
 import { scrollIntoView } from "./";
@@ -219,6 +221,68 @@ describe("text mode", () => {
     setup({ mode: "text", value: "" } as never);
     key("Backspace");
     expect(textProps.onChangeText).not.toHaveBeenCalled();
+  });
+});
+
+describe("rich rows (spec 060)", () => {
+  const rich = [
+    {
+      id: "r1",
+      label: "Café da manhã",
+      leading: <Text>LEAD</Text>,
+      matchRange: [0, 4] as [number, number],
+      trailing: <Text>TRAIL</Text>,
+    },
+  ];
+
+  it("SHOULD show the leading and trailing slots AND the matched part", () => {
+    setup({
+      mode: "text",
+      prefiltered: true,
+      suggestions: rich,
+      value: "cafe",
+    } as never);
+    open();
+    expect(screen.getByText("LEAD")).toBeTruthy();
+    expect(screen.getByText("TRAIL")).toBeTruthy();
+    expect(screen.getByText("Café")).toBeTruthy();
+    expect(screen.getByText(" da manhã")).toBeTruthy();
+  });
+
+  it("SHOULD list suggestions the caller already filtered, whatever the text", () => {
+    setup({ mode: "text", suggestions: rich, value: "cafe" } as never);
+    open();
+    expect(screen.queryByTestId("ac-suggestion-Café da manhã")).toBeNull();
+
+    setup({
+      mode: "text",
+      prefiltered: true,
+      suggestions: rich,
+      value: "cafe",
+    } as never);
+    open();
+    expect(screen.getByTestId("ac-suggestion-Café da manhã")).toBeTruthy();
+  });
+
+  it("SHOULD set the text before reporting the pick (onSelect has the last word)", () => {
+    const calls: string[] = [];
+
+    textProps.onChangeText.mockImplementation(() => calls.push("text"));
+    textProps.onSelect.mockImplementation(() => calls.push("select"));
+    setup({
+      mode: "text",
+      prefiltered: true,
+      suggestions: rich,
+      value: "c",
+    } as never);
+    open();
+    fireEvent.press(screen.getByTestId("ac-suggestion-Café da manhã"));
+    expect(calls).toEqual(["text", "select"]);
+  });
+
+  it("SHOULD cap the input length", () => {
+    setup({ maxLength: 200, mode: "text" } as never);
+    expect(input().props.maxLength).toBe(200);
   });
 });
 
