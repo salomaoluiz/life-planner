@@ -1,0 +1,61 @@
+url: ${E2E_WEB_URL}
+name: navigation/modal-on-refresh
+tags:
+  - navigation
+  - spec-057
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+# (a) New transaction opened from Overview, then a fresh load of the same URL
+- tapOn:
+    id: "tab-finances"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.screen"
+    timeout: 20000
+- tapOn:
+    id: "navigation-rail-financial-overview"
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.screen"
+    timeout: 20000
+- openLink: ${E2E_WEB_URL}/financial/overview/add_new_transaction
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.sheet"
+    timeout: 20000
+- assertVisible:
+    id: "financial.overview.screen"
+# Closing the modal lands on the screen behind it
+- tapOn:
+    id: "financial.transaction-form.sheet-close"
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.screen"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.transaction-form.sheet"
+# (b) An invite link opens over Family
+- openLink: ${E2E_WEB_URL}/invite?token=fake-token
+- extendedWaitUntil:
+    visible:
+      id: "family.list.screen"
+    timeout: 20000
+# (c) The old /financial URL lands on Transactions
+- openLink: ${E2E_WEB_URL}/financial
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.screen"
+    timeout: 20000
