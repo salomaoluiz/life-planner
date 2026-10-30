@@ -176,11 +176,14 @@ function CardInvoiceRow(props: Props) {
                   : item.description
               }
               trailing={
-                <AmountText
-                  currency={invoice.currency}
-                  type="EXPENSE"
-                  value={item.amountCents}
-                />
+                <View style={styles.purchaseTrailing}>
+                  {item.notes ? <NoteIcon note={item.notes} /> : null}
+                  <AmountText
+                    currency={invoice.currency}
+                    type="EXPENSE"
+                    value={item.amountCents}
+                  />
+                </View>
               }
             />
           ))}
