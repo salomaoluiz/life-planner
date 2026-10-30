@@ -3,6 +3,15 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.3.0] - 2026-10-30
+
+### Added
+
+- Transactions, installment plans and recurring series have an optional Notes field (up to 1000 characters) in the form and in the installment sheet (spec 059).
+- Lists show a small note icon on rows that have a note; on the web, hovering it shows the note in up to 2 lines (spec 059).
+- The search also finds transactions by notes, category name and amount (spec 059).
+- The transactions CSV import maps a Notes column, and the export has one (spec 059).
+
 ## [1.2.0] - 2026-10-30
 
 ### Added
