@@ -58,6 +58,10 @@ function useVersionInfo(): UseVersionInfoResponse {
     staleTime: STALE_MS,
   });
   const { refetch } = query;
+  // The fetcher returns a new `refetch` on every render; the AppState effect reads it through a
+  // ref so it subscribes once, instead of re-running (and re-reading version.json) every render.
+  const refetchRef = useRef(refetch);
+  refetchRef.current = refetch;
 
   const refreshServed = useCallback(async () => {
     setServed(await fetchServedWebVersion());
@@ -68,12 +72,12 @@ function useVersionInfo(): UseVersionInfoResponse {
     const subscription = AppState.addEventListener("change", (state) => {
       if (state === "active") {
         void refreshServed();
-        void refetch();
+        void refetchRef.current();
       }
     });
 
     return () => subscription.remove();
-  }, [refetch, refreshServed]);
+  }, [refreshServed]);
 
   const status = useMemo(
     () =>
