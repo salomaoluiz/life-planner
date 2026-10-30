@@ -73,6 +73,7 @@ const defaultViewModel: ReturnType<typeof useInstallmentEditViewModel> = {
   onDeleteConfirm: jest.fn(),
   onDeletePress: jest.fn(),
   onDescriptionChange: jest.fn(),
+  onNotesChange: jest.fn(),
   onPlanClose: jest.fn(),
   onPlanOpen: jest.fn(),
   onPrepayPress: jest.fn(),

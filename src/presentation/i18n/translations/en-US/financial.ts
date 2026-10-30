@@ -1063,7 +1063,7 @@ const financial = {
       remove: "Remove filter {{name}}",
       result: "Result",
       resultOf: "result of the filters",
-      searchPlaceholder: "Search description",
+      searchPlaceholder: "Search by description, notes, category or amount",
       situation: {
         paid: "Paid",
         title: "Situation",
@@ -1121,6 +1121,8 @@ const financial = {
       noAccounts: "No accounts for this owner yet.",
       noCards: "No active cards for this owner yet.",
       noCategories: "No categories of this type for this owner yet.",
+      notes: "Notes (optional)",
+      notesHelper: "Anything: route, people, reason.",
       overLimit: "This purchase passes the card limit by {{amount}}",
       paid: "Paid",
       paidFirstOnly: "Applies to this first one",
@@ -1152,6 +1154,7 @@ const financial = {
       tagsTooLong: "A tag can have up to 30 characters",
       totalValue: "Total value",
     },
+    hasNote: "Has a note",
     invoicePayment: "Invoice payment",
     monthPicker: {
       nextYear: "Next year",

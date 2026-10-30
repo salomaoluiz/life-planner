@@ -22,6 +22,7 @@ import {
 const MAX_DESCRIPTION = 200;
 // Spec 043 FR 4 / 18.
 const MAX_TAGS = 10;
+const MAX_NOTES = 1000;
 const MAX_TAG_NAME = 30;
 
 type PayWith = "ACCOUNT" | "CARD";
@@ -50,6 +51,8 @@ interface TransactionFormState {
   // Card purchases only (spec 030): the amount is then the TOTAL split in `installmentsCount` parts.
   installmentsCount: number;
   installmentsOn: boolean;
+  // Spec 059: free text, up to MAX_NOTES characters; empty means no note.
+  notes: string;
   // Origin of the transaction being edited: true/false = its stored status, undefined while creating.
   originalPaid?: boolean;
   ownerId: string;
@@ -237,6 +240,7 @@ function createInitialState(params: {
     date: normalizeDate(params.now),
     description: "",
     ...REPEAT_AND_INSTALLMENTS_DEFAULTS,
+    notes: "",
     ownerId,
     paid: true,
     paidTouched: false,
@@ -272,6 +276,7 @@ function isSameState(a: TransactionFormState, b: TransactionFormState) {
     a.description === b.description &&
     a.installmentsCount === b.installmentsCount &&
     a.installmentsOn === b.installmentsOn &&
+    a.notes === b.notes &&
     a.ownerId === b.ownerId &&
     a.paid === b.paid &&
     a.payWith === b.payWith &&
@@ -288,6 +293,11 @@ function normalizeDate(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
+// A new record sends the notes only when there are some.
+function notesToCreate(state: TransactionFormState) {
+  return state.notes.trim() || undefined;
+}
+
 function pickNewRecordId(previousIds: string[], current: { id: string }[]) {
   return current.find((record) => !previousIds.includes(record.id))?.id;
 }
@@ -300,6 +310,7 @@ function resetForNext(state: TransactionFormState): TransactionFormState {
     ...REPEAT_AND_INSTALLMENTS_DEFAULTS,
     amountCents: 0,
     description: "",
+    notes: "",
     originalPaid: undefined,
     paid: !isAfterToday(state.date),
     paidTouched: false,
@@ -319,6 +330,7 @@ function stateFromDto(
     description: dto.description,
     installmentsCount: dto.installmentCount ?? 2,
     installmentsOn: false,
+    notes: dto.notes ?? "",
     originalPaid: dto.paid,
     ownerId: dto.ownerId,
     paid: dto.paid,
@@ -345,6 +357,7 @@ function toCreateInstallmentParams(
     date: state.date.toISOString(),
     description: state.description.trim(),
     installments: state.installmentsCount,
+    notes: notesToCreate(state),
     owner: owner.type,
     ownerId: owner.id,
     tags: state.tags,
@@ -366,6 +379,7 @@ function toCreateParams(
     creditCardId: isCard ? state.creditCardId : undefined,
     date: state.date.toISOString(),
     description: state.description.trim(),
+    notes: notesToCreate(state),
     owner: owner.type,
     ownerId: owner.id,
     // A card purchase follows its invoice: no status is sent (spec 033 FR 2).
@@ -391,6 +405,7 @@ function toCreateRecurrenceParams(
     description: state.description.trim(),
     endDate: state.repeatEnd?.toISOString(),
     frequency: state.repeatFrequency,
+    notes: notesToCreate(state),
     owner: owner.type,
     ownerId: owner.id,
     paid: isCard ? undefined : state.paid,
@@ -406,7 +421,12 @@ function toUpdateParams(
   owner: OwnerDTO,
   categoryName: string,
 ): UpdateTransactionUseCaseParams {
-  return { ...toCreateParams(state, owner, categoryName), id };
+  // An edit clears the notes with `null` (absent would leave them).
+  return {
+    ...toCreateParams(state, owner, categoryName),
+    id,
+    notes: state.notes.trim() || null,
+  };
 }
 
 function validate(state: TransactionFormState): TransactionFormErrors {
@@ -474,6 +494,7 @@ export {
   defaultAccountId,
   defaultCardId,
   isSameState,
+  MAX_NOTES,
   MAX_TAG_NAME,
   MAX_TAGS,
   normalizeDate,

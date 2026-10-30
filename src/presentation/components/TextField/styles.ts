@@ -24,7 +24,7 @@ export function getFrameStyle(args: {
   };
 }
 
-function useStyles(multiline: boolean) {
+function useStyles(multiline: boolean, minLines = 3) {
   const theme = useKitTheme();
   const { colors, spacing, typography } = theme;
   function lines(n: number) {
@@ -37,7 +37,7 @@ function useStyles(multiline: boolean) {
           alignItems: "flex-start" as const,
           height: undefined,
           maxHeight: lines(6),
-          minHeight: lines(3),
+          minHeight: lines(minLines),
         }
       : {},
     styles: StyleSheet.create({

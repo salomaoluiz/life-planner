@@ -11,6 +11,8 @@ export type TextFieldProps = SecureProps & {
   autoCapitalize?: "characters" | "none" | "sentences" | "words";
   autoComplete?: React.ComponentProps<typeof TextInput>["autoComplete"];
   autoCorrect?: boolean;
+  // Right side of the helper line, e.g. `12/1000` (spec 059).
+  counter?: string;
   disabled?: boolean;
   error?: string;
   helper?: string;
@@ -19,6 +21,8 @@ export type TextFieldProps = SecureProps & {
   label: string;
   leftIcon?: string;
   maxLength?: number;
+  // Multiline only: the field starts this tall (default 3 lines) and grows up to 6.
+  minLines?: number;
   multiline?: boolean;
   onChangeText: (text: string) => void;
   onSubmitEditing?: () => void;
@@ -44,11 +48,15 @@ type SecureProps =
 function TextField(props: TextFieldProps) {
   const [focused, setFocused] = useState(false);
   const [hidden, setHidden] = useState(true);
-  const { multilineFrame, styles, theme } = useStyles(!!props.multiline);
+  const { multilineFrame, styles, theme } = useStyles(
+    !!props.multiline,
+    props.minLines,
+  );
   const { testID } = props;
 
   return (
     <FieldShell
+      counter={props.counter}
       disabled={props.disabled}
       error={props.error}
       helper={props.helper}

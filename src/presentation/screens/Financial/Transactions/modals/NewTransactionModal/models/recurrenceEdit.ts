@@ -49,6 +49,11 @@ function buildRecurringSave(
       state.description.trim() !== initial.description.trim()
         ? state.description.trim()
         : undefined,
+    // `null` clears the notes (spec 059).
+    notes:
+      state.notes.trim() !== initial.notes.trim()
+        ? state.notes.trim() || null
+        : undefined,
     // The whole list travels when it changed (`[]` removes every tag).
     tags: isSameTags(state.tags, initial.tags) ? undefined : state.tags,
     value:
@@ -143,6 +148,7 @@ function onlyThis(
   common: {
     categoryId?: string;
     description?: string;
+    notes?: null | string;
     tags?: string[];
     value?: string;
   },

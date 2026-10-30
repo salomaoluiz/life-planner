@@ -1063,7 +1063,7 @@ const financial = {
       remove: "Remover filtro {{name}}",
       result: "Resultado",
       resultOf: "resultado dos filtros",
-      searchPlaceholder: "Buscar na descrição",
+      searchPlaceholder: "Buscar por descrição, notas, categoria ou valor",
       situation: {
         paid: "Paga",
         title: "Situação",
@@ -1121,6 +1121,8 @@ const financial = {
       noAccounts: "Ainda não há contas para este dono.",
       noCards: "Ainda não há cartões ativos para este dono.",
       noCategories: "Ainda não há categorias deste tipo para este dono.",
+      notes: "Notas (opcional)",
+      notesHelper: "Qualquer texto: rota, pessoas, motivo.",
       overLimit: "Esta compra passa o limite do cartão em {{amount}}",
       paid: "Pago",
       paidFirstOnly: "Vale para esta primeira",
@@ -1152,6 +1154,7 @@ const financial = {
       tagsTooLong: "A tag pode ter até 30 caracteres",
       totalValue: "Valor total",
     },
+    hasNote: "Tem nota",
     invoicePayment: "Pagamento de fatura",
     monthPicker: {
       nextYear: "Próximo ano",

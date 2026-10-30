@@ -11,6 +11,7 @@ import {
 } from "@utils/money";
 
 const MAX_DESCRIPTION = 200;
+const MAX_NOTES = 1000;
 
 interface EditableFields {
   amount: boolean;
@@ -34,6 +35,8 @@ interface InstallmentEditState {
   creditCardId: string;
   date: Date;
   description: string;
+  // Spec 059: the note of the plan (copied to every row); empty means no note.
+  notes: string;
   scope: EditScope;
 }
 
@@ -42,6 +45,16 @@ function changed<T>(value: T, stored: T): T | undefined {
 }
 
 // "Only this one" and "This and the next ones" edit the value of one row; "All" edits the plan TOTAL.
+// `null` clears the notes; `undefined` leaves them (spec 059).
+function changedNotes(
+  value: string,
+  stored?: string,
+): null | string | undefined {
+  const trimmed = value.trim();
+
+  return trimmed === (stored ?? "").trim() ? undefined : trimmed || null;
+}
+
 function changeScope(
   state: InstallmentEditState,
   scope: EditScope,
@@ -93,6 +106,7 @@ function initialState(
     creditCardId: plan.creditCardId,
     date: dayOf(new Date(plan.date)),
     description: transaction.description,
+    notes: transaction.notes ?? "",
     scope: "ONLY_THIS",
   };
 }
@@ -105,6 +119,7 @@ function isSameState(a: InstallmentEditState, b: InstallmentEditState) {
     a.creditCardId === b.creditCardId &&
     a.date.getTime() === b.date.getTime() &&
     a.description === b.description &&
+    a.notes === b.notes &&
     a.scope === b.scope
   );
 }
@@ -150,6 +165,7 @@ function toPlanUpdate(
     installments: structural
       ? changed(state.count, plan.installmentCount)
       : undefined,
+    notes: changedNotes(state.notes, plan.notes),
     value:
       structural && state.amountCents !== decimalStringToCents(plan.totalValue)
         ? centsToDecimalString(state.amountCents)
@@ -167,6 +183,7 @@ function toTransactionUpdate(
     categoryId: changed(state.categoryId, transaction.categoryId),
     description: changed(state.description.trim(), transaction.description),
     id: transaction.id,
+    notes: changedNotes(state.notes, transaction.notes),
     scope: state.scope === "THIS_AND_NEXT" ? "THIS_AND_NEXT" : "ONLY_THIS",
     value:
       !paid && state.amountCents !== decimalStringToCents(transaction.value)
@@ -220,6 +237,7 @@ export {
   editableFields,
   initialState,
   isSameState,
+  MAX_NOTES,
   needsRecalcConfirm,
   toPlanUpdate,
   toTransactionUpdate,

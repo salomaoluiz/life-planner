@@ -242,3 +242,12 @@ describe("wide layout (spec 037)", () => {
     ).toBeOnTheScreen();
   });
 });
+
+it("SHOULD show the notes of the plan AND report the typing (spec 059)", () => {
+  const vm = setup();
+  const input = screen.getByTestId(installmentEditTestIds.notes);
+
+  expect(input.props.maxLength).toBe(1000);
+  fireEvent.changeText(input, "Presente");
+  expect(vm.onNotesChange).toHaveBeenCalledWith("Presente");
+});

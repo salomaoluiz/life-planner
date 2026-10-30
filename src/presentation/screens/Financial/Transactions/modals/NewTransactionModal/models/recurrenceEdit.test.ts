@@ -16,6 +16,7 @@ const initial: TransactionFormState = {
   description: "Rent",
   installmentsCount: 2,
   installmentsOn: false,
+  notes: "",
   originalPaid: false,
   ownerId: "user-id",
   paid: false,
@@ -255,5 +256,45 @@ describe("buildRecurringSave - all", () => {
         real,
       ),
     ).toEqual({ kind: "none" });
+  });
+});
+
+describe("notes (spec 059)", () => {
+  const changed = { ...initial, notes: "Contrato" };
+
+  it("SHOULD send only the notes WHEN only they changed, in every scope", () => {
+    expect(buildRecurringSave("ALL", changed, initial, real)).toEqual({
+      kind: "update-series",
+      params: { id: "series-1", notes: "Contrato" },
+    });
+    expect(buildRecurringSave("ONLY_THIS", changed, initial, real)).toEqual({
+      kind: "update-transaction",
+      params: { id: "t-5", notes: "Contrato", scope: "ONLY_THIS" },
+    });
+    expect(buildRecurringSave("THIS_AND_NEXT", changed, initial, real)).toEqual(
+      {
+        kind: "split",
+        params: {
+          notes: "Contrato",
+          occurrenceNumber: 5,
+          recurrenceId: "series-1",
+        },
+      },
+    );
+  });
+
+  it("SHOULD send null WHEN the notes were cleared", () => {
+    const filled = { ...initial, notes: "Contrato" };
+
+    expect(buildRecurringSave("ALL", initial, filled, real)).toEqual({
+      kind: "update-series",
+      params: { id: "series-1", notes: null },
+    });
+  });
+
+  it("SHOULD NOT send the notes WHEN they did not change", () => {
+    expect(buildRecurringSave("ALL", initial, initial, real)).toEqual({
+      kind: "none",
+    });
   });
 });

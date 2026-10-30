@@ -141,3 +141,13 @@ it("SHOULD leave autoCorrect unset by default", () => {
 
   expect(input().props.autoCorrect).toBeUndefined();
 });
+
+it("SHOULD start at minLines WHEN given and show the counter (spec 059)", () => {
+  setup({ counter: "0/1000", minLines: 4, multiline: true });
+  const style = StyleSheet.flatten(frame().props.style);
+  const { lineHeight } = lightTheme.typography.input;
+  const { md } = lightTheme.sizes.spacing;
+
+  expect(style.minHeight).toBe(lineHeight * 4 + md);
+  expect(screen.getByTestId("field-counter").props.children).toBe("0/1000");
+});

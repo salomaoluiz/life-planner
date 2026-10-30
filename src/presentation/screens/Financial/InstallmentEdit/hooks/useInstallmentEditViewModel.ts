@@ -245,6 +245,7 @@ function useInstallmentEditViewModel() {
     onDeletePress: () => setDeleteOpen(true),
     onDescriptionChange: (text: string) =>
       state && update({ ...state, description: text }),
+    onNotesChange: (text: string) => state && update({ ...state, notes: text }),
     onPlanClose: () => setPlanOpen(false),
     onPlanOpen: () => setPlanOpen(true),
     onPrepayPress: () => {

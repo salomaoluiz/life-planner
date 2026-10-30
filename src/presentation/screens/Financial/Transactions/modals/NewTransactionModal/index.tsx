@@ -32,6 +32,7 @@ import { RECURRENCE_FREQUENCIES } from "@screens/Financial/models/recurrence";
 import CategoryChips from "./components/CategoryChips";
 import CategoryPickerSheet from "./components/CategoryPickerSheet";
 import MissingRecordHint from "./components/MissingRecordHint";
+import NotesField from "./components/NotesField";
 import RecurrenceDeleteSheet from "./components/RecurrenceDeleteSheet";
 import { useNewTransactionViewModel } from "./hooks";
 import { MAX_TAG_NAME, MAX_TAGS } from "./models/transactionFormState";
@@ -267,6 +268,13 @@ function NewTransactionModal() {
                 tooLongLabel={t("financial.transactions.form.tagsTooLong")}
                 values={vm.tags}
               />
+              {vm.showNotes ? (
+                <NotesField
+                  onChange={vm.onNotesChange}
+                  placement={"left"}
+                  value={vm.notes}
+                />
+              ) : null}
             </>
           }
           right={
@@ -485,6 +493,13 @@ function NewTransactionModal() {
                 testID={transactionFormTestIds.owner}
                 value={vm.ownerId}
               />
+              {vm.showNotes ? (
+                <NotesField
+                  onChange={vm.onNotesChange}
+                  placement={"right"}
+                  value={vm.notes}
+                />
+              ) : null}
             </>
           }
           testID={transactionFormTestIds.sheet}
