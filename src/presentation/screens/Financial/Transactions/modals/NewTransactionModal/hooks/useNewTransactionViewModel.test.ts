@@ -14,6 +14,7 @@ import {
   FinancialNotFound,
   RecurrenceHasPaidOccurrences,
 } from "@domain/entities/errors";
+import TransactionUIModel from "@screens/Financial/Transactions/models/TransactionUIModel";
 
 import {
   acc,
@@ -1661,5 +1662,81 @@ describe("tags (spec 043)", () => {
     expect(mutations.update.value.mutate).toHaveBeenCalledWith(
       expect.objectContaining({ id: "tx-1", tags: [] }),
     );
+  });
+});
+
+describe("description suggestions (spec 060)", () => {
+  function givenCached(rows: ReturnType<typeof tx>[]) {
+    queries.transactions_list.withData({
+      items: rows.map((row) => new TransactionUIModel(row)),
+      owners: [],
+    });
+  }
+
+  it("SHOULD suggest past transactions of the cache while typing a new one", () => {
+    givenLoaded();
+    givenCached([tx("t1", { description: "Uber" })]);
+    const { result } = setup();
+
+    expect(result.current.descriptionSuggestions).toEqual([]);
+    act(() => result.current.onDescriptionChange("ub"));
+    expect(
+      result.current.descriptionSuggestions.map((row) => row.label),
+    ).toEqual(["Uber"]);
+  });
+
+  it("SHOULD only read the cache, never fetch it", () => {
+    givenLoaded();
+    setup();
+
+    const call = spies.useQuery.mock.calls
+      .map((args) => args[0])
+      .find((options) => options.cacheKey[1] === "list");
+
+    expect(call?.enabled).toBe(false);
+  });
+
+  it("SHOULD suggest nothing with an empty cache AND in edit mode", () => {
+    givenLoaded();
+    const empty = setup();
+
+    act(() => empty.result.current.onDescriptionChange("ub"));
+    expect(empty.result.current.descriptionSuggestions).toEqual([]);
+
+    givenLoaded({ params: { id: "t1" }, transactions: [tx("t1")] });
+    givenCached([tx("t1", { description: "Shop" })]);
+    const edit = setup();
+
+    act(() => edit.result.current.onDescriptionChange("sh"));
+    expect(edit.result.current.descriptionSuggestions).toEqual([]);
+  });
+
+  it("SHOULD fill the form from the picked suggestion, keep the amount AND focus Amount", () => {
+    givenLoaded({ categories: [cat("food")] });
+    givenCached([
+      tx("t1", {
+        description: "Uber",
+        notes: "x",
+        tags: [{ id: "g", name: "trip" }],
+      }),
+    ]);
+    const { result } = setup();
+    const focus = jest.fn();
+
+    Object.assign(result.current.amountInputRef, { current: { focus } });
+    act(() => result.current.onAmountChange(1500));
+    act(() => result.current.onDescriptionChange("ub"));
+    act(() =>
+      result.current.onDescriptionSelect(
+        result.current.descriptionSuggestions[0].id,
+      ),
+    );
+
+    expect(result.current.description).toBe("Uber");
+    expect(result.current.selectedCategoryId).toBe("food");
+    expect(result.current.tags).toEqual(["trip"]);
+    expect(result.current.amountCents).toBe(1500);
+    expect(result.current.notes).toBe("");
+    expect(focus).toHaveBeenCalled();
   });
 });

@@ -26,16 +26,22 @@ import {
   dueDateOf,
   invoiceMonthOf,
 } from "@screens/Financial/models/invoiceMonth";
-import { personalOwnerId } from "@screens/Financial/models/ownerOptions";
+import {
+  archivedOwnerIds,
+  personalOwnerId,
+} from "@screens/Financial/models/ownerOptions";
+import { listQueryKey } from "@screens/Financial/models/queryKeys";
 import {
   RECURRENCE_FREQUENCIES,
   recurrenceLastDate,
   recurrenceOccurrenceCount,
 } from "@screens/Financial/models/recurrence";
+import type { TransactionsData } from "@screens/Financial/Transactions/hooks/useTransactionsViewModel";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 import { decimalStringToCents } from "@utils/money";
 
+import { buildDescriptionSuggestions } from "../models/descriptionSuggestions";
 import NewTransactionUIModel from "../models/NewTransactionUIModel";
 import {
   buildRecurringSave,
@@ -43,6 +49,7 @@ import {
   recurrenceLocks,
 } from "../models/recurrenceEdit";
 import {
+  applySuggestion,
   changeDate,
   changeInstallmentsOn,
   changeOwner,
@@ -411,6 +418,25 @@ function useNewTransactionViewModel() {
       }),
   });
 
+  // Spec 060: past transactions come from what the Transactions screen already cached; this never fetches.
+  const cachedTransactions = useQuery<TransactionsData>({
+    cacheKey: listQueryKey(useCases.getFinancialTransactionsUseCase.uniqueName),
+    enabled: false,
+    fetch: async () => ({ items: [], owners: [] }),
+  });
+  const typedDescription = state?.description ?? "";
+  const descriptionSuggestions = useMemo(
+    () =>
+      isEditing || !cachedTransactions.data
+        ? []
+        : buildDescriptionSuggestions({
+            archivedOwnerIds: archivedOwnerIds(cachedTransactions.data.owners),
+            items: cachedTransactions.data.items,
+            query: typedDescription,
+          }),
+    [cachedTransactions.data, isEditing, typedDescription],
+  );
+
   const createMutation = useMutation({
     cacheKey: [useCases.createFinancialTransactionUseCase.uniqueName],
     fetch: useCases.createFinancialTransactionUseCase.execute,
@@ -762,6 +788,7 @@ function useNewTransactionViewModel() {
       : "financial.transactions.form.date") as TranslationKeys,
     description: state?.description ?? "",
     descriptionError: errors.description,
+    descriptionSuggestions,
     formErrorKey,
     hasCards:
       (cards.data ?? []).some((card) => card.status === "ACTIVE") ||
@@ -829,6 +856,20 @@ function useNewTransactionViewModel() {
     onDescriptionChange: (text: string) => {
       if (state) {
         update({ ...state, description: text });
+      }
+    },
+    onDescriptionSelect: (id: string) => {
+      const picked = descriptionSuggestions.find((item) => item.id === id);
+
+      if (state && picked) {
+        update(
+          applySuggestion(state, picked.template.dto, {
+            accounts: accounts.data ?? [],
+            cards: cards.data ?? [],
+            categories: categories.data ?? [],
+          }),
+        );
+        amountInputRef.current?.focus();
       }
     },
     onDiscardCancel: () => setDiscardDialogOpen(false),

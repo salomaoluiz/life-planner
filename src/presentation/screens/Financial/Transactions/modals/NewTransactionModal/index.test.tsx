@@ -794,3 +794,46 @@ describe("notes (spec 059)", () => {
     expect(screen.queryByTestId(transactionFormTestIds.notesInput)).toBeNull();
   });
 });
+
+describe("description suggestions (spec 060)", () => {
+  const suggestion = {
+    categoryColor: "#3B82F6",
+    categoryIcon: "car",
+    id: "uber-key",
+    label: "Uber",
+    matchRange: [0, 2] as [number, number],
+    template: {} as never,
+    type: "EXPENSE" as const,
+  };
+
+  it("SHOULD list the suggestions under the description AND report the pick", () => {
+    const vm = setup({
+      description: "ub",
+      descriptionSuggestions: [suggestion],
+    });
+
+    fireEvent(
+      screen.getByTestId(transactionFormTestIds.descriptionInput),
+      "focus",
+    );
+    fireEvent.press(
+      screen.getByTestId(
+        `${transactionFormTestIds.description}-suggestion-Uber`,
+      ),
+    );
+
+    expect(vm.onDescriptionSelect).toHaveBeenCalledWith("uber-key");
+  });
+
+  it("SHOULD show no list WHEN there are no suggestions", () => {
+    setup({ description: "ub", descriptionSuggestions: [] });
+
+    fireEvent(
+      screen.getByTestId(transactionFormTestIds.descriptionInput),
+      "focus",
+    );
+    expect(
+      screen.queryByTestId(`${transactionFormTestIds.description}-menu`),
+    ).toBeNull();
+  });
+});

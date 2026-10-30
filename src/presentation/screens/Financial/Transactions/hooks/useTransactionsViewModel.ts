@@ -688,6 +688,7 @@ function useTransactionsViewModel() {
   };
 }
 
+export type { TransactionsData };
 export {
   fetchFilteredTransactions,
   fetchProjections,

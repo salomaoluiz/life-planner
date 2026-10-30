@@ -6,6 +6,7 @@ const transactionFormTestIds = {
   dateField: "financial.transaction-form.date-field",
   deleteButton: "financial.transaction-form.delete-button",
   deleteDialog: "financial.transaction-form.delete-dialog",
+  description: "financial.transaction-form.description",
   descriptionInput: "financial.transaction-form.description-input",
   formError: "financial.transaction-form.form-error",
   installmentsCount: "financial.transactionForm.installments.count",
