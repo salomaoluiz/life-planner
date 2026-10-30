@@ -3,6 +3,12 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.3.1] - 2026-10-30
+
+### Fixed
+
+- The web app no longer re-reads `version.json` in a loop after opening, which made it extremely slow (spec 056).
+
 ## [1.3.0] - 2026-10-30
 
 ### Added

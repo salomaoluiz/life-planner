@@ -216,3 +216,20 @@ it("SHOULD remove the foreground listener on unmount", () => {
 
   expect(remove).toHaveBeenCalled();
 });
+
+it("SHOULD read version.json once on mount WHEN refetch changes on every render", async () => {
+  const { built, rerender } = setup({
+    served: { builtAt: "2026-10-30T10:00:00Z", version: "1.0.0" },
+  });
+  jest
+    .mocked(useQuery)
+    .mockImplementation(() => ({ ...built, refetch: jest.fn() }) as never);
+
+  rerender({});
+  rerender({});
+  await waitFor(() => expect(fetchServedWebVersion).toHaveBeenCalledTimes(1));
+  await act(async () => {});
+
+  expect(fetchServedWebVersion).toHaveBeenCalledTimes(1);
+  expect(AppState.addEventListener).toHaveBeenCalledTimes(1);
+});
