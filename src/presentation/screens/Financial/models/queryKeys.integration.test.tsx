@@ -32,6 +32,7 @@ jest.mock("@application/useCases", () => {
     "createFinancialCategoryUseCase",
     "deleteFinancialAccountUseCase",
     "deleteFinancialCategoryUseCase",
+    "getCategoryIconsUseCase",
     "getFinancialAccountsUseCase",
     "getFinancialCardInvoicesForMonthUseCase",
     "getFinancialCategoriesUseCase",
@@ -43,6 +44,7 @@ jest.mock("@application/useCases", () => {
     "getMonthSummaryUseCase",
     "getOwnersUseCase",
     "updateFinancialAccountUseCase",
+    "updateFinancialCategoryAppearanceUseCase",
     "updateFinancialCategoryUseCase",
   ];
 
