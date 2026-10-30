@@ -1,3 +1,6 @@
+import pkg from "./package.json";
+import { versionCode } from "./scripts/versionCode";
+
 export default {
   expo: {
     android: {
@@ -6,10 +9,12 @@ export default {
         foregroundImage: "./assets/images/adaptive-icon.png",
       },
       package: "com.jacobysoftware.lifeplanner",
+      versionCode: versionCode(pkg.version),
     },
     experiments: {
       typedRoutes: true,
     },
+    extra: { builtAt: new Date().toISOString() },
     icon: "./assets/images/icon.png",
     ios: {
       bundleIdentifier: "com.jacobysoftware.lifeplanner",
@@ -43,7 +48,7 @@ export default {
     scheme: "myapp",
     slug: "life-planner",
     userInterfaceStyle: "automatic",
-    version: "1.0.0",
+    version: pkg.version,
     web: {
       bundler: "metro",
       favicon: "./assets/images/favicon.png",

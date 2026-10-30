@@ -1,2 +1,3 @@
 yarn lint
 yarn test --coverage
+yarn version:check
