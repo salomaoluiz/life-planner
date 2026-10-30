@@ -1,0 +1,8 @@
+url: ${E2E_WEB_URL}
+---
+# A short scroll of the transaction form (spec 059): its Notes field made the form taller, so the full
+# scroll-form-down now hides the top of the right column (account, date). One short swipe reveals the lower
+# controls (paid, installments) and keeps the account in view.
+- swipe:
+    start: 50%, 70%
+    end: 50%, 55%

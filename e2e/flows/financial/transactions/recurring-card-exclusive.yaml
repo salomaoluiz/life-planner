@@ -51,7 +51,7 @@ onFlowComplete:
     timeout: 20000
 - tapOn:
     id: "financial.transactionForm.payWith-CARD"
-- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- runFlow: ../../../subflows/financial/scroll-form-nudge.yaml
 # Installments on: its count field shows; Repeat turns it off
 - tapOn:
     id: "financial.transactionForm.installments.switch"

@@ -92,13 +92,13 @@ onFlowComplete:
     id: "financial.transaction-form.description-input"
 - inputText: ${output.TRANSACTION_NAME}
 # Choose the family as owner (last field of the form); this resets category and account
-- runFlow: ../../subflows/financial/scroll-form-down.yaml
+- runFlow: ../../subflows/financial/scroll-form-nudge.yaml
 - tapOn:
     id: "financial.transaction-form.owner-${output.FAMILY_ID}"
 - runFlow: ../../subflows/financial/scroll-form-up.yaml
 - tapOn:
     id: "financial.transaction-form.category-${output.FAMILY_CATEGORY_ID}"
-- runFlow: ../../subflows/financial/scroll-form-down.yaml
+- runFlow: ../../subflows/financial/scroll-form-nudge.yaml
 - tapOn:
     id: "financial.transaction-form.account-select"
 # Only the family's account is offered, never the personal one

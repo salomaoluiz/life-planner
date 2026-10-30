@@ -74,12 +74,12 @@ onFlowComplete:
 - tapOn:
     id: "financial.transaction-form.category-${output.KEEP_CATEGORY_ID}"
 # Installments are off by default (the sheet footer hides the switch until the form is scrolled); turn them on and type the count
-- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- runFlow: ../../../subflows/financial/scroll-form-nudge.yaml
 - assertNotVisible:
     id: "financial.transactionForm.installments.count"
 - tapOn:
     id: "financial.transactionForm.installments.switch"
-- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- runFlow: ../../../subflows/financial/scroll-form-nudge.yaml
 - extendedWaitUntil:
     visible:
       id: "financial.transactionForm.installments.count"

@@ -122,7 +122,7 @@ onFlowComplete:
     visible:
       id: "financial.transaction-form.description-input"
     timeout: 20000
-- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- runFlow: ../../../subflows/financial/scroll-form-nudge.yaml
 - tapOn:
     id: "financial.transactionForm.paid"
 - tapOn:
@@ -149,7 +149,7 @@ onFlowComplete:
     visible:
       id: "financial.transactionForm.payWith"
     timeout: 20000
-- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- runFlow: ../../../subflows/financial/scroll-form-nudge.yaml
 - assertVisible:
     id: "financial.transactionForm.paid"
 - runFlow: ../../../subflows/financial/scroll-form-up.yaml

@@ -47,7 +47,7 @@ onFlowComplete:
 - inputText: ${output.TRANSACTION_NAME}
 - tapOn:
     id: "financial.transaction-form.category-${output.EXPENSE_CATEGORY_ID}"
-- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- runFlow: ../../../subflows/financial/scroll-form-nudge.yaml
 - tapOn:
     id: "financial.transaction-form.account-select"
 - tapOn:
