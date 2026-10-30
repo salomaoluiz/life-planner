@@ -10,6 +10,7 @@ import {
 } from "@components";
 import { useKitTheme } from "@components/utils/useKitTheme";
 import { useTranslation } from "@presentation/i18n";
+import NoteIcon from "@screens/Financial/Transactions/components/NoteIcon";
 import TransactionUIModel from "@screens/Financial/Transactions/models/TransactionUIModel";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
@@ -90,6 +91,7 @@ function TransactionRow(props: Props) {
       title={item.isAdjustment ? t("financial.transactions.adjustment") : title}
       trailing={
         <View style={styles.trailing}>
+          {item.notes ? <NoteIcon note={item.notes} /> : null}
           <AmountText
             currency={item.currency}
             type={item.amountType}

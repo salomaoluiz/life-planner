@@ -34,6 +34,7 @@ export interface InvoicePurchaseUIModel {
   // Set for an installment: "k of n" (spec 030 FR 8).
   installment?: InstallmentLabel;
   // Moved into this invoice by a prepayment.
+  notes?: string;
   prepaid: boolean;
 }
 
@@ -223,6 +224,7 @@ class CardInvoiceUIModel {
               number: purchase.installmentNumber,
             }
           : undefined,
+      notes: purchase.notes,
       prepaid: !!purchase.prepaid,
     }));
   }

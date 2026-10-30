@@ -11,7 +11,7 @@ export interface TooltipProps {
   testID?: string;
 }
 
-// Web only: the bubble shows under the children while the pointer is over them. Native renders the children as they are.
+// Web only: the bubble shows under the children while the pointer is over them or a child has the keyboard focus. Native renders the children as they are.
 function Tooltip(props: TooltipProps) {
   const { colors, radius, spacing } = useKitTheme();
   const [visible, setVisible] = useState(false);
@@ -41,6 +41,8 @@ function Tooltip(props: TooltipProps) {
     <Pressable
       accessible={false}
       focusable={false}
+      onBlur={() => setVisible(false)}
+      onFocus={() => setVisible(true)}
       onHoverIn={() => setVisible(true)}
       onHoverOut={() => setVisible(false)}
       style={styles.anchor}

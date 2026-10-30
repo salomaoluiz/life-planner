@@ -232,3 +232,26 @@ it("SHOULD format the amount with the currency of the transaction (spec 040)", (
 
   expect(screen.UNSAFE_getByType(AmountText).props.currency).toBe("USD");
 });
+
+describe("notes (spec 059)", () => {
+  it("SHOULD show the note icon only WHEN the transaction has a note, and still open it on press", () => {
+    const onPress = jest.fn();
+    const noted = new TransactionUIModel(
+      makeTransactionDTO({ id: "tx-9", notes: "Casa → Aeroporto" }),
+    );
+
+    render(<TransactionRow item={noted} onPress={onPress} />);
+
+    expect(
+      screen.getByTestId(transactionsTestIds.rowNoteIcon),
+    ).toBeOnTheScreen();
+    fireEvent.press(screen.getByTestId(transactionsTestIds.row));
+    expect(onPress).toHaveBeenCalledWith("tx-9");
+  });
+
+  it("SHOULD NOT show the icon WHEN there is no note", () => {
+    setup();
+
+    expect(screen.queryByTestId(transactionsTestIds.rowNoteIcon)).toBeNull();
+  });
+});

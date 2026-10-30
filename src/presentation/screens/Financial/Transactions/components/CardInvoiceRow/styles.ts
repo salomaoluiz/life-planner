@@ -21,6 +21,11 @@ function useStyles() {
       },
       headerText: { flex: 1, gap: theme.sizes.spacing.xxs, minWidth: 0 },
       purchases: { paddingBottom: theme.sizes.spacing.xs },
+      purchaseTrailing: {
+        alignItems: "center",
+        flexDirection: "row",
+        gap: theme.sizes.spacing.xs,
+      },
     }),
   };
 }

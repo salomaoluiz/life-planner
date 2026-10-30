@@ -274,3 +274,24 @@ describe("filtered invoice (spec 045)", () => {
     ).toBeNull();
   });
 });
+
+describe("notes (spec 059 FR 13)", () => {
+  it("SHOULD show the note icon on the purchases that have a note", () => {
+    const dto = makeInvoiceDTO();
+
+    dto.purchases[0].notes = "Presente da Ana";
+    render(
+      <CardInvoiceRow
+        expanded
+        invoice={new CardInvoiceUIModel(dto)}
+        onOpen={jest.fn()}
+        onPurchasePress={jest.fn()}
+        onToggle={jest.fn()}
+      />,
+    );
+
+    expect(screen.getAllByTestId(transactionsTestIds.rowNoteIcon)).toHaveLength(
+      1,
+    );
+  });
+});

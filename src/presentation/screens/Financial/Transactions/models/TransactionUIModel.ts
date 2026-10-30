@@ -122,6 +122,11 @@ class TransactionUIModel {
     return this.dateKey.slice(0, 7);
   }
 
+  // Spec 059: the free-text note of a normal transaction, when it has one.
+  get notes() {
+    return this.dto.notes;
+  }
+
   get occurrenceNumber() {
     return this.dto.occurrenceNumber;
   }

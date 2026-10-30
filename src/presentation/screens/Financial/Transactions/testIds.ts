@@ -122,6 +122,8 @@ const transactionsTestIds = {
   readOnlyBanner: "financial.transactions.readonly-banner",
   readOnlyToast: "financial.transactions.readonly-toast",
   row: "financial.transactions.row",
+  rowNoteIcon: "financial.transactions.rowNoteIcon",
+  rowNoteTooltip: "financial.transactions.rowNoteTooltip",
   rowOverdue: "financial.transactions.row.overdue",
   rowPay: "financial.transactions.row.pay",
   rowProjected: "financial.transactions.row-projected",
