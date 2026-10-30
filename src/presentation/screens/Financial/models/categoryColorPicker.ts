@@ -5,6 +5,8 @@ import { colors } from "@presentation/theme/constants";
 interface ColorNode {
   iconColor: string;
   id: string;
+  // Only used to order siblings in `subtreeColors` (tree order = name order inside each level).
+  name?: string;
   parentId?: string;
   status?: string;
 }
@@ -180,6 +182,76 @@ function shownIn(color: string, theme: "dark" | "light") {
   return ensureContrast(color, palette.surface, palette.textPrimary);
 }
 
+// Spec 058 FR 4: recolors a whole subtree top-down as if it were created again in tree order. Children of one parent
+// share one tone; each group of children takes the next tone of `rootColor` not used yet (archived included). The root
+// itself is not in the result.
+function subtreeColors(
+  rootId: string,
+  rootColor: string,
+  tree: ColorNode[],
+): Map<string, string> {
+  const childrenOf = new Map<string, ColorNode[]>();
+
+  for (const item of tree) {
+    if (item.parentId) {
+      childrenOf.set(item.parentId, [
+        ...(childrenOf.get(item.parentId) ?? []),
+        item,
+      ]);
+    }
+  }
+  for (const children of childrenOf.values()) {
+    children.sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
+  }
+  const tones = toneSequence(rootColor);
+  const result = new Map<string, string>();
+  const groupTones: string[] = [];
+  const seen = new Set<string>([rootId]);
+
+  function nextTone() {
+    const fresh = tones.find(
+      (tone) =>
+        !looksSame(tone, rootColor) &&
+        !groupTones.some((used) => looksSame(tone, used)),
+    );
+
+    if (fresh) {
+      return fresh;
+    }
+    function uses(tone: string) {
+      return groupTones.filter((used) => sameColor(used, tone)).length;
+    }
+
+    return tones.reduce((best, tone) =>
+      uses(tone) < uses(best) ? tone : best,
+    );
+  }
+
+  function visit(parentId: string) {
+    const children = (childrenOf.get(parentId) ?? []).filter(
+      (child) => !seen.has(child.id),
+    );
+
+    if (children.length === 0) {
+      return;
+    }
+    const tone = nextTone();
+
+    groupTones.push(tone);
+    for (const child of children) {
+      seen.add(child.id);
+      result.set(child.id, tone);
+    }
+    for (const child of children) {
+      visit(child.id);
+    }
+  }
+
+  visit(rootId);
+
+  return result;
+}
+
 function toHsl(color: string): Hsl {
   const rgb = parseColor(color) ?? { b: 0, g: 0, r: 0 };
   const r = rgb.r / 255;
@@ -220,4 +292,4 @@ function toneSequence(rootColor: string): string[] {
 }
 
 export type { ColorNode };
-export { childColor, pickRootColor, rootColorOf, toneSequence };
+export { childColor, pickRootColor, rootColorOf, subtreeColors, toneSequence };
