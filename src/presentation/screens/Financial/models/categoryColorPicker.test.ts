@@ -7,6 +7,7 @@ import {
   childColor,
   ColorNode,
   pickRootColor,
+  subtreeColors,
   toneSequence,
 } from "./categoryColorPicker";
 
@@ -169,5 +170,96 @@ describe("childColor", () => {
 
     expect(result).toMatch(HEX);
     expect(toneSequence("#EF4444")).toContain(result);
+  });
+});
+
+describe("subtreeColors (spec 058)", () => {
+  const ORANGE = "#F97316";
+  function named(
+    id: string,
+    name: string,
+    parentId?: string,
+    status = "ACTIVE",
+  ): ColorNode {
+    return { iconColor: "#6366F1", id, name, parentId, status };
+  }
+  const food = [
+    named("root", "Alimentação"),
+    named("padaria", "Padaria", "root", "ARCHIVED"),
+    named("mercado", "Mercado", "root"),
+    named("restaurante", "Restaurante", "root"),
+    named("lanches", "Lanches", "restaurante"),
+    named("delivery", "Delivery", "restaurante"),
+  ];
+
+  it("SHOULD give the children of one parent one tone and the next group the next tone (spec example)", () => {
+    const colors = subtreeColors("root", ORANGE, food);
+    const tones = toneSequence(ORANGE);
+
+    expect(colors.has("root")).toBe(false);
+    expect(colors.get("mercado")).toBe(colors.get("restaurante"));
+    expect(colors.get("padaria")).toBe(colors.get("mercado"));
+    expect(colors.get("delivery")).toBe(colors.get("lanches"));
+    expect(colors.get("delivery")).not.toBe(colors.get("mercado"));
+    expect(tones).toContain(colors.get("mercado"));
+    expect(tones).toContain(colors.get("delivery"));
+  });
+
+  it("SHOULD color archived-only children too", () => {
+    const colors = subtreeColors("root", ORANGE, [
+      named("root", "A"),
+      named("old", "Old", "root", "ARCHIVED"),
+    ]);
+
+    expect(colors.get("old")).toMatch(HEX);
+  });
+
+  it("SHOULD derive the tones of a subcategory subtree from the given color and leave siblings and ancestors out", () => {
+    const tree = [
+      named("root", "A"),
+      named("sibling", "S", "root"),
+      named("sub", "Sub", "root"),
+      named("child", "Child", "sub"),
+    ];
+    const colors = subtreeColors("sub", ORANGE, tree);
+
+    expect([...colors.keys()]).toEqual(["child"]);
+    expect(toneSequence(ORANGE)).toContain(colors.get("child"));
+  });
+
+  it("SHOULD reuse the least used tone WHEN there are more groups than tones, deterministically", () => {
+    const tree = [named("root", "R")];
+
+    for (let index = 0; index < 8; index += 1) {
+      tree.push(
+        named(`n${index}`, `N${index}`, index === 0 ? "root" : `n${index - 1}`),
+      );
+    }
+    const first = subtreeColors("root", ORANGE, tree);
+    const second = subtreeColors("root", ORANGE, tree);
+
+    expect(first.size).toBe(8);
+    expect([...first.entries()]).toEqual([...second.entries()]);
+    for (const value of first.values()) {
+      expect(toneSequence(ORANGE)).toContain(value);
+    }
+  });
+
+  it("SHOULD return an empty map for a category without descendants and not mutate the tree", () => {
+    const tree = [named("root", "R"), named("b", "B", "root")];
+    const before = JSON.stringify(tree);
+
+    expect(subtreeColors("b", ORANGE, tree).size).toBe(0);
+    subtreeColors("root", ORANGE, tree);
+    expect(JSON.stringify(tree)).toBe(before);
+  });
+
+  it("SHOULD not loop on a cycle", () => {
+    const colors = subtreeColors("a", ORANGE, [
+      named("a", "A", "b"),
+      named("b", "B", "a"),
+    ]);
+
+    expect([...colors.keys()]).toEqual(["b"]);
   });
 });

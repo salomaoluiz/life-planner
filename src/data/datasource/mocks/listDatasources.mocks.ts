@@ -35,7 +35,9 @@ const datasourcesMocks: jest.MockedObjectDeep<Datasources> = {
     createCategory: jest.fn(),
     deleteCategory: jest.fn(),
     getCategories: jest.fn(),
+    getCategoryIcons: jest.fn(),
     updateCategory: jest.fn(),
+    updateCategoryAppearance: jest.fn(),
   },
   financialCreditCardDatasource: {
     createCreditCard: jest.fn(),

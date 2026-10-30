@@ -3,6 +3,7 @@ import CategoryEntity, {
   CategoryStatus,
   CategoryType,
 } from "@domain/entities/financial/CategoryEntity";
+import { CategoryIconEntity } from "@domain/entities/financial/CategoryIconEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 export type FinancialCategoryRepository = {
@@ -11,7 +12,14 @@ export type FinancialCategoryRepository = {
   ): Promise<CategoryEntity>;
   deleteCategory(params: DeleteCategoryRepositoryParams): Promise<void>;
   getCategories(ownerIds: string[]): Promise<CategoryEntity[]>;
+  getCategoryIcons(
+    params: GetCategoryIconsRepositoryParams,
+  ): Promise<CategoryIconEntity[]>;
   updateCategory(params: UpdateCategoryRepositoryParams): Promise<void>;
+  // Spec 058: the category and the icon / color of its descendants, all or nothing.
+  updateCategoryAppearance(
+    params: UpdateCategoryAppearanceRepositoryParams,
+  ): Promise<void>;
 };
 
 interface CreateCategoryRepositoryParams {
@@ -30,6 +38,15 @@ interface DeleteCategoryRepositoryParams {
   ownerId: string;
 }
 
+interface GetCategoryIconsRepositoryParams {
+  limit?: number;
+  q?: string;
+}
+
+interface UpdateCategoryAppearanceRepositoryParams extends UpdateCategoryRepositoryParams {
+  descendants: { icon?: string; iconColor?: string; id: string }[];
+}
+
 interface UpdateCategoryRepositoryParams {
   depthLevel?: number;
   icon?: string;
@@ -45,4 +62,9 @@ interface UpdateCategoryRepositoryParams {
   type?: CategoryType;
 }
 
-export { CreateCategoryRepositoryParams, UpdateCategoryRepositoryParams };
+export {
+  CreateCategoryRepositoryParams,
+  GetCategoryIconsRepositoryParams,
+  UpdateCategoryAppearanceRepositoryParams,
+  UpdateCategoryRepositoryParams,
+};

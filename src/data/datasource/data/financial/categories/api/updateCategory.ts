@@ -12,6 +12,39 @@ import handleFinancialApiError from "../../financialApiError";
 export type Params = Parameters<CategoryDatasource["updateCategory"]>[0];
 export type Response = ReturnType<CategoryDatasource["updateCategory"]>;
 
+// The API rejects owner / ownerId on PATCH and depthLevel is computed server-side.
+function categoryBody(params: Params) {
+  return {
+    icon: params.icon,
+    iconColor:
+      params.iconColor === undefined ? undefined : toApiColor(params.iconColor),
+    name: params.name,
+    parentId: params.parentId,
+    scope: params.scope,
+    status: params.status,
+    type: params.type,
+  };
+}
+
+function categoryErrorHandlers(body: Record<string, unknown>) {
+  return {
+    conflict: (_details: unknown, errorBody: Record<string, unknown>) =>
+      pendingItemsOf(errorBody),
+    fields: body,
+    unprocessable: (message: string) => {
+      if (message === "Parent category is archived") {
+        return new CategoryParentArchived();
+      }
+
+      if (message === "Category is archived") {
+        return new CategoryArchived();
+      }
+
+      return undefined;
+    },
+  };
+}
+
 // The 409 body lists what blocks the archive. Any other 409 (no blockers) stays a generic failure instead of
 // an empty "resolve these items" dialog.
 function pendingItemsOf(body: Record<string, unknown>) {
@@ -32,17 +65,7 @@ function pendingItemsOf(body: Record<string, unknown>) {
 }
 
 async function updateCategory(params: Params): Response {
-  // The API rejects owner / ownerId on PATCH and depthLevel is computed server-side.
-  const body = {
-    icon: params.icon,
-    iconColor:
-      params.iconColor === undefined ? undefined : toApiColor(params.iconColor),
-    name: params.name,
-    parentId: params.parentId,
-    scope: params.scope,
-    status: params.status,
-    type: params.type,
-  };
+  const body = categoryBody(params);
 
   if (Object.values(body).every((value) => value === undefined)) {
     return;
@@ -54,23 +77,10 @@ async function updateCategory(params: Params): Response {
     return handleFinancialApiError(
       error,
       { datasource: "CategoryDatasource - updateCategory", id: params.id },
-      {
-        conflict: (_details, errorBody) => pendingItemsOf(errorBody),
-        fields: body,
-        unprocessable: (message) => {
-          if (message === "Parent category is archived") {
-            return new CategoryParentArchived();
-          }
-
-          if (message === "Category is archived") {
-            return new CategoryArchived();
-          }
-
-          return undefined;
-        },
-      },
+      categoryErrorHandlers(body),
     );
   }
 }
 
+export { categoryBody, categoryErrorHandlers };
 export default updateCategory;

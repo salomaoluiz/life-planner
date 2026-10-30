@@ -101,18 +101,11 @@ it("SHOULD expose the 19 palette colors with financial.colors keys", () => {
   );
 });
 
-it("SHOULD return the 12 common icons, the 18 full set or a search over the full set", () => {
-  const model = build();
+it("SHOULD always return the 12 bundled common icons for the quick row", () => {
+  const options = build().iconOptions();
 
-  expect(model.iconOptions("", false)).toHaveLength(12);
-  expect(model.iconOptions("", true)).toHaveLength(18);
-  expect(model.iconOptions("", false)[0]).toEqual({
-    label: expect.any(String),
-    value: expect.any(String),
-  });
-  expect(model.iconOptions("heart", false).map((o) => o.value)).toEqual([
-    "heart",
-  ]);
+  expect(options).toHaveLength(12);
+  expect(options[0]).toEqual({ label: "folder", value: "folder" });
 });
 
 it("SHOULD expose type options, owner choices and owner lookup", () => {

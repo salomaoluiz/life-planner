@@ -84,6 +84,8 @@ interfaces:
       - deleteCategory
       - getCategories
       - updateCategory
+      - updateCategoryAppearance # spec 058: category + descendants' icon/color in one request
+      - getCategoryIcons # spec 058: icon catalog (GET /finance/category-icons)
   TransactionRepository:
     path: src/domain/repositories/financial/financialTransactionRepository.ts
     methods:
@@ -487,3 +489,10 @@ On `medium`/`expanded` these modals are `BottomSheet size="form"` with `FormColu
   - **Select all:** `bulkSelection(rows)` in `models/importReview.ts`, `onSelectionBulkChange` (one state change, one Refresh), action next to the filter chips, hidden on Errors. testIDs `financial.import.review.selectAll`, `financial.import.value.delete.<i>`, `financial.import.created.{open,dialog,delete.<id>,deleteConfirm,deleteCancel,deleteError}`, `financial.import.create.color`.
   - **E2E:** `financial/transactions/{import-csv-same-name-parent,import-csv-delete-created-category,import-review-select-all-duplicates}` (tag `spec-054`).
 - **Filters modal categories and sources (spec 051):** Categories is a search (`components/CategorySearchField`: `SearchField`, `ResultsPanel` dropdown on wide / inline on compact, `OptionRow` results, `RemovableChip` with `dotColor` for the picked ones) over `categoryPicker.buildCategoryIndex` / `searchCategories` (normalized once per load, max 8, contains on name and parent name, `typeFirst` from the Transactions type filter, `coveredBy` for children of a picked parent). The view model exposes `categoryResults`, `selectedCategoryChips`, `onCategoryPick`, `onCategoryRemove`; the mobile "Escolher categorias" step is gone (`FiltersStep` = `period | root | sources`). Archived accounts and cards are not listed, except ids already in the filter applied when the modal opened. The modal uses `presentation="modal"` (scrim over the whole window) and `BottomSheet paneScroll` (fixed height, each `FormColumns` column scrolls alone).
+
+## Spec 058 — apply color/icon to subcategories, icon catalog
+
+- `NewCategoryModal` edit mode shows `ApplyToSubcategories` (components/) in the right column after Icon when the color or icon changed and the category has descendants. Pure model: `models/applyToSubcategories.ts` (`descendantsOf`, `buildApplyModel`: switch visibility, preview rows, payload); tones come from `subtreeColors` in `models/categoryColorPicker.ts` (054 tone rule, archived counted as used).
+- Saving with a switch on calls `updateFinancialCategoryAppearanceUseCase` (`PATCH /finance/categories/:id/appearance`, all or nothing); both switches off keeps the plain `updateFinancialCategoryUseCase` (054 FR 14).
+- `IconPickerSheet` searches the API catalog through `getCategoryIconsUseCase` and `hooks/useIconSearch.ts` (250 ms debounce, one cache entry per text, failures are turned into inline `BusinessError`s so they show "Try again"); the quick row keeps 12 bundled icons (`COMMON_CATEGORY_ICONS`). `src/presentation/constants/categoryIconCatalog.json` is a copy of the catalog names used only by the glyph test; refresh it with the API's `prisma/data/category-icons.json`.
+- New kit tile `IconTileButton`; testIDs `financial.category-form.apply-*`, `financial.icon-picker.{search,result-<name>,empty,retry}`; flows `category-apply-to-children`, `category-icon-search`.

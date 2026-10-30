@@ -3,9 +3,7 @@ import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { CATEGORY_COLORS } from "@presentation/constants/categoryColors";
 import {
-  ALL_CATEGORY_ICONS,
   COMMON_CATEGORY_ICONS,
-  filterIcons,
   iconLabel,
 } from "@presentation/constants/categoryIcons";
 import { TranslationKeys } from "@presentation/i18n/types";
@@ -66,13 +64,12 @@ class NewCategoryUIModel {
     );
   }
 
-  iconOptions(query: string, all: boolean): { label: string; value: string }[] {
-    const names =
-      !all && !query.trim()
-        ? COMMON_CATEGORY_ICONS
-        : filterIcons(ALL_CATEGORY_ICONS, query);
-
-    return names.map((name) => ({ label: iconLabel(name), value: name }));
+  // The quick row of the form: 12 common icons bundled in the app, so picking one never needs the network.
+  iconOptions(): { label: string; value: string }[] {
+    return COMMON_CATEGORY_ICONS.map((name) => ({
+      label: iconLabel(name),
+      value: name,
+    }));
   }
 
   owner(ownerId: string): OwnerDTO {
