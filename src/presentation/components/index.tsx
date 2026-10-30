@@ -105,6 +105,7 @@ export {
 export { default as SelectField, SelectFieldProps } from "./SelectField";
 export { default as Spacer, SpacerProps } from "./Spacer";
 export { default as StatTile, StatTileProps } from "./StatTile";
+export { default as StatusBanner, StatusBannerProps } from "./StatusBanner";
 export { default as Stepper, StepperProps, StepperStep } from "./Stepper";
 export { default as Switch, SwitchProps } from "./Switch";
 export { default as SwitchRow, SwitchRowProps } from "./SwitchRow";
