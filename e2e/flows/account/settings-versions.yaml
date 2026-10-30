@@ -1,0 +1,46 @@
+url: ${E2E_WEB_URL}
+name: account/settings-versions
+tags:
+  - account
+  - spec-056
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+# The login screen shows the versions as plain text
+- extendedWaitUntil:
+    visible:
+      id: "auth.login.versions"
+    timeout: 20000
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/account/open-settings.yaml
+# The local API has no GitHub repos configured, so the check is "not checked"
+- extendedWaitUntil:
+    visible:
+      id: "settings.versions.footer"
+    timeout: 20000
+- assertVisible:
+    id: "settings.versions.status"
+    text: ".*(Sem verificação|Not checked).*"
+- tapOn:
+    id: "settings.versions.footer"
+- extendedWaitUntil:
+    visible:
+      id: "versions.modal"
+    timeout: 20000
+- assertVisible:
+    id: "versions.card.app"
+- assertVisible:
+    id: "versions.card.api"
+- assertVisible:
+    id: "versions.action.check-now"
+- tapOn:
+    id: "versions.action.close"
+- assertNotVisible:
+    id: "versions.modal"
