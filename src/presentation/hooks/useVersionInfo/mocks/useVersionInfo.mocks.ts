@@ -30,6 +30,7 @@ function versionInfo(
   overrides: Partial<UseVersionInfoResponse> = {},
 ): UseVersionInfoResponse {
   return {
+    appBuiltAt: "2026-10-28T18:12:00Z",
     banner: null,
     checkedAt: info.checkedAt,
     checkNow: jest.fn().mockResolvedValue(undefined),

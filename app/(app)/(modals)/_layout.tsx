@@ -8,6 +8,7 @@ export default function AppLayout() {
       <Stack.Screen name="family/add_new_family_member" />
       <Stack.Screen name="family/add_new_family" />
       <Stack.Screen name={"business_feedback"} />
+      <Stack.Screen name={"versions"} />
       <Stack.Screen name={"stock/add_new_stock_item"} />
       <Stack.Screen name={"financial/transaction/add_new_transaction"} />
       <Stack.Screen name={"financial/category/add_new_category"} />

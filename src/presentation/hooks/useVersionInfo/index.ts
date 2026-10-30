@@ -17,6 +17,8 @@ const POLL_MS = 30 * 60 * 1000;
 const STALE_MS = 10 * 60 * 1000;
 
 interface UseVersionInfoResponse {
+  /** Build time of the running bundle or APK. */
+  appBuiltAt: null | string;
   /** The banner to show: null when there is none or it was dismissed for this version. */
   banner: VersionStatus["banner"];
   checkedAt: null | string;
@@ -109,6 +111,7 @@ function useVersionInfo(): UseVersionInfoResponse {
       : null;
 
   return {
+    appBuiltAt: appInfo.builtAt,
     banner,
     checkedAt: query.data?.checkedAt ?? null,
     checkNow,

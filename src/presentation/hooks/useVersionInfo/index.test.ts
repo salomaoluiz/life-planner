@@ -142,6 +142,7 @@ it("SHOULD expose the checked time AND the running version", () => {
 
   expect(result.current.checkedAt).toBe("2026-10-30T10:00:00Z");
   expect(result.current.runningVersion).toBe("1.0.0");
+  expect(result.current.appBuiltAt).toBeNull();
 });
 
 it("SHOULD show the reload banner WHEN the served web version is newer", async () => {
