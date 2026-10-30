@@ -43,7 +43,9 @@ const repositoriesMocks: Repositories = {
       createCategory: jest.fn(),
       deleteCategory: jest.fn(),
       getCategories: jest.fn(),
+      getCategoryIcons: jest.fn(),
       updateCategory: jest.fn(),
+      updateCategoryAppearance: jest.fn(),
     },
     creditCard: {
       createCreditCard: jest.fn(),

@@ -33,4 +33,18 @@ function iconLabel(name: string) {
   return name.replace(/-/g, " ");
 }
 
-export { ALL_CATEGORY_ICONS, COMMON_CATEGORY_ICONS, filterIcons, iconLabel };
+// The label of a catalog icon in the language of the app (Portuguese for pt-*, English otherwise).
+function iconLabelFor(
+  icon: { labelEn: string; labelPt: string },
+  language: string,
+) {
+  return language.toLowerCase().startsWith("pt") ? icon.labelPt : icon.labelEn;
+}
+
+export {
+  ALL_CATEGORY_ICONS,
+  COMMON_CATEGORY_ICONS,
+  filterIcons,
+  iconLabel,
+  iconLabelFor,
+};

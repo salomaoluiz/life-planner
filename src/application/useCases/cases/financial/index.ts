@@ -20,9 +20,11 @@ export {
 export {
   createCategoryUseCase as createFinancialCategoryUseCase,
   deleteCategoryUseCase as deleteFinancialCategoryUseCase,
+  getCategoryIconsUseCase,
   getCategoriesUseCase as getFinancialCategoriesUseCase,
   getMostUsedCategoriesUseCase as getMostUsedFinancialCategoriesUseCase,
   refreshCategoriesUseCase as refreshFinancialCategoriesUseCase,
+  updateCategoryAppearanceUseCase as updateFinancialCategoryAppearanceUseCase,
   updateCategoryUseCase as updateFinancialCategoryUseCase,
 } from "./categories";
 

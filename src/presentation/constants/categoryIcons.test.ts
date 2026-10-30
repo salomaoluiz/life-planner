@@ -3,6 +3,7 @@ import {
   COMMON_CATEGORY_ICONS,
   filterIcons,
   iconLabel,
+  iconLabelFor,
 } from "./categoryIcons";
 
 it("SHOULD list 18 icons with the first 12 as common", () => {
@@ -24,4 +25,11 @@ it("SHOULD return every icon WHEN the query is empty", () => {
 
 it("SHOULD return an empty list WHEN nothing matches", () => {
   expect(filterIcons(ALL_CATEGORY_ICONS, "zzz")).toEqual([]);
+});
+
+it("SHOULD label a catalog icon in the language of the app", () => {
+  const icon = { labelEn: "Folder", labelPt: "Pasta" };
+
+  expect(iconLabelFor(icon, "pt-BR")).toBe("Pasta");
+  expect(iconLabelFor(icon, "en-US")).toBe("Folder");
 });

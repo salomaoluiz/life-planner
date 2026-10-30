@@ -1,3 +1,4 @@
+import CategoryIconModel from "@data/models/financial/CategoryIconModel";
 import CategoryModel from "@data/models/financial/CategoryModel";
 import { OwnerType } from "@data/models/financial/TransactionModel";
 
@@ -7,7 +8,14 @@ export interface CategoryDatasource {
   ): Promise<CategoryModel>;
   deleteCategory(params: DeleteCategoryDatasourceParams): Promise<void>;
   getCategories(ownerIds: string[]): Promise<CategoryModel[]>;
+  getCategoryIcons(params: {
+    limit?: number;
+    q?: string;
+  }): Promise<CategoryIconModel[]>;
   updateCategory(params: UpdateCategoryDatasourceParams): Promise<void>;
+  updateCategoryAppearance(
+    params: UpdateCategoryAppearanceDatasourceParams,
+  ): Promise<void>;
 }
 
 // "ALL" (spec 038): the creator's Personal scope and every family they are in; no ownerId.
@@ -29,6 +37,10 @@ interface DeleteCategoryDatasourceParams {
   ownerId: string;
 }
 
+interface UpdateCategoryAppearanceDatasourceParams extends UpdateCategoryDatasourceParams {
+  descendants: { icon?: string; iconColor?: string; id: string }[];
+}
+
 interface UpdateCategoryDatasourceParams {
   depthLevel?: number;
   icon?: string;
@@ -44,4 +56,8 @@ interface UpdateCategoryDatasourceParams {
   type?: string;
 }
 
-export { CreateCategoryDatasourceParams, UpdateCategoryDatasourceParams };
+export {
+  CreateCategoryDatasourceParams,
+  UpdateCategoryAppearanceDatasourceParams,
+  UpdateCategoryDatasourceParams,
+};
