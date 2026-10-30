@@ -7,7 +7,7 @@ import AppTabBar from "../";
 
 jest.mock("expo-router", () => ({
   router: { navigate: jest.fn(), push: jest.fn(), replace: jest.fn() },
-  usePathname: jest.fn(() => "/financial"),
+  usePathname: jest.fn(() => "/financial/transaction"),
 }));
 jest.mock("react-native-safe-area-context", () => ({
   useSafeAreaInsets: jest.fn(() => ({ bottom: 0, left: 0, right: 0, top: 0 })),
@@ -44,7 +44,7 @@ beforeEach(() => {
   setBreakpoint("compact");
 });
 
-function setup(activeIndex = 0, pathname = "/financial") {
+function setup(activeIndex = 0, pathname = "/financial/transaction") {
   jest.mocked(usePathname).mockReturnValue(pathname);
   render(<AppTabBar {...buildProps(activeIndex)} />);
 }

@@ -198,7 +198,7 @@ describe("categories and drill-through", () => {
       scope: "family-1",
       type: "INCOME",
     });
-    expect(spies.push).toHaveBeenCalledWith("/financial");
+    expect(spies.push).toHaveBeenCalledWith("/financial/transaction");
   });
 
   it("SHOULD open the parent in Transactions from its subcategories AND open a tag", () => {

@@ -22,7 +22,7 @@ it("SHOULD list the 5 sections AND mark the current one as selected", () => {
 });
 
 it("SHOULD close AND replace to the section WHEN another one is chosen", () => {
-  setup("/financial");
+  setup("/financial/transaction");
 
   fireEvent.press(
     screen.getByTestId("financial.layout.section-sheet-accounts"),

@@ -104,7 +104,7 @@ describe("WHEN the Finances tab is pressed", () => {
 
     fireEvent.press(screen.getByTestId("tab-finances"));
 
-    expect(spies.navigate).toHaveBeenCalledWith("/financial");
+    expect(spies.navigate).toHaveBeenCalledWith("/financial/transaction");
     expect(spies.dispatch).not.toHaveBeenCalled();
   });
 
@@ -113,7 +113,7 @@ describe("WHEN the Finances tab is pressed", () => {
 
     fireEvent.press(screen.getByTestId("tab-finances"));
 
-    expect(spies.navigate).toHaveBeenCalledWith("/financial");
+    expect(spies.navigate).toHaveBeenCalledWith("/financial/transaction");
     expect(spies.push).not.toHaveBeenCalled();
   });
 

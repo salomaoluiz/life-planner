@@ -188,8 +188,8 @@ describe("navigation", () => {
     result.current.onSummaryPress();
     result.current.onTransactionsSeeAllPress();
 
-    expect(spies.push).toHaveBeenNthCalledWith(1, "/financial");
-    expect(spies.push).toHaveBeenNthCalledWith(2, "/financial");
+    expect(spies.push).toHaveBeenNthCalledWith(1, "/financial/transaction");
+    expect(spies.push).toHaveBeenNthCalledWith(2, "/financial/transaction");
   });
 
   it("SHOULD open Stock with the Expiring filter from the stock link", () => {

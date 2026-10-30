@@ -17,7 +17,7 @@ import {
 } from "@screens/Navigation/models/navigationItems";
 
 const FINANCES_ROUTE = "financial";
-const FINANCES_PATH = "/financial";
+const FINANCES_PATH = "/financial/transaction";
 
 function useAppTabBarViewModel({ navigation, state }: BottomTabBarProps) {
   const { t } = useTranslation();

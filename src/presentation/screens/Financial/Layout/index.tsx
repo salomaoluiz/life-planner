@@ -37,6 +37,7 @@ function FinancialLayoutContent() {
       <View style={styles.content}>
         <Stack screenOptions={{ animation: "none", headerShown: false }}>
           <Stack.Screen name={"index"} />
+          <Stack.Screen name={"transaction"} />
           <Stack.Screen name={"overview"} />
           <Stack.Screen name={"categories"} />
           <Stack.Screen name={"accounts"} />

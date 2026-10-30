@@ -250,7 +250,7 @@ function useOverviewViewModel() {
   function openTransactions(pick: { categoryId?: string; tagId?: string }) {
     setTransactionFilters(toDrillThroughFilters(applied, period, pick));
     setPendingNavigation({ scope: ownerFilter, type });
-    router.push("/financial" as never);
+    router.push("/financial/transaction" as never);
   }
 
   const filtersActive =

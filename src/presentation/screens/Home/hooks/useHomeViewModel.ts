@@ -189,8 +189,8 @@ function useHomeViewModel() {
     onRefresh,
     onStockSeeAllPress: () =>
       push({ params: { filter: "EXPIRING" }, pathname: "/stock" }),
-    onSummaryPress: () => push("/financial"),
-    onTransactionsSeeAllPress: () => push("/financial"),
+    onSummaryPress: () => push("/financial/transaction"),
+    onTransactionsSeeAllPress: () => push("/financial/transaction"),
     stock: stockState,
     summary: summaryState,
     transactions: transactionsState,
