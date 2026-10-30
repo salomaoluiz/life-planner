@@ -26,6 +26,7 @@ interface CreateInstallmentPlanDatasourceParams {
   date: string;
   description: string;
   installments: number;
+  notes?: null | string;
   owner: OwnerType;
   ownerId: string;
   tags?: string[];
@@ -54,6 +55,7 @@ interface UpdateInstallmentPlanDatasourceParams {
   description?: string;
   id: string;
   installments?: number;
+  notes?: null | string;
   // `[]` removes every tag; omitted keeps them (also across a recalculation).
   tags?: string[];
   value?: string;

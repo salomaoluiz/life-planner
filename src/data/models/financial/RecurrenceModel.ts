@@ -26,6 +26,7 @@ interface IRecurrenceModel {
   frequency: RecurrenceFrequency;
   id: string;
   nextOccurrenceDate?: string;
+  notes?: string;
   occurrenceCount?: number;
   owner: OwnerType;
   ownerId: string;
@@ -48,6 +49,7 @@ class RecurrenceModel implements IRecurrenceModel {
   frequency: RecurrenceFrequency;
   id: string;
   nextOccurrenceDate?: string;
+  notes?: string;
   occurrenceCount?: number;
   owner: OwnerType;
   ownerId: string;
@@ -63,6 +65,7 @@ class RecurrenceModel implements IRecurrenceModel {
     this.creditCardId = params.creditCardId;
     this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.description = params.description;
+    this.notes = params.notes;
     this.endDate = params.endDate;
     this.firstNumber = params.firstNumber;
     this.frequency = params.frequency;
@@ -96,6 +99,7 @@ class RecurrenceModel implements IRecurrenceModel {
       nextOccurrenceDate: data.nextOccurrenceDate
         ? calendarDateToIso(data.nextOccurrenceDate as string)
         : undefined,
+      notes: (data.notes as null | string) ?? undefined,
       occurrenceCount: (data.occurrenceCount as null | number) ?? undefined,
       owner: data.owner as OwnerType,
       ownerId: data.ownerId as string,

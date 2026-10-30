@@ -446,3 +446,19 @@ describe("writes", () => {
     ).toBeInstanceOf(FinancialNotFound);
   });
 });
+
+describe("notes (spec 059)", () => {
+  it("SHOULD send the notes of a new series", async () => {
+    jest.mocked(api.post).mockResolvedValueOnce({
+      occurrences: [apiRecurringTransaction],
+      recurrence: apiRecurrence,
+    });
+
+    await createRecurrence({ ...createParams, notes: "Contrato" });
+
+    expect(api.post).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ notes: "Contrato" }),
+    );
+  });
+});

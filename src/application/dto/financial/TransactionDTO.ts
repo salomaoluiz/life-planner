@@ -27,6 +27,7 @@ export interface ITransactionDTO {
   invoiceMonth?: string;
   // Front-only: a projected occurrence of a series (spec 034), not a stored row.
   isProjected?: boolean;
+  notes?: string;
   occurrenceCount?: number;
   occurrenceNumber?: number;
   owner: string;
@@ -58,6 +59,7 @@ class TransactionDTO {
   installmentPlanId?: string;
   invoiceMonth?: string;
   isProjected: boolean;
+  notes?: string;
   occurrenceCount?: number;
   occurrenceNumber?: number;
   owner: string;
@@ -89,6 +91,7 @@ class TransactionDTO {
     this.categoryName = params.categoryName;
     this.accountName = params.accountName;
     this.description = params.description;
+    this.notes = params.notes;
     this.earlyPayment = params.earlyPayment;
     this.id = params.id;
     this.owner = params.owner;
@@ -123,6 +126,7 @@ class TransactionDTO {
       installmentNumber: entity.installmentNumber,
       installmentPlanId: entity.installmentPlanId,
       invoiceMonth: entity.invoiceMonth,
+      notes: entity.notes,
       occurrenceCount: entity.occurrenceCount,
       occurrenceNumber: entity.occurrenceNumber,
       owner: entity.owner,

@@ -153,3 +153,19 @@ it("SHOULD read the currency of the API AND fall back to BRL WHEN it is missing"
   ).toBe("USD");
   expect(TransactionModel.fromJSON(withoutCurrency).currency).toBe("BRL");
 });
+
+it("SHOULD read notes from the API and treat null as no note (spec 059)", () => {
+  expect(
+    TransactionModel.fromJSON({ ...mocks.json, notes: "Casa\nAeroporto" })
+      .notes,
+  ).toBe("Casa\nAeroporto");
+  expect(
+    TransactionModel.fromJSON({ ...mocks.json, notes: null }).notes,
+  ).toBeUndefined();
+  expect(
+    TransactionModel.fromJSON({
+      ...mocks.json,
+      notes: "Casa",
+    }).toJSON().notes,
+  ).toBe("Casa");
+});

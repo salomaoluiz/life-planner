@@ -268,3 +268,16 @@ describe("prepayment (spec 032)", () => {
     );
   });
 });
+
+describe("notes (spec 059)", () => {
+  it("SHOULD send the notes of a new plan", async () => {
+    jest.mocked(api.post).mockResolvedValueOnce(apiInstallmentPlan);
+
+    await createInstallmentPlan({ ...createParams, notes: "Presente" });
+
+    expect(api.post).toHaveBeenCalledWith(
+      "/v1/finance/installment-plans",
+      expect.objectContaining({ notes: "Presente" }),
+    );
+  });
+});

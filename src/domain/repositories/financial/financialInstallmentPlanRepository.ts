@@ -27,6 +27,7 @@ interface CreateInstallmentPlanRepositoryParams {
   date: string;
   description: string;
   installments: number;
+  notes?: null | string;
   owner: OwnerType;
   ownerId: string;
   tags?: string[];
@@ -56,6 +57,7 @@ interface UpdateInstallmentPlanRepositoryParams {
   description?: string;
   id: string;
   installments?: number;
+  notes?: null | string;
   tags?: string[];
   value?: string;
 }

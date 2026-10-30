@@ -155,3 +155,17 @@ describe("card credits (spec 032)", () => {
     });
   });
 });
+
+it("SHOULD read the notes of a purchase, null meaning none (spec 059)", () => {
+  const purchase = apiCardInvoice.purchases[0];
+  const model = CardInvoiceModel.fromJSON({
+    ...apiCardInvoice,
+    purchases: [
+      { ...purchase, notes: "Presente" },
+      { ...purchase, id: "p-2", notes: null },
+    ],
+  });
+
+  expect(model.purchases[0].notes).toBe("Presente");
+  expect(model.purchases[1].notes).toBeUndefined();
+});

@@ -25,6 +25,7 @@ class ProjectedOccurrenceDTO {
   frequency: RecurrenceFrequency;
   invoiceListDate?: string;
   invoiceMonth?: string;
+  notes?: string;
   occurrenceCount?: number;
   occurrenceNumber: number;
   owner: string;
@@ -49,6 +50,7 @@ class ProjectedOccurrenceDTO {
     frequency: RecurrenceFrequency;
     invoiceListDate?: string;
     invoiceMonth?: string;
+    notes?: string;
     occurrenceCount?: number;
     occurrenceNumber: number;
     owner: string;
@@ -69,6 +71,7 @@ class ProjectedOccurrenceDTO {
     this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.date = params.date;
     this.description = params.description;
+    this.notes = params.notes;
     this.frequency = params.frequency;
     this.invoiceListDate = params.invoiceListDate;
     this.invoiceMonth = params.invoiceMonth;
@@ -114,6 +117,7 @@ class ProjectedOccurrenceDTO {
       id: `projected-${this.recurrenceId}-${this.occurrenceNumber}`,
       invoiceMonth: this.invoiceMonth,
       isProjected: true,
+      notes: this.notes,
       occurrenceCount: this.occurrenceCount,
       occurrenceNumber: this.occurrenceNumber,
       owner: this.owner,

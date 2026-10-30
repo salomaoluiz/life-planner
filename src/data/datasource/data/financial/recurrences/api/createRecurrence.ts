@@ -27,6 +27,7 @@ async function createRecurrence(params: Params): Response {
         ? undefined
         : isoToCalendarDate(params.endDate),
     frequency: params.frequency,
+    notes: params.notes,
     owner: params.owner,
     ownerId: params.ownerId,
     paid: params.paid,

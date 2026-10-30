@@ -7,6 +7,7 @@ export interface MaterializeOccurrenceUseCaseParams {
   categoryId?: string;
   date?: string;
   description?: string;
+  notes?: null | string;
   occurrenceNumber: number;
   paid?: boolean;
   recurrenceId: string;

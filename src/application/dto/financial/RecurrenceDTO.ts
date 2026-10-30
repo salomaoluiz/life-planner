@@ -18,6 +18,7 @@ class RecurrenceDTO {
   firstNumber: number;
   frequency: RecurrenceFrequency;
   id: string;
+  notes?: string;
   occurrenceCount?: number;
   owner: string;
   ownerId: string;
@@ -37,6 +38,7 @@ class RecurrenceDTO {
     firstNumber: number;
     frequency: RecurrenceFrequency;
     id: string;
+    notes?: string;
     occurrenceCount?: number;
     owner: string;
     ownerId: string;
@@ -51,6 +53,7 @@ class RecurrenceDTO {
     this.creditCardId = params.creditCardId;
     this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.description = params.description;
+    this.notes = params.notes;
     this.endDate = params.endDate;
     this.firstNumber = params.firstNumber;
     this.frequency = params.frequency;
@@ -76,6 +79,7 @@ class RecurrenceDTO {
       firstNumber: entity.firstNumber,
       frequency: entity.frequency,
       id: entity.id,
+      notes: entity.notes,
       occurrenceCount: entity.occurrenceCount,
       owner: entity.owner,
       ownerId: entity.ownerId,

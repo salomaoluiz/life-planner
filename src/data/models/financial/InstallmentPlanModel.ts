@@ -36,6 +36,7 @@ class InstallmentPlanModel {
   id: string;
   installmentCount: number;
   installments: InstallmentModel[];
+  notes?: string;
   overLimit?: boolean;
   owner: OwnerType;
   ownerId: string;
@@ -51,6 +52,7 @@ class InstallmentPlanModel {
     id: string;
     installmentCount: number;
     installments: InstallmentModel[];
+    notes?: string;
     overLimit?: boolean;
     owner: OwnerType;
     ownerId: string;
@@ -62,6 +64,7 @@ class InstallmentPlanModel {
     this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.date = params.date;
     this.description = params.description;
+    this.notes = params.notes;
     this.id = params.id;
     this.installmentCount = params.installmentCount;
     this.installments = params.installments;
@@ -92,6 +95,7 @@ class InstallmentPlanModel {
         prepaid: Boolean(row.prepaid),
         value: centsToDecimalString(Number(row.value)),
       })),
+      notes: (plan.notes as null | string) ?? undefined,
       overLimit: (data.overLimit as boolean | undefined) ?? undefined,
       owner: plan.owner as OwnerType,
       ownerId: plan.ownerId as string,

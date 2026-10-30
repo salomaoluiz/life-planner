@@ -47,11 +47,15 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-async function setup(override: Partial<typeof params> = {}) {
+async function setup(
+  override: Partial<Parameters<typeof createTransaction>[0]> = {},
+) {
   return createTransaction({ ...params, ...override });
 }
 
-async function setupThrowable(override: Partial<typeof params> = {}) {
+async function setupThrowable(
+  override: Partial<Parameters<typeof createTransaction>[0]> = {},
+) {
   try {
     await setup(override);
   } catch (error) {

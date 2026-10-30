@@ -26,6 +26,7 @@ interface IRecurrenceEntity {
   frequency: RecurrenceFrequency;
   id: string;
   nextOccurrenceDate?: string;
+  notes?: string;
   // Total shown as "k/n"; absent without an end date.
   occurrenceCount?: number;
   owner: OwnerType;
@@ -49,6 +50,7 @@ class RecurrenceEntity {
   frequency: RecurrenceFrequency;
   id: string;
   nextOccurrenceDate?: string;
+  notes?: string;
   occurrenceCount?: number;
   owner: OwnerType;
   ownerId: string;
@@ -64,6 +66,7 @@ class RecurrenceEntity {
     this.creditCardId = params.creditCardId;
     this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.description = params.description;
+    this.notes = params.notes;
     this.endDate = params.endDate;
     this.firstNumber = params.firstNumber;
     this.frequency = params.frequency;

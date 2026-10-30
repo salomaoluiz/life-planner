@@ -22,6 +22,7 @@ async function updateRecurrence(params: Params): Response {
       params.endDate === undefined || params.endDate === null
         ? params.endDate
         : isoToCalendarDate(params.endDate),
+    notes: params.notes,
     tags: params.tags,
     value:
       params.value === undefined

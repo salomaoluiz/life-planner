@@ -25,6 +25,7 @@ async function createInstallmentPlan(params: Params): Response {
     date: isoToCalendarDate(params.date),
     description: params.description,
     installments: params.installments,
+    notes: params.notes,
     owner: params.owner,
     ownerId: params.ownerId,
     tags: params.tags,

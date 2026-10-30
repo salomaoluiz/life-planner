@@ -79,3 +79,18 @@ describe("ProjectedOccurrenceModel.fromJSON", () => {
     });
   });
 });
+
+describe("notes (spec 059)", () => {
+  it("SHOULD read the series and the projected occurrence notes, null meaning none", () => {
+    expect(
+      RecurrenceModel.fromJSON({ ...apiRecurrence, notes: "Contrato" }).notes,
+    ).toBe("Contrato");
+    expect(
+      RecurrenceModel.fromJSON({ ...apiRecurrence, notes: null }).notes,
+    ).toBeUndefined();
+    expect(
+      ProjectedOccurrenceModel.fromJSON({ ...apiProjected, notes: "Contrato" })
+        .notes,
+    ).toBe("Contrato");
+  });
+});
