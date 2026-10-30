@@ -45,8 +45,12 @@ interface QueryProps<R> {
   @default "offlineFirst"
    */
   networkMode?: NetworkMode;
+  /** Milliseconds between automatic refetches while mounted. */
+  refetchInterval?: number;
   retry?: boolean | number;
   retryDelay?: number;
+  /** Milliseconds a result counts as fresh (no refetch on mount inside it). */
+  staleTime?: number;
 }
 
 interface QueryResponse<R = void> {

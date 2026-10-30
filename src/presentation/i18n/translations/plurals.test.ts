@@ -39,6 +39,7 @@ describe.each(Object.entries(languages))("%s", (_language, keys) => {
     ["financial.categories.subcount", "1 sub", "0 sub"],
     ["family.card.membersOwner", "1 mem", "0 mem"],
     ["family.card.membersOwnerYou", "1 mem", "0 mem"],
+    ["versions.status.updates", "1 upd", "0 upd"],
   ])("SHOULD define singular for 1 and plural for 0 in %s", (key) => {
     expect(keys[`${key}_one`]).toMatch(/^1 /);
     expect(keys[`${key}_other`]).toMatch(/^\{\{count\}\} /);

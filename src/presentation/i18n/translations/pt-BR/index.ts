@@ -10,6 +10,7 @@ import login from "./login";
 import navigation from "./navigation";
 import signup from "./signup";
 import stock from "./stock";
+import versions from "./versions";
 
 const ptBR = {
   translation: {
@@ -25,6 +26,7 @@ const ptBR = {
     navigation,
     signup,
     stock,
+    versions,
     welcome: "Bem Vindo",
   },
 };

@@ -13,8 +13,10 @@ function useQuery<Response>(
     networkMode: props.networkMode ?? "offlineFirst",
     queryFn: props.fetch,
     queryKey: props.cacheKey,
+    refetchInterval: props.refetchInterval,
     retry: props.retry,
     retryDelay: props.retryDelay,
+    staleTime: props.staleTime,
   });
 
   function getError() {

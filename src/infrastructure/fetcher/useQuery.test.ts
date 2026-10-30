@@ -153,3 +153,18 @@ it("SHOULD call useQuery with custom params", async () => {
     retryDelay: 1000,
   });
 });
+
+it("SHOULD forward the refetch interval and the stale time", () => {
+  spies.useReactQuery.mockReturnValueOnce(mocks.pendingResponse as never);
+
+  setup({
+    cacheKey: ["CacheKey1"],
+    fetch: spies.fetch,
+    refetchInterval: 1800000,
+    staleTime: 600000,
+  });
+
+  expect(spies.useReactQuery).toHaveBeenCalledWith(
+    expect.objectContaining({ refetchInterval: 1800000, staleTime: 600000 }),
+  );
+});
