@@ -8,6 +8,7 @@ import { useCases } from "@application/useCases";
 import { useQuery } from "@infrastructure/fetcher";
 import { useTranslationLocale } from "@presentation/i18n";
 import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 import StockListUIModel, {
   StockFilters,
   StockSort,
@@ -91,19 +92,16 @@ function useStockViewModel() {
   const activeFilter = view?.activeFilter ?? StockFilters.ALL;
 
   const scope = useReadOnlyScope(data?.owners, activeFilter);
+  const { openModal } = useModalNavigation();
 
   const onAddPress = scope.guard(() => {
     const isOwnerFilter = !(Object.values(StockFilters) as string[]).includes(
       activeFilter,
     );
 
-    router.push(
-      isOwnerFilter
-        ? {
-            params: { ownerId: activeFilter },
-            pathname: "/stock/add_new_stock_item",
-          }
-        : { pathname: "/stock/add_new_stock_item" },
+    openModal(
+      "add_new_stock_item",
+      isOwnerFilter ? { ownerId: activeFilter } : undefined,
     );
   });
 

@@ -1,4 +1,5 @@
 import { act } from "@tests";
+import { modalNavigation } from "@tests/modalNavigation";
 
 import {
   archivedFamily,
@@ -133,17 +134,14 @@ it("SHOULD open the form to add, to edit the selected card and to open an archiv
   result.current.onEditPress();
   result.current.onArchivedCardPress("z");
 
-  expect(spies.push).toHaveBeenNthCalledWith(
-    1,
-    "/financial/credit_card/add_new_credit_card",
-  );
-  expect(spies.push).toHaveBeenNthCalledWith(2, {
-    params: { id: "a" },
-    pathname: "/financial/credit_card/add_new_credit_card",
+  const { openModal } = modalNavigation;
+
+  expect(openModal).toHaveBeenNthCalledWith(1, "add_new_credit_card");
+  expect(openModal).toHaveBeenNthCalledWith(2, "add_new_credit_card", {
+    id: "a",
   });
-  expect(spies.push).toHaveBeenNthCalledWith(3, {
-    params: { id: "z" },
-    pathname: "/financial/credit_card/add_new_credit_card",
+  expect(openModal).toHaveBeenNthCalledWith(3, "add_new_credit_card", {
+    id: "z",
   });
 });
 
@@ -153,7 +151,7 @@ it("SHOULD NOT push WHEN editing without a selected card", () => {
 
   result.current.onEditPress();
 
-  expect(spies.push).not.toHaveBeenCalled();
+  expect(modalNavigation.openModal).not.toHaveBeenCalled();
 });
 
 it("SHOULD refetch WHEN the screen is focused", () => {
@@ -182,9 +180,9 @@ it("SHOULD switch to the upcoming tab AND open the invoice detail route", () => 
   act(() => {
     result.current.onInvoicePress("a", "2026-10");
   });
-  expect(spies.push).toHaveBeenCalledWith({
-    params: { cardId: "a", month: "2026-10" },
-    pathname: "/financial/invoice/invoice_detail",
+  expect(modalNavigation.openModal).toHaveBeenCalledWith("invoice_detail", {
+    cardId: "a",
+    month: "2026-10",
   });
 });
 
@@ -195,14 +193,14 @@ it("SHOULD open the refund and early payment sheets for the selected card (spec 
   result.current.onRefundPress();
   result.current.onEarlyPaymentPress();
 
-  expect(spies.push).toHaveBeenNthCalledWith(1, {
-    params: { creditCardId: "a" },
-    pathname: "/financial/refund/card_refund",
+  expect(modalNavigation.openModal).toHaveBeenNthCalledWith(1, "card_refund", {
+    creditCardId: "a",
   });
-  expect(spies.push).toHaveBeenNthCalledWith(2, {
-    params: { creditCardId: "a" },
-    pathname: "/financial/early_payment/card_early_payment",
-  });
+  expect(modalNavigation.openModal).toHaveBeenNthCalledWith(
+    2,
+    "card_early_payment",
+    { creditCardId: "a" },
+  );
 });
 
 it("SHOULD NOT open them WHEN no card is selected", () => {
@@ -212,7 +210,7 @@ it("SHOULD NOT open them WHEN no card is selected", () => {
   result.current.onRefundPress();
   result.current.onEarlyPaymentPress();
 
-  expect(spies.push).not.toHaveBeenCalled();
+  expect(modalNavigation.openModal).not.toHaveBeenCalled();
 });
 
 describe("archived family (spec 042)", () => {
@@ -242,7 +240,7 @@ describe("archived family (spec 042)", () => {
       result.current.onInvoicePress("b", "2026-10");
     });
 
-    expect(spies.push).not.toHaveBeenCalled();
+    expect(modalNavigation.openModal).not.toHaveBeenCalled();
     expect(result.current.toastVisible).toBe(true);
   });
 });

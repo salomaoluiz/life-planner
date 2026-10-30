@@ -27,6 +27,7 @@ import {
   toDateKey,
   toQueryFilter,
 } from "@screens/Financial/Transactions/models/transactionFilters";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import toDrillThroughFilters from "../models/drillThrough";
 import { defaultCurrency, keepOrDefault } from "../models/overviewFormat";
@@ -54,6 +55,7 @@ export interface ParentCategory {
 }
 
 function useOverviewViewModel() {
+  const { openModal } = useModalNavigation();
   const isFocused = useIsFocused();
   const today = toDateKey(new Date());
   const filterStore = useOverviewFilters();
@@ -250,7 +252,7 @@ function useOverviewViewModel() {
   function openTransactions(pick: { categoryId?: string; tagId?: string }) {
     setTransactionFilters(toDrillThroughFilters(applied, period, pick));
     setPendingNavigation({ scope: ownerFilter, type });
-    router.push("/financial" as never);
+    router.push("/financial/transaction" as never);
   }
 
   const filtersActive =
@@ -315,8 +317,7 @@ function useOverviewViewModel() {
     onFiltersOpen: () => setFiltersOpen(true),
     onGranularityChange: (value: DashboardGranularity) =>
       setGranularityChoice(value),
-    onNewTransaction: () =>
-      router.push("/financial/transaction/add_new_transaction" as never),
+    onNewTransaction: () => openModal("add_new_transaction"),
     onNextPeriod() {
       if (!canGoNext) {
         return;

@@ -3,6 +3,7 @@ export { default as Family } from "./Family";
 export { default as FinancialAccounts } from "./Financial/Accounts";
 export { default as FinancialCards } from "./Financial/Cards";
 export { default as FinancialCategories } from "./Financial/Categories";
+export { default as FinancialIndexRedirect } from "./Financial/IndexRedirect";
 export { default as FinancialLayout } from "./Financial/Layout";
 export { default as FinancialOverview } from "./Financial/Overview";
 export { default as FinancialSectionPicker } from "./Financial/SectionPicker";

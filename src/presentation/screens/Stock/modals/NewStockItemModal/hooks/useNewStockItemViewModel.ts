@@ -1,15 +1,17 @@
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
 import { useCases } from "@application/useCases";
 import { useMutation } from "@infrastructure/fetcher";
 import { useBreakpoint } from "@presentation/theme";
 import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 import NewStockItemUIModel from "@screens/Stock/modals/NewStockItemModal/models/NewStockItemUIModel";
 
 import useForm from "./useForm";
 
 function useNewStockItemViewModel() {
+  const { closeModal } = useModalNavigation();
   const params = useLocalSearchParams<{ ownerId?: string }>();
   // Spec 037 FR 13b: the extra fields sit in the right column on wide, so they
   // start open there. Read once on mount; a later resize does not toggle it.
@@ -34,7 +36,7 @@ function useNewStockItemViewModel() {
 
   useEffect(() => {
     if (addStock.status === "success") {
-      router.back();
+      closeModal();
     }
   }, [addStock.status]);
 
@@ -56,7 +58,7 @@ function useNewStockItemViewModel() {
       return;
     }
 
-    router.back();
+    closeModal();
   }
 
   return {
@@ -71,7 +73,7 @@ function useNewStockItemViewModel() {
     isSaving: addStock.isFetching,
     model,
     onClose,
-    onDiscard: () => router.back(),
+    onDiscard: () => closeModal(),
     onKeepEditing: () => setIsDiscardOpen(false),
     onSave,
     onToggleMore: () => setIsMoreOpen((open) => !open),

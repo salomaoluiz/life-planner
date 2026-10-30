@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 
 import { act, renderHook } from "@tests";
+import { modalNavigation } from "@tests/modalNavigation";
 
 import { GenericError } from "@domain/entities/errors";
 import { familyNamed } from "@screens/Family/mocks/index.mocks";
@@ -142,6 +143,6 @@ it("SHOULD open the new family form AND refetch on retry or refresh", () => {
   result.current.onRetry();
   result.current.onRefresh();
 
-  expect(spies.push).toHaveBeenCalledWith("/family/add_new_family");
+  expect(modalNavigation.openModal).toHaveBeenCalledWith("add_new_family");
   expect(refetch).toHaveBeenCalledTimes(2);
 });

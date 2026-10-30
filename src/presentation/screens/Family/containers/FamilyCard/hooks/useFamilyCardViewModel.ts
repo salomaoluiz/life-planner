@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { useEffect, useState } from "react";
 
 import { useCases } from "@application/useCases";
@@ -17,6 +16,7 @@ import {
 } from "@screens/Family/models/FamilyConfirm";
 import FamilyMemberUIModel from "@screens/Family/models/FamilyMemberUIModel";
 import FamilyViewModel from "@screens/Family/models/FamilyViewModel";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 export type FamilyNotice = "DELETE_BLOCKED" | "GENERIC";
 
@@ -37,6 +37,7 @@ interface MenuView {
 }
 
 function useFamilyCardViewModel({ family }: Props) {
+  const { openModal } = useModalNavigation();
   const [menu, setMenu] = useState<Menu>();
   const [confirm, setConfirm] = useState<FamilyConfirm>();
   const [notice, setNotice] = useState<FamilyNotice>();
@@ -219,10 +220,10 @@ function useFamilyCardViewModel({ family }: Props) {
   }
 
   function onInviteMember() {
-    router.push({
-      params: { familyId: family.familyId, familyName: family.familyName },
-      pathname: "/(app)/(modals)/family/add_new_family_member",
-    } as never);
+    openModal("add_new_family_member", {
+      familyId: family.familyId,
+      familyName: family.familyName,
+    });
   }
 
   return {

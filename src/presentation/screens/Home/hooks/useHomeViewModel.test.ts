@@ -1,3 +1,5 @@
+import { modalNavigation } from "@tests/modalNavigation";
+
 import { ALL_FILTER, PERSONAL_FILTER } from "../models/ownerFilter";
 import {
   act,
@@ -188,8 +190,8 @@ describe("navigation", () => {
     result.current.onSummaryPress();
     result.current.onTransactionsSeeAllPress();
 
-    expect(spies.push).toHaveBeenNthCalledWith(1, "/financial");
-    expect(spies.push).toHaveBeenNthCalledWith(2, "/financial");
+    expect(spies.push).toHaveBeenNthCalledWith(1, "/financial/transaction");
+    expect(spies.push).toHaveBeenNthCalledWith(2, "/financial/transaction");
   });
 
   it("SHOULD open Stock with the Expiring filter from the stock link", () => {
@@ -209,10 +211,13 @@ describe("navigation", () => {
     result.current.onAddStockItemPress();
     result.current.onAddTransactionPress();
 
-    expect(spies.push).toHaveBeenNthCalledWith(1, "/stock/add_new_stock_item");
-    expect(spies.push).toHaveBeenNthCalledWith(
+    expect(modalNavigation.openModal).toHaveBeenNthCalledWith(
+      1,
+      "add_new_stock_item",
+    );
+    expect(modalNavigation.openModal).toHaveBeenNthCalledWith(
       2,
-      "/financial/transaction/add_new_transaction",
+      "add_new_transaction",
     );
   });
 });

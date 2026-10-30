@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
 import AccountDTO from "@application/dto/financial/AccountDTO";
@@ -16,9 +16,7 @@ import CardInvoiceUIModel, {
 } from "@screens/Financial/Transactions/models/CardInvoiceUIModel";
 import TransactionUIModel from "@screens/Financial/Transactions/models/TransactionUIModel";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
-
-const EARLY_PAYMENT_ROUTE = "/financial/early_payment/card_early_payment";
-const REFUND_ROUTE = "/financial/refund/card_refund";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 type PayMethod = "ACCOUNT" | "EXTERNAL";
 
@@ -50,6 +48,7 @@ function toMonthKey(date: Date) {
 }
 
 function useInvoiceViewModel() {
+  const { closeModal, replaceModal } = useModalNavigation();
   const params = useLocalSearchParams<{ cardId: string; month: string }>();
   const [isPayOpen, setPayOpen] = useState(false);
   const [isUndoOpen, setUndoOpen] = useState(false);
@@ -209,15 +208,13 @@ function useInvoiceViewModel() {
     method,
     onAccountChange: setAccountId,
     onAddPurchasePress: () => {
-      router.replace({
-        params: { creditCardId: params.cardId },
-        pathname: "/financial/transaction/add_new_transaction",
-      } as never);
+      replaceModal("add_new_transaction", { creditCardId: params.cardId });
     },
-    onClose: () => router.back(),
+    onClose: () => closeModal(),
     onCreditPress: (credit: InvoiceCreditUIModel) =>
-      router.replace({
-        params: {
+      replaceModal(
+        credit.kind === "REFUND" ? "card_refund" : "card_early_payment",
+        {
           accountId: credit.accountId,
           creditCardId: params.cardId,
           date: toCalendarDate(credit.date),
@@ -229,13 +226,12 @@ function useInvoiceViewModel() {
           refundedTransactionId: credit.refundedTransactionId,
           value: String(credit.amountCents),
         },
-        pathname: credit.kind === "REFUND" ? REFUND_ROUTE : EARLY_PAYMENT_ROUTE,
-      } as never),
+      ),
     onEarlyPaymentPress: () =>
-      router.replace({
-        params: { creditCardId: params.cardId, invoiceMonth: params.month },
-        pathname: EARLY_PAYMENT_ROUTE,
-      } as never),
+      replaceModal("card_early_payment", {
+        creditCardId: params.cardId,
+        invoiceMonth: params.month,
+      }),
     onMethodChange: (value: string) =>
       setMethod(value === "EXTERNAL" ? "EXTERNAL" : "ACCOUNT"),
     onPaidOnChange: (date?: Date) => date && setPaidOn(date),
@@ -245,24 +241,18 @@ function useInvoiceViewModel() {
       setPayOpen(true);
     },
     onProjectedPress: (item: TransactionUIModel) =>
-      router.replace({
-        params: {
-          month: item.monthKey,
-          occurrenceNumber: String(item.occurrenceNumber),
-          recurrenceId: item.recurrenceId,
-        },
-        pathname: "/financial/transaction/add_new_transaction",
-      } as never),
+      replaceModal("add_new_transaction", {
+        month: item.monthKey,
+        occurrenceNumber: String(item.occurrenceNumber),
+        recurrenceId: item.recurrenceId,
+      }),
     onPurchasePress: (id: string) =>
-      router.replace({
-        params: { id },
-        pathname: "/financial/transaction/add_new_transaction",
-      } as never),
+      replaceModal("add_new_transaction", { id }),
     onRefundPress: () =>
-      router.replace({
-        params: { creditCardId: params.cardId, invoiceMonth: params.month },
-        pathname: REFUND_ROUTE,
-      } as never),
+      replaceModal("card_refund", {
+        creditCardId: params.cardId,
+        invoiceMonth: params.month,
+      }),
     onRetry: async () => invoice.refetch(),
     onUndoCancel: () => setUndoOpen(false),
     onUndoConfirm: () =>

@@ -11,6 +11,7 @@ import { useCases } from "@application/useCases";
 import { useQuery } from "@infrastructure/fetcher";
 import { useTranslationLocale } from "@presentation/i18n";
 import { useBreakpoint } from "@presentation/theme";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import HomeHeaderUIModel from "../models/HomeHeaderUIModel";
 import MonthSummaryUIModel from "../models/MonthSummaryUIModel";
@@ -168,6 +169,8 @@ function useHomeViewModel() {
       dtos.map((dto) => new RecentTransactionUIModel(dto, now, languageTag)),
   );
 
+  const { openModal } = useModalNavigation();
+
   function push(
     path: string | { params: Record<string, string>; pathname: string },
   ) {
@@ -183,14 +186,13 @@ function useHomeViewModel() {
     header: new HomeHeaderUIModel(user.data, now, languageTag),
     isRefreshing,
     isSplitLayout: breakpoint === "expanded",
-    onAddStockItemPress: () => push("/stock/add_new_stock_item"),
-    onAddTransactionPress: () =>
-      push("/financial/transaction/add_new_transaction"),
+    onAddStockItemPress: () => openModal("add_new_stock_item"),
+    onAddTransactionPress: () => openModal("add_new_transaction"),
     onRefresh,
     onStockSeeAllPress: () =>
       push({ params: { filter: "EXPIRING" }, pathname: "/stock" }),
-    onSummaryPress: () => push("/financial"),
-    onTransactionsSeeAllPress: () => push("/financial"),
+    onSummaryPress: () => push("/financial/transaction"),
+    onTransactionsSeeAllPress: () => push("/financial/transaction"),
     stock: stockState,
     summary: summaryState,
     transactions: transactionsState,

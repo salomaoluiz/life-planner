@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
 import CreditCardOverviewDTO from "@application/dto/financial/CreditCardOverviewDTO";
@@ -17,6 +17,7 @@ import {
   todayDate,
 } from "@screens/Financial/models/creditSheet";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import { resultingTotal, summaryOf, validate } from "../models/prepaymentState";
 
@@ -34,6 +35,7 @@ function invalidateAfterWrite() {
 }
 
 function usePrepaymentViewModel() {
+  const { closeModal } = useModalNavigation();
   const params = useLocalSearchParams<{ planId: string }>();
   const [targetMonth, setTargetMonth] = useState<string>();
   const [hasDiscount, setHasDiscount] = useState(false);
@@ -89,7 +91,7 @@ function usePrepaymentViewModel() {
   useEffect(() => {
     if (prepayMutation.status === "success") {
       invalidateAfterWrite();
-      router.back();
+      closeModal();
     }
   }, [prepayMutation.status]);
 
@@ -131,7 +133,7 @@ function usePrepaymentViewModel() {
     isPreviewing: preview.isFetching && !preview.data,
     isSaving: prepayMutation.isFetching,
     movedCents,
-    onClose: () => router.back(),
+    onClose: () => closeModal(),
     onConfirm,
     onDateChange: (value?: Date) => value && setDate(value),
     onDiscountChange: setDiscountCents,

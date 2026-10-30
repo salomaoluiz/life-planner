@@ -1,4 +1,5 @@
 import { fireEvent, screen } from "@tests";
+import { modalNavigation } from "@tests/modalNavigation";
 
 import { setup, spies } from "./mocks/index.mocks";
 
@@ -22,13 +23,13 @@ it("SHOULD list the 5 sections AND mark the current one as selected", () => {
 });
 
 it("SHOULD close AND replace to the section WHEN another one is chosen", () => {
-  setup("/financial");
+  setup("/financial/transaction");
 
   fireEvent.press(
     screen.getByTestId("financial.layout.section-sheet-accounts"),
   );
 
-  expect(spies.back).toHaveBeenCalledTimes(1);
+  expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
   expect(spies.replace).toHaveBeenCalledWith("/financial/accounts");
 });
 
@@ -37,7 +38,7 @@ it("SHOULD only close WHEN the current section is chosen", () => {
 
   fireEvent.press(screen.getByTestId("financial.layout.section-sheet-cards"));
 
-  expect(spies.back).toHaveBeenCalledTimes(1);
+  expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
   expect(spies.replace).not.toHaveBeenCalled();
 });
 
@@ -46,6 +47,6 @@ it("SHOULD only close WHEN the close button is pressed", () => {
 
   fireEvent.press(screen.getByTestId("financial.layout.section-sheet-close"));
 
-  expect(spies.back).toHaveBeenCalledTimes(1);
+  expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
   expect(spies.replace).not.toHaveBeenCalled();
 });

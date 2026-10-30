@@ -1,4 +1,5 @@
 import { act } from "@tests";
+import { modalNavigation } from "@tests/modalNavigation";
 
 import {
   givenLoaded,
@@ -116,7 +117,7 @@ it("SHOULD refresh the lists AND close WHEN the prepayment succeeds", () => {
   expect(spies.invalidate).toHaveBeenCalledWith(["overview"]);
   expect(spies.invalidate).toHaveBeenCalledWith(["summary"]);
   expect(spies.invalidate).toHaveBeenCalledWith(["plan"]);
-  expect(spies.back).toHaveBeenCalled();
+  expect(modalNavigation.closeModal).toHaveBeenCalled();
 });
 
 it("SHOULD map a prepayment error to its copy key AND close on demand", () => {
@@ -126,5 +127,5 @@ it("SHOULD map a prepayment error to its copy key AND close on demand", () => {
 
   expect(result.current.formErrorKey).toBe("common.errors.generic");
   act(() => result.current.onClose());
-  expect(spies.back).toHaveBeenCalled();
+  expect(modalNavigation.closeModal).toHaveBeenCalled();
 });

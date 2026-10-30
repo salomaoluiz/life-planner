@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
 import { useCases } from "@application/useCases";
@@ -15,6 +15,7 @@ import {
   personalOwnerId,
 } from "@screens/Financial/models/ownerOptions";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import {
   createInitialState,
@@ -27,6 +28,7 @@ import {
 } from "../models/tagFormState";
 
 function useNewTagViewModel() {
+  const { closeModal } = useModalNavigation();
   const params = useLocalSearchParams<{ id?: string; ownerId?: string }>();
   const isEditing = !!params.id;
 
@@ -88,7 +90,7 @@ function useNewTagViewModel() {
         useCases.getFinancialTagsUseCase.uniqueName,
         useCases.getFinancialTransactionsUseCase.uniqueName,
       ]);
-      router.back();
+      closeModal();
     }
   }, [createMutation.status, updateMutation.status, deleteMutation.status]);
 
@@ -128,7 +130,7 @@ function useNewTagViewModel() {
 
       // Only the id means nothing changed: close without a request.
       if (Object.keys(changes).length === 1) {
-        router.back();
+        closeModal();
         return;
       }
       updateMutation.mutate(changes);
@@ -148,7 +150,7 @@ function useNewTagViewModel() {
       setDiscardDialogOpen(true);
       return;
     }
-    router.back();
+    closeModal();
   }
 
   const usage = existing?.usageCount ?? 0;
@@ -185,7 +187,7 @@ function useNewTagViewModel() {
     },
     onDeletePress: () => setDeleteDialogOpen(true),
     onDiscardCancel: () => setDiscardDialogOpen(false),
-    onDiscardConfirm: () => router.back(),
+    onDiscardConfirm: () => closeModal(),
     onNameChange: (value: string) => {
       if (state) {
         setEdited({ ...state, name: value });

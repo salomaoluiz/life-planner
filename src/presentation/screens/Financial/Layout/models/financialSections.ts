@@ -28,7 +28,7 @@ export const FINANCIAL_SECTIONS: readonly FinancialSectionItem[] = [
   {
     icon: "swap-vertical",
     labelKey: "financial.sections.transactions",
-    path: "/financial",
+    path: "/financial/transaction",
     section: "transactions",
     testID: "navigation-rail-financial-transactions",
   },
@@ -65,6 +65,9 @@ export const FINANCIAL_SECTIONS: readonly FinancialSectionItem[] = [
 export function getFinancialSection(pathname: string): FinancialSection {
   const normalized = pathname.replace(/\/+$/, "");
 
+  if (normalized.endsWith("/financial/transaction")) {
+    return "transactions";
+  }
   if (normalized.endsWith("/financial/overview")) {
     return "overview";
   }
@@ -89,5 +92,5 @@ export function getFinancialSectionPath(section: FinancialSection): string {
     (candidate) => candidate.section === section,
   );
 
-  return item ? item.path : "/financial";
+  return item ? item.path : "/financial/transaction";
 }

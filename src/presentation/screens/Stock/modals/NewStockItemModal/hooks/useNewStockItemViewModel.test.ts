@@ -1,5 +1,7 @@
 import { act, renderHook } from "@testing-library/react-native";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
+
+import { modalNavigation } from "@tests/modalNavigation";
 
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
@@ -121,7 +123,7 @@ it("SHOULD mutate once WHEN valid and ignore saves while fetching", () => {
 it("SHOULD go back WHEN the mutation succeeds", () => {
   setup({ status: "success" });
 
-  expect(router.back).toHaveBeenCalledTimes(1);
+  expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
 });
 
 it("SHOULD expose the generic error and keep values WHEN the mutation fails", () => {
@@ -138,7 +140,7 @@ it("SHOULD go back WHEN closing a clean form", () => {
     result.current.onClose();
   });
 
-  expect(router.back).toHaveBeenCalledTimes(1);
+  expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
   expect(result.current.isDiscardOpen).toBe(false);
 });
 
@@ -153,7 +155,7 @@ it("SHOULD ask to discard WHEN closing a dirty form, then keep or discard", () =
   });
 
   expect(result.current.isDiscardOpen).toBe(true);
-  expect(router.back).not.toHaveBeenCalled();
+  expect(modalNavigation.closeModal).not.toHaveBeenCalled();
 
   act(() => {
     result.current.onKeepEditing();
@@ -163,7 +165,7 @@ it("SHOULD ask to discard WHEN closing a dirty form, then keep or discard", () =
   act(() => {
     result.current.onDiscard();
   });
-  expect(router.back).toHaveBeenCalledTimes(1);
+  expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
 });
 
 it("SHOULD toggle the more details section", () => {

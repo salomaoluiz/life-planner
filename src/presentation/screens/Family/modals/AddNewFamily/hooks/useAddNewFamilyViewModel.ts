@@ -1,15 +1,16 @@
-import { router } from "expo-router";
 import { useEffect, useState } from "react";
 
 import { useCases } from "@application/useCases";
 import { CreateFamilyUseCaseParams } from "@application/useCases/cases/family/createFamilyUseCase";
 import { invalidateFetcherData, useMutation } from "@infrastructure/fetcher";
 import { TranslationKeys } from "@presentation/i18n/types";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 export const COUNTER_FROM = 40;
 export const FAMILY_NAME_MAX = 50;
 
 function useAddNewFamilyViewModel() {
+  const { closeModal } = useModalNavigation();
   const [name, setName] = useState("");
   const [showValidation, setShowValidation] = useState(false);
 
@@ -21,7 +22,7 @@ function useAddNewFamilyViewModel() {
   useEffect(() => {
     if (createFamily.status === "success") {
       // Close first, then refetch: the Family list shows the new card expanded.
-      router.back();
+      closeModal();
       invalidateFetcherData();
     }
   }, [createFamily.status]);
@@ -47,7 +48,7 @@ function useAddNewFamilyViewModel() {
     isSubmitting: createFamily.isFetching,
     name,
     onChangeName: (value: string) => setName(value.slice(0, FAMILY_NAME_MAX)),
-    onClose: () => router.back(),
+    onClose: () => closeModal(),
     onSubmit,
   };
 }

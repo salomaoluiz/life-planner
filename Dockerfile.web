@@ -32,10 +32,11 @@ ENV EXPO_PUBLIC_API_URL=$EXPO_PUBLIC_API_URL \
     EXPO_PUBLIC_SENTRY_ENVIRONMENT=$EXPO_PUBLIC_SENTRY_ENVIRONMENT \
     EXPO_PUBLIC_SENTRY_ENABLED=$EXPO_PUBLIC_SENTRY_ENABLED
 
-RUN npx expo export -p web
-
-# Lets an open tab detect a newer deploy (served with Cache-Control: no-store).
-RUN node -e "require('fs').writeFileSync('dist/version.json', JSON.stringify({ builtAt: new Date().toISOString(), version: require('./package.json').version }))"
+# One build id per build: the bundle (app.config.ts extra.builtAt) and version.json share BUILT_AT.
+# version.json lets an open tab detect a newer deploy (served with Cache-Control: no-store).
+RUN BUILT_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ) && export BUILT_AT \
+    && npx expo export -p web \
+    && node -e "require('fs').writeFileSync('dist/version.json', JSON.stringify({ builtAt: process.env.BUILT_AT, version: require('./package.json').version }))"
 
 FROM nginx:alpine AS runtime
 

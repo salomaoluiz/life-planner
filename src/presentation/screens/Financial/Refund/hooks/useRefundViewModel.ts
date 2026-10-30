@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
 import CreditCardOverviewDTO from "@application/dto/financial/CreditCardOverviewDTO";
@@ -18,6 +18,7 @@ import {
 } from "@screens/Financial/models/creditSheet";
 import { addMonthsTo } from "@screens/Financial/models/invoiceMonth";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import {
   createLinkFields,
@@ -60,6 +61,7 @@ function parseDate(value: string) {
 }
 
 function useRefundViewModel() {
+  const { closeModal } = useModalNavigation();
   const params = useLocalSearchParams<RefundParams>();
   const isEdit = !!params.id;
   const originalCents = params.value ? Number(params.value) : 0;
@@ -111,7 +113,7 @@ function useRefundViewModel() {
       deleteMutation.status === "success"
     ) {
       invalidateAfterWrite();
-      router.back();
+      closeModal();
     }
   }, [createMutation.status, updateMutation.status, deleteMutation.status]);
 
@@ -216,7 +218,7 @@ function useRefundViewModel() {
     linkedIsPlan: !!linked?.startsWith("plan:"),
     linkedName: options.find((option) => option.value === linked)?.name,
     onAmountChange: setAmountCents,
-    onClose: () => router.back(),
+    onClose: () => closeModal(),
     onDateChange: (value?: Date) => value && setDate(value),
     onDeleteCancel: () => setDeleteOpen(false),
     onDeleteConfirm: () => {

@@ -1,4 +1,5 @@
 import { act } from "@tests";
+import { modalNavigation } from "@tests/modalNavigation";
 
 import { InstallmentPaid } from "@domain/entities/errors";
 
@@ -247,7 +248,7 @@ describe("after a write", () => {
 
     setup();
 
-    expect(spies.back).toHaveBeenCalledTimes(1);
+    expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
     expect(spies.invalidate).toHaveBeenCalled();
   });
 
@@ -269,7 +270,7 @@ describe("after a write", () => {
 
     act(() => result.current.onClose());
 
-    expect(spies.back).toHaveBeenCalled();
+    expect(modalNavigation.closeModal).toHaveBeenCalled();
   });
 });
 
@@ -280,10 +281,10 @@ describe("prepayment (spec 032)", () => {
 
     act(() => result.current.onPrepayPress());
 
-    expect(spies.replace).toHaveBeenCalledWith({
-      params: { planId: "plan-1" },
-      pathname: "/financial/prepayment/prepay_installments",
-    });
+    expect(modalNavigation.replaceModal).toHaveBeenCalledWith(
+      "prepay_installments",
+      { planId: "plan-1" },
+    );
   });
 
   it("SHOULD undo the prepayment after the confirmation", () => {
@@ -320,8 +321,8 @@ it("SHOULD open the refund sheet linked to the plan (spec 032)", () => {
 
   act(() => result.current.onRefundPress());
 
-  expect(spies.replace).toHaveBeenCalledWith({
-    params: { creditCardId: "card-1", refundedPlanId: "plan-1" },
-    pathname: "/financial/refund/card_refund",
+  expect(modalNavigation.replaceModal).toHaveBeenCalledWith("card_refund", {
+    creditCardId: "card-1",
+    refundedPlanId: "plan-1",
   });
 });

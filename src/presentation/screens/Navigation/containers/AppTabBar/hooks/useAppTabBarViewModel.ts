@@ -9,18 +9,19 @@ import {
   getFinancialSection,
   getFinancialSectionPath,
 } from "@screens/Financial/Layout/models/financialSections";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
+import { screenPath } from "@screens/Navigation/models/modalPath";
 import {
   NAVIGATION_ITEMS,
-  QUICK_ADD_PATH,
-  SECTION_PICKER_PATH,
   SETTINGS_PATH,
 } from "@screens/Navigation/models/navigationItems";
 
 const FINANCES_ROUTE = "financial";
-const FINANCES_PATH = "/financial";
+const FINANCES_PATH = "/financial/transaction";
 
 function useAppTabBarViewModel({ navigation, state }: BottomTabBarProps) {
   const { t } = useTranslation();
+  const { openModal } = useModalNavigation();
   const breakpoint = useBreakpoint();
 
   const pathname = usePathname();
@@ -29,7 +30,7 @@ function useAppTabBarViewModel({ navigation, state }: BottomTabBarProps) {
   const activeRouteName = state.routes[state.index].name;
   const activeChildPath =
     activeRouteName === FINANCES_ROUTE
-      ? getFinancialSectionPath(getFinancialSection(pathname))
+      ? getFinancialSectionPath(getFinancialSection(screenPath(pathname)))
       : undefined;
 
   const items: NavigationRailItem[] = NAVIGATION_ITEMS.map((item) => ({
@@ -48,7 +49,7 @@ function useAppTabBarViewModel({ navigation, state }: BottomTabBarProps) {
     if (routeName === FINANCES_ROUTE) {
       // Finances always opens Transactions; a re-press on the bottom bar opens the section picker.
       if (!isWide && activeRouteName === FINANCES_ROUTE) {
-        router.push(SECTION_PICKER_PATH as never);
+        openModal("section_picker");
       } else {
         router.navigate(FINANCES_PATH as never);
       }
@@ -83,7 +84,7 @@ function useAppTabBarViewModel({ navigation, state }: BottomTabBarProps) {
   }
 
   function onAddPress() {
-    router.push(QUICK_ADD_PATH as never);
+    openModal("quick_add");
   }
 
   function onProfilePress() {

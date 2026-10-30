@@ -1,4 +1,5 @@
 import { act } from "@tests";
+import { modalNavigation } from "@tests/modalNavigation";
 
 import { consumePendingNavigation } from "@screens/Financial/Transactions/hooks/pendingNavigation";
 import { setTransactionFilters } from "@screens/Financial/Transactions/hooks/useTransactionFilters";
@@ -198,7 +199,7 @@ describe("categories and drill-through", () => {
       scope: "family-1",
       type: "INCOME",
     });
-    expect(spies.push).toHaveBeenCalledWith("/financial");
+    expect(spies.push).toHaveBeenCalledWith("/financial/transaction");
   });
 
   it("SHOULD open the parent in Transactions from its subcategories AND open a tag", () => {
@@ -221,8 +222,8 @@ describe("categories and drill-through", () => {
     const { result } = setup();
 
     act(() => result.current.onNewTransaction());
-    expect(spies.push).toHaveBeenCalledWith(
-      "/financial/transaction/add_new_transaction",
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "add_new_transaction",
     );
   });
 });

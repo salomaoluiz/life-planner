@@ -1,4 +1,5 @@
 import { act } from "@tests";
+import { modalNavigation } from "@tests/modalNavigation";
 
 import {
   CategoryHasPendingItems,
@@ -12,7 +13,6 @@ import {
   givenLoaded,
   mutations,
   setup,
-  spies,
   tx,
 } from "./mocks/useNewCategoryViewModel.mocks";
 
@@ -410,7 +410,7 @@ it("SHOULD go back without a request WHEN nothing changed in edit", () => {
   });
 
   expect(mutations.update.value.mutate).not.toHaveBeenCalled();
-  expect(spies.back).toHaveBeenCalledTimes(1);
+  expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
 });
 
 it("SHOULD go back WHEN a mutation succeeds", () => {
@@ -419,7 +419,7 @@ it("SHOULD go back WHEN a mutation succeeds", () => {
 
   setup();
 
-  expect(spies.back).toHaveBeenCalled();
+  expect(modalNavigation.closeModal).toHaveBeenCalled();
 });
 
 it("SHOULD keep the values and expose the 006 key WHEN delete fails with transactions", () => {
@@ -443,7 +443,7 @@ it("SHOULD ask to discard WHEN dirty and close directly otherwise", () => {
   act(() => {
     result.current.onClose();
   });
-  expect(spies.back).toHaveBeenCalledTimes(1);
+  expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
 
   act(() => {
     result.current.onNameChange("x");
@@ -452,12 +452,12 @@ it("SHOULD ask to discard WHEN dirty and close directly otherwise", () => {
     result.current.onClose();
   });
   expect(result.current.isDiscardDialogOpen).toBe(true);
-  expect(spies.back).toHaveBeenCalledTimes(1);
+  expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
 
   act(() => {
     result.current.onDiscardConfirm();
   });
-  expect(spies.back).toHaveBeenCalledTimes(2);
+  expect(modalNavigation.closeModal).toHaveBeenCalledTimes(2);
 });
 
 it("SHOULD confirm delete with the subcategories message WHEN it has children, then delete with id and ownerId", () => {

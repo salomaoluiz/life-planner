@@ -1,4 +1,5 @@
 import { act } from "@tests";
+import { modalNavigation } from "@tests/modalNavigation";
 
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
 import ProjectedOccurrenceDTO from "@application/dto/financial/ProjectedOccurrenceDTO";
@@ -287,10 +288,10 @@ it("SHOULD open the form with the scope owner WHEN one owner is selected (spec 0
   act(() => result.current.onOwnerFilterChange("family-1"));
   act(() => result.current.onAddPress());
 
-  expect(spies.push).toHaveBeenCalledWith({
-    params: { ownerId: "family-1" },
-    pathname: "/financial/transaction/add_new_transaction",
-  });
+  expect(modalNavigation.openModal).toHaveBeenCalledWith(
+    "add_new_transaction",
+    { ownerId: "family-1" },
+  );
 });
 
 it("SHOULD open the form to add and the edit sheet for a row", () => {
@@ -298,15 +299,16 @@ it("SHOULD open the form to add and the edit sheet for a row", () => {
   const { result } = setup();
 
   result.current.onAddPress();
-  expect(spies.push).toHaveBeenCalledWith({
-    pathname: "/financial/transaction/add_new_transaction",
-  });
+  expect(modalNavigation.openModal).toHaveBeenCalledWith(
+    "add_new_transaction",
+    undefined,
+  );
 
   result.current.onRowPress("tx-1");
-  expect(spies.push).toHaveBeenCalledWith({
-    params: { id: "tx-1" },
-    pathname: "/financial/transaction/add_new_transaction",
-  });
+  expect(modalNavigation.openModal).toHaveBeenCalledWith(
+    "add_new_transaction",
+    { id: "tx-1" },
+  );
 });
 
 it("SHOULD refetch WHEN the screen is focused", () => {
@@ -385,9 +387,9 @@ describe("card invoices (spec 029)", () => {
     expect(result.current.expandedInvoiceId).toBeUndefined();
 
     act(() => result.current.onInvoiceOpen(invoice));
-    expect(spies.push).toHaveBeenCalledWith({
-      params: { cardId: "card-1", month: "2026-10" },
-      pathname: "/financial/invoice/invoice_detail",
+    expect(modalNavigation.openModal).toHaveBeenCalledWith("invoice_detail", {
+      cardId: "card-1",
+      month: "2026-10",
     });
   });
 });
@@ -579,14 +581,14 @@ describe("projected occurrences (spec 034)", () => {
 
     act(() => result.current.onProjectedPress(item));
 
-    expect(spies.push).toHaveBeenCalledWith({
-      params: {
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "add_new_transaction",
+      {
         month: "2026-11",
         occurrenceNumber: "2",
         recurrenceId: "series-1",
       },
-      pathname: "/financial/transaction/add_new_transaction",
-    });
+    );
   });
 
   it("SHOULD refetch the projections WHEN refreshing a future month, not the current one", () => {
@@ -745,7 +747,7 @@ describe("archived family (spec 042)", () => {
       result.current.onRowPress("item-fam-exp");
     });
 
-    expect(spies.push).not.toHaveBeenCalled();
+    expect(modalNavigation.openModal).not.toHaveBeenCalled();
     expect(result.current.toastVisible).toBe(true);
   });
 

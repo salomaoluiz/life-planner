@@ -1,4 +1,5 @@
 import { act } from "@tests";
+import { modalNavigation } from "@tests/modalNavigation";
 
 import {
   givenLoaded,
@@ -219,7 +220,7 @@ it("SHOULD refresh everything AND close WHEN saved", () => {
     "getFinancialAccountsUseCase",
   ]);
   expect(spies.invalidate).toHaveBeenCalledWith(["getMonthSummaryUseCase"]);
-  expect(spies.back).toHaveBeenCalled();
+  expect(modalNavigation.closeModal).toHaveBeenCalled();
 });
 
 it("SHOULD map a save error to its copy key AND close on demand", () => {
@@ -229,5 +230,5 @@ it("SHOULD map a save error to its copy key AND close on demand", () => {
 
   expect(result.current.formErrorKey).toBe("common.errors.generic");
   act(() => result.current.onClose());
-  expect(spies.back).toHaveBeenCalled();
+  expect(modalNavigation.closeModal).toHaveBeenCalled();
 });

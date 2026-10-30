@@ -1,4 +1,5 @@
 import { act } from "@tests";
+import { modalNavigation } from "@tests/modalNavigation";
 
 import { AccountHasTransactions } from "@domain/entities/errors";
 
@@ -163,7 +164,7 @@ it("SHOULD go back without a request WHEN nothing changed in edit", () => {
   act(() => result.current.onSave());
 
   expect(mutations.update.value.mutate).not.toHaveBeenCalled();
-  expect(spies.back).toHaveBeenCalledTimes(1);
+  expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
 });
 
 it.each(["create", "update", "delete"] as const)(
@@ -176,7 +177,7 @@ it.each(["create", "update", "delete"] as const)(
 
     expect(spies.invalidate).toHaveBeenCalledTimes(1);
     expect(spies.invalidate).toHaveBeenCalledWith(["accounts"]);
-    expect(spies.back).toHaveBeenCalledTimes(1);
+    expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
   },
 );
 
@@ -187,7 +188,7 @@ it("SHOULD NOT invalidate WHEN a mutation fails", () => {
   setup();
 
   expect(spies.invalidate).not.toHaveBeenCalled();
-  expect(spies.back).not.toHaveBeenCalled();
+  expect(modalNavigation.closeModal).not.toHaveBeenCalled();
 });
 
 it("SHOULD NOT invalidate WHEN saving an edit with no changes", () => {
@@ -244,19 +245,19 @@ it("SHOULD ask to discard WHEN dirty and close directly otherwise", () => {
   const { result } = setup();
 
   act(() => result.current.onClose());
-  expect(spies.back).toHaveBeenCalledTimes(1);
+  expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
 
   act(() => result.current.onNameChange("x"));
   act(() => result.current.onClose());
   expect(result.current.isDiscardDialogOpen).toBe(true);
-  expect(spies.back).toHaveBeenCalledTimes(1);
+  expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
 
   act(() => result.current.onDiscardCancel());
   expect(result.current.isDiscardDialogOpen).toBe(false);
 
   act(() => result.current.onClose());
   act(() => result.current.onDiscardConfirm());
-  expect(spies.back).toHaveBeenCalledTimes(2);
+  expect(modalNavigation.closeModal).toHaveBeenCalledTimes(2);
 });
 
 it("SHOULD confirm delete and then delete with id and ownerId", () => {

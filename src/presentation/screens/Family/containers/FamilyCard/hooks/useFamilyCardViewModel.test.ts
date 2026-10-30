@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 
 import { act, renderHook } from "@tests";
+import { modalNavigation } from "@tests/modalNavigation";
 
 import {
   FamilyHasPendingItems,
@@ -226,10 +227,10 @@ it("SHOULD open the invite sheet with the family id AND name", () => {
 
   act(() => result.current.onInviteMember());
 
-  expect(spies.push).toHaveBeenCalledWith({
-    params: { familyId: "family-1", familyName: "Test Family" },
-    pathname: "/(app)/(modals)/family/add_new_family_member",
-  });
+  expect(modalNavigation.openModal).toHaveBeenCalledWith(
+    "add_new_family_member",
+    { familyId: "family-1", familyName: "Test Family" },
+  );
 });
 
 it("SHOULD cancel the confirmation AND the menu without side effects", () => {

@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
 import { useCases } from "@application/useCases";
@@ -14,6 +14,7 @@ import {
   selectableCategories,
 } from "@screens/Financial/models/categoryTree";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import {
   changeScope,
@@ -26,9 +27,6 @@ import {
   toTransactionUpdate,
   validate,
 } from "../models/installmentEditState";
-
-const REFUND_ROUTE = "/financial/refund/card_refund";
-const PREPAY_ROUTE = "/financial/prepayment/prepay_installments";
 
 // Plan writes move card purchases, invoices, the limit and the month lists (spec 030).
 function invalidateAfterWrite() {
@@ -44,6 +42,7 @@ function invalidateAfterWrite() {
 }
 
 function useInstallmentEditViewModel() {
+  const { closeModal, replaceModal } = useModalNavigation();
   const params = useLocalSearchParams<{ id?: string }>();
 
   const owners = useQuery({
@@ -128,7 +127,7 @@ function useInstallmentEditViewModel() {
       deletePlanMutation.status === "success"
     ) {
       invalidateAfterWrite();
-      router.back();
+      closeModal();
     }
   }, [
     updateTransactionMutation.status,
@@ -226,7 +225,7 @@ function useInstallmentEditViewModel() {
       state && update({ ...state, creditCardId: id }),
     onCategoryChange: (id: string) =>
       state && update({ ...state, categoryId: id }),
-    onClose: () => router.back(),
+    onClose: () => closeModal(),
     onCountChange: (text: string) =>
       state &&
       update({ ...state, count: Number(text.replace(/\D/g, "")) || 0 }),
@@ -250,10 +249,7 @@ function useInstallmentEditViewModel() {
     onPlanOpen: () => setPlanOpen(true),
     onPrepayPress: () => {
       if (planId) {
-        router.replace({
-          params: { planId },
-          pathname: PREPAY_ROUTE,
-        } as never);
+        replaceModal("prepay_installments", { planId });
       }
     },
     onRecalcCancel: () => setRecalcOpen(false),
@@ -263,10 +259,10 @@ function useInstallmentEditViewModel() {
     },
     onRefundPress: () => {
       if (planId && state?.creditCardId) {
-        router.replace({
-          params: { creditCardId: state.creditCardId, refundedPlanId: planId },
-          pathname: REFUND_ROUTE,
-        } as never);
+        replaceModal("card_refund", {
+          creditCardId: state.creditCardId,
+          refundedPlanId: planId,
+        });
       }
     },
     onSave,

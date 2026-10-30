@@ -1,6 +1,5 @@
-import { router } from "expo-router";
-
 import { fireEvent, hasText, render, screen } from "@tests";
+import { modalNavigation } from "@tests/modalNavigation";
 
 import useVersionInfo from "@presentation/hooks/useVersionInfo";
 import {
@@ -12,7 +11,6 @@ import {
 import settingsTestIds from "../../testIds";
 import Versions from "./";
 
-jest.mock("expo-router", () => ({ router: { push: jest.fn() } }));
 jest.mock("@presentation/hooks/useVersionInfo");
 
 function setup(overrides: Parameters<typeof versionInfo>[0] = {}) {
@@ -64,5 +62,5 @@ it("SHOULD open the versions modal WHEN pressed", () => {
 
   fireEvent.press(screen.getByTestId(settingsTestIds.versionsFooter));
 
-  expect(router.push).toHaveBeenCalledWith("/versions");
+  expect(modalNavigation.openModal).toHaveBeenCalledWith("versions");
 });

@@ -33,7 +33,7 @@ const items = [
 const financeChildren = [
   {
     label: "Transactions",
-    path: "/financial",
+    path: "/financial/transaction",
     testID: "navigation-rail-financial-transactions",
   },
   {

@@ -13,7 +13,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-function setup(pathname = "/financial") {
+function setup(pathname = "/financial/transaction") {
   jest.mocked(usePathname).mockReturnValue(pathname);
 
   return render(<SectionPicker />);

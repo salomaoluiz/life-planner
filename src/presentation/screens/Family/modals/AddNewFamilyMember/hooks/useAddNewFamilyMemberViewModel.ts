@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 
 import { useCases } from "@application/useCases";
@@ -9,11 +9,13 @@ import { invalidateFetcherData, useMutation } from "@infrastructure/fetcher";
 import { isShareAvailable, shareText } from "@infrastructure/share";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { buildInviteLink } from "@screens/Family/utils/inviteLink";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 import { validateEmail } from "@utils/authValidation";
 
 const COPIED_MS = 2000;
 
 function useAddNewFamilyMemberViewModel() {
+  const { closeModal } = useModalNavigation();
   const { familyId, familyName } = useLocalSearchParams<{
     familyId: string;
     familyName?: string;
@@ -83,7 +85,7 @@ function useAddNewFamilyMemberViewModel() {
       invalidateFetcherData();
     }
 
-    router.back();
+    closeModal();
   }
 
   async function onCopy() {

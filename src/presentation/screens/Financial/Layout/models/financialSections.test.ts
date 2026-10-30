@@ -6,6 +6,7 @@ import {
 
 it.each([
   ["/financial", "transactions"],
+  ["/financial/transaction", "transactions"],
   ["/financial/", "transactions"],
   ["/financial/overview", "overview"],
   ["/financial/overview/", "overview"],
@@ -23,7 +24,9 @@ it.each([
 });
 
 it("SHOULD give each section its route path", () => {
-  expect(getFinancialSectionPath("transactions")).toBe("/financial");
+  expect(getFinancialSectionPath("transactions")).toBe(
+    "/financial/transaction",
+  );
   expect(getFinancialSectionPath("overview")).toBe("/financial/overview");
   expect(getFinancialSectionPath("categories")).toBe("/financial/categories");
   expect(getFinancialSectionPath("tags")).toBe("/financial/tags");

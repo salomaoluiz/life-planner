@@ -1,4 +1,5 @@
 import { act } from "@tests";
+import { modalNavigation } from "@tests/modalNavigation";
 
 import { GenericError } from "@domain/entities/errors";
 
@@ -53,7 +54,7 @@ it("SHOULD filter by owner AND mark an archived family as read-only", () => {
     result.current.onAddPress();
   });
 
-  expect(spies.push).not.toHaveBeenCalled();
+  expect(modalNavigation.openModal).not.toHaveBeenCalled();
   expect(result.current.toastVisible).toBe(true);
   act(() => {
     result.current.onToastHide();
@@ -68,10 +69,9 @@ it("SHOULD open the form to add and to edit a row", () => {
   result.current.onAddPress();
   result.current.onRowPress("tag-1");
 
-  expect(spies.push).toHaveBeenNthCalledWith(1, "/financial/tag/add_new_tag");
-  expect(spies.push).toHaveBeenNthCalledWith(2, {
-    params: { id: "tag-1" },
-    pathname: "/financial/tag/add_new_tag",
+  expect(modalNavigation.openModal).toHaveBeenNthCalledWith(1, "add_new_tag");
+  expect(modalNavigation.openModal).toHaveBeenNthCalledWith(2, "add_new_tag", {
+    id: "tag-1",
   });
 });
 

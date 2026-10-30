@@ -24,7 +24,7 @@ export const spies = {
 };
 
 export function setup(
-  pathname = "/financial",
+  pathname = "/financial/transaction",
   breakpoint: "compact" | "expanded" | "medium" = "compact",
 ) {
   spies.push.mockClear();

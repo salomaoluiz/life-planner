@@ -210,3 +210,13 @@ jest.mock("react-native-reanimated", () => {
     withTiming: (toValue: number) => toValue,
   };
 });
+
+jest.mock("@screens/Navigation/hooks/useModalNavigation", () => ({
+  __esModule: true,
+  default: () => jest.requireActual("./modalNavigation").modalNavigation,
+}));
+
+beforeEach(() => {
+  const { modalNavigation } = jest.requireActual("./modalNavigation");
+  Object.values<jest.Mock>(modalNavigation).forEach((spy) => spy.mockClear());
+});

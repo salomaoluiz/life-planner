@@ -1,5 +1,4 @@
 import { useIsFocused } from "@react-navigation/native";
-import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
 import TagDTO from "@application/dto/financial/TagDTO";
@@ -13,6 +12,7 @@ import {
   buildOwnerFilterChoices,
 } from "@screens/Financial/models/ownerOptions";
 import { listQueryKey } from "@screens/Financial/models/queryKeys";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import { buildTagRows, tagInActiveScope, tagInScope } from "../models/tagRows";
 
@@ -50,6 +50,7 @@ function useTagsViewModel() {
     [query.data],
   );
   const scope = useReadOnlyScope(query.data?.owners, ownerFilter);
+  const { openModal } = useModalNavigation();
   const rows = useMemo(
     () =>
       buildTagRows(
@@ -67,18 +68,11 @@ function useTagsViewModel() {
     isEmpty: rows.length === 0,
     isLoading: query.isFetching && !query.data,
     isRefreshing: query.isFetching && !!query.data,
-    onAddPress: scope.guard(() =>
-      router.push("/financial/tag/add_new_tag" as never),
-    ),
+    onAddPress: scope.guard(() => openModal("add_new_tag")),
     onOwnerFilterChange: setOwnerFilter,
     onRefresh: async () => query.refetch(),
     onRetry: async () => query.refetch(),
-    onRowPress: scope.guard((id: string) =>
-      router.push({
-        params: { id },
-        pathname: "/financial/tag/add_new_tag",
-      } as never),
-    ),
+    onRowPress: scope.guard((id: string) => openModal("add_new_tag", { id })),
     onToastHide: scope.onToastHide,
     ownerChoices: buildOwnerFilterChoices(query.data?.owners ?? []),
     ownerFilter,

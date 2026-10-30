@@ -78,8 +78,8 @@ function useAccountsViewModel() {
   }, [isFocused, refetch]);
 
   function onAddPress() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    router.push("/financial/account/add_new_account" as any);
+    // `openModal` (useModalNavigation, spec 057) pushes `<current screen>/add_new_account`.
+    openModal("add_new_account");
   }
 
   return {
