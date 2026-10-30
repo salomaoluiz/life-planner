@@ -1,0 +1,110 @@
+url: ${E2E_WEB_URL}
+name: financial/categories/category-apply-to-children
+tags:
+  - financial
+  - spec-058
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Parent
+      KEY: PARENT_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Child
+      KEY: CHILD_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-category.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: ${output.PARENT_NAME}
+- evalScript: ${output.PARENT_CATEGORY_ID = output.CATEGORY_ID}
+- runFlow:
+    file: ../../../subflows/setup/create-category.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: ${output.CHILD_NAME}
+      PARENT_ID: ${output.PARENT_CATEGORY_ID}
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../../subflows/financial/open-categories.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.categories.child-row-title"
+      text: ${output.CHILD_NAME}
+    timeout: 20000
+- tapOn:
+    id: "financial.categories.row-title"
+    text: ${output.PARENT_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.category-form.name-input"
+    timeout: 20000
+# nothing changed yet: the block is hidden
+- assertNotVisible:
+    id: "financial.category-form.apply-to-children"
+# a new color and a new icon (found by a Portuguese synonym through the catalog search)
+- tapOn:
+    id: "financial.category-form.color-swatch-#F59E0B"
+- tapOn:
+    id: "financial.category-form.icon-more"
+- extendedWaitUntil:
+    visible:
+      id: "financial.icon-picker.search"
+    timeout: 20000
+- tapOn:
+    id: "financial.icon-picker.search"
+- inputText: gasolina
+- extendedWaitUntil:
+    visible:
+      id: "financial.icon-picker.result-gas-station"
+    timeout: 20000
+- tapOn:
+    id: "financial.icon-picker.result-gas-station"
+- extendedWaitUntil:
+    visible:
+      id: "financial.category-form.apply-to-children"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- assertVisible:
+    id: "financial.category-form.apply-color-switch"
+- assertVisible:
+    id: "financial.category-form.apply-icon-switch"
+- assertVisible:
+    id: "financial.category-form.apply-preview"
+- tapOn:
+    id: "financial.category-form.apply-color-switch"
+- tapOn:
+    id: "financial.category-form.apply-icon-switch"
+- tapOn:
+    id: "financial.category-form.save-button"
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.category-form.sheet"
+    timeout: 20000
+# the child kept the new icon
+- extendedWaitUntil:
+    visible:
+      id: "financial.categories.child-row-title"
+      text: ${output.CHILD_NAME}
+    timeout: 20000
+- tapOn:
+    id: "financial.categories.child-row-title"
+    text: ${output.CHILD_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.category-form.name-input"
+    timeout: 20000
+- assertVisible:
+    id: "financial.category-form.icon-icon-gas-station"

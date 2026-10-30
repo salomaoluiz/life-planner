@@ -1,0 +1,53 @@
+url: ${E2E_WEB_URL}
+name: financial/categories/category-icon-search
+tags:
+  - financial
+  - spec-058
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../../subflows/financial/open-categories.yaml
+- tapOn:
+    id: "financial.categories.add-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.category-form.name-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.category-form.icon-more"
+- extendedWaitUntil:
+    visible:
+      id: "financial.icon-picker.search"
+    timeout: 20000
+# a word no icon has: the empty state
+- tapOn:
+    id: "financial.icon-picker.search"
+- inputText: zzzzqq
+- extendedWaitUntil:
+    visible:
+      id: "financial.icon-picker.empty"
+    timeout: 20000
+# a synonym without accent finds the water icon
+- eraseText: 20
+- inputText: agua
+- extendedWaitUntil:
+    visible:
+      id: "financial.icon-picker.result-water"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.icon-picker.empty"
+# picking a result closes the picker and keeps the icon in the form
+- tapOn:
+    id: "financial.icon-picker.result-water"
+- extendedWaitUntil:
+    visible:
+      id: "financial.category-form.icon-icon-water"
+    timeout: 20000
