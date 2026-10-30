@@ -1,4 +1,8 @@
 const categoryFormTestIds = {
+  applyColorSwitch: "financial.category-form.apply-color-switch",
+  applyIconSwitch: "financial.category-form.apply-icon-switch",
+  applyPreview: "financial.category-form.apply-preview",
+  applyToChildren: "financial.category-form.apply-to-children",
   archiveButton: "financial.category-form.archive-button",
   archiveDialog: "financial.category-form.archive-dialog",
   deleteButton: "financial.category-form.delete-button",

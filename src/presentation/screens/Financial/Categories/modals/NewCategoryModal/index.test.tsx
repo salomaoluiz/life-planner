@@ -305,3 +305,71 @@ describe("archive (spec 041)", () => {
     expect(vm.onPendingClose).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("apply to subcategories (spec 058)", () => {
+  const applyPreview = [
+    {
+      archived: false,
+      depth: 0,
+      icon: "food",
+      id: "p",
+      name: "Food",
+      tint: "#3B82F6",
+    },
+    {
+      archived: false,
+      depth: 1,
+      icon: "food",
+      id: "k",
+      name: "Market",
+      tint: "#5B9CF8",
+      tone: 1,
+    },
+  ];
+
+  it("SHOULD NOT render the block WHEN the view model hides it (create mode / nothing changed)", () => {
+    setup();
+
+    expect(
+      screen.queryByTestId(categoryFormTestIds.applyToChildren),
+    ).toBeNull();
+  });
+
+  it("SHOULD render the block, report the toggles and use the apply save label", () => {
+    const vm = setup(
+      {
+        applyColorOn: true,
+        applyCount: 1,
+        applyName: "Food",
+        applyPreview,
+        colorSwitchVisible: true,
+        iconSwitchVisible: true,
+        isApplyVisible: true,
+        isEditing: true,
+        saveLabelKey: "financial.categories.form.saveAndApply",
+        saveLabelParams: { count: 1 },
+        titleKey: "financial.categories.edit",
+      },
+      "expanded",
+    );
+
+    expect(
+      screen.getByTestId(categoryFormTestIds.applyToChildren),
+    ).toBeTruthy();
+    expect(
+      screen.getByText('financial.categories.form.saveAndApply {"count":1}'),
+    ).toBeTruthy();
+    expect(
+      screen.getByText(
+        /financial.categories.form.apply.description_one .*"name":"Food"/,
+      ),
+    ).toBeTruthy();
+
+    fireEvent(
+      screen.getByTestId(categoryFormTestIds.applyIconSwitch),
+      "valueChange",
+      true,
+    );
+    expect(vm.onApplyIconToggle).toHaveBeenCalled();
+  });
+});

@@ -21,8 +21,10 @@ import Skeleton from "@components/Skeleton";
 import { useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
 import { TranslationKeys } from "@presentation/i18n/types";
+import { useBreakpoint } from "@presentation/theme";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
+import ApplyToSubcategories from "./components/ApplyToSubcategories";
 import CustomColorSheet from "./components/CustomColorSheet";
 import IconPickerSheet from "./components/IconPickerSheet";
 import { useNewCategoryViewModel } from "./hooks";
@@ -35,6 +37,7 @@ function NewCategoryModal() {
   const { styles } = useStyles();
   const { t } = useTranslation();
   const vm = useNewCategoryViewModel();
+  const breakpoint = useBreakpoint();
 
   function err(key?: TranslationKeys) {
     return key ? t(key) : undefined;
@@ -162,6 +165,57 @@ function NewCategoryModal() {
                 testID={categoryFormTestIds.icon}
                 value={vm.icon}
               />
+              {vm.isApplyVisible && (
+                <ApplyToSubcategories
+                  colorOn={vm.applyColorOn}
+                  colorSwitchVisible={vm.colorSwitchVisible}
+                  compact={breakpoint === "compact"}
+                  description={t(
+                    pluralKey(
+                      "financial.categories.form.apply.description",
+                      vm.applyCount,
+                    ),
+                    { count: vm.applyCount, name: vm.applyName },
+                  )}
+                  iconOn={vm.applyIconOn}
+                  iconSwitchVisible={vm.iconSwitchVisible}
+                  labels={{
+                    archivedSuffix: t(
+                      "financial.categories.form.apply.archivedSuffix",
+                    ),
+                    colorHint: t("financial.categories.form.apply.colorHint"),
+                    colorSwitch: t(
+                      breakpoint === "compact"
+                        ? "financial.categories.form.apply.colorCompact"
+                        : "financial.categories.form.apply.color",
+                    ),
+                    iconHint: t("financial.categories.form.apply.iconHint"),
+                    iconSwitch: t("financial.categories.form.apply.icon"),
+                    keeps: t("financial.categories.form.apply.keeps"),
+                    offHint: t("financial.categories.form.apply.offHint", {
+                      name: vm.applyName,
+                    }),
+                    preview: t("financial.categories.form.apply.preview"),
+                    root: t("financial.categories.form.apply.root"),
+                    title:
+                      breakpoint === "compact"
+                        ? t(
+                            pluralKey(
+                              "financial.categories.form.apply.titleCompact",
+                              vm.applyCount,
+                            ),
+                            { count: vm.applyCount },
+                          )
+                        : t("financial.categories.form.apply.title"),
+                  }}
+                  onColorToggle={vm.onApplyColorToggle}
+                  onIconToggle={vm.onApplyIconToggle}
+                  preview={vm.applyPreview}
+                  toneLabel={(number) =>
+                    t("financial.categories.form.apply.tone", { number })
+                  }
+                />
+              )}
               <View style={styles.helper}>
                 <ChipGroup
                   disabled={vm.isOwnerLocked}
@@ -228,7 +282,7 @@ function NewCategoryModal() {
         footer={
           <Button.Primary
             fullWidth
-            label={t(vm.saveLabelKey)}
+            label={t(vm.saveLabelKey, vm.saveLabelParams)}
             loading={vm.isSaving}
             onPress={vm.onSave}
             size={"lg"}

@@ -529,7 +529,7 @@ function useNewCategoryViewModel() {
     pendingItems,
     pickerIcons: uiModel?.iconOptions(iconQuery, true) ?? [],
     saveLabelKey,
-    saveLabelParams: { count: apply?.count ?? 0 },
+    saveLabelParams: isApplying ? { count: apply.count } : undefined,
     titleKey: (isEditing
       ? "financial.categories.edit"
       : "financial.categories.new") as TranslationKeys,

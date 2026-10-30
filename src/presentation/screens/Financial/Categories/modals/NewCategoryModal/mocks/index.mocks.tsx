@@ -88,7 +88,7 @@ const defaultViewModel: ReturnType<typeof useNewCategoryViewModel> = {
   pendingItems: undefined,
   pickerIcons: [{ label: "Heart", value: "heart" }],
   saveLabelKey: "financial.categories.form.save",
-  saveLabelParams: { count: 0 },
+  saveLabelParams: undefined,
   titleKey: "financial.categories.new",
   toneOptions: [],
   type: "EXPENSE",
