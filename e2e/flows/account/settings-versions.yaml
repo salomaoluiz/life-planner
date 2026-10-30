@@ -27,7 +27,8 @@ onFlowComplete:
     timeout: 20000
 - assertVisible:
     id: "settings.versions.status"
-    text: ".*(Sem verificação|Not checked).*"
+- assertVisible:
+    text: "(Sem verificação|Not checked)"
 - tapOn:
     id: "settings.versions.footer"
 - extendedWaitUntil:
