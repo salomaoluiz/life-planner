@@ -1,6 +1,6 @@
 import { ScrollView, View } from "react-native";
 
-import { ChipGroup, SegmentedControl, SelectField, Text } from "@components";
+import { ChipGroup, SegmentedControl, SelectField } from "@components";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { useBreakpoint } from "@presentation/theme";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
@@ -12,6 +12,7 @@ import { OverviewViewModel } from "../hooks/useOverviewViewModel";
 import { formatDay } from "../models/overviewFormat";
 import useStyles from "../styles";
 import overviewTestIds from "../testIds";
+import PeriodArrows from "./PeriodArrows";
 
 const PRESETS = ["1M", "3M", "6M", "12M", "YEAR", "CUSTOM"] as const;
 const PRESET_KEYS = {
@@ -62,6 +63,19 @@ function OverviewToolbar(props: { vm: OverviewViewModel }) {
     />
   );
 
+  const arrows = (
+    <PeriodArrows
+      canGoNext={vm.canGoNext}
+      compact={compact}
+      limitDate={formatDay(vm.limitDate, localeTag)}
+      onBackToToday={vm.onBackToToday}
+      onNext={vm.onNextPeriod}
+      onPrevious={vm.onPreviousPeriod}
+      rangeLabel={`${formatDay(vm.period.from, localeTag)} – ${formatDay(vm.period.to, localeTag)}`}
+      showToday={vm.showToday}
+    />
+  );
+
   return (
     <View style={styles.toolbar}>
       <View accessibilityLabel={t("financial.transactions.scope.label")}>
@@ -88,10 +102,7 @@ function OverviewToolbar(props: { vm: OverviewViewModel }) {
             presets
           )}
         </View>
-        <Text.Caption
-          tone="secondary"
-          value={`${formatDay(vm.period.from, localeTag)} – ${formatDay(vm.period.to, localeTag)}`}
-        />
+        {compact ? null : arrows}
         {showCurrency ? (
           <SelectField
             closeLabel={t("common.actions.close")}
@@ -111,6 +122,7 @@ function OverviewToolbar(props: { vm: OverviewViewModel }) {
           />
         ) : null}
       </View>
+      {compact ? arrows : null}
       <FilterToolbar
         chips={chips}
         clearAllLabel={t("financial.transactions.filters.clearAll")}

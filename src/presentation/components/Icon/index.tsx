@@ -8,6 +8,7 @@ export interface IconButtonProps {
   accessibilityLabel: string;
   /** Legacy, kept until spec 014: defaults to textPrimary */
   color?: string;
+  disabled?: boolean;
   name: string;
   onPress: () => void;
   /** Legacy, kept until spec 014: defaults to iconMd */
@@ -48,6 +49,7 @@ function IconButton(props: IconButtonProps) {
     <Touchable
       accessibilityLabel={props.accessibilityLabel}
       accessibilityRole="button"
+      disabled={props.disabled}
       focusRadius={radius.full}
       onPress={props.onPress}
       style={[
