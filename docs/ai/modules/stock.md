@@ -96,7 +96,7 @@ containers:
 modals:
   - name: NewStockItemModal
     path: src/presentation/screens/Stock/modals/NewStockItemModal/index.tsx
-    behavior: BottomSheet route `/stock/add_new_stock_item` (optional `ownerId` param preselects the owner); "More details" collapsed; quantity is digits-only (number-pad, >= 1); discard confirm when dirty
+    behavior: BottomSheet modal `add_new_stock_item` (URL `/stock/add_new_stock_item` from Stock) (optional `ownerId` param preselects the owner); "More details" collapsed; quantity is digits-only (number-pad, >= 1); discard confirm when dirty
 
 view_models:
   - useStockViewModel: src/presentation/screens/Stock/hooks/useStockViewModel.ts (query, 200 ms search debounce, filter/sort state, route param, sheets)

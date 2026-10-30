@@ -66,10 +66,10 @@ components:
 
 routes_opened:
   - /settings (profile button)
-  - /financial (summary, transactions See all)
-  - /financial/transaction/add_new_transaction
+  - /financial/transaction (summary, transactions See all)
+  - /add_new_transaction (modal over Home, spec 057)
   - /stock (See all, filter=EXPIRING)
-  - /stock/add_new_stock_item
+  - /add_new_stock_item (modal over Home)
 ```
 
 ## Removed
@@ -85,7 +85,7 @@ routes_opened:
 ## Settings: app and API versions (spec 056)
 
 - `src/presentation/screens/Config/containers/Versions` — footer pill below "Delete account": `App X · API Y · <Environment>` + status chip; opens the modal. The Login screen shows the same line as plain text (`Login/components/VersionLine`).
-- `src/presentation/screens/Config/modals/Versions` — Versions modal (route `app/(app)/(modals)/versions.tsx`): two cards (app, API) and the "What changed" view (`components/ChangesList`), driven by `hooks/useVersionsViewModel`.
+- `src/presentation/screens/Config/modals/Versions` — Versions modal (modal `versions`, URL `/settings/versions`, registry `src/navigation/modalRoutes.tsx`): two cards (app, API) and the "What changed" view (`components/ChangesList`), driven by `hooks/useVersionsViewModel`.
 - `src/presentation/hooks/useVersionInfo` — shared hook: version query (start, foreground, every 30 min, stale 10 min), web `/version.json`, banner dismissal (`@version_banner_dismissed`); `labels.ts` maps status to chip keys.
 - `src/presentation/screens/Navigation/containers/UpdateBanner` — banner slot at the top of the signed-in layout (`StatusBanner` from `@components`).
 - Pure rules: `src/domain/entities/version/versionStatus.ts` (`resolveVersionStatus`, `newerReleases`, `isNewerVersion`).

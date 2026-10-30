@@ -13,13 +13,8 @@ app/
   (app)/(tabs)/index/index.tsx   Home
   (app)/(tabs)/stock/index.tsx, family/index.tsx
   (app)/(tabs)/financial/_layout.tsx   FinancialLayout: ScreenHeader (overline "Finances" + section title; below `expanded` the title opens the section picker) + nested Stack (index, overview, categories, tags, accounts, cards); sections come from `FINANCIAL_SECTIONS` and switching uses router.replace (spec 044)
-  (app)/(modals)/financial/section_picker.tsx   FinancialSectionPicker: BottomSheet listing the sections; opened by the title or by re-pressing the active Finances tab on the bottom bar. On `expanded` the side menu (NavigationRail children) lists the sections instead
-  (app)/(tabs)/financial/{index,overview,categories,tags,accounts,cards}.tsx
-  (app)/(modals)/financial/tag/add_new_tag.tsx   NewTagModal (spec 043)
-  (app)/(modals)/_layout.tsx     Stack, presentation "transparentModal", headerShown false
-  (app)/(modals)/quick_add.tsx   quick-add BottomSheet (Transaction / Stock item); options router.replace to the add forms
-  (app)/(modals)/family/..., financial/..., stock/add_new_stock_item.tsx, business_feedback.tsx, invite.tsx
-  (app)/(modals)/financial/invoice/invoice_detail.tsx   invoice detail + payment sheet (params cardId, month; spec 029)
+  (app)/(modals)/_layout.tsx     Stack, presentation "transparentModal", headerShown false; one screen, the catch-all
+  (app)/(modals)/[...modal].tsx  ModalRoute (src/navigation): the last URL segment is the modal, resolved through MODAL_ROUTES (src/navigation/modalRoutes.tsx)
 ```
 
 ## Add a screen
@@ -32,10 +27,17 @@ app/
 
 Tab screens hide the navigator header (the title comes from `ScreenHeader`). Quick add is `QUICK_ADD_PATH`. Android back goes to Home (`backBehavior: "initialRoute"`). `/config` redirects to `/settings`.
 
+## Modals (spec 057)
+
+A modal URL is `<base>/<modal>`: `<base>` is the screen it was opened from, `<modal>` is only the modal name (one segment, no folder), params stay in the query (`/financial/overview/add_new_transaction?id=…`, `/settings/versions`, `/invite?token=…` falls back to Family). Valid bases (`VALID_BASES` in `Navigation/models/modalPath.ts`, derived from `FINANCIAL_SECTIONS`): `/`, `/financial/transaction`, `/financial/overview`, `/financial/categories`, `/financial/tags`, `/financial/accounts`, `/financial/cards`, `/stock`, `/family`, `/settings`. Transactions is `/financial/transaction`; `/financial` redirects there.
+
+- Pure rules: `splitModalPath`, `buildModalPath`, `isValidBase`, `fallbackBase`, `screenPath` (strips the modal segment; use it before `getFinancialSection(usePathname())`) in `src/presentation/screens/Navigation/models/modalPath.ts`.
+- Open/close only through `useModalNavigation()` (`@screens/Navigation/hooks/useModalNavigation`): `openModal(name, params?)` pushes, `replaceModal(name, params?)` replaces keeping the base, `closeModal()` goes back or, with nothing below, replaces to the base. Never build modal paths by hand or call `router.back()` in a modal. Tests assert `modalNavigation.openModal|replaceModal|closeModal` from `@tests/modalNavigation` (global mock in `tests/setup.tsx`).
+- Fresh load (F5, direct link): `app/(app)/_layout.tsx` sets `unstable_settings.initialRouteName = "(tabs)"` and `useScreenBehindModal` (`src/navigation`) rebuilds `[(tabs) at base, (modals)]` (dismissAll → navigate(base) → push(modal)) behind an opaque cover. Invalid or missing base → Home behind (invite → Family). Unknown modal name → not found.
+
 ## Add a modal
 
-1. Route file `app/(app)/(modals)/<module>/<thing>/add_new_<thing>.tsx`: `export { NewXModal as default } from "@screens/<Area>/<Screen>/modals";`
-2. Add `<Stack.Screen name={"<module>/<thing>/add_new_<thing>"} />` to `app/(app)/(modals)/_layout.tsx`.
-3. Open it: `router.push("/<module>/<thing>/add_new_<thing>" as any)` (groups are omitted from the URL; `as any` + eslint-disable comment is the accepted pattern because typed routes lag).
+1. Add the name to `MODAL_NAMES` in `modalPath.ts` and the component to `MODAL_ROUTES` in `src/navigation/modalRoutes.tsx` (typed `Record<ModalName, ComponentType>`, so TypeScript flags a missing entry). No route file and no `Stack.Screen`.
+2. Open it with `openModal("<name>", params)` and close it with `closeModal()` from `useModalNavigation()`.
 
-- `app/(app)/(modals)/versions.tsx` → `VersionsModal` (`@screens/Config/modals`, spec 056): opened from the Settings footer (`router.push("/versions")`); the signed-in layout `app/(app)/_layout.tsx` renders `UpdateBanner` above the stack.
+- The signed-in layout `app/(app)/_layout.tsx` renders `UpdateBanner` above the stack (spec 056); the versions modal is `versions` (opened from the Settings footer).
