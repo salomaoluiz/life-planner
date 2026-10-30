@@ -3,6 +3,7 @@ import {
   fallbackBase,
   isValidBase,
   MODAL_NAMES,
+  screenPath,
   splitModalPath,
   VALID_BASES,
 } from "./modalPath";
@@ -74,4 +75,14 @@ describe("fallbackBase", () => {
 it("SHOULD have 18 unique modal names", () => {
   expect(MODAL_NAMES).toHaveLength(18);
   expect(new Set(MODAL_NAMES).size).toBe(18);
+});
+
+describe("screenPath", () => {
+  it("SHOULD drop the modal segment AND keep plain paths", () => {
+    expect(screenPath("/financial/cards/invoice_detail")).toBe(
+      "/financial/cards",
+    );
+    expect(screenPath("/financial/cards")).toBe("/financial/cards");
+    expect(screenPath("/quick_add")).toBe("/");
+  });
 });

@@ -1,6 +1,7 @@
 import { act, renderHook } from "@testing-library/react-native";
-import { router } from "expo-router";
 import { Linking } from "react-native";
+
+import { modalNavigation } from "@tests/modalNavigation";
 
 import { ReleaseEntity } from "@domain/entities/version/VersionEntity";
 import { reloadApp } from "@infrastructure/appInfo";
@@ -251,7 +252,7 @@ describe("actions", () => {
     act(() => result.current.onClose());
 
     expect(value.checkNow).toHaveBeenCalledTimes(1);
-    expect(router.back).toHaveBeenCalledTimes(1);
+    expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
   });
 
   it("SHOULD describe how long ago it was checked", () => {

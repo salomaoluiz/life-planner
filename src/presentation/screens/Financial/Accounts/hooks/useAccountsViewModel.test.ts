@@ -1,4 +1,5 @@
 import { act } from "@tests";
+import { modalNavigation } from "@tests/modalNavigation";
 
 import AccountDTO from "@application/dto/financial/AccountDTO";
 
@@ -86,14 +87,15 @@ it("SHOULD open the form to add and to edit a row", () => {
   result.current.onAddPress();
   result.current.onRowPress("a1");
 
-  expect(spies.push).toHaveBeenNthCalledWith(
+  expect(modalNavigation.openModal).toHaveBeenNthCalledWith(
     1,
-    "/financial/account/add_new_account",
+    "add_new_account",
   );
-  expect(spies.push).toHaveBeenNthCalledWith(2, {
-    params: { id: "a1" },
-    pathname: "/financial/account/add_new_account",
-  });
+  expect(modalNavigation.openModal).toHaveBeenNthCalledWith(
+    2,
+    "add_new_account",
+    { id: "a1" },
+  );
 });
 
 it("SHOULD refetch WHEN the screen is focused", () => {
@@ -183,7 +185,7 @@ describe("archived family (spec 042)", () => {
       result.current.onRowPress("b");
     });
 
-    expect(spies.push).not.toHaveBeenCalled();
+    expect(modalNavigation.openModal).not.toHaveBeenCalled();
     expect(result.current.toastVisible).toBe(true);
   });
 });

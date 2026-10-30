@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 
 import { act, renderHook } from "@tests";
+import { modalNavigation } from "@tests/modalNavigation";
 
 import { GenericError } from "@domain/entities/errors";
 import { invalidateFetcherData, useMutation } from "@infrastructure/fetcher";
@@ -96,7 +97,7 @@ it.each([
 it("SHOULD close the sheet AND refetch on success", () => {
   setup({ status: "success" });
 
-  expect(spies.back).toHaveBeenCalledTimes(1);
+  expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
   expect(spies.invalidate).toHaveBeenCalledTimes(1);
 });
 
@@ -105,7 +106,7 @@ it("SHOULD close WHEN onClose is called", () => {
 
   act(() => result.current.onClose());
 
-  expect(spies.back).toHaveBeenCalledTimes(1);
+  expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
 });
 
 it("SHOULD show a generic error AND stop loading WHEN the creation fails", () => {

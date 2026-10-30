@@ -1,4 +1,5 @@
 import { act } from "@tests";
+import { modalNavigation } from "@tests/modalNavigation";
 
 import ProjectedOccurrenceDTO from "@application/dto/financial/ProjectedOccurrenceDTO";
 
@@ -139,17 +140,17 @@ it("SHOULD navigate to the add form with the card AND to a purchase edit AND clo
   const { result } = setup();
 
   act(() => result.current.onAddPurchasePress());
-  expect(spies.replace).toHaveBeenCalledWith({
-    params: { creditCardId: "card-1" },
-    pathname: "/financial/transaction/add_new_transaction",
-  });
+  expect(modalNavigation.replaceModal).toHaveBeenCalledWith(
+    "add_new_transaction",
+    { creditCardId: "card-1" },
+  );
   act(() => result.current.onPurchasePress("p1"));
-  expect(spies.replace).toHaveBeenLastCalledWith({
-    params: { id: "p1" },
-    pathname: "/financial/transaction/add_new_transaction",
-  });
+  expect(modalNavigation.replaceModal).toHaveBeenLastCalledWith(
+    "add_new_transaction",
+    { id: "p1" },
+  );
   act(() => result.current.onClose());
-  expect(spies.back).toHaveBeenCalled();
+  expect(modalNavigation.closeModal).toHaveBeenCalled();
 });
 
 it("SHOULD open the refund and early payment sheets for this invoice (spec 032)", () => {
@@ -157,15 +158,15 @@ it("SHOULD open the refund and early payment sheets for this invoice (spec 032)"
   const { result } = setup();
 
   act(() => result.current.onRefundPress());
-  expect(spies.replace).toHaveBeenLastCalledWith({
-    params: { creditCardId: "card-1", invoiceMonth: "2026-10" },
-    pathname: "/financial/refund/card_refund",
+  expect(modalNavigation.replaceModal).toHaveBeenLastCalledWith("card_refund", {
+    creditCardId: "card-1",
+    invoiceMonth: "2026-10",
   });
   act(() => result.current.onEarlyPaymentPress());
-  expect(spies.replace).toHaveBeenLastCalledWith({
-    params: { creditCardId: "card-1", invoiceMonth: "2026-10" },
-    pathname: "/financial/early_payment/card_early_payment",
-  });
+  expect(modalNavigation.replaceModal).toHaveBeenLastCalledWith(
+    "card_early_payment",
+    { creditCardId: "card-1", invoiceMonth: "2026-10" },
+  );
 });
 
 it("SHOULD edit a credit in the sheet of its kind", () => {
@@ -181,20 +182,17 @@ it("SHOULD edit a credit in the sheet of its kind", () => {
   } as never;
 
   act(() => result.current.onCreditPress(credit));
-  expect(spies.replace).toHaveBeenLastCalledWith({
-    params: {
-      accountId: undefined,
-      creditCardId: "card-1",
-      date: "2026-10-16",
-      description: "Chargeback",
-      id: "c1",
-      invoiceMonth: "2026-10",
-      method: undefined,
-      refundedPlanId: undefined,
-      refundedTransactionId: "t1",
-      value: "50000",
-    },
-    pathname: "/financial/refund/card_refund",
+  expect(modalNavigation.replaceModal).toHaveBeenLastCalledWith("card_refund", {
+    accountId: undefined,
+    creditCardId: "card-1",
+    date: "2026-10-16",
+    description: "Chargeback",
+    id: "c1",
+    invoiceMonth: "2026-10",
+    method: undefined,
+    refundedPlanId: undefined,
+    refundedTransactionId: "t1",
+    value: "50000",
   });
   act(() =>
     result.current.onCreditPress({
@@ -207,15 +205,15 @@ it("SHOULD edit a credit in the sheet of its kind", () => {
       method: "ACCOUNT",
     } as never),
   );
-  expect(spies.replace).toHaveBeenLastCalledWith({
-    params: expect.objectContaining({
+  expect(modalNavigation.replaceModal).toHaveBeenLastCalledWith(
+    "card_early_payment",
+    expect.objectContaining({
       accountId: "a1",
       id: "c2",
       method: "ACCOUNT",
       value: "60000",
     }),
-    pathname: "/financial/early_payment/card_early_payment",
-  });
+  );
 });
 
 describe("projected purchases (spec 034 FR 14)", () => {
@@ -295,14 +293,14 @@ describe("projected purchases (spec 034 FR 14)", () => {
       result.current.onProjectedPress(result.current.projected[0] as never),
     );
 
-    expect(spies.replace).toHaveBeenCalledWith({
-      params: {
+    expect(modalNavigation.replaceModal).toHaveBeenCalledWith(
+      "add_new_transaction",
+      {
         month: "2026-12",
         occurrenceNumber: "3",
         recurrenceId: "series-1",
       },
-      pathname: "/financial/transaction/add_new_transaction",
-    });
+    );
     expect(row.isProjected).toBe(true);
   });
 });

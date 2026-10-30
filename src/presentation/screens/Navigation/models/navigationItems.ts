@@ -23,12 +23,7 @@ export type TabRouteName =
   | "index/index"
   | "stock/index";
 
-export const SECTION_PICKER_PATH = "/financial/section_picker";
-export const QUICK_ADD_PATH = "/quick_add";
 export const SETTINGS_PATH = "/settings";
-export const STOCK_ITEM_ADD_PATH = "/stock/add_new_stock_item";
-export const TRANSACTION_ADD_PATH =
-  "/financial/transaction/add_new_transaction";
 
 // Order matters: the bottom bar puts the quick-add button between the 2nd and 3rd item.
 export const NAVIGATION_ITEMS: NavigationItem[] = [

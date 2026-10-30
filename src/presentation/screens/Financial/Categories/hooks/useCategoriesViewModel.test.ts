@@ -1,4 +1,5 @@
 import { act } from "@tests";
+import { modalNavigation } from "@tests/modalNavigation";
 
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
 
@@ -103,14 +104,15 @@ it("SHOULD open the form to add and to edit a row", () => {
   result.current.onAddPress();
   result.current.onRowPress("cat-1");
 
-  expect(spies.push).toHaveBeenNthCalledWith(
+  expect(modalNavigation.openModal).toHaveBeenNthCalledWith(
     1,
-    "/financial/category/add_new_category",
+    "add_new_category",
   );
-  expect(spies.push).toHaveBeenNthCalledWith(2, {
-    params: { id: "cat-1" },
-    pathname: "/financial/category/add_new_category",
-  });
+  expect(modalNavigation.openModal).toHaveBeenNthCalledWith(
+    2,
+    "add_new_category",
+    { id: "cat-1" },
+  );
 });
 
 it("SHOULD refetch WHEN the screen is focused", () => {
@@ -211,7 +213,7 @@ describe("archived family (spec 042)", () => {
       result.current.onRowPress("old");
     });
 
-    expect(spies.push).not.toHaveBeenCalled();
+    expect(modalNavigation.openModal).not.toHaveBeenCalled();
     expect(result.current.toastVisible).toBe(true);
   });
 });

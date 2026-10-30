@@ -1,5 +1,4 @@
 import { useIsFocused } from "@react-navigation/native";
-import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
@@ -19,6 +18,7 @@ import {
   buildOwnerFilterChoices,
 } from "@screens/Financial/models/ownerOptions";
 import { listQueryKey } from "@screens/Financial/models/queryKeys";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import { buildCategoryEntries } from "../models/categoryEntries";
 import CategoryRowUIModel from "../models/CategoryRowUIModel";
@@ -70,6 +70,7 @@ function useCategoriesViewModel() {
     [query.data],
   );
   const scope = useReadOnlyScope(query.data?.owners, ownerFilter);
+  const { openModal } = useModalNavigation();
 
   const { archivedRows, rows } = useMemo(() => {
     const visible = (query.data?.categories ?? []).filter(
@@ -106,18 +107,13 @@ function useCategoriesViewModel() {
     isEmpty: rows.length === 0 && archivedRows.length === 0,
     isLoading: query.isFetching && !query.data,
     isRefreshing: query.isFetching && !!query.data,
-    onAddPress: scope.guard(() =>
-      router.push("/financial/category/add_new_category" as never),
-    ),
+    onAddPress: scope.guard(() => openModal("add_new_category")),
     onArchivedToggle: () => setArchivedExpanded((expanded) => !expanded),
     onOwnerFilterChange: setOwnerFilter,
     onRefresh: async () => query.refetch(),
     onRetry: async () => query.refetch(),
     onRowPress: scope.guard((id: string) =>
-      router.push({
-        params: { id },
-        pathname: "/financial/category/add_new_category",
-      } as never),
+      openModal("add_new_category", { id }),
     ),
     onToastHide: scope.onToastHide,
     onTypeChange: setType,

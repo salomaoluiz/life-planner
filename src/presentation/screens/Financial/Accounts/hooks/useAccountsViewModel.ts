@@ -1,5 +1,4 @@
 import { useIsFocused } from "@react-navigation/native";
-import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
 import AccountDTO from "@application/dto/financial/AccountDTO";
@@ -13,6 +12,7 @@ import {
   buildOwnerFilterChoices,
 } from "@screens/Financial/models/ownerOptions";
 import { listQueryKey } from "@screens/Financial/models/queryKeys";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import {
   buildAccountEntries,
@@ -62,6 +62,7 @@ function useAccountsViewModel() {
     return filterByOwner(models, ownerFilter, archivedOwnerIds(owners));
   }, [query.data, ownerFilter]);
   const scope = useReadOnlyScope(query.data?.owners, ownerFilter);
+  const { openModal } = useModalNavigation();
 
   const entries = useMemo(
     () => buildAccountEntries(filtered, archivedExpanded),
@@ -75,18 +76,13 @@ function useAccountsViewModel() {
     isEmpty: filtered.length === 0,
     isLoading: query.isFetching && !query.data,
     isRefreshing: query.isFetching && !!query.data,
-    onAddPress: scope.guard(() =>
-      router.push("/financial/account/add_new_account" as never),
-    ),
+    onAddPress: scope.guard(() => openModal("add_new_account")),
     onArchivedToggle: () => setArchivedExpanded((expanded) => !expanded),
     onOwnerFilterChange: setOwnerFilter,
     onRefresh: async () => query.refetch(),
     onRetry: async () => query.refetch(),
     onRowPress: scope.guard((id: string) =>
-      router.push({
-        params: { id },
-        pathname: "/financial/account/add_new_account",
-      } as never),
+      openModal("add_new_account", { id }),
     ),
     onToastHide: scope.onToastHide,
     ownerChoices: buildOwnerFilterChoices(query.data?.owners ?? []),

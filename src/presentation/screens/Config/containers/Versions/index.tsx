@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { View } from "react-native";
 
 import { Badge, Text, Touchable } from "@components";
@@ -8,6 +7,7 @@ import {
   statusChip,
 } from "@presentation/hooks/useVersionInfo/labels";
 import { useTranslation } from "@presentation/i18n";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import settingsTestIds from "../../testIds";
 import useStyles from "./styles";
@@ -15,6 +15,7 @@ import useStyles from "./styles";
 // "App X · API Y · Production" plus a status chip; opens the Versions modal (spec 056).
 function Versions() {
   const { t } = useTranslation();
+  const { openModal } = useModalNavigation();
   const { styles } = useStyles();
   const { info, runningVersion, status } = useVersionInfo();
   const chip = statusChip(status);
@@ -25,7 +26,7 @@ function Versions() {
     <Touchable
       accessibilityLabel={t("versions.title")}
       accessibilityRole="button"
-      onPress={() => router.push("/versions" as never)}
+      onPress={() => openModal("versions")}
       style={styles.pill}
       testID={settingsTestIds.versionsFooter}
     >

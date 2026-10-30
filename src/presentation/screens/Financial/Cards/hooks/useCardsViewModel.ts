@@ -1,5 +1,4 @@
 import { useIsFocused } from "@react-navigation/native";
-import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
 import CreditCardDTO from "@application/dto/financial/CreditCardDTO";
@@ -14,6 +13,7 @@ import {
   buildOwnerFilterChoices,
 } from "@screens/Financial/models/ownerOptions";
 import { listQueryKey } from "@screens/Financial/models/queryKeys";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import {
   aggregateOf,
@@ -24,11 +24,6 @@ import {
   resolveSelectedId,
   usedProgress,
 } from "../models/cardList";
-
-const EARLY_PAYMENT_ROUTE = "/financial/early_payment/card_early_payment";
-const REFUND_ROUTE = "/financial/refund/card_refund";
-const FORM_ROUTE = "/financial/credit_card/add_new_credit_card";
-const INVOICE_ROUTE = "/financial/invoice/invoice_detail";
 
 interface CardsData {
   cards: CreditCardDTO[];
@@ -72,6 +67,7 @@ function useCardsViewModel() {
     [query.data],
   );
   const scope = useReadOnlyScope(query.data?.owners, ownerFilter);
+  const { openModal } = useModalNavigation();
   const summaries = useMemo(
     () =>
       filterSummariesByOwner(
@@ -111,33 +107,24 @@ function useCardsViewModel() {
     invoiceTab,
     isLoading: query.isFetching && !query.data,
     isRefreshing: query.isFetching && !!query.data,
-    onAddPress: scope.guard(() => router.push(FORM_ROUTE as never)),
+    onAddPress: scope.guard(() => openModal("add_new_credit_card")),
     onArchivedCardPress: scope.guard((id: string) =>
-      router.push({ params: { id }, pathname: FORM_ROUTE } as never),
+      openModal("add_new_credit_card", { id }),
     ),
     onArchivedToggle: () => setArchivedExpanded((expanded) => !expanded),
     onCardSelect: (id: string) => setSelectedId(id),
     onEarlyPaymentPress: () => {
       if (resolvedId) {
-        router.push({
-          params: { creditCardId: resolvedId },
-          pathname: EARLY_PAYMENT_ROUTE,
-        } as never);
+        openModal("card_early_payment", { creditCardId: resolvedId });
       }
     },
     onEditPress: () => {
       if (resolvedId) {
-        router.push({
-          params: { id: resolvedId },
-          pathname: FORM_ROUTE,
-        } as never);
+        openModal("add_new_credit_card", { id: resolvedId });
       }
     },
     onInvoicePress: scope.guard((cardId: string, month: string) =>
-      router.push({
-        params: { cardId, month },
-        pathname: INVOICE_ROUTE,
-      } as never),
+      openModal("invoice_detail", { cardId, month }),
     ),
     onInvoiceTabChange: (value: string) =>
       setInvoiceTab(
@@ -147,10 +134,7 @@ function useCardsViewModel() {
     onRefresh: async () => query.refetch(),
     onRefundPress: () => {
       if (resolvedId) {
-        router.push({
-          params: { creditCardId: resolvedId },
-          pathname: REFUND_ROUTE,
-        } as never);
+        openModal("card_refund", { creditCardId: resolvedId });
       }
     },
     onRetry: async () => query.refetch(),

@@ -1,9 +1,10 @@
 import { Text } from "react-native";
 
 import { fireEvent, screen } from "@tests";
+import { modalNavigation } from "@tests/modalNavigation";
 
 import { useFinancialHeaderActions } from "./headerActions";
-import { setup, spies } from "./mocks/index.mocks";
+import { setup } from "./mocks/index.mocks";
 import layoutTestIds from "./testIds";
 
 it("SHOULD show the Finances overline AND the current section as title", () => {
@@ -36,7 +37,7 @@ it("SHOULD open the section picker WHEN the title is pressed on a narrow layout"
   );
   fireEvent.press(button);
 
-  expect(spies.push).toHaveBeenCalledWith("/financial/section_picker");
+  expect(modalNavigation.openModal).toHaveBeenCalledWith("section_picker");
 });
 
 it("SHOULD render a plain title WHEN the layout is expanded", () => {

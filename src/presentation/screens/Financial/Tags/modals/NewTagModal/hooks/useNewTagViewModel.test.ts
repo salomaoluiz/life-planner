@@ -1,4 +1,5 @@
 import { act } from "@tests";
+import { modalNavigation } from "@tests/modalNavigation";
 
 import { GenericError, TagNameInUse } from "@domain/entities/errors";
 
@@ -7,7 +8,6 @@ import {
   mutations,
   queries,
   setup,
-  spies,
   tag,
 } from "./mocks/useNewTagViewModel.mocks";
 
@@ -81,7 +81,7 @@ describe("creating", () => {
     const { result } = setup();
 
     act(() => result.current.onClose());
-    expect(spies.back).toHaveBeenCalledTimes(1);
+    expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
 
     act(() => result.current.onNameChange("x"));
     act(() => result.current.onClose());
@@ -90,7 +90,7 @@ describe("creating", () => {
     act(() => result.current.onDiscardCancel());
     expect(result.current.isDiscardDialogOpen).toBe(false);
     act(() => result.current.onDiscardConfirm());
-    expect(spies.back).toHaveBeenCalledTimes(2);
+    expect(modalNavigation.closeModal).toHaveBeenCalledTimes(2);
   });
 
   it("SHOULD show a name already in use on the field AND other errors on the form", () => {
@@ -111,7 +111,7 @@ describe("creating", () => {
 
     setup();
 
-    expect(spies.back).toHaveBeenCalled();
+    expect(modalNavigation.closeModal).toHaveBeenCalled();
   });
 });
 
@@ -154,7 +154,7 @@ describe("editing", () => {
     act(() => result.current.onSave());
 
     expect(mutations.update.value.mutate).not.toHaveBeenCalled();
-    expect(spies.back).toHaveBeenCalled();
+    expect(modalNavigation.closeModal).toHaveBeenCalled();
   });
 
   it("SHOULD keep an All tag All (owner locked)", () => {

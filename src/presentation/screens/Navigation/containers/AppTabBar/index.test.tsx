@@ -1,4 +1,5 @@
 import { fireEvent, screen } from "@tests";
+import { modalNavigation } from "@tests/modalNavigation";
 
 import { setBreakpoint, setup, spies } from "./mocks/index.mocks";
 
@@ -54,13 +55,13 @@ it("SHOULD NOT navigate WHEN tabPress is default-prevented", () => {
 it("SHOULD open the quick-add modal from the + button AND from the rail Add button", () => {
   setup();
   fireEvent.press(screen.getByTestId("quick-add-button"));
-  expect(spies.push).toHaveBeenLastCalledWith("/quick_add");
+  expect(modalNavigation.openModal).toHaveBeenLastCalledWith("quick_add");
 
   screen.unmount();
   setBreakpoint("expanded");
   setup();
   fireEvent.press(screen.getByTestId("navigation-rail-add"));
-  expect(spies.push).toHaveBeenLastCalledWith("/quick_add");
+  expect(modalNavigation.openModal).toHaveBeenLastCalledWith("quick_add");
 });
 
 it("SHOULD open /settings from the rail profile entry", () => {
@@ -122,7 +123,7 @@ describe("WHEN the Finances tab is pressed", () => {
 
     fireEvent.press(screen.getByTestId("tab-finances"));
 
-    expect(spies.push).toHaveBeenCalledWith("/financial/section_picker");
+    expect(modalNavigation.openModal).toHaveBeenCalledWith("section_picker");
     expect(spies.navigate).not.toHaveBeenCalled();
   });
 });

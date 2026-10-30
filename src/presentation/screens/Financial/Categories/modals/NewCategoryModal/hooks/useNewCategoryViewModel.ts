@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import OwnerDTO from "@application/dto/user/OwnerDTO";
@@ -23,6 +23,7 @@ import {
   personalOwnerId,
 } from "@screens/Financial/models/ownerOptions";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import {
   autoColor,
@@ -57,6 +58,7 @@ function formatShortDate(calendarDate: string, localeTag: string) {
 }
 
 function useNewCategoryViewModel() {
+  const { closeModal } = useModalNavigation();
   const params = useLocalSearchParams<{
     id?: string;
     ownerId?: string;
@@ -168,7 +170,7 @@ function useNewCategoryViewModel() {
       invalidateFetcherData([
         useCases.getFinancialCategoriesUseCase.uniqueName,
       ]);
-      router.back();
+      closeModal();
     }
   }, [createMutation.status, updateMutation.status, deleteMutation.status]);
 
@@ -240,7 +242,7 @@ function useNewCategoryViewModel() {
 
       // Only the id means nothing changed: close without a request.
       if (Object.keys(changes).length === 1) {
-        router.back();
+        closeModal();
         return;
       }
       updateMutation.mutate(changes);
@@ -261,7 +263,7 @@ function useNewCategoryViewModel() {
       setDiscardDialogOpen(true);
       return;
     }
-    router.back();
+    closeModal();
   }
 
   function onDeleteConfirm() {
@@ -404,7 +406,7 @@ function useNewCategoryViewModel() {
     onDeleteConfirm,
     onDeletePress: () => setDeleteDialogOpen(true),
     onDiscardCancel: () => setDiscardDialogOpen(false),
-    onDiscardConfirm: () => router.back(),
+    onDiscardConfirm: () => closeModal(),
     onIconChange: (value: string) => {
       if (state) {
         update({ ...state, icon: value });

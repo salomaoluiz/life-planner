@@ -1,6 +1,7 @@
 import { router, useLocalSearchParams } from "expo-router";
 
 import { act, renderHook } from "@tests";
+import { modalNavigation } from "@tests/modalNavigation";
 
 import { useCases } from "@application/useCases";
 import {
@@ -271,7 +272,7 @@ it("SHOULD refetch AND close on Done", () => {
   act(() => result.current.onDone());
 
   expect(spies.invalidate).toHaveBeenCalledTimes(1);
-  expect(spies.back).toHaveBeenCalledTimes(1);
+  expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
 });
 
 it("SHOULD also refetch WHEN the sheet is closed (X) after the invite was created", () => {
@@ -280,7 +281,7 @@ it("SHOULD also refetch WHEN the sheet is closed (X) after the invite was create
   act(() => result.current.onClose());
 
   expect(spies.invalidate).toHaveBeenCalledTimes(1);
-  expect(spies.back).toHaveBeenCalledTimes(1);
+  expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
 });
 
 it("SHOULD NOT refetch WHEN the sheet is closed before creating an invite", () => {
@@ -289,5 +290,5 @@ it("SHOULD NOT refetch WHEN the sheet is closed before creating an invite", () =
   act(() => result.current.onClose());
 
   expect(spies.invalidate).not.toHaveBeenCalled();
-  expect(spies.back).toHaveBeenCalledTimes(1);
+  expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
 });

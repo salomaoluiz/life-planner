@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { useState } from "react";
 import { Linking } from "react-native";
 
@@ -13,6 +12,7 @@ import { reloadApp } from "@infrastructure/appInfo";
 import useVersionInfo from "@presentation/hooks/useVersionInfo";
 import { TranslationKeys } from "@presentation/i18n/types";
 import useLocaleTag from "@presentation/i18n/useLocaleTag";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import { formatDate, formatDateTime, timeAgo } from "../utils";
 
@@ -58,6 +58,7 @@ const APP_LABEL: Record<string, TranslationKeys> = {
 };
 
 function useVersionsViewModel() {
+  const { closeModal } = useModalNavigation();
   const localeTag = useLocaleTag();
   const version = useVersionInfo();
   const [changes, setChanges] = useState<null | Service>(null);
@@ -216,7 +217,7 @@ function useVersionsViewModel() {
     },
     onBack: () => setChanges(null),
     onCheckNow: async () => version.checkNow(),
-    onClose: () => router.back(),
+    onClose: () => closeModal(),
     onOpenGithub: (url: string) => void Linking.openURL(url),
     onWhatChanged: (service: Service) => setChanges(service),
   };

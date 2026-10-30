@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
 import AccountDTO from "@application/dto/financial/AccountDTO";
@@ -12,6 +12,7 @@ import { TranslationKeys } from "@presentation/i18n/types";
 import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
 import { personalOwnerId } from "@screens/Financial/models/ownerOptions";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import {
   CardFormState,
@@ -27,6 +28,7 @@ import {
 import NewCreditCardUIModel from "../models/NewCreditCardUIModel";
 
 function useNewCreditCardViewModel() {
+  const { closeModal } = useModalNavigation();
   const params = useLocalSearchParams<{ id?: string }>();
   const isEditing = !!params.id;
 
@@ -120,7 +122,7 @@ function useNewCreditCardViewModel() {
       invalidateFetcherData([
         useCases.getFinancialCreditCardsUseCase.uniqueName,
       ]);
-      router.back();
+      closeModal();
     }
   }, [createMutation.status, updateMutation.status, deleteMutation.status]);
 
@@ -155,7 +157,7 @@ function useNewCreditCardViewModel() {
 
       // Only the id means nothing changed: close without a request.
       if (Object.keys(changes).length === 1) {
-        router.back();
+        closeModal();
         return;
       }
       updateMutation.mutate(changes);
@@ -170,7 +172,7 @@ function useNewCreditCardViewModel() {
       setDiscardDialogOpen(true);
       return;
     }
-    router.back();
+    closeModal();
   }
 
   function onArchiveToggle() {
@@ -222,7 +224,7 @@ function useNewCreditCardViewModel() {
     onDeleteConfirm,
     onDeletePress: () => setDeleteDialogOpen(true),
     onDiscardCancel: () => setDiscardDialogOpen(false),
-    onDiscardConfirm: () => router.back(),
+    onDiscardConfirm: () => closeModal(),
     onDueDayChange: (value: string) => change({ dueDay: value }),
     onLastDigitsChange: (value: string) =>
       change({ lastDigits: value.replace(/\D/g, "").slice(0, 4) }),

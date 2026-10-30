@@ -5,19 +5,22 @@ import {
   FINANCIAL_SECTIONS,
   getFinancialSection,
 } from "@screens/Financial/Layout/models/financialSections";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
+import { screenPath } from "@screens/Navigation/models/modalPath";
 
 import sectionPickerTestIds from "../testIds";
 
 function useSectionPickerViewModel() {
   const { t } = useTranslation();
-  const current = getFinancialSection(usePathname());
+  const { closeModal } = useModalNavigation();
+  const current = getFinancialSection(screenPath(usePathname()));
 
   function onClose() {
-    router.back();
+    closeModal();
   }
 
   function onChoose(path: string, selected: boolean) {
-    router.back();
+    closeModal();
     if (!selected) {
       // replace: switching sections must not grow the back stack
       router.replace(path as never);

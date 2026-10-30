@@ -1,4 +1,5 @@
 import { act } from "@tests";
+import { modalNavigation } from "@tests/modalNavigation";
 
 import { consumePendingNavigation } from "@screens/Financial/Transactions/hooks/pendingNavigation";
 import { setTransactionFilters } from "@screens/Financial/Transactions/hooks/useTransactionFilters";
@@ -221,8 +222,8 @@ describe("categories and drill-through", () => {
     const { result } = setup();
 
     act(() => result.current.onNewTransaction());
-    expect(spies.push).toHaveBeenCalledWith(
-      "/financial/transaction/add_new_transaction",
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "add_new_transaction",
     );
   });
 });

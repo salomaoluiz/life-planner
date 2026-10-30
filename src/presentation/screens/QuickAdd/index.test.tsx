@@ -1,6 +1,7 @@
 import { fireEvent, screen } from "@tests";
+import { modalNavigation } from "@tests/modalNavigation";
 
-import { setup, spies } from "./mocks/index.mocks";
+import { setup } from "./mocks/index.mocks";
 
 it("SHOULD render the sheet with the Add title AND the two options", () => {
   setup();
@@ -16,10 +17,10 @@ it("SHOULD replace the sheet with the add-transaction form WHEN Transaction is c
 
   fireEvent.press(screen.getByTestId("quick-add-transaction"));
 
-  expect(spies.replace).toHaveBeenCalledWith(
-    "/financial/transaction/add_new_transaction",
+  expect(modalNavigation.replaceModal).toHaveBeenCalledWith(
+    "add_new_transaction",
   );
-  expect(spies.back).not.toHaveBeenCalled();
+  expect(modalNavigation.closeModal).not.toHaveBeenCalled();
 });
 
 it("SHOULD replace the sheet with the add-stock-item form WHEN Stock item is chosen", () => {
@@ -27,7 +28,9 @@ it("SHOULD replace the sheet with the add-stock-item form WHEN Stock item is cho
 
   fireEvent.press(screen.getByTestId("quick-add-stock-item"));
 
-  expect(spies.replace).toHaveBeenCalledWith("/stock/add_new_stock_item");
+  expect(modalNavigation.replaceModal).toHaveBeenCalledWith(
+    "add_new_stock_item",
+  );
 });
 
 it("SHOULD go back (keeping the tab the user was on) WHEN the sheet is closed", () => {
@@ -35,5 +38,5 @@ it("SHOULD go back (keeping the tab the user was on) WHEN the sheet is closed", 
 
   fireEvent.press(screen.getByTestId("quick-add-sheet-close"));
 
-  expect(spies.back).toHaveBeenCalledTimes(1);
+  expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
 });

@@ -2,6 +2,8 @@ import { useIsFocused } from "@react-navigation/native";
 import { act, renderHook } from "@testing-library/react-native";
 import { router, useLocalSearchParams } from "expo-router";
 
+import { modalNavigation } from "@tests/modalNavigation";
+
 import StockDTO from "@application/dto/stock/StockDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
@@ -401,9 +403,10 @@ describe("onAddPress", () => {
       result.current.onAddPress();
     });
 
-    expect(spies.push).toHaveBeenCalledWith({
-      pathname: "/stock/add_new_stock_item",
-    });
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "add_new_stock_item",
+      undefined,
+    );
   });
 
   it("SHOULD pass the ownerId WHEN a family filter is active", () => {
@@ -416,10 +419,10 @@ describe("onAddPress", () => {
       result.current.onAddPress();
     });
 
-    expect(spies.push).toHaveBeenCalledWith({
-      params: { ownerId: "family-1" },
-      pathname: "/stock/add_new_stock_item",
-    });
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "add_new_stock_item",
+      { ownerId: "family-1" },
+    );
   });
 });
 
@@ -451,7 +454,7 @@ describe("archived family (spec 042)", () => {
       result.current.onItemPress("stock-2");
     });
 
-    expect(spies.push).not.toHaveBeenCalled();
+    expect(modalNavigation.openModal).not.toHaveBeenCalled();
     expect(result.current.selectedItem).toBeUndefined();
     expect(result.current.toastVisible).toBe(true);
   });

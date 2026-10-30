@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
 import AccountDTO from "@application/dto/financial/AccountDTO";
@@ -17,6 +17,7 @@ import {
   todayDate,
 } from "@screens/Financial/models/creditSheet";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import { leftToPay, PayMethod, validate } from "../models/earlyPaymentState";
 
@@ -55,6 +56,7 @@ function parseDate(value: string) {
 }
 
 function useEarlyPaymentViewModel() {
+  const { closeModal } = useModalNavigation();
   const params = useLocalSearchParams<EarlyPaymentParams>();
   const isEdit = !!params.id;
   const [edits, setEdits] = useState<Edits>({});
@@ -110,7 +112,7 @@ function useEarlyPaymentViewModel() {
       deleteMutation.status === "success"
     ) {
       invalidateAfterWrite();
-      router.back();
+      closeModal();
     }
   }, [createMutation.status, updateMutation.status, deleteMutation.status]);
 
@@ -237,7 +239,7 @@ function useEarlyPaymentViewModel() {
     method,
     onAccountChange: (value: string) => patch({ accountId: value }),
     onAmountChange: (value: number) => patch({ amountCents: value }),
-    onClose: () => router.back(),
+    onClose: () => closeModal(),
     onDateChange: (value?: Date) => value && patch({ date: value }),
     onDeleteCancel: () => setDeleteOpen(false),
     onDeleteConfirm: () => {

@@ -7,7 +7,7 @@ import {
   splitModalPath,
 } from "@screens/Navigation/models/modalPath";
 
-type ModalParams = Record<string, string>;
+type ModalParams = Record<string, string | undefined>;
 
 function currentBase(pathname: string): string {
   const split = splitModalPath(pathname);

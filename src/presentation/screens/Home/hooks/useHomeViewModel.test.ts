@@ -1,3 +1,5 @@
+import { modalNavigation } from "@tests/modalNavigation";
+
 import { ALL_FILTER, PERSONAL_FILTER } from "../models/ownerFilter";
 import {
   act,
@@ -209,10 +211,13 @@ describe("navigation", () => {
     result.current.onAddStockItemPress();
     result.current.onAddTransactionPress();
 
-    expect(spies.push).toHaveBeenNthCalledWith(1, "/stock/add_new_stock_item");
-    expect(spies.push).toHaveBeenNthCalledWith(
+    expect(modalNavigation.openModal).toHaveBeenNthCalledWith(
+      1,
+      "add_new_stock_item",
+    );
+    expect(modalNavigation.openModal).toHaveBeenNthCalledWith(
       2,
-      "/financial/transaction/add_new_transaction",
+      "add_new_transaction",
     );
   });
 });

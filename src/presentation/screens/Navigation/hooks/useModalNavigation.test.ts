@@ -2,7 +2,7 @@ import { router, usePathname } from "expo-router";
 
 import { renderHook } from "@tests";
 
-import useModalNavigation from "./useModalNavigation";
+const useModalNavigation = jest.requireActual("./useModalNavigation").default;
 
 jest.mock("expo-router", () => ({
   router: {

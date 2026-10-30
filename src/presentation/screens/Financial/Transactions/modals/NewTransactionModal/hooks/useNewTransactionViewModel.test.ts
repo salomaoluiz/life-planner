@@ -1,4 +1,5 @@
 import { act } from "@tests";
+import { modalNavigation } from "@tests/modalNavigation";
 
 import CreditCardOverviewDTO, {
   CreditCardSummaryDTO,
@@ -219,7 +220,7 @@ it("SHOULD go back WHEN a mutation succeeds", () => {
 
   setup();
 
-  expect(spies.back).toHaveBeenCalled();
+  expect(modalNavigation.closeModal).toHaveBeenCalled();
 });
 
 it("SHOULD keep the values and expose the 006 key WHEN the mutation fails", () => {
@@ -238,7 +239,7 @@ it("SHOULD close directly WHEN not dirty and ask to discard WHEN dirty", () => {
   act(() => {
     result.current.onClose();
   });
-  expect(spies.back).toHaveBeenCalledTimes(1);
+  expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
   expect(result.current.isDiscardDialogOpen).toBe(false);
 
   act(() => {
@@ -247,7 +248,7 @@ it("SHOULD close directly WHEN not dirty and ask to discard WHEN dirty", () => {
   act(() => {
     result.current.onClose();
   });
-  expect(spies.back).toHaveBeenCalledTimes(1);
+  expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
   expect(result.current.isDiscardDialogOpen).toBe(true);
 
   act(() => {
@@ -261,7 +262,7 @@ it("SHOULD close directly WHEN not dirty and ask to discard WHEN dirty", () => {
   act(() => {
     result.current.onDiscardConfirm();
   });
-  expect(spies.back).toHaveBeenCalledTimes(2);
+  expect(modalNavigation.closeModal).toHaveBeenCalledTimes(2);
 });
 
 it("SHOULD ask before deleting and delete with id and ownerId after confirming", () => {
@@ -320,14 +321,16 @@ it("SHOULD flag an owner without accounts or categories and open the create form
     result.current.onCreateCategoryPress();
   });
 
-  expect(spies.push).toHaveBeenNthCalledWith(1, {
-    params: { ownerId: "user-id" },
-    pathname: "/financial/account/add_new_account",
-  });
-  expect(spies.push).toHaveBeenNthCalledWith(2, {
-    params: { ownerId: "user-id", type: "EXPENSE" },
-    pathname: "/financial/category/add_new_category",
-  });
+  expect(modalNavigation.openModal).toHaveBeenNthCalledWith(
+    1,
+    "add_new_account",
+    { ownerId: "user-id" },
+  );
+  expect(modalNavigation.openModal).toHaveBeenNthCalledWith(
+    2,
+    "add_new_category",
+    { ownerId: "user-id", type: "EXPENSE" },
+  );
 });
 
 it("SHOULD select the new account WHEN the account list gains one after the inline create", () => {
@@ -651,10 +654,10 @@ describe("card mode (spec 029)", () => {
 
       const { result } = setup();
 
-      expect(spies.replace).toHaveBeenCalledWith({
-        params: { id: "t1" },
-        pathname: "/financial/installment/edit_installment",
-      });
+      expect(modalNavigation.replaceModal).toHaveBeenCalledWith(
+        "edit_installment",
+        { id: "t1" },
+      );
       expect(result.current.isLoading).toBe(true);
     });
 
@@ -674,14 +677,14 @@ describe("card mode (spec 029)", () => {
 
       const { result } = setup();
 
-      expect(spies.replace).toHaveBeenCalledWith({
-        params: {
+      expect(modalNavigation.replaceModal).toHaveBeenCalledWith(
+        "card_early_payment",
+        {
           creditCardId: "c1",
           id: "early-1",
           invoiceMonth: "2026-10",
         },
-        pathname: "/financial/early_payment/card_early_payment",
-      });
+      );
       expect(result.current.isLoading).toBe(true);
     });
 
@@ -696,9 +699,9 @@ describe("card mode (spec 029)", () => {
 
       expect(result.current.canRefund).toBe(true);
       act(() => result.current.onRefundPress());
-      expect(spies.replace).toHaveBeenCalledWith({
-        params: { creditCardId: "c1", refundedTransactionId: "t1" },
-        pathname: "/financial/refund/card_refund",
+      expect(modalNavigation.replaceModal).toHaveBeenCalledWith("card_refund", {
+        creditCardId: "c1",
+        refundedTransactionId: "t1",
       });
     });
 
@@ -708,7 +711,7 @@ describe("card mode (spec 029)", () => {
 
       expect(result.current.canRefund).toBe(false);
       act(() => result.current.onRefundPress());
-      expect(spies.replace).not.toHaveBeenCalled();
+      expect(modalNavigation.replaceModal).not.toHaveBeenCalled();
     });
 
     it("SHOULD NOT offer installments WHEN editing a purchase", () => {
@@ -972,7 +975,7 @@ describe("repeat on create (spec 034)", () => {
 
     setup();
 
-    expect(spies.back).toHaveBeenCalled();
+    expect(modalNavigation.closeModal).toHaveBeenCalled();
   });
 });
 
@@ -1140,7 +1143,7 @@ describe("editing a recurring occurrence (spec 034)", () => {
       result.current.onSave();
     });
 
-    expect(spies.back).toHaveBeenCalled();
+    expect(modalNavigation.closeModal).toHaveBeenCalled();
     expect(mutations.update.value.mutate).not.toHaveBeenCalled();
   });
 
@@ -1409,7 +1412,7 @@ describe("save and add another (spec 039)", () => {
     expect(mutations.create.value.mutate).toHaveBeenCalledTimes(1);
     succeed(rerender);
 
-    expect(spies.back).not.toHaveBeenCalled();
+    expect(modalNavigation.closeModal).not.toHaveBeenCalled();
     expect(result.current.amountCents).toBe(0);
     expect(result.current.description).toBe("");
     expect(result.current.selectedCategoryId).toBe("food");
@@ -1446,7 +1449,7 @@ describe("save and add another (spec 039)", () => {
     act(() => result.current.onSaveAndNew());
     succeed(rerender);
 
-    expect(spies.back).not.toHaveBeenCalled();
+    expect(modalNavigation.closeModal).not.toHaveBeenCalled();
     expect(result.current.amountCents).toBe(0);
     expect(mutations.create.value.mutate).toHaveBeenCalledTimes(2);
   });
@@ -1463,7 +1466,7 @@ describe("save and add another (spec 039)", () => {
     act(() => result.current.onSave());
     succeed(rerender);
 
-    expect(spies.back).toHaveBeenCalledTimes(1);
+    expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
   });
 
   it("SHOULD NOT be dirty right after it, and be dirty again after typing", () => {
@@ -1473,7 +1476,7 @@ describe("save and add another (spec 039)", () => {
     succeed(rerender);
     act(() => result.current.onClose());
     expect(result.current.isDiscardDialogOpen).toBe(false);
-    expect(spies.back).toHaveBeenCalledTimes(1);
+    expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
 
     act(() => result.current.onAmountChange(100));
     act(() => result.current.onClose());
@@ -1522,12 +1525,12 @@ describe("save and add another (spec 039)", () => {
     expect(result.current.formErrorKey).toBe("financial.errors.notFound");
     expect(result.current.amountCents).toBe(31290);
     expect(result.current.isSaved).toBe(false);
-    expect(spies.back).not.toHaveBeenCalled();
+    expect(modalNavigation.closeModal).not.toHaveBeenCalled();
 
     mutations.create.value.error = null;
     act(() => result.current.onSave());
     succeed(rerender);
-    expect(spies.back).toHaveBeenCalledTimes(1);
+    expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
   });
 
   it("SHOULD hide the notice on onSavedHide", () => {

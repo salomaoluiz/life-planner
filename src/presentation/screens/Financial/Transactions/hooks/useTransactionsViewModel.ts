@@ -1,5 +1,4 @@
 import { useIsFocused } from "@react-navigation/native";
-import { router } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { MonthSummary } from "@application/dto/home/MonthSummaryDTO";
@@ -17,6 +16,7 @@ import {
   personalOwnerId as findPersonalOwnerId,
 } from "@screens/Financial/models/ownerOptions";
 import { listQueryKey } from "@screens/Financial/models/queryKeys";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import CardInvoiceUIModel from "../models/CardInvoiceUIModel";
 import {
@@ -227,6 +227,7 @@ function useTransactionsViewModel() {
 
   const archivedIds = useMemo(() => archivedOwnerIds(owners ?? []), [owners]);
   const scope = useReadOnlyScope(owners, ownerFilter);
+  const { openModal } = useModalNavigation();
 
   const monthKey = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, "0")}`;
   const allOwnerIds = useMemo(
@@ -608,13 +609,11 @@ function useTransactionsViewModel() {
     monthLabel: formatMonthLabel(month, languageTag),
     monthName: formatMonthName(month, languageTag),
     onAddPress: scope.guard(() =>
-      router.push({
-        // Spec 050: the form starts with the scope owner (All leaves its default).
-        ...(ownerFilter === ALL_FILTER
-          ? {}
-          : { params: { ownerId: ownerFilter } }),
-        pathname: "/financial/transaction/add_new_transaction",
-      }),
+      // Spec 050: the form starts with the scope owner (All leaves its default).
+      openModal(
+        "add_new_transaction",
+        ownerFilter === ALL_FILTER ? undefined : { ownerId: ownerFilter },
+      ),
     ),
     onClearFilters: () => {
       setOwnerSelection(ALL_FILTER);
@@ -629,10 +628,10 @@ function useTransactionsViewModel() {
     onFiltersApply: filterStore.replace,
     onFiltersClear: filterStore.clearAll,
     onInvoiceOpen: scope.guard((invoice: CardInvoiceUIModel) =>
-      router.push({
-        params: { cardId: invoice.cardId, month: invoice.referenceMonth },
-        pathname: "/financial/invoice/invoice_detail",
-      } as never),
+      openModal("invoice_detail", {
+        cardId: invoice.cardId,
+        month: invoice.referenceMonth,
+      }),
     ),
     onInvoiceRetry: async () => invoices.refetch(),
     onInvoiceToggle: (id: string) =>
@@ -646,23 +645,17 @@ function useTransactionsViewModel() {
       setPickerYear((year) => year + delta),
     onPreviousMonth: () => setMonth((current) => shiftMonth(current, -1)),
     onProjectedPress: scope.guard((item: TransactionUIModel) =>
-      router.push({
-        params: {
-          month: item.monthKey,
-          occurrenceNumber: String(item.occurrenceNumber),
-          recurrenceId: item.recurrenceId,
-        },
-        pathname: "/financial/transaction/add_new_transaction",
-      } as never),
+      openModal("add_new_transaction", {
+        month: item.monthKey,
+        occurrenceNumber: String(item.occurrenceNumber),
+        recurrenceId: item.recurrenceId,
+      }),
     ),
     onReadOnlyAttempt: scope.notifyReadOnly,
     onRefresh,
     onRetry: async () => transactions.refetch(),
     onRowPress: scope.guard((id: string) =>
-      router.push({
-        params: { id },
-        pathname: "/financial/transaction/add_new_transaction",
-      }),
+      openModal("add_new_transaction", { id }),
     ),
     onSearchChange: filterStore.setSearch,
     onSummaryRetry: async () => summary.refetch(),

@@ -64,6 +64,11 @@ export function isValidBase(base: string): boolean {
   return VALID_BASES.includes(normalizeBase(base));
 }
 
+// The path of the screen: the pathname itself, or the base WHEN a modal is open over it.
+export function screenPath(pathname: string): string {
+  return splitModalPath(pathname)?.rawBase ?? pathname;
+}
+
 export function splitModalPath(path: string): ModalPathParts | null {
   const pathname = path.split("?")[0].replace(/\/+$/, "");
   const index = pathname.lastIndexOf("/");

@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
 import OwnerDTO from "@application/dto/user/OwnerDTO";
@@ -12,6 +12,7 @@ import { TranslationKeys } from "@presentation/i18n/types";
 import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
 import { personalOwnerId } from "@screens/Financial/models/ownerOptions";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import {
   AccountChanges,
@@ -62,6 +63,7 @@ async function saveAccountChanges({ balance, ...fields }: AccountChanges) {
 }
 
 function useNewAccountViewModel() {
+  const { closeModal } = useModalNavigation();
   const params = useLocalSearchParams<{ id?: string; ownerId?: string }>();
   const isEditing = !!params.id;
 
@@ -146,7 +148,7 @@ function useNewAccountViewModel() {
     ) {
       // Narrow key (prefix also covers the list); the form must not reopen on old data.
       invalidateFetcherData([useCases.getFinancialAccountsUseCase.uniqueName]);
-      router.back();
+      closeModal();
     }
   }, [createMutation.status, updateMutation.status, deleteMutation.status]);
 
@@ -179,7 +181,7 @@ function useNewAccountViewModel() {
 
       // Only the id means nothing changed: close without a request.
       if (Object.keys(changes).length === 1) {
-        router.back();
+        closeModal();
         return;
       }
       updateMutation.mutate(changes);
@@ -194,7 +196,7 @@ function useNewAccountViewModel() {
       setDiscardDialogOpen(true);
       return;
     }
-    router.back();
+    closeModal();
   }
 
   function onDeleteConfirm() {
@@ -245,7 +247,7 @@ function useNewAccountViewModel() {
     onDeleteConfirm,
     onDeletePress: () => setDeleteDialogOpen(true),
     onDiscardCancel: () => setDiscardDialogOpen(false),
-    onDiscardConfirm: () => router.back(),
+    onDiscardConfirm: () => closeModal(),
     onIconChange: (value: string) => {
       if (state) {
         update({ ...state, icon: value });

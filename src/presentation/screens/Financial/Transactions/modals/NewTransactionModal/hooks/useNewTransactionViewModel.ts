@@ -1,5 +1,5 @@
 import { useIsFocused } from "@react-navigation/native";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TextInput } from "react-native";
 
@@ -33,6 +33,7 @@ import {
   recurrenceOccurrenceCount,
 } from "@screens/Financial/models/recurrence";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 import { decimalStringToCents } from "@utils/money";
 
 import NewTransactionUIModel from "../models/NewTransactionUIModel";
@@ -191,6 +192,7 @@ function suggestTags(tags: TagDTO[], ownerId?: string) {
 }
 
 function useNewTransactionViewModel() {
+  const { closeModal, openModal, replaceModal } = useModalNavigation();
   const params = useLocalSearchParams<{
     creditCardId?: string;
     id?: string;
@@ -325,23 +327,17 @@ function useNewTransactionViewModel() {
 
   useEffect(() => {
     if (isInstallment) {
-      router.replace({
-        params: { id: params.id },
-        pathname: "/financial/installment/edit_installment",
-      } as never);
+      replaceModal("edit_installment", { id: params.id });
     }
   }, [isInstallment]);
 
   useEffect(() => {
     if (earlyPayment) {
-      router.replace({
-        params: {
-          creditCardId: earlyPayment.creditCardId,
-          id: earlyPayment.id,
-          invoiceMonth: earlyPayment.invoiceMonth,
-        },
-        pathname: "/financial/early_payment/card_early_payment",
-      } as never);
+      replaceModal("card_early_payment", {
+        creditCardId: earlyPayment.creditCardId,
+        id: earlyPayment.id,
+        invoiceMonth: earlyPayment.invoiceMonth,
+      });
     }
   }, [earlyPayment?.id]);
 
@@ -488,7 +484,7 @@ function useNewTransactionViewModel() {
 
       return;
     }
-    router.back();
+    closeModal();
   }, [mutations.map((mutation) => mutation.status).join(",")]);
 
   // Records created in the stacked create sheet appear on return: refetch on focus.
@@ -605,7 +601,7 @@ function useNewTransactionViewModel() {
         materializeMutation.mutate(request.params);
         break;
       case "none":
-        router.back();
+        closeModal();
         break;
       case "split":
         splitRecurrenceMutation.mutate(request.params);
@@ -667,7 +663,7 @@ function useNewTransactionViewModel() {
       setDiscardDialogOpen(true);
       return;
     }
-    router.back();
+    closeModal();
   }
 
   function onDeleteConfirm() {
@@ -678,19 +674,16 @@ function useNewTransactionViewModel() {
   function onCreateAccountPress() {
     knownIds.current = uiModel!.accountIds(state!.ownerId);
     setPendingCreate("account");
-    router.push({
-      params: { ownerId: state!.ownerId },
-      pathname: "/financial/account/add_new_account",
-    } as never);
+    openModal("add_new_account", { ownerId: state!.ownerId });
   }
 
   function onCreateCategoryPress() {
     knownIds.current = uiModel!.categoryIds(state!.ownerId, state!.type);
     setPendingCreate("category");
-    router.push({
-      params: { ownerId: state!.ownerId, type: state!.type },
-      pathname: "/financial/category/add_new_category",
-    } as never);
+    openModal("add_new_category", {
+      ownerId: state!.ownerId,
+      type: state!.type,
+    });
   }
 
   const installments = installmentsOf(
@@ -838,7 +831,7 @@ function useNewTransactionViewModel() {
       }
     },
     onDiscardCancel: () => setDiscardDialogOpen(false),
-    onDiscardConfirm: () => router.back(),
+    onDiscardConfirm: () => closeModal(),
     onInstallmentsCountChange: (text: string) => {
       if (state) {
         update({
@@ -893,13 +886,10 @@ function useNewTransactionViewModel() {
       setDeleteScope(value as RecurrenceScope),
     onRefundPress: () => {
       if (existing?.creditCardId) {
-        router.replace({
-          params: {
-            creditCardId: existing.creditCardId,
-            refundedTransactionId: existing.id,
-          },
-          pathname: "/financial/refund/card_refund",
-        } as never);
+        replaceModal("card_refund", {
+          creditCardId: existing.creditCardId,
+          refundedTransactionId: existing.id,
+        });
       }
     },
     onRepeatEndChange: (date?: Date) => {
