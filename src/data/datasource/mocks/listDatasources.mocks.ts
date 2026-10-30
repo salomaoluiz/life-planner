@@ -105,6 +105,9 @@ const datasourcesMocks: jest.MockedObjectDeep<Datasources> = {
     getUser: jest.fn(),
     getUserById: jest.fn(),
   },
+  versionDatasource: {
+    getVersionInfo: jest.fn(),
+  },
 };
 
 export { datasourcesMocks };

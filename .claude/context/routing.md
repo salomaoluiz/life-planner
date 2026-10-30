@@ -37,3 +37,5 @@ Tab screens hide the navigator header (the title comes from `ScreenHeader`). Qui
 1. Route file `app/(app)/(modals)/<module>/<thing>/add_new_<thing>.tsx`: `export { NewXModal as default } from "@screens/<Area>/<Screen>/modals";`
 2. Add `<Stack.Screen name={"<module>/<thing>/add_new_<thing>"} />` to `app/(app)/(modals)/_layout.tsx`.
 3. Open it: `router.push("/<module>/<thing>/add_new_<thing>" as any)` (groups are omitted from the URL; `as any` + eslint-disable comment is the accepted pattern because typed routes lag).
+
+- `app/(app)/(modals)/versions.tsx` → `VersionsModal` (`@screens/Config/modals`, spec 056): opened from the Settings footer (`router.push("/versions")`); the signed-in layout `app/(app)/_layout.tsx` renders `UpdateBanner` above the stack.

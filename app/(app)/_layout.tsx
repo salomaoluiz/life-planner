@@ -1,6 +1,8 @@
 import { Redirect, Stack } from "expo-router";
+import { View } from "react-native";
 
 import { useUser } from "@application/providers/user";
+import { UpdateBanner } from "@screens";
 
 export default function StackNavigator() {
   const { logged } = useUser();
@@ -12,12 +14,15 @@ export default function StackNavigator() {
   }
 
   return (
-    <Stack>
-      <Stack.Screen name={"(tabs)"} options={{ headerShown: false }} />
-      <Stack.Screen
-        name={"(modals)"}
-        options={{ headerShown: false, presentation: "transparentModal" }}
-      />
-    </Stack>
+    <View style={{ flex: 1 }}>
+      <UpdateBanner />
+      <Stack>
+        <Stack.Screen name={"(tabs)"} options={{ headerShown: false }} />
+        <Stack.Screen
+          name={"(modals)"}
+          options={{ headerShown: false, presentation: "transparentModal" }}
+        />
+      </Stack>
+    </View>
   );
 }

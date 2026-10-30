@@ -1,0 +1,30 @@
+name: Version Check
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  version-check:
+    name: Version and changelog
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Fetch main
+        run: git fetch origin main
+
+      - name: Check version bump and changelog
+        env:
+          HUSKY: "0"
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: node scripts/check-version.mjs

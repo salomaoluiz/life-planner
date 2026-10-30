@@ -5,6 +5,10 @@ import Login from "../index";
 
 jest.mock("expo-router", () => ({ Redirect: "Redirect" }));
 jest.mock("../hooks/useLoginViewModel");
+jest.mock("../components/VersionLine", () => {
+  const { View: MockView } = jest.requireActual("react-native");
+  return { __esModule: true, default: () => <MockView testID="versions" /> };
+});
 
 // region mocks
 const viewModel = {

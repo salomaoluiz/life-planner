@@ -58,6 +58,7 @@ const useCases = {
   getUserByUserIdUseCase: expect.any(Function),
   getUserConfigsUseCase: expect.any(Function),
   getUserUseCase: expect.any(Function),
+  getVersionInfoUseCase: expect.any(Function),
   importFinancialTransactionsUseCase: expect.any(Function),
   inviteFamilyMemberUseCase: expect.any(Function),
   joinFamilyMemberUseCase: expect.any(Function),

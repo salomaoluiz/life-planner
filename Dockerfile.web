@@ -34,6 +34,9 @@ ENV EXPO_PUBLIC_API_URL=$EXPO_PUBLIC_API_URL \
 
 RUN npx expo export -p web
 
+# Lets an open tab detect a newer deploy (served with Cache-Control: no-store).
+RUN node -e "require('fs').writeFileSync('dist/version.json', JSON.stringify({ builtAt: new Date().toISOString(), version: require('./package.json').version }))"
+
 FROM nginx:alpine AS runtime
 
 COPY nginx.web.conf /etc/nginx/conf.d/default.conf

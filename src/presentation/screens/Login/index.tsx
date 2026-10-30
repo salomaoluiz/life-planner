@@ -4,7 +4,7 @@ import { View } from "react-native";
 import { Button, Card, HelperText, TextField } from "@components";
 import { useTranslation } from "@presentation/i18n";
 
-import { Welcome } from "./components";
+import { VersionLine, Welcome } from "./components";
 import useLoginViewModel from "./hooks/useLoginViewModel";
 import useStyles from "./styles";
 import loginTestIds from "./testIds";
@@ -85,6 +85,7 @@ function Login() {
           </View>
         </Card>
       </View>
+      <VersionLine />
     </View>
   );
 }

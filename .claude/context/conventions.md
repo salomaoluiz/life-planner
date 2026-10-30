@@ -34,6 +34,7 @@ Module folder names: `financial/accounts`, `stock`, `family`, `familyMember`, `u
   - `pre-commit`: `yarn lint-staged` (lint + prettier), `yarn type-check`, `yarn test` on staged files.
   - `pre-push`: `yarn lint`, `yarn test --coverage` (90% threshold).
     Fix what the hooks report, then re-commit.
+- Versioning (rule 17): `yarn version:check` (`scripts/check-version.mjs`) runs on `pre-push` and in the `version-check` CI workflow; the `release` workflow tags `vX.Y.Z` and creates the GitHub release from the `CHANGELOG.md` section when `main` gets a new version. `app.config.ts` reads the version from `package.json` and derives the Android `versionCode`.
 - **Secrets/personal data check before every commit** (golden rule 10 in `.claude/CLAUDE.md`): stage files by name, review `git diff --cached` for keys, tokens, DSNs, URLs with credentials, and real personal or financial data. Gitignored and never staged: `.env`, `.env*.local`, `*.jks *.p8 *.p12 *.key *.pem *.mobileprovision`.
 - Conventional commits (`feat:`, `fix:`, `style:`, `test:`, `docs:`, scope optional based on the module that was worked e.g. `feat(financial): ...`).
 - After code changes update `docs/ai/modules/<module>.md`; don't commit plan files (`docs/superpowers/plans` are working notes).

@@ -79,7 +79,7 @@ iOS is not covered; use the web app on the iPhone.
 
 ### Release flow
 
-Merge to `main` → "Pull and redeploy" the affected Portainer stack (API and web together when the API contract changes) → build a new APK only when the app itself changed. Keep `main` deployable: PRs merge green and migrations are additive.
+Merge to `main` → "Pull and redeploy" the affected Portainer stack (API and web together when the API contract changes) → build a new APK only when the app itself changed. Every PR that changes shipped code bumps the version and adds a `CHANGELOG.md` entry (`yarn version:check`); merging creates the `vX.Y.Z` tag and GitHub release through the `release` workflow, so wait for it before "Pull and redeploy". Keep `main` deployable: PRs merge green and migrations are additive.
 
 ## Contributing
 

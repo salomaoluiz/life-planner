@@ -6,6 +6,7 @@ import * as familyMember from "./familyMember";
 import * as financial from "./financial";
 import * as stock from "./stock";
 import * as user from "./user";
+import * as version from "./version";
 
 const listRepositories = {
   ...auth,
@@ -16,6 +17,7 @@ const listRepositories = {
   ...financial,
   ...stock,
   ...user,
+  ...version,
 };
 
 export { listRepositories };

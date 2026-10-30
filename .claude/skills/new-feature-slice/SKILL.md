@@ -60,6 +60,10 @@ Placeholders: `<module>` (e.g. `financial`), `<sub>` (e.g. `accounts`, optional)
 - [ ] Add new keys to the registration tests (`cases/index.test.ts`, datasource/repository `index.test.ts`) — they assert the exact key set.
 - [ ] E2E flow in `e2e/flows/<module>/` (+ `testIds.ts` constants, tags module + `spec-NNN`); build it with the `wip` tag, then remove `wip`
 
+## 7b. Version and changelog (golden rule 17)
+
+- [ ] Bump `package.json` `version` once (breaking → major, `feat` → minor, else patch) from the latest `origin/main`, add the `## [x.y.z] - YYYY-MM-DD` entry at the top of `CHANGELOG.md`, run `yarn version:check`. Docs/tests/e2e/CI-only changes don't bump. Do this before opening the PR.
+
 ## 8. Docs & commit → `.claude/context/conventions.md`
 
 - [ ] Update/create `docs/ai/modules/<module>.md` (and add module to `docs/ai/INDEX.md` if new)

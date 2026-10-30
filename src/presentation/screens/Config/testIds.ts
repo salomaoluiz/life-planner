@@ -6,6 +6,9 @@ const settingsTestIds = {
   deleteAccountEmailSheet: "settings.delete-account.email-sheet",
   deleteAccountError: "settings.delete-account.error",
   deleteAccountSubmitButton: "settings.delete-account.submit-button",
+  versionsEnvironment: "settings.versions.environment",
+  versionsFooter: "settings.versions.footer",
+  versionsStatus: "settings.versions.status",
 } as const;
 
 export default settingsTestIds;

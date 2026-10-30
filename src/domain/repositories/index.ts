@@ -17,6 +17,7 @@ import {
 } from "./financial";
 import { StockRepository } from "./stock";
 import { UserRepository } from "./user";
+import { VersionRepository } from "./version";
 
 interface Repositories {
   cacheRepository: CacheRepository;
@@ -37,6 +38,7 @@ interface Repositories {
   loginRepository: LoginRepository;
   stockRepository: StockRepository;
   userRepository: UserRepository;
+  versionRepository: VersionRepository;
 }
 
 export default Repositories;

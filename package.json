@@ -1,7 +1,7 @@
 {
   "name": "life-planner",
   "main": "expo-router/entry",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -10,6 +10,7 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "e2e": "node scripts/e2e/cli.mjs",
+    "version:check": "node scripts/check-version.mjs",
     "e2e:tags": "node scripts/e2e/cli.mjs --list-tags",
     "e2e:failed": "node scripts/e2e/cli.mjs --failed",
     "e2e:smoke": "node scripts/e2e/cli.mjs --tags smoke",
