@@ -76,6 +76,7 @@ const defaultViewModel: ReturnType<typeof useTransactionsViewModel> = {
   isLoading: false,
   isMonthPickerOpen: false,
   isRefreshing: false,
+  isTotalsUpdating: false,
   languageTag: "en-US",
   monthChoices: [{ label: "January", value: "0" }],
   monthLabel: "October 2026",
@@ -129,8 +130,6 @@ const defaultViewModel: ReturnType<typeof useTransactionsViewModel> = {
 };
 
 const defaultAdjustmentSheet: ReturnType<typeof useAdjustmentSheet> = {
-  errorKey: undefined,
-  isDeleting: false,
   item: undefined,
   onClose: jest.fn(),
   onDelete: jest.fn(),

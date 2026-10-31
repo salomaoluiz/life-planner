@@ -33,7 +33,11 @@ function TextBase(props: TextProps & { mode: TextMode }) {
       accessibilityLiveRegion={props.accessibilityLiveRegion}
       accessibilityRole={props.accessibilityRole}
       numberOfLines={props.numberOfLines}
-      style={style}
+      style={
+        props.strikethrough
+          ? [style, { textDecorationLine: "line-through" }]
+          : style
+      }
       testID={props.testID}
     >
       {props.value}

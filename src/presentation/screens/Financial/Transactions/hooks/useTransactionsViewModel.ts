@@ -1,6 +1,8 @@
 import { useIsFocused } from "@react-navigation/native";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import CategoryDTO from "@application/dto/financial/CategoryDTO";
+import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import { MonthSummary } from "@application/dto/home/MonthSummaryDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
@@ -20,9 +22,14 @@ import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import CardInvoiceUIModel from "../models/CardInvoiceUIModel";
 import {
+  applyPendingToInvoices,
+  applyPendingToItems,
+} from "../models/pendingRows";
+import {
   activeGroups,
   effectiveRange,
   isFiltering,
+  matchesPendingFilters,
   summarize,
   toDateKey,
   toQueryFilter,
@@ -50,6 +57,8 @@ import {
   TypeFilter,
 } from "../models/transactionList";
 import TransactionUIModel from "../models/TransactionUIModel";
+import { hasPendingChanges } from "../pending/pendingChanges";
+import { usePendingChanges } from "../pending/usePendingChanges";
 import { consumePendingNavigation } from "./pendingNavigation";
 import useTransactionFilters from "./useTransactionFilters";
 
@@ -65,6 +74,8 @@ interface ProjectedData {
 }
 
 interface TransactionsData {
+  // Spec 061: lets a row that is still being saved show its category color and icon.
+  categories?: CategoryDTO[];
   items: TransactionUIModel[];
   owners: OwnerDTO[];
 }
@@ -164,6 +175,7 @@ async function fetchTransactions(): Promise<TransactionsData> {
   );
 
   return {
+    categories,
     items: transactions.map(
       (transaction) =>
         new TransactionUIModel(
@@ -427,7 +439,26 @@ function useTransactionsViewModel() {
   function inRange(dateKey: string) {
     return dateKey >= range.from && dateKey <= range.to;
   }
-  const itemsOfMonth = useMemo(
+  const pendingChanges = usePendingChanges();
+  const pendingContext = useMemo(
+    () => ({
+      categoryById: new Map(
+        (transactions.data?.categories ?? []).map((category) => [
+          category.id,
+          category,
+        ]),
+      ),
+      matches: (row: TransactionDTO) => {
+        const date = new Date(row.date);
+
+        return filtering
+          ? matchesPendingFilters(row, applied) && inRange(toDateKey(date))
+          : isInMonth(date, month);
+      },
+    }),
+    [transactions.data, filtering, applied, month, range],
+  );
+  const loadedItemsOfMonth = useMemo(
     () =>
       filtering
         ? [
@@ -458,8 +489,13 @@ function useTransactionsViewModel() {
       range,
     ],
   );
+  const itemsOfMonth = useMemo(
+    () =>
+      applyPendingToItems(loadedItemsOfMonth, pendingChanges, pendingContext),
+    [loadedItemsOfMonth, pendingChanges, pendingContext],
+  );
   // Real invoices of the month carrying their projections, plus the invoices that only exist as projections.
-  const allInvoices = useMemo(
+  const loadedInvoices = useMemo(
     () =>
       filtering
         ? mergeProjectedInvoices(
@@ -489,6 +525,11 @@ function useTransactionsViewModel() {
       keptFilteredProjections,
       range,
     ],
+  );
+  const allInvoices = useMemo(
+    () =>
+      applyPendingToInvoices(loadedInvoices, pendingChanges, pendingContext),
+    [loadedInvoices, pendingChanges, pendingContext],
   );
   const visible = useMemo(
     () =>
@@ -604,6 +645,7 @@ function useTransactionsViewModel() {
     isLoading: transactions.isFetching && !transactions.data,
     isMonthPickerOpen,
     isRefreshing: transactions.isFetching && !!transactions.data,
+    isTotalsUpdating: hasPendingChanges(pendingChanges),
     languageTag,
     monthChoices: monthChoices(languageTag),
     monthLabel: formatMonthLabel(month, languageTag),

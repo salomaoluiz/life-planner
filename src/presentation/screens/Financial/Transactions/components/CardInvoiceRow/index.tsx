@@ -16,6 +16,8 @@ import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { installmentTitle } from "@screens/Financial/models/installments";
 import NoteIcon from "@screens/Financial/Transactions/components/NoteIcon";
+import PendingChip from "@screens/Financial/Transactions/components/PendingChip";
+import UpdatingTotal from "@screens/Financial/Transactions/components/UpdatingTotal";
 import CardInvoiceUIModel from "@screens/Financial/Transactions/models/CardInvoiceUIModel";
 import TransactionUIModel from "@screens/Financial/Transactions/models/TransactionUIModel";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
@@ -29,6 +31,8 @@ interface Props {
   onProjectedPress?: (item: TransactionUIModel) => void;
   onPurchasePress: (id: string) => void;
   onToggle: (id: string) => void;
+  // Spec 061: a change is still being saved; the invoice total is the old one.
+  updating?: boolean;
 }
 
 // One card invoice as a grouped line of the day list: tap to expand its purchases (spec 029 FR 24).
@@ -115,12 +119,14 @@ function CardInvoiceRow(props: Props) {
               />
             ) : null}
           </View>
-          <AmountText
-            currency={invoice.currency}
-            testID={transactionsTestIds.cardInvoiceAmount}
-            type="EXPENSE"
-            value={invoice.amountCents}
-          />
+          <UpdatingTotal updating={props.updating}>
+            <AmountText
+              currency={invoice.currency}
+              testID={transactionsTestIds.cardInvoiceAmount}
+              type="EXPENSE"
+              value={invoice.amountCents}
+            />
+          </UpdatingTotal>
           <Icon name={expanded ? "chevron-up" : "chevron-down"} size={20} />
         </View>
       </Touchable>
@@ -135,7 +141,12 @@ function CardInvoiceRow(props: Props) {
                   name={purchase.categoryIcon}
                 />
               }
-              onPress={() => props.onPurchasePress(purchase.id)}
+              onPress={() => {
+                if (!purchase.pendingState) {
+                  props.onPurchasePress(purchase.id);
+                }
+              }}
+              strikethrough={purchase.pendingState === "deleting"}
               subtitle={`${purchase.categoryName} · ${formatShortDate(purchase.date, localeTag)}`}
               testID={transactionsTestIds.cardInvoicePurchase}
               title={installmentTitle(
@@ -145,9 +156,13 @@ function CardInvoiceRow(props: Props) {
               )}
               trailing={
                 <View style={styles.purchaseTrailing}>
+                  {purchase.pendingState ? (
+                    <PendingChip state={purchase.pendingState} />
+                  ) : null}
                   {purchase.notes ? <NoteIcon note={purchase.notes} /> : null}
                   <AmountText
                     currency={invoice.currency}
+                    strikethrough={purchase.pendingState === "deleting"}
                     type="EXPENSE"
                     value={purchase.amountCents}
                   />
@@ -168,6 +183,7 @@ function CardInvoiceRow(props: Props) {
                 />
               }
               onPress={() => props.onProjectedPress?.(item)}
+              strikethrough={item.pendingState === "deleting"}
               subtitle={`${item.categoryName} · ${formatShortDate(item.date, localeTag)}`}
               testID={transactionsTestIds.cardInvoiceProjectedPurchase}
               title={

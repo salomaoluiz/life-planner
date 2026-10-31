@@ -77,6 +77,37 @@ onFlowComplete:
     timeout: 20000
 - tapOn:
     id: "financial.recurrence-delete.confirm-confirm"
+# Spec 061: the delete is optimistic; the API refuses it (paid occurrence), the row comes back and
+# "Try again" reopens the form, whose delete asks for the second confirmation
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.errorToastRetry"
+    timeout: 20000
+- tapOn:
+    id: "financial.transactions.errorToastRetry"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.description-input"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.transaction-form.delete-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.recurrence-delete.scope-ALL"
+    timeout: 20000
+- tapOn:
+    id: "financial.recurrence-delete.scope-ALL"
+- tapOn:
+    id: "financial.recurrence-delete.sheet"
+- extendedWaitUntil:
+    visible:
+      id: "financial.recurrence-delete.confirm-confirm"
+    timeout: 20000
+- tapOn:
+    id: "financial.recurrence-delete.confirm-confirm"
 - extendedWaitUntil:
     visible:
       id: "financial.recurrence-delete.paid-confirm-confirm"

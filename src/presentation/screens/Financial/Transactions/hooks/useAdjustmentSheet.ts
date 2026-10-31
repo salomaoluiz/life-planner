@@ -1,54 +1,46 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { useCases } from "@application/useCases";
-import { useMutation } from "@infrastructure/fetcher";
-import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
 
 import TransactionUIModel from "../models/TransactionUIModel";
-
-interface Props {
-  onDeleted: () => void;
-}
+import runPendingChange from "../pending/runPendingChange";
 
 // A balance adjustment cannot be edited (the API answers 422): tapping its row opens a sheet
 // whose only action is Delete, which reverses its effect on the account balance.
-function useAdjustmentSheet(props: Props) {
+// Spec 061: the sheet closes at once and the row stays in the list as "Deleting" until the API answers.
+function useAdjustmentSheet() {
   const [item, setItem] = useState<TransactionUIModel>();
-  const [attempted, setAttempted] = useState(false);
 
-  const deleteMutation = useMutation({
-    cacheKey: [useCases.deleteFinancialTransactionUseCase.uniqueName],
-    fetch: useCases.deleteFinancialTransactionUseCase.execute,
-  });
-
-  useEffect(() => {
-    if (deleteMutation.status === "success") {
-      setItem(undefined);
-      props.onDeleted();
-    }
-  }, [deleteMutation.status]);
+  function sendDelete(target: TransactionUIModel) {
+    runPendingChange(
+      {
+        description: target.description,
+        kind: "delete",
+        previous: target.dto,
+        target: { transactionId: target.id },
+      },
+      async () => {
+        await useCases.deleteFinancialTransactionUseCase.execute({
+          id: target.id,
+          ownerId: target.ownerId,
+        });
+      },
+      // An adjustment has no form to reopen: "Try again" sends the delete once more.
+      () => sendDelete(target),
+    );
+  }
 
   return {
-    errorKey: attempted
-      ? getFinancialErrorMessageKey(deleteMutation.error)
-      : undefined,
-    isDeleting: deleteMutation.isFetching,
     item,
-    onClose: () => {
-      setAttempted(false);
-      setItem(undefined);
-    },
+    onClose: () => setItem(undefined),
     onDelete: () => {
       if (!item) {
         return;
       }
-      setAttempted(true);
-      deleteMutation.mutate({ id: item.id, ownerId: item.ownerId });
+      sendDelete(item);
+      setItem(undefined);
     },
-    onOpen: (next: TransactionUIModel) => {
-      setAttempted(false);
-      setItem(next);
-    },
+    onOpen: (next: TransactionUIModel) => setItem(next),
   };
 }
 

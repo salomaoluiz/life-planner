@@ -92,3 +92,7 @@ Each DTO has `XDTO.test.ts` + `mocks/XDTO.mocks.ts` (see `testing.md`).
 ## Providers (`application/providers`)
 
 `UserProvider` / `useUser()` → `{ data?: { profile }, logged, update }`. Add new app-level contexts here and compose in `providers/index.tsx`.
+
+## Use cases that feed optimistic updates (spec 061)
+
+`createFinancialTransactionUseCase` returns `{ id }` (the created row) so the list can tell the real row from its pending copy. Other write use cases stay `void`.

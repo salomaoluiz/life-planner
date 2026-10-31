@@ -4,7 +4,7 @@ import { View } from "react-native";
 import { useUser } from "@application/providers/user";
 import { useScreenBehindModal } from "@navigation";
 import { useTheme } from "@presentation/theme";
-import { UpdateBanner } from "@screens";
+import { ErrorToastHost, UpdateBanner } from "@screens";
 
 // A fresh load never builds the signed-in stack without the tabs under a modal.
 export const unstable_settings = { initialRouteName: "(tabs)" };
@@ -30,6 +30,7 @@ export default function StackNavigator() {
           options={{ headerShown: false, presentation: "transparentModal" }}
         />
       </Stack>
+      <ErrorToastHost />
       {ready ? null : (
         // Hides the Home flash while the stack is rebuilt behind the modal.
         <View

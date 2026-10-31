@@ -1,3 +1,4 @@
+import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import { TransactionQueryFilter } from "@domain/entities/financial/TransactionQueryFilter";
 
 import CardInvoiceUIModel from "./CardInvoiceUIModel";
@@ -116,6 +117,68 @@ function lastDayOfMonth(year: number, monthIndex: number) {
   return new Date(year, monthIndex + 1, 0);
 }
 
+// Spec 061 FR 4: would a row that is still being saved be listed under these filters? Conservative: what the app
+// cannot decide alone (a category chosen with its children) answers no, and the refetch brings the row in.
+function matchesPendingFilters(
+  row: TransactionDTO,
+  filters: TransactionFilters,
+) {
+  const isCard = !!row.creditCardId;
+  const dateKey = toDateKey(new Date(row.date));
+
+  if (
+    filters.period &&
+    (dateKey < filters.period.from || dateKey > filters.period.to)
+  ) {
+    return false;
+  }
+  if (filters.origin === "CARD" && !isCard) {
+    return false;
+  }
+  if (filters.origin === "ACCOUNT" && isCard) {
+    return false;
+  }
+  if (
+    (filters.accountIds.length > 0 || filters.cardIds.length > 0) &&
+    !(
+      (row.accountId && filters.accountIds.includes(row.accountId)) ||
+      (row.creditCardId && filters.cardIds.includes(row.creditCardId))
+    )
+  ) {
+    return false;
+  }
+  if (
+    filters.categoryIds.length > 0 &&
+    !filters.categoryIds.includes(row.categoryId)
+  ) {
+    return false;
+  }
+  if (
+    filters.tagIds.length > 0 &&
+    !row.tags.some((tag) => filters.tagIds.includes(tag.id))
+  ) {
+    return false;
+  }
+  if (filters.situation && (filters.situation === "PAID") !== row.paid) {
+    return false;
+  }
+  const search = normalizeText(filters.search.trim());
+
+  return (
+    !search ||
+    normalizeText(
+      `${row.description} ${row.notes ?? ""} ${row.category}`,
+    ).includes(search)
+  );
+}
+
+function normalizeText(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
 function pad2(value: number) {
   return String(value).padStart(2, "0");
 }
@@ -220,6 +283,7 @@ export {
   clearGroup,
   effectiveRange,
   isFiltering,
+  matchesPendingFilters,
   periodPreset,
   summarize,
   toDateKey,

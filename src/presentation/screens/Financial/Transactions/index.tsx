@@ -59,7 +59,7 @@ function FinancialTransactions() {
   const { t } = useTranslation();
   const localeTag = useLocaleTag();
   const vm = useTransactionsViewModel();
-  const adjustment = useAdjustmentSheet({ onDeleted: vm.onRefresh });
+  const adjustment = useAdjustmentSheet();
   const pay = usePayTransaction({ onPaid: vm.onRefresh });
   const csv = useCsvActions();
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -120,6 +120,7 @@ function FinancialTransactions() {
           onProjectedPress={vm.onProjectedPress}
           onPurchasePress={vm.onRowPress}
           onToggle={vm.onInvoiceToggle}
+          updating={vm.isTotalsUpdating}
         />
       );
     }
@@ -154,6 +155,7 @@ function FinancialTransactions() {
           isCards={item.isCards}
           isLast={item.isLast}
           name={item.name}
+          updating={vm.isTotalsUpdating}
         />
       );
     }
@@ -226,6 +228,7 @@ function FinancialTransactions() {
                   isCards={false}
                   key={account.accountId}
                   name={account.name}
+                  updating={vm.isTotalsUpdating}
                   variant={"tooltip"}
                 />
               ))}
@@ -372,6 +375,7 @@ function FinancialTransactions() {
           incomesLabel={t("financial.common.incomes")}
           resultLabel={t("financial.transactions.filters.result")}
           summary={vm.filteredSummary}
+          updating={vm.isTotalsUpdating}
         />
       ) : (
         <MonthSummary
@@ -403,6 +407,7 @@ function FinancialTransactions() {
           toReceiveCents={vm.summary?.toReceiveCents}
           toReceiveLabel={t("financial.transactions.summary.toReceive")}
           toReceiveTestID={transactionsTestIds.summaryToReceive}
+          updating={vm.isTotalsUpdating}
         />
       )}
       {pay.hasError ? (
@@ -605,10 +610,7 @@ function FinancialTransactions() {
           deleteLabel={t("financial.transactions.delete")}
           deleteMessage={t("financial.transactions.adjustmentDeleteMessage")}
           deleteTitle={t("financial.transactions.deleteTitle")}
-          errorMessage={
-            adjustment.errorKey ? t(adjustment.errorKey) : undefined
-          }
-          isDeleting={adjustment.isDeleting}
+          isDeleting={false}
           onClose={adjustment.onClose}
           onDelete={adjustment.onDelete}
           title={t("financial.transactions.adjustment")}

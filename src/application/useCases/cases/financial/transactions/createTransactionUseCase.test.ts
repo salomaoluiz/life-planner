@@ -10,6 +10,10 @@ import {
 const createTransactionSpy =
   spies.financialRepositoryTransaction.createTransaction;
 
+it("SHOULD return the id of the created transaction", async () => {
+  expect(await setup()).toEqual({ id: "created-id" });
+});
+
 it("SHOULD create a transaction", () => {
   setup();
 

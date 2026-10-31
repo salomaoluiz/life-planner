@@ -3,6 +3,14 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.5.0] - 2026-10-31
+
+### Added
+
+- Creating, editing and deleting a transaction now closes the form at once; the list shows the row as "Saving" or "Deleting" while the server answers, and the totals dim with a spinner (spec 061).
+- If a change fails it is undone and a toast offers "Try again", which reopens the form with what you typed (spec 061).
+- Installments and recurrences keep the form open with a "Saving" button and blocked fields until the server answers (spec 061).
+
 ## [1.4.0] - 2026-10-30
 
 ### Added

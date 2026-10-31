@@ -12,10 +12,13 @@ import RecurrenceDTO from "@application/dto/financial/RecurrenceDTO";
 import TagDTO from "@application/dto/financial/TagDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
+import { useCases } from "@application/useCases";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
 import UseMutationFixture from "@infrastructure/fetcher/mocks/useMutation.fixture";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
+import openTransactionModal from "@screens/Financial/Transactions/pending/openTransactionModal";
+import runPendingChange from "@screens/Financial/Transactions/pending/runPendingChange";
 
 import useNewTransactionViewModel from "../useNewTransactionViewModel";
 
@@ -25,6 +28,18 @@ jest.mock("expo-router", () => ({
 }));
 jest.mock("@react-navigation/native", () => ({ useIsFocused: jest.fn() }));
 jest.mock("@infrastructure/fetcher");
+// Spec 061: the optimistic paths hand their request to the runner; here it just runs it.
+jest.mock("@screens/Financial/Transactions/pending/runPendingChange", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+jest.mock(
+  "@screens/Financial/Transactions/pending/openTransactionModal",
+  () => ({
+    __esModule: true,
+    default: jest.fn(),
+  }),
+);
 jest.mock("@application/useCases", () => ({
   useCases: {
     createFinancialInstallmentPlanUseCase: {
@@ -178,9 +193,11 @@ const mutations: Record<string, UseMutationFixture<unknown, unknown>> = {};
 const spies = {
   back: jest.mocked(router.back),
   focused: jest.mocked(useIsFocused),
+  openTransactionModal: jest.mocked(openTransactionModal),
   params: jest.mocked(useLocalSearchParams),
   push: jest.mocked(router.push),
   replace: jest.mocked(router.replace),
+  runPendingChange: jest.mocked(runPendingChange),
   useMutation: jest.mocked(useMutation),
   useQuery: jest.mocked(useQuery),
 };
@@ -217,6 +234,9 @@ beforeEach(() => {
     "delete_recurrence",
   ].forEach((key) => {
     mutations[key] = new UseMutationFixture<unknown, unknown>();
+  });
+  spies.runPendingChange.mockImplementation(async (_change, execute) => {
+    await execute();
   });
   spies.focused.mockReturnValue(false);
   spies.params.mockReturnValue({});
@@ -269,4 +289,15 @@ function setup() {
   return renderHook(() => useNewTransactionViewModel());
 }
 
-export { acc, card, cat, givenLoaded, mutations, queries, setup, spies, tx };
+export {
+  acc,
+  card,
+  cat,
+  givenLoaded,
+  mutations,
+  queries,
+  setup,
+  spies,
+  tx,
+  useCases,
+};

@@ -17,6 +17,8 @@ export interface ListItemProps {
   onLongPress?: () => void;
   onPress?: () => void;
   selected?: boolean;
+  /** Spec 061: strike the title through (a row being deleted). */
+  strikethrough?: boolean;
   subtitle?: string;
   testID?: string;
   title: string;
@@ -46,6 +48,7 @@ function ListItem(props: ListItemProps) {
       <View style={styles.text}>
         <Text.BodyStrong
           numberOfLines={1}
+          strikethrough={props.strikethrough}
           testID={testID && `${testID}-title`}
           value={props.title}
         />

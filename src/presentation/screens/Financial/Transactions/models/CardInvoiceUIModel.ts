@@ -4,7 +4,7 @@ import { normalizeCategoryColor } from "@presentation/constants/categoryColors";
 import { InstallmentLabel } from "@screens/Financial/models/installments";
 import { addMonthsTo } from "@screens/Financial/models/invoiceMonth";
 
-import TransactionUIModel from "./TransactionUIModel";
+import TransactionUIModel, { PendingState } from "./TransactionUIModel";
 
 const FALLBACK_ICON = "help-circle-outline";
 
@@ -23,6 +23,13 @@ export interface InvoiceCreditUIModel {
   refundedTransactionId?: string;
 }
 
+// Spec 061: purchases created or edited by a running request, and the ones being deleted.
+export interface InvoiceOverlay {
+  added: InvoicePurchaseUIModel[];
+  replaced: Map<string, InvoicePurchaseUIModel>;
+  states: Map<string, PendingState>;
+}
+
 export interface InvoicePurchaseUIModel {
   amountCents: number;
   categoryColor?: string;
@@ -35,6 +42,8 @@ export interface InvoicePurchaseUIModel {
   installment?: InstallmentLabel;
   // Moved into this invoice by a prepayment.
   notes?: string;
+  // Spec 061: the create/edit/delete of this purchase is still running.
+  pendingState?: PendingState;
   prepaid: boolean;
 }
 
@@ -206,8 +215,12 @@ class CardInvoiceUIModel {
     );
   }
 
+  get purchaseIds() {
+    return this.dto.purchases.map((purchase) => purchase.id);
+  }
+
   get purchases(): InvoicePurchaseUIModel[] {
-    return this.dto.purchases.map((purchase) => ({
+    const stored = this.dto.purchases.map((purchase) => ({
       amountCents: purchase.value,
       categoryColor: purchase.categoryIconColor
         ? normalizeCategoryColor(purchase.categoryIconColor)
@@ -227,6 +240,18 @@ class CardInvoiceUIModel {
       notes: purchase.notes,
       prepaid: !!purchase.prepaid,
     }));
+    const { added, replaced, states } = this.overlay;
+
+    return [
+      ...stored.map(
+        (purchase) =>
+          replaced.get(purchase.id) ??
+          (states.has(purchase.id)
+            ? { ...purchase, pendingState: states.get(purchase.id) }
+            : purchase),
+      ),
+      ...added,
+    ];
   }
 
   get referenceMonth() {
@@ -253,11 +278,21 @@ class CardInvoiceUIModel {
   constructor(
     private readonly dto: CardInvoiceDTO,
     readonly projectedItems: TransactionUIModel[] = [],
+    private readonly overlay: InvoiceOverlay = {
+      added: [],
+      replaced: new Map(),
+      states: new Map(),
+    },
   ) {}
+
+  // The same invoice line with the pending purchases of running requests (spec 061).
+  withOverlay(overlay: InvoiceOverlay, projectedItems = this.projectedItems) {
+    return new CardInvoiceUIModel(this.dto, projectedItems, overlay);
+  }
 
   // The same invoice line with the projected purchases of its month.
   withProjected(items: TransactionUIModel[]) {
-    return new CardInvoiceUIModel(this.dto, items);
+    return new CardInvoiceUIModel(this.dto, items, this.overlay);
   }
 }
 

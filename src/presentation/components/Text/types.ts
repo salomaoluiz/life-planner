@@ -18,6 +18,8 @@ export interface TextProps {
   /** Legacy for screens, kept until spec 014: use `tone`. Kit internals may pass token colors. */
   color?: string;
   numberOfLines?: number;
+  /** Spec 061: a row that is being deleted. */
+  strikethrough?: boolean;
   tabular?: boolean;
   testID?: string;
   /** Legacy, kept until spec 014: use `align` */

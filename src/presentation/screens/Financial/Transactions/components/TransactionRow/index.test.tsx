@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from "@tests";
 import { AmountText } from "@components";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
-import { makeTransactionDTO } from "../../mocks/index.mocks";
+import { categories, makeTransactionDTO } from "../../mocks/index.mocks";
 import TransactionUIModel from "../../models/TransactionUIModel";
 import TransactionRow from "./index";
 import { setup } from "./mocks/index.mocks";
@@ -253,5 +253,43 @@ describe("notes (spec 059)", () => {
     setup();
 
     expect(screen.queryByTestId(transactionsTestIds.rowNoteIcon)).toBeNull();
+  });
+});
+
+describe("pending rows (spec 061)", () => {
+  const dto = makeTransactionDTO({ value: "12.50" });
+
+  function renderPending(state: "deleting" | "saving") {
+    const onPress = jest.fn();
+
+    render(
+      <TransactionRow
+        item={new TransactionUIModel(dto, categories[0], state)}
+        onPress={onPress}
+      />,
+    );
+
+    return onPress;
+  }
+
+  it("SHOULD show the chip AND ignore a tap WHILE saving", () => {
+    const onPress = renderPending("saving");
+
+    expect(screen.getByTestId(transactionsTestIds.pendingChip)).toBeTruthy();
+    expect(
+      screen.getByText("financial.transactions.pending.saving"),
+    ).toBeTruthy();
+    fireEvent.press(screen.getByTestId(transactionsTestIds.row));
+    expect(onPress).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD show Deleting AND ignore a tap WHILE deleting", () => {
+    const onPress = renderPending("deleting");
+
+    expect(
+      screen.getByText("financial.transactions.pending.deleting"),
+    ).toBeTruthy();
+    fireEvent.press(screen.getByTestId(transactionsTestIds.row));
+    expect(onPress).not.toHaveBeenCalled();
   });
 });

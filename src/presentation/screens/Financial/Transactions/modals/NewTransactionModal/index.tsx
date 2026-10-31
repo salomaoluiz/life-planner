@@ -617,10 +617,14 @@ function NewTransactionModal() {
         closeLabel={t("common.actions.close")}
         footer={
           <Button.Primary
-            disabled={vm.isSaveDisabled || vm.isSaving}
+            disabled={vm.isSaveDisabled || vm.isBlocking}
             fullWidth
-            label={t(vm.saveLabelKey)}
-            loading={vm.isSaving && !vm.isSavingNext}
+            label={
+              vm.isBlocking
+                ? t("financial.transactionModal.saving")
+                : t(vm.saveLabelKey)
+            }
+            loading={vm.isBlocking && !vm.isSavingNext}
             onPress={vm.onSave}
             size={"lg"}
             testID={transactionFormTestIds.saveButton}
@@ -629,7 +633,7 @@ function NewTransactionModal() {
         footerSecondary={
           vm.canSaveAndNew && (
             <Button.Secondary
-              disabled={vm.isSaveDisabled || vm.isSaving}
+              disabled={vm.isSaveDisabled || vm.isBlocking}
               fullWidth
               label={t("financial.transactions.form.saveAndNew")}
               loading={vm.isSavingNext}
@@ -642,6 +646,7 @@ function NewTransactionModal() {
         footerStart={
           vm.isEditing && (
             <Button.Ghost
+              disabled={vm.isBlocking}
               label={t("financial.transactions.delete")}
               onPress={vm.onDeletePress}
               testID={transactionFormTestIds.deleteButton}
@@ -656,7 +661,13 @@ function NewTransactionModal() {
         title={t(vm.titleKey)}
         visible
       >
-        {renderBody()}
+        {/* Spec 061 FR 2: the fields are disabled while a blocking request runs. */}
+        <View
+          pointerEvents={vm.isBlocking ? "none" : "auto"}
+          style={vm.isBlocking ? { opacity: 0.6 } : undefined}
+        >
+          {renderBody()}
+        </View>
       </BottomSheet>
       <Toast
         bottom={toastBottom}

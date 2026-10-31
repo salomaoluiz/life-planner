@@ -4,6 +4,9 @@ import { BALANCE_ADJUSTMENT } from "@domain/entities/financial/TransactionEntity
 import { normalizeCategoryColor } from "@presentation/constants/categoryColors";
 import { decimalStringToCents } from "@utils/money";
 
+// Spec 061: a row whose create/edit ("saving") or delete ("deleting") request is still running.
+export type PendingState = "deleting" | "saving";
+
 const FALLBACK_ICON = "help-circle-outline";
 const ADJUSTMENT_ICON = "scale-balance";
 
@@ -108,6 +111,10 @@ class TransactionUIModel {
     return this.canPay && this.dateKey < todayKey();
   }
 
+  get isPending() {
+    return !!this.pendingState;
+  }
+
   // An occurrence of a series that has no stored row yet: muted, no pay button (spec 034 FR 14).
   get isProjected() {
     return !!this.dto.isProjected;
@@ -154,7 +161,12 @@ class TransactionUIModel {
   constructor(
     readonly dto: TransactionDTO,
     private readonly category?: CategoryDTO,
+    readonly pendingState?: PendingState,
   ) {}
+
+  withPendingState(state: PendingState) {
+    return new TransactionUIModel(this.dto, this.category, state);
+  }
 }
 
 function pad(value: number) {

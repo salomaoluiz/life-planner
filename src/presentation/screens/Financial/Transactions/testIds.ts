@@ -24,6 +24,8 @@ const transactionsTestIds = {
   dayBalanceLine: "financial.transactions.day-balance-line",
   dayBalanceProjected: "financial.transactions.day-balance-projected",
   emptyMonth: "financial.transactions.empty-month",
+  errorToast: "financial.transactions.errorToast",
+  errorToastRetry: "financial.transactions.errorToastRetry",
   exportButton: "financial.transactions.exportButton",
   exportCancel: "financial.export.cancel",
   exportCount: "financial.export.count",
@@ -118,6 +120,7 @@ const transactionsTestIds = {
   monthSummary: "financial.transactions.month-summary",
   moreActions: "financial.transactions.moreActions",
   moreActionsSheet: "financial.transactions.moreActionsSheet",
+  pendingChip: "financial.transactions.pendingChip",
   periodChip: "financial.transactions.period-chip",
   readOnlyBanner: "financial.transactions.readonly-banner",
   readOnlyToast: "financial.transactions.readonly-toast",
@@ -139,6 +142,7 @@ const transactionsTestIds = {
   summaryScope: "financial.transactions.summary-scope",
   summaryToPay: "financial.transactions.summary.toPay",
   summaryToReceive: "financial.transactions.summary.toReceive",
+  totalsUpdating: "financial.transactions.totalsUpdating",
   typeFilter: "financial.transactions.type-filter",
 } as const;
 

@@ -686,7 +686,7 @@ describe("save and add another (spec 039)", () => {
   });
 
   it("SHOULD disable both buttons while saving", () => {
-    setup({ isSaving: true, isSavingNext: true });
+    setup({ isBlocking: true, isSaving: true, isSavingNext: true });
 
     expect(
       screen.getByTestId(transactionFormTestIds.saveButton).props
@@ -694,6 +694,16 @@ describe("save and add another (spec 039)", () => {
     ).toBe(true);
     expect(
       screen.getByTestId(transactionFormTestIds.saveAndNewButton).props
+        .accessibilityState?.disabled,
+    ).toBe(true);
+  });
+
+  it("SHOULD show Saving on the primary button AND block delete WHILE a blocking request runs (spec 061)", () => {
+    setup({ isBlocking: true, isEditing: true, isSaving: true });
+
+    expect(screen.getByText("financial.transactionModal.saving")).toBeTruthy();
+    expect(
+      screen.getByTestId(transactionFormTestIds.deleteButton).props
         .accessibilityState?.disabled,
     ).toBe(true);
   });
