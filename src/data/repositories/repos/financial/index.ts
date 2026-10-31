@@ -9,6 +9,7 @@ import installmentPlanRepository from "./installmentPlans/installmentPlanReposit
 import recurrenceRepository from "./recurrences/recurrenceRepositoryImpl";
 import tagRepository from "./tags/tagRepositoryImpl";
 import transactionRepository from "./transactions/transactionRepositoryImpl";
+import upcomingRepository from "./upcoming/upcomingRepositoryImpl";
 
 export function financialRepository(datasources: Datasources) {
   return {
@@ -21,5 +22,6 @@ export function financialRepository(datasources: Datasources) {
     recurrence: recurrenceRepository(datasources),
     tag: tagRepository(datasources),
     transaction: transactionRepository(datasources),
+    upcoming: upcomingRepository(datasources),
   };
 }

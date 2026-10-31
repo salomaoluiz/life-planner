@@ -7,3 +7,4 @@ export { default as financialInstallmentPlanDatasource } from "./installmentPlan
 export { default as financialRecurrenceDatasource } from "./recurrences";
 export { default as financialTagDatasource } from "./tags";
 export { default as financialTransactionDatasource } from "./transactions";
+export { default as financialUpcomingDatasource } from "./upcoming";
