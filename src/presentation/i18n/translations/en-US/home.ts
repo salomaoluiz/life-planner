@@ -46,11 +46,6 @@ const home = {
     subtitle: "{{quantity}} {{unit}} · {{ownerName}}",
     title: "Stock",
   },
-  summary: {
-    expenses: "Expenses",
-    income: "Income",
-    title: "{{month}} balance",
-  },
   upcoming: {
     emptyMessage: "Nothing overdue or due in the next 7 days.",
     emptyTitle: "All set",

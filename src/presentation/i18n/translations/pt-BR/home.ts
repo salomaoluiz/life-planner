@@ -46,11 +46,6 @@ const home = {
     subtitle: "{{quantity}} {{unit}} · {{ownerName}}",
     title: "Estoque",
   },
-  summary: {
-    expenses: "Despesas",
-    income: "Receitas",
-    title: "Saldo de {{month}}",
-  },
   upcoming: {
     emptyMessage: "Nada vencido nem a pagar ou receber nos próximos 7 dias.",
     emptyTitle: "Tudo em dia",
