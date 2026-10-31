@@ -152,7 +152,7 @@ class TransactionUIModel {
   }
 
   constructor(
-    private readonly dto: TransactionDTO,
+    readonly dto: TransactionDTO,
     private readonly category?: CategoryDTO,
   ) {}
 }

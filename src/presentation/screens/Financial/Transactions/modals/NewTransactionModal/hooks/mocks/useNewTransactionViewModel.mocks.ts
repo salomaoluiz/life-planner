@@ -197,6 +197,7 @@ beforeEach(() => {
     "categories",
     "tags",
     "transactions",
+    "transactions_list",
     "most_used",
     "projections",
     "recurrences",
@@ -220,7 +221,11 @@ beforeEach(() => {
   spies.focused.mockReturnValue(false);
   spies.params.mockReturnValue({});
   spies.useQuery.mockImplementation(((options: { cacheKey: string[] }) =>
-    queries[options.cacheKey[0]].build()) as never);
+    queries[
+      options.cacheKey[1] === "list"
+        ? `${options.cacheKey[0]}_list`
+        : options.cacheKey[0]
+    ].build()) as never);
   spies.useMutation.mockImplementation(((options: { cacheKey: string[] }) =>
     mutations[options.cacheKey[0]].build()) as never);
 });

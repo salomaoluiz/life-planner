@@ -10,6 +10,7 @@ import {
   DateField,
   ErrorState,
   FormColumns,
+  IconTile,
   RadioGroup,
   SegmentedControl,
   SelectField,
@@ -18,6 +19,7 @@ import {
   Text,
   TextField,
   Toast,
+  ToneDot,
 } from "@components";
 import { formatAmount } from "@components/AmountText/formatAmount";
 import Skeleton from "@components/Skeleton";
@@ -214,15 +216,46 @@ function NewTransactionModal() {
                 tone={vm.typeTone}
                 value={vm.amountCents}
               />
-              <TextField
+              <AutocompleteField
                 error={err(vm.descriptionError)}
                 label={t("financial.transactions.form.description")}
                 maxLength={200}
+                maxSuggestions={6}
+                mode={"text"}
                 onChangeText={vm.onDescriptionChange}
+                onSelect={(suggestion) => vm.onDescriptionSelect(suggestion.id)}
                 placeholder={t(
                   "financial.transactions.form.descriptionPlaceholder",
                 )}
-                testID={transactionFormTestIds.descriptionInput}
+                prefiltered
+                resultsLabel={(count) =>
+                  t(pluralKey("common.autocompleteField.results", count), {
+                    count,
+                  })
+                }
+                suggestions={vm.descriptionSuggestions.map((item) => ({
+                  id: item.id,
+                  label: item.label,
+                  leading: (
+                    <IconTile
+                      color={item.categoryColor}
+                      name={item.categoryIcon}
+                      size="sm"
+                    />
+                  ),
+                  matchRange: item.matchRange,
+                  trailing: (
+                    <ToneDot
+                      accessibilityLabel={t(
+                        item.type === "EXPENSE"
+                          ? "financial.common.expense"
+                          : "financial.common.income",
+                      )}
+                      tone={item.type === "EXPENSE" ? "expense" : "income"}
+                    />
+                  ),
+                }))}
+                testID={transactionFormTestIds.description}
                 value={vm.description}
               />
               {vm.hasNoCategories ? (

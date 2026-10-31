@@ -39,13 +39,13 @@ onFlowComplete:
       id: "financial.transaction-form.amount-input-error"
     timeout: 20000
 - assertVisible:
-    id: "financial.transaction-form.description-input-error"
+    id: "financial.transaction-form.description-error"
 - tapOn:
     id: "financial.transaction-form.description-input"
 - inputText: "   "
 - tapOn:
     id: "financial.transaction-form.save-button"
 - assertVisible:
-    id: "financial.transaction-form.description-input-error"
+    id: "financial.transaction-form.description-error"
 - assertVisible:
     id: "financial.transaction-form.sheet"

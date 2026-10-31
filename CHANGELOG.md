@@ -3,6 +3,16 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.4.0] - 2026-10-30
+
+### Added
+
+- While creating a transaction, typing 2+ characters in Description suggests past transactions (one per description, the most recent); picking one fills type, owner, account or card, category and tags (spec 060).
+
+### Fixed
+
+- On the Transactions list, an expanded card invoice no longer stops the scroll at "Open invoice" and its buttons are clickable again; the note tooltip is drawn above the list (specs 059, 060).
+
 ## [1.3.1] - 2026-10-30
 
 ### Fixed

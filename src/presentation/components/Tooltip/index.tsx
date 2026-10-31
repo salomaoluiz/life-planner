@@ -1,8 +1,9 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useRef, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { useKitTheme } from "@components/utils/useKitTheme";
 import { isWeb } from "@utils/platform";
+
+import TooltipBubble, { TooltipAnchor } from "./TooltipBubble";
 
 export interface TooltipProps {
   children: ReactNode;
@@ -13,25 +14,20 @@ export interface TooltipProps {
 
 // Web only: the bubble shows under the children while the pointer is over them or a child has the keyboard focus. Native renders the children as they are.
 function Tooltip(props: TooltipProps) {
-  const { colors, radius, spacing } = useKitTheme();
   const [visible, setVisible] = useState(false);
-  const styles = StyleSheet.create({
-    anchor: { zIndex: 10 },
-    bubble: {
-      backgroundColor: colors.surfaceRaised,
-      borderColor: colors.border,
-      borderRadius: radius.md,
-      borderWidth: 1,
-      boxShadow: `0 12px 32px ${colors.scrim}`,
-      marginTop: spacing.xxs,
-      padding: spacing.sm,
-      position: "absolute",
-      right: 0,
-      top: "100%",
-      width: 300,
-      zIndex: 20,
-    },
-  });
+  const [anchor, setAnchor] = useState<TooltipAnchor>();
+  const ref = useRef<View>(null);
+
+  function show() {
+    // On the web the host node is a DOM element: where it is on the page places the bubble.
+    const node = ref.current as unknown as null | {
+      getBoundingClientRect?: () => TooltipAnchor;
+    };
+    const rect = node?.getBoundingClientRect?.();
+
+    setAnchor(rect && { bottom: rect.bottom, right: rect.right });
+    setVisible(true);
+  }
 
   if (!isWeb() || !props.content) {
     return <>{props.children}</>;
@@ -42,19 +38,22 @@ function Tooltip(props: TooltipProps) {
       accessible={false}
       focusable={false}
       onBlur={() => setVisible(false)}
-      onFocus={() => setVisible(true)}
-      onHoverIn={() => setVisible(true)}
+      onFocus={show}
+      onHoverIn={show}
       onHoverOut={() => setVisible(false)}
+      ref={ref}
       style={styles.anchor}
     >
       {props.children}
       {visible && (
-        <View pointerEvents="none" style={styles.bubble} testID={props.testID}>
+        <TooltipBubble anchor={anchor} testID={props.testID}>
           {props.content}
-        </View>
+        </TooltipBubble>
       )}
     </Pressable>
   );
 }
+
+const styles = StyleSheet.create({ anchor: { zIndex: 10 } });
 
 export default Tooltip;
