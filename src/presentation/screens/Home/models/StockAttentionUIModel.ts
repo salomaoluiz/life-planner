@@ -6,6 +6,10 @@ import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { TranslationKeys } from "@presentation/i18n/types";
 
 class StockAttentionUIModel {
+  get attentionCount() {
+    return this.dto.attentionCount;
+  }
+
   get countLabelParams() {
     return { count: this.dto.totalItems };
   }
@@ -22,6 +26,10 @@ class StockAttentionUIModel {
     return this.dto.items.map(
       (item) => new StockAttentionRowUIModel(item, this.owners),
     );
+  }
+
+  get totalItems() {
+    return this.dto.totalItems;
   }
 
   constructor(

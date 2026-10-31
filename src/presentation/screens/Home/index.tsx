@@ -1,12 +1,14 @@
 import { View } from "react-native";
 
-import { ChipGroup, Screen, ScreenHeader } from "@components";
+import { ChipGroup, Screen, ScreenHeader, Section } from "@components";
 import { useTranslation } from "@presentation/i18n";
 import ProfileButton from "@screens/Navigation/containers/ProfileButton";
 
-import LatestTransactions from "./components/LatestTransactions";
-import MonthSummaryCard from "./components/MonthSummaryCard";
-import StockAttentionCard from "./components/StockAttentionCard";
+import FinanceBalanceCard from "./components/FinanceBalanceCard";
+import LowestBalanceTiles from "./components/LowestBalanceTiles";
+import StockAttentionListCard from "./components/StockAttentionListCard";
+import StockSummaryCard from "./components/StockSummaryCard";
+import UpcomingList from "./components/UpcomingList";
 import { useHomeViewModel } from "./hooks";
 import useStyles from "./styles";
 import homeTestIds from "./testIds";
@@ -18,6 +20,8 @@ function Home() {
   const { styles } = useStyles();
   const { t } = useTranslation();
   const vm = useHomeViewModel();
+  const rowStyle = vm.isSplitLayout ? styles.split : styles.stack;
+  const columnStyle = vm.isSplitLayout ? styles.column : undefined;
 
   return (
     <Screen
@@ -48,28 +52,56 @@ function Home() {
         testID="home-filter"
         value={vm.filter.value}
       />
-      <View style={vm.isSplitLayout ? styles.split : styles.stack}>
-        <View style={vm.isSplitLayout ? styles.column : undefined}>
-          <MonthSummaryCard
-            fill={vm.isSplitLayout}
-            onPress={vm.onSummaryPress}
-            state={vm.summary}
-          />
+      <Section
+        actionLabel={t("home.finance.overview")}
+        onActionPress={vm.onOverviewPress}
+        testID={homeTestIds.financeSection}
+        title={t("home.finance.title")}
+      >
+        <View style={rowStyle}>
+          <View style={[columnStyle, styles.stack]}>
+            <FinanceBalanceCard
+              onPress={vm.onOverviewPress}
+              state={vm.balance}
+            />
+            <LowestBalanceTiles
+              onCreateAccountPress={vm.onCreateAccountPress}
+              onPress={vm.onOverviewPress}
+              state={vm.lowest}
+            />
+          </View>
+          <View style={columnStyle}>
+            <UpcomingList
+              fill={vm.isSplitLayout}
+              onAddTransactionPress={vm.onAddTransactionPress}
+              onInvoicePress={vm.onInvoicePress}
+              onItemPress={vm.onUpcomingItemPress}
+              onSeeAllPress={vm.onUpcomingSeeAllPress}
+              state={vm.upcoming}
+            />
+          </View>
         </View>
-        <View style={vm.isSplitLayout ? styles.column : undefined}>
-          <StockAttentionCard
-            fill={vm.isSplitLayout}
-            onAddItemPress={vm.onAddStockItemPress}
-            onSeeAllPress={vm.onStockSeeAllPress}
-            state={vm.stock}
-          />
+      </Section>
+      <Section
+        actionLabel={t("home.stock.seeAll")}
+        onActionPress={vm.onStockSeeAllPress}
+        testID={homeTestIds.stockSection}
+        title={t("home.stock.title")}
+      >
+        <View style={rowStyle}>
+          <View style={columnStyle}>
+            <StockSummaryCard fill={vm.isSplitLayout} state={vm.stock} />
+          </View>
+          <View style={columnStyle}>
+            <StockAttentionListCard
+              fill={vm.isSplitLayout}
+              onAddItemPress={vm.onAddStockItemPress}
+              onRowPress={vm.onStockSeeAllPress}
+              state={vm.stock}
+            />
+          </View>
         </View>
-      </View>
-      <LatestTransactions
-        onAddPress={vm.onAddTransactionPress}
-        onSeeAllPress={vm.onTransactionsSeeAllPress}
-        state={vm.transactions}
-      />
+      </Section>
     </Screen>
   );
 }

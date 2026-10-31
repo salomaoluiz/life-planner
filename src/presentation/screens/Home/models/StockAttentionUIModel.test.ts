@@ -86,3 +86,13 @@ it("SHOULD report nothing expiring WHEN items exist but none need attention", ()
   expect(model.isNothingExpiring).toBe(true);
   expect(model.countLabelParams).toEqual({ count: 3 });
 });
+
+it("SHOULD expose the attention and total counts for the summary card", () => {
+  const model = new StockAttentionUIModel(
+    new StockAttentionDTO({ attentionCount: 4, items: [], totalItems: 12 }),
+    [],
+  );
+
+  expect(model.attentionCount).toBe(4);
+  expect(model.totalItems).toBe(12);
+});

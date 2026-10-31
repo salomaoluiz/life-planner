@@ -2,26 +2,33 @@ import { useIsFocused } from "@react-navigation/native";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 
+import AccountDTO from "@application/dto/financial/AccountDTO";
+import DailyBalanceDTO from "@application/dto/financial/DailyBalanceDTO";
 import MonthSummaryDTO from "@application/dto/home/MonthSummaryDTO";
-import RecentTransactionDTO from "@application/dto/home/RecentTransactionDTO";
 import StockAttentionDTO from "@application/dto/home/StockAttentionDTO";
+import UpcomingDTO, {
+  UpcomingItemDTO,
+} from "@application/dto/home/UpcomingDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import UserDTO from "@application/dto/user/UserDTO";
 import { useCases } from "@application/useCases";
 import { useQuery } from "@infrastructure/fetcher";
 import { useTranslationLocale } from "@presentation/i18n";
 import { useBreakpoint } from "@presentation/theme";
+import { setTransactionFilters } from "@screens/Financial/Transactions/hooks/useTransactionFilters";
+import { EMPTY_FILTERS } from "@screens/Financial/Transactions/models/transactionFilters";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
+import FinanceBalanceUIModel from "../models/FinanceBalanceUIModel";
 import HomeHeaderUIModel from "../models/HomeHeaderUIModel";
-import MonthSummaryUIModel from "../models/MonthSummaryUIModel";
+import LowestBalanceUIModel from "../models/LowestBalanceUIModel";
 import {
   buildOwnerFilterOptions,
   normalizeSelection,
   resolveOwnerIds,
 } from "../models/ownerFilter";
-import RecentTransactionUIModel from "../models/RecentTransactionUIModel";
 import StockAttentionUIModel from "../models/StockAttentionUIModel";
+import UpcomingUIModel from "../models/UpcomingUIModel";
 import { useHomeOwnerFilter } from "./homeOwnerFilterStore";
 
 export interface BlockState<T> {
@@ -29,6 +36,39 @@ export interface BlockState<T> {
   isError: boolean;
   isLoading: boolean;
   onRetry: () => void;
+}
+
+// A block that needs several queries: loading until all arrive, an error when any fails with nothing to show.
+function combineBlocks<U>(
+  queries: { data?: unknown; error: unknown; refetch: () => unknown }[],
+  ownersFailed: boolean,
+  onOwnersRetry: () => unknown,
+  build: () => U,
+): BlockState<U> {
+  const ready = queries.every((query) => !!query.data);
+  const isError =
+    ownersFailed || (!ready && queries.some((query) => !!query.error));
+
+  return {
+    data: ready && !ownersFailed ? build() : undefined,
+    isError,
+    isLoading: !isError && !ready,
+    onRetry: () => {
+      if (ownersFailed) {
+        onOwnersRetry();
+      } else {
+        queries.forEach((query) => query.refetch());
+      }
+    },
+  };
+}
+
+async function fetchAccounts(ownerIds: string[]) {
+  return useCases.getFinancialAccountsUseCase.execute(ownerIds);
+}
+
+async function fetchBalances(ownerIds: string[], month: string) {
+  return useCases.getFinancialDailyBalancesUseCase.execute({ month, ownerIds });
 }
 
 async function fetchOwners() {
@@ -43,8 +83,8 @@ async function fetchSummary(ownerIds: string[], month: Date) {
   return useCases.getMonthSummaryUseCase.execute({ month, ownerIds });
 }
 
-async function fetchTransactions(ownerIds: string[]) {
-  return useCases.getRecentTransactionsUseCase.execute({ ownerIds });
+async function fetchUpcoming(ownerIds: string[]) {
+  return useCases.getUpcomingItemsUseCase.execute({ ownerIds });
 }
 
 async function fetchUser() {
@@ -53,6 +93,19 @@ async function fetchUser() {
 
 function monthKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+// The first and last day (`YYYY-MM-DD`) of the month of a `YYYY-MM-DD` date.
+function monthPeriod(dateKey: string) {
+  const [year, month] = dateKey.split("-").map(Number);
+  const last = new Date(year, month, 0).getDate();
+  const key = dateKey.slice(0, 7);
+
+  return { from: `${key}-01`, to: `${key}-${String(last).padStart(2, "0")}` };
+}
+
+function nextMonthKey(date: Date) {
+  return monthKey(new Date(date.getFullYear(), date.getMonth() + 1, 1));
 }
 
 function toBlock<D, U>(
@@ -117,10 +170,35 @@ function useHomeViewModel() {
     enabled: ownersReady,
     fetch: async () => fetchStock(ownerIds),
   });
-  const transactions = useQuery<RecentTransactionDTO[]>({
-    cacheKey: [useCases.getRecentTransactionsUseCase.uniqueName, ownersKey],
+  const accounts = useQuery<AccountDTO[]>({
+    cacheKey: [useCases.getFinancialAccountsUseCase.uniqueName, ownersKey],
     enabled: ownersReady,
-    fetch: async () => fetchTransactions(ownerIds),
+    fetch: async () => fetchAccounts(ownerIds),
+  });
+  const balancesNow = useQuery<DailyBalanceDTO>({
+    cacheKey: [
+      useCases.getFinancialDailyBalancesUseCase.uniqueName,
+      "home",
+      ownersKey,
+      monthKey(now),
+    ],
+    enabled: ownersReady,
+    fetch: async () => fetchBalances(ownerIds, monthKey(now)),
+  });
+  const balancesNext = useQuery<DailyBalanceDTO>({
+    cacheKey: [
+      useCases.getFinancialDailyBalancesUseCase.uniqueName,
+      "home",
+      ownersKey,
+      nextMonthKey(now),
+    ],
+    enabled: ownersReady,
+    fetch: async () => fetchBalances(ownerIds, nextMonthKey(now)),
+  });
+  const upcoming = useQuery<UpcomingDTO>({
+    cacheKey: [useCases.getUpcomingItemsUseCase.uniqueName, ownersKey],
+    enabled: ownersReady,
+    fetch: async () => fetchUpcoming(ownerIds),
   });
 
   async function refetchAll() {
@@ -128,7 +206,14 @@ function useHomeViewModel() {
       owners.refetch(),
       user.refetch(),
       ...(ownersReady
-        ? [summary.refetch(), stock.refetch(), transactions.refetch()]
+        ? [
+            summary.refetch(),
+            stock.refetch(),
+            accounts.refetch(),
+            balancesNow.refetch(),
+            balancesNext.refetch(),
+            upcoming.refetch(),
+          ]
         : []),
     ]);
   }
@@ -149,11 +234,30 @@ function useHomeViewModel() {
   }
 
   const ownersFailed = !!owners.error && !ownersReady;
-  const summaryState = toBlock(
-    summary,
+  const balanceState = combineBlocks(
+    [summary, balancesNow, accounts],
     ownersFailed,
     owners.refetch,
-    (dto) => new MonthSummaryUIModel(dto, now, languageTag),
+    () =>
+      new FinanceBalanceUIModel(
+        summary.data as MonthSummaryDTO,
+        balancesNow.data as DailyBalanceDTO,
+        accounts.data as AccountDTO[],
+        now,
+        languageTag,
+      ),
+  );
+  const lowestState = combineBlocks(
+    [balancesNow, balancesNext],
+    ownersFailed,
+    owners.refetch,
+    () =>
+      new LowestBalanceUIModel(
+        balancesNow.data as DailyBalanceDTO,
+        balancesNext.data as DailyBalanceDTO,
+        now,
+        languageTag,
+      ),
   );
   const stockState = toBlock(
     stock,
@@ -161,12 +265,11 @@ function useHomeViewModel() {
     owners.refetch,
     (dto) => new StockAttentionUIModel(dto, ownerList),
   );
-  const transactionsState = toBlock(
-    transactions,
+  const upcomingState = toBlock(
+    upcoming,
     ownersFailed,
     owners.refetch,
-    (dtos) =>
-      dtos.map((dto) => new RecentTransactionUIModel(dto, now, languageTag)),
+    (dto) => new UpcomingUIModel(dto, now, languageTag),
   );
 
   const { openModal } = useModalNavigation();
@@ -177,7 +280,33 @@ function useHomeViewModel() {
     router.push(path as never);
   }
 
+  function onUpcomingItemPress(item: UpcomingItemDTO) {
+    if (item.kind === "PROJECTION") {
+      openModal("add_new_transaction", {
+        month: item.date.slice(0, 7),
+        occurrenceNumber: String(item.occurrenceNumber),
+        recurrenceId: item.recurrenceId as string,
+      });
+
+      return;
+    }
+
+    openModal("add_new_transaction", { id: item.id });
+  }
+
+  // The transactions screen filtered by that card, on the month the invoice is due.
+  function onInvoicePress(item: UpcomingItemDTO) {
+    setTransactionFilters({
+      ...EMPTY_FILTERS,
+      cardIds: [item.creditCardId as string],
+      origin: "CARD",
+      period: monthPeriod(item.date),
+    });
+    push("/financial/transaction");
+  }
+
   return {
+    balance: balanceState,
     filter: {
       onChange: setSelection,
       options: buildOwnerFilterOptions(ownerList),
@@ -186,16 +315,19 @@ function useHomeViewModel() {
     header: new HomeHeaderUIModel(user.data, now, languageTag),
     isRefreshing,
     isSplitLayout: breakpoint === "expanded",
+    lowest: lowestState,
     onAddStockItemPress: () => openModal("add_new_stock_item"),
     onAddTransactionPress: () => openModal("add_new_transaction"),
+    onCreateAccountPress: () => openModal("add_new_account"),
+    onInvoicePress,
+    onOverviewPress: () => push("/financial/overview"),
     onRefresh,
     onStockSeeAllPress: () =>
       push({ params: { filter: "EXPIRING" }, pathname: "/stock" }),
-    onSummaryPress: () => push("/financial/transaction"),
-    onTransactionsSeeAllPress: () => push("/financial/transaction"),
+    onUpcomingItemPress,
+    onUpcomingSeeAllPress: () => push("/financial/transaction"),
     stock: stockState,
-    summary: summaryState,
-    transactions: transactionsState,
+    upcoming: upcomingState,
   };
 }
 

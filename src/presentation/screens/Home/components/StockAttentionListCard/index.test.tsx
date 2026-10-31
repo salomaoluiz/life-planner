@@ -12,7 +12,7 @@ import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import StockAttentionUIModel from "@screens/Home/models/StockAttentionUIModel";
 import homeTestIds from "@screens/Home/testIds";
 
-import StockAttentionCard from "./";
+import StockAttentionListCard from "./";
 
 const owners = [
   new OwnerDTO({ id: "owner-1", name: "Silva", type: OwnerType.FAMILY }),
@@ -55,11 +55,11 @@ function stock(id: string, description: string) {
   });
 }
 
-const handlers = { onAddItemPress: jest.fn(), onSeeAllPress: jest.fn() };
+const handlers = { onAddItemPress: jest.fn(), onRowPress: jest.fn() };
 
 function renderLoaded(data: StockAttentionUIModel) {
   render(
-    <StockAttentionCard
+    <StockAttentionListCard
       {...handlers}
       state={{ data, isError: false, isLoading: false, onRetry: jest.fn() }}
     />,
@@ -70,7 +70,7 @@ beforeEach(() => jest.clearAllMocks());
 
 it("SHOULD render the skeleton WHILE loading", () => {
   render(
-    <StockAttentionCard
+    <StockAttentionListCard
       {...handlers}
       state={{ isError: false, isLoading: true, onRetry: jest.fn() }}
     />,
@@ -84,7 +84,7 @@ it("SHOULD render the skeleton WHILE loading", () => {
 it("SHOULD render the error with a retry that refetches only this block", () => {
   const onRetry = jest.fn();
   render(
-    <StockAttentionCard
+    <StockAttentionListCard
       {...handlers}
       state={{ isError: true, isLoading: false, onRetry }}
     />,
@@ -107,28 +107,12 @@ it("SHOULD render the rows with title, subtitle and badge", () => {
   ).toBeOnTheScreen();
 });
 
-it("SHOULD show the item count under the title", () => {
-  renderLoaded(model(5));
-
-  expect(screen.getByTestId(homeTestIds.stockAttentionCount)).toHaveTextContent(
-    'home.stock.count_other {"count":5}',
-  );
-});
-
-it("SHOULD open the stock WHEN pressing See all", () => {
-  renderLoaded(model(5));
-
-  fireEvent.press(screen.getByText("common.actions.seeAll"));
-
-  expect(handlers.onSeeAllPress).toHaveBeenCalledTimes(1);
-});
-
 it("SHOULD open the stock WHEN pressing a row", () => {
   renderLoaded(model(5));
 
   fireEvent.press(screen.getAllByTestId(homeTestIds.stockAttentionRow)[0]);
 
-  expect(handlers.onSeeAllPress).toHaveBeenCalledTimes(1);
+  expect(handlers.onRowPress).toHaveBeenCalledTimes(1);
 });
 
 it("SHOULD say nothing is expiring WHEN there are items but none need attention", () => {
@@ -149,17 +133,9 @@ it("SHOULD offer to add an item WHEN the stock is empty", () => {
   expect(handlers.onAddItemPress).toHaveBeenCalledTimes(1);
 });
 
-it("SHOULD use the singular count key WHEN there is one item", () => {
-  renderLoaded(model(1));
-
-  expect(screen.getByTestId(homeTestIds.stockAttentionCount)).toHaveTextContent(
-    'home.stock.count_one {"count":1}',
-  );
-});
-
 it("SHOULD fill its column WHEN fill is set", () => {
   render(
-    <StockAttentionCard
+    <StockAttentionListCard
       {...handlers}
       fill
       state={{

@@ -3,9 +3,11 @@ import { router } from "expo-router";
 
 import { act, renderHook } from "@tests";
 
+import AccountDTO from "@application/dto/financial/AccountDTO";
+import DailyBalanceDTO from "@application/dto/financial/DailyBalanceDTO";
 import MonthSummaryDTO from "@application/dto/home/MonthSummaryDTO";
-import RecentTransactionDTO from "@application/dto/home/RecentTransactionDTO";
 import StockAttentionDTO from "@application/dto/home/StockAttentionDTO";
+import UpcomingDTO from "@application/dto/home/UpcomingDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import UserDTO from "@application/dto/user/UserDTO";
 import { useCases } from "@application/useCases";
@@ -13,6 +15,7 @@ import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { useQuery } from "@infrastructure/fetcher";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
 import { useBreakpoint } from "@presentation/theme";
+import { setTransactionFilters } from "@screens/Financial/Transactions/hooks/useTransactionFilters";
 
 import { resetHomeOwnerFilter } from "../homeOwnerFilterStore";
 import useHomeViewModel from "../useHomeViewModel";
@@ -21,15 +24,21 @@ jest.mock("@react-navigation/native", () => ({ useIsFocused: jest.fn() }));
 jest.mock("expo-router", () => ({ router: { push: jest.fn() } }));
 jest.mock("@infrastructure/fetcher");
 jest.mock("@presentation/theme", () => ({ useBreakpoint: jest.fn() }));
+jest.mock(
+  "@screens/Financial/Transactions/hooks/useTransactionFilters",
+  () => ({ setTransactionFilters: jest.fn() }),
+);
 jest.mock("@application/useCases", () => ({
   useCases: {
+    getFinancialAccountsUseCase: { execute: jest.fn(), uniqueName: "accounts" },
+    getFinancialDailyBalancesUseCase: {
+      execute: jest.fn(),
+      uniqueName: "balances",
+    },
     getMonthSummaryUseCase: { execute: jest.fn(), uniqueName: "summary" },
     getOwnersUseCase: { execute: jest.fn(), uniqueName: "owners" },
-    getRecentTransactionsUseCase: {
-      execute: jest.fn(),
-      uniqueName: "transactions",
-    },
     getStockAttentionUseCase: { execute: jest.fn(), uniqueName: "stock" },
+    getUpcomingItemsUseCase: { execute: jest.fn(), uniqueName: "upcoming" },
     getUserUseCase: { execute: jest.fn(), uniqueName: "user" },
   },
 }));
@@ -64,24 +73,83 @@ const stock = new StockAttentionDTO({
   items: [],
   totalItems: 2,
 });
-const transactions = [
-  new RecentTransactionDTO({
-    categoryName: "Groceries",
-    date: new Date(2026, 9, 3).toISOString(),
-    description: "Market",
-    id: "t1",
-    type: "EXPENSE",
-    value: 1000,
+const accounts = [
+  new AccountDTO({
+    balance: 1000,
+    icon: "bank",
+    id: "account-1",
+    name: "Checking",
+    owner: "USER",
+    ownerId: "user-id",
+    status: "ACTIVE",
   }),
 ];
+const balances = new DailyBalanceDTO({
+  accounts: [
+    {
+      icon: "bank",
+      id: "account-1",
+      name: "Checking",
+      owner: OwnerType.USER,
+      ownerId: "user-id",
+    },
+  ],
+  days: [
+    {
+      accounts: [{ accountId: "account-1", balanceCents: 80000 }],
+      cardsDueCents: 0,
+      date: "2026-10-31",
+      projected: true,
+      totalCents: 80000,
+    },
+  ],
+  month: "2026-10",
+});
+const upcoming = new UpcomingDTO({
+  next: [],
+  nextTotal: 0,
+  overdue: [
+    {
+      accountId: "account-1",
+      categoryId: "category-1",
+      creditCardId: null,
+      currency: "BRL",
+      date: "2026-10-03",
+      description: "Rent",
+      id: "t1",
+      invoiceMonth: null,
+      kind: "TRANSACTION",
+      occurrenceNumber: null,
+      owner: "USER",
+      ownerId: "user-id",
+      purchaseCount: null,
+      recurrenceId: null,
+      type: "EXPENSE",
+      valueCents: 240000,
+    },
+  ],
+  overdueExpenseCents: 240000,
+});
 
-const mocks = { family, owners, person, stock, summary, transactions, user };
+const mocks = {
+  accounts,
+  balances,
+  family,
+  owners,
+  person,
+  stock,
+  summary,
+  upcoming,
+  user,
+};
 
 const queries = {
+  accounts: new UseQueryFixture<AccountDTO[]>(),
+  balances: new UseQueryFixture<DailyBalanceDTO>(),
   owners: new UseQueryFixture<OwnerDTO[]>(),
   stock: new UseQueryFixture<StockAttentionDTO>(),
   summary: new UseQueryFixture<MonthSummaryDTO>(),
-  transactions: new UseQueryFixture<RecentTransactionDTO[]>(),
+  upcoming: new UseQueryFixture<UpcomingDTO>(),
   user: new UseQueryFixture<UserDTO>(),
 };
 
@@ -90,13 +158,14 @@ const queries = {
 // region spies
 
 const spies = {
+  getAccounts: jest.mocked(useCases.getFinancialAccountsUseCase.execute),
+  getBalances: jest.mocked(useCases.getFinancialDailyBalancesUseCase.execute),
   getMonthSummary: jest.mocked(useCases.getMonthSummaryUseCase.execute),
-  getRecentTransactions: jest.mocked(
-    useCases.getRecentTransactionsUseCase.execute,
-  ),
   getStockAttention: jest.mocked(useCases.getStockAttentionUseCase.execute),
+  getUpcoming: jest.mocked(useCases.getUpcomingItemsUseCase.execute),
   isFocused: jest.mocked(useIsFocused),
   push: jest.mocked(router.push),
+  setTransactionFilters: jest.mocked(setTransactionFilters),
   useBreakpoint: jest.mocked(useBreakpoint),
   useQuery: jest.mocked(useQuery),
 };
@@ -134,6 +203,14 @@ function setup(data: Partial<Record<QueryName, unknown>> = {}) {
   return renderHook(() => useHomeViewModel());
 }
 
-const loaded = { owners, stock, summary, transactions, user };
+const loaded = {
+  accounts,
+  balances,
+  owners,
+  stock,
+  summary,
+  upcoming,
+  user,
+};
 
 export { act, loaded, mocks, optionsOf, queries, setup, spies };

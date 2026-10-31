@@ -53,7 +53,6 @@ const useCases = {
   getMonthSummaryUseCase: expect.any(Function),
   getMostUsedFinancialCategoriesUseCase: expect.any(Function),
   getOwnersUseCase: expect.any(Function),
-  getRecentTransactionsUseCase: expect.any(Function),
   getStockAttentionUseCase: expect.any(Function),
   getStockItemsUseCase: expect.any(Function),
   getUpcomingItemsUseCase: expect.any(Function),
