@@ -3,6 +3,18 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.6.0] - 2026-10-31
+
+### Added
+
+- The home has a Finance section: the balance expected at the end of the month (current balance plus what is left to receive and to pay), the day of lowest balance this month and next month with the balance by account, and a list of everything overdue plus the next 7 days (spec 062).
+- A card invoice shows as one item in that list, with a "See transactions" button that opens the transactions of that card and month (spec 062).
+- The Stock section on the home has a summary card and the list of items that need attention (spec 062).
+
+### Changed
+
+- "Latest transactions" and the month result card are gone from the home (spec 062).
+
 ## [1.5.0] - 2026-10-31
 
 ### Added

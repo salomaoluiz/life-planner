@@ -1,0 +1,35 @@
+url: ${E2E_WEB_URL}
+name: financial/home/finance-section-empty
+tags:
+  - financial
+  - home
+  - spec-062
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Nothing overdue and nothing in the next 7 days: the "All set" empty state (spec 062 FR 18),
+# with a way to add a transaction. Without an account the lowest-balance tiles offer to create one.
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "home.finance.upcomingEmpty"
+    timeout: 20000
+- assertVisible:
+    id: "home.finance.lowestCreateAccount"
+- tapOn:
+    text: "New transaction|Nova transação"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.description-input"
+    timeout: 20000

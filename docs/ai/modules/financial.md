@@ -333,7 +333,7 @@ testIDs: `Financial/Transactions/testIds.ts` (`financial.transactions.*`; the ro
 - `create-expense` (spec-006, spec-013, smoke), `create-income` (spec-013, asserts no EXPENSE chip), `create-from-quick-add` (spec-009, spec-013)
 - `create-missing-records` (spec-013), `create-validation` (spec-013, includes a whitespace-only description)
 - `edit-transaction` (spec-006, spec-013), `delete-transaction` (spec-006, spec-013)
-- `month-navigation` (spec-013; the transaction is dated the 10th of last month), `home-latest-transactions` (spec-010, secondary tag `home`)
+- `month-navigation` (spec-013; the transaction is dated the 10th of last month), `home-latest-transactions` (spec-010, secondary tag `home`; spec 062 moved it to the upcoming list)
 
 ## E2E flows: family-owned records (spec 022)
 
@@ -514,3 +514,7 @@ On `medium`/`expanded` these modals are `BottomSheet size="form"` with `FormColu
 - UI: `PendingChip` (kit `ProgressChip` + `Spinner`) before the amount on web, under the subtitle on mobile; deleting rows use `strikethrough` (new on `Text`, `AmountText`, `ListItem`); `UpdatingTotal` dims month summary, filtered summary, day balance lines and invoice totals with a spinner "Updating" while `isTotalsUpdating`. Kit `Toast` gained `actionLabel`/`onAction`/`actionTestID`.
 - "Try again": create/edit reopen the form with the typed draft (`setRetryDraft` + route param `retry`); delete reopens the transaction (its delete then goes through the blocking path, so paid occurrences still ask, spec 034 FR 31); Save-and-create-another and adjustments resend directly. Limitations: the installment sheet (`edit_installment`) keeps its own blocking delete; real card purchases of a recurring series are marked "Deleting" only by id, projected ones by series.
 - Flow `instant-create-delete` (spec-061); testIDs `financial.transactions.{pendingChip,totalsUpdating,errorToast,errorToastRetry}`. Network error states are unit-tested only.
+
+## Upcoming items for the home (spec 062)
+
+- **Data chain:** `getUpcomingItemsUseCase` (`home.get_upcoming_items_use_case`) → `financialRepository.upcoming.getUpcoming({ ownerIds, days?, limit? })` → `GET /v1/finance/upcoming?ownerId=&today=&days=&limit=`; `UpcomingModel` / `UpcomingEntity` / `UpcomingDTO` keep money in **cents** (`valueCents`). Never cached in the repository. Items are `TRANSACTION`, `INVOICE` (one per card and month, `creditCardId` + `invoiceMonth`, `purchaseCount`) or `PROJECTION` (`recurrenceId` + `occurrenceNumber`). Used only by the Home Finance section.

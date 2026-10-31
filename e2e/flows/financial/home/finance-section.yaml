@@ -1,0 +1,88 @@
+url: ${E2E_WEB_URL}
+name: financial/home/finance-section
+tags:
+  - financial
+  - home
+  - spec-062
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# The home Finance section (spec 062): projected balance, lowest balance days and the upcoming list with an
+# overdue row and a row of the next days. The latest-transactions list is gone.
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript: ../../../scripts/upcoming-dates.js
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Overdue
+      KEY: OVERDUE_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Upcoming
+      KEY: UPCOMING_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: ${output.OVERDUE_NAME}
+      VALUE_CENTS: "6500"
+      DATE: ${output.OVERDUE_DATE}
+      PAID: "false"
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: ${output.UPCOMING_NAME}
+      VALUE_CENTS: "4200"
+      DATE: ${output.UPCOMING_DATE}
+      PAID: "false"
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "home.finance.projectedBalance"
+    timeout: 20000
+- assertVisible:
+    id: "home.finance.lowestCurrent"
+# The overdue group and its row, then the row of the next days
+- extendedWaitUntil:
+    visible:
+      id: "home.finance.upcomingOverdueHeader"
+    timeout: 20000
+- assertVisible:
+    id: "home.finance.upcomingItem-title"
+    text: ${output.OVERDUE_NAME}
+- assertVisible:
+    id: "home.finance.upcomingItem-title"
+    text: ${output.UPCOMING_NAME}
+# The month summary and the latest transactions list are gone
+- assertNotVisible:
+    id: "home.latest-transactions.row-title"
+# The section link opens the Overview
+- tapOn:
+    id: "home.finance.section-action"
+- extendedWaitUntil:
+    visible:
+      id: "financial.overview.screen"
+    timeout: 20000
