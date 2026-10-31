@@ -10,6 +10,8 @@ import { AmountType, formatAmount } from "./formatAmount";
 export interface AmountTextProps {
   currency: CurrencyCode;
   size?: "body" | "caption" | "display" | "heading";
+  /** Spec 061: a row that is being deleted. */
+  strikethrough?: boolean;
   testID?: string;
   tone?: "expense" | "income" | "primary" | "secondary";
   type?: AmountType;
@@ -35,7 +37,15 @@ function AmountText(props: AmountTextProps) {
   });
 
   return (
-    <RNText numberOfLines={1} style={style} testID={props.testID}>
+    <RNText
+      numberOfLines={1}
+      style={
+        props.strikethrough
+          ? [style, { textDecorationLine: "line-through" }]
+          : style
+      }
+      testID={props.testID}
+    >
       {formatAmount(props.value, localeTag, props.currency, props.type)}
     </RNText>
   );

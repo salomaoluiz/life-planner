@@ -3,6 +3,7 @@ import { View } from "react-native";
 import { AmountText, GroupBodyRow, IconTile, Text } from "@components";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useTranslation } from "@presentation/i18n";
+import UpdatingTotal from "@screens/Financial/Transactions/components/UpdatingTotal";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
 import useStyles from "./styles";
@@ -15,6 +16,8 @@ interface Props {
   // Closes the card opened by the day header (list variant only).
   isLast?: boolean;
   name: string;
+  // Spec 061: a change is still being saved; the balance is the old one.
+  updating?: boolean;
   // `tooltip` = the web hover bubble, `list` = the lines under an expanded day header.
   variant?: "list" | "tooltip";
 }
@@ -51,12 +54,14 @@ function DayBalanceLine(props: Props) {
             }
           />
         </View>
-        <AmountText
-          currency={DEFAULT_CURRENCY}
-          size="body"
-          type={negative ? "EXPENSE" : undefined}
-          value={Math.abs(props.balanceCents)}
-        />
+        <UpdatingTotal updating={props.updating}>
+          <AmountText
+            currency={DEFAULT_CURRENCY}
+            size="body"
+            type={negative ? "EXPENSE" : undefined}
+            value={Math.abs(props.balanceCents)}
+          />
+        </UpdatingTotal>
       </View>
     </GroupBodyRow>
   );

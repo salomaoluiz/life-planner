@@ -47,6 +47,7 @@ const defaultViewModel: ReturnType<typeof useNewTransactionViewModel> = {
   },
   invoiceHint: undefined,
   invoiceMonthLabelDate: undefined,
+  isBlocking: false,
   isCategoryPickerOpen: false,
   isDeleteDialogOpen: false,
   isDeleting: false,

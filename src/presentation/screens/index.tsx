@@ -9,6 +9,7 @@ export { default as FinancialOverview } from "./Financial/Overview";
 export { default as FinancialSectionPicker } from "./Financial/SectionPicker";
 export { default as FinancialTags } from "./Financial/Tags";
 export { default as FinancialTransaction } from "./Financial/Transactions";
+export { default as ErrorToastHost } from "./Financial/Transactions/pending/ErrorToastHost";
 export { default as Home } from "./Home";
 export { default as Invite } from "./Invite";
 export { default as Login } from "./Login";

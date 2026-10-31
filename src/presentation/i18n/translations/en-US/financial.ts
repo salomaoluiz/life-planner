@@ -982,6 +982,9 @@ const financial = {
     usage_one: "1 transaction",
     usage_other: "{{count}} transactions",
   },
+  transactionModal: {
+    saving: "Saving",
+  },
   transactions: {
     add: "Add transaction",
     adjustment: "Balance adjustment",
@@ -1010,6 +1013,11 @@ const financial = {
     deleteTitle: "Delete this transaction?",
     emptyMessage: "Add an income or expense for this month.",
     emptyTitle: "No transactions in {{month}}",
+    error: {
+      delete: 'Couldn\'t delete "{{description}}".',
+      retry: "Try again",
+      save: 'Couldn\'t save "{{description}}".',
+    },
     fab: "New transaction",
     filters: {
       a11y: "Filters, {{count}} active",
@@ -1171,6 +1179,10 @@ const financial = {
     noMatchMessage: "Try another filter or month.",
     overdue: "Overdue",
     pay: "Mark as paid",
+    pending: {
+      deleting: "Deleting",
+      saving: "Saving",
+    },
     previousMonth: "Previous month",
     scope: {
       all: "Everything",
@@ -1182,6 +1194,9 @@ const financial = {
       toReceive: "To receive",
     },
     today: "Today",
+    totals: {
+      updating: "Updating",
+    },
     typeFilter: {
       label: "Transaction type",
     },

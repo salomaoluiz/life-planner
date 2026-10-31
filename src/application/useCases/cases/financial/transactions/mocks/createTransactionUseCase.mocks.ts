@@ -67,6 +67,9 @@ const mocks = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  spies.financialRepositoryTransaction.createTransaction.mockResolvedValue({
+    id: "created-id",
+  } as never);
 });
 
 export { mocks, setup, setupThrowable, spies };

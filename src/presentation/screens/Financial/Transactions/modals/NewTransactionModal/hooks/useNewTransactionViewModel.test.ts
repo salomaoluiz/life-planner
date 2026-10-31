@@ -15,6 +15,7 @@ import {
   RecurrenceHasPaidOccurrences,
 } from "@domain/entities/errors";
 import TransactionUIModel from "@screens/Financial/Transactions/models/TransactionUIModel";
+import { consumeRetryDraft } from "@screens/Financial/Transactions/pending/pendingChanges";
 
 import {
   acc,
@@ -26,6 +27,7 @@ import {
   setup,
   spies,
   tx,
+  useCases,
 } from "./mocks/useNewTransactionViewModel.mocks";
 
 it("SHOULD be loading until owners, accounts and categories are loaded", () => {
@@ -148,7 +150,9 @@ it("SHOULD NOT call create WHEN the form is invalid", () => {
     result.current.onSave();
   });
 
-  expect(mutations.create.value.mutate).not.toHaveBeenCalled();
+  expect(
+    useCases.createFinancialTransactionUseCase.execute,
+  ).not.toHaveBeenCalled();
 });
 
 it("SHOULD call create with a decimal-string value and the category name WHEN valid", () => {
@@ -168,7 +172,9 @@ it("SHOULD call create with a decimal-string value and the category name WHEN va
     result.current.onSave();
   });
 
-  expect(mutations.create.value.mutate).toHaveBeenCalledWith({
+  expect(
+    useCases.createFinancialTransactionUseCase.execute,
+  ).toHaveBeenCalledWith({
     accountId: "a1",
     category: "food",
     categoryId: "food",
@@ -200,7 +206,9 @@ it("SHOULD prefill in edit mode and call update with the id", () => {
     result.current.onSave();
   });
 
-  expect(mutations.update.value.mutate).toHaveBeenCalledWith(
+  expect(
+    useCases.updateFinancialTransactionUseCase.execute,
+  ).toHaveBeenCalledWith(
     expect.objectContaining({
       description: "Changed",
       id: "tx-1",
@@ -274,12 +282,16 @@ it("SHOULD ask before deleting and delete with id and ownerId after confirming",
     result.current.onDeletePress();
   });
   expect(result.current.isDeleteDialogOpen).toBe(true);
-  expect(mutations.delete.value.mutate).not.toHaveBeenCalled();
+  expect(
+    useCases.deleteFinancialTransactionUseCase.execute,
+  ).not.toHaveBeenCalled();
 
   act(() => {
     result.current.onDeleteConfirm();
   });
-  expect(mutations.delete.value.mutate).toHaveBeenCalledWith({
+  expect(
+    useCases.deleteFinancialTransactionUseCase.execute,
+  ).toHaveBeenCalledWith({
     id: "tx-1",
     ownerId: "user-id",
   });
@@ -490,7 +502,9 @@ describe("card mode (spec 029)", () => {
 
     expect(result.current.isInvoicePaid).toBe(true);
     expect(result.current.isSaveDisabled).toBe(true);
-    expect(mutations.create.value.mutate).not.toHaveBeenCalled();
+    expect(
+      useCases.createFinancialTransactionUseCase.execute,
+    ).not.toHaveBeenCalled();
   });
 
   it("SHOULD create the purchase with creditCardId and no account", () => {
@@ -501,7 +515,9 @@ describe("card mode (spec 029)", () => {
     act(() => result.current.onCategorySelect("food"));
     act(() => result.current.onSave());
 
-    expect(mutations.create.value.mutate).toHaveBeenCalledWith(
+    expect(
+      useCases.createFinancialTransactionUseCase.execute,
+    ).toHaveBeenCalledWith(
       expect.objectContaining({
         accountId: undefined,
         creditCardId: "c1",
@@ -574,7 +590,9 @@ describe("card mode (spec 029)", () => {
           value: "5120.00",
         }),
       );
-      expect(mutations.create.value.mutate).not.toHaveBeenCalled();
+      expect(
+        useCases.createFinancialTransactionUseCase.execute,
+      ).not.toHaveBeenCalled();
     });
 
     it("SHOULD keep the card and turn installments off WHEN saving and adding another", () => {
@@ -876,7 +894,9 @@ describe("repeat on create (spec 034)", () => {
         value: "2000.00",
       }),
     );
-    expect(mutations.create.value.mutate).not.toHaveBeenCalled();
+    expect(
+      useCases.createFinancialTransactionUseCase.execute,
+    ).not.toHaveBeenCalled();
   });
 
   it("SHOULD preview the count and the last date WHEN there is an end date, AND the cadence WHEN there is none", () => {
@@ -1254,7 +1274,9 @@ describe("deleting a recurring occurrence (spec 034 FR 28-31)", () => {
       result.current.onRecurrenceDeletePress();
     });
 
-    expect(mutations.delete_occurrence.value.mutate).toHaveBeenCalledWith({
+    expect(
+      useCases.deleteFinancialOccurrenceUseCase.execute,
+    ).toHaveBeenCalledWith({
       confirmPaid: false,
       occurrenceNumber: 5,
       recurrenceId: "series-1",
@@ -1274,9 +1296,9 @@ describe("deleting a recurring occurrence (spec 034 FR 28-31)", () => {
       result.current.onRecurrenceDeletePress();
     });
 
-    expect(mutations.delete_occurrence.value.mutate).toHaveBeenCalledWith(
-      expect.objectContaining({ scope: "THIS_AND_NEXT" }),
-    );
+    expect(
+      useCases.deleteFinancialOccurrenceUseCase.execute,
+    ).toHaveBeenCalledWith(expect.objectContaining({ scope: "THIS_AND_NEXT" }));
   });
 
   it("SHOULD ask to confirm BEFORE deleting all, then delete the series", () => {
@@ -1291,13 +1313,17 @@ describe("deleting a recurring occurrence (spec 034 FR 28-31)", () => {
     });
 
     expect(result.current.recurrence.isAllDeleteOpen).toBe(true);
-    expect(mutations.delete_recurrence.value.mutate).not.toHaveBeenCalled();
+    expect(
+      useCases.deleteFinancialRecurrenceUseCase.execute,
+    ).not.toHaveBeenCalled();
 
     act(() => {
       result.current.onRecurrenceDeleteConfirm();
     });
 
-    expect(mutations.delete_recurrence.value.mutate).toHaveBeenCalledWith({
+    expect(
+      useCases.deleteFinancialRecurrenceUseCase.execute,
+    ).toHaveBeenCalledWith({
       confirmPaid: false,
       id: "series-1",
     });
@@ -1406,12 +1432,18 @@ describe("save and add another (spec 039)", () => {
     rerender({});
   }
 
-  it("SHOULD stay open, reset the form, keep the rest and show the notice WHEN it succeeds", () => {
-    const { rerender, result } = filled();
+  it("SHOULD stay open, reset the form at once, keep the rest and show the notice (spec 061)", () => {
+    const { result } = filled();
 
     act(() => result.current.onSaveAndNew());
-    expect(mutations.create.value.mutate).toHaveBeenCalledTimes(1);
-    succeed(rerender);
+    expect(spies.runPendingChange).toHaveBeenCalledTimes(1);
+    expect(spies.runPendingChange.mock.calls[0][0]).toMatchObject({
+      description: "Weekly shop",
+      kind: "create",
+    });
+    expect(
+      useCases.createFinancialTransactionUseCase.execute,
+    ).toHaveBeenCalledTimes(1);
 
     expect(modalNavigation.closeModal).not.toHaveBeenCalled();
     expect(result.current.amountCents).toBe(0);
@@ -1422,7 +1454,6 @@ describe("save and add another (spec 039)", () => {
     expect(result.current.ownerId).toBe("user-id");
     expect(result.current.type).toBe("EXPENSE");
     expect(result.current.isSaved).toBe(true);
-    expect(mutations.create.value.reset).toHaveBeenCalled();
   });
 
   it("SHOULD turn repeat off WHEN a recurrence was saved and added another", () => {
@@ -1438,43 +1469,35 @@ describe("save and add another (spec 039)", () => {
     expect(result.current.repeatEnd).toBeUndefined();
   });
 
-  it("SHOULD detect a second save and add another WHEN the status went back to idle", () => {
-    const { rerender, result } = filled();
+  it("SHOULD keep resetting on every save and add another", () => {
+    const { result } = filled();
 
     act(() => result.current.onSaveAndNew());
-    succeed(rerender);
-    mutations.create.withStatus("idle");
-    rerender({});
     act(() => result.current.onAmountChange(500));
     act(() => result.current.onDescriptionChange("Bread"));
     act(() => result.current.onSaveAndNew());
-    succeed(rerender);
 
     expect(modalNavigation.closeModal).not.toHaveBeenCalled();
     expect(result.current.amountCents).toBe(0);
-    expect(mutations.create.value.mutate).toHaveBeenCalledTimes(2);
+    expect(spies.runPendingChange).toHaveBeenCalledTimes(2);
   });
 
   it("SHOULD still go back WHEN a plain save follows a save and add another", () => {
-    const { rerender, result } = filled();
+    const { result } = filled();
 
     act(() => result.current.onSaveAndNew());
-    succeed(rerender);
-    mutations.create.withStatus("idle");
-    rerender({});
     act(() => result.current.onAmountChange(500));
     act(() => result.current.onDescriptionChange("Bread"));
     act(() => result.current.onSave());
-    succeed(rerender);
 
+    expect(spies.runPendingChange).toHaveBeenCalledTimes(2);
     expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
   });
 
   it("SHOULD NOT be dirty right after it, and be dirty again after typing", () => {
-    const { rerender, result } = filled();
+    const { result } = filled();
 
     act(() => result.current.onSaveAndNew());
-    succeed(rerender);
     act(() => result.current.onClose());
     expect(result.current.isDiscardDialogOpen).toBe(false);
     expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
@@ -1516,22 +1539,29 @@ describe("save and add another (spec 039)", () => {
     );
   });
 
-  it("SHOULD keep the values, show the error, no notice and close on a later plain save WHEN the mutation fails", () => {
-    const { rerender, result } = filled();
+  it("SHOULD resend the same request WHEN Try again is pressed after a failed save and add another (spec 061)", () => {
+    const { result } = filled();
 
     act(() => result.current.onSaveAndNew());
-    mutations.create.withError(new FinancialNotFound());
-    rerender({});
+    expect(spies.runPendingChange).toHaveBeenCalledTimes(1);
+    spies.runPendingChange.mock.calls[0][2]();
 
-    expect(result.current.formErrorKey).toBe("financial.errors.notFound");
-    expect(result.current.amountCents).toBe(31290);
-    expect(result.current.isSaved).toBe(false);
-    expect(modalNavigation.closeModal).not.toHaveBeenCalled();
+    expect(spies.runPendingChange).toHaveBeenCalledTimes(2);
+    expect(spies.openTransactionModal).not.toHaveBeenCalled();
+    expect(result.current.description).toBe("");
+  });
 
-    mutations.create.value.error = null;
+  it("SHOULD reopen the form with the typed values WHEN Try again follows a plain save (spec 061)", () => {
+    const { result } = filled();
+
     act(() => result.current.onSave());
-    succeed(rerender);
-    expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
+    spies.runPendingChange.mock.calls[0][2]();
+
+    expect(spies.openTransactionModal).toHaveBeenCalledWith({ retry: "1" });
+    expect(consumeRetryDraft()).toMatchObject({
+      amountCents: 31290,
+      description: "Weekly shop",
+    });
   });
 
   it("SHOULD hide the notice on onSavedHide", () => {
@@ -1556,20 +1586,22 @@ describe("save and add another (spec 039)", () => {
     expect(mutations.update.value.mutate).not.toHaveBeenCalled();
   });
 
-  it("SHOULD report the pressed intent while saving", () => {
+  it("SHOULD report the pressed intent while a blocking save runs", () => {
     const { rerender, result } = filled();
 
+    act(() => result.current.onRepeatToggle(true));
     act(() => result.current.onSaveAndNew());
-    mutations.create.withIsFetching(true);
+    mutations.create_recurrence.withIsFetching(true);
     rerender({});
 
+    expect(result.current.isBlocking).toBe(true);
     expect(result.current.isSaving).toBe(true);
     expect(result.current.isSavingNext).toBe(true);
 
-    mutations.create.withIsFetching(false);
+    mutations.create_recurrence.withIsFetching(false);
     rerender({});
     act(() => result.current.onSave());
-    mutations.create.withIsFetching(true);
+    mutations.create_recurrence.withIsFetching(true);
     rerender({});
 
     expect(result.current.isSavingNext).toBe(false);
@@ -1637,9 +1669,9 @@ describe("tags (spec 043)", () => {
     act(() => result.current.onTagsChange(["a", "b"]));
     act(() => result.current.onSave());
 
-    expect(mutations.create.value.mutate).toHaveBeenCalledWith(
-      expect.objectContaining({ tags: ["a", "b"] }),
-    );
+    expect(
+      useCases.createFinancialTransactionUseCase.execute,
+    ).toHaveBeenCalledWith(expect.objectContaining({ tags: ["a", "b"] }));
   });
 
   it("SHOULD load the tags of the transaction being edited AND send [] WHEN they are removed", () => {
@@ -1659,9 +1691,9 @@ describe("tags (spec 043)", () => {
     act(() => result.current.onTagsChange([]));
     act(() => result.current.onSave());
 
-    expect(mutations.update.value.mutate).toHaveBeenCalledWith(
-      expect.objectContaining({ id: "tx-1", tags: [] }),
-    );
+    expect(
+      useCases.updateFinancialTransactionUseCase.execute,
+    ).toHaveBeenCalledWith(expect.objectContaining({ id: "tx-1", tags: [] }));
   });
 });
 

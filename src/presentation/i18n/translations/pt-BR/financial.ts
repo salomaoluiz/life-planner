@@ -983,6 +983,9 @@ const financial = {
     usage_one: "1 transação",
     usage_other: "{{count}} transações",
   },
+  transactionModal: {
+    saving: "Salvando",
+  },
   transactions: {
     add: "Adicionar transação",
     adjustment: "Ajuste de saldo",
@@ -1010,6 +1013,11 @@ const financial = {
     deleteTitle: "Excluir esta transação?",
     emptyMessage: "Adicione uma receita ou despesa para este mês.",
     emptyTitle: "Nenhuma transação em {{month}}",
+    error: {
+      delete: 'Não foi possível excluir "{{description}}".',
+      retry: "Tentar de novo",
+      save: 'Não foi possível salvar "{{description}}".',
+    },
     fab: "Nova transação",
     filters: {
       a11y: "Filtros, {{count}} ativos",
@@ -1171,6 +1179,10 @@ const financial = {
     noMatchMessage: "Tente outro filtro ou outro mês.",
     overdue: "Atrasada",
     pay: "Marcar como pago",
+    pending: {
+      deleting: "Excluindo",
+      saving: "Salvando",
+    },
     previousMonth: "Mês anterior",
     scope: {
       all: "Tudo",
@@ -1182,6 +1194,9 @@ const financial = {
       toReceive: "A receber",
     },
     today: "Hoje",
+    totals: {
+      updating: "Atualizando",
+    },
     typeFilter: {
       label: "Tipo de transação",
     },

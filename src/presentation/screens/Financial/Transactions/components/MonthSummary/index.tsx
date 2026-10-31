@@ -4,6 +4,7 @@ import { AmountText, Button, Card, Divider, Text } from "@components";
 import Skeleton from "@components/Skeleton";
 import { useKitTheme } from "@components/utils/useKitTheme";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
+import UpdatingTotal from "@screens/Financial/Transactions/components/UpdatingTotal";
 
 interface Props {
   balanceCents: number;
@@ -33,6 +34,8 @@ interface Props {
   toReceiveCents?: number;
   toReceiveLabel?: string;
   toReceiveTestID?: string;
+  // Spec 061: a change is still being saved; the figures are the old ones.
+  updating?: boolean;
 }
 
 function MonthSummary(props: Props) {
@@ -76,12 +79,14 @@ function MonthSummary(props: Props) {
     <Card customStyles={{ padding: 0 }} testID={props.testID}>
       <View style={styles.top}>
         <Text.Overline tone={"secondary"} value={props.balanceLabel} />
-        <AmountText
-          currency={DEFAULT_CURRENCY}
-          size={"heading"}
-          type={negative ? "EXPENSE" : undefined}
-          value={Math.abs(props.balanceCents)}
-        />
+        <UpdatingTotal updating={props.updating}>
+          <AmountText
+            currency={DEFAULT_CURRENCY}
+            size={"heading"}
+            type={negative ? "EXPENSE" : undefined}
+            value={Math.abs(props.balanceCents)}
+          />
+        </UpdatingTotal>
         <Text.Caption
           testID={props.scopeTestID}
           tone={"secondary"}
@@ -92,12 +97,14 @@ function MonthSummary(props: Props) {
       <View style={styles.metrics}>
         <View style={[styles.column, styles.columnLeft]}>
           <Text.Overline tone={"secondary"} value={props.incomesLabel} />
-          <AmountText
-            currency={DEFAULT_CURRENCY}
-            testID={props.incomeTestID}
-            tone={"income"}
-            value={props.incomeCents}
-          />
+          <UpdatingTotal updating={props.updating}>
+            <AmountText
+              currency={DEFAULT_CURRENCY}
+              testID={props.incomeTestID}
+              tone={"income"}
+              value={props.incomeCents}
+            />
+          </UpdatingTotal>
           {props.toReceiveLabel ? (
             <View style={styles.pending}>
               <Text.Caption tone={"secondary"} value={props.toReceiveLabel} />
@@ -114,12 +121,14 @@ function MonthSummary(props: Props) {
         <Divider vertical />
         <View style={[styles.column, styles.columnRight]}>
           <Text.Overline tone={"secondary"} value={props.expensesLabel} />
-          <AmountText
-            currency={DEFAULT_CURRENCY}
-            testID={props.expenseTestID}
-            tone={"expense"}
-            value={props.expenseCents}
-          />
+          <UpdatingTotal updating={props.updating}>
+            <AmountText
+              currency={DEFAULT_CURRENCY}
+              testID={props.expenseTestID}
+              tone={"expense"}
+              value={props.expenseCents}
+            />
+          </UpdatingTotal>
           {props.toPayLabel ? (
             <View style={styles.pending}>
               <Text.Caption tone={"secondary"} value={props.toPayLabel} />

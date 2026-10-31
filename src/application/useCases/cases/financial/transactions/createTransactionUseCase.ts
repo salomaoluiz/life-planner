@@ -4,6 +4,11 @@ import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import Repositories from "@domain/repositories";
 
+// Spec 061: the id lets the list tell the created row from its pending copy.
+export interface CreatedTransaction {
+  id: string;
+}
+
 export interface CreateTransactionUseCaseParams {
   // Exactly one of accountId / creditCardId (a card purchase has no account).
   accountId?: string;
@@ -23,7 +28,10 @@ export interface CreateTransactionUseCaseParams {
 
 function createTransactionUseCase(
   repositories: Repositories,
-): IUseCaseFactoryWithParamResponse<CreateTransactionUseCaseParams, void> {
+): IUseCaseFactoryWithParamResponse<
+  CreateTransactionUseCaseParams,
+  CreatedTransaction
+> {
   return {
     execute: async (params: CreateTransactionUseCaseParams) => {
       const owner = OwnerType[params.owner as keyof typeof OwnerType];
@@ -38,21 +46,24 @@ function createTransactionUseCase(
       }
 
       try {
-        await repositories.financialRepository.transaction.createTransaction({
-          accountId: params.accountId,
-          category: params.category,
-          categoryId: params.categoryId,
-          creditCardId: params.creditCardId,
-          date: params.date,
-          description: params.description,
-          notes: params.notes,
-          owner,
-          ownerId: params.ownerId,
-          paid: params.paid,
-          tags: params.tags,
-          type,
-          value: params.value,
-        });
+        const created =
+          await repositories.financialRepository.transaction.createTransaction({
+            accountId: params.accountId,
+            category: params.category,
+            categoryId: params.categoryId,
+            creditCardId: params.creditCardId,
+            date: params.date,
+            description: params.description,
+            notes: params.notes,
+            owner,
+            ownerId: params.ownerId,
+            paid: params.paid,
+            tags: params.tags,
+            type,
+            value: params.value,
+          });
+
+        return { id: created.id };
       } catch (error) {
         if (error instanceof DefaultError) {
           error.addContext({

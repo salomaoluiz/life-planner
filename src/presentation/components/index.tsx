@@ -87,6 +87,7 @@ export {
 export { default as Picker } from "./Picker";
 export { default as PieBreakdown, PieBreakdownProps } from "./PieBreakdown";
 export { default as ProgressBar, ProgressBarProps } from "./ProgressBar";
+export { default as ProgressChip, ProgressChipProps } from "./ProgressChip";
 export {
   default as QuickAddButton,
   QuickAddButtonProps,
@@ -108,6 +109,7 @@ export {
 } from "./SegmentedControl";
 export { default as SelectField, SelectFieldProps } from "./SelectField";
 export { default as Spacer, SpacerProps } from "./Spacer";
+export { default as Spinner, SpinnerProps } from "./Spinner";
 export { default as StatTile, StatTileProps } from "./StatTile";
 export { default as StatusBanner, StatusBannerProps } from "./StatusBanner";
 export { default as Stepper, StepperProps, StepperStep } from "./Stepper";

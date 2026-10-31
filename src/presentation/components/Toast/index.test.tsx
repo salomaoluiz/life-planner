@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-import { act, screen } from "@tests";
+import { act, fireEvent, screen } from "@tests";
 
 import { setup, spies } from "./mocks/index.mocks";
 
@@ -55,4 +55,21 @@ it("SHOULD show a custom icon WHEN one is given", () => {
   setup({ icon: "lock-outline" });
 
   expect(screen.getByText("Transaction saved")).toBeTruthy();
+});
+
+it("SHOULD render the action and call onAction when pressed", () => {
+  const onAction = jest.fn();
+
+  setup({ actionLabel: "Try again", actionTestID: "toast-action", onAction });
+  expect(screen.getByText("Try again")).toBeTruthy();
+  fireEvent.press(screen.getByTestId("toast-action"));
+  expect(onAction).toHaveBeenCalledTimes(1);
+  expect(screen.getByTestId("toast-wrapper").props.pointerEvents).toBe(
+    "box-none",
+  );
+});
+
+it("SHOULD NOT render the action without onAction", () => {
+  setup({ actionLabel: "Try again", actionTestID: "toast-action" });
+  expect(screen.queryByTestId("toast-action")).toBeNull();
 });

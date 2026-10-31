@@ -37,12 +37,23 @@ import {
   recurrenceOccurrenceCount,
 } from "@screens/Financial/models/recurrence";
 import type { TransactionsData } from "@screens/Financial/Transactions/hooks/useTransactionsViewModel";
+import openTransactionModal from "@screens/Financial/Transactions/pending/openTransactionModal";
+import {
+  consumeRetryDraft,
+  newPendingId,
+  setRetryDraft,
+} from "@screens/Financial/Transactions/pending/pendingChanges";
+import runPendingChange from "@screens/Financial/Transactions/pending/runPendingChange";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 import { decimalStringToCents } from "@utils/money";
 
 import { buildDescriptionSuggestions } from "../models/descriptionSuggestions";
 import NewTransactionUIModel from "../models/NewTransactionUIModel";
+import {
+  buildDeleteTarget,
+  buildPendingRow,
+} from "../models/pendingTransaction";
 import {
   buildRecurringSave,
   lockedHelperKey,
@@ -209,6 +220,8 @@ function useNewTransactionViewModel() {
     // The scope owner the form was opened from (spec 050); ignored when it is not a known owner.
     ownerId?: string;
     recurrenceId?: string;
+    // Set by "Try again" of a failed change (spec 061): the form starts from the draft the user had typed.
+    retry?: string;
   }>();
   const isProjected = !!params.recurrenceId && !params.id;
   const isEditing = !!params.id || isProjected;
@@ -380,7 +393,12 @@ function useNewTransactionViewModel() {
     params.ownerId,
   ]);
 
-  const [edited, setEdited] = useState<TransactionFormState>();
+  const [retryDraft] = useState(() =>
+    params.retry ? consumeRetryDraft() : undefined,
+  );
+  const [edited, setEdited] = useState<TransactionFormState | undefined>(
+    retryDraft,
+  );
   // Spec 039: after "Save and add another" the reset form is the new baseline, so closing it untouched is not "dirty".
   const [baseline, setBaseline] = useState<TransactionFormState>();
   const [isSaved, setSaved] = useState(false);
@@ -594,18 +612,144 @@ function useNewTransactionViewModel() {
     if (isRecurring && initial && existing) {
       saveRecurring(state, initial, existing);
     } else if (isEditing) {
-      updateMutation.mutate(
-        toUpdateParams(params.id!, state, owner, categoryName),
-      );
+      sendEdit(state, owner, categoryName);
     } else if (state.payWith === "CARD" && state.installmentsOn) {
       createPlanMutation.mutate(toCreateInstallmentParams(state, owner));
     } else if (state.repeatOn) {
       createRecurrenceMutation.mutate(toCreateRecurrenceParams(state, owner));
     } else {
-      createMutation.mutate(toCreateParams(state, owner, categoryName));
+      sendCreate(state, owner, categoryName);
     }
 
     return true;
+  }
+
+  // Spec 061 FR 4: the row as the form describes it, for the list to show while the request runs.
+  function pendingRowOf(
+    id: string,
+    form: TransactionFormState,
+    owner: OwnerDTO,
+    categoryName: string,
+  ) {
+    const card =
+      form.payWith === "CARD" ? uiModel?.card(form.creditCardId) : undefined;
+    const day = `${form.date.getFullYear()}-${String(form.date.getMonth() + 1).padStart(2, "0")}-${String(form.date.getDate()).padStart(2, "0")}`;
+
+    return buildPendingRow({
+      accountName: accounts.data?.find((item) => item.id === form.accountId)
+        ?.name,
+      categoryName,
+      id,
+      invoiceMonth: card ? invoiceMonthOf(day, card.closingDay) : undefined,
+      owner,
+      state: form,
+    });
+  }
+
+  // After an optimistic save: leave the modal, or clear it for the next entry (spec 039), with no wait.
+  function finishOptimisticSave(form: TransactionFormState) {
+    if (saveIntent.current === "next") {
+      const next = resetForNext(form);
+
+      saveIntent.current = "close";
+      setEdited(next);
+      setBaseline(next);
+      setSubmitted(false);
+      setSaved(true);
+      amountInputRef.current?.focus();
+      tags.refetch();
+
+      return;
+    }
+    closeModal();
+  }
+
+  // Spec 061 FR 1: a single create closes the modal at once; the request runs from the pending-changes runner.
+  function sendCreate(
+    form: TransactionFormState,
+    owner: OwnerDTO,
+    categoryName: string,
+  ) {
+    const createParams = toCreateParams(form, owner, categoryName);
+    const resend = saveIntent.current === "next";
+
+    function run() {
+      const id = newPendingId();
+
+      runPendingChange(
+        {
+          description: form.description.trim(),
+          id,
+          kind: "create",
+          row: pendingRowOf(id, form, owner, categoryName),
+        },
+        async () =>
+          useCases.createFinancialTransactionUseCase.execute(createParams),
+        // Save and create another: the form in front is a new entry, so "Try again" resends (open question 1).
+        resend
+          ? run
+          : () => {
+              setRetryDraft(form);
+              openTransactionModal({ retry: "1" });
+            },
+      );
+    }
+
+    run();
+    finishOptimisticSave(form);
+  }
+
+  function sendEdit(
+    form: TransactionFormState,
+    owner: OwnerDTO,
+    categoryName: string,
+  ) {
+    const id = params.id!;
+
+    runPendingChange(
+      {
+        description: form.description.trim(),
+        id: newPendingId(),
+        kind: "edit",
+        previous: existing,
+        row: pendingRowOf(id, form, owner, categoryName),
+      },
+      async () =>
+        useCases.updateFinancialTransactionUseCase.execute(
+          toUpdateParams(id, form, owner, categoryName),
+        ),
+      () => {
+        setRetryDraft(form);
+        openTransactionModal({ id, retry: "1" });
+      },
+    );
+    finishOptimisticSave(form);
+  }
+
+  // Spec 061 FR 6: a delete keeps the row in the list as "Deleting" and closes the modal at once.
+  function sendDelete(
+    execute: () => Promise<unknown>,
+    scopeOfDelete?: RecurrenceScope,
+  ) {
+    if (!existing) {
+      return;
+    }
+    const id = existing.id;
+
+    runPendingChange(
+      {
+        description: existing.description,
+        kind: "delete",
+        previous: existing,
+        target: buildDeleteTarget(existing, scopeOfDelete),
+      },
+      async () => {
+        await execute();
+      },
+      // The retry goes through the form, whose delete asks again (and confirms paid occurrences).
+      () => openTransactionModal({ id, retry: "1" }),
+    );
+    closeModal();
   }
 
   // Spec 034 FR 19-23: the scope decides which endpoint takes the change.
@@ -656,21 +800,44 @@ function useNewTransactionViewModel() {
     setAllDeleteOpen(false);
     setDeleteDialogOpen(false);
 
+    // A retry (or the confirmation of paid occurrences) goes through the blocking mutations, so the API answer
+    // can still ask the user (spec 034 FR 31).
+    const optimistic = !params.retry && !confirmPaid;
+
     if (deleteScope === "ALL") {
-      deleteRecurrenceMutation.mutate({
+      const request = {
         confirmPaid,
         id: existing.recurrenceId,
-      });
+      };
+
+      if (optimistic) {
+        sendDelete(
+          async () =>
+            useCases.deleteFinancialRecurrenceUseCase.execute(request),
+          "ALL",
+        );
+      } else {
+        deleteRecurrenceMutation.mutate(request);
+      }
 
       return;
     }
 
-    deleteOccurrenceMutation.mutate({
+    const request = {
       confirmPaid,
       occurrenceNumber: existing.occurrenceNumber!,
       recurrenceId: existing.recurrenceId,
       scope: deleteScope,
-    });
+    };
+
+    if (optimistic) {
+      sendDelete(
+        async () => useCases.deleteFinancialOccurrenceUseCase.execute(request),
+        deleteScope,
+      );
+    } else {
+      deleteOccurrenceMutation.mutate(request);
+    }
   }
 
   function onRecurrenceDeletePress() {
@@ -685,6 +852,10 @@ function useNewTransactionViewModel() {
   }
 
   function onClose() {
+    // Spec 061 FR 2: the modal cannot be closed while a blocking request runs.
+    if (isBlocking) {
+      return;
+    }
     if (isDirty) {
       setDiscardDialogOpen(true);
       return;
@@ -693,8 +864,17 @@ function useNewTransactionViewModel() {
   }
 
   function onDeleteConfirm() {
+    const request = { id: params.id!, ownerId: state!.ownerId };
+
     setDeleteDialogOpen(false);
-    deleteMutation.mutate({ id: params.id!, ownerId: state!.ownerId });
+    if (params.retry) {
+      deleteMutation.mutate(request);
+
+      return;
+    }
+    sendDelete(async () =>
+      useCases.deleteFinancialTransactionUseCase.execute(request),
+    );
   }
 
   function onCreateAccountPress() {
@@ -751,6 +931,10 @@ function useNewTransactionViewModel() {
     splitRecurrenceMutation.isFetching ||
     materializeMutation.isFetching;
 
+  // Spec 061 FR 2: installment plans, recurrences and edits of their rows keep the modal open while they run.
+  const isBlocking =
+    isSaving || mutations.some((mutation) => mutation.isFetching);
+
   // The amount is in the currency of the chosen account or card (spec 040); it is never typed.
   const currency =
     (state?.payWith === "CARD"
@@ -799,6 +983,7 @@ function useNewTransactionViewModel() {
     installments,
     invoiceHint: cardHints.invoiceHint,
     invoiceMonthLabelDate: cardHints.monthDate,
+    isBlocking,
     isCategoryPickerOpen,
     isDeleteDialogOpen,
     isDeleting:

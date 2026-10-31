@@ -1,9 +1,12 @@
+import TransactionDTO from "@application/dto/financial/TransactionDTO";
+
 import {
   activeGroups,
   clearGroup,
   effectiveRange,
   EMPTY_FILTERS,
   isFiltering,
+  matchesPendingFilters,
   periodPreset,
   summarize,
   toQueryFilter,
@@ -172,5 +175,73 @@ describe("summarize", () => {
       incomeCents: 1000,
       resultCents: -40530,
     });
+  });
+});
+
+describe("matchesPendingFilters (spec 061)", () => {
+  const row = new TransactionDTO({
+    accountId: "acc-1",
+    category: "Food",
+    categoryId: "cat-1",
+    date: new Date(2026, 9, 10).toISOString(),
+    description: "Lunch at Café",
+    id: "p-1",
+    notes: "with team",
+    owner: "USER",
+    ownerId: "user-id",
+    tags: [{ id: "tag-1", name: "work" }],
+    type: "EXPENSE",
+    value: "10.00",
+  });
+
+  it("SHOULD accept a row when no group excludes it", () => {
+    expect(matchesPendingFilters(row, EMPTY_FILTERS)).toBe(true);
+  });
+
+  it("SHOULD reject a row outside the period, category, source, tags or situation", () => {
+    expect(
+      matchesPendingFilters(row, {
+        ...EMPTY_FILTERS,
+        period: { from: "2026-11-01", to: "2026-11-30" },
+      }),
+    ).toBe(false);
+    expect(
+      matchesPendingFilters(row, { ...EMPTY_FILTERS, categoryIds: ["x"] }),
+    ).toBe(false);
+    expect(
+      matchesPendingFilters(row, { ...EMPTY_FILTERS, accountIds: ["x"] }),
+    ).toBe(false);
+    expect(
+      matchesPendingFilters(row, { ...EMPTY_FILTERS, tagIds: ["x"] }),
+    ).toBe(false);
+    expect(
+      matchesPendingFilters(row, { ...EMPTY_FILTERS, situation: "UNPAID" }),
+    ).toBe(false);
+    expect(
+      matchesPendingFilters(row, { ...EMPTY_FILTERS, origin: "CARD" }),
+    ).toBe(false);
+  });
+
+  it("SHOULD accept a row that matches the chosen groups", () => {
+    expect(
+      matchesPendingFilters(row, {
+        ...EMPTY_FILTERS,
+        accountIds: ["acc-1"],
+        categoryIds: ["cat-1"],
+        tagIds: ["tag-1"],
+      }),
+    ).toBe(true);
+  });
+
+  it("SHOULD search description, notes and category without case or accents", () => {
+    expect(
+      matchesPendingFilters(row, { ...EMPTY_FILTERS, search: "cafe" }),
+    ).toBe(true);
+    expect(
+      matchesPendingFilters(row, { ...EMPTY_FILTERS, search: "TEAM" }),
+    ).toBe(true);
+    expect(
+      matchesPendingFilters(row, { ...EMPTY_FILTERS, search: "zzz" }),
+    ).toBe(false);
   });
 });

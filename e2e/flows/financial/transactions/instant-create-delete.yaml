@@ -1,0 +1,100 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/instant-create-delete
+tags:
+  - financial
+  - spec-061
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Transaction
+      KEY: TRANSACTION_NAME
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.empty-month"
+    timeout: 20000
+# The header is taller since spec 025: scroll the list to reach the action
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- tapOn:
+    id: "financial.transactions.empty-month-action"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.amount-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.transaction-form.amount-input"
+- eraseText
+- inputText: "23490"
+- tapOn:
+    id: "financial.transaction-form.description-input"
+- inputText: ${output.TRANSACTION_NAME}
+- tapOn:
+    id: "financial.transaction-form.category-${output.EXPENSE_CATEGORY_ID}"
+- runFlow: ../../../subflows/financial/scroll-form-nudge.yaml
+- tapOn:
+    id: "financial.transaction-form.account-select"
+- tapOn:
+    id: "financial.transaction-form.account-select-option-${output.ACCOUNT_ID}"
+- tapOn:
+    id: "financial.transaction-form.save-button"
+# The modal closes at once and the row shows up (pending first, then confirmed)
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.TRANSACTION_NAME}
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.transaction-form.save-button"
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.transactions.pendingChip"
+    timeout: 20000
+- assertVisible:
+    id: "financial.transactions.summary-expense"
+    text: ".*234[.,]90.*"
+# Confirmed row opens as a normal one
+- tapOn:
+    id: "financial.transactions.row-title"
+    text: ${output.TRANSACTION_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.description-input"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.delete-button"
+    timeout: 20000
+- tapOn:
+    id: "financial.transaction-form.delete-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.delete-dialog-confirm"
+    timeout: 20000
+- tapOn:
+    id: "financial.transaction-form.delete-dialog-confirm"
+# The modal closes at once; the row leaves when the API confirms
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.empty-month"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.transactions.row-title"
+- assertNotVisible:
+    id: "financial.transactions.pendingChip"
