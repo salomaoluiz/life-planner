@@ -4,6 +4,7 @@ tags:
   - stock
   - home
   - spec-010
+  - spec-062
 onFlowComplete:
   - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
 ---
@@ -41,6 +42,12 @@ onFlowComplete:
     env:
       TOKEN: ${output.TOKEN}
       REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+# Spec 062: the Stock section sits below the Finance section, outside the 1024x625 viewport
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+- runFlow: ../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:
       id: "home.stock-attention.card"
