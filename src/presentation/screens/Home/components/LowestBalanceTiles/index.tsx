@@ -107,34 +107,36 @@ function LowestBalanceTiles({
 
   return (
     <Card fill={fill}>
-      <Text.Overline value={t("home.finance.lowest.title")} />
-      <View style={styles.tiles}>
-        {data.hasAccounts ? (
-          data.tiles.map((tile) => (
-            <Tile key={tile.id} onPress={onPress} tile={tile} />
-          ))
-        ) : (
-          <>
-            <EmptyTile />
-            <EmptyTile />
-          </>
+      <View style={styles.root}>
+        <Text.Overline value={t("home.finance.lowest.title")} />
+        <View style={styles.tiles}>
+          {data.hasAccounts ? (
+            data.tiles.map((tile) => (
+              <Tile key={tile.id} onPress={onPress} tile={tile} />
+            ))
+          ) : (
+            <>
+              <EmptyTile />
+              <EmptyTile />
+            </>
+          )}
+        </View>
+        {!data.hasAccounts && (
+          <View>
+            <Text.Caption value={t("home.finance.lowest.noAccounts")} />
+            <Touchable
+              accessibilityRole="link"
+              onPress={onCreateAccountPress}
+              testID={homeTestIds.financeLowestCreateAccount}
+            >
+              <Text.BodyStrong
+                tone="accent"
+                value={t("home.finance.lowest.createAccount")}
+              />
+            </Touchable>
+          </View>
         )}
       </View>
-      {!data.hasAccounts && (
-        <View>
-          <Text.Caption value={t("home.finance.lowest.noAccounts")} />
-          <Touchable
-            accessibilityRole="link"
-            onPress={onCreateAccountPress}
-            testID={homeTestIds.financeLowestCreateAccount}
-          >
-            <Text.BodyStrong
-              tone="accent"
-              value={t("home.finance.lowest.createAccount")}
-            />
-          </Touchable>
-        </View>
-      )}
     </Card>
   );
 }

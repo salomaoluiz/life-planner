@@ -101,10 +101,14 @@ it("SHOULD show the projected balance, what it is made of and open the Overview 
     screen.getByTestId(homeTestIds.financeProjectedBalance),
   ).toHaveTextContent(/800/);
   expect(
-    screen.getByText(
-      /home.finance.breakdown.*\$1,000\.00.*\$500\.00.*\$300\.00/,
-    ),
+    screen.getByText(/home.finance.breakdown.current.*R\$1,000\.00/),
   ).toBeOnTheScreen();
+  expect(screen.getByText(/^\+ R\$300\.00$/)).toBeOnTheScreen();
+  expect(screen.getByText(/^− R\$500\.00$/)).toBeOnTheScreen();
+  expect(
+    screen.getByText("home.finance.breakdown.toReceive"),
+  ).toBeOnTheScreen();
+  expect(screen.getByText("home.finance.breakdown.toPay")).toBeOnTheScreen();
 
   fireEvent.press(screen.getByTestId(homeTestIds.financeBalance));
 

@@ -4,8 +4,11 @@ const home = {
     personal: "Personal",
   },
   finance: {
-    breakdown:
-      "Current balance {{current}} + {{toReceive}} to receive − {{toPay}} to pay",
+    breakdown: {
+      current: "Current balance {{amount}}",
+      toPay: "to pay",
+      toReceive: "to receive",
+    },
     expenses: "Expenses this month",
     income: "Income this month",
     lowest: {

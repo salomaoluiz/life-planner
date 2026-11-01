@@ -9,6 +9,7 @@ function useStyles() {
     styles: StyleSheet.create({
       detail: { gap: theme.sizes.spacing.xs },
       detailTitle: { paddingBottom: theme.sizes.spacing.xs },
+      root: { gap: theme.sizes.spacing.sm },
       tile: { flex: 1, gap: theme.sizes.spacing.xs },
       tileHeader: {
         alignItems: "center",

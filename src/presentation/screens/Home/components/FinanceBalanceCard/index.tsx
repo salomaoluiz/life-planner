@@ -47,51 +47,77 @@ function FinanceBalanceCard({ fill, onPress, state }: Props) {
 
   return (
     <Card fill={fill} onPress={onPress} testID={homeTestIds.financeBalance}>
-      <Text.Overline
-        value={t("home.finance.projectedEnd", { month: data.monthName })}
-      />
-      <AmountText
-        currency={DEFAULT_CURRENCY}
-        size="display"
-        testID={homeTestIds.financeProjectedBalance}
-        type={data.projectedType}
-        value={data.projectedValue}
-      />
-      <Text.Caption
-        value={t("home.finance.breakdown", {
-          current: money(currentCents),
-          toPay: money(toPayCents),
-          toReceive: money(toReceiveCents),
-        })}
-      />
-      <View style={styles.metrics}>
-        <View style={styles.metric}>
-          <MetricBlock
-            label={t("home.finance.income")}
-            trend="income"
-            value={
-              <AmountText
-                currency={DEFAULT_CURRENCY}
-                size="body"
-                tone="income"
-                value={data.income}
-              />
-            }
+      <View style={styles.root}>
+        <View style={styles.header}>
+          <Text.Overline
+            value={t("home.finance.projectedEnd", { month: data.monthName })}
           />
+          <AmountText
+            currency={DEFAULT_CURRENCY}
+            size="display"
+            testID={homeTestIds.financeProjectedBalance}
+            type={data.projectedType}
+            value={data.projectedValue}
+          />
+          <View style={styles.breakdown}>
+            <Text.Caption
+              value={t("home.finance.breakdown.current", {
+                amount: money(currentCents),
+              })}
+            />
+            <Text.Caption
+              bold
+              tone="income"
+              value={formatAmount(
+                toReceiveCents,
+                localeTag,
+                DEFAULT_CURRENCY,
+                "INCOME",
+              )}
+            />
+            <Text.Caption value={t("home.finance.breakdown.toReceive")} />
+            <Text.Caption
+              bold
+              tone="expense"
+              value={formatAmount(
+                toPayCents,
+                localeTag,
+                DEFAULT_CURRENCY,
+                "EXPENSE",
+              )}
+            />
+            <Text.Caption value={t("home.finance.breakdown.toPay")} />
+          </View>
         </View>
-        <View style={styles.metric}>
-          <MetricBlock
-            label={t("home.finance.expenses")}
-            trend="expense"
-            value={
-              <AmountText
-                currency={DEFAULT_CURRENCY}
-                size="body"
-                tone="expense"
-                value={data.expense}
-              />
-            }
-          />
+        <View style={styles.metrics}>
+          <View style={styles.metric}>
+            <MetricBlock
+              label={t("home.finance.income")}
+              trend="income"
+              value={
+                <AmountText
+                  currency={DEFAULT_CURRENCY}
+                  size="body"
+                  tone="income"
+                  value={data.income}
+                />
+              }
+            />
+          </View>
+          <View style={styles.metric}>
+            <MetricBlock
+              label={t("home.finance.expenses")}
+              trend="expense"
+              value={
+                <AmountText
+                  currency={DEFAULT_CURRENCY}
+                  size="body"
+                  tone="expense"
+                  value={data.expense}
+                />
+              }
+            />
+          </View>
         </View>
       </View>
     </Card>

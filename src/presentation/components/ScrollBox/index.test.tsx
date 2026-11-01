@@ -4,7 +4,7 @@ import { render, screen } from "@tests";
 
 import ScrollBox from "./";
 
-it("SHOULD cap the height, scroll nested and label the list", () => {
+it("SHOULD cap the height, scroll nested without a scroll bar and label the list", () => {
   render(
     <ScrollBox accessibilityLabel="Upcoming list" maxHeight={320} testID="box">
       <Text>row</Text>
@@ -15,6 +15,7 @@ it("SHOULD cap the height, scroll nested and label the list", () => {
 
   expect(StyleSheet.flatten(box.props.style).maxHeight).toBe(320);
   expect(box.props.nestedScrollEnabled).toBe(true);
+  expect(box.props.showsVerticalScrollIndicator).toBe(false);
   expect(box.props.accessibilityLabel).toBe("Upcoming list");
   expect(screen.getByText("row")).toBeTruthy();
 });

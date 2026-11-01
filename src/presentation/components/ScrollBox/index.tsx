@@ -8,13 +8,14 @@ export interface ScrollBoxProps {
   testID?: string;
 }
 
-// A list that scrolls inside its card, apart from the scroll of the screen: nested scroll is on for Android.
+// A list that scrolls inside its card, apart from the scroll of the screen: nested scroll is on for Android and the
+// scroll bar is hidden (the list still scrolls by wheel, touch and keyboard).
 function ScrollBox(props: ScrollBoxProps) {
   return (
     <ScrollView
       accessibilityLabel={props.accessibilityLabel}
       nestedScrollEnabled
-      showsVerticalScrollIndicator
+      showsVerticalScrollIndicator={false}
       style={{ maxHeight: props.maxHeight }}
       testID={props.testID}
     >
