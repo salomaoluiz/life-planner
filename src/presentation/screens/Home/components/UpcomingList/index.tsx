@@ -56,6 +56,7 @@ function Row({
   return (
     <ListItem
       divider
+      inset
       leading={<IconTile name={row.icon} tone={row.tone} />}
       meta={
         badge ? (
@@ -208,6 +209,7 @@ function UpcomingList({
   return (
     <Card fill={fill} testID={homeTestIds.financeUpcoming}>
       <Section
+        actionInset
         actionLabel={t("common.actions.seeAll")}
         onActionPress={onSeeAllPress}
         title={t("home.upcoming.title")}

@@ -5,6 +5,8 @@ import Text from "@components/Text";
 import { useKitTheme } from "@components/utils/useKitTheme";
 
 export interface SectionProps {
+  /** Keeps the horizontal padding of the action button, so its focus ring does not touch the edge (default: the label lines up with the content edge) */
+  actionInset?: boolean;
   actionLabel?: string;
   children: React.ReactNode;
   onActionPress?: () => void;
@@ -40,7 +42,7 @@ function Section(props: SectionProps) {
         </View>
         {props.actionLabel && props.onActionPress ? (
           <Button.Ghost
-            inline
+            inline={!props.actionInset}
             label={props.actionLabel}
             onPress={props.onActionPress}
             testID={testID && `${testID}-action`}

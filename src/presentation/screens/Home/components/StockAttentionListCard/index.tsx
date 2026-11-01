@@ -53,7 +53,6 @@ function StockAttentionListCard({
           title={t("home.stock.empty")}
           trailing={
             <Button.Ghost
-              inline
               label={t("home.stock.addItem")}
               onPress={onAddItemPress}
             />

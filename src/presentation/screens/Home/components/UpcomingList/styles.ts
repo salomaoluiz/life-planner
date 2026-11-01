@@ -11,6 +11,7 @@ function useStyles() {
         alignItems: "center",
         flexDirection: "row",
         justifyContent: "space-between",
+        paddingHorizontal: theme.sizes.spacing.sm,
         paddingTop: theme.sizes.spacing.sm,
       },
       trailing: { alignItems: "flex-end", gap: theme.sizes.spacing.xs },

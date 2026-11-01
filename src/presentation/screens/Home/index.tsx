@@ -53,6 +53,7 @@ function Home() {
         value={vm.filter.value}
       />
       <Section
+        actionInset
         actionLabel={t("home.finance.overview")}
         onActionPress={vm.onOverviewPress}
         testID={homeTestIds.financeSection}
@@ -83,6 +84,7 @@ function Home() {
         </View>
       </Section>
       <Section
+        actionInset
         actionLabel={t("home.stock.seeAll")}
         onActionPress={vm.onStockSeeAllPress}
         testID={homeTestIds.stockSection}
