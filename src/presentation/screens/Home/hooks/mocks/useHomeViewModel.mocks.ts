@@ -174,10 +174,34 @@ const spies = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  // Only the clock is fixed (October 2026, the month of the balances above): timers stay real for the awaits.
+  jest.useFakeTimers({
+    doNotFake: [
+      "cancelAnimationFrame",
+      "cancelIdleCallback",
+      "clearImmediate",
+      "clearInterval",
+      "clearTimeout",
+      "hrtime",
+      "nextTick",
+      "performance",
+      "queueMicrotask",
+      "requestAnimationFrame",
+      "requestIdleCallback",
+      "setImmediate",
+      "setInterval",
+      "setTimeout",
+    ],
+    now: new Date(2026, 9, 15, 10),
+  });
   resetHomeOwnerFilter();
   Object.values(queries).forEach((query) => query.reset());
   spies.isFocused.mockReturnValue(false);
   spies.useBreakpoint.mockReturnValue("compact");
+});
+
+afterEach(() => {
+  jest.useRealTimers();
 });
 
 type QueryName = keyof typeof queries;

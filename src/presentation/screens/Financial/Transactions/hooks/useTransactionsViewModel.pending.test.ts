@@ -13,8 +13,8 @@ import {
   ui,
 } from "./mocks/useTransactionsViewModel.mocks";
 
-const today = new Date();
-const thisMonth = new Date(today.getFullYear(), today.getMonth(), 3);
+// The mocks fix the clock at 2026-10-05: the rows belong to that month, whatever day the suite runs on.
+const thisMonth = new Date(2026, 9, 3);
 
 beforeEach(() => resetPending());
 
