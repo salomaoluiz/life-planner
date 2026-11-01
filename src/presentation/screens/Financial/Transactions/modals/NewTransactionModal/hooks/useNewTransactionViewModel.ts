@@ -800,44 +800,23 @@ function useNewTransactionViewModel() {
     setAllDeleteOpen(false);
     setDeleteDialogOpen(false);
 
-    // A retry (or the confirmation of paid occurrences) goes through the blocking mutations, so the API answer
-    // can still ask the user (spec 034 FR 31).
-    const optimistic = !params.retry && !confirmPaid;
-
+    // Recurring deletes stay blocking (not optimistic): the API answer can ask the user to confirm the paid
+    // occurrences (spec 034 FR 31), and that question has to show on the first try, with the form still open.
     if (deleteScope === "ALL") {
-      const request = {
+      deleteRecurrenceMutation.mutate({
         confirmPaid,
         id: existing.recurrenceId,
-      };
-
-      if (optimistic) {
-        sendDelete(
-          async () =>
-            useCases.deleteFinancialRecurrenceUseCase.execute(request),
-          "ALL",
-        );
-      } else {
-        deleteRecurrenceMutation.mutate(request);
-      }
+      });
 
       return;
     }
 
-    const request = {
+    deleteOccurrenceMutation.mutate({
       confirmPaid,
       occurrenceNumber: existing.occurrenceNumber!,
       recurrenceId: existing.recurrenceId,
       scope: deleteScope,
-    };
-
-    if (optimistic) {
-      sendDelete(
-        async () => useCases.deleteFinancialOccurrenceUseCase.execute(request),
-        deleteScope,
-      );
-    } else {
-      deleteOccurrenceMutation.mutate(request);
-    }
+    });
   }
 
   function onRecurrenceDeletePress() {

@@ -15,6 +15,11 @@ Format: [Keep a Changelog](https://keepachangelog.com).
 
 - "Latest transactions" and the month result card are gone from the home (spec 062).
 
+### Fixed
+
+- Deleting a recurring series with "All" shows the paid-occurrences warning on the first try, instead of failing first and asking only on "Try again": recurring deletes keep the form open with a "Saving" button until the server answers (spec 061).
+- Creating or deleting two transactions in a row no longer drops the first one's "Saving"/"Deleting" state before the list refreshed (spec 061).
+
 ## [1.5.0] - 2026-10-31
 
 ### Added
