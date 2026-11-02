@@ -13,3 +13,20 @@ it("SHOULD call Sentry.initialize", () => {
     tracesSampleRate: 1,
   });
 });
+
+it.each([
+  ["0.2", 0.2],
+  ["1", 1],
+  ["not-a-number", 0],
+  ["5", 1],
+])("SHOULD read the traces sample rate %s as %s", (value, rate) => {
+  const previous = process.env.EXPO_PUBLIC_SENTRY_TRACES_SAMPLER;
+
+  process.env.EXPO_PUBLIC_SENTRY_TRACES_SAMPLER = value;
+  setup();
+  process.env.EXPO_PUBLIC_SENTRY_TRACES_SAMPLER = previous;
+
+  expect(spies.init).toHaveBeenCalledWith(
+    expect.objectContaining({ tracesSampleRate: rate }),
+  );
+});

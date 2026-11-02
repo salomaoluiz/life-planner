@@ -109,6 +109,8 @@ return models.map((m) => new XEntity({ ... }));
 
 `cache` = `import cache, { CacheStringKeys } from "@infrastructure/cache"` (`get`, `set`, `invalidate(key | key[], { uniqueId? })`, `invalidateAll`).
 
+Cache write/read failures report only the key, options and byte size to monitoring, never the cached data (it holds personal/financial records).
+
 ## Repository impl (`xRepositoryImpl.ts`)
 
 ```ts

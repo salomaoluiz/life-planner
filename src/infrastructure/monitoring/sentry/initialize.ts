@@ -24,8 +24,15 @@ function sentryInitialize() {
     enableNativeFramesTracking: !isRunningInExpoGo(),
     environment: sentryEnvironment,
     integrations: [navigationIntegration],
-    tracesSampleRate: parseInt(sentryTracesSampler ?? "0"),
+    tracesSampleRate: toSampleRate(sentryTracesSampler),
   });
+}
+
+// A fraction between 0 and 1 ("0.2" = 20%): parseInt read "0.2" as 0. Anything unreadable turns tracing off.
+function toSampleRate(value: string | undefined) {
+  const rate = Number.parseFloat(value ?? "0");
+
+  return Number.isFinite(rate) ? Math.min(Math.max(rate, 0), 1) : 0;
 }
 
 export default sentryInitialize;

@@ -5,6 +5,7 @@ import { cacheStorage } from "@infrastructure/storage";
 import { CachedData, CacheParams, CacheStringKeys } from "./types";
 
 const DEFAULT_TTL = 3600;
+
 function set<T>(cacheKey: CacheStringKeys, data: T, options?: CacheParams) {
   try {
     const key = `${cacheKey}${options?.uniqueId ?? ""}`;
@@ -25,11 +26,21 @@ function set<T>(cacheKey: CacheStringKeys, data: T, options?: CacheParams) {
 
     cacheStorage.setCacheObject(key, cachedData);
   } catch (error) {
+    // Never the data itself: it can hold personal/financial records (and be megabytes, e.g. over the storage quota).
     captureException(error as Error, {
+      bytes: sizeInBytes(data),
       cacheKey,
-      data,
       options,
     });
+  }
+}
+
+// Only the size of the value is reported, and only on the failure path (the value can be megabytes).
+function sizeInBytes(data: unknown): number | undefined {
+  try {
+    return JSON.stringify(data)?.length;
+  } catch {
+    return undefined;
   }
 }
 
