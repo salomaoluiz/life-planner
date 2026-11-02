@@ -3,6 +3,14 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.6.1] - 2026-11-02
+
+### Fixed
+
+- Privacy: a failed local cache write no longer sends any of your data to the monitoring service (spec 063).
+- The app no longer goes blank while your profile refreshes in the background (spec 063).
+- Performance tracing now uses the configured sample rate, and the web app loads fewer bytes (smaller bundle, compressed icon font) (spec 063).
+
 ## [1.6.0] - 2026-10-31
 
 ### Added
