@@ -90,3 +90,22 @@ it("SHOULD expose logged=false and no data WHEN the user query failed (not logge
   expect(result.current.logged).toBe(false);
   expect(result.current.data).toBeUndefined();
 });
+
+it("SHOULD hold the app behind the loader WHILE the first profile load runs", () => {
+  spies.useQuery.mockReturnValue(mocks.useQuery.pendingResponse as never);
+
+  setup();
+
+  expect(spies.loaderSetIsLoading).toHaveBeenLastCalledWith(true, "user");
+});
+
+it("SHOULD NOT turn the loader on WHEN a profile on screen refetches in the background", () => {
+  spies.useQuery.mockReturnValue({
+    ...mocks.useQuery.successResponse,
+    isFetching: true,
+  } as never);
+
+  setup();
+
+  expect(spies.loaderSetIsLoading).toHaveBeenLastCalledWith(false, "user");
+});

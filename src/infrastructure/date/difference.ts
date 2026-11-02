@@ -1,4 +1,8 @@
-import * as dateFns from "date-fns";
+import {
+  differenceInDays,
+  differenceInMilliseconds,
+  differenceInYears,
+} from "date-fns";
 
 import { Duration } from "./types";
 
@@ -9,11 +13,11 @@ function difference(
 ): number {
   switch (type) {
     case Duration.days:
-      return dateFns.differenceInDays(currentDate, dateToCompare);
+      return differenceInDays(currentDate, dateToCompare);
     case Duration.milliseconds:
-      return dateFns.differenceInMilliseconds(currentDate, dateToCompare);
+      return differenceInMilliseconds(currentDate, dateToCompare);
     case Duration.years:
-      return dateFns.differenceInYears(currentDate, dateToCompare);
+      return differenceInYears(currentDate, dateToCompare);
   }
 }
 

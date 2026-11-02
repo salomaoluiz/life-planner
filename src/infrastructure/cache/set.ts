@@ -25,9 +25,9 @@ function set<T>(cacheKey: CacheStringKeys, data: T, options?: CacheParams) {
 
     cacheStorage.setCacheObject(key, cachedData);
   } catch (error) {
+    // Never the data itself: it can hold personal/financial records (and be megabytes, e.g. over the storage quota).
     captureException(error as Error, {
       cacheKey,
-      data,
       options,
     });
   }

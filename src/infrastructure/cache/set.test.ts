@@ -31,7 +31,7 @@ it("SHOULD set cache object with default TTL", () => {
   );
 });
 
-it("SHOULD handle error", () => {
+it("SHOULD report a failed write without the cached data", () => {
   spies.setCacheObject.mockImplementationOnce(() => {
     throw new Error("error");
   });
@@ -42,7 +42,6 @@ it("SHOULD handle error", () => {
   expect(spies.captureException).toHaveBeenCalledTimes(1);
   expect(spies.captureException).toHaveBeenCalledWith(new Error("error"), {
     cacheKey: CacheStringKeys.CACHE_USER_DATA,
-    data: { userId: "1" },
     options: { TTL: 1000 },
   });
 });

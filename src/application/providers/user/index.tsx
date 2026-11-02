@@ -39,9 +39,13 @@ function UserProvider(props: Props) {
     }
   }
 
+  // Only the first load (no profile yet) holds the app behind the global loader. A background refetch of a
+  // profile already on screen must not: the root layout unmounts every screen while the loader is on.
+  const hasProfile = !!data;
+
   useEffect(() => {
-    setIsLoading(isFetching, "user");
-  }, [isFetching]);
+    setIsLoading(isFetching && !hasProfile, "user");
+  }, [isFetching, hasProfile]);
 
   // The API client clears the token/cache on a 401; resetting the queries makes the user
   // query fail (no token) so `logged` becomes false and the router sends the user to /login.

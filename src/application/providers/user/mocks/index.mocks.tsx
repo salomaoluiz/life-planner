@@ -85,6 +85,7 @@ function throwableSetupWithoutProvider() {
 }
 
 const spies = {
+  loaderSetIsLoading: useProviderLoaderResponse.setIsLoading,
   onSessionExpired: onSessionExpiredSpy,
   resetFetcherData: jest.mocked(fetcher.resetFetcherData),
   unsubscribe,
