@@ -101,6 +101,7 @@ export { default as RemovableChip, RemovableChipProps } from "./RemovableChip";
 export { default as ResultsPanel, ResultsPanelProps } from "./ResultsPanel";
 export { default as Screen, ScreenProps } from "./Screen";
 export { default as ScreenHeader, ScreenHeaderProps } from "./ScreenHeader";
+export { default as ScrollBox, ScrollBoxProps } from "./ScrollBox";
 export { default as SearchField, SearchFieldProps } from "./SearchField";
 export { default as Section, SectionProps } from "./Section";
 export {

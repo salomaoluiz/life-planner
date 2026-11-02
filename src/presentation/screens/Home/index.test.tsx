@@ -1,4 +1,4 @@
-import { render, screen } from "@tests";
+import { fireEvent, render, screen } from "@tests";
 import "@shopify/flash-list/jestSetup";
 
 import ProfileButton from "@screens/Navigation/containers/ProfileButton";
@@ -25,6 +25,7 @@ const state = { isError: false, isLoading: true, onRetry: jest.fn() };
 
 function givenViewModel(overrides: Record<string, unknown> = {}) {
   jest.mocked(useHomeViewModel).mockReturnValue({
+    balance: state,
     filter: {
       onChange: jest.fn(),
       options: [
@@ -42,20 +43,23 @@ function givenViewModel(overrides: Record<string, unknown> = {}) {
     },
     isRefreshing: false,
     isSplitLayout: false,
+    lowest: state,
     onAddStockItemPress: jest.fn(),
     onAddTransactionPress: jest.fn(),
+    onCreateAccountPress: jest.fn(),
+    onInvoicePress: jest.fn(),
+    onOverviewPress: jest.fn(),
     onRefresh: jest.fn(),
     onStockSeeAllPress: jest.fn(),
-    onSummaryPress: jest.fn(),
-    onTransactionsSeeAllPress: jest.fn(),
+    onUpcomingItemPress: jest.fn(),
+    onUpcomingSeeAllPress: jest.fn(),
     stock: state,
-    summary: state,
-    transactions: state,
+    upcoming: state,
     ...overrides,
   } as never);
 }
 
-it("SHOULD render the header, the filter and the three blocks", () => {
+it("SHOULD render the header, the filter and the Finance and Stock sections", () => {
   givenViewModel();
 
   render(<Home />);
@@ -65,11 +69,18 @@ it("SHOULD render the header, the filter and the three blocks", () => {
     screen.getByText('home.greeting.morning {"name":"Ana"}'),
   ).toBeOnTheScreen();
   expect(screen.getByTestId("home-filter-ALL")).toBeOnTheScreen();
-  expect(screen.getByTestId("home-summary-loading")).toBeOnTheScreen();
   expect(
-    screen.getByTestId(homeTestIds.stockAttentionLoading),
+    screen.getByTestId(homeTestIds.financeBalanceLoading),
   ).toBeOnTheScreen();
-  expect(screen.getAllByTestId("home-transactions-loading")).toHaveLength(3);
+  expect(
+    screen.getByTestId(homeTestIds.financeLowestLoading),
+  ).toBeOnTheScreen();
+  expect(
+    screen.getAllByTestId(homeTestIds.financeUpcomingLoading),
+  ).toHaveLength(3);
+  expect(
+    screen.getAllByTestId(homeTestIds.stockAttentionLoading).length,
+  ).toBeGreaterThan(0);
 });
 
 it("SHOULD expose the screen testID used by the E2E flows", () => {
@@ -81,12 +92,22 @@ it("SHOULD expose the screen testID used by the E2E flows", () => {
 });
 
 it("SHOULD show an error only in the failed block", () => {
-  givenViewModel({ stock: { ...state, isError: true, isLoading: false } });
+  givenViewModel({
+    stock: { ...state, isError: true, isLoading: false },
+    upcoming: { ...state, isError: true, isLoading: false },
+  });
 
   render(<Home />);
 
-  expect(screen.getByTestId(homeTestIds.stockAttentionError)).toBeOnTheScreen();
-  expect(screen.getByTestId("home-summary-loading")).toBeOnTheScreen();
+  expect(
+    screen.getAllByTestId(homeTestIds.stockAttentionError).length,
+  ).toBeGreaterThan(0);
+  expect(
+    screen.getByTestId(homeTestIds.financeBalanceLoading),
+  ).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(homeTestIds.financeUpcomingError),
+  ).toBeOnTheScreen();
 });
 
 it("SHOULD render the profile button (009) with the user name", () => {
@@ -105,8 +126,31 @@ it("SHOULD render with the split layout on wide screens", () => {
 
   render(<Home />);
 
-  expect(screen.getByTestId("home-summary-loading")).toBeOnTheScreen();
   expect(
-    screen.getByTestId(homeTestIds.stockAttentionLoading),
+    screen.getByTestId(homeTestIds.financeBalanceLoading),
   ).toBeOnTheScreen();
+  expect(
+    screen.getAllByTestId(homeTestIds.stockAttentionLoading).length,
+  ).toBeGreaterThan(0);
+});
+
+it("SHOULD order the sections Finance then Stock and no longer list the latest transactions", () => {
+  givenViewModel();
+
+  render(<Home />);
+
+  expect(screen.getByTestId(homeTestIds.financeSection)).toBeOnTheScreen();
+  expect(screen.getByTestId(homeTestIds.stockSection)).toBeOnTheScreen();
+  expect(screen.queryByText("home.transactions.title")).not.toBeOnTheScreen();
+});
+
+it("SHOULD open the Overview from the section link", () => {
+  const onOverviewPress = jest.fn();
+
+  givenViewModel({ onOverviewPress });
+
+  render(<Home />);
+  fireEvent.press(screen.getByTestId(`${homeTestIds.financeSection}-action`));
+
+  expect(onOverviewPress).toHaveBeenCalledTimes(1);
 });

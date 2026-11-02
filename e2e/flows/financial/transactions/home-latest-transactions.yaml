@@ -4,9 +4,12 @@ tags:
   - financial
   - home
   - spec-010
+  - spec-062
 onFlowComplete:
   - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
 ---
+# Spec 062: the home no longer lists the latest transactions; an unpaid row dated in the past shows in the
+# upcoming list as overdue. A paid row is not listed there.
 - launchApp:
     clearState: true
 - runFlow: ../../../subflows/signup-via-api.yaml
@@ -15,6 +18,7 @@ onFlowComplete:
     env:
       TOKEN: ${output.TOKEN}
       OWNER_ID: ${output.USER_ID}
+- runScript: ../../../scripts/upcoming-dates.js
 - runScript:
     file: ../../../scripts/random-name.js
     env:
@@ -29,6 +33,8 @@ onFlowComplete:
       CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
       DESCRIPTION: ${output.TRANSACTION_NAME}
       VALUE_CENTS: "5500"
+      DATE: ${output.OVERDUE_DATE}
+      PAID: "false"
 - runFlow:
     file: ../../../subflows/login-by-token.yaml
     env:
@@ -40,6 +46,6 @@ onFlowComplete:
     timeout: 20000
 - extendedWaitUntil:
     visible:
-      id: "home.latest-transactions.row-title"
+      id: "home.finance.upcomingItem-title"
       text: ${output.TRANSACTION_NAME}
     timeout: 20000

@@ -1,0 +1,166 @@
+import { StyleSheet } from "react-native";
+
+import { fireEvent, render, screen } from "@tests";
+
+import StockAttentionDTO, {
+  StockAttentionStatus,
+} from "@application/dto/home/StockAttentionDTO";
+import StockDTO from "@application/dto/stock/StockDTO";
+import OwnerDTO from "@application/dto/user/OwnerDTO";
+import { StockOwners, StockUnits } from "@domain/entities/stock/StockEntity";
+import { OwnerType } from "@domain/entities/user/OwnerEntity";
+import StockAttentionUIModel from "@screens/Home/models/StockAttentionUIModel";
+import homeTestIds from "@screens/Home/testIds";
+
+import StockAttentionListCard from "./";
+
+const owners = [
+  new OwnerDTO({ id: "owner-1", name: "Silva", type: OwnerType.FAMILY }),
+];
+
+function model(totalItems: number, withRows = true) {
+  const items = withRows
+    ? [
+        {
+          daysLeft: -1,
+          status: StockAttentionStatus.EXPIRED,
+          stock: stock("s-1", "Milk"),
+        },
+        {
+          daysLeft: 2,
+          status: StockAttentionStatus.EXPIRING,
+          stock: stock("s-2", "Cheese"),
+        },
+      ]
+    : [];
+
+  return new StockAttentionUIModel(
+    new StockAttentionDTO({
+      attentionCount: items.length,
+      items,
+      totalItems,
+    }),
+    owners,
+  );
+}
+
+function stock(id: string, description: string) {
+  return new StockDTO({
+    description,
+    id,
+    owner: StockOwners.FAMILY,
+    ownerId: "owner-1",
+    quantity: 2,
+    unit: StockUnits.UNIT,
+  });
+}
+
+const handlers = { onAddItemPress: jest.fn(), onRowPress: jest.fn() };
+
+function renderLoaded(data: StockAttentionUIModel) {
+  render(
+    <StockAttentionListCard
+      {...handlers}
+      state={{ data, isError: false, isLoading: false, onRetry: jest.fn() }}
+    />,
+  );
+}
+
+beforeEach(() => jest.clearAllMocks());
+
+it("SHOULD render the skeleton WHILE loading", () => {
+  render(
+    <StockAttentionListCard
+      {...handlers}
+      state={{ isError: false, isLoading: true, onRetry: jest.fn() }}
+    />,
+  );
+
+  expect(
+    screen.getByTestId(homeTestIds.stockAttentionLoading),
+  ).toBeOnTheScreen();
+});
+
+it("SHOULD render the error with a retry that refetches only this block", () => {
+  const onRetry = jest.fn();
+  render(
+    <StockAttentionListCard
+      {...handlers}
+      state={{ isError: true, isLoading: false, onRetry }}
+    />,
+  );
+
+  fireEvent.press(screen.getByText("common.actions.tryAgain"));
+
+  expect(onRetry).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD render the rows with title, subtitle and badge", () => {
+  renderLoaded(model(5));
+
+  expect(screen.getByText("Milk")).toBeOnTheScreen();
+  expect(screen.getByText("Cheese")).toBeOnTheScreen();
+  expect(screen.getAllByText(/home.stock.subtitle/)).toHaveLength(2);
+  expect(screen.getByText("home.stock.expired")).toBeOnTheScreen();
+  expect(
+    screen.getByText('home.stock.expiresIn {"count":2}'),
+  ).toBeOnTheScreen();
+});
+
+it("SHOULD open the stock WHEN pressing a row", () => {
+  renderLoaded(model(5));
+
+  fireEvent.press(screen.getAllByTestId(homeTestIds.stockAttentionRow)[0]);
+
+  expect(handlers.onRowPress).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD say nothing is expiring WHEN there are items but none need attention", () => {
+  renderLoaded(model(5, false));
+
+  expect(screen.getByText("home.stock.nothingExpiring")).toBeOnTheScreen();
+  expect(
+    screen.queryByTestId(homeTestIds.stockAttentionRow),
+  ).not.toBeOnTheScreen();
+});
+
+it("SHOULD offer to add an item WHEN the stock is empty", () => {
+  renderLoaded(model(0, false));
+
+  fireEvent.press(screen.getByText("home.stock.addItem"));
+
+  expect(screen.getByText("home.stock.empty")).toBeOnTheScreen();
+  expect(handlers.onAddItemPress).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD fill its column WHEN fill is set", () => {
+  render(
+    <StockAttentionListCard
+      {...handlers}
+      fill
+      state={{
+        data: model(5),
+        isError: false,
+        isLoading: false,
+        onRetry: jest.fn(),
+      }}
+    />,
+  );
+
+  expect(
+    StyleSheet.flatten(
+      screen.getByTestId(homeTestIds.stockAttentionCard).props.style,
+    ).flex,
+  ).toBe(1);
+});
+
+it("SHOULD expose the row and its title ids", () => {
+  renderLoaded(model(5));
+
+  expect(
+    screen.getAllByTestId(homeTestIds.stockAttentionRow).length,
+  ).toBeGreaterThan(0);
+  expect(
+    screen.getAllByTestId(`${homeTestIds.stockAttentionRow}-title`).length,
+  ).toBeGreaterThan(0);
+});

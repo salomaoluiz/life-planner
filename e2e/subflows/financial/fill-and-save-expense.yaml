@@ -1,0 +1,24 @@
+url: ${E2E_WEB_URL}
+---
+# Fills the open transaction form with an expense paid from an account and saves it. Env: AMOUNT (digits), NAME,
+# CATEGORY_ID, ACCOUNT_ID. Leaves the screen right after the tap on save (the modal closes at once, spec 061).
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.amount-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.transaction-form.amount-input"
+- eraseText
+- inputText: ${AMOUNT}
+- tapOn:
+    id: "financial.transaction-form.description-input"
+- inputText: ${NAME}
+- tapOn:
+    id: "financial.transaction-form.category-${CATEGORY_ID}"
+- runFlow: scroll-form-nudge.yaml
+- tapOn:
+    id: "financial.transaction-form.account-select"
+- tapOn:
+    id: "financial.transaction-form.account-select-option-${ACCOUNT_ID}"
+- tapOn:
+    id: "financial.transaction-form.save-button"

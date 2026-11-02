@@ -1274,14 +1274,14 @@ describe("deleting a recurring occurrence (spec 034 FR 28-31)", () => {
       result.current.onRecurrenceDeletePress();
     });
 
-    expect(
-      useCases.deleteFinancialOccurrenceUseCase.execute,
-    ).toHaveBeenCalledWith({
+    // Blocking, not optimistic: the API answer may ask to confirm paid occurrences, and that has to show at once
+    expect(mutations.delete_occurrence.value.mutate).toHaveBeenCalledWith({
       confirmPaid: false,
       occurrenceNumber: 5,
       recurrenceId: "series-1",
       scope: "ONLY_THIS",
     });
+    expect(spies.runPendingChange).not.toHaveBeenCalled();
     expect(result.current.isDeleteDialogOpen).toBe(false);
   });
 
@@ -1296,9 +1296,10 @@ describe("deleting a recurring occurrence (spec 034 FR 28-31)", () => {
       result.current.onRecurrenceDeletePress();
     });
 
-    expect(
-      useCases.deleteFinancialOccurrenceUseCase.execute,
-    ).toHaveBeenCalledWith(expect.objectContaining({ scope: "THIS_AND_NEXT" }));
+    expect(mutations.delete_occurrence.value.mutate).toHaveBeenCalledWith(
+      expect.objectContaining({ scope: "THIS_AND_NEXT" }),
+    );
+    expect(spies.runPendingChange).not.toHaveBeenCalled();
   });
 
   it("SHOULD ask to confirm BEFORE deleting all, then delete the series", () => {
@@ -1313,20 +1314,17 @@ describe("deleting a recurring occurrence (spec 034 FR 28-31)", () => {
     });
 
     expect(result.current.recurrence.isAllDeleteOpen).toBe(true);
-    expect(
-      useCases.deleteFinancialRecurrenceUseCase.execute,
-    ).not.toHaveBeenCalled();
+    expect(mutations.delete_recurrence.value.mutate).not.toHaveBeenCalled();
 
     act(() => {
       result.current.onRecurrenceDeleteConfirm();
     });
 
-    expect(
-      useCases.deleteFinancialRecurrenceUseCase.execute,
-    ).toHaveBeenCalledWith({
+    expect(mutations.delete_recurrence.value.mutate).toHaveBeenCalledWith({
       confirmPaid: false,
       id: "series-1",
     });
+    expect(spies.runPendingChange).not.toHaveBeenCalled();
     expect(result.current.recurrence.isAllDeleteOpen).toBe(false);
   });
 

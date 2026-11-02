@@ -99,6 +99,9 @@ const repositoriesMocks: Repositories = {
       updateTransaction: jest.fn(),
       validateImport: jest.fn(),
     },
+    upcoming: {
+      getUpcoming: jest.fn(),
+    },
   },
   loginRepository: {
     loginWithEmail: jest.fn(),

@@ -91,6 +91,9 @@ const datasourcesMocks: jest.MockedObjectDeep<Datasources> = {
     updateTransaction: jest.fn(),
     validateImport: jest.fn(),
   },
+  financialUpcomingDatasource: {
+    getUpcoming: jest.fn(),
+  },
   loginDatasource: {
     loginWithEmail: jest.fn(),
     logout: jest.fn(),

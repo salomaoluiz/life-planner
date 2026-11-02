@@ -66,3 +66,5 @@ Spec 048 (additive): import rows may carry `invoiceMonth` (`YYYY-MM`) and `paidF
 ## App and API versions (spec 056)
 
 `GET /v1/version` (public) feeds the `version` slice: `VersionModel.fromJSON` → `versionDatasource.getVersionInfo({ refresh })` (any failure becomes `VersionUnavailable`, a `BusinessError`, so the UI shows "API unavailable" instead of crashing) → `versionRepository` (never cached) → `useCases.getVersionInfoUseCase`. The running app version comes from `@infrastructure/appInfo` (`getAppInfo`, `fetchServedWebVersion` for the web `/version.json`, `reloadApp`).
+
+Upcoming items (spec 062, additive): `GET /v1/finance/upcoming?ownerId=…&today=YYYY-MM-DD&days=7&limit=5` returns `{ overdue, next, nextTotal, overdueTotals: { expenseCents, incomeCents } }` for the home Finance section; the app reads it through `financialRepository.upcoming` and `home.getUpcomingItemsUseCase`. Needs the API version with this endpoint (back 1.3.0).

@@ -16,7 +16,9 @@ it("SHOULD key every block query by the owner ids and the month, and wait for th
 
   expect(optionsOf("summary").enabled).toBe(false);
   expect(optionsOf("stock").enabled).toBe(false);
-  expect(optionsOf("transactions").enabled).toBe(false);
+  expect(optionsOf("upcoming").enabled).toBe(false);
+  expect(optionsOf("balances").enabled).toBe(false);
+  expect(optionsOf("accounts").enabled).toBe(false);
 });
 
 it("SHOULD enable the block queries once the owners are loaded", () => {
@@ -63,10 +65,10 @@ describe("owner filter", () => {
     expect(spies.getStockAttention).toHaveBeenCalledWith({
       ownerIds: ["user-id"],
     });
-    await optionsOf("transactions").fetch();
-    expect(spies.getRecentTransactions).toHaveBeenCalledWith({
-      ownerIds: ["user-id"],
-    });
+    await optionsOf("upcoming").fetch();
+    expect(spies.getUpcoming).toHaveBeenCalledWith({ ownerIds: ["user-id"] });
+    await optionsOf("accounts").fetch();
+    expect(spies.getAccounts).toHaveBeenCalledWith(["user-id"]);
   });
 
   it("SHOULD query only that family WHEN a family is chosen", async () => {
@@ -96,32 +98,38 @@ describe("block states", () => {
   it("SHOULD be loading while there is no data and no error", () => {
     const { result } = setup();
 
-    expect(result.current.summary).toMatchObject({
+    expect(result.current.balance).toMatchObject({
       isError: false,
       isLoading: true,
     });
+    expect(result.current.upcoming.isLoading).toBe(true);
   });
 
   it("SHOULD map the data to UI models", () => {
     const { result } = setup(loaded);
 
-    expect(result.current.summary.data?.income).toBe(150);
+    expect(result.current.balance.data?.income).toBe(150);
+    expect(result.current.balance.data?.projectedValue).toBe(80000);
+    expect(result.current.lowest.data?.tiles).toHaveLength(2);
     expect(result.current.stock.data?.isNothingExpiring).toBe(true);
-    expect(result.current.transactions.data?.[0].title).toBe("Market");
+    expect(result.current.upcoming.data?.overdue.rows[0].id).toBe("t1");
     expect(result.current.header.avatarName).toBe("Ana Souza");
   });
 
   it("SHOULD fail only the stock block WHEN the stock query fails", () => {
     queries.stock.withError();
     const { result } = setup({
+      accounts: mocks.accounts,
+      balances: mocks.balances,
       owners: mocks.owners,
       summary: mocks.summary,
-      transactions: mocks.transactions,
+      upcoming: mocks.upcoming,
     });
 
     expect(result.current.stock.isError).toBe(true);
-    expect(result.current.summary.isError).toBe(false);
-    expect(result.current.transactions.isError).toBe(false);
+    expect(result.current.balance.isError).toBe(false);
+    expect(result.current.lowest.isError).toBe(false);
+    expect(result.current.upcoming.isError).toBe(false);
   });
 
   it("SHOULD retry only the failed query", () => {
@@ -135,20 +143,51 @@ describe("block states", () => {
   });
 
   it("SHOULD keep showing the data WHEN a background refetch fails", () => {
-    queries.summary.withError();
-    const { result } = setup({ owners: mocks.owners, summary: mocks.summary });
+    queries.upcoming.withError();
+    const { result } = setup({
+      owners: mocks.owners,
+      upcoming: mocks.upcoming,
+    });
 
-    expect(result.current.summary.isError).toBe(false);
-    expect(result.current.summary.data?.income).toBe(150);
+    expect(result.current.upcoming.isError).toBe(false);
+    expect(result.current.upcoming.data?.isEmpty).toBe(false);
+  });
+
+  it("SHOULD fail only the upcoming block WHEN the upcoming query fails", () => {
+    queries.upcoming.withError();
+    const { result } = setup({
+      accounts: mocks.accounts,
+      balances: mocks.balances,
+      owners: mocks.owners,
+      stock: mocks.stock,
+      summary: mocks.summary,
+    });
+
+    expect(result.current.upcoming.isError).toBe(true);
+    expect(result.current.balance.isError).toBe(false);
+    expect(result.current.lowest.isError).toBe(false);
+    expect(result.current.stock.isError).toBe(false);
+  });
+
+  it("SHOULD retry every query of a block that needs several", () => {
+    queries.summary.withError();
+    const { result } = setup({ owners: mocks.owners });
+
+    result.current.balance.onRetry();
+
+    expect(queries.summary.value.refetch).toHaveBeenCalledTimes(1);
+    expect(queries.balances.value.refetch).toHaveBeenCalled();
+    expect(queries.accounts.value.refetch).toHaveBeenCalledTimes(1);
   });
 
   it("SHOULD show retry on every block WHEN the owners query fails", () => {
     queries.owners.withError();
     const { result } = setup();
 
-    expect(result.current.summary.isError).toBe(true);
+    expect(result.current.balance.isError).toBe(true);
+    expect(result.current.lowest.isError).toBe(true);
     expect(result.current.stock.isError).toBe(true);
-    expect(result.current.transactions.isError).toBe(true);
+    expect(result.current.upcoming.isError).toBe(true);
 
     result.current.stock.onRetry();
     expect(queries.owners.value.refetch).toHaveBeenCalledTimes(1);
@@ -163,8 +202,11 @@ describe("refresh", () => {
       await result.current.onRefresh();
     });
 
-    Object.values(queries).forEach((query) =>
-      expect(query.value.refetch).toHaveBeenCalledTimes(1),
+    Object.entries(queries).forEach(([name, query]) =>
+      // This month's and next month's balances share one fixture here.
+      expect(query.value.refetch).toHaveBeenCalledTimes(
+        name === "balances" ? 2 : 1,
+      ),
     );
     expect(result.current.isRefreshing).toBe(false);
   });
@@ -184,14 +226,70 @@ describe("refresh", () => {
 });
 
 describe("navigation", () => {
-  it("SHOULD open Finances from the summary, the transactions link and the rows", () => {
+  it("SHOULD open the Overview and the transactions screen", () => {
     const { result } = setup(loaded);
 
-    result.current.onSummaryPress();
-    result.current.onTransactionsSeeAllPress();
+    result.current.onOverviewPress();
+    result.current.onUpcomingSeeAllPress();
 
-    expect(spies.push).toHaveBeenNthCalledWith(1, "/financial/transaction");
+    expect(spies.push).toHaveBeenNthCalledWith(1, "/financial/overview");
     expect(spies.push).toHaveBeenNthCalledWith(2, "/financial/transaction");
+  });
+
+  it("SHOULD open the transaction modal from a transaction row", () => {
+    const { result } = setup(loaded);
+
+    result.current.onUpcomingItemPress(mocks.upcoming.overdue[0]);
+
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "add_new_transaction",
+      { id: "t1" },
+    );
+  });
+
+  it("SHOULD open a projection the way the transactions screen does", () => {
+    const { result } = setup(loaded);
+
+    result.current.onUpcomingItemPress({
+      ...mocks.upcoming.overdue[0],
+      date: "2026-12-05",
+      kind: "PROJECTION",
+      occurrenceNumber: 4,
+      recurrenceId: "rec-1",
+    });
+
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "add_new_transaction",
+      { month: "2026-12", occurrenceNumber: "4", recurrenceId: "rec-1" },
+    );
+  });
+
+  it("SHOULD open the transactions screen filtered by the card and the invoice month", () => {
+    const { result } = setup(loaded);
+
+    result.current.onInvoicePress({
+      ...mocks.upcoming.overdue[0],
+      creditCardId: "card-1",
+      date: "2026-11-15",
+      kind: "INVOICE",
+    });
+
+    expect(spies.setTransactionFilters).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cardIds: ["card-1"],
+        origin: "CARD",
+        period: { from: "2026-11-01", to: "2026-11-30" },
+      }),
+    );
+    expect(spies.push).toHaveBeenCalledWith("/financial/transaction");
+  });
+
+  it("SHOULD open the new account form", () => {
+    const { result } = setup(loaded);
+
+    result.current.onCreateAccountPress();
+
+    expect(modalNavigation.openModal).toHaveBeenCalledWith("add_new_account");
   });
 
   it("SHOULD open Stock with the Expiring filter from the stock link", () => {

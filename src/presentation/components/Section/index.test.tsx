@@ -35,3 +35,21 @@ it("SHOULD render a ghost action and call it", () => {
   fireEvent.press(screen.getByTestId("section-action"));
   expect(onActionPress).toHaveBeenCalledTimes(1);
 });
+
+it("SHOULD drop the side padding of the action by default", () => {
+  setup({ actionLabel: "See all", onActionPress });
+  const inline = StyleSheet.flatten(
+    screen.getByTestId("section-action").props.style,
+  );
+
+  expect(inline.paddingHorizontal).toBe(0);
+});
+
+it("SHOULD give the action side padding for its focus ring WHEN actionInset", () => {
+  setup({ actionInset: true, actionLabel: "See all", onActionPress });
+  const inset = StyleSheet.flatten(
+    screen.getByTestId("section-action").props.style,
+  );
+
+  expect(inset.paddingHorizontal).toBeGreaterThan(0);
+});
