@@ -61,6 +61,8 @@ Placeholders: `<module>` (e.g. `financial`), `<sub>` (e.g. `accounts`, optional)
 - [ ] Perf budget (spec 067): a `__perf__/<screen>.perf.test.tsx` next to every new screen/modal and its entry in `perf/budgets/<module>.json` (`route` or `modal` field, then `yarn perf --module <m> --update-baseline`); the coverage test fails without it
 - [ ] E2E flow in `e2e/flows/<module>/` (+ `testIds.ts` constants, tags module + `spec-NNN`); build it with the `wip` tag, then remove `wip`
 
+- [ ] Performance (golden rule 18): after the registry entry and `yarn perf --module <m> --update-baseline`, run `yarn perf --changed` and expect `PERF PASSED`; put the modules and the summary line in the PR's Performance block (`.claude/context/performance.md`)
+
 ## 7b. Version and changelog (golden rule 17)
 
 - [ ] Bump `package.json` `version` once (breaking → major, `feat` → minor, else patch) from the latest `origin/main`, add the `## [x.y.z] - YYYY-MM-DD` entry at the top of `CHANGELOG.md`, run `yarn version:check`. Docs/tests/e2e/CI-only changes don't bump. Do this before opening the PR.

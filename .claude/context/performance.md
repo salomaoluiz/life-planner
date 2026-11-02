@@ -1,0 +1,38 @@
+# Performance guardrail (frontend)
+
+Rule: `.claude/CLAUDE.md` rule 18. Specs: 067 (request budgets and screen coverage), 068 (rules). The backend counterpart is `../life-planner-back/.claude/context/performance.md`.
+
+## Commands
+
+- `yarn perf --changed`: modules touched by the diff (against `origin/main`, plus uncommitted and untracked files). Shared paths (`src/infrastructure/`, `src/application/providers/`, `src/presentation/components/`, `app/_layout.tsx`, `package.json`, `yarn.lock`) select every module.
+- `yarn perf --all`, `yarn perf --module <name>[,<name>]`, `--dry-run` (shows the selection only; `PERF SKIPPED: no module selected` when nothing matches).
+- `yarn perf --module <m> --update-baseline`: writes the measured numbers into the budgets (the ratchet, see below).
+- Exit codes: `0` passed, `1` a budget failed, `2` could not run (bad arguments or jest produced no report). On `2`, report its one-line reason and never claim the change was checked.
+
+## Reading the result
+
+Read only `perf-report/summary.md` (git-ignored). It ends with `PERF PASSED: N/N` or `PERF FAILED: N/N` and lists each failure. Open other files in `perf-report/` only for a failure named there.
+
+## Registry
+
+`perf/budgets/<module>.json`, one entry per screen or modal, key `<module>.<screen>.<scenario>` (for example `home.home.mount.cold`):
+
+| Field              | Meaning                                                           |
+| ------------------ | ----------------------------------------------------------------- |
+| `route` or `modal` | the `app/` route file or the modal name the scenario mounts       |
+| `maxRequests`      | max HTTP requests during the scenario                             |
+| `maxDuplicates`    | max identical requests repeated                                   |
+| `maxDepth`         | max depth of request waterfalls                                   |
+| `knownException`   | a budget above the default limit, naming the spec that removes it |
+
+Each screen or modal has a `__perf__/<screen>.perf.test.tsx` next to it. A screen or modal without an entry and a perf test fails the coverage tests (`scripts/perf/coverage.test.ts`): add both in the same PR, then `yarn perf --module <m> --update-baseline`.
+
+## Ratchet and exceptions
+
+- `--update-baseline` only lowers a budget silently. Raising one needs a reason in the PR description and the owner's review.
+- A `knownException` always names the spec that removes it.
+- No `GET` of a money list without `from`/`to`; no `import * as` from `date-fns`; no namespace import of heavy modules outside lazy routes.
+
+## PR block
+
+Copy into the PR description (template: `.github/pull_request_template.md`): modules checked, the final summary line, and before/after of any changed budget.
