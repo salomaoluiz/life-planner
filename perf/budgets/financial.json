@@ -1,1 +1,48 @@
-{}
+{
+  "financial.transactions.focusReturn": {
+    "maxDepth": 1,
+    "maxDuplicates": 1,
+    "maxRequests": 3
+  },
+  "financial.transactions.modal.openCreate": {
+    "maxDepth": 1,
+    "maxDuplicates": 0,
+    "maxRequests": 1,
+    "modal": "add_new_transaction"
+  },
+  "financial.transactions.modal.openEdit": {
+    "maxDepth": 1,
+    "maxDuplicates": 0,
+    "maxRequests": 1
+  },
+  "financial.transactions.monthSwitch": {
+    "maxDepth": 1,
+    "maxDuplicates": 1,
+    "maxRequests": 3
+  },
+  "financial.transactions.mount.cold": {
+    "maxDepth": 4,
+    "maxDuplicates": 2,
+    "maxFullHistory": 2,
+    "maxRequests": 10,
+    "route": "app/(app)/(tabs)/financial/transaction.tsx"
+  },
+  "financial.transactions.write.create": {
+    "maxDepth": 2,
+    "maxDuplicates": 3,
+    "maxFullHistory": 4,
+    "maxRequests": 9
+  },
+  "financial.transactions.write.delete": {
+    "maxDepth": 2,
+    "maxDuplicates": 3,
+    "maxFullHistory": 4,
+    "maxRequests": 9
+  },
+  "financial.transactions.write.edit": {
+    "maxDepth": 2,
+    "maxDuplicates": 3,
+    "maxFullHistory": 4,
+    "maxRequests": 9
+  }
+}
