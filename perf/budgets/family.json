@@ -1,1 +1,14 @@
-{}
+{
+  "family.list.mount.cold": {
+    "maxDepth": 2,
+    "maxDuplicates": 0,
+    "maxRequests": 2,
+    "route": "app/(app)/(tabs)/family/index.tsx"
+  },
+  "family.newFamily.mount.cold": {
+    "maxDepth": 0,
+    "maxDuplicates": 0,
+    "maxRequests": 0,
+    "modal": "add_new_family"
+  }
+}

@@ -31,6 +31,7 @@ jest.mock("@react-navigation/native", () => ({ useIsFocused: jest.fn() }));
 jest.mock("expo-router", () => ({
   router: { back: jest.fn(), push: jest.fn(), replace: jest.fn() },
   useLocalSearchParams: jest.fn(),
+  usePathname: () => "/",
 }));
 jest.mock("@screens/Navigation/hooks/useModalNavigation", () => ({
   __esModule: true,

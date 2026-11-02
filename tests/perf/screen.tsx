@@ -27,8 +27,12 @@ function fullHistoryCalls() {
   );
 }
 
-// Mounts the hook(s) a screen mounts and lets every request round settle.
-async function openScreen<T>(useViewModel: () => T) {
+// Mounts the hook(s) a screen mounts (with the route params it receives) and lets every request round settle.
+async function openScreen<T>(
+  useViewModel: () => T,
+  params: Record<string, string> = {},
+) {
+  jest.mocked(useLocalSearchParams).mockReturnValue(params);
   const view = renderHook(useViewModel, { wrapper });
 
   await flush();
