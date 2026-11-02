@@ -3,6 +3,12 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.6.2] - 2026-11-02
+
+### Changed
+
+- Internal: request budgets per screen (tests and `yarn perf`) guard against extra or duplicate API calls (spec 067). No change for users.
+
 ## [1.6.1] - 2026-11-02
 
 ### Fixed
