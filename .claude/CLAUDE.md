@@ -27,6 +27,7 @@ Clean Architecture: `app/` (expo-router routes) → `src/presentation` → `src/
 | What already exists in a module (file inventory per layer)                       | `docs/ai/modules/<auth\|family\|familyMember\|financial\|home\|stock>.md` |
 | Backend API (`../life-planner-back`): endpoints, auth, contract, Supabase → API  | `.claude/context/backend.md`                                              |
 | E2E flows, testIDs, running the suite                                            | `.claude/context/e2e.md`                                                  |
+| Performance budgets, `yarn perf`, PR performance block, `perf-report/summary.md` | `.claude/context/performance.md`                                          |
 | Building a whole new feature / CRUD slice end-to-end                             | skill `new-feature-slice` (`.claude/skills/new-feature-slice/`)           |
 
 Tip: for a single-layer change read just that layer file + `conventions.md`. Do not open the module inventory unless you need to locate existing files.
@@ -76,3 +77,12 @@ Reference implementation for any new CRUD work: **financial accounts** (smallest
     - Never set `Done` from a single merged PR, and never plan or implement spec N while a lower spec has an open PR in either repo, unless the owner explicitly approves (record `Started with open specs: …` as in rule 13).
     - The production redeploy of the personal rules fires only when the spec transitions to `Done`, so it also waits for both PRs.
 17. **Version and changelog guardrail.** Every PR that touches shipped paths (`src/`, `app/`, `assets/`, `plugins/`, `app.config.ts`, `Dockerfile.web`, `nginx.web.conf`, `docker-compose.web.prod.yml`, `package.json` dependencies, `yarn.lock`) bumps `package.json` `version` once (breaking → major, `feat` → minor, anything else → patch, from the latest `origin/main`) and adds a matching `## [x.y.z] - YYYY-MM-DD` entry at the top of `CHANGELOG.md` with 1–5 short user-facing bullets (English, spec number when there is one). Docs/tests/e2e/CI-only PRs don't bump. Re-bump after a rebase if `main` moved. `yarn version:check` must pass before the PR (Husky `pre-push` and the `version-check` CI job run it). Merging tags `vX.Y.Z` through the `release` workflow.
+18. **Performance guardrail.** Details, commands and registry format: `.claude/context/performance.md`.
+    - Every PR that changes `src/` or `app/` runs `yarn perf --changed` and is opened only when it ends `PERF PASSED` (read only `perf-report/summary.md`). Shared paths select every module.
+    - The PR description has a "Performance" block: modules checked, the summary line, and before/after for any budget that changed.
+    - Budgets only go down silently; raising one needs a reason in the PR and the owner's review.
+    - Every new screen or modal gets its registry entry (`perf/budgets/<module>.json`) and `__perf__` test in the same PR; the coverage tests fail otherwise.
+    - Lists of any module have a period or pagination; a list over 256 KB needs a `knownException` with the spec that removes it.
+    - Money data is never cached with `max-age`; caches are `private, no-cache` plus validation.
+    - Frontend: no `GET` of a money list without `from`/`to`, no `import * as` from `date-fns`, no namespace import of heavy modules outside lazy routes.
+    - If `yarn perf` cannot run (exit 2: setup or build), say so in the final report with its one-line reason; never claim the change was checked.
