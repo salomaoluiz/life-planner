@@ -1,0 +1,20 @@
+{
+  "home.feedback.mount.cold": {
+    "maxDepth": 0,
+    "maxDuplicates": 0,
+    "maxRequests": 0,
+    "modal": "business_feedback"
+  },
+  "home.home.mount.cold": {
+    "maxDepth": 3,
+    "maxDuplicates": 1,
+    "maxRequests": 11,
+    "route": "app/(app)/(tabs)/index/index.tsx"
+  },
+  "home.quickAdd.mount.cold": {
+    "maxDepth": 0,
+    "maxDuplicates": 0,
+    "maxRequests": 0,
+    "modal": "quick_add"
+  }
+}

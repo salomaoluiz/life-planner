@@ -58,6 +58,7 @@ Placeholders: `<module>` (e.g. `financial`), `<sub>` (e.g. `accounts`, optional)
 
 - [ ] `.test.ts` + `mocks/*.mocks.ts` for: model, DTO, datasource methods, repository methods + impl, use cases (happy + error paths), UI models, ViewModel hooks, useForm, Views (with the hook mocked).
 - [ ] Add new keys to the registration tests (`cases/index.test.ts`, datasource/repository `index.test.ts`) — they assert the exact key set.
+- [ ] Perf budget (spec 067): a `__perf__/<screen>.perf.test.tsx` next to every new screen/modal and its entry in `perf/budgets/<module>.json` (`route` or `modal` field, then `yarn perf --module <m> --update-baseline`); the coverage test fails without it
 - [ ] E2E flow in `e2e/flows/<module>/` (+ `testIds.ts` constants, tags module + `spec-NNN`); build it with the `wip` tag, then remove `wip`
 
 ## 7b. Version and changelog (golden rule 17)

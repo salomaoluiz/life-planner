@@ -1,0 +1,19 @@
+{
+  "stock.list.mount.cold": {
+    "maxDepth": 3,
+    "maxDuplicates": 0,
+    "maxRequests": 3,
+    "route": "app/(app)/(tabs)/stock/index.tsx"
+  },
+  "stock.newItem.mount.cold": {
+    "maxDepth": 2,
+    "maxDuplicates": 0,
+    "maxRequests": 2,
+    "modal": "add_new_stock_item"
+  },
+  "stock.write.create": {
+    "maxDepth": 1,
+    "maxDuplicates": 0,
+    "maxRequests": 1
+  }
+}

@@ -82,3 +82,13 @@ export { mocks, setup, setupThrowable, spies };
   - `src/data/datasource/data/index.test.ts` and `src/data/datasource/index.test.ts` (datasource keys)
   - `src/data/repositories/index.test.ts` (repository keys)
   - `src/application/useCases/index.test.ts`
+
+## Perf budgets: requests per screen (spec 067)
+
+Every screen (route under `app/`) and modal (`MODAL_ROUTES`) has a request budget in `perf/budgets/<module>.json` (`financial`, `stock`, `family`, `familyMember`, `home`, `auth`, `configs`), keyed `<module>.<screen>.<scenario>` (`mount.cold`, `focusReturn`, `monthSwitch`, `modal.openEdit`, `write.create`...). Fields: `maxRequests`, `maxDepth` (waterfall rounds), `maxDuplicates`, optional `maxFullHistory`; the `mount.cold` entry carries `route` (the `app/` file) or `modal` (the `MODAL_ROUTES` name).
+
+- **Harness:** `tests/perf/networkHarness.ts` replaces only `@infrastructure/api/transport` and `refresh`; the real view model, use cases, repositories and datasources run. `import "@tests/perf/mocks"` must be the first import of the test; `tests/perf/screen.tsx` gives `setupPerf()`, `openScreen(useViewModel, params?)` and `report(label)`; `tests/perf/respond.ts` + `tests/perf/fixtures/*` answer with fake data (the finance history is a 5,000-row account).
+- **Test:** `src/presentation/screens/**/__perf__/<screen>.perf.test.tsx`, ending in `expectWithinBudget(report("..."), "<key>")`. Assert only through the transport and the registry. They are plain jest tests: they run in `yarn test` and the pre-push hook.
+- **Ratchet:** lower a budget when a change improves it (`yarn perf --module <m> --update-baseline` rewrites the measured keys); never raise one silently. `PERF_REPORT=1 yarn jest <file>` prints the requests behind a number.
+- **CLI:** `yarn perf --changed` (modules touched by the diff; shared paths select all), `--all`, `--module a,b`, `--dry-run`, `--update-baseline`. Writes `perf-report/summary.md` (gitignored), ending in `PERF PASSED: N/N`.
+- `scripts/perf/coverage.test.ts` fails, naming the route or modal, when one has no registry entry.

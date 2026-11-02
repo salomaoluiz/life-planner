@@ -1,0 +1,8 @@
+{
+  "familyMember.newMember.mount.cold": {
+    "maxDepth": 0,
+    "maxDuplicates": 0,
+    "maxRequests": 0,
+    "modal": "add_new_family_member"
+  }
+}

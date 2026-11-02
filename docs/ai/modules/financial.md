@@ -518,3 +518,7 @@ On `medium`/`expanded` these modals are `BottomSheet size="form"` with `FormColu
 ## Upcoming items for the home (spec 062)
 
 - **Data chain:** `getUpcomingItemsUseCase` (`home.get_upcoming_items_use_case`) → `financialRepository.upcoming.getUpcoming({ ownerIds, days?, limit? })` → `GET /v1/finance/upcoming?ownerId=&today=&days=&limit=`; `UpcomingModel` / `UpcomingEntity` / `UpcomingDTO` keep money in **cents** (`valueCents`). Never cached in the repository. Items are `TRANSACTION`, `INVOICE` (one per card and month, `creditCardId` + `invoiceMonth`, `purchaseCount`) or `PROJECTION` (`recurrenceId` + `occurrenceNumber`). Used only by the Home Finance section.
+
+## Perf budgets (spec 067)
+
+- Request budgets of the transactions screen (cold open, focus return, month switch, modals, create/edit/delete): `src/presentation/screens/Financial/Transactions/__perf__/transactions.perf.test.tsx`; one `__perf__` test per other financial screen/modal. Numbers live in `perf/budgets/financial.json`; run `yarn perf --module financial`. See `.claude/context/testing.md`.

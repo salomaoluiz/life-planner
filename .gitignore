@@ -49,3 +49,4 @@ e2e/.durations.json
 
 # Production build (never committed)
 .env.production
+perf-report/
