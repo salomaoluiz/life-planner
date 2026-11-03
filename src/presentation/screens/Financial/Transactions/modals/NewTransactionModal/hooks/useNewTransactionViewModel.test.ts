@@ -1714,7 +1714,6 @@ describe("description suggestions (spec 060)", () => {
   function givenCached(rows: ReturnType<typeof tx>[]) {
     queries.transactions_list.withData({
       items: rows.map((row) => new TransactionUIModel(row)),
-      owners: [],
     });
   }
 
@@ -1739,6 +1738,18 @@ describe("description suggestions (spec 060)", () => {
       .find((options) => options.cacheKey[1] === "list");
 
     expect(call?.enabled).toBe(false);
+  });
+
+  it("SHOULD read the cache entry of the screen (list key plus every owner id)", () => {
+    givenLoaded();
+    setup();
+
+    const call = spies.useQuery.mock.calls
+      .map((args) => args[0])
+      .find((options) => options.cacheKey[1] === "list");
+
+    expect(call?.cacheKey.slice(0, 2)).toEqual(["transactions", "list"]);
+    expect(call?.cacheKey.length).toBeGreaterThan(2);
   });
 
   it("SHOULD suggest nothing with an empty cache AND in edit mode", () => {

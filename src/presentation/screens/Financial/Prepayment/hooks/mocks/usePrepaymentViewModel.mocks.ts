@@ -128,7 +128,7 @@ const spies = {
 beforeEach(() => {
   jest.clearAllMocks();
   jest.useFakeTimers().setSystemTime(new Date(2026, 9, 16, 12));
-  ["plan", "overview", "preview"].forEach((key) => {
+  ["plan", "overview", "preview", "owners"].forEach((key) => {
     queries[key] = new UseQueryFixture<unknown>();
   });
   ["prepay"].forEach((key) => {
@@ -145,6 +145,7 @@ beforeEach(() => {
 
 function givenLoaded() {
   queries.plan.withData(plan);
+  queries.owners.withData([{ id: "user-id" }]);
   queries.overview.withData({ cards: [summary] });
   queries.preview.withData(preview);
 }

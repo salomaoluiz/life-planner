@@ -10,6 +10,8 @@ import { useCases } from "@application/useCases";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { refetchStaleFetcherData, useQuery } from "@infrastructure/fetcher";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
+import useOwners from "@presentation/hooks/useOwners";
+import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 
 import CardInvoiceUIModel from "../../models/CardInvoiceUIModel";
 import {
@@ -23,6 +25,8 @@ import useTransactionsViewModel from "../useTransactionsViewModel";
 jest.mock("expo-router", () => ({ router: { push: jest.fn() } }));
 jest.mock("@react-navigation/native", () => ({ useIsFocused: jest.fn() }));
 jest.mock("@infrastructure/fetcher");
+jest.mock("@presentation/hooks/useOwners");
+jest.mock("@presentation/hooks/useOwnerScopedQuery");
 jest.mock("@presentation/i18n/useTranslationLocale", () => ({
   __esModule: true,
   default: () => ({ getLocale: () => ({ languageTag: "en-US" }) }),
@@ -99,8 +103,8 @@ const category = new CategoryDTO({
 
 const transactionsQuery = new UseQueryFixture<{
   items: TransactionUIModel[];
-  owners: OwnerDTO[];
 }>();
+const ownersQuery = new UseQueryFixture<OwnerDTO[]>();
 const invoicesQuery = new UseQueryFixture<CardInvoiceUIModel[]>();
 const projectionsQuery = new UseQueryFixture<{
   accountItems: TransactionUIModel[];
@@ -151,6 +155,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   jest.useFakeTimers().setSystemTime(new Date(2026, 9, 5, 12));
   transactionsQuery.reset();
+  ownersQuery.reset();
   summaryQuery.reset();
   balancesQuery.reset();
   invoicesQuery.reset();
@@ -161,6 +166,10 @@ beforeEach(() => {
   filteredProjectionsQuery.reset();
   resetTransactionFilters();
   spies.isFocused.mockReturnValue(false);
+  jest.mocked(useOwners).mockImplementation(() => ownersQuery.build());
+  jest
+    .mocked(useOwnerScopedQuery)
+    .mockImplementation((() => transactionsQuery.build()) as never);
   spies.useQuery.mockImplementation(((options: { cacheKey: string[] }) => {
     if (options.cacheKey[0] === "summary") {
       return summaryQuery.build();
@@ -199,7 +208,8 @@ function givenData(
   items: TransactionUIModel[],
   withOwners: OwnerDTO[] = owners,
 ) {
-  transactionsQuery.withData({ items, owners: withOwners });
+  transactionsQuery.withData({ items });
+  ownersQuery.withData(withOwners);
   summaryQuery.withData({
     balance: 4000,
     expense: 1000,
@@ -233,6 +243,7 @@ export {
   givenData,
   invoicesQuery,
   owners,
+  ownersQuery,
   projectionsQuery,
   setup,
   spies,
