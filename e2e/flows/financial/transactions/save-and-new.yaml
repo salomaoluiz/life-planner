@@ -64,7 +64,10 @@ onFlowComplete:
 - assertVisible:
     id: "financial.transaction-form.amount-input"
     text: ".*0[.,]00.*"
+# The saved row may already show in the list behind the form (month list refreshes fast, spec 075): the form is what
+# must be cleared.
 - assertNotVisible:
+    id: "financial.transaction-form.description-input"
     text: ${output.FIRST_NAME}
 # An empty amount is still validated and nothing is saved
 - tapOn:
