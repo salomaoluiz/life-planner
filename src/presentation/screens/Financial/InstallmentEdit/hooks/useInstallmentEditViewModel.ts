@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useCases } from "@application/useCases";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
+import useOwners from "@presentation/hooks/useOwners";
 import { TranslationKeys } from "@presentation/i18n/types";
 import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 import {
@@ -34,10 +35,7 @@ function useInstallmentEditViewModel() {
   const { closeModal, replaceModal } = useModalNavigation();
   const params = useLocalSearchParams<{ id?: string }>();
 
-  const owners = useQuery({
-    cacheKey: [useCases.getOwnersUseCase.uniqueName],
-    fetch: useCases.getOwnersUseCase.execute,
-  });
+  const owners = useOwners();
   const ownerIds = (owners.data ?? []).map((owner) => owner.id);
   const transactions = useQuery({
     cacheKey: [useCases.getFinancialTransactionsUseCase.uniqueName],

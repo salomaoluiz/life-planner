@@ -8,9 +8,10 @@ export const OWNERS_STALE_TIME = 5 * 60 * 1000;
 
 // The owners (personal + families) of the user: one cache entry shared by every owner-filtered screen, so they all
 // start their data queries in the same batch as soon as it resolves (spec 074).
-function useOwners() {
+function useOwners(options: { enabled?: boolean } = {}) {
   return useQuery<OwnerDTO[]>({
     cacheKey: [useCases.getOwnersUseCase.uniqueName],
+    enabled: options.enabled,
     fetch: useCases.getOwnersUseCase.execute,
     staleTime: OWNERS_STALE_TIME,
   });

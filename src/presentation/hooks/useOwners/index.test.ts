@@ -32,3 +32,9 @@ it("SHOULD return the query", () => {
 
   expect(result.current).toBe(query);
 });
+
+it("SHOULD pass enabled through", () => {
+  renderHook(() => useOwners({ enabled: false }));
+
+  expect(jest.mocked(useQuery).mock.lastCall![0].enabled).toBe(false);
+});
