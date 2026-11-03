@@ -522,3 +522,9 @@ On `medium`/`expanded` these modals are `BottomSheet size="form"` with `FormColu
 ## Perf budgets (spec 067)
 
 - Request budgets of the transactions screen (cold open, focus return, month switch, modals, create/edit/delete): `src/presentation/screens/Financial/Transactions/__perf__/transactions.perf.test.tsx`; one `__perf__` test per other financial screen/modal. Numbers live in `perf/budgets/financial.json`; run `yarn perf --module financial`. See `.claude/context/testing.md`.
+
+## Month-scoped transactions (spec 075)
+
+- **Range:** `TransactionDateRange` / `monthDateRange(monthKey)` (`TransactionQueryFilter.ts`). `getTransactions(ownerIds, range?)` goes through the repository, datasource and `getTransactionsUseCase` (`range` param). With a range the datasource sends `from`/`to` on both requests (account rows by date, `source=CARD` rows by the list date of their invoice) and the repository returns the entities straight from the API, never persisted. Without one it is the whole history, kept in the persistent cache under one entry per sorted owner set (`CACHE_FINANCIAL_TRANSACTION_DATA` + `:ownerId,ownerId`).
+- **Consumers:** the Transactions screen list (`useTransactionsViewModel`: key `[list key, monthKey, ...ownerIds]`, `keepPreviousData`, the skeleton stays while the previous month shows as placeholder), `getMonthSummaryUseCase` (the month), `getMostUsedCategoriesUseCase` (90 days back up to 366 days ahead). The edit form takes its row from the cached month data and the description suggestions merge the cached months (`getCachedFetcherData`); only a row opened from elsewhere (Home, an invoice) still loads the whole history until spec 077.
+- Flow `month-switch` (spec-075); perf budgets of the screen now have `maxFullHistory: 0`.

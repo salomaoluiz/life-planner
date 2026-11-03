@@ -6,7 +6,10 @@ import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import { MonthSummary } from "@application/dto/home/MonthSummaryDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
-import { TransactionQueryFilter } from "@domain/entities/financial/TransactionQueryFilter";
+import {
+  monthDateRange,
+  TransactionQueryFilter,
+} from "@domain/entities/financial/TransactionQueryFilter";
 import { refetchStaleFetcherData, useQuery } from "@infrastructure/fetcher";
 import useOwners from "@presentation/hooks/useOwners";
 import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
@@ -164,12 +167,17 @@ async function fetchSummary(
   return useCases.getMonthSummaryUseCase.execute({ month, ownerIds });
 }
 
+// Only the month on screen is downloaded, never the whole history (spec 075).
 async function fetchTransactions(
   owners: OwnerDTO[],
+  monthKey: string,
 ): Promise<TransactionsData> {
   const ownerIds = owners.map((owner) => owner.id);
   const [transactions, categories] = await Promise.all([
-    useCases.getFinancialTransactionsUseCase.execute({ ownerIds }),
+    useCases.getFinancialTransactionsUseCase.execute({
+      ownerIds,
+      range: monthDateRange(monthKey),
+    }),
     useCases.getFinancialCategoriesUseCase.execute(ownerIds),
   ]);
   const categoryById = new Map(
@@ -223,10 +231,19 @@ function useTransactionsViewModel() {
   // Owners come from the shared query: every query below starts as soon as they are known, none waits for the
   // transactions list (spec 074).
   const owners = useOwners().data;
+  const monthKey = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, "0")}`;
+  // Keyed by month and owners (spec 075); another month keeps the previous rows flagged as placeholder until its own
+  // arrive, and the edit form and the description suggestions read these cached months.
   const transactions = useOwnerScopedQuery<TransactionsData>({
-    cacheKey: listQueryKey(useCases.getFinancialTransactionsUseCase.uniqueName),
-    fetch: fetchTransactions,
+    cacheKey: [
+      ...listQueryKey(useCases.getFinancialTransactionsUseCase.uniqueName),
+      monthKey,
+    ],
+    fetch: async (loadedOwners) => fetchTransactions(loadedOwners, monthKey),
+    keepPreviousData: true,
   });
+  // The month's own rows are not here yet (first load, or another month showing the previous one meanwhile).
+  const isListPending = !transactions.data || !!transactions.isPlaceholderData;
   // A selected family that is no longer an owner (user left it) falls back to All.
   const ownerFilter =
     ownerSelection === ALL_FILTER ||
@@ -243,7 +260,6 @@ function useTransactionsViewModel() {
   const scope = useReadOnlyScope(owners, ownerFilter);
   const { openModal } = useModalNavigation();
 
-  const monthKey = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, "0")}`;
   const allOwnerIds = useMemo(
     () => (owners ?? []).map((owner) => owner.id),
     [owners],
@@ -644,9 +660,9 @@ function useTransactionsViewModel() {
       !filtering &&
       scopedItemsOfMonth.length + invoicesOfMonth.length > 0 &&
       entries.length === 0,
-    isLoading: transactions.isFetching && !transactions.data,
+    isLoading: isListPending && !transactions.error,
     isMonthPickerOpen,
-    isRefreshing: transactions.isFetching && !!transactions.data,
+    isRefreshing: transactions.isFetching && !isListPending,
     isTotalsUpdating: hasPendingChanges(pendingChanges),
     languageTag,
     monthChoices: monthChoices(languageTag),

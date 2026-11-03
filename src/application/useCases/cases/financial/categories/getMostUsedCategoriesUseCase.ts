@@ -12,6 +12,8 @@ export interface GetMostUsedCategoriesUseCaseParams {
 
 const DEFAULT_LIMIT = 5;
 const WINDOW_DAYS = 90;
+// Rows dated later still count (future-dated rows, invoices the window's card purchases land on), up to this far ahead.
+const FUTURE_DAYS = 366;
 
 function getMostUsedCategoriesUseCase(
   repositories: Repositories,
@@ -22,21 +24,26 @@ function getMostUsedCategoriesUseCase(
   return {
     execute: async (params) => {
       try {
-        const [transactions, categories] = await Promise.all([
-          repositories.financialRepository.transaction.getTransactions([
-            params.ownerId,
-          ]),
-          repositories.financialRepository.category.getCategories([
-            params.ownerId,
-          ]),
-        ]);
-
         const today = startOfDay(params.now ?? new Date());
         const cutoff = new Date(
           today.getFullYear(),
           today.getMonth(),
           today.getDate() - WINDOW_DAYS,
         );
+        const until = new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          today.getDate() + FUTURE_DAYS,
+        );
+        const [transactions, categories] = await Promise.all([
+          repositories.financialRepository.transaction.getTransactions(
+            [params.ownerId],
+            { from: toDateKey(cutoff), to: toDateKey(until) },
+          ),
+          repositories.financialRepository.category.getCategories([
+            params.ownerId,
+          ]),
+        ]);
 
         const counts = new Map<string, number>();
         transactions.forEach((transaction) => {
@@ -81,6 +88,11 @@ function getMostUsedCategoriesUseCase(
 
 function startOfDay(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+// `YYYY-MM-DD` of the local day.
+function toDateKey(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
 export default getMostUsedCategoriesUseCase;

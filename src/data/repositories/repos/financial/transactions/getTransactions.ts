@@ -11,9 +11,30 @@ export type Params = Parameters<
   FinancialTransactionRepository["getTransactions"]
 >[0];
 
-async function getTransactions(ownerIds: Params, datasources: Datasources) {
+export type Range = Parameters<
+  FinancialTransactionRepository["getTransactions"]
+>[1];
+
+async function getTransactions(
+  ownerIds: Params,
+  datasources: Datasources,
+  range?: Range,
+) {
+  // A period is small and short-lived (the screen keeps it in memory): it is never persisted.
+  if (range) {
+    const models =
+      await datasources.financialTransactionDatasource.getTransactions(
+        ownerIds,
+        range,
+      );
+
+    return models.map((transaction) => toTransactionEntity(transaction));
+  }
+
+  const cacheOptions = { uniqueId: ownersCacheId(ownerIds) };
   const cached = cache.get<Array<Record<string, unknown>> | null>(
     CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA,
+    cacheOptions,
   );
 
   let transactionsModel: TransactionModel[] = [];
@@ -30,6 +51,7 @@ async function getTransactions(ownerIds: Params, datasources: Datasources) {
       cache.set<Record<string, unknown>[]>(
         CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA,
         transactionsModel.map((financial) => financial.toJSON()),
+        cacheOptions,
       );
     }
   }
@@ -37,6 +59,11 @@ async function getTransactions(ownerIds: Params, datasources: Datasources) {
   return transactionsModel.map((transaction) =>
     toTransactionEntity(transaction),
   );
+}
+
+// One persisted entry per owner set (spec 075): a call for one owner must never be read back as the list of every owner.
+function ownersCacheId(ownerIds: string[]) {
+  return `:${[...ownerIds].sort().join(",")}`;
 }
 
 function toTransactionEntity(transaction: TransactionModel) {

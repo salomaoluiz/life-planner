@@ -61,3 +61,18 @@ it("SHOULD throw if the repository throws a business error", async () => {
     useCase: "financial.getTransactionsUseCase",
   });
 });
+
+it("SHOULD ask the repository only for the period WHEN a range is given", async () => {
+  const range = { from: "2026-10-01", to: "2026-10-31" };
+  spies.financialRepositoryTransaction.getTransactions.mockResolvedValueOnce(
+    [],
+  );
+  spies.financialRepositoryCategory.getCategories.mockResolvedValueOnce([]);
+  spies.financialRepositoryAccount.getAccounts.mockResolvedValueOnce([]);
+
+  await setup({ range });
+
+  expect(
+    spies.financialRepositoryTransaction.getTransactions,
+  ).toHaveBeenCalledWith(mocks.defaultParams.ownerIds, range);
+});

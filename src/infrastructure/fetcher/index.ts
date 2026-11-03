@@ -1,3 +1,4 @@
+export { getCachedFetcherData } from "./cachedData";
 export { default as invalidateFetcherData } from "./invalidate";
 export { default as markFetcherDataStale } from "./markStale";
 export { default as FetcherProvider } from "./provider";

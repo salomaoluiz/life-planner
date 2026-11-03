@@ -17,13 +17,16 @@ function given(
   spies.transactions.getTransactions.mockResolvedValue(transactions);
 }
 
-it("SHOULD request only the selected owner", async () => {
+it("SHOULD request only the selected owner AND only the 90 days back up to a year ahead (not the whole history)", async () => {
   given();
 
   await setup({ ownerId: "family-1" });
 
   expect(spies.categories.getCategories).toHaveBeenCalledWith(["family-1"]);
-  expect(spies.transactions.getTransactions).toHaveBeenCalledWith(["family-1"]);
+  expect(spies.transactions.getTransactions).toHaveBeenCalledWith(
+    ["family-1"],
+    { from: "2026-07-07", to: "2027-10-06" },
+  );
 });
 
 it("SHOULD rank by number of transactions in the last 90 days, then by name", async () => {

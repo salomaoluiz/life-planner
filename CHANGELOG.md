@@ -3,6 +3,14 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.7.0] - 2026-11-03
+
+### Changed
+
+- The transactions screen loads only the month you are looking at instead of your whole history, so it opens much faster with years of data (spec 075).
+- Switching month keeps the previous rows with the loading skeleton until the new month arrives (spec 075).
+- Description suggestions come from the months you have seen in the session, and "most used categories" ignores rows more than a year ahead (spec 075).
+
 ## [1.6.4] - 2026-11-03
 
 ### Changed

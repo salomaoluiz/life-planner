@@ -5,7 +5,7 @@ import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import cache from "@infrastructure/cache";
 
-import getTransactions, { Params } from "../getTransactions";
+import getTransactions, { Params, Range } from "../getTransactions";
 
 // region mocks
 const defaultParams: Params = [
@@ -52,8 +52,8 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-async function setup(params?: Params) {
-  return getTransactions(params ?? defaultParams, datasourcesMocks);
+async function setup(params?: Params, range?: Range) {
+  return getTransactions(params ?? defaultParams, datasourcesMocks, range);
 }
 
 const spies = {

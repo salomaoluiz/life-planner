@@ -6,6 +6,8 @@ interface Props<R> {
   cacheKey: string[];
   enabled?: boolean;
   fetch: (owners: OwnerDTO[]) => Promise<R>;
+  // Spec 075: another key (a month) shows the previous key's data, flagged `isPlaceholderData`, until its own arrives.
+  keepPreviousData?: boolean;
 }
 
 // A query that needs the owners of the user (spec 074): it starts in the same render the shared owners query
@@ -21,6 +23,7 @@ function useOwnerScopedQuery<R>(props: Props<R>) {
     ],
     enabled: !!ownerList && props.enabled !== false,
     fetch: async () => props.fetch(ownerList as OwnerDTO[]),
+    keepPreviousData: props.keepPreviousData,
   });
 
   async function refetch(options?: { throwOnError?: boolean }) {

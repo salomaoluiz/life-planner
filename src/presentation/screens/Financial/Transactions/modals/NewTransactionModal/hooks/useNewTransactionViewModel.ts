@@ -13,6 +13,7 @@ import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { RecurrenceScope } from "@domain/entities/financial/RecurrenceEntity";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import {
+  getCachedFetcherData,
   refetchStaleFetcherData,
   useMutation,
   useQuery,
@@ -89,6 +90,13 @@ import {
   validate,
 } from "../models/transactionFormState";
 
+// The months the Transactions screen holds in memory (one entry per month and owner set). Never fetches.
+function cachedMonthLists() {
+  return getCachedFetcherData<TransactionsData>(
+    listQueryKey(useCases.getFinancialTransactionsUseCase.uniqueName),
+  ).filter((data) => !!data.items);
+}
+
 // Live hints of Card mode (spec 029 FR 30): which invoice the purchase lands on, whether it passes
 // the limit (non-blocking) and whether that invoice is already paid (blocks saving).
 function cardHintsOf(
@@ -142,6 +150,22 @@ async function fetchByOwners<T>(
   execute: (ownerIds: string[]) => Promise<T>,
 ) {
   return execute(owners.map((owner) => owner.id));
+}
+
+// The row being edited, from a month the screen already holds: no request at all.
+function findCachedRow(id: string | undefined): TransactionDTO | undefined {
+  if (!id) {
+    return undefined;
+  }
+  for (const data of cachedMonthLists()) {
+    const item = data.items.find((row) => row.id === id);
+
+    if (item) {
+      return item.dto;
+    }
+  }
+
+  return undefined;
 }
 
 // The "Installments" block of Card mode (spec 030 FR 1-3, 8.1): count, split preview and first/last invoice.
@@ -275,9 +299,14 @@ function useNewTransactionViewModel() {
     fetch: async () =>
       fetchByOwners(owners.data!, useCases.getFinancialTagsUseCase.execute),
   });
+  // Rows open from a month the Transactions screen already holds (spec 075). Only a row opened from elsewhere (Home,
+  // an invoice) falls back to the whole history: the API has no GET /transactions/:id yet (spec 077).
+  const [cachedExisting] = useState(() =>
+    isEditing && !isProjected ? findCachedRow(params.id) : undefined,
+  );
   const transactions = useQuery({
     cacheKey: [useCases.getFinancialTransactionsUseCase.uniqueName],
-    enabled: isEditing && !!owners.data,
+    enabled: isEditing && !isProjected && !cachedExisting && !!owners.data,
     fetch: async () =>
       useCases.getFinancialTransactionsUseCase.execute({
         ownerIds: owners.data!.map((owner) => owner.id),
@@ -320,7 +349,8 @@ function useNewTransactionViewModel() {
     ?.toTransactionDTO();
   const existing = isProjected
     ? projectedExisting
-    : transactions.data?.find((item) => item.id === params.id);
+    : (cachedExisting ??
+      transactions.data?.find((item) => item.id === params.id));
   const isRecurring = isEditing && !!existing?.recurrenceId;
   // The series (end date, frequency) of the occurrence being edited.
   const seriesList = useQuery({
@@ -338,7 +368,8 @@ function useNewTransactionViewModel() {
   const isNotFound =
     (isProjected
       ? !!projections.data && !projectedExisting
-      : isEditing && !!transactions.data && !existing) || isSeriesMissing;
+      : isEditing && !cachedExisting && !!transactions.data && !existing) ||
+    isSeriesMissing;
   // An installment is edited through its own sheet (spec 030): hand over instead of opening this form.
   const isInstallment = isEditing && !!existing?.installmentPlanId;
   // The account debit row of an early payment is edited on the card (spec 032 FR 35): hand over as well.
@@ -442,29 +473,27 @@ function useNewTransactionViewModel() {
       }),
   });
 
-  // Spec 060: past transactions come from what the Transactions screen already cached; this never fetches.
-  // The list is cached under the key of the screen: the list prefix plus every owner id (archived ones too).
+  // Spec 060: past transactions come from the months the Transactions screen already cached; this never fetches.
+  // The screen loads one month at a time (spec 075), so the suggestions cover the months seen in this session.
   const allOwners = useOwners().data;
-  const cachedTransactions = useQuery<TransactionsData>({
-    cacheKey: [
-      ...listQueryKey(useCases.getFinancialTransactionsUseCase.uniqueName),
-      ...(allOwners ?? []).map((owner) => owner.id),
-    ],
-    enabled: false,
-    fetch: async () => ({ items: [] }),
-  });
   const typedDescription = state?.description ?? "";
-  const descriptionSuggestions = useMemo(
-    () =>
-      isEditing || !cachedTransactions.data
-        ? []
-        : buildDescriptionSuggestions({
-            archivedOwnerIds: archivedOwnerIds(allOwners ?? []),
-            items: cachedTransactions.data.items,
-            query: typedDescription,
-          }),
-    [cachedTransactions.data, isEditing, typedDescription],
-  );
+  const descriptionSuggestions = useMemo(() => {
+    const lists = isEditing ? [] : cachedMonthLists();
+
+    if (lists.length === 0) {
+      return [];
+    }
+
+    const byId = new Map(
+      lists.flatMap((data) => data.items).map((item) => [item.id, item]),
+    );
+
+    return buildDescriptionSuggestions({
+      archivedOwnerIds: archivedOwnerIds(allOwners ?? []),
+      items: [...byId.values()],
+      query: typedDescription,
+    });
+  }, [allOwners, isEditing, typedDescription]);
 
   const createMutation = useMutation({
     cacheKey: [useCases.createFinancialTransactionUseCase.uniqueName],

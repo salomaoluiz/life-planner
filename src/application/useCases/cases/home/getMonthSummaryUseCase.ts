@@ -3,6 +3,7 @@ import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import { DefaultError } from "@domain/entities/errors";
 import { InvoiceStatus } from "@domain/entities/financial/InvoiceEntity";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
+import { monthDateRange } from "@domain/entities/financial/TransactionQueryFilter";
 import Repositories from "@domain/repositories";
 import { decimalStringToCents } from "@utils/money";
 
@@ -24,6 +25,8 @@ function getMonthSummaryUseCase(
         const [transactions, invoices] = await Promise.all([
           repositories.financialRepository.transaction.getTransactions(
             params.ownerIds,
+            // Only the month: the totals never need the rest of the history.
+            monthDateRange(toMonthKey(params.month)),
           ),
           // Card purchases count on the month their invoice is paid (spec 029 FR 25).
           repositories.financialRepository.creditCard.getCardInvoicesForMonth({

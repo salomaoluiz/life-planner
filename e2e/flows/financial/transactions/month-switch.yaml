@@ -1,0 +1,95 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/month-switch
+tags:
+  - financial
+  - spec-075
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Spec 075: the screen loads only the month on screen. Each month shows its own row, coming back shows the first
+# month again, and a row of the visible month opens for edit with its data.
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Current
+      KEY: CURRENT_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Previous
+      KEY: PREVIOUS_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: ${output.CURRENT_NAME}
+      VALUE_CENTS: "11100"
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: ${output.PREVIOUS_NAME}
+      VALUE_CENTS: "9900"
+      MONTHS_AGO: "1"
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.CURRENT_NAME}
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.transactions.row-title"
+    text: ${output.PREVIOUS_NAME}
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
+- tapOn:
+    id: "financial.transactions.month-previous"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.PREVIOUS_NAME}
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.transactions.row-title"
+    text: ${output.CURRENT_NAME}
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
+- tapOn:
+    id: "financial.transactions.month-next"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.CURRENT_NAME}
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.transactions.row-title"
+    text: ${output.PREVIOUS_NAME}
+# A row of the visible month opens for edit with its own data.
+- tapOn:
+    id: "financial.transactions.row-title"
+    text: ${output.CURRENT_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.description-input"
+      text: ${output.CURRENT_NAME}
+    timeout: 20000

@@ -34,8 +34,8 @@ function transactionRepositoryImpl(
     async getFilteredTransactions(params): Promise<TransactionEntity[]> {
       return getFilteredTransactions(params, datasources);
     },
-    async getTransactions(ownerIds): Promise<TransactionEntity[]> {
-      return getTransactions(ownerIds, datasources);
+    async getTransactions(ownerIds, range): Promise<TransactionEntity[]> {
+      return getTransactions(ownerIds, datasources, range);
     },
     async importTransactions(params): Promise<number> {
       return importTransactions(params, datasources);

@@ -9,7 +9,10 @@ import {
 import TransactionEntity, {
   TransactionType,
 } from "@domain/entities/financial/TransactionEntity";
-import { TransactionQueryFilter } from "@domain/entities/financial/TransactionQueryFilter";
+import {
+  TransactionDateRange,
+  TransactionQueryFilter,
+} from "@domain/entities/financial/TransactionQueryFilter";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 export type FinancialTransactionRepository = {
@@ -25,7 +28,11 @@ export type FinancialTransactionRepository = {
   getFilteredTransactions(
     params: GetFilteredTransactionsRepositoryParams,
   ): Promise<TransactionEntity[]>;
-  getTransactions(ownerIds: string[]): Promise<TransactionEntity[]>;
+  // Without a range: the whole history (persisted cache). With one: only that period, never persisted.
+  getTransactions(
+    ownerIds: string[],
+    range?: TransactionDateRange,
+  ): Promise<TransactionEntity[]>;
   // Spec 047: writes every row or none; a 422 throws `ImportRowsInvalid`.
   importTransactions(params: ImportRequest): Promise<number>;
   updateTransaction(params: UpdateTransactionRepositoryParams): Promise<void>;

@@ -126,3 +126,19 @@ it("SHOULD refetch the owners AND the data WHEN the owners are known", async () 
   });
   expect(dataQuery.value.refetch).toHaveBeenCalledWith({ throwOnError: true });
 });
+
+it("SHOULD forward keepPreviousData AND the placeholder flag", () => {
+  ownersQuery.withData(owners);
+  dataQuery.withIsPlaceholderData(true);
+
+  const { result } = renderHook(() =>
+    useOwnerScopedQuery<string>({
+      cacheKey: ["list"],
+      fetch: fetchData,
+      keepPreviousData: true,
+    }),
+  );
+
+  expect(queryOptions().keepPreviousData).toBe(true);
+  expect(result.current.isPlaceholderData).toBe(true);
+});

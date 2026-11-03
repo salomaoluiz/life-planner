@@ -234,3 +234,7 @@ The Transactions filters live in a module-level store (`useTransactionFilters`, 
 ## Optimistic updates (spec 061)
 
 A change the user confirmed that should show at once goes through `Transactions/pending/runPendingChange`, not through a modal's `useMutation`: the request outlives the modal. Pattern: build a `PendingChange` (kind, description, row/previous/target), call `runPendingChange(change, execute, retry)`, then close the modal. The list ViewModel merges the pending changes into the loaded data with a pure function; the React Query cache is never edited, so refetches cannot drop or double a pending row. Failures are queued in the store and shown by the global `ErrorToastHost`.
+
+## Month-scoped query pattern (spec 075)
+
+A list that can hold years of rows loads one month: key `[...listQueryKey(uniqueName), monthKey, ...ownerIds]` through `useOwnerScopedQuery({ cacheKey, fetch, keepPreviousData: true })`. While another month loads, `data` is the previous month's and `isPlaceholderData` is `true`: show the list skeleton, not the stale rows. Other screens and modals read these cached months with `getCachedFetcherData(listQueryKey(uniqueName))` (never fetches; one entry per month and owner set), and fall back to a request only when the data they need is in none of them.
