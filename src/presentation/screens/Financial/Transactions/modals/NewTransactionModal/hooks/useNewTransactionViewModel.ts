@@ -518,7 +518,8 @@ function useNewTransactionViewModel() {
       return;
     }
     // These writes do not go through runPendingChange: mark everything they touched stale (data stays fresh 30 s).
-    void invalidateFinanceData();
+    // The Transactions screen refetches it on regaining focus, right after this modal closes.
+    void invalidateFinanceData({ refetch: false });
     if (saveIntent.current === "next" && state) {
       const next = resetForNext(state);
 

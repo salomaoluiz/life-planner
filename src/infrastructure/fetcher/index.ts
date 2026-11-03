@@ -1,4 +1,5 @@
 export { default as invalidateFetcherData } from "./invalidate";
+export { default as markFetcherDataStale } from "./markStale";
 export { default as FetcherProvider } from "./provider";
 export { default as refetchStaleFetcherData } from "./refetchStale";
 export { default as resetFetcherData } from "./reset";
