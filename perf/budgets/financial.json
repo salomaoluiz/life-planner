@@ -1,26 +1,26 @@
 {
   "financial.accounts.mount.cold": {
-    "maxDepth": 3,
+    "maxDepth": 2,
     "maxDuplicates": 0,
-    "maxRequests": 3,
+    "maxRequests": 2,
     "route": "app/(app)/(tabs)/financial/accounts.tsx"
   },
   "financial.cards.mount.cold": {
-    "maxDepth": 3,
+    "maxDepth": 2,
     "maxDuplicates": 0,
-    "maxRequests": 4,
+    "maxRequests": 3,
     "route": "app/(app)/(tabs)/financial/cards.tsx"
   },
   "financial.categories.mount.cold": {
-    "maxDepth": 3,
+    "maxDepth": 2,
     "maxDuplicates": 0,
-    "maxRequests": 3,
+    "maxRequests": 2,
     "route": "app/(app)/(tabs)/financial/categories.tsx"
   },
   "financial.earlyPayment.mount.cold": {
-    "maxDepth": 3,
+    "maxDepth": 2,
     "maxDuplicates": 0,
-    "maxRequests": 4,
+    "maxRequests": 3,
     "modal": "card_early_payment"
   },
   "financial.indexRedirect.mount.cold": {
@@ -30,9 +30,9 @@
     "route": "app/(app)/(tabs)/financial/index.tsx"
   },
   "financial.installmentEdit.mount.cold": {
-    "maxDepth": 3,
+    "maxDepth": 2,
     "maxDuplicates": 0,
-    "maxRequests": 7,
+    "maxRequests": 6,
     "modal": "edit_installment"
   },
   "financial.invoice.mount.cold": {
@@ -42,45 +42,45 @@
     "modal": "invoice_detail"
   },
   "financial.newAccount.mount.cold": {
-    "maxDepth": 3,
+    "maxDepth": 2,
     "maxDuplicates": 0,
-    "maxRequests": 3,
+    "maxRequests": 2,
     "modal": "add_new_account"
   },
   "financial.newCategory.mount.cold": {
-    "maxDepth": 3,
+    "maxDepth": 2,
     "maxDuplicates": 0,
-    "maxRequests": 3,
+    "maxRequests": 2,
     "modal": "add_new_category"
   },
   "financial.newCreditCard.mount.cold": {
-    "maxDepth": 3,
+    "maxDepth": 2,
     "maxDuplicates": 0,
-    "maxRequests": 4,
+    "maxRequests": 3,
     "modal": "add_new_credit_card"
   },
   "financial.newTag.mount.cold": {
-    "maxDepth": 3,
+    "maxDepth": 2,
     "maxDuplicates": 0,
-    "maxRequests": 3,
+    "maxRequests": 2,
     "modal": "add_new_tag"
   },
   "financial.overview.mount.cold": {
-    "maxDepth": 3,
+    "maxDepth": 2,
     "maxDuplicates": 0,
-    "maxRequests": 7,
+    "maxRequests": 6,
     "route": "app/(app)/(tabs)/financial/overview.tsx"
   },
   "financial.prepayment.mount.cold": {
     "maxDepth": 1,
     "maxDuplicates": 0,
-    "maxRequests": 1,
+    "maxRequests": 2,
     "modal": "prepay_installments"
   },
   "financial.refund.mount.cold": {
-    "maxDepth": 3,
+    "maxDepth": 2,
     "maxDuplicates": 0,
-    "maxRequests": 7,
+    "maxRequests": 6,
     "modal": "card_refund"
   },
   "financial.sectionPicker.mount.cold": {
@@ -90,9 +90,9 @@
     "modal": "section_picker"
   },
   "financial.tags.mount.cold": {
-    "maxDepth": 3,
+    "maxDepth": 2,
     "maxDuplicates": 0,
-    "maxRequests": 3,
+    "maxRequests": 2,
     "route": "app/(app)/(tabs)/financial/tags.tsx"
   },
   "financial.transactions.focusReturn": {
@@ -117,10 +117,10 @@
     "maxRequests": 2
   },
   "financial.transactions.mount.cold": {
-    "maxDepth": 4,
+    "maxDepth": 2,
     "maxDuplicates": 0,
     "maxFullHistory": 2,
-    "maxRequests": 8,
+    "maxRequests": 7,
     "route": "app/(app)/(tabs)/financial/transaction.tsx"
   },
   "financial.transactions.write.create": {

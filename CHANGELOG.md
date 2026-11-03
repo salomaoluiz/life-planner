@@ -3,6 +3,12 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.6.4] - 2026-11-03
+
+### Changed
+
+- Screens that filter by family or personal data open faster: the owners (you and your families) load in one request and every list on the screen starts loading at the same time instead of one after another (spec 074).
+
 ## [1.6.3] - 2026-11-03
 
 ### Changed

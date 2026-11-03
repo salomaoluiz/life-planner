@@ -140,3 +140,7 @@ Reference: `financial/accounts/api/getAccounts.ts` — guard an empty owner list
 - `refetchStaleFetcherData(keyPrefixes)` refetches only the mounted (active), stale queries under those prefixes; disabled queries are skipped. Pull to refresh keeps using `refetch()`.
 - `api.get` shares identical GETs (same path) while one is in flight and forgets them once settled (no cache). GETs time out after 10 s, writes after 15 s.
 - `tokenStorage.getToken()` reads the store once and serves the access token from memory; `setToken` and `clearToken` keep it in sync (every writer goes through `tokenStorage`).
+
+## Owners query (spec 074)
+
+Owners (personal + families) come from the `families` of one `GET /v1/user/me`: `userRepository.getOwners()` never reads the cached profile (`CACHE_USER_DATA`), because families change while the profile does not. The shared query is `useOwners` (`src/presentation/hooks/useOwners`, staleTime 5 min); queries that need owners use `useOwnerScopedQuery` (enabled once owners are known, keyed by the list key plus the owner ids, so code that reads such a cache entry must build the same key). Family writes call `invalidateFetcherData()`, which refreshes the owners entry.
