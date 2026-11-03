@@ -104,6 +104,7 @@ Rules:
   - `useMutation({ cacheKey, fetch })` → `{ mutate, status, error, data, isFetching }`
   - `cacheKey` is `[useCases.X.uniqueName, ...]`.
 - Side effects live here: react to `mutation.status === "success"` (`router.back()`, `props.refetch()`), refetch on focus, `navigation.setOptions` (header buttons such as `RefetchCache`).
+  - Focus return refetches only what went stale: `useEffect(() => { if (isFocused) refetchStaleFetcherData([[...key prefixes]]); }, [isFocused])` (spec 073; data is fresh for 30 s). Use plain `refetch()` only for pull to refresh, retry and after a write.
 - Container ViewModels receive the container's props: `useListItemViewModel(props: Props)`. Export `Props` from the hook file.
 - **Imperative UI with no View** (`Alert.alert`, `window.confirm`, header titles set through `navigation.setOptions`) is the only case where the hook calls `useTranslation()` itself. Delete confirmation: `isWeb()` → `window.confirm`, otherwise `Alert.alert` with cancel/destructive buttons.
 
