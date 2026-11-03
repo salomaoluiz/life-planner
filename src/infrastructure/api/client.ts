@@ -71,10 +71,30 @@ async function request<T>(
   return (await execute(method, path, body)).json as T;
 }
 
+// Identical GETs in flight at the same time share one request (e.g. a list and the month summary asking for the
+// same month). Only while in flight: nothing is cached once it settles.
+const inFlightGets = new Map<string, Promise<unknown>>();
+
+async function sharedGet<T>(path: string): Promise<T> {
+  const running = inFlightGets.get(path);
+
+  if (running) {
+    return running as Promise<T>;
+  }
+
+  const sent = request<T>("GET", path).finally(() => {
+    inFlightGets.delete(path);
+  });
+
+  inFlightGets.set(path, sent);
+
+  return sent;
+}
+
 const api = {
   delete: async <T>(path: string, body?: unknown) =>
     request<T>("DELETE", path, body),
-  get: async <T>(path: string) => request<T>("GET", path),
+  get: async <T>(path: string) => sharedGet<T>(path),
   // A text response (the CSV export, spec 047) with the attachment filename the API chose.
   getText: async (path: string) => {
     const { filename, text } = await execute("GET", path);

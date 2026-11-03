@@ -1,5 +1,7 @@
 import { ConnectivityError } from "@domain/entities/errors";
 
+// Reads fail faster than writes: a read can be retried safely, a write may already have been applied.
+const GET_TIMEOUT_MS = 10_000;
 const REQUEST_TIMEOUT_MS = 15_000;
 
 type Method = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
@@ -48,7 +50,10 @@ async function send(
 ): Promise<SendResult> {
   const baseUrl = getBaseUrl();
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const timer = setTimeout(
+    () => controller.abort(),
+    method === "GET" ? GET_TIMEOUT_MS : REQUEST_TIMEOUT_MS,
+  );
 
   try {
     const response = await fetch(`${baseUrl}${path}`, {

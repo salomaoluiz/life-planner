@@ -151,7 +151,7 @@ it("SHOULD map a network failure to ConnectivityError", async () => {
   );
 });
 
-it("SHOULD abort after 15 s and throw ConnectivityError", async () => {
+function hangUntilAborted() {
   spies.fetch.mockImplementationOnce(
     async (_url: string, init: RequestInit) =>
       new Promise((_resolve, reject) => {
@@ -160,9 +160,31 @@ it("SHOULD abort after 15 s and throw ConnectivityError", async () => {
         );
       }),
   );
+}
+
+it("SHOULD abort a GET after 10 s and throw ConnectivityError", async () => {
+  hangUntilAborted();
 
   const promise = setupThrowable("GET", "/v1/slow");
-  await jest.advanceTimersByTimeAsync(15_000);
+  await jest.advanceTimersByTimeAsync(10_000);
+
+  expect(await promise).toBeInstanceOf(ConnectivityError);
+});
+
+it("SHOULD abort a write only after 15 s", async () => {
+  hangUntilAborted();
+  let settled = false;
+
+  const promise = setupThrowable("POST", "/v1/slow", {}).then((error) => {
+    settled = true;
+
+    return error;
+  });
+  await jest.advanceTimersByTimeAsync(10_000);
+
+  expect(settled).toBe(false);
+
+  await jest.advanceTimersByTimeAsync(5_000);
 
   expect(await promise).toBeInstanceOf(ConnectivityError);
 });
@@ -429,4 +451,48 @@ describe("getText", () => {
       ApiBusinessError,
     );
   });
+});
+
+it("SHOULD share one request between identical GETs in flight AND send again once it settled", async () => {
+  spies.fetch.mockResolvedValue(mocks.json(200, [{ id: "a" }]));
+
+  const [first, second] = await Promise.all([
+    setup("GET", "/v1/finance/transactions?ownerId=o1"),
+    setup("GET", "/v1/finance/transactions?ownerId=o1"),
+  ]);
+
+  expect(first).toEqual([{ id: "a" }]);
+  expect(second).toBe(first);
+  expect(spies.fetch).toHaveBeenCalledTimes(1);
+
+  await setup("GET", "/v1/finance/transactions?ownerId=o1");
+
+  expect(spies.fetch).toHaveBeenCalledTimes(2);
+});
+
+it("SHOULD NOT share GETs of different paths nor writes", async () => {
+  spies.fetch.mockResolvedValue(mocks.json(200, {}));
+
+  await Promise.all([
+    setup("GET", "/v1/a"),
+    setup("GET", "/v1/b"),
+    setup("POST", "/v1/a", {}),
+    setup("POST", "/v1/a", {}),
+  ]);
+
+  expect(spies.fetch).toHaveBeenCalledTimes(4);
+});
+
+it("SHOULD reject every caller of a shared GET that failed AND allow a new attempt", async () => {
+  spies.fetch.mockResolvedValueOnce(mocks.json(500, {}));
+
+  const errors = await Promise.all([
+    setupThrowable("GET", "/v1/a"),
+    setupThrowable("GET", "/v1/a"),
+  ]);
+
+  expect(errors[0]).toBeInstanceOf(GenericError);
+  expect(errors[1]).toBe(errors[0]);
+  spies.fetch.mockResolvedValueOnce(mocks.json(200, { ok: true }));
+  expect(await setup("GET", "/v1/a")).toEqual({ ok: true });
 });
