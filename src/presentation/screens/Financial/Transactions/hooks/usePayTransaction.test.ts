@@ -4,11 +4,16 @@ import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import { GenericError } from "@domain/entities/errors";
 import { useMutation } from "@infrastructure/fetcher";
 import UseMutationFixture from "@infrastructure/fetcher/mocks/useMutation.fixture";
+import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 
 import TransactionUIModel from "../models/TransactionUIModel";
 import usePayTransaction from "./usePayTransaction";
 
 jest.mock("@infrastructure/fetcher");
+jest.mock("@screens/Financial/hooks/invalidateFinanceData", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
 jest.mock("@application/useCases", () => ({
   useCases: {
     updateFinancialTransactionUseCase: {
@@ -68,6 +73,8 @@ it("SHOULD report the payment WHEN the mutation succeeds", () => {
   const { result } = setup();
 
   expect(onPaid).toHaveBeenCalledTimes(1);
+  // The paid row moves to today: every cached month and summary is stale, not only the one on screen.
+  expect(invalidateFinanceData).toHaveBeenCalledTimes(1);
   expect(result.current.payingId).toBeUndefined();
 });
 

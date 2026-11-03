@@ -64,6 +64,9 @@ function FinancialTransactions() {
   const csv = useCsvActions();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [filtersStep, setFiltersStep] = useState<"period" | "root">("root");
+  // FlashList only lays the sticky headers out on a scroll event: at the top it pins the first day header over the
+  // month switcher until the first scroll. They are off while the list sits at the top.
+  const [scrolled, setScrolled] = useState(false);
   function openFilters(step: "period" | "root" = "root") {
     setFiltersStep(step);
     setFiltersOpen(true);
@@ -534,10 +537,17 @@ function FinancialTransactions() {
         ListEmptyComponent={empty}
         ListHeaderComponent={toolbar}
         onRefresh={vm.onRefresh}
+        onScroll={(event) => {
+          const isScrolled = event.nativeEvent.contentOffset.y > 0;
+
+          if (isScrolled !== scrolled) {
+            setScrolled(isScrolled);
+          }
+        }}
         refreshing={vm.isRefreshing}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
-        stickyHeaderIndices={vm.stickyIndices}
+        stickyHeaderIndices={scrolled ? vm.stickyIndices : []}
       />
       {fab}
       {vm.isMonthPickerOpen && (

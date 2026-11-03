@@ -8,6 +8,8 @@ Format: [Keep a Changelog](https://keepachangelog.com).
 ### Changed
 
 - The transactions list is read page by page over a period, and a search without a period looks at the last 2 years (spec 078, needs the API 2.0.0).
+- The month switcher is no longer hidden behind the last day's balance when the Transactions screen opens.
+- Paying a bill refreshes the other months too, so the paid row shows in its new month at once.
 
 ## [1.7.0] - 2026-11-03
 
