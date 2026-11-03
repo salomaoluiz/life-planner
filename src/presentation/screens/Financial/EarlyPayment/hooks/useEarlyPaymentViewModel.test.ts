@@ -216,10 +216,7 @@ it("SHOULD refresh everything AND close WHEN saved", () => {
 
   setup();
 
-  expect(spies.invalidate).toHaveBeenCalledWith([
-    "getFinancialAccountsUseCase",
-  ]);
-  expect(spies.invalidate).toHaveBeenCalledWith(["getMonthSummaryUseCase"]);
+  expect(spies.invalidateFinance).toHaveBeenCalled();
   expect(modalNavigation.closeModal).toHaveBeenCalled();
 });
 

@@ -8,6 +8,7 @@ import {
   mutations,
   queries,
   setup,
+  spies,
   tag,
 } from "./mocks/useNewTagViewModel.mocks";
 
@@ -111,6 +112,7 @@ describe("creating", () => {
 
     setup();
 
+    expect(spies.invalidateFinance).toHaveBeenCalledTimes(1);
     expect(modalNavigation.closeModal).toHaveBeenCalled();
   });
 });

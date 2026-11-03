@@ -2,12 +2,9 @@ import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
 import { useCases } from "@application/useCases";
-import {
-  invalidateFetcherData,
-  useMutation,
-  useQuery,
-} from "@infrastructure/fetcher";
+import { useMutation, useQuery } from "@infrastructure/fetcher";
 import { TranslationKeys } from "@presentation/i18n/types";
+import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
 import {
   ALL_OWNERS,
@@ -86,10 +83,7 @@ function useNewTagViewModel() {
       deleteMutation.status === "success"
     ) {
       // The list, the suggestions of the transaction form and the cached transactions must not show the old tags.
-      invalidateFetcherData([
-        useCases.getFinancialTagsUseCase.uniqueName,
-        useCases.getFinancialTransactionsUseCase.uniqueName,
-      ]);
+      void invalidateFinanceData();
       closeModal();
     }
   }, [createMutation.status, updateMutation.status, deleteMutation.status]);

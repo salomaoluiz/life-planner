@@ -209,7 +209,7 @@ it("SHOULD refresh everything AND close WHEN a refund is saved", () => {
 
   setup();
 
-  expect(spies.invalidate).toHaveBeenCalledWith(["getMonthSummaryUseCase"]);
+  expect(spies.invalidateFinance).toHaveBeenCalled();
   expect(modalNavigation.closeModal).toHaveBeenCalled();
 });
 

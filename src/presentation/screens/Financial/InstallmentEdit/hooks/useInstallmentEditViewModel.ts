@@ -3,12 +3,9 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useCases } from "@application/useCases";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
-import {
-  invalidateFetcherData,
-  useMutation,
-  useQuery,
-} from "@infrastructure/fetcher";
+import { useMutation, useQuery } from "@infrastructure/fetcher";
 import { TranslationKeys } from "@presentation/i18n/types";
+import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 import {
   categoryInScope,
   selectableCategories,
@@ -30,15 +27,7 @@ import {
 
 // Plan writes move card purchases, invoices, the limit and the month lists (spec 030).
 function invalidateAfterWrite() {
-  [
-    useCases.getFinancialTransactionsUseCase.uniqueName,
-    useCases.getFinancialCardInvoiceUseCase.uniqueName,
-    useCases.getFinancialCardInvoicesForMonthUseCase.uniqueName,
-    useCases.getFinancialCreditCardsOverviewUseCase.uniqueName,
-    useCases.getFinancialInstallmentPlanUseCase.uniqueName,
-    useCases.getFinancialAccountsUseCase.uniqueName,
-    useCases.getMonthSummaryUseCase.uniqueName,
-  ].forEach(async (key) => invalidateFetcherData([key]));
+  void invalidateFinanceData();
 }
 
 function useInstallmentEditViewModel() {

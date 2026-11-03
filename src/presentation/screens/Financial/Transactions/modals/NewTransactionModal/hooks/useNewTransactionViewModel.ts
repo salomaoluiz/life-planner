@@ -19,6 +19,7 @@ import {
 } from "@infrastructure/fetcher";
 import { normalizeCategoryColor } from "@presentation/constants/categoryColors";
 import { TranslationKeys } from "@presentation/i18n/types";
+import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
 import { filterRowsByQuery } from "@screens/Financial/models/categoryTree";
 import {
@@ -516,6 +517,8 @@ function useNewTransactionViewModel() {
     if (!mutations.some((mutation) => mutation.status === "success")) {
       return;
     }
+    // These writes do not go through runPendingChange: mark everything they touched stale (data stays fresh 30 s).
+    void invalidateFinanceData();
     if (saveIntent.current === "next" && state) {
       const next = resetForNext(state);
 

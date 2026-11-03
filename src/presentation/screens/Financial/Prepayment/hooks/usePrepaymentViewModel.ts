@@ -6,11 +6,8 @@ import InstallmentPlanDTO from "@application/dto/financial/InstallmentPlanDTO";
 import PrepaymentPreviewDTO from "@application/dto/financial/PrepaymentPreviewDTO";
 import { useCases } from "@application/useCases";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
-import {
-  invalidateFetcherData,
-  useMutation,
-  useQuery,
-} from "@infrastructure/fetcher";
+import { useMutation, useQuery } from "@infrastructure/fetcher";
+import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 import {
   assignableInvoices,
   toCalendarDate,
@@ -23,15 +20,7 @@ import { resultingTotal, summaryOf, validate } from "../models/prepaymentState";
 
 // A prepayment moves installments between invoices: refresh everything that shows them (spec 032).
 function invalidateAfterWrite() {
-  [
-    useCases.getFinancialTransactionsUseCase.uniqueName,
-    useCases.getFinancialCardInvoiceUseCase.uniqueName,
-    useCases.getFinancialCardInvoicesForMonthUseCase.uniqueName,
-    useCases.getFinancialCreditCardsOverviewUseCase.uniqueName,
-    useCases.getFinancialInstallmentPlanUseCase.uniqueName,
-    useCases.getFinancialAccountsUseCase.uniqueName,
-    useCases.getMonthSummaryUseCase.uniqueName,
-  ].forEach(async (key) => invalidateFetcherData([key]));
+  void invalidateFinanceData();
 }
 
 function usePrepaymentViewModel() {

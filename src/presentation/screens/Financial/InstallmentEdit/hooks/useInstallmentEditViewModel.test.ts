@@ -249,7 +249,7 @@ describe("after a write", () => {
     setup();
 
     expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
-    expect(spies.invalidate).toHaveBeenCalled();
+    expect(spies.invalidateFinance).toHaveBeenCalled();
   });
 
   it("SHOULD expose the form error of a failed write", () => {
@@ -311,7 +311,7 @@ describe("prepayment (spec 032)", () => {
     expect(
       queries.getFinancialInstallmentPlanUseCase.value.refetch,
     ).toHaveBeenCalled();
-    expect(spies.invalidate).toHaveBeenCalled();
+    expect(spies.invalidateFinance).toHaveBeenCalled();
   });
 });
 

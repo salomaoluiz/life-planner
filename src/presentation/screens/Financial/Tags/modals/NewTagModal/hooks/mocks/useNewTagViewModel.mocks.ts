@@ -8,9 +8,11 @@ import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
 import UseMutationFixture from "@infrastructure/fetcher/mocks/useMutation.fixture";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
+import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 
 import useNewTagViewModel from "../useNewTagViewModel";
 
+jest.mock("@screens/Financial/hooks/invalidateFinanceData");
 jest.mock("expo-router", () => ({
   router: { back: jest.fn() },
   useLocalSearchParams: jest.fn(),
@@ -54,6 +56,7 @@ const mutations: Record<string, UseMutationFixture<unknown, unknown>> = {};
 
 const spies = {
   back: jest.mocked(router.back),
+  invalidateFinance: jest.mocked(invalidateFinanceData),
   params: jest.mocked(useLocalSearchParams),
   useMutation: jest.mocked(useMutation),
   useQuery: jest.mocked(useQuery),

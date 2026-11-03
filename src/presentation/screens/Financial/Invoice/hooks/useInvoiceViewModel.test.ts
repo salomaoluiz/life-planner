@@ -121,10 +121,7 @@ it("SHOULD refresh everything a payment changes AND close the sheets WHEN it suc
   const { result } = setup();
 
   expect(result.current.isPayOpen).toBe(false);
-  expect(spies.invalidate).toHaveBeenCalledWith(["accounts"]);
-  expect(spies.invalidate).toHaveBeenCalledWith(["overview"]);
-  expect(spies.invalidate).toHaveBeenCalledWith(["invoices"]);
-  expect(spies.invalidate).toHaveBeenCalledWith(["summary"]);
+  expect(spies.invalidateFinance).toHaveBeenCalled();
   expect(queries.invoice.value.refetch).toHaveBeenCalled();
 });
 

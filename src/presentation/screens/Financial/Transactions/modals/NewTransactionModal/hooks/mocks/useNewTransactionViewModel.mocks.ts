@@ -21,11 +21,13 @@ import {
 } from "@infrastructure/fetcher";
 import UseMutationFixture from "@infrastructure/fetcher/mocks/useMutation.fixture";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
+import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 import openTransactionModal from "@screens/Financial/Transactions/pending/openTransactionModal";
 import runPendingChange from "@screens/Financial/Transactions/pending/runPendingChange";
 
 import useNewTransactionViewModel from "../useNewTransactionViewModel";
 
+jest.mock("@screens/Financial/hooks/invalidateFinanceData");
 jest.mock("expo-router", () => ({
   router: { back: jest.fn(), push: jest.fn(), replace: jest.fn() },
   useLocalSearchParams: jest.fn(),
@@ -197,6 +199,7 @@ const mutations: Record<string, UseMutationFixture<unknown, unknown>> = {};
 const spies = {
   back: jest.mocked(router.back),
   focused: jest.mocked(useIsFocused),
+  invalidateFinance: jest.mocked(invalidateFinanceData),
   openTransactionModal: jest.mocked(openTransactionModal),
   params: jest.mocked(useLocalSearchParams),
   push: jest.mocked(router.push),

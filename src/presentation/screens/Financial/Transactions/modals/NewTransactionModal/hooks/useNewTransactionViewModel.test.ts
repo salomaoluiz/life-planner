@@ -229,6 +229,8 @@ it("SHOULD go back WHEN a mutation succeeds", () => {
 
   setup();
 
+  // Direct mutations skip runPendingChange: the lists, summary and balances must be marked stale here.
+  expect(spies.invalidateFinance).toHaveBeenCalled();
   expect(modalNavigation.closeModal).toHaveBeenCalled();
 });
 

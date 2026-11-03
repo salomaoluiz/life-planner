@@ -13,6 +13,7 @@ import { isHexColor } from "@presentation/constants/categoryColors";
 import { iconLabelFor } from "@presentation/constants/categoryIcons";
 import { useLocaleTag } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
+import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
 import {
   pickRootColor,
@@ -182,6 +183,7 @@ function useNewCategoryViewModel() {
       invalidateFetcherData([
         useCases.getFinancialCategoriesUseCase.uniqueName,
       ]);
+      void invalidateFinanceData();
       closeModal();
     }
   }, [
