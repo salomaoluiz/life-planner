@@ -12,7 +12,11 @@ import { RecurrenceHasPaidOccurrences } from "@domain/entities/errors";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { RecurrenceScope } from "@domain/entities/financial/RecurrenceEntity";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
-import { useMutation, useQuery } from "@infrastructure/fetcher";
+import {
+  refetchStaleFetcherData,
+  useMutation,
+  useQuery,
+} from "@infrastructure/fetcher";
 import { normalizeCategoryColor } from "@presentation/constants/categoryColors";
 import { TranslationKeys } from "@presentation/i18n/types";
 import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
@@ -531,13 +535,15 @@ function useNewTransactionViewModel() {
     closeModal();
   }, [mutations.map((mutation) => mutation.status).join(",")]);
 
-  // Records created in the stacked create sheet appear on return: refetch on focus.
+  // Records created in the stacked create sheet appear on return: refetch the stale ones on focus.
   useEffect(() => {
     if (isFocused) {
-      accounts.refetch();
-      cards.refetch();
-      overview.refetch();
-      categories.refetch();
+      refetchStaleFetcherData([
+        [useCases.getFinancialAccountsUseCase.uniqueName],
+        [useCases.getFinancialCreditCardsUseCase.uniqueName],
+        [useCases.getFinancialCreditCardsOverviewUseCase.uniqueName],
+        [useCases.getFinancialCategoriesUseCase.uniqueName],
+      ]);
     }
   }, [isFocused]);
 

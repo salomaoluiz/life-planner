@@ -12,7 +12,7 @@ import UpcomingDTO, {
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import UserDTO from "@application/dto/user/UserDTO";
 import { useCases } from "@application/useCases";
-import { useQuery } from "@infrastructure/fetcher";
+import { refetchStaleFetcherData, useQuery } from "@infrastructure/fetcher";
 import { useTranslationLocale } from "@presentation/i18n";
 import { useBreakpoint } from "@presentation/theme";
 import { setTransactionFilters } from "@screens/Financial/Transactions/hooks/useTransactionFilters";
@@ -148,6 +148,8 @@ function useHomeViewModel() {
   const user = useQuery<UserDTO>({
     cacheKey: [useCases.getUserUseCase.uniqueName],
     fetch: fetchUser,
+    // The profile changes only through the user's own edits, which update it: never stale on its own.
+    staleTime: Infinity,
   });
 
   const ownerList = owners.data ?? [];
@@ -218,9 +220,17 @@ function useHomeViewModel() {
     ]);
   }
 
+  // Returning to Home only refreshes what went stale (the profile never does; disabled queries are skipped).
   useEffect(() => {
     if (isFocused) {
-      refetchAll();
+      refetchStaleFetcherData([
+        [useCases.getOwnersUseCase.uniqueName],
+        [useCases.getMonthSummaryUseCase.uniqueName],
+        [useCases.getStockAttentionUseCase.uniqueName],
+        [useCases.getFinancialAccountsUseCase.uniqueName],
+        [useCases.getFinancialDailyBalancesUseCase.uniqueName, "home"],
+        [useCases.getUpcomingItemsUseCase.uniqueName],
+      ]);
     }
   }, [isFocused]);
 

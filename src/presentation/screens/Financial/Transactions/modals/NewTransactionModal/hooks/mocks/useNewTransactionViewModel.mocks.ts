@@ -14,7 +14,11 @@ import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
-import { useMutation, useQuery } from "@infrastructure/fetcher";
+import {
+  refetchStaleFetcherData,
+  useMutation,
+  useQuery,
+} from "@infrastructure/fetcher";
 import UseMutationFixture from "@infrastructure/fetcher/mocks/useMutation.fixture";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
 import openTransactionModal from "@screens/Financial/Transactions/pending/openTransactionModal";
@@ -196,6 +200,7 @@ const spies = {
   openTransactionModal: jest.mocked(openTransactionModal),
   params: jest.mocked(useLocalSearchParams),
   push: jest.mocked(router.push),
+  refetchStale: jest.mocked(refetchStaleFetcherData),
   replace: jest.mocked(router.replace),
   runPendingChange: jest.mocked(runPendingChange),
   useMutation: jest.mocked(useMutation),

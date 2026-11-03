@@ -8,7 +8,7 @@ import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
-import { useQuery } from "@infrastructure/fetcher";
+import { refetchStaleFetcherData, useQuery } from "@infrastructure/fetcher";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
 
 import CardInvoiceUIModel from "../../models/CardInvoiceUIModel";
@@ -142,6 +142,7 @@ const spies = {
   ),
   isFocused: jest.mocked(useIsFocused),
   push: jest.mocked(router.push),
+  refetchStale: jest.mocked(refetchStaleFetcherData),
   useQuery: jest.mocked(useQuery),
 };
 // endregion spies
