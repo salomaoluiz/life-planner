@@ -114,9 +114,7 @@ it("SHOULD refresh the lists AND close WHEN the prepayment succeeds", () => {
 
   setup();
 
-  expect(spies.invalidate).toHaveBeenCalledWith(["overview"]);
-  expect(spies.invalidate).toHaveBeenCalledWith(["summary"]);
-  expect(spies.invalidate).toHaveBeenCalledWith(["plan"]);
+  expect(spies.invalidateFinance).toHaveBeenCalled();
   expect(modalNavigation.closeModal).toHaveBeenCalled();
 });
 

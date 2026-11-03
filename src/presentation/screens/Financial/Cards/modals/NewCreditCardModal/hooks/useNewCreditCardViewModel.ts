@@ -9,6 +9,7 @@ import {
   useQuery,
 } from "@infrastructure/fetcher";
 import { TranslationKeys } from "@presentation/i18n/types";
+import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
 import { personalOwnerId } from "@screens/Financial/models/ownerOptions";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
@@ -122,6 +123,7 @@ function useNewCreditCardViewModel() {
       invalidateFetcherData([
         useCases.getFinancialCreditCardsUseCase.uniqueName,
       ]);
+      void invalidateFinanceData();
       closeModal();
     }
   }, [createMutation.status, updateMutation.status, deleteMutation.status]);

@@ -12,7 +12,7 @@ import OwnerDTO from "@application/dto/user/OwnerDTO";
 import UserDTO from "@application/dto/user/UserDTO";
 import { useCases } from "@application/useCases";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
-import { useQuery } from "@infrastructure/fetcher";
+import { refetchStaleFetcherData, useQuery } from "@infrastructure/fetcher";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
 import { useBreakpoint } from "@presentation/theme";
 import { setTransactionFilters } from "@screens/Financial/Transactions/hooks/useTransactionFilters";
@@ -165,6 +165,7 @@ const spies = {
   getUpcoming: jest.mocked(useCases.getUpcomingItemsUseCase.execute),
   isFocused: jest.mocked(useIsFocused),
   push: jest.mocked(router.push),
+  refetchStale: jest.mocked(refetchStaleFetcherData),
   setTransactionFilters: jest.mocked(setTransactionFilters),
   useBreakpoint: jest.mocked(useBreakpoint),
   useQuery: jest.mocked(useQuery),

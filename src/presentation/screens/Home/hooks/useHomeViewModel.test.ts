@@ -211,17 +211,34 @@ describe("refresh", () => {
     expect(result.current.isRefreshing).toBe(false);
   });
 
-  it("SHOULD refetch WHEN the screen is focused", () => {
+  it("SHOULD refetch only the stale queries WHEN the screen is focused AND leave the profile alone", () => {
     spies.isFocused.mockReturnValue(true);
     setup(loaded);
 
-    expect(queries.stock.value.refetch).toHaveBeenCalled();
+    expect(spies.refetchStale).toHaveBeenCalledWith([
+      ["owners"],
+      ["summary"],
+      ["stock"],
+      ["accounts"],
+      ["balances", "home"],
+      ["upcoming"],
+    ]);
+    expect(queries.stock.value.refetch).not.toHaveBeenCalled();
+    expect(queries.user.value.refetch).not.toHaveBeenCalled();
   });
 
   it("SHOULD NOT refetch WHEN the screen is not focused", () => {
     setup(loaded);
 
-    expect(queries.stock.value.refetch).not.toHaveBeenCalled();
+    expect(spies.refetchStale).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD keep the profile fresh for good (it changes only through the user's own edits)", () => {
+    setup(loaded);
+
+    expect(spies.useQuery).toHaveBeenCalledWith(
+      expect.objectContaining({ cacheKey: ["user"], staleTime: Infinity }),
+    );
   });
 });
 

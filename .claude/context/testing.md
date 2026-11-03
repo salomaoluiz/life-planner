@@ -83,6 +83,10 @@ export { mocks, setup, setupThrowable, spies };
   - `src/data/repositories/index.test.ts` (repository keys)
   - `src/application/useCases/index.test.ts`
 
+## Fetcher client contract tests (spec 073)
+
+`src/infrastructure/fetcher/reactQuery/defaults.test.ts` asserts the default `staleTime`/`gcTime` and the retry table of `shouldRetry`; `useQuery.test.ts` asserts the wrapper never passes `undefined` options; `api/client.test.ts` covers in-flight GET sharing and the GET/write timeouts. Change a default only by changing these tests with it. View-model tests assert the focus effect calls `refetchStaleFetcherData` with the screen's key prefixes (the `@infrastructure/fetcher` automock).
+
 ## Perf budgets: requests per screen (spec 067)
 
 Every screen (route under `app/`) and modal (`MODAL_ROUTES`) has a request budget in `perf/budgets/<module>.json` (`financial`, `stock`, `family`, `familyMember`, `home`, `auth`, `configs`), keyed `<module>.<screen>.<scenario>` (`mount.cold`, `focusReturn`, `monthSwitch`, `modal.openEdit`, `write.create`...). Fields: `maxRequests`, `maxDepth` (waterfall rounds), `maxDuplicates`, optional `maxFullHistory`; the `mount.cold` entry carries `route` (the `app/` file) or `modal` (the `MODAL_ROUTES` name).

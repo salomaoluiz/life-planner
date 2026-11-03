@@ -229,6 +229,8 @@ it("SHOULD go back WHEN a mutation succeeds", () => {
 
   setup();
 
+  // Direct mutations skip runPendingChange: the lists, summary and balances must be marked stale here.
+  expect(spies.invalidateFinance).toHaveBeenCalledWith({ refetch: false });
   expect(modalNavigation.closeModal).toHaveBeenCalled();
 });
 
@@ -359,14 +361,27 @@ it("SHOULD select the new account WHEN the account list gains one after the inli
   expect(result.current.selectedAccountId).toBe("new-account");
 });
 
-it("SHOULD refetch accounts and categories WHEN the screen regains focus", () => {
+it("SHOULD refetch only the stale accounts, cards, overview and categories WHEN the screen regains focus", () => {
   givenLoaded();
   spies.focused.mockReturnValue(true);
 
   setup();
 
-  expect(queries.accounts.value.refetch).toHaveBeenCalled();
-  expect(queries.categories.value.refetch).toHaveBeenCalled();
+  expect(spies.refetchStale).toHaveBeenCalledWith([
+    ["accounts"],
+    ["cards"],
+    ["overview"],
+    ["categories"],
+  ]);
+  expect(queries.accounts.value.refetch).not.toHaveBeenCalled();
+});
+
+it("SHOULD NOT refetch WHEN the screen is not focused", () => {
+  givenLoaded();
+
+  setup();
+
+  expect(spies.refetchStale).not.toHaveBeenCalled();
 });
 
 it("SHOULD filter the category picker rows by the search text", () => {

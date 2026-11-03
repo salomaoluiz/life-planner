@@ -13,10 +13,12 @@ import {
 } from "@infrastructure/fetcher";
 import UseMutationFixture from "@infrastructure/fetcher/mocks/useMutation.fixture";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
+import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 import CardInvoiceUIModel from "@screens/Financial/Transactions/models/CardInvoiceUIModel";
 
 import useInvoiceViewModel from "../useInvoiceViewModel";
 
+jest.mock("@screens/Financial/hooks/invalidateFinanceData");
 jest.mock("expo-router", () => ({
   router: { back: jest.fn(), replace: jest.fn() },
   useLocalSearchParams: jest.fn(),
@@ -83,6 +85,7 @@ const spies = {
   getCategories: jest.mocked(useCases.getFinancialCategoriesUseCase.execute),
   getProjections: jest.mocked(useCases.getFinancialProjectionsUseCase.execute),
   invalidate: jest.mocked(invalidateFetcherData),
+  invalidateFinance: jest.mocked(invalidateFinanceData),
   params: jest.mocked(useLocalSearchParams),
   replace: jest.mocked(router.replace),
   useMutation: jest.mocked(useMutation),

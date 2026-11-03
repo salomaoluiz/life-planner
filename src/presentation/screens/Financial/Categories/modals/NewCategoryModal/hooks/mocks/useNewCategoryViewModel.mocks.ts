@@ -17,6 +17,7 @@ jest.mock("expo-router", () => ({
   useLocalSearchParams: jest.fn(),
 }));
 jest.mock("@infrastructure/fetcher");
+jest.mock("@screens/Financial/hooks/invalidateFinanceData");
 jest.mock("@application/useCases", () => ({
   useCases: {
     createFinancialCategoryUseCase: {

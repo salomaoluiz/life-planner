@@ -3,6 +3,13 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.6.3] - 2026-11-03
+
+### Changed
+
+- Faster screens: data seen less than 30 seconds ago is reused when you return to a screen, and identical requests are sent once (spec 073).
+- Errors show sooner: failed requests are retried once instead of three times, and reads time out after 10 seconds (spec 073).
+
 ## [1.6.2] - 2026-11-02
 
 ### Changed

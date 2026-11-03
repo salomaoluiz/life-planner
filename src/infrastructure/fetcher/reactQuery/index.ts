@@ -1,4 +1,4 @@
-export { queryClient } from "./provider";
+export { queryClient, shouldRetry } from "./provider";
 export { default as ReactQueryProvider } from "./provider";
 export {
   useMutation as useReactMutation,

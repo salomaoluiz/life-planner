@@ -3,11 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import AccountDTO from "@application/dto/financial/AccountDTO";
 import { useCases } from "@application/useCases";
-import {
-  invalidateFetcherData,
-  useMutation,
-  useQuery,
-} from "@infrastructure/fetcher";
+import { useMutation, useQuery } from "@infrastructure/fetcher";
+import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 import { toCalendarDate } from "@screens/Financial/models/creditSheet";
 import { addMonthsTo } from "@screens/Financial/models/invoiceMonth";
 import { listQueryKey } from "@screens/Financial/models/queryKeys";
@@ -22,13 +19,7 @@ type PayMethod = "ACCOUNT" | "EXTERNAL";
 
 // Everything the invoice, the balances and the lists show changes with a payment (spec 029 FR 19-21).
 function invalidateAfterPayment() {
-  [
-    useCases.getFinancialCardInvoiceUseCase.uniqueName,
-    useCases.getFinancialCardInvoicesForMonthUseCase.uniqueName,
-    useCases.getFinancialCreditCardsOverviewUseCase.uniqueName,
-    useCases.getFinancialAccountsUseCase.uniqueName,
-    useCases.getMonthSummaryUseCase.uniqueName,
-  ].forEach(async (key) => invalidateFetcherData([key]));
+  void invalidateFinanceData();
 }
 
 // The later of two `YYYY-MM` keys.

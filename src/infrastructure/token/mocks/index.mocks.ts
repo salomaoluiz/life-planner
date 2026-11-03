@@ -25,7 +25,9 @@ jest.mock("@infrastructure/storage", () => ({
   },
 }));
 
-beforeEach(() => {
+beforeEach(async () => {
+  // The access token is memoized in the module: forget it so each test starts cold.
+  await tokenStorage.clearToken();
   jest.clearAllMocks();
 });
 

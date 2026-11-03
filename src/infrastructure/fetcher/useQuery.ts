@@ -2,6 +2,12 @@ import { BusinessError, GenericError } from "@domain/entities/errors";
 import { useReactQuery } from "@infrastructure/fetcher/reactQuery";
 import { UseQuery } from "@infrastructure/fetcher/types";
 
+function definedOptions<T extends Record<string, unknown>>(options: T) {
+  return Object.fromEntries(
+    Object.entries(options).filter(([, value]) => value !== undefined),
+  ) as Partial<T>;
+}
+
 function useQuery<Response>(
   props: Parameters<UseQuery<Response>>[0],
 ): ReturnType<UseQuery<Response>> {
@@ -9,14 +15,17 @@ function useQuery<Response>(
     Response,
     BusinessError | GenericError
   >({
-    enabled: props.enabled,
     networkMode: props.networkMode ?? "offlineFirst",
     queryFn: props.fetch,
     queryKey: props.cacheKey,
-    refetchInterval: props.refetchInterval,
-    retry: props.retry,
-    retryDelay: props.retryDelay,
-    staleTime: props.staleTime,
+    // An option passed as `undefined` would override the client defaults (staleTime, retry): only set what was given.
+    ...definedOptions({
+      enabled: props.enabled,
+      refetchInterval: props.refetchInterval,
+      retry: props.retry,
+      retryDelay: props.retryDelay,
+      staleTime: props.staleTime,
+    }),
   });
 
   function getError() {
@@ -42,8 +51,9 @@ function useQuery<Response>(
     throw genericError;
   }
 
+  // Joins a fetch that is already running instead of cancelling it and sending the same request again.
   async function refetchQuery(options?: { throwOnError?: boolean }) {
-    await (options ? refetch(options) : refetch());
+    await refetch({ cancelRefetch: false, ...options });
   }
 
   return {

@@ -5,11 +5,8 @@ import CreditCardOverviewDTO from "@application/dto/financial/CreditCardOverview
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import { useCases } from "@application/useCases";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
-import {
-  invalidateFetcherData,
-  useMutation,
-  useQuery,
-} from "@infrastructure/fetcher";
+import { useMutation, useQuery } from "@infrastructure/fetcher";
+import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 import {
   assignableInvoices,
   defaultInvoiceMonth,
@@ -44,14 +41,7 @@ type RefundParams = {
 
 // A refund changes invoices, the limit and the month summaries (spec 032).
 function invalidateAfterWrite() {
-  [
-    useCases.getFinancialTransactionsUseCase.uniqueName,
-    useCases.getFinancialCardInvoiceUseCase.uniqueName,
-    useCases.getFinancialCardInvoicesForMonthUseCase.uniqueName,
-    useCases.getFinancialCreditCardsOverviewUseCase.uniqueName,
-    useCases.getFinancialAccountsUseCase.uniqueName,
-    useCases.getMonthSummaryUseCase.uniqueName,
-  ].forEach(async (key) => invalidateFetcherData([key]));
+  void invalidateFinanceData();
 }
 
 function parseDate(value: string) {

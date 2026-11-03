@@ -311,13 +311,29 @@ it("SHOULD open the form to add and the edit sheet for a row", () => {
   );
 });
 
-it("SHOULD refetch WHEN the screen is focused", () => {
+it("SHOULD refetch only the stale queries WHEN the screen is focused", () => {
   givenData([]);
   spies.isFocused.mockReturnValue(true);
 
   setup();
 
-  expect(transactionsQuery.value.refetch).toHaveBeenCalled();
+  expect(spies.refetchStale).toHaveBeenCalledWith([
+    ["transactions", "list"],
+    ["cardInvoices", "list"],
+    ["projections", "list"],
+    ["dailyBalances", "list"],
+    ["filteredTransactions", "list"],
+    ["summary"],
+  ]);
+  expect(transactionsQuery.value.refetch).not.toHaveBeenCalled();
+});
+
+it("SHOULD NOT refetch WHEN the screen is not focused", () => {
+  givenData([]);
+
+  setup();
+
+  expect(spies.refetchStale).not.toHaveBeenCalled();
 });
 
 describe("card invoices (spec 029)", () => {

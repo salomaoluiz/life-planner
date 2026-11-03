@@ -63,18 +63,50 @@ function redactPath(path: string) {
   return path.replace(INVITE_TOKEN_SEGMENT, "$1:token");
 }
 
+// Identical GETs in flight at the same time share one request (e.g. a list and the month summary asking for the
+// same month). Only while in flight: nothing is cached once it settles.
+const inFlightGets = new Map<string, Promise<unknown>>();
+
 async function request<T>(
   method: Method,
   path: string,
   body?: unknown,
 ): Promise<T> {
-  return (await execute(method, path, body)).json as T;
+  if (method === "GET") {
+    return (await execute(method, path, body)).json as T;
+  }
+  // A write changes what a GET returns: one sent after it must never join a GET that started before it.
+  inFlightGets.clear();
+  try {
+    return (await execute(method, path, body)).json as T;
+  } finally {
+    inFlightGets.clear();
+  }
+}
+
+async function sharedGet<T>(path: string): Promise<T> {
+  const running = inFlightGets.get(path);
+
+  if (running) {
+    return running as Promise<T>;
+  }
+
+  const sent: Promise<T> = request<T>("GET", path).finally(() => {
+    // A write may have cleared the map and a newer GET taken the slot: only remove our own entry.
+    if (inFlightGets.get(path) === sent) {
+      inFlightGets.delete(path);
+    }
+  });
+
+  inFlightGets.set(path, sent);
+
+  return sent;
 }
 
 const api = {
   delete: async <T>(path: string, body?: unknown) =>
     request<T>("DELETE", path, body),
-  get: async <T>(path: string) => request<T>("GET", path),
+  get: async <T>(path: string) => sharedGet<T>(path),
   // A text response (the CSV export, spec 047) with the attachment filename the API chose.
   getText: async (path: string) => {
     const { filename, text } = await execute("GET", path);

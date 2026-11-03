@@ -98,3 +98,47 @@ describe("GIVEN the web platform", () => {
     );
   });
 });
+
+describe("GIVEN the access token is read repeatedly", () => {
+  beforeEach(() => {
+    mocks.platform.isWeb.mockReturnValue(false);
+  });
+
+  it("SHOULD read the store only once", async () => {
+    spies.secureStore.getItemAsync.mockResolvedValue("jwt");
+
+    expect(await setup().getToken()).toBe("jwt");
+    expect(await setup().getToken()).toBe("jwt");
+    expect(spies.secureStore.getItemAsync).toHaveBeenCalledTimes(1);
+  });
+
+  it("SHOULD return the new token WHEN setToken ran after a read", async () => {
+    spies.secureStore.getItemAsync.mockResolvedValue("old");
+    await setup().getToken();
+
+    await setup().setToken("new");
+
+    expect(await setup().getToken()).toBe("new");
+    expect(spies.secureStore.getItemAsync).toHaveBeenCalledTimes(1);
+  });
+
+  it("SHOULD NOT serve a cleared token AND read the store again", async () => {
+    spies.secureStore.getItemAsync.mockResolvedValue("jwt");
+    await setup().getToken();
+
+    await setup().clearToken();
+    spies.secureStore.getItemAsync.mockResolvedValue(null);
+
+    expect(await setup().getToken()).toBeNull();
+    expect(spies.secureStore.getItemAsync).toHaveBeenCalledTimes(2);
+  });
+
+  it("SHOULD NOT memoize a missing token", async () => {
+    spies.secureStore.getItemAsync.mockResolvedValueOnce(null);
+    expect(await setup().getToken()).toBeNull();
+
+    spies.secureStore.getItemAsync.mockResolvedValueOnce("late");
+
+    expect(await setup().getToken()).toBe("late");
+  });
+});

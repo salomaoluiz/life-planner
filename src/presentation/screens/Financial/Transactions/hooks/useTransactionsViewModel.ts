@@ -7,7 +7,7 @@ import { MonthSummary } from "@application/dto/home/MonthSummaryDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
 import { TransactionQueryFilter } from "@domain/entities/financial/TransactionQueryFilter";
-import { useQuery } from "@infrastructure/fetcher";
+import { refetchStaleFetcherData, useQuery } from "@infrastructure/fetcher";
 import useTranslationLocale from "@presentation/i18n/useTranslationLocale";
 import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
 import { addMonthsTo } from "@screens/Financial/models/invoiceMonth";
@@ -396,6 +396,16 @@ function useTransactionsViewModel() {
     fetch: async () => fetchSummary(month, summaryOwnerIds),
   });
 
+  // Key prefixes of every query this screen shows (the month, the filtered and the projected variants share them).
+  const focusCacheKeys = [
+    listQueryKey(useCases.getFinancialTransactionsUseCase.uniqueName),
+    listQueryKey(useCases.getFinancialCardInvoicesForMonthUseCase.uniqueName),
+    listQueryKey(useCases.getFinancialProjectionsUseCase.uniqueName),
+    listQueryKey(useCases.getFinancialDailyBalancesUseCase.uniqueName),
+    listQueryKey(useCases.getFinancialFilteredTransactionsUseCase.uniqueName),
+    [useCases.getMonthSummaryUseCase.uniqueName],
+  ];
+
   function refetchFiltered() {
     if (showAccountRows) {
       filteredTransactions.refetch();
@@ -421,18 +431,8 @@ function useTransactionsViewModel() {
       if (pendingNavigation?.type) {
         setTypeFilter(pendingNavigation.type);
       }
-      transactions.refetch();
-      invoices.refetch();
-      summary.refetch();
-      if (balancesEnabled) {
-        balances.refetch();
-      }
-      if (isFutureMonth) {
-        projections.refetch();
-      }
-      if (filtering) {
-        refetchFiltered();
-      }
+      // Returning to the screen only refreshes what went stale; disabled queries are skipped by the helper.
+      refetchStaleFetcherData(focusCacheKeys);
     }
   }, [isFocused]);
 

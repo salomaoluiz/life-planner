@@ -6,11 +6,8 @@ import CardInvoiceDTO from "@application/dto/financial/CardInvoiceDTO";
 import CreditCardOverviewDTO from "@application/dto/financial/CreditCardOverviewDTO";
 import { useCases } from "@application/useCases";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
-import {
-  invalidateFetcherData,
-  useMutation,
-  useQuery,
-} from "@infrastructure/fetcher";
+import { useMutation, useQuery } from "@infrastructure/fetcher";
+import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 import {
   assignableInvoices,
   toCalendarDate,
@@ -39,14 +36,7 @@ interface Edits {
 
 // An early payment changes invoices, the limit, an account balance and the month summaries (spec 032).
 function invalidateAfterWrite() {
-  [
-    useCases.getFinancialTransactionsUseCase.uniqueName,
-    useCases.getFinancialCardInvoiceUseCase.uniqueName,
-    useCases.getFinancialCardInvoicesForMonthUseCase.uniqueName,
-    useCases.getFinancialCreditCardsOverviewUseCase.uniqueName,
-    useCases.getFinancialAccountsUseCase.uniqueName,
-    useCases.getMonthSummaryUseCase.uniqueName,
-  ].forEach(async (key) => invalidateFetcherData([key]));
+  void invalidateFinanceData();
 }
 
 function parseDate(value: string) {

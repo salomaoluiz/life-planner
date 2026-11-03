@@ -132,3 +132,11 @@ Wiring: `repos/<module>/index.ts` exports a factory named exactly like the `Repo
 ## API datasource method (`datasource/data/<module>/<sub>/api/<method>.ts`)
 
 Reference: `financial/accounts/api/getAccounts.ts` — guard an empty owner list (no request), `api.get<...>(path + toOwnerQuery(ownerIds))` from `@infrastructure/api`, map with `Model.fromJSON`, and in `catch` return `handleFinancialApiError(error, { datasource, ...ids })` (ids only in the context). `<sub>/index.ts`: `import api from "./api"; export default function financialAccountDatasource() { return api; }`.
+
+## Fetcher defaults and request sharing (spec 073)
+
+- `queryClient` (`@infrastructure/fetcher/reactQuery/provider.tsx`): `staleTime` 30 s, `gcTime` 10 min, `retry: shouldRetry` (one retry, only for `ConnectivityError` or non-`BusinessError`; never 4xx, validation or `UserNotLoggedError`). `defaults.test.ts` locks them.
+- `useQuery` passes only the options it was given (an `undefined` would override the defaults) and `refetch` joins a running fetch (`cancelRefetch: false`). A query that is never stale on its own sets `staleTime: Infinity` (the profile).
+- `refetchStaleFetcherData(keyPrefixes)` refetches only the mounted (active), stale queries under those prefixes; disabled queries are skipped. Pull to refresh keeps using `refetch()`.
+- `api.get` shares identical GETs (same path) while one is in flight and forgets them once settled (no cache). GETs time out after 10 s, writes after 15 s.
+- `tokenStorage.getToken()` reads the store once and serves the access token from memory; `setToken` and `clearToken` keep it in sync (every writer goes through `tokenStorage`).
