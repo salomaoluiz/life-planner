@@ -13,11 +13,14 @@ import {
 const { transaction } = mocks;
 const getTransactions = spies.transactionRepository.getTransactions;
 
-it("SHOULD read the transactions of the selected owners only", async () => {
+it("SHOULD read only the month's transactions of the selected owners", async () => {
   await setup();
 
   expect(getTransactions).toHaveBeenCalledTimes(1);
-  expect(getTransactions).toHaveBeenCalledWith(mocks.defaultParams.ownerIds);
+  expect(getTransactions).toHaveBeenCalledWith(mocks.defaultParams.ownerIds, {
+    from: "2026-10-01",
+    to: "2026-10-31",
+  });
 });
 
 it("SHOULD return zeros WHEN the month has no transactions", async () => {

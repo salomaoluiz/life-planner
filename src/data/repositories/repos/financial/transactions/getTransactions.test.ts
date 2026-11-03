@@ -26,6 +26,7 @@ it("SHOULD return transactions from cache", async () => {
   expect(spies.cache.get).toHaveBeenCalledTimes(1);
   expect(spies.cache.get).toHaveBeenCalledWith(
     CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA,
+    { uniqueId: `:${[...mocks.defaultParams].sort().join(",")}` },
   );
   expect(result).toEqual([
     new TransactionEntity({
@@ -56,6 +57,7 @@ it("SHOULD call cache.set and datasource if has no cached data", async () => {
   expect(spies.cache.set).toHaveBeenCalledWith(
     CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA,
     [mocks.firstTransaction.toJSON(), mocks.secondTransaction.toJSON()],
+    { uniqueId: `:${[...mocks.defaultParams].sort().join(",")}` },
   );
   expect(
     spies.financialTransactionDatasource.getTransactions,
@@ -128,4 +130,39 @@ it("SHOULD NOT cache an empty result", async () => {
 
   expect(await setup()).toEqual([]);
   expect(spies.cache.set).not.toHaveBeenCalled();
+});
+
+it("SHOULD read a period straight from the datasource AND never persist it", async () => {
+  const range = { from: "2026-10-01", to: "2026-10-31" };
+  spies.financialTransactionDatasource.getTransactions.mockResolvedValueOnce([
+    mocks.firstTransaction,
+  ]);
+
+  const result = await setup(undefined, range);
+
+  expect(
+    spies.financialTransactionDatasource.getTransactions,
+  ).toHaveBeenCalledWith(mocks.defaultParams, range);
+  expect(spies.cache.get).not.toHaveBeenCalled();
+  expect(spies.cache.set).not.toHaveBeenCalled();
+  expect(result.map((item) => item.id)).toEqual([mocks.firstTransaction.id]);
+});
+
+it("SHOULD keep one persisted entry per owner set whatever the order of the ids", async () => {
+  spies.cache.get.mockReturnValue(null);
+  spies.financialTransactionDatasource.getTransactions.mockResolvedValue([
+    mocks.firstTransaction,
+  ]);
+
+  await setup(["b-owner", "a-owner"]);
+
+  expect(spies.cache.get).toHaveBeenCalledWith(
+    CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA,
+    { uniqueId: ":a-owner,b-owner" },
+  );
+  expect(spies.cache.set).toHaveBeenCalledWith(
+    CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA,
+    expect.any(Array),
+    { uniqueId: ":a-owner,b-owner" },
+  );
 });

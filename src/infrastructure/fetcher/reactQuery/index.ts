@@ -1,6 +1,7 @@
 export { queryClient, shouldRetry } from "./provider";
 export { default as ReactQueryProvider } from "./provider";
 export {
+  keepPreviousData,
   useMutation as useReactMutation,
   useQuery as useReactQuery,
 } from "@tanstack/react-query";

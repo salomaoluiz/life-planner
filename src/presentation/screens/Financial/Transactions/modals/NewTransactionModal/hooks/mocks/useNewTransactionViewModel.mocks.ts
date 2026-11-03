@@ -15,6 +15,7 @@ import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import {
+  getCachedFetcherData,
   refetchStaleFetcherData,
   useMutation,
   useQuery,
@@ -199,6 +200,7 @@ const mutations: Record<string, UseMutationFixture<unknown, unknown>> = {};
 const spies = {
   back: jest.mocked(router.back),
   focused: jest.mocked(useIsFocused),
+  getCachedFetcherData: jest.mocked(getCachedFetcherData),
   invalidateFinance: jest.mocked(invalidateFinanceData),
   openTransactionModal: jest.mocked(openTransactionModal),
   params: jest.mocked(useLocalSearchParams),
@@ -214,6 +216,8 @@ const spies = {
 beforeEach(() => {
   jest.clearAllMocks();
   jest.useFakeTimers().setSystemTime(new Date(2026, 9, 5, 12));
+  // Fixtures a test added (e.g. another cached month) never leak into the next one.
+  Object.keys(queries).forEach((key) => delete queries[key]);
   [
     "owners",
     "accounts",
@@ -256,6 +260,12 @@ beforeEach(() => {
     ].build()) as never);
   spies.useMutation.mockImplementation(((options: { cacheKey: string[] }) =>
     mutations[options.cacheKey[0]].build()) as never);
+  // The months the Transactions screen cached: every `*_list*` fixture that holds data.
+  spies.getCachedFetcherData.mockImplementation(((cacheKey: string[]) =>
+    Object.entries(queries)
+      .filter(([key]) => key.startsWith(`${cacheKey[0]}_list`))
+      .map(([, query]) => query.value.data)
+      .filter((data) => data !== undefined)) as never);
 });
 
 function givenLoaded(

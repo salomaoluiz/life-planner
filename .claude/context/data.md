@@ -144,3 +144,7 @@ Reference: `financial/accounts/api/getAccounts.ts` — guard an empty owner list
 ## Owners query (spec 074)
 
 Owners (personal + families) come from the `families` of one `GET /v1/user/me`: `userRepository.getOwners()` never reads the cached profile (`CACHE_USER_DATA`), because families change while the profile does not. The shared query is `useOwners` (`src/presentation/hooks/useOwners`, staleTime 5 min); queries that need owners use `useOwnerScopedQuery` (enabled once owners are known, keyed by the list key plus the owner ids, so code that reads such a cache entry must build the same key). Family writes call `invalidateFetcherData()`, which refreshes the owners entry.
+
+## Month results are not persisted (spec 075)
+
+`financialRepository.transaction.getTransactions(ownerIds, range)` with a `range` (`monthDateRange`) reads straight from the API and writes nothing to the persistent cache: the screens keep months in React Query memory. The persisted whole-history entry (read only by the screens that still load the full history, removed by spec 077) is keyed by the sorted owner ids, and `cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA)` without a unique id still clears every entry.

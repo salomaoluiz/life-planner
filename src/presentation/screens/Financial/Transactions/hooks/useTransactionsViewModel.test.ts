@@ -29,19 +29,21 @@ import {
 } from "./useTransactionsViewModel";
 
 describe("fetchTransactions", () => {
-  it("SHOULD load the transactions and categories of the given owners and join the category to each row", async () => {
+  it("SHOULD load only the month's transactions and the categories of the given owners and join the category to each row", async () => {
     spies.getTransactions.mockResolvedValue([
       dto("tx-1", new Date(2026, 9, 1)),
     ]);
     spies.getCategories.mockResolvedValue([]);
 
-    const result = await fetchTransactions([
-      { id: "user-id", name: "Alice Test", type: "USER" },
-    ] as never);
+    const result = await fetchTransactions(
+      [{ id: "user-id", name: "Alice Test", type: "USER" }] as never,
+      "2026-10",
+    );
 
     expect(spies.getOwners).not.toHaveBeenCalled();
     expect(spies.getTransactions).toHaveBeenCalledWith({
       ownerIds: ["user-id"],
+      range: { from: "2026-10-01", to: "2026-10-31" },
     });
     expect(spies.getCategories).toHaveBeenCalledWith(["user-id"]);
     expect(result.items[0].id).toBe("tx-1");
@@ -813,5 +815,60 @@ describe("archived family (spec 042)", () => {
     act(() => result.current.onOwnerFilterChange("family-1"));
 
     expect(result.current.isEmptyMonth).toBe(false);
+  });
+});
+
+describe("month-scoped list (spec 075)", () => {
+  function listOptions() {
+    return spies.ownerScopedQuery.mock.calls.at(-1)![0];
+  }
+
+  it("SHOULD key the list by month AND keep the previous month while another loads", () => {
+    setup();
+
+    expect(listOptions().cacheKey).toEqual(["transactions", "list", "2026-10"]);
+    expect(listOptions().keepPreviousData).toBe(true);
+  });
+
+  it("SHOULD load the month of the owners it is given", async () => {
+    spies.getTransactions.mockResolvedValue([]);
+    spies.getCategories.mockResolvedValue([]);
+    setup();
+
+    await listOptions().fetch([
+      { id: "user-id", name: "Alice Test", type: "USER" },
+    ] as never);
+
+    expect(spies.getTransactions).toHaveBeenCalledWith({
+      ownerIds: ["user-id"],
+      range: { from: "2026-10-01", to: "2026-10-31" },
+    });
+  });
+
+  it("SHOULD key the next month by that month", () => {
+    const { result } = setup();
+
+    act(() => result.current.onNextMonth());
+
+    expect(listOptions().cacheKey).toEqual(["transactions", "list", "2026-11"]);
+  });
+
+  it("SHOULD keep the skeleton WHILE another month shows the previous one as placeholder", () => {
+    givenData([ui("tx-1", new Date(2026, 9, 2))]);
+    transactionsQuery.withIsPlaceholderData(true);
+
+    const { result } = setup();
+
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.isRefreshing).toBe(false);
+  });
+
+  it("SHOULD show the error WHEN the month fails to load", () => {
+    transactionsQuery.withError();
+
+    const { result } = setup();
+
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.errorMessage).toBeDefined();
   });
 });

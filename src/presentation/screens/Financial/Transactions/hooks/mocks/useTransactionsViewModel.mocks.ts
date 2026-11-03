@@ -145,6 +145,7 @@ const spies = {
     useCases.getFinancialTransactionsUseCase.execute,
   ),
   isFocused: jest.mocked(useIsFocused),
+  ownerScopedQuery: jest.mocked(useOwnerScopedQuery),
   push: jest.mocked(router.push),
   refetchStale: jest.mocked(refetchStaleFetcherData),
   useQuery: jest.mocked(useQuery),

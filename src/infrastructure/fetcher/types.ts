@@ -41,6 +41,8 @@ interface QueryProps<R> {
   cacheKey: string[];
   enabled?: boolean;
   fetch: () => Promise<R>;
+  /** Another cache key keeps showing the previous key's data (flagged `isPlaceholderData`) until its own arrives. */
+  keepPreviousData?: boolean;
   /*
   @default "offlineFirst"
    */
@@ -57,6 +59,8 @@ interface QueryResponse<R = void> {
   data?: R;
   error: Errors;
   isFetching: boolean;
+  /** The data is the previous key's (see `keepPreviousData`), not this key's own. */
+  isPlaceholderData?: boolean;
   refetch: (options?: { throwOnError?: boolean }) => Promise<void>;
   status: QueryStatus;
 }

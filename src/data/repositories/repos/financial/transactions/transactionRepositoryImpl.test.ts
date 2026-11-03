@@ -56,6 +56,7 @@ it("SHOULD call getTransactions correctly", async () => {
   expect(spies.getTransactions).toHaveBeenCalledWith(
     ownerIds,
     mocks.datasources,
+    undefined,
   );
   expect(transactions).toEqual("getTransactions response");
 });
@@ -117,4 +118,17 @@ describe("CSV import and export (spec 047)", () => {
     expect(await importTransactions(importRequest)).toBe(3);
     expect(datasource.importTransactions).toHaveBeenCalledWith(importRequest);
   });
+});
+
+it("SHOULD pass the range of getTransactions on", async () => {
+  const { getTransactions } = setup();
+  const range = { from: "2026-10-01", to: "2026-10-31" };
+
+  await getTransactions(["owner-1"], range);
+
+  expect(spies.getTransactions).toHaveBeenCalledWith(
+    ["owner-1"],
+    mocks.datasources,
+    range,
+  );
 });

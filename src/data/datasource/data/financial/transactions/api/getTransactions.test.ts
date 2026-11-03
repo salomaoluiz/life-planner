@@ -81,3 +81,24 @@ it("SHOULD wrap unknown errors in GenericError with the owner ids only", async (
     ownerIds: mocks.ownerIds,
   });
 });
+
+it("SHOULD ask only the period for both account rows and card purchases WHEN a range is given", async () => {
+  spies.get.mockResolvedValue([]);
+
+  await setup(mocks.ownerIds, { from: "2026-10-01", to: "2026-10-31" });
+
+  const query = `ownerId=${mocks.ownerIds[0]}&ownerId=${mocks.ownerIds[1]}&today=${todayCalendarDate()}&from=2026-10-01&to=2026-10-31`;
+
+  expect(spies.get).toHaveBeenCalledWith(`/v1/finance/transactions?${query}`);
+  expect(spies.get).toHaveBeenCalledWith(
+    `/v1/finance/transactions?${query}&source=CARD`,
+  );
+});
+
+it("SHOULD NOT send a period WHEN no range is given", async () => {
+  spies.get.mockResolvedValue([]);
+
+  await setup();
+
+  spies.get.mock.calls.forEach(([path]) => expect(path).not.toContain("from="));
+});

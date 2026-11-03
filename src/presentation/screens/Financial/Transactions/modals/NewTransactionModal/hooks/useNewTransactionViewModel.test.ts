@@ -14,6 +14,7 @@ import {
   FinancialNotFound,
   RecurrenceHasPaidOccurrences,
 } from "@domain/entities/errors";
+import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
 import TransactionUIModel from "@screens/Financial/Transactions/models/TransactionUIModel";
 import { consumeRetryDraft } from "@screens/Financial/Transactions/pending/pendingChanges";
 
@@ -1729,27 +1730,37 @@ describe("description suggestions (spec 060)", () => {
     ).toEqual(["Uber"]);
   });
 
-  it("SHOULD only read the cache, never fetch it", () => {
+  it("SHOULD only read the cached months, never fetch them", () => {
     givenLoaded();
-    setup();
+    givenCached([tx("t1", { description: "Uber" })]);
+    const { result } = setup();
 
-    const call = spies.useQuery.mock.calls
-      .map((args) => args[0])
-      .find((options) => options.cacheKey[1] === "list");
+    act(() => result.current.onDescriptionChange("ub"));
 
-    expect(call?.enabled).toBe(false);
+    expect(spies.getCachedFetcherData).toHaveBeenCalledWith([
+      "transactions",
+      "list",
+    ]);
+    expect(
+      spies.useQuery.mock.calls.some(
+        ([options]) => options.cacheKey[1] === "list",
+      ),
+    ).toBe(false);
   });
 
-  it("SHOULD read the cache entry of the screen (list key plus every owner id)", () => {
+  it("SHOULD merge the suggestions of every cached month", () => {
     givenLoaded();
-    setup();
+    givenCached([tx("t1", { description: "Uber" })]);
+    queries.transactions_list_other = new UseQueryFixture<unknown>().withData({
+      items: [new TransactionUIModel(tx("t2", { description: "Ubatuba" }))],
+    });
+    const { result } = setup();
 
-    const call = spies.useQuery.mock.calls
-      .map((args) => args[0])
-      .find((options) => options.cacheKey[1] === "list");
+    act(() => result.current.onDescriptionChange("ub"));
 
-    expect(call?.cacheKey.slice(0, 2)).toEqual(["transactions", "list"]);
-    expect(call?.cacheKey.length).toBeGreaterThan(2);
+    expect(
+      result.current.descriptionSuggestions.map((row) => row.label).sort(),
+    ).toEqual(["Ubatuba", "Uber"]);
   });
 
   it("SHOULD suggest nothing with an empty cache AND in edit mode", () => {
@@ -1794,5 +1805,42 @@ describe("description suggestions (spec 060)", () => {
     expect(result.current.amountCents).toBe(1500);
     expect(result.current.notes).toBe("");
     expect(focus).toHaveBeenCalled();
+  });
+});
+
+describe("row lookup of an edit (spec 075)", () => {
+  function fullHistoryCall() {
+    return spies.useQuery.mock.calls
+      .map(([options]) => options)
+      .filter(
+        (options) =>
+          options.cacheKey.length === 1 &&
+          options.cacheKey[0] === "transactions",
+      )
+      .pop()!;
+  }
+
+  it("SHOULD take the row from the month the screen holds AND never load the whole history", () => {
+    givenLoaded({ params: { id: "t1" }, transactions: [] });
+    queries.transactions_list.withData({
+      items: [new TransactionUIModel(tx("t1", { description: "Cached" }))],
+    });
+
+    const { result } = setup();
+
+    expect(result.current.description).toBe("Cached");
+    expect(fullHistoryCall().enabled).toBe(false);
+  });
+
+  it("SHOULD fall back to the whole history WHEN the row is in no cached month (opened from elsewhere)", () => {
+    givenLoaded({
+      params: { id: "t1" },
+      transactions: [tx("t1", { description: "From history" })],
+    });
+
+    const { result } = setup();
+
+    expect(fullHistoryCall().enabled).toBe(true);
+    expect(result.current.description).toBe("From history");
   });
 });

@@ -1,5 +1,8 @@
 import { BusinessError, GenericError } from "@domain/entities/errors";
-import { useReactQuery } from "@infrastructure/fetcher/reactQuery";
+import {
+  keepPreviousData,
+  useReactQuery,
+} from "@infrastructure/fetcher/reactQuery";
 import { UseQuery } from "@infrastructure/fetcher/types";
 
 function definedOptions<T extends Record<string, unknown>>(options: T) {
@@ -11,22 +14,21 @@ function definedOptions<T extends Record<string, unknown>>(options: T) {
 function useQuery<Response>(
   props: Parameters<UseQuery<Response>>[0],
 ): ReturnType<UseQuery<Response>> {
-  const { data, error, isFetching, refetch, status } = useReactQuery<
-    Response,
-    BusinessError | GenericError
-  >({
-    networkMode: props.networkMode ?? "offlineFirst",
-    queryFn: props.fetch,
-    queryKey: props.cacheKey,
-    // An option passed as `undefined` would override the client defaults (staleTime, retry): only set what was given.
-    ...definedOptions({
-      enabled: props.enabled,
-      refetchInterval: props.refetchInterval,
-      retry: props.retry,
-      retryDelay: props.retryDelay,
-      staleTime: props.staleTime,
-    }),
-  });
+  const { data, error, isFetching, isPlaceholderData, refetch, status } =
+    useReactQuery<Response, BusinessError | GenericError>({
+      networkMode: props.networkMode ?? "offlineFirst",
+      queryFn: props.fetch,
+      queryKey: props.cacheKey,
+      // An option passed as `undefined` would override the client defaults (staleTime, retry): only set what was given.
+      ...definedOptions({
+        enabled: props.enabled,
+        placeholderData: props.keepPreviousData ? keepPreviousData : undefined,
+        refetchInterval: props.refetchInterval,
+        retry: props.retry,
+        retryDelay: props.retryDelay,
+        staleTime: props.staleTime,
+      }),
+    });
 
   function getError() {
     if (!error) {
@@ -60,6 +62,7 @@ function useQuery<Response>(
     data,
     error: getError(),
     isFetching,
+    isPlaceholderData,
     refetch: refetchQuery,
     status,
   };

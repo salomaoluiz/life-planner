@@ -189,3 +189,31 @@ it("SHOULD NOT pass options that were not given (undefined would override the cl
     "queryKey",
   ]);
 });
+
+it("SHOULD keep the previous key's data as placeholder WHEN keepPreviousData is set", () => {
+  spies.useReactQuery.mockReturnValueOnce({
+    ...(mocks.successResponse as object),
+    isPlaceholderData: true,
+  } as never);
+
+  const { result } = setup({
+    cacheKey: ["list", "2026-10"],
+    fetch: spies.fetch,
+    keepPreviousData: true,
+  });
+
+  expect(spies.useReactQuery).toHaveBeenCalledWith(
+    expect.objectContaining({ placeholderData: expect.any(Function) }),
+  );
+  expect(result.current.isPlaceholderData).toBe(true);
+});
+
+it("SHOULD NOT set a placeholder by default", () => {
+  spies.useReactQuery.mockReturnValueOnce(mocks.successResponse);
+
+  setup({ cacheKey: ["list"], fetch: spies.fetch });
+
+  expect(spies.useReactQuery.mock.calls[0][0]).not.toHaveProperty(
+    "placeholderData",
+  );
+});

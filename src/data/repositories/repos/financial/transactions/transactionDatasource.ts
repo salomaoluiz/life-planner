@@ -10,7 +10,10 @@ import {
   ImportRequest,
   ImportValidationEntity,
 } from "@domain/entities/financial/TransactionCsv";
-import { TransactionQueryFilter } from "@domain/entities/financial/TransactionQueryFilter";
+import {
+  TransactionDateRange,
+  TransactionQueryFilter,
+} from "@domain/entities/financial/TransactionQueryFilter";
 
 export interface TransactionDatasource {
   createTransaction(
@@ -22,7 +25,10 @@ export interface TransactionDatasource {
   getFilteredTransactions(
     params: GetFilteredTransactionsDatasourceParams,
   ): Promise<TransactionModel[]>;
-  getTransactions(ownerIds: string[]): Promise<TransactionModel[]>;
+  getTransactions(
+    ownerIds: string[],
+    range?: TransactionDateRange,
+  ): Promise<TransactionModel[]>;
   importTransactions(params: ImportRequest): Promise<number>;
   updateTransaction(params: UpdateTransactionDatasourceParams): Promise<void>;
   validateImport(params: ImportRequest): Promise<ImportValidationEntity>;

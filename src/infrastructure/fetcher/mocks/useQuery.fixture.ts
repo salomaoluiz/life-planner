@@ -8,6 +8,7 @@ class UseQueryFixture<Response> {
     data: undefined,
     error: null,
     isFetching: false,
+    isPlaceholderData: false,
     refetch: jest.fn(),
     status: "pending",
   };
@@ -41,6 +42,11 @@ class UseQueryFixture<Response> {
 
   withIsFetching(isFetching: boolean) {
     this.value.isFetching = isFetching;
+    return this;
+  }
+
+  withIsPlaceholderData(isPlaceholderData: boolean) {
+    this.value.isPlaceholderData = isPlaceholderData;
     return this;
   }
 

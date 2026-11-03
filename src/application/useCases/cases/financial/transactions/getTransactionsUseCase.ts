@@ -1,10 +1,13 @@
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import { DefaultError } from "@domain/entities/errors";
+import { TransactionDateRange } from "@domain/entities/financial/TransactionQueryFilter";
 import Repositories from "@domain/repositories";
 
 export interface GetTransactionsUseCaseParams {
   ownerIds: string[];
+  // Only this period (account rows by date, card purchases by invoice list date); omitted → the whole history.
+  range?: TransactionDateRange;
 }
 
 function getTransactionsUseCase(
@@ -17,9 +20,14 @@ function getTransactionsUseCase(
     execute: async (params) => {
       try {
         const [transactions, categories, accounts] = await Promise.all([
-          repositories.financialRepository.transaction.getTransactions(
-            params.ownerIds,
-          ),
+          params.range
+            ? repositories.financialRepository.transaction.getTransactions(
+                params.ownerIds,
+                params.range,
+              )
+            : repositories.financialRepository.transaction.getTransactions(
+                params.ownerIds,
+              ),
           repositories.financialRepository.category.getCategories(
             params.ownerIds,
           ),

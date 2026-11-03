@@ -43,8 +43,11 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-async function setup(ids: string[] = ownerIds) {
-  return getTransactions(ids);
+async function setup(
+  ids: string[] = ownerIds,
+  range?: { from: string; to: string },
+) {
+  return getTransactions(ids, range);
 }
 
 async function setupThrowable(ids: string[] = ownerIds) {
