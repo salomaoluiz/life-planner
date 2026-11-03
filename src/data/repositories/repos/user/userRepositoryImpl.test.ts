@@ -32,3 +32,13 @@ it("SHOULD call deleteAccount correctly", async () => {
     mocks.datasources,
   );
 });
+
+it("SHOULD call getOwners correctly", async () => {
+  const { getOwners } = setup();
+
+  const owners = await getOwners();
+
+  expect(spies.getOwners).toHaveBeenCalledTimes(1);
+  expect(spies.getOwners).toHaveBeenCalledWith(mocks.datasources);
+  expect(owners).toEqual("getOwners response");
+});

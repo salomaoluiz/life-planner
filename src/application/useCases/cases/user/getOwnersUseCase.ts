@@ -1,8 +1,6 @@
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { IUseCaseFactoryWithoutParamResponse } from "@application/useCases/types";
 import { DefaultError } from "@domain/entities/errors";
-import { FamilyStatus } from "@domain/entities/family/FamilyStatus";
-import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import Repositories from "@domain/repositories";
 
 function getOwnersUseCase(
@@ -11,26 +9,17 @@ function getOwnersUseCase(
   return {
     execute: async () => {
       try {
-        const user = await repositories.userRepository.getUser();
-        const families = await repositories.familyRepository.getFamilies(
-          user.id,
+        const owners = await repositories.userRepository.getOwners();
+
+        return owners.map(
+          (owner) =>
+            new OwnerDTO({
+              archived: owner.archived,
+              id: owner.ownerId,
+              name: owner.name,
+              type: owner.type,
+            }),
         );
-
-        const ownerIds = families.map((family) => ({
-          archived: family.status === FamilyStatus.ARCHIVED,
-          id: family.id,
-          name: family.name,
-          type: OwnerType.FAMILY,
-        }));
-
-        ownerIds.push({
-          archived: false,
-          id: user.id,
-          name: user.name,
-          type: OwnerType.USER,
-        });
-
-        return ownerIds.map((owner) => new OwnerDTO(owner));
       } catch (error) {
         if (error instanceof DefaultError) {
           error.addContext({
