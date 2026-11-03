@@ -1,6 +1,7 @@
 import { datasourcesMocks } from "@data/datasource/mocks/listDatasources.mocks";
 
 import * as deleteAccount from "../deleteAccount";
+import * as getOwners from "../getOwners";
 import * as getUser from "../getUser";
 import * as getUserById from "../getUserById";
 import userRepositoryImpl from "../userRepositoryImpl";
@@ -13,6 +14,9 @@ import userRepositoryImpl from "../userRepositoryImpl";
 
 const deleteAccountSpy = jest.spyOn(deleteAccount, "default");
 deleteAccountSpy.mockResolvedValue(undefined as never);
+
+const getOwnersSpy = jest.spyOn(getOwners, "default");
+getOwnersSpy.mockResolvedValue("getOwners response" as never);
 
 const getUserSpy = jest.spyOn(getUser, "default");
 getUserSpy.mockResolvedValue("getUser response" as never);
@@ -32,6 +36,7 @@ function setup() {
 
 const spies = {
   deleteAccount: deleteAccountSpy,
+  getOwners: getOwnersSpy,
   getUser: getUserSpy,
   getUserById: getUserByIdSpy,
 };

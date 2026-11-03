@@ -7,6 +7,7 @@ import CreditCardOverviewDTO from "@application/dto/financial/CreditCardOverview
 import { useCases } from "@application/useCases";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
+import useOwners from "@presentation/hooks/useOwners";
 import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 import {
   assignableInvoices,
@@ -53,10 +54,7 @@ function useEarlyPaymentViewModel() {
   const [submitted, setSubmitted] = useState(false);
   const [isDeleteOpen, setDeleteOpen] = useState(false);
 
-  const owners = useQuery({
-    cacheKey: [useCases.getOwnersUseCase.uniqueName],
-    fetch: useCases.getOwnersUseCase.execute,
-  });
+  const owners = useOwners();
   const ownerIds = (owners.data ?? []).map((owner) => owner.id);
   const overview = useQuery<CreditCardOverviewDTO>({
     cacheKey: [useCases.getFinancialCreditCardsOverviewUseCase.uniqueName],

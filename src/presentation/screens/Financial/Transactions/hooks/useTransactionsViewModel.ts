@@ -8,6 +8,8 @@ import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
 import { TransactionQueryFilter } from "@domain/entities/financial/TransactionQueryFilter";
 import { refetchStaleFetcherData, useQuery } from "@infrastructure/fetcher";
+import useOwners from "@presentation/hooks/useOwners";
+import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import useTranslationLocale from "@presentation/i18n/useTranslationLocale";
 import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
 import { addMonthsTo } from "@screens/Financial/models/invoiceMonth";
@@ -77,7 +79,6 @@ interface TransactionsData {
   // Spec 061: lets a row that is still being saved show its category color and icon.
   categories?: CategoryDTO[];
   items: TransactionUIModel[];
-  owners: OwnerDTO[];
 }
 
 // Spec 045: the account rows that match the filters in the range.
@@ -163,8 +164,9 @@ async function fetchSummary(
   return useCases.getMonthSummaryUseCase.execute({ month, ownerIds });
 }
 
-async function fetchTransactions(): Promise<TransactionsData> {
-  const owners = await useCases.getOwnersUseCase.execute();
+async function fetchTransactions(
+  owners: OwnerDTO[],
+): Promise<TransactionsData> {
   const ownerIds = owners.map((owner) => owner.id);
   const [transactions, categories] = await Promise.all([
     useCases.getFinancialTransactionsUseCase.execute({ ownerIds }),
@@ -183,7 +185,6 @@ async function fetchTransactions(): Promise<TransactionsData> {
           categoryById.get(transaction.categoryId),
         ),
     ),
-    owners,
   };
 }
 
@@ -219,12 +220,13 @@ function useTransactionsViewModel() {
   const [isMonthPickerOpen, setMonthPickerOpen] = useState(false);
   const [pickerYear, setPickerYear] = useState(month.getFullYear());
 
-  const transactions = useQuery<TransactionsData>({
+  // Owners come from the shared query: every query below starts as soon as they are known, none waits for the
+  // transactions list (spec 074).
+  const owners = useOwners().data;
+  const transactions = useOwnerScopedQuery<TransactionsData>({
     cacheKey: listQueryKey(useCases.getFinancialTransactionsUseCase.uniqueName),
     fetch: fetchTransactions,
   });
-
-  const owners = transactions.data?.owners;
   // A selected family that is no longer an owner (user left it) falls back to All.
   const ownerFilter =
     ownerSelection === ALL_FILTER ||

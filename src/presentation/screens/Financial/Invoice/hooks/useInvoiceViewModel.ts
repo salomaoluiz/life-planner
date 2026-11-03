@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import AccountDTO from "@application/dto/financial/AccountDTO";
 import { useCases } from "@application/useCases";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
+import useOwners from "@presentation/hooks/useOwners";
 import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 import { toCalendarDate } from "@screens/Financial/models/creditSheet";
 import { addMonthsTo } from "@screens/Financial/models/invoiceMonth";
@@ -102,11 +103,7 @@ function useInvoiceViewModel() {
         );
     },
   });
-  const owners = useQuery({
-    cacheKey: [useCases.getOwnersUseCase.uniqueName],
-    enabled: isPayOpen,
-    fetch: useCases.getOwnersUseCase.execute,
-  });
+  const owners = useOwners({ enabled: isPayOpen });
   const accounts = useQuery<AccountDTO[]>({
     cacheKey: [useCases.getFinancialAccountsUseCase.uniqueName],
     enabled: isPayOpen && !!owners.data,

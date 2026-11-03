@@ -12,13 +12,13 @@ import {
 } from "./mocks/useTagsViewModel.mocks";
 import { fetchTags } from "./useTagsViewModel";
 
-it("SHOULD load the owners then the tags of those owners", async () => {
+it("SHOULD fetch the tags of the given owners AND never ask for the owners", async () => {
   const owners = [{ id: "user-id", name: "Alice", type: "USER" }];
   const tags = [tag("a")];
-  spies.getOwners.mockResolvedValue(owners as never);
   spies.getTags.mockResolvedValue(tags);
 
-  expect(await fetchTags()).toEqual({ owners, tags });
+  expect(await fetchTags(owners as never)).toEqual({ owners, tags });
+  expect(spies.getOwners).not.toHaveBeenCalled();
   expect(spies.getTags).toHaveBeenCalledWith(["user-id"]);
 });
 

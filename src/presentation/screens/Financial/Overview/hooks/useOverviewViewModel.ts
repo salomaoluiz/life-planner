@@ -2,7 +2,6 @@ import { useIsFocused } from "@react-navigation/native";
 import { router } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
 import {
   BalanceSeriesEntity,
@@ -13,6 +12,7 @@ import {
 } from "@domain/entities/financial/DashboardEntity";
 import { TransactionQueryFilter } from "@domain/entities/financial/TransactionQueryFilter";
 import { useQuery } from "@infrastructure/fetcher";
+import useOwners from "@presentation/hooks/useOwners";
 import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
 import {
   activeOwnerIds,
@@ -79,10 +79,7 @@ function useOverviewViewModel() {
   const [selectedPoint, setSelectedPoint] = useState<number>();
   const [selectedGroup, setSelectedGroup] = useState<number>();
 
-  const ownersQuery = useQuery<OwnerDTO[]>({
-    cacheKey: [useCases.getOwnersUseCase.uniqueName],
-    fetch: useCases.getOwnersUseCase.execute,
-  });
+  const ownersQuery = useOwners();
   const owners = ownersQuery.data;
   const ownerFilter =
     ownerSelection === ALL_OWNERS ||

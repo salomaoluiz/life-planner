@@ -9,10 +9,10 @@ import StockAttentionDTO from "@application/dto/home/StockAttentionDTO";
 import UpcomingDTO, {
   UpcomingItemDTO,
 } from "@application/dto/home/UpcomingDTO";
-import OwnerDTO from "@application/dto/user/OwnerDTO";
 import UserDTO from "@application/dto/user/UserDTO";
 import { useCases } from "@application/useCases";
 import { refetchStaleFetcherData, useQuery } from "@infrastructure/fetcher";
+import useOwners from "@presentation/hooks/useOwners";
 import { useTranslationLocale } from "@presentation/i18n";
 import { useBreakpoint } from "@presentation/theme";
 import { setTransactionFilters } from "@screens/Financial/Transactions/hooks/useTransactionFilters";
@@ -69,10 +69,6 @@ async function fetchAccounts(ownerIds: string[]) {
 
 async function fetchBalances(ownerIds: string[], month: string) {
   return useCases.getFinancialDailyBalancesUseCase.execute({ month, ownerIds });
-}
-
-async function fetchOwners() {
-  return useCases.getOwnersUseCase.execute();
 }
 
 async function fetchStock(ownerIds: string[]) {
@@ -141,10 +137,7 @@ function useHomeViewModel() {
 
   const now = new Date();
 
-  const owners = useQuery<OwnerDTO[]>({
-    cacheKey: [useCases.getOwnersUseCase.uniqueName],
-    fetch: fetchOwners,
-  });
+  const owners = useOwners();
   const user = useQuery<UserDTO>({
     cacheKey: [useCases.getUserUseCase.uniqueName],
     fetch: fetchUser,

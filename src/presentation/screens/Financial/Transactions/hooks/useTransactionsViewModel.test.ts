@@ -14,6 +14,7 @@ import {
   givenData,
   invoicesQuery,
   owners,
+  ownersQuery,
   projectionsQuery,
   setup,
   spies,
@@ -28,22 +29,57 @@ import {
 } from "./useTransactionsViewModel";
 
 describe("fetchTransactions", () => {
-  it("SHOULD load owners, transactions and categories and join the category to each row", async () => {
-    spies.getOwners.mockResolvedValue([
-      { id: "user-id", name: "Alice Test", type: "USER" },
-    ] as never);
+  it("SHOULD load the transactions and categories of the given owners and join the category to each row", async () => {
     spies.getTransactions.mockResolvedValue([
       dto("tx-1", new Date(2026, 9, 1)),
     ]);
     spies.getCategories.mockResolvedValue([]);
 
-    const result = await fetchTransactions();
+    const result = await fetchTransactions([
+      { id: "user-id", name: "Alice Test", type: "USER" },
+    ] as never);
 
+    expect(spies.getOwners).not.toHaveBeenCalled();
     expect(spies.getTransactions).toHaveBeenCalledWith({
       ownerIds: ["user-id"],
     });
     expect(spies.getCategories).toHaveBeenCalledWith(["user-id"]);
     expect(result.items[0].id).toBe("tx-1");
+  });
+});
+
+describe("owners batch (spec 074)", () => {
+  function enabledByKey() {
+    const result: Record<string, boolean> = {};
+
+    spies.useQuery.mock.calls.forEach(([options]) => {
+      result[options.cacheKey[0]] =
+        !!result[options.cacheKey[0]] || !!options.enabled;
+    });
+
+    return result;
+  }
+
+  it("SHOULD enable the summary, balances and invoices once the owners are known, with the transactions list still loading", () => {
+    ownersQuery.withData(owners);
+    transactionsQuery.reset();
+
+    setup();
+
+    expect(enabledByKey()).toMatchObject({
+      cardInvoices: true,
+      dailyBalances: true,
+      summary: true,
+    });
+  });
+
+  it("SHOULD NOT enable any data query WHILE the owners are loading", () => {
+    setup();
+
+    const enabled = Object.values(enabledByKey());
+
+    expect(enabled.length).toBeGreaterThan(0);
+    expect(enabled.every((value) => !value)).toBe(true);
   });
 });
 
@@ -232,10 +268,9 @@ it("SHOULD fall back to All WHEN the selected family is no longer an owner", () 
   const { rerender, result } = setup();
   act(() => result.current.onOwnerFilterChange("family-1"));
 
-  transactionsQuery.withData({
-    items: items(),
-    owners: owners.filter((owner) => owner.id === "user-id"),
-  });
+  ownersQuery
+    .reset()
+    .withData(owners.filter((owner) => owner.id === "user-id"));
   rerender({});
 
   expect(result.current.ownerFilter).toBe("ALL");
@@ -244,7 +279,8 @@ it("SHOULD fall back to All WHEN the selected family is no longer an owner", () 
 });
 
 it("SHOULD render only the All scope WHEN the user has no personal owner or families", () => {
-  transactionsQuery.withData({ items: [], owners: [] });
+  transactionsQuery.withData({ items: [] });
+  ownersQuery.withData([]);
   summaryQuery.withData({
     balance: 0,
     expense: 0,

@@ -37,3 +37,31 @@ it("SHOULD round-trip through the cache json", () => {
 
   expect(UserModel.fromJSON(model.toJSON())).toStrictEqual(model);
 });
+
+it("SHOULD map the families of /user/me", () => {
+  const families = [
+    { id: "family-1", name: "Family", status: "ACTIVE" },
+    { id: "family-2", name: "Old", status: "ARCHIVED" },
+  ];
+
+  const model = UserModel.fromJSON({ ...mocks.json, families });
+
+  expect(model.families).toEqual(families);
+});
+
+it.each([
+  ["missing", undefined],
+  ["not an array", "x"],
+  ["null", null],
+])("SHOULD default the families to [] WHEN they are %s", (_label, families) => {
+  expect(UserModel.fromJSON({ ...mocks.json, families }).families).toEqual([]);
+});
+
+it("SHOULD NOT put the families in the cached profile json", () => {
+  const model = UserModel.fromJSON({
+    ...mocks.json,
+    families: [{ id: "family-1", name: "Family", status: "ACTIVE" }],
+  });
+
+  expect(model.toJSON()).not.toHaveProperty("families");
+});

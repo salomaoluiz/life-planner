@@ -18,6 +18,7 @@ import {
   useQuery,
 } from "@infrastructure/fetcher";
 import { normalizeCategoryColor } from "@presentation/constants/categoryColors";
+import useOwners from "@presentation/hooks/useOwners";
 import { TranslationKeys } from "@presentation/i18n/types";
 import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
@@ -442,10 +443,15 @@ function useNewTransactionViewModel() {
   });
 
   // Spec 060: past transactions come from what the Transactions screen already cached; this never fetches.
+  // The list is cached under the key of the screen: the list prefix plus every owner id (archived ones too).
+  const allOwners = useOwners().data;
   const cachedTransactions = useQuery<TransactionsData>({
-    cacheKey: listQueryKey(useCases.getFinancialTransactionsUseCase.uniqueName),
+    cacheKey: [
+      ...listQueryKey(useCases.getFinancialTransactionsUseCase.uniqueName),
+      ...(allOwners ?? []).map((owner) => owner.id),
+    ],
     enabled: false,
-    fetch: async () => ({ items: [], owners: [] }),
+    fetch: async () => ({ items: [] }),
   });
   const typedDescription = state?.description ?? "";
   const descriptionSuggestions = useMemo(
@@ -453,7 +459,7 @@ function useNewTransactionViewModel() {
       isEditing || !cachedTransactions.data
         ? []
         : buildDescriptionSuggestions({
-            archivedOwnerIds: archivedOwnerIds(cachedTransactions.data.owners),
+            archivedOwnerIds: archivedOwnerIds(allOwners ?? []),
             items: cachedTransactions.data.items,
             query: typedDescription,
           }),

@@ -150,6 +150,7 @@ testIDs: `Family/testIds.ts` (`family.list.*`; per-record ids append `-<familyId
 
 ## Archived families (spec 042)
 
+- Owners (spec 074): `getOwnersUseCase` -> `userRepository.getOwners()` builds them from the `families` of ONE `GET /v1/user/me` call (never the cached profile, never `GET /families`). Screens read them through `useOwners` (`@presentation/hooks/useOwners`, key `[getOwnersUseCase.uniqueName]`, staleTime 5 min) and owner-scoped queries through `useOwnerScopedQuery` (starts when owners are known, key = list key + owner ids).
 - `FamilyEntity.status` (`FamilyStatus` ACTIVE | ARCHIVED, a missing value reads as ACTIVE), `FamilyDTO.isArchived`, `OwnerDTO.archived` (set by `getOwnersUseCase`).
 - `setFamilyStatusUseCase` (`family.set_family_status_use_case`, `{ id, status }`) calls `PATCH /v1/families/:id` with only `status`; `updateFamily` maps 409 with `blockers` to `FamilyHasPendingItems` (a 409 without them stays generic) and 422 to `FamilyArchived`.
 - Families screen: active families first, then a collapsed `Archived (N)` group (`family.list.archived-toggle`); an archived card has the `Archived` chip (`family.card.archived-chip-<id>`), the note, no invite and no member actions. The owner of an active family archives from the card menu (`family.card.menu-<id>-archive-action`, then the confirm dialog); the owner of an archived one has inline Reactivate / Delete buttons (`family.card.reactivate-button-<id>`, `family.card.delete-button-<id>`); a member keeps Leave.

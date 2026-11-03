@@ -116,6 +116,7 @@ const repositoriesMocks: Repositories = {
   },
   userRepository: {
     deleteAccount: jest.fn(),
+    getOwners: jest.fn(),
     getUser: jest.fn(),
     getUserById: jest.fn(),
   },

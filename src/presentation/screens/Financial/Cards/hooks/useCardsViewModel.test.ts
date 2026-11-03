@@ -13,13 +13,13 @@ import {
 import { fetchCards } from "./useCardsViewModel";
 
 describe("fetchCards", () => {
-  it("SHOULD load owners, then the overview and the list of those owners", async () => {
-    spies.getOwners.mockResolvedValue([owners[0]]);
+  it("SHOULD fetch the overview and the list of the given owners AND never ask for the owners", async () => {
     spies.getOverview.mockResolvedValue("overview" as never);
     spies.getCards.mockResolvedValue(["cards"] as never);
 
-    const result = await fetchCards();
+    const result = await fetchCards([owners[0]]);
 
+    expect(spies.getOwners).not.toHaveBeenCalled();
     expect(spies.getOverview).toHaveBeenCalledWith(["user-id"]);
     expect(spies.getCards).toHaveBeenCalledWith(["user-id"]);
     expect(result).toEqual({

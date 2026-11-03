@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import TagDTO from "@application/dto/financial/TagDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
-import { useQuery } from "@infrastructure/fetcher";
+import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
 import {
   ALL_OWNERS,
@@ -21,8 +21,7 @@ interface TagsData {
   tags: TagDTO[];
 }
 
-async function fetchTags(): Promise<TagsData> {
-  const owners = await useCases.getOwnersUseCase.execute();
+async function fetchTags(owners: OwnerDTO[]): Promise<TagsData> {
   const tags = await useCases.getFinancialTagsUseCase.execute(
     owners.map((owner) => owner.id),
   );
@@ -34,7 +33,7 @@ function useTagsViewModel() {
   const isFocused = useIsFocused();
   const [ownerFilter, setOwnerFilter] = useState(ALL_OWNERS);
 
-  const query = useQuery<TagsData>({
+  const query = useOwnerScopedQuery<TagsData>({
     cacheKey: listQueryKey(useCases.getFinancialTagsUseCase.uniqueName),
     fetch: fetchTags,
   });

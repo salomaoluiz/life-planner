@@ -6,9 +6,9 @@
     "modal": "business_feedback"
   },
   "home.home.mount.cold": {
-    "maxDepth": 3,
+    "maxDepth": 2,
     "maxDuplicates": 0,
-    "maxRequests": 10,
+    "maxRequests": 9,
     "route": "app/(app)/(tabs)/index/index.tsx"
   },
   "home.quickAdd.mount.cold": {

@@ -7,6 +7,7 @@ import PrepaymentPreviewDTO from "@application/dto/financial/PrepaymentPreviewDT
 import { useCases } from "@application/useCases";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
+import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 import {
   assignableInvoices,
@@ -40,16 +41,13 @@ function usePrepaymentViewModel() {
     fetch: async () =>
       useCases.getFinancialInstallmentPlanUseCase.execute(params.planId),
   });
-  const overview = useQuery<CreditCardOverviewDTO>({
+  const overview = useOwnerScopedQuery<CreditCardOverviewDTO>({
     cacheKey: [useCases.getFinancialCreditCardsOverviewUseCase.uniqueName],
     enabled: !!plan.data,
-    fetch: async () => {
-      const owners = await useCases.getOwnersUseCase.execute();
-
-      return useCases.getFinancialCreditCardsOverviewUseCase.execute(
+    fetch: async (owners) =>
+      useCases.getFinancialCreditCardsOverviewUseCase.execute(
         owners.map((owner) => owner.id),
-      );
-    },
+      ),
   });
 
   const summary = overview.data?.cards.find(

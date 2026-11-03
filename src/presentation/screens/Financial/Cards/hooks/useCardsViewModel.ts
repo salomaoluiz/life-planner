@@ -5,7 +5,7 @@ import CreditCardDTO from "@application/dto/financial/CreditCardDTO";
 import CreditCardOverviewDTO from "@application/dto/financial/CreditCardOverviewDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
-import { useQuery } from "@infrastructure/fetcher";
+import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
 import {
   ALL_OWNERS,
@@ -31,8 +31,7 @@ interface CardsData {
   owners: OwnerDTO[];
 }
 
-async function fetchCards(): Promise<CardsData> {
-  const owners = await useCases.getOwnersUseCase.execute();
+async function fetchCards(owners: OwnerDTO[]): Promise<CardsData> {
   const ownerIds = owners.map((owner) => owner.id);
   const [overview, cards] = await Promise.all([
     useCases.getFinancialCreditCardsOverviewUseCase.execute(ownerIds),
@@ -49,7 +48,7 @@ function useCardsViewModel() {
   const [invoiceTab, setInvoiceTab] = useState<InvoiceTab>("open");
   const [archivedExpanded, setArchivedExpanded] = useState(false);
 
-  const query = useQuery<CardsData>({
+  const query = useOwnerScopedQuery<CardsData>({
     cacheKey: listQueryKey(
       useCases.getFinancialCreditCardsOverviewUseCase.uniqueName,
     ),

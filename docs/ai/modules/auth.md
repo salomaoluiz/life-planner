@@ -49,7 +49,7 @@ datasources:
     signUpWithEmail: POST /v1/auth/signup/email; 422 -> EmailAlreadyInUseError
     logout: reads the refresh token, tokenStorage.clearToken() (clears both), then POST /v1/auth/logout { refreshToken } ignoring any failure
   userDatasource (src/data/datasource/data/user/api):
-    getUser: GET /v1/user/me (no stored token -> UserNotLoggedError without calling the API; calls refreshSessionIfNeeded() first, so opening the app renews an access token that expires within 5 minutes)
+    getUser: GET /v1/user/me (the response also carries `families`, read by `userRepository.getOwners`, spec 074; the cached profile keeps only id/name/email/photoUrl; no stored token -> UserNotLoggedError without calling the API; calls refreshSessionIfNeeded() first, so opening the app renews an access token that expires within 5 minutes)
     getUserById: GET /v1/user/:id (404 -> undefined)
 
 models:
