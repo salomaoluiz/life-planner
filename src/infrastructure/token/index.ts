@@ -9,7 +9,12 @@ const NATIVE_REFRESH_KEY = "session_refresh_token";
 const WEB_KEY = StorageKeys.string.SESSION_TOKEN;
 const WEB_REFRESH_KEY = StorageKeys.string.SESSION_REFRESH_TOKEN;
 
+// Every request needs the access token: read it from the store once and keep it here until it changes.
+// All writers (login, refresh, logout, session expiry) go through this module, so they keep it in sync.
+let memoryToken: null | string = null;
+
 async function clearToken(): Promise<void> {
+  memoryToken = null;
   if (isWeb()) {
     asyncStorage.deleteItem(WEB_KEY);
     asyncStorage.deleteItem(WEB_REFRESH_KEY);
@@ -27,10 +32,15 @@ async function getRefreshToken(): Promise<null | string> {
 }
 
 async function getToken(): Promise<null | string> {
-  if (isWeb()) {
-    return asyncStorage.getString(WEB_KEY);
+  if (memoryToken) {
+    return memoryToken;
   }
-  return SecureStore.getItemAsync(NATIVE_KEY);
+  // A missing token is not memoized: a login may store one at any moment.
+  memoryToken = isWeb()
+    ? asyncStorage.getString(WEB_KEY)
+    : await SecureStore.getItemAsync(NATIVE_KEY);
+
+  return memoryToken;
 }
 
 async function setRefreshToken(token: string): Promise<void> {
@@ -42,6 +52,7 @@ async function setRefreshToken(token: string): Promise<void> {
 }
 
 async function setToken(token: string): Promise<void> {
+  memoryToken = token;
   if (isWeb()) {
     asyncStorage.setString(WEB_KEY, token);
     return;
