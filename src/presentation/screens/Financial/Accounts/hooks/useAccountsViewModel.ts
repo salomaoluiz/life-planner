@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import AccountDTO from "@application/dto/financial/AccountDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
-import { useQuery } from "@infrastructure/fetcher";
+import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
 import {
   ALL_OWNERS,
@@ -28,8 +28,7 @@ interface AccountsData {
   owners: OwnerDTO[];
 }
 
-async function fetchAccounts(): Promise<AccountsData> {
-  const owners = await useCases.getOwnersUseCase.execute();
+async function fetchAccounts(owners: OwnerDTO[]): Promise<AccountsData> {
   const accounts = await useCases.getFinancialAccountsUseCase.execute(
     owners.map((owner) => owner.id),
   );
@@ -42,7 +41,7 @@ function useAccountsViewModel() {
   const [ownerFilter, setOwnerFilter] = useState(ALL_OWNERS);
   const [archivedExpanded, setArchivedExpanded] = useState(false);
 
-  const query = useQuery<AccountsData>({
+  const query = useOwnerScopedQuery<AccountsData>({
     cacheKey: listQueryKey(useCases.getFinancialAccountsUseCase.uniqueName),
     fetch: fetchAccounts,
   });

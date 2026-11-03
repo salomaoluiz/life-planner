@@ -15,14 +15,14 @@ import {
 import { fetchCategories } from "./useCategoriesViewModel";
 
 describe("fetchCategories", () => {
-  it("SHOULD load owners then the categories of those owners", async () => {
+  it("SHOULD fetch the categories of the given owners AND never ask for the owners", async () => {
     const owner = { id: "user-id", name: "Alice Test", type: "USER" };
     const categories = [cat("food", "Food", "EXPENSE")];
-    spies.getOwners.mockResolvedValue([owner] as never);
     spies.getCategories.mockResolvedValue(categories);
 
-    const result = await fetchCategories();
+    const result = await fetchCategories([owner] as never);
 
+    expect(spies.getOwners).not.toHaveBeenCalled();
     expect(spies.getCategories).toHaveBeenCalledWith(["user-id"]);
     expect(result).toEqual({ categories, owners: [owner] });
   });

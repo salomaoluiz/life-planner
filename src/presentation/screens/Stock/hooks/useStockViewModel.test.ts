@@ -9,8 +9,8 @@ import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
 import { StockOwners, StockUnits } from "@domain/entities/stock/StockEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
-import { useQuery } from "@infrastructure/fetcher";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
+import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 
 import useStockViewModel, { fetchStock } from "./useStockViewModel";
 
@@ -20,6 +20,7 @@ jest.mock("expo-router", () => ({
 }));
 jest.mock("@react-navigation/native", () => ({ useIsFocused: jest.fn() }));
 jest.mock("@infrastructure/fetcher");
+jest.mock("@presentation/hooks/useOwnerScopedQuery");
 jest.mock("@presentation/i18n/useTranslationLocale", () => ({
   __esModule: true,
   default: () => ({ getLocale: () => ({ languageTag: "en-US" }) }),
@@ -64,7 +65,7 @@ const spies = {
   isFocused: jest.mocked(useIsFocused),
   params: jest.mocked(useLocalSearchParams),
   push: jest.mocked(router.push),
-  useQuery: jest.mocked(useQuery),
+  useQuery: jest.mocked(useOwnerScopedQuery),
 };
 
 beforeEach(() => {
@@ -133,12 +134,12 @@ describe("states", () => {
 });
 
 describe("fetchStock", () => {
-  it("SHOULD fetch the owners and then their items", async () => {
-    spies.getOwners.mockResolvedValue(owners);
+  it("SHOULD fetch the items of the given owners AND never ask for the owners", async () => {
     spies.getStock.mockResolvedValue(items);
 
-    const result = await fetchStock();
+    const result = await fetchStock(owners);
 
+    expect(spies.getOwners).not.toHaveBeenCalled();
     expect(spies.getStock).toHaveBeenCalledWith({
       ownerIds: ["user-id", "family-1"],
     });

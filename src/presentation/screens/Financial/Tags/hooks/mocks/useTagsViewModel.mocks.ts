@@ -7,14 +7,15 @@ import TagDTO from "@application/dto/financial/TagDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
-import { useQuery } from "@infrastructure/fetcher";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
+import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 
 import useTagsViewModel from "../useTagsViewModel";
 
 jest.mock("expo-router", () => ({ router: { push: jest.fn() } }));
 jest.mock("@react-navigation/native", () => ({ useIsFocused: jest.fn() }));
 jest.mock("@infrastructure/fetcher");
+jest.mock("@presentation/hooks/useOwnerScopedQuery");
 jest.mock("@application/useCases", () => ({
   useCases: {
     getFinancialTagsUseCase: { execute: jest.fn(), uniqueName: "tags" },
@@ -52,7 +53,7 @@ const spies = {
   getTags: jest.mocked(useCases.getFinancialTagsUseCase.execute),
   isFocused: jest.mocked(useIsFocused),
   push: jest.mocked(router.push),
-  useQuery: jest.mocked(useQuery),
+  useQuery: jest.mocked(useOwnerScopedQuery),
 };
 
 beforeEach(() => {

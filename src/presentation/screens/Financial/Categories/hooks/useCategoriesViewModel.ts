@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
-import { useQuery } from "@infrastructure/fetcher";
+import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import { TranslationKeys } from "@presentation/i18n/types";
 import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
 import {
@@ -33,8 +33,7 @@ const TYPE_OPTIONS: { labelKey: TranslationKeys; value: string }[] = [
   { labelKey: "financial.common.income", value: "INCOME" },
 ];
 
-async function fetchCategories(): Promise<CategoriesData> {
-  const owners = await useCases.getOwnersUseCase.execute();
+async function fetchCategories(owners: OwnerDTO[]): Promise<CategoriesData> {
   const categories = await useCases.getFinancialCategoriesUseCase.execute(
     owners.map((owner) => owner.id),
   );
@@ -54,7 +53,7 @@ function useCategoriesViewModel() {
   const [ownerFilter, setOwnerFilter] = useState(ALL_OWNERS);
   const [archivedExpanded, setArchivedExpanded] = useState(false);
 
-  const query = useQuery<CategoriesData>({
+  const query = useOwnerScopedQuery<CategoriesData>({
     cacheKey: listQueryKey(useCases.getFinancialCategoriesUseCase.uniqueName),
     fetch: fetchCategories,
   });

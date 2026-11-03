@@ -7,14 +7,15 @@ import CategoryDTO from "@application/dto/financial/CategoryDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
-import { useQuery } from "@infrastructure/fetcher";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
+import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 
 import useCategoriesViewModel from "../useCategoriesViewModel";
 
 jest.mock("expo-router", () => ({ router: { push: jest.fn() } }));
 jest.mock("@react-navigation/native", () => ({ useIsFocused: jest.fn() }));
 jest.mock("@infrastructure/fetcher");
+jest.mock("@presentation/hooks/useOwnerScopedQuery");
 jest.mock("@application/useCases", () => ({
   useCases: {
     getFinancialCategoriesUseCase: {
@@ -62,7 +63,7 @@ const spies = {
   getOwners: jest.mocked(useCases.getOwnersUseCase.execute),
   isFocused: jest.mocked(useIsFocused),
   push: jest.mocked(router.push),
-  useQuery: jest.mocked(useQuery),
+  useQuery: jest.mocked(useOwnerScopedQuery),
 };
 // endregion spies
 

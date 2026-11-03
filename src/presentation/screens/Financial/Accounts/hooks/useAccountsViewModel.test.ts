@@ -15,14 +15,14 @@ import {
 import { fetchAccounts } from "./useAccountsViewModel";
 
 describe("fetchAccounts", () => {
-  it("SHOULD load owners then the accounts of those owners", async () => {
+  it("SHOULD fetch the accounts of the given owners AND never ask for the owners", async () => {
     const owner = { id: "user-id", name: "Alice Test", type: "USER" };
     const accounts = [acc("a", 10)];
-    spies.getOwners.mockResolvedValue([owner] as never);
     spies.getAccounts.mockResolvedValue(accounts);
 
-    const result = await fetchAccounts();
+    const result = await fetchAccounts([owner] as never);
 
+    expect(spies.getOwners).not.toHaveBeenCalled();
     expect(spies.getAccounts).toHaveBeenCalledWith(["user-id"]);
     expect(result).toEqual({ accounts, owners: [owner] });
   });

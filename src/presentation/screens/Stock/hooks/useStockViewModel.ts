@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import StockDTO from "@application/dto/stock/StockDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
-import { useQuery } from "@infrastructure/fetcher";
+import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import { useTranslationLocale } from "@presentation/i18n";
 import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
@@ -26,8 +26,7 @@ interface StockData {
   owners: OwnerDTO[];
 }
 
-export async function fetchStock(): Promise<StockData> {
-  const owners = await useCases.getOwnersUseCase.execute();
+export async function fetchStock(owners: OwnerDTO[]): Promise<StockData> {
   const items = await useCases.getStockItemsUseCase.execute({
     ownerIds: owners.map((owner) => owner.id),
   });
@@ -50,7 +49,7 @@ function useStockViewModel() {
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | undefined>();
 
-  const { data, error, isFetching, refetch } = useQuery<StockData>({
+  const { data, error, isFetching, refetch } = useOwnerScopedQuery<StockData>({
     cacheKey: [useCases.getStockItemsUseCase.uniqueName],
     fetch: fetchStock,
   });
