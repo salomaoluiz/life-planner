@@ -7,8 +7,8 @@
   },
   "home.home.mount.cold": {
     "maxDepth": 3,
-    "maxDuplicates": 1,
-    "maxRequests": 11,
+    "maxDuplicates": 0,
+    "maxRequests": 10,
     "route": "app/(app)/(tabs)/index/index.tsx"
   },
   "home.quickAdd.mount.cold": {

@@ -31,8 +31,8 @@
   },
   "financial.installmentEdit.mount.cold": {
     "maxDepth": 3,
-    "maxDuplicates": 1,
-    "maxRequests": 8,
+    "maxDuplicates": 0,
+    "maxRequests": 7,
     "modal": "edit_installment"
   },
   "financial.invoice.mount.cold": {
@@ -96,49 +96,49 @@
     "route": "app/(app)/(tabs)/financial/tags.tsx"
   },
   "financial.transactions.focusReturn": {
-    "maxDepth": 1,
-    "maxDuplicates": 1,
-    "maxRequests": 3
+    "maxDepth": 0,
+    "maxDuplicates": 0,
+    "maxRequests": 0
   },
   "financial.transactions.modal.openCreate": {
     "maxDepth": 1,
     "maxDuplicates": 0,
-    "maxRequests": 1,
+    "maxRequests": 3,
     "modal": "add_new_transaction"
   },
   "financial.transactions.modal.openEdit": {
     "maxDepth": 1,
     "maxDuplicates": 0,
-    "maxRequests": 1
+    "maxRequests": 3
   },
   "financial.transactions.monthSwitch": {
     "maxDepth": 1,
-    "maxDuplicates": 1,
-    "maxRequests": 3
+    "maxDuplicates": 0,
+    "maxRequests": 2
   },
   "financial.transactions.mount.cold": {
     "maxDepth": 4,
-    "maxDuplicates": 2,
+    "maxDuplicates": 0,
     "maxFullHistory": 2,
-    "maxRequests": 10,
+    "maxRequests": 8,
     "route": "app/(app)/(tabs)/financial/transaction.tsx"
   },
   "financial.transactions.write.create": {
     "maxDepth": 2,
-    "maxDuplicates": 3,
-    "maxFullHistory": 4,
-    "maxRequests": 9
+    "maxDuplicates": 0,
+    "maxFullHistory": 2,
+    "maxRequests": 6
   },
   "financial.transactions.write.delete": {
     "maxDepth": 2,
-    "maxDuplicates": 3,
-    "maxFullHistory": 4,
-    "maxRequests": 9
+    "maxDuplicates": 0,
+    "maxFullHistory": 2,
+    "maxRequests": 6
   },
   "financial.transactions.write.edit": {
     "maxDepth": 2,
-    "maxDuplicates": 3,
-    "maxFullHistory": 4,
-    "maxRequests": 9
+    "maxDuplicates": 0,
+    "maxFullHistory": 2,
+    "maxRequests": 6
   }
 }
