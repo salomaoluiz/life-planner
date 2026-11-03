@@ -13,7 +13,7 @@ const get = api.get as jest.Mock;
 describe("getFilteredTransactions", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    get.mockResolvedValue([{ id: "t1" }]);
+    get.mockResolvedValue({ items: [{ id: "t1" }], nextCursor: null });
   });
 
   it("SHOULD send the owners, today and every account-row filter", async () => {
@@ -43,6 +43,20 @@ describe("getFilteredTransactions", () => {
     expect(url).toContain("tagId=t1");
     expect(url).not.toContain("creditCardId");
     expect(result).toEqual([{ id: "t1" }]);
+  });
+
+  it("SHOULD search the last 2 years WHEN no period is chosen (spec 078)", async () => {
+    await getFilteredTransactions({
+      filter: { q: "mercado" },
+      ownerIds: ["o1"],
+    });
+
+    const url = get.mock.calls[0][0] as string;
+    const query = new URLSearchParams(url.split("?")[1]);
+
+    expect(query.get("to")).toBe(query.get("today"));
+    expect(query.get("from")).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(query.get("from")! > "2000-01-01").toBe(true);
   });
 
   it("SHOULD return [] without calling the API when there are no owners", async () => {

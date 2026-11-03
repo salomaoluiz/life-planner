@@ -3,7 +3,6 @@ import { calendarDateToIso } from "@data/models/financial/calendarDate";
 import TransactionModel from "@data/models/financial/TransactionModel";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
-import cache from "@infrastructure/cache";
 
 import getTransactions, { Params, Range } from "../getTransactions";
 
@@ -43,24 +42,19 @@ const secondTransaction = new TransactionModel({
 
 // region spies
 
-const getCacheSpy = jest.spyOn(cache, "get");
-const setCacheSpy = jest.spyOn(cache, "set");
-
 // endregion spies
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
-async function setup(params?: Params, range?: Range) {
+const defaultRange: Range = { from: "2026-10-01", to: "2026-10-31" };
+
+async function setup(params?: Params, range: Range = defaultRange) {
   return getTransactions(params ?? defaultParams, datasourcesMocks, range);
 }
 
 const spies = {
-  cache: {
-    get: getCacheSpy,
-    set: setCacheSpy,
-  },
   financialTransactionDatasource: jest.mocked(
     datasourcesMocks.financialTransactionDatasource,
   ),
@@ -68,6 +62,7 @@ const spies = {
 
 const mocks = {
   defaultParams,
+  defaultRange,
   firstTransaction,
   secondTransaction,
 };

@@ -3,6 +3,12 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.7.1] - 2026-11-03
+
+### Changed
+
+- The transactions list is read page by page over a period, and a search without a period looks at the last 2 years (spec 078, needs the API 2.0.0).
+
 ## [1.7.0] - 2026-11-03
 
 ### Changed

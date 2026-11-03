@@ -162,7 +162,7 @@ use_cases:
 
   getTransactionsUseCase:
     path: src/application/useCases/cases/financial/transactions/getTransactionsUseCase.ts
-    behavior: Retrieves the user's financial transactions.
+    behavior: Retrieves the user's financial transactions of a period (the recent 24-month window when none is given, spec 078); the datasource loads every API page of the period.
 
   refreshTransactionsUseCase:
     path: src/application/useCases/cases/financial/transactions/refreshTransactionsUseCase.ts

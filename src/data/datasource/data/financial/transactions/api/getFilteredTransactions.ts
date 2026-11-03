@@ -1,10 +1,11 @@
 import { todayCalendarDate } from "@data/models/financial/calendarDate";
 import TransactionModel from "@data/models/financial/TransactionModel";
 import { TransactionDatasource } from "@data/repositories/repos/financial/transactions/transactionDatasource";
-import { api } from "@infrastructure/api";
+import { lastTwoYearsRange } from "@domain/entities/financial/TransactionQueryFilter";
 
 import appendFilterParams from "../../filterQuery";
 import handleFinancialApiError from "../../financialApiError";
+import fetchTransactionPages from "./fetchTransactionPages";
 
 export type Params = Parameters<
   TransactionDatasource["getFilteredTransactions"]
@@ -19,7 +20,8 @@ async function getFilteredTransactions(params: Params): Response {
     return [];
   }
 
-  const query = new URLSearchParams({ today: todayCalendarDate() });
+  const today = todayCalendarDate();
+  const query = new URLSearchParams({ today });
 
   params.ownerIds.forEach((id) => query.append("ownerId", id));
   appendFilterParams(query, params.filter, [
@@ -30,9 +32,16 @@ async function getFilteredTransactions(params: Params): Response {
     "q",
     "tagIds",
   ]);
+  // The API needs a period: without a chosen one the search covers the last 2 years (spec 078).
+  if (!query.has("from")) {
+    const { from, to } = lastTwoYearsRange(today);
+
+    query.append("from", from);
+    query.append("to", to);
+  }
 
   try {
-    const data = await api.get<Record<string, unknown>[]>(
+    const data = await fetchTransactionPages(
       `/v1/finance/transactions?${query.toString()}`,
     );
 

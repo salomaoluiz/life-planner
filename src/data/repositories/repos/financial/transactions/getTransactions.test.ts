@@ -3,78 +3,19 @@ import TransactionEntity, {
   TransactionType,
 } from "@domain/entities/financial/TransactionEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
-import { CacheStringKeys } from "@infrastructure/cache";
 
 import { mocks, setup, spies } from "./mocks/getTransactions.mocks";
 
-it("SHOULD NOT call cache.set and datasource if has cached data", async () => {
-  spies.cache.get.mockReturnValue([mocks.firstTransaction.toJSON()]);
-
-  await setup();
-
-  expect(spies.cache.set).not.toHaveBeenCalled();
-  expect(
-    spies.financialTransactionDatasource.getTransactions,
-  ).not.toHaveBeenCalled();
-});
-
-it("SHOULD return transactions from cache", async () => {
-  spies.cache.get.mockReturnValue([mocks.firstTransaction.toJSON()]);
-
-  const result = await setup();
-
-  expect(spies.cache.get).toHaveBeenCalledTimes(1);
-  expect(spies.cache.get).toHaveBeenCalledWith(
-    CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA,
-    { uniqueId: `:${[...mocks.defaultParams].sort().join(",")}` },
-  );
-  expect(result).toEqual([
-    new TransactionEntity({
-      accountId: mocks.firstTransaction.accountId,
-      category: mocks.firstTransaction.category,
-      categoryId: mocks.firstTransaction.categoryId,
-      date: mocks.firstTransaction.date,
-      description: mocks.firstTransaction.description,
-      id: mocks.firstTransaction.id,
-      owner: OwnerType[mocks.firstTransaction.owner],
-      ownerId: mocks.firstTransaction.ownerId,
-      type: TransactionType[mocks.firstTransaction.type],
-      value: mocks.firstTransaction.value,
-    }),
-  ]);
-});
-
-it("SHOULD call cache.set and datasource if has no cached data", async () => {
-  spies.cache.get.mockReturnValue(null);
-  spies.financialTransactionDatasource.getTransactions.mockResolvedValueOnce([
-    mocks.firstTransaction,
-    mocks.secondTransaction,
-  ]);
-
-  await setup();
-
-  expect(spies.cache.set).toHaveBeenCalledTimes(1);
-  expect(spies.cache.set).toHaveBeenCalledWith(
-    CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA,
-    [mocks.firstTransaction.toJSON(), mocks.secondTransaction.toJSON()],
-    { uniqueId: `:${[...mocks.defaultParams].sort().join(",")}` },
-  );
-  expect(
-    spies.financialTransactionDatasource.getTransactions,
-  ).toHaveBeenCalledTimes(1);
-  expect(
-    spies.financialTransactionDatasource.getTransactions,
-  ).toHaveBeenCalledWith(mocks.defaultParams);
-});
-
-it("SHOULD return transactions from datasource", async () => {
-  spies.cache.get.mockReturnValue(null);
+it("SHOULD read the period straight from the datasource (spec 078: a period is always asked)", async () => {
   spies.financialTransactionDatasource.getTransactions.mockResolvedValueOnce([
     mocks.secondTransaction,
   ]);
 
   const result = await setup();
 
+  expect(
+    spies.financialTransactionDatasource.getTransactions,
+  ).toHaveBeenCalledWith(mocks.defaultParams, mocks.defaultRange);
   expect(result).toEqual([
     new TransactionEntity({
       accountId: mocks.secondTransaction.accountId,
@@ -92,7 +33,6 @@ it("SHOULD return transactions from datasource", async () => {
 });
 
 it("SHOULD keep the system category key and excludeFromTotals from the model", async () => {
-  spies.cache.get.mockReturnValue(null);
   const adjustment = new TransactionModel({
     ...mocks.firstTransaction,
     excludeFromTotals: true,
@@ -108,61 +48,10 @@ it("SHOULD keep the system category key and excludeFromTotals from the model", a
   expect(result.excludeFromTotals).toBe(true);
 });
 
-it("SHOULD ignore an empty cache AND read the datasource (an empty list must never hide the transactions)", async () => {
-  spies.cache.get.mockReturnValue([]);
-  spies.financialTransactionDatasource.getTransactions.mockResolvedValueOnce([
-    mocks.firstTransaction,
-  ]);
-
-  const result = await setup();
-
-  expect(
-    spies.financialTransactionDatasource.getTransactions,
-  ).toHaveBeenCalledTimes(1);
-  expect(result).toHaveLength(1);
-});
-
-it("SHOULD NOT cache an empty result", async () => {
-  spies.cache.get.mockReturnValue(null);
+it("SHOULD return an empty list WHEN the period has no transactions", async () => {
   spies.financialTransactionDatasource.getTransactions.mockResolvedValueOnce(
     [],
   );
 
   expect(await setup()).toEqual([]);
-  expect(spies.cache.set).not.toHaveBeenCalled();
-});
-
-it("SHOULD read a period straight from the datasource AND never persist it", async () => {
-  const range = { from: "2026-10-01", to: "2026-10-31" };
-  spies.financialTransactionDatasource.getTransactions.mockResolvedValueOnce([
-    mocks.firstTransaction,
-  ]);
-
-  const result = await setup(undefined, range);
-
-  expect(
-    spies.financialTransactionDatasource.getTransactions,
-  ).toHaveBeenCalledWith(mocks.defaultParams, range);
-  expect(spies.cache.get).not.toHaveBeenCalled();
-  expect(spies.cache.set).not.toHaveBeenCalled();
-  expect(result.map((item) => item.id)).toEqual([mocks.firstTransaction.id]);
-});
-
-it("SHOULD keep one persisted entry per owner set whatever the order of the ids", async () => {
-  spies.cache.get.mockReturnValue(null);
-  spies.financialTransactionDatasource.getTransactions.mockResolvedValue([
-    mocks.firstTransaction,
-  ]);
-
-  await setup(["b-owner", "a-owner"]);
-
-  expect(spies.cache.get).toHaveBeenCalledWith(
-    CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA,
-    { uniqueId: ":a-owner,b-owner" },
-  );
-  expect(spies.cache.set).toHaveBeenCalledWith(
-    CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA,
-    expect.any(Array),
-    { uniqueId: ":a-owner,b-owner" },
-  );
 });

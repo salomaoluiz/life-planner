@@ -43,9 +43,19 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
+const defaultRange = { from: "2026-10-01", to: "2026-10-31" };
+
+// The API answers in keyset pages (spec 078).
+function page(
+  items: Record<string, unknown>[],
+  nextCursor: null | string = null,
+) {
+  return { items, nextCursor };
+}
+
 async function setup(
   ids: string[] = ownerIds,
-  range?: { from: string; to: string },
+  range: { from: string; to: string } = defaultRange,
 ) {
   return getTransactions(ids, range);
 }
@@ -59,6 +69,6 @@ async function setupThrowable(ids: string[] = ownerIds) {
 }
 
 const spies = { get: jest.mocked(api.get) };
-const mocks = { apiTransactions, ownerIds };
+const mocks = { apiTransactions, defaultRange, ownerIds };
 
-export { mocks, setup, setupThrowable, spies };
+export { mocks, page, setup, setupThrowable, spies };

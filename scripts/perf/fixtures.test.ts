@@ -16,13 +16,19 @@ describe("perf fixtures", () => {
   });
 
   it("SHOULD return the whole history WHEN the transactions GET has no period", () => {
-    expect(respond("GET", "/v1/finance/transactions")).toHaveLength(5000);
+    expect(
+      (respond("GET", "/v1/finance/transactions") as { items: unknown[] })
+        .items,
+    ).toHaveLength(5000);
   });
 
   it("SHOULD return the month rows WHEN from= is present", () => {
     expect(
-      (respond("GET", "/v1/finance/transactions?from=2025-01-01") as unknown[])
-        .length,
+      (
+        respond("GET", "/v1/finance/transactions?from=2025-01-01") as {
+          items: unknown[];
+        }
+      ).items.length,
     ).toBeLessThan(10);
   });
 });

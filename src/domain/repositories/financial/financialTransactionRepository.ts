@@ -28,10 +28,10 @@ export type FinancialTransactionRepository = {
   getFilteredTransactions(
     params: GetFilteredTransactionsRepositoryParams,
   ): Promise<TransactionEntity[]>;
-  // Without a range: the whole history (persisted cache). With one: only that period, never persisted.
+  // Only the given period (spec 078: the API needs one), never persisted.
   getTransactions(
     ownerIds: string[],
-    range?: TransactionDateRange,
+    range: TransactionDateRange,
   ): Promise<TransactionEntity[]>;
   // Spec 047: writes every row or none; a 422 throws `ImportRowsInvalid`.
   importTransactions(params: ImportRequest): Promise<number>;
