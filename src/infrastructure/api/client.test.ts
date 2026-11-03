@@ -496,3 +496,28 @@ it("SHOULD reject every caller of a shared GET that failed AND allow a new attem
   spies.fetch.mockResolvedValueOnce(mocks.json(200, { ok: true }));
   expect(await setup("GET", "/v1/a")).toEqual({ ok: true });
 });
+
+it("SHOULD NOT let a GET sent after a write join a GET that started before it", async () => {
+  const stale = mocks.json(200, [{ id: "before-write" }]);
+  const gate: { release?: (response: Response) => void } = {};
+
+  spies.fetch.mockImplementationOnce(
+    async () =>
+      new Promise<Response>((resolve) => {
+        gate.release = resolve;
+      }),
+  );
+  const before = setup("GET", "/v1/finance/transactions?ownerId=o1");
+
+  spies.fetch.mockResolvedValueOnce(mocks.json(201, { id: "new" }));
+  await setup("POST", "/v1/finance/transactions", {});
+
+  spies.fetch.mockResolvedValueOnce(mocks.json(200, [{ id: "after-write" }]));
+  const after = await setup("GET", "/v1/finance/transactions?ownerId=o1");
+
+  gate.release?.(stale);
+  await before;
+
+  expect(after).toEqual([{ id: "after-write" }]);
+  expect(spies.fetch).toHaveBeenCalledTimes(3);
+});
