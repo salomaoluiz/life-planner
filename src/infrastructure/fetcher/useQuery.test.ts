@@ -99,6 +99,10 @@ it("SHOULD refetch", async () => {
   await result.current.refetch();
 
   expect(mocks.pendingResponse.refetch).toHaveBeenCalledTimes(1);
+  // Joins a running fetch instead of cancelling it and sending the same request again.
+  expect(mocks.pendingResponse.refetch).toHaveBeenCalledWith({
+    cancelRefetch: false,
+  });
 });
 
 it("SHOULD make refetch reject WHEN throwOnError is requested and the refetch fails", async () => {
@@ -112,7 +116,10 @@ it("SHOULD make refetch reject WHEN throwOnError is requested and the refetch fa
   await expect(result.current.refetch({ throwOnError: true })).rejects.toThrow(
     "offline",
   );
-  expect(failing.refetch).toHaveBeenCalledWith({ throwOnError: true });
+  expect(failing.refetch).toHaveBeenCalledWith({
+    cancelRefetch: false,
+    throwOnError: true,
+  });
 });
 
 it("SHOULD call useQuery with default params", async () => {
@@ -167,4 +174,18 @@ it("SHOULD forward the refetch interval and the stale time", () => {
   expect(spies.useReactQuery).toHaveBeenCalledWith(
     expect.objectContaining({ refetchInterval: 1800000, staleTime: 600000 }),
   );
+});
+
+it("SHOULD NOT pass options that were not given (undefined would override the client defaults)", () => {
+  spies.useReactQuery.mockReturnValueOnce(mocks.pendingResponse as never);
+
+  setup({ cacheKey: ["CacheKey1"], fetch: spies.fetch });
+
+  const options = spies.useReactQuery.mock.calls[0][0] as object;
+
+  expect(Object.keys(options).sort()).toEqual([
+    "networkMode",
+    "queryFn",
+    "queryKey",
+  ]);
 });

@@ -49,7 +49,7 @@ interface QueryProps<R> {
   refetchInterval?: number;
   retry?: boolean | number;
   retryDelay?: number;
-  /** Milliseconds a result counts as fresh (no refetch on mount inside it). */
+  /** Milliseconds a result counts as fresh (no refetch on mount inside it). @default 30s (client default) */
   staleTime?: number;
 }
 
