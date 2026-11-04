@@ -1,6 +1,7 @@
 export { getCachedFetcherData, updateCachedFetcherData } from "./cachedData";
 export { default as invalidateFetcherData } from "./invalidate";
 export { default as markFetcherDataStale } from "./markStale";
+export { default as prefetchFetcherData } from "./prefetch";
 export { default as FetcherProvider } from "./provider";
 export { default as refetchStaleFetcherData } from "./refetchStale";
 export { default as resetFetcherData } from "./reset";
