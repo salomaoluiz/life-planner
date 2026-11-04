@@ -25,7 +25,7 @@ app/
 
 ## Web code splitting (spec 089)
 
-- `app.config.ts` sets `expo-router` `asyncRoutes: { default: "development", web: true }`: on web every route is its own chunk; native is unchanged.
+- `app.config.ts` sets `expo-router` `asyncRoutes: { default: false, web: true }`: on web every route is its own chunk; native is unchanged.
 - Metro hoists a module imported by two async chunks into the entry chunk, so keep screens and their modals reachable from one route only. Import a modal by its own folder (`@screens/Financial/Transactions/modals/FiltersModal`), not through a `modals/index` barrel that also pulls its siblings.
 - `src/navigation/modalRoutes.tsx` loads every modal with `React.lazy` (`lazyModal`), and `ModalRoute` wraps it in `Suspense` (fallback `null`).
 - `metro.config.js` resolves `@sentry-internal/replay`, `replay-canvas` and `feedback` to `scripts/metro/sentryWebShim.js` on web (replay and feedback are not configured). Import date-fns by function (`date-fns/addDays`), never from the `date-fns` root.

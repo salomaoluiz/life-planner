@@ -24,7 +24,7 @@ export default {
     newArchEnabled: true,
     orientation: "portrait",
     plugins: [
-      ["expo-router", { asyncRoutes: { default: "development", web: true } }],
+      ["expo-router", { asyncRoutes: { default: false, web: true } }],
       "./plugins/withReleaseSigning",
       [
         "expo-splash-screen",
