@@ -117,31 +117,31 @@
     "maxDepth": 1,
     "maxDuplicates": 0,
     "maxFullHistory": 0,
-    "maxRequests": 4
+    "maxRequests": 1
   },
   "financial.transactions.mount.cold": {
     "maxDepth": 2,
     "maxDuplicates": 0,
     "maxFullHistory": 0,
-    "maxRequests": 7,
+    "maxRequests": 4,
     "route": "app/(app)/(tabs)/financial/transaction.tsx"
   },
   "financial.transactions.write.create": {
     "maxDepth": 2,
     "maxDuplicates": 0,
     "maxFullHistory": 0,
-    "maxRequests": 6
+    "maxRequests": 3
   },
   "financial.transactions.write.delete": {
     "maxDepth": 2,
     "maxDuplicates": 0,
     "maxFullHistory": 0,
-    "maxRequests": 5
+    "maxRequests": 3
   },
   "financial.transactions.write.edit": {
     "maxDepth": 2,
     "maxDuplicates": 0,
     "maxFullHistory": 0,
-    "maxRequests": 6
+    "maxRequests": 3
   }
 }

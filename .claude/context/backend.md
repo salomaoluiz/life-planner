@@ -75,3 +75,7 @@ Upcoming items (spec 062, additive): `GET /v1/finance/upcoming?ownerId=…&today
 ## Transaction by id (spec 077)
 
 `GET /v1/finance/transactions/:id?today=` (backend 2.1.0) returns one transaction (404 when missing or not readable). The app reads a row that is not in a loaded month with `getFinancialTransactionByIdUseCase` (query key `financeKeys.transactions.raw("byId", id)`; `null` = not found). No screen asks for transactions without a chosen period: `getFinancialTransactionsUseCase` requires `range`, the refund sheet reads one card (`creditCardId` option, `refundPurchasesRange`) and the category form asks `hasFinancialCategoryTransactionsUseCase`. Deploy the backend first.
+
+## Month endpoint (spec 080, backend 3.1.0)
+
+`GET /v1/finance/month?ownerId=&month=YYYY-MM&today=` returns `{ month, rows: { items, nextCursor }, lookups, invoices, dailyBalances, projections, summary }` (lean rows of spec 079; the invoices, balances and projections have the shape of their separate endpoints; `summary` holds `income/expense/toPay/toReceive` without projections plus `projectedIncome/projectedExpense`). The transactions screen reads it through `TransactionDatasource.getFinanceMonth` (it follows `nextCursor` through `GET /transactions`) → `getFinancialMonthUseCase`. The unfiltered month only; the filtered period views (spec 045), Home and the forms keep the separate endpoints.
