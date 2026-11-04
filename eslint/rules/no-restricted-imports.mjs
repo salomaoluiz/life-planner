@@ -66,11 +66,32 @@ const preventPresentationLibsImports = {
         message: "Please, use `@presentation/i18n` instead",
         name: "react-i18next",
       },
+      {
+        message:
+          "Import the function from `lodash/<name>`: the root import pulls the whole library into the web bundle (spec 088)",
+        name: "lodash",
+      },
     ],
   },
 };
 
+// Spec 088: a namespace import of date-fns defeats tree shaking.
+export const bundleSyntaxSelectors = [
+  {
+    message:
+      "Use named imports from `date-fns`: `import * as` pulls the whole library into the web bundle (spec 088)",
+    selector:
+      "ImportDeclaration[source.value='date-fns'] > ImportNamespaceSpecifier",
+  },
+];
+
+const preventBundleHeavyImports = {
+  files: ["**/*.{js,ts,tsx,jsx}"],
+  rules: { "no-restricted-syntax": ["error", ...bundleSyntaxSelectors] },
+};
+
 export default [
+  preventBundleHeavyImports,
   preventAbsoluteImports,
   preventInfrastructureLibsImports,
   preventPresentationLibsImports,

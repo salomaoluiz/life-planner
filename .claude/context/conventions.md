@@ -45,3 +45,7 @@ Module folder names: `financial/accounts`, `stock`, `family`, `familyMember`, `u
 - Web: `Dockerfile.web` (`npx expo export -p web` → nginx, `nginx.web.conf` SPA fallback) + `docker-compose.web.prod.yml` (host port 1016, Portainer Git stack, `refs/heads/main`).
 - Android: `yarn build:android:prod` (`scripts/build-android-prod.sh`) runs `expo prebuild --clean` + `assembleRelease`. The config plugin `plugins/withReleaseSigning.js` replaces the debug signing of the release build type with the `LP_RELEASE_*` Gradle properties (keystore outside the repo) and fails the release build when one is missing; `plugins/*.js` are CommonJS and not linted (like `metro.config.js`).
 - Details and owner steps: README "Production" and `docs/production.md` in `life-planner-back`.
+
+## Bundle lint rules (spec 088)
+
+- No `import * as` from `date-fns` (use named imports) and no root `import ... from "lodash"` (use `lodash/<name>`); the web bundle budget is in `.claude/context/performance.md`.

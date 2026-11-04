@@ -12,6 +12,7 @@
     "e2e": "node scripts/e2e/cli.mjs",
     "version:check": "node scripts/check-version.mjs",
     "perf": "node scripts/perf/cli.mjs",
+    "perf:bundle": "node scripts/perf/check-bundle-size.mjs",
     "e2e:tags": "node scripts/e2e/cli.mjs --list-tags",
     "e2e:failed": "node scripts/e2e/cli.mjs --failed",
     "e2e:smoke": "node scripts/e2e/cli.mjs --tags smoke",
