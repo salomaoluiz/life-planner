@@ -169,3 +169,65 @@ it("SHOULD read notes from the API and treat null as no note (spec 059)", () => 
     }).toJSON().notes,
   ).toBe("Casa");
 });
+
+describe("fromLeanJSON (spec 079)", () => {
+  const lookups = {
+    categories: {
+      c1: { name: "Food" },
+      c2: {
+        excludeFromTotals: true,
+        name: "Adjustment",
+        systemKey: "BALANCE_ADJUSTMENT",
+      },
+    },
+    tags: { g1: { name: "home" } },
+  };
+  const item = {
+    accountId: "a1",
+    categoryId: "c1",
+    currency: "BRL",
+    date: "2026-11-03",
+    description: "Groceries",
+    id: "t1",
+    owner: "USER",
+    ownerId: "u1",
+    paid: true,
+    tagIds: ["g1"],
+    type: "EXPENSE",
+    value: 1250,
+  };
+
+  it("SHOULD equal the model of the equivalent nested payload", () => {
+    const nested = {
+      ...item,
+      category: { excludeFromTotals: false, name: "Food", systemKey: null },
+      tags: [{ id: "g1", name: "home" }],
+    };
+
+    expect(TransactionModel.fromLeanJSON(item, lookups).toJSON()).toEqual(
+      TransactionModel.fromJSON(nested).toJSON(),
+    );
+  });
+
+  it("SHOULD read the system key and excludeFromTotals from the lookup", () => {
+    const model = TransactionModel.fromLeanJSON(
+      { ...item, categoryId: "c2" },
+      lookups,
+    );
+
+    expect(model.excludeFromTotals).toBe(true);
+    expect(model.systemKey).toBe("BALANCE_ADJUSTMENT");
+  });
+
+  it("SHOULD give no tags WHEN tagIds is absent AND an empty name WHEN the lookup is missing", () => {
+    const noTags: Record<string, unknown> = { ...item };
+
+    delete noTags.tagIds;
+
+    expect(TransactionModel.fromLeanJSON(noTags, lookups).tags).toEqual([]);
+    expect(
+      TransactionModel.fromLeanJSON({ ...item, categoryId: "zz" }, lookups)
+        .category,
+    ).toBe("");
+  });
+});

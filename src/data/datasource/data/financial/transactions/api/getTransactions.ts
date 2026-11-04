@@ -1,5 +1,4 @@
 import { todayCalendarDate } from "@data/models/financial/calendarDate";
-import TransactionModel from "@data/models/financial/TransactionModel";
 import { TransactionDatasource } from "@data/repositories/repos/financial/transactions/transactionDatasource";
 
 import handleFinancialApiError from "../../financialApiError";
@@ -28,11 +27,9 @@ async function getTransactions(
     const query = `${toOwnerQuery(ownerIds)}&today=${todayCalendarDate()}&from=${range.from}&to=${range.to}`;
     // One card's purchases only (spec 077): a single source, a single read.
     if (options?.creditCardId) {
-      const rows = await fetchTransactionPages(
+      return await fetchTransactionPages(
         `/v1/finance/transactions${query}&source=CARD&creditCardId=${options.creditCardId}`,
       );
-
-      return rows.map((transaction) => TransactionModel.fromJSON(transaction));
     }
 
     const [accountRows, cardRows] = await Promise.all([
@@ -40,9 +37,7 @@ async function getTransactions(
       fetchTransactionPages(`/v1/finance/transactions${query}&source=CARD`),
     ]);
 
-    return [...accountRows, ...cardRows].map((transaction) =>
-      TransactionModel.fromJSON(transaction),
-    );
+    return [...accountRows, ...cardRows];
   } catch (error) {
     return handleFinancialApiError(error, {
       datasource: "TransactionDatasource - getTransactions",

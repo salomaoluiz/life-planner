@@ -18,7 +18,22 @@ export type OwnerType = "FAMILY" | "USER";
 
 export type RecurrenceFrequency = "BIWEEKLY" | "MONTHLY" | "WEEKLY" | "YEARLY";
 
+// Spec 079: the entities a lean transaction response references, once each, by id.
+export interface TransactionLookups {
+  categories: Record<
+    string,
+    { excludeFromTotals?: boolean; name?: string; systemKey?: string }
+  >;
+  tags: Record<string, { name: string }>;
+}
+
 export type TransactionType = "EXPENSE" | "INCOME";
+
+// `{ item, lookups }`: the response of by id, create and update.
+export interface TransactionWithLookups {
+  item: Record<string, unknown>;
+  lookups: TransactionLookups;
+}
 
 interface ITransactionModel {
   accountId?: string;
@@ -145,6 +160,26 @@ class TransactionModel implements ITransactionModel {
       tags: tagRefsFromJSON(data.tags),
       type: data.type as TransactionType,
       value: centsToDecimalString(Number(data.value)),
+    });
+  }
+
+  // Spec 079: a lean item (ids only, absent fields) joined with the response `lookups`. It rebuilds the nested
+  // shape `fromJSON` and the repository cache read, so nothing downstream changes.
+  static fromLeanJSON(
+    item: Record<string, unknown>,
+    lookups: Partial<TransactionLookups>,
+  ): TransactionModel {
+    const category = lookups.categories?.[item.categoryId as string];
+    const tagIds = (item.tagIds as string[] | undefined) ?? [];
+
+    return TransactionModel.fromJSON({
+      ...item,
+      category: category && {
+        excludeFromTotals: category.excludeFromTotals,
+        name: category.name,
+        systemKey: category.systemKey,
+      },
+      tags: tagIds.map((id) => ({ id, name: lookups.tags?.[id]?.name ?? "" })),
     });
   }
 

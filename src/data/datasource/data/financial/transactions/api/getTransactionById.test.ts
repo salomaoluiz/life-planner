@@ -14,14 +14,16 @@ import {
 } from "./mocks/getTransactionById.mocks";
 
 it("SHOULD GET /v1/finance/transactions/:id with today AND return the TransactionModel", async () => {
-  spies.get.mockResolvedValueOnce(mocks.apiTransaction);
+  spies.get.mockResolvedValueOnce(mocks.apiResponse);
 
   const result = await setup();
 
   expect(spies.get).toHaveBeenCalledWith(
     `/v1/finance/transactions/${mocks.apiTransaction.id}?today=${todayCalendarDate()}`,
   );
-  expect(result).toEqual(TransactionModel.fromJSON(mocks.apiTransaction));
+  expect(result).toEqual(
+    TransactionModel.fromLeanJSON(mocks.apiTransaction, mocks.lookups),
+  );
 });
 
 it("SHOULD return undefined WHEN the API answers 404 (missing or not readable)", async () => {
