@@ -84,4 +84,4 @@ if (!plan.ok) {
 output.CARD_ID = cardId;
 output.CLOSED_MONTH = calendarDate(yesterday).slice(0, 7);
 output.PLAN_ID = json(plan.body).plan.id;
-output.PURCHASE_ID = json(purchase.body).id;
+output.PURCHASE_ID = json(purchase.body).item.id;
