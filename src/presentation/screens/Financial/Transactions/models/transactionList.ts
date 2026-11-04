@@ -4,6 +4,7 @@ import DailyBalanceDTO from "@application/dto/financial/DailyBalanceDTO";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import CardInvoiceUIModel from "./CardInvoiceUIModel";
+import { getDateTimeFormat } from "./formatters";
 import TransactionUIModel from "./TransactionUIModel";
 
 export const ALL_FILTER = "ALL";
@@ -249,25 +250,23 @@ function filterInvoicesByType(
 
 // "Wed, 30 Sep": weekday, day-first, short month, in the active language.
 function formatDayTitle(day: Date, languageTag: string) {
-  const weekday = new Intl.DateTimeFormat(languageTag, {
-    weekday: "short",
-  }).format(day);
-  const month = new Intl.DateTimeFormat(languageTag, { month: "short" }).format(
+  const weekday = getDateTimeFormat(languageTag, { weekday: "short" }).format(
     day,
   );
+  const month = getDateTimeFormat(languageTag, { month: "short" }).format(day);
 
   return `${weekday}, ${day.getDate()} ${month}`;
 }
 
 function formatMonthLabel(month: Date, languageTag: string) {
-  return new Intl.DateTimeFormat(languageTag, {
+  return getDateTimeFormat(languageTag, {
     month: "long",
     year: "numeric",
   }).format(month);
 }
 
 function formatMonthName(month: Date, languageTag: string) {
-  return new Intl.DateTimeFormat(languageTag, { month: "long" }).format(month);
+  return getDateTimeFormat(languageTag, { month: "long" }).format(month);
 }
 
 function isInMonth(date: Date, month: Date) {
@@ -306,7 +305,7 @@ function mergeProjectedInvoices(
 }
 
 function monthChoices(languageTag: string) {
-  const formatter = new Intl.DateTimeFormat(languageTag, { month: "long" });
+  const formatter = getDateTimeFormat(languageTag, { month: "long" });
 
   return Array.from({ length: 12 }, (_, index) => ({
     label: formatter.format(new Date(2026, index, 1)),

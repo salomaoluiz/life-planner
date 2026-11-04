@@ -219,3 +219,14 @@ describe("recurring series (spec 034)", () => {
     expect(new TransactionUIModel(dto()).monthKey).toBe("2026-09");
   });
 });
+
+describe("cached values", () => {
+  it("SHOULD return the same Date instance on every access", () => {
+    const model = new TransactionUIModel(
+      dto({ date: "2026-11-03T12:00:00.000Z" }),
+    );
+
+    expect(model.date).toBe(model.date);
+    expect(model.dateKey).toBe(model.dateKey);
+  });
+});

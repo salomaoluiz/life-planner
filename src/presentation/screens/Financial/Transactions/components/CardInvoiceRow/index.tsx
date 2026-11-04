@@ -19,6 +19,7 @@ import NoteIcon from "@screens/Financial/Transactions/components/NoteIcon";
 import PendingChip from "@screens/Financial/Transactions/components/PendingChip";
 import UpdatingTotal from "@screens/Financial/Transactions/components/UpdatingTotal";
 import CardInvoiceUIModel from "@screens/Financial/Transactions/models/CardInvoiceUIModel";
+import { getDateTimeFormat } from "@screens/Financial/Transactions/models/formatters";
 import TransactionUIModel from "@screens/Financial/Transactions/models/TransactionUIModel";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
@@ -41,7 +42,7 @@ function CardInvoiceRow(props: Props) {
   const { t } = useTranslation();
   const localeTag = useLocaleTag();
   const { expanded, invoice } = props;
-  const month = new Intl.DateTimeFormat(localeTag, { month: "long" }).format(
+  const month = getDateTimeFormat(localeTag, { month: "long" }).format(
     invoice.referenceMonthDate,
   );
   const title = invoice.lastDigits
