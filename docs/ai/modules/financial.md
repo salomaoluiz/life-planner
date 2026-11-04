@@ -168,7 +168,7 @@ use_cases:
     behavior: Whether a category has any transaction in the last two years, with two single-row reads (account rows and card purchases); drives the type lock of the category form (spec 077).
   getTransactionsUseCase:
     path: src/application/useCases/cases/financial/transactions/getTransactionsUseCase.ts
-    behavior: Retrieves the user's financial transactions of a period (`range` is required, spec 078/077; `creditCardId` narrows it to one card's purchases); the datasource loads every API page of the period.
+    behavior: Retrieves the user's financial transactions of a period (`range` is required, spec 078/077; `creditCardId` narrows it to one card's purchases); the datasource loads every API page of the period (spec 079: lean items joined with each page's `lookups` by `TransactionModel.fromLeanJSON`; by id, create and update read `{ item, lookups }`).
 
   refreshTransactionsUseCase:
     path: src/application/useCases/cases/financial/transactions/refreshTransactionsUseCase.ts

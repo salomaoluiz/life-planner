@@ -1,5 +1,4 @@
 import { todayCalendarDate } from "@data/models/financial/calendarDate";
-import TransactionModel from "@data/models/financial/TransactionModel";
 import { TransactionDatasource } from "@data/repositories/repos/financial/transactions/transactionDatasource";
 import { lastTwoYearsRange } from "@domain/entities/financial/TransactionQueryFilter";
 
@@ -41,11 +40,9 @@ async function getFilteredTransactions(params: Params): Response {
   }
 
   try {
-    const data = await fetchTransactionPages(
+    return await fetchTransactionPages(
       `/v1/finance/transactions?${query.toString()}`,
     );
-
-    return data.map((transaction) => TransactionModel.fromJSON(transaction));
   } catch (error) {
     return handleFinancialApiError(error, {
       datasource: "TransactionDatasource - getFilteredTransactions",

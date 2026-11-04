@@ -23,7 +23,9 @@ it("SHOULD GET /v1/finance/transactions with repeated ownerId params AND return 
   expect(spies.get).toHaveBeenCalledWith(
     `/v1/finance/transactions?${query.replace("&limit", "&source=CARD&limit")}`,
   );
-  expect(result).toEqual([TransactionModel.fromJSON(mocks.apiTransactions[0])]);
+  expect(result).toEqual([
+    TransactionModel.fromLeanJSON(mocks.apiTransactions[0], mocks.lookups),
+  ]);
   expect(result[0].value).toBe("234.90");
   expect(result[0].category).toBe("Groceries");
 });
@@ -35,7 +37,7 @@ it("SHOULD merge card purchases (source=CARD) after the account rows", async () 
       page([
         {
           ...mocks.apiTransactions[0],
-          accountId: null,
+          accountId: undefined,
           creditCardId: "card-1",
           id: "purchase-1",
           invoiceMonth: "2026-10",

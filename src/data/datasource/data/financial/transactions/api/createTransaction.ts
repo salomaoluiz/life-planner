@@ -3,7 +3,9 @@ import {
   todayCalendarDate,
 } from "@data/models/financial/calendarDate";
 import { decimalStringToCents } from "@data/models/financial/money";
-import TransactionModel from "@data/models/financial/TransactionModel";
+import TransactionModel, {
+  TransactionWithLookups,
+} from "@data/models/financial/TransactionModel";
 import { TransactionDatasource } from "@data/repositories/repos/financial/transactions/transactionDatasource";
 import { api } from "@infrastructure/api";
 
@@ -32,12 +34,12 @@ async function createTransaction(params: Params): Response {
   };
 
   try {
-    const data = await api.post<Record<string, unknown>>(
+    const { item, lookups } = await api.post<TransactionWithLookups>(
       `/v1/finance/transactions?today=${todayCalendarDate()}`,
       body,
     );
 
-    return TransactionModel.fromJSON(data);
+    return TransactionModel.fromLeanJSON(item, lookups);
   } catch (error) {
     return handleFinancialApiError(
       error,

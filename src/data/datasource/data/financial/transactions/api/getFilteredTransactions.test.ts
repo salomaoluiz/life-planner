@@ -5,7 +5,7 @@ import getFilteredTransactions from "./getFilteredTransactions";
 jest.mock("@infrastructure/api", () => ({ api: { get: jest.fn() } }));
 jest.mock("@data/models/financial/TransactionModel", () => ({
   __esModule: true,
-  default: { fromJSON: jest.fn((json) => json) },
+  default: { fromLeanJSON: jest.fn((json) => json) },
 }));
 
 const get = api.get as jest.Mock;
@@ -13,7 +13,11 @@ const get = api.get as jest.Mock;
 describe("getFilteredTransactions", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    get.mockResolvedValue({ items: [{ id: "t1" }], nextCursor: null });
+    get.mockResolvedValue({
+      items: [{ id: "t1" }],
+      lookups: { categories: {}, tags: {} },
+      nextCursor: null,
+    });
   });
 
   it("SHOULD send the owners, today and every account-row filter", async () => {

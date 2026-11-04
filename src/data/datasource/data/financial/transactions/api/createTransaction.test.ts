@@ -17,7 +17,7 @@ import {
 const TODAY_URL = /^\/v1\/finance\/transactions\?today=\d{4}-\d{2}-\d{2}$/;
 
 it("SHOULD POST /v1/finance/transactions with the value in cents AND the date as YYYY-MM-DD (the category name is NOT sent)", async () => {
-  spies.post.mockResolvedValueOnce(mocks.apiTransaction);
+  spies.post.mockResolvedValueOnce(mocks.apiResponse);
 
   const result = await setup();
 
@@ -31,7 +31,9 @@ it("SHOULD POST /v1/finance/transactions with the value in cents AND the date as
     type: "EXPENSE",
     value: 23490,
   });
-  expect(result).toEqual(TransactionModel.fromJSON(mocks.apiTransaction));
+  expect(result).toEqual(
+    TransactionModel.fromLeanJSON(mocks.apiTransaction, mocks.lookups),
+  );
 });
 
 it.each([
@@ -40,7 +42,7 @@ it.each([
   ["234.9", 23490],
   ["0.29", 29],
 ])("SHOULD send %j as %i cents", async (value, cents) => {
-  spies.post.mockResolvedValueOnce(mocks.apiTransaction);
+  spies.post.mockResolvedValueOnce(mocks.apiResponse);
 
   await setup({ value });
 
@@ -96,7 +98,7 @@ it("SHOULD wrap unknown errors in GenericError with the owner id only (no descri
 });
 
 it("SHOULD send paid WHEN the form chose it (spec 033)", async () => {
-  spies.post.mockResolvedValueOnce(mocks.apiTransaction);
+  spies.post.mockResolvedValueOnce(mocks.apiResponse);
 
   await setup({ paid: false });
 
@@ -107,7 +109,7 @@ it("SHOULD send paid WHEN the form chose it (spec 033)", async () => {
 });
 
 it("SHOULD send the notes WHEN given (spec 059)", async () => {
-  spies.post.mockResolvedValueOnce(mocks.apiTransaction);
+  spies.post.mockResolvedValueOnce(mocks.apiResponse);
 
   await setup({ notes: "Casa → Aeroporto" });
 

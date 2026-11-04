@@ -3,6 +3,12 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.7.4] - 2026-11-04
+
+### Changed
+
+- Transaction lists load smaller responses: each page lists the categories and tags once instead of repeating them in every row (spec 079).
+
 ## [1.7.3] - 2026-11-03
 
 ### Changed

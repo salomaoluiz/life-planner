@@ -17,6 +17,8 @@ Three parts, all wired by DI (see `architecture.md`):
 
 Like the entity, plus `static fromJSON(data: Record<string, unknown>)` (snake_case → camelCase, cast/convert types e.g. `Number(data.balance)`) and `toJSON()` (back to snake_case; used for DB writes and cache storage).
 
+A model can also read a lean API response that references other entities by id (spec 079): `TransactionModel.fromLeanJSON(item, lookups)` joins the item with the response `lookups` and delegates to `fromJSON`, so `toJSON()` and the cache keep the nested shape.
+
 ```ts
 static fromJSON(data: Record<string, unknown>): AccountModel {
   return new AccountModel({

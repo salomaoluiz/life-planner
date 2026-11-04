@@ -22,25 +22,24 @@ const params = {
   value: "234,90",
 };
 const apiTransaction = {
-  account: { icon: "bank", id: params.accountId, name: "Checking" },
   accountId: params.accountId,
-  category: {
-    icon: "cart",
-    iconColor: "#2E7D32",
-    id: params.categoryId,
-    name: "Groceries",
-  },
   categoryId: params.categoryId,
-  createdAt: "2026-10-04T12:00:00.000Z",
+  currency: "BRL",
   date: "2026-10-03",
   description: "Weekly groceries",
   id: "c3d4e5f6-0718-4293-a4b5-c6d7e8f90a1b",
   owner: "USER",
   ownerId: params.ownerId,
+  paid: true,
   type: "EXPENSE",
-  updatedAt: "2026-10-04T12:00:00.000Z",
   value: 23490,
 };
+const lookups = {
+  categories: { [params.categoryId]: { name: "Groceries" } },
+  tags: {},
+};
+// Spec 079: the lean response.
+const apiResponse = { item: apiTransaction, lookups };
 // endregion mocks
 
 beforeEach(() => {
@@ -64,6 +63,6 @@ async function setupThrowable(
 }
 
 const spies = { post: jest.mocked(api.post) };
-const mocks = { apiTransaction, params };
+const mocks = { apiResponse, apiTransaction, lookups, params };
 
 export { mocks, setup, setupThrowable, spies };
