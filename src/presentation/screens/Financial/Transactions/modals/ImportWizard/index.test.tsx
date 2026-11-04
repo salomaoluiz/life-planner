@@ -1,5 +1,6 @@
 import queryName from "@tests/queryName";
 
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import { BusinessError, ImportRowsInvalid } from "@domain/entities/errors";
 import { lightTheme } from "@presentation/theme/provider";
 
@@ -1186,6 +1187,9 @@ describe("step 4: review and import", () => {
 
     await waitFor(() => expect(params.onImported).toHaveBeenCalledWith(3));
     expect(params.onClose).toHaveBeenCalledTimes(1);
+    // Only the finance caches, never the whole app (spec 076).
+    expect(spies.invalidate).toHaveBeenCalledWith(financeKeys.all());
+    expect(spies.invalidate).not.toHaveBeenCalledWith();
   });
 
   it("SHOULD not allow the import while the rows are being checked again", async () => {

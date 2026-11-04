@@ -233,8 +233,23 @@ it("SHOULD go back WHEN a mutation succeeds", () => {
   setup();
 
   // Direct mutations skip runPendingChange: the lists, summary and balances must be marked stale here.
-  expect(spies.invalidateFinance).toHaveBeenCalledWith({ refetch: false });
+  expect(spies.invalidateAfterWrite).toHaveBeenCalledWith(
+    { invoiceMonths: "all", listMonths: "all", projections: true },
+    { refetch: false },
+  );
   expect(modalNavigation.closeModal).toHaveBeenCalled();
+});
+
+it("SHOULD leave the projections alone WHEN only an installment plan was created", () => {
+  givenLoaded();
+  mutations.create_plan.withStatus("success");
+
+  setup();
+
+  expect(spies.invalidateAfterWrite).toHaveBeenCalledWith(
+    { invoiceMonths: "all", listMonths: "all", projections: false },
+    { refetch: false },
+  );
 });
 
 it("SHOULD keep the values and expose the 006 key WHEN the mutation fails", () => {

@@ -22,7 +22,6 @@ import {
 import { normalizeCategoryColor } from "@presentation/constants/categoryColors";
 import useOwners from "@presentation/hooks/useOwners";
 import { TranslationKeys } from "@presentation/i18n/types";
-import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
 import { filterRowsByQuery } from "@screens/Financial/models/categoryTree";
 import {
@@ -51,6 +50,7 @@ import {
   setRetryDraft,
 } from "@screens/Financial/Transactions/pending/pendingChanges";
 import runPendingChange from "@screens/Financial/Transactions/pending/runPendingChange";
+import { invalidateAfterWrite } from "@screens/Financial/Transactions/pending/writeCache";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 import { decimalStringToCents } from "@utils/money";
@@ -549,9 +549,21 @@ function useNewTransactionViewModel() {
     if (!mutations.some((mutation) => mutation.status === "success")) {
       return;
     }
-    // These writes do not go through runPendingChange: mark everything they touched stale (data stays fresh 30 s).
+    // These writes do not go through runPendingChange: mark what they touched stale (data stays fresh 30 s). They can
+    // reach rows in any month, so every month; an installment plan alone leaves the projections as they are.
     // The Transactions screen refetches it on regaining focus, right after this modal closes.
-    void invalidateFinanceData({ refetch: false });
+    const onlyInstallmentPlan = mutations
+      .filter((mutation) => mutation.status === "success")
+      .every((mutation) => mutation === createPlanMutation);
+
+    void invalidateAfterWrite(
+      {
+        invoiceMonths: "all",
+        listMonths: "all",
+        projections: !onlyInstallmentPlan,
+      },
+      { refetch: false },
+    );
     if (saveIntent.current === "next" && state) {
       const next = resetForNext(state);
 

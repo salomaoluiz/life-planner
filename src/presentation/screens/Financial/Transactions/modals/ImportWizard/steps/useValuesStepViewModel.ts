@@ -4,6 +4,7 @@ import { ScrollView } from "react-native";
 import { matchCreditCategory } from "@application/csvImport/cardCredits";
 import { autoMatch } from "@application/csvImport/distinctValues";
 import { RowType } from "@application/csvImport/types";
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
 import { invalidateFetcherData, useMutation } from "@infrastructure/fetcher";
 import { IMPORTED_CARD_DEFAULTS } from "@presentation/constants/cardColors";
@@ -163,7 +164,7 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
           values.type,
         );
 
-        await invalidateFetcherData();
+        await invalidateFetcherData(financeKeys.all());
 
         return levels.map((level) => level.id);
       } else if (kind === "account") {
@@ -186,7 +187,7 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
       }
 
       // The lists of the wizard follow the cache: the new record shows up in `records` and is selected then.
-      await invalidateFetcherData();
+      await invalidateFetcherData(financeKeys.all());
 
       return [];
     },
@@ -196,7 +197,7 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
     cacheKey: ["financial.import_delete_category"],
     fetch: async (request) => {
       await useCases.deleteFinancialCategoryUseCase.execute(request);
-      await invalidateFetcherData();
+      await invalidateFetcherData(financeKeys.all());
     },
   });
 

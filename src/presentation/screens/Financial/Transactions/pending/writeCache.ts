@@ -77,6 +77,13 @@ async function invalidateAfterWrite(
   if (scope.projections) {
     keys.push(financeKeys.projections.all());
   }
+  if (scope.listMonths === "all") {
+    keys.push(
+      financeKeys.recurrences.all(),
+      financeKeys.installmentPlans.all(),
+      financeKeys.tags.all(),
+    );
+  }
 
   await Promise.all(keys.map(async (key) => invalidate(key)));
 }
