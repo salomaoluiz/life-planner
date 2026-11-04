@@ -1,1 +1,1 @@
-export { Family as default } from "@screens";
+export { default } from "@screens/Family";

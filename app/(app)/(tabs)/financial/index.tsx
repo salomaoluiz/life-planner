@@ -1,1 +1,1 @@
-export { FinancialIndexRedirect as default } from "@screens";
+export { default } from "@screens/Financial/IndexRedirect";

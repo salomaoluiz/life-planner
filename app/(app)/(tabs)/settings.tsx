@@ -1,1 +1,1 @@
-export { Config as default } from "@screens";
+export { default } from "@screens/Config";

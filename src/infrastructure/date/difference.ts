@@ -1,8 +1,6 @@
-import {
-  differenceInDays,
-  differenceInMilliseconds,
-  differenceInYears,
-} from "date-fns";
+import { differenceInDays } from "date-fns/differenceInDays";
+import { differenceInMilliseconds } from "date-fns/differenceInMilliseconds";
+import { differenceInYears } from "date-fns/differenceInYears";
 
 import { Duration } from "./types";
 

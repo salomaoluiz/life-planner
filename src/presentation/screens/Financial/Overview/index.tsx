@@ -6,7 +6,7 @@ import { formatAmount } from "@components/AmountText/formatAmount";
 import type { CurrencyCode } from "@domain/entities/financial/Currency";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { useBreakpoint, useTheme } from "@presentation/theme";
-import { FiltersModal } from "@screens/Financial/Transactions/modals";
+import FiltersModal from "@screens/Financial/Transactions/modals/FiltersModal";
 
 import BalanceBlock from "./components/BalanceBlock";
 import CategoriesBlock from "./components/CategoriesBlock";

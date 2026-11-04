@@ -1,1 +1,1 @@
-export { LegacyConfigRedirect as default } from "@screens";
+export { default } from "@screens/Navigation/containers/LegacyConfigRedirect";

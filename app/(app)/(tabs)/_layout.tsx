@@ -2,7 +2,7 @@ import { Redirect, Tabs } from "expo-router";
 
 import { useUser } from "@application/providers/user";
 import { useBreakpoint } from "@presentation/theme";
-import { AppTabBar } from "@screens";
+import AppTabBar from "@screens/Navigation/containers/AppTabBar";
 
 export default function TabNavigator() {
   const { logged } = useUser();
