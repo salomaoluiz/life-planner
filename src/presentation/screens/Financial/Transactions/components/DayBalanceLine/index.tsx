@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { View } from "react-native";
 
 import { AmountText, GroupBodyRow, IconTile, Text } from "@components";
@@ -67,4 +68,4 @@ function DayBalanceLine(props: Props) {
   );
 }
 
-export default DayBalanceLine;
+export default memo(DayBalanceLine);

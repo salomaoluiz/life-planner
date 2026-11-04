@@ -10,6 +10,7 @@ import { TransactionQueryFilter } from "@domain/entities/financial/TransactionQu
 import { refetchStaleFetcherData, useQuery } from "@infrastructure/fetcher";
 import useOwners from "@presentation/hooks/useOwners";
 import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
+import useStableCallback from "@presentation/hooks/useStableCallback";
 import useTranslationLocale from "@presentation/i18n/useTranslationLocale";
 import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
 import { addMonthsTo } from "@screens/Financial/models/invoiceMonth";
@@ -539,6 +540,32 @@ function useTransactionsViewModel() {
     ? (filteredTransactions.error ?? filteredInvoices.error)
     : null;
 
+  // Spec 087: handlers handed to the memoized rows keep their identity; each call reads the latest scope.
+  const onInvoiceOpen = useStableCallback(
+    scope.guard((invoice: CardInvoiceUIModel) =>
+      openModal("invoice_detail", {
+        cardId: invoice.cardId,
+        month: invoice.referenceMonth,
+      }),
+    ),
+  );
+  const onInvoiceToggle = useStableCallback((id: string) =>
+    setExpandedInvoiceId((current) => (current === id ? undefined : id)),
+  );
+  const onProjectedPress = useStableCallback(
+    scope.guard((item: TransactionUIModel) =>
+      openModal("add_new_transaction", {
+        month: item.monthKey,
+        occurrenceNumber: String(item.occurrenceNumber),
+        recurrenceId: item.recurrenceId,
+      }),
+    ),
+  );
+  const onReadOnlyAttempt = useStableCallback(scope.notifyReadOnly);
+  const onRowPress = useStableCallback(
+    scope.guard((id: string) => openModal("add_new_transaction", { id })),
+  );
+
   function onMonthSelect(monthIndex: string) {
     setMonth(new Date(pickerYear, Number(monthIndex), 1));
     setMonthPickerOpen(false);
@@ -608,15 +635,9 @@ function useTransactionsViewModel() {
     onFilterRemove: filterStore.removeGroup,
     onFiltersApply: filterStore.replace,
     onFiltersClear: filterStore.clearAll,
-    onInvoiceOpen: scope.guard((invoice: CardInvoiceUIModel) =>
-      openModal("invoice_detail", {
-        cardId: invoice.cardId,
-        month: invoice.referenceMonth,
-      }),
-    ),
+    onInvoiceOpen,
     onInvoiceRetry: async () => monthQuery.refetch(),
-    onInvoiceToggle: (id: string) =>
-      setExpandedInvoiceId((current) => (current === id ? undefined : id)),
+    onInvoiceToggle,
     onMonthPickerClose: () => setMonthPickerOpen(false),
     onMonthPickerOpen,
     onMonthSelect,
@@ -625,19 +646,11 @@ function useTransactionsViewModel() {
     onPickerYearChange: (delta: number) =>
       setPickerYear((year) => year + delta),
     onPreviousMonth: () => setMonth((current) => shiftMonth(current, -1)),
-    onProjectedPress: scope.guard((item: TransactionUIModel) =>
-      openModal("add_new_transaction", {
-        month: item.monthKey,
-        occurrenceNumber: String(item.occurrenceNumber),
-        recurrenceId: item.recurrenceId,
-      }),
-    ),
-    onReadOnlyAttempt: scope.notifyReadOnly,
+    onProjectedPress,
+    onReadOnlyAttempt,
     onRefresh,
     onRetry: async () => monthQuery.refetch(),
-    onRowPress: scope.guard((id: string) =>
-      openModal("add_new_transaction", { id }),
-    ),
+    onRowPress,
     onSearchChange: filterStore.setSearch,
     onSummaryRetry: async () => monthQuery.refetch(),
     onToastHide: scope.onToastHide,

@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@tests";
 
 import { AmountText } from "@components";
+import { useTranslation } from "@presentation/i18n";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
 import { categories, makeTransactionDTO } from "../../mocks/index.mocks";
@@ -290,6 +291,116 @@ describe("pending rows (spec 061)", () => {
       screen.getByText("financial.transactions.pending.deleting"),
     ).toBeTruthy();
     fireEvent.press(screen.getByTestId(transactionsTestIds.row));
+    expect(onPress).not.toHaveBeenCalled();
+  });
+});
+
+describe("memoized row (spec 087)", () => {
+  const onPress = jest.fn();
+  const onPay = jest.fn();
+
+  function make(overrides: Parameters<typeof makeTransactionDTO>[0] = {}) {
+    return new TransactionUIModel(
+      makeTransactionDTO({ value: "12.50", ...overrides }),
+      categories[0],
+    );
+  }
+
+  // The row reads the translations once per render: the calls since the last reading count its renders.
+  function renders() {
+    const calls = jest.mocked(useTranslation).mock.calls.length;
+
+    jest.mocked(useTranslation).mockClear();
+
+    return calls;
+  }
+
+  function mount(item: TransactionUIModel, extra = {}) {
+    const view = render(
+      <TransactionRow item={item} onPay={onPay} onPress={onPress} {...extra} />,
+    );
+
+    renders();
+
+    return {
+      again: (next: TransactionUIModel, more = {}) => {
+        view.rerender(
+          <TransactionRow
+            item={next}
+            onPay={onPay}
+            onPress={onPress}
+            {...extra}
+            {...more}
+          />,
+        );
+
+        return renders();
+      },
+    };
+  }
+
+  it("SHOULD NOT render again WHEN the model is rebuilt from an equal DTO", () => {
+    const { again } = mount(make());
+
+    expect(again(make())).toBe(0);
+  });
+
+  it.each([
+    ["amount", { value: "99.00" }],
+    ["description", { description: "Other" }],
+    ["paid status", { paid: false }],
+    ["notes", { notes: "A note" }],
+  ])("SHOULD render again WHEN the %s changes", (_name, overrides) => {
+    const { again } = mount(make());
+
+    expect(again(make(overrides))).toBeGreaterThan(0);
+  });
+
+  it("SHOULD render again WHEN the pending state changes", () => {
+    const item = make();
+    const { again } = mount(item);
+
+    expect(again(item.withPendingState("saving"))).toBeGreaterThan(0);
+  });
+
+  it("SHOULD render again WHEN the category look changes", () => {
+    const { again } = mount(make());
+    const other = new TransactionUIModel(
+      makeTransactionDTO({ value: "12.50" }),
+      {
+        ...categories[0],
+        icon: "other-icon",
+      },
+    );
+
+    expect(again(other)).toBeGreaterThan(0);
+  });
+
+  it("SHOULD render again WHEN isPaying or a handler changes", () => {
+    const item = make();
+    const { again } = mount(item);
+
+    expect(again(item, { isPaying: true })).toBeGreaterThan(0);
+    expect(again(item, { onPress: jest.fn() })).toBeGreaterThan(0);
+  });
+
+  it("SHOULD call onAdjustmentPress with the item for an adjustment row", () => {
+    const onAdjustmentPress = jest.fn();
+    const adjustment = make({
+      description: "Balance adjustment",
+      systemKey: "BALANCE_ADJUSTMENT",
+    });
+
+    render(
+      <TransactionRow
+        item={adjustment}
+        onAdjustmentPress={onAdjustmentPress}
+        onPress={onPress}
+      />,
+    );
+    fireEvent.press(screen.getByTestId(transactionsTestIds.adjustmentRow));
+
+    expect(onAdjustmentPress).toHaveBeenCalledWith(adjustment);
     expect(onPress).not.toHaveBeenCalled();
   });
 });

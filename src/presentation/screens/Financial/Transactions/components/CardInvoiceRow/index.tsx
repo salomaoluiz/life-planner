@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { View } from "react-native";
 
 import {
@@ -225,4 +226,4 @@ function formatShortDate(date: Date, localeTag: string) {
   }).format(date);
 }
 
-export default CardInvoiceRow;
+export default memo(CardInvoiceRow);

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import { useCases } from "@application/useCases";
 import { useMutation } from "@infrastructure/fetcher";
+import useStableCallback from "@presentation/hooks/useStableCallback";
 import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 
 import TransactionUIModel from "../models/TransactionUIModel";
@@ -34,15 +35,14 @@ function usePayTransaction(props: Props) {
     }
   }, [payMutation.status]);
 
-  return {
-    hasError,
-    onPay: (item: TransactionUIModel) => {
-      setHasError(false);
-      setPayingId(item.id);
-      payMutation.mutate({ id: item.id, ownerId: item.ownerId, paid: true });
-    },
-    payingId,
-  };
+  // A stable identity: the memoized rows do not render again when the screen does.
+  const onPay = useStableCallback((item: TransactionUIModel) => {
+    setHasError(false);
+    setPayingId(item.id);
+    payMutation.mutate({ id: item.id, ownerId: item.ownerId, paid: true });
+  });
+
+  return { hasError, onPay, payingId };
 }
 
 export default usePayTransaction;

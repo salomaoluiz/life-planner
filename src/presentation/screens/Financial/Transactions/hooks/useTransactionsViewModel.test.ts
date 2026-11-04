@@ -745,6 +745,28 @@ describe("archived family (spec 042)", () => {
     expect(result.current.toastVisible).toBe(true);
   });
 
+  it("SHOULD keep the row handlers' identity AND still respect the scope of the latest render (spec 087)", () => {
+    givenData(items(), withArchived);
+    const { result } = setup();
+    const { onInvoiceToggle, onProjectedPress, onRowPress } = result.current;
+
+    act(() => result.current.onOwnerFilterChange("family-1"));
+
+    expect(result.current.onRowPress).toBe(onRowPress);
+    expect(result.current.onProjectedPress).toBe(onProjectedPress);
+    expect(result.current.onInvoiceToggle).toBe(onInvoiceToggle);
+    act(() => onRowPress("item-fam-exp"));
+    expect(modalNavigation.openModal).not.toHaveBeenCalled();
+    expect(result.current.toastVisible).toBe(true);
+
+    act(() => result.current.onOwnerFilterChange("ALL"));
+    act(() => onRowPress("item-exp"));
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "add_new_transaction",
+      { id: "item-exp" },
+    );
+  });
+
   it("SHOULD report an empty month (not a filtered one) WHEN only the archived family has data in All", () => {
     givenData([items()[2]], withArchived);
     const { result } = setup();

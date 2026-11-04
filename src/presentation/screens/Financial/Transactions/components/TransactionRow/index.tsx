@@ -1,4 +1,5 @@
-import { Platform, StyleSheet, View } from "react-native";
+import { memo } from "react";
+import { Platform, View } from "react-native";
 
 import {
   AmountText,
@@ -8,30 +9,66 @@ import {
   IconTile,
   ListItem,
 } from "@components";
-import { useKitTheme } from "@components/utils/useKitTheme";
 import { useTranslation } from "@presentation/i18n";
 import NoteIcon from "@screens/Financial/Transactions/components/NoteIcon";
 import PendingChip from "@screens/Financial/Transactions/components/PendingChip";
 import TransactionUIModel from "@screens/Financial/Transactions/models/TransactionUIModel";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
+import useStyles from "./styles";
+
 interface Props {
   isPaying?: boolean;
   item: TransactionUIModel;
+  // A balance adjustment cannot be edited: its row opens the delete sheet instead of the form.
+  onAdjustmentPress?: (item: TransactionUIModel) => void;
   onPay?: (item: TransactionUIModel) => void;
   onPress: (id: string) => void;
   onProjectedPress?: (item: TransactionUIModel) => void;
 }
 
+function sameRowProps(prev: Props, next: Props) {
+  return (
+    prev.isPaying === next.isPaying &&
+    prev.onAdjustmentPress === next.onAdjustmentPress &&
+    prev.onPay === next.onPay &&
+    prev.onPress === next.onPress &&
+    prev.onProjectedPress === next.onProjectedPress &&
+    sameTransaction(prev.item, next.item)
+  );
+}
+
+// The model is rebuilt on every refetch: rows compare what they show, so an unchanged row is not rendered again.
+function sameTransaction(a: TransactionUIModel, b: TransactionUIModel) {
+  if (a === b) {
+    return true;
+  }
+  if (
+    a.pendingState !== b.pendingState ||
+    a.categoryColor !== b.categoryColor ||
+    a.categoryIcon !== b.categoryIcon
+  ) {
+    return false;
+  }
+  const left = a.dto as unknown as Record<string, unknown>;
+  const right = b.dto as unknown as Record<string, unknown>;
+  const keys = Object.keys(left);
+
+  return (
+    keys.length === Object.keys(right).length &&
+    keys.every(
+      (key) =>
+        Object.is(left[key], right[key]) ||
+        (typeof left[key] === "object" &&
+          JSON.stringify(left[key]) === JSON.stringify(right[key])),
+    )
+  );
+}
+
 function TransactionRow(props: Props) {
   const { t } = useTranslation();
-  const { spacing } = useKitTheme();
+  const { styles } = useStyles();
   const { item } = props;
-  const styles = StyleSheet.create({
-    muted: { opacity: 0.6 },
-    pending: { opacity: 0.5 },
-    trailing: { alignItems: "center", flexDirection: "row", gap: spacing.xs },
-  });
 
   const title = item.counter
     ? `${item.description} ${item.counter}`
@@ -94,7 +131,9 @@ function TransactionRow(props: Props) {
         if (item.isPending) {
           return;
         }
-        if (item.isProjected && props.onProjectedPress) {
+        if (item.isAdjustment && props.onAdjustmentPress) {
+          props.onAdjustmentPress(item);
+        } else if (item.isProjected && props.onProjectedPress) {
           props.onProjectedPress(item);
         } else {
           props.onPress(item.id);
@@ -142,4 +181,5 @@ function TransactionRow(props: Props) {
   return item.isProjected ? <View style={styles.muted}>{row}</View> : row;
 }
 
-export default TransactionRow;
+export { sameTransaction };
+export default memo(TransactionRow, sameRowProps);
