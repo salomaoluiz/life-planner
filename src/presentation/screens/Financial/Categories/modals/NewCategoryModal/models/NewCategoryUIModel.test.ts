@@ -1,5 +1,4 @@
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
-import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
@@ -25,11 +24,8 @@ const owners = [
   new OwnerDTO({ id: "family-1", name: "Family", type: OwnerType.FAMILY }),
 ];
 
-function build(
-  categories: CategoryDTO[] = [],
-  transactions: TransactionDTO[] = [],
-) {
-  return new NewCategoryUIModel({ categories, owners, transactions });
+function build(categories: CategoryDTO[] = []) {
+  return new NewCategoryUIModel({ categories, owners });
 }
 
 const state = { ownerId: "user-id", type: "EXPENSE" };
@@ -65,31 +61,13 @@ it("SHOULD exclude the edited category and its descendants from the parent optio
   ]);
 });
 
-it("SHOULD report children, parent and transactions", () => {
-  const model = build(
-    [cat("p"), cat("c", { parentId: "p" })],
-    [
-      new TransactionDTO({
-        accountId: "a1",
-        category: "c",
-        categoryId: "c",
-        date: new Date(2026, 8, 30).toISOString(),
-        description: "Shop",
-        id: "t1",
-        owner: "USER",
-        ownerId: "user-id",
-        type: "EXPENSE",
-        value: "10.00",
-      }),
-    ],
-  );
+it("SHOULD report children and parent", () => {
+  const model = build([cat("p"), cat("c", { parentId: "p" })]);
 
   expect(model.hasChildren("p")).toBe(true);
   expect(model.hasChildren("c")).toBe(false);
   expect(model.hasParent("c")).toBe(true);
   expect(model.hasParent("p")).toBe(false);
-  expect(model.hasTransactions("c")).toBe(true);
-  expect(model.hasTransactions("p")).toBe(false);
 });
 
 it("SHOULD expose the 19 palette colors with financial.colors keys", () => {

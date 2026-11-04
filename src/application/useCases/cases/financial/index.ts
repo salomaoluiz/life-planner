@@ -23,6 +23,7 @@ export {
   getCategoryIconsUseCase,
   getCategoriesUseCase as getFinancialCategoriesUseCase,
   getMostUsedCategoriesUseCase as getMostUsedFinancialCategoriesUseCase,
+  hasCategoryTransactionsUseCase as hasFinancialCategoryTransactionsUseCase,
   refreshCategoriesUseCase as refreshFinancialCategoriesUseCase,
   updateCategoryAppearanceUseCase as updateFinancialCategoryAppearanceUseCase,
   updateCategoryUseCase as updateFinancialCategoryUseCase,

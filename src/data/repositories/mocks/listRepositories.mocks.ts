@@ -96,6 +96,7 @@ const repositoriesMocks: Repositories = {
       getFilteredTransactions: jest.fn(),
       getTransactionById: jest.fn(),
       getTransactions: jest.fn(),
+      hasCategoryTransactions: jest.fn(),
       importTransactions: jest.fn(),
       updateTransaction: jest.fn(),
       validateImport: jest.fn(),

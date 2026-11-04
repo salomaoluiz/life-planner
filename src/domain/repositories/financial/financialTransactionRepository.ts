@@ -37,6 +37,11 @@ export type FinancialTransactionRepository = {
     range: TransactionDateRange,
     options?: TransactionReadOptions,
   ): Promise<TransactionEntity[]>;
+  // Spec 077: any transaction of the category in the last two years (account rows or card purchases).
+  hasCategoryTransactions(
+    ownerIds: string[],
+    categoryId: string,
+  ): Promise<boolean>;
   // Spec 047: writes every row or none; a 422 throws `ImportRowsInvalid`.
   importTransactions(params: ImportRequest): Promise<number>;
   updateTransaction(params: UpdateTransactionRepositoryParams): Promise<void>;

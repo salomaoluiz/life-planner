@@ -134,6 +134,18 @@ describe("CSV import and export (spec 047)", () => {
   });
 });
 
+it("SHOULD ask the datasource whether a category has transactions (spec 077)", async () => {
+  const { hasCategoryTransactions } = setup();
+
+  mocks.datasources.financialTransactionDatasource.hasCategoryTransactions =
+    jest.fn().mockResolvedValue(true);
+
+  expect(await hasCategoryTransactions(["owner-1"], "category-1")).toBe(true);
+  expect(
+    mocks.datasources.financialTransactionDatasource.hasCategoryTransactions,
+  ).toHaveBeenCalledWith(["owner-1"], "category-1");
+});
+
 it("SHOULD pass the range of getTransactions on", async () => {
   const { getTransactions } = setup();
   const range = { from: "2026-10-01", to: "2026-10-31" };

@@ -32,6 +32,10 @@ export interface TransactionDatasource {
     range: TransactionDateRange,
     options?: TransactionReadOptions,
   ): Promise<TransactionModel[]>;
+  hasCategoryTransactions(
+    ownerIds: string[],
+    categoryId: string,
+  ): Promise<boolean>;
   importTransactions(params: ImportRequest): Promise<number>;
   updateTransaction(params: UpdateTransactionDatasourceParams): Promise<void>;
   validateImport(params: ImportRequest): Promise<ImportValidationEntity>;

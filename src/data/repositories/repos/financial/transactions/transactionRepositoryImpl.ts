@@ -45,6 +45,12 @@ function transactionRepositoryImpl(
     ): Promise<TransactionEntity[]> {
       return getTransactions(ownerIds, datasources, range, options);
     },
+    async hasCategoryTransactions(ownerIds, categoryId): Promise<boolean> {
+      return datasources.financialTransactionDatasource.hasCategoryTransactions(
+        ownerIds,
+        categoryId,
+      );
+    },
     async importTransactions(params): Promise<number> {
       return importTransactions(params, datasources);
     },

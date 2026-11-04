@@ -1,5 +1,4 @@
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
-import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { CATEGORY_COLORS } from "@presentation/constants/categoryColors";
 import {
@@ -24,7 +23,6 @@ import { CategoryFormState } from "./categoryFormState";
 interface Params {
   categories: CategoryDTO[];
   owners: OwnerDTO[];
-  transactions: TransactionDTO[];
 }
 
 class NewCategoryUIModel {
@@ -56,12 +54,6 @@ class NewCategoryUIModel {
   hasParent(id: string): boolean {
     return !!this.params.categories.find((category) => category.id === id)
       ?.parentId;
-  }
-
-  hasTransactions(id: string): boolean {
-    return this.params.transactions.some(
-      (transaction) => transaction.categoryId === id,
-    );
   }
 
   // The quick row of the form: 12 common icons bundled in the app, so picking one never needs the network.

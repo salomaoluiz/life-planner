@@ -6,6 +6,7 @@ import queryName from "@tests/queryName";
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
+import { useCases } from "@application/useCases";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
 import UseMutationFixture from "@infrastructure/fetcher/mocks/useMutation.fixture";
@@ -34,11 +35,11 @@ jest.mock("@application/useCases", () => ({
       execute: jest.fn(),
       uniqueName: "categories",
     },
-    getFinancialTransactionsUseCase: {
+    getOwnersUseCase: { execute: jest.fn(), uniqueName: "owners" },
+    hasFinancialCategoryTransactionsUseCase: {
       execute: jest.fn(),
       uniqueName: "transactions",
     },
-    getOwnersUseCase: { execute: jest.fn(), uniqueName: "owners" },
     updateFinancialCategoryAppearanceUseCase: {
       execute: jest.fn(),
       uniqueName: "appearance",
@@ -94,6 +95,9 @@ const mutations: Record<string, UseMutationFixture<unknown, unknown>> = {};
 // region spies
 const spies = {
   back: jest.mocked(router.back),
+  hasTransactions: jest.mocked(
+    useCases.hasFinancialCategoryTransactionsUseCase.execute,
+  ),
   params: jest.mocked(useLocalSearchParams),
   push: jest.mocked(router.push),
   useMutation: jest.mocked(useMutation),
@@ -125,7 +129,8 @@ function givenLoaded(
 ) {
   queries.owners.withData(owners);
   queries.categories.withData(data.categories ?? []);
-  queries.transactions.withData(data.transactions ?? []);
+  // Whether the category has transactions (spec 077), not the rows.
+  queries.transactions.withData((data.transactions ?? []).length > 0);
   spies.params.mockReturnValue(data.params ?? {});
 }
 

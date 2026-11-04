@@ -5,6 +5,7 @@ import getExportCount from "./getExportCount";
 import getFilteredTransactions from "./getFilteredTransactions";
 import getTransactionById from "./getTransactionById";
 import getTransactions from "./getTransactions";
+import hasCategoryTransactions from "./hasCategoryTransactions";
 import { importTransactions, validateImport } from "./importTransactions";
 import updateTransaction from "./updateTransaction";
 
@@ -16,6 +17,7 @@ export default {
   getFilteredTransactions,
   getTransactionById,
   getTransactions,
+  hasCategoryTransactions,
   importTransactions,
   updateTransaction,
   validateImport,
