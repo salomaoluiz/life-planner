@@ -1,6 +1,5 @@
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import { BusinessError } from "@domain/entities/errors";
-import { recentTransactionsRange } from "@domain/entities/financial/TransactionQueryFilter";
 
 import {
   mocks,
@@ -21,10 +20,9 @@ it("SHOULD get all transactions and return the TransactionDTO", async () => {
   const result = await setup();
 
   expect(getTransactionsSpy).toHaveBeenCalledTimes(1);
-  // Spec 078: without a range, the recent 24-month window (never the whole history).
   expect(getTransactionsSpy).toHaveBeenCalledWith(
     mocks.defaultParams.ownerIds,
-    recentTransactionsRange(new Date()),
+    mocks.defaultParams.range,
     undefined,
   );
   expect(getCategoriesSpy).toHaveBeenCalledTimes(1);

@@ -160,9 +160,15 @@ use_cases:
     path: src/application/useCases/cases/financial/transactions/deleteTransactionUseCase.ts
     behavior: Deletes a transaction by ID.
 
+  getTransactionByIdUseCase:
+    path: src/application/useCases/cases/financial/transactions/getTransactionByIdUseCase.ts
+    behavior: Reads one transaction by id (`GET /finance/transactions/:id`, spec 077) for the edit forms opened from outside a loaded month (Home upcoming, invoice, installment edit); `null` when the API answers 404.
+  hasCategoryTransactionsUseCase:
+    path: src/application/useCases/cases/financial/categories/hasCategoryTransactionsUseCase.ts
+    behavior: Whether a category has any transaction in the last two years, with two single-row reads (account rows and card purchases); drives the type lock of the category form (spec 077).
   getTransactionsUseCase:
     path: src/application/useCases/cases/financial/transactions/getTransactionsUseCase.ts
-    behavior: Retrieves the user's financial transactions of a period (the recent 24-month window when none is given, spec 078); the datasource loads every API page of the period.
+    behavior: Retrieves the user's financial transactions of a period (`range` is required, spec 078/077; `creditCardId` narrows it to one card's purchases); the datasource loads every API page of the period.
 
   refreshTransactionsUseCase:
     path: src/application/useCases/cases/financial/transactions/refreshTransactionsUseCase.ts
@@ -525,6 +531,6 @@ On `medium`/`expanded` these modals are `BottomSheet size="form"` with `FormColu
 
 ## Month-scoped transactions (spec 075)
 
-- **Range:** `TransactionDateRange` / `monthDateRange(monthKey)` (`TransactionQueryFilter.ts`). `getTransactions(ownerIds, range?)` goes through the repository, datasource and `getTransactionsUseCase` (`range` param). With a range the datasource sends `from`/`to` on both requests (account rows by date, `source=CARD` rows by the list date of their invoice) and the repository returns the entities straight from the API, never persisted. Without one it is the whole history, kept in the persistent cache under one entry per sorted owner set (`CACHE_FINANCIAL_TRANSACTION_DATA` + `:ownerId,ownerId`).
-- **Consumers:** the Transactions screen list (`useTransactionsViewModel`: key `[list key, monthKey, ...ownerIds]`, `keepPreviousData`, the skeleton stays while the previous month shows as placeholder), `getMonthSummaryUseCase` (the month), `getMostUsedCategoriesUseCase` (90 days back up to 366 days ahead). The edit form takes its row from the cached month data and the description suggestions merge the cached months (`getCachedFetcherData`); only a row opened from elsewhere (Home, an invoice) still loads the whole history until spec 077.
+- **Range:** `TransactionDateRange` / `monthDateRange(monthKey)` (`TransactionQueryFilter.ts`). `getTransactions(ownerIds, range, options?)` goes through the repository, datasource and `getTransactionsUseCase` (`range` param). With a range the datasource sends `from`/`to` on both requests (account rows by date, `source=CARD` rows by the list date of their invoice) and the repository returns the entities straight from the API, never persisted. A range is always required (spec 078/077): there is no whole-history read. `options.creditCardId` reads only that card's purchases (one request, the refund sheet).
+- **Consumers:** the Transactions screen list (`useTransactionsViewModel`: key `[list key, monthKey, ...ownerIds]`, `keepPreviousData`, the skeleton stays while the previous month shows as placeholder), `getMonthSummaryUseCase` (the month), `getMostUsedCategoriesUseCase` (90 days back up to 366 days ahead). The edit form takes its row from the cached month data and the description suggestions merge the cached months (`getCachedFetcherData`); a row opened from elsewhere (Home, an invoice, installment edit) is read by id (`getTransactionByIdUseCase`, spec 077); the refund sheet reads one card's purchases of the last year (`refundPurchasesRange`) and the category form asks `hasCategoryTransactionsUseCase` (two single-row reads).
 - Flow `month-switch` (spec-075); perf budgets of the screen now have `maxFullHistory: 0`.

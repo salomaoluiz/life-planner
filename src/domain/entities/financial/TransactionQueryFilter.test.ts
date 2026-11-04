@@ -1,7 +1,6 @@
 import {
   lastTwoYearsRange,
   monthDateRange,
-  recentTransactionsRange,
   refundPurchasesRange,
 } from "./TransactionQueryFilter";
 
@@ -28,15 +27,6 @@ describe("lastTwoYearsRange (spec 078)", () => {
 
     expect(to).toBe("2028-02-29");
     expect(from > "2026-02-28" && from <= "2026-03-02").toBe(true);
-  });
-});
-
-describe("recentTransactionsRange (spec 078)", () => {
-  it("SHOULD cover 24 whole months: 20 back, the current one and 3 ahead", () => {
-    expect(recentTransactionsRange(new Date(2026, 10, 3))).toEqual({
-      from: "2025-03-01",
-      to: "2027-02-28",
-    });
   });
 });
 

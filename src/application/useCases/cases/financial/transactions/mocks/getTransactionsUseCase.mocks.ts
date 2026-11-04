@@ -19,6 +19,7 @@ const defaultParams: GetTransactionsUseCaseParams = {
     "a02fc555-758a-419b-bfa9-b27799db926d",
     "e3ff764d-c31f-4739-8f25-9f31ab8b7a8b",
   ],
+  range: { from: "2026-10-01", to: "2026-10-31" },
 };
 
 const transactionEntityFixture = new TransactionEntityFixture().withDefault();

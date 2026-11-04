@@ -48,18 +48,6 @@ export function monthDateRange(monthKey: string): TransactionDateRange {
   };
 }
 
-// Spec 078: what a screen that needs "the transactions" without a period looks at (a row to edit, the transactions of a
-// category): 24 whole months, from 20 months back to 3 months ahead of `today`. The API needs a period of 2 years at most.
-export function recentTransactionsRange(today: Date): TransactionDateRange {
-  const start = new Date(today.getFullYear(), today.getMonth() - 20, 1);
-  const end = new Date(today.getFullYear(), today.getMonth() + 3, 1);
-
-  return {
-    from: monthDateRange(toMonthKey(start)).from,
-    to: monthDateRange(toMonthKey(end)).to,
-  };
-}
-
 // Spec 077: the card purchases a refund can be linked to: 11 months back, the current month and the next (a purchase
 // made today can land on next month's invoice). Older ones are linked by opening the refund from the purchase itself.
 export function refundPurchasesRange(today: Date): TransactionDateRange {
