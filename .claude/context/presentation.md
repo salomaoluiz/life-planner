@@ -67,7 +67,7 @@ async function fetchAccounts() {
 function useAccountsViewModel() {
   const isFocused = useIsFocused();
   const { data, error, isFetching, refetch } = useQuery<AccountUIModel[]>({
-    cacheKey: [useCases.getFinancialAccountsUseCase.uniqueName],
+    cacheKey: financeKeys.accounts.raw(),
     fetch: fetchAccounts,
   });
 
@@ -102,7 +102,7 @@ Rules:
 - Data access only through `@infrastructure/fetcher`:
   - `useQuery({ cacheKey, fetch, enabled?, retry?, networkMode? })` → `{ data, error, isFetching, refetch, status }`
   - `useMutation({ cacheKey, fetch })` → `{ mutate, status, error, data, isFetching }`
-  - `cacheKey` is `[useCases.X.uniqueName, ...]`.
+  - `cacheKey` of finance data comes from `financeKeys` (`@application/queryKeys/financeKeys`, spec 076): `financeKeys.accounts.raw()` for the raw use-case output the forms cache, `financeKeys.accounts.list()` for the composed shape a list screen caches, `financeKeys.transactions.list(month)`, `financeKeys.summary.ofMonth(month, "screen" | "home")`... Other modules use `[useCases.X.uniqueName, ...]`.
 - Side effects live here: react to `mutation.status === "success"` (`router.back()`, `props.refetch()`), refetch on focus, `navigation.setOptions` (header buttons such as `RefetchCache`).
   - Focus return refetches only what went stale: `useEffect(() => { if (isFocused) refetchStaleFetcherData([[...key prefixes]]); }, [isFocused])` (spec 073; data is fresh for 30 s). Use plain `refetch()` only for pull to refresh, retry and after a write.
 - Container ViewModels receive the container's props: `useListItemViewModel(props: Props)`. Export `Props` from the hook file.
@@ -237,4 +237,4 @@ A change the user confirmed that should show at once goes through `Transactions/
 
 ## Month-scoped query pattern (spec 075)
 
-A list that can hold years of rows loads one month: key `[...listQueryKey(uniqueName), monthKey, ...ownerIds]` through `useOwnerScopedQuery({ cacheKey, fetch, keepPreviousData: true })`. While another month loads, `data` is the previous month's and `isPlaceholderData` is `true`: show the list skeleton, not the stale rows. Other screens and modals read these cached months with `getCachedFetcherData(listQueryKey(uniqueName))` (never fetches; one entry per month and owner set), and fall back to a request only when the data they need is in none of them.
+A list that can hold years of rows loads one month: key `[...financeKeys.transactions.list(monthKey), ...ownerIds]` through `useOwnerScopedQuery({ cacheKey, fetch, keepPreviousData: true })`. While another month loads, `data` is the previous month's and `isPlaceholderData` is `true`: show the list skeleton, not the stale rows. Other screens and modals read these cached months with `getCachedFetcherData(listQueryKey(uniqueName))` (never fetches; one entry per month and owner set), and fall back to a request only when the data they need is in none of them.

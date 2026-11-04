@@ -3,6 +3,13 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.7.2] - 2026-11-03
+
+### Changed
+
+- Saving, editing or deleting a transaction updates the month in memory and refreshes only the numbers it changes, so totals settle faster and fewer requests are sent (spec 076).
+- Importing a CSV refreshes the finance data only, not the whole app (spec 076).
+
 ## [1.7.1] - 2026-11-03
 
 ### Changed
