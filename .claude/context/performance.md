@@ -36,3 +36,9 @@ Each screen or modal has a `__perf__/<screen>.perf.test.tsx` next to it. A scree
 ## PR block
 
 Copy into the PR description (template: `.github/pull_request_template.md`): modules checked, the final summary line, and before/after of any changed budget.
+
+## Render commits and benchmarks (spec 087)
+
+- Registry field `maxCommits`: max React commits of a render scenario (`<module>.<screen>.render.mount`, and for transactions `render.create`, `render.expandInvoice`). A render scenario has no request fields; `--update-baseline` writes only `maxCommits` for it.
+- Month prefetch: `financial.transactions.mount.idle` (requests of the idle prefetch, max 2) and `financial.transactions.monthSwitch.prefetched` (0 requests). The cold-open and switch budgets exclude the prefetch (it waits `PREFETCH_IDLE_MS`).
+- `__perf__/transactionList.bench.test.ts`: the list derivation (filter, group by day, sort) at 5k and 20k rows must scale with a ratio below 6.
