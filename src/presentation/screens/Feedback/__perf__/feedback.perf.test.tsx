@@ -1,6 +1,11 @@
 import "@tests/perf/mocks";
 import { expectWithinBudget } from "@tests/perf/budgets";
-import { openScreen, report, setupPerf } from "@tests/perf/screen";
+import {
+  countHookCommits,
+  openScreen,
+  report,
+  setupPerf,
+} from "@tests/perf/screen";
 
 setupPerf();
 
@@ -13,5 +18,12 @@ it("SHOULD open within the request budget", async () => {
   const view = await openScreen(useStaticScreen);
 
   expectWithinBudget(report("feedback"), "home.feedback.mount.cold");
+  view.unmount();
+});
+
+it("SHOULD mount within the render budget", async () => {
+  const { commits, view } = await countHookCommits(useStaticScreen);
+
+  expectWithinBudget({ commits: commits() }, "home.feedback.render.mount");
   view.unmount();
 });

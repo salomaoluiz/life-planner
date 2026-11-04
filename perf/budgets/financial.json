@@ -5,11 +5,17 @@
     "maxRequests": 2,
     "route": "app/(app)/(tabs)/financial/accounts.tsx"
   },
+  "financial.accounts.render.mount": {
+    "maxCommits": 3
+  },
   "financial.cards.mount.cold": {
     "maxDepth": 2,
     "maxDuplicates": 0,
     "maxRequests": 3,
     "route": "app/(app)/(tabs)/financial/cards.tsx"
+  },
+  "financial.cards.render.mount": {
+    "maxCommits": 3
   },
   "financial.categories.mount.cold": {
     "maxDepth": 2,
@@ -17,11 +23,17 @@
     "maxRequests": 2,
     "route": "app/(app)/(tabs)/financial/categories.tsx"
   },
+  "financial.categories.render.mount": {
+    "maxCommits": 3
+  },
   "financial.earlyPayment.mount.cold": {
     "maxDepth": 2,
     "maxDuplicates": 0,
     "maxRequests": 3,
     "modal": "card_early_payment"
+  },
+  "financial.earlyPayment.render.mount": {
+    "maxCommits": 3
   },
   "financial.indexRedirect.mount.cold": {
     "maxDepth": 0,
@@ -29,11 +41,17 @@
     "maxRequests": 0,
     "route": "app/(app)/(tabs)/financial/index.tsx"
   },
+  "financial.indexRedirect.render.mount": {
+    "maxCommits": 1
+  },
   "financial.installmentEdit.mount.cold": {
     "maxDepth": 2,
     "maxDuplicates": 0,
     "maxRequests": 6,
     "modal": "edit_installment"
+  },
+  "financial.installmentEdit.render.mount": {
+    "maxCommits": 3
   },
   "financial.invoice.mount.cold": {
     "maxDepth": 1,
@@ -41,11 +59,17 @@
     "maxRequests": 1,
     "modal": "invoice_detail"
   },
+  "financial.invoice.render.mount": {
+    "maxCommits": 1
+  },
   "financial.newAccount.mount.cold": {
     "maxDepth": 2,
     "maxDuplicates": 0,
     "maxRequests": 2,
     "modal": "add_new_account"
+  },
+  "financial.newAccount.render.mount": {
+    "maxCommits": 3
   },
   "financial.newCategory.mount.cold": {
     "maxDepth": 2,
@@ -53,11 +77,17 @@
     "maxRequests": 2,
     "modal": "add_new_category"
   },
+  "financial.newCategory.render.mount": {
+    "maxCommits": 3
+  },
   "financial.newCreditCard.mount.cold": {
     "maxDepth": 2,
     "maxDuplicates": 0,
     "maxRequests": 3,
     "modal": "add_new_credit_card"
+  },
+  "financial.newCreditCard.render.mount": {
+    "maxCommits": 3
   },
   "financial.newTag.mount.cold": {
     "maxDepth": 2,
@@ -65,11 +95,17 @@
     "maxRequests": 2,
     "modal": "add_new_tag"
   },
+  "financial.newTag.render.mount": {
+    "maxCommits": 3
+  },
   "financial.overview.mount.cold": {
     "maxDepth": 2,
     "maxDuplicates": 0,
     "maxRequests": 6,
     "route": "app/(app)/(tabs)/financial/overview.tsx"
+  },
+  "financial.overview.render.mount": {
+    "maxCommits": 4
   },
   "financial.prepayment.mount.cold": {
     "maxDepth": 1,
@@ -77,11 +113,17 @@
     "maxRequests": 2,
     "modal": "prepay_installments"
   },
+  "financial.prepayment.render.mount": {
+    "maxCommits": 2
+  },
   "financial.refund.mount.cold": {
     "maxDepth": 2,
     "maxDuplicates": 0,
     "maxRequests": 6,
     "modal": "card_refund"
+  },
+  "financial.refund.render.mount": {
+    "maxCommits": 3
   },
   "financial.sectionPicker.mount.cold": {
     "maxDepth": 0,
@@ -89,11 +131,17 @@
     "maxRequests": 0,
     "modal": "section_picker"
   },
+  "financial.sectionPicker.render.mount": {
+    "maxCommits": 1
+  },
   "financial.tags.mount.cold": {
     "maxDepth": 2,
     "maxDuplicates": 0,
     "maxRequests": 2,
     "route": "app/(app)/(tabs)/financial/tags.tsx"
+  },
+  "financial.tags.render.mount": {
+    "maxCommits": 3
   },
   "financial.transactions.focusReturn": {
     "maxDepth": 0,
@@ -125,6 +173,15 @@
     "maxFullHistory": 0,
     "maxRequests": 4,
     "route": "app/(app)/(tabs)/financial/transaction.tsx"
+  },
+  "financial.transactions.render.create": {
+    "maxCommits": 2
+  },
+  "financial.transactions.render.expandInvoice": {
+    "maxCommits": 2
+  },
+  "financial.transactions.render.mount": {
+    "maxCommits": 5
   },
   "financial.transactions.write.create": {
     "maxDepth": 2,

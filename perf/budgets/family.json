@@ -5,10 +5,16 @@
     "maxRequests": 2,
     "route": "app/(app)/(tabs)/family/index.tsx"
   },
+  "family.list.render.mount": {
+    "maxCommits": 3
+  },
   "family.newFamily.mount.cold": {
     "maxDepth": 0,
     "maxDuplicates": 0,
     "maxRequests": 0,
     "modal": "add_new_family"
+  },
+  "family.newFamily.render.mount": {
+    "maxCommits": 1
   }
 }

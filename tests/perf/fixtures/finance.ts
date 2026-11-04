@@ -15,6 +15,43 @@ const accountRow = {
   value: 23490,
 };
 
+// One open card invoice of the current month, as the month endpoint sends it (spec 087 expand scenario).
+const invoiceRow = {
+  card: {
+    color: "#1D4ED8",
+    id: "9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d",
+    lastDigits: "1234",
+    owner: "USER",
+    ownerId: USER_ID,
+    title: "Main card",
+  },
+  credits: [],
+  invoice: {
+    amount: 5000,
+    closingDate: todayKey,
+    currency: "BRL",
+    dueDate: todayKey,
+    listDate: todayKey,
+    paymentDate: todayKey,
+    periodEnd: todayKey,
+    periodStart: todayKey,
+    referenceMonth: todayKey.slice(0, 7),
+    status: "OPEN",
+  },
+  purchases: [
+    {
+      category: "Groceries",
+      categoryId: accountRow.categoryId,
+      date: todayKey,
+      description: "Card purchase",
+      id: "5b4a3c2d-1e0f-4a9b-8c7d-6e5f4a3b2c1d",
+      ownerId: USER_ID,
+      prepaid: false,
+      value: 5000,
+    },
+  ],
+};
+
 // A "large account": enough history that a whole-history download is visible in parse time.
 function largeAccountRows(count = 5000) {
   return Array.from({ length: count }, (_, index) => {
@@ -37,4 +74,4 @@ const overview = {
   cards: [],
 };
 
-export { accountRow, largeAccountRows, overview, todayKey };
+export { accountRow, invoiceRow, largeAccountRows, overview, todayKey };

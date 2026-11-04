@@ -6,7 +6,12 @@ jest.mock("@application/providers/user", () => ({
 }));
 
 import { expectWithinBudget } from "@tests/perf/budgets";
-import { openScreen, report, setupPerf } from "@tests/perf/screen";
+import {
+  countHookCommits,
+  openScreen,
+  report,
+  setupPerf,
+} from "@tests/perf/screen";
 
 import useSignupViewModel from "../hooks/useSignupViewModel";
 
@@ -16,5 +21,12 @@ it("SHOULD open within the request budget", async () => {
   const view = await openScreen(useSignupViewModel);
 
   expectWithinBudget(report("signup"), "auth.signup.mount.cold");
+  view.unmount();
+});
+
+it("SHOULD mount within the render budget", async () => {
+  const { commits, view } = await countHookCommits(useSignupViewModel);
+
+  expectWithinBudget({ commits: commits() }, "auth.signup.render.mount");
   view.unmount();
 });

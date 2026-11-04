@@ -1,20 +1,30 @@
 import "@tests/perf/mocks";
-
+import "@shopify/flash-list/jestSetup";
 import { useIsFocused } from "@react-navigation/native";
 import { useLocalSearchParams } from "expo-router";
 
-import { act } from "@tests";
+import { act, fireEvent, screen } from "@tests";
 import { expectWithinBudget } from "@tests/perf/budgets";
-import { accountRow } from "@tests/perf/fixtures/finance";
+import { accountRow, invoiceRow } from "@tests/perf/fixtures/finance";
 import { USER_ID } from "@tests/perf/fixtures/user";
 import * as network from "@tests/perf/networkHarness";
-import { flush, openScreen, report, setupPerf } from "@tests/perf/screen";
+import { countCommits } from "@tests/perf/renderBudget";
+import respond from "@tests/perf/respond";
+import {
+  flush,
+  openScreen,
+  report,
+  setupPerf,
+  wrapper,
+} from "@tests/perf/screen";
 
 import { useCases } from "@application/useCases";
 
 import useTransactionsViewModel from "../hooks/useTransactionsViewModel";
+import FinancialTransactions from "../index";
 import useNewTransactionViewModel from "../modals/NewTransactionModal/hooks/useNewTransactionViewModel";
 import runPendingChange from "../pending/runPendingChange";
+import transactionsTestIds from "../testIds";
 
 setupPerf();
 
@@ -190,5 +200,80 @@ describe("writes", () => {
     );
 
     expectWithinBudget(result, "financial.transactions.write.delete");
+  });
+});
+
+describe("render commits", () => {
+  async function mountScreen() {
+    return countCommits(<FinancialTransactions />, {
+      settle: flush,
+      wrapper: wrapper as never,
+    });
+  }
+
+  it("SHOULD mount within the render budget", async () => {
+    const { commits, view } = await mountScreen();
+
+    expectWithinBudget(
+      { commits: commits() },
+      "financial.transactions.render.mount",
+    );
+    view.unmount();
+  });
+
+  it("SHOULD create a row within the render budget", async () => {
+    const { commits, mark, view } = await mountScreen();
+
+    mark();
+    await act(async () => {
+      const running = runPendingChange(
+        { description: "Weekly groceries", kind: "create" },
+        async () => {
+          await useCases.createFinancialTransactionUseCase.execute({
+            accountId: accountRow.accountId,
+            category: "Groceries",
+            categoryId: accountRow.categoryId,
+            date: new Date().toISOString(),
+            description: "Weekly groceries",
+            owner: "USER",
+            ownerId: USER_ID,
+            type: "EXPENSE",
+            value: "10.00",
+          } as never);
+        },
+        jest.fn(),
+      );
+
+      await network.flush(async (callback) => callback());
+      await running;
+    });
+    await flush();
+
+    expectWithinBudget(
+      { commits: commits() },
+      "financial.transactions.render.create",
+    );
+    view.unmount();
+  });
+
+  it("SHOULD expand an invoice within the render budget", async () => {
+    network.reset((method, path) => {
+      const body = respond(method, path) as Record<string, unknown>;
+
+      return path.startsWith("/v1/finance/month")
+        ? { ...body, invoices: [invoiceRow] }
+        : body;
+    });
+    const { commits, mark, view } = await mountScreen();
+
+    mark();
+    fireEvent.press(screen.getByTestId(transactionsTestIds.cardInvoiceToggle));
+    await flush();
+
+    expectWithinBudget(
+      { commits: commits() },
+      "financial.transactions.render.expandInvoice",
+    );
+    view.unmount();
   });
 });
