@@ -5,11 +5,17 @@
     "maxRequests": 2,
     "route": "app/(app)/(tabs)/stock/index.tsx"
   },
+  "stock.list.render.mount": {
+    "maxCommits": 3
+  },
   "stock.newItem.mount.cold": {
     "maxDepth": 1,
     "maxDuplicates": 0,
     "maxRequests": 1,
     "modal": "add_new_stock_item"
+  },
+  "stock.newItem.render.mount": {
+    "maxCommits": 2
   },
   "stock.write.create": {
     "maxDepth": 1,

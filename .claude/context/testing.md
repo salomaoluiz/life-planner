@@ -96,3 +96,8 @@ Every screen (route under `app/`) and modal (`MODAL_ROUTES`) has a request budge
 - **Ratchet:** lower a budget when a change improves it (`yarn perf --module <m> --update-baseline` rewrites the measured keys); never raise one silently. `PERF_REPORT=1 yarn jest <file>` prints the requests behind a number.
 - **CLI:** `yarn perf --changed` (modules touched by the diff; shared paths select all), `--all`, `--module a,b`, `--dry-run`, `--update-baseline`. Writes `perf-report/summary.md` (gitignored), ending in `PERF PASSED: N/N`.
 - `scripts/perf/coverage.test.ts` fails, naming the route or modal, when one has no registry entry.
+
+## Render budgets and benchmarks (spec 087)
+
+- **Render budgets:** `tests/perf/renderBudget.tsx` (`countCommits(element, { settle, wrapper })`) counts `<Profiler>` commits; `countHookCommits(useViewModel, params?)` in `tests/perf/screen.tsx` does it for a view-model hook. A scenario ends in `expectWithinBudget({ commits: commits() }, "<module>.<screen>.render.mount")` and the registry entry carries `maxCommits`. Every screen has a `render.mount`; the transactions screen also has `render.create` and `render.expandInvoice` on the real screen (add `import "@shopify/flash-list/jestSetup"` so rows render in jest).
+- **Benchmarks:** `__perf__/*.bench.test.ts` use real timers (`jest.useRealTimers()` in `beforeAll`; the setup installs fake ones) and assert a machine-independent ratio (20k rows / 5k rows < 6) from medians of several runs.

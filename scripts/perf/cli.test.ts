@@ -135,4 +135,22 @@ describe("mergeBaseline", () => {
     });
     expect(merged["stock.b"].maxRequests).toBe(9);
   });
+
+  it("SHOULD write only maxCommits for a commits-only measure and keep the metadata", () => {
+    const dir = mkdtempSync(join(tmpdir(), "perf-baseline-"));
+
+    writeFileSync(
+      join(dir, "stock.json"),
+      JSON.stringify({ "stock.r": { maxCommits: 9, route: "app/x.tsx" } }),
+    );
+
+    mergeBaseline(
+      { "stock.n": { commits: 3 }, "stock.r": { commits: 4 } },
+      dir,
+    );
+    const merged = JSON.parse(readFileSync(join(dir, "stock.json"), "utf8"));
+
+    expect(merged["stock.n"]).toEqual({ maxCommits: 3 });
+    expect(merged["stock.r"]).toEqual({ maxCommits: 4, route: "app/x.tsx" });
+  });
 });

@@ -19,6 +19,7 @@ import {
 import { formatAmount } from "@components/AmountText/formatAmount";
 import Skeleton from "@components/Skeleton";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
+import useStableCallback from "@presentation/hooks/useStableCallback";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
 import { useBreakpoint } from "@presentation/theme";
@@ -48,10 +49,19 @@ import {
   ListEntry,
   netAmount,
 } from "./models/transactionList";
+import TransactionUIModel from "./models/TransactionUIModel";
 import useStyles from "./styles";
 import transactionsTestIds from "./testIds";
 
 const SKELETON_ROWS = [0, 1, 2, 3, 4, 5];
+
+function entryKey(entry: ListEntry) {
+  return entry.key;
+}
+
+function entryType(entry: ListEntry) {
+  return entry.kind;
+}
 
 function FinancialTransactions() {
   const wide = useBreakpoint() !== "compact";
@@ -113,7 +123,16 @@ function FinancialTransactions() {
     return formatDayTitle(entry.label.date, vm.languageTag);
   }
 
-  function renderItem({ item }: { item: ListEntry }) {
+  // Spec 087: handlers by item, with a stable identity, so the memoized rows keep their render.
+  const onPayRow = useStableCallback((item: TransactionUIModel) =>
+    vm.readOnly ? vm.onReadOnlyAttempt() : pay.onPay(item),
+  );
+  const onAdjustmentPress = useStableCallback((item: TransactionUIModel) =>
+    vm.readOnly ? vm.onReadOnlyAttempt() : adjustment.onOpen(item),
+  );
+
+  // A stable identity too: FlashList renders the cells again when `extraData` changes, and each one calls the latest.
+  const renderItem = useStableCallback(({ item }: { item: ListEntry }) => {
     if (item.kind === "invoice") {
       return (
         <CardInvoiceRow
@@ -135,15 +154,9 @@ function FinancialTransactions() {
         <TransactionRow
           isPaying={pay.payingId === transaction.id}
           item={transaction}
-          onPay={vm.readOnly ? vm.onReadOnlyAttempt : pay.onPay}
-          onPress={
-            transaction.isAdjustment
-              ? () =>
-                  vm.readOnly
-                    ? vm.onReadOnlyAttempt()
-                    : adjustment.onOpen(transaction)
-              : vm.onRowPress
-          }
+          onAdjustmentPress={onAdjustmentPress}
+          onPay={onPayRow}
+          onPress={vm.onRowPress}
           onProjectedPress={vm.onProjectedPress}
         />
       );
@@ -279,7 +292,7 @@ function FinancialTransactions() {
         }
       />
     );
-  }
+  });
 
   const scopeOptions = translateChoices(vm.scopeChoices, t).map((option) => ({
     ...option,
@@ -531,9 +544,9 @@ function FinancialTransactions() {
         data={vm.entries}
         estimatedItemSize={64}
         // Expanding an invoice only changes this id: without it the virtualized row keeps its old render.
-        extraData={`${vm.expandedInvoiceId ?? ""}|${vm.expandedDayKey ?? ""}`}
-        getItemType={(entry) => entry.kind}
-        keyExtractor={(entry) => entry.key}
+        extraData={`${vm.expandedInvoiceId ?? ""}|${vm.expandedDayKey ?? ""}|${vm.isTotalsUpdating}|${pay.payingId ?? ""}|${vm.readOnly}|${localeTag}|${wide}`}
+        getItemType={entryType}
+        keyExtractor={entryKey}
         ListEmptyComponent={empty}
         ListHeaderComponent={toolbar}
         onRefresh={vm.onRefresh}

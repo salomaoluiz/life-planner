@@ -538,3 +538,10 @@ On `medium`/`expanded` these modals are `BottomSheet size="form"` with `FormColu
 ## One month request (spec 080)
 
 `getFinancialMonthUseCase({ month, ownerIds })` reads `GET /v1/finance/month` and returns `{ items (account rows), invoices, dailyBalances, projections, summary }`. The Transactions screen caches it as one entry `financeKeys.transactions.list(month)` + the scope's owner ids joined by `,` + every owner id (`MonthData`): rows, categories, invoices, balances, projections and summary. A transaction write patches the rows of that entry (spec 076) and then refreshes it, because the totals live in it. A failing month request fails the whole screen state (no partial errors). Filtered views (spec 045) keep their own queries.
+
+## Render budgets, row memo and month prefetch (spec 087)
+
+- `Transactions/hooks/usePrefetchAdjacentMonths.ts` (`PREFETCH_IDLE_MS`): idle prefetch of month ±1 through `prefetchFetcherData` (`src/infrastructure/fetcher/prefetch.ts`) and `isSlowConnection` (`src/infrastructure/network/isSlowConnection.ts`); `useTransactionsViewModel` exports `monthCacheKey` (the key shared by the month query and the prefetch) and wires it.
+- `Transactions/models/formatters.ts` (`getDateTimeFormat`, one formatter per locale and options); `TransactionUIModel.date`/`dateKey` are cached.
+- `Transactions/components/TransactionRow` is memoized (`styles.ts` holds its per-theme styles; `onAdjustmentPress` opens the adjustment sheet); `CardInvoiceRow` and `DayBalanceLine` are memoized; `useStableCallback` (`src/presentation/hooks/useStableCallback`) gives the rows stable handlers.
+- Perf: `__perf__/transactionList.bench.test.ts`, render commit scenarios in every `__perf__` test, registry field `maxCommits`.

@@ -68,14 +68,21 @@ class TransactionUIModel {
     return this.dto.currency;
   }
 
+  // Computed once: the list reads it while it filters, sorts and groups.
   get date() {
-    return new Date(this.dto.date);
+    this.cachedDate ??= new Date(this.dto.date);
+
+    return this.cachedDate;
   }
 
   get dateKey() {
-    const date = this.date;
+    if (this.cachedDateKey === undefined) {
+      const date = this.date;
 
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+      this.cachedDateKey = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    }
+
+    return this.cachedDateKey;
   }
 
   get description() {
@@ -157,6 +164,10 @@ class TransactionUIModel {
 
     return [this.categoryName, this.accountName].filter(Boolean).join(" · ");
   }
+
+  private cachedDate?: Date;
+
+  private cachedDateKey?: string;
 
   constructor(
     readonly dto: TransactionDTO,

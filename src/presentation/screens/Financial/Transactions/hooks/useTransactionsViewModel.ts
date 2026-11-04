@@ -10,6 +10,7 @@ import { TransactionQueryFilter } from "@domain/entities/financial/TransactionQu
 import { refetchStaleFetcherData, useQuery } from "@infrastructure/fetcher";
 import useOwners from "@presentation/hooks/useOwners";
 import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
+import useStableCallback from "@presentation/hooks/useStableCallback";
 import useTranslationLocale from "@presentation/i18n/useTranslationLocale";
 import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
 import { addMonthsTo } from "@screens/Financial/models/invoiceMonth";
@@ -62,6 +63,7 @@ import TransactionUIModel from "../models/TransactionUIModel";
 import { hasPendingChanges } from "../pending/pendingChanges";
 import { usePendingChanges } from "../pending/usePendingChanges";
 import { consumePendingNavigation } from "./pendingNavigation";
+import usePrefetchAdjacentMonths from "./usePrefetchAdjacentMonths";
 import useTransactionFilters from "./useTransactionFilters";
 
 // The projections endpoint answers at most this many months.
@@ -153,6 +155,22 @@ function maxMonth(a: string, b: string) {
   return a > b ? a : b;
 }
 
+// The cache key of one month's query. The screen's query and the prefetch of the neighbouring months (spec 087) both
+// use it, so a prefetched month is found on a switch; `useOwnerScopedQuery` appends the owner ids, which the
+// prefetch passes itself.
+function monthCacheKey(
+  monthKey: string,
+  scopeOwnerIds: string[],
+  allOwnerIds: string[] = [],
+) {
+  return [
+    ...financeKeys.transactions.list(),
+    monthKey,
+    scopeOwnerIds.join(","),
+    ...allOwnerIds,
+  ];
+}
+
 // `YYYY-MM` of the local month.
 function toMonthKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
@@ -239,11 +257,7 @@ function useTransactionsViewModel() {
   // month and the scope (spec 075); another key keeps the previous data flagged as placeholder until its own arrives,
   // and the edit form and the description suggestions read these cached months.
   const monthQuery = useOwnerScopedQuery<MonthData>({
-    cacheKey: [
-      ...financeKeys.transactions.list(),
-      monthKey,
-      summaryOwnerIds.join(","),
-    ],
+    cacheKey: monthCacheKey(monthKey, summaryOwnerIds),
     fetch: async (loadedOwners) =>
       fetchMonth(
         loadedOwners.map((owner) => owner.id),
@@ -539,6 +553,48 @@ function useTransactionsViewModel() {
     ? (filteredTransactions.error ?? filteredInvoices.error)
     : null;
 
+  // Spec 087: once the month is settled and the app idle, the previous and next month are fetched into the cache.
+  usePrefetchAdjacentMonths({
+    cacheKey: (key) => monthCacheKey(key, summaryOwnerIds, allOwnerIds),
+    enabled:
+      isFocused &&
+      !!monthData &&
+      !monthQuery.isFetching &&
+      !filtering &&
+      !hasPendingChanges(pendingChanges),
+    fetch: async (key) => fetchMonth(allOwnerIds, key, summaryOwnerIds),
+    monthKeys: [
+      toMonthKey(shiftMonth(month, -1)),
+      toMonthKey(shiftMonth(month, 1)),
+    ],
+  });
+
+  // Spec 087: handlers handed to the memoized rows keep their identity; each call reads the latest scope.
+  const onInvoiceOpen = useStableCallback(
+    scope.guard((invoice: CardInvoiceUIModel) =>
+      openModal("invoice_detail", {
+        cardId: invoice.cardId,
+        month: invoice.referenceMonth,
+      }),
+    ),
+  );
+  const onInvoiceToggle = useStableCallback((id: string) =>
+    setExpandedInvoiceId((current) => (current === id ? undefined : id)),
+  );
+  const onProjectedPress = useStableCallback(
+    scope.guard((item: TransactionUIModel) =>
+      openModal("add_new_transaction", {
+        month: item.monthKey,
+        occurrenceNumber: String(item.occurrenceNumber),
+        recurrenceId: item.recurrenceId,
+      }),
+    ),
+  );
+  const onReadOnlyAttempt = useStableCallback(scope.notifyReadOnly);
+  const onRowPress = useStableCallback(
+    scope.guard((id: string) => openModal("add_new_transaction", { id })),
+  );
+
   function onMonthSelect(monthIndex: string) {
     setMonth(new Date(pickerYear, Number(monthIndex), 1));
     setMonthPickerOpen(false);
@@ -608,15 +664,9 @@ function useTransactionsViewModel() {
     onFilterRemove: filterStore.removeGroup,
     onFiltersApply: filterStore.replace,
     onFiltersClear: filterStore.clearAll,
-    onInvoiceOpen: scope.guard((invoice: CardInvoiceUIModel) =>
-      openModal("invoice_detail", {
-        cardId: invoice.cardId,
-        month: invoice.referenceMonth,
-      }),
-    ),
+    onInvoiceOpen,
     onInvoiceRetry: async () => monthQuery.refetch(),
-    onInvoiceToggle: (id: string) =>
-      setExpandedInvoiceId((current) => (current === id ? undefined : id)),
+    onInvoiceToggle,
     onMonthPickerClose: () => setMonthPickerOpen(false),
     onMonthPickerOpen,
     onMonthSelect,
@@ -625,19 +675,11 @@ function useTransactionsViewModel() {
     onPickerYearChange: (delta: number) =>
       setPickerYear((year) => year + delta),
     onPreviousMonth: () => setMonth((current) => shiftMonth(current, -1)),
-    onProjectedPress: scope.guard((item: TransactionUIModel) =>
-      openModal("add_new_transaction", {
-        month: item.monthKey,
-        occurrenceNumber: String(item.occurrenceNumber),
-        recurrenceId: item.recurrenceId,
-      }),
-    ),
-    onReadOnlyAttempt: scope.notifyReadOnly,
+    onProjectedPress,
+    onReadOnlyAttempt,
     onRefresh,
     onRetry: async () => monthQuery.refetch(),
-    onRowPress: scope.guard((id: string) =>
-      openModal("add_new_transaction", { id }),
-    ),
+    onRowPress,
     onSearchChange: filterStore.setSearch,
     onSummaryRetry: async () => monthQuery.refetch(),
     onToastHide: scope.onToastHide,
@@ -669,5 +711,10 @@ function useTransactionsViewModel() {
   };
 }
 
-export { fetchFilteredTransactions, fetchMonth, fetchProjections };
+export {
+  fetchFilteredTransactions,
+  fetchMonth,
+  fetchProjections,
+  monthCacheKey,
+};
 export default useTransactionsViewModel;

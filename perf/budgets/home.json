@@ -5,11 +5,17 @@
     "maxRequests": 0,
     "modal": "business_feedback"
   },
+  "home.feedback.render.mount": {
+    "maxCommits": 1
+  },
   "home.home.mount.cold": {
     "maxDepth": 2,
     "maxDuplicates": 0,
     "maxRequests": 9,
     "route": "app/(app)/(tabs)/index/index.tsx"
+  },
+  "home.home.render.mount": {
+    "maxCommits": 3
   },
   "home.home.write.mounted": {
     "maxDepth": 2,
@@ -22,5 +28,8 @@
     "maxDuplicates": 0,
     "maxRequests": 0,
     "modal": "quick_add"
+  },
+  "home.quickAdd.render.mount": {
+    "maxCommits": 1
   }
 }

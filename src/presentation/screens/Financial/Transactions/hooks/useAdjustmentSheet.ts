@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { useCases } from "@application/useCases";
+import useStableCallback from "@presentation/hooks/useStableCallback";
 
 import TransactionUIModel from "../models/TransactionUIModel";
 import runPendingChange from "../pending/runPendingChange";
@@ -30,6 +31,8 @@ function useAdjustmentSheet() {
     );
   }
 
+  const onOpen = useStableCallback((next: TransactionUIModel) => setItem(next));
+
   return {
     item,
     onClose: () => setItem(undefined),
@@ -40,7 +43,7 @@ function useAdjustmentSheet() {
       sendDelete(item);
       setItem(undefined);
     },
-    onOpen: (next: TransactionUIModel) => setItem(next),
+    onOpen,
   };
 }
 

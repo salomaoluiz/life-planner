@@ -24,7 +24,11 @@ import {
   transactionsQuery,
   ui,
 } from "./mocks/useTransactionsViewModel.mocks";
-import { fetchMonth, fetchProjections } from "./useTransactionsViewModel";
+import {
+  fetchMonth,
+  fetchProjections,
+  monthCacheKey,
+} from "./useTransactionsViewModel";
 
 describe("fetchMonth (spec 080)", () => {
   it("SHOULD load the month of the scope owners in one request, the categories of every owner, AND join them", async () => {
@@ -156,6 +160,21 @@ function items() {
 function lastMonthKey() {
   return spies.ownerScopedQuery.mock.calls.at(-1)![0].cacheKey;
 }
+
+it("SHOULD use the month query's key for the prefetch, owner ids last (spec 087)", () => {
+  givenData([]);
+  setup();
+
+  const [scope] = lastMonthKey().slice(-1);
+
+  expect(monthCacheKey("2026-10", scope.split(","))).toEqual(lastMonthKey());
+  // Under the month prefix every write refresh (spec 076) reaches a prefetched month too.
+  expect(monthCacheKey("2026-09", ["user-id"], ["user-id"])).toEqual([
+    ...financeKeys.transactions.list("2026-09"),
+    "user-id",
+    "user-id",
+  ]);
+});
 
 it("SHOULD combine owner and type filters, owner first", () => {
   givenData(items());
@@ -743,6 +762,28 @@ describe("archived family (spec 042)", () => {
 
     expect(modalNavigation.openModal).not.toHaveBeenCalled();
     expect(result.current.toastVisible).toBe(true);
+  });
+
+  it("SHOULD keep the row handlers' identity AND still respect the scope of the latest render (spec 087)", () => {
+    givenData(items(), withArchived);
+    const { result } = setup();
+    const { onInvoiceToggle, onProjectedPress, onRowPress } = result.current;
+
+    act(() => result.current.onOwnerFilterChange("family-1"));
+
+    expect(result.current.onRowPress).toBe(onRowPress);
+    expect(result.current.onProjectedPress).toBe(onProjectedPress);
+    expect(result.current.onInvoiceToggle).toBe(onInvoiceToggle);
+    act(() => onRowPress("item-fam-exp"));
+    expect(modalNavigation.openModal).not.toHaveBeenCalled();
+    expect(result.current.toastVisible).toBe(true);
+
+    act(() => result.current.onOwnerFilterChange("ALL"));
+    act(() => onRowPress("item-exp"));
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "add_new_transaction",
+      { id: "item-exp" },
+    );
   });
 
   it("SHOULD report an empty month (not a filtered one) WHEN only the archived family has data in All", () => {

@@ -4,7 +4,13 @@ import { expectWithinBudget } from "@tests/perf/budgets";
 import { accountRow } from "@tests/perf/fixtures/finance";
 import { USER_ID } from "@tests/perf/fixtures/user";
 import * as network from "@tests/perf/networkHarness";
-import { flush, openScreen, report, setupPerf } from "@tests/perf/screen";
+import {
+  countHookCommits,
+  flush,
+  openScreen,
+  report,
+  setupPerf,
+} from "@tests/perf/screen";
 
 import { useCases } from "@application/useCases";
 import runPendingChange from "@screens/Financial/Transactions/pending/runPendingChange";
@@ -17,6 +23,13 @@ it("SHOULD open within the request budget", async () => {
   const view = await openScreen(useHomeViewModel);
 
   expectWithinBudget(report("home"), "home.home.mount.cold");
+  view.unmount();
+});
+
+it("SHOULD mount within the render budget", async () => {
+  const { commits, view } = await countHookCommits(useHomeViewModel);
+
+  expectWithinBudget({ commits: commits() }, "home.home.render.mount");
   view.unmount();
 });
 

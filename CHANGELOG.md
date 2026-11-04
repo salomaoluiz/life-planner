@@ -3,6 +3,13 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.7.6] - 2026-11-04
+
+### Changed
+
+- The transactions list scrolls and updates more smoothly: rows only render again when what they show changes (spec 087).
+- After a short pause on a month, the previous and next month load in the background, so switching months shows their rows at once (spec 087).
+
 ## [1.7.5] - 2026-11-04
 
 ### Changed

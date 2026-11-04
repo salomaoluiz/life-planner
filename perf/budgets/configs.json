@@ -5,16 +5,25 @@
     "maxRequests": 0,
     "route": "app/(app)/config.tsx"
   },
+  "configs.legacyRedirect.render.mount": {
+    "maxCommits": 1
+  },
   "configs.settings.mount.cold": {
     "maxDepth": 0,
     "maxDuplicates": 0,
     "maxRequests": 0,
     "route": "app/(app)/(tabs)/settings.tsx"
   },
+  "configs.settings.render.mount": {
+    "maxCommits": 1
+  },
   "configs.versions.mount.cold": {
     "maxDepth": 1,
     "maxDuplicates": 0,
     "maxRequests": 1,
     "modal": "versions"
+  },
+  "configs.versions.render.mount": {
+    "maxCommits": 3
   }
 }
