@@ -82,10 +82,5 @@ const financeKeys = {
   upcoming,
 };
 
-// `YYYY-MM` of an ISO date or `YYYY-MM-DD`: a slice, never a `Date`, so the timezone cannot move the month.
-function monthKeyOfDate(date: string) {
-  return date.slice(0, 7);
-}
-
 export type { Scope };
-export { financeKeys, monthKeyOfDate };
+export { financeKeys };

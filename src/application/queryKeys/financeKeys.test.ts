@@ -1,4 +1,4 @@
-import { financeKeys, monthKeyOfDate } from "./financeKeys";
+import { financeKeys } from "./financeKeys";
 
 function startsWith(key: string[], prefix: string[]) {
   return prefix.every((part, index) => key[index] === part);
@@ -66,10 +66,5 @@ describe("financeKeys", () => {
     roots.forEach((root) =>
       expect(startsWith(root, financeKeys.all())).toBe(true),
     );
-  });
-
-  it("SHOULD read the month of a date without shifting it by timezone", () => {
-    expect(monthKeyOfDate("2026-11-30T23:30:00-03:00")).toBe("2026-11");
-    expect(monthKeyOfDate("2026-01-01")).toBe("2026-01");
   });
 });

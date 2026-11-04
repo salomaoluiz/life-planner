@@ -11,21 +11,16 @@ import {
   removeChange,
   resolveChange,
 } from "./pendingChanges";
+import {
+  invalidateAfterWrite,
+  isPatchable,
+  patchMonthLists,
+  scopeOfChange,
+} from "./writeCache";
 
-// Every query the transactions screen reads (spec 061 FR 12), by the prefix of its cache key.
-function listCachePrefixes() {
-  return [
-    financeKeys.transactions.all(),
-    financeKeys.transactionsFiltered.all(),
-    financeKeys.invoices.all(),
-    financeKeys.projections.all(),
-    financeKeys.summary.all(),
-    financeKeys.dailyBalances.all(),
-  ];
-}
-
-// Runs the request of an optimistic change. The change stays registered until the lists refetched, so a row never
-// disappears or doubles between the answer and the fresh data. A failure rolls the change back and queues a toast.
+// Runs the request of an optimistic change. On success the saved row is patched into the cached month lists (spec 076)
+// before the change is cleared, so a row never disappears or doubles between the answer and the fresh data; then only
+// the queries the write can move are refreshed. A failure rolls the change back and queues a toast.
 async function runPendingChange(
   change: Omit<PendingChange, "id"> & { id?: string },
   execute: () => Promise<undefined | void | { id?: string }>,
@@ -43,9 +38,15 @@ async function runPendingChange(
     if (result && result.id) {
       resolveChange(registered.id, result.id);
     }
-    await Promise.all(
-      listCachePrefixes().map(async (prefix) => invalidateFetcherData(prefix)),
-    );
+    const patchable = isPatchable(registered);
+
+    if (patchable) {
+      patchMonthLists(registered, result?.id);
+    }
+    removeChange(registered.id);
+    await invalidateAfterWrite(scopeOfChange(registered), {
+      skipLists: patchable,
+    });
   } catch (error) {
     addFailure({
       description: registered.description,
