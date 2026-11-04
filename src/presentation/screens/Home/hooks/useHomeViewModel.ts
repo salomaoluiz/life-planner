@@ -10,6 +10,7 @@ import UpcomingDTO, {
   UpcomingItemDTO,
 } from "@application/dto/home/UpcomingDTO";
 import UserDTO from "@application/dto/user/UserDTO";
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
 import { refetchStaleFetcherData, useQuery } from "@infrastructure/fetcher";
 import useOwners from "@presentation/hooks/useOwners";
@@ -153,9 +154,8 @@ function useHomeViewModel() {
 
   const summary = useQuery<MonthSummaryDTO>({
     cacheKey: [
-      useCases.getMonthSummaryUseCase.uniqueName,
+      ...financeKeys.summary.ofMonth(monthKey(now), "home"),
       ownersKey,
-      monthKey(now),
     ],
     enabled: ownersReady,
     fetch: async () => fetchSummary(ownerIds, now),
@@ -166,32 +166,28 @@ function useHomeViewModel() {
     fetch: async () => fetchStock(ownerIds),
   });
   const accounts = useQuery<AccountDTO[]>({
-    cacheKey: [useCases.getFinancialAccountsUseCase.uniqueName, ownersKey],
+    cacheKey: financeKeys.accounts.raw(ownersKey),
     enabled: ownersReady,
     fetch: async () => fetchAccounts(ownerIds),
   });
   const balancesNow = useQuery<DailyBalanceDTO>({
     cacheKey: [
-      useCases.getFinancialDailyBalancesUseCase.uniqueName,
-      "home",
+      ...financeKeys.dailyBalances.ofMonth(monthKey(now), "home"),
       ownersKey,
-      monthKey(now),
     ],
     enabled: ownersReady,
     fetch: async () => fetchBalances(ownerIds, monthKey(now)),
   });
   const balancesNext = useQuery<DailyBalanceDTO>({
     cacheKey: [
-      useCases.getFinancialDailyBalancesUseCase.uniqueName,
-      "home",
+      ...financeKeys.dailyBalances.ofMonth(nextMonthKey(now), "home"),
       ownersKey,
-      nextMonthKey(now),
     ],
     enabled: ownersReady,
     fetch: async () => fetchBalances(ownerIds, nextMonthKey(now)),
   });
   const upcoming = useQuery<UpcomingDTO>({
-    cacheKey: [useCases.getUpcomingItemsUseCase.uniqueName, ownersKey],
+    cacheKey: financeKeys.upcoming.raw(ownersKey),
     enabled: ownersReady,
     fetch: async () => fetchUpcoming(ownerIds),
   });
@@ -218,11 +214,11 @@ function useHomeViewModel() {
     if (isFocused) {
       refetchStaleFetcherData([
         [useCases.getOwnersUseCase.uniqueName],
-        [useCases.getMonthSummaryUseCase.uniqueName],
+        financeKeys.summary.all(),
         [useCases.getStockAttentionUseCase.uniqueName],
-        [useCases.getFinancialAccountsUseCase.uniqueName],
-        [useCases.getFinancialDailyBalancesUseCase.uniqueName, "home"],
-        [useCases.getUpcomingItemsUseCase.uniqueName],
+        financeKeys.accounts.all(),
+        financeKeys.dailyBalances.all(),
+        financeKeys.upcoming.all(),
       ]);
     }
   }, [isFocused]);

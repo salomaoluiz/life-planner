@@ -2,13 +2,13 @@ import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
 import AccountDTO from "@application/dto/financial/AccountDTO";
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
 import useOwners from "@presentation/hooks/useOwners";
 import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 import { toCalendarDate } from "@screens/Financial/models/creditSheet";
 import { addMonthsTo } from "@screens/Financial/models/invoiceMonth";
-import { listQueryKey } from "@screens/Financial/models/queryKeys";
 import CardInvoiceUIModel, {
   InvoiceCreditUIModel,
 } from "@screens/Financial/Transactions/models/CardInvoiceUIModel";
@@ -51,11 +51,7 @@ function useInvoiceViewModel() {
   // The early payment and refund forms cache the raw DTO under `[uniqueName, ...]`: this screen caches the UI
   // model, so it gets its own key (sharing one crashed both screens: LIFE-PLANNER-5Z and -61).
   const invoice = useQuery<CardInvoiceUIModel>({
-    cacheKey: [
-      ...listQueryKey(useCases.getFinancialCardInvoiceUseCase.uniqueName),
-      params.cardId,
-      params.month,
-    ],
+    cacheKey: [...financeKeys.invoice.list(), params.cardId, params.month],
     fetch: async () =>
       new CardInvoiceUIModel(
         await useCases.getFinancialCardInvoiceUseCase.execute({
@@ -70,12 +66,11 @@ function useInvoiceViewModel() {
     addMonthsTo(toMonthKey(new Date()), 1),
   );
   const projected = useQuery<TransactionUIModel[]>({
-    cacheKey: [
-      useCases.getFinancialProjectionsUseCase.uniqueName,
+    cacheKey: financeKeys.projections.raw(
       "invoice",
       params.cardId,
       params.month,
-    ],
+    ),
     enabled: !!invoice.data && projectionsFrom <= params.month,
     fetch: async () => {
       const owner = invoice.data!.ownerId;
@@ -105,7 +100,7 @@ function useInvoiceViewModel() {
   });
   const owners = useOwners({ enabled: isPayOpen });
   const accounts = useQuery<AccountDTO[]>({
-    cacheKey: [useCases.getFinancialAccountsUseCase.uniqueName],
+    cacheKey: financeKeys.accounts.raw(),
     enabled: isPayOpen && !!owners.data,
     fetch: async () =>
       useCases.getFinancialAccountsUseCase.execute(
@@ -114,7 +109,7 @@ function useInvoiceViewModel() {
   });
   // The card's linked account prefills "Pay from" (spec 035 FR 20).
   const cards = useQuery({
-    cacheKey: [useCases.getFinancialCreditCardsUseCase.uniqueName],
+    cacheKey: financeKeys.creditCards.raw(),
     enabled: isPayOpen && !!owners.data,
     fetch: async () =>
       useCases.getFinancialCreditCardsUseCase.execute(

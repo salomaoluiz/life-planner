@@ -2,6 +2,7 @@ import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import OwnerDTO from "@application/dto/user/OwnerDTO";
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
 import { CategoryHasPendingItems } from "@domain/entities/errors";
 import {
@@ -74,7 +75,7 @@ function useNewCategoryViewModel() {
 
   const owners = useActiveOwners();
   const categories = useQuery({
-    cacheKey: [useCases.getFinancialCategoriesUseCase.uniqueName],
+    cacheKey: financeKeys.categories.raw(),
     enabled: !!owners.data,
     fetch: async () =>
       fetchByOwners(
@@ -84,7 +85,7 @@ function useNewCategoryViewModel() {
   });
   // Only edit mode needs the transactions (a category with transactions cannot change type).
   const transactions = useQuery({
-    cacheKey: [useCases.getFinancialTransactionsUseCase.uniqueName],
+    cacheKey: financeKeys.transactions.raw(),
     enabled: isEditing && !!owners.data,
     fetch: async () =>
       useCases.getFinancialTransactionsUseCase.execute({
@@ -180,9 +181,7 @@ function useNewCategoryViewModel() {
       deleteMutation.status === "success"
     ) {
       // The list (and a reopened form) must not show the old status.
-      invalidateFetcherData([
-        useCases.getFinancialCategoriesUseCase.uniqueName,
-      ]);
+      invalidateFetcherData(financeKeys.categories.all());
       void invalidateFinanceData();
       closeModal();
     }

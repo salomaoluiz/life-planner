@@ -2,6 +2,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { router, useLocalSearchParams } from "expo-router";
 
 import { renderHook } from "@tests";
+import queryName from "@tests/queryName";
 
 import AccountDTO from "@application/dto/financial/AccountDTO";
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
@@ -22,13 +23,13 @@ import {
 } from "@infrastructure/fetcher";
 import UseMutationFixture from "@infrastructure/fetcher/mocks/useMutation.fixture";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
-import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 import openTransactionModal from "@screens/Financial/Transactions/pending/openTransactionModal";
 import runPendingChange from "@screens/Financial/Transactions/pending/runPendingChange";
+import { invalidateAfterWrite } from "@screens/Financial/Transactions/pending/writeCache";
 
 import useNewTransactionViewModel from "../useNewTransactionViewModel";
 
-jest.mock("@screens/Financial/hooks/invalidateFinanceData");
+jest.mock("@screens/Financial/Transactions/pending/writeCache");
 jest.mock("expo-router", () => ({
   router: { back: jest.fn(), push: jest.fn(), replace: jest.fn() },
   useLocalSearchParams: jest.fn(),
@@ -201,7 +202,7 @@ const spies = {
   back: jest.mocked(router.back),
   focused: jest.mocked(useIsFocused),
   getCachedFetcherData: jest.mocked(getCachedFetcherData),
-  invalidateFinance: jest.mocked(invalidateFinanceData),
+  invalidateAfterWrite: jest.mocked(invalidateAfterWrite),
   openTransactionModal: jest.mocked(openTransactionModal),
   params: jest.mocked(useLocalSearchParams),
   push: jest.mocked(router.push),
@@ -254,16 +255,16 @@ beforeEach(() => {
   spies.params.mockReturnValue({});
   spies.useQuery.mockImplementation(((options: { cacheKey: string[] }) =>
     queries[
-      options.cacheKey[1] === "list"
-        ? `${options.cacheKey[0]}_list`
-        : options.cacheKey[0]
+      options.cacheKey[options.cacheKey[0] === "finance" ? 2 : 1] === "list"
+        ? `${queryName(options.cacheKey)}_list`
+        : queryName(options.cacheKey)
     ].build()) as never);
   spies.useMutation.mockImplementation(((options: { cacheKey: string[] }) =>
-    mutations[options.cacheKey[0]].build()) as never);
+    mutations[queryName(options.cacheKey)].build()) as never);
   // The months the Transactions screen cached: every `*_list*` fixture that holds data.
   spies.getCachedFetcherData.mockImplementation(((cacheKey: string[]) =>
     Object.entries(queries)
-      .filter(([key]) => key.startsWith(`${cacheKey[0]}_list`))
+      .filter(([key]) => key.startsWith(`${queryName(cacheKey)}_list`))
       .map(([, query]) => query.value.data)
       .filter((data) => data !== undefined)) as never);
 });

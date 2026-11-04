@@ -1,10 +1,11 @@
 import { act, fireEvent, render, screen, waitFor } from "@tests";
+import queryName from "@tests/queryName";
 
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
-import { useMutation } from "@infrastructure/fetcher";
+import { invalidateFetcherData, useMutation } from "@infrastructure/fetcher";
 import UseMutationFixture from "@infrastructure/fetcher/mocks/useMutation.fixture";
 import { pickCsvFile } from "@infrastructure/filePicker";
 import * as theme from "@presentation/theme";
@@ -127,6 +128,7 @@ const spies = {
   createAccount: jest.mocked(useCases.createFinancialAccountUseCase.execute),
   createCard: jest.mocked(useCases.createFinancialCreditCardUseCase.execute),
   import: jest.mocked(useCases.importFinancialTransactionsUseCase.execute),
+  invalidate: jest.mocked(invalidateFetcherData),
   pick: jest.mocked(pickCsvFile),
   useMutation: jest.mocked(useMutation),
   validate: jest.mocked(useCases.validateFinancialImportUseCase.execute),
@@ -156,7 +158,7 @@ function setup(
   jest.mocked(theme.useBreakpoint).mockReturnValue(breakpoint);
   jest.mocked(useFilterOptions).mockReturnValue(options as never);
   spies.useMutation.mockImplementation(((props: { cacheKey: string[] }) => {
-    const key = props.cacheKey[0];
+    const key = queryName(props.cacheKey);
 
     if (key === "validateImport") {
       return mutations.validate.build();

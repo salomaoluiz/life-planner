@@ -1,4 +1,5 @@
 import { renderHook } from "@tests";
+import queryName from "@tests/queryName";
 
 import { useCases } from "@application/useCases";
 import { useQuery } from "@infrastructure/fetcher";
@@ -36,7 +37,7 @@ beforeEach(() => {
   }) => {
     options.fetch();
 
-    return { data: data[options.cacheKey[0]], error: null };
+    return { data: data[queryName(options.cacheKey)], error: null };
   }) as never);
 });
 

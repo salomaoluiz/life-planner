@@ -1,7 +1,9 @@
 import { act } from "@tests";
 import { modalNavigation } from "@tests/modalNavigation";
+import queryName from "@tests/queryName";
 
 import ProjectedOccurrenceDTO from "@application/dto/financial/ProjectedOccurrenceDTO";
+import { financeKeys } from "@application/queryKeys/financeKeys";
 
 import { makeInvoice } from "../../Transactions/mocks/invoice.mocks";
 import {
@@ -25,8 +27,7 @@ it("SHOULD read the invoice of the route params", () => {
   setup();
 
   expect(spies.useQuery.mock.calls[0][0].cacheKey).toEqual([
-    "invoice",
-    "list",
+    ...financeKeys.invoice.list(),
     "card-1",
     "2026-10",
   ]);
@@ -37,10 +38,9 @@ it("SHOULD NOT share its cache key with the raw invoice read by the early paymen
   setup();
 
   // The form caches the DTO under ["invoice", cardId, month]: the UI model must live elsewhere.
-  expect(spies.useQuery.mock.calls[0][0].cacheKey.slice(0, 2)).not.toEqual([
-    "invoice",
-    "card-1",
-  ]);
+  expect(spies.useQuery.mock.calls[0][0].cacheKey.slice(0, 4)).not.toEqual(
+    financeKeys.invoice.raw("card-1", "2026-10"),
+  );
 });
 
 it("SHOULD offer only ACTIVE accounts AND require one for ACCOUNT payments", () => {
@@ -238,7 +238,8 @@ describe("projected purchases (spec 034 FR 14)", () => {
   function projectionsOptions() {
     return spies.useQuery.mock.calls.find(
       ([option]) =>
-        (option as { cacheKey: string[] }).cacheKey[0] === "projections",
+        queryName((option as { cacheKey: string[] }).cacheKey) ===
+        "projections",
     )![0] as { enabled: boolean; fetch: () => Promise<unknown> };
   }
 

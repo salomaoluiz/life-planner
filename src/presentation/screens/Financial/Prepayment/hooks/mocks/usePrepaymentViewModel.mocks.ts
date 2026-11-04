@@ -1,6 +1,7 @@
 import { router, useLocalSearchParams } from "expo-router";
 
 import { renderHook } from "@tests";
+import queryName from "@tests/queryName";
 
 import {
   CreditCardSummaryDTO,
@@ -137,10 +138,12 @@ beforeEach(() => {
   spies.params.mockReturnValue({ planId: "plan-1" });
   spies.useQuery.mockImplementation(((options: { cacheKey: string[] }) =>
     queries[
-      options.cacheKey[0] === "preview" ? "preview" : options.cacheKey[0]
+      queryName(options.cacheKey) === "preview"
+        ? "preview"
+        : queryName(options.cacheKey)
     ].build()) as never);
   spies.useMutation.mockImplementation(((options: { cacheKey: string[] }) =>
-    mutations[options.cacheKey[0]].build()) as never);
+    mutations[queryName(options.cacheKey)].build()) as never);
 });
 
 function givenLoaded() {

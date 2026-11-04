@@ -4,6 +4,7 @@ import AccountDTO from "@application/dto/financial/AccountDTO";
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
 import CreditCardDTO from "@application/dto/financial/CreditCardDTO";
 import TagDTO from "@application/dto/financial/TagDTO";
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
 import { CurrencyCode } from "@domain/entities/financial/Currency";
 import { useQuery } from "@infrastructure/fetcher";
@@ -27,23 +28,23 @@ export interface SourceOption {
 function useFilterOptions(ownerIds: string[], enabled: boolean) {
   const on = enabled && ownerIds.length > 0;
   const accounts = useQuery<AccountDTO[]>({
-    cacheKey: [useCases.getFinancialAccountsUseCase.uniqueName],
+    cacheKey: financeKeys.accounts.raw(),
     enabled: on,
     fetch: async () => useCases.getFinancialAccountsUseCase.execute(ownerIds),
   });
   const cards = useQuery<CreditCardDTO[]>({
-    cacheKey: [useCases.getFinancialCreditCardsUseCase.uniqueName],
+    cacheKey: financeKeys.creditCards.raw(),
     enabled: on,
     fetch: async () =>
       useCases.getFinancialCreditCardsUseCase.execute(ownerIds),
   });
   const categories = useQuery<CategoryDTO[]>({
-    cacheKey: [useCases.getFinancialCategoriesUseCase.uniqueName],
+    cacheKey: financeKeys.categories.raw(),
     enabled: on,
     fetch: async () => useCases.getFinancialCategoriesUseCase.execute(ownerIds),
   });
   const tags = useQuery<TagDTO[]>({
-    cacheKey: [useCases.getFinancialTagsUseCase.uniqueName],
+    cacheKey: financeKeys.tags.raw(),
     enabled: on,
     fetch: async () => useCases.getFinancialTagsUseCase.execute(ownerIds),
   });

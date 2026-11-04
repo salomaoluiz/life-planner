@@ -1,6 +1,7 @@
 import { router, useLocalSearchParams } from "expo-router";
 
 import { renderHook } from "@tests";
+import queryName from "@tests/queryName";
 
 import TagDTO from "@application/dto/financial/TagDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
@@ -72,9 +73,9 @@ beforeEach(() => {
   });
   spies.params.mockReturnValue({});
   spies.useQuery.mockImplementation(((options: { cacheKey: string[] }) =>
-    queries[options.cacheKey[0]].build()) as never);
+    queries[queryName(options.cacheKey)].build()) as never);
   spies.useMutation.mockImplementation(((options: { cacheKey: string[] }) =>
-    mutations[options.cacheKey[0]].build()) as never);
+    mutations[queryName(options.cacheKey)].build()) as never);
 });
 
 function givenLoaded(

@@ -1,5 +1,7 @@
 import { modalNavigation } from "@tests/modalNavigation";
 
+import { financeKeys } from "@application/queryKeys/financeKeys";
+
 import { ALL_FILTER, PERSONAL_FILTER } from "../models/ownerFilter";
 import {
   act,
@@ -26,9 +28,8 @@ it("SHOULD enable the block queries once the owners are loaded", () => {
 
   expect(optionsOf("summary").enabled).toBe(true);
   expect(optionsOf("summary").cacheKey).toEqual([
-    "summary",
+    ...financeKeys.summary.ofMonth("2026-10", "home"),
     "family-1,user-id",
-    "2026-10",
   ]);
 });
 
@@ -217,11 +218,11 @@ describe("refresh", () => {
 
     expect(spies.refetchStale).toHaveBeenCalledWith([
       ["owners"],
-      ["summary"],
+      financeKeys.summary.all(),
       ["stock"],
-      ["accounts"],
-      ["balances", "home"],
-      ["upcoming"],
+      financeKeys.accounts.all(),
+      financeKeys.dailyBalances.all(),
+      financeKeys.upcoming.all(),
     ]);
     expect(queries.stock.value.refetch).not.toHaveBeenCalled();
     expect(queries.user.value.refetch).not.toHaveBeenCalled();

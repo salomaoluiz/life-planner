@@ -2,6 +2,7 @@ import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
 import OwnerDTO from "@application/dto/user/OwnerDTO";
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
 import {
   invalidateFetcherData,
@@ -70,7 +71,7 @@ function useNewAccountViewModel() {
 
   const owners = useActiveOwners();
   const accounts = useQuery({
-    cacheKey: [useCases.getFinancialAccountsUseCase.uniqueName],
+    cacheKey: financeKeys.accounts.raw(),
     enabled: !!owners.data,
     fetch: async () =>
       fetchByOwners(owners.data!, useCases.getFinancialAccountsUseCase.execute),
@@ -106,11 +107,7 @@ function useNewAccountViewModel() {
 
   // The recurring series that end when the account is archived (spec 034 FR 34).
   const series = useQuery({
-    cacheKey: [
-      useCases.getFinancialRecurrencesUseCase.uniqueName,
-      "account",
-      params.id ?? "",
-    ],
+    cacheKey: financeKeys.recurrences.raw("account", params.id ?? ""),
     enabled: isEditing && !!existing && existing.status !== "ARCHIVED",
     fetch: async () =>
       useCases.getFinancialRecurrencesUseCase.execute({
@@ -148,7 +145,7 @@ function useNewAccountViewModel() {
       deleteMutation.status === "success"
     ) {
       // Narrow key (prefix also covers the list); the form must not reopen on old data.
-      invalidateFetcherData([useCases.getFinancialAccountsUseCase.uniqueName]);
+      invalidateFetcherData(financeKeys.accounts.all());
       void invalidateFinanceData();
       closeModal();
     }

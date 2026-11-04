@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import TagDTO from "@application/dto/financial/TagDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
 import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
@@ -11,7 +12,6 @@ import {
   archivedOwnerIds,
   buildOwnerFilterChoices,
 } from "@screens/Financial/models/ownerOptions";
-import { listQueryKey } from "@screens/Financial/models/queryKeys";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import { buildTagRows, tagInActiveScope, tagInScope } from "../models/tagRows";
@@ -34,7 +34,7 @@ function useTagsViewModel() {
   const [ownerFilter, setOwnerFilter] = useState(ALL_OWNERS);
 
   const query = useOwnerScopedQuery<TagsData>({
-    cacheKey: listQueryKey(useCases.getFinancialTagsUseCase.uniqueName),
+    cacheKey: financeKeys.tags.list(),
     fetch: fetchTags,
   });
 

@@ -9,6 +9,7 @@ import {
   ImportRowPayload,
 } from "@application/csvImport/types";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
 import { ImportRowsInvalid } from "@domain/entities/errors";
 import { ImportValidationEntity } from "@domain/entities/financial/TransactionCsv";
@@ -304,7 +305,7 @@ function useImportWizardViewModel(params: ImportWizardParams) {
       return;
     }
 
-    invalidateFetcherData();
+    invalidateFetcherData(financeKeys.all());
     params.onImported(importMutation.data);
     params.onClose();
   }, [importDone]);
