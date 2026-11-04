@@ -89,7 +89,7 @@ describe("month prefetch (spec 087)", () => {
     view.unmount();
   });
 
-  it("SHOULD switch to a prefetched month with no request and no skeleton", async () => {
+  it("SHOULD switch to a prefetched month with its rows at once, revalidating in the background", async () => {
     const view = await openIdle();
 
     network.mark();

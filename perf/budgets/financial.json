@@ -168,9 +168,9 @@
     "maxRequests": 1
   },
   "financial.transactions.monthSwitch.prefetched": {
-    "maxDepth": 0,
+    "maxDepth": 1,
     "maxDuplicates": 0,
-    "maxRequests": 0
+    "maxRequests": 1
   },
   "financial.transactions.mount.cold": {
     "maxDepth": 2,
