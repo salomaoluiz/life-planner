@@ -1,5 +1,6 @@
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import { BusinessError } from "@domain/entities/errors";
+import { recentTransactionsRange } from "@domain/entities/financial/TransactionQueryFilter";
 
 import {
   mocks,
@@ -20,7 +21,11 @@ it("SHOULD get all transactions and return the TransactionDTO", async () => {
   const result = await setup();
 
   expect(getTransactionsSpy).toHaveBeenCalledTimes(1);
-  expect(getTransactionsSpy).toHaveBeenCalledWith(mocks.defaultParams.ownerIds);
+  // Spec 078: without a range, the recent 24-month window (never the whole history).
+  expect(getTransactionsSpy).toHaveBeenCalledWith(
+    mocks.defaultParams.ownerIds,
+    recentTransactionsRange(new Date()),
+  );
   expect(getCategoriesSpy).toHaveBeenCalledTimes(1);
   expect(getCategoriesSpy).toHaveBeenCalledWith(mocks.defaultParams.ownerIds);
   expect(getAccountsSpy).toHaveBeenCalledTimes(1);
@@ -75,4 +80,18 @@ it("SHOULD ask the repository only for the period WHEN a range is given", async 
   expect(
     spies.financialRepositoryTransaction.getTransactions,
   ).toHaveBeenCalledWith(mocks.defaultParams.ownerIds, range);
+});
+
+it("SHOULD pass the given range through", async () => {
+  getTransactionsSpy.mockResolvedValueOnce([]);
+  getCategoriesSpy.mockResolvedValueOnce([]);
+  getAccountsSpy.mockResolvedValueOnce([]);
+  const range = { from: "2026-10-01", to: "2026-10-31" };
+
+  await setup({ ...mocks.defaultParams, range });
+
+  expect(getTransactionsSpy).toHaveBeenCalledWith(
+    mocks.defaultParams.ownerIds,
+    range,
+  );
 });

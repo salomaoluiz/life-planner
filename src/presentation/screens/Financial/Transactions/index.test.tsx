@@ -1,7 +1,7 @@
 import { fireEvent, screen, within } from "@testing-library/react-native";
 import { StyleSheet } from "react-native";
 
-import { hasText } from "@tests";
+import { act, hasText } from "@tests";
 
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
@@ -61,12 +61,27 @@ it("SHOULD render the day header with Today and the rows", () => {
   expect(screen.getAllByTestId(transactionsTestIds.row)).toHaveLength(2);
 });
 
-it("SHOULD pass the day header indices to the list as sticky", () => {
+it("SHOULD keep the day headers from sticking until the list is scrolled (they cover the month switcher at the top)", () => {
   setup({ entries: makeEntries(), stickyIndices: [0] });
+  const list = screen.getByTestId("flashList");
+
+  expect(list.props.stickyHeaderIndices).toEqual([]);
+
+  act(() => {
+    list.props.onScroll({ nativeEvent: { contentOffset: { y: 40 } } });
+  });
 
   expect(screen.getByTestId("flashList").props.stickyHeaderIndices).toEqual([
     0,
   ]);
+
+  act(() => {
+    screen
+      .getByTestId("flashList")
+      .props.onScroll({ nativeEvent: { contentOffset: { y: 0 } } });
+  });
+
+  expect(screen.getByTestId("flashList").props.stickyHeaderIndices).toEqual([]);
 });
 
 it("SHOULD call onRowPress with the transaction id", () => {

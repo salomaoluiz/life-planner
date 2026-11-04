@@ -50,13 +50,14 @@ it("SHOULD call getTransactions correctly", async () => {
 
   const ownerIds = ["bb3443d4-a9bd-401e-9732-d6bf0dca7e83"];
 
-  const transactions = await getTransactions(ownerIds);
+  const range = { from: "2026-10-01", to: "2026-10-31" };
+  const transactions = await getTransactions(ownerIds, range);
 
   expect(spies.getTransactions).toHaveBeenCalledTimes(1);
   expect(spies.getTransactions).toHaveBeenCalledWith(
     ownerIds,
     mocks.datasources,
-    undefined,
+    range,
   );
   expect(transactions).toEqual("getTransactions response");
 });

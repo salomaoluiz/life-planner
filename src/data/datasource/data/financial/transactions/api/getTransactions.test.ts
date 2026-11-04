@@ -4,6 +4,7 @@ import { ConnectivityError, GenericError } from "@domain/entities/errors";
 
 import {
   mocks,
+  page,
   setup,
   setupThrowable,
   spies,
@@ -11,16 +12,16 @@ import {
 
 it("SHOULD GET /v1/finance/transactions with repeated ownerId params AND return TransactionModels (cents -> decimal string, category name filled)", async () => {
   spies.get
-    .mockResolvedValueOnce(mocks.apiTransactions)
-    .mockResolvedValueOnce([]);
+    .mockResolvedValueOnce(page(mocks.apiTransactions))
+    .mockResolvedValueOnce(page([]));
 
   const result = await setup();
 
+  const query = `ownerId=${mocks.ownerIds[0]}&ownerId=${mocks.ownerIds[1]}&today=${todayCalendarDate()}&from=2026-10-01&to=2026-10-31&limit=200`;
+
+  expect(spies.get).toHaveBeenCalledWith(`/v1/finance/transactions?${query}`);
   expect(spies.get).toHaveBeenCalledWith(
-    `/v1/finance/transactions?ownerId=${mocks.ownerIds[0]}&ownerId=${mocks.ownerIds[1]}&today=${todayCalendarDate()}`,
-  );
-  expect(spies.get).toHaveBeenCalledWith(
-    `/v1/finance/transactions?ownerId=${mocks.ownerIds[0]}&ownerId=${mocks.ownerIds[1]}&today=${todayCalendarDate()}&source=CARD`,
+    `/v1/finance/transactions?${query.replace("&limit", "&source=CARD&limit")}`,
   );
   expect(result).toEqual([TransactionModel.fromJSON(mocks.apiTransactions[0])]);
   expect(result[0].value).toBe("234.90");
@@ -28,15 +29,19 @@ it("SHOULD GET /v1/finance/transactions with repeated ownerId params AND return 
 });
 
 it("SHOULD merge card purchases (source=CARD) after the account rows", async () => {
-  spies.get.mockResolvedValueOnce(mocks.apiTransactions).mockResolvedValueOnce([
-    {
-      ...mocks.apiTransactions[0],
-      accountId: null,
-      creditCardId: "card-1",
-      id: "purchase-1",
-      invoiceMonth: "2026-10",
-    },
-  ]);
+  spies.get
+    .mockResolvedValueOnce(page(mocks.apiTransactions))
+    .mockResolvedValueOnce(
+      page([
+        {
+          ...mocks.apiTransactions[0],
+          accountId: null,
+          creditCardId: "card-1",
+          id: "purchase-1",
+          invoiceMonth: "2026-10",
+        },
+      ]),
+    );
 
   const result = await setup();
 
@@ -56,8 +61,8 @@ it("SHOULD NOT call the API WHEN there are no ownerIds", async () => {
   expect(spies.get).not.toHaveBeenCalled();
 });
 
-it("SHOULD return an empty list WHEN the API returns []", async () => {
-  spies.get.mockResolvedValue([]);
+it("SHOULD return an empty list WHEN the API returns an empty page", async () => {
+  spies.get.mockResolvedValue(page([]));
 
   expect(await setup()).toEqual([]);
 });
@@ -79,26 +84,25 @@ it("SHOULD wrap unknown errors in GenericError with the owner ids only", async (
     datasource: "TransactionDatasource - getTransactions",
     error: expect.any(Error),
     ownerIds: mocks.ownerIds,
+    range: mocks.defaultRange,
   });
 });
 
-it("SHOULD ask only the period for both account rows and card purchases WHEN a range is given", async () => {
-  spies.get.mockResolvedValue([]);
+it("SHOULD load every page of the period, following nextCursor (spec 078)", async () => {
+  const second = { ...mocks.apiTransactions[0], id: "second" };
 
-  await setup(mocks.ownerIds, { from: "2026-10-01", to: "2026-10-31" });
+  spies.get
+    .mockResolvedValueOnce(page(mocks.apiTransactions, "cursor-1"))
+    .mockResolvedValueOnce(page([second]))
+    .mockResolvedValueOnce(page([]));
 
-  const query = `ownerId=${mocks.ownerIds[0]}&ownerId=${mocks.ownerIds[1]}&today=${todayCalendarDate()}&from=2026-10-01&to=2026-10-31`;
+  const result = await setup();
 
-  expect(spies.get).toHaveBeenCalledWith(`/v1/finance/transactions?${query}`);
+  expect(result.map((item) => item.id)).toEqual([
+    mocks.apiTransactions[0].id,
+    "second",
+  ]);
   expect(spies.get).toHaveBeenCalledWith(
-    `/v1/finance/transactions?${query}&source=CARD`,
+    expect.stringContaining("&cursor=cursor-1"),
   );
-});
-
-it("SHOULD NOT send a period WHEN no range is given", async () => {
-  spies.get.mockResolvedValue([]);
-
-  await setup();
-
-  spies.get.mock.calls.forEach(([path]) => expect(path).not.toContain("from="));
 });

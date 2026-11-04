@@ -27,7 +27,7 @@ export interface TransactionDatasource {
   ): Promise<TransactionModel[]>;
   getTransactions(
     ownerIds: string[],
-    range?: TransactionDateRange,
+    range: TransactionDateRange,
   ): Promise<TransactionModel[]>;
   importTransactions(params: ImportRequest): Promise<number>;
   updateTransaction(params: UpdateTransactionDatasourceParams): Promise<void>;

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import { useCases } from "@application/useCases";
 import { useMutation } from "@infrastructure/fetcher";
+import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 
 import TransactionUIModel from "../models/TransactionUIModel";
 
@@ -23,6 +24,8 @@ function usePayTransaction(props: Props) {
   useEffect(() => {
     if (payMutation.status === "success") {
       setPayingId(undefined);
+      // The row moves to today's date, so it leaves its month and joins another one that may be cached.
+      void invalidateFinanceData();
       props.onPaid();
     }
     if (payMutation.status === "error") {

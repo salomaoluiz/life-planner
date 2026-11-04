@@ -13,11 +13,15 @@ function respond(method: Method, path: string): unknown {
     return me;
   }
   if (path.startsWith("/v1/finance/transactions")) {
+    // The API answers in keyset pages (spec 078).
     if (path.includes("source=CARD")) {
-      return [];
+      return { items: [], nextCursor: null };
     }
 
-    return path.includes("from=") ? [accountRow] : history;
+    return {
+      items: path.includes("from=") ? [accountRow] : history,
+      nextCursor: null,
+    };
   }
   if (path.startsWith("/v1/finance/accounts/daily-balances")) {
     return {};
