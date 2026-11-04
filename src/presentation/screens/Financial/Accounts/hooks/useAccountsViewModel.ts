@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import AccountDTO from "@application/dto/financial/AccountDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
 import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
@@ -11,7 +12,6 @@ import {
   archivedOwnerIds,
   buildOwnerFilterChoices,
 } from "@screens/Financial/models/ownerOptions";
-import { listQueryKey } from "@screens/Financial/models/queryKeys";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import {
@@ -42,7 +42,7 @@ function useAccountsViewModel() {
   const [archivedExpanded, setArchivedExpanded] = useState(false);
 
   const query = useOwnerScopedQuery<AccountsData>({
-    cacheKey: listQueryKey(useCases.getFinancialAccountsUseCase.uniqueName),
+    cacheKey: financeKeys.accounts.list(),
     fetch: fetchAccounts,
   });
 

@@ -1,10 +1,10 @@
 import { useIsFocused } from "@react-navigation/native";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import CategoryDTO from "@application/dto/financial/CategoryDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import { MonthSummary } from "@application/dto/home/MonthSummaryDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
 import {
   monthDateRange,
@@ -22,7 +22,6 @@ import {
   buildOwnerFilterChoices,
   personalOwnerId as findPersonalOwnerId,
 } from "@screens/Financial/models/ownerOptions";
-import { listQueryKey } from "@screens/Financial/models/queryKeys";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import CardInvoiceUIModel from "../models/CardInvoiceUIModel";
@@ -61,6 +60,7 @@ import {
   toDayBalanceViews,
   TypeFilter,
 } from "../models/transactionList";
+import { TransactionsData } from "../models/transactionsData";
 import TransactionUIModel from "../models/TransactionUIModel";
 import { hasPendingChanges } from "../pending/pendingChanges";
 import { usePendingChanges } from "../pending/usePendingChanges";
@@ -76,12 +76,6 @@ const MAX_PROJECTION_MONTHS = 12;
 interface ProjectedData {
   accountItems: TransactionUIModel[];
   cardGroups: ProjectedInvoiceGroup[];
-}
-
-interface TransactionsData {
-  // Spec 061: lets a row that is still being saved show its category color and icon.
-  categories?: CategoryDTO[];
-  items: TransactionUIModel[];
 }
 
 // Spec 045: the account rows that match the filters in the range.
@@ -235,10 +229,7 @@ function useTransactionsViewModel() {
   // Keyed by month and owners (spec 075); another month keeps the previous rows flagged as placeholder until its own
   // arrive, and the edit form and the description suggestions read these cached months.
   const transactions = useOwnerScopedQuery<TransactionsData>({
-    cacheKey: [
-      ...listQueryKey(useCases.getFinancialTransactionsUseCase.uniqueName),
-      monthKey,
-    ],
+    cacheKey: [...financeKeys.transactions.list(), monthKey],
     fetch: async (loadedOwners) => fetchTransactions(loadedOwners, monthKey),
     keepPreviousData: true,
   });
@@ -266,13 +257,7 @@ function useTransactionsViewModel() {
   );
   // A failing invoices request keeps the account rows: only the inline error row appears.
   const invoices = useQuery<CardInvoiceUIModel[]>({
-    cacheKey: [
-      ...listQueryKey(
-        useCases.getFinancialCardInvoicesForMonthUseCase.uniqueName,
-      ),
-      monthKey,
-      ...allOwnerIds,
-    ],
+    cacheKey: [...financeKeys.invoices.list(), monthKey, ...allOwnerIds],
     enabled: !!owners,
     fetch: async () =>
       (
@@ -292,7 +277,7 @@ function useTransactionsViewModel() {
   );
   const projections = useQuery<ProjectedData>({
     cacheKey: [
-      ...listQueryKey(useCases.getFinancialProjectionsUseCase.uniqueName),
+      ...financeKeys.projections.list(),
       projectionsFrom,
       monthKey,
       ...allOwnerIds,
@@ -311,8 +296,7 @@ function useTransactionsViewModel() {
     monthKey <= addMonthsTo(currentMonthKey, MAX_BALANCE_MONTHS_AHEAD);
   const balances = useQuery<Map<string, DayBalanceView>>({
     cacheKey: [
-      ...listQueryKey(useCases.getFinancialDailyBalancesUseCase.uniqueName),
-      monthKey,
+      ...financeKeys.dailyBalances.ofMonth(monthKey, "screen"),
       ...summaryOwnerIds,
     ],
     enabled: balancesEnabled,
@@ -340,9 +324,7 @@ function useTransactionsViewModel() {
   const showCards = wantsCards(applied);
   const filteredTransactions = useQuery<TransactionUIModel[]>({
     cacheKey: [
-      ...listQueryKey(
-        useCases.getFinancialFilteredTransactionsUseCase.uniqueName,
-      ),
+      ...financeKeys.transactionsFiltered.list(),
       filterKey,
       ...allOwnerIds,
     ],
@@ -351,9 +333,7 @@ function useTransactionsViewModel() {
   });
   const filteredInvoices = useQuery<CardInvoiceUIModel[]>({
     cacheKey: [
-      ...listQueryKey(
-        useCases.getFinancialCardInvoicesForMonthUseCase.uniqueName,
-      ),
+      ...financeKeys.invoices.list(),
       "filtered",
       filterKey,
       ...allOwnerIds,
@@ -380,7 +360,7 @@ function useTransactionsViewModel() {
   ].sort()[0];
   const filteredProjections = useQuery<ProjectedData>({
     cacheKey: [
-      ...listQueryKey(useCases.getFinancialProjectionsUseCase.uniqueName),
+      ...financeKeys.projections.list(),
       "filtered",
       filteredProjectionsFrom,
       filteredProjectionsTo,
@@ -406,8 +386,7 @@ function useTransactionsViewModel() {
 
   const summary = useQuery<MonthSummary>({
     cacheKey: [
-      useCases.getMonthSummaryUseCase.uniqueName,
-      `${month.getFullYear()}-${month.getMonth()}`,
+      ...financeKeys.summary.ofMonth(monthKey, "screen"),
       ...summaryOwnerIds,
     ],
     enabled: !!owners,
@@ -416,12 +395,12 @@ function useTransactionsViewModel() {
 
   // Key prefixes of every query this screen shows (the month, the filtered and the projected variants share them).
   const focusCacheKeys = [
-    listQueryKey(useCases.getFinancialTransactionsUseCase.uniqueName),
-    listQueryKey(useCases.getFinancialCardInvoicesForMonthUseCase.uniqueName),
-    listQueryKey(useCases.getFinancialProjectionsUseCase.uniqueName),
-    listQueryKey(useCases.getFinancialDailyBalancesUseCase.uniqueName),
-    listQueryKey(useCases.getFinancialFilteredTransactionsUseCase.uniqueName),
-    [useCases.getMonthSummaryUseCase.uniqueName],
+    financeKeys.transactions.list(),
+    financeKeys.invoices.list(),
+    financeKeys.projections.list(),
+    financeKeys.dailyBalances.all(),
+    financeKeys.transactionsFiltered.list(),
+    financeKeys.summary.all(),
   ];
 
   function refetchFiltered() {
@@ -748,7 +727,6 @@ function useTransactionsViewModel() {
   };
 }
 
-export type { TransactionsData };
 export {
   fetchFilteredTransactions,
   fetchProjections,

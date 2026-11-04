@@ -1,4 +1,4 @@
-import { useCases } from "@application/useCases";
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import { BusinessError } from "@domain/entities/errors";
 import { invalidateFetcherData } from "@infrastructure/fetcher";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
@@ -15,12 +15,12 @@ import {
 // Every query the transactions screen reads (spec 061 FR 12), by the prefix of its cache key.
 function listCachePrefixes() {
   return [
-    useCases.getFinancialTransactionsUseCase.uniqueName,
-    useCases.getFinancialFilteredTransactionsUseCase.uniqueName,
-    useCases.getFinancialCardInvoicesForMonthUseCase.uniqueName,
-    useCases.getFinancialProjectionsUseCase.uniqueName,
-    useCases.getMonthSummaryUseCase.uniqueName,
-    useCases.getFinancialDailyBalancesUseCase.uniqueName,
+    financeKeys.transactions.all(),
+    financeKeys.transactionsFiltered.all(),
+    financeKeys.invoices.all(),
+    financeKeys.projections.all(),
+    financeKeys.summary.all(),
+    financeKeys.dailyBalances.all(),
   ];
 }
 
@@ -44,9 +44,7 @@ async function runPendingChange(
       resolveChange(registered.id, result.id);
     }
     await Promise.all(
-      listCachePrefixes().map(async (prefix) =>
-        invalidateFetcherData([prefix]),
-      ),
+      listCachePrefixes().map(async (prefix) => invalidateFetcherData(prefix)),
     );
   } catch (error) {
     addFailure({
@@ -61,9 +59,7 @@ async function runPendingChange(
       retry,
     });
     // The server data may have changed even on failure (partial success): refresh quietly.
-    invalidateFetcherData([
-      useCases.getFinancialTransactionsUseCase.uniqueName,
-    ]);
+    invalidateFetcherData(financeKeys.transactions.all());
   } finally {
     removeChange(registered.id);
   }

@@ -1,7 +1,9 @@
 import { act } from "@tests";
 import { modalNavigation } from "@tests/modalNavigation";
+import queryName from "@tests/queryName";
 
 import AccountDTO from "@application/dto/financial/AccountDTO";
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import { CreditCardHasTransactions } from "@domain/entities/errors";
 
 import {
@@ -202,8 +204,12 @@ it.each(["create", "update", "delete"] as const)(
 
     setup();
 
-    expect(spies.invalidate).toHaveBeenCalledWith(["overview"]);
-    expect(spies.invalidate).toHaveBeenCalledWith(["cards"]);
+    expect(spies.invalidate).toHaveBeenCalledWith(
+      financeKeys.creditCardsOverview.all(),
+    );
+    expect(spies.invalidate).toHaveBeenCalledWith(
+      financeKeys.creditCards.all(),
+    );
     expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
   },
 );
@@ -262,7 +268,8 @@ describe("archiving ends the recurring series (spec 034 FR 34)", () => {
 
     const options = spies.useQuery.mock.calls.find(
       ([option]) =>
-        (option as { cacheKey: string[] }).cacheKey[0] === "recurrences",
+        queryName((option as { cacheKey: string[] }).cacheKey) ===
+        "recurrences",
     )![0] as { fetch: () => Promise<unknown> };
 
     await options.fetch();

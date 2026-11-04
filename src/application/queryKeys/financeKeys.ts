@@ -31,18 +31,18 @@ function resource(name: string) {
 
 const accounts = resource("accounts");
 const categories = resource("categories");
-const creditCards = resource("credit-cards");
-const creditCardsOverview = resource("credit-cards-overview");
-const installmentPlans = resource("installment-plans");
+const creditCards = resource("creditCards");
+const creditCardsOverview = resource("creditCardsOverview");
+const installmentPlans = resource("installmentPlans");
 const invoice = resource("invoice");
 const invoices = resource("invoices");
 const projections = resource("projections");
 const recurrences = resource("recurrences");
 const tags = resource("tags");
 const transactions = resource("transactions");
-const transactionsFiltered = resource("transactions-filtered");
+const transactionsFiltered = resource("transactionsFiltered");
 const upcoming = resource("upcoming");
-const dailyBalances = monthly("daily-balances");
+const dailyBalances = monthly("dailyBalances");
 const summary = monthly("summary");
 
 const financeKeys = {

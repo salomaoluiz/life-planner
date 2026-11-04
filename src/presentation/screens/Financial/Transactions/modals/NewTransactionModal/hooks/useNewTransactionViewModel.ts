@@ -7,6 +7,7 @@ import CreditCardOverviewDTO from "@application/dto/financial/CreditCardOverview
 import TagDTO from "@application/dto/financial/TagDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
 import { RecurrenceHasPaidOccurrences } from "@domain/entities/errors";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
@@ -37,13 +38,12 @@ import {
   archivedOwnerIds,
   personalOwnerId,
 } from "@screens/Financial/models/ownerOptions";
-import { listQueryKey } from "@screens/Financial/models/queryKeys";
 import {
   RECURRENCE_FREQUENCIES,
   recurrenceLastDate,
   recurrenceOccurrenceCount,
 } from "@screens/Financial/models/recurrence";
-import type { TransactionsData } from "@screens/Financial/Transactions/hooks/useTransactionsViewModel";
+import type { TransactionsData } from "@screens/Financial/Transactions/models/transactionsData";
 import openTransactionModal from "@screens/Financial/Transactions/pending/openTransactionModal";
 import {
   consumeRetryDraft,
@@ -93,7 +93,7 @@ import {
 // The months the Transactions screen holds in memory (one entry per month and owner set). Never fetches.
 function cachedMonthLists() {
   return getCachedFetcherData<TransactionsData>(
-    listQueryKey(useCases.getFinancialTransactionsUseCase.uniqueName),
+    financeKeys.transactions.list(),
   ).filter((data) => !!data.items);
 }
 
@@ -259,13 +259,13 @@ function useNewTransactionViewModel() {
 
   const owners = useActiveOwners();
   const accounts = useQuery({
-    cacheKey: [useCases.getFinancialAccountsUseCase.uniqueName],
+    cacheKey: financeKeys.accounts.raw(),
     enabled: !!owners.data,
     fetch: async () =>
       fetchByOwners(owners.data!, useCases.getFinancialAccountsUseCase.execute),
   });
   const cards = useQuery({
-    cacheKey: [useCases.getFinancialCreditCardsUseCase.uniqueName],
+    cacheKey: financeKeys.creditCards.raw(),
     enabled: !!owners.data,
     fetch: async () =>
       fetchByOwners(
@@ -275,7 +275,7 @@ function useNewTransactionViewModel() {
   });
   // The overview carries the available limit and the paid invoices used by the live hints.
   const overview = useQuery({
-    cacheKey: [useCases.getFinancialCreditCardsOverviewUseCase.uniqueName],
+    cacheKey: financeKeys.creditCardsOverview.raw(),
     enabled: !!owners.data,
     fetch: async () =>
       fetchByOwners(
@@ -284,7 +284,7 @@ function useNewTransactionViewModel() {
       ),
   });
   const categories = useQuery({
-    cacheKey: [useCases.getFinancialCategoriesUseCase.uniqueName],
+    cacheKey: financeKeys.categories.raw(),
     enabled: !!owners.data,
     fetch: async () =>
       fetchByOwners(
@@ -294,7 +294,7 @@ function useNewTransactionViewModel() {
   });
   // Suggestions of the Tags field. A failed load is not an error: the field still creates tags (FR 20).
   const tags = useQuery({
-    cacheKey: [useCases.getFinancialTagsUseCase.uniqueName],
+    cacheKey: financeKeys.tags.raw(),
     enabled: !!owners.data,
     fetch: async () =>
       fetchByOwners(owners.data!, useCases.getFinancialTagsUseCase.execute),
@@ -305,7 +305,7 @@ function useNewTransactionViewModel() {
     isEditing && !isProjected ? findCachedRow(params.id) : undefined,
   );
   const transactions = useQuery({
-    cacheKey: [useCases.getFinancialTransactionsUseCase.uniqueName],
+    cacheKey: financeKeys.transactions.raw(),
     enabled: isEditing && !isProjected && !cachedExisting && !!owners.data,
     fetch: async () =>
       useCases.getFinancialTransactionsUseCase.execute({
@@ -314,10 +314,7 @@ function useNewTransactionViewModel() {
   });
 
   const projections = useQuery({
-    cacheKey: [
-      useCases.getFinancialProjectionsUseCase.uniqueName,
-      params.month ?? "",
-    ],
+    cacheKey: financeKeys.projections.raw(params.month ?? ""),
     enabled: isProjected && !!params.month && !!owners.data,
     fetch: async () =>
       useCases.getFinancialProjectionsUseCase.execute({
@@ -354,7 +351,7 @@ function useNewTransactionViewModel() {
   const isRecurring = isEditing && !!existing?.recurrenceId;
   // The series (end date, frequency) of the occurrence being edited.
   const seriesList = useQuery({
-    cacheKey: [useCases.getFinancialRecurrencesUseCase.uniqueName],
+    cacheKey: financeKeys.recurrences.raw(),
     enabled: isRecurring && !!owners.data,
     fetch: async () =>
       useCases.getFinancialRecurrencesUseCase.execute({
@@ -578,10 +575,10 @@ function useNewTransactionViewModel() {
   useEffect(() => {
     if (isFocused) {
       refetchStaleFetcherData([
-        [useCases.getFinancialAccountsUseCase.uniqueName],
-        [useCases.getFinancialCreditCardsUseCase.uniqueName],
-        [useCases.getFinancialCreditCardsOverviewUseCase.uniqueName],
-        [useCases.getFinancialCategoriesUseCase.uniqueName],
+        financeKeys.accounts.all(),
+        financeKeys.creditCards.all(),
+        financeKeys.creditCardsOverview.all(),
+        financeKeys.categories.all(),
       ]);
     }
   }, [isFocused]);

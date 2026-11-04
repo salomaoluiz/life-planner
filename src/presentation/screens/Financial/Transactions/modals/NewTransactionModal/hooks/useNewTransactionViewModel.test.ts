@@ -1,5 +1,6 @@
 import { act } from "@tests";
 import { modalNavigation } from "@tests/modalNavigation";
+import queryName from "@tests/queryName";
 
 import CreditCardOverviewDTO, {
   CreditCardSummaryDTO,
@@ -9,6 +10,7 @@ import ProjectedOccurrenceDTO from "@application/dto/financial/ProjectedOccurren
 import RecurrenceDTO from "@application/dto/financial/RecurrenceDTO";
 import TagDTO from "@application/dto/financial/TagDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import {
   AccountHasTransactions,
   FinancialNotFound,
@@ -369,10 +371,10 @@ it("SHOULD refetch only the stale accounts, cards, overview and categories WHEN 
   setup();
 
   expect(spies.refetchStale).toHaveBeenCalledWith([
-    ["accounts"],
-    ["cards"],
-    ["overview"],
-    ["categories"],
+    financeKeys.accounts.all(),
+    financeKeys.creditCards.all(),
+    financeKeys.creditCardsOverview.all(),
+    financeKeys.categories.all(),
   ]);
   expect(queries.accounts.value.refetch).not.toHaveBeenCalled();
 });
@@ -1737,13 +1739,12 @@ describe("description suggestions (spec 060)", () => {
 
     act(() => result.current.onDescriptionChange("ub"));
 
-    expect(spies.getCachedFetcherData).toHaveBeenCalledWith([
-      "transactions",
-      "list",
-    ]);
+    expect(spies.getCachedFetcherData).toHaveBeenCalledWith(
+      financeKeys.transactions.list(),
+    );
     expect(
       spies.useQuery.mock.calls.some(
-        ([options]) => options.cacheKey[1] === "list",
+        ([options]) => options.cacheKey[2] === "list",
       ),
     ).toBe(false);
   });
@@ -1814,8 +1815,8 @@ describe("row lookup of an edit (spec 075)", () => {
       .map(([options]) => options)
       .filter(
         (options) =>
-          options.cacheKey.length === 1 &&
-          options.cacheKey[0] === "transactions",
+          options.cacheKey[2] === "raw" &&
+          queryName(options.cacheKey) === "transactions",
       )
       .pop()!;
   }

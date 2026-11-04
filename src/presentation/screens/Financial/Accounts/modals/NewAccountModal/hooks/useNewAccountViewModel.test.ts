@@ -1,6 +1,8 @@
 import { act } from "@tests";
 import { modalNavigation } from "@tests/modalNavigation";
+import queryName from "@tests/queryName";
 
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import { AccountHasTransactions } from "@domain/entities/errors";
 
 import {
@@ -176,7 +178,7 @@ it.each(["create", "update", "delete"] as const)(
     setup();
 
     expect(spies.invalidate).toHaveBeenCalledTimes(1);
-    expect(spies.invalidate).toHaveBeenCalledWith(["accounts"]);
+    expect(spies.invalidate).toHaveBeenCalledWith(financeKeys.accounts.all());
     expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
   },
 );
@@ -363,7 +365,7 @@ describe("archiving ends the recurring series (spec 034 FR 34)", () => {
 
     expect(spies.useQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        cacheKey: ["recurrences", "account", "a1"],
+        cacheKey: financeKeys.recurrences.raw("account", "a1"),
         enabled: true,
       }),
     );
@@ -378,7 +380,7 @@ describe("archiving ends the recurring series (spec 034 FR 34)", () => {
 
     expect(spies.useQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        cacheKey: ["recurrences", "account", "a1"],
+        cacheKey: financeKeys.recurrences.raw("account", "a1"),
         enabled: false,
       }),
     );
@@ -411,7 +413,8 @@ describe("archiving ends the recurring series (spec 034 FR 34)", () => {
 
     const options = spies.useQuery.mock.calls.find(
       ([option]) =>
-        (option as { cacheKey: string[] }).cacheKey[0] === "recurrences",
+        queryName((option as { cacheKey: string[] }).cacheKey) ===
+        "recurrences",
     )![0] as { fetch: () => Promise<unknown> };
 
     await options.fetch();

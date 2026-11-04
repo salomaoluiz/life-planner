@@ -1,4 +1,5 @@
 import { act } from "@tests";
+import queryName from "@tests/queryName";
 
 import { makeInvoice } from "../mocks/invoice.mocks";
 import { EMPTY_FILTERS } from "../models/transactionFilters";
@@ -20,7 +21,7 @@ function lastQuery(prefix: string, filtered: boolean) {
   const calls = spies.useQuery.mock.calls.filter(([options]) => {
     const key = (options as { cacheKey: string[] }).cacheKey;
 
-    return key[0] === prefix && key.includes("filtered") === filtered;
+    return queryName(key) === prefix && key.includes("filtered") === filtered;
   });
 
   return calls[calls.length - 1][0] as { enabled?: boolean };
@@ -122,7 +123,9 @@ describe("with filters", () => {
     const key = (
       spies.useQuery.mock.calls
         .map(([options]) => options as { cacheKey: string[] })
-        .filter((options) => options.cacheKey[0] === "filteredTransactions")
+        .filter(
+          (options) => queryName(options.cacheKey) === "filteredTransactions",
+        )
         .pop() as { cacheKey: string[] }
     ).cacheKey.join("|");
 
@@ -138,14 +141,14 @@ describe("with filters", () => {
     act(() =>
       result.current.onFiltersApply({ ...EMPTY_FILTERS, accountIds: ["a1"] }),
     );
-    expect(lastQuery("cardInvoices", true).enabled).toBe(false);
+    expect(lastQuery("invoices", true).enabled).toBe(false);
     expect(lastQuery("filteredTransactions", false).enabled).toBe(true);
 
     act(() =>
       result.current.onFiltersApply({ ...EMPTY_FILTERS, origin: "CARD" }),
     );
     expect(lastQuery("filteredTransactions", false).enabled).toBe(false);
-    expect(lastQuery("cardInvoices", true).enabled).toBe(true);
+    expect(lastQuery("invoices", true).enabled).toBe(true);
   });
 
   it("SHOULD not ask for projections of paid rows", () => {

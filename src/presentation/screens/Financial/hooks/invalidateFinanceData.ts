@@ -1,4 +1,4 @@
-import { useCases } from "@application/useCases";
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import {
   invalidateFetcherData,
   markFetcherDataStale,
@@ -9,27 +9,12 @@ import {
 // all of them stale itself instead of relying on the next focus or mount. Only the mounted queries refetch at once.
 // `refetch: false` only marks them stale: the screen under a modal refetches them when it regains focus, once the modal
 // is closed (an immediate refetch while the modal closes raced with the write on the recurrence flows).
-// One call per key prefix: `invalidateFetcherData([a, b])` would mean the single prefix `a → b`.
+// One call per key prefix (`financeKeys.invalidationRoots()`): `invalidateFetcherData([a, b])` would mean the single prefix `a → b`.
 async function invalidateFinanceData({ refetch = true } = {}) {
   const invalidate = refetch ? invalidateFetcherData : markFetcherDataStale;
 
   await Promise.all(
-    [
-      useCases.getFinancialTransactionsUseCase.uniqueName,
-      useCases.getFinancialFilteredTransactionsUseCase.uniqueName,
-      useCases.getFinancialCardInvoicesForMonthUseCase.uniqueName,
-      useCases.getFinancialCardInvoiceUseCase.uniqueName,
-      useCases.getFinancialProjectionsUseCase.uniqueName,
-      useCases.getMonthSummaryUseCase.uniqueName,
-      useCases.getFinancialDailyBalancesUseCase.uniqueName,
-      useCases.getFinancialAccountsUseCase.uniqueName,
-      useCases.getFinancialCreditCardsUseCase.uniqueName,
-      useCases.getFinancialCreditCardsOverviewUseCase.uniqueName,
-      useCases.getFinancialInstallmentPlanUseCase.uniqueName,
-      useCases.getFinancialRecurrencesUseCase.uniqueName,
-      useCases.getFinancialCategoriesUseCase.uniqueName,
-      useCases.getFinancialTagsUseCase.uniqueName,
-    ].map(async (key) => invalidate([key])),
+    financeKeys.invalidationRoots().map(async (key) => invalidate(key)),
   );
 }
 

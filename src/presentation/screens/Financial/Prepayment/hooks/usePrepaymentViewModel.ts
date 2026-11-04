@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import CreditCardOverviewDTO from "@application/dto/financial/CreditCardOverviewDTO";
 import InstallmentPlanDTO from "@application/dto/financial/InstallmentPlanDTO";
 import PrepaymentPreviewDTO from "@application/dto/financial/PrepaymentPreviewDTO";
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
@@ -34,15 +35,12 @@ function usePrepaymentViewModel() {
   const [submitted, setSubmitted] = useState(false);
 
   const plan = useQuery<InstallmentPlanDTO>({
-    cacheKey: [
-      useCases.getFinancialInstallmentPlanUseCase.uniqueName,
-      params.planId,
-    ],
+    cacheKey: financeKeys.installmentPlans.raw(params.planId),
     fetch: async () =>
       useCases.getFinancialInstallmentPlanUseCase.execute(params.planId),
   });
   const overview = useOwnerScopedQuery<CreditCardOverviewDTO>({
-    cacheKey: [useCases.getFinancialCreditCardsOverviewUseCase.uniqueName],
+    cacheKey: financeKeys.creditCardsOverview.raw(),
     enabled: !!plan.data,
     fetch: async (owners) =>
       useCases.getFinancialCreditCardsOverviewUseCase.execute(

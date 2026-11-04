@@ -1,6 +1,7 @@
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
@@ -38,7 +39,7 @@ function useInstallmentEditViewModel() {
   const owners = useOwners();
   const ownerIds = (owners.data ?? []).map((owner) => owner.id);
   const transactions = useQuery({
-    cacheKey: [useCases.getFinancialTransactionsUseCase.uniqueName],
+    cacheKey: financeKeys.transactions.raw(),
     enabled: !!owners.data,
     fetch: async () =>
       useCases.getFinancialTransactionsUseCase.execute({ ownerIds }),
@@ -46,22 +47,19 @@ function useInstallmentEditViewModel() {
   const transaction = transactions.data?.find((item) => item.id === params.id);
   const planId = transaction?.installmentPlanId;
   const plan = useQuery({
-    cacheKey: [
-      useCases.getFinancialInstallmentPlanUseCase.uniqueName,
-      planId ?? "",
-    ],
+    cacheKey: financeKeys.installmentPlans.raw(planId ?? ""),
     enabled: !!planId,
     fetch: async () =>
       useCases.getFinancialInstallmentPlanUseCase.execute(planId!),
   });
   const cards = useQuery({
-    cacheKey: [useCases.getFinancialCreditCardsUseCase.uniqueName],
+    cacheKey: financeKeys.creditCards.raw(),
     enabled: !!owners.data,
     fetch: async () =>
       useCases.getFinancialCreditCardsUseCase.execute(ownerIds),
   });
   const categories = useQuery({
-    cacheKey: [useCases.getFinancialCategoriesUseCase.uniqueName],
+    cacheKey: financeKeys.categories.raw(),
     enabled: !!owners.data,
     fetch: async () => useCases.getFinancialCategoriesUseCase.execute(ownerIds),
   });

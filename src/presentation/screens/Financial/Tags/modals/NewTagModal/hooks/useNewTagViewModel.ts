@@ -1,6 +1,7 @@
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
 import { TranslationKeys } from "@presentation/i18n/types";
@@ -31,7 +32,7 @@ function useNewTagViewModel() {
 
   const owners = useActiveOwners();
   const tags = useQuery({
-    cacheKey: [useCases.getFinancialTagsUseCase.uniqueName],
+    cacheKey: financeKeys.tags.raw(),
     enabled: !!owners.data,
     fetch: async () =>
       useCases.getFinancialTagsUseCase.execute(

@@ -2,6 +2,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { router, useLocalSearchParams } from "expo-router";
 
 import { renderHook } from "@tests";
+import queryName from "@tests/queryName";
 
 import AccountDTO from "@application/dto/financial/AccountDTO";
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
@@ -254,16 +255,16 @@ beforeEach(() => {
   spies.params.mockReturnValue({});
   spies.useQuery.mockImplementation(((options: { cacheKey: string[] }) =>
     queries[
-      options.cacheKey[1] === "list"
-        ? `${options.cacheKey[0]}_list`
-        : options.cacheKey[0]
+      options.cacheKey[options.cacheKey[0] === "finance" ? 2 : 1] === "list"
+        ? `${queryName(options.cacheKey)}_list`
+        : queryName(options.cacheKey)
     ].build()) as never);
   spies.useMutation.mockImplementation(((options: { cacheKey: string[] }) =>
-    mutations[options.cacheKey[0]].build()) as never);
+    mutations[queryName(options.cacheKey)].build()) as never);
   // The months the Transactions screen cached: every `*_list*` fixture that holds data.
   spies.getCachedFetcherData.mockImplementation(((cacheKey: string[]) =>
     Object.entries(queries)
-      .filter(([key]) => key.startsWith(`${cacheKey[0]}_list`))
+      .filter(([key]) => key.startsWith(`${queryName(cacheKey)}_list`))
       .map(([, query]) => query.value.data)
       .filter((data) => data !== undefined)) as never);
 });

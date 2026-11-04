@@ -1,3 +1,4 @@
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import { InvoiceIsPaid } from "@domain/entities/errors";
 import { invalidateFetcherData } from "@infrastructure/fetcher";
 
@@ -7,23 +8,6 @@ import runPendingChange from "./runPendingChange";
 jest.mock("@infrastructure/fetcher", () => ({
   invalidateFetcherData: jest.fn(),
 }));
-jest.mock("@application/useCases", () => {
-  function uc(name: string) {
-    return { uniqueName: name };
-  }
-
-  return {
-    useCases: {
-      getFinancialCardInvoicesForMonthUseCase: uc("invoices"),
-      getFinancialDailyBalancesUseCase: uc("balances"),
-      getFinancialFilteredTransactionsUseCase: uc("filtered"),
-      getFinancialProjectionsUseCase: uc("projections"),
-      getFinancialTransactionsUseCase: uc("transactions"),
-      getMonthSummaryUseCase: uc("summary"),
-    },
-  };
-});
-
 const invalidate = invalidateFetcherData as jest.Mock;
 const base = { description: "Lunch", kind: "create" as const };
 
@@ -56,8 +40,8 @@ it("SHOULD keep the change registered until the lists refetched", async () => {
   await run;
   expect(getChanges()).toHaveLength(0);
   expect(getFailures()).toHaveLength(0);
-  expect(invalidate).toHaveBeenCalledWith(["transactions"]);
-  expect(invalidate).toHaveBeenCalledWith(["summary"]);
+  expect(invalidate).toHaveBeenCalledWith(financeKeys.transactions.all());
+  expect(invalidate).toHaveBeenCalledWith(financeKeys.summary.all());
 });
 
 it("SHOULD roll back and queue one failure with retry on error", async () => {

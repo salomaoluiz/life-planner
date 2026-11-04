@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import CreditCardDTO from "@application/dto/financial/CreditCardDTO";
 import CreditCardOverviewDTO from "@application/dto/financial/CreditCardOverviewDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
 import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
@@ -12,7 +13,6 @@ import {
   archivedOwnerIds,
   buildOwnerFilterChoices,
 } from "@screens/Financial/models/ownerOptions";
-import { listQueryKey } from "@screens/Financial/models/queryKeys";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import {
@@ -49,9 +49,7 @@ function useCardsViewModel() {
   const [archivedExpanded, setArchivedExpanded] = useState(false);
 
   const query = useOwnerScopedQuery<CardsData>({
-    cacheKey: listQueryKey(
-      useCases.getFinancialCreditCardsOverviewUseCase.uniqueName,
-    ),
+    cacheKey: financeKeys.creditCardsOverview.list(),
     fetch: fetchCards,
   });
 

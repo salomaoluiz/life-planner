@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import AccountDTO from "@application/dto/financial/AccountDTO";
 import CardInvoiceDTO from "@application/dto/financial/CardInvoiceDTO";
 import CreditCardOverviewDTO from "@application/dto/financial/CreditCardOverviewDTO";
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
@@ -57,22 +58,21 @@ function useEarlyPaymentViewModel() {
   const owners = useOwners();
   const ownerIds = (owners.data ?? []).map((owner) => owner.id);
   const overview = useQuery<CreditCardOverviewDTO>({
-    cacheKey: [useCases.getFinancialCreditCardsOverviewUseCase.uniqueName],
+    cacheKey: financeKeys.creditCardsOverview.raw(),
     enabled: !!owners.data,
     fetch: async () =>
       useCases.getFinancialCreditCardsOverviewUseCase.execute(ownerIds),
   });
   const accounts = useQuery<AccountDTO[]>({
-    cacheKey: [useCases.getFinancialAccountsUseCase.uniqueName],
+    cacheKey: financeKeys.accounts.raw(),
     enabled: !!owners.data,
     fetch: async () => useCases.getFinancialAccountsUseCase.execute(ownerIds),
   });
   const stored = useQuery<CardInvoiceDTO>({
-    cacheKey: [
-      useCases.getFinancialCardInvoiceUseCase.uniqueName,
+    cacheKey: financeKeys.invoice.raw(
       params.creditCardId,
       params.invoiceMonth ?? "",
-    ],
+    ),
     enabled: isEdit && !!params.invoiceMonth,
     fetch: async () =>
       useCases.getFinancialCardInvoiceUseCase.execute({

@@ -2,6 +2,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { router } from "expo-router";
 
 import { act, renderHook } from "@tests";
+import queryName from "@tests/queryName";
 
 import AccountDTO from "@application/dto/financial/AccountDTO";
 import DailyBalanceDTO from "@application/dto/financial/DailyBalanceDTO";
@@ -207,10 +208,17 @@ afterEach(() => {
 
 type QueryName = keyof typeof queries;
 
+// The daily balances fixture is called `balances` here.
+function fixtureName(cacheKey: string[]) {
+  const name = queryName(cacheKey);
+
+  return name === "dailyBalances" ? "balances" : name;
+}
+
 // The options each query was created with (cacheKey, enabled, fetch).
 function optionsOf(name: QueryName) {
   const calls = spies.useQuery.mock.calls.filter(
-    ([options]) => options.cacheKey[0] === name,
+    ([options]) => fixtureName(options.cacheKey) === name,
   );
 
   return calls[calls.length - 1][0];
@@ -223,7 +231,7 @@ function setup(data: Partial<Record<QueryName, unknown>> = {}) {
   });
 
   spies.useQuery.mockImplementation(((options: { cacheKey: string[] }) =>
-    queries[options.cacheKey[0] as QueryName].build()) as never);
+    queries[fixtureName(options.cacheKey) as QueryName].build()) as never);
 
   return renderHook(() => useHomeViewModel());
 }

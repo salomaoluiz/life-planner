@@ -1,4 +1,4 @@
-import { useCases } from "@application/useCases";
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import {
   invalidateFetcherData,
   markFetcherDataStale,
@@ -15,25 +15,8 @@ it("SHOULD invalidate every cache a finance write can change, one key prefix eac
     .mocked(invalidateFetcherData)
     .mock.calls.map(([prefix]) => prefix);
 
-  expect(keys).toEqual(
-    expect.arrayContaining([
-      [useCases.getFinancialTransactionsUseCase.uniqueName],
-      [useCases.getFinancialFilteredTransactionsUseCase.uniqueName],
-      [useCases.getFinancialCardInvoicesForMonthUseCase.uniqueName],
-      [useCases.getFinancialCardInvoiceUseCase.uniqueName],
-      [useCases.getFinancialProjectionsUseCase.uniqueName],
-      [useCases.getMonthSummaryUseCase.uniqueName],
-      [useCases.getFinancialDailyBalancesUseCase.uniqueName],
-      [useCases.getFinancialAccountsUseCase.uniqueName],
-      [useCases.getFinancialCreditCardsUseCase.uniqueName],
-      [useCases.getFinancialCreditCardsOverviewUseCase.uniqueName],
-      [useCases.getFinancialInstallmentPlanUseCase.uniqueName],
-      [useCases.getFinancialRecurrencesUseCase.uniqueName],
-      [useCases.getFinancialCategoriesUseCase.uniqueName],
-      [useCases.getFinancialTagsUseCase.uniqueName],
-    ]),
-  );
-  keys.forEach((prefix) => expect(prefix).toHaveLength(1));
+  expect(keys).toEqual(financeKeys.invalidationRoots());
+  keys.forEach((prefix) => expect(prefix).toHaveLength(2));
 });
 
 it("SHOULD only mark the caches stale WHEN asked not to refetch now (a write made in a modal over the screen)", async () => {
@@ -42,10 +25,8 @@ it("SHOULD only mark the caches stale WHEN asked not to refetch now (a write mad
   await invalidateFinanceData({ refetch: false });
 
   expect(invalidateFetcherData).not.toHaveBeenCalled();
-  expect(markFetcherDataStale).toHaveBeenCalledWith([
-    useCases.getFinancialTransactionsUseCase.uniqueName,
-  ]);
-  expect(markFetcherDataStale).toHaveBeenCalledWith([
-    useCases.getMonthSummaryUseCase.uniqueName,
-  ]);
+  expect(markFetcherDataStale).toHaveBeenCalledWith(
+    financeKeys.transactions.all(),
+  );
+  expect(markFetcherDataStale).toHaveBeenCalledWith(financeKeys.summary.all());
 });

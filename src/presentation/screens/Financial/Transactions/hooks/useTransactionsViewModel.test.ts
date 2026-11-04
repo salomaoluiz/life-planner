@@ -1,9 +1,11 @@
 import { act } from "@tests";
 import { modalNavigation } from "@tests/modalNavigation";
+import queryName from "@tests/queryName";
 
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
 import ProjectedOccurrenceDTO from "@application/dto/financial/ProjectedOccurrenceDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
+import { financeKeys } from "@application/queryKeys/financeKeys";
 
 import { makeInvoice } from "../mocks/invoice.mocks";
 import TransactionUIModel from "../models/TransactionUIModel";
@@ -55,8 +57,8 @@ describe("owners batch (spec 074)", () => {
     const result: Record<string, boolean> = {};
 
     spies.useQuery.mock.calls.forEach(([options]) => {
-      result[options.cacheKey[0]] =
-        !!result[options.cacheKey[0]] || !!options.enabled;
+      result[queryName(options.cacheKey)] =
+        !!result[queryName(options.cacheKey)] || !!options.enabled;
     });
 
     return result;
@@ -69,8 +71,8 @@ describe("owners batch (spec 074)", () => {
     setup();
 
     expect(enabledByKey()).toMatchObject({
-      cardInvoices: true,
       dailyBalances: true,
+      invoices: true,
       summary: true,
     });
   });
@@ -164,7 +166,7 @@ function items() {
 function lastSummaryKey() {
   return spies.useQuery.mock.calls
     .map((call) => call[0])
-    .filter((o) => o.cacheKey[0] === "summary")
+    .filter((o) => queryName(o.cacheKey) === "summary")
     .pop()!.cacheKey;
 }
 
@@ -250,7 +252,10 @@ it("SHOULD summarize for the selected owner only and ignore the type filter", ()
   act(() => result.current.onOwnerFilterChange("family-1"));
   act(() => result.current.onTypeFilterChange("EXPENSE"));
 
-  expect(lastSummaryKey()).toEqual(["summary", "2026-9", "family-1"]);
+  expect(lastSummaryKey()).toEqual([
+    ...financeKeys.summary.ofMonth("2026-10", "screen"),
+    "family-1",
+  ]);
 });
 
 it("SHOULD summarize every owner WHEN the scope is All", () => {
@@ -258,8 +263,7 @@ it("SHOULD summarize every owner WHEN the scope is All", () => {
   setup();
 
   expect(lastSummaryKey()).toEqual([
-    "summary",
-    "2026-9",
+    ...financeKeys.summary.ofMonth("2026-10", "screen"),
     "user-id",
     "family-1",
   ]);
@@ -277,7 +281,10 @@ it("SHOULD fall back to All WHEN the selected family is no longer an owner", () 
 
   expect(result.current.ownerFilter).toBe("ALL");
   expect(itemIds(result.current.entries)).toHaveLength(4);
-  expect(lastSummaryKey()).toEqual(["summary", "2026-9", "user-id"]);
+  expect(lastSummaryKey()).toEqual([
+    ...financeKeys.summary.ofMonth("2026-10", "screen"),
+    "user-id",
+  ]);
 });
 
 it("SHOULD render only the All scope WHEN the user has no personal owner or families", () => {
@@ -356,12 +363,12 @@ it("SHOULD refetch only the stale queries WHEN the screen is focused", () => {
   setup();
 
   expect(spies.refetchStale).toHaveBeenCalledWith([
-    ["transactions", "list"],
-    ["cardInvoices", "list"],
-    ["projections", "list"],
-    ["dailyBalances", "list"],
-    ["filteredTransactions", "list"],
-    ["summary"],
+    financeKeys.transactions.list(),
+    financeKeys.invoices.list(),
+    financeKeys.projections.list(),
+    financeKeys.dailyBalances.all(),
+    financeKeys.transactionsFiltered.list(),
+    financeKeys.summary.all(),
   ]);
   expect(transactionsQuery.value.refetch).not.toHaveBeenCalled();
 });
@@ -717,12 +724,10 @@ describe("day balances (spec 035)", () => {
     act(() => result.current.onTypeFilterChange("INCOME"));
     const keys = spies.useQuery.mock.calls
       .map(([options]) => options.cacheKey as string[])
-      .filter((key) => key[0] === "dailyBalances");
+      .filter((key) => queryName(key) === "dailyBalances");
 
     expect(keys.at(-1)).toEqual([
-      "dailyBalances",
-      "list",
-      "2026-10",
+      ...financeKeys.dailyBalances.ofMonth("2026-10", "screen"),
       "user-id",
       "family-1",
     ]);
@@ -730,10 +735,13 @@ describe("day balances (spec 035)", () => {
     act(() => result.current.onOwnerFilterChange("family-1"));
     const last = spies.useQuery.mock.calls
       .map(([options]) => options.cacheKey as string[])
-      .filter((key) => key[0] === "dailyBalances")
+      .filter((key) => queryName(key) === "dailyBalances")
       .at(-1);
 
-    expect(last).toEqual(["dailyBalances", "list", "2026-10", "family-1"]);
+    expect(last).toEqual([
+      ...financeKeys.dailyBalances.ofMonth("2026-10", "screen"),
+      "family-1",
+    ]);
   });
 
   it("SHOULD not enable the query for a month more than 12 ahead", () => {
@@ -745,7 +753,7 @@ describe("day balances (spec 035)", () => {
     }
     const last = spies.useQuery.mock.calls
       .map(([options]) => options)
-      .filter((options) => options.cacheKey[0] === "dailyBalances")
+      .filter((options) => queryName(options.cacheKey) === "dailyBalances")
       .at(-1);
 
     expect(last?.enabled).toBe(false);
@@ -761,7 +769,7 @@ describe("day balances (spec 035)", () => {
     setup();
     const options = spies.useQuery.mock.calls
       .map(([item]) => item)
-      .find((item) => item.cacheKey[0] === "dailyBalances");
+      .find((item) => queryName(item.cacheKey) === "dailyBalances");
 
     await options?.fetch();
 
@@ -780,7 +788,10 @@ describe("archived family (spec 042)", () => {
     const { result } = setup();
 
     expect(itemIds(result.current.entries)).toEqual(["item-inc", "item-exp"]);
-    expect(lastSummaryKey()).toEqual(["summary", "2026-9", "user-id"]);
+    expect(lastSummaryKey()).toEqual([
+      ...financeKeys.summary.ofMonth("2026-10", "screen"),
+      "user-id",
+    ]);
     expect(result.current.readOnly).toBe(false);
   });
 
@@ -826,7 +837,9 @@ describe("month-scoped list (spec 075)", () => {
   it("SHOULD key the list by month AND keep the previous month while another loads", () => {
     setup();
 
-    expect(listOptions().cacheKey).toEqual(["transactions", "list", "2026-10"]);
+    expect(listOptions().cacheKey).toEqual(
+      financeKeys.transactions.list("2026-10"),
+    );
     expect(listOptions().keepPreviousData).toBe(true);
   });
 
@@ -850,7 +863,9 @@ describe("month-scoped list (spec 075)", () => {
 
     act(() => result.current.onNextMonth());
 
-    expect(listOptions().cacheKey).toEqual(["transactions", "list", "2026-11"]);
+    expect(listOptions().cacheKey).toEqual(
+      financeKeys.transactions.list("2026-11"),
+    );
   });
 
   it("SHOULD keep the skeleton WHILE another month shows the previous one as placeholder", () => {

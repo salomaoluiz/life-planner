@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen, waitFor } from "@tests";
+import queryName from "@tests/queryName";
 
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
@@ -156,7 +157,7 @@ function setup(
   jest.mocked(theme.useBreakpoint).mockReturnValue(breakpoint);
   jest.mocked(useFilterOptions).mockReturnValue(options as never);
   spies.useMutation.mockImplementation(((props: { cacheKey: string[] }) => {
-    const key = props.cacheKey[0];
+    const key = queryName(props.cacheKey);
 
     if (key === "validateImport") {
       return mutations.validate.build();

@@ -1,3 +1,5 @@
+import queryName from "@tests/queryName";
+
 import { BusinessError, ImportRowsInvalid } from "@domain/entities/errors";
 import { lightTheme } from "@presentation/theme/provider";
 
@@ -273,7 +275,8 @@ describe("step 3: values", () => {
 
     // The mutation runs the use case in the owner of the file.
     const create = spies.useMutation.mock.calls.find(
-      ([props]) => props.cacheKey[0] === "financial.import_create_record",
+      ([props]) =>
+        queryName(props.cacheKey) === "financial.import_create_record",
     );
 
     await create?.[0].fetch({
@@ -436,7 +439,8 @@ describe("step 3: values", () => {
     fireEvent.press(screen.getByTestId(ids.importContinue));
 
     const create = spies.useMutation.mock.calls.find(
-      ([props]) => props.cacheKey[0] === "financial.import_create_record",
+      ([props]) =>
+        queryName(props.cacheKey) === "financial.import_create_record",
     )?.[0];
 
     await create?.fetch({
@@ -467,7 +471,8 @@ describe("step 3: values", () => {
     fireEvent.press(screen.getByTestId(ids.importContinue));
 
     const create = spies.useMutation.mock.calls.find(
-      ([props]) => props.cacheKey[0] === "financial.import_create_record",
+      ([props]) =>
+        queryName(props.cacheKey) === "financial.import_create_record",
     )?.[0];
 
     await create?.fetch({

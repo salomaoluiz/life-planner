@@ -2,6 +2,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { router } from "expo-router";
 
 import { renderHook } from "@tests";
+import queryName from "@tests/queryName";
 
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
@@ -35,7 +36,7 @@ jest.mock("@application/useCases", () => ({
   useCases: {
     getFinancialCardInvoicesForMonthUseCase: {
       execute: jest.fn(),
-      uniqueName: "cardInvoices",
+      uniqueName: "invoices",
     },
     getFinancialCategoriesUseCase: {
       execute: jest.fn(),
@@ -172,21 +173,21 @@ beforeEach(() => {
     .mocked(useOwnerScopedQuery)
     .mockImplementation((() => transactionsQuery.build()) as never);
   spies.useQuery.mockImplementation(((options: { cacheKey: string[] }) => {
-    if (options.cacheKey[0] === "summary") {
+    if (queryName(options.cacheKey) === "summary") {
       return summaryQuery.build();
     }
-    if (options.cacheKey[0] === "dailyBalances") {
+    if (queryName(options.cacheKey) === "dailyBalances") {
       return balancesQuery.build();
     }
-    if (options.cacheKey[0] === "filteredTransactions") {
+    if (queryName(options.cacheKey) === "filteredTransactions") {
       return filteredTransactionsQuery.build();
     }
-    if (options.cacheKey[0] === "projections") {
+    if (queryName(options.cacheKey) === "projections") {
       return options.cacheKey.includes("filtered")
         ? filteredProjectionsQuery.build()
         : projectionsQuery.build();
     }
-    if (options.cacheKey[0] === "cardInvoices") {
+    if (queryName(options.cacheKey) === "invoices") {
       return options.cacheKey.includes("filtered")
         ? filteredInvoicesQuery.build()
         : invoicesQuery.build();

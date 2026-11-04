@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import CreditCardOverviewDTO from "@application/dto/financial/CreditCardOverviewDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
@@ -70,13 +71,13 @@ function useRefundViewModel() {
   const owners = useOwners();
   const ownerIds = (owners.data ?? []).map((owner) => owner.id);
   const overview = useQuery<CreditCardOverviewDTO>({
-    cacheKey: [useCases.getFinancialCreditCardsOverviewUseCase.uniqueName],
+    cacheKey: financeKeys.creditCardsOverview.raw(),
     enabled: !!owners.data,
     fetch: async () =>
       useCases.getFinancialCreditCardsOverviewUseCase.execute(ownerIds),
   });
   const transactions = useQuery<TransactionDTO[]>({
-    cacheKey: [useCases.getFinancialTransactionsUseCase.uniqueName],
+    cacheKey: financeKeys.transactions.raw(),
     enabled: !!owners.data,
     fetch: async () =>
       useCases.getFinancialTransactionsUseCase.execute({ ownerIds }),

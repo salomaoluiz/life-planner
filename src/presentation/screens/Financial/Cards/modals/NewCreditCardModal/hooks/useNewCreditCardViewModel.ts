@@ -2,6 +2,7 @@ import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
 import AccountDTO from "@application/dto/financial/AccountDTO";
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
 import {
   invalidateFetcherData,
@@ -35,7 +36,7 @@ function useNewCreditCardViewModel() {
 
   const owners = useActiveOwners();
   const cards = useQuery({
-    cacheKey: [useCases.getFinancialCreditCardsUseCase.uniqueName],
+    cacheKey: financeKeys.creditCards.raw(),
     enabled: !!owners.data,
     fetch: async () =>
       useCases.getFinancialCreditCardsUseCase.execute(
@@ -44,7 +45,7 @@ function useNewCreditCardViewModel() {
   });
 
   const accounts = useQuery<AccountDTO[]>({
-    cacheKey: [useCases.getFinancialAccountsUseCase.uniqueName],
+    cacheKey: financeKeys.accounts.raw(),
     enabled: !!owners.data,
     fetch: async () =>
       useCases.getFinancialAccountsUseCase.execute(
@@ -75,11 +76,7 @@ function useNewCreditCardViewModel() {
 
   // The recurring series that end when the card is archived (spec 034 FR 34).
   const series = useQuery({
-    cacheKey: [
-      useCases.getFinancialRecurrencesUseCase.uniqueName,
-      "card",
-      params.id ?? "",
-    ],
+    cacheKey: financeKeys.recurrences.raw("card", params.id ?? ""),
     enabled: isEditing && !!existing && existing.status !== "ARCHIVED",
     fetch: async () =>
       useCases.getFinancialRecurrencesUseCase.execute({
@@ -117,12 +114,8 @@ function useNewCreditCardViewModel() {
       deleteMutation.status === "success"
     ) {
       // The list screen (overview) and this form's list query must not reopen on old data.
-      invalidateFetcherData([
-        useCases.getFinancialCreditCardsOverviewUseCase.uniqueName,
-      ]);
-      invalidateFetcherData([
-        useCases.getFinancialCreditCardsUseCase.uniqueName,
-      ]);
+      invalidateFetcherData(financeKeys.creditCardsOverview.all());
+      invalidateFetcherData(financeKeys.creditCards.all());
       void invalidateFinanceData();
       closeModal();
     }
