@@ -136,7 +136,7 @@
     "maxDepth": 2,
     "maxDuplicates": 0,
     "maxFullHistory": 0,
-    "maxRequests": 6
+    "maxRequests": 5
   },
   "financial.transactions.write.edit": {
     "maxDepth": 2,

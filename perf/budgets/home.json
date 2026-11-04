@@ -11,6 +11,12 @@
     "maxRequests": 9,
     "route": "app/(app)/(tabs)/index/index.tsx"
   },
+  "home.home.write.mounted": {
+    "maxDepth": 2,
+    "maxDuplicates": 0,
+    "maxRequests": 8,
+    "route": "app/(app)/(tabs)/index/index.tsx"
+  },
   "home.quickAdd.mount.cold": {
     "maxDepth": 0,
     "maxDuplicates": 0,
