@@ -1,3 +1,4 @@
+import FinanceMonthModel from "@data/models/financial/FinanceMonthModel";
 import TransactionModel, {
   OwnerType,
   TransactionType,
@@ -26,6 +27,10 @@ export interface TransactionDatasource {
   getFilteredTransactions(
     params: GetFilteredTransactionsDatasourceParams,
   ): Promise<TransactionModel[]>;
+  // Spec 080: rows, invoices, balances, projections and summary of one month in one request.
+  getFinanceMonth(
+    params: GetFinanceMonthDatasourceParams,
+  ): Promise<FinanceMonthModel>;
   getTransactionById(id: string): Promise<TransactionModel | undefined>;
   getTransactions(
     ownerIds: string[],
@@ -70,6 +75,12 @@ interface GetFilteredTransactionsDatasourceParams {
   ownerIds: string[];
 }
 
+interface GetFinanceMonthDatasourceParams {
+  // `YYYY-MM`
+  month: string;
+  ownerIds: string[];
+}
+
 interface UpdateTransactionDatasourceParams {
   accountId?: string;
   category?: string;
@@ -90,4 +101,8 @@ interface UpdateTransactionDatasourceParams {
   value?: string;
 }
 
-export { CreateTransactionDatasourceParams, UpdateTransactionDatasourceParams };
+export {
+  CreateTransactionDatasourceParams,
+  GetFinanceMonthDatasourceParams,
+  UpdateTransactionDatasourceParams,
+};

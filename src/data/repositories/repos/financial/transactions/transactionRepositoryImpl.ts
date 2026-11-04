@@ -1,4 +1,5 @@
 import { Datasources } from "@data/datasource";
+import FinanceMonthEntity from "@domain/entities/financial/FinanceMonthEntity";
 import {
   ExportFileEntity,
   ImportValidationEntity,
@@ -9,6 +10,7 @@ import { FinancialTransactionRepository } from "@domain/repositories/financial";
 import createTransaction from "./createTransaction";
 import deleteTransaction from "./deleteTransaction";
 import getFilteredTransactions from "./getFilteredTransactions";
+import getFinanceMonth from "./getFinanceMonth";
 import getTransactionById from "./getTransactionById";
 import getTransactions from "./getTransactions";
 import importTransactions from "./importTransactions";
@@ -34,6 +36,9 @@ function transactionRepositoryImpl(
     },
     async getFilteredTransactions(params): Promise<TransactionEntity[]> {
       return getFilteredTransactions(params, datasources);
+    },
+    async getFinanceMonth(params): Promise<FinanceMonthEntity> {
+      return getFinanceMonth(params, datasources);
     },
     async getTransactionById(id): Promise<TransactionEntity | undefined> {
       return getTransactionById(id, datasources);

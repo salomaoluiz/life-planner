@@ -1,4 +1,5 @@
 import { Datasources } from "@data/datasource";
+import DailyBalanceModel from "@data/models/financial/DailyBalanceModel";
 import DailyBalanceEntity from "@domain/entities/financial/DailyBalanceEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
@@ -9,9 +10,12 @@ async function getDailyBalances(
   params: GetDailyBalancesDatasourceParams,
   datasources: Datasources,
 ) {
-  const model =
-    await datasources.financialAccountDatasource.getDailyBalances(params);
+  return toDailyBalanceEntity(
+    await datasources.financialAccountDatasource.getDailyBalances(params),
+  );
+}
 
+function toDailyBalanceEntity(model: DailyBalanceModel) {
   return new DailyBalanceEntity({
     accounts: model.accounts.map((account) => ({
       ...account,
@@ -23,3 +27,4 @@ async function getDailyBalances(
 }
 
 export default getDailyBalances;
+export { toDailyBalanceEntity };
