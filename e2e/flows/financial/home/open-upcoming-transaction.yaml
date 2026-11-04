@@ -1,0 +1,61 @@
+url: ${E2E_WEB_URL}
+name: financial/home/open-upcoming-transaction
+tags:
+  - financial
+  - home
+  - spec-077
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# An upcoming item of the Home opens its transaction (spec 077): the row is not in any loaded month, so the form
+# reads it by id.
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript: ../../../scripts/upcoming-dates.js
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Upcoming
+      KEY: UPCOMING_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: ${output.UPCOMING_NAME}
+      VALUE_CENTS: "4200"
+      DATE: ${output.UPCOMING_DATE}
+      PAID: "false"
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "home.finance.upcomingItem-title"
+      text: ${output.UPCOMING_NAME}
+    timeout: 20000
+- tapOn:
+    id: "home.finance.upcomingItem-title"
+    text: ${output.UPCOMING_NAME}
+# The transaction form opens on that row
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.description-input"
+    timeout: 20000
+- assertVisible:
+    id: "financial.transaction-form.description-input"
+    text: ${output.UPCOMING_NAME}
