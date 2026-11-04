@@ -1824,8 +1824,8 @@ describe("description suggestions (spec 060)", () => {
   });
 });
 
-describe("row lookup of an edit (spec 075)", () => {
-  function fullHistoryCall() {
+describe("row lookup of an edit (spec 075, 077)", () => {
+  function byIdCall() {
     return spies.useQuery.mock.calls
       .map(([options]) => options)
       .filter(
@@ -1836,7 +1836,7 @@ describe("row lookup of an edit (spec 075)", () => {
       .pop()!;
   }
 
-  it("SHOULD take the row from the month the screen holds AND never load the whole history", () => {
+  it("SHOULD take the row from the month the screen holds AND not read it by id", () => {
     givenLoaded({ params: { id: "t1" }, transactions: [] });
     queries.transactions_list.withData({
       items: [new TransactionUIModel(tx("t1", { description: "Cached" }))],
@@ -1845,18 +1845,40 @@ describe("row lookup of an edit (spec 075)", () => {
     const { result } = setup();
 
     expect(result.current.description).toBe("Cached");
-    expect(fullHistoryCall().enabled).toBe(false);
+    expect(byIdCall().enabled).toBe(false);
   });
 
-  it("SHOULD fall back to the whole history WHEN the row is in no cached month (opened from elsewhere)", () => {
+  it("SHOULD read the row by id WHEN it is in no cached month (opened from elsewhere)", async () => {
     givenLoaded({
       params: { id: "t1" },
-      transactions: [tx("t1", { description: "From history" })],
+      transactions: [tx("t1", { description: "By id" })],
     });
 
     const { result } = setup();
 
-    expect(fullHistoryCall().enabled).toBe(true);
-    expect(result.current.description).toBe("From history");
+    expect(byIdCall().enabled).toBe(true);
+    expect(byIdCall().cacheKey).toEqual([
+      "finance",
+      "transactions",
+      "raw",
+      "byId",
+      "t1",
+    ]);
+    expect(result.current.description).toBe("By id");
+
+    await byIdCall().fetch();
+
+    expect(
+      useCases.getFinancialTransactionByIdUseCase.execute,
+    ).toHaveBeenCalledWith({
+      id: "t1",
+      ownerIds: ["user-id", "family-1"],
+    });
+  });
+
+  it("SHOULD report notFound WHEN the API does not have the row", () => {
+    givenLoaded({ params: { id: "gone" }, transactions: [] });
+
+    expect(setup().result.current.isNotFound).toBe(true);
   });
 });

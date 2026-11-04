@@ -1,17 +1,16 @@
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import { DefaultError } from "@domain/entities/errors";
-import {
-  recentTransactionsRange,
-  TransactionDateRange,
-} from "@domain/entities/financial/TransactionQueryFilter";
+import { TransactionDateRange } from "@domain/entities/financial/TransactionQueryFilter";
 import Repositories from "@domain/repositories";
 
 export interface GetTransactionsUseCaseParams {
+  // Spec 077: only this card's purchases (one request).
+  creditCardId?: string;
   ownerIds: string[];
-  // Only this period (account rows by date, card purchases by invoice list date); omitted → the whole history.
-  // Default: the recent window (spec 078: the API never lists the whole history).
-  range?: TransactionDateRange;
+  // Only this period (account rows by date, card purchases by invoice list date). Required: the API never lists the
+  // whole history (spec 078) and no screen asks for it (spec 077).
+  range: TransactionDateRange;
 }
 
 function getTransactionsUseCase(
@@ -26,7 +25,10 @@ function getTransactionsUseCase(
         const [transactions, categories, accounts] = await Promise.all([
           repositories.financialRepository.transaction.getTransactions(
             params.ownerIds,
-            params.range ?? recentTransactionsRange(new Date()),
+            params.range,
+            params.creditCardId
+              ? { creditCardId: params.creditCardId }
+              : undefined,
           ),
           repositories.financialRepository.category.getCategories(
             params.ownerIds,

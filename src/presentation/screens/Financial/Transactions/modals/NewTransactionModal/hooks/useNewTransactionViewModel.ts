@@ -300,15 +300,17 @@ function useNewTransactionViewModel() {
       fetchByOwners(owners.data!, useCases.getFinancialTagsUseCase.execute),
   });
   // Rows open from a month the Transactions screen already holds (spec 075). Only a row opened from elsewhere (Home,
-  // an invoice) falls back to the whole history: the API has no GET /transactions/:id yet (spec 077).
+  // an invoice) is read on its own, by id (spec 077).
   const [cachedExisting] = useState(() =>
     isEditing && !isProjected ? findCachedRow(params.id) : undefined,
   );
+  // `null` once the API says the row is missing or not readable.
   const transactions = useQuery({
-    cacheKey: financeKeys.transactions.raw(),
+    cacheKey: financeKeys.transactions.raw("byId", params.id ?? ""),
     enabled: isEditing && !isProjected && !cachedExisting && !!owners.data,
     fetch: async () =>
-      useCases.getFinancialTransactionsUseCase.execute({
+      useCases.getFinancialTransactionByIdUseCase.execute({
+        id: params.id!,
         ownerIds: owners.data!.map((owner) => owner.id),
       }),
   });
@@ -346,8 +348,7 @@ function useNewTransactionViewModel() {
     ?.toTransactionDTO();
   const existing = isProjected
     ? projectedExisting
-    : (cachedExisting ??
-      transactions.data?.find((item) => item.id === params.id));
+    : (cachedExisting ?? transactions.data ?? undefined);
   const isRecurring = isEditing && !!existing?.recurrenceId;
   // The series (end date, frequency) of the occurrence being edited.
   const seriesList = useQuery({
@@ -365,7 +366,7 @@ function useNewTransactionViewModel() {
   const isNotFound =
     (isProjected
       ? !!projections.data && !projectedExisting
-      : isEditing && !cachedExisting && !!transactions.data && !existing) ||
+      : isEditing && !cachedExisting && transactions.data === null) ||
     isSeriesMissing;
   // An installment is edited through its own sheet (spec 030): hand over instead of opening this form.
   const isInstallment = isEditing && !!existing?.installmentPlanId;

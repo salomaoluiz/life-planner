@@ -38,13 +38,17 @@ function useInstallmentEditViewModel() {
 
   const owners = useOwners();
   const ownerIds = (owners.data ?? []).map((owner) => owner.id);
-  const transactions = useQuery({
-    cacheKey: financeKeys.transactions.raw(),
-    enabled: !!owners.data,
+  // The row of the sheet, by id (spec 077); `null` once the API says it is missing or not readable.
+  const transactionQuery = useQuery({
+    cacheKey: financeKeys.transactions.raw("byId", params.id ?? ""),
+    enabled: !!owners.data && !!params.id,
     fetch: async () =>
-      useCases.getFinancialTransactionsUseCase.execute({ ownerIds }),
+      useCases.getFinancialTransactionByIdUseCase.execute({
+        id: params.id!,
+        ownerIds,
+      }),
   });
-  const transaction = transactions.data?.find((item) => item.id === params.id);
+  const transaction = transactionQuery.data ?? undefined;
   const planId = transaction?.installmentPlanId;
   const plan = useQuery({
     cacheKey: financeKeys.installmentPlans.raw(planId ?? ""),
@@ -196,8 +200,8 @@ function useInstallmentEditViewModel() {
     installmentNumber: transaction?.installmentNumber ?? 0,
     isDeleteOpen,
     isDeleting: deletePlanMutation.isFetching,
-    isLoading: !state && !(transactions.data && !transaction),
-    isNotFound: !!transactions.data && !transaction,
+    isLoading: !state && transactionQuery.data !== null,
+    isNotFound: transactionQuery.data === null,
     isPaid,
     isPlanOpen,
     isRecalcOpen,

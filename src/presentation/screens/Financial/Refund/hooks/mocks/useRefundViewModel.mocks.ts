@@ -9,6 +9,7 @@ import {
 } from "@application/dto/financial/CreditCardOverviewDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
+import { useCases } from "@application/useCases";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import {
   invalidateFetcherData,
@@ -102,6 +103,9 @@ const summary = {
 
 const spies = {
   back: jest.mocked(router.back),
+  getTransactions: jest.mocked(
+    useCases.getFinancialTransactionsUseCase.execute,
+  ),
   invalidate: jest.mocked(invalidateFetcherData),
   invalidateFinance: jest.mocked(invalidateFinanceData),
   params: jest.mocked(useLocalSearchParams),

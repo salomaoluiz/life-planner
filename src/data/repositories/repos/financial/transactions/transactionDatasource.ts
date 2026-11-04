@@ -13,6 +13,7 @@ import {
 import {
   TransactionDateRange,
   TransactionQueryFilter,
+  TransactionReadOptions,
 } from "@domain/entities/financial/TransactionQueryFilter";
 
 export interface TransactionDatasource {
@@ -25,10 +26,16 @@ export interface TransactionDatasource {
   getFilteredTransactions(
     params: GetFilteredTransactionsDatasourceParams,
   ): Promise<TransactionModel[]>;
+  getTransactionById(id: string): Promise<TransactionModel | undefined>;
   getTransactions(
     ownerIds: string[],
     range: TransactionDateRange,
+    options?: TransactionReadOptions,
   ): Promise<TransactionModel[]>;
+  hasCategoryTransactions(
+    ownerIds: string[],
+    categoryId: string,
+  ): Promise<boolean>;
   importTransactions(params: ImportRequest): Promise<number>;
   updateTransaction(params: UpdateTransactionDatasourceParams): Promise<void>;
   validateImport(params: ImportRequest): Promise<ImportValidationEntity>;

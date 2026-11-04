@@ -45,6 +45,18 @@ it("SHOULD call deleteTransaction correctly", async () => {
   );
 });
 
+it("SHOULD call getTransactionById correctly (spec 077)", async () => {
+  const { getTransactionById } = setup();
+
+  const result = await getTransactionById("transaction-1");
+
+  expect(spies.getTransactionById).toHaveBeenCalledWith(
+    "transaction-1",
+    mocks.datasources,
+  );
+  expect(result).toEqual("getTransactionById response");
+});
+
 it("SHOULD call getTransactions correctly", async () => {
   const { getTransactions } = setup();
 
@@ -58,6 +70,7 @@ it("SHOULD call getTransactions correctly", async () => {
     ownerIds,
     mocks.datasources,
     range,
+    undefined,
   );
   expect(transactions).toEqual("getTransactions response");
 });
@@ -121,6 +134,18 @@ describe("CSV import and export (spec 047)", () => {
   });
 });
 
+it("SHOULD ask the datasource whether a category has transactions (spec 077)", async () => {
+  const { hasCategoryTransactions } = setup();
+
+  mocks.datasources.financialTransactionDatasource.hasCategoryTransactions =
+    jest.fn().mockResolvedValue(true);
+
+  expect(await hasCategoryTransactions(["owner-1"], "category-1")).toBe(true);
+  expect(
+    mocks.datasources.financialTransactionDatasource.hasCategoryTransactions,
+  ).toHaveBeenCalledWith(["owner-1"], "category-1");
+});
+
 it("SHOULD pass the range of getTransactions on", async () => {
   const { getTransactions } = setup();
   const range = { from: "2026-10-01", to: "2026-10-31" };
@@ -131,5 +156,20 @@ it("SHOULD pass the range of getTransactions on", async () => {
     ["owner-1"],
     mocks.datasources,
     range,
+    undefined,
+  );
+});
+
+it("SHOULD pass the read options of getTransactions on (spec 077)", async () => {
+  const { getTransactions } = setup();
+  const range = { from: "2026-10-01", to: "2026-10-31" };
+
+  await getTransactions(["owner-1"], range, { creditCardId: "card-1" });
+
+  expect(spies.getTransactions).toHaveBeenCalledWith(
+    ["owner-1"],
+    mocks.datasources,
+    range,
+    { creditCardId: "card-1" },
   );
 });

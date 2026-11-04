@@ -9,6 +9,7 @@ import { FinancialTransactionRepository } from "@domain/repositories/financial";
 import createTransaction from "./createTransaction";
 import deleteTransaction from "./deleteTransaction";
 import getFilteredTransactions from "./getFilteredTransactions";
+import getTransactionById from "./getTransactionById";
 import getTransactions from "./getTransactions";
 import importTransactions from "./importTransactions";
 import updateTransaction from "./updateTransaction";
@@ -34,8 +35,21 @@ function transactionRepositoryImpl(
     async getFilteredTransactions(params): Promise<TransactionEntity[]> {
       return getFilteredTransactions(params, datasources);
     },
-    async getTransactions(ownerIds, range): Promise<TransactionEntity[]> {
-      return getTransactions(ownerIds, datasources, range);
+    async getTransactionById(id): Promise<TransactionEntity | undefined> {
+      return getTransactionById(id, datasources);
+    },
+    async getTransactions(
+      ownerIds,
+      range,
+      options,
+    ): Promise<TransactionEntity[]> {
+      return getTransactions(ownerIds, datasources, range, options);
+    },
+    async hasCategoryTransactions(ownerIds, categoryId): Promise<boolean> {
+      return datasources.financialTransactionDatasource.hasCategoryTransactions(
+        ownerIds,
+        categoryId,
+      );
     },
     async importTransactions(params): Promise<number> {
       return importTransactions(params, datasources);

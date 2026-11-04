@@ -79,6 +79,26 @@ describe("modals", () => {
     );
   });
 
+  it("SHOULD read the row with exactly one by-id request WHEN it is opened from elsewhere (Home, an invoice)", async () => {
+    const modal = await openScreen(useNewTransactionViewModel, {
+      id: accountRow.id,
+    });
+    const transactionReads = network
+      .requests()
+      .filter((request) => request.startsWith("GET /v1/finance/transactions"));
+
+    expect(
+      transactionReads.filter((request) =>
+        request.includes(`/transactions/${accountRow.id}?today=`),
+      ),
+    ).toHaveLength(1);
+    // The rest are the bounded reads of the category chips (a period each), never a list of the history.
+    transactionReads
+      .filter((request) => !request.includes(`/transactions/${accountRow.id}`))
+      .forEach((request) => expect(request).toContain("from="));
+    modal.unmount();
+  });
+
   it("SHOULD open the create form within the request budget", async () => {
     expectWithinBudget(
       await openModal({}, "create modal open"),

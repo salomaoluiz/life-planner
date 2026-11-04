@@ -12,6 +12,7 @@ import TransactionEntity, {
 import {
   TransactionDateRange,
   TransactionQueryFilter,
+  TransactionReadOptions,
 } from "@domain/entities/financial/TransactionQueryFilter";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
@@ -28,11 +29,19 @@ export type FinancialTransactionRepository = {
   getFilteredTransactions(
     params: GetFilteredTransactionsRepositoryParams,
   ): Promise<TransactionEntity[]>;
+  // Spec 077: one row; `undefined` when it is missing or not readable.
+  getTransactionById(id: string): Promise<TransactionEntity | undefined>;
   // Only the given period (spec 078: the API needs one), never persisted.
   getTransactions(
     ownerIds: string[],
     range: TransactionDateRange,
+    options?: TransactionReadOptions,
   ): Promise<TransactionEntity[]>;
+  // Spec 077: any transaction of the category in the last two years (account rows or card purchases).
+  hasCategoryTransactions(
+    ownerIds: string[],
+    categoryId: string,
+  ): Promise<boolean>;
   // Spec 047: writes every row or none; a 422 throws `ImportRowsInvalid`.
   importTransactions(params: ImportRequest): Promise<number>;
   updateTransaction(params: UpdateTransactionRepositoryParams): Promise<void>;

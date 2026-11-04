@@ -3,6 +3,7 @@ export { default as deleteCategoryUseCase } from "./deleteCategoryUseCase";
 export { default as getCategoriesUseCase } from "./getCategoriesUseCase";
 export { default as getCategoryIconsUseCase } from "./getCategoryIconsUseCase";
 export { default as getMostUsedCategoriesUseCase } from "./getMostUsedCategoriesUseCase";
+export { default as hasCategoryTransactionsUseCase } from "./hasCategoryTransactionsUseCase";
 export { default as refreshCategoriesUseCase } from "./refreshCategoriesUseCase";
 export { default as updateCategoryAppearanceUseCase } from "./updateCategoryAppearanceUseCase";
 export { default as updateCategoryUseCase } from "./updateCategoryUseCase";

@@ -106,3 +106,17 @@ it("SHOULD load every page of the period, following nextCursor (spec 078)", asyn
     expect.stringContaining("&cursor=cursor-1"),
   );
 });
+
+it("SHOULD read only the card source filtered by creditCardId WHEN options.creditCardId is set (spec 077)", async () => {
+  spies.get.mockResolvedValueOnce(page(mocks.apiTransactions));
+
+  const result = await setup(mocks.ownerIds, mocks.defaultRange, {
+    creditCardId: "card-1",
+  });
+
+  expect(spies.get).toHaveBeenCalledTimes(1);
+  expect(spies.get).toHaveBeenCalledWith(
+    expect.stringContaining("&source=CARD&creditCardId=card-1&limit=200"),
+  );
+  expect(result.map((item) => item.id)).toEqual([mocks.apiTransactions[0].id]);
+});

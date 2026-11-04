@@ -3,6 +3,13 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.7.3] - 2026-11-03
+
+### Changed
+
+- Opening a transaction from Home or an invoice reads that one transaction instead of a long period, so it opens faster (spec 077).
+- Installment edit, refund and category forms stop loading the recent transactions: the first reads its row by id, the refund only the opened card's purchases, the category form only checks whether it has any (spec 077).
+
 ## [1.7.2] - 2026-11-03
 
 ### Changed

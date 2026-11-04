@@ -52,6 +52,32 @@ describe("loading", () => {
   });
 });
 
+describe("row lookup (spec 077)", () => {
+  it("SHOULD read the row by id with the owner ids", async () => {
+    givenLoaded();
+    setup();
+
+    const options = spies.useQuery.mock.calls
+      .map(([call]) => call)
+      .find((call) => call.cacheKey[3] === "byId")!;
+
+    expect(options.cacheKey).toEqual([
+      "finance",
+      "transactions",
+      "raw",
+      "byId",
+      "row-2",
+    ]);
+
+    await options.fetch();
+
+    expect(spies.getTransactionById).toHaveBeenCalledWith({
+      id: "row-2",
+      ownerIds: ["user-id"],
+    });
+  });
+});
+
 describe("scope", () => {
   it("SHOULD open every field AND show the plan TOTAL on All", () => {
     givenLoaded();

@@ -56,8 +56,9 @@ function page(
 async function setup(
   ids: string[] = ownerIds,
   range: { from: string; to: string } = defaultRange,
+  options?: { creditCardId?: string },
 ) {
-  return getTransactions(ids, range);
+  return getTransactions(ids, range, options);
 }
 
 async function setupThrowable(ids: string[] = ownerIds) {

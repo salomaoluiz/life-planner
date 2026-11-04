@@ -83,12 +83,14 @@ function useNewCategoryViewModel() {
         useCases.getFinancialCategoriesUseCase.execute,
       ),
   });
-  // Only edit mode needs the transactions (a category with transactions cannot change type).
+  // Only edit mode asks (a category with transactions cannot change type): two single-row reads, never the rows
+  // (spec 077).
   const transactions = useQuery({
-    cacheKey: financeKeys.transactions.raw(),
+    cacheKey: financeKeys.transactions.raw("category", params.id ?? ""),
     enabled: isEditing && !!owners.data,
     fetch: async () =>
-      useCases.getFinancialTransactionsUseCase.execute({
+      useCases.hasFinancialCategoryTransactionsUseCase.execute({
+        categoryId: params.id!,
         ownerIds: owners.data!.map((owner) => owner.id),
       }),
   });
@@ -102,10 +104,9 @@ function useNewCategoryViewModel() {
         ? new NewCategoryUIModel({
             categories: categories.data,
             owners: owners.data,
-            transactions: transactions.data ?? [],
           })
         : undefined,
-    [owners.data, categories.data, transactions.data],
+    [owners.data, categories.data],
   );
 
   const initial = useMemo(() => {
@@ -113,7 +114,9 @@ function useNewCategoryViewModel() {
       return undefined;
     }
     if (isEditing) {
-      return existing && transactions.data ? stateFromDto(existing) : undefined;
+      return existing && transactions.data !== undefined
+        ? stateFromDto(existing)
+        : undefined;
     }
 
     const ownerId =
@@ -195,7 +198,7 @@ function useNewCategoryViewModel() {
   const id = params.id ?? "";
   const hasChildren = isEditing && !!uiModel?.hasChildren(id);
   const hasParent = isEditing && !!uiModel?.hasParent(id);
-  const hasTransactions = isEditing && !!uiModel?.hasTransactions(id);
+  const hasTransactions = isEditing && transactions.data === true;
   const isTypeLocked =
     isEditing && (hasParent || hasChildren || hasTransactions);
   const isAll = state?.ownerId === ALL_OWNERS;

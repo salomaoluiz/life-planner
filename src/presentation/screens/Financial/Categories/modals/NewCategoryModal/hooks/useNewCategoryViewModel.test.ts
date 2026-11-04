@@ -16,6 +16,7 @@ import {
   mutations,
   queries,
   setup,
+  spies,
   tx,
 } from "./mocks/useNewCategoryViewModel.mocks";
 
@@ -778,4 +779,40 @@ describe("apply to subcategories (spec 058)", () => {
     expect(setup().result.current.formErrorKey).toBeDefined();
     expect(result.current.isSaving).toBe(false);
   });
+});
+
+it("SHOULD ask whether the category has transactions with the owner ids, only in edit (spec 077)", async () => {
+  givenLoaded({ categories: [cat("solo")], params: { id: "solo" } });
+  setup();
+
+  const options = spies.useQuery.mock.calls
+    .map(([call]) => call)
+    .find((call) => call.cacheKey[3] === "category")!;
+
+  expect(options.cacheKey).toEqual([
+    "finance",
+    "transactions",
+    "raw",
+    "category",
+    "solo",
+  ]);
+  expect(options.enabled).toBe(true);
+
+  await options.fetch();
+
+  expect(spies.hasTransactions).toHaveBeenCalledWith({
+    categoryId: "solo",
+    ownerIds: ["user-id", "family-1"],
+  });
+});
+
+it("SHOULD NOT ask WHEN creating a category", () => {
+  givenLoaded();
+  setup();
+
+  const options = spies.useQuery.mock.calls
+    .map(([call]) => call)
+    .find((call) => call.cacheKey[3] === "category")!;
+
+  expect(options.enabled).toBe(false);
 });

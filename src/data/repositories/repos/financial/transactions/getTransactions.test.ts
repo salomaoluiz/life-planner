@@ -15,7 +15,7 @@ it("SHOULD read the period straight from the datasource (spec 078: a period is a
 
   expect(
     spies.financialTransactionDatasource.getTransactions,
-  ).toHaveBeenCalledWith(mocks.defaultParams, mocks.defaultRange);
+  ).toHaveBeenCalledWith(mocks.defaultParams, mocks.defaultRange, undefined);
   expect(result).toEqual([
     new TransactionEntity({
       accountId: mocks.secondTransaction.accountId,
