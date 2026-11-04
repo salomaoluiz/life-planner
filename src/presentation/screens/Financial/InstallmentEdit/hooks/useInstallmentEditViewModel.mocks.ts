@@ -8,6 +8,7 @@ import CreditCardDTO from "@application/dto/financial/CreditCardDTO";
 import InstallmentPlanDTO from "@application/dto/financial/InstallmentPlanDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
+import { useCases } from "@application/useCases";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import {
   invalidateFetcherData,
@@ -29,7 +30,7 @@ jest.mock("@infrastructure/fetcher");
 jest.mock("@application/useCases", () => {
   const names = [
     "getOwnersUseCase",
-    "getFinancialTransactionsUseCase",
+    "getFinancialTransactionByIdUseCase",
     "getFinancialInstallmentPlanUseCase",
     "getFinancialCreditCardsUseCase",
     "getFinancialCategoriesUseCase",
@@ -129,6 +130,9 @@ const mutations: Record<string, UseMutationFixture<unknown, unknown>> = {};
 
 const spies = {
   back: jest.mocked(router.back),
+  getTransactionById: jest.mocked(
+    useCases.getFinancialTransactionByIdUseCase.execute,
+  ),
   invalidate: jest.mocked(invalidateFetcherData),
   invalidateFinance: jest.mocked(invalidateFinanceData),
   params: jest.mocked(useLocalSearchParams),
@@ -167,8 +171,12 @@ function givenLoaded(
   data: { plan?: InstallmentPlanDTO; rows?: TransactionDTO[] } = {},
 ) {
   queries.getOwnersUseCase.withData(owners);
+  // The row of the sheet, read by id (spec 077); `null` when the API does not have it.
+  // (the fixture keeps the name the shared `queryName` gives the `transactions` resource)
   queries.getFinancialTransactionsUseCase.withData(
-    data.rows ?? [makeRow(1), makeRow(2), makeRow(3)],
+    (data.rows ?? [makeRow(1), makeRow(2), makeRow(3)]).find(
+      (row) => row.id === "row-2",
+    ) ?? null,
   );
   queries.getFinancialInstallmentPlanUseCase.withData(data.plan ?? makePlan());
   queries.getFinancialCreditCardsUseCase.withData([
