@@ -544,7 +544,7 @@ function FinancialTransactions() {
         data={vm.entries}
         estimatedItemSize={64}
         // Expanding an invoice only changes this id: without it the virtualized row keeps its old render.
-        extraData={`${vm.expandedInvoiceId ?? ""}|${vm.expandedDayKey ?? ""}|${vm.isTotalsUpdating}|${pay.payingId ?? ""}|${vm.readOnly}|${localeTag}`}
+        extraData={`${vm.expandedInvoiceId ?? ""}|${vm.expandedDayKey ?? ""}|${vm.isTotalsUpdating}|${pay.payingId ?? ""}|${vm.readOnly}|${localeTag}|${wide}`}
         getItemType={entryType}
         keyExtractor={entryKey}
         ListEmptyComponent={empty}
