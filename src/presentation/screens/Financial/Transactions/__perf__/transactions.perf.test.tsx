@@ -20,6 +20,7 @@ import {
 
 import { useCases } from "@application/useCases";
 
+import { PREFETCH_IDLE_MS } from "../hooks/usePrefetchAdjacentMonths";
 import useTransactionsViewModel from "../hooks/useTransactionsViewModel";
 import FinancialTransactions from "../index";
 import useNewTransactionViewModel from "../modals/NewTransactionModal/hooks/useNewTransactionViewModel";
@@ -65,6 +66,43 @@ it("SHOULD load another month within the request budget", async () => {
     "financial.transactions.monthSwitch",
   );
   view.unmount();
+});
+
+describe("month prefetch (spec 087)", () => {
+  async function openIdle() {
+    const view = await openScreen(useTransactionsViewModel);
+
+    network.mark();
+    await new Promise((resolve) => setTimeout(resolve, PREFETCH_IDLE_MS + 200));
+    await flush();
+
+    return view;
+  }
+
+  it("SHOULD fetch only the two neighbouring months once idle", async () => {
+    const view = await openIdle();
+
+    expectWithinBudget(
+      report("mount idle"),
+      "financial.transactions.mount.idle",
+    );
+    view.unmount();
+  });
+
+  it("SHOULD switch to a prefetched month with no request and no skeleton", async () => {
+    const view = await openIdle();
+
+    network.mark();
+    act(() => view.result.current.onPreviousMonth());
+
+    expect(view.result.current.isLoading).toBe(false);
+    await flush();
+    expectWithinBudget(
+      report("month switch prefetched"),
+      "financial.transactions.monthSwitch.prefetched",
+    );
+    view.unmount();
+  });
 });
 
 describe("modals", () => {

@@ -63,6 +63,7 @@ import TransactionUIModel from "../models/TransactionUIModel";
 import { hasPendingChanges } from "../pending/pendingChanges";
 import { usePendingChanges } from "../pending/usePendingChanges";
 import { consumePendingNavigation } from "./pendingNavigation";
+import usePrefetchAdjacentMonths from "./usePrefetchAdjacentMonths";
 import useTransactionFilters from "./useTransactionFilters";
 
 // The projections endpoint answers at most this many months.
@@ -154,6 +155,22 @@ function maxMonth(a: string, b: string) {
   return a > b ? a : b;
 }
 
+// The cache key of one month's query. The screen's query and the prefetch of the neighbouring months (spec 087) both
+// use it, so a prefetched month is found on a switch; `useOwnerScopedQuery` appends the owner ids, which the
+// prefetch passes itself.
+function monthCacheKey(
+  monthKey: string,
+  scopeOwnerIds: string[],
+  allOwnerIds: string[] = [],
+) {
+  return [
+    ...financeKeys.transactions.list(),
+    monthKey,
+    scopeOwnerIds.join(","),
+    ...allOwnerIds,
+  ];
+}
+
 // `YYYY-MM` of the local month.
 function toMonthKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
@@ -240,11 +257,7 @@ function useTransactionsViewModel() {
   // month and the scope (spec 075); another key keeps the previous data flagged as placeholder until its own arrives,
   // and the edit form and the description suggestions read these cached months.
   const monthQuery = useOwnerScopedQuery<MonthData>({
-    cacheKey: [
-      ...financeKeys.transactions.list(),
-      monthKey,
-      summaryOwnerIds.join(","),
-    ],
+    cacheKey: monthCacheKey(monthKey, summaryOwnerIds),
     fetch: async (loadedOwners) =>
       fetchMonth(
         loadedOwners.map((owner) => owner.id),
@@ -540,6 +553,22 @@ function useTransactionsViewModel() {
     ? (filteredTransactions.error ?? filteredInvoices.error)
     : null;
 
+  // Spec 087: once the month is settled and the app idle, the previous and next month are fetched into the cache.
+  usePrefetchAdjacentMonths({
+    cacheKey: (key) => monthCacheKey(key, summaryOwnerIds, allOwnerIds),
+    enabled:
+      isFocused &&
+      !!monthData &&
+      !monthQuery.isFetching &&
+      !filtering &&
+      !hasPendingChanges(pendingChanges),
+    fetch: async (key) => fetchMonth(allOwnerIds, key, summaryOwnerIds),
+    monthKeys: [
+      toMonthKey(shiftMonth(month, -1)),
+      toMonthKey(shiftMonth(month, 1)),
+    ],
+  });
+
   // Spec 087: handlers handed to the memoized rows keep their identity; each call reads the latest scope.
   const onInvoiceOpen = useStableCallback(
     scope.guard((invoice: CardInvoiceUIModel) =>
@@ -682,5 +711,10 @@ function useTransactionsViewModel() {
   };
 }
 
-export { fetchFilteredTransactions, fetchMonth, fetchProjections };
+export {
+  fetchFilteredTransactions,
+  fetchMonth,
+  fetchProjections,
+  monthCacheKey,
+};
 export default useTransactionsViewModel;
