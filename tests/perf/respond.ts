@@ -12,6 +12,10 @@ function respond(method: Method, path: string): unknown {
   if (path === "/v1/user/me") {
     return me;
   }
+  // One transaction by id (spec 077).
+  if (/^\/v1\/finance\/transactions\/[^/?]+(\?|$)/.test(path)) {
+    return accountRow;
+  }
   if (path.startsWith("/v1/finance/transactions")) {
     // The API answers in keyset pages (spec 078).
     if (path.includes("source=CARD")) {

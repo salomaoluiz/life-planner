@@ -31,12 +31,12 @@ it("SHOULD return the DTO of the row with its category and account names", async
   );
 });
 
-it("SHOULD return undefined WHEN the row is missing or not readable", async () => {
+it("SHOULD return null WHEN the row is missing or not readable", async () => {
   getByIdSpy.mockResolvedValueOnce(undefined);
   getCategoriesSpy.mockResolvedValueOnce(mocks.categories);
   getAccountsSpy.mockResolvedValueOnce(mocks.accounts);
 
-  expect(await setup()).toBeUndefined();
+  expect(await setup()).toBeNull();
 });
 
 it("SHOULD re-throw a business error with the use case context", async () => {

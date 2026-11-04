@@ -8,12 +8,12 @@ export interface GetTransactionByIdUseCaseParams {
   ownerIds: string[];
 }
 
-// Spec 077: one row for the edit forms; `undefined` when it is missing or the user cannot read it.
+// Spec 077: one row for the edit forms; `null` (a query cannot hold `undefined`) when it is missing or unreadable.
 function getTransactionByIdUseCase(
   repositories: Repositories,
 ): IUseCaseFactoryWithParamResponse<
   GetTransactionByIdUseCaseParams,
-  TransactionDTO | undefined
+  null | TransactionDTO
 > {
   return {
     execute: async (params) => {
@@ -29,7 +29,7 @@ function getTransactionByIdUseCase(
         ]);
 
         if (!transaction) {
-          return undefined;
+          return null;
         }
 
         return TransactionDTO.fromEntity(

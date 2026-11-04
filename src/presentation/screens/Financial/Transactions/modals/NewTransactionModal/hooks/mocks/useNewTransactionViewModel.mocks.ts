@@ -93,7 +93,7 @@ jest.mock("@application/useCases", () => ({
       uniqueName: "recurrences",
     },
     getFinancialTagsUseCase: { execute: jest.fn(), uniqueName: "tags" },
-    getFinancialTransactionsUseCase: {
+    getFinancialTransactionByIdUseCase: {
       execute: jest.fn(),
       uniqueName: "transactions",
     },
@@ -297,7 +297,10 @@ function givenLoaded(
     data.categories ?? [cat("food"), cat("salary", "user-id", "INCOME")],
   );
   queries.tags.withData(data.tags ?? []);
-  queries.transactions.withData(data.transactions ?? []);
+  // The row of the edit, read by id (spec 077); `null` when the API does not have it.
+  queries.transactions.withData(
+    (data.transactions ?? []).find((row) => row.id === data.params?.id) ?? null,
+  );
   queries.projections.withData(data.projected ?? []);
   queries.recurrences.withData(data.series ?? []);
   queries.most_used.withData(data.top ?? [cat("food")]);
