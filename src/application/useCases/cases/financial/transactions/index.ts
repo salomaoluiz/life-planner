@@ -3,6 +3,7 @@ export { default as deleteTransactionUseCase } from "./deleteTransactionUseCase"
 export { default as exportTransactionsUseCase } from "./exportTransactionsUseCase";
 export { default as getExportCountUseCase } from "./getExportCountUseCase";
 export { default as getFilteredTransactionsUseCase } from "./getFilteredTransactionsUseCase";
+export { default as getTransactionByIdUseCase } from "./getTransactionByIdUseCase";
 export { default as getTransactionsUseCase } from "./getTransactionsUseCase";
 export {
   importTransactionsUseCase,

@@ -25,6 +25,7 @@ export interface TransactionDatasource {
   getFilteredTransactions(
     params: GetFilteredTransactionsDatasourceParams,
   ): Promise<TransactionModel[]>;
+  getTransactionById(id: string): Promise<TransactionModel | undefined>;
   getTransactions(
     ownerIds: string[],
     range: TransactionDateRange,

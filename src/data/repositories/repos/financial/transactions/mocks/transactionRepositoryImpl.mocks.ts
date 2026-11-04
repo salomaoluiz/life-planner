@@ -2,6 +2,7 @@ import { datasourcesMocks } from "@data/datasource/mocks/listDatasources.mocks";
 
 import * as createTransaction from "../createTransaction";
 import * as deleteTransaction from "../deleteTransaction";
+import * as getTransactionById from "../getTransactionById";
 import * as getTransactions from "../getTransactions";
 import transactionRepositoryImpl from "../transactionRepositoryImpl";
 import * as updateTransaction from "../updateTransaction";
@@ -17,6 +18,9 @@ createTransactionSpy.mockResolvedValue("createTransaction response" as never);
 
 const deleteTransactionSpy = jest.spyOn(deleteTransaction, "default");
 deleteTransactionSpy.mockResolvedValue("deleteTransaction response" as never);
+
+const getTransactionByIdSpy = jest.spyOn(getTransactionById, "default");
+getTransactionByIdSpy.mockResolvedValue("getTransactionById response" as never);
 
 const getTransactionsSpy = jest.spyOn(getTransactions, "default");
 getTransactionsSpy.mockResolvedValue("getTransactions response" as never);
@@ -37,6 +41,7 @@ function setup() {
 const spies = {
   createTransaction: createTransactionSpy,
   deleteTransaction: deleteTransactionSpy,
+  getTransactionById: getTransactionByIdSpy,
   getTransactions: getTransactionsSpy,
   updateTransaction: updateTransactionSpy,
 };

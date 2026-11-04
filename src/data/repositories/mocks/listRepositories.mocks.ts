@@ -94,6 +94,7 @@ const repositoriesMocks: Repositories = {
       exportTransactions: jest.fn(),
       getExportCount: jest.fn(),
       getFilteredTransactions: jest.fn(),
+      getTransactionById: jest.fn(),
       getTransactions: jest.fn(),
       importTransactions: jest.fn(),
       updateTransaction: jest.fn(),

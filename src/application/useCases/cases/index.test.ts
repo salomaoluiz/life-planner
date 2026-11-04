@@ -49,6 +49,7 @@ const useCases = {
   getFinancialRecurrencesUseCase: expect.any(Function),
   getFinancialTagsUseCase: expect.any(Function),
   getFinancialTotalsUseCase: expect.any(Function),
+  getFinancialTransactionByIdUseCase: expect.any(Function),
   getFinancialTransactionsUseCase: expect.any(Function),
   getMonthSummaryUseCase: expect.any(Function),
   getMostUsedFinancialCategoriesUseCase: expect.any(Function),

@@ -45,6 +45,18 @@ it("SHOULD call deleteTransaction correctly", async () => {
   );
 });
 
+it("SHOULD call getTransactionById correctly (spec 077)", async () => {
+  const { getTransactionById } = setup();
+
+  const result = await getTransactionById("transaction-1");
+
+  expect(spies.getTransactionById).toHaveBeenCalledWith(
+    "transaction-1",
+    mocks.datasources,
+  );
+  expect(result).toEqual("getTransactionById response");
+});
+
 it("SHOULD call getTransactions correctly", async () => {
   const { getTransactions } = setup();
 
