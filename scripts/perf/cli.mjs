@@ -9,6 +9,7 @@ import {
 import { join } from "node:path";
 
 import { mergeBaseline } from "./baseline.mjs";
+import { selectsBundle } from "./bundle.mjs";
 import { testPathsFor } from "./modules.mjs";
 import { parseArgs, selection, summaryText } from "./run.mjs";
 
@@ -48,19 +49,28 @@ function main() {
     return 2;
   }
   const modules = selection(args, changedFiles);
+  const bundle = args.mode === "changed" && wantsBundle();
 
-  if (modules.length === 0) {
+  if (modules.length === 0 && !bundle) {
     process.stdout.write("PERF SKIPPED: no module selected\n");
 
     return 0;
   }
-  process.stdout.write(`Perf modules: ${modules.join(", ")}\n`);
+  process.stdout.write(`Perf modules: ${modules.join(", ") || "none"}\n`);
+  if (bundle) {
+    process.stdout.write("Perf bundle: selected\n");
+  }
   if (args.dryRun) {
     return 0;
   }
 
   rmSync(REPORT_DIR, { force: true, recursive: true });
   mkdirSync(REPORT_DIR, { recursive: true });
+  if (modules.length === 0) {
+    writeFileSync(join(REPORT_DIR, "summary.md"), "# Perf budgets\n");
+
+    return runBundle();
+  }
   const jsonFile = join(REPORT_DIR, "jest.json");
   const run = spawnSync(
     "yarn",
@@ -105,7 +115,14 @@ function main() {
     process.stdout.write(`Baseline updated: ${files.join(", ")}\n`);
   }
 
-  return run.status === 0 && failures.length === 0 ? 0 : 1;
+  const jestStatus = run.status === 0 && failures.length === 0 ? 0 : 1;
+
+  if (!bundle) {
+    return jestStatus;
+  }
+  const bundleStatus = runBundle();
+
+  return bundleStatus === 2 ? 2 : Math.max(jestStatus, bundleStatus);
 }
 
 function readMeasured() {
@@ -118,6 +135,18 @@ function readMeasured() {
       return [key, measured];
     }),
   );
+}
+
+function runBundle() {
+  return (
+    spawnSync("node", ["scripts/perf/check-bundle-size.mjs"], {
+      stdio: "inherit",
+    }).status ?? 2
+  );
+}
+
+function wantsBundle() {
+  return selectsBundle(changedFiles(), (file) => readFileSync(file, "utf8"));
 }
 
 process.exit(main());

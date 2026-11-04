@@ -1,4 +1,5 @@
 import {
+  bundleSyntaxSelectors,
   restrictedPatterns,
   restrictedPaths,
 } from "./no-restricted-imports.mjs";
@@ -68,7 +69,13 @@ export default [
   {
     files: ["src/presentation/**/*.{ts,tsx}"],
     ignores: [...colorLiteralIgnores, ...testsAndMocks],
-    rules: { "no-restricted-syntax": ["error", ...colorLiteralSelectors] },
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        ...colorLiteralSelectors,
+        ...bundleSyntaxSelectors,
+      ],
+    },
   },
   {
     files: ["src/presentation/screens/**/*.{ts,tsx}"],
@@ -92,6 +99,7 @@ export default [
         "error",
         ...colorLiteralSelectors,
         ...screenStyleSelectors,
+        ...bundleSyntaxSelectors,
       ],
     },
   },

@@ -42,3 +42,10 @@ Copy into the PR description (template: `.github/pull_request_template.md`): mod
 - Registry field `maxCommits`: max React commits of a render scenario (`<module>.<screen>.render.mount`, and for transactions `render.create`, `render.expandInvoice`). A render scenario has no request fields; `--update-baseline` writes only `maxCommits` for it.
 - Month prefetch: `financial.transactions.mount.idle` (requests of the idle prefetch, max 2) and `financial.transactions.monthSwitch.prefetched` (rows at once, no skeleton; 1 background revalidation request, because prefetched months are marked stale so a change made elsewhere is not hidden). The cold-open and switch budgets exclude the prefetch (it waits `PREFETCH_IDLE_MS`).
 - `__perf__/transactionList.bench.test.ts`: the list derivation (filter, group by day, sort) at 5k and 20k rows must scale with a ratio below 6.
+
+## Web bundle budget (spec 088)
+
+- `yarn perf:bundle` (`scripts/perf/check-bundle-size.mjs`) runs `npx expo export -p web` into a temp dir (about 30 s), measures the entry chunk and the total JS (gzip and brotli) and compares with `perf/bundle-budget.json`. It appends a table (budget, measured, delta) to `perf-report/summary.md` and ends with `BUNDLE PASSED` or `BUNDLE FAILED: over budget`. Exit `0` passed, `1` over budget, `2` the export could not run.
+- `yarn perf --changed` runs it too (after the module tests) when the diff touches `app/`, `metro.config.js`, `app.config.ts`, `package.json`, `yarn.lock`, or a `src/` file that imports date-fns, lodash, Sentry, react-native-paper or Supabase. `--dry-run` prints `Perf bundle: selected`.
+- `node scripts/perf/check-bundle-size.mjs --update-budget` rewrites the budget as measured + 2%. Budgets only go down silently; raising one needs a reason in the PR and the owner's review.
+- ESLint blocks `import * as` from `date-fns` and the `lodash` root import (`eslint/rules/no-restricted-imports.mjs`); Sentry is already restricted to `@infrastructure/monitoring`.
