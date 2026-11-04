@@ -14,6 +14,28 @@ beforeAll(() => {
   jest.useRealTimers();
 });
 
+// The best of several runs after a warm-up: pauses of the machine (garbage collection, other workers) only add time,
+// so the fastest run is the stablest reading. Floored so a coarse clock never divides by zero.
+function bestMs(task: () => void, repeats = 9) {
+  // Each sample runs the task several times: the clock of the test environment is coarse (about 1 ms).
+  function run() {
+    for (let index = 0; index < 5; index += 1) {
+      task();
+    }
+  }
+
+  run();
+  const samples = Array.from({ length: repeats }, () => {
+    const start = performance.now();
+
+    run();
+
+    return performance.now() - start;
+  });
+
+  return Math.max(Math.min(...samples), 0.01);
+}
+
 // The derivation the transactions screen runs on every change: filter by scope and type, group by day, sort.
 function derive(items: TransactionUIModel[]) {
   return buildEntries(
@@ -37,20 +59,6 @@ function makeRows(count: number) {
   });
 }
 
-// Median of several runs after a warm-up, floored so a coarse clock never divides by zero.
-function medianMs(run: () => void, repeats = 5) {
-  run();
-  const samples = Array.from({ length: repeats }, () => {
-    const start = performance.now();
-
-    run();
-
-    return performance.now() - start;
-  }).sort((a, b) => a - b);
-
-  return Math.max(samples[Math.floor(repeats / 2)], 0.01);
-}
-
 it("SHOULD group 20k rows by day into one header per day plus one entry per row", () => {
   const entries = derive(makeRows(20000));
 
@@ -61,8 +69,8 @@ it("SHOULD group 20k rows by day into one header per day plus one entry per row"
 it("SHOULD derive 20k rows in less than 6x the time of 5k rows", () => {
   const small = makeRows(5000);
   const large = makeRows(20000);
-  const smallMs = medianMs(() => derive(small));
-  const largeMs = medianMs(() => derive(large));
+  const smallMs = bestMs(() => derive(small));
+  const largeMs = bestMs(() => derive(large));
   const ratio = largeMs / smallMs;
 
   if (process.env.PERF_REPORT) {
