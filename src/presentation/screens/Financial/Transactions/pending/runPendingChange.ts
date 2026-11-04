@@ -44,9 +44,7 @@ async function runPendingChange(
       patchMonthLists(registered, result?.id);
     }
     removeChange(registered.id);
-    await invalidateAfterWrite(scopeOfChange(registered), {
-      skipLists: patchable,
-    });
+    await invalidateAfterWrite(scopeOfChange(registered));
   } catch (error) {
     addFailure({
       description: registered.description,

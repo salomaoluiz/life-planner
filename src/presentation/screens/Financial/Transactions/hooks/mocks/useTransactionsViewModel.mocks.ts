@@ -50,6 +50,7 @@ jest.mock("@application/useCases", () => ({
       execute: jest.fn(),
       uniqueName: "filteredTransactions",
     },
+    getFinancialMonthUseCase: { execute: jest.fn(), uniqueName: "month" },
     getFinancialProjectionsUseCase: {
       execute: jest.fn(),
       uniqueName: "projections",
@@ -139,6 +140,7 @@ const spies = {
   getInvoices: jest.mocked(
     useCases.getFinancialCardInvoicesForMonthUseCase.execute,
   ),
+  getMonth: jest.mocked(useCases.getFinancialMonthUseCase.execute),
   getOwners: jest.mocked(useCases.getOwnersUseCase.execute),
   getProjections: jest.mocked(useCases.getFinancialProjectionsUseCase.execute),
   getSummary: jest.mocked(useCases.getMonthSummaryUseCase.execute),
@@ -169,9 +171,32 @@ beforeEach(() => {
   resetTransactionFilters();
   spies.isFocused.mockReturnValue(false);
   jest.mocked(useOwners).mockImplementation(() => ownersQuery.build());
-  jest
-    .mocked(useOwnerScopedQuery)
-    .mockImplementation((() => transactionsQuery.build()) as never);
+  // Spec 080: the screen reads ONE month query; the fixtures of the old separate queries are its parts.
+  jest.mocked(useOwnerScopedQuery).mockImplementation((() => {
+    const query = transactionsQuery.build();
+
+    return {
+      ...query,
+      data: query.data && {
+        balances: balancesQuery.value.data ?? new Map(),
+        invoices: invoicesQuery.value.data ?? [],
+        projections: projectionsQuery.value.data ?? {
+          accountItems: [],
+          cardGroups: [],
+        },
+        summary: summaryQuery.value.data ?? {
+          balance: 0,
+          expense: 0,
+          income: 0,
+          toPay: 0,
+          toReceive: 0,
+        },
+        ...query.data,
+      },
+      error:
+        query.error ?? invoicesQuery.value.error ?? summaryQuery.value.error,
+    };
+  }) as never);
   spies.useQuery.mockImplementation(((options: { cacheKey: string[] }) => {
     if (queryName(options.cacheKey) === "summary") {
       return summaryQuery.build();

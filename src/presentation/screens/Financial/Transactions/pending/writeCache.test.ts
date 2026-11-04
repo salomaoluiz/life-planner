@@ -33,6 +33,7 @@ function idsOf(month: string, owners = ["owner-1"]) {
   return queryClient
     .getQueryData<TransactionsData>([
       ...financeKeys.transactions.list(month),
+      owners.join(","),
       ...owners,
     ])
     ?.items.map((item) => item.id);
@@ -40,7 +41,7 @@ function idsOf(month: string, owners = ["owner-1"]) {
 
 function seed(month: string, ids: string[], owners = ["owner-1"]) {
   queryClient.setQueryData<TransactionsData>(
-    [...financeKeys.transactions.list(month), ...owners],
+    [...financeKeys.transactions.list(month), owners.join(","), ...owners],
     { items: ids.map((id) => new TransactionUIModel(dto(id))) },
   );
 }
@@ -127,6 +128,7 @@ describe("patchMonthLists", () => {
     expect(
       queryClient.getQueryData<TransactionsData>([
         ...financeKeys.transactions.list("2026-10"),
+        "owner-1",
         "owner-1",
       ])?.items[0].description,
     ).toBe("new");
