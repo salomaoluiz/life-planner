@@ -6,6 +6,10 @@ import TransactionEntity, {
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { FinancialTransactionRepository } from "@domain/repositories/financial";
 
+export type Options = Parameters<
+  FinancialTransactionRepository["getTransactions"]
+>[2];
+
 export type Params = Parameters<
   FinancialTransactionRepository["getTransactions"]
 >[0];
@@ -18,12 +22,14 @@ async function getTransactions(
   ownerIds: Params,
   datasources: Datasources,
   range: Range,
+  options?: Options,
 ) {
   // A period is small and short-lived (the screen keeps it in memory): it is never persisted.
   const models =
     await datasources.financialTransactionDatasource.getTransactions(
       ownerIds,
       range,
+      options,
     );
 
   return models.map((transaction) => toTransactionEntity(transaction));

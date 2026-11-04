@@ -70,6 +70,7 @@ it("SHOULD call getTransactions correctly", async () => {
     ownerIds,
     mocks.datasources,
     range,
+    undefined,
   );
   expect(transactions).toEqual("getTransactions response");
 });
@@ -143,5 +144,20 @@ it("SHOULD pass the range of getTransactions on", async () => {
     ["owner-1"],
     mocks.datasources,
     range,
+    undefined,
+  );
+});
+
+it("SHOULD pass the read options of getTransactions on (spec 077)", async () => {
+  const { getTransactions } = setup();
+  const range = { from: "2026-10-01", to: "2026-10-31" };
+
+  await getTransactions(["owner-1"], range, { creditCardId: "card-1" });
+
+  expect(spies.getTransactions).toHaveBeenCalledWith(
+    ["owner-1"],
+    mocks.datasources,
+    range,
+    { creditCardId: "card-1" },
   );
 });

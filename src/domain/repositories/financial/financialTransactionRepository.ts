@@ -12,6 +12,7 @@ import TransactionEntity, {
 import {
   TransactionDateRange,
   TransactionQueryFilter,
+  TransactionReadOptions,
 } from "@domain/entities/financial/TransactionQueryFilter";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
@@ -34,6 +35,7 @@ export type FinancialTransactionRepository = {
   getTransactions(
     ownerIds: string[],
     range: TransactionDateRange,
+    options?: TransactionReadOptions,
   ): Promise<TransactionEntity[]>;
   // Spec 047: writes every row or none; a 422 throws `ImportRowsInvalid`.
   importTransactions(params: ImportRequest): Promise<number>;

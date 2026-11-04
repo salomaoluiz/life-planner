@@ -13,6 +13,7 @@ import {
 import {
   TransactionDateRange,
   TransactionQueryFilter,
+  TransactionReadOptions,
 } from "@domain/entities/financial/TransactionQueryFilter";
 
 export interface TransactionDatasource {
@@ -29,6 +30,7 @@ export interface TransactionDatasource {
   getTransactions(
     ownerIds: string[],
     range: TransactionDateRange,
+    options?: TransactionReadOptions,
   ): Promise<TransactionModel[]>;
   importTransactions(params: ImportRequest): Promise<number>;
   updateTransaction(params: UpdateTransactionDatasourceParams): Promise<void>;

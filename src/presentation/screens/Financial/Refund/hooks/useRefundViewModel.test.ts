@@ -222,3 +222,30 @@ it("SHOULD map a save error to its copy key AND close on demand", () => {
   act(() => result.current.onClose());
   expect(modalNavigation.closeModal).toHaveBeenCalled();
 });
+
+describe("purchases to link (spec 077)", () => {
+  it("SHOULD read only the opened card's purchases of the last year, in one keyed read", async () => {
+    givenLoaded();
+    setup();
+
+    const options = spies.useQuery.mock.calls
+      .map(([call]) => call)
+      .find((call) => call.cacheKey[3] === "card")!;
+
+    expect(options.cacheKey).toEqual([
+      "finance",
+      "transactions",
+      "raw",
+      "card",
+      "card-1",
+    ]);
+
+    await options.fetch();
+
+    expect(spies.getTransactions).toHaveBeenCalledWith({
+      creditCardId: "card-1",
+      ownerIds: ["user-id"],
+      range: { from: "2025-11-01", to: "2026-11-30" },
+    });
+  });
+});

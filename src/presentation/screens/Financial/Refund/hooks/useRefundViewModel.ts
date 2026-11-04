@@ -6,6 +6,7 @@ import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
+import { refundPurchasesRange } from "@domain/entities/financial/TransactionQueryFilter";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
 import useOwners from "@presentation/hooks/useOwners";
 import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
@@ -77,10 +78,15 @@ function useRefundViewModel() {
       useCases.getFinancialCreditCardsOverviewUseCase.execute(ownerIds),
   });
   const transactions = useQuery<TransactionDTO[]>({
-    cacheKey: financeKeys.transactions.raw(),
+    cacheKey: financeKeys.transactions.raw("card", params.creditCardId),
     enabled: !!owners.data,
+    // Only this card's purchases of the last year (spec 077): the options of the link picker.
     fetch: async () =>
-      useCases.getFinancialTransactionsUseCase.execute({ ownerIds }),
+      useCases.getFinancialTransactionsUseCase.execute({
+        creditCardId: params.creditCardId,
+        ownerIds,
+        range: refundPurchasesRange(new Date()),
+      }),
   });
   const createMutation = useMutation({
     cacheKey: [useCases.createFinancialRefundUseCase.uniqueName],

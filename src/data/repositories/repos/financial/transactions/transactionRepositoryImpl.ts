@@ -38,8 +38,12 @@ function transactionRepositoryImpl(
     async getTransactionById(id): Promise<TransactionEntity | undefined> {
       return getTransactionById(id, datasources);
     },
-    async getTransactions(ownerIds, range): Promise<TransactionEntity[]> {
-      return getTransactions(ownerIds, datasources, range);
+    async getTransactions(
+      ownerIds,
+      range,
+      options,
+    ): Promise<TransactionEntity[]> {
+      return getTransactions(ownerIds, datasources, range, options);
     },
     async importTransactions(params): Promise<number> {
       return importTransactions(params, datasources);

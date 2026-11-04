@@ -8,6 +8,8 @@ import {
 import Repositories from "@domain/repositories";
 
 export interface GetTransactionsUseCaseParams {
+  // Spec 077: only this card's purchases (one request).
+  creditCardId?: string;
   ownerIds: string[];
   // Only this period (account rows by date, card purchases by invoice list date); omitted → the whole history.
   // Default: the recent window (spec 078: the API never lists the whole history).
@@ -27,6 +29,9 @@ function getTransactionsUseCase(
           repositories.financialRepository.transaction.getTransactions(
             params.ownerIds,
             params.range ?? recentTransactionsRange(new Date()),
+            params.creditCardId
+              ? { creditCardId: params.creditCardId }
+              : undefined,
           ),
           repositories.financialRepository.category.getCategories(
             params.ownerIds,

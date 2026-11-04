@@ -6,11 +6,16 @@ import handleFinancialApiError from "../../financialApiError";
 import toOwnerQuery from "../../ownerQuery";
 import fetchTransactionPages from "./fetchTransactionPages";
 
+export type Options = Parameters<TransactionDatasource["getTransactions"]>[2];
 export type Params = Parameters<TransactionDatasource["getTransactions"]>[0];
 export type Range = Parameters<TransactionDatasource["getTransactions"]>[1];
 export type Response = ReturnType<TransactionDatasource["getTransactions"]>;
 
-async function getTransactions(ownerIds: Params, range: Range): Response {
+async function getTransactions(
+  ownerIds: Params,
+  range: Range,
+  options?: Options,
+): Response {
   // Without the filter the API returns every owner the user can access.
   if (ownerIds.length === 0) {
     return [];
@@ -21,6 +26,15 @@ async function getTransactions(ownerIds: Params, range: Range): Response {
     // `today` lets the API derive the paid status of card purchases from their invoice.
     // Only the period comes back: account rows by date, card purchases by their invoice list date (spec 078: a period is required).
     const query = `${toOwnerQuery(ownerIds)}&today=${todayCalendarDate()}&from=${range.from}&to=${range.to}`;
+    // One card's purchases only (spec 077): a single source, a single read.
+    if (options?.creditCardId) {
+      const rows = await fetchTransactionPages(
+        `/v1/finance/transactions${query}&source=CARD&creditCardId=${options.creditCardId}`,
+      );
+
+      return rows.map((transaction) => TransactionModel.fromJSON(transaction));
+    }
+
     const [accountRows, cardRows] = await Promise.all([
       fetchTransactionPages(`/v1/finance/transactions${query}`),
       fetchTransactionPages(`/v1/finance/transactions${query}&source=CARD`),

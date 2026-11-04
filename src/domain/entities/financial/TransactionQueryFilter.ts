@@ -18,6 +18,11 @@ export interface TransactionQueryFilter {
   to?: string;
 }
 
+// Spec 077: narrows a period read. `creditCardId`: only that card's purchases (one source, one request).
+export interface TransactionReadOptions {
+  creditCardId?: string;
+}
+
 // Spec 078: the longest period the API accepts (2 years) ending on `today` (`YYYY-MM-DD`): what a search without a
 // chosen period looks at.
 export function lastTwoYearsRange(today: string): TransactionDateRange {
@@ -48,6 +53,18 @@ export function monthDateRange(monthKey: string): TransactionDateRange {
 export function recentTransactionsRange(today: Date): TransactionDateRange {
   const start = new Date(today.getFullYear(), today.getMonth() - 20, 1);
   const end = new Date(today.getFullYear(), today.getMonth() + 3, 1);
+
+  return {
+    from: monthDateRange(toMonthKey(start)).from,
+    to: monthDateRange(toMonthKey(end)).to,
+  };
+}
+
+// Spec 077: the card purchases a refund can be linked to: 11 months back, the current month and the next (a purchase
+// made today can land on next month's invoice). Older ones are linked by opening the refund from the purchase itself.
+export function refundPurchasesRange(today: Date): TransactionDateRange {
+  const start = new Date(today.getFullYear(), today.getMonth() - 11, 1);
+  const end = new Date(today.getFullYear(), today.getMonth() + 1, 1);
 
   return {
     from: monthDateRange(toMonthKey(start)).from,

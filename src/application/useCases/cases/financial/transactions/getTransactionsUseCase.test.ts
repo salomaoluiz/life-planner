@@ -25,6 +25,7 @@ it("SHOULD get all transactions and return the TransactionDTO", async () => {
   expect(getTransactionsSpy).toHaveBeenCalledWith(
     mocks.defaultParams.ownerIds,
     recentTransactionsRange(new Date()),
+    undefined,
   );
   expect(getCategoriesSpy).toHaveBeenCalledTimes(1);
   expect(getCategoriesSpy).toHaveBeenCalledWith(mocks.defaultParams.ownerIds);
@@ -79,7 +80,7 @@ it("SHOULD ask the repository only for the period WHEN a range is given", async 
 
   expect(
     spies.financialRepositoryTransaction.getTransactions,
-  ).toHaveBeenCalledWith(mocks.defaultParams.ownerIds, range);
+  ).toHaveBeenCalledWith(mocks.defaultParams.ownerIds, range, undefined);
 });
 
 it("SHOULD pass the given range through", async () => {
@@ -93,5 +94,21 @@ it("SHOULD pass the given range through", async () => {
   expect(getTransactionsSpy).toHaveBeenCalledWith(
     mocks.defaultParams.ownerIds,
     range,
+    undefined,
+  );
+});
+
+it("SHOULD read only that card's purchases WHEN a creditCardId is given (spec 077)", async () => {
+  getTransactionsSpy.mockResolvedValueOnce(mocks.transactionEntities);
+  getCategoriesSpy.mockResolvedValueOnce(mocks.categories);
+  getAccountsSpy.mockResolvedValueOnce(mocks.accounts);
+  const range = { from: "2026-01-01", to: "2026-12-31" };
+
+  await setup({ creditCardId: "card-1", range });
+
+  expect(getTransactionsSpy).toHaveBeenCalledWith(
+    mocks.defaultParams.ownerIds,
+    range,
+    { creditCardId: "card-1" },
   );
 });

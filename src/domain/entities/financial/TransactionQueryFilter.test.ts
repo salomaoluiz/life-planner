@@ -2,6 +2,7 @@ import {
   lastTwoYearsRange,
   monthDateRange,
   recentTransactionsRange,
+  refundPurchasesRange,
 } from "./TransactionQueryFilter";
 
 it.each([
@@ -35,6 +36,15 @@ describe("recentTransactionsRange (spec 078)", () => {
     expect(recentTransactionsRange(new Date(2026, 10, 3))).toEqual({
       from: "2025-03-01",
       to: "2027-02-28",
+    });
+  });
+});
+
+describe("refundPurchasesRange (spec 077)", () => {
+  it("SHOULD cover the purchases a refund can point at: 11 months back, this one and the next", () => {
+    expect(refundPurchasesRange(new Date(2026, 10, 3))).toEqual({
+      from: "2025-12-01",
+      to: "2026-12-31",
     });
   });
 });
