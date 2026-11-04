@@ -81,6 +81,7 @@ export {
   exportTransactionsUseCase as exportFinancialTransactionsUseCase,
   getExportCountUseCase as getFinancialExportCountUseCase,
   getFilteredTransactionsUseCase as getFinancialFilteredTransactionsUseCase,
+  getFinanceMonthUseCase as getFinancialMonthUseCase,
   getTransactionByIdUseCase as getFinancialTransactionByIdUseCase,
   getTransactionsUseCase as getFinancialTransactionsUseCase,
   importTransactionsUseCase as importFinancialTransactionsUseCase,

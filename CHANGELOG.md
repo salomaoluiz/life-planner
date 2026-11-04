@@ -3,6 +3,12 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.7.5] - 2026-11-04
+
+### Changed
+
+- The transactions screen loads a month with one request (rows, card invoices, daily balances, projections and the month totals together) instead of five (spec 080).
+
 ## [1.7.4] - 2026-11-04
 
 ### Changed

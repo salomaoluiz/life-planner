@@ -17,6 +17,8 @@ interface TransactionsPage {
 // unbounded list, and the app never builds one.
 async function fetchTransactionPages(
   path: string,
+  // Spec 080: continue a list whose first page another response already brought.
+  startCursor?: string,
 ): Promise<TransactionModel[]> {
   const query = new URLSearchParams(path.split("?")[1] ?? "");
   const hasPeriod = query.has("from") && query.has("to");
@@ -26,7 +28,7 @@ async function fetchTransactionPages(
   }
 
   const rows: TransactionModel[] = [];
-  let cursor: null | string = null;
+  let cursor: null | string = startCursor ?? null;
 
   do {
     const page: TransactionsPage = await api.get<TransactionsPage>(

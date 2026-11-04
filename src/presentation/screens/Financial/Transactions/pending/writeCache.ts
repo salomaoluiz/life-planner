@@ -20,11 +20,12 @@ interface WriteScope {
   projections: boolean;
 }
 
-// Refreshes what a write moved. Month lists are left out when the write was patched in memory (`skipLists`);
-// `refetch: false` only marks the queries stale, for a write made in a modal over the screen.
+// Refreshes what a write moved. A month entry holds the rows, invoices, balances, projections and summary of the month
+// (spec 080), so it is refreshed even when the rows were patched in memory: the patch shows the saved row at once, the
+// refetch brings the totals; `refetch: false` only marks the queries stale, for a write made in a modal over the screen.
 async function invalidateAfterWrite(
   scope: WriteScope,
-  { refetch = true, skipLists = false } = {},
+  { refetch = true } = {},
 ) {
   const invalidate = refetch ? invalidateFetcherData : markFetcherDataStale;
   const keys: string[][] = [
@@ -47,15 +48,11 @@ async function invalidateAfterWrite(
     list.forEach((month) => months.add(month));
   });
 
-  if (!skipLists) {
-    keys.push(
-      ...(scope.listMonths === "all"
-        ? [financeKeys.transactions.list()]
-        : scope.listMonths.map((month) =>
-            financeKeys.transactions.list(month),
-          )),
-    );
-  }
+  keys.push(
+    ...(everyMonth
+      ? [financeKeys.transactions.list()]
+      : [...months].map((month) => financeKeys.transactions.list(month))),
+  );
   if (scope.invoiceMonths === "all") {
     keys.push(financeKeys.invoices.list(), financeKeys.invoice.all());
   } else if (scope.invoiceMonths.length > 0) {
@@ -130,8 +127,9 @@ function patchMonthLists(change: ChangeShape, resolvedId?: string) {
       if (!data.items) {
         return data;
       }
+      // [finance, transactions, list, month, scope owner ids joined by "," (spec 080), ...every owner id]
       const month = String(queryKey[3]);
-      const ownerIds = queryKey.slice(4);
+      const ownerIds = String(queryKey[4]).split(",");
 
       if (change.kind === "delete") {
         return {

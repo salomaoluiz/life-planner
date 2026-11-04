@@ -22,6 +22,26 @@ function respond(method: Method, path: string): unknown {
   if (/^\/v1\/finance\/transactions\/[^/?]+(\?|$)/.test(path)) {
     return { item: accountRow, lookups };
   }
+  // The month of the transactions screen in one answer (spec 080).
+  if (path.startsWith("/v1/finance/month")) {
+    return {
+      dailyBalances: { accounts: [], days: [], month: "2026-11" },
+      invoices: [],
+      lookups,
+      month: "2026-11",
+      projections: [],
+      rows: { items: [accountRow], nextCursor: null },
+      summary: {
+        currency: "BRL",
+        expense: 0,
+        income: 0,
+        projectedExpense: 0,
+        projectedIncome: 0,
+        toPay: 0,
+        toReceive: 0,
+      },
+    };
+  }
   if (path.startsWith("/v1/finance/transactions")) {
     // The API answers in keyset pages (spec 078).
     if (path.includes("source=CARD")) {

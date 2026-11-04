@@ -1,3 +1,4 @@
+import FinanceMonthEntity from "@domain/entities/financial/FinanceMonthEntity";
 import { InstallmentScope } from "@domain/entities/financial/InstallmentPlanEntity";
 import {
   ExportFileEntity,
@@ -29,6 +30,11 @@ export type FinancialTransactionRepository = {
   getFilteredTransactions(
     params: GetFilteredTransactionsRepositoryParams,
   ): Promise<TransactionEntity[]>;
+  // Spec 080: rows, invoices, balances, projections and summary of one month in one request (no cache).
+  getFinanceMonth(params: {
+    month: string;
+    ownerIds: string[];
+  }): Promise<FinanceMonthEntity>;
   // Spec 077: one row; `undefined` when it is missing or not readable.
   getTransactionById(id: string): Promise<TransactionEntity | undefined>;
   // Only the given period (spec 078: the API needs one), never persisted.

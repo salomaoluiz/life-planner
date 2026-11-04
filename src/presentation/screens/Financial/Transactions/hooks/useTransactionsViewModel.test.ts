@@ -24,31 +24,44 @@ import {
   transactionsQuery,
   ui,
 } from "./mocks/useTransactionsViewModel.mocks";
-import {
-  fetchProjections,
-  fetchSummary,
-  fetchTransactions,
-} from "./useTransactionsViewModel";
+import { fetchMonth, fetchProjections } from "./useTransactionsViewModel";
 
-describe("fetchTransactions", () => {
-  it("SHOULD load only the month's transactions and the categories of the given owners and join the category to each row", async () => {
-    spies.getTransactions.mockResolvedValue([
-      dto("tx-1", new Date(2026, 9, 1)),
+describe("fetchMonth (spec 080)", () => {
+  it("SHOULD load the month of the scope owners in one request, the categories of every owner, AND join them", async () => {
+    spies.getMonth.mockResolvedValue({
+      dailyBalances: { accounts: [], days: [], month: "2026-10" },
+      invoices: [],
+      items: [dto("tx-1", new Date(2026, 9, 1))],
+      projections: [],
+      summary: {
+        expense: 1000,
+        income: 5000,
+        projectedExpense: 0,
+        projectedIncome: 0,
+        toPay: 700,
+        toReceive: 900,
+      },
+    } as never);
+    const categories = [{ id: "cat-1", name: "Food" }] as never;
+    spies.getCategories.mockResolvedValue(categories);
+
+    const result = await fetchMonth(["user-id", "family-1"], "2026-10", [
+      "user-id",
     ]);
-    spies.getCategories.mockResolvedValue([]);
-
-    const result = await fetchTransactions(
-      [{ id: "user-id", name: "Alice Test", type: "USER" }] as never,
-      "2026-10",
-    );
 
     expect(spies.getOwners).not.toHaveBeenCalled();
-    expect(spies.getTransactions).toHaveBeenCalledWith({
+    expect(spies.getMonth).toHaveBeenCalledWith({
+      month: "2026-10",
       ownerIds: ["user-id"],
-      range: { from: "2026-10-01", to: "2026-10-31" },
     });
-    expect(spies.getCategories).toHaveBeenCalledWith(["user-id"]);
+    expect(spies.getCategories).toHaveBeenCalledWith(["user-id", "family-1"]);
+    expect(spies.getTransactions).not.toHaveBeenCalled();
+    expect(spies.getInvoices).not.toHaveBeenCalled();
+    expect(spies.getBalances).not.toHaveBeenCalled();
+    expect(spies.getSummary).not.toHaveBeenCalled();
     expect(result.items[0].id).toBe("tx-1");
+    expect(result.categories).toEqual(categories);
+    expect(result.summary).toMatchObject({ balance: 4000, income: 5000 });
   });
 });
 
@@ -64,17 +77,16 @@ describe("owners batch (spec 074)", () => {
     return result;
   }
 
-  it("SHOULD enable the summary, balances and invoices once the owners are known, with the transactions list still loading", () => {
+  it("SHOULD start the ONE month query as soon as the owners are known", () => {
     ownersQuery.withData(owners);
     transactionsQuery.reset();
 
     setup();
 
-    expect(enabledByKey()).toMatchObject({
-      dailyBalances: true,
-      invoices: true,
-      summary: true,
-    });
+    expect(spies.ownerScopedQuery).toHaveBeenCalledTimes(1);
+    expect(
+      spies.useQuery.mock.calls.map(([o]) => queryName(o.cacheKey)),
+    ).toEqual(expect.not.arrayContaining(["summary", "dailyBalances"]));
   });
 
   it("SHOULD NOT enable any data query WHILE the owners are loading", () => {
@@ -84,28 +96,6 @@ describe("owners batch (spec 074)", () => {
 
     expect(enabled.length).toBeGreaterThan(0);
     expect(enabled.every((value) => !value)).toBe(true);
-  });
-});
-
-describe("fetchSummary", () => {
-  it("SHOULD call the 010 use case with month and owners", async () => {
-    const month = new Date(2026, 9, 1);
-    spies.getSummary.mockResolvedValue({
-      balance: 0,
-      expense: 0,
-      income: 0,
-      projectedExpense: 0,
-      projectedIncome: 0,
-      toPay: 0,
-      toReceive: 0,
-    });
-
-    await fetchSummary(month, ["user-id"]);
-
-    expect(spies.getSummary).toHaveBeenCalledWith({
-      month,
-      ownerIds: ["user-id"],
-    });
   });
 });
 
@@ -163,11 +153,8 @@ function items() {
   ];
 }
 
-function lastSummaryKey() {
-  return spies.useQuery.mock.calls
-    .map((call) => call[0])
-    .filter((o) => queryName(o.cacheKey) === "summary")
-    .pop()!.cacheKey;
+function lastMonthKey() {
+  return spies.ownerScopedQuery.mock.calls.at(-1)![0].cacheKey;
 }
 
 it("SHOULD combine owner and type filters, owner first", () => {
@@ -252,8 +239,8 @@ it("SHOULD summarize for the selected owner only and ignore the type filter", ()
   act(() => result.current.onOwnerFilterChange("family-1"));
   act(() => result.current.onTypeFilterChange("EXPENSE"));
 
-  expect(lastSummaryKey()).toEqual([
-    ...financeKeys.summary.ofMonth("2026-10", "screen"),
+  expect(lastMonthKey()).toEqual([
+    ...financeKeys.transactions.list("2026-10"),
     "family-1",
   ]);
 });
@@ -262,10 +249,9 @@ it("SHOULD summarize every owner WHEN the scope is All", () => {
   givenData([]);
   setup();
 
-  expect(lastSummaryKey()).toEqual([
-    ...financeKeys.summary.ofMonth("2026-10", "screen"),
-    "user-id",
-    "family-1",
+  expect(lastMonthKey()).toEqual([
+    ...financeKeys.transactions.list("2026-10"),
+    "user-id,family-1",
   ]);
 });
 
@@ -281,8 +267,8 @@ it("SHOULD fall back to All WHEN the selected family is no longer an owner", () 
 
   expect(result.current.ownerFilter).toBe("ALL");
   expect(itemIds(result.current.entries)).toHaveLength(4);
-  expect(lastSummaryKey()).toEqual([
-    ...financeKeys.summary.ofMonth("2026-10", "screen"),
+  expect(lastMonthKey()).toEqual([
+    ...financeKeys.transactions.list("2026-10"),
     "user-id",
   ]);
 });
@@ -366,9 +352,7 @@ it("SHOULD refetch only the stale queries WHEN the screen is focused", () => {
     financeKeys.transactions.list(),
     financeKeys.invoices.list(),
     financeKeys.projections.list(),
-    financeKeys.dailyBalances.all(),
     financeKeys.transactionsFiltered.list(),
-    financeKeys.summary.all(),
   ]);
   expect(transactionsQuery.value.refetch).not.toHaveBeenCalled();
 });
@@ -652,16 +636,17 @@ describe("projected occurrences (spec 034)", () => {
     );
   });
 
-  it("SHOULD refetch the projections WHEN refreshing a future month, not the current one", () => {
+  it("SHOULD refresh the month with ONE refetch, the current or a future one", () => {
     givenData([]);
     const { result } = setup();
 
     act(() => result.current.onRefresh());
-    expect(projectionsQuery.value.refetch).not.toHaveBeenCalled();
+    expect(transactionsQuery.value.refetch).toHaveBeenCalledTimes(1);
 
     act(() => result.current.onNextMonth());
     act(() => result.current.onRefresh());
-    expect(projectionsQuery.value.refetch).toHaveBeenCalled();
+    expect(transactionsQuery.value.refetch).toHaveBeenCalledTimes(2);
+    expect(projectionsQuery.value.refetch).not.toHaveBeenCalled();
   });
 });
 
@@ -694,17 +679,6 @@ describe("day balances (spec 035)", () => {
     expect(result.current.expandedDayKey).toBeUndefined();
   });
 
-  it("SHOULD keep the day net WHEN the balances request failed AND not report an error", () => {
-    givenData([ui("a", new Date(2026, 9, 3))]);
-    balancesQuery.withError();
-    const { result } = setup();
-
-    expect(result.current.entries[0]).toMatchObject({
-      balanceCents: undefined,
-    });
-    expect(result.current.errorMessage).toBeUndefined();
-  });
-
   it("SHOULD collapse the day WHEN the month changes", () => {
     givenData([ui("a", new Date(2026, 9, 3))]);
     balancesQuery.withData(views);
@@ -716,67 +690,22 @@ describe("day balances (spec 035)", () => {
     expect(result.current.expandedDayKey).toBeUndefined();
   });
 
-  it("SHOULD follow the scope filter in the query key AND ignore the type filter", () => {
+  it("SHOULD follow the scope filter in the month key AND ignore the type filter", () => {
     givenData([ui("a", new Date(2026, 9, 3))]);
     balancesQuery.withData(views);
     const { result } = setup();
 
     act(() => result.current.onTypeFilterChange("INCOME"));
-    const keys = spies.useQuery.mock.calls
-      .map(([options]) => options.cacheKey as string[])
-      .filter((key) => queryName(key) === "dailyBalances");
-
-    expect(keys.at(-1)).toEqual([
-      ...financeKeys.dailyBalances.ofMonth("2026-10", "screen"),
-      "user-id",
-      "family-1",
+    expect(lastMonthKey()).toEqual([
+      ...financeKeys.transactions.list("2026-10"),
+      "user-id,family-1",
     ]);
 
     act(() => result.current.onOwnerFilterChange("family-1"));
-    const last = spies.useQuery.mock.calls
-      .map(([options]) => options.cacheKey as string[])
-      .filter((key) => queryName(key) === "dailyBalances")
-      .at(-1);
-
-    expect(last).toEqual([
-      ...financeKeys.dailyBalances.ofMonth("2026-10", "screen"),
+    expect(lastMonthKey()).toEqual([
+      ...financeKeys.transactions.list("2026-10"),
       "family-1",
     ]);
-  });
-
-  it("SHOULD not enable the query for a month more than 12 ahead", () => {
-    givenData([]);
-    const { result } = setup();
-
-    for (let i = 0; i < 13; i += 1) {
-      act(() => result.current.onNextMonth());
-    }
-    const last = spies.useQuery.mock.calls
-      .map(([options]) => options)
-      .filter((options) => queryName(options.cacheKey) === "dailyBalances")
-      .at(-1);
-
-    expect(last?.enabled).toBe(false);
-  });
-
-  it("SHOULD fetch the month with the selected owners", async () => {
-    givenData([]);
-    spies.getBalances.mockResolvedValue({
-      accounts: [],
-      days: [],
-      month: "2026-10",
-    } as never);
-    setup();
-    const options = spies.useQuery.mock.calls
-      .map(([item]) => item)
-      .find((item) => queryName(item.cacheKey) === "dailyBalances");
-
-    await options?.fetch();
-
-    expect(spies.getBalances).toHaveBeenCalledWith({
-      month: "2026-10",
-      ownerIds: ["user-id", "family-1"],
-    });
   });
 });
 
@@ -788,8 +717,8 @@ describe("archived family (spec 042)", () => {
     const { result } = setup();
 
     expect(itemIds(result.current.entries)).toEqual(["item-inc", "item-exp"]);
-    expect(lastSummaryKey()).toEqual([
-      ...financeKeys.summary.ofMonth("2026-10", "screen"),
+    expect(lastMonthKey()).toEqual([
+      ...financeKeys.transactions.list("2026-10"),
       "user-id",
     ]);
     expect(result.current.readOnly).toBe(false);
@@ -837,35 +766,57 @@ describe("month-scoped list (spec 075)", () => {
   it("SHOULD key the list by month AND keep the previous month while another loads", () => {
     setup();
 
-    expect(listOptions().cacheKey).toEqual(
-      financeKeys.transactions.list("2026-10"),
-    );
+    expect(listOptions().cacheKey).toEqual([
+      ...financeKeys.transactions.list(),
+      "2026-10",
+      "",
+    ]);
     expect(listOptions().keepPreviousData).toBe(true);
   });
 
-  it("SHOULD load the month of the owners it is given", async () => {
-    spies.getTransactions.mockResolvedValue([]);
+  it("SHOULD load the month with ONE request for the scope owners", async () => {
+    givenData([]);
+    spies.getMonth.mockResolvedValue({
+      dailyBalances: { accounts: [], days: [], month: "2026-10" },
+      invoices: [],
+      items: [],
+      projections: [],
+      summary: {
+        expense: 0,
+        income: 0,
+        projectedExpense: 0,
+        projectedIncome: 0,
+        toPay: 0,
+        toReceive: 0,
+      },
+    } as never);
     spies.getCategories.mockResolvedValue([]);
     setup();
 
     await listOptions().fetch([
       { id: "user-id", name: "Alice Test", type: "USER" },
+      { id: "family-1", name: "Test Family", type: "FAMILY" },
     ] as never);
 
-    expect(spies.getTransactions).toHaveBeenCalledWith({
-      ownerIds: ["user-id"],
-      range: { from: "2026-10-01", to: "2026-10-31" },
+    expect(spies.getMonth).toHaveBeenCalledTimes(1);
+    expect(spies.getMonth).toHaveBeenCalledWith({
+      month: "2026-10",
+      ownerIds: ["user-id", "family-1"],
     });
+    expect(spies.getTransactions).not.toHaveBeenCalled();
   });
 
   it("SHOULD key the next month by that month", () => {
+    givenData([]);
     const { result } = setup();
 
     act(() => result.current.onNextMonth());
 
-    expect(listOptions().cacheKey).toEqual(
-      financeKeys.transactions.list("2026-11"),
-    );
+    expect(listOptions().cacheKey).toEqual([
+      ...financeKeys.transactions.list(),
+      "2026-11",
+      "user-id,family-1",
+    ]);
   });
 
   it("SHOULD keep the skeleton WHILE another month shows the previous one as placeholder", () => {

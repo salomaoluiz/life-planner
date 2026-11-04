@@ -81,15 +81,15 @@ it("SHOULD patch the lists and clear the change BEFORE the refreshes land", asyn
   expect(getFailures()).toHaveLength(0);
 });
 
-it("SHOULD refresh only the month's balances and summary, the accounts and the cards after a plain create", async () => {
+it("SHOULD refresh only the month's entry (rows patched, totals refetched), the accounts and the cards after a plain create", async () => {
   await runPendingChange(
     { ...base, row: dto({ id: "pending-1" }) },
     async () => ({ id: "real-1" }),
     jest.fn(),
   );
 
-  expect(wasInvalidated(financeKeys.transactions.list("2026-10"))).toBe(false);
-  expect(wasInvalidated(financeKeys.transactions.list())).toBe(false);
+  expect(wasInvalidated(financeKeys.transactions.list("2026-10"))).toBe(true);
+  expect(wasInvalidated(financeKeys.transactions.list("2026-09"))).toBe(false);
   expect(wasInvalidated(financeKeys.projections.all())).toBe(false);
   expect(wasInvalidated(financeKeys.summary.monthPrefix("2026-10"))).toBe(true);
   expect(wasInvalidated(financeKeys.dailyBalances.monthPrefix("2026-10"))).toBe(
@@ -99,7 +99,7 @@ it("SHOULD refresh only the month's balances and summary, the accounts and the c
   expect(wasInvalidated(financeKeys.creditCards.all())).toBe(true);
 });
 
-it("SHOULD drop a deleted row from memory WITHOUT refetching the list", async () => {
+it("SHOULD drop a deleted row from memory AND refresh the month's totals", async () => {
   await runPendingChange(
     {
       description: "Lunch",
@@ -112,7 +112,7 @@ it("SHOULD drop a deleted row from memory WITHOUT refetching the list", async ()
   );
 
   expect(patch).toHaveBeenCalledTimes(1);
-  expect(wasInvalidated(financeKeys.transactions.list("2026-10"))).toBe(false);
+  expect(wasInvalidated(financeKeys.transactions.list("2026-10"))).toBe(true);
   expect(wasInvalidated(financeKeys.summary.monthPrefix("2026-10"))).toBe(true);
 });
 

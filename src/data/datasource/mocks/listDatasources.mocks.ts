@@ -86,6 +86,7 @@ const datasourcesMocks: jest.MockedObjectDeep<Datasources> = {
     exportTransactions: jest.fn(),
     getExportCount: jest.fn(),
     getFilteredTransactions: jest.fn(),
+    getFinanceMonth: jest.fn(),
     getTransactionById: jest.fn(),
     getTransactions: jest.fn(),
     hasCategoryTransactions: jest.fn(),

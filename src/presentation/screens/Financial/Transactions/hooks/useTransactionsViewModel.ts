@@ -1,15 +1,12 @@
 import { useIsFocused } from "@react-navigation/native";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import CategoryDTO from "@application/dto/financial/CategoryDTO";
+import ProjectedOccurrenceDTO from "@application/dto/financial/ProjectedOccurrenceDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
-import { MonthSummary } from "@application/dto/home/MonthSummaryDTO";
-import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
-import {
-  monthDateRange,
-  TransactionQueryFilter,
-} from "@domain/entities/financial/TransactionQueryFilter";
+import { TransactionQueryFilter } from "@domain/entities/financial/TransactionQueryFilter";
 import { refetchStaleFetcherData, useQuery } from "@infrastructure/fetcher";
 import useOwners from "@presentation/hooks/useOwners";
 import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
@@ -60,23 +57,15 @@ import {
   toDayBalanceViews,
   TypeFilter,
 } from "../models/transactionList";
-import { TransactionsData } from "../models/transactionsData";
+import { MonthData, ProjectedData } from "../models/transactionsData";
 import TransactionUIModel from "../models/TransactionUIModel";
 import { hasPendingChanges } from "../pending/pendingChanges";
 import { usePendingChanges } from "../pending/usePendingChanges";
 import { consumePendingNavigation } from "./pendingNavigation";
 import useTransactionFilters from "./useTransactionFilters";
 
-// Balances exist up to this many months after the current one (spec 035 FR 10).
-const MAX_BALANCE_MONTHS_AHEAD = 12;
 // The projections endpoint answers at most this many months.
 const MAX_PROJECTION_MONTHS = 12;
-
-// What the API projects for the months after the current one (spec 034 FR 14).
-interface ProjectedData {
-  accountItems: TransactionUIModel[];
-  cardGroups: ProjectedInvoiceGroup[];
-}
 
 // Spec 045: the account rows that match the filters in the range.
 async function fetchFilteredTransactions(
@@ -103,6 +92,43 @@ async function fetchFilteredTransactions(
   );
 }
 
+// Spec 080: one request brings the rows, invoices, balances, projections and summary of the month, for the owners of
+// the scope on screen. Only the month on screen is downloaded, never the whole history (spec 075).
+async function fetchMonth(
+  allOwnerIds: string[],
+  monthKey: string,
+  scopeOwnerIds: string[],
+): Promise<MonthData> {
+  const [month, categories] = await Promise.all([
+    useCases.getFinancialMonthUseCase.execute({
+      month: monthKey,
+      ownerIds: scopeOwnerIds,
+    }),
+    useCases.getFinancialCategoriesUseCase.execute(allOwnerIds),
+  ]);
+  const categoryById = new Map(
+    categories.map((category) => [category.id, category]),
+  );
+
+  return {
+    balances: toDayBalanceViews(month.dailyBalances),
+    categories,
+    invoices: month.invoices.map((invoice) => new CardInvoiceUIModel(invoice)),
+    items: month.items.map(
+      (transaction) =>
+        new TransactionUIModel(
+          transaction,
+          categoryById.get(transaction.categoryId),
+        ),
+    ),
+    projections: toProjectedData(month.projections, categories),
+    summary: {
+      ...month.summary,
+      balance: month.summary.income - month.summary.expense,
+    },
+  };
+}
+
 async function fetchProjections(
   from: string,
   to: string,
@@ -118,6 +144,25 @@ async function fetchProjections(
     }),
     useCases.getFinancialCategoriesUseCase.execute(ownerIds),
   ]);
+
+  return toProjectedData(items, categories);
+}
+
+// The later of two `YYYY-MM` keys.
+function maxMonth(a: string, b: string) {
+  return a > b ? a : b;
+}
+
+// `YYYY-MM` of the local month.
+function toMonthKey(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+// Account projections as rows; card projections grouped by the invoice they would land on.
+function toProjectedData(
+  items: ProjectedOccurrenceDTO[],
+  categories: CategoryDTO[],
+): ProjectedData {
   const categoryById = new Map(
     categories.map((category) => [category.id, category]),
   );
@@ -154,52 +199,6 @@ async function fetchProjections(
   return { accountItems, cardGroups: [...groups.values()] };
 }
 
-async function fetchSummary(
-  month: Date,
-  ownerIds: string[],
-): Promise<MonthSummary> {
-  return useCases.getMonthSummaryUseCase.execute({ month, ownerIds });
-}
-
-// Only the month on screen is downloaded, never the whole history (spec 075).
-async function fetchTransactions(
-  owners: OwnerDTO[],
-  monthKey: string,
-): Promise<TransactionsData> {
-  const ownerIds = owners.map((owner) => owner.id);
-  const [transactions, categories] = await Promise.all([
-    useCases.getFinancialTransactionsUseCase.execute({
-      ownerIds,
-      range: monthDateRange(monthKey),
-    }),
-    useCases.getFinancialCategoriesUseCase.execute(ownerIds),
-  ]);
-  const categoryById = new Map(
-    categories.map((category) => [category.id, category]),
-  );
-
-  return {
-    categories,
-    items: transactions.map(
-      (transaction) =>
-        new TransactionUIModel(
-          transaction,
-          categoryById.get(transaction.categoryId),
-        ),
-    ),
-  };
-}
-
-// The later of two `YYYY-MM` keys.
-function maxMonth(a: string, b: string) {
-  return a > b ? a : b;
-}
-
-// `YYYY-MM` of the local month.
-function toMonthKey(date: Date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-}
-
 // Spec 045 FR 11 of the NFR: the previous result stays on screen while a new filter loads.
 function useKept<T>(data: T | undefined): T | undefined {
   const ref = useRef<T>();
@@ -222,19 +221,9 @@ function useTransactionsViewModel() {
   const [isMonthPickerOpen, setMonthPickerOpen] = useState(false);
   const [pickerYear, setPickerYear] = useState(month.getFullYear());
 
-  // Owners come from the shared query: every query below starts as soon as they are known, none waits for the
-  // transactions list (spec 074).
+  // Owners come from the shared query: the month query starts as soon as they are known (spec 074).
   const owners = useOwners().data;
   const monthKey = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, "0")}`;
-  // Keyed by month and owners (spec 075); another month keeps the previous rows flagged as placeholder until its own
-  // arrive, and the edit form and the description suggestions read these cached months.
-  const transactions = useOwnerScopedQuery<TransactionsData>({
-    cacheKey: [...financeKeys.transactions.list(), monthKey],
-    fetch: async (loadedOwners) => fetchTransactions(loadedOwners, monthKey),
-    keepPreviousData: true,
-  });
-  // The month's own rows are not here yet (first load, or another month showing the previous one meanwhile).
-  const isListPending = !transactions.data || !!transactions.isPlaceholderData;
   // A selected family that is no longer an owner (user left it) falls back to All.
   const ownerFilter =
     ownerSelection === ALL_FILTER ||
@@ -246,6 +235,27 @@ function useTransactionsViewModel() {
       ownerFilter === ALL_FILTER ? activeOwnerIds(owners ?? []) : [ownerFilter],
     [ownerFilter, owners],
   );
+  // Spec 080: the rows, invoices, balances, projections and summary of the month come from ONE request, keyed by the
+  // month and the scope (spec 075); another key keeps the previous data flagged as placeholder until its own arrives,
+  // and the edit form and the description suggestions read these cached months.
+  const monthQuery = useOwnerScopedQuery<MonthData>({
+    cacheKey: [
+      ...financeKeys.transactions.list(),
+      monthKey,
+      summaryOwnerIds.join(","),
+    ],
+    fetch: async (loadedOwners) =>
+      fetchMonth(
+        loadedOwners.map((owner) => owner.id),
+        monthKey,
+        summaryOwnerIds,
+      ),
+    keepPreviousData: true,
+  });
+  // The month's own data is not here yet (first load, or another month showing the previous one meanwhile).
+  const isListPending = !monthQuery.data || !!monthQuery.isPlaceholderData;
+  // Only the rows may show while the month's own data loads; the invoices, balances and summary never do.
+  const monthData = monthQuery.isPlaceholderData ? undefined : monthQuery.data;
 
   const archivedIds = useMemo(() => archivedOwnerIds(owners ?? []), [owners]);
   const scope = useReadOnlyScope(owners, ownerFilter);
@@ -255,59 +265,11 @@ function useTransactionsViewModel() {
     () => (owners ?? []).map((owner) => owner.id),
     [owners],
   );
-  // A failing invoices request keeps the account rows: only the inline error row appears.
-  const invoices = useQuery<CardInvoiceUIModel[]>({
-    cacheKey: [...financeKeys.invoices.list(), monthKey, ...allOwnerIds],
-    enabled: !!owners,
-    fetch: async () =>
-      (
-        await useCases.getFinancialCardInvoicesForMonthUseCase.execute({
-          month: monthKey,
-          ownerIds: allOwnerIds,
-        })
-      ).map((invoice) => new CardInvoiceUIModel(invoice)),
-  });
-  // Months after the current one also show what the series will create. Card purchases show on the invoice
-  // they would land on, which appears up to two months after the purchase: the range looks that far back.
+  // Months after the current one also show what the series will create (the month response carries them).
   const currentMonthKey = toMonthKey(new Date());
   const isFutureMonth = monthKey > currentMonthKey;
-  const projectionsFrom = maxMonth(
-    addMonthsTo(monthKey, -2),
-    addMonthsTo(currentMonthKey, 1),
-  );
-  const projections = useQuery<ProjectedData>({
-    cacheKey: [
-      ...financeKeys.projections.list(),
-      projectionsFrom,
-      monthKey,
-      ...allOwnerIds,
-    ],
-    enabled: !!owners && isFutureMonth,
-    fetch: async () => fetchProjections(projectionsFrom, monthKey, allOwnerIds),
-  });
   const [expandedInvoiceId, setExpandedInvoiceId] = useState<string>();
   const [expandedDayKey, setExpandedDayKey] = useState<string>();
-
-  // End-of-day balances of the scope filter (spec 035). They load in parallel with the list and never block it:
-  // a failed or missing request leaves the day headers with their net, and the type filter never touches them.
-  const balancesEnabled =
-    !!owners &&
-    summaryOwnerIds.length > 0 &&
-    monthKey <= addMonthsTo(currentMonthKey, MAX_BALANCE_MONTHS_AHEAD);
-  const balances = useQuery<Map<string, DayBalanceView>>({
-    cacheKey: [
-      ...financeKeys.dailyBalances.ofMonth(monthKey, "screen"),
-      ...summaryOwnerIds,
-    ],
-    enabled: balancesEnabled,
-    fetch: async () =>
-      toDayBalanceViews(
-        await useCases.getFinancialDailyBalancesUseCase.execute({
-          month: monthKey,
-          ownerIds: summaryOwnerIds,
-        }),
-      ),
-  });
 
   // Spec 045: while a filter is active the list comes from the filtered queries, over the period
   // (or the month on screen); the unfiltered queries above keep serving the plain month.
@@ -384,23 +346,12 @@ function useTransactionsViewModel() {
   const keptFilteredInvoices = useKept(filteredInvoices.data);
   const keptFilteredProjections = useKept(filteredProjections.data);
 
-  const summary = useQuery<MonthSummary>({
-    cacheKey: [
-      ...financeKeys.summary.ofMonth(monthKey, "screen"),
-      ...summaryOwnerIds,
-    ],
-    enabled: !!owners,
-    fetch: async () => fetchSummary(month, summaryOwnerIds),
-  });
-
-  // Key prefixes of every query this screen shows (the month, the filtered and the projected variants share them).
+  // Key prefixes of every query this screen shows (the month and the filtered variants).
   const focusCacheKeys = [
     financeKeys.transactions.list(),
     financeKeys.invoices.list(),
     financeKeys.projections.list(),
-    financeKeys.dailyBalances.all(),
     financeKeys.transactionsFiltered.list(),
-    financeKeys.summary.all(),
   ];
 
   function refetchFiltered() {
@@ -440,7 +391,7 @@ function useTransactionsViewModel() {
   const pendingContext = useMemo(
     () => ({
       categoryById: new Map(
-        (transactions.data?.categories ?? []).map((category) => [
+        (monthQuery.data?.categories ?? []).map((category) => [
           category.id,
           category,
         ]),
@@ -453,7 +404,7 @@ function useTransactionsViewModel() {
           : isInMonth(date, month);
       },
     }),
-    [transactions.data, filtering, applied, month, range],
+    [monthQuery.data, filtering, applied, month, range],
   );
   const loadedItemsOfMonth = useMemo(
     () =>
@@ -466,17 +417,17 @@ function useTransactionsViewModel() {
             ).filter((item) => inRange(toDateKey(item.date))),
           ]
         : [
-            ...(transactions.data?.items ?? []).filter(
+            ...(monthQuery.data?.items ?? []).filter(
               (item) => !item.isCardPurchase && isInMonth(item.date, month),
             ),
             ...(isFutureMonth
-              ? (projections.data?.accountItems ?? [])
+              ? (monthData?.projections.accountItems ?? [])
               : []
             ).filter((item) => isInMonth(item.date, month)),
           ],
     [
-      transactions.data,
-      projections.data,
+      monthQuery.data,
+      monthData,
       month,
       isFutureMonth,
       filtering,
@@ -504,16 +455,15 @@ function useTransactionsViewModel() {
               : [],
           )
         : mergeProjectedInvoices(
-            invoices.data ?? [],
+            monthData?.invoices ?? [],
             isFutureMonth
-              ? (projections.data?.cardGroups ?? []).filter(
+              ? (monthData?.projections.cardGroups ?? []).filter(
                   (group) => group.listDate.slice(0, 7) === monthKey,
                 )
               : [],
           ),
     [
-      invoices.data,
-      projections.data,
+      monthData,
       monthKey,
       isFutureMonth,
       filtering,
@@ -561,8 +511,8 @@ function useTransactionsViewModel() {
   );
   // A balance of a filtered list has no meaning: the day lines go away while a filter is active (spec 045 FR 14).
   const balanceViews = useMemo(
-    () => (balances.error || filtering ? undefined : balances.data),
-    [balances.data, balances.error, filtering],
+    () => (filtering ? undefined : monthData?.balances),
+    [monthData, filtering],
   );
   const filteredSummary = useMemo(
     () => (filtering ? summarize(visible, visibleInvoices) : undefined),
@@ -603,15 +553,7 @@ function useTransactionsViewModel() {
     if (filtering) {
       refetchFiltered();
     }
-    transactions.refetch();
-    invoices.refetch();
-    summary.refetch();
-    if (balancesEnabled) {
-      balances.refetch();
-    }
-    if (isFutureMonth) {
-      projections.refetch();
-    }
+    monthQuery.refetch();
   }
 
   return {
@@ -619,7 +561,7 @@ function useTransactionsViewModel() {
     archivedOwnerIds: archivedIds,
     balances: balanceViews ?? new Map<string, DayBalanceView>(),
     entries,
-    errorMessage: transactions.error?.message,
+    errorMessage: monthQuery.error?.message,
     expandedDayKey,
     expandedInvoiceId,
     filterCount: activeGroups(filterStore.filters).length,
@@ -630,7 +572,7 @@ function useTransactionsViewModel() {
     filtersError: filtersError?.message,
     filtersLoading,
     hasPeriod: !!applied.period,
-    invoicesError: !!invoices.error,
+    invoicesError: !!monthQuery.error,
     isEmptyMonth:
       !filtering &&
       scopedItemsOfMonth.length === 0 &&
@@ -639,9 +581,9 @@ function useTransactionsViewModel() {
       !filtering &&
       scopedItemsOfMonth.length + invoicesOfMonth.length > 0 &&
       entries.length === 0,
-    isLoading: isListPending && !transactions.error,
+    isLoading: isListPending && !monthQuery.error,
     isMonthPickerOpen,
-    isRefreshing: transactions.isFetching && !isListPending,
+    isRefreshing: monthQuery.isFetching && !isListPending,
     isTotalsUpdating: hasPendingChanges(pendingChanges),
     languageTag,
     monthChoices: monthChoices(languageTag),
@@ -672,7 +614,7 @@ function useTransactionsViewModel() {
         month: invoice.referenceMonth,
       }),
     ),
-    onInvoiceRetry: async () => invoices.refetch(),
+    onInvoiceRetry: async () => monthQuery.refetch(),
     onInvoiceToggle: (id: string) =>
       setExpandedInvoiceId((current) => (current === id ? undefined : id)),
     onMonthPickerClose: () => setMonthPickerOpen(false),
@@ -692,12 +634,12 @@ function useTransactionsViewModel() {
     ),
     onReadOnlyAttempt: scope.notifyReadOnly,
     onRefresh,
-    onRetry: async () => transactions.refetch(),
+    onRetry: async () => monthQuery.refetch(),
     onRowPress: scope.guard((id: string) =>
       openModal("add_new_transaction", { id }),
     ),
     onSearchChange: filterStore.setSearch,
-    onSummaryRetry: async () => summary.refetch(),
+    onSummaryRetry: async () => monthQuery.refetch(),
     onToastHide: scope.onToastHide,
     onTypeFilterChange: (value: string) => setTypeFilter(value as TypeFilter),
     ownerFilter,
@@ -710,27 +652,22 @@ function useTransactionsViewModel() {
     selectedMonthIndex:
       pickerYear === month.getFullYear() ? String(month.getMonth()) : undefined,
     stickyIndices: stickyIndices(entries),
-    summary: summary.data
+    summary: monthData
       ? {
-          balanceCents: summary.data.balance,
-          expenseCents: summary.data.expense,
-          incomeCents: summary.data.income,
-          projectedExpenseCents: summary.data.projectedExpense ?? 0,
-          projectedIncomeCents: summary.data.projectedIncome ?? 0,
-          toPayCents: summary.data.toPay,
-          toReceiveCents: summary.data.toReceive,
+          balanceCents: monthData.summary.balance,
+          expenseCents: monthData.summary.expense,
+          incomeCents: monthData.summary.income,
+          projectedExpenseCents: monthData.summary.projectedExpense ?? 0,
+          projectedIncomeCents: monthData.summary.projectedIncome ?? 0,
+          toPayCents: monthData.summary.toPay,
+          toReceiveCents: monthData.summary.toReceive,
         }
       : undefined,
-    summaryError: !!summary.error,
+    summaryError: !!monthQuery.error,
     toastVisible: scope.toastVisible,
     typeFilter,
   };
 }
 
-export {
-  fetchFilteredTransactions,
-  fetchProjections,
-  fetchSummary,
-  fetchTransactions,
-};
+export { fetchFilteredTransactions, fetchMonth, fetchProjections };
 export default useTransactionsViewModel;

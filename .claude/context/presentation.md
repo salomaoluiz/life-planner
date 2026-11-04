@@ -238,3 +238,7 @@ A change the user confirmed that should show at once goes through `Transactions/
 ## Month-scoped query pattern (spec 075)
 
 A list that can hold years of rows loads one month: key `[...financeKeys.transactions.list(monthKey), ...ownerIds]` through `useOwnerScopedQuery({ cacheKey, fetch, keepPreviousData: true })`. While another month loads, `data` is the previous month's and `isPlaceholderData` is `true`: show the list skeleton, not the stale rows. Other screens and modals read these cached months with `getCachedFetcherData(listQueryKey(uniqueName))` (never fetches; one entry per month and owner set), and fall back to a request only when the data they need is in none of them.
+
+## Transactions month query (spec 080)
+
+`useTransactionsViewModel` has ONE data query for the unfiltered month (`useOwnerScopedQuery<MonthData>`, key `[...financeKeys.transactions.list(), month, scopeOwnerIds.join(",")]` + owner ids); the invoices, balances, projections and summary are read from its data (never while it shows a previous month as placeholder). Request budgets: cold open 4, month switch 1.
