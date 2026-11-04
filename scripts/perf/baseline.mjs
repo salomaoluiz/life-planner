@@ -2,6 +2,11 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 function entryFrom(previous, measured) {
+  // A render scenario (spec 087) measures commits only: no request numbers to write.
+  if (measured.total === undefined) {
+    return { ...previous, maxCommits: measured.commits };
+  }
+
   const entry = {
     ...previous,
     maxDepth: measured.rounds,

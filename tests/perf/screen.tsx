@@ -12,6 +12,23 @@ import {
 } from "@infrastructure/fetcher/reactQuery";
 
 import type { Report } from "./budgets";
+import { countCommits } from "./renderBudget";
+
+// Spec 087: the React commits a screen's view model causes while it mounts (probe component under a Profiler).
+async function countHookCommits<T>(
+  useViewModel: () => T,
+  params: Record<string, string> = {},
+) {
+  jest.mocked(useLocalSearchParams).mockReturnValue(params);
+
+  function Probe() {
+    useViewModel();
+
+    return null;
+  }
+
+  return countCommits(<Probe />, { settle: flush, wrapper: wrapper as never });
+}
 
 async function flush() {
   await network.flush(async (callback) => act(callback));
@@ -76,4 +93,4 @@ function wrapper({ children }: { children: React.ReactNode }) {
   return <ReactQueryProvider>{children}</ReactQueryProvider>;
 }
 
-export { flush, openScreen, report, setupPerf, wrapper };
+export { countHookCommits, flush, openScreen, report, setupPerf, wrapper };

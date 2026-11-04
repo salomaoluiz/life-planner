@@ -22,6 +22,7 @@ beforeAll(() => {
         maxRequests: 10,
       },
       "demo.b.mount.cold": { maxDepth: 3, maxDuplicates: 1, maxRequests: 10 },
+      "demo.c.render.mount": { maxCommits: 5 },
     }),
   );
   process.env.PERF_BUDGETS_DIR = dir;
@@ -67,13 +68,31 @@ describe("expectWithinBudget", () => {
     ).not.toThrow();
   });
 
+  it("SHOULD fail naming maxCommits WHEN commits exceed the budget", () => {
+    expect(() =>
+      expectWithinBudget({ commits: 7 }, "demo.c.render.mount"),
+    ).toThrow("maxCommits: measured 7, budget 5");
+  });
+
+  it("SHOULD pass WHEN commits are equal to the budget", () => {
+    expect(() =>
+      expectWithinBudget({ commits: 5 }, "demo.c.render.mount"),
+    ).not.toThrow();
+  });
+
+  it("SHOULD not check commits WHEN the report has none", () => {
+    expect(() =>
+      expectWithinBudget(report, "demo.c.render.mount"),
+    ).not.toThrow();
+  });
+
   it("SHOULD record the measure instead of asserting WHEN updating the baseline", () => {
     process.env.PERF_UPDATE_BASELINE = "1";
 
     expect(() =>
       expectWithinBudget({ ...report, total: 99 }, "demo.a.mount.cold"),
     ).not.toThrow();
-    expect(readMeasured()["demo.a.mount.cold"].total).toBe(99);
+    expect(readMeasured()["demo.a.mount.cold"]).toMatchObject({ total: 99 });
     expect(
       readFileSync(join(dir, "measured", "demo.a.mount.cold.json"), "utf8"),
     ).toContain('"total":99');
