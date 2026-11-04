@@ -1,1 +1,1 @@
-export { Signup as default } from "@screens";
+export { default } from "@screens/Signup";

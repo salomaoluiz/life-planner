@@ -1,40 +1,86 @@
-import { ComponentType } from "react";
+import { ComponentType, lazy } from "react";
 
-import { FinancialSectionPicker, Invite, QuickAdd } from "@screens";
-import { VersionsModal } from "@screens/Config/modals";
-import { AddNewFamily, AddNewFamilyMember } from "@screens/Family/modals";
-import { BusinessFeedback } from "@screens/Feedback";
-import { NewAccountModal } from "@screens/Financial/Accounts/modals";
-import { NewCreditCardModal } from "@screens/Financial/Cards/modals";
-import { NewCategoryModal } from "@screens/Financial/Categories/modals";
-import { EarlyPaymentModal } from "@screens/Financial/EarlyPayment";
-import { InstallmentEditModal } from "@screens/Financial/InstallmentEdit";
-import { InvoiceModal } from "@screens/Financial/Invoice";
-import { PrepaymentModal } from "@screens/Financial/Prepayment";
-import { RefundModal } from "@screens/Financial/Refund";
-import { NewTagModal } from "@screens/Financial/Tags/modals";
-import { NewTransactionModal } from "@screens/Financial/Transactions/modals";
 import { ModalName } from "@screens/Navigation/models/modalPath";
-import { NewStockItemModal } from "@screens/Stock/modals";
+
+// Every modal is its own chunk on web (spec 089): none of them ships in the entry bundle.
+type ModalModule = Record<string, ComponentType>;
+
+function lazyModal(
+  load: () => Promise<object>,
+  key = "default",
+): ComponentType {
+  return lazy<ComponentType>(async () => {
+    const loaded = (await load()) as unknown as ModalModule;
+
+    return { default: loaded[key] };
+  });
+}
 
 // Add a modal here (and its name to MODAL_NAMES); the catch-all route serves `<base>/<name>`.
 export const MODAL_ROUTES: Record<ModalName, ComponentType> = {
-  add_new_account: NewAccountModal,
-  add_new_category: NewCategoryModal,
-  add_new_credit_card: NewCreditCardModal,
-  add_new_family: AddNewFamily,
-  add_new_family_member: AddNewFamilyMember,
-  add_new_stock_item: NewStockItemModal,
-  add_new_tag: NewTagModal,
-  add_new_transaction: NewTransactionModal,
-  business_feedback: BusinessFeedback,
-  card_early_payment: EarlyPaymentModal,
-  card_refund: RefundModal,
-  edit_installment: InstallmentEditModal,
-  invite: Invite,
-  invoice_detail: InvoiceModal,
-  prepay_installments: PrepaymentModal,
-  quick_add: QuickAdd,
-  section_picker: FinancialSectionPicker,
-  versions: VersionsModal,
+  add_new_account: lazyModal(
+    async () => import("@screens/Financial/Accounts/modals"),
+    "NewAccountModal",
+  ),
+  add_new_category: lazyModal(
+    async () => import("@screens/Financial/Categories/modals"),
+    "NewCategoryModal",
+  ),
+  add_new_credit_card: lazyModal(
+    async () => import("@screens/Financial/Cards/modals"),
+    "NewCreditCardModal",
+  ),
+  add_new_family: lazyModal(
+    async () => import("@screens/Family/modals"),
+    "AddNewFamily",
+  ),
+  add_new_family_member: lazyModal(
+    async () => import("@screens/Family/modals"),
+    "AddNewFamilyMember",
+  ),
+  add_new_stock_item: lazyModal(
+    async () => import("@screens/Stock/modals"),
+    "NewStockItemModal",
+  ),
+  add_new_tag: lazyModal(
+    async () => import("@screens/Financial/Tags/modals"),
+    "NewTagModal",
+  ),
+  add_new_transaction: lazyModal(
+    async () =>
+      import("@screens/Financial/Transactions/modals/NewTransactionModal"),
+  ),
+  business_feedback: lazyModal(
+    async () => import("@screens/Feedback"),
+    "BusinessFeedback",
+  ),
+  card_early_payment: lazyModal(
+    async () => import("@screens/Financial/EarlyPayment"),
+    "EarlyPaymentModal",
+  ),
+  card_refund: lazyModal(
+    async () => import("@screens/Financial/Refund"),
+    "RefundModal",
+  ),
+  edit_installment: lazyModal(
+    async () => import("@screens/Financial/InstallmentEdit"),
+    "InstallmentEditModal",
+  ),
+  invite: lazyModal(async () => import("@screens/Invite")),
+  invoice_detail: lazyModal(
+    async () => import("@screens/Financial/Invoice"),
+    "InvoiceModal",
+  ),
+  prepay_installments: lazyModal(
+    async () => import("@screens/Financial/Prepayment"),
+    "PrepaymentModal",
+  ),
+  quick_add: lazyModal(async () => import("@screens/QuickAdd")),
+  section_picker: lazyModal(
+    async () => import("@screens/Financial/SectionPicker"),
+  ),
+  versions: lazyModal(
+    async () => import("@screens/Config/modals"),
+    "VersionsModal",
+  ),
 };

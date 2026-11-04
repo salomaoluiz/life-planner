@@ -1,1 +1,1 @@
-export { Stock as default } from "@screens";
+export { default } from "@screens/Stock";

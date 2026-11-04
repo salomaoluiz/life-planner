@@ -41,7 +41,9 @@ import useAdjustmentSheet from "./hooks/useAdjustmentSheet";
 import useCsvActions from "./hooks/useCsvActions";
 import useFilterOptions from "./hooks/useFilterOptions";
 import usePayTransaction from "./hooks/usePayTransaction";
-import { ExportModal, FiltersModal, ImportWizard } from "./modals";
+import ExportModal from "./modals/ExportModal";
+import FiltersModal from "./modals/FiltersModal";
+import ImportWizard from "./modals/ImportWizard";
 import { buildActiveChips, formatPeriod } from "./models/filterLabels";
 import {
   ALL_FILTER,

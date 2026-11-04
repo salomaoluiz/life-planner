@@ -1,1 +1,1 @@
-export { FinancialOverview as default } from "@screens";
+export { default } from "@screens/Financial/Overview";

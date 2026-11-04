@@ -49,3 +49,5 @@ Copy into the PR description (template: `.github/pull_request_template.md`): mod
 - `yarn perf --changed` runs it too (after the module tests) when the diff touches `app/`, `metro.config.js`, `app.config.ts`, `package.json`, `yarn.lock`, or a `src/` file that imports date-fns, lodash, Sentry, react-native-paper or Supabase. `--dry-run` prints `Perf bundle: selected`.
 - `node scripts/perf/check-bundle-size.mjs --update-budget` rewrites the budget as measured + 2%. Budgets only go down silently; raising one needs a reason in the PR and the owner's review.
 - ESLint blocks `import * as` from `date-fns` and the `lodash` root import (`eslint/rules/no-restricted-imports.mjs`); Sentry is already restricted to `@infrastructure/monitoring`.
+
+- Spec 089 lowered the budget: entry 1.16 MB to about 0.92 MB gzip through async routes on web, lazy modals, the Sentry replay/feedback shim and per-function date-fns imports (see `routing.md`, "Web code splitting").

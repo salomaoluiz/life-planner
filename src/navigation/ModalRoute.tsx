@@ -1,4 +1,5 @@
 import { Unmatched, useLocalSearchParams } from "expo-router";
+import { Suspense } from "react";
 
 import { isModalName } from "@screens/Navigation/models/modalPath";
 
@@ -16,7 +17,11 @@ function ModalRoute() {
 
   const Modal = MODAL_ROUTES[name];
 
-  return <Modal />;
+  return (
+    <Suspense fallback={null}>
+      <Modal />
+    </Suspense>
+  );
 }
 
 export default ModalRoute;

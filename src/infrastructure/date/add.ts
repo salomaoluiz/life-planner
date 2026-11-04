@@ -1,4 +1,6 @@
-import { addDays, addMilliseconds, addYears } from "date-fns";
+import { addDays } from "date-fns/addDays";
+import { addMilliseconds } from "date-fns/addMilliseconds";
+import { addYears } from "date-fns/addYears";
 
 import { Duration } from "./types";
 

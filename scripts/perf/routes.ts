@@ -5,7 +5,7 @@ const IGNORED = /(^|\/)(_layout\.tsx|\+not-found\.tsx|\(dev\))(\/|$)/;
 // The catch-all route is covered through the modal names it serves.
 const CATCH_ALL = /\[\.\.\.modal\]\.tsx$/;
 
-// The names registered in MODAL_ROUTES (`name: Component,` lines).
+// The names registered in MODAL_ROUTES (`name: Component,` or `name: lazyModal(` lines).
 function listModals(root = process.cwd()): string[] {
   const source = readFileSync(
     join(root, "src/navigation/modalRoutes.tsx"),
@@ -13,7 +13,9 @@ function listModals(root = process.cwd()): string[] {
   );
   const body = source.slice(source.indexOf("MODAL_ROUTES"));
 
-  return [...body.matchAll(/^\s+([a-z_]+): \w+,$/gm)].map((match) => match[1]);
+  return [...body.matchAll(/^\s+([a-z_]+): (?:\w+,|lazyModal\()/gm)].map(
+    (match) => match[1],
+  );
 }
 
 // Route files under `app/` (posix paths relative to the repo root) that stand for a screen of their own.

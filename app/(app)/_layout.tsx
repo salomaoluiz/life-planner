@@ -4,7 +4,8 @@ import { View } from "react-native";
 import { useUser } from "@application/providers/user";
 import { useScreenBehindModal } from "@navigation";
 import { useTheme } from "@presentation/theme";
-import { ErrorToastHost, UpdateBanner } from "@screens";
+import ErrorToastHost from "@screens/Financial/Transactions/pending/ErrorToastHost";
+import UpdateBanner from "@screens/Navigation/containers/UpdateBanner";
 
 // A fresh load never builds the signed-in stack without the tabs under a modal.
 export const unstable_settings = { initialRouteName: "(tabs)" };
