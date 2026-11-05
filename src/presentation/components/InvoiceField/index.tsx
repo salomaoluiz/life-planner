@@ -54,6 +54,8 @@ function InvoiceField(props: InvoiceFieldProps) {
       flexDirection: "row",
       flexWrap: "wrap",
     },
+    // The 44 px touch target centers its text, so the focus ring wraps the link instead of sitting under it.
+    link: { justifyContent: "center", paddingHorizontal: spacing.xs },
     text: { flex: 1 },
   });
 
@@ -89,7 +91,9 @@ function InvoiceField(props: InvoiceFieldProps) {
           <Touchable
             accessibilityLabel={props.hint.actionLabel}
             accessibilityRole="button"
+            focusRadius={theme.radius.sm}
             onPress={props.hint.onAction}
+            style={styles.link}
             testID={`${testID}-reset`}
           >
             <Text.Caption tone={"accent"} value={props.hint.actionLabel} />
