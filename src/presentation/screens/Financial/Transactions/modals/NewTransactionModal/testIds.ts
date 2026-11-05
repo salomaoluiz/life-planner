@@ -23,6 +23,8 @@ const transactionFormTestIds = {
   owner: "financial.transaction-form.owner",
   paid: "financial.transactionForm.paid",
   payWith: "financial.transactionForm.payWith",
+  projectedNote: "financial.transactionForm.projected.note",
+  projectedSwitch: "financial.transactionForm.projected.switch",
   recurrenceDeleteAllDialog: "financial.recurrence-delete.confirm",
   recurrenceDeletePaidDialog: "financial.recurrence-delete.paid-confirm",
   recurrenceDeleteScope: "financial.recurrence-delete.scope",

@@ -95,6 +95,7 @@ const defaultViewModel: ReturnType<typeof useNewTransactionViewModel> = {
   onOwnerChange: jest.fn(),
   onPaidChange: jest.fn(),
   onPayWithChange: jest.fn(),
+  onProjectedToggle: jest.fn(),
   onRecurrenceDeleteCancel: jest.fn(),
   onRecurrenceDeleteConfirm: jest.fn(),
   onRecurrenceDeletePaidConfirm: jest.fn(),
@@ -119,6 +120,7 @@ const defaultViewModel: ReturnType<typeof useNewTransactionViewModel> = {
   paidHintKey: undefined as TranslationKeys | undefined,
   paidLabelKey: "financial.transactions.form.paid" as TranslationKeys,
   payWith: "ACCOUNT" as "ACCOUNT" | "CARD",
+  projected: { on: false, visible: false },
   recurrence: {
     deleteScope: "ONLY_THIS" as "ALL" | "ONLY_THIS" | "THIS_AND_NEXT",
     endError: undefined as TranslationKeys | undefined,

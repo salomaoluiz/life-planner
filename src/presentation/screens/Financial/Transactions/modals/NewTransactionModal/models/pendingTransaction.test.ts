@@ -96,3 +96,26 @@ describe("buildDeleteTarget", () => {
     ).toEqual({ transactionId: "tx-1" });
   });
 });
+
+it("SHOULD mark the pending row of a projected card purchase as projected (spec 096)", () => {
+  const input = {
+    categoryName: "Food",
+    id: "pending-2",
+    invoiceMonth: "2026-11",
+    owner,
+  };
+  const card = {
+    ...base,
+    amountCents: 1000,
+    categoryId: "cat-1",
+    creditCardId: "card-1",
+    description: "Youtube Premium",
+    payWith: "CARD" as const,
+  };
+
+  expect(
+    buildPendingRow({ ...input, state: { ...card, projected: true } })
+      .projected,
+  ).toBe(true);
+  expect(buildPendingRow({ ...input, state: card }).projected).toBe(false);
+});

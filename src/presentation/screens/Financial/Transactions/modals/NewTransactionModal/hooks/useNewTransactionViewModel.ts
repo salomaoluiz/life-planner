@@ -74,6 +74,7 @@ import {
   changeOwner,
   changePaid,
   changePayWith,
+  changeProjected,
   changeRepeatOn,
   changeType,
   chipCategories,
@@ -197,7 +198,9 @@ function installmentsOf(
   isEditing: boolean,
   error: TranslationKeys | undefined,
 ) {
-  const visible = !!state && state.payWith === "CARD" && !isEditing;
+  // A projected purchase can't be split (spec 096 FR 15).
+  const visible =
+    !!state && state.payWith === "CARD" && !isEditing && !state.projected;
   const enabled = visible && !!state && state.installmentsOn;
   const count = state?.installmentsCount ?? 0;
   const valid =
@@ -1213,6 +1216,11 @@ function useNewTransactionViewModel() {
         );
       }
     },
+    onProjectedToggle: (on: boolean) => {
+      if (state) {
+        update(changeProjected(state, on));
+      }
+    },
     onRecurrenceDeleteCancel: () => {
       setAllDeleteOpen(false);
       setPaidDeleteDismissed(true);
@@ -1284,6 +1292,15 @@ function useNewTransactionViewModel() {
       ? "financial.transactions.form.paid"
       : "financial.transactions.form.received") as TranslationKeys,
     payWith: state?.payWith ?? "ACCOUNT",
+    // Spec 096 FR 15: only a card expense that is being created can be projected.
+    projected: {
+      on: !!state?.projected,
+      visible:
+        !!state &&
+        state.payWith === "CARD" &&
+        state.type === TransactionType.EXPENSE &&
+        !isEditing,
+    },
     recurrence: {
       // Create: the "Repeat" switch. Edit: the series of the occurrence, with the scope selector (FR 17, 19).
       deleteScope,

@@ -17,6 +17,7 @@ import {
   changeOwner,
   changePaid,
   changePayWith,
+  changeProjected,
   changeRepeatOn,
   changeType,
   chipCategories,
@@ -93,6 +94,7 @@ function state(
     paid: true,
     paidTouched: false,
     payWith: "ACCOUNT",
+    projected: false,
     repeatEnd: undefined,
     repeatFrequency: "MONTHLY",
     repeatOn: false,
@@ -125,6 +127,7 @@ it("SHOULD create an expense form for today with the default account", () => {
     paid: true,
     paidTouched: false,
     payWith: "ACCOUNT",
+    projected: false,
     repeatFrequency: "MONTHLY",
     repeatOn: false,
     tags: [],
@@ -161,6 +164,7 @@ it("SHOULD build the state of an existing transaction from its DTO", () => {
     paid: true,
     paidTouched: true,
     payWith: "ACCOUNT",
+    projected: false,
     repeatFrequency: "MONTHLY",
     repeatOn: false,
     tags: [],
@@ -1339,5 +1343,103 @@ describe("invoice month (spec 095)", () => {
 
     expect(stateFromDto(dto).invoiceMonth).toBe("2026-11");
     expect(calendarDayOf(new Date(2026, 0, 5))).toBe("2026-01-05");
+  });
+});
+
+describe("projected card purchases (spec 096)", () => {
+  const card = state({
+    accountId: undefined,
+    creditCardId: "card-1",
+    payWith: "CARD",
+  });
+
+  it("SHOULD turn Installments off WHEN Projected is turned on, and keep Repeat", () => {
+    const next = changeProjected(
+      { ...card, installmentsOn: true, repeatOn: true },
+      true,
+    );
+
+    expect(next).toMatchObject({
+      installmentsOn: false,
+      projected: true,
+      repeatOn: true,
+    });
+  });
+
+  it("SHOULD NOT let Installments on while the purchase is projected", () => {
+    const projected = changeProjected(card, true);
+
+    expect(changeInstallmentsOn(projected, true).installmentsOn).toBe(false);
+    expect(changeInstallmentsOn(card, true).installmentsOn).toBe(true);
+  });
+
+  it("SHOULD drop Projected WHEN the purchase moves to an account", () => {
+    const next = changePayWith(changeProjected(card, true), "ACCOUNT", [], []);
+
+    expect(next.projected).toBe(false);
+  });
+
+  it("SHOULD drop Projected WHEN the type turns into an income", () => {
+    const next = changeType(
+      changeProjected(card, true),
+      TransactionType.INCOME,
+      [],
+    );
+
+    expect(next.projected).toBe(false);
+  });
+
+  it("SHOULD clear Projected for the next entry", () => {
+    expect(resetForNext(changeProjected(card, true)).projected).toBe(false);
+  });
+
+  it("SHOULD send projected for a projected card purchase AND for its series, never for an account row", () => {
+    const owner = new OwnerDTO({
+      id: "user-id",
+      name: "Alice",
+      type: OwnerType.USER,
+    });
+    const projected = changeProjected(card, true);
+
+    expect(toCreateParams(projected, owner, "Food")).toMatchObject({
+      projected: true,
+    });
+    expect(toCreateRecurrenceParams(projected, owner)).toMatchObject({
+      projected: true,
+    });
+    expect(toCreateParams(card, owner, "Food").projected).toBeUndefined();
+    expect(
+      toCreateParams({ ...state(), projected: true }, owner, "Food").projected,
+    ).toBeUndefined();
+  });
+
+  it("SHOULD never send projected on an update (the API takes it only on create)", () => {
+    const owner = new OwnerDTO({
+      id: "user-id",
+      name: "Alice",
+      type: OwnerType.USER,
+    });
+
+    expect(
+      toUpdateParams("tx-1", changeProjected(card, true), owner, "Food"),
+    ).not.toHaveProperty("projected");
+  });
+
+  it("SHOULD read the projected flag of an existing transaction", () => {
+    const dto = new TransactionDTO({
+      category: "Food",
+      categoryId: "food",
+      creditCardId: "card-1",
+      date: new Date(2026, 9, 5).toISOString(),
+      description: "Youtube Premium",
+      id: "tx-1",
+      owner: "USER",
+      ownerId: "user-id",
+      projected: true,
+      type: "EXPENSE",
+      value: "10.00",
+    });
+
+    expect(stateFromDto(dto).projected).toBe(true);
   });
 });

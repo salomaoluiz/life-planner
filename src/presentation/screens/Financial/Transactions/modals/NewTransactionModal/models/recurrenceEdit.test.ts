@@ -22,6 +22,7 @@ const initial: TransactionFormState = {
   paid: false,
   paidTouched: true,
   payWith: "ACCOUNT",
+  projected: false,
   repeatEnd: new Date(2027, 8, 5),
   repeatFrequency: "MONTHLY",
   repeatOn: true,
