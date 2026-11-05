@@ -57,6 +57,8 @@ onFlowComplete:
     id: "financial.transactionForm.installments.switch"
 - assertVisible:
     id: "financial.transactionForm.installments.count"
+# Spec 096: the Projected row pushes Repeat below the fold
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
 - tapOn:
     id: "financial.transaction-form.repeat"
 - assertNotVisible:
@@ -64,6 +66,7 @@ onFlowComplete:
 - assertVisible:
     id: "financial.transaction-form.repeat-frequency-MONTHLY"
 # And the other way around
+- runFlow: ../../../subflows/financial/scroll-form-up.yaml
 - tapOn:
     id: "financial.transactionForm.installments.switch"
 - assertVisible:
