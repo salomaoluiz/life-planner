@@ -13,6 +13,7 @@ import {
   accountsQuery,
   archivedFamily,
   balancesQuery,
+  cardsQuery,
   dto,
   givenData,
   invoicesQuery,
@@ -798,6 +799,72 @@ describe("favorite account (spec 094)", () => {
 
     accountsQuery.withData([account({ status: "ARCHIVED" })]);
     expect(setup().result.current.favorite).toBeUndefined();
+  });
+});
+
+describe("favorite month summary columns (spec 094.2)", () => {
+  function account(over: Record<string, unknown> = {}) {
+    return {
+      currency: "BRL",
+      id: "fav",
+      isFavorite: true,
+      name: "Main",
+      ownerId: "user-id",
+      status: "ACTIVE",
+      ...over,
+    };
+  }
+
+  function given(accounts: unknown[]) {
+    givenData([ui("a", new Date(2026, 9, 3))]);
+    accountsQuery.withData(accounts);
+    cardsQuery.withData([]);
+  }
+
+  it("SHOULD build the favorite column and the muted total column", () => {
+    given([account(), account({ id: "other", isFavorite: false })]);
+    const { result } = setup();
+
+    expect(result.current.summaryColumns?.map((c) => c.key)).toEqual([
+      "favorite",
+      "total",
+    ]);
+    expect(result.current.summaryColumns?.[1]).toMatchObject({
+      emphasis: "muted",
+      values: { balanceCents: 4000, incomeCents: 5000, toPayCents: 700 },
+    });
+  });
+
+  it("SHOULD build ONE column WHEN the favorite is the only account of the scope", () => {
+    given([account()]);
+
+    expect(setup().result.current.summaryColumns?.map((c) => c.key)).toEqual([
+      "favorite",
+    ]);
+  });
+
+  it("SHOULD expose no columns WHEN there is no favorite, it is archived or in another currency", () => {
+    given([account({ isFavorite: false })]);
+    expect(setup().result.current.summaryColumns).toBeUndefined();
+
+    given([account({ status: "ARCHIVED" })]);
+    expect(setup().result.current.summaryColumns).toBeUndefined();
+
+    given([account({ currency: "USD" })]);
+    expect(setup().result.current.summaryColumns).toBeUndefined();
+  });
+
+  it("SHOULD share the cached cards of the filters and forms", async () => {
+    given([account()]);
+    setup();
+
+    const call = spies.useQuery.mock.calls.find(
+      ([options]) =>
+        (options as { cacheKey: string[] }).cacheKey[1] === "creditCards",
+    )?.[0] as { cacheKey: string[]; enabled: boolean };
+
+    expect(call.cacheKey).toEqual(["finance", "creditCards", "raw"]);
+    expect(call.enabled).toBe(true);
   });
 });
 

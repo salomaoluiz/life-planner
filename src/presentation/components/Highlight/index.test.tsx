@@ -28,3 +28,18 @@ it("SHOULD tint the content only while active", () => {
     StyleSheet.flatten(screen.getByTestId("box").props.style)?.backgroundColor,
   ).toBeUndefined();
 });
+
+it("SHOULD use the warning tint AND fill the row WHEN asked (spec 094.2)", () => {
+  render(
+    <Highlight active fill testID="box" tone="warning">
+      <></>
+    </Highlight>,
+  );
+
+  expect(
+    StyleSheet.flatten(screen.getByTestId("box").props.style),
+  ).toMatchObject({
+    backgroundColor: lightTheme.colors.warningSoft,
+    flex: 1,
+  });
+});

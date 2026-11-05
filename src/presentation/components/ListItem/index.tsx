@@ -9,6 +9,8 @@ import { useKitTheme } from "@components/utils/useKitTheme";
 export interface ListItemProps {
   accessibilityLabel?: string;
   divider?: boolean;
+  /** Tints the row (the favorite account, spec 094.2) */
+  highlight?: boolean;
   /** Horizontal padding inside the pressable area, so the content doesn't touch the hover edge */
   inset?: boolean;
   leading?: React.ReactNode;
@@ -22,17 +24,20 @@ export interface ListItemProps {
   subtitle?: string;
   testID?: string;
   title: string;
+  /** Drawn right after the title, e.g. the favorite star (spec 094.2) */
+  titleTrailing?: React.ReactNode;
   trailing?: React.ReactNode;
 }
 
 const MIN_HEIGHT = 56;
 
 function ListItem(props: ListItemProps) {
-  const { spacing } = useKitTheme();
+  const { colors, spacing } = useKitTheme();
   const { testID } = props;
   const styles = StyleSheet.create({
     row: {
       alignItems: "center",
+      backgroundColor: props.highlight ? colors.warningSoft : undefined,
       flexDirection: "row",
       gap: spacing.sm,
       minHeight: MIN_HEIGHT,
@@ -40,18 +45,31 @@ function ListItem(props: ListItemProps) {
       paddingVertical: spacing.sm,
     },
     text: { flex: 1, minWidth: 0 },
+    title: { alignItems: "center", flexDirection: "row", gap: spacing.xs },
   });
 
   const content = (
     <>
       {props.leading}
       <View style={styles.text}>
-        <Text.BodyStrong
-          numberOfLines={1}
-          strikethrough={props.strikethrough}
-          testID={testID && `${testID}-title`}
-          value={props.title}
-        />
+        {props.titleTrailing ? (
+          <View style={styles.title}>
+            <Text.BodyStrong
+              numberOfLines={1}
+              strikethrough={props.strikethrough}
+              testID={testID && `${testID}-title`}
+              value={props.title}
+            />
+            {props.titleTrailing}
+          </View>
+        ) : (
+          <Text.BodyStrong
+            numberOfLines={1}
+            strikethrough={props.strikethrough}
+            testID={testID && `${testID}-title`}
+            value={props.title}
+          />
+        )}
         {props.subtitle ? (
           <Text.Caption
             numberOfLines={1}

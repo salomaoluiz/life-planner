@@ -651,3 +651,46 @@ describe("floating new transaction button (spec 050)", () => {
     ).toBeNull();
   });
 });
+
+describe("favorite month summary (spec 094.2)", () => {
+  const values = {
+    balanceCents: 100,
+    expenseCents: 200,
+    incomeCents: 300,
+    projectedExpenseCents: 0,
+    projectedIncomeCents: 0,
+    toPayCents: 0,
+    toReceiveCents: 0,
+  };
+
+  it("SHOULD render the favorite | total table WHEN the view model has columns", () => {
+    setup({
+      favorite: { id: "fav", name: "Main" },
+      summary: {
+        balanceCents: 100,
+        expenseCents: 200,
+        incomeCents: 300,
+        projectedExpenseCents: 0,
+        projectedIncomeCents: 0,
+        toPayCents: 0,
+        toReceiveCents: 0,
+      },
+      summaryColumns: [
+        { emphasis: "primary", key: "favorite", values },
+        { emphasis: "muted", key: "total", values },
+      ],
+    });
+
+    expect(
+      screen.getByTestId(transactionsTestIds.summaryTable),
+    ).toBeOnTheScreen();
+    expect(hasText("Main")).toBe(true);
+    expect(hasText("financial.transactions.summary.total")).toBe(true);
+  });
+
+  it("SHOULD keep today's card WHEN there are no columns", () => {
+    setup({ summaryColumns: undefined });
+
+    expect(screen.queryByTestId(transactionsTestIds.summaryTable)).toBeNull();
+  });
+});

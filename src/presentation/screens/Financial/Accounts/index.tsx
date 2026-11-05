@@ -3,6 +3,7 @@ import { View } from "react-native";
 
 import {
   AmountText,
+  Badge,
   Card,
   ChipGroup,
   EmptyState,
@@ -20,6 +21,7 @@ import Skeleton from "@components/Skeleton";
 import { useKitTheme } from "@components/utils/useKitTheme";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useTranslation } from "@presentation/i18n";
+import { useBreakpoint } from "@presentation/theme";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
 import ProjectedBalance from "./components/ProjectedBalance";
@@ -33,7 +35,8 @@ const SKELETON_ROWS = [0, 1, 2, 3, 4, 5];
 function FinancialAccounts() {
   const { styles } = useStyles();
   const { t } = useTranslation();
-  const { sizes } = useKitTheme();
+  const { colors, sizes } = useKitTheme();
+  const breakpoint = useBreakpoint();
   const vm = useAccountsViewModel();
 
   const toolbar = (
@@ -117,14 +120,48 @@ function FinancialAccounts() {
       tone = "neutral";
     }
 
+    const favorite = account.isFavorite && !account.isArchived;
+    const compact = breakpoint === "compact";
+    let subtitle = account.ownerName;
+    if (favorite && compact) {
+      subtitle = t("financial.accounts.favoriteSubtitle", {
+        owner: account.ownerName,
+      });
+    }
+
     return (
       <ListItem
+        accessibilityLabel={
+          favorite
+            ? t("financial.accounts.favoriteA11y", { name: account.name })
+            : undefined
+        }
+        highlight={favorite}
         inset
         leading={<IconTile name={account.icon} tone={tone} />}
+        meta={
+          favorite && !compact ? (
+            <Badge
+              label={t("financial.accounts.favoriteTag")}
+              testID={accountsTestIds.favoriteTag}
+              tone={"warning"}
+            />
+          ) : undefined
+        }
         onPress={() => vm.onRowPress(account.id)}
-        subtitle={account.ownerName}
+        subtitle={subtitle}
         testID={accountsTestIds.row}
         title={account.name}
+        titleTrailing={
+          favorite ? (
+            <Icon
+              color={colors.warning}
+              name={"star"}
+              size={sizes.iconSm}
+              testID={accountsTestIds.favoriteStar}
+            />
+          ) : undefined
+        }
         trailing={
           <View style={styles.balanceColumn}>
             <AmountText

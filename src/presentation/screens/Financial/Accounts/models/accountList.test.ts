@@ -132,3 +132,45 @@ it("SHOULD total the projected balance of the active accounts only", () => {
   ).toBe(14050);
   expect(totalProjectedCents([])).toBe(0);
 });
+
+it("SHOULD pin the favorite first in Active and keep the others by name (spec 094.2)", () => {
+  const favorite = new AccountUIModel(
+    new AccountDTO({
+      balance: 1,
+      icon: "bank",
+      id: "z-favorite",
+      isFavorite: true,
+      name: "z-favorite",
+      owner: "USER",
+      ownerId: "user-id",
+      status: "ACTIVE",
+    }),
+    [],
+  );
+  const ids = buildAccountEntries([...accounts, favorite], false)
+    .map((e) => (e.kind === "row" ? e.account.id : undefined))
+    .filter(Boolean);
+
+  expect(ids).toEqual(["z-favorite", "a-active", "b-active", "family"]);
+});
+
+it("SHOULD NOT pin an archived favorite", () => {
+  const archivedFavorite = new AccountUIModel(
+    new AccountDTO({
+      balance: 1,
+      icon: "bank",
+      id: "old",
+      isFavorite: true,
+      name: "old",
+      owner: "USER",
+      ownerId: "user-id",
+      status: "ARCHIVED",
+    }),
+    [],
+  );
+  const ids = buildAccountEntries([...accounts, archivedFavorite], false)
+    .map((e) => (e.kind === "row" ? e.account.id : undefined))
+    .filter(Boolean);
+
+  expect(ids).toEqual(["a-active", "b-active", "family"]);
+});

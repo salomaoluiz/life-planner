@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import AccountDTO from "@application/dto/financial/AccountDTO";
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
+import CreditCardDTO from "@application/dto/financial/CreditCardDTO";
 import ProjectedOccurrenceDTO from "@application/dto/financial/ProjectedOccurrenceDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import { financeKeys } from "@application/queryKeys/financeKeys";
@@ -26,6 +27,10 @@ import {
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import CardInvoiceUIModel from "../models/CardInvoiceUIModel";
+import {
+  favoriteMonthSummary,
+  MonthSummaryColumnData,
+} from "../models/favoriteMonthSummary";
 import {
   applyPendingToInvoices,
   applyPendingToItems,
@@ -308,6 +313,71 @@ function useTransactionsViewModel() {
     ),
     { currency: DEFAULT_CURRENCY },
   );
+  // Spec 094.2: the cards say who pays an invoice that is still open. Same key and fetch as the filter options.
+  const cards = useQuery<CreditCardDTO[]>({
+    cacheKey: financeKeys.creditCards.raw(),
+    enabled: !!favoriteAccount,
+    fetch: async () =>
+      useCases.getFinancialCreditCardsUseCase.execute(allOwnerIds),
+  });
+  const scopeAccountCount = (accounts.data ?? []).filter(
+    (account) =>
+      summaryOwnerIds.includes(account.ownerId) &&
+      account.status === "ACTIVE" &&
+      account.currency === DEFAULT_CURRENCY,
+  ).length;
+  const cardsReady = !!cards.data || !!cards.error;
+  const summaryColumns = useMemo<MonthSummaryColumnData[] | undefined>(() => {
+    if (!favoriteAccount || !monthData || !cardsReady) {
+      return undefined;
+    }
+
+    const favorite: MonthSummaryColumnData = {
+      emphasis: "primary",
+      key: "favorite",
+      values: favoriteMonthSummary({
+        favoriteId: favoriteAccount.id,
+        invoices: monthData.invoices,
+        items: monthData.items,
+        paymentAccountByCardId: new Map(
+          (cards.data ?? []).flatMap((card) =>
+            card.paymentAccountId
+              ? [[card.id, card.paymentAccountId] as const]
+              : [],
+          ),
+        ),
+        projections: monthData.projections,
+      }),
+    };
+
+    // The favorite is the only account of the scope: one column, no repeated total (spec 094.2 FR 9).
+    if (scopeAccountCount <= 1) {
+      return [favorite];
+    }
+
+    return [
+      favorite,
+      {
+        emphasis: "muted",
+        key: "total",
+        values: {
+          balanceCents: monthData.summary.balance,
+          expenseCents: monthData.summary.expense,
+          incomeCents: monthData.summary.income,
+          projectedExpenseCents: monthData.summary.projectedExpense ?? 0,
+          projectedIncomeCents: monthData.summary.projectedIncome ?? 0,
+          toPayCents: monthData.summary.toPay,
+          toReceiveCents: monthData.summary.toReceive,
+        },
+      },
+    ];
+  }, [
+    favoriteAccount?.id,
+    monthData,
+    cards.data,
+    cardsReady,
+    scopeAccountCount,
+  ]);
   const range = useMemo(() => effectiveRange(applied, month), [applied, month]);
   const queryFilter = useMemo<TransactionQueryFilter>(
     () => ({ ...toQueryFilter(applied), from: range.from, to: range.to }),
@@ -734,6 +804,7 @@ function useTransactionsViewModel() {
           toReceiveCents: monthData.summary.toReceive,
         }
       : undefined,
+    summaryColumns,
     summaryError: !!monthQuery.error,
     toastVisible: scope.toastVisible,
     typeFilter,

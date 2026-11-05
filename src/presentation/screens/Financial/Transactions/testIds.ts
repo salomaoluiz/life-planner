@@ -141,6 +141,7 @@ const transactionsTestIds = {
   summaryIncome: "financial.transactions.summary-income",
   summaryProjected: "financial.transactions.summary-projected",
   summaryScope: "financial.transactions.summary-scope",
+  summaryTable: "financial.transactions.summary-table",
   summaryToPay: "financial.transactions.summary.toPay",
   summaryToReceive: "financial.transactions.summary.toReceive",
   totalsUpdating: "financial.transactions.totalsUpdating",

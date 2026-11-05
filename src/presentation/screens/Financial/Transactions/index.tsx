@@ -451,6 +451,13 @@ function FinancialTransactions() {
           balanceLabel={t("financial.transactions.balanceOf", {
             month: vm.monthName,
           })}
+          columns={vm.summaryColumns?.map((column) => ({
+            ...column,
+            label:
+              column.key === "favorite"
+                ? (vm.favorite?.name ?? "")
+                : t("financial.transactions.summary.total"),
+          }))}
           errorMessage={t("common.errors.generic")}
           expenseCents={vm.summary?.expenseCents ?? 0}
           expensesLabel={t("financial.common.expenses")}
@@ -466,8 +473,25 @@ function FinancialTransactions() {
           projectedLabel={t("financial.transactions.summary.projected")}
           projectedTestID={transactionsTestIds.summaryProjected}
           retryLabel={t("common.actions.tryAgain")}
+          rowA11yLabel={(label, values) =>
+            t("financial.transactions.summary.rowA11y", {
+              label,
+              name: vm.favorite?.name ?? "",
+              total: values[1] ?? values[0],
+              value: values[0],
+            })
+          }
           scopeLabel={scopeLabel}
           scopeTestID={transactionsTestIds.summaryScope}
+          tableLabels={{
+            expenses: t("financial.common.expenses"),
+            income: t("financial.common.incomes"),
+            projected: t("financial.transactions.summary.projected"),
+            result: t("financial.transactions.summary.result"),
+            toPay: t("financial.transactions.summary.toPay"),
+            toReceive: t("financial.transactions.summary.toReceive"),
+          }}
+          tableTestID={transactionsTestIds.summaryTable}
           testID={transactionsTestIds.monthSummary}
           toPayCents={vm.summary?.toPayCents}
           toPayLabel={t("financial.transactions.summary.toPay")}

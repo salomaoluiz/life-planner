@@ -182,6 +182,11 @@ class CardInvoiceUIModel {
     return this.dto.card.ownerId;
   }
 
+  // The account the invoice was paid from; unset while unpaid or when paid outside the app.
+  get paidAccountId() {
+    return this.dto.invoice.payment?.accountId;
+  }
+
   get paidAccountName() {
     return this.dto.invoice.payment?.accountName;
   }

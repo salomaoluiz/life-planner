@@ -6,9 +6,16 @@ import { useKitTheme } from "@components/utils/useKitTheme";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import UpdatingTotal from "@screens/Financial/Transactions/components/UpdatingTotal";
 
+import FavoriteTable, {
+  SummaryTableColumn,
+  SummaryTableLabels,
+} from "./FavoriteTable";
+
 interface Props {
   balanceCents: number;
   balanceLabel: string;
+  // Spec 094.2: the favorite | total table; without it (or empty) the card is the single-figure one.
+  columns?: SummaryTableColumn[];
   errorMessage: string;
   expenseCents: number;
   expensesLabel: string;
@@ -25,8 +32,11 @@ interface Props {
   projectedLabel?: string;
   projectedTestID?: string;
   retryLabel: string;
+  rowA11yLabel?: (label: string, values: string[]) => string;
   scopeLabel: string;
   scopeTestID?: string;
+  tableLabels?: SummaryTableLabels;
+  tableTestID?: string;
   testID?: string;
   toPayCents?: number;
   toPayLabel?: string;
@@ -69,6 +79,28 @@ function MonthSummary(props: Props) {
       <Card>
         <Text.Body tone={"expense"} value={props.errorMessage} />
         <Button.Ghost inline label={props.retryLabel} onPress={props.onRetry} />
+      </Card>
+    );
+  }
+
+  if (props.columns?.length && props.tableLabels && props.rowA11yLabel) {
+    return (
+      <Card customStyles={{ padding: 0 }} testID={props.testID}>
+        <View style={styles.top}>
+          <Text.Overline tone={"secondary"} value={props.balanceLabel} />
+          <Text.Caption
+            testID={props.scopeTestID}
+            tone={"secondary"}
+            value={props.scopeLabel}
+          />
+        </View>
+        <FavoriteTable
+          columns={props.columns}
+          labels={props.tableLabels}
+          rowA11yLabel={props.rowA11yLabel}
+          testID={props.tableTestID}
+          updating={props.updating}
+        />
       </Card>
     );
   }
