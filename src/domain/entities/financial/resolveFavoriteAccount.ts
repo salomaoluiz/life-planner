@@ -8,8 +8,8 @@ interface FavoriteCandidate {
 }
 
 interface FavoriteScope {
-  // The account filter of the screen (spec 045), when set.
-  accountId?: string;
+  // The account filter of the screen (spec 045); empty or omitted = no filter.
+  accountIds?: string[];
   // The currency the screen shows (spec 040); the default currency when omitted.
   currency?: CurrencyCode;
 }
@@ -25,7 +25,7 @@ function resolveFavoriteAccount<T extends FavoriteCandidate>(
   if (!favorite || favorite.status !== "ACTIVE") {
     return undefined;
   }
-  if (scope.accountId !== undefined && scope.accountId !== favorite.id) {
+  if (scope.accountIds?.length && !scope.accountIds.includes(favorite.id)) {
     return undefined;
   }
   if (

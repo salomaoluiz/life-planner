@@ -39,14 +39,17 @@ it("SHOULD return undefined WHEN the favorite is archived", () => {
 
 it("SHOULD return undefined WHEN the account filter selects another account", () => {
   expect(
-    resolveFavoriteAccount([favorite, account()], { accountId: "a1" }),
+    resolveFavoriteAccount([favorite, account()], { accountIds: ["a1"] }),
   ).toBeUndefined();
 });
 
-it("SHOULD return the favorite WHEN the account filter selects it", () => {
+it("SHOULD return the favorite WHEN the account filter includes it OR is empty", () => {
   expect(
-    resolveFavoriteAccount([favorite, account()], { accountId: "fav" }),
+    resolveFavoriteAccount([favorite, account()], {
+      accountIds: ["a1", "fav"],
+    }),
   ).toBe(favorite);
+  expect(resolveFavoriteAccount([favorite], { accountIds: [] })).toBe(favorite);
 });
 
 it("SHOULD return undefined WHEN the screen currency differs", () => {
