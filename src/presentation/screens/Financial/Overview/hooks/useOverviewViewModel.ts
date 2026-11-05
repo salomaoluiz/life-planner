@@ -2,7 +2,10 @@ import { useIsFocused } from "@react-navigation/native";
 import { router } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import AccountDTO from "@application/dto/financial/AccountDTO";
+import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
+import { CurrencyCode } from "@domain/entities/financial/Currency";
 import {
   BalanceSeriesEntity,
   DashboardGranularity,
@@ -10,6 +13,7 @@ import {
   DashboardTotalsEntity,
   DashboardType,
 } from "@domain/entities/financial/DashboardEntity";
+import { resolveFavoriteAccount } from "@domain/entities/financial/resolveFavoriteAccount";
 import { TransactionQueryFilter } from "@domain/entities/financial/TransactionQueryFilter";
 import { useQuery } from "@infrastructure/fetcher";
 import useOwners from "@presentation/hooks/useOwners";
@@ -131,6 +135,15 @@ function useOverviewViewModel() {
   const baseKey = JSON.stringify(base);
   const enabled = !!owners && ownerIds.length > 0;
 
+  // Spec 094: the accounts tell which one is the favorite. Same key and fetch as the filter options and the forms, so
+  // the list is requested once for all of them; the owner filter is applied here.
+  const accounts = useQuery<AccountDTO[]>({
+    cacheKey: financeKeys.accounts.raw(),
+    enabled: !!owners && allOwnerIds.length > 0,
+    fetch: async () =>
+      useCases.getFinancialAccountsUseCase.execute(allOwnerIds),
+  });
+
   const summary = useQuery<DashboardSummaryEntity>({
     cacheKey: [
       useCases.getFinancialDashboardSummaryUseCase.uniqueName,
@@ -216,6 +229,17 @@ function useOverviewViewModel() {
     }
   }, [currencies, currencyChoice]);
 
+  // The favorite is highlighted only while it is inside the scope, the account filter and the currency shown.
+  const favorite = resolveFavoriteAccount(
+    (accounts.data ?? []).filter((account) =>
+      ownerIds.includes(account.ownerId),
+    ),
+    {
+      accountIds: filterStore.filters.accountIds,
+      currency: currency as CurrencyCode,
+    },
+  );
+
   // Back on screen: the numbers move with every write made elsewhere.
   const firstFocus = useRef(true);
 
@@ -278,6 +302,7 @@ function useOverviewViewModel() {
     customOpen,
     customPeriod,
     effectiveGranularity,
+    favorite,
     filtersActive,
     filtersOpen,
     filterStore,

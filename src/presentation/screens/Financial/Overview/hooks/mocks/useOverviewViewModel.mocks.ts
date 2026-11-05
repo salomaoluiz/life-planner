@@ -17,6 +17,7 @@ jest.mock("@react-navigation/native", () => ({ useIsFocused: jest.fn() }));
 jest.mock("@infrastructure/fetcher");
 jest.mock("@application/useCases", () => ({
   useCases: {
+    getFinancialAccountsUseCase: { execute: jest.fn(), uniqueName: "accounts" },
     getFinancialBalanceSeriesUseCase: {
       execute: jest.fn(),
       uniqueName: "balance",
@@ -42,6 +43,7 @@ const owners = [
 ];
 
 const queries = {
+  accounts: new UseQueryFixture<unknown>(),
   balance: new UseQueryFixture<unknown>(),
   CATEGORY: new UseQueryFixture<unknown>(),
   owners: new UseQueryFixture<OwnerDTO[]>(),
@@ -64,6 +66,10 @@ function bind() {
 }
 
 function keyOf(cacheKey: string[]): Key {
+  if (cacheKey[0] === "finance") {
+    return "accounts";
+  }
+
   return (cacheKey[0] === "totals" ? cacheKey[1] : cacheKey[0]) as Key;
 }
 

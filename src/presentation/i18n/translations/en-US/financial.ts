@@ -771,11 +771,16 @@ const financial = {
     a11y: {
       balanceChart:
         "Balance from {{from}} to {{to}}, from {{start}} to {{end}}, expected {{projected}} at the end of the month",
+      balanceChartFavorite:
+        "Balance of {{name}} from {{start}} to {{end}}; total from {{totalStart}} to {{totalEnd}}, from {{from}} to {{to}}",
       incomeExpenseChart: "Income and expenses from {{from}} to {{to}}",
       open: "Open in Transactions",
     },
     balance: {
+      favoriteCaption: "Favorite account",
+      favoriteLegend: "{{name}} · favorite",
       filtersNote: "Balance follows scope, currency and accounts",
+      otherAccounts: "Other accounts",
       projected: "Expected (after today)",
       projectedEnd: "Projected on {{date}}",
       realized: "Actual",
@@ -783,6 +788,7 @@ const financial = {
         "Balance of the accounts in the filter at the end of each {{bucket}}",
       title: "Balance over time",
       total: "Total",
+      totalLegend: "Total of accounts",
     },
     blockError: "Couldn't load this chart",
     bucket: { day: "day", month: "month", week: "week" },

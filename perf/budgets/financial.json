@@ -101,7 +101,7 @@
   "financial.overview.mount.cold": {
     "maxDepth": 2,
     "maxDuplicates": 0,
-    "maxRequests": 6,
+    "maxRequests": 7,
     "route": "app/(app)/(tabs)/financial/overview.tsx"
   },
   "financial.overview.render.mount": {

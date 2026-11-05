@@ -773,17 +773,23 @@ const financial = {
     a11y: {
       balanceChart:
         "Saldo de {{from}} a {{to}}, de {{start}} a {{end}}, previsto {{projected}} no fim do mês",
+      balanceChartFavorite:
+        "Saldo de {{name}} de {{start}} a {{end}}; total de {{totalStart}} a {{totalEnd}}, de {{from}} a {{to}}",
       incomeExpenseChart: "Receitas e despesas de {{from}} a {{to}}",
       open: "Abrir em Transações",
     },
     balance: {
+      favoriteCaption: "Conta favorita",
+      favoriteLegend: "{{name}} · favorita",
       filtersNote: "O saldo segue escopo, moeda e contas",
+      otherAccounts: "Outras contas",
       projected: "Previsto (depois de hoje)",
       projectedEnd: "Previsto em {{date}}",
       realized: "Realizado",
       subtitle: "Saldo das contas do filtro ao fim de cada {{bucket}}",
       title: "Evolução do saldo",
       total: "Total",
+      totalLegend: "Total das contas",
     },
     blockError: "Não foi possível carregar este gráfico",
     bucket: { day: "dia", month: "mês", week: "semana" },
