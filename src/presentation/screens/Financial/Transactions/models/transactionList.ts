@@ -30,6 +30,8 @@ export type ListEntry =
       accountId?: string;
       balanceCents: number;
       dateKey: string;
+      // Spec 094: the favorite account of the user, listed first.
+      favorite?: boolean;
       icon: string;
       isCards: boolean;
       // The last line of the group closes the card the header opened.
@@ -71,11 +73,21 @@ export interface ProjectedInvoiceGroup {
 export type TypeFilter = "ALL" | "EXPENSE" | "INCOME";
 
 // One line per account (API order), plus the card invoices line only when it is not zero.
-function balanceLines(dateKey: string, balance: DayBalanceView): ListEntry[] {
-  const lines: ListEntry[] = balance.accounts.map((account) => ({
+function balanceLines(
+  dateKey: string,
+  balance: DayBalanceView,
+  favoriteId?: string,
+): ListEntry[] {
+  // The favorite account first (spec 094 FR 24); the others keep the API order.
+  const accounts = [...balance.accounts].sort(
+    (a, b) =>
+      Number(b.accountId === favoriteId) - Number(a.accountId === favoriteId),
+  );
+  const lines: ListEntry[] = accounts.map((account) => ({
     accountId: account.accountId,
     balanceCents: account.balanceCents,
     dateKey,
+    favorite: account.accountId === favoriteId,
     icon: account.icon,
     isCards: false,
     isLast: false,
@@ -114,6 +126,8 @@ function buildEntries(
   options: {
     balances?: Map<string, DayBalanceView>;
     expandedDateKey?: string;
+    // The favorite account (spec 094): listed first and flagged in the day lines.
+    favoriteId?: string;
     // The month on screen: its first and last day always get a header with the balance (spec 035).
     month?: Date;
   } = {},
@@ -184,7 +198,7 @@ function buildEntries(
         projected: balance?.projected,
       });
       if (balance && options.expandedDateKey === row.dateKey) {
-        entries.push(...balanceLines(row.dateKey, balance));
+        entries.push(...balanceLines(row.dateKey, balance, options.favoriteId));
       }
     }
 

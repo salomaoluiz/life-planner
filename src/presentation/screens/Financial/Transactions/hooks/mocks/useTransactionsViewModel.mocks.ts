@@ -34,6 +34,7 @@ jest.mock("@presentation/i18n/useTranslationLocale", () => ({
 }));
 jest.mock("@application/useCases", () => ({
   useCases: {
+    getFinancialAccountsUseCase: { execute: jest.fn(), uniqueName: "accounts" },
     getFinancialCardInvoicesForMonthUseCase: {
       execute: jest.fn(),
       uniqueName: "invoices",
@@ -113,6 +114,7 @@ const projectionsQuery = new UseQueryFixture<{
   cardGroups: ProjectedInvoiceGroup[];
 }>();
 const balancesQuery = new UseQueryFixture<Map<string, DayBalanceView>>();
+const accountsQuery = new UseQueryFixture<unknown>();
 const filteredTransactionsQuery = new UseQueryFixture<TransactionUIModel[]>();
 const filteredInvoicesQuery = new UseQueryFixture<CardInvoiceUIModel[]>();
 const filteredProjectionsQuery = new UseQueryFixture<{
@@ -132,6 +134,7 @@ const summaryQuery = new UseQueryFixture<{
 
 // region spies
 const spies = {
+  getAccounts: jest.mocked(useCases.getFinancialAccountsUseCase.execute),
   getBalances: jest.mocked(useCases.getFinancialDailyBalancesUseCase.execute),
   getCategories: jest.mocked(useCases.getFinancialCategoriesUseCase.execute),
   getFilteredTransactions: jest.mocked(
@@ -159,6 +162,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   jest.useFakeTimers().setSystemTime(new Date(2026, 9, 5, 12));
   transactionsQuery.reset();
+  accountsQuery.reset();
   ownersQuery.reset();
   summaryQuery.reset();
   balancesQuery.reset();
@@ -198,6 +202,9 @@ beforeEach(() => {
     };
   }) as never);
   spies.useQuery.mockImplementation(((options: { cacheKey: string[] }) => {
+    if (queryName(options.cacheKey) === "accounts") {
+      return accountsQuery.build();
+    }
     if (queryName(options.cacheKey) === "summary") {
       return summaryQuery.build();
     }
@@ -261,6 +268,7 @@ function ui(
 }
 
 export {
+  accountsQuery,
   archivedFamily,
   balancesQuery,
   dto,

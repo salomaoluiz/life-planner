@@ -10,6 +10,7 @@ import { financeKeys } from "@application/queryKeys/financeKeys";
 import { makeInvoice } from "../mocks/invoice.mocks";
 import TransactionUIModel from "../models/TransactionUIModel";
 import {
+  accountsQuery,
   archivedFamily,
   balancesQuery,
   dto,
@@ -725,6 +726,78 @@ describe("day balances (spec 035)", () => {
       ...financeKeys.transactions.list("2026-10"),
       "family-1",
     ]);
+  });
+});
+
+describe("favorite account (spec 094)", () => {
+  const views = new Map([
+    [
+      "2026-10-03",
+      {
+        accounts: [
+          { accountId: "other", balanceCents: 10, icon: "bank", name: "Other" },
+          { accountId: "fav", balanceCents: 20, icon: "bank", name: "Main" },
+        ],
+        cardsDueCents: 0,
+        projected: false,
+        totalCents: 30,
+      },
+    ],
+  ]);
+
+  function account(over: Record<string, unknown> = {}) {
+    return {
+      currency: "BRL",
+      id: "fav",
+      isFavorite: true,
+      name: "Main",
+      ownerId: "user-id",
+      status: "ACTIVE",
+      ...over,
+    };
+  }
+
+  it("SHOULD share the cached accounts of the filters and forms", async () => {
+    givenData([ui("a", new Date(2026, 9, 3))]);
+    setup();
+
+    const call = spies.useQuery.mock.calls.find(
+      ([options]) =>
+        (options as { cacheKey: string[] }).cacheKey[1] === "accounts",
+    )?.[0] as { cacheKey: string[]; fetch: () => Promise<unknown> };
+
+    expect(call.cacheKey).toEqual(["finance", "accounts", "raw"]);
+    await call.fetch();
+    expect(spies.getAccounts).toHaveBeenCalledWith(["user-id", "family-1"]);
+  });
+
+  it("SHOULD expose the favorite AND list it first in the expanded day", () => {
+    givenData([ui("a", new Date(2026, 9, 3))]);
+    balancesQuery.withData(views);
+    accountsQuery.withData([account()]);
+    const { result } = setup();
+
+    expect(result.current.favorite).toEqual({ id: "fav", name: "Main" });
+
+    act(() => result.current.onDayToggle("2026-10-03"));
+
+    expect(
+      result.current.entries
+        .filter((entry) => entry.kind === "balanceLine")
+        .map((entry) => entry.kind === "balanceLine" && entry.accountId),
+    ).toEqual(["fav", "other"]);
+  });
+
+  it("SHOULD expose no favorite WHEN it is out of the owner scope OR archived", () => {
+    givenData([ui("a", new Date(2026, 9, 3))]);
+    accountsQuery.withData([account({ ownerId: "user-id" })]);
+    const { result } = setup();
+
+    act(() => result.current.onOwnerFilterChange("family-1"));
+    expect(result.current.favorite).toBeUndefined();
+
+    accountsQuery.withData([account({ status: "ARCHIVED" })]);
+    expect(setup().result.current.favorite).toBeUndefined();
   });
 });
 

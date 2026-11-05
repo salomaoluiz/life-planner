@@ -38,3 +38,39 @@ it("SHOULD render the card invoices line with its own test id AND a negative amo
   ).toBeOnTheScreen();
   expect(hasText("financial.transactions.dayBalance.cardsDue")).toBe(true);
 });
+
+it("SHOULD show a star, the name in bold AND tint the row WHEN it is the favorite (spec 094)", () => {
+  render(
+    <DayBalanceLine
+      accountId="a1"
+      balanceCents={157000}
+      favorite
+      icon="bank"
+      isCards={false}
+      name="Checking"
+    />,
+  );
+
+  expect(
+    screen.getByTestId(`${transactionsTestIds.dayBalanceLine}-a1-favorite`),
+  ).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(`${transactionsTestIds.dayBalanceLine}-a1`),
+  ).toBeOnTheScreen();
+});
+
+it("SHOULD show no star WHEN it is not the favorite", () => {
+  render(
+    <DayBalanceLine
+      accountId="a1"
+      balanceCents={1}
+      icon="bank"
+      isCards={false}
+      name="Checking"
+    />,
+  );
+
+  expect(
+    screen.queryByTestId(`${transactionsTestIds.dayBalanceLine}-a1-favorite`),
+  ).toBeNull();
+});

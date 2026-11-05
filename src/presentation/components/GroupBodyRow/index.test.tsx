@@ -39,3 +39,20 @@ it("SHOULD close the card WHEN it is the last row AND stay bare in a tooltip", (
     borderLeftWidth: 0,
   });
 });
+
+it("SHOULD tint the row WHEN highlighted (the favorite account, spec 094)", () => {
+  const { rerender } = render(
+    <GroupBodyRow testID="row">
+      <Text>child</Text>
+    </GroupBodyRow>,
+  );
+  const plain = screen.getByTestId("row").props.style.backgroundColor;
+
+  rerender(
+    <GroupBodyRow highlight testID="row">
+      <Text>child</Text>
+    </GroupBodyRow>,
+  );
+
+  expect(screen.getByTestId("row").props.style.backgroundColor).not.toBe(plain);
+});

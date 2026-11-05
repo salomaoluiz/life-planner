@@ -417,6 +417,39 @@ describe("day balances (spec 035)", () => {
     ).toHaveLength(3);
   });
 
+  it("SHOULD list the favorite account first AND flag it WHEN a favorite is given (spec 094)", () => {
+    const entries = buildEntries(items, now, [], {
+      balances,
+      expandedDateKey: "2026-10-05",
+      favoriteId: "a2",
+    });
+    const lines = entries.filter((entry) => entry.kind === "balanceLine");
+
+    expect(
+      lines.map((line) => (line.kind === "balanceLine" ? line.accountId : "")),
+    ).toEqual(["a2", "a1", undefined]);
+    expect(lines[0]).toMatchObject({ favorite: true });
+    expect(lines[1]).toMatchObject({ favorite: false });
+    // The cards line still closes the group.
+    expect(lines[2]).toMatchObject({ isCards: true, isLast: true });
+  });
+
+  it("SHOULD keep the API order WHEN the favorite is not on that day", () => {
+    const entries = buildEntries(items, now, [], {
+      balances,
+      expandedDateKey: "2026-10-05",
+      favoriteId: "gone",
+    });
+    const lines = entries.filter((entry) => entry.kind === "balanceLine");
+
+    expect(
+      lines.map((line) => (line.kind === "balanceLine" ? line.accountId : "")),
+    ).toEqual(["a1", "a2", undefined]);
+    expect(
+      lines.every((line) => line.kind === "balanceLine" && !line.favorite),
+    ).toBe(true);
+  });
+
   it("SHOULD omit the cards line WHEN nothing is due AND keep stickyIndices on headers only", () => {
     const quiet = new Map([
       ["2026-10-05", { ...balances.get("2026-10-05")!, cardsDueCents: 0 }],

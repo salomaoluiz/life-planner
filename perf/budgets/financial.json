@@ -191,7 +191,7 @@
     "maxCommits": 2
   },
   "financial.transactions.render.mount": {
-    "maxCommits": 5
+    "maxCommits": 6
   },
   "financial.transactions.write.create": {
     "maxDepth": 2,

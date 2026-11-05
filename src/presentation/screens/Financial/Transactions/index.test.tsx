@@ -357,6 +357,84 @@ describe("day balance header (spec 035)", () => {
   });
 });
 
+describe("favorite account in the day balance header (spec 094)", () => {
+  const favorite = { id: "a1", name: "Checking" };
+  const day = {
+    accounts: [
+      {
+        accountId: "a2",
+        balanceCents: 7420,
+        icon: "piggy-bank",
+        name: "Savings",
+      },
+      { accountId: "a1", balanceCents: 668040, icon: "bank", name: "Checking" },
+    ],
+    cardsDueCents: 0,
+    projected: false,
+    totalCents: 1437040,
+  };
+  const balances = new Map([["2026-10-05", day]]);
+
+  function entries(): ListEntry[] {
+    const [header, ...rest] = makeEntries();
+
+    return [{ ...header, balanceCents: day.totalCents } as ListEntry, ...rest];
+  }
+
+  it("SHOULD show the favorite name and ITS end-of-day balance in the collapsed header", () => {
+    setup({ balances, entries: entries(), favorite, stickyIndices: [0] });
+
+    expect(
+      screen.getByTestId(
+        `${transactionsTestIds.dayBalanceFavorite}-2026-10-05`,
+      ),
+    ).toBeOnTheScreen();
+    expect(hasText("Checking")).toBe(true);
+    expect(hasText("financial.transactions.dayBalance.total")).toBe(false);
+  });
+
+  it("SHOULD name the favorite for screen readers WHEN collapsed", () => {
+    setup({ balances, entries: entries(), favorite, stickyIndices: [0] });
+
+    expect(
+      screen.getByTestId(`${transactionsTestIds.dayBalance}-2026-10-05`).props
+        .accessibilityLabel,
+    ).toContain("financial.transactions.dayBalance.a11yFavorite");
+  });
+
+  it("SHOULD switch the header to the Total WHEN the day is expanded", () => {
+    setup({
+      balances,
+      entries: entries(),
+      expandedDayKey: "2026-10-05",
+      favorite,
+      stickyIndices: [0],
+    });
+
+    expect(hasText("financial.transactions.dayBalance.total")).toBe(true);
+    expect(
+      screen.queryByTestId(
+        `${transactionsTestIds.dayBalanceFavorite}-2026-10-05`,
+      ),
+    ).toBeNull();
+    expect(
+      screen.getByTestId(`${transactionsTestIds.dayBalance}-2026-10-05`).props
+        .accessibilityLabel,
+    ).not.toContain("a11yFavorite");
+  });
+
+  it("SHOULD look as before WHEN there is no favorite OR the day has no entry for it", () => {
+    setup({ balances, entries: entries(), stickyIndices: [0] });
+
+    expect(
+      screen.queryByTestId(
+        `${transactionsTestIds.dayBalanceFavorite}-2026-10-05`,
+      ),
+    ).toBeNull();
+    expect(hasText("financial.transactions.dayBalance.label")).toBe(true);
+  });
+});
+
 describe("archived family selected (spec 042)", () => {
   it("SHOULD show the read-only banner AND the toast, and no add action in the empty month", () => {
     setup({ isEmptyMonth: true, readOnly: true, toastVisible: true });

@@ -1,11 +1,14 @@
 import { useIsFocused } from "@react-navigation/native";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import AccountDTO from "@application/dto/financial/AccountDTO";
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
 import ProjectedOccurrenceDTO from "@application/dto/financial/ProjectedOccurrenceDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
+import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
+import { resolveFavoriteAccount } from "@domain/entities/financial/resolveFavoriteAccount";
 import { TransactionQueryFilter } from "@domain/entities/financial/TransactionQueryFilter";
 import { refetchStaleFetcherData, useQuery } from "@infrastructure/fetcher";
 import useOwners from "@presentation/hooks/useOwners";
@@ -279,6 +282,14 @@ function useTransactionsViewModel() {
     () => (owners ?? []).map((owner) => owner.id),
     [owners],
   );
+  // Spec 094: the accounts tell which one is the favorite. Same key and fetch as the filter options and the forms, so the
+  // list is requested once for all of them; the owner scope is applied here.
+  const accounts = useQuery<AccountDTO[]>({
+    cacheKey: financeKeys.accounts.raw(),
+    enabled: allOwnerIds.length > 0,
+    fetch: async () =>
+      useCases.getFinancialAccountsUseCase.execute(allOwnerIds),
+  });
   // Months after the current one also show what the series will create (the month response carries them).
   const currentMonthKey = toMonthKey(new Date());
   const isFutureMonth = monthKey > currentMonthKey;
@@ -290,6 +301,13 @@ function useTransactionsViewModel() {
   const filterStore = useTransactionFilters();
   const { applied } = filterStore;
   const filtering = isFiltering(applied);
+  // The day lines are only drawn without a filter, so the favorite only has to pass the owner scope and the currency.
+  const favoriteAccount = resolveFavoriteAccount(
+    (accounts.data ?? []).filter((account) =>
+      summaryOwnerIds.includes(account.ownerId),
+    ),
+    { currency: DEFAULT_CURRENCY },
+  );
   const range = useMemo(() => effectiveRange(applied, month), [applied, month]);
   const queryFilter = useMemo<TransactionQueryFilter>(
     () => ({ ...toQueryFilter(applied), from: range.from, to: range.to }),
@@ -537,9 +555,17 @@ function useTransactionsViewModel() {
       buildEntries(visible, new Date(), visibleInvoices, {
         balances: balanceViews,
         expandedDateKey: expandedDayKey,
+        favoriteId: favoriteAccount?.id,
         month,
       }),
-    [visible, visibleInvoices, balanceViews, expandedDayKey, month],
+    [
+      visible,
+      visibleInvoices,
+      balanceViews,
+      expandedDayKey,
+      favoriteAccount?.id,
+      month,
+    ],
   );
 
   // The first load of a filter shows skeleton rows; later loads keep the previous result visible.
@@ -620,6 +646,9 @@ function useTransactionsViewModel() {
     errorMessage: monthQuery.error?.message,
     expandedDayKey,
     expandedInvoiceId,
+    favorite: favoriteAccount
+      ? { id: favoriteAccount.id, name: favoriteAccount.name }
+      : undefined,
     filterCount: activeGroups(filterStore.filters).length,
     filteredSummary,
     filtering,
