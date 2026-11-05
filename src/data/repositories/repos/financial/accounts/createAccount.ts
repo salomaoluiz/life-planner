@@ -10,6 +10,7 @@ async function createAccount(params: Params, datasources: Datasources) {
   const account = await datasources.financialAccountDatasource.createAccount({
     balance: params.balance,
     icon: params.icon,
+    isFavorite: params.isFavorite,
     name: params.name,
     owner: params.owner,
     ownerId: params.ownerId,
@@ -23,6 +24,7 @@ async function createAccount(params: Params, datasources: Datasources) {
     currency: account.currency,
     icon: account.icon,
     id: account.id,
+    isFavorite: account.isFavorite,
     name: account.name,
     owner: OwnerType[account.owner],
     ownerId: account.ownerId,

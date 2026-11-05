@@ -5,6 +5,7 @@ import Repositories from "@domain/repositories";
 export interface UpdateAccountUseCaseParams {
   icon?: string;
   id: string;
+  isFavorite?: boolean;
   name?: string;
   owner?: string;
   ownerId?: string;
@@ -20,6 +21,7 @@ function updateAccountUseCase(
         await repositories.financialRepository.account.updateAccount({
           icon: params.icon,
           id: params.id,
+          isFavorite: params.isFavorite,
           name: params.name,
           ownerId: params.ownerId,
           status: params.status,

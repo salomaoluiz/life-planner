@@ -36,7 +36,9 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-async function setup(override: Partial<typeof params> = {}) {
+async function setup(
+  override: Partial<typeof params> & { isFavorite?: boolean } = {},
+) {
   return createAccount({ ...params, ...override });
 }
 

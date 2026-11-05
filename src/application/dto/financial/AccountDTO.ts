@@ -9,6 +9,7 @@ export interface IAccountDTO {
   currency?: CurrencyCode;
   icon: string;
   id: string;
+  isFavorite?: boolean;
   name: string;
   owner: string;
   ownerId: string;
@@ -21,6 +22,7 @@ class AccountDTO {
   currency: CurrencyCode;
   icon: string;
   id: string;
+  isFavorite: boolean;
   name: string;
   owner: string;
   ownerId: string;
@@ -32,6 +34,7 @@ class AccountDTO {
     this.currency = params.currency ?? DEFAULT_CURRENCY;
     this.icon = params.icon;
     this.id = params.id;
+    this.isFavorite = params.isFavorite ?? false;
     this.name = params.name;
     this.owner = params.owner;
     this.ownerId = params.ownerId;
@@ -45,6 +48,7 @@ class AccountDTO {
       currency: entity.currency,
       icon: entity.icon,
       id: entity.id,
+      isFavorite: entity.isFavorite,
       name: entity.name,
       owner: entity.owner,
       ownerId: entity.ownerId,

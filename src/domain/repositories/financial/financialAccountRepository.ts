@@ -24,6 +24,7 @@ interface CreateAccountRepositoryParams {
   // The initial balance of the new account.
   balance: number;
   icon: string;
+  isFavorite?: boolean;
   name: string;
   owner: OwnerType;
   ownerId: string;
@@ -43,6 +44,7 @@ interface GetDailyBalancesRepositoryParams {
 interface UpdateAccountRepositoryParams {
   icon?: string;
   id: string;
+  isFavorite?: boolean;
   name?: string;
   owner?: OwnerType;
   ownerId?: string;

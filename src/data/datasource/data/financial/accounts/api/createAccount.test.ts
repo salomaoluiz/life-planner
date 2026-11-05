@@ -29,6 +29,17 @@ it("SHOULD POST /v1/finance/accounts with the balance in cents AND return the cr
   expect(result).toEqual(AccountModel.fromJSON(mocks.apiAccount));
 });
 
+it("SHOULD send isFavorite WHEN the new account is marked as favorite (spec 094)", async () => {
+  spies.post.mockResolvedValueOnce(mocks.apiAccount);
+
+  await setup({ isFavorite: true });
+
+  expect(spies.post).toHaveBeenCalledWith(
+    "/v1/finance/accounts",
+    expect.objectContaining({ isFavorite: true }),
+  );
+});
+
 it("SHOULD send a negative balance in cents", async () => {
   spies.post.mockResolvedValueOnce(mocks.apiAccount);
 

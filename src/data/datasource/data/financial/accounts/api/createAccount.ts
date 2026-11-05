@@ -13,6 +13,7 @@ async function createAccount(params: Params): Response {
     icon: params.icon,
     // Spec 028: a new account starts from an initial balance; transactions move it afterwards.
     initialBalance: decimalToCents(params.balance),
+    isFavorite: params.isFavorite,
     name: params.name,
     owner: params.owner,
     ownerId: params.ownerId,

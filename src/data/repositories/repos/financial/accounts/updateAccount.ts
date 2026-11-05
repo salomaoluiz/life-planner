@@ -8,6 +8,7 @@ async function updateAccount(params: Params, datasources: Datasources) {
   await datasources.financialAccountDatasource.updateAccount({
     icon: params.icon,
     id: params.id,
+    isFavorite: params.isFavorite,
     name: params.name,
     owner: params.owner,
     ownerId: params.ownerId,

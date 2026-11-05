@@ -72,3 +72,16 @@ it("SHOULD read the currency of the API AND fall back to BRL WHEN it is missing 
     AccountModel.fromJSON({ ...mocks.json, currency: "EUR" }).toJSON().currency,
   ).toBe("EUR");
 });
+
+it("SHOULD read isFavorite from the API AND default to false WHEN it is missing (spec 094)", () => {
+  const { isFavorite, ...withoutFlag } = mocks.json;
+
+  expect(isFavorite).toBe(false);
+  expect(
+    AccountModel.fromJSON({ ...mocks.json, isFavorite: true }).isFavorite,
+  ).toBe(true);
+  expect(AccountModel.fromJSON(withoutFlag).isFavorite).toBe(false);
+  expect(
+    AccountModel.fromJSON({ ...mocks.json, isFavorite: true }).toJSON(),
+  ).toHaveProperty("isFavorite", true);
+});

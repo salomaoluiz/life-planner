@@ -6,6 +6,7 @@ import Repositories from "@domain/repositories";
 export interface CreateAccountUseCaseParams {
   balance: number;
   icon: string;
+  isFavorite?: boolean;
   name: string;
   owner: string;
   ownerId: string;
@@ -27,6 +28,7 @@ function createAccountUseCase(
         await repositories.financialRepository.account.createAccount({
           balance: params.balance,
           icon: params.icon,
+          isFavorite: params.isFavorite,
           name: params.name,
           owner,
           ownerId: params.ownerId,
