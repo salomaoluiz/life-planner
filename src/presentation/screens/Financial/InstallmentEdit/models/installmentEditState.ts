@@ -20,6 +20,8 @@ interface EditableFields {
   count: boolean;
   date: boolean;
   description: boolean;
+  // Spec 095 FR 18: the invoice of the row, or of the 1st installment with "All".
+  invoice: boolean;
 }
 
 type EditScope = "ALL" | "ONLY_THIS" | "THIS_AND_NEXT";
@@ -35,9 +37,16 @@ interface InstallmentEditState {
   creditCardId: string;
   date: Date;
   description: string;
+  // Spec 095: the selected invoice month: the row's with the row scopes, the 1st installment's with "All".
+  invoiceMonth: string;
   // Spec 059: the note of the plan (copied to every row); empty means no note.
   notes: string;
   scope: EditScope;
+}
+
+// `YYYY-MM-DD` of a local date, the format the billing rules work on.
+function calendarDayOf(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
 function changed<T>(value: T, stored: T): T | undefined {
@@ -63,7 +72,15 @@ function changeScope(
 ): InstallmentEditState {
   const amount = scope === "ALL" ? plan.totalValue : transaction.value;
 
-  return { ...state, amountCents: decimalStringToCents(amount), scope };
+  return {
+    ...state,
+    amountCents: decimalStringToCents(amount),
+    invoiceMonth:
+      scope === "ALL"
+        ? firstInvoiceMonthOf(plan)
+        : (transaction.invoiceMonth ?? ""),
+    scope,
+  };
 }
 
 function dayOf(date: Date) {
@@ -80,6 +97,7 @@ function editableFields(scope: EditScope, paid: boolean): EditableFields {
       count: false,
       date: false,
       description: true,
+      invoice: false,
     };
   }
 
@@ -92,7 +110,13 @@ function editableFields(scope: EditScope, paid: boolean): EditableFields {
     count: all,
     date: all,
     description: true,
+    invoice: true,
   };
+}
+
+// The invoice of the 1st installment (rows come ordered by number).
+function firstInvoiceMonthOf(plan: InstallmentPlanDTO) {
+  return plan.installments[0]?.invoiceMonth ?? "";
 }
 
 function initialState(
@@ -106,6 +130,7 @@ function initialState(
     creditCardId: plan.creditCardId,
     date: dayOf(new Date(plan.date)),
     description: transaction.description,
+    invoiceMonth: transaction.invoiceMonth ?? "",
     notes: transaction.notes ?? "",
     scope: "ONLY_THIS",
   };
@@ -119,6 +144,7 @@ function isSameState(a: InstallmentEditState, b: InstallmentEditState) {
     a.creditCardId === b.creditCardId &&
     a.date.getTime() === b.date.getTime() &&
     a.description === b.description &&
+    a.invoiceMonth === b.invoiceMonth &&
     a.notes === b.notes &&
     a.scope === b.scope
   );
@@ -129,7 +155,9 @@ function isStructural(plan: InstallmentPlanDTO, state: InstallmentEditState) {
     state.amountCents !== decimalStringToCents(plan.totalValue) ||
     state.count !== plan.installmentCount ||
     state.creditCardId !== plan.creditCardId ||
-    state.date.getTime() !== dayOf(new Date(plan.date)).getTime()
+    state.date.getTime() !== dayOf(new Date(plan.date)).getTime() ||
+    // Spec 095 FR 6: a new 1st invoice recreates the rows, like any structural edit.
+    state.invoiceMonth !== firstInvoiceMonthOf(plan)
   );
 }
 
@@ -161,6 +189,9 @@ function toPlanUpdate(
         ? state.date.toISOString()
         : undefined,
     description: changed(state.description.trim(), plan.description),
+    firstInvoiceMonth: structural
+      ? changed(state.invoiceMonth, firstInvoiceMonthOf(plan))
+      : undefined,
     id: plan.id,
     installments: structural
       ? changed(state.count, plan.installmentCount)
@@ -183,6 +214,9 @@ function toTransactionUpdate(
     categoryId: changed(state.categoryId, transaction.categoryId),
     description: changed(state.description.trim(), transaction.description),
     id: transaction.id,
+    invoiceMonth: !paid
+      ? changed(state.invoiceMonth, transaction.invoiceMonth ?? "")
+      : undefined,
     notes: changedNotes(state.notes, transaction.notes),
     scope: state.scope === "THIS_AND_NEXT" ? "THIS_AND_NEXT" : "ONLY_THIS",
     value:
@@ -233,8 +267,10 @@ export type {
   InstallmentEditState,
 };
 export {
+  calendarDayOf,
   changeScope,
   editableFields,
+  firstInvoiceMonthOf,
   initialState,
   isSameState,
   MAX_NOTES,

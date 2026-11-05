@@ -4,6 +4,7 @@ import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import {
   changeScope,
   editableFields,
+  firstInvoiceMonthOf,
   initialState,
   isSameState,
   needsRecalcConfirm,
@@ -50,6 +51,7 @@ describe("editableFields", () => {
         count: false,
         date: false,
         description: true,
+        invoice: true,
       });
     }
   });
@@ -70,6 +72,7 @@ describe("editableFields", () => {
         count: false,
         date: false,
         description: true,
+        invoice: false,
       });
     },
   );
@@ -329,5 +332,116 @@ describe("notes (spec 059)", () => {
     const same = initialState(plan, noted);
 
     expect(isSameState(same, { ...same, notes: "x" })).toBe(false);
+  });
+});
+
+describe("invoice (spec 095)", () => {
+  const planWithRows = new InstallmentPlanDTO({
+    categoryId: "cat-1",
+    creditCardId: "card-1",
+    date: new Date(2026, 9, 20).toISOString(),
+    description: "Notebook",
+    id: "plan-1",
+    installmentCount: 3,
+    installments: ["2026-10", "2026-11", "2026-12"].map(
+      (invoiceMonth, index) => ({
+        id: `row-${index + 1}`,
+        installmentNumber: index + 1,
+        invoiceMonth,
+        invoiceStatus: "OPEN" as const,
+        value: "33.33",
+      }),
+    ),
+    owner: "USER",
+    ownerId: "user-id",
+    totalValue: "100.00",
+  });
+  const row = new TransactionDTO({
+    category: "Tech",
+    categoryId: "cat-1",
+    creditCardId: "card-1",
+    date: new Date(2026, 9, 20).toISOString(),
+    description: "Notebook",
+    id: "row-2",
+    installmentCount: 3,
+    installmentNumber: 2,
+    installmentPlanId: "plan-1",
+    invoiceMonth: "2026-11",
+    owner: "USER",
+    ownerId: "user-id",
+    type: "EXPENSE",
+    value: "33.33",
+  });
+
+  it("SHOULD start on the invoice of the row AND switch to the 1st installment's with All", () => {
+    const state = initialState(planWithRows, row);
+
+    expect(state.invoiceMonth).toBe("2026-11");
+    expect(firstInvoiceMonthOf(planWithRows)).toBe("2026-10");
+    expect(changeScope(state, "ALL", planWithRows, row).invoiceMonth).toBe(
+      "2026-10",
+    );
+    expect(
+      changeScope(
+        changeScope(state, "ALL", planWithRows, row),
+        "THIS_AND_NEXT",
+        planWithRows,
+        row,
+      ).invoiceMonth,
+    ).toBe("2026-11");
+  });
+
+  it("SHOULD send the new invoice of the row with its scope, only when it changed", () => {
+    const state = initialState(planWithRows, row);
+
+    expect(toTransactionUpdate(row, state, false).invoiceMonth).toBeUndefined();
+    expect(
+      toTransactionUpdate(
+        row,
+        { ...state, invoiceMonth: "2026-12", scope: "THIS_AND_NEXT" },
+        false,
+      ),
+    ).toEqual(
+      expect.objectContaining({
+        invoiceMonth: "2026-12",
+        scope: "THIS_AND_NEXT",
+      }),
+    );
+  });
+
+  it("SHOULD NOT send an invoice for a row in a paid invoice", () => {
+    const state = {
+      ...initialState(planWithRows, row),
+      invoiceMonth: "2026-12",
+    };
+
+    expect(toTransactionUpdate(row, state, true).invoiceMonth).toBeUndefined();
+  });
+
+  it("SHOULD send firstInvoiceMonth with All AND ask to confirm the recalculation", () => {
+    const all = changeScope(
+      initialState(planWithRows, row),
+      "ALL",
+      planWithRows,
+      row,
+    );
+    const moved = { ...all, invoiceMonth: "2026-11" };
+
+    expect(
+      toPlanUpdate(planWithRows, all, false).firstInvoiceMonth,
+    ).toBeUndefined();
+    expect(needsRecalcConfirm(planWithRows, all)).toBe(false);
+    expect(toPlanUpdate(planWithRows, moved, false).firstInvoiceMonth).toBe(
+      "2026-11",
+    );
+    expect(needsRecalcConfirm(planWithRows, moved)).toBe(true);
+  });
+
+  it("SHOULD count the invoice in the dirty check", () => {
+    const state = initialState(planWithRows, row);
+
+    expect(isSameState(state, { ...state, invoiceMonth: "2026-12" })).toBe(
+      false,
+    );
   });
 });

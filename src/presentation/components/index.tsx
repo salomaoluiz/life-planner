@@ -65,7 +65,11 @@ export {
   default as IconTileButton,
   IconTileButtonProps,
 } from "./IconTileButton";
-export { default as InvoiceField, InvoiceFieldProps } from "./InvoiceField";
+export {
+  default as InvoiceField,
+  InvoiceFieldOption,
+  InvoiceFieldProps,
+} from "./InvoiceField";
 export {
   default as LineChart,
   LineChartPoint,

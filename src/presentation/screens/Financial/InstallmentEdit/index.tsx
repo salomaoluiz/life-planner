@@ -9,6 +9,7 @@ import {
   ErrorState,
   FormColumns,
   HelperText,
+  InvoiceField,
   RadioGroup,
   SelectField,
   TextField,
@@ -17,6 +18,10 @@ import { formatAmount } from "@components/AmountText/formatAmount";
 import Skeleton from "@components/Skeleton";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
+import {
+  monthLabel,
+  toInvoiceFieldOption,
+} from "@screens/Financial/utils/invoiceFieldOption";
 
 import InstallmentPlanSheet from "./components/InstallmentPlanSheet";
 import { useInstallmentEditViewModel } from "./hooks";
@@ -176,6 +181,45 @@ function InstallmentEditModal() {
                 value={state.date}
                 yesterdayLabel={t("common.date.yesterday")}
               />
+              {vm.invoiceField ? (
+                <InvoiceField
+                  closeLabel={t("common.actions.close")}
+                  hint={
+                    state.invoiceMonth !== vm.invoiceField.computedMonth
+                      ? {
+                          actionLabel: t(
+                            "financial.transactions.form.invoiceUseDate",
+                          ),
+                          onAction: vm.onInvoiceReset,
+                          text: t(
+                            "financial.transactions.form.invoiceChosenHint",
+                            {
+                              month: monthLabel(
+                                vm.invoiceField.computedMonth,
+                                localeTag,
+                                false,
+                              ),
+                            },
+                          ),
+                        }
+                      : undefined
+                  }
+                  label={t(
+                    state.scope === "ALL"
+                      ? "financial.transactions.form.invoiceFieldFirst"
+                      : "financial.transactions.form.invoiceField",
+                  )}
+                  onChange={vm.onInvoiceChange}
+                  options={vm.invoiceField.options.map((option) =>
+                    toInvoiceFieldOption(option, t, localeTag),
+                  )}
+                  sheetTitle={t(
+                    "financial.transactions.form.invoiceSheetTitle",
+                  )}
+                  testID={installmentEditTestIds.invoice}
+                  value={state.invoiceMonth}
+                />
+              ) : null}
               {vm.isPaid ? (
                 <HelperText
                   label={t("financial.installmentEdit.paidHelper")}

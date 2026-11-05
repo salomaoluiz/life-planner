@@ -66,6 +66,7 @@ it("SHOULD show the total label AND the count WHEN editing All", () => {
       count: true,
       date: true,
       description: true,
+      invoice: true,
     },
   });
 
@@ -81,6 +82,7 @@ it("SHOULD lock the amount with the paid helper WHEN the invoice is paid", () =>
       count: false,
       date: false,
       description: true,
+      invoice: false,
     },
     isPaid: true,
   });
@@ -250,4 +252,48 @@ it("SHOULD show the notes of the plan AND report the typing (spec 059)", () => {
   expect(input.props.maxLength).toBe(1000);
   fireEvent.changeText(input, "Presente");
   expect(vm.onNotesChange).toHaveBeenCalledWith("Presente");
+});
+
+describe("invoice field (spec 095)", () => {
+  const field = {
+    computedMonth: "2026-11",
+    options: [
+      {
+        closingDate: "2026-11-30",
+        disabled: false,
+        dueDate: "2026-12-10",
+        isComputed: true,
+        month: "2026-11",
+        readOnly: false,
+        status: "FUTURE" as const,
+      },
+      {
+        closingDate: "2026-12-31",
+        disabled: false,
+        dueDate: "2027-01-10",
+        isComputed: false,
+        month: "2026-12",
+        readOnly: false,
+        status: "FUTURE" as const,
+      },
+    ],
+    value: "2026-11",
+  };
+
+  it("SHOULD show the picker AND hand the picked month to the view model", () => {
+    const vm = setup({ invoiceField: field });
+
+    fireEvent.press(screen.getByTestId(installmentEditTestIds.invoice));
+    fireEvent.press(
+      screen.getByTestId(`${installmentEditTestIds.invoice}-option-2026-12`),
+    );
+
+    expect(vm.onInvoiceChange).toHaveBeenCalledWith("2026-12");
+  });
+
+  it("SHOULD NOT show the picker WHEN the view model has none (paid invoice)", () => {
+    setup({ invoiceField: undefined });
+
+    expect(screen.queryByTestId(installmentEditTestIds.invoice)).toBeNull();
+  });
 });

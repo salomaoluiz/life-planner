@@ -102,6 +102,7 @@ describe("scope", () => {
       count: false,
       date: false,
       description: true,
+      invoice: false,
     });
   });
 });
@@ -350,5 +351,117 @@ it("SHOULD open the refund sheet linked to the plan (spec 032)", () => {
   expect(modalNavigation.replaceModal).toHaveBeenCalledWith("card_refund", {
     creditCardId: "card-1",
     refundedPlanId: "plan-1",
+  });
+});
+
+describe("invoice (spec 095)", () => {
+  it("SHOULD offer the previous, natural and next invoice of the row (installment 2 is naturally on November)", () => {
+    givenLoaded();
+    const { result } = setup();
+
+    expect(result.current.invoiceField?.options.map((o) => o.month)).toEqual([
+      "2026-10",
+      "2026-11",
+      "2026-12",
+    ]);
+    expect(result.current.invoiceField).toMatchObject({
+      computedMonth: "2026-11",
+      value: "2026-11",
+    });
+  });
+
+  it("SHOULD send the picked invoice with Only this one AND with This and the next ones", () => {
+    givenLoaded();
+    const { result } = setup();
+
+    act(() => result.current.onInvoiceChange("2026-12"));
+    act(() => result.current.onSave());
+    expect(
+      mutations.updateFinancialTransactionUseCase.value.mutate,
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({ invoiceMonth: "2026-12", scope: "ONLY_THIS" }),
+    );
+
+    act(() => result.current.onScopeChange("THIS_AND_NEXT"));
+    act(() => result.current.onInvoiceChange("2026-10"));
+    act(() => result.current.onSave());
+    expect(
+      mutations.updateFinancialTransactionUseCase.value.mutate,
+    ).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        invoiceMonth: "2026-10",
+        scope: "THIS_AND_NEXT",
+      }),
+    );
+  });
+
+  it("SHOULD send nothing WHEN the invoice was not touched", () => {
+    givenLoaded();
+    const { result } = setup();
+
+    act(() => result.current.onDescriptionChange("Laptop"));
+    act(() => result.current.onSave());
+
+    expect(
+      mutations.updateFinancialTransactionUseCase.value.mutate,
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({ invoiceMonth: undefined }),
+    );
+  });
+
+  it("SHOULD pick the 1st invoice with All, ask to confirm AND send firstInvoiceMonth", () => {
+    givenLoaded();
+    const { result } = setup();
+
+    act(() => result.current.onScopeChange("ALL"));
+    expect(result.current.invoiceField?.options.map((o) => o.month)).toEqual([
+      "2026-09",
+      "2026-10",
+      "2026-11",
+    ]);
+    expect(result.current.invoiceField?.value).toBe("2026-10");
+
+    act(() => result.current.onInvoiceChange("2026-11"));
+    act(() => result.current.onSave());
+    expect(result.current.isRecalcOpen).toBe(true);
+
+    act(() => result.current.onRecalcConfirm());
+    expect(
+      mutations.updateFinancialInstallmentPlanUseCase.value.mutate,
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({ firstInvoiceMonth: "2026-11" }),
+    );
+  });
+
+  it("SHOULD restart the 1st invoice from the date WHEN the date changes with All", () => {
+    givenLoaded();
+    const { result } = setup();
+
+    act(() => result.current.onScopeChange("ALL"));
+    act(() => result.current.onInvoiceChange("2026-11"));
+    act(() => result.current.onDateChange(new Date(2026, 11, 5)));
+
+    expect(result.current.invoiceField?.value).toBe("2026-12");
+  });
+
+  it("SHOULD reset to the natural invoice", () => {
+    givenLoaded();
+    const { result } = setup();
+
+    act(() => result.current.onInvoiceChange("2026-12"));
+    act(() => result.current.onInvoiceReset());
+
+    expect(result.current.state?.invoiceMonth).toBe("2026-11");
+  });
+
+  it("SHOULD disable a paid neighbour AND hide the picker for a row in a paid invoice", () => {
+    givenLoaded({ plan: makePlan(["PAID", "OPEN", "OPEN"]) });
+    expect(setup().result.current.invoiceField?.options[0]).toMatchObject({
+      disabled: true,
+      status: "PAID",
+    });
+
+    givenLoaded({ plan: makePlan(["OPEN", "PAID", "OPEN"]) });
+    expect(setup().result.current.invoiceField).toBeUndefined();
   });
 });

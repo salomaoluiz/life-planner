@@ -111,4 +111,29 @@ describe("buildInvoiceOptions (spec 095)", () => {
     expect(options).toHaveLength(3);
     expect(options.some((option) => option.readOnly)).toBe(false);
   });
+
+  it("SHOULD sit around the natural month of installment n (shiftMonths)", () => {
+    const options = buildInvoiceOptions({
+      ...base,
+      shiftMonths: 2,
+      summary: undefined,
+    });
+
+    expect(options.map((option) => option.month)).toEqual([
+      "2026-11",
+      "2026-12",
+      "2027-01",
+    ]);
+    expect(options.find((option) => option.isComputed)?.month).toBe("2026-12");
+  });
+
+  it("SHOULD take paid months from the plan rows WHEN there is no card summary", () => {
+    const options = buildInvoiceOptions({
+      ...base,
+      paidMonths: ["2026-09"],
+      summary: undefined,
+    });
+
+    expect(options[0]).toMatchObject({ disabled: true, status: "PAID" });
+  });
 });

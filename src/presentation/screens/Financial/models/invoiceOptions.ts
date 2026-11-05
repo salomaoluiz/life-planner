@@ -1,4 +1,5 @@
 import {
+  addMonthsTo,
   closingDateOf,
   dueDateOf,
   invoiceMonthOf,
@@ -9,6 +10,10 @@ interface BuildInvoiceOptionsParams {
   card: { closingDay: number; dueDay: number };
   // Purchase date, `YYYY-MM-DD`.
   date: string;
+  // Months already known to be paid (the installments of a plan), when there is no card summary.
+  paidMonths?: string[];
+  // The options sit around the computed invoice moved by this many months: installment `n` uses `n - 1` (FR 7).
+  shiftMonths?: number;
   // Invoice month stored on the row being edited, when there is one.
   storedMonth?: string;
   summary?: InvoiceSummaryLike;
@@ -40,12 +45,25 @@ interface InvoiceSummaryLike {
 function buildInvoiceOptions(
   params: BuildInvoiceOptionsParams,
 ): InvoiceOption[] {
-  const { card, date, storedMonth, summary, today } = params;
-  const computed = invoiceMonthOf(date, card.closingDay);
+  const {
+    card,
+    date,
+    paidMonths,
+    shiftMonths = 0,
+    storedMonth,
+    summary,
+    today,
+  } = params;
+  const computed = addMonthsTo(
+    invoiceMonthOf(date, card.closingDay),
+    shiftMonths,
+  );
   const openMonth =
     summary?.openInvoice.referenceMonth ??
     invoiceMonthOf(today, card.closingDay);
-  const months = [...purchaseInvoiceOptions(date, card.closingDay)];
+  const months = purchaseInvoiceOptions(date, card.closingDay).map((month) =>
+    addMonthsTo(month, shiftMonths),
+  );
   const extra = storedMonth && !months.includes(storedMonth);
 
   if (extra) {
@@ -53,10 +71,13 @@ function buildInvoiceOptions(
   }
 
   function statusOf(month: string): InvoiceOptionStatus {
-    const paid = summary?.closedInvoices.some(
-      (invoice) =>
-        invoice.referenceMonth === month && invoice.status === "PAID",
-    );
+    const paid =
+      (paidMonths?.includes(month) ?? false) ||
+      (summary?.closedInvoices.some(
+        (invoice) =>
+          invoice.referenceMonth === month && invoice.status === "PAID",
+      ) ??
+        false);
 
     if (paid) {
       return "PAID";

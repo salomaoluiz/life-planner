@@ -12,13 +12,20 @@ import {
   categoryInScope,
   selectableCategories,
 } from "@screens/Financial/models/categoryTree";
+import {
+  addMonthsTo,
+  invoiceMonthOf,
+} from "@screens/Financial/models/invoiceMonth";
+import { buildInvoiceOptions } from "@screens/Financial/models/invoiceOptions";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import {
+  calendarDayOf,
   changeScope,
   editableFields,
   EditScope,
+  firstInvoiceMonthOf,
   initialState,
   InstallmentEditState,
   needsRecalcConfirm,
@@ -137,6 +144,55 @@ function useInstallmentEditViewModel() {
       undoPrepaymentMutation.error,
   );
   const ownerId = plan.data?.ownerId;
+  const stateCard = (cards.data ?? []).find(
+    (card) => card.id === state?.creditCardId,
+  );
+  // Spec 095 FR 18: the picker of the row (previous, natural and next of its natural month) or, with "All",
+  // of the 1st installment. Paid invoices come from the plan rows: no extra request.
+  const invoiceOptions =
+    state && plan.data && transaction && stateCard && fields.invoice
+      ? buildInvoiceOptions({
+          card: stateCard,
+          date: calendarDayOf(state.date),
+          paidMonths: plan.data.installments
+            .filter((item) => item.invoiceStatus === "PAID")
+            .map((item) => item.invoiceMonth),
+          shiftMonths:
+            state.scope === "ALL"
+              ? 0
+              : Math.max(0, (transaction.installmentNumber ?? 1) - 1),
+          storedMonth:
+            state.scope === "ALL"
+              ? firstInvoiceMonthOf(plan.data)
+              : transaction.invoiceMonth,
+          today: calendarDayOf(new Date()),
+        })
+      : undefined;
+  const invoiceField = invoiceOptions
+    ? {
+        computedMonth: invoiceOptions.find((option) => option.isComputed)!
+          .month,
+        options: invoiceOptions,
+        value: state!.invoiceMonth,
+      }
+    : undefined;
+
+  // A new date or card restarts the 1st invoice from the date (spec 095 FR 15).
+  function withFirstInvoice(next: InstallmentEditState) {
+    const card = (cards.data ?? []).find(
+      (item) => item.id === next.creditCardId,
+    );
+
+    return next.scope === "ALL" && card
+      ? {
+          ...next,
+          invoiceMonth: addMonthsTo(
+            invoiceMonthOf(calendarDayOf(next.date), card.closingDay),
+            0,
+          ),
+        }
+      : next;
+  }
 
   function update(next: InstallmentEditState) {
     setEdited(next);
@@ -198,6 +254,7 @@ function useInstallmentEditViewModel() {
     formErrorKey: formErrorKey as TranslationKeys | undefined,
     installmentCount: plan.data?.installmentCount ?? 0,
     installmentNumber: transaction?.installmentNumber ?? 0,
+    invoiceField,
     isDeleteOpen,
     isDeleting: deletePlanMutation.isFetching,
     isLoading: !state && transactionQuery.data !== null,
@@ -211,7 +268,7 @@ function useInstallmentEditViewModel() {
     onAmountChange: (cents: number) =>
       state && update({ ...state, amountCents: cents }),
     onCardChange: (id: string) =>
-      state && update({ ...state, creditCardId: id }),
+      state && update(withFirstInvoice({ ...state, creditCardId: id })),
     onCategoryChange: (id: string) =>
       state && update({ ...state, categoryId: id }),
     onClose: () => closeModal(),
@@ -220,10 +277,12 @@ function useInstallmentEditViewModel() {
       update({ ...state, count: Number(text.replace(/\D/g, "")) || 0 }),
     onDateChange: (date: Date) =>
       state &&
-      update({
-        ...state,
-        date: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
-      }),
+      update(
+        withFirstInvoice({
+          ...state,
+          date: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
+        }),
+      ),
     onDeleteCancel: () => setDeleteOpen(false),
     onDeleteConfirm: () => {
       setDeleteOpen(false);
@@ -234,6 +293,12 @@ function useInstallmentEditViewModel() {
     onDeletePress: () => setDeleteOpen(true),
     onDescriptionChange: (text: string) =>
       state && update({ ...state, description: text }),
+    onInvoiceChange: (month: string) =>
+      state && update({ ...state, invoiceMonth: month }),
+    onInvoiceReset: () =>
+      state &&
+      invoiceField &&
+      update({ ...state, invoiceMonth: invoiceField.computedMonth }),
     onNotesChange: (text: string) => state && update({ ...state, notes: text }),
     onPlanClose: () => setPlanOpen(false),
     onPlanOpen: () => setPlanOpen(true),
