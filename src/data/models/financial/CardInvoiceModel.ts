@@ -35,6 +35,8 @@ export interface InvoicePurchaseModel {
   notes?: string;
   ownerId: string;
   prepaid: boolean;
+  // Spec 096: a purchase not charged yet.
+  projected: boolean;
   value: number;
 }
 
@@ -119,6 +121,7 @@ class CardInvoiceModel {
         notes: (purchase.notes as null | string) ?? undefined,
         ownerId: purchase.ownerId as string,
         prepaid: Boolean(purchase.prepaid),
+        projected: Boolean(purchase.projected),
         value: Number(purchase.value),
       })),
     });

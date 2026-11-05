@@ -56,6 +56,7 @@ interface ITransactionModel {
   owner: OwnerType;
   ownerId: string;
   paid?: boolean;
+  projected?: boolean;
   recurrenceFrequency?: RecurrenceFrequency;
   recurrenceId?: string;
   systemKey?: string;
@@ -85,6 +86,8 @@ class TransactionModel implements ITransactionModel {
   owner: OwnerType;
   ownerId: string;
   paid: boolean;
+  // Spec 096: a card purchase not charged yet.
+  projected: boolean;
   recurrenceFrequency?: RecurrenceFrequency;
   recurrenceId?: string;
   systemKey?: string;
@@ -112,6 +115,7 @@ class TransactionModel implements ITransactionModel {
     this.id = params.id;
     this.ownerId = params.ownerId;
     this.paid = params.paid ?? true;
+    this.projected = params.projected ?? false;
     this.recurrenceFrequency = params.recurrenceFrequency;
     this.recurrenceId = params.recurrenceId;
     this.excludeFromTotals = params.excludeFromTotals ?? false;
@@ -153,6 +157,7 @@ class TransactionModel implements ITransactionModel {
       ownerId: data.ownerId as string,
       // An API without spec 033 sends no status: every row then counts as paid.
       paid: (data.paid as boolean | undefined) ?? true,
+      projected: data.projected === true,
       recurrenceFrequency:
         (data.recurrenceFrequency as null | RecurrenceFrequency) ?? undefined,
       recurrenceId: (data.recurrenceId as null | string) ?? undefined,
@@ -209,6 +214,8 @@ class TransactionModel implements ITransactionModel {
       owner: this.owner,
       ownerId: this.ownerId,
       paid: this.paid,
+      // Lean like the API: only a projected row carries the flag.
+      ...(this.projected ? { projected: true } : {}),
       recurrenceFrequency: this.recurrenceFrequency ?? null,
       recurrenceId: this.recurrenceId ?? null,
       tags: this.tags,

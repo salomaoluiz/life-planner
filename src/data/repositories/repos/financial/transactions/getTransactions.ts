@@ -57,6 +57,7 @@ function toTransactionEntity(transaction: TransactionModel) {
     owner: OwnerType[transaction.owner],
     ownerId: transaction.ownerId,
     paid: transaction.paid,
+    projected: transaction.projected,
     recurrenceFrequency: transaction.recurrenceFrequency,
     recurrenceId: transaction.recurrenceId,
     systemKey: transaction.systemKey,

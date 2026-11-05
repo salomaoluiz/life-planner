@@ -18,6 +18,8 @@ import {
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 export type FinancialTransactionRepository = {
+  // Spec 096 FR 4: turns a projected card purchase into the real charge (value and date as charged).
+  confirmTransaction(params: ConfirmTransactionRepositoryParams): Promise<void>;
   createTransaction(
     params: CreateTransactionRepositoryParams,
   ): Promise<TransactionEntity>;
@@ -55,6 +57,16 @@ export type FinancialTransactionRepository = {
   validateImport(params: ImportRequest): Promise<ImportValidationEntity>;
 };
 
+interface ConfirmTransactionRepositoryParams {
+  // ISO instant of the day charged.
+  date: string;
+  id: string;
+  // Spec 095 rules; omitted = the invoice of the date.
+  invoiceMonth?: string;
+  ownerId: string;
+  // Decimal text of the amount charged.
+  value: string;
+}
 interface CreateTransactionRepositoryParams {
   accountId?: string;
   category: string;
@@ -69,6 +81,8 @@ interface CreateTransactionRepositoryParams {
   ownerId: string;
   // Account rows only; omitted → the API decides from the date (spec 033).
   paid?: boolean;
+  // Spec 096: a card expense not charged yet.
+  projected?: boolean;
   // Spec 043: tag names, resolved (or created) by the API in the owner.
   tags?: string[];
   type: TransactionType;
@@ -107,6 +121,7 @@ interface UpdateTransactionRepositoryParams {
 }
 
 export {
+  ConfirmTransactionRepositoryParams,
   CreateTransactionRepositoryParams,
   GetFilteredTransactionsRepositoryParams,
   UpdateTransactionRepositoryParams,

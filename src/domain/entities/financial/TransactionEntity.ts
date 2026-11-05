@@ -46,6 +46,7 @@ interface ITransactionEntity {
   ownerId: string;
   // Account rows: stored status. Card rows: whether the invoice is paid (spec 033).
   paid?: boolean;
+  projected?: boolean;
   recurrenceFrequency?: RecurrenceFrequency;
   recurrenceId?: string;
   systemKey?: string;
@@ -75,6 +76,8 @@ class TransactionEntity {
   owner: OwnerType;
   ownerId: string;
   paid: boolean;
+  // Spec 096: a card purchase not charged yet.
+  projected: boolean;
   recurrenceFrequency?: RecurrenceFrequency;
   recurrenceId?: string;
   systemKey?: string;
@@ -102,6 +105,7 @@ class TransactionEntity {
     this.earlyPayment = params.earlyPayment;
     this.ownerId = params.ownerId;
     this.paid = params.paid ?? true;
+    this.projected = params.projected ?? false;
     this.recurrenceFrequency = params.recurrenceFrequency;
     this.recurrenceId = params.recurrenceId;
     this.excludeFromTotals = params.excludeFromTotals ?? false;

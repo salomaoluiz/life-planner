@@ -50,6 +50,8 @@ interface CreateRecurrenceRepositoryParams {
   ownerId: string;
   // Occurrence 1 of an account series only.
   paid?: boolean;
+  // Spec 096: every occurrence of a card expense series is born projected.
+  projected?: boolean;
   tags?: string[];
   type: TransactionType;
   value: string;

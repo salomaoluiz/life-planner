@@ -89,6 +89,7 @@ const repositoriesMocks: Repositories = {
       updateTag: jest.fn(),
     },
     transaction: {
+      confirmTransaction: jest.fn(),
       createTransaction: jest.fn(),
       deleteTransaction: jest.fn(),
       exportTransactions: jest.fn(),

@@ -9,6 +9,7 @@ it("SHOULD map the aggregate, cards and invoices", () => {
 
   expect(model.aggregate).toEqual({
     available: 500000,
+    projectedUsed: 0,
     totalLimit: 500000,
     used: 0,
   });
@@ -19,9 +20,23 @@ it("SHOULD map the aggregate, cards and invoices", () => {
   expect(model.cards[0].available).toBe(500000);
 });
 
+it("SHOULD read projectedUsed per card and in the aggregate, defaulting to 0 (spec 096)", () => {
+  const model = CreditCardOverviewModel.fromJSON({
+    ...apiOverview,
+    aggregate: { ...apiOverview.aggregate, projectedUsed: 1200 },
+    cards: [{ ...apiOverview.cards[0], projectedUsed: 700 }],
+  });
+
+  expect(model.aggregate.projectedUsed).toBe(1200);
+  expect(model.cards[0].projectedUsed).toBe(700);
+  expect(
+    CreditCardOverviewModel.fromJSON(apiOverview).cards[0].projectedUsed,
+  ).toBe(0);
+});
+
 it("SHOULD build an empty overview", () => {
   expect(CreditCardOverviewModel.empty()).toEqual({
-    aggregate: { available: 0, totalLimit: 0, used: 0 },
+    aggregate: { available: 0, projectedUsed: 0, totalLimit: 0, used: 0 },
     cards: [],
   });
 });

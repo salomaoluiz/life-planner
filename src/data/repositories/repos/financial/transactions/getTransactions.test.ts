@@ -32,6 +32,16 @@ it("SHOULD read the period straight from the datasource (spec 078: a period is a
   ]);
 });
 
+it("SHOULD keep the projected flag from the model (spec 096)", async () => {
+  spies.financialTransactionDatasource.getTransactions.mockResolvedValueOnce([
+    new TransactionModel({ ...mocks.firstTransaction, projected: true }),
+  ]);
+
+  const [result] = await setup();
+
+  expect(result.projected).toBe(true);
+});
+
 it("SHOULD keep the system category key and excludeFromTotals from the model", async () => {
   const adjustment = new TransactionModel({
     ...mocks.firstTransaction,

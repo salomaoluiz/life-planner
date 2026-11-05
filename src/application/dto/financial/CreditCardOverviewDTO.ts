@@ -23,17 +23,30 @@ export interface IInvoiceDTO {
   paymentDate: string;
   periodEnd: string;
   periodStart: string;
+  projectedAmount?: number;
+  projectedCount?: number;
+  projectedTotal?: number;
   referenceMonth: string;
   status: string;
   total: number;
 }
 
 class CreditCardOverviewDTO {
-  aggregate: { available: number; totalLimit: number; used: number };
+  aggregate: {
+    available: number;
+    projectedUsed?: number;
+    totalLimit: number;
+    used: number;
+  };
   cards: CreditCardSummaryDTO[];
 
   constructor(params: {
-    aggregate: { available: number; totalLimit: number; used: number };
+    aggregate: {
+      available: number;
+      projectedUsed?: number;
+      totalLimit: number;
+      used: number;
+    };
     cards: CreditCardSummaryDTO[];
   }) {
     this.aggregate = params.aggregate;
@@ -52,6 +65,7 @@ class CreditCardOverviewDTO {
               InvoiceDTO.fromEntity(invoice),
             ),
             openInvoice: InvoiceDTO.fromEntity(summary.openInvoice),
+            projectedUsed: summary.projectedUsed,
             upcomingInvoices: summary.upcomingInvoices.map((invoice) =>
               InvoiceDTO.fromEntity(invoice),
             ),
@@ -67,6 +81,7 @@ export class CreditCardSummaryDTO {
   card: CreditCardDTO;
   closedInvoices: InvoiceDTO[];
   openInvoice: InvoiceDTO;
+  projectedUsed: number;
   upcomingInvoices: InvoiceDTO[];
   used: number;
 
@@ -75,6 +90,7 @@ export class CreditCardSummaryDTO {
     card: CreditCardDTO;
     closedInvoices: InvoiceDTO[];
     openInvoice: InvoiceDTO;
+    projectedUsed?: number;
     upcomingInvoices: InvoiceDTO[];
     used: number;
   }) {
@@ -82,6 +98,7 @@ export class CreditCardSummaryDTO {
     this.card = params.card;
     this.closedInvoices = params.closedInvoices;
     this.openInvoice = params.openInvoice;
+    this.projectedUsed = params.projectedUsed ?? 0;
     this.upcomingInvoices = params.upcomingInvoices;
     this.used = params.used;
   }
@@ -102,6 +119,9 @@ export class InvoiceDTO implements IInvoiceDTO {
   paymentDate: string;
   periodEnd: string;
   periodStart: string;
+  projectedAmount: number;
+  projectedCount: number;
+  projectedTotal: number;
   referenceMonth: string;
   status: string;
   total: number;
@@ -121,6 +141,9 @@ export class InvoiceDTO implements IInvoiceDTO {
     this.paymentDate = params.paymentDate;
     this.periodEnd = params.periodEnd;
     this.periodStart = params.periodStart;
+    this.projectedAmount = params.projectedAmount ?? 0;
+    this.projectedCount = params.projectedCount ?? 0;
+    this.projectedTotal = params.projectedTotal ?? params.amountDue;
     this.referenceMonth = params.referenceMonth;
     this.status = params.status;
     this.total = params.total;
@@ -142,6 +165,9 @@ export class InvoiceDTO implements IInvoiceDTO {
       paymentDate: entity.paymentDate,
       periodEnd: entity.periodEnd,
       periodStart: entity.periodStart,
+      projectedAmount: entity.projectedAmount,
+      projectedCount: entity.projectedCount,
+      projectedTotal: entity.projectedTotal,
       referenceMonth: entity.referenceMonth,
       status: entity.status,
       total: entity.total,

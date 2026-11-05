@@ -33,6 +33,7 @@ export interface ITransactionDTO {
   owner: string;
   ownerId: string;
   paid?: boolean;
+  projected?: boolean;
   recurrenceFrequency?: RecurrenceFrequency;
   recurrenceId?: string;
   systemKey?: string;
@@ -65,6 +66,7 @@ class TransactionDTO {
   owner: string;
   ownerId: string;
   paid: boolean;
+  projected: boolean;
   recurrenceFrequency?: RecurrenceFrequency;
   recurrenceId?: string;
   systemKey?: string;
@@ -97,6 +99,7 @@ class TransactionDTO {
     this.owner = params.owner;
     this.ownerId = params.ownerId;
     this.paid = params.paid ?? true;
+    this.projected = params.projected ?? false;
     this.excludeFromTotals = params.excludeFromTotals ?? false;
     this.systemKey = params.systemKey;
     this.tags = params.tags ?? [];
@@ -132,6 +135,7 @@ class TransactionDTO {
       owner: entity.owner,
       ownerId: entity.ownerId,
       paid: entity.paid,
+      projected: entity.projected,
       recurrenceFrequency: entity.recurrenceFrequency,
       recurrenceId: entity.recurrenceId,
       systemKey: entity.systemKey,

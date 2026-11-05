@@ -96,6 +96,21 @@ it("SHOULD treat a regular category as not excluded and without a key", () => {
   expect(model.systemKey).toBeUndefined();
 });
 
+it("SHOULD read AND write the projected flag, false by default (spec 096)", () => {
+  const projected = TransactionModel.fromJSON({
+    ...mocks.json,
+    projected: true,
+  });
+
+  expect(projected.projected).toBe(true);
+  expect(projected.toJSON().projected).toBe(true);
+  expect(TransactionModel.fromJSON(mocks.json).projected).toBe(false);
+  expect(
+    TransactionModel.fromLeanJSON({ ...mocks.json, projected: true }, {})
+      .projected,
+  ).toBe(true);
+});
+
 it("SHOULD read the paid status AND default to paid WHEN the API sends none (spec 033)", () => {
   const withStatus = TransactionModel.fromJSON({ ...mocks.json, paid: false });
   const withoutStatus = TransactionModel.fromJSON({

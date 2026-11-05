@@ -42,3 +42,19 @@ it("SHOULD carry excludeFromTotals and systemKey from the entity", () => {
   expect(result.systemKey).toBe("BALANCE_ADJUSTMENT");
   expect(setupFromEntity().excludeFromTotals).toBe(false);
 });
+
+it("SHOULD carry the projected flag from the entity (spec 096)", () => {
+  const entity = new TransactionEntity({
+    ...mocks.defaultProps,
+    owner: OwnerType.FAMILY,
+    projected: true,
+    type: TransactionType.EXPENSE,
+  });
+
+  expect(TransactionDTO.fromEntity(entity).projected).toBe(true);
+  expect(
+    TransactionDTO.fromEntity(
+      new TransactionEntity({ ...entity, projected: undefined }),
+    ).projected,
+  ).toBe(false);
+});

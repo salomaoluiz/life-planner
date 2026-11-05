@@ -36,6 +36,17 @@ it("SHOULD POST /v1/finance/transactions with the value in cents AND the date as
   );
 });
 
+it("SHOULD send projected for a projected card purchase (spec 096)", async () => {
+  spies.post.mockResolvedValueOnce(mocks.apiResponse);
+
+  await setup({ projected: true });
+
+  expect(spies.post).toHaveBeenCalledWith(
+    expect.stringMatching(TODAY_URL),
+    expect.objectContaining({ projected: true }),
+  );
+});
+
 it.each([
   ["234.90", 23490],
   ["234,90", 23490],

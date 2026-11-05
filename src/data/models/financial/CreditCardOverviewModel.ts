@@ -10,11 +10,21 @@ import {
 } from "@domain/entities/financial/InvoiceEntity";
 
 class CreditCardOverviewModel {
-  aggregate: { available: number; totalLimit: number; used: number };
+  aggregate: {
+    available: number;
+    projectedUsed?: number;
+    totalLimit: number;
+    used: number;
+  };
   cards: CreditCardSummaryModel[];
 
   constructor(params: {
-    aggregate: { available: number; totalLimit: number; used: number };
+    aggregate: {
+      available: number;
+      projectedUsed?: number;
+      totalLimit: number;
+      used: number;
+    };
     cards: CreditCardSummaryModel[];
   }) {
     this.aggregate = params.aggregate;
@@ -23,7 +33,7 @@ class CreditCardOverviewModel {
 
   static empty(): CreditCardOverviewModel {
     return new CreditCardOverviewModel({
-      aggregate: { available: 0, totalLimit: 0, used: 0 },
+      aggregate: { available: 0, projectedUsed: 0, totalLimit: 0, used: 0 },
       cards: [],
     });
   }
@@ -35,6 +45,7 @@ class CreditCardOverviewModel {
     return new CreditCardOverviewModel({
       aggregate: {
         available: Number(aggregate.available),
+        projectedUsed: Number(aggregate.projectedUsed ?? 0),
         totalLimit: Number(aggregate.totalLimit),
         used: Number(aggregate.used),
       },
@@ -51,6 +62,7 @@ class CreditCardOverviewModel {
             openInvoice: InvoiceModel.fromJSON(
               item.openInvoice as Record<string, unknown>,
             ),
+            projectedUsed: Number(item.projectedUsed ?? 0),
             upcomingInvoices: (
               (item.upcomingInvoices ?? []) as Record<string, unknown>[]
             ).map((invoice) => InvoiceModel.fromJSON(invoice)),
@@ -66,6 +78,7 @@ export class CreditCardSummaryModel {
   card: CreditCardModel;
   closedInvoices: InvoiceModel[];
   openInvoice: InvoiceModel;
+  projectedUsed: number;
   upcomingInvoices: InvoiceModel[];
   used: number;
 
@@ -74,6 +87,7 @@ export class CreditCardSummaryModel {
     card: CreditCardModel;
     closedInvoices: InvoiceModel[];
     openInvoice: InvoiceModel;
+    projectedUsed?: number;
     upcomingInvoices: InvoiceModel[];
     used: number;
   }) {
@@ -81,6 +95,7 @@ export class CreditCardSummaryModel {
     this.card = params.card;
     this.closedInvoices = params.closedInvoices;
     this.openInvoice = params.openInvoice;
+    this.projectedUsed = params.projectedUsed ?? 0;
     this.upcomingInvoices = params.upcomingInvoices;
     this.used = params.used;
   }
@@ -101,6 +116,9 @@ export class InvoiceModel {
   paymentDate: string;
   periodEnd: string;
   periodStart: string;
+  projectedAmount: number;
+  projectedCount: number;
+  projectedTotal: number;
   referenceMonth: string;
   status: InvoiceStatus;
   total: number;
@@ -120,6 +138,9 @@ export class InvoiceModel {
     paymentDate: string;
     periodEnd: string;
     periodStart: string;
+    projectedAmount?: number;
+    projectedCount?: number;
+    projectedTotal?: number;
     referenceMonth: string;
     status: InvoiceStatus;
     total: number;
@@ -138,6 +159,9 @@ export class InvoiceModel {
     this.paymentDate = params.paymentDate;
     this.periodEnd = params.periodEnd;
     this.periodStart = params.periodStart;
+    this.projectedAmount = params.projectedAmount ?? 0;
+    this.projectedCount = params.projectedCount ?? 0;
+    this.projectedTotal = params.projectedTotal ?? params.amountDue;
     this.referenceMonth = params.referenceMonth;
     this.status = params.status;
     this.total = params.total;
@@ -160,6 +184,13 @@ export class InvoiceModel {
       paymentDate: data.paymentDate as string,
       periodEnd: data.periodEnd as string,
       periodStart: data.periodStart as string,
+      // Lean payload: absent = nothing projected.
+      projectedAmount: Number(data.projectedAmount ?? 0),
+      projectedCount: Number(data.projectedCount ?? 0),
+      projectedTotal:
+        data.projectedTotal === undefined
+          ? undefined
+          : Number(data.projectedTotal),
       referenceMonth: data.referenceMonth as string,
       status: data.status as InvoiceStatus,
       total: Number(data.total ?? data.amount),

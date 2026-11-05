@@ -2,6 +2,7 @@ import { listUseCases } from "./index";
 
 const useCases = {
   adjustFinancialAccountBalanceUseCase: expect.any(Function),
+  confirmFinancialTransactionUseCase: expect.any(Function),
   createFamilyUseCase: expect.any(Function),
   createFinancialAccountUseCase: expect.any(Function),
   createFinancialCategoryUseCase: expect.any(Function),

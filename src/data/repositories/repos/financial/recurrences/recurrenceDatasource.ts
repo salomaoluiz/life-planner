@@ -20,6 +20,7 @@ export interface CreateRecurrenceDatasourceParams {
   owner: OwnerType;
   ownerId: string;
   paid?: boolean;
+  projected?: boolean;
   tags?: string[];
   type: TransactionType;
   value: string;
