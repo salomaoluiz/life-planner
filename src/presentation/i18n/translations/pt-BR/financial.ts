@@ -318,6 +318,8 @@ const financial = {
       "Esta fatura não pode ser paga agora. Recarregue e tente de novo.",
     invoicePaid: "Esta fatura está paga. Desfaça o pagamento para alterar.",
     notFound: "Este item não existe mais ou você não tem acesso a ele.",
+    notProjected:
+      "Esta compra não é mais prevista. Recarregue e tente de novo.",
     overAmountDue: "O valor não pode passar do que falta pagar.",
     ownerNotAllowed: "Você não tem acesso a este proprietário.",
     recurrenceFrequencyBlocked:
@@ -897,6 +899,56 @@ const financial = {
     undoConfirm:
       "As parcelas voltam para as faturas originais e o desconto é removido.",
     undoTitle: "Desfazer este adiantamento?",
+  },
+  projected: {
+    chip: "Prevista",
+    confirm: {
+      action: "Efetivar",
+      charged: "Valor cobrado",
+      chargedDate: "Data da cobrança",
+      difference: "Previsto: {{projected}} · diferença {{difference}}",
+      errors: { amount: "Informe um valor maior que zero." },
+      hint: "Ao efetivar, a compra passa a contar no valor efetivo da fatura e no limite consumido.",
+      invoiceCaption: "Entra na fatura de {{month}}",
+      itemTitle: "Prevista",
+      seriesNote: "Série: as próximas continuam previstas.",
+      title: "Efetivar {{name}}",
+    },
+    form: {
+      amountLabel: "Valor previsto",
+      dateLabel: "Data prevista",
+      hint: "Ainda não cobrada. Conta no previsto e no limite previsto; você efetiva quando a cobrança chegar.",
+      installmentsOff: "Parcelar fica indisponível em transação prevista.",
+      repeatNote: "Toda ocorrência nasce prevista.",
+      title: "Prevista",
+    },
+    invoice: {
+      effective: "Valor efetivo",
+      notEffective: "Não entram no efetivo",
+      plusProjected: "+ {{value}} em {{count}} previstas",
+      projectedTotal: "Previsto: {{value}}",
+      sectionTitle: "Previstas ({{count}})",
+    },
+    limit: {
+      available: "Disponível",
+      consumed: "Consumido",
+      projected: "Previsto",
+      title: "Limite do cartão",
+    },
+    list: {
+      includes: "inclui {{value}} previsto",
+      plusProjected: "+ {{value}} previsto",
+    },
+    pay: {
+      confirmed: "Efetivada {{value}}",
+      discard: "Descartar",
+      discarded: "Descartada",
+      move: "Mover para {{month}}",
+      moved: "Movida para {{month}}",
+      remaining: "Faltam {{count}} previstas",
+      warning:
+        "A fatura não pode ser paga com previstas. Resolva cada uma antes: efetive, mova para a próxima fatura ou descarte.",
+    },
   },
   recurrence: {
     archiveWarning_one: "1 transação recorrente será encerrada.",

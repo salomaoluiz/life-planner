@@ -11,6 +11,7 @@ export const MODAL_NAMES = [
   "prepay_installments",
   "card_refund",
   "card_early_payment",
+  "confirm_projected",
   "section_picker",
   "add_new_stock_item",
   "add_new_family",

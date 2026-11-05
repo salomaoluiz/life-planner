@@ -116,6 +116,15 @@
   "financial.prepayment.render.mount": {
     "maxCommits": 2
   },
+  "financial.confirmProjected.mount.cold": {
+    "maxDepth": 2,
+    "maxDuplicates": 0,
+    "maxRequests": 6,
+    "modal": "confirm_projected"
+  },
+  "financial.confirmProjected.render.mount": {
+    "maxCommits": 3
+  },
   "financial.refund.mount.cold": {
     "maxDepth": 2,
     "maxDuplicates": 0,
