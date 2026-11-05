@@ -320,6 +320,7 @@ const financial = {
       "This invoice can't be paid right now. Reload and try again.",
     invoicePaid: "This invoice is paid. Undo the payment to change it.",
     notFound: "This item no longer exists or you don't have access to it.",
+    notProjected: "This purchase is no longer projected. Reload and try again.",
     overAmountDue: "The value can't exceed what is left to pay.",
     ownerNotAllowed: "You don't have access to this owner.",
     recurrenceFrequencyBlocked:
@@ -896,6 +897,58 @@ const financial = {
     undoConfirm:
       "The installments go back to their invoices and the discount is removed.",
     undoTitle: "Undo this prepayment?",
+  },
+  projected: {
+    chip: "Projected",
+    confirm: {
+      action: "Confirm",
+      charged: "Amount charged",
+      chargedDate: "Charge date",
+      difference: "Projected: {{projected}} · difference {{difference}}",
+      errors: { amount: "Enter a value greater than zero." },
+      hint: "Once confirmed, the purchase counts in the effective amount of the invoice and in the used limit.",
+      invoiceCaption: "Goes on the {{month}} invoice",
+      itemTitle: "Projected",
+      seriesNote: "Series: the next ones stay projected.",
+      title: "Confirm {{name}}",
+    },
+    form: {
+      amountLabel: "Projected amount",
+      dateLabel: "Projected date",
+      hint: "Not charged yet. It counts in the forecast and in the projected limit; you confirm it when the charge arrives.",
+      installmentsOff: "Installments are unavailable on a projected purchase.",
+      repeatNote: "Every occurrence is born projected.",
+      title: "Projected",
+    },
+    invoice: {
+      effective: "Effective amount",
+      notEffective: "Not in the effective amount",
+      plusProjected: "+ {{value}} in {{count}} projected",
+      projectedTotal: "Projected: {{value}}",
+      sectionTitle: "Projected ({{count}})",
+    },
+    limit: {
+      available: "Available",
+      consumed: "Consumed",
+      projected: "Projected",
+      title: "Card limit",
+    },
+    list: {
+      includes: "includes {{value}} projected",
+      plusProjected: "+ {{value}} projected",
+    },
+    pay: {
+      confirmed: "Confirmed {{value}}",
+      discard: "Discard",
+      discarded: "Discarded",
+      discardSeries:
+        "Only this occurrence is discarded; the next ones stay projected.",
+      move: "Move to {{month}}",
+      moved: "Moved to {{month}}",
+      remaining: "{{count}} projected left",
+      warning:
+        "This invoice can't be paid with projected purchases. Resolve each one first: confirm it, move it to the next invoice or discard it.",
+    },
   },
   recurrence: {
     archiveWarning_one: "1 recurring transaction will end.",

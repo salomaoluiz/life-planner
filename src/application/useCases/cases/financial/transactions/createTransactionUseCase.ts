@@ -23,6 +23,8 @@ export interface CreateTransactionUseCaseParams {
   owner: string;
   ownerId: string;
   paid?: boolean;
+  // Spec 096: a card expense not charged yet.
+  projected?: boolean;
   tags?: string[];
   type: string;
   value: string;
@@ -61,6 +63,7 @@ function createTransactionUseCase(
             owner,
             ownerId: params.ownerId,
             paid: params.paid,
+            projected: params.projected,
             tags: params.tags,
             type,
             value: params.value,

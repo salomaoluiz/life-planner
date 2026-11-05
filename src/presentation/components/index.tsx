@@ -70,6 +70,7 @@ export {
   InvoiceFieldOption,
   InvoiceFieldProps,
 } from "./InvoiceField";
+export { default as LimitBar, LimitBarProps } from "./LimitBar";
 export {
   default as LineChart,
   LineChartPoint,

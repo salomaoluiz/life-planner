@@ -53,6 +53,7 @@ function toOverviewEntity(
             (invoice) => new InvoiceEntity({ ...invoice }),
           ),
           openInvoice: new InvoiceEntity({ ...summary.openInvoice }),
+          projectedUsed: summary.projectedUsed,
           upcomingInvoices: summary.upcomingInvoices.map(
             (invoice) => new InvoiceEntity({ ...invoice }),
           ),

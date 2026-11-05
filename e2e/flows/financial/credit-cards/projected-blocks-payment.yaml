@@ -1,0 +1,105 @@
+url: ${E2E_WEB_URL}
+name: financial/credit-cards/projected-blocks-payment
+tags:
+  - financial
+  - spec-096
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Spec 096: an invoice with a projected purchase can't be paid; after discarding it the payment works.
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- evalScript: ${output.KEEP_ACCOUNT_ID = output.ACCOUNT_ID}
+- evalScript: ${output.KEEP_CATEGORY_ID = output.EXPENSE_CATEGORY_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Card
+      KEY: CARD_TITLE
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Market
+      KEY: PURCHASE_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Stream
+      KEY: PROJECTED_NAME
+# A card whose last invoice closed yesterday (CLOSED, listed today): one purchase of 250,00 and one PROJECTED of 100,00
+- runFlow:
+    file: ../../../subflows/setup/create-card-purchase.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      CATEGORY_ID: ${output.KEEP_CATEGORY_ID}
+      TITLE: ${output.CARD_TITLE}
+      DESCRIPTION: ${output.PURCHASE_NAME}
+      VALUE_CENTS: "25000"
+      SECOND_CATEGORY_ID: ${output.KEEP_CATEGORY_ID}
+      SECOND_DESCRIPTION: ${output.PROJECTED_NAME}
+      SECOND_VALUE_CENTS: "10000"
+      SECOND_PROJECTED: "true"
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.cardInvoice.row"
+    timeout: 20000
+# Expand the line, then open the invoice
+- tapOn:
+    id: "financial.transactions.cardInvoice.toggle"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- tapOn:
+    id: "financial.transactions.cardInvoice.open"
+- extendedWaitUntil:
+    visible:
+      id: "financial.invoice.pay"
+    timeout: 20000
+- tapOn:
+    id: "financial.invoice.pay"
+- extendedWaitUntil:
+    visible:
+      id: "financial.invoice.pay-warning"
+    timeout: 20000
+- assertVisible:
+    id: "financial.invoice.pay-projected"
+# Pay is disabled: tapping it changes nothing
+- tapOn:
+    id: "financial.invoice.pay-confirm"
+- assertNotVisible:
+    id: "financial.invoice.paid-info"
+- assertVisible:
+    id: "financial.invoice.pay-warning"
+# Discard the projected purchase: the warning goes away
+- tapOn:
+    id: "financial.invoice.pay-projected-discard"
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.invoice.pay-warning"
+    timeout: 20000
+- tapOn:
+    id: "financial.invoice.pay-account"
+- tapOn:
+    id: "financial.invoice.pay-account-option-${output.KEEP_ACCOUNT_ID}"
+- tapOn:
+    id: "financial.invoice.pay-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "financial.invoice.paid-info"
+    timeout: 20000

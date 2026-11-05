@@ -28,6 +28,7 @@ export interface CreateRecurrenceUseCaseParams {
   ownerId: string;
   // Occurrence 1 of an account series only.
   paid?: boolean;
+  projected?: boolean;
   tags?: string[];
   type: string;
   value: string;
@@ -74,6 +75,7 @@ function createRecurrenceUseCase(
             owner,
             ownerId: params.ownerId,
             paid: params.paid,
+            projected: params.projected,
             tags: params.tags,
             type,
             value: params.value,

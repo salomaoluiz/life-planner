@@ -999,3 +999,36 @@ describe("description suggestions (spec 060)", () => {
     ).toBeNull();
   });
 });
+
+describe("projected switch (spec 096)", () => {
+  it("SHOULD show the Projected switch WHEN the form allows it AND report the toggle", () => {
+    const vm = setup({ projected: { on: false, visible: true } });
+
+    fireEvent(
+      screen.getByTestId(transactionFormTestIds.projectedSwitch),
+      "valueChange",
+      true,
+    );
+
+    expect(vm.onProjectedToggle).toHaveBeenCalledWith(true);
+    expect(
+      screen.queryByTestId(transactionFormTestIds.projectedNote),
+    ).toBeNull();
+  });
+
+  it("SHOULD say Installments are unavailable WHEN Projected is on", () => {
+    setup({ projected: { on: true, visible: true } });
+
+    expect(
+      screen.getByTestId(transactionFormTestIds.projectedNote),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD hide the switch WHEN the form does not allow it", () => {
+    setup();
+
+    expect(
+      screen.queryByTestId(transactionFormTestIds.projectedSwitch),
+    ).toBeNull();
+  });
+});

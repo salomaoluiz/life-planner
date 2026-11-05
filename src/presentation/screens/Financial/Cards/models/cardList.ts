@@ -3,6 +3,7 @@ import {
   CreditCardSummaryDTO,
   InvoiceDTO,
 } from "@application/dto/financial/CreditCardOverviewDTO";
+import limitBar from "@screens/Financial/models/limitBar";
 import { ALL_OWNERS } from "@screens/Financial/models/ownerOptions";
 
 type CardEntry =
@@ -14,6 +15,8 @@ type CardEntry =
 
 interface CardsAggregate {
   available: number;
+  // Spec 096: projected purchases of the unpaid invoices; `available` already subtracts them.
+  projectedUsed: number;
   totalLimit: number;
   used: number;
 }
@@ -24,8 +27,17 @@ type InvoiceTab = "closed" | "open" | "upcoming";
 function aggregateOf(summaries: CreditCardSummaryDTO[]): CardsAggregate {
   const totalLimit = summaries.reduce((sum, item) => sum + item.card.limit, 0);
   const used = summaries.reduce((sum, item) => sum + item.used, 0);
+  const projectedUsed = summaries.reduce(
+    (sum, item) => sum + item.projectedUsed,
+    0,
+  );
 
-  return { available: totalLimit - used, totalLimit, used };
+  return {
+    available: totalLimit - used - projectedUsed,
+    projectedUsed,
+    totalLimit,
+    used,
+  };
 }
 
 function amountProps(cents: number): { type?: "EXPENSE"; value: number } {
@@ -143,6 +155,17 @@ function formatReferenceMonth(referenceMonth: string, languageTag: string) {
   }).format(new Date(year, month - 1, 1));
 }
 
+// The consumed and projected shares of the limit bar (spec 096 FR 16).
+function limitShares(aggregate: CardsAggregate) {
+  const { consumedPct, projectedPct } = limitBar({
+    limit: aggregate.totalLimit,
+    projectedUsed: aggregate.projectedUsed,
+    used: aggregate.used,
+  });
+
+  return { consumedPct, projectedPct };
+}
+
 function resolveSelectedId(
   summaries: CreditCardSummaryDTO[],
   selectedId?: string,
@@ -171,6 +194,7 @@ export {
   filterSummariesByOwner,
   formatDayMonth,
   formatReferenceMonth,
+  limitShares,
   resolveSelectedId,
   usedProgress,
 };

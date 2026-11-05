@@ -4,8 +4,12 @@ import queryName from "@tests/queryName";
 
 import ProjectedOccurrenceDTO from "@application/dto/financial/ProjectedOccurrenceDTO";
 import { financeKeys } from "@application/queryKeys/financeKeys";
+import { InvoiceHasProjected } from "@domain/entities/errors";
 
-import { makeInvoice } from "../../Transactions/mocks/invoice.mocks";
+import {
+  makeInvoice,
+  makeInvoiceWithProjected,
+} from "../../Transactions/mocks/invoice.mocks";
 import {
   account,
   givenLoaded,
@@ -148,6 +152,37 @@ it("SHOULD navigate to the add form with the card AND to a purchase edit AND clo
   );
   act(() => result.current.onClose());
   expect(modalNavigation.closeModal).toHaveBeenCalled();
+});
+
+it("SHOULD open the confirm sheet of a projected purchase with its series flag (spec 096)", () => {
+  givenLoaded({ invoice: makeInvoice() });
+  const { result } = setup();
+
+  act(() =>
+    result.current.onConfirmPress({
+      amountCents: 10000,
+      categoryIcon: "x",
+      categoryName: "Subscriptions",
+      date: new Date(2026, 9, 25),
+      description: "Youtube Premium",
+      id: "p9",
+      prepaid: false,
+      projected: true,
+      recurrenceId: "series-1",
+    }),
+  );
+
+  expect(modalNavigation.replaceModal).toHaveBeenLastCalledWith(
+    "confirm_projected",
+    {
+      creditCardId: "card-1",
+      date: "2026-10-25",
+      description: "Youtube Premium",
+      id: "p9",
+      recurring: "1",
+      value: "10000",
+    },
+  );
 });
 
 it("SHOULD open the refund and early payment sheets for this invoice (spec 032)", () => {
@@ -344,5 +379,103 @@ describe("payment account prefill (spec 035)", () => {
     act(() => result.current.onPayPress());
 
     expect(result.current.accountId).toBe("a1");
+  });
+});
+
+describe("resolving projected purchases before paying (spec 096)", () => {
+  function purchaseOf(recurrenceId?: string) {
+    const invoice = makeInvoiceWithProjected({}, recurrenceId);
+
+    return { invoice, projected: invoice.projectedPurchases[0] };
+  }
+
+  it("SHOULD count the stored projected purchases that still block the payment", () => {
+    givenLoaded({ invoice: purchaseOf().invoice });
+
+    expect(setup().result.current.projectedPurchases).toHaveLength(1);
+  });
+
+  it("SHOULD move a series occurrence to the next invoice with ONLY_THIS", () => {
+    const { invoice, projected } = purchaseOf("series-1");
+    givenLoaded({ invoice });
+    const { result } = setup();
+
+    act(() => result.current.onProjectedMove(projected));
+
+    expect(mutations.updateTx.value.mutate).toHaveBeenCalledWith({
+      id: "purchase-3",
+      invoiceMonth: "2026-11",
+      ownerId: "user-id",
+      scope: "ONLY_THIS",
+    });
+  });
+
+  it("SHOULD move a one-off projected purchase without a scope", () => {
+    const { invoice, projected } = purchaseOf();
+    givenLoaded({ invoice });
+    const { result } = setup();
+
+    act(() => result.current.onProjectedMove(projected));
+
+    expect(mutations.updateTx.value.mutate).toHaveBeenCalledWith({
+      id: "purchase-3",
+      invoiceMonth: "2026-11",
+      ownerId: "user-id",
+      scope: undefined,
+    });
+  });
+
+  it("SHOULD discard a one-off projected purchase right away", () => {
+    const { invoice, projected } = purchaseOf();
+    givenLoaded({ invoice });
+    const { result } = setup();
+
+    act(() => result.current.onProjectedDiscard(projected));
+
+    expect(mutations.deleteTx.value.mutate).toHaveBeenCalledWith({
+      id: "purchase-3",
+      ownerId: "user-id",
+      scope: undefined,
+    });
+    expect(result.current.discarding).toBeUndefined();
+  });
+
+  it("SHOULD ask before discarding a series occurrence AND skip only that one", () => {
+    const { invoice, projected } = purchaseOf("series-1");
+    givenLoaded({ invoice });
+    const { result } = setup();
+
+    act(() => result.current.onProjectedDiscard(projected));
+
+    expect(mutations.deleteTx.value.mutate).not.toHaveBeenCalled();
+    expect(result.current.discarding?.id).toBe("purchase-3");
+
+    act(() => result.current.onDiscardConfirm());
+
+    expect(mutations.deleteTx.value.mutate).toHaveBeenCalledWith({
+      id: "purchase-3",
+      ownerId: "user-id",
+      scope: "ONLY_THIS",
+    });
+
+    act(() => result.current.onDiscardCancel());
+    expect(result.current.discarding).toBeUndefined();
+  });
+
+  it("SHOULD refresh the finance data AND the invoice WHEN a purchase is moved or discarded", () => {
+    givenLoaded({ invoice: purchaseOf().invoice });
+    mutations.updateTx.withStatus("success");
+    setup();
+
+    expect(spies.invalidateFinance).toHaveBeenCalled();
+    expect(queries.invoice.value.refetch).toHaveBeenCalled();
+  });
+
+  it("SHOULD reload the invoice WHEN the API refuses the payment because of projected purchases", () => {
+    givenLoaded({ invoice: purchaseOf().invoice });
+    mutations.pay.withError(new InvoiceHasProjected([]));
+    setup();
+
+    expect(queries.invoice.value.refetch).toHaveBeenCalled();
   });
 });

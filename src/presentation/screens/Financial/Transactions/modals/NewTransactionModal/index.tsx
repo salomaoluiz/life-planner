@@ -207,11 +207,7 @@ function NewTransactionModal() {
                 currency={vm.currency}
                 error={err(vm.amountError)}
                 inputRef={vm.amountInputRef}
-                label={t(
-                  vm.installments.enabled
-                    ? "financial.transactions.form.totalValue"
-                    : "financial.transactions.form.amount",
-                )}
+                label={t(amountLabelKey)}
                 onChange={vm.onAmountChange}
                 testID={transactionFormTestIds.amountInput}
                 tone={vm.typeTone}
@@ -402,6 +398,22 @@ function NewTransactionModal() {
                   ) : null}
                 </View>
               ) : null}
+              {vm.projected.visible ? (
+                <SwitchRow
+                  hint={t("financial.projected.form.hint")}
+                  label={t("financial.projected.form.title")}
+                  onToggle={vm.onProjectedToggle}
+                  testID={transactionFormTestIds.projectedSwitch}
+                  value={vm.projected.on}
+                />
+              ) : null}
+              {vm.projected.on ? (
+                <Text.Caption
+                  testID={transactionFormTestIds.projectedNote}
+                  tone="secondary"
+                  value={t("financial.projected.form.installmentsOff")}
+                />
+              ) : null}
               {vm.installments.visible ? (
                 <View style={styles.form}>
                   <View style={styles.switchRow}>
@@ -458,6 +470,11 @@ function NewTransactionModal() {
               ) : null}
               {vm.recurrence.isRepeatToggleVisible ? (
                 <SwitchRow
+                  hint={
+                    vm.projected.on
+                      ? t("financial.projected.form.repeatNote")
+                      : undefined
+                  }
                   label={t("financial.transactions.form.repeat")}
                   onToggle={vm.onRepeatToggle}
                   testID={transactionFormTestIds.repeat}
@@ -615,12 +632,26 @@ function NewTransactionModal() {
       )}
     </View>
   );
+  function amountLabelKeyOf(): TranslationKeys {
+    if (vm.projected.on) {
+      return "financial.projected.form.amountLabel";
+    }
+
+    return vm.installments.enabled
+      ? "financial.transactions.form.totalValue"
+      : "financial.transactions.form.amount";
+  }
+  const amountLabelKey = amountLabelKeyOf();
   const dateField = (
     <View style={styles.field}>
       <DateField
         disabled={vm.scopeLocks?.date}
         error={err(vm.dateError)}
-        label={t(vm.dateLabelKey)}
+        label={t(
+          vm.projected.on
+            ? "financial.projected.form.dateLabel"
+            : vm.dateLabelKey,
+        )}
         onChange={(date) => date && vm.onDateChange(date)}
         testID={transactionFormTestIds.dateField}
         todayLabel={t("common.date.today")}

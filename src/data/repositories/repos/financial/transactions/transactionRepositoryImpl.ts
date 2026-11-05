@@ -7,6 +7,7 @@ import {
 import TransactionEntity from "@domain/entities/financial/TransactionEntity";
 import { FinancialTransactionRepository } from "@domain/repositories/financial";
 
+import confirmTransaction from "./confirmTransaction";
 import createTransaction from "./createTransaction";
 import deleteTransaction from "./deleteTransaction";
 import getFilteredTransactions from "./getFilteredTransactions";
@@ -20,6 +21,9 @@ function transactionRepositoryImpl(
   datasources: Datasources,
 ): FinancialTransactionRepository {
   return {
+    async confirmTransaction(params): Promise<void> {
+      return confirmTransaction(params, datasources);
+    },
     async createTransaction(params): Promise<TransactionEntity> {
       return createTransaction(params, datasources);
     },

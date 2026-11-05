@@ -79,3 +79,7 @@ Upcoming items (spec 062, additive): `GET /v1/finance/upcoming?ownerId=…&today
 ## Month endpoint (spec 080, backend 3.1.0)
 
 `GET /v1/finance/month?ownerId=&month=YYYY-MM&today=` returns `{ month, rows: { items, nextCursor }, lookups, invoices, dailyBalances, projections, summary }` (lean rows of spec 079; the invoices, balances and projections have the shape of their separate endpoints; `summary` holds `income/expense/toPay/toReceive` without projections plus `projectedIncome/projectedExpense`). The transactions screen reads it through `TransactionDatasource.getFinanceMonth` (it follows `nextCursor` through `GET /transactions`) → `getFinancialMonthUseCase`. The unfiltered month only; the filtered period views (spec 045), Home and the forms keep the separate endpoints.
+
+## Projected card purchases (spec 096)
+
+Additive: optional `projected` on `POST /finance/transactions` and `POST /finance/recurrences`; `POST /finance/transactions/:id/confirm { value, date, invoiceMonth? }` (`409 Transaction is not projected`, `422 Invoice is paid`); invoices carry `projectedAmount|Count|Total` only when something is projected; the cards overview carries `projectedUsed`; invoice `purchases` carry `projected: true` and `recurrenceId`; `GET /transactions?projected=`; paying an invoice with projected rows answers `409 { projected: [...] }`; `PATCH` with `invoiceMonth = stored + 1` and `scope: ONLY_THIS` moves a projected series occurrence. Upcoming invoice items carry `projectedAmount`.

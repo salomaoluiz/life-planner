@@ -3,6 +3,7 @@ import {
   ApiBusinessError,
   FinancialNotFound,
   GenericError,
+  InvoiceHasProjected,
   InvoiceNotPayable,
 } from "@domain/entities/errors";
 import { api } from "@infrastructure/api";
@@ -127,6 +128,45 @@ describe("payInvoice", () => {
       "/v1/finance/credit-cards/card-1/invoices/2026-10/payment?today=2026-11-02",
       { accountId: "acc-1", method: "ACCOUNT", paidOn: "2026-11-05" },
     );
+  });
+
+  it("SHOULD map a 409 with the projected list to InvoiceHasProjected (spec 096)", async () => {
+    const projected = [
+      {
+        date: "2026-10-25",
+        description: "Youtube Premium",
+        id: "p-1",
+        recurrenceId: "series-1",
+        value: 10000,
+      },
+      {
+        date: "2026-10-20",
+        description: "Gift",
+        id: "p-2",
+        recurrenceId: null,
+        value: 3000,
+      },
+    ];
+    jest
+      .mocked(api.post)
+      .mockRejectedValueOnce(
+        new ApiBusinessError(
+          "Invoice has projected purchases",
+          409,
+          {},
+          { projected },
+        ),
+      );
+
+    const error = await capture(
+      payInvoice({ ...key, method: "EXTERNAL", paidOn: "2026-11-05" }),
+    );
+
+    expect(error).toBeInstanceOf(InvoiceHasProjected);
+    expect((error as InvoiceHasProjected).projected).toEqual([
+      { ...projected[0] },
+      { ...projected[1], recurrenceId: undefined },
+    ]);
   });
 
   it.each([409, 422])("SHOULD map %i to InvoiceNotPayable", async (status) => {

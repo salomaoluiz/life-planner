@@ -1,3 +1,4 @@
+export { default as confirmTransactionUseCase } from "./confirmTransactionUseCase";
 export { default as createTransactionUseCase } from "./createTransactionUseCase";
 export { default as deleteTransactionUseCase } from "./deleteTransactionUseCase";
 export { default as exportTransactionsUseCase } from "./exportTransactionsUseCase";

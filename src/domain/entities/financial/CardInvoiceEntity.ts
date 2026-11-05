@@ -51,6 +51,9 @@ export interface InvoicePurchaseEntity {
   ownerId: string;
   // Moved into this invoice by a prepayment.
   prepaid?: boolean;
+  // Spec 096: not charged yet.
+  projected?: boolean;
+  recurrenceId?: string;
   // Integer cents.
   value: number;
 }

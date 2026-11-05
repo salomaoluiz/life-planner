@@ -1,6 +1,9 @@
 import { todayCalendarDate } from "@data/models/financial/calendarDate";
 import { CreditCardDatasource } from "@data/repositories/repos/financial/creditCards/creditCardDatasource";
-import { InvoiceNotPayable } from "@domain/entities/errors";
+import {
+  InvoiceHasProjected,
+  InvoiceNotPayable,
+} from "@domain/entities/errors";
 import { api } from "@infrastructure/api";
 
 import handleFinancialApiError from "../../financialApiError";
@@ -29,7 +32,22 @@ async function payInvoice(params: Params): Response {
         month: params.month,
       },
       {
-        conflict: () => new InvoiceNotPayable(),
+        // Spec 096 FR 10: a 409 with the list of projected purchases to resolve first.
+        conflict: (_, errorBody) =>
+          Array.isArray(errorBody.projected)
+            ? new InvoiceHasProjected(
+                (errorBody.projected as Record<string, unknown>[]).map(
+                  (item) => ({
+                    date: item.date as string,
+                    description: item.description as string,
+                    id: item.id as string,
+                    recurrenceId:
+                      (item.recurrenceId as null | string) ?? undefined,
+                    value: Number(item.value),
+                  }),
+                ),
+              )
+            : new InvoiceNotPayable(),
         fields: body,
         unprocessable: () => new InvoiceNotPayable(),
       },

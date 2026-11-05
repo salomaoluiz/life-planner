@@ -72,4 +72,39 @@ function makeInvoiceDTO(
   });
 }
 
-export { makeInvoice, makeInvoiceDTO };
+// An invoice with 800 projected in one stored purchase (spec 096): 45000 effective, 45800 projected total.
+function makeInvoiceWithProjected(
+  overrides: Partial<ConstructorParameters<typeof InvoiceDTO>[0]> = {},
+  recurrenceId?: string,
+) {
+  const dto = makeInvoiceDTO({
+    projectedAmount: 800,
+    projectedCount: 1,
+    projectedTotal: 45800,
+    ...overrides,
+  });
+
+  return new CardInvoiceUIModel(
+    new CardInvoiceDTO({
+      card: dto.card,
+      credits: dto.credits,
+      invoice: dto.invoice,
+      purchases: [
+        ...dto.purchases,
+        {
+          category: "Subscriptions",
+          categoryId: "cat-3",
+          date: "2026-10-25",
+          description: "Youtube Premium",
+          id: "purchase-3",
+          ownerId: "user-id",
+          projected: true,
+          recurrenceId,
+          value: 800,
+        },
+      ],
+    }),
+  );
+}
+
+export { makeInvoice, makeInvoiceDTO, makeInvoiceWithProjected };

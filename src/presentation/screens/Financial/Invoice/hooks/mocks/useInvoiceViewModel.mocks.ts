@@ -31,6 +31,10 @@ jest.mock("@infrastructure/fetcher", () => ({
 }));
 jest.mock("@application/useCases", () => ({
   useCases: {
+    deleteFinancialTransactionUseCase: {
+      execute: jest.fn(),
+      uniqueName: "deleteTx",
+    },
     getFinancialAccountsUseCase: { execute: jest.fn(), uniqueName: "accounts" },
     getFinancialCardInvoicesForMonthUseCase: {
       execute: jest.fn(),
@@ -59,6 +63,10 @@ jest.mock("@application/useCases", () => ({
     undoFinancialInvoicePaymentUseCase: {
       execute: jest.fn(),
       uniqueName: "undo",
+    },
+    updateFinancialTransactionUseCase: {
+      execute: jest.fn(),
+      uniqueName: "updateTx",
     },
   },
 }));
@@ -99,7 +107,7 @@ beforeEach(() => {
   ["invoice", "owners", "accounts", "projections", "cards"].forEach((key) => {
     queries[key] = new UseQueryFixture<unknown>();
   });
-  ["pay", "undo"].forEach((key) => {
+  ["pay", "undo", "updateTx", "deleteTx"].forEach((key) => {
     mutations[key] = new UseMutationFixture<unknown, unknown>();
   });
   spies.params.mockReturnValue({ cardId: "card-1", month: "2026-10" });

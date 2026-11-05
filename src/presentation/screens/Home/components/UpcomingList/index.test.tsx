@@ -167,6 +167,28 @@ it("SHOULD show an invoice as one row with a See transactions button", () => {
   expect(handlers.onItemPress).not.toHaveBeenCalled();
 });
 
+it("SHOULD say how much of an invoice is projected (spec 096)", () => {
+  renderLoaded(
+    model(
+      [],
+      [
+        item("2026-11-15", {
+          creditCardId: "card-id",
+          description: "Main card",
+          invoiceMonth: "2026-11",
+          kind: "INVOICE",
+          projectedAmount: 26460,
+          purchaseCount: 23,
+        }),
+      ],
+    ),
+  );
+
+  expect(
+    screen.getByText(/financial.projected.list.includes/),
+  ).toBeOnTheScreen();
+});
+
 it("SHOULD scroll inside a labelled box with a capped height", () => {
   renderLoaded(model([item("2026-11-01")], []));
 

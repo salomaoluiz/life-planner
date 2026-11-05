@@ -1,6 +1,11 @@
+import CardInvoiceDTO from "@application/dto/financial/CardInvoiceDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 
-import { makeInvoice, makeInvoiceDTO } from "../mocks/invoice.mocks";
+import {
+  makeInvoice,
+  makeInvoiceDTO,
+  makeInvoiceWithProjected,
+} from "../mocks/invoice.mocks";
 import CardInvoiceUIModel from "./CardInvoiceUIModel";
 import TransactionUIModel from "./TransactionUIModel";
 
@@ -158,6 +163,15 @@ describe("projected purchases (spec 034 FR 14)", () => {
     expect(invoice.canOpen).toBe(true);
   });
 
+  it("SHOULD sum the stored projected purchases and the 034 projections as 'plus projected' (spec 096)", () => {
+    const stored = makeInvoiceWithProjected();
+    const both = stored.withProjected([projected("10.00")]);
+
+    expect(stored.plusProjectedCents).toBe(800);
+    expect(both.plusProjectedCents).toBe(1800);
+    expect(makeInvoice().plusProjectedCents).toBe(0);
+  });
+
   it("SHOULD not include anything WHEN there are no projections", () => {
     const invoice = makeInvoice();
 
@@ -175,5 +189,91 @@ describe("projected purchases (spec 034 FR 14)", () => {
     expect(invoice.isProjectedOnly).toBe(true);
     expect(invoice.canOpen).toBe(false);
     expect(invoice.amountCents).toBe(1000);
+  });
+});
+
+describe("projected purchases (spec 096)", () => {
+  function withProjected() {
+    const dto = makeInvoiceDTO({
+      projectedAmount: 800,
+      projectedCount: 1,
+      projectedTotal: 45800,
+    });
+
+    return new CardInvoiceUIModel(
+      new CardInvoiceDTO({
+        card: dto.card,
+        credits: dto.credits,
+        invoice: dto.invoice,
+        purchases: [
+          ...dto.purchases,
+          {
+            category: "Subscriptions",
+            categoryId: "cat-3",
+            date: "2026-10-25",
+            description: "Youtube Premium",
+            id: "purchase-3",
+            ownerId: "user-id",
+            projected: true,
+            recurrenceId: "series-1",
+            value: 800,
+          },
+        ],
+      }),
+    );
+  }
+
+  it("SHOULD keep the effective purchases apart from the projected ones", () => {
+    const invoice = withProjected();
+
+    expect(invoice.purchases.map((purchase) => purchase.id)).toEqual([
+      "purchase-1",
+      "purchase-2",
+    ]);
+    expect(invoice.projectedPurchases).toEqual([
+      expect.objectContaining({
+        amountCents: 800,
+        description: "Youtube Premium",
+        id: "purchase-3",
+        recurrenceId: "series-1",
+      }),
+    ]);
+  });
+
+  it("SHOULD expose the effective, projected and projected-total amounts", () => {
+    const invoice = withProjected();
+
+    expect(invoice.effectiveCents).toBe(45000);
+    expect(invoice.projectedAmountCents).toBe(800);
+    expect(invoice.projectedCount).toBe(1);
+    expect(invoice.projectedTotalCents).toBe(45800);
+  });
+
+  it("SHOULD add the 034 projections of later months to the projected total and count", () => {
+    const projection = new TransactionUIModel(
+      new TransactionDTO({
+        category: "Subscriptions",
+        categoryId: "cat-3",
+        date: "2026-11-25T00:00:00.000Z",
+        description: "Spotify",
+        id: "series-1:5",
+        owner: "USER" as never,
+        ownerId: "user-id",
+        type: "EXPENSE" as never,
+        value: "10.00",
+      }),
+    );
+    const invoice = withProjected().withProjected([projection]);
+
+    expect(invoice.projectedTotalCents).toBe(45800 + 1000);
+    expect(invoice.projectedTotalCount).toBe(2);
+  });
+
+  it("SHOULD show no projected amount for an invoice without projected purchases", () => {
+    const invoice = makeInvoice();
+
+    expect(invoice.projectedPurchases).toEqual([]);
+    expect(invoice.projectedAmountCents).toBe(0);
+    expect(invoice.projectedTotalCents).toBe(45000);
   });
 });

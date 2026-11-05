@@ -3,7 +3,11 @@ import { fireEvent, render, screen } from "@tests";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
-import { makeInvoice, makeInvoiceDTO } from "../../mocks/invoice.mocks";
+import {
+  makeInvoice,
+  makeInvoiceDTO,
+  makeInvoiceWithProjected,
+} from "../../mocks/invoice.mocks";
 import CardInvoiceUIModel from "../../models/CardInvoiceUIModel";
 import TransactionUIModel from "../../models/TransactionUIModel";
 import CardInvoiceRow from "./index";
@@ -157,6 +161,22 @@ describe("projected purchases (spec 034 FR 14)", () => {
     ).toBeOnTheScreen();
     expect(
       screen.getByTestId(transactionsTestIds.cardInvoiceAmount),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD show '+ projected' for the stored projected purchases of the invoice (spec 096)", () => {
+    render(
+      <CardInvoiceRow
+        expanded={false}
+        invoice={makeInvoiceWithProjected()}
+        onOpen={jest.fn()}
+        onPurchasePress={jest.fn()}
+        onToggle={jest.fn()}
+      />,
+    );
+
+    expect(
+      screen.getByText(/financial.projected.list.plusProjected/),
     ).toBeOnTheScreen();
   });
 

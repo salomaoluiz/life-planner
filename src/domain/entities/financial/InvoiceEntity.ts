@@ -34,6 +34,10 @@ interface IInvoiceEntity {
   paymentDate: string;
   periodEnd: string;
   periodStart: string;
+  // Spec 096: projected purchases of the invoice (never part of net, total or amountDue).
+  projectedAmount?: number;
+  projectedCount?: number;
+  projectedTotal?: number;
   referenceMonth: string;
   status: InvoiceStatus;
   total: number;
@@ -60,6 +64,10 @@ class InvoiceEntity implements IInvoiceEntity {
   paymentDate: string;
   periodEnd: string;
   periodStart: string;
+  // amountDue + projectedAmount (cents).
+  projectedAmount: number;
+  projectedCount: number;
+  projectedTotal: number;
   referenceMonth: string;
   status: InvoiceStatus;
   // net + carryIn; below 0 the credit moves to the next invoice.
@@ -80,6 +88,9 @@ class InvoiceEntity implements IInvoiceEntity {
     this.paymentDate = params.paymentDate;
     this.periodEnd = params.periodEnd;
     this.periodStart = params.periodStart;
+    this.projectedAmount = params.projectedAmount ?? 0;
+    this.projectedCount = params.projectedCount ?? 0;
+    this.projectedTotal = params.projectedTotal ?? params.amountDue;
     this.referenceMonth = params.referenceMonth;
     this.status = params.status;
     this.total = params.total;

@@ -223,3 +223,23 @@ it("SHOULD show the read-only banner AND toast, and hide the card actions WHEN a
   expect(screen.queryByTestId(cardsTestIds.refundButton)).toBeNull();
   expect(screen.queryByTestId(cardsTestIds.earlyPaymentButton)).toBeNull();
 });
+
+it("SHOULD show the projected use of the limit apart WHEN some purchase is projected (spec 096)", () => {
+  setup({
+    aggregate: {
+      available: 440000,
+      projectedUsed: 50000,
+      totalLimit: 500000,
+      used: 10000,
+    },
+  });
+
+  expect(screen.getByTestId(cardsTestIds.projectedUsed)).toBeTruthy();
+  expect(screen.getByTestId("cards-progress-projected")).toBeTruthy();
+});
+
+it("SHOULD NOT show the projected use WHEN nothing is projected", () => {
+  setup();
+
+  expect(screen.queryByTestId(cardsTestIds.projectedUsed)).toBeNull();
+});

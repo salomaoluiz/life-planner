@@ -16,6 +16,7 @@ function summary(id: string, ownerId: string, limit: number, used: number) {
     card: { id, limit, ownerId },
     closedInvoices: [],
     openInvoice: {},
+    projectedUsed: 0,
     used,
   } as never;
 }
@@ -46,22 +47,51 @@ describe("aggregateOf", () => {
   it("SHOULD sum limit and used AND derive available", () => {
     expect(aggregateOf([a, b])).toEqual({
       available: 700000,
+      projectedUsed: 0,
       totalLimit: 800000,
       used: 100000,
     });
   });
 
   it("SHOULD be all zeros WHEN there are no cards", () => {
-    expect(aggregateOf([])).toEqual({ available: 0, totalLimit: 0, used: 0 });
+    expect(aggregateOf([])).toEqual({
+      available: 0,
+      projectedUsed: 0,
+      totalLimit: 0,
+      used: 0,
+    });
+  });
+
+  it("SHOULD sum the projected use AND subtract it from available (spec 096)", () => {
+    const withProjected = { ...(a as object), projectedUsed: 50000 } as never;
+
+    expect(aggregateOf([withProjected, b])).toEqual({
+      available: 650000,
+      projectedUsed: 50000,
+      totalLimit: 800000,
+      used: 100000,
+    });
   });
 });
 
 describe("usedProgress", () => {
   it("SHOULD be used / totalLimit AND 0 WHEN the limit is 0", () => {
-    expect(usedProgress({ available: 0, totalLimit: 400, used: 100 })).toBe(
-      0.25,
-    );
-    expect(usedProgress({ available: 0, totalLimit: 0, used: 0 })).toBe(0);
+    expect(
+      usedProgress({
+        available: 0,
+        projectedUsed: 0,
+        totalLimit: 400,
+        used: 100,
+      }),
+    ).toBe(0.25);
+    expect(
+      usedProgress({
+        available: 0,
+        projectedUsed: 0,
+        totalLimit: 0,
+        used: 0,
+      }),
+    ).toBe(0);
   });
 });
 

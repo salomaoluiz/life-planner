@@ -714,6 +714,60 @@ describe("card mode (spec 029)", () => {
     });
   });
 
+  describe("projected card purchases (spec 096)", () => {
+    it("SHOULD offer the Projected switch only for a card expense that is being created", () => {
+      givenLoaded({ cards: [mainCard] });
+      const { result } = setup();
+
+      expect(result.current.projected.visible).toBe(false);
+
+      act(() => result.current.onPayWithChange("CARD"));
+
+      expect(result.current.projected).toEqual({ on: false, visible: true });
+    });
+
+    it("SHOULD hide Installments AND keep Repeat WHEN Projected is on", () => {
+      const { result } = inCardMode();
+
+      act(() => result.current.onInstallmentsToggle(true));
+      act(() => result.current.onProjectedToggle(true));
+
+      expect(result.current.projected.on).toBe(true);
+      expect(result.current.installments.visible).toBe(false);
+      expect(result.current.installments.enabled).toBe(false);
+      expect(result.current.recurrence.isRepeatToggleVisible).toBe(true);
+    });
+
+    it("SHOULD create a projected card purchase", () => {
+      const { result } = inCardMode();
+
+      act(() => result.current.onAmountChange(10000));
+      act(() => result.current.onDescriptionChange("Youtube Premium"));
+      act(() => result.current.onCategorySelect("food"));
+      act(() => result.current.onProjectedToggle(true));
+      act(() => result.current.onSave());
+
+      expect(
+        useCases.createFinancialTransactionUseCase.execute,
+      ).toHaveBeenCalledWith(expect.objectContaining({ projected: true }));
+    });
+
+    it("SHOULD create a projected series WHEN Repeat is on", () => {
+      const { result } = inCardMode();
+
+      act(() => result.current.onAmountChange(10000));
+      act(() => result.current.onDescriptionChange("Youtube Premium"));
+      act(() => result.current.onCategorySelect("food"));
+      act(() => result.current.onProjectedToggle(true));
+      act(() => result.current.onRepeatToggle(true));
+      act(() => result.current.onSave());
+
+      expect(mutations.create_recurrence.value.mutate).toHaveBeenCalledWith(
+        expect.objectContaining({ projected: true }),
+      );
+    });
+  });
+
   describe("installments (spec 030)", () => {
     it("SHOULD be off by default, only in Card mode AND show nothing until turned on", () => {
       givenLoaded({ cards: [mainCard] });

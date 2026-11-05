@@ -64,6 +64,8 @@ interface TransactionFormState {
   paid: boolean;
   paidTouched: boolean;
   payWith: PayWith;
+  // Spec 096: a card expense not charged yet (create only). With "Repeat" the series is projected.
+  projected: boolean;
   // Spec 034: "Repeat". Create: a new series; edit: the series of the occurrence being edited.
   repeatEnd?: Date;
   repeatFrequency: RecurrenceFrequency;
@@ -157,6 +159,11 @@ function changeInstallmentsOn(
   state: TransactionFormState,
   on: boolean,
 ): TransactionFormState {
+  // A projected purchase can't be split in installments (spec 096 FR 15).
+  if (on && state.projected) {
+    return state;
+  }
+
   return {
     ...state,
     installmentsOn: on,
@@ -237,10 +244,11 @@ function changePayWith(
       installmentsCount: 2,
       installmentsOn: false,
       invoiceMonth: undefined,
-      // Coming back from a card the status restarts from the date.
       paid: state.payWith === "CARD" ? !isAfterToday(state.date) : state.paid,
       paidTouched: state.payWith === "CARD" ? false : state.paidTouched,
       payWith,
+      // Coming back from a card the status restarts from the date.
+      projected: false,
     };
   }
 
@@ -251,6 +259,18 @@ function changePayWith(
       categories,
     ),
     creditCardId: state.creditCardId ?? defaultCardId(cards, state.ownerId),
+  };
+}
+
+// Spec 096 FR 15: "Projected" and "Installments" never go together.
+function changeProjected(
+  state: TransactionFormState,
+  on: boolean,
+): TransactionFormState {
+  return {
+    ...state,
+    installmentsOn: on ? false : state.installmentsOn,
+    projected: on,
   };
 }
 
@@ -278,6 +298,8 @@ function changeType(
     ...state,
     categoryId:
       selected && selected.type === type ? state.categoryId : undefined,
+    // Only card expenses can be projected.
+    projected: type === TransactionType.EXPENSE ? state.projected : false,
     type,
   };
 }
@@ -347,6 +369,7 @@ function createInitialState(params: {
     paid: true,
     paidTouched: false,
     payWith: params.card ? "CARD" : "ACCOUNT",
+    projected: false,
     tags: [],
     type: TransactionType.EXPENSE,
   };
@@ -445,6 +468,34 @@ function pickNewRecordId(previousIds: string[], current: { id: string }[]) {
   return current.find((record) => !previousIds.includes(record.id))?.id;
 }
 
+// The fields of a card or account purchase that a create and a patch share.
+function purchaseFields(
+  state: TransactionFormState,
+  owner: OwnerDTO,
+  categoryName: string,
+  invoice?: InvoiceContext,
+) {
+  const isCard = state.payWith === "CARD";
+
+  return {
+    accountId: isCard ? undefined : state.accountId,
+    category: categoryName,
+    categoryId: state.categoryId!,
+    creditCardId: isCard ? state.creditCardId : undefined,
+    date: state.date.toISOString(),
+    description: state.description.trim(),
+    invoiceMonth: invoiceMonthToSend(state, invoice),
+    notes: notesToCreate(state),
+    owner: owner.type,
+    ownerId: owner.id,
+    // A card purchase follows its invoice: no status is sent (spec 033 FR 2).
+    paid: isCard ? undefined : state.paid,
+    tags: state.tags,
+    type: state.type,
+    value: centsToDecimalString(state.amountCents),
+  };
+}
+
 // "Save and add another" (spec 039): keeps what repeats from one entry to the next
 // (type, category, account/card, date, owner) and clears what changes every time.
 function resetForNext(state: TransactionFormState): TransactionFormState {
@@ -459,6 +510,7 @@ function resetForNext(state: TransactionFormState): TransactionFormState {
     originalPaid: undefined,
     paid: !isAfterToday(state.date),
     paidTouched: false,
+    projected: false,
   };
 }
 
@@ -483,6 +535,7 @@ function stateFromDto(
     paid: dto.paid,
     paidTouched: true,
     payWith: dto.creditCardId ? "CARD" : "ACCOUNT",
+    projected: dto.projected,
     repeatEnd: series?.endDate
       ? normalizeDate(new Date(series.endDate))
       : undefined,
@@ -520,24 +573,10 @@ function toCreateParams(
   categoryName: string,
   invoice?: InvoiceContext,
 ): CreateTransactionUseCaseParams {
-  const isCard = state.payWith === "CARD";
-
   return {
-    accountId: isCard ? undefined : state.accountId,
-    category: categoryName,
-    categoryId: state.categoryId!,
-    creditCardId: isCard ? state.creditCardId : undefined,
-    date: state.date.toISOString(),
-    description: state.description.trim(),
-    invoiceMonth: invoiceMonthToSend(state, invoice),
-    notes: notesToCreate(state),
-    owner: owner.type,
-    ownerId: owner.id,
-    // A card purchase follows its invoice: no status is sent (spec 033 FR 2).
-    paid: isCard ? undefined : state.paid,
-    tags: state.tags,
-    type: state.type,
-    value: centsToDecimalString(state.amountCents),
+    ...purchaseFields(state, owner, categoryName, invoice),
+    // Spec 096: set on create only (the API refuses it on a patch).
+    projected: state.payWith === "CARD" && state.projected ? true : undefined,
   };
 }
 
@@ -560,6 +599,7 @@ function toCreateRecurrenceParams(
     owner: owner.type,
     ownerId: owner.id,
     paid: isCard ? undefined : state.paid,
+    projected: isCard && state.projected ? true : undefined,
     tags: state.tags,
     type: state.type,
     value: centsToDecimalString(state.amountCents),
@@ -575,7 +615,7 @@ function toUpdateParams(
 ): UpdateTransactionUseCaseParams {
   // An edit clears the notes with `null` (absent would leave them).
   return {
-    ...toCreateParams(state, owner, categoryName, invoice),
+    ...purchaseFields(state, owner, categoryName, invoice),
     id,
     notes: state.notes.trim() || null,
   };
@@ -648,6 +688,7 @@ export {
   changeOwner,
   changePaid,
   changePayWith,
+  changeProjected,
   changeRepeatOn,
   changeType,
   chipCategories,

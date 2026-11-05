@@ -19,6 +19,37 @@ it("SHOULD map the card, the invoice and the purchases (cents kept)", () => {
   expect(model.purchases[0]).toMatchObject({ category: "Food", value: 25000 });
 });
 
+it("SHOULD default the projected fields: nothing projected, projectedTotal = amountDue (spec 096)", () => {
+  const { invoice, purchases } = CardInvoiceModel.fromJSON(apiCardInvoice);
+
+  expect(invoice).toMatchObject({
+    projectedAmount: 0,
+    projectedCount: 0,
+    projectedTotal: invoice.amountDue,
+  });
+  expect(purchases[0].projected).toBe(false);
+});
+
+it("SHOULD read the projected fields of an invoice and of its purchases (spec 096)", () => {
+  const { invoice, purchases } = CardInvoiceModel.fromJSON({
+    ...apiCardInvoice,
+    invoice: {
+      ...apiCardInvoice.invoice,
+      projectedAmount: 800,
+      projectedCount: 2,
+      projectedTotal: 45800,
+    },
+    purchases: [{ ...apiCardInvoice.purchases[0], projected: true }],
+  });
+
+  expect(invoice).toMatchObject({
+    projectedAmount: 800,
+    projectedCount: 2,
+    projectedTotal: 45800,
+  });
+  expect(purchases[0].projected).toBe(true);
+});
+
 it("SHOULD map the payment of a paid invoice (account and boleto)", () => {
   const paid = CardInvoiceModel.fromJSON({
     ...apiCardInvoice,

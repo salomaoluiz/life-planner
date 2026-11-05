@@ -55,6 +55,21 @@ const createParams = {
 };
 
 describe("createRecurrence", () => {
+  it("SHOULD send projected for a projected card series (spec 096)", async () => {
+    jest.mocked(api.post).mockResolvedValueOnce({
+      occurrences: [apiRecurringTransaction],
+      overLimit: false,
+      recurrence: apiRecurrence,
+    });
+
+    await createRecurrence({ ...createParams, projected: true });
+
+    expect(api.post).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ projected: true }),
+    );
+  });
+
   it("SHOULD POST the cents, the calendar dates AND the local today, then map the series and its rows", async () => {
     jest.mocked(api.post).mockResolvedValueOnce({
       occurrences: [apiRecurringTransaction],

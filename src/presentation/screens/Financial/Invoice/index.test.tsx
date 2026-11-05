@@ -5,7 +5,10 @@ import { fireEvent, screen, within } from "@tests";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import TransactionUIModel from "@screens/Financial/Transactions/models/TransactionUIModel";
 
-import { makeInvoice } from "../Transactions/mocks/invoice.mocks";
+import {
+  makeInvoice,
+  makeInvoiceWithProjected,
+} from "../Transactions/mocks/invoice.mocks";
 import { setup } from "./mocks/index.mocks";
 import invoiceTestIds from "./testIds";
 
@@ -296,6 +299,52 @@ describe("projected purchases (spec 034)", () => {
   });
 });
 
+describe("stored projected purchases (spec 096)", () => {
+  it("SHOULD label the effective amount AND show the projected total WHEN some purchase is projected", () => {
+    setup({ invoice: makeInvoiceWithProjected() });
+
+    expect(
+      screen.getByText("financial.projected.invoice.effective"),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(invoiceTestIds.projectedSummary),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByText(/financial.projected.invoice.projectedTotal/),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByText(/financial.projected.invoice.plusProjected/),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD keep the projected purchase out of Compras AND list it under Previstas with Efetivar", () => {
+    const vm = setup({
+      invoice: makeInvoiceWithProjected({}, "series-1"),
+    });
+
+    expect(screen.getAllByTestId(invoiceTestIds.purchase)).toHaveLength(2);
+    expect(
+      screen.getAllByTestId(invoiceTestIds.projectedPurchase),
+    ).toHaveLength(1);
+
+    fireEvent.press(screen.getByTestId(invoiceTestIds.projectedConfirm));
+
+    expect(vm.onConfirmPress).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "purchase-3", recurrenceId: "series-1" }),
+    );
+  });
+
+  it("SHOULD show neither the summary nor the Efetivar button WHEN nothing is projected", () => {
+    setup();
+
+    expect(screen.queryByTestId(invoiceTestIds.projectedSummary)).toBeNull();
+    expect(screen.queryByTestId(invoiceTestIds.projectedConfirm)).toBeNull();
+    expect(
+      screen.queryByText("financial.projected.invoice.effective"),
+    ).toBeNull();
+  });
+});
+
 describe("wide layout (spec 037)", () => {
   const sheet = invoiceTestIds.screen;
 
@@ -334,5 +383,67 @@ describe("wide layout (spec 037)", () => {
     expect(
       StyleSheet.flatten(actions.props.style).flexDirection,
     ).toBeUndefined();
+  });
+});
+
+describe("paying with projected purchases (spec 096)", () => {
+  function withProjected(recurrenceId?: string) {
+    const invoice = makeInvoiceWithProjected(
+      { status: "CLOSED" },
+      recurrenceId,
+    );
+
+    return { invoice, projectedPurchases: invoice.projectedPurchases };
+  }
+
+  it("SHOULD warn AND list each projected purchase with its three actions, Pay disabled with the count", () => {
+    const vm = setup({
+      ...withProjected("series-1"),
+      isPayOpen: true,
+      isSubmitDisabled: false,
+    });
+
+    expect(screen.getByTestId(invoiceTestIds.payWarning)).toBeOnTheScreen();
+    expect(screen.getAllByTestId(invoiceTestIds.payProjected)).toHaveLength(1);
+    expect(
+      screen.getByText(/financial.projected.pay.remaining/),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(invoiceTestIds.payConfirm).props.accessibilityState,
+    ).toMatchObject({ disabled: true });
+
+    fireEvent.press(screen.getByTestId(invoiceTestIds.payProjectedConfirm));
+    fireEvent.press(screen.getByTestId(invoiceTestIds.payProjectedMove));
+    fireEvent.press(screen.getByTestId(invoiceTestIds.payProjectedDiscard));
+
+    expect(vm.onConfirmPress).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "purchase-3" }),
+    );
+    expect(vm.onProjectedMove).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "purchase-3" }),
+    );
+    expect(vm.onProjectedDiscard).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "purchase-3" }),
+    );
+  });
+
+  it("SHOULD show no warning AND enable Pay WHEN no projected purchase is left", () => {
+    setup({ isPayOpen: true, isSubmitDisabled: false });
+
+    expect(screen.queryByTestId(invoiceTestIds.payWarning)).toBeNull();
+    expect(
+      screen.getByTestId(invoiceTestIds.payConfirm).props.accessibilityState,
+    ).toMatchObject({ disabled: false });
+  });
+
+  it("SHOULD ask before discarding a series occurrence", () => {
+    const { projectedPurchases } = withProjected("series-1");
+    const vm = setup({ discarding: projectedPurchases[0] });
+
+    fireEvent.press(
+      screen.getByTestId(`${invoiceTestIds.discardConfirm}-confirm`),
+    );
+
+    expect(vm.onDiscardConfirm).toHaveBeenCalledTimes(1);
   });
 });

@@ -53,6 +53,7 @@ function buildPendingRow(input: PendingRowInput): TransactionDTO {
     owner: input.owner.type,
     ownerId: input.owner.id,
     paid: isCard ? true : state.paid,
+    projected: isCard && state.projected,
     tags: state.tags.map((name) => ({ id: name, name })),
     type: state.type,
     value: centsToDecimalString(state.amountCents),

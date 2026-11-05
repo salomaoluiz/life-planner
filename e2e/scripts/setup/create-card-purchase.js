@@ -5,7 +5,7 @@
 // day is today, in the current month.
 // Reads E2E_API_URL, TOKEN, TITLE, OWNER_ID, CATEGORY_ID, DESCRIPTION, VALUE_CENTS from env. Never logs the token.
 // Optional caller-scoped params (spec 045): SECOND_CATEGORY_ID, SECOND_DESCRIPTION, SECOND_VALUE_CENTS add a second
-// purchase on the same invoice.
+// purchase on the same invoice; SECOND_PROJECTED="true" makes it a projected purchase (spec 096).
 function pad(value) {
   return value < 10 ? "0" + value : String(value);
 }
@@ -70,6 +70,10 @@ if (typeof SECOND_DESCRIPTION !== "undefined" && SECOND_DESCRIPTION) {
       description: SECOND_DESCRIPTION,
       owner: "USER",
       ownerId: OWNER_ID,
+      projected:
+        typeof SECOND_PROJECTED !== "undefined" && SECOND_PROJECTED === "true"
+          ? true
+          : undefined,
       type: "EXPENSE",
       value: Number(SECOND_VALUE_CENTS),
     }),

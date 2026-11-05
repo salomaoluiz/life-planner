@@ -1,3 +1,4 @@
+import confirmTransaction from "./confirmTransaction";
 import createTransaction from "./createTransaction";
 import deleteTransaction from "./deleteTransaction";
 import exportTransactions from "./exportTransactions";
@@ -11,6 +12,7 @@ import { importTransactions, validateImport } from "./importTransactions";
 import updateTransaction from "./updateTransaction";
 
 export default {
+  confirmTransaction,
   createTransaction,
   deleteTransaction,
   exportTransactions,

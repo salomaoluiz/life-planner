@@ -76,6 +76,7 @@ export {
 } from "./tags";
 
 export {
+  confirmTransactionUseCase as confirmFinancialTransactionUseCase,
   createTransactionUseCase as createFinancialTransactionUseCase,
   deleteTransactionUseCase as deleteFinancialTransactionUseCase,
   exportTransactionsUseCase as exportFinancialTransactionsUseCase,

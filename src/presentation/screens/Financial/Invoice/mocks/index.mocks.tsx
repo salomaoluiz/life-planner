@@ -12,12 +12,14 @@ jest.mock("../hooks");
 const defaultViewModel: ReturnType<typeof useInvoiceViewModel> = {
   accountId: undefined,
   accountOptions: [{ label: "Checking", value: "a1" }],
+  discarding: undefined,
   errorMessage: undefined,
   formErrorKey: undefined,
   invoice: makeInvoice(),
   isLoading: false,
   isPaying: false,
   isPayOpen: false,
+  isResolving: false,
   isSubmitDisabled: true,
   isUndoing: false,
   isUndoOpen: false,
@@ -25,13 +27,18 @@ const defaultViewModel: ReturnType<typeof useInvoiceViewModel> = {
   onAccountChange: jest.fn(),
   onAddPurchasePress: jest.fn(),
   onClose: jest.fn(),
+  onConfirmPress: jest.fn(),
   onCreditPress: jest.fn(),
+  onDiscardCancel: jest.fn(),
+  onDiscardConfirm: jest.fn(),
   onEarlyPaymentPress: jest.fn(),
   onMethodChange: jest.fn(),
   onPaidOnChange: jest.fn(),
   onPayClose: jest.fn(),
   onPayConfirm: jest.fn(),
   onPayPress: jest.fn(),
+  onProjectedDiscard: jest.fn(),
+  onProjectedMove: jest.fn(),
   onProjectedPress: jest.fn(),
   onPurchasePress: jest.fn(),
   onRefundPress: jest.fn(),
@@ -41,6 +48,9 @@ const defaultViewModel: ReturnType<typeof useInvoiceViewModel> = {
   onUndoPress: jest.fn(),
   paidOn: new Date(2026, 10, 5),
   projected: [] as TransactionUIModel[],
+  projectedPurchases: [] as ReturnType<
+    typeof makeInvoice
+  >["projectedPurchases"],
 };
 
 function setup(

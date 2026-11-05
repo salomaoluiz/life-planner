@@ -29,6 +29,7 @@ async function createTransaction(params: Params): Response {
     owner: params.owner,
     ownerId: params.ownerId,
     paid: params.paid,
+    projected: params.projected,
     tags: params.tags,
     type: params.type,
     value: decimalStringToCents(params.value),

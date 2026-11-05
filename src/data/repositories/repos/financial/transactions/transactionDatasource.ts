@@ -18,6 +18,7 @@ import {
 } from "@domain/entities/financial/TransactionQueryFilter";
 
 export interface TransactionDatasource {
+  confirmTransaction(params: ConfirmTransactionDatasourceParams): Promise<void>;
   createTransaction(
     params: CreateTransactionDatasourceParams,
   ): Promise<TransactionModel>;
@@ -46,6 +47,14 @@ export interface TransactionDatasource {
   validateImport(params: ImportRequest): Promise<ImportValidationEntity>;
 }
 
+interface ConfirmTransactionDatasourceParams {
+  date: string;
+  id: string;
+  invoiceMonth?: string;
+  ownerId: string;
+  value: string;
+}
+
 interface CreateTransactionDatasourceParams {
   accountId?: string;
   category: string;
@@ -59,6 +68,7 @@ interface CreateTransactionDatasourceParams {
   ownerId: string;
   // Account rows only; omitted → the API decides from the date (spec 033).
   paid?: boolean;
+  projected?: boolean;
   // Spec 043: tag names, resolved (or created) by the API in the owner.
   tags?: string[];
   type: TransactionType;

@@ -165,6 +165,7 @@ function toTransactionEntity(model: TransactionModel): TransactionEntity {
     owner: OwnerType[model.owner],
     ownerId: model.ownerId,
     paid: model.paid,
+    projected: model.projected,
     recurrenceFrequency: model.recurrenceFrequency,
     recurrenceId: model.recurrenceId,
     systemKey: model.systemKey,
