@@ -47,6 +47,13 @@ class NewAccountUIModel {
       this.params.owners[0]
     );
   }
+
+  // Spec 094 FR 14: the name of the favorite that turning the switch on would replace.
+  replacedFavoriteName(accountId: string | undefined): string | undefined {
+    const favorite = this.params.accounts.find((account) => account.isFavorite);
+
+    return favorite && favorite.id !== accountId ? favorite.name : undefined;
+  }
 }
 
 export default NewAccountUIModel;

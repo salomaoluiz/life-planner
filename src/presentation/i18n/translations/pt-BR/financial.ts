@@ -24,6 +24,12 @@ const financial = {
         balanceTooLarge: "Esse saldo é grande demais.",
         nameTooLong: "O nome pode ter no máximo 60 caracteres.",
       },
+      favorite: "Conta favorita",
+      favoriteArchived: "Contas arquivadas não podem ser a favorita.",
+      favoriteHelper:
+        "Fica em destaque na Visão geral, no saldo diário e na Home. Só você vê esta escolha.",
+      favoriteReplace:
+        "Hoje a favorita é {{name}}. Ao salvar, esta passa a ser a favorita.",
       icon: "Ícone",
       initialBalance: "Saldo inicial",
       initialBalanceHelper:

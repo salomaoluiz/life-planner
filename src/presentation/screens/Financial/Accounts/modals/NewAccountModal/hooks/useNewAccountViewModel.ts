@@ -25,6 +25,7 @@ import {
   toCreateParams,
   toUpdateParams,
   validate,
+  withArchived,
 } from "../models/accountFormState";
 import NewAccountUIModel from "../models/NewAccountUIModel";
 
@@ -225,6 +226,8 @@ function useNewAccountViewModel() {
     isDeleting: deleteMutation.isFetching,
     isDiscardDialogOpen,
     isEditing,
+    isFavorite: state?.isFavorite ?? false,
+    isFavoriteDisabled: state?.isArchived ?? false,
     isLoading: !state && !isNotFound,
     isNotFound,
     isOwnerLocked,
@@ -238,7 +241,7 @@ function useNewAccountViewModel() {
     },
     onArchivedChange: (value: boolean) => {
       if (state) {
-        update({ ...state, isArchived: value });
+        update(withArchived(state, value));
       }
     },
     onClose,
@@ -247,6 +250,11 @@ function useNewAccountViewModel() {
     onDeletePress: () => setDeleteDialogOpen(true),
     onDiscardCancel: () => setDiscardDialogOpen(false),
     onDiscardConfirm: () => closeModal(),
+    onFavoriteChange: (value: boolean) => {
+      if (state && !state.isArchived) {
+        update({ ...state, isFavorite: value });
+      }
+    },
     onIconChange: (value: string) => {
       if (state) {
         update({ ...state, icon: value });
@@ -273,6 +281,9 @@ function useNewAccountViewModel() {
       | TranslationKeys
       | undefined,
     ownerId: state?.ownerId ?? "",
+    replacedFavoriteName: state?.isFavorite
+      ? uiModel?.replacedFavoriteName(params.id)
+      : undefined,
     saveLabelKey: (isEditing
       ? "financial.common.saveChanges"
       : "financial.accounts.form.save") as TranslationKeys,

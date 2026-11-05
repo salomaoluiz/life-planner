@@ -8,6 +8,7 @@ function useStyles() {
   return {
     styles: StyleSheet.create({
       form: { gap: theme.sizes.spacing.md },
+      grow: { flex: 1 },
       helper: { gap: theme.sizes.spacing.xs },
       preview: {
         alignItems: "center",

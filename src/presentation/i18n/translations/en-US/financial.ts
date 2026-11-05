@@ -25,6 +25,12 @@ const financial = {
         balanceTooLarge: "This balance is too large.",
         nameTooLong: "Name can have at most 60 characters.",
       },
+      favorite: "Favorite account",
+      favoriteArchived: "Archived accounts can't be the favorite.",
+      favoriteHelper:
+        "Highlighted on the Overview, the daily balance and the Home. Only you see this choice.",
+      favoriteReplace:
+        "Your favorite today is {{name}}. Saving makes this one the favorite.",
       icon: "Icon",
       initialBalance: "Initial balance",
       initialBalanceHelper:
