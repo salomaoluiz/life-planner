@@ -3,6 +3,12 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.10.1] - 2026-11-05
+
+### Fixed
+
+- The total line in the Finance overview "Balance over time" chart is easier to see: it now has its own color, shown in the legend, and is no longer almost transparent.
+
 ## [1.10.0] - 2026-11-05
 
 ### Added
