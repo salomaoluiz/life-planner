@@ -14,9 +14,10 @@ import {
   Section,
   Text,
 } from "@components";
+import { formatAmount } from "@components/AmountText/formatAmount";
 import Skeleton from "@components/Skeleton";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
-import { useTranslation } from "@presentation/i18n";
+import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
 import { useBreakpoint } from "@presentation/theme";
 import { BlockState } from "@screens/Home/hooks/useHomeViewModel";
@@ -49,9 +50,28 @@ function Row({
   row: UpcomingRowUIModel;
 }) {
   const { t } = useTranslation();
+  const localeTag = useLocaleTag();
   const { styles } = useStyles();
   const item = row.value;
   const badge = row.badge;
+
+  function subtitleOf() {
+    if (!row.isInvoice) {
+      return row.dateText;
+    }
+
+    const base = t(pluralKey("home.upcoming.purchases", row.purchaseCount), {
+      count: row.purchaseCount,
+      date: row.dateText,
+    });
+
+    // Spec 096 FR 21: an invoice item counts the projected purchases; say how much of it is projected.
+    return row.projectedAmount > 0
+      ? `${base} · ${t("financial.projected.list.includes", {
+          value: formatAmount(row.projectedAmount, localeTag, row.currency),
+        })}`
+      : base;
+  }
 
   return (
     <ListItem
@@ -64,14 +84,7 @@ function Row({
         ) : undefined
       }
       onPress={() => (row.isInvoice ? onInvoicePress(item) : onItemPress(item))}
-      subtitle={
-        row.isInvoice
-          ? t(pluralKey("home.upcoming.purchases", row.purchaseCount), {
-              count: row.purchaseCount,
-              date: row.dateText,
-            })
-          : row.dateText
-      }
+      subtitle={subtitleOf()}
       testID={homeTestIds.financeUpcomingItem}
       title={
         row.isInvoice

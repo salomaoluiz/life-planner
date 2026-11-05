@@ -212,6 +212,11 @@ class CardInvoiceUIModel {
     return this.dto.invoice.paymentAfterDue;
   }
 
+  // Spec 096 FR 20: what the line adds to the effective amount: the stored projected purchases plus the 034 projections.
+  get plusProjectedCents() {
+    return this.dto.invoice.projectedAmount + this.projectedCents;
+  }
+
   get previousMonth() {
     return addMonthsTo(this.dto.invoice.referenceMonth, -1);
   }

@@ -11,6 +11,7 @@ import {
   GroupHeader,
   Icon,
   IconButton,
+  LimitBar,
   ListItem,
   MetricBlock,
   ProgressBar,
@@ -29,7 +30,7 @@ import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
 import InvoiceRow from "./components/InvoiceRow";
 import { useCardsViewModel } from "./hooks";
-import { amountProps, CardEntry } from "./models/cardList";
+import { amountProps, CardEntry, limitShares } from "./models/cardList";
 import useStyles from "./styles";
 import cardsTestIds from "./testIds";
 
@@ -72,14 +73,28 @@ function FinancialCards() {
               />
             )}
           </View>
-          <ProgressBar
-            accessibilityLabel={t("financial.cards.usedPercent", {
-              percent: Math.round(vm.usedProgress * 100),
-            })}
-            progress={vm.usedProgress}
-            testID="cards-progress"
-            tone={vm.aggregate.available < 0 ? "expense" : "accent"}
-          />
+          {vm.aggregate.projectedUsed > 0 ? (
+            <LimitBar
+              accessibilityLabel={t("financial.cards.usedPercent", {
+                percent: Math.round(
+                  ((vm.aggregate.used + vm.aggregate.projectedUsed) /
+                    Math.max(vm.aggregate.totalLimit, 1)) *
+                    100,
+                ),
+              })}
+              {...limitShares(vm.aggregate)}
+              testID="cards-progress"
+            />
+          ) : (
+            <ProgressBar
+              accessibilityLabel={t("financial.cards.usedPercent", {
+                percent: Math.round(vm.usedProgress * 100),
+              })}
+              progress={vm.usedProgress}
+              testID="cards-progress"
+              tone={vm.aggregate.available < 0 ? "expense" : "accent"}
+            />
+          )}
           <View style={styles.metrics}>
             <MetricBlock
               label={t("financial.cards.used")}
@@ -90,6 +105,18 @@ function FinancialCards() {
                 />
               }
             />
+            {vm.aggregate.projectedUsed > 0 ? (
+              <MetricBlock
+                label={t("financial.projected.limit.projected")}
+                testID={cardsTestIds.projectedUsed}
+                value={
+                  <AmountText
+                    currency={DEFAULT_CURRENCY}
+                    {...amountProps(vm.aggregate.projectedUsed)}
+                  />
+                }
+              />
+            ) : null}
             <MetricBlock
               label={t("financial.cards.available")}
               value={

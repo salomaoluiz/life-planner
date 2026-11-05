@@ -40,6 +40,10 @@ function item(data: Json): UpcomingItemEntity {
         : Number(data.occurrenceNumber),
     owner: data.owner as string,
     ownerId: data.ownerId as string,
+    projectedAmount:
+      data.projectedAmount === undefined
+        ? undefined
+        : Number(data.projectedAmount),
     purchaseCount:
       data.purchaseCount === null || data.purchaseCount === undefined
         ? null

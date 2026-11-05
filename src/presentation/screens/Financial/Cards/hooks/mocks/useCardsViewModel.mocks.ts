@@ -131,7 +131,7 @@ function givenData(
   withOwners: OwnerDTO[] = owners,
 ) {
   const overview = new CreditCardOverviewDTO({
-    aggregate: { available: 0, totalLimit: 0, used: 0 },
+    aggregate: { available: 0, projectedUsed: 0, totalLimit: 0, used: 0 },
     cards: cards
       .filter((item) => item.status === "ACTIVE")
       .map((item) => summary(item, used)),

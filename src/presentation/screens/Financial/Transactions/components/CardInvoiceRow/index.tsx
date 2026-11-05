@@ -85,11 +85,17 @@ function CardInvoiceRow(props: Props) {
                 })}
               />
             ) : null}
-            {invoice.includesProjected ? (
+            {invoice.plusProjectedCents > 0 ? (
               <Text.Caption
                 testID={transactionsTestIds.cardInvoiceIncludesProjected}
                 tone="secondary"
-                value={t("financial.invoice.includesProjected")}
+                value={t("financial.projected.list.plusProjected", {
+                  value: formatAmount(
+                    invoice.plusProjectedCents,
+                    localeTag,
+                    invoice.currency,
+                  ),
+                })}
               />
             ) : null}
             <View style={styles.badges}>
@@ -126,7 +132,7 @@ function CardInvoiceRow(props: Props) {
               currency={invoice.currency}
               testID={transactionsTestIds.cardInvoiceAmount}
               type="EXPENSE"
-              value={invoice.amountCents}
+              value={invoice.effectiveCents}
             />
           </UpdatingTotal>
           <Icon name={expanded ? "chevron-up" : "chevron-down"} size={20} />

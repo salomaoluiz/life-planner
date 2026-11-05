@@ -91,7 +91,7 @@ function makeSummary(card = makeCard()) {
 }
 
 const defaultViewModel: ReturnType<typeof useCardsViewModel> = {
-  aggregate: { available: 0, totalLimit: 0, used: 0 },
+  aggregate: { available: 0, projectedUsed: 0, totalLimit: 0, used: 0 },
   entries: [],
   errorMessage: undefined,
   hasCards: false,
@@ -142,7 +142,12 @@ function withCards(): Partial<typeof defaultViewModel> {
   ];
 
   return {
-    aggregate: { available: 500000, totalLimit: 500000, used: 0 },
+    aggregate: {
+      available: 500000,
+      projectedUsed: 0,
+      totalLimit: 500000,
+      used: 0,
+    },
     entries,
     hasCards: true,
     selected: summary,

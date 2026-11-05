@@ -20,6 +20,8 @@ export interface UpcomingItemEntity {
   occurrenceNumber: null | number;
   owner: string;
   ownerId: string;
+  // Spec 096: the projected part of an invoice item (cents); absent when there is none.
+  projectedAmount?: number;
   purchaseCount: null | number;
   recurrenceId: null | string;
   type: "EXPENSE" | "INCOME";

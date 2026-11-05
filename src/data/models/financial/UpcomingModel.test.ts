@@ -37,6 +37,18 @@ it("SHOULD map every field of the API payload keeping cents", () => {
   expect(result.next[0]).toEqual(payload.next[0]);
 });
 
+it("SHOULD map the projected part of an invoice item (spec 096)", () => {
+  const result = UpcomingModel.fromJSON({
+    ...payload,
+    next: [{ ...payload.next[0], projectedAmount: 26460 }],
+  });
+
+  expect(result.next[0].projectedAmount).toBe(26460);
+  expect(
+    UpcomingModel.fromJSON(payload).next[0].projectedAmount,
+  ).toBeUndefined();
+});
+
 it("SHOULD default missing lists and totals to empty", () => {
   expect(UpcomingModel.fromJSON({})).toEqual({
     next: [],

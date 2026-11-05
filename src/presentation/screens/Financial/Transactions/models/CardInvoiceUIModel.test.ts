@@ -1,7 +1,11 @@
 import CardInvoiceDTO from "@application/dto/financial/CardInvoiceDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 
-import { makeInvoice, makeInvoiceDTO } from "../mocks/invoice.mocks";
+import {
+  makeInvoice,
+  makeInvoiceDTO,
+  makeInvoiceWithProjected,
+} from "../mocks/invoice.mocks";
 import CardInvoiceUIModel from "./CardInvoiceUIModel";
 import TransactionUIModel from "./TransactionUIModel";
 
@@ -157,6 +161,15 @@ describe("projected purchases (spec 034 FR 14)", () => {
     expect(invoice.signedCents).toBe(-45000);
     expect(invoice.isProjectedOnly).toBe(false);
     expect(invoice.canOpen).toBe(true);
+  });
+
+  it("SHOULD sum the stored projected purchases and the 034 projections as 'plus projected' (spec 096)", () => {
+    const stored = makeInvoiceWithProjected();
+    const both = stored.withProjected([projected("10.00")]);
+
+    expect(stored.plusProjectedCents).toBe(800);
+    expect(both.plusProjectedCents).toBe(1800);
+    expect(makeInvoice().plusProjectedCents).toBe(0);
   });
 
   it("SHOULD not include anything WHEN there are no projections", () => {

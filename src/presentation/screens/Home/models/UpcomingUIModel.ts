@@ -109,6 +109,10 @@ export class UpcomingRowUIModel {
     );
   }
 
+  get projectedAmount() {
+    return this.item.projectedAmount ?? 0;
+  }
+
   get purchaseCount() {
     return this.item.purchaseCount ?? 0;
   }
