@@ -25,6 +25,7 @@ interface CreateInstallmentPlanDatasourceParams {
   creditCardId: string;
   date: string;
   description: string;
+  firstInvoiceMonth?: string;
   installments: number;
   notes?: null | string;
   owner: OwnerType;
@@ -53,6 +54,7 @@ interface UpdateInstallmentPlanDatasourceParams {
   creditCardId?: string;
   date?: string;
   description?: string;
+  firstInvoiceMonth?: string;
   id: string;
   installments?: number;
   notes?: null | string;

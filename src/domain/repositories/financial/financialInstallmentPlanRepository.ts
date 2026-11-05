@@ -26,6 +26,8 @@ interface CreateInstallmentPlanRepositoryParams {
   // ISO date-time of the purchase day.
   date: string;
   description: string;
+  // Spec 095: invoice of the 1st installment; omitted = the invoice of the date.
+  firstInvoiceMonth?: string;
   installments: number;
   notes?: null | string;
   owner: OwnerType;
@@ -55,6 +57,7 @@ interface UpdateInstallmentPlanRepositoryParams {
   creditCardId?: string;
   date?: string;
   description?: string;
+  firstInvoiceMonth?: string;
   id: string;
   installments?: number;
   notes?: null | string;

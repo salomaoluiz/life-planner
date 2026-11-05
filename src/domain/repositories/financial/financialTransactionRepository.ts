@@ -62,6 +62,8 @@ interface CreateTransactionRepositoryParams {
   creditCardId?: string;
   date: string;
   description: string;
+  // Spec 095: card purchases only; omitted = the invoice of the date.
+  invoiceMonth?: string;
   notes?: null | string;
   owner: OwnerType;
   ownerId: string;
@@ -91,6 +93,8 @@ interface UpdateTransactionRepositoryParams {
   date?: string;
   description?: string;
   id: string;
+  // Spec 095: the invoice of a card purchase (installment rows with `scope`); omitted = unchanged.
+  invoiceMonth?: string;
   notes?: null | string;
   owner?: OwnerType;
   ownerId?: string;

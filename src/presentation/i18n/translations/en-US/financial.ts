@@ -314,6 +314,8 @@ const financial = {
     close: "OK",
     deleteRefundsFirst: "Delete its refunds first.",
     installmentPaid: "An installment is in a paid invoice.",
+    invoiceNotAvailable:
+      "This invoice is not available for this date. Pick another one.",
     invoiceNotPayable:
       "This invoice can't be paid right now. Reload and try again.",
     invoicePaid: "This invoice is paid. Undo the payment to change it.",
@@ -323,6 +325,8 @@ const financial = {
     recurrenceFrequencyBlocked:
       "Some occurrences are already paid, so the frequency can't change.",
     recurrencePaidAfterEnd: "Occurrences after the new end date are paid.",
+    recurringFollowsDate:
+      "Recurring transactions follow the date, so they have no invoice choice.",
     refundOverPurchase: "Refunds can't exceed the purchase value.",
     title: "We couldn't complete this action",
     undoPrepaymentFirst: "Undo the prepayment first.",

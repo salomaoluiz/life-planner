@@ -312,6 +312,8 @@ const financial = {
     close: "OK",
     deleteRefundsFirst: "Exclua os estornos dela antes.",
     installmentPaid: "Uma parcela está numa fatura paga.",
+    invoiceNotAvailable:
+      "Esta fatura não está disponível para esta data. Escolha outra.",
     invoiceNotPayable:
       "Esta fatura não pode ser paga agora. Recarregue e tente de novo.",
     invoicePaid: "Esta fatura está paga. Desfaça o pagamento para alterar.",
@@ -321,6 +323,8 @@ const financial = {
     recurrenceFrequencyBlocked:
       "Há ocorrências já pagas, então a frequência não pode mudar.",
     recurrencePaidAfterEnd: "Há ocorrências pagas depois da nova data final.",
+    recurringFollowsDate:
+      "Transações recorrentes seguem a data, então não têm escolha de fatura.",
     refundOverPurchase: "Os estornos não podem passar do valor da compra.",
     title: "Não foi possível concluir a ação",
     undoPrepaymentFirst: "Desfaça o adiantamento antes.",

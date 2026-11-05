@@ -118,3 +118,14 @@ it("SHOULD send the notes WHEN given (spec 059)", async () => {
     expect.objectContaining({ notes: "Casa → Aeroporto" }),
   );
 });
+
+it("SHOULD send invoiceMonth WHEN a card purchase picked another invoice (spec 095)", async () => {
+  spies.post.mockResolvedValueOnce(mocks.apiResponse);
+
+  await setup({ invoiceMonth: "2026-11" });
+
+  expect(spies.post).toHaveBeenCalledWith(
+    expect.stringMatching(TODAY_URL),
+    expect.objectContaining({ invoiceMonth: "2026-11" }),
+  );
+});

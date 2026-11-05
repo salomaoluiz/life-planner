@@ -5,10 +5,12 @@ import {
   HasRefunds,
   InstallmentPaid,
   InvoiceIsPaid,
+  InvoiceNotAvailable,
   OverAmountDue,
   PrepaymentBlocksEdit,
   RecurrenceFrequencyBlocked,
   RecurrencePaidAfterEnd,
+  RecurringFollowsDate,
   RefundOverPurchase,
 } from "@domain/entities/errors";
 
@@ -33,6 +35,15 @@ function unprocessableError(message: string): BusinessError {
 
   if (message.includes("Invoice is paid")) {
     return new InvoiceIsPaid();
+  }
+
+  // Spec 095: the chosen invoice is not one of the three options of the date.
+  if (message.includes("Invoice is not available for this date")) {
+    return new InvoiceNotAvailable();
+  }
+
+  if (message.includes("Recurring transactions follow the date")) {
+    return new RecurringFollowsDate();
   }
 
   if (message.includes("Credit card is archived")) {

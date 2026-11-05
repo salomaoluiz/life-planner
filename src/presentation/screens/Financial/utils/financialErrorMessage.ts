@@ -13,11 +13,13 @@ import {
   HasRefunds,
   InstallmentPaid,
   InvoiceIsPaid,
+  InvoiceNotAvailable,
   InvoiceNotPayable,
   OverAmountDue,
   PrepaymentBlocksEdit,
   RecurrenceFrequencyBlocked,
   RecurrencePaidAfterEnd,
+  RecurringFollowsDate,
   RefundOverPurchase,
   TagNameInUse,
 } from "@domain/entities/errors";
@@ -67,6 +69,14 @@ function getFinancialErrorMessageKey(
 
   if (error instanceof InvoiceIsPaid) {
     return "financial.errors.invoicePaid";
+  }
+
+  if (error instanceof InvoiceNotAvailable) {
+    return "financial.errors.invoiceNotAvailable";
+  }
+
+  if (error instanceof RecurringFollowsDate) {
+    return "financial.errors.recurringFollowsDate";
   }
 
   if (error instanceof InvoiceNotPayable) {

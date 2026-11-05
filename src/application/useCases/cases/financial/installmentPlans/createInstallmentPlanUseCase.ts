@@ -12,6 +12,8 @@ export interface CreateInstallmentPlanUseCaseParams {
   creditCardId: string;
   date: string;
   description: string;
+  // Spec 095: invoice of the 1st installment; omitted = the invoice of the date.
+  firstInvoiceMonth?: string;
   installments: number;
   notes?: null | string;
   owner: string;
@@ -51,6 +53,7 @@ function createInstallmentPlanUseCase(
               creditCardId: params.creditCardId,
               date: params.date,
               description: params.description,
+              firstInvoiceMonth: params.firstInvoiceMonth,
               installments: params.installments,
               notes: params.notes,
               owner,
