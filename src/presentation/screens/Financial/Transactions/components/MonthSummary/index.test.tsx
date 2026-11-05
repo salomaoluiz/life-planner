@@ -125,3 +125,114 @@ describe("projected line (spec 034 FR 15)", () => {
     expect(screen.queryByTestId("projected-line")).toBeNull();
   });
 });
+
+describe("favorite | total table (spec 094.2)", () => {
+  function values(overrides = {}) {
+    return {
+      balanceCents: 88000,
+      expenseCents: 812000,
+      incomeCents: 900000,
+      projectedExpenseCents: 0,
+      projectedIncomeCents: 0,
+      toPayCents: 530000,
+      toReceiveCents: 450000,
+      ...overrides,
+    };
+  }
+  const labels = {
+    expenses: "Expenses",
+    income: "Incomes",
+    projected: "Projected",
+    result: "Result",
+    toPay: "To pay",
+    toReceive: "To receive",
+  };
+  const favorite = {
+    emphasis: "primary" as const,
+    key: "favorite",
+    label: "Main",
+    values: values(),
+  };
+  const total = {
+    emphasis: "muted" as const,
+    key: "total",
+    label: "Total",
+    values: values({ balanceCents: 142000 }),
+  };
+
+  function table(props = {}) {
+    return setup({
+      columns: [favorite, total],
+      rowA11yLabel: (label, parts) => `${label}: ${parts.join(" | ")}`,
+      tableLabels: labels,
+      tableTestID: "table",
+      ...props,
+    });
+  }
+
+  it("SHOULD render both column headers and every row", () => {
+    table();
+
+    expect(screen.getByText("Main")).toBeOnTheScreen();
+    expect(screen.getByText("Total")).toBeOnTheScreen();
+    ["Result", "Incomes", "To receive", "Expenses", "To pay"].forEach((label) =>
+      expect(screen.getByText(label)).toBeOnTheScreen(),
+    );
+    expect(screen.getByTestId("table-favorite-balanceCents")).toBeOnTheScreen();
+    expect(screen.getByTestId("table-total-balanceCents")).toBeOnTheScreen();
+  });
+
+  it("SHOULD render ONE value per row WHEN there is a single column", () => {
+    table({ columns: [favorite] });
+
+    expect(screen.queryByText("Total")).not.toBeOnTheScreen();
+    expect(screen.queryByTestId("table-total-balanceCents")).toBeNull();
+  });
+
+  it("SHOULD show a negative result as an EXPENSE of its absolute value", () => {
+    table({
+      columns: [{ ...favorite, values: values({ balanceCents: -60000 }) }],
+    });
+
+    const result = screen
+      .UNSAFE_getAllByType(AmountText)
+      .find((node) => node.props.testID === "table-favorite-balanceCents");
+    expect(result?.props.type).toBe("EXPENSE");
+    expect(result?.props.value).toBe(60000);
+  });
+
+  it("SHOULD show the Projected row only WHEN a column has projected values", () => {
+    table();
+    expect(screen.queryByText("Projected")).not.toBeOnTheScreen();
+  });
+
+  it("SHOULD show the Projected row WHEN the series add something", () => {
+    table({
+      columns: [
+        { ...favorite, values: values({ projectedIncomeCents: 450000 }) },
+        total,
+      ],
+    });
+    expect(screen.getByText("Projected")).toBeOnTheScreen();
+  });
+
+  it("SHOULD give every row one accessible label", () => {
+    table();
+
+    expect(screen.getByLabelText(/^Result: /)).toBeOnTheScreen();
+    expect(screen.getByLabelText(/^To pay: /)).toBeOnTheScreen();
+  });
+
+  it("SHOULD keep the single-figure card WHEN there are no columns", () => {
+    setup({ columns: undefined });
+
+    expect(screen.getByText("Balance")).toBeOnTheScreen();
+    expect(screen.queryByText("Result")).not.toBeOnTheScreen();
+  });
+
+  it("SHOULD still render the skeleton WHEN loading with columns", () => {
+    table({ isLoading: true });
+
+    expect(screen.queryByText("Main")).not.toBeOnTheScreen();
+  });
+});

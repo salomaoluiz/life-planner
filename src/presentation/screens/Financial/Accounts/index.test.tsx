@@ -3,6 +3,8 @@ import { StyleSheet } from "react-native";
 
 import { hasText } from "@tests";
 
+import * as theme from "@presentation/theme";
+
 import { makeAccountDTO, owners } from "./mocks/index.mocks";
 import { makeEntries, setup } from "./mocks/screen.mocks";
 import AccountUIModel from "./models/AccountUIModel";
@@ -163,5 +165,47 @@ describe("archived family selected (spec 042)", () => {
     setup({ isEmpty: true, readOnly: true });
 
     expect(hasText("financial.accounts.new")).toBe(false);
+  });
+});
+
+describe("favorite account (spec 094.2)", () => {
+  function favoriteEntries(): ReturnType<typeof makeEntries> {
+    return [
+      {
+        account: new AccountUIModel(
+          makeAccountDTO({ id: "acc-9", isFavorite: true, name: "Main" }),
+          owners,
+        ),
+        key: "row-acc-9",
+        kind: "row",
+      },
+    ];
+  }
+
+  it("SHOULD show the star, tag and the a11y label on the favorite row", () => {
+    jest.mocked(theme.useBreakpoint).mockReturnValue("expanded");
+    setup({ entries: favoriteEntries() });
+
+    expect(screen.getByTestId(accountsTestIds.favoriteStar)).toBeOnTheScreen();
+    expect(hasText("financial.accounts.favoriteTag")).toBe(true);
+    expect(
+      screen.getByLabelText('financial.accounts.favoriteA11y {"name":"Main"}'),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD show 'Favorite · owner' as the subtitle, without the tag, on a phone", () => {
+    jest.mocked(theme.useBreakpoint).mockReturnValue("compact");
+    setup({ entries: favoriteEntries() });
+
+    expect(
+      hasText('financial.accounts.favoriteSubtitle {"owner":"Alice Test"}'),
+    ).toBe(true);
+    expect(screen.queryByTestId(accountsTestIds.favoriteTag)).toBeNull();
+  });
+
+  it("SHOULD NOT mark rows that are not the favorite", () => {
+    setup({ entries: makeEntries() });
+
+    expect(screen.queryByTestId(accountsTestIds.favoriteStar)).toBeNull();
   });
 });

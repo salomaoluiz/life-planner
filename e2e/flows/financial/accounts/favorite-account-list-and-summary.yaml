@@ -1,0 +1,104 @@
+url: ${E2E_WEB_URL}
+name: financial/accounts/favorite-account-list-and-summary
+tags:
+  - financial
+  - spec-094.2
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# The favorite account on the accounts list (star) and the two-column month summary of Transactions (spec 094.2).
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Favorite Row
+      KEY: ROW_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: ${output.ROW_NAME}
+      VALUE_CENTS: "1500"
+      PAID: "true"
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Other Account
+      KEY: OTHER_ACCOUNT_NAME
+- evalScript: ${output.KEEP_ACCOUNT_ID = output.ACCOUNT_ID}
+- evalScript: ${output.KEEP_ACCOUNT_NAME = output.ACCOUNT_NAME}
+- runFlow:
+    file: ../../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: ${output.OTHER_ACCOUNT_NAME}
+- evalScript: ${output.ACCOUNT_ID = output.KEEP_ACCOUNT_ID}
+- evalScript: ${output.ACCOUNT_NAME = output.KEEP_ACCOUNT_NAME}
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+# Without a favorite: no star on the list and today's summary card
+- runFlow: ../../../subflows/financial/open-accounts.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.row-title"
+      text: ${output.ACCOUNT_NAME}
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.accounts.favorite-star"
+- tapOn:
+    id: "navigation-rail-financial-transactions"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.month-summary"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.transactions.summary-table"
+# Mark the account as favorite
+- runFlow: ../../../subflows/financial/open-accounts.yaml
+- tapOn:
+    id: "financial.accounts.row-title"
+    text: ${output.ACCOUNT_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.account-form.name-input"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.account-form.favorite-switch"
+- tapOn:
+    id: "financial.account-form.save-button"
+# The favorite is pinned on the list with its star
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.favorite-star"
+    timeout: 20000
+# The month summary is a favorite | total table
+- tapOn:
+    id: "navigation-rail-financial-transactions"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.summary-table"
+    timeout: 20000
+- assertVisible:
+    id: "financial.transactions.summary-table-favorite-header"
+- assertVisible:
+    id: "financial.transactions.summary-table-total-header"

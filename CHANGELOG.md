@@ -3,6 +3,12 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.9.0] - 2026-11-05
+
+### Added
+
+- The favorite account is pinned first in the accounts list with a star and a "Favorite" tag (on the phone, "Favorite · owner"), and the month summary in Transactions becomes a table with the favorite account highlighted next to the total (spec 094.2).
+
 ## [1.8.0] - 2026-11-05
 
 ### Added

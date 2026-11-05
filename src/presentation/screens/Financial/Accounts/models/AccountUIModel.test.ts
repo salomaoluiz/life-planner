@@ -77,3 +77,7 @@ it("SHOULD flag a projected balance that differs from the current one", () => {
   expect(modelWithProjected(100.1, 100.1).hasProjectedDifference).toBe(false);
   expect(model(50).hasProjectedDifference).toBe(false);
 });
+
+it("SHOULD expose the favorite flag (spec 094.2)", () => {
+  expect(model(0).isFavorite).toBe(false);
+});

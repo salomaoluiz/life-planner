@@ -12,7 +12,9 @@ function buildAccountEntries(
   accounts: AccountUIModel[],
   archivedExpanded: boolean,
 ): AccountEntry[] {
-  const active = accounts.filter((account) => !account.isArchived).sort(byName);
+  const active = favoriteFirst(
+    accounts.filter((account) => !account.isArchived).sort(byName),
+  );
   const archived = accounts
     .filter((account) => account.isArchived)
     .sort(byName);
@@ -46,6 +48,15 @@ function buildAccountEntries(
 
 function byName(a: AccountUIModel, b: AccountUIModel) {
   return a.name.localeCompare(b.name);
+}
+
+// Spec 094.2 FR 1: the favorite (when it is in the list) opens the Active section; the others keep their order.
+function favoriteFirst(accounts: AccountUIModel[]) {
+  const favorite = accounts.find((account) => account.isFavorite);
+
+  return favorite
+    ? [favorite, ...accounts.filter((account) => account !== favorite)]
+    : accounts;
 }
 
 // "All" leaves out the archived families (spec 042); selecting one shows its data.

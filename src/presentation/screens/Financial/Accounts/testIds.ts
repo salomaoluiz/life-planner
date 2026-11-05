@@ -2,6 +2,8 @@ const accountsTestIds = {
   addButton: "financial.accounts.add-button",
   archivedToggle: "financial.accounts.archived-toggle",
   emptyState: "financial.accounts.empty-state",
+  favoriteStar: "financial.accounts.favorite-star",
+  favoriteTag: "financial.accounts.favorite-tag",
   ownerFilter: "financial.accounts.owner-filter",
   readOnlyBanner: "financial.accounts.readonly-banner",
   readOnlyToast: "financial.accounts.readonly-toast",

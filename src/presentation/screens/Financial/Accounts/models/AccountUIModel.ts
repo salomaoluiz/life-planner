@@ -37,6 +37,10 @@ class AccountUIModel {
     return this.dto.status === "ARCHIVED";
   }
 
+  get isFavorite() {
+    return this.dto.isFavorite;
+  }
+
   get name() {
     return this.dto.name;
   }

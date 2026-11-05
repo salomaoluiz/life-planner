@@ -15,6 +15,9 @@ const financial = {
       hasTransactions:
         "This account has transactions. Delete or move them first.",
     },
+    favoriteA11y: "{{name}}, favorite account",
+    favoriteSubtitle: "Favorite · {{owner}}",
+    favoriteTag: "Favorite",
     form: {
       archived: "Archived",
       archivedHelper:
@@ -1204,8 +1207,11 @@ const financial = {
     },
     summary: {
       projected: "Projected",
+      result: "Result",
+      rowA11y: "{{label}}: {{name}} {{value}}, total {{total}}",
       toPay: "To pay",
       toReceive: "To receive",
+      total: "Total",
     },
     today: "Today",
     totals: {

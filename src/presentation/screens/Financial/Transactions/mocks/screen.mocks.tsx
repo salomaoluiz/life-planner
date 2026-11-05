@@ -125,6 +125,7 @@ const defaultViewModel: ReturnType<typeof useTransactionsViewModel> = {
     toPayCents: 500,
     toReceiveCents: 800,
   },
+  summaryColumns: undefined,
   summaryError: false,
   toastVisible: false,
   typeFilter: "ALL",

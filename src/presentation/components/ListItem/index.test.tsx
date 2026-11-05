@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Text } from "react-native";
 
 import { fireEvent, screen } from "@tests";
 
@@ -64,4 +64,12 @@ it("SHOULD expose the selected state", () => {
   expect(screen.getByTestId("item").props.accessibilityState.selected).toBe(
     true,
   );
+});
+
+it("SHOULD render the title trailing slot and tint the row WHEN highlighted (spec 094.2)", () => {
+  setup({ highlight: true, titleTrailing: <Text>star</Text> });
+  expect(screen.getByText("star")).toBeTruthy();
+  expect(
+    StyleSheet.flatten(screen.getByTestId("item").props.style).backgroundColor,
+  ).toBe(lightTheme.colors.warningSoft);
 });

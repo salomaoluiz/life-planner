@@ -14,6 +14,9 @@ const financial = {
     errors: {
       hasTransactions: "Esta conta tem transações. Exclua ou mova-as primeiro.",
     },
+    favoriteA11y: "{{name}}, conta favorita",
+    favoriteSubtitle: "Favorita · {{owner}}",
+    favoriteTag: "Favorita",
     form: {
       archived: "Arquivada",
       archivedHelper:
@@ -1204,8 +1207,11 @@ const financial = {
     },
     summary: {
       projected: "Previsto",
+      result: "Resultado",
+      rowA11y: "{{label}}: {{name}} {{value}}, total {{total}}",
       toPay: "A pagar",
       toReceive: "A receber",
+      total: "Total",
     },
     today: "Hoje",
     totals: {

@@ -63,9 +63,15 @@ onFlowComplete:
       id: "financial.accounts.row-title"
       text: ${output.ACCOUNT_NAME}
     timeout: 20000
-# The day header of Transactions shows the favorite account (star + name)
+# The day header of Transactions shows the favorite account (star + name). The month summary is a taller
+# favorite | total table now (spec 094.2), so the list is scrolled into view first.
 - tapOn:
     id: "navigation-rail-financial-transactions"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.summary-table"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.day-balance-favorite-.*"

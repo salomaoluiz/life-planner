@@ -11,6 +11,10 @@ const FALLBACK_ICON = "help-circle-outline";
 const ADJUSTMENT_ICON = "scale-balance";
 
 class TransactionUIModel {
+  get accountId() {
+    return this.dto.accountId;
+  }
+
   get accountName() {
     return this.dto.accountName ?? "";
   }
@@ -116,6 +120,11 @@ class TransactionUIModel {
   // Unpaid and already past: flagged in the list (spec 033 FR 7).
   get isOverdue() {
     return this.canPay && this.dateKey < todayKey();
+  }
+
+  // Stored status of an account row (spec 033); a projected occurrence is never paid.
+  get isPaid() {
+    return !!this.dto.paid;
   }
 
   get isPending() {

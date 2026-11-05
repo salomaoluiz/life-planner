@@ -43,6 +43,7 @@ jest.mock("@application/useCases", () => ({
       execute: jest.fn(),
       uniqueName: "categories",
     },
+    getFinancialCreditCardsUseCase: { execute: jest.fn(), uniqueName: "cards" },
     getFinancialDailyBalancesUseCase: {
       execute: jest.fn(),
       uniqueName: "dailyBalances",
@@ -115,6 +116,7 @@ const projectionsQuery = new UseQueryFixture<{
 }>();
 const balancesQuery = new UseQueryFixture<Map<string, DayBalanceView>>();
 const accountsQuery = new UseQueryFixture<unknown>();
+const cardsQuery = new UseQueryFixture<unknown>();
 const filteredTransactionsQuery = new UseQueryFixture<TransactionUIModel[]>();
 const filteredInvoicesQuery = new UseQueryFixture<CardInvoiceUIModel[]>();
 const filteredProjectionsQuery = new UseQueryFixture<{
@@ -163,6 +165,7 @@ beforeEach(() => {
   jest.useFakeTimers().setSystemTime(new Date(2026, 9, 5, 12));
   transactionsQuery.reset();
   accountsQuery.reset();
+  cardsQuery.reset();
   ownersQuery.reset();
   summaryQuery.reset();
   balancesQuery.reset();
@@ -204,6 +207,9 @@ beforeEach(() => {
   spies.useQuery.mockImplementation(((options: { cacheKey: string[] }) => {
     if (queryName(options.cacheKey) === "accounts") {
       return accountsQuery.build();
+    }
+    if (queryName(options.cacheKey) === "cards") {
+      return cardsQuery.build();
     }
     if (queryName(options.cacheKey) === "summary") {
       return summaryQuery.build();
@@ -271,6 +277,7 @@ export {
   accountsQuery,
   archivedFamily,
   balancesQuery,
+  cardsQuery,
   dto,
   filteredInvoicesQuery,
   filteredProjectionsQuery,
