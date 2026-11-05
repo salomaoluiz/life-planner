@@ -18,6 +18,7 @@ import {
 } from "@components";
 import { formatAmount } from "@components/AmountText/formatAmount";
 import Skeleton from "@components/Skeleton";
+import { useKitTheme } from "@components/utils/useKitTheme";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import useStableCallback from "@presentation/hooks/useStableCallback";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
@@ -69,6 +70,7 @@ function FinancialTransactions() {
   const wide = useBreakpoint() !== "compact";
   const { styles } = useStyles(wide);
   const { t } = useTranslation();
+  const { colors } = useKitTheme();
   const localeTag = useLocaleTag();
   const vm = useTransactionsViewModel();
   const adjustment = useAdjustmentSheet();
@@ -169,6 +171,7 @@ function FinancialTransactions() {
         <DayBalanceLine
           accountId={item.accountId}
           balanceCents={item.balanceCents}
+          favorite={item.favorite}
           icon={item.icon}
           isCards={item.isCards}
           isLast={item.isLast}
@@ -198,21 +201,35 @@ function FinancialTransactions() {
     }
 
     const expanded = vm.expandedDayKey === item.dateKey;
-    const balanceNegative = item.balanceCents < 0;
     const day = vm.balances.get(item.dateKey);
     const title = dayTitle(item);
+    // Spec 094: a collapsed header shows the favorite's balance, an expanded one (and the tooltip) the total.
+    const favoriteDay = vm.favorite
+      ? day?.accounts.find((account) => account.accountId === vm.favorite?.id)
+      : undefined;
+    const showFavorite = !!favoriteDay && !expanded;
+    const shownCents = showFavorite
+      ? favoriteDay.balanceCents
+      : item.balanceCents;
+    const balanceNegative = shownCents < 0;
 
     return (
       <GroupHeader
-        accessibilityLabel={t("financial.transactions.dayBalance.a11y", {
-          day: title,
-          value: formatAmount(
-            Math.abs(item.balanceCents),
-            localeTag,
-            DEFAULT_CURRENCY,
-            balanceNegative ? "EXPENSE" : undefined,
-          ),
-        })}
+        accessibilityLabel={t(
+          showFavorite
+            ? "financial.transactions.dayBalance.a11yFavorite"
+            : "financial.transactions.dayBalance.a11y",
+          {
+            day: title,
+            name: vm.favorite?.name,
+            value: formatAmount(
+              Math.abs(shownCents),
+              localeTag,
+              DEFAULT_CURRENCY,
+              balanceNegative ? "EXPENSE" : undefined,
+            ),
+          },
+        )}
         expanded={expanded}
         meta={
           <View style={styles.net}>
@@ -238,10 +255,11 @@ function FinancialTransactions() {
                 tone={"secondary"}
                 value={t("financial.transactions.dayBalance.title")}
               />
-              {day.accounts.map((account) => (
+              {sortedAccounts(day.accounts, vm.favorite?.id).map((account) => (
                 <DayBalanceLine
                   accountId={account.accountId}
                   balanceCents={account.balanceCents}
+                  favorite={account.accountId === vm.favorite?.id}
                   icon={account.icon}
                   isCards={false}
                   key={account.accountId}
@@ -258,6 +276,20 @@ function FinancialTransactions() {
                   name={""}
                   variant={"tooltip"}
                 />
+              ) : null}
+              {vm.favorite && favoriteDay ? (
+                <View style={styles.tooltipTotal}>
+                  <Text.Caption
+                    tone={"secondary"}
+                    value={t("financial.transactions.dayBalance.total")}
+                  />
+                  <AmountText
+                    currency={DEFAULT_CURRENCY}
+                    size={"body"}
+                    type={day.totalCents < 0 ? "EXPENSE" : undefined}
+                    value={Math.abs(day.totalCents)}
+                  />
+                </View>
               ) : null}
               <Text.Caption
                 tone={"secondary"}
@@ -277,16 +309,34 @@ function FinancialTransactions() {
                     value={t("financial.recurrence.projected")}
                   />
                 ) : null}
-                <Text.Overline
-                  tone={"secondary"}
-                  value={t("financial.transactions.dayBalance.label")}
-                />
+                {showFavorite ? (
+                  <View
+                    style={styles.favoriteLabel}
+                    testID={`${transactionsTestIds.dayBalanceFavorite}-${item.dateKey}`}
+                  >
+                    <Icon color={colors.warning} name={"star"} size={13} />
+                    <Text.Overline
+                      numberOfLines={1}
+                      tone={"secondary"}
+                      value={vm.favorite?.name ?? ""}
+                    />
+                  </View>
+                ) : (
+                  <Text.Overline
+                    tone={"secondary"}
+                    value={t(
+                      favoriteDay
+                        ? "financial.transactions.dayBalance.total"
+                        : "financial.transactions.dayBalance.label",
+                    )}
+                  />
+                )}
               </View>
               <AmountText
                 currency={DEFAULT_CURRENCY}
                 size={"body"}
                 type={balanceNegative ? "EXPENSE" : undefined}
-                value={Math.abs(item.balanceCents)}
+                value={Math.abs(shownCents)}
               />
             </View>
             <Icon name={expanded ? "chevron-up" : "chevron-down"} size={16} />
@@ -651,6 +701,17 @@ function scopeIcon(value: string, personalOwnerId?: string) {
   }
 
   return value === personalOwnerId ? "account" : "account-group";
+}
+
+// The favorite account first, the others keep the API order (spec 094 FR 25).
+function sortedAccounts<T extends { accountId: string }>(
+  accounts: T[],
+  favoriteId?: string,
+): T[] {
+  return [...accounts].sort(
+    (a, b) =>
+      Number(b.accountId === favoriteId) - Number(a.accountId === favoriteId),
+  );
 }
 
 export default FinancialTransactions;

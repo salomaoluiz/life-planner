@@ -17,6 +17,13 @@ function useStyles() {
       metric: { flex: 1 },
       metrics: { flexDirection: "row", gap: theme.sizes.spacing.sm },
       root: { gap: theme.sizes.spacing.lg },
+      title: { flexShrink: 1 },
+      titleRow: {
+        alignItems: "center",
+        flexDirection: "row",
+        gap: theme.sizes.spacing.xs,
+        justifyContent: "space-between",
+      },
     }),
     theme,
   };

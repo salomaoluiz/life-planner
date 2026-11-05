@@ -4,6 +4,7 @@ const accountFormTestIds = {
   balanceInput: "financial.account-form.balance-input",
   deleteButton: "financial.account-form.delete-button",
   deleteDialog: "financial.account-form.delete-dialog",
+  favoriteSwitch: "financial.account-form.favorite-switch",
   formError: "financial.account-form.form-error",
   icon: "financial.account-form.icon",
   nameInput: "financial.account-form.name-input",

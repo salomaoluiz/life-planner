@@ -24,6 +24,12 @@ const financial = {
         balanceTooLarge: "Esse saldo é grande demais.",
         nameTooLong: "O nome pode ter no máximo 60 caracteres.",
       },
+      favorite: "Conta favorita",
+      favoriteArchived: "Contas arquivadas não podem ser a favorita.",
+      favoriteHelper:
+        "Fica em destaque na Visão geral, no saldo diário e na Home. Só você vê esta escolha.",
+      favoriteReplace:
+        "Hoje a favorita é {{name}}. Ao salvar, esta passa a ser a favorita.",
       icon: "Ícone",
       initialBalance: "Saldo inicial",
       initialBalanceHelper:
@@ -767,17 +773,23 @@ const financial = {
     a11y: {
       balanceChart:
         "Saldo de {{from}} a {{to}}, de {{start}} a {{end}}, previsto {{projected}} no fim do mês",
+      balanceChartFavorite:
+        "Saldo de {{name}} de {{start}} a {{end}}; total de {{totalStart}} a {{totalEnd}}, de {{from}} a {{to}}",
       incomeExpenseChart: "Receitas e despesas de {{from}} a {{to}}",
       open: "Abrir em Transações",
     },
     balance: {
+      favoriteCaption: "Conta favorita",
+      favoriteLegend: "{{name}} · favorita",
       filtersNote: "O saldo segue escopo, moeda e contas",
+      otherAccounts: "Outras contas",
       projected: "Previsto (depois de hoje)",
       projectedEnd: "Previsto em {{date}}",
       realized: "Realizado",
       subtitle: "Saldo das contas do filtro ao fim de cada {{bucket}}",
       title: "Evolução do saldo",
       total: "Total",
+      totalLegend: "Total das contas",
     },
     blockError: "Não foi possível carregar este gráfico",
     bucket: { day: "dia", month: "mês", week: "semana" },
@@ -1002,12 +1014,14 @@ const financial = {
     },
     dayBalance: {
       a11y: "Saldo ao fim de {{day}}: {{value}}",
+      a11yFavorite: "Saldo de {{name}} ao fim de {{day}}: {{value}}",
       cardsDue: "Faturas a pagar",
       expand: "Ver saldo por conta",
       label: "Saldo",
       netSuffix: "no dia",
       pinHint: "Clique para fixar o detalhe na lista",
       title: "Saldo ao fim do dia",
+      total: "Total",
     },
     delete: "Excluir transação",
     deleteTitle: "Excluir esta transação?",

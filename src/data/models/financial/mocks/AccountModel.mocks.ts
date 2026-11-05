@@ -9,6 +9,7 @@ const jsonMock = {
   currency: "BRL",
   icon: "bank-icon",
   id: "2be16cb6-b9e4-47bb-99cb-eb62ff6576c3",
+  isFavorite: false,
   name: "Savings Account",
   owner: "USER",
   ownerId: "9e6cd00a-f854-48c0-be6d-c2e904bfd9b7",

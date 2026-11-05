@@ -1,7 +1,8 @@
 import { memo } from "react";
 import { View } from "react-native";
 
-import { AmountText, GroupBodyRow, IconTile, Text } from "@components";
+import { AmountText, GroupBodyRow, Icon, IconTile, Text } from "@components";
+import { useKitTheme } from "@components/utils/useKitTheme";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useTranslation } from "@presentation/i18n";
 import UpdatingTotal from "@screens/Financial/Transactions/components/UpdatingTotal";
@@ -12,6 +13,8 @@ import useStyles from "./styles";
 interface Props {
   accountId?: string;
   balanceCents: number;
+  // Spec 094: the favorite account of the user, highlighted.
+  favorite?: boolean;
   icon: string;
   isCards: boolean;
   // Closes the card opened by the day header (list variant only).
@@ -27,10 +30,12 @@ interface Props {
 function DayBalanceLine(props: Props) {
   const { styles } = useStyles();
   const { t } = useTranslation();
+  const { colors } = useKitTheme();
   const negative = props.balanceCents < 0;
 
   return (
     <GroupBodyRow
+      highlight={props.favorite}
       isLast={props.isLast}
       testID={
         props.isCards
@@ -40,20 +45,33 @@ function DayBalanceLine(props: Props) {
       variant={props.variant === "tooltip" ? "bare" : "card"}
     >
       <View style={styles.row}>
-        <IconTile
-          name={props.icon}
-          size="sm"
-          tone={props.isCards ? "expense" : "accent"}
-        />
-        <View style={styles.title}>
-          <Text.Body
-            numberOfLines={1}
-            value={
-              props.isCards
-                ? t("financial.transactions.dayBalance.cardsDue")
-                : props.name
-            }
+        {props.favorite ? (
+          <Icon
+            color={colors.warning}
+            name="star"
+            size={20}
+            testID={`${transactionsTestIds.dayBalanceLine}-${props.accountId}-favorite`}
           />
+        ) : (
+          <IconTile
+            name={props.icon}
+            size="sm"
+            tone={props.isCards ? "expense" : "accent"}
+          />
+        )}
+        <View style={styles.title}>
+          {props.favorite ? (
+            <Text.BodyStrong numberOfLines={1} value={props.name} />
+          ) : (
+            <Text.Body
+              numberOfLines={1}
+              value={
+                props.isCards
+                  ? t("financial.transactions.dayBalance.cardsDue")
+                  : props.name
+              }
+            />
+          )}
         </View>
         <UpdatingTotal updating={props.updating}>
           <AmountText

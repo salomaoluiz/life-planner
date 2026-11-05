@@ -62,6 +62,7 @@ const defaultViewModel: ReturnType<typeof useTransactionsViewModel> = {
   errorMessage: undefined,
   expandedDayKey: undefined,
   expandedInvoiceId: undefined,
+  favorite: undefined,
   filterCount: 0,
   filteredSummary: undefined,
   filtering: false,

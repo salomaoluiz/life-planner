@@ -48,3 +48,30 @@ it("SHOULD find an account by id and fall back to the first owner", () => {
   expect(model.owner("family-1").id).toBe("family-1");
   expect(model.owner("nobody").id).toBe("user-id");
 });
+
+describe("replacedFavoriteName (spec 094)", () => {
+  const favorite = new AccountDTO({
+    balance: 0,
+    icon: "bank",
+    id: "fav",
+    isFavorite: true,
+    name: "Savings",
+    owner: "USER",
+    ownerId: "user-id",
+    status: "ACTIVE",
+  });
+  const withFavorite = new NewAccountUIModel({
+    accounts: [account, favorite],
+    owners,
+  });
+
+  it("SHOULD name the current favorite WHEN it is another account", () => {
+    expect(withFavorite.replacedFavoriteName("a1")).toBe("Savings");
+    expect(withFavorite.replacedFavoriteName(undefined)).toBe("Savings");
+  });
+
+  it("SHOULD be undefined WHEN the account is the favorite OR there is none", () => {
+    expect(withFavorite.replacedFavoriteName("fav")).toBeUndefined();
+    expect(model.replacedFavoriteName("a1")).toBeUndefined();
+  });
+});

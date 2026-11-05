@@ -23,6 +23,11 @@ function useStyles(wide = false) {
         gap: theme.sizes.spacing.xs,
       },
       fab: { bottom: fabMargin, position: "absolute", right: fabMargin },
+      favoriteLabel: {
+        alignItems: "center",
+        flexDirection: "row",
+        gap: theme.sizes.spacing.xxs,
+      },
       listContent: { paddingBottom: FAB_SIZE + 2 * fabMargin },
       monthSwitcher: {
         alignItems: "center",
@@ -41,6 +46,11 @@ function useStyles(wide = false) {
         paddingBottom: theme.sizes.spacing.lg,
       },
       tooltip: { gap: theme.sizes.spacing.xxs },
+      tooltipTotal: {
+        alignItems: "center",
+        flexDirection: "row",
+        justifyContent: "space-between",
+      },
     }),
   };
 }

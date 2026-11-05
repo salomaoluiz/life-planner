@@ -14,6 +14,8 @@ interface IAccountEntity {
   currency?: CurrencyCode;
   icon: string;
   id: string;
+  // Spec 094: the favorite account of the signed-in user (one at most).
+  isFavorite?: boolean;
   name: string;
   owner: OwnerType;
   ownerId: string;
@@ -26,6 +28,7 @@ class AccountEntity implements IAccountEntity {
   currency: CurrencyCode;
   icon: string;
   id: string;
+  isFavorite: boolean;
   name: string;
   owner: OwnerType;
   ownerId: string;
@@ -38,6 +41,7 @@ class AccountEntity implements IAccountEntity {
     this.id = params.id;
     this.balance = params.balance;
     this.icon = params.icon;
+    this.isFavorite = params.isFavorite ?? false;
     this.name = params.name;
     this.owner = params.owner;
     this.ownerId = params.ownerId;

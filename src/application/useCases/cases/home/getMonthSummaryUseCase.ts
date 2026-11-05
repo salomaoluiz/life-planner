@@ -1,4 +1,6 @@
-import MonthSummaryDTO from "@application/dto/home/MonthSummaryDTO";
+import MonthSummaryDTO, {
+  AccountMonthTotals,
+} from "@application/dto/home/MonthSummaryDTO";
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import { DefaultError } from "@domain/entities/errors";
 import { InvoiceStatus } from "@domain/entities/financial/InvoiceEntity";
@@ -44,6 +46,17 @@ function getMonthSummaryUseCase(
         let expense = 0;
         let toPay = 0;
         let toReceive = 0;
+        const byAccount: Record<string, AccountMonthTotals> = {};
+        function totalsOf(accountId: string) {
+          byAccount[accountId] ??= {
+            expense: 0,
+            income: 0,
+            toPay: 0,
+            toReceive: 0,
+          };
+
+          return byAccount[accountId];
+        }
 
         transactions
           .filter(
@@ -57,12 +70,24 @@ function getMonthSummaryUseCase(
           .forEach((transaction) => {
             const cents = decimalStringToCents(transaction.value);
 
+            const mine = transaction.accountId
+              ? totalsOf(transaction.accountId)
+              : undefined;
+
             if (transaction.type === TransactionType.INCOME) {
               income += cents;
               toReceive += transaction.paid ? 0 : cents;
+              if (mine) {
+                mine.income += cents;
+                mine.toReceive += transaction.paid ? 0 : cents;
+              }
             } else {
               expense += cents;
               toPay += transaction.paid ? 0 : cents;
+              if (mine) {
+                mine.expense += cents;
+                mine.toPay += transaction.paid ? 0 : cents;
+              }
             }
           });
 
@@ -71,6 +96,11 @@ function getMonthSummaryUseCase(
           .forEach((item) => {
             // What is due plus what was paid early: credits lower the expense, early payments only move money (spec 032 FR 9).
             expense += item.invoice.amount + item.invoice.earlyPaid;
+            // An invoice already paid from an account is an expense of that account (spec 094 FR 28).
+            if (item.invoice.payment?.accountId) {
+              totalsOf(item.invoice.payment.accountId).expense +=
+                item.invoice.amount + item.invoice.earlyPaid;
+            }
             // An invoice that is paid (or settled by credits) has nothing left to pay (spec 033 FR 16).
             if (item.invoice.status !== InvoiceStatus.PAID) {
               toPay += item.invoice.amountDue;
@@ -79,6 +109,7 @@ function getMonthSummaryUseCase(
 
         return new MonthSummaryDTO({
           balance: income - expense,
+          byAccount,
           expense,
           income,
           projectedExpense,

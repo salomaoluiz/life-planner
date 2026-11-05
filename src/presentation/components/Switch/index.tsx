@@ -4,13 +4,14 @@ import { Switch as SwitchPaper } from "react-native-paper";
 import getStyles from "./styles";
 
 export interface SwitchProps {
+  disabled?: boolean;
   initialStatus: boolean;
   onToggle: (status: boolean) => void;
   testID?: string;
 }
 
 function Switch(props: SwitchProps) {
-  const { initialStatus, onToggle, testID } = props;
+  const { disabled, initialStatus, onToggle, testID } = props;
   const [isEnabled, setIsEnabled] = useState(initialStatus);
   const { styles, switchColors } = getStyles();
 
@@ -27,6 +28,7 @@ function Switch(props: SwitchProps) {
   return (
     <SwitchPaper
       color={switchColors.trackColorTrue}
+      disabled={disabled}
       onValueChange={onValueChange}
       style={styles.switch}
       testID={testID}

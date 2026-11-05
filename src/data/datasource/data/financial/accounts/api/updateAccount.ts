@@ -10,6 +10,7 @@ async function updateAccount(params: Params): Response {
   // The API rejects owner / ownerId on PATCH: only editable fields travel.
   const body = {
     icon: params.icon,
+    isFavorite: params.isFavorite,
     name: params.name,
     status: params.status,
   };

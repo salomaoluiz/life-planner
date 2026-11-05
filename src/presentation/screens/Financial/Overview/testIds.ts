@@ -1,6 +1,8 @@
 const overviewTestIds = {
   balanceChart: "financial.overview.balance-chart",
   balanceDetail: "financial.overview.balance-detail",
+  balanceFavoriteRow: "financial.overview.balance-favorite-row",
+  balanceOtherAccounts: "financial.overview.balance-other-accounts",
   balanceProjectedEnd: "financial.overview.tile-balance-projected-end",
   blockError: (block: string) => `financial.overview.block-error-${block}`,
   categories: "financial.overview.categories",

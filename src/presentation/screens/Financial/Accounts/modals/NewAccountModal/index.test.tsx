@@ -236,3 +236,55 @@ describe("wide layout (spec 037)", () => {
     expect(vm.onDeletePress).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("favorite account (spec 094)", () => {
+  it("SHOULD show the favorite switch with its helper on create AND edit", () => {
+    setup();
+
+    expect(
+      screen.getByText("financial.accounts.form.favorite"),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByText("financial.accounts.form.favoriteHelper"),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(accountFormTestIds.favoriteSwitch).props.value,
+    ).toBe(false);
+  });
+
+  it("SHOULD report the toggle", () => {
+    const vm = setup();
+
+    fireEvent(
+      screen.getByTestId(accountFormTestIds.favoriteSwitch),
+      "valueChange",
+      true,
+    );
+
+    expect(vm.onFavoriteChange).toHaveBeenCalledWith(true);
+  });
+
+  it("SHOULD name the favorite that this one replaces", () => {
+    setup({ isFavorite: true, replacedFavoriteName: "Savings" });
+
+    expect(
+      screen.getByTestId(accountFormTestIds.favoriteSwitch).props.value,
+    ).toBe(true);
+    expect(
+      screen.getByText(
+        'financial.accounts.form.favoriteReplace {"name":"Savings"}',
+      ),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD disable the switch with the archived helper WHEN the account is archived", () => {
+    setup({ isEditing: true, isFavoriteDisabled: true });
+
+    expect(
+      screen.getByTestId(accountFormTestIds.favoriteSwitch).props.disabled,
+    ).toBe(true);
+    expect(
+      screen.getByText("financial.accounts.form.favoriteArchived"),
+    ).toBeOnTheScreen();
+  });
+});

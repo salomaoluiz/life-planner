@@ -347,3 +347,64 @@ describe("period arrows", () => {
     );
   });
 });
+
+describe("favorite account (spec 094)", () => {
+  function account(over: Record<string, unknown> = {}) {
+    return {
+      currency: "BRL",
+      id: "fav",
+      isFavorite: true,
+      name: "Checking",
+      ownerId: "user-id",
+      status: "ACTIVE",
+      ...over,
+    };
+  }
+
+  it("SHOULD share the cached accounts of the filters AND the forms (one request for everyone)", async () => {
+    setup();
+
+    const props = queryProps("accounts");
+
+    expect(props.cacheKey).toEqual(["finance", "accounts", "raw"]);
+    await props.fetch();
+    expect(useCases.getFinancialAccountsUseCase.execute).toHaveBeenCalledWith([
+      "user-id",
+      "family-1",
+      "family-2",
+    ]);
+  });
+
+  it("SHOULD leave out the favorite that is outside the owner filter", () => {
+    given("accounts", [account({ ownerId: "user-id" })]);
+    const { result } = setup();
+
+    expect(result.current.favorite?.id).toBe("fav");
+
+    act(() => result.current.onOwnerFilterChange("family-1"));
+
+    expect(result.current.favorite).toBeUndefined();
+  });
+
+  it("SHOULD resolve the favorite WHEN it is active and in the currency shown", () => {
+    given("accounts", [account(), account({ id: "other", isFavorite: false })]);
+
+    expect(setup().result.current.favorite?.id).toBe("fav");
+  });
+
+  it("SHOULD resolve nothing WHEN the account filter leaves the favorite out OR the currency differs", () => {
+    given("accounts", [account()]);
+    const { result } = setup();
+
+    act(() => {
+      result.current.filterStore.replace({
+        ...EMPTY_FILTERS,
+        accountIds: ["other"],
+      });
+    });
+    expect(result.current.favorite).toBeUndefined();
+
+    given("accounts", [account({ currency: "USD" })]);
+    expect(setup().result.current.favorite).toBeUndefined();
+  });
+});

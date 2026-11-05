@@ -13,6 +13,7 @@ interface IAccountModel {
   currency?: CurrencyCode;
   icon: string;
   id: string;
+  isFavorite?: boolean;
   name: string;
   owner: OwnerType;
   ownerId: string;
@@ -25,6 +26,7 @@ class AccountModel implements IAccountModel {
   currency: CurrencyCode;
   icon: string;
   id: string;
+  isFavorite: boolean;
   name: string;
   owner: OwnerType;
   ownerId: string;
@@ -36,6 +38,7 @@ class AccountModel implements IAccountModel {
     this.id = params.id;
     this.balance = params.balance;
     this.icon = params.icon;
+    this.isFavorite = params.isFavorite ?? false;
     this.name = params.name;
     this.owner = params.owner;
     this.ownerId = params.ownerId;
@@ -51,6 +54,7 @@ class AccountModel implements IAccountModel {
       currency: toCurrencyCode(data.currency),
       icon: data.icon as string,
       id: data.id as string,
+      isFavorite: data.isFavorite === true,
       name: data.name as string,
       owner: data.owner as OwnerType,
       ownerId: data.ownerId as string,
@@ -69,6 +73,7 @@ class AccountModel implements IAccountModel {
       currency: this.currency,
       icon: this.icon,
       id: this.id,
+      isFavorite: this.isFavorite,
       name: this.name,
       owner: this.owner,
       ownerId: this.ownerId,

@@ -1,20 +1,15 @@
-import { View } from "react-native";
-
 import { ChartCard, LineChart, SegmentedControl, Text } from "@components";
 import { formatAmount } from "@components/AmountText/formatAmount";
 import type { CurrencyCode } from "@domain/entities/financial/Currency";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 
 import { OverviewViewModel } from "../hooks/useOverviewViewModel";
+import balanceSeriesModel from "../models/balanceSeriesModel";
 import blockState from "../models/blockState";
-import {
-  formatBucketLabel,
-  formatDay,
-  formatTick,
-} from "../models/overviewFormat";
+import { formatDay, formatTick } from "../models/overviewFormat";
 import { todayIndex } from "../models/overviewPeriod";
-import useStyles from "../styles";
 import overviewTestIds from "../testIds";
+import BalancePointDetail from "./BalancePointDetail";
 
 const BUCKET_KEYS = {
   DAY: "financial.overview.bucket.day",
@@ -32,18 +27,25 @@ const HINT_KEYS = {
 } as const;
 
 // Balance over time (spec 046 FR 12): a line per bucket, the projected part dashed, the detail of the chosen point below.
+// With a favorite account (spec 094) the chart draws it as its own thick line over a muted total line.
 function BalanceBlock(props: { compact: boolean; vm: OverviewViewModel }) {
   const { compact, vm } = props;
-  const { styles } = useStyles();
   const { t } = useTranslation();
   const localeTag = useLocaleTag();
   const currency = vm.currency as CurrencyCode;
-  const series = vm.balance.data;
-  const points = series?.points ?? [];
+  const points = vm.balance.data?.points ?? [];
   const granularity = vm.effectiveGranularity;
   function money(cents: number) {
     return formatAmount(cents, localeTag, currency);
   }
+  const model = balanceSeriesModel({
+    favoriteId: vm.favorite?.id,
+    granularity,
+    locale: localeTag,
+    points,
+  });
+  // The favorite is highlighted only when the series has values for it.
+  const favorite = model.favorite ? vm.favorite : undefined;
   // Mobile opens on today's bucket (the last realized one).
   const defaultIndex = Math.max(
     0,
@@ -59,6 +61,31 @@ function BalanceBlock(props: { compact: boolean; vm: OverviewViewModel }) {
   const bucketName = t(BUCKET_KEYS[granularity]);
   // The realized point of today (the line goes dashed from there), only when today is inside the period.
   const marker = todayIndex(points, vm.today);
+
+  function describe() {
+    if (!first || !last) {
+      return t("financial.overview.balance.title");
+    }
+    if (favorite && model.favorite && model.total) {
+      return t("financial.overview.a11y.balanceChartFavorite", {
+        end: money(model.favorite.end),
+        from: formatDay(first.start, localeTag),
+        name: favorite.name,
+        start: money(model.favorite.start),
+        to: formatDay(last.end, localeTag),
+        totalEnd: money(model.total.end),
+        totalStart: money(model.total.start),
+      });
+    }
+
+    return t("financial.overview.a11y.balanceChart", {
+      end: money(last.balance),
+      from: formatDay(first.start, localeTag),
+      projected: money(last.balance),
+      start: money(first.balance),
+      to: formatDay(last.end, localeTag),
+    });
+  }
 
   return (
     <ChartCard
@@ -80,14 +107,39 @@ function BalanceBlock(props: { compact: boolean; vm: OverviewViewModel }) {
       }
       errorText={t("financial.overview.blockError")}
       footnote={t("financial.overview.balance.filtersNote")}
-      legend={[
-        { label: t("financial.overview.balance.realized"), tone: "neutral" },
-        {
-          dashed: true,
-          label: t("financial.overview.balance.projected"),
-          tone: "neutral",
-        },
-      ]}
+      legend={
+        favorite
+          ? [
+              {
+                icon: "star",
+                label: t("financial.overview.balance.favoriteLegend", {
+                  name: favorite.name,
+                }),
+                tone: "income",
+              },
+              {
+                label: t("financial.overview.balance.totalLegend"),
+                muted: true,
+                tone: "neutral",
+              },
+              {
+                dashed: true,
+                label: t("financial.overview.balance.projected"),
+                tone: "neutral",
+              },
+            ]
+          : [
+              {
+                label: t("financial.overview.balance.realized"),
+                tone: "neutral",
+              },
+              {
+                dashed: true,
+                label: t("financial.overview.balance.projected"),
+                tone: "neutral",
+              },
+            ]
+      }
       onRetry={vm.balance.refetch}
       retryLabel={t("financial.overview.retry")}
       state={
@@ -102,41 +154,12 @@ function BalanceBlock(props: { compact: boolean; vm: OverviewViewModel }) {
       title={t("financial.overview.balance.title")}
     >
       <LineChart
-        accessibilityLabel={
-          first && last
-            ? t("financial.overview.a11y.balanceChart", {
-                end: money(last.balance),
-                from: formatDay(first.start, localeTag),
-                projected: money(last.balance),
-                start: money(first.balance),
-                to: formatDay(last.end, localeTag),
-              })
-            : t("financial.overview.balance.title")
-        }
+        accessibilityLabel={describe()}
         formatTick={(value) => formatTick(value, localeTag, currency, compact)}
         formatValue={money}
         onSelect={vm.setSelectedPoint}
-        points={points.map((item, index) => {
-          const label = formatBucketLabel(item.start, granularity, localeTag);
-
-          return {
-            accessibilityLabel: formatDay(item.end, localeTag),
-            // The projected rest of the current bucket repeats its label: the axis shows it once.
-            label:
-              index > 0 &&
-              label ===
-                formatBucketLabel(
-                  points[index - 1].start,
-                  granularity,
-                  localeTag,
-                )
-                ? ""
-                : label,
-            projected: item.projected,
-            value: item.balance,
-          };
-        })}
         selectedIndex={selected}
+        series={model.series}
         testID="financial.overview.balance-line"
         today={
           marker === undefined
@@ -148,33 +171,13 @@ function BalanceBlock(props: { compact: boolean; vm: OverviewViewModel }) {
         <Text.Caption tone="secondary" value={hints.join(" · ")} />
       ) : null}
       {point ? (
-        <View style={styles.detail} testID={overviewTestIds.balanceDetail}>
-          <Text.Caption
-            tone="secondary"
-            value={`${formatDay(point.start, localeTag)}${point.start === point.end ? "" : ` – ${formatDay(point.end, localeTag)}`}`}
-          />
-          <View style={styles.detailRow}>
-            <Text.Caption
-              tone={point.balance >= 0 ? "income" : "expense"}
-              value={t("financial.overview.balance.total")}
-            />
-            <Text.BodyStrong
-              tabular
-              tone={point.balance >= 0 ? "income" : "expense"}
-              value={money(point.balance)}
-            />
-          </View>
-          {point.accounts.map((account) => (
-            <View key={account.id} style={styles.detailRow}>
-              <Text.Caption tone="secondary" value={account.name} />
-              <Text.Caption
-                tabular
-                tone={account.balance >= 0 ? "income" : "expense"}
-                value={money(account.balance)}
-              />
-            </View>
-          ))}
-        </View>
+        <BalancePointDetail
+          compact={compact}
+          favoriteId={favorite?.id}
+          localeTag={localeTag}
+          money={money}
+          point={point}
+        />
       ) : null}
     </ChartCard>
   );

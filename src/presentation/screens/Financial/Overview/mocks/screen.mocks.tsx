@@ -78,6 +78,7 @@ const vmStub = {
   currency: "BRL",
   customOpen: false,
   effectiveGranularity: "MONTH",
+  favorite: undefined,
   filtersActive: false,
   filtersOpen: false,
   filterStore: {

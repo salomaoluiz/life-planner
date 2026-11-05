@@ -49,6 +49,7 @@ export { default as GroupBodyRow, GroupBodyRowProps } from "./GroupBodyRow";
 export { default as GroupHeader, GroupHeaderProps } from "./GroupHeader";
 export { default as HelperText, HelperTextProps } from "./HelperText";
 export { default as Highlight, HighlightProps } from "./Highlight";
+export { default as HighlightRow, HighlightRowProps } from "./HighlightRow";
 export {
   default as Icon,
   IconButton,
@@ -68,6 +69,7 @@ export {
   default as LineChart,
   LineChartPoint,
   LineChartProps,
+  LineChartSeries,
 } from "./LineChart";
 export { default as ListItem, ListItemProps } from "./ListItem";
 export { default as Menu, MenuProps } from "./Menu";

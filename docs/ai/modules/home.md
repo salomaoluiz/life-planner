@@ -95,3 +95,10 @@ Flows `financial/home/finance-section` (overdue + upcoming rows, projected balan
 - `src/presentation/hooks/useVersionInfo` — shared hook: version query (start, foreground, every 30 min, stale 10 min), web `/version.json`, banner dismissal (`@version_banner_dismissed`); `labels.ts` maps status to chip keys.
 - `src/presentation/screens/Navigation/containers/UpdateBanner` — banner slot at the top of the signed-in layout (`StatusBanner` from `@components`).
 - Pure rules: `src/domain/entities/version/versionStatus.ts` (`resolveVersionStatus`, `newerReleases`, `isNewerVersion`).
+
+## Favorite account (spec 094)
+
+- `useHomeViewModel` resolves the favorite with `resolveFavoriteAccount` over the accounts the balances cover and passes it to `FinanceBalanceUIModel` (6th argument) and `LowestBalanceUIModel` (`{ id, name }`).
+- `getMonthSummaryUseCase` returns `MonthSummaryDTO.byAccount` (income, expense, toPay, toReceive per account id: account rows plus the invoices already paid from the account), computed from the data it already reads: no new request.
+- With a favorite the balance card shows a `Badge` (star + name, `home.finance.favoriteBadge`), the favorite's balance on the last day of the month as the projected end, a breakdown derived so it adds up to that end (`deriveBreakdown`), its income and expenses (expenses include the invoices the daily balances say it still pays), and a muted "Total of accounts" line (`home.finance.totalOfAccounts`, the 062 number). The lowest-balance tiles follow the favorite's daily balance ("Lowest balance day · name"); the detail lists it first (highlighted) and ends with the total of the filter on that day (`LowestBalanceTile.filterTotalCents`). The Upcoming list does not change.
+- Without a favorite everything is as in spec 062.

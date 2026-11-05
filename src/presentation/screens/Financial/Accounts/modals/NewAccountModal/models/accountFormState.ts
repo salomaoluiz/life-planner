@@ -20,6 +20,7 @@ interface AccountFormState {
   amountCents: number;
   icon: string;
   isArchived: boolean;
+  isFavorite: boolean;
   isNegative: boolean;
   name: string;
   ownerId: string;
@@ -30,6 +31,7 @@ function createInitialState(params: { ownerId: string }): AccountFormState {
     amountCents: 0,
     icon: "bank",
     isArchived: false,
+    isFavorite: false,
     isNegative: false,
     name: "",
     ownerId: params.ownerId,
@@ -41,6 +43,7 @@ function isSameState(a: AccountFormState, b: AccountFormState) {
     a.amountCents === b.amountCents &&
     a.icon === b.icon &&
     a.isArchived === b.isArchived &&
+    a.isFavorite === b.isFavorite &&
     a.isNegative === b.isNegative &&
     a.name === b.name &&
     a.ownerId === b.ownerId
@@ -64,6 +67,7 @@ function stateFromDto(dto: AccountDTO): AccountFormState {
     amountCents: Math.abs(cents),
     icon: dto.icon,
     isArchived: dto.status === "ARCHIVED",
+    isFavorite: dto.isFavorite,
     isNegative: cents < 0,
     name: dto.name,
     ownerId: dto.ownerId,
@@ -77,6 +81,8 @@ function toCreateParams(
   return {
     balance: signedBalance(state),
     icon: state.icon,
+    // Spec 094: only a favorite is worth sending.
+    ...(state.isFavorite ? { isFavorite: true } : {}),
     name: state.name.trim(),
     owner: owner.type,
     ownerId: owner.id,
@@ -103,6 +109,10 @@ function toUpdateParams(
   }
   if (state.isArchived !== initial.isArchived) {
     params.status = state.isArchived ? "ARCHIVED" : "ACTIVE";
+  }
+  // Archiving clears the favorite on the API, so only a stand-alone change is sent (spec 094 FR 16).
+  if (state.isFavorite !== initial.isFavorite && !state.isArchived) {
+    params.isFavorite = state.isFavorite;
   }
 
   return params;
@@ -134,6 +144,18 @@ function validate(
   return errors;
 }
 
+// Spec 094 FR 15: an archived account can't be the favorite, so archiving turns the favorite off.
+function withArchived(
+  state: AccountFormState,
+  isArchived: boolean,
+): AccountFormState {
+  return {
+    ...state,
+    isArchived,
+    isFavorite: isArchived ? false : state.isFavorite,
+  };
+}
+
 export type { AccountChanges, AccountFormErrors, AccountFormState };
 export {
   createInitialState,
@@ -143,4 +165,5 @@ export {
   toCreateParams,
   toUpdateParams,
   validate,
+  withArchived,
 };

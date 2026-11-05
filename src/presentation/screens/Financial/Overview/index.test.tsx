@@ -1,4 +1,4 @@
-import { fireEvent, screen } from "@tests";
+import { fireEvent, screen, within } from "@tests";
 
 import { query, setup, vmStub } from "./mocks/screen.mocks";
 import overviewTestIds from "./testIds";
@@ -230,4 +230,107 @@ it("SHOULD reopen the custom period WHEN Custom is pressed while selected", () =
   fireEvent.press(screen.getByTestId("financial.overview.period-CUSTOM"));
   expect(vmStub.onPresetReselect).toHaveBeenCalledWith("CUSTOM");
   expect(vmStub.onPresetChange).not.toHaveBeenCalled();
+});
+
+describe("favorite account on the balance chart (spec 094)", () => {
+  const favorite = {
+    currency: "BRL",
+    id: "a",
+    isFavorite: true,
+    name: "Checking",
+  };
+  const twoAccounts = query({
+    currency: "BRL",
+    granularity: "MONTH",
+    points: [
+      {
+        accounts: [
+          { balance: 5000, id: "a", name: "Checking" },
+          { balance: 2000, id: "b", name: "Savings" },
+        ],
+        balance: 7000,
+        end: "2026-09-30",
+        projected: false,
+        start: "2026-09-01",
+      },
+      {
+        accounts: [{ balance: 6000, id: "b", name: "Savings" }],
+        balance: 6000,
+        end: "2026-10-31",
+        projected: true,
+        start: "2026-10-01",
+      },
+    ],
+  });
+
+  it("SHOULD draw the favorite on top of a muted total AND explain both in the legend", () => {
+    setup({ balance: twoAccounts, favorite, selectedPoint: 0 });
+
+    expect(
+      screen.getByTestId("financial.overview.balance-line-series-0"),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId("financial.overview.balance-line-series-1"),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByText(
+        'financial.overview.balance.favoriteLegend {"name":"Checking"}',
+      ),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getAllByText("financial.overview.balance.totalLegend").length,
+    ).toBeGreaterThan(0);
+    expect(
+      screen.getByText("financial.overview.balance.projected"),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD name both series for screen readers", () => {
+    setup({ balance: twoAccounts, favorite, selectedPoint: 0 });
+
+    expect(
+      screen.getByTestId("financial.overview.balance-line").props
+        .accessibilityLabel,
+    ).toContain("financial.overview.a11y.balanceChartFavorite");
+  });
+
+  it("SHOULD list the favorite first and highlighted, then the total, then the other accounts", () => {
+    setup({ balance: twoAccounts, favorite, selectedPoint: 0 });
+
+    expect(
+      screen.getByTestId(overviewTestIds.balanceFavoriteRow),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByText("financial.overview.balance.favoriteCaption"),
+    ).toBeOnTheScreen();
+    expect(
+      within(screen.getByTestId(overviewTestIds.balanceDetail)).getByText(
+        "financial.overview.balance.totalLegend",
+      ),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(overviewTestIds.balanceOtherAccounts),
+    ).toBeOnTheScreen();
+    expect(screen.getAllByText("Savings")).toHaveLength(1);
+  });
+
+  it("SHOULD start the favorite line late WHEN the account has no value in a bucket (no NaN)", () => {
+    setup({ balance: twoAccounts, favorite: { ...favorite, id: "b" } });
+
+    expect(JSON.stringify(screen.toJSON())).not.toContain("NaN");
+  });
+
+  it("SHOULD look as before WHEN there is no favorite", () => {
+    setup({ balance: twoAccounts, selectedPoint: 0 });
+
+    expect(
+      screen.queryByTestId("financial.overview.balance-line-series-1"),
+    ).toBeNull();
+    expect(screen.queryByTestId(overviewTestIds.balanceFavoriteRow)).toBeNull();
+    expect(
+      screen.getByText("financial.overview.balance.total"),
+    ).toBeOnTheScreen();
+    expect(screen.getAllByText("Savings")).toHaveLength(1);
+    expect(screen.getAllByText("Checking")).toHaveLength(1);
+  });
 });

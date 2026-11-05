@@ -5,6 +5,8 @@ import { useKitTheme } from "@components/utils/useKitTheme";
 
 export interface GroupBodyRowProps {
   children: ReactNode;
+  /** Tints the row (the favorite account, spec 094) */
+  highlight?: boolean;
   /** Closes the card a pressable `GroupHeader` opened (bottom border and radius) */
   isLast?: boolean;
   testID?: string;
@@ -17,9 +19,16 @@ function GroupBodyRow(props: GroupBodyRowProps) {
   const { colors, radius, spacing } = useKitTheme();
   const card = props.variant !== "bare";
   const closing = card && !!props.isLast;
+  function backgroundOf() {
+    if (props.highlight) {
+      return colors.warningSoft;
+    }
+
+    return card ? colors.surface : undefined;
+  }
   const styles = StyleSheet.create({
     card: {
-      backgroundColor: card ? colors.surface : undefined,
+      backgroundColor: backgroundOf(),
       borderBottomLeftRadius: closing ? radius.md : 0,
       borderBottomRightRadius: closing ? radius.md : 0,
       borderBottomWidth: closing ? 1 : 0,

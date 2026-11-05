@@ -25,6 +25,12 @@ const financial = {
         balanceTooLarge: "This balance is too large.",
         nameTooLong: "Name can have at most 60 characters.",
       },
+      favorite: "Favorite account",
+      favoriteArchived: "Archived accounts can't be the favorite.",
+      favoriteHelper:
+        "Highlighted on the Overview, the daily balance and the Home. Only you see this choice.",
+      favoriteReplace:
+        "Your favorite today is {{name}}. Saving makes this one the favorite.",
       icon: "Icon",
       initialBalance: "Initial balance",
       initialBalanceHelper:
@@ -765,11 +771,16 @@ const financial = {
     a11y: {
       balanceChart:
         "Balance from {{from}} to {{to}}, from {{start}} to {{end}}, expected {{projected}} at the end of the month",
+      balanceChartFavorite:
+        "Balance of {{name}} from {{start}} to {{end}}; total from {{totalStart}} to {{totalEnd}}, from {{from}} to {{to}}",
       incomeExpenseChart: "Income and expenses from {{from}} to {{to}}",
       open: "Open in Transactions",
     },
     balance: {
+      favoriteCaption: "Favorite account",
+      favoriteLegend: "{{name}} · favorite",
       filtersNote: "Balance follows scope, currency and accounts",
+      otherAccounts: "Other accounts",
       projected: "Expected (after today)",
       projectedEnd: "Projected on {{date}}",
       realized: "Actual",
@@ -777,6 +788,7 @@ const financial = {
         "Balance of the accounts in the filter at the end of each {{bucket}}",
       title: "Balance over time",
       total: "Total",
+      totalLegend: "Total of accounts",
     },
     blockError: "Couldn't load this chart",
     bucket: { day: "day", month: "month", week: "week" },
@@ -1002,12 +1014,14 @@ const financial = {
     },
     dayBalance: {
       a11y: "Balance at the end of {{day}}: {{value}}",
+      a11yFavorite: "Balance of {{name}} at the end of {{day}}: {{value}}",
       cardsDue: "Card invoices to pay",
       expand: "Show balance per account",
       label: "Balance",
       netSuffix: "for the day",
       pinHint: "Click to pin the details in the list",
       title: "End of day balance",
+      total: "Total",
     },
     delete: "Delete transaction",
     deleteTitle: "Delete this transaction?",

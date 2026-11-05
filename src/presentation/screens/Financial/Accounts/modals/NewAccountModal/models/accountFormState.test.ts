@@ -11,6 +11,7 @@ import {
   toCreateParams,
   toUpdateParams,
   validate,
+  withArchived,
 } from "./accountFormState";
 
 const user = new OwnerDTO({
@@ -22,6 +23,7 @@ const base: AccountFormState = {
   amountCents: 152075,
   icon: "bank",
   isArchived: false,
+  isFavorite: false,
   isNegative: false,
   name: "Checking",
   ownerId: "user-id",
@@ -32,6 +34,7 @@ it("SHOULD start with the bank icon, zero positive balance, active", () => {
     amountCents: 0,
     icon: "bank",
     isArchived: false,
+    isFavorite: false,
     isNegative: false,
     name: "",
     ownerId: "user-id",
@@ -53,6 +56,7 @@ it("SHOULD split a negative decimal balance into amount and sign", () => {
     amountCents: 1230,
     icon: "wallet",
     isArchived: true,
+    isFavorite: false,
     isNegative: true,
     name: "Wallet",
     ownerId: "user-id",
@@ -140,4 +144,58 @@ it("SHOULD reject a balance change on an account that is archived AND stays arch
   ).toEqual({});
   // creating: no initial state to compare with
   expect(validate({ ...base, amountCents: 100 })).toEqual({});
+});
+
+describe("favorite account (spec 094)", () => {
+  it("SHOULD read isFavorite from the account", () => {
+    const dto = new AccountDTO({
+      balance: 1,
+      icon: "bank",
+      id: "a1",
+      isFavorite: true,
+      name: "Main",
+      owner: "USER",
+      ownerId: "user-id",
+      status: "ACTIVE",
+    });
+
+    expect(stateFromDto(dto).isFavorite).toBe(true);
+  });
+
+  it("SHOULD send isFavorite only WHEN it changed", () => {
+    expect(toUpdateParams("a1", { ...base, isFavorite: true }, base)).toEqual({
+      id: "a1",
+      isFavorite: true,
+    });
+    expect(toUpdateParams("a1", base, { ...base, isFavorite: true })).toEqual({
+      id: "a1",
+      isFavorite: false,
+    });
+    expect(toUpdateParams("a1", base, base)).toEqual({ id: "a1" });
+  });
+
+  it("SHOULD NOT send isFavorite WHEN archiving (the API clears it)", () => {
+    const favorite = { ...base, isFavorite: true };
+
+    expect(
+      toUpdateParams("a1", withArchived(favorite, true), favorite),
+    ).toEqual({ id: "a1", status: "ARCHIVED" });
+  });
+
+  it("SHOULD send isFavorite on create only WHEN it is on", () => {
+    expect(toCreateParams({ ...base, isFavorite: true }, user)).toHaveProperty(
+      "isFavorite",
+      true,
+    );
+    expect(toCreateParams(base, user)).not.toHaveProperty("isFavorite");
+  });
+
+  it("SHOULD turn the favorite off WHEN the account is archived", () => {
+    expect(withArchived({ ...base, isFavorite: true }, true)).toEqual({
+      ...base,
+      isArchived: true,
+      isFavorite: false,
+    });
+    expect(withArchived({ ...base, isArchived: true }, false)).toEqual(base);
+  });
 });

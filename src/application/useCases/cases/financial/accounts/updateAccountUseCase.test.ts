@@ -63,3 +63,16 @@ describe("error handling and arguments", () => {
     expect(error).not.toHaveProperty("context");
   });
 });
+
+it("SHOULD pass isFavorite to the repository (spec 094)", async () => {
+  await updateAccountUseCase(repositoriesMocks).execute({
+    id: "acc-id",
+    isFavorite: true,
+  });
+
+  expect(
+    repositoriesMocks.financialRepository.account.updateAccount,
+  ).toHaveBeenCalledWith(
+    expect.objectContaining({ id: "acc-id", isFavorite: true }),
+  );
+});

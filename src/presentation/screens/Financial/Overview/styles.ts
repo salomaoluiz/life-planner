@@ -17,11 +17,14 @@ function useStyles() {
       dates: { gap: spacing.sm },
       detail: { gap: spacing.xxs },
       // Label and value side by side (not at the two ends), so they stay associated on wide screens
+      detailColumn: { flex: 1, gap: spacing.xs },
+      detailColumns: { flexDirection: "row", gap: spacing.lg },
       detailRow: {
         alignItems: "baseline",
         flexDirection: "row",
         gap: spacing.sm,
       },
+      detailStack: { gap: spacing.sm },
       limitHint: { textAlign: "center" },
       pair: { flexBasis: 420, flexGrow: 1, flexShrink: 1, minWidth: 280 },
       pairs: { flexDirection: "row", flexWrap: "wrap", gap: spacing.md },

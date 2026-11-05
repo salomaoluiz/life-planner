@@ -8,6 +8,7 @@ import {
   ConfirmDialog,
   ErrorState,
   FormColumns,
+  Icon,
   IconChoiceGroup,
   IconTile,
   SegmentedControl,
@@ -16,6 +17,7 @@ import {
   TextField,
 } from "@components";
 import Skeleton from "@components/Skeleton";
+import { useKitTheme } from "@components/utils/useKitTheme";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
@@ -31,6 +33,7 @@ const SKELETON_ROWS = [0, 1, 2];
 function NewAccountModal() {
   const { styles } = useStyles();
   const { t } = useTranslation();
+  const { colors } = useKitTheme();
   const vm = useNewAccountViewModel();
 
   function err(key?: TranslationKeys) {
@@ -162,6 +165,38 @@ function NewAccountModal() {
                     value={t(vm.ownerHelperKey)}
                   />
                 )}
+              </View>
+              <View style={styles.helper}>
+                <View style={styles.preview}>
+                  <Icon color={colors.warning} name={"star"} size={20} />
+                  <View style={styles.grow}>
+                    <Text.Body value={t("financial.accounts.form.favorite")} />
+                  </View>
+                  <Switch
+                    disabled={vm.isFavoriteDisabled}
+                    initialStatus={vm.isFavorite}
+                    onToggle={vm.onFavoriteChange}
+                    testID={accountFormTestIds.favoriteSwitch}
+                  />
+                </View>
+                <Text.Caption
+                  tone={"secondary"}
+                  value={t("financial.accounts.form.favoriteHelper")}
+                />
+                {vm.replacedFavoriteName ? (
+                  <Text.Caption
+                    tone={"warning"}
+                    value={t("financial.accounts.form.favoriteReplace", {
+                      name: vm.replacedFavoriteName,
+                    })}
+                  />
+                ) : null}
+                {vm.isFavoriteDisabled ? (
+                  <Text.Caption
+                    tone={"secondary"}
+                    value={t("financial.accounts.form.favoriteArchived")}
+                  />
+                ) : null}
               </View>
             </>
           }

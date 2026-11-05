@@ -38,3 +38,15 @@ it("SHOULD use the caption size with bold weight", () => {
   expect(label().fontSize).toBe(lightTheme.typography.caption.fontSize);
   expect(label().fontWeight).toBe(lightTheme.typography.heading.fontWeight);
 });
+
+it("SHOULD draw an icon before the label WHEN given (the favorite star, spec 094)", () => {
+  setup({ icon: "star", tone: "warning" });
+
+  expect(screen.getByTestId("badge-icon").props.source).toBe("star");
+});
+
+it("SHOULD draw no icon by default", () => {
+  setup();
+
+  expect(screen.queryByTestId("badge-icon")).toBeNull();
+});

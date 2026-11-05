@@ -24,6 +24,7 @@ interface AdjustAccountBalanceDatasourceParams {
 interface CreateAccountDatasourceParams {
   balance: number;
   icon: string;
+  isFavorite?: boolean;
   name: string;
   owner: OwnerType;
   ownerId: string;
@@ -42,6 +43,7 @@ interface GetDailyBalancesDatasourceParams {
 interface UpdateAccountDatasourceParams {
   icon?: string;
   id: string;
+  isFavorite?: boolean;
   name?: string;
   owner?: OwnerType;
   ownerId?: string;

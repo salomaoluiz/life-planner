@@ -21,6 +21,7 @@ const transactionsTestIds = {
   clearFilters: "financial.transactions.clear-filters",
   dayBalance: "financial.transactions.day-balance",
   dayBalanceCards: "financial.transactions.day-balance-cards",
+  dayBalanceFavorite: "financial.transactions.day-balance-favorite",
   dayBalanceLine: "financial.transactions.day-balance-line",
   dayBalanceProjected: "financial.transactions.day-balance-projected",
   emptyMonth: "financial.transactions.empty-month",

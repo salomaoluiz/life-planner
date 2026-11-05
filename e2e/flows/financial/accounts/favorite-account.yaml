@@ -1,0 +1,108 @@
+url: ${E2E_WEB_URL}
+name: financial/accounts/favorite-account
+tags:
+  - financial
+  - home
+  - spec-094
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Marking an account as favorite (spec 094): the daily balance header of Transactions and the Home balance card follow it;
+# unmarking brings the totals back.
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Favorite Row
+      KEY: ROW_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: ${output.ROW_NAME}
+      VALUE_CENTS: "1500"
+      PAID: "true"
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+# Without a favorite nothing is highlighted.
+- extendedWaitUntil:
+    visible:
+      id: "home.finance.projectedBalance"
+    timeout: 20000
+- assertNotVisible:
+    id: "home.finance.favoriteBadge"
+# Mark the account as favorite in its form
+- runFlow: ../../../subflows/financial/open-accounts.yaml
+- tapOn:
+    id: "financial.accounts.row-title"
+    text: ${output.ACCOUNT_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.account-form.name-input"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.account-form.favorite-switch"
+- tapOn:
+    id: "financial.account-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.row-title"
+      text: ${output.ACCOUNT_NAME}
+    timeout: 20000
+# The day header of Transactions shows the favorite account (star + name)
+- tapOn:
+    id: "navigation-rail-financial-transactions"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.day-balance-favorite-.*"
+    timeout: 20000
+# The Home balance card is about the favorite account
+- tapOn:
+    id: "tab-home"
+- extendedWaitUntil:
+    visible:
+      id: "home.finance.favoriteBadge"
+    timeout: 20000
+- assertVisible:
+    id: "home.finance.totalOfAccounts"
+# Unmark it: the totals come back
+- runFlow: ../../../subflows/financial/open-accounts.yaml
+- tapOn:
+    id: "financial.accounts.row-title"
+    text: ${output.ACCOUNT_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.account-form.name-input"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- tapOn:
+    id: "financial.account-form.favorite-switch"
+- tapOn:
+    id: "financial.account-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.row-title"
+      text: ${output.ACCOUNT_NAME}
+    timeout: 20000
+- tapOn:
+    id: "tab-home"
+- extendedWaitUntil:
+    visible:
+      id: "home.finance.projectedBalance"
+    timeout: 20000
+- assertNotVisible:
+    id: "home.finance.favoriteBadge"

@@ -19,11 +19,13 @@ const home = {
       noAccounts: "Nenhuma conta ativa neste filtro.",
       show: "Ver saldo por conta",
       title: "Dia com menor saldo",
+      titleFavorite: "Dia com menor saldo · {{name}}",
       total: "Total",
     },
     overview: "Visão geral",
     projectedEnd: "{{month}} · saldo previsto no fim do mês",
     title: "Finanças",
+    totalOfAccounts: "Total das contas: {{amount}}",
   },
   greeting: {
     afternoon: "Boa tarde, {{name}}",

@@ -35,3 +35,18 @@ it("SHOULD show the empty text AND the skeleton while loading", () => {
   setup({ state: "loading" });
   expect(screen.getAllByTestId("skeleton-loader").length).toBeGreaterThan(0);
 });
+
+it("SHOULD draw an icon before a legend label AND fade a muted swatch (spec 094)", () => {
+  setup({
+    legend: [
+      { icon: "star", label: "Checking · favorite", tone: "income" },
+      { label: "Total", muted: true, tone: "neutral" },
+    ],
+  });
+
+  expect(screen.getByTestId("card-legend-icon-0").props.source).toBe("star");
+  expect(screen.queryByTestId("card-legend-icon-1")).toBeNull();
+  expect(screen.getByTestId("card-legend-swatch-1").props.style).toEqual(
+    expect.arrayContaining([expect.objectContaining({ opacity: 0.5 })]),
+  );
+});

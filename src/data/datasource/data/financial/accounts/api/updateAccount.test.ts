@@ -23,6 +23,15 @@ it("SHOULD PATCH /v1/finance/accounts/:id with ONLY the editable fields (no owne
   });
 });
 
+it("SHOULD send isFavorite alone WHEN it is the only change (spec 094)", async () => {
+  spies.patch.mockResolvedValueOnce({});
+
+  await setup({ ...mocks.onlyId, isFavorite: true });
+
+  const [, body] = spies.patch.mock.calls[0];
+  expect(JSON.parse(JSON.stringify(body))).toEqual({ isFavorite: true });
+});
+
 it("SHOULD send only the fields that are defined", async () => {
   spies.patch.mockResolvedValueOnce({});
 

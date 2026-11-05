@@ -426,3 +426,51 @@ describe("archiving ends the recurring series (spec 034 FR 34)", () => {
     });
   });
 });
+
+describe("favorite account (spec 094)", () => {
+  it("SHOULD save the favorite as a stand-alone change AND name the one it replaces", () => {
+    givenLoaded({
+      accounts: [
+        acc("a1"),
+        acc("fav", 0, { isFavorite: true, name: "Savings" }),
+      ],
+      params: { id: "a1" },
+    });
+    const { result } = setup();
+
+    expect(result.current.isFavorite).toBe(false);
+    expect(result.current.replacedFavoriteName).toBeUndefined();
+
+    act(() => result.current.onFavoriteChange(true));
+
+    expect(result.current.isFavorite).toBe(true);
+    expect(result.current.replacedFavoriteName).toBe("Savings");
+
+    act(() => result.current.onSave());
+
+    expect(mutations.update.value.mutate).toHaveBeenCalledWith({
+      id: "a1",
+      isFavorite: true,
+    });
+  });
+
+  it("SHOULD turn the favorite off AND disable the switch WHEN the account is archived", () => {
+    givenLoaded({
+      accounts: [acc("a1", 0, { isFavorite: true })],
+      params: { id: "a1" },
+    });
+    const { result } = setup();
+
+    expect(result.current.isFavorite).toBe(true);
+    expect(result.current.replacedFavoriteName).toBeUndefined();
+
+    act(() => result.current.onArchivedChange(true));
+
+    expect(result.current.isFavorite).toBe(false);
+    expect(result.current.isFavoriteDisabled).toBe(true);
+
+    act(() => result.current.onFavoriteChange(true));
+
+    expect(result.current.isFavorite).toBe(false);
+  });
+});

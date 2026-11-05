@@ -1,5 +1,6 @@
 import { modalNavigation } from "@tests/modalNavigation";
 
+import AccountDTO from "@application/dto/financial/AccountDTO";
 import { financeKeys } from "@application/queryKeys/financeKeys";
 
 import { ALL_FILTER, PERSONAL_FILTER } from "../models/ownerFilter";
@@ -115,6 +116,29 @@ describe("block states", () => {
     expect(result.current.stock.data?.isNothingExpiring).toBe(true);
     expect(result.current.upcoming.data?.overdue.rows[0].id).toBe("t1");
     expect(result.current.header.avatarName).toBe("Ana Souza");
+  });
+
+  it("SHOULD put the favorite account on the balance AND the lowest balance blocks (spec 094)", () => {
+    const favorite = new AccountDTO({
+      ...mocks.accounts[0],
+      isFavorite: true,
+    });
+    const { result } = setup({ ...loaded, accounts: [favorite] });
+
+    expect(result.current.balance.data?.favoriteName).toBe("Checking");
+    expect(result.current.lowest.data?.favoriteName).toBe("Checking");
+  });
+
+  it("SHOULD ignore a favorite that is archived (spec 094)", () => {
+    const archived = new AccountDTO({
+      ...mocks.accounts[0],
+      isFavorite: true,
+      status: "ARCHIVED",
+    });
+    const { result } = setup({ ...loaded, accounts: [archived] });
+
+    expect(result.current.balance.data?.favoriteName).toBeUndefined();
+    expect(result.current.lowest.data?.favoriteName).toBeUndefined();
   });
 
   it("SHOULD fail only the stock block WHEN the stock query fails", () => {

@@ -132,3 +132,95 @@ it("SHOULD show a negative projected balance with the expense look", () => {
     screen.getByTestId(homeTestIds.financeProjectedBalance),
   ).toHaveTextContent(/^−.*120/);
 });
+
+describe("favorite account (spec 094)", () => {
+  const favorite = new AccountDTO({
+    balance: 1000,
+    icon: "bank",
+    id: "a1",
+    isFavorite: true,
+    name: "Checking",
+    owner: "USER",
+    ownerId: "o1",
+    status: "ACTIVE",
+  });
+
+  function favoriteModel() {
+    return new FinanceBalanceUIModel(
+      new MonthSummaryDTO({
+        balance: 0,
+        byAccount: {
+          a1: {
+            expense: 90000,
+            income: 200000,
+            toPay: 20000,
+            toReceive: 30000,
+          },
+        },
+        expense: 1088040,
+        income: 1230000,
+        toPay: 50000,
+        toReceive: 30000,
+      }),
+      new DailyBalanceDTO({
+        accounts: [
+          {
+            icon: "bank",
+            id: "a1",
+            name: "Checking",
+            owner: OwnerType.USER,
+            ownerId: "o1",
+          },
+        ],
+        days: [
+          {
+            accounts: [{ accountId: "a1", balanceCents: 80000 }],
+            cardsDueCents: 0,
+            date: "2026-11-30",
+            projected: true,
+            totalCents: 123456,
+          },
+        ],
+        month: "2026-11",
+      }),
+      [favorite],
+      new Date(2026, 10, 12),
+      "en-US",
+      favorite,
+    );
+  }
+
+  function renderCard(data: FinanceBalanceUIModel) {
+    render(
+      <FinanceBalanceCard
+        onPress={jest.fn()}
+        state={{ data, isError: false, isLoading: false, onRetry: jest.fn() }}
+      />,
+    );
+  }
+
+  it("SHOULD show a badge with the favorite name AND the total of accounts as a muted line", () => {
+    renderCard(favoriteModel());
+
+    expect(
+      screen.getByTestId(`${homeTestIds.financeFavoriteBadge}-label`),
+    ).toHaveTextContent("Checking");
+    expect(
+      screen.getByText(/home.finance.totalOfAccounts.*R\$1,234\.56/),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(homeTestIds.financeProjectedBalance),
+    ).toHaveTextContent(/800/);
+  });
+
+  it("SHOULD show no badge and no total line WHEN there is no favorite", () => {
+    renderCard(model(80000));
+
+    expect(
+      screen.queryByTestId(homeTestIds.financeFavoriteBadge),
+    ).not.toBeOnTheScreen();
+    expect(
+      screen.queryByTestId(homeTestIds.financeTotalOfAccounts),
+    ).not.toBeOnTheScreen();
+  });
+});

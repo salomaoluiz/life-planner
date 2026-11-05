@@ -29,6 +29,7 @@ async function getAccounts(ownerIds: string[], datasources: Datasources) {
         currency: account.currency,
         icon: account.icon,
         id: account.id,
+        isFavorite: account.isFavorite,
         name: account.name,
         owner: OwnerType[account.owner],
         ownerId: account.ownerId,

@@ -1,6 +1,7 @@
 import { StyleSheet, View } from "react-native";
 
 import ErrorState from "@components/ErrorState";
+import Icon from "@components/Icon";
 import Skeleton from "@components/Skeleton";
 import Text from "@components/Text";
 import { useKitTheme } from "@components/utils/useKitTheme";
@@ -24,13 +25,17 @@ export interface ChartCardProps {
 export interface ChartLegendItem {
   /** Drawn dashed for projected values */
   dashed?: boolean;
+  /** Drawn before the label in the warning colour (the favorite star, spec 094) */
+  icon?: string;
   label: string;
+  /** A faded swatch for the secondary line of the chart (spec 094) */
+  muted?: boolean;
   tone: "accent" | "expense" | "income" | "neutral";
 }
 
 // The frame of a dashboard block: title, actions, legend, footnote and the loading / error / empty states (spec 046 FR 19).
 function ChartCard(props: ChartCardProps) {
-  const { colors, radius, spacing } = useKitTheme();
+  const { colors, radius, sizes, spacing } = useKitTheme();
   const { testID } = props;
   function legendColor(tone: ChartLegendItem["tone"]) {
     return tone === "neutral" ? colors.textSecondary : colors[tone];
@@ -78,7 +83,7 @@ function ChartCard(props: ChartCardProps) {
       </View>
       {props.legend && props.state === "ready" ? (
         <View style={styles.legend} testID={testID && `${testID}-legend`}>
-          {props.legend.map((item) => (
+          {props.legend.map((item, index) => (
             <View key={item.label} style={styles.legendItem}>
               <View
                 style={[
@@ -86,8 +91,18 @@ function ChartCard(props: ChartCardProps) {
                   item.dashed
                     ? { borderColor: legendColor(item.tone), borderWidth: 1 }
                     : { backgroundColor: legendColor(item.tone) },
+                  item.muted ? { opacity: 0.5 } : null,
                 ]}
+                testID={testID && `${testID}-legend-swatch-${index}`}
               />
+              {item.icon ? (
+                <Icon
+                  color={colors.warning}
+                  name={item.icon}
+                  size={sizes.iconSm}
+                  testID={testID && `${testID}-legend-icon-${index}`}
+                />
+              ) : null}
               <Text.Caption tone="secondary" value={item.label} />
             </View>
           ))}

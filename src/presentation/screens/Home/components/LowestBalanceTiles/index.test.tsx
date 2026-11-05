@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@tests";
+import { fireEvent, render, screen, within } from "@tests";
 
 import DailyBalanceDTO from "@application/dto/financial/DailyBalanceDTO";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
@@ -131,4 +131,75 @@ it("SHOULD say there is no active account and offer to create one", () => {
   fireEvent.press(screen.getByTestId(homeTestIds.financeLowestCreateAccount));
 
   expect(handlers.onCreateAccountPress).toHaveBeenCalledTimes(1);
+});
+
+describe("favorite account (spec 094 FR 29)", () => {
+  function favoriteModel() {
+    const list = [
+      account,
+      {
+        icon: "piggy-bank",
+        id: "a2",
+        name: "Savings",
+        owner: OwnerType.USER,
+        ownerId: "o1",
+      },
+    ];
+    function days(date: string, a1: number, a2: number) {
+      return {
+        accounts: [
+          { accountId: "a1", balanceCents: a1 },
+          { accountId: "a2", balanceCents: a2 },
+        ],
+        cardsDueCents: 0,
+        date,
+        projected: false,
+        totalCents: a1 + a2,
+      };
+    }
+
+    return new LowestBalanceUIModel(
+      new DailyBalanceDTO({
+        accounts: list,
+        days: [days("2026-11-25", -51960, 400000)],
+        month: "2026-11",
+      }),
+      new DailyBalanceDTO({
+        accounts: list,
+        days: [days("2026-12-10", 32000, 1)],
+        month: "2026-12",
+      }),
+      now,
+      "en-US",
+      { id: "a1", name: "Checking" },
+    );
+  }
+
+  it("SHOULD name the favorite in the title AND show ITS lowest balance in the tile", () => {
+    renderLoaded(favoriteModel());
+
+    expect(
+      screen.getByText('home.finance.lowest.titleFavorite {"name":"Checking"}'),
+    ).toBeOnTheScreen();
+    expect(screen.queryByText("home.finance.lowest.title")).toBeNull();
+    expect(
+      screen.getByTestId(homeTestIds.financeLowestCurrent),
+    ).toHaveTextContent(/519/);
+  });
+
+  it("SHOULD list the favorite first in the detail AND end with the total of the filter", () => {
+    renderLoaded(favoriteModel());
+    fireEvent.press(
+      screen.getByTestId(`${homeTestIds.financeLowestToggle}-current`),
+    );
+
+    const detail = screen.getByTestId(homeTestIds.financeLowestDetail);
+
+    expect(
+      within(detail).getByTestId(
+        "financial.transactions.day-balance-line-a1-favorite",
+      ),
+    ).toBeOnTheScreen();
+    expect(detail).toHaveTextContent(/3,480\.40|3\.480,40/);
+  });
 });
