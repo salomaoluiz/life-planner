@@ -19,11 +19,13 @@ const home = {
       noAccounts: "No active account in this filter.",
       show: "Show balance by account",
       title: "Lowest balance day",
+      titleFavorite: "Lowest balance day · {{name}}",
       total: "Total",
     },
     overview: "Overview",
     projectedEnd: "{{month}} · projected at month end",
     title: "Finance",
+    totalOfAccounts: "Total of accounts: {{amount}}",
   },
   greeting: {
     afternoon: "Good afternoon, {{name}}",

@@ -4,6 +4,8 @@ import { lowestBalanceDay } from "@domain/entities/home/balanceProjection";
 export interface LowestBalanceLine {
   accountId: string;
   balanceCents: number;
+  // Spec 094: the favorite account, listed first and highlighted.
+  favorite: boolean;
   icon: string;
   name: string;
 }
@@ -11,6 +13,8 @@ export interface LowestBalanceLine {
 export interface LowestBalanceTile {
   dateLabel: string;
   day: number;
+  // The total of the accounts of the filter on that day (spec 094): `totalCents` is the favorite's when there is one.
+  filterTotalCents: number;
   id: "current" | "next";
   isNegative: boolean;
   lines: LowestBalanceLine[];
@@ -20,6 +24,10 @@ export interface LowestBalanceTile {
 
 // The two "lowest balance day" tiles: this month from today on, next month whole (spec 062 FR 8-9).
 class LowestBalanceUIModel {
+  get favoriteName() {
+    return this.favorite?.name;
+  }
+
   get hasAccounts() {
     return this.current.accounts.length > 0;
   }
@@ -43,6 +51,7 @@ class LowestBalanceUIModel {
     private readonly next: DailyBalanceDTO,
     private readonly now: Date,
     private readonly languageTag: string,
+    private readonly favorite?: { id: string; name: string },
   ) {}
 
   private tile(
@@ -50,13 +59,35 @@ class LowestBalanceUIModel {
     balances: DailyBalanceDTO,
     fromDate: string,
   ): LowestBalanceTile | undefined {
-    const lowest = lowestBalanceDay(balances.days, fromDate);
+    const lowest = lowestBalanceDay(
+      this.favorite
+        ? balances.days.map((day) => ({
+            ...day,
+            totalCents:
+              day.accounts.find((item) => item.accountId === this.favorite?.id)
+                ?.balanceCents ?? 0,
+          }))
+        : balances.days,
+      fromDate,
+    );
 
     if (!lowest) {
       return undefined;
     }
 
     const date = new Date(`${lowest.date}T12:00:00`);
+    const filterTotalCents =
+      balances.days.find((item) => item.date === lowest.date)?.totalCents ??
+      lowest.totalCents;
+    const lines = balances.accounts.map((account) => ({
+      accountId: account.id,
+      balanceCents:
+        lowest.accounts.find((item) => item.accountId === account.id)
+          ?.balanceCents ?? 0,
+      favorite: account.id === this.favorite?.id,
+      icon: account.icon,
+      name: account.name,
+    }));
 
     return {
       dateLabel: new Intl.DateTimeFormat(this.languageTag, {
@@ -64,16 +95,10 @@ class LowestBalanceUIModel {
         month: "short",
       }).format(date),
       day: date.getDate(),
+      filterTotalCents,
       id,
       isNegative: lowest.totalCents < 0,
-      lines: balances.accounts.map((account) => ({
-        accountId: account.id,
-        balanceCents:
-          lowest.accounts.find((item) => item.accountId === account.id)
-            ?.balanceCents ?? 0,
-        icon: account.icon,
-        name: account.name,
-      })),
+      lines: lines.sort((x, y) => Number(y.favorite) - Number(x.favorite)),
       monthName: new Intl.DateTimeFormat(this.languageTag, {
         month: "long",
       }).format(date),

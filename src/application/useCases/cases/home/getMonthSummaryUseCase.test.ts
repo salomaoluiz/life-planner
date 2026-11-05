@@ -29,6 +29,7 @@ it("SHOULD return zeros WHEN the month has no transactions", async () => {
   expect(result).toBeInstanceOf(MonthSummaryDTO);
   expect(result).toEqual({
     balance: 0,
+    byAccount: {},
     expense: 0,
     income: 0,
     projectedExpense: 0,
@@ -412,5 +413,93 @@ describe("projected occurrences (spec 034 FR 15)", () => {
     await setup({ month: november, ownerIds: [] });
 
     expect(spies.recurrenceRepository.getProjections).not.toHaveBeenCalled();
+  });
+});
+
+describe("totals by account (spec 094)", () => {
+  const getInvoices = spies.creditCardRepository.getCardInvoicesForMonth;
+  const owner = mocks.defaultParams.ownerIds[0];
+
+  function row(
+    value: string,
+    type: TransactionType,
+    extra: Record<string, unknown> = {},
+  ) {
+    return Object.assign(transaction(new Date(2026, 9, 5), value, type), {
+      accountId: "fav",
+      paid: true,
+      ...extra,
+    });
+  }
+
+  it("SHOULD sum income, expense and what is still open per account row", async () => {
+    getTransactions.mockResolvedValueOnce([
+      row("100.00", TransactionType.INCOME),
+      row("40.00", TransactionType.INCOME, { paid: false }),
+      row("30.00", TransactionType.EXPENSE),
+      row("20.00", TransactionType.EXPENSE, { paid: false }),
+      row("7.00", TransactionType.EXPENSE, { accountId: "other" }),
+    ]);
+
+    const result = await setup();
+
+    expect(result.byAccount.fav).toEqual({
+      expense: 5000,
+      income: 14000,
+      toPay: 2000,
+      toReceive: 4000,
+    });
+    expect(result.byAccount.other).toEqual({
+      expense: 700,
+      income: 0,
+      toPay: 0,
+      toReceive: 0,
+    });
+    // The overall totals do not change.
+    expect(result).toMatchObject({ expense: 5700, income: 14000 });
+  });
+
+  it("SHOULD leave card rows, excluded rows AND rows without an account out", async () => {
+    getTransactions.mockResolvedValueOnce([
+      row("10.00", TransactionType.EXPENSE, { creditCardId: "card" }),
+      row("10.00", TransactionType.EXPENSE, { excludeFromTotals: true }),
+      row("10.00", TransactionType.EXPENSE, { accountId: undefined }),
+    ]);
+
+    expect((await setup()).byAccount).toEqual({});
+  });
+
+  it("SHOULD count an invoice paid from an account as an expense of that account", async () => {
+    getInvoices.mockResolvedValueOnce([
+      {
+        card: { ownerId: owner },
+        invoice: {
+          amount: 48000,
+          amountDue: 0,
+          earlyPaid: 0,
+          payment: { accountId: "fav" },
+          status: "PAID",
+        },
+      },
+      {
+        card: { ownerId: owner },
+        invoice: {
+          amount: 9000,
+          amountDue: 9000,
+          earlyPaid: 0,
+          status: "CLOSED",
+        },
+      },
+    ] as never);
+
+    const result = await setup();
+
+    expect(result.byAccount.fav).toEqual({
+      expense: 48000,
+      income: 0,
+      toPay: 0,
+      toReceive: 0,
+    });
+    expect(result.expense).toBe(57000);
   });
 });

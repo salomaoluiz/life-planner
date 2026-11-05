@@ -1,6 +1,13 @@
 import { View } from "react-native";
 
-import { AmountText, Card, ErrorState, MetricBlock, Text } from "@components";
+import {
+  AmountText,
+  Badge,
+  Card,
+  ErrorState,
+  MetricBlock,
+  Text,
+} from "@components";
 import { formatAmount } from "@components/AmountText/formatAmount";
 import Skeleton from "@components/Skeleton";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
@@ -49,9 +56,23 @@ function FinanceBalanceCard({ fill, onPress, state }: Props) {
     <Card fill={fill} onPress={onPress} testID={homeTestIds.financeBalance}>
       <View style={styles.root}>
         <View style={styles.header}>
-          <Text.Overline
-            value={t("home.finance.projectedEnd", { month: data.monthName })}
-          />
+          <View style={styles.titleRow}>
+            <View style={styles.title}>
+              <Text.Overline
+                value={t("home.finance.projectedEnd", {
+                  month: data.monthName,
+                })}
+              />
+            </View>
+            {data.favoriteName ? (
+              <Badge
+                icon="star"
+                label={data.favoriteName}
+                testID={homeTestIds.financeFavoriteBadge}
+                tone="warning"
+              />
+            ) : null}
+          </View>
           <AmountText
             currency={DEFAULT_CURRENCY}
             size="display"
@@ -88,6 +109,15 @@ function FinanceBalanceCard({ fill, onPress, state }: Props) {
             />
             <Text.Caption value={t("home.finance.breakdown.toPay")} />
           </View>
+          {data.favoriteName ? (
+            <Text.Caption
+              testID={homeTestIds.financeTotalOfAccounts}
+              tone="secondary"
+              value={t("home.finance.totalOfAccounts", {
+                amount: money(data.totalProjectedCents),
+              })}
+            />
+          ) : null}
         </View>
         <View style={styles.metrics}>
           <View style={styles.metric}>

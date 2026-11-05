@@ -12,6 +12,7 @@ import UpcomingDTO, {
 import UserDTO from "@application/dto/user/UserDTO";
 import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
+import { resolveFavoriteAccount } from "@domain/entities/financial/resolveFavoriteAccount";
 import { refetchStaleFetcherData, useQuery } from "@infrastructure/fetcher";
 import useOwners from "@presentation/hooks/useOwners";
 import { useTranslationLocale } from "@presentation/i18n";
@@ -232,6 +233,16 @@ function useHomeViewModel() {
     }
   }
 
+  // Spec 094: the favorite of the filter, when it is one of the accounts the balances cover (active, in the filter).
+  const balanceAccountIds = new Set(
+    (balancesNow.data?.accounts ?? []).map((account) => account.id),
+  );
+  const favorite = resolveFavoriteAccount(
+    (accounts.data ?? []).filter((account) =>
+      balanceAccountIds.has(account.id),
+    ),
+    {},
+  );
   const ownersFailed = !!owners.error && !ownersReady;
   const balanceState = combineBlocks(
     [summary, balancesNow, accounts],
@@ -244,6 +255,7 @@ function useHomeViewModel() {
         accounts.data as AccountDTO[],
         now,
         languageTag,
+        favorite,
       ),
   );
   const lowestState = combineBlocks(
@@ -256,6 +268,7 @@ function useHomeViewModel() {
         balancesNext.data as DailyBalanceDTO,
         now,
         languageTag,
+        favorite && { id: favorite.id, name: favorite.name },
       ),
   );
   const stockState = toBlock(

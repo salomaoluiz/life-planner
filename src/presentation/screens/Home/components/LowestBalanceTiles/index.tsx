@@ -57,6 +57,7 @@ function Lines({ tile }: { tile: LowestBalanceTile }) {
         <DayBalanceLine
           accountId={line.accountId}
           balanceCents={line.balanceCents}
+          favorite={line.favorite}
           icon={line.icon}
           isCards={false}
           key={line.accountId}
@@ -70,8 +71,8 @@ function Lines({ tile }: { tile: LowestBalanceTile }) {
         <AmountText
           currency={DEFAULT_CURRENCY}
           size="body"
-          type={tile.isNegative ? "EXPENSE" : undefined}
-          value={Math.abs(tile.totalCents)}
+          type={tile.filterTotalCents < 0 ? "EXPENSE" : undefined}
+          value={Math.abs(tile.filterTotalCents)}
         />
       </View>
     </View>
@@ -108,7 +109,15 @@ function LowestBalanceTiles({
   return (
     <Card fill={fill}>
       <View style={styles.root}>
-        <Text.Overline value={t("home.finance.lowest.title")} />
+        <Text.Overline
+          value={
+            data.favoriteName
+              ? t("home.finance.lowest.titleFavorite", {
+                  name: data.favoriteName,
+                })
+              : t("home.finance.lowest.title")
+          }
+        />
         <View style={styles.tiles}>
           {data.hasAccounts ? (
             data.tiles.map((tile) => (
