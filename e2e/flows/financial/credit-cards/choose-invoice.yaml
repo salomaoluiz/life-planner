@@ -1,0 +1,132 @@
+url: ${E2E_WEB_URL}
+name: financial/credit-cards/choose-invoice
+tags:
+  - financial
+  - spec-095
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Spec 095: a card purchase can be put on the next invoice instead of the one its date computes.
+# The card closed yesterday: the closed invoice (CLOSED_MONTH) is paid, today computes CLOSED_MONTH + 1 and the next
+# invoice is CLOSED_MONTH + 2.
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- evalScript: ${output.KEEP_ACCOUNT_ID = output.ACCOUNT_ID}
+- evalScript: ${output.KEEP_CATEGORY_ID = output.EXPENSE_CATEGORY_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Card
+      KEY: CARD_TITLE
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Market
+      KEY: PURCHASE_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Fuel
+      KEY: NEW_PURCHASE_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-card-purchase.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      CATEGORY_ID: ${output.KEEP_CATEGORY_ID}
+      TITLE: ${output.CARD_TITLE}
+      DESCRIPTION: ${output.PURCHASE_NAME}
+      VALUE_CENTS: "25000"
+- runFlow:
+    file: ../../../subflows/setup/pay-invoice.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      CARD_ID: ${output.CARD_ID}
+      ACCOUNT_ID: ${output.KEEP_ACCOUNT_ID}
+      INVOICE_MONTH: ${output.CLOSED_MONTH}
+- evalScript: ${output.NEXT_MONTH = (function () { var parts = output.CLOSED_MONTH.split("-"); var date = new Date(Number(parts[0]), Number(parts[1]) - 1 + 2, 1); return date.getFullYear() + "-" + ("0" + (date.getMonth() + 1)).slice(-2); })()}
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+# New purchase in Card mode: the invoice field shows the invoice of the date
+- tapOn:
+    id: "quick-add-button|navigation-rail-add"
+- extendedWaitUntil:
+    visible:
+      id: "quick-add-transaction"
+    timeout: 20000
+- tapOn:
+    id: "quick-add-transaction"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactionForm.payWith"
+    timeout: 20000
+- tapOn:
+    id: "financial.transactionForm.payWith-CARD"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.invoice-field"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.transaction-form.invoice-field-hint"
+# The paid invoice is listed but cannot be picked: tapping it leaves the sheet open
+- tapOn:
+    id: "financial.transaction-form.invoice-field"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.invoice-field-option-${output.CLOSED_MONTH}"
+    timeout: 20000
+- tapOn:
+    id: "financial.transaction-form.invoice-field-option-${output.CLOSED_MONTH}"
+- assertVisible:
+    id: "financial.transaction-form.invoice-field-sheet"
+# The next invoice can be picked: the sheet closes and the hint offers to go back to the date's invoice
+- tapOn:
+    id: "financial.transaction-form.invoice-field-option-${output.NEXT_MONTH}"
+- assertNotVisible:
+    id: "financial.transaction-form.invoice-field-sheet"
+- assertVisible:
+    id: "financial.transaction-form.invoice-field-hint"
+- tapOn:
+    id: "financial.transaction-form.amount-input"
+- eraseText
+- inputText: "1000"
+- tapOn:
+    id: "financial.transaction-form.description-input"
+- inputText: ${output.NEW_PURCHASE_NAME}
+- tapOn:
+    id: "financial.transaction-form.category-${output.KEEP_CATEGORY_ID}"
+- tapOn:
+    id: "financial.transaction-form.save-button"
+# The purchase is on the invoice two months ahead of the list's month...
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- tapOn:
+    id: "financial.transactions.month-next"
+- tapOn:
+    id: "financial.transactions.month-next"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.cardInvoice.row"
+    timeout: 20000
+- assertVisible:
+    id: "financial.transactions.cardInvoice.amount"
+    text: ".*10[.,]00.*"
+# ...and not on the invoice its date computes (the month before)
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
+- tapOn:
+    id: "financial.transactions.month-previous"
+- assertNotVisible:
+    id: "financial.transactions.cardInvoice.row"
