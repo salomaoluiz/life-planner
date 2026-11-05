@@ -45,6 +45,9 @@ export interface InvoicePurchaseUIModel {
   // Spec 061: the create/edit/delete of this purchase is still running.
   pendingState?: PendingState;
   prepaid: boolean;
+  // Spec 096: not charged yet (the "Previstas" section) AND the series it belongs to.
+  projected?: boolean;
+  recurrenceId?: string;
 }
 
 // One card invoice as a line of the transactions list (spec 029 FR 24).
@@ -130,6 +133,11 @@ class CardInvoiceUIModel {
     return this.dto.invoice.earlyPaid;
   }
 
+  // Spec 096: what was really charged (cents); the 034 projections and the projected purchases are not in it.
+  get effectiveCents() {
+    return this.dto.filtered?.filteredTotal ?? this.dto.invoice.amount;
+  }
+
   get hasPayment() {
     return !!this.dto.invoice.payment;
   }
@@ -208,8 +216,32 @@ class CardInvoiceUIModel {
     return addMonthsTo(this.dto.invoice.referenceMonth, -1);
   }
 
+  // Spec 096: the projected purchases stored on the invoice (cents), apart from the 034 projections of later months.
+  get projectedAmountCents() {
+    return this.dto.invoice.projectedAmount;
+  }
+
   get projectedCents() {
     return this.projectedItems.reduce((sum, item) => sum + item.amountCents, 0);
+  }
+
+  get projectedCount() {
+    return this.dto.invoice.projectedCount;
+  }
+
+  // Stored projected purchases (they can be confirmed), in the order of the invoice.
+  get projectedPurchases(): InvoicePurchaseUIModel[] {
+    return this.allPurchases.filter((purchase) => purchase.projected);
+  }
+
+  // What the invoice would be if every projected purchase became effective, 034 projections included (cents).
+  get projectedTotalCents() {
+    return this.dto.invoice.projectedTotal + this.projectedCents;
+  }
+
+  // Stored projected purchases plus the 034 projections.
+  get projectedTotalCount() {
+    return this.dto.invoice.projectedCount + this.projectedItems.length;
   }
 
   // Every row of the invoice, matching or not (spec 045).
@@ -224,39 +256,9 @@ class CardInvoiceUIModel {
     return this.dto.purchases.map((purchase) => purchase.id);
   }
 
+  // The effective purchases (the "Compras" section).
   get purchases(): InvoicePurchaseUIModel[] {
-    const stored = this.dto.purchases.map((purchase) => ({
-      amountCents: purchase.value,
-      categoryColor: purchase.categoryIconColor
-        ? normalizeCategoryColor(purchase.categoryIconColor)
-        : undefined,
-      categoryIcon: purchase.categoryIcon ?? FALLBACK_ICON,
-      categoryName: purchase.category,
-      date: parseCalendarDate(purchase.date),
-      description: purchase.description,
-      id: purchase.id,
-      installment:
-        purchase.installmentNumber && purchase.installmentCount
-          ? {
-              count: purchase.installmentCount,
-              number: purchase.installmentNumber,
-            }
-          : undefined,
-      notes: purchase.notes,
-      prepaid: !!purchase.prepaid,
-    }));
-    const { added, replaced, states } = this.overlay;
-
-    return [
-      ...stored.map(
-        (purchase) =>
-          replaced.get(purchase.id) ??
-          (states.has(purchase.id)
-            ? { ...purchase, pendingState: states.get(purchase.id) }
-            : purchase),
-      ),
-      ...added,
-    ];
+    return this.allPurchases.filter((purchase) => !purchase.projected);
   }
 
   get referenceMonth() {
@@ -278,6 +280,43 @@ class CardInvoiceUIModel {
 
   get status() {
     return this.dto.invoice.status;
+  }
+
+  private get allPurchases(): InvoicePurchaseUIModel[] {
+    const stored = this.dto.purchases.map((purchase) => ({
+      amountCents: purchase.value,
+      categoryColor: purchase.categoryIconColor
+        ? normalizeCategoryColor(purchase.categoryIconColor)
+        : undefined,
+      categoryIcon: purchase.categoryIcon ?? FALLBACK_ICON,
+      categoryName: purchase.category,
+      date: parseCalendarDate(purchase.date),
+      description: purchase.description,
+      id: purchase.id,
+      installment:
+        purchase.installmentNumber && purchase.installmentCount
+          ? {
+              count: purchase.installmentCount,
+              number: purchase.installmentNumber,
+            }
+          : undefined,
+      notes: purchase.notes,
+      prepaid: !!purchase.prepaid,
+      projected: !!purchase.projected,
+      recurrenceId: purchase.recurrenceId,
+    }));
+    const { added, replaced, states } = this.overlay;
+
+    return [
+      ...stored.map(
+        (purchase) =>
+          replaced.get(purchase.id) ??
+          (states.has(purchase.id)
+            ? { ...purchase, pendingState: states.get(purchase.id) }
+            : purchase),
+      ),
+      ...added,
+    ];
   }
 
   constructor(

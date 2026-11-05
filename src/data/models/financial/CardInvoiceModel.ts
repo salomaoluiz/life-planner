@@ -37,6 +37,8 @@ export interface InvoicePurchaseModel {
   prepaid: boolean;
   // Spec 096: a purchase not charged yet.
   projected: boolean;
+  // Spec 096: the series of a recurring purchase.
+  recurrenceId?: string;
   value: number;
 }
 
@@ -122,6 +124,7 @@ class CardInvoiceModel {
         ownerId: purchase.ownerId as string,
         prepaid: Boolean(purchase.prepaid),
         projected: Boolean(purchase.projected),
+        recurrenceId: (purchase.recurrenceId as null | string) ?? undefined,
         value: Number(purchase.value),
       })),
     });
