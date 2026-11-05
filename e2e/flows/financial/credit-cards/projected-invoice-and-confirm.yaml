@@ -1,0 +1,106 @@
+url: ${E2E_WEB_URL}
+name: financial/credit-cards/projected-invoice-and-confirm
+tags:
+  - financial
+  - spec-096
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Spec 096: a projected purchase sits on the invoice apart from the effective amount; confirming it with the real value
+# moves it to the effective amount.
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- evalScript: ${output.KEEP_ACCOUNT_ID = output.ACCOUNT_ID}
+- evalScript: ${output.KEEP_CATEGORY_ID = output.EXPENSE_CATEGORY_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Card
+      KEY: CARD_TITLE
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Market
+      KEY: PURCHASE_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Stream
+      KEY: PROJECTED_NAME
+# A card whose last invoice closed yesterday (CLOSED, listed today): one purchase of 250,00 and one PROJECTED of 100,00
+- runFlow:
+    file: ../../../subflows/setup/create-card-purchase.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      CATEGORY_ID: ${output.KEEP_CATEGORY_ID}
+      TITLE: ${output.CARD_TITLE}
+      DESCRIPTION: ${output.PURCHASE_NAME}
+      VALUE_CENTS: "25000"
+      SECOND_CATEGORY_ID: ${output.KEEP_CATEGORY_ID}
+      SECOND_DESCRIPTION: ${output.PROJECTED_NAME}
+      SECOND_VALUE_CENTS: "10000"
+      SECOND_PROJECTED: "true"
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.cardInvoice.row"
+    timeout: 20000
+# The line shows the effective amount (250,00) and "+ projected"
+- assertVisible:
+    id: "financial.transactions.cardInvoice.amount"
+    text: ".*250[.,]00.*"
+- assertVisible:
+    id: "financial.transactions.cardInvoice.includes-projected"
+# The invoice: the projected summary and the Previstas section with the purchase
+# Expand the line, then open the invoice
+- tapOn:
+    id: "financial.transactions.cardInvoice.toggle"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- tapOn:
+    id: "financial.transactions.cardInvoice.open"
+- extendedWaitUntil:
+    visible:
+      id: "financial.invoice.projected-summary"
+    timeout: 20000
+- assertVisible:
+    id: "financial.invoice.projected-purchase"
+# Confirm it with the real value (99,90)
+- tapOn:
+    id: "financial.invoice.projected-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "financial.confirm-projected.amount"
+    timeout: 20000
+- tapOn:
+    id: "financial.confirm-projected.amount"
+- eraseText
+- inputText: "9990"
+- tapOn:
+    id: "financial.confirm-projected.confirm"
+# The invoice now has 349,90 effective and nothing projected
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.cardInvoice.amount"
+      text: ".*349[.,]90.*"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.transactions.cardInvoice.includes-projected"

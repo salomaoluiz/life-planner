@@ -3,6 +3,14 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.11.0] - 2026-11-05
+
+### Added
+
+- Card purchases can be created as projected ("Prevista"): not charged yet, one-off or as a monthly series. The invoice shows the effective amount, the projected total and a "Previstas" section (spec 096).
+- Confirm ("Efetivar") a projected purchase with the real value and date; an invoice with projected purchases can't be paid until each one is confirmed, moved to the next invoice or discarded (spec 096).
+- The card limit separates consumed, projected and available; Home and the invoice line say how much of an invoice is projected (spec 096).
+
 ## [1.10.1] - 2026-11-05
 
 ### Fixed

@@ -1,0 +1,94 @@
+url: ${E2E_WEB_URL}
+name: financial/credit-cards/projected-create
+tags:
+  - financial
+  - spec-096
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Spec 096: a card purchase created as "Prevista" lands on the invoice as projected, not as effective.
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- evalScript: ${output.KEEP_ACCOUNT_ID = output.ACCOUNT_ID}
+- evalScript: ${output.KEEP_CATEGORY_ID = output.EXPENSE_CATEGORY_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Card
+      KEY: CARD_TITLE
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Market
+      KEY: PURCHASE_NAME
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Stream
+      KEY: PROJECTED_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-card-purchase.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      CATEGORY_ID: ${output.KEEP_CATEGORY_ID}
+      TITLE: ${output.CARD_TITLE}
+      DESCRIPTION: ${output.PURCHASE_NAME}
+      VALUE_CENTS: "25000"
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+- tapOn:
+    id: "quick-add-button|navigation-rail-add"
+- extendedWaitUntil:
+    visible:
+      id: "quick-add-transaction"
+    timeout: 20000
+- tapOn:
+    id: "quick-add-transaction"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactionForm.payWith"
+    timeout: 20000
+- tapOn:
+    id: "financial.transactionForm.payWith-CARD"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactionForm.projected.switch"
+    timeout: 20000
+- tapOn:
+    id: "financial.transactionForm.projected.switch"
+- assertVisible:
+    id: "financial.transactionForm.projected.note"
+- tapOn:
+    id: "financial.transaction-form.amount-input"
+- eraseText
+- inputText: "10000"
+- tapOn:
+    id: "financial.transaction-form.description-input"
+- inputText: ${output.PROJECTED_NAME}
+- tapOn:
+    id: "financial.transaction-form.category-${output.KEEP_CATEGORY_ID}"
+- tapOn:
+    id: "financial.transaction-form.save-button"
+# Today's purchase goes to the next invoice (the card closed yesterday): it is listed a month ahead
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- tapOn:
+    id: "financial.transactions.month-next"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.cardInvoice.includes-projected"
+    timeout: 20000
