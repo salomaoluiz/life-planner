@@ -3,6 +3,12 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.7.7] - 2026-11-04
+
+### Changed
+
+- The web app loads faster: each screen and modal downloads only when opened, and the first load is about 20% smaller (spec 089).
+
 ## [1.7.6] - 2026-11-04
 
 ### Changed

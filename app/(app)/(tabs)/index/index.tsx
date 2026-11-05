@@ -1,1 +1,1 @@
-export { Home as default } from "@screens";
+export { default } from "@screens/Home";
