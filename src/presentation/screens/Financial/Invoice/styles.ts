@@ -24,6 +24,11 @@ function useStyles(columns: 1 | 2 = 1) {
         flexDirection: "row",
         justifyContent: "space-between",
       },
+      projectedRow: {
+        alignItems: "center",
+        flexDirection: "row",
+        gap: theme.sizes.spacing.sm,
+      },
       trailing: {
         alignItems: "flex-end",
         gap: theme.sizes.spacing.xxs,

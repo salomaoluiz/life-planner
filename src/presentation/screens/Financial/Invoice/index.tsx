@@ -5,6 +5,7 @@ import {
   Badge,
   BottomSheet,
   Button,
+  Card,
   ConfirmDialog,
   ErrorState,
   FormColumns,
@@ -76,6 +77,12 @@ function InvoiceModal() {
       return <Skeleton.ListItem testID="invoice-skeleton" />;
     }
 
+    // Stored projected purchases plus the 034 projections of a later invoice (they come apart from the invoice).
+    const projectedCount = invoice.projectedCount + vm.projected.length;
+    const projectedTotalCents =
+      invoice.projectedTotalCents +
+      vm.projected.reduce((sum, item) => sum + item.amountCents, 0);
+    const hasProjected = projectedCount > 0;
     const isPaid = invoice.status === "PAID";
     const isClosed = invoice.status === "CLOSED";
     const dates = invoice.dates;
@@ -86,13 +93,21 @@ function InvoiceModal() {
           compactGap="lg"
           left={
             <View style={styles.header}>
+              {hasProjected ? (
+                <Text.Caption
+                  tone="secondary"
+                  value={t("financial.projected.invoice.effective")}
+                />
+              ) : null}
               <View style={styles.headerRow}>
                 <AmountText
                   currency={invoice.currency}
                   size="heading"
                   testID={invoiceTestIds.amount}
                   type="EXPENSE"
-                  value={invoice.amountCents}
+                  value={
+                    hasProjected ? invoice.effectiveCents : invoice.amountCents
+                  }
                 />
                 <Badge
                   label={t(
@@ -102,6 +117,36 @@ function InvoiceModal() {
                   tone={isPaid ? "income" : "accent"}
                 />
               </View>
+              {hasProjected ? (
+                <Card testID={invoiceTestIds.projectedSummary} variant="dashed">
+                  <View style={styles.projectedRow}>
+                    <Badge
+                      label={t("financial.projected.chip")}
+                      tone="accent"
+                    />
+                    <Text.Body
+                      value={t("financial.projected.invoice.projectedTotal", {
+                        value: formatAmount(
+                          projectedTotalCents,
+                          localeTag,
+                          invoice.currency,
+                        ),
+                      })}
+                    />
+                  </View>
+                  <Text.Caption
+                    tone="secondary"
+                    value={t("financial.projected.invoice.plusProjected", {
+                      count: projectedCount,
+                      value: formatAmount(
+                        projectedTotalCents - invoice.effectiveCents,
+                        localeTag,
+                        invoice.currency,
+                      ),
+                    })}
+                  />
+                </Card>
+              ) : null}
               <Text.Caption
                 tone="secondary"
                 value={t("financial.invoice.dates", {
@@ -212,13 +257,52 @@ function InvoiceModal() {
                   />
                 ))}
               </View>
-              {vm.projected.length > 0 ? (
+              {hasProjected ? (
                 <View>
                   <GroupHeader
-                    title={t("financial.invoice.projectedTitle", {
-                      count: vm.projected.length,
+                    title={t("financial.projected.invoice.sectionTitle", {
+                      count: projectedCount,
                     })}
                   />
+                  {invoice.projectedPurchases.map((purchase) => (
+                    <ListItem
+                      inset
+                      key={purchase.id}
+                      leading={
+                        <IconTile
+                          color={purchase.categoryColor}
+                          name={purchase.categoryIcon}
+                        />
+                      }
+                      meta={
+                        <Badge
+                          label={t("financial.projected.chip")}
+                          tone="accent"
+                        />
+                      }
+                      subtitle={`${purchase.categoryName} · ${formatDayMonth(toIsoDate(purchase.date))}`}
+                      testID={invoiceTestIds.projectedPurchase}
+                      title={
+                        purchase.recurrenceId
+                          ? `${purchase.description} ↻`
+                          : purchase.description
+                      }
+                      trailing={
+                        <View style={styles.trailing}>
+                          <AmountText
+                            currency={invoice.currency}
+                            type="EXPENSE"
+                            value={purchase.amountCents}
+                          />
+                          <Button.Secondary
+                            label={t("financial.projected.confirm.action")}
+                            onPress={() => vm.onConfirmPress(purchase)}
+                            testID={invoiceTestIds.projectedConfirm}
+                          />
+                        </View>
+                      }
+                    />
+                  ))}
                   {vm.projected.map((item) => (
                     <ListItem
                       inset

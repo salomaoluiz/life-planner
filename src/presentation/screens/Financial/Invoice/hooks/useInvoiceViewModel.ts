@@ -11,6 +11,7 @@ import { toCalendarDate } from "@screens/Financial/models/creditSheet";
 import { addMonthsTo } from "@screens/Financial/models/invoiceMonth";
 import CardInvoiceUIModel, {
   InvoiceCreditUIModel,
+  InvoicePurchaseUIModel,
 } from "@screens/Financial/Transactions/models/CardInvoiceUIModel";
 import TransactionUIModel from "@screens/Financial/Transactions/models/TransactionUIModel";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
@@ -194,6 +195,15 @@ function useInvoiceViewModel() {
       replaceModal("add_new_transaction", { creditCardId: params.cardId });
     },
     onClose: () => closeModal(),
+    onConfirmPress: (purchase: InvoicePurchaseUIModel) =>
+      replaceModal("confirm_projected", {
+        creditCardId: params.cardId,
+        date: toCalendarDate(purchase.date),
+        description: purchase.description,
+        id: purchase.id,
+        recurring: purchase.recurrenceId ? "1" : undefined,
+        value: String(purchase.amountCents),
+      }),
     onCreditPress: (credit: InvoiceCreditUIModel) =>
       replaceModal(
         credit.kind === "REFUND" ? "card_refund" : "card_early_payment",

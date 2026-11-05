@@ -25,6 +25,7 @@ const defaultViewModel: ReturnType<typeof useInvoiceViewModel> = {
   onAccountChange: jest.fn(),
   onAddPurchasePress: jest.fn(),
   onClose: jest.fn(),
+  onConfirmPress: jest.fn(),
   onCreditPress: jest.fn(),
   onEarlyPaymentPress: jest.fn(),
   onMethodChange: jest.fn(),

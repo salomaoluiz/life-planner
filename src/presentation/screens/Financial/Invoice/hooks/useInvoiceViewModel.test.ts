@@ -150,6 +150,37 @@ it("SHOULD navigate to the add form with the card AND to a purchase edit AND clo
   expect(modalNavigation.closeModal).toHaveBeenCalled();
 });
 
+it("SHOULD open the confirm sheet of a projected purchase with its series flag (spec 096)", () => {
+  givenLoaded({ invoice: makeInvoice() });
+  const { result } = setup();
+
+  act(() =>
+    result.current.onConfirmPress({
+      amountCents: 10000,
+      categoryIcon: "x",
+      categoryName: "Subscriptions",
+      date: new Date(2026, 9, 25),
+      description: "Youtube Premium",
+      id: "p9",
+      prepaid: false,
+      projected: true,
+      recurrenceId: "series-1",
+    }),
+  );
+
+  expect(modalNavigation.replaceModal).toHaveBeenLastCalledWith(
+    "confirm_projected",
+    {
+      creditCardId: "card-1",
+      date: "2026-10-25",
+      description: "Youtube Premium",
+      id: "p9",
+      recurring: "1",
+      value: "10000",
+    },
+  );
+});
+
 it("SHOULD open the refund and early payment sheets for this invoice (spec 032)", () => {
   givenLoaded({ invoice: makeInvoice() });
   const { result } = setup();

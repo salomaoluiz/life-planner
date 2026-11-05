@@ -5,7 +5,10 @@ import { fireEvent, screen, within } from "@tests";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import TransactionUIModel from "@screens/Financial/Transactions/models/TransactionUIModel";
 
-import { makeInvoice } from "../Transactions/mocks/invoice.mocks";
+import {
+  makeInvoice,
+  makeInvoiceWithProjected,
+} from "../Transactions/mocks/invoice.mocks";
 import { setup } from "./mocks/index.mocks";
 import invoiceTestIds from "./testIds";
 
@@ -293,6 +296,52 @@ describe("projected purchases (spec 034)", () => {
     setup();
 
     expect(screen.queryByTestId(invoiceTestIds.projected)).toBeNull();
+  });
+});
+
+describe("stored projected purchases (spec 096)", () => {
+  it("SHOULD label the effective amount AND show the projected total WHEN some purchase is projected", () => {
+    setup({ invoice: makeInvoiceWithProjected() });
+
+    expect(
+      screen.getByText("financial.projected.invoice.effective"),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(invoiceTestIds.projectedSummary),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByText(/financial.projected.invoice.projectedTotal/),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByText(/financial.projected.invoice.plusProjected/),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD keep the projected purchase out of Compras AND list it under Previstas with Efetivar", () => {
+    const vm = setup({
+      invoice: makeInvoiceWithProjected({}, "series-1"),
+    });
+
+    expect(screen.getAllByTestId(invoiceTestIds.purchase)).toHaveLength(2);
+    expect(
+      screen.getAllByTestId(invoiceTestIds.projectedPurchase),
+    ).toHaveLength(1);
+
+    fireEvent.press(screen.getByTestId(invoiceTestIds.projectedConfirm));
+
+    expect(vm.onConfirmPress).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "purchase-3", recurrenceId: "series-1" }),
+    );
+  });
+
+  it("SHOULD show neither the summary nor the Efetivar button WHEN nothing is projected", () => {
+    setup();
+
+    expect(screen.queryByTestId(invoiceTestIds.projectedSummary)).toBeNull();
+    expect(screen.queryByTestId(invoiceTestIds.projectedConfirm)).toBeNull();
+    expect(
+      screen.queryByText("financial.projected.invoice.effective"),
+    ).toBeNull();
   });
 });
 
