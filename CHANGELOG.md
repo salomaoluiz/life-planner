@@ -3,6 +3,12 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.8.0] - 2026-11-05
+
+### Added
+
+- Mark one account as your favorite in the account form. The Overview balance chart draws it as its own line over the total, the daily balance in Transactions shows its balance first (and the total when you open the day), and the Home balance card follows it, with the total of accounts still shown (spec 094).
+
 ## [1.7.7] - 2026-11-04
 
 ### Changed

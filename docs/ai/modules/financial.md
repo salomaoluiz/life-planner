@@ -545,3 +545,13 @@ On `medium`/`expanded` these modals are `BottomSheet size="form"` with `FormColu
 - `Transactions/models/formatters.ts` (`getDateTimeFormat`, one formatter per locale and options); `TransactionUIModel.date`/`dateKey` are cached.
 - `Transactions/components/TransactionRow` is memoized (`styles.ts` holds its per-theme styles; `onAdjustmentPress` opens the adjustment sheet); `CardInvoiceRow` and `DayBalanceLine` are memoized; `useStableCallback` (`src/presentation/hooks/useStableCallback`) gives the rows stable handlers.
 - Perf: `__perf__/transactionList.bench.test.ts`, render commit scenarios in every `__perf__` test, registry field `maxCommits`.
+
+## Favorite account (spec 094)
+
+- `AccountEntity` / `AccountModel` / `AccountDTO` carry `isFavorite` (the API computes it for the requesting user; missing = `false`). Create/update use cases and repositories take an optional `isFavorite`; the datasource sends it only when defined.
+- `domain/entities/financial/resolveFavoriteAccount(accounts, { accountIds?, currency? })`: the favorite only when it is in the given set, active, in the filter's `accountIds` (empty = no filter) and in the screen currency; otherwise `undefined` and the screen behaves as before (no notice).
+- Account modal (`NewAccountModal`): "Favorite account" `Switch` (testID `financial.account-form.favorite-switch`), `AccountFormState.isFavorite`, `withArchived` (archiving turns it off and disables the switch), `NewAccountUIModel.replacedFavoriteName`. `toUpdateParams` sends `isFavorite` only when it changed and never together with archiving (the API clears it).
+- Overview `BalanceBlock` is split into `models/balanceSeriesModel` (pure: muted total + primary favorite series, gaps where the account does not exist yet) and `components/BalancePointDetail` (favorite `HighlightRow`, total, "Other accounts"); the legend is a `ChartCard` legend with an icon. `useOverviewViewModel.favorite` reads the accounts through the shared `financeKeys.accounts.raw()` query (also used by the filters and forms).
+- Transactions: `useTransactionsViewModel.favorite` (same shared query), `buildEntries({ favoriteId })` lists the favorite first in the expanded day (`ListEntry.balanceLine.favorite`); a collapsed day header shows the star, the favorite name and ITS balance (`day-balance-favorite-<date>`), an expanded header and the tooltip show the Total.
+- Perf: `financial.overview.mount.cold` maxRequests 6 → 7 and `financial.transactions.render.mount` maxCommits 5 → 6 (the accounts list is needed to know the favorite; it is shared with the filters, so it is one request).
+- E2E: `financial/accounts/favorite-account` (tags `financial`, `home`, `spec-094`).
