@@ -3,6 +3,7 @@ import { Suspense, useEffect, useState } from "react";
 import { Button, Text, View } from "react-native";
 
 import image from "@assets/images/error_boundary.png";
+import { reloadOnStaleChunk } from "@infrastructure/appInfo";
 import { ErrorBoundaryFallBackProps } from "@infrastructure/monitoring/types";
 import { asyncStorage, StorageKeys } from "@infrastructure/storage";
 import {
@@ -14,7 +15,11 @@ import styles from "./styles";
 
 type TranslationKeys = keyof typeof translations;
 
-function Index({ retry }: ErrorBoundaryFallBackProps) {
+function Index({ error, retry }: ErrorBoundaryFallBackProps) {
+  useEffect(() => {
+    reloadOnStaleChunk(error);
+  }, [error]);
+
   const [translation, setTranslation] =
     useState<TranslationKeys>(fallbackLanguage);
 

@@ -3,6 +3,12 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.9.1] - 2026-11-05
+
+### Fixed
+
+- Opening a transaction (or any screen) after a new deploy no longer shows an error when a script file was replaced: the page reloads once on its own, and the browser always checks for the newest script files.
+
 ## [1.9.0] - 2026-11-05
 
 ### Added

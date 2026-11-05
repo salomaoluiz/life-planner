@@ -1,14 +1,20 @@
 import { Image } from "expo-image";
+import { useEffect } from "react";
 import { View } from "react-native";
 
 import image from "@assets/images/error_boundary.png";
 import { Button, Text } from "@components";
+import { reloadOnStaleChunk } from "@infrastructure/appInfo";
 import { ErrorBoundaryFallBackProps } from "@infrastructure/monitoring/types";
 import { useTranslation } from "@presentation/i18n";
 
 import useStyles from "./styles";
 
-function GlobalBoundary({ retry }: ErrorBoundaryFallBackProps) {
+function GlobalBoundary({ error, retry }: ErrorBoundaryFallBackProps) {
+  useEffect(() => {
+    reloadOnStaleChunk(error);
+  }, [error]);
+
   const { t } = useTranslation();
   const { styles, theme } = useStyles();
 

@@ -1,7 +1,13 @@
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 
-import { fetchServedWebVersion, getAppInfo, reloadApp } from "./";
+import {
+  fetchServedWebVersion,
+  getAppInfo,
+  isChunkLoadError,
+  reloadApp,
+  reloadOnStaleChunk,
+} from "./";
 
 jest.mock("expo-constants", () => ({
   __esModule: true,
@@ -13,6 +19,14 @@ const reloadMock = jest.fn();
 
 beforeEach(() => {
   jest.clearAllMocks();
+  const store = new Map<string, string>();
+  Object.defineProperty(window, "sessionStorage", {
+    configurable: true,
+    value: {
+      getItem: (key: string) => store.get(key) ?? null,
+      setItem: (key: string, value: string) => store.set(key, value),
+    },
+  });
   global.fetch = fetchMock;
   Object.defineProperty(window, "location", {
     configurable: true,
@@ -114,6 +128,46 @@ describe("reloadApp", () => {
     Platform.OS = "android";
     reloadApp();
 
+    expect(reloadMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("reloadOnStaleChunk", () => {
+  const chunkError = Object.assign(
+    new Error("Loading module /_expo/static/js/web/index-x.js failed."),
+    { name: "AsyncRequireError" },
+  );
+
+  it("SHOULD recognise a chunk load error", () => {
+    expect(isChunkLoadError(chunkError)).toBe(true);
+    expect(isChunkLoadError(new Error("Loading module a.js failed."))).toBe(
+      true,
+    );
+    expect(isChunkLoadError(new Error("boom"))).toBe(false);
+    expect(isChunkLoadError("AsyncRequireError")).toBe(false);
+  });
+
+  it("SHOULD reload the page once for a chunk error", () => {
+    expect(reloadOnStaleChunk(chunkError)).toBe(true);
+    expect(reloadMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("SHOULD NOT reload again within a minute, so a missing chunk does not loop", () => {
+    reloadOnStaleChunk(chunkError);
+
+    expect(reloadOnStaleChunk(chunkError)).toBe(false);
+    expect(reloadMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("SHOULD NOT reload for other errors", () => {
+    expect(reloadOnStaleChunk(new Error("boom"))).toBe(false);
+    expect(reloadMock).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD NOT reload on native", () => {
+    Platform.OS = "android";
+
+    expect(reloadOnStaleChunk(chunkError)).toBe(false);
     expect(reloadMock).not.toHaveBeenCalled();
   });
 });
