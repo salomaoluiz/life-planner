@@ -16,6 +16,13 @@ function addMonthsTo(month: string, delta: number): string {
   return formatMonth(addMonths(parseMonth(month), delta));
 }
 
+// Closing date of the invoice of `referenceMonth` ("2026-10", closing 31 -> "2026-10-31"; February is clamped).
+function closingDateOf(referenceMonth: string, closingDay: number): string {
+  const reference = parseMonth(referenceMonth);
+
+  return toDate(reference, effectiveDay(closingDay, reference));
+}
+
 // Due day of the invoice of `referenceMonth`: in that month when after the closing day, else the next.
 function dueDateOf(
   referenceMonth: string,
@@ -50,8 +57,24 @@ function parseMonth(month: string): YearMonth {
   return { month: value, year };
 }
 
+// Spec 095 FR 1: the previous, computed and next invoice of a purchase made on `date`.
+function purchaseInvoiceOptions(
+  date: string,
+  closingDay: number,
+): [string, string, string] {
+  const computed = invoiceMonthOf(date, closingDay);
+
+  return [addMonthsTo(computed, -1), computed, addMonthsTo(computed, 1)];
+}
+
 function toDate(reference: YearMonth, day: number) {
   return `${formatMonth(reference)}-${String(day).padStart(2, "0")}`;
 }
 
-export { addMonthsTo, dueDateOf, invoiceMonthOf };
+export {
+  addMonthsTo,
+  closingDateOf,
+  dueDateOf,
+  invoiceMonthOf,
+  purchaseInvoiceOptions,
+};
