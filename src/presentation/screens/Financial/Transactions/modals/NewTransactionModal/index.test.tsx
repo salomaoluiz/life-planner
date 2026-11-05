@@ -279,6 +279,39 @@ describe("Pay with (spec 029)", () => {
 
   it("SHOULD hide the type control, show the card field with the hints AND disable Save WHEN the invoice is paid", () => {
     setup({
+      invoiceField: {
+        computedMonth: "2026-10",
+        options: [
+          {
+            closingDate: "2026-09-30",
+            disabled: true,
+            dueDate: "2026-10-10",
+            isComputed: false,
+            month: "2026-09",
+            readOnly: false,
+            status: "PAID" as const,
+          },
+          {
+            closingDate: "2026-10-31",
+            disabled: false,
+            dueDate: "2026-11-10",
+            isComputed: true,
+            month: "2026-10",
+            readOnly: false,
+            status: "OPEN" as const,
+          },
+          {
+            closingDate: "2026-11-30",
+            disabled: false,
+            dueDate: "2026-12-10",
+            isComputed: false,
+            month: "2026-11",
+            readOnly: false,
+            status: "FUTURE" as const,
+          },
+        ],
+        value: "2026-10",
+      },
       invoiceHint: { due: "2026-11-10", month: "2026-10" },
       invoiceMonthLabelDate: new Date(2026, 9, 1),
       isInvoicePaid: true,
@@ -295,7 +328,7 @@ describe("Pay with (spec 029)", () => {
       screen.getByTestId(transactionFormTestIds.cardSelect),
     ).toBeOnTheScreen();
     expect(
-      screen.getByTestId(transactionFormTestIds.invoiceHint),
+      screen.getByTestId(transactionFormTestIds.invoiceField),
     ).toBeOnTheScreen();
     expect(
       screen.getByTestId(transactionFormTestIds.overLimit),
@@ -307,6 +340,125 @@ describe("Pay with (spec 029)", () => {
       screen.getByTestId(transactionFormTestIds.saveButton).props
         .accessibilityState?.disabled,
     ).toBe(true);
+  });
+
+  describe("invoice field (spec 095)", () => {
+    const field = {
+      computedMonth: "2026-10",
+      options: [
+        {
+          closingDate: "2026-09-30",
+          disabled: true,
+          dueDate: "2026-10-10",
+          isComputed: false,
+          month: "2026-09",
+          readOnly: false,
+          status: "PAID" as const,
+        },
+        {
+          closingDate: "2026-10-31",
+          disabled: false,
+          dueDate: "2026-11-10",
+          isComputed: true,
+          month: "2026-10",
+          readOnly: false,
+          status: "OPEN" as const,
+        },
+        {
+          closingDate: "2026-11-30",
+          disabled: false,
+          dueDate: "2026-12-10",
+          isComputed: false,
+          month: "2026-11",
+          readOnly: false,
+          status: "FUTURE" as const,
+        },
+      ],
+      value: "2026-10",
+    };
+
+    it("SHOULD show the invoice with its due date AND no hint WHEN it follows the date", () => {
+      setup({ invoiceField: field, payWith: "CARD" });
+
+      expect(
+        screen.getByTestId(`${transactionFormTestIds.invoiceField}-value`).props
+          .children,
+      ).toContain("financial.transactions.form.invoiceFieldValue");
+      expect(
+        screen.queryByTestId(`${transactionFormTestIds.invoiceField}-hint`),
+      ).toBeNull();
+    });
+
+    it("SHOULD show the hint that resets the choice WHEN the invoice is not the computed one", () => {
+      const vm = setup({
+        invoiceField: { ...field, value: "2026-11" },
+        payWith: "CARD",
+      });
+
+      expect(
+        screen.getByTestId(`${transactionFormTestIds.invoiceField}-hint`),
+      ).toBeOnTheScreen();
+
+      fireEvent.press(
+        screen.getByTestId(`${transactionFormTestIds.invoiceField}-reset`),
+      );
+
+      expect(vm.onInvoiceReset).toHaveBeenCalledTimes(1);
+    });
+
+    it("SHOULD hand the picked month to the view model", () => {
+      const vm = setup({ invoiceField: field, payWith: "CARD" });
+
+      fireEvent.press(screen.getByTestId(transactionFormTestIds.invoiceField));
+      fireEvent.press(
+        screen.getByTestId(
+          `${transactionFormTestIds.invoiceField}-option-2026-11`,
+        ),
+      );
+
+      expect(vm.onInvoiceChange).toHaveBeenCalledWith("2026-11");
+    });
+
+    it("SHOULD label the field for the 1st installment WHEN installments are on", () => {
+      setup({
+        installments: {
+          count: 6,
+          countText: "6",
+          enabled: true,
+          error: undefined,
+          preview: undefined,
+          range: undefined,
+          visible: true,
+        },
+        invoiceField: field,
+        payWith: "CARD",
+      });
+
+      expect(
+        screen.getByText("financial.transactions.form.invoiceFieldFirst"),
+      ).toBeOnTheScreen();
+    });
+
+    it("SHOULD NOT show the field WHEN the view model has none (account, repeat, recurring)", () => {
+      setup({ invoiceField: undefined, payWith: "CARD" });
+
+      expect(
+        screen.queryByTestId(transactionFormTestIds.invoiceField),
+      ).toBeNull();
+    });
+
+    it("SHOULD keep a paid neighbour unselectable", () => {
+      const vm = setup({ invoiceField: field, payWith: "CARD" });
+
+      fireEvent.press(screen.getByTestId(transactionFormTestIds.invoiceField));
+      fireEvent.press(
+        screen.getByTestId(
+          `${transactionFormTestIds.invoiceField}-option-2026-09`,
+        ),
+      );
+
+      expect(vm.onInvoiceChange).not.toHaveBeenCalled();
+    });
   });
 
   it("SHOULD show a hint WHEN the owner has no card", () => {

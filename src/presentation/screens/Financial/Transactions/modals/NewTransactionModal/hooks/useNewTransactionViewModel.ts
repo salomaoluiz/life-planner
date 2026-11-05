@@ -29,10 +29,8 @@ import {
   installmentPreview,
   isValidInstallmentCount,
 } from "@screens/Financial/models/installments";
-import {
-  dueDateOf,
-  invoiceMonthOf,
-} from "@screens/Financial/models/invoiceMonth";
+import { dueDateOf } from "@screens/Financial/models/invoiceMonth";
+import { buildInvoiceOptions } from "@screens/Financial/models/invoiceOptions";
 import {
   archivedOwnerIds,
   personalOwnerId,
@@ -68,8 +66,11 @@ import {
 } from "../models/recurrenceEdit";
 import {
   applySuggestion,
+  calendarDayOf,
+  changeCard,
   changeDate,
   changeInstallmentsOn,
+  changeInvoiceMonth,
   changeOwner,
   changePaid,
   changePayWith,
@@ -77,6 +78,8 @@ import {
   changeType,
   chipCategories,
   createInitialState,
+  effectiveInvoiceMonth,
+  InvoiceContext,
   isSameState,
   normalizeDate,
   pickNewRecordId,
@@ -98,14 +101,18 @@ function cachedMonthLists() {
 }
 
 // Live hints of Card mode (spec 029 FR 30): which invoice the purchase lands on, whether it passes
-// the limit (non-blocking) and whether that invoice is already paid (blocks saving).
+// the limit (non-blocking) and whether that invoice is already paid (blocks saving). Spec 095: the invoice is the
+// one the user chose, or the one the date computes; `invoiceField` carries the three options of the picker and is
+// absent for a recurring card transaction, which follows the date (FR 12).
 function cardHintsOf(
   state: TransactionFormState | undefined,
   uiModel: NewTransactionUIModel | undefined,
   overview: CreditCardOverviewDTO | undefined,
   existing: TransactionDTO | undefined,
+  followsDate: boolean,
 ) {
   const none = {
+    invoiceField: undefined,
     invoiceHint: undefined,
     isInvoicePaid: false,
     monthDate: undefined,
@@ -118,9 +125,8 @@ function cardHintsOf(
     return none;
   }
 
-  const date = state.date;
-  const day = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-  const month = invoiceMonthOf(day, card.closingDay);
+  const day = calendarDayOf(state.date);
+  const month = effectiveInvoiceMonth(state, card.closingDay);
   const summary = overview?.cards.find((item) => item.card.id === card.id);
   const paid = (summary?.closedInvoices ?? []).some(
     (invoice) => invoice.referenceMonth === month && invoice.status === "PAID",
@@ -132,8 +138,23 @@ function cardHintsOf(
       : 0;
   const available = summary ? summary.available + stored : undefined;
   const [year, monthNumber] = month.split("-").map(Number);
+  const options = buildInvoiceOptions({
+    card,
+    date: day,
+    storedMonth:
+      existing?.creditCardId === card.id ? existing.invoiceMonth : undefined,
+    summary,
+    today: calendarDayOf(new Date()),
+  });
 
   return {
+    invoiceField: followsDate
+      ? undefined
+      : {
+          computedMonth: options.find((option) => option.isComputed)!.month,
+          options,
+          value: month,
+        },
     invoiceHint: {
       due: dueDateOf(month, card.closingDay, card.dueDay),
       month,
@@ -618,7 +639,13 @@ function useNewTransactionViewModel() {
   }, [accounts.data, categories.data]);
 
   const errors = submitted && state ? validate(state) : {};
-  const cardHints = cardHintsOf(state, uiModel, overview.data, existing);
+  const cardHints = cardHintsOf(
+    state,
+    uiModel,
+    overview.data,
+    existing,
+    !!state?.repeatOn || isRecurring,
+  );
   const mutationError = mutations.find((mutation) => mutation.error)?.error;
   // Deleting paid occurrences needs a second, explicit confirmation (spec 034 FR 31).
   const paidConflict =
@@ -633,6 +660,27 @@ function useNewTransactionViewModel() {
 
   function update(next: TransactionFormState) {
     setEdited(next);
+  }
+
+  // Spec 095 FR 16: what the invoice rules need beyond the form (the card's closing day and, on edit, the stored row).
+  function invoiceContextOf(
+    form: TransactionFormState,
+  ): InvoiceContext | undefined {
+    const card =
+      form.payWith === "CARD" ? uiModel?.card(form.creditCardId) : undefined;
+
+    if (!card) {
+      return undefined;
+    }
+
+    return isEditing && existing?.creditCardId
+      ? {
+          closingDay: card.closingDay,
+          storedCardId: existing.creditCardId,
+          storedDate: calendarDayOf(normalizeDate(new Date(existing.date))),
+          storedMonth: existing.invoiceMonth,
+        }
+      : { closingDay: card.closingDay };
   }
 
   function onSave() {
@@ -669,7 +717,9 @@ function useNewTransactionViewModel() {
     } else if (isEditing) {
       sendEdit(state, owner, categoryName);
     } else if (state.payWith === "CARD" && state.installmentsOn) {
-      createPlanMutation.mutate(toCreateInstallmentParams(state, owner));
+      createPlanMutation.mutate(
+        toCreateInstallmentParams(state, owner, invoiceContextOf(state)),
+      );
     } else if (state.repeatOn) {
       createRecurrenceMutation.mutate(toCreateRecurrenceParams(state, owner));
     } else {
@@ -688,14 +738,14 @@ function useNewTransactionViewModel() {
   ) {
     const card =
       form.payWith === "CARD" ? uiModel?.card(form.creditCardId) : undefined;
-    const day = `${form.date.getFullYear()}-${String(form.date.getMonth() + 1).padStart(2, "0")}-${String(form.date.getDate()).padStart(2, "0")}`;
-
     return buildPendingRow({
       accountName: accounts.data?.find((item) => item.id === form.accountId)
         ?.name,
       categoryName,
       id,
-      invoiceMonth: card ? invoiceMonthOf(day, card.closingDay) : undefined,
+      invoiceMonth: card
+        ? effectiveInvoiceMonth(form, card.closingDay)
+        : undefined,
       owner,
       state: form,
     });
@@ -725,7 +775,12 @@ function useNewTransactionViewModel() {
     owner: OwnerDTO,
     categoryName: string,
   ) {
-    const createParams = toCreateParams(form, owner, categoryName);
+    const createParams = toCreateParams(
+      form,
+      owner,
+      categoryName,
+      invoiceContextOf(form),
+    );
     const resend = saveIntent.current === "next";
 
     function run() {
@@ -771,7 +826,7 @@ function useNewTransactionViewModel() {
       },
       async () =>
         useCases.updateFinancialTransactionUseCase.execute(
-          toUpdateParams(id, form, owner, categoryName),
+          toUpdateParams(id, form, owner, categoryName, invoiceContextOf(form)),
         ),
       () => {
         setRetryDraft(form);
@@ -1015,6 +1070,7 @@ function useNewTransactionViewModel() {
     hasNoCards: uiModel ? !uiModel.hasCards(ownerId) : false,
     hasNoCategories: uiModel ? !uiModel.hasCategories(ownerId, type) : false,
     installments,
+    invoiceField: cardHints.invoiceField,
     invoiceHint: cardHints.invoiceHint,
     invoiceMonthLabelDate: cardHints.monthDate,
     isBlocking,
@@ -1046,7 +1102,7 @@ function useNewTransactionViewModel() {
     },
     onCardChange: (id: string) => {
       if (state) {
-        update({ ...state, creditCardId: id });
+        update(changeCard(state, id));
       }
     },
     onCategoryPickerClose: () => setCategoryPickerOpen(false),
@@ -1104,6 +1160,22 @@ function useNewTransactionViewModel() {
     onInstallmentsToggle: (on: boolean) => {
       if (state) {
         update(changeInstallmentsOn(state, on));
+      }
+    },
+    onInvoiceChange: (month: string) => {
+      if (state && cardHints.invoiceField) {
+        // The computed invoice is "follow the date", not a manual choice.
+        update(
+          changeInvoiceMonth(
+            state,
+            month === cardHints.invoiceField.computedMonth ? undefined : month,
+          ),
+        );
+      }
+    },
+    onInvoiceReset: () => {
+      if (state) {
+        update(changeInvoiceMonth(state, undefined));
       }
     },
     onNotesChange: (text: string) => {

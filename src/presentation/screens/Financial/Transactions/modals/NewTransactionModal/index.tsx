@@ -11,6 +11,7 @@ import {
   ErrorState,
   FormColumns,
   IconTile,
+  InvoiceField,
   RadioGroup,
   SegmentedControl,
   SelectField,
@@ -28,6 +29,10 @@ import pluralKey from "@presentation/i18n/pluralKey";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { useBreakpoint } from "@presentation/theme";
 import { formatDayMonth } from "@screens/Financial/Cards/models/cardList";
+import type {
+  InvoiceOption,
+  InvoiceOptionStatus,
+} from "@screens/Financial/models/invoiceOptions";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 import { RECURRENCE_FREQUENCIES } from "@screens/Financial/models/recurrence";
 
@@ -42,6 +47,12 @@ import useStyles from "./styles";
 import transactionFormTestIds from "./testIds";
 
 const SKELETON_ROWS = [0, 1, 2];
+const INVOICE_STATUS_KEYS: Record<InvoiceOptionStatus, TranslationKeys> = {
+  CLOSED: "financial.transactions.form.invoiceStatus.closed",
+  FUTURE: "financial.transactions.form.invoiceStatus.future",
+  OPEN: "financial.transactions.form.invoiceStatus.open",
+  PAID: "financial.transactions.form.invoiceStatus.paid",
+};
 // Compact: the notice floats just above the two stacked footer buttons; wide: near the bottom of the window.
 const TOAST_BOTTOM = { compact: 176, wide: 32 };
 
@@ -70,6 +81,43 @@ function NewTransactionModal() {
   const isCard = vm.payWith === "CARD";
   const toastBottom =
     useBreakpoint() === "compact" ? TOAST_BOTTOM.compact : TOAST_BOTTOM.wide;
+
+  // Spec 095 FR 13: one row of the picker: month, closing and due dates, status chip.
+  function invoiceOptionOf(option: InvoiceOption) {
+    const date = monthDateOf(option.month);
+    const month = option.readOnly
+      ? monthYearName(date, localeTag)
+      : monthName(date, localeTag);
+    const dates = {
+      closing: formatDayMonth(option.closingDate),
+      due: formatDayMonth(option.dueDate),
+    };
+    const refusesPurchases = option.status === "PAID" && option.disabled;
+    const closed = option.status === "CLOSED" || option.status === "PAID";
+
+    return {
+      disabled: option.disabled,
+      fieldLabel: t("financial.transactions.form.invoiceFieldValue", {
+        due: dates.due,
+        month,
+      }),
+      statusLabel: t(INVOICE_STATUS_KEYS[option.status]),
+      statusTone:
+        option.status === "OPEN" ? ("income" as const) : ("neutral" as const),
+      subtitle: refusesPurchases
+        ? t("financial.transactions.form.invoicePaidOption")
+        : t(
+            closed
+              ? "financial.transactions.form.invoiceClosedOn"
+              : "financial.transactions.form.invoiceCloses",
+            dates,
+          ),
+      title: option.isComputed
+        ? t("financial.transactions.form.invoiceByDate", { month })
+        : month,
+      value: option.month,
+    };
+  }
 
   function renderPreview(installments: NonNullable<typeof vm.installments>) {
     const { first, hasRemainder, others } = installments.preview!;
@@ -339,14 +387,40 @@ function NewTransactionModal() {
                       value={vm.selectedCardId}
                     />
                   )}
-                  {vm.invoiceHint && vm.invoiceMonthLabelDate ? (
-                    <Text.Caption
-                      testID={transactionFormTestIds.invoiceHint}
-                      tone={"secondary"}
-                      value={t("financial.transactions.form.invoiceHint", {
-                        due: formatDayMonth(vm.invoiceHint.due),
-                        month: monthName(vm.invoiceMonthLabelDate, localeTag),
-                      })}
+                  {vm.invoiceField ? (
+                    <InvoiceField
+                      closeLabel={t("common.actions.close")}
+                      hint={
+                        vm.invoiceField.value !== vm.invoiceField.computedMonth
+                          ? {
+                              actionLabel: t(
+                                "financial.transactions.form.invoiceUseDate",
+                              ),
+                              onAction: vm.onInvoiceReset,
+                              text: t(
+                                "financial.transactions.form.invoiceChosenHint",
+                                {
+                                  month: monthName(
+                                    monthDateOf(vm.invoiceField.computedMonth),
+                                    localeTag,
+                                  ),
+                                },
+                              ),
+                            }
+                          : undefined
+                      }
+                      label={t(
+                        vm.installments.enabled
+                          ? "financial.transactions.form.invoiceFieldFirst"
+                          : "financial.transactions.form.invoiceField",
+                      )}
+                      onChange={vm.onInvoiceChange}
+                      options={vm.invoiceField.options.map(invoiceOptionOf)}
+                      sheetTitle={t(
+                        "financial.transactions.form.invoiceSheetTitle",
+                      )}
+                      testID={transactionFormTestIds.invoiceField}
+                      value={vm.invoiceField.value}
                     />
                   ) : null}
                   {vm.overLimitCents > 0 ? (

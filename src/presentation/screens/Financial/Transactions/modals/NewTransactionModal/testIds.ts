@@ -13,7 +13,7 @@ const transactionFormTestIds = {
   installmentsInvoices: "financial.transactionForm.installments.invoices",
   installmentsPreview: "financial.transactionForm.installments.preview",
   installmentsSwitch: "financial.transactionForm.installments.switch",
-  invoiceHint: "financial.transaction-form.invoice-hint",
+  invoiceField: "financial.transaction-form.invoice-field",
   invoicePaid: "financial.transaction-form.invoice-paid",
   missingAccountHint: "financial.transaction-form.missing-account-hint",
   missingCardHint: "financial.transaction-form.missing-card-hint",

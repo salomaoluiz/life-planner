@@ -68,7 +68,7 @@ onFlowComplete:
 - assertNotVisible:
     id: "financial.transaction-form.type"
 - assertVisible:
-    id: "financial.transaction-form.invoice-hint"
+    id: "financial.transaction-form.invoice-field"
 - tapOn:
     id: "financial.transaction-form.amount-input"
 - eraseText
