@@ -68,6 +68,7 @@ export {
   default as LineChart,
   LineChartPoint,
   LineChartProps,
+  LineChartSeries,
 } from "./LineChart";
 export { default as ListItem, ListItemProps } from "./ListItem";
 export { default as Menu, MenuProps } from "./Menu";

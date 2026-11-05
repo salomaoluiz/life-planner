@@ -85,3 +85,40 @@ describe("axisWidth", () => {
     expect(axisWidth([], 11, 52)).toBe(52);
   });
 });
+
+describe("buildSegments with gaps (spec 094)", () => {
+  const coords = [undefined, { x: 10, y: 30 }, { x: 20, y: 20 }];
+
+  it("SHOULD start at the first point that has a value AND skip the pairs with a gap", () => {
+    const segments = buildSegments(
+      coords,
+      [
+        { projected: false, value: undefined },
+        { projected: false, value: 5 },
+        { projected: false, value: 8 },
+      ],
+      50,
+      "green",
+      "red",
+    );
+
+    expect(segments).toEqual([
+      { color: "green", dashed: false, x1: 10, x2: 20, y1: 30, y2: 20 },
+    ]);
+  });
+
+  it("SHOULD return no segment WHEN fewer than two points have a value", () => {
+    expect(
+      buildSegments(
+        [undefined, { x: 10, y: 30 }],
+        [
+          { projected: false, value: undefined },
+          { projected: false, value: 5 },
+        ],
+        50,
+        "green",
+        "red",
+      ),
+    ).toEqual([]);
+  });
+});

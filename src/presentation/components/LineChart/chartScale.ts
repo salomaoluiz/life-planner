@@ -25,10 +25,11 @@ export function axisWidth(
 }
 
 // One segment per pair of points, split where the line crosses zero so each part takes the colour of its side;
-// the segments that lead to a projected point are dashed.
+// the segments that lead to a projected point are dashed. A point without a value (an account that did not exist yet,
+// spec 094) leaves a gap: no segment touches it.
 export function buildSegments(
-  coords: { x: number; y: number }[],
-  points: { projected: boolean; value: number }[],
+  coords: (undefined | { x: number; y: number })[],
+  points: { projected: boolean; value: number | undefined }[],
   baseline: number,
   positive: string,
   negative: string,
@@ -43,6 +44,10 @@ export function buildSegments(
     const [a, b] = [coords[index], coords[index + 1]];
     const [v1, v2] = [points[index].value, points[index + 1].value];
     const dashed = points[index + 1].projected;
+
+    if (!a || !b || v1 === undefined || v2 === undefined) {
+      continue;
+    }
 
     if (v1 * v2 < 0) {
       const crossX = a.x + (v1 / (v1 - v2)) * (b.x - a.x);
