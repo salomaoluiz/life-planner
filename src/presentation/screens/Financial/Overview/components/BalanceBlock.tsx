@@ -119,8 +119,7 @@ function BalanceBlock(props: { compact: boolean; vm: OverviewViewModel }) {
               },
               {
                 label: t("financial.overview.balance.totalLegend"),
-                muted: true,
-                tone: "neutral",
+                tone: "accent",
               },
               {
                 dashed: true,

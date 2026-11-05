@@ -87,7 +87,7 @@ describe("several series (spec 094)", () => {
     expect(lineWidths(3.5).length).toBeGreaterThan(0);
     expect(lineWidths(2).length).toBeGreaterThan(0);
     expect(
-      lineWidths(2).every((node) => node.props.strokeOpacity === 0.35),
+      lineWidths(2).every((node) => node.props.strokeOpacity === 0.75),
     ).toBe(true);
   });
 

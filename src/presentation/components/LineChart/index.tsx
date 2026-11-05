@@ -47,7 +47,7 @@ const BOTTOM = 24;
 const TOP = 8;
 const PRIMARY_WIDTH = 3.5;
 const MUTED_WIDTH = 2;
-const MUTED_OPACITY = 0.35;
+const MUTED_OPACITY = 0.75;
 const SINGLE_WIDTH = 2;
 
 // Balance over time (spec 046 FR 12): a line that is green above zero and red below it, the projected part dashed, a crosshair on the selected point.
@@ -92,8 +92,8 @@ function LineChart(props: LineChartProps) {
         coords,
         item.points,
         baseline,
-        colors.income,
-        colors.expense,
+        item.emphasis === "muted" ? colors.accent : colors.income,
+        item.emphasis === "muted" ? colors.accent : colors.expense,
       ),
     };
   });
@@ -216,7 +216,13 @@ function LineChart(props: LineChartProps) {
                   fill={colors.surface}
                   key={seriesIndex}
                   r={item.emphasis === "muted" ? 4 : 5}
-                  stroke={value < 0 ? colors.expense : colors.income}
+                  stroke={
+                    item.emphasis === "muted"
+                      ? colors.accent
+                      : value < 0
+                        ? colors.expense
+                        : colors.income
+                  }
                   strokeWidth={2}
                 />
               ) : null;
