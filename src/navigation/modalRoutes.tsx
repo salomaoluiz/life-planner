@@ -62,6 +62,10 @@ export const MODAL_ROUTES: Record<ModalName, ComponentType> = {
     async () => import("@screens/Financial/Refund"),
     "RefundModal",
   ),
+  confirm_payment: lazyModal(
+    async () => import("@screens/Financial/ConfirmPayment"),
+    "ConfirmPaymentModal",
+  ),
   confirm_projected: lazyModal(
     async () => import("@screens/Financial/ConfirmProjected"),
     "ConfirmProjectedModal",

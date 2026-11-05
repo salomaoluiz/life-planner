@@ -47,6 +47,7 @@ async function runPendingChange(
     await invalidateAfterWrite(scopeOfChange(registered));
   } catch (error) {
     addFailure({
+      action: registered.action,
       description: registered.description,
       id: registered.id,
       kind: registered.kind,

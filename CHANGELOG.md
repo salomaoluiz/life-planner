@@ -3,6 +3,12 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.12.0] - 2026-11-05
+
+### Changed
+
+- The check button on an unpaid transaction now opens a confirmation ("Efetivar" / "Receber") with the real value and a date (the transaction's own date, Today, Yesterday or another day) instead of paying with today's date (spec 097).
+
 ## [1.11.0] - 2026-11-05
 
 ### Added

@@ -1,88 +1,54 @@
-import { act, renderHook } from "@tests";
+import { renderHook } from "@tests";
 
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
-import { GenericError } from "@domain/entities/errors";
-import { useMutation } from "@infrastructure/fetcher";
-import UseMutationFixture from "@infrastructure/fetcher/mocks/useMutation.fixture";
-import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
+import {
+  clearPayRequest,
+  getPayRequest,
+} from "@screens/Financial/ConfirmPayment/models/payRequest";
 
 import TransactionUIModel from "../models/TransactionUIModel";
 import usePayTransaction from "./usePayTransaction";
 
-jest.mock("@infrastructure/fetcher");
-jest.mock("@screens/Financial/hooks/invalidateFinanceData", () => ({
+const mockOpenModal = jest.fn();
+
+jest.mock("@screens/Navigation/hooks/useModalNavigation", () => ({
   __esModule: true,
-  default: jest.fn(),
-}));
-jest.mock("@application/useCases", () => ({
-  useCases: {
-    updateFinancialTransactionUseCase: {
-      execute: jest.fn(),
-      uniqueName: "update-transaction",
-    },
-  },
+  default: () => ({ openModal: mockOpenModal }),
 }));
 
-const item = new TransactionUIModel(
-  new TransactionDTO({
-    accountId: "acc-1",
-    category: "Bills",
-    categoryId: "cat-1",
-    date: new Date(2026, 9, 10).toISOString(),
-    description: "Electricity",
-    id: "tx-1",
-    owner: "USER",
-    ownerId: "user-id",
-    paid: false,
-    type: "EXPENSE",
-    value: "189.90",
-  }),
-);
-
-let mutation = new UseMutationFixture<unknown, unknown>();
-const onPaid = jest.fn();
+const dto = new TransactionDTO({
+  accountId: "acc-1",
+  category: "Bills",
+  categoryId: "cat-1",
+  date: new Date(2026, 9, 10).toISOString(),
+  description: "Electricity",
+  id: "tx-1",
+  owner: "USER",
+  ownerId: "user-id",
+  paid: false,
+  type: "EXPENSE",
+  value: "189.90",
+});
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mutation = new UseMutationFixture<unknown, unknown>();
-  jest
-    .mocked(useMutation)
-    .mockImplementation((() => mutation.build()) as never);
+  clearPayRequest();
 });
 
-function setup() {
-  return renderHook(() => usePayTransaction({ onPaid }));
-}
+it("SHOULD store the row AND open the confirm modal WHEN openFor is called", () => {
+  const { result } = renderHook(() => usePayTransaction());
 
-it("SHOULD send only { paid: true } for the row AND track the paying row", () => {
-  const { result } = setup();
+  result.current.openFor(new TransactionUIModel(dto));
 
-  act(() => result.current.onPay(item));
-
-  expect(mutation.value.mutate).toHaveBeenCalledWith({
-    id: "tx-1",
-    ownerId: "user-id",
-    paid: true,
-  });
-  expect(result.current.payingId).toBe("tx-1");
-  expect(result.current.hasError).toBe(false);
+  expect(getPayRequest()).toEqual({ item: dto });
+  expect(mockOpenModal).toHaveBeenCalledWith("confirm_payment");
 });
 
-it("SHOULD report the payment WHEN the mutation succeeds", () => {
-  mutation.withStatus("success");
-  const { result } = setup();
+it("SHOULD keep the same openFor identity across renders", () => {
+  const { rerender, result } = renderHook(() => usePayTransaction());
+  const first = result.current.openFor;
 
-  expect(onPaid).toHaveBeenCalledTimes(1);
-  // The paid row moves to today: every cached month and summary is stale, not only the one on screen.
-  expect(invalidateFinanceData).toHaveBeenCalledTimes(1);
-  expect(result.current.payingId).toBeUndefined();
-});
+  rerender({});
 
-it("SHOULD flag the error AND free the row WHEN the mutation fails", () => {
-  mutation.withStatus("error").withError(new GenericError());
-  const { result } = setup();
-
-  expect(result.current.hasError).toBe(true);
-  expect(result.current.payingId).toBeUndefined();
-  expect(onPaid).not.toHaveBeenCalled();
+  expect(result.current.openFor).toBe(first);
 });

@@ -18,7 +18,6 @@ import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 import useStyles from "./styles";
 
 interface Props {
-  isPaying?: boolean;
   item: TransactionUIModel;
   // A balance adjustment cannot be edited: its row opens the delete sheet instead of the form.
   onAdjustmentPress?: (item: TransactionUIModel) => void;
@@ -29,7 +28,6 @@ interface Props {
 
 function sameRowProps(prev: Props, next: Props) {
   return (
-    prev.isPaying === next.isPaying &&
     prev.onAdjustmentPress === next.onAdjustmentPress &&
     prev.onPay === next.onPay &&
     prev.onPress === next.onPress &&
@@ -159,12 +157,8 @@ function TransactionRow(props: Props) {
           {item.canPay && props.onPay && !item.isPending ? (
             <IconButton
               accessibilityLabel={t("financial.transactions.pay")}
-              name={props.isPaying ? "timer-sand" : "check-circle-outline"}
-              onPress={() => {
-                if (!props.isPaying) {
-                  props.onPay?.(item);
-                }
-              }}
+              name={"check-circle-outline"}
+              onPress={() => props.onPay?.(item)}
               testID={transactionsTestIds.rowPay}
               variant={"plain"}
             />

@@ -19,17 +19,24 @@ function ErrorToastHost() {
   const { dismiss, failure } = usePendingFailures();
   const message = failure ? messageOf(failure) : "";
 
+  function errorKeyOf(item: PendingFailure) {
+    if (item.action) {
+      return item.action === "pay"
+        ? "financial.transactions.error.pay"
+        : "financial.transactions.error.receive";
+    }
+
+    return item.kind === "delete"
+      ? "financial.transactions.error.delete"
+      : "financial.transactions.error.save";
+  }
+
   function messageOf(item: PendingFailure) {
     if (item.messageKey) {
       return t(item.messageKey);
     }
 
-    return t(
-      item.kind === "delete"
-        ? "financial.transactions.error.delete"
-        : "financial.transactions.error.save",
-      { description: item.description },
-    );
+    return t(errorKeyOf(item), { description: item.description });
   }
 
   return (

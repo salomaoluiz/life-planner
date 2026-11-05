@@ -93,22 +93,6 @@ describe("paid status (spec 033)", () => {
     expect(screen.getByTestId(transactionsTestIds.rowPay)).toBeOnTheScreen();
   });
 
-  it("SHOULD NOT call onPay again WHILE the row is paying", () => {
-    const onPay = jest.fn();
-
-    render(
-      <TransactionRow
-        isPaying
-        item={unpaid(new Date(2026, 9, 20))}
-        onPay={onPay}
-        onPress={jest.fn()}
-      />,
-    );
-    fireEvent.press(screen.getByTestId(transactionsTestIds.rowPay));
-
-    expect(onPay).not.toHaveBeenCalled();
-  });
-
   it("SHOULD show neither WHEN the row is paid", () => {
     render(
       <TransactionRow
@@ -376,11 +360,10 @@ describe("memoized row (spec 087)", () => {
     expect(again(other)).toBeGreaterThan(0);
   });
 
-  it("SHOULD render again WHEN isPaying or a handler changes", () => {
+  it("SHOULD render again WHEN a handler changes", () => {
     const item = make();
     const { again } = mount(item);
 
-    expect(again(item, { isPaying: true })).toBeGreaterThan(0);
     expect(again(item, { onPress: jest.fn() })).toBeGreaterThan(0);
   });
 

@@ -1,0 +1,94 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/pay-with-modal
+tags:
+  - financial
+  - spec-097
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Bill
+      KEY: BILL_NAME
+# A bill of 50,00 due last month and never paid
+- runFlow:
+    file: ../../../subflows/setup/create-transaction.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: ${output.BILL_NAME}
+      VALUE_CENTS: "5000"
+      MONTHS_AGO: "1"
+      PAID: "false"
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
+- tapOn:
+    id: "financial.transactions.month-previous"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.BILL_NAME}
+    timeout: 20000
+# The pay button only opens the modal; cancelling changes nothing
+- tapOn:
+    id: "financial.transactions.row.pay"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.confirm-pay.modal"
+    timeout: 20000
+- assertVisible:
+    id: "financial.transactions.confirm-pay.date-transaction"
+- tapOn:
+    id: "financial.transactions.confirm-pay.cancel"
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.transactions.confirm-pay.modal"
+    timeout: 20000
+- assertVisible:
+    id: "financial.transactions.row.pay"
+# Confirm with another value, keeping the transaction's own date
+- tapOn:
+    id: "financial.transactions.row.pay"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.confirm-pay.value"
+    timeout: 20000
+- tapOn:
+    id: "financial.transactions.confirm-pay.value"
+- eraseText
+- inputText: "6000"
+- tapOn:
+    id: "financial.transactions.confirm-pay.submit"
+- extendedWaitUntil:
+    notVisible:
+      id: "financial.transactions.row.pay"
+    timeout: 20000
+# The date was kept, so the paid row stays in last month
+- assertVisible:
+    id: "financial.transactions.row-title"
+    text: ${output.BILL_NAME}
+# The account balance counts the value that was really paid
+- runFlow: ../../../subflows/financial/open-accounts.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.row-balance"
+      text: ".*60[.,]00.*"
+    timeout: 20000

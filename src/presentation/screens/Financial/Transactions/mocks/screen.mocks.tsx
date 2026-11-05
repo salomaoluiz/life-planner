@@ -139,9 +139,7 @@ const defaultAdjustmentSheet: ReturnType<typeof useAdjustmentSheet> = {
 };
 
 const defaultPay: ReturnType<typeof usePayTransaction> = {
-  hasError: false,
-  onPay: jest.fn(),
-  payingId: undefined,
+  openFor: jest.fn(),
 };
 
 // What the Finances layout does with the header slot (spec 050).
