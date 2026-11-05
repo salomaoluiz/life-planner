@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import AccountDTO from "@application/dto/financial/AccountDTO";
 import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
+import { InvoiceHasProjected } from "@domain/entities/errors";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
 import useOwners from "@presentation/hooks/useOwners";
 import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
@@ -121,6 +122,16 @@ function useInvoiceViewModel() {
     cacheKey: [useCases.payFinancialInvoiceUseCase.uniqueName],
     fetch: useCases.payFinancialInvoiceUseCase.execute,
   });
+  // Spec 096 FR 19: projected purchases are resolved one by one before the invoice can be paid.
+  const moveMutation = useMutation({
+    cacheKey: [useCases.updateFinancialTransactionUseCase.uniqueName],
+    fetch: useCases.updateFinancialTransactionUseCase.execute,
+  });
+  const discardMutation = useMutation({
+    cacheKey: [useCases.deleteFinancialTransactionUseCase.uniqueName],
+    fetch: useCases.deleteFinancialTransactionUseCase.execute,
+  });
+  const [discarding, setDiscarding] = useState<InvoicePurchaseUIModel>();
   const undoMutation = useMutation({
     cacheKey: [useCases.undoFinancialInvoicePaymentUseCase.uniqueName],
     fetch: useCases.undoFinancialInvoicePaymentUseCase.execute,
@@ -156,6 +167,24 @@ function useInvoiceViewModel() {
     }
   }, [payMutation.status, undoMutation.status]);
 
+  useEffect(() => {
+    if (
+      moveMutation.status === "success" ||
+      discardMutation.status === "success"
+    ) {
+      invalidateAfterPayment();
+      setDiscarding(undefined);
+      invoice.refetch();
+    }
+  }, [moveMutation.status, discardMutation.status]);
+
+  // The API refused the payment: the list on screen was stale.
+  useEffect(() => {
+    if (payMutation.error instanceof InvoiceHasProjected) {
+      invoice.refetch();
+    }
+  }, [payMutation.error]);
+
   const data = invoice.data;
   const isSubmitDisabled = method === "ACCOUNT" && !accountId;
 
@@ -172,12 +201,21 @@ function useInvoiceViewModel() {
     });
   }
 
+  function discard(purchase: InvoicePurchaseUIModel) {
+    discardMutation.mutate({
+      id: purchase.id,
+      ownerId: data?.ownerId as string,
+      scope: purchase.recurrenceId ? "ONLY_THIS" : undefined,
+    });
+  }
+
   return {
     accountId,
     accountOptions: activeAccounts.map((account) => ({
       label: account.name,
       value: account.id,
     })),
+    discarding,
     errorMessage: invoice.error?.message,
     formErrorKey: getFinancialErrorMessageKey(
       payMutation.error ?? undoMutation.error,
@@ -186,6 +224,7 @@ function useInvoiceViewModel() {
     isLoading: invoice.isFetching && !data,
     isPaying: payMutation.isFetching,
     isPayOpen,
+    isResolving: moveMutation.isFetching || discardMutation.isFetching,
     isSubmitDisabled,
     isUndoing: undoMutation.isFetching,
     isUndoOpen,
@@ -220,6 +259,8 @@ function useInvoiceViewModel() {
           value: String(credit.amountCents),
         },
       ),
+    onDiscardCancel: () => setDiscarding(undefined),
+    onDiscardConfirm: () => discarding && discard(discarding),
     onEarlyPaymentPress: () =>
       replaceModal("card_early_payment", {
         creditCardId: params.cardId,
@@ -233,6 +274,22 @@ function useInvoiceViewModel() {
     onPayPress: () => {
       setPayOpen(true);
     },
+    onProjectedDiscard: (purchase: InvoicePurchaseUIModel) => {
+      if (purchase.recurrenceId) {
+        setDiscarding(purchase);
+
+        return;
+      }
+
+      discard(purchase);
+    },
+    onProjectedMove: (purchase: InvoicePurchaseUIModel) =>
+      moveMutation.mutate({
+        id: purchase.id,
+        invoiceMonth: addMonthsTo(params.month, 1),
+        ownerId: data?.ownerId as string,
+        scope: purchase.recurrenceId ? "ONLY_THIS" : undefined,
+      }),
     onProjectedPress: (item: TransactionUIModel) =>
       replaceModal("add_new_transaction", {
         month: item.monthKey,
@@ -256,6 +313,7 @@ function useInvoiceViewModel() {
     onUndoPress: () => setUndoOpen(true),
     paidOn,
     projected: projected.data ?? [],
+    projectedPurchases: data?.projectedPurchases ?? [],
   };
 }
 

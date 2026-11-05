@@ -943,6 +943,8 @@ const financial = {
       confirmed: "Efetivada {{value}}",
       discard: "Descartar",
       discarded: "Descartada",
+      discardSeries:
+        "Só esta ocorrência é descartada; as próximas continuam previstas.",
       move: "Mover para {{month}}",
       moved: "Movida para {{month}}",
       remaining: "Faltam {{count}} previstas",

@@ -12,6 +12,7 @@ import {
   FinancialOwnerNotAllowed,
   HasRefunds,
   InstallmentPaid,
+  InvoiceHasProjected,
   InvoiceIsPaid,
   InvoiceNotAvailable,
   InvoiceNotPayable,
@@ -78,6 +79,11 @@ function getFinancialErrorMessageKey(
 
   if (error instanceof RecurringFollowsDate) {
     return "financial.errors.recurringFollowsDate";
+  }
+
+  // Shown by its own list of what blocks the payment, not as a form error.
+  if (error instanceof InvoiceHasProjected) {
+    return undefined;
   }
 
   if (error instanceof TransactionNotProjected) {

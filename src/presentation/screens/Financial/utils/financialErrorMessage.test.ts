@@ -6,6 +6,8 @@ import {
   FinancialNotFound,
   FinancialOwnerNotAllowed,
   GenericError,
+  InvoiceHasProjected,
+  TransactionNotProjected,
 } from "@domain/entities/errors";
 
 import { getFinancialErrorMessageKey } from "./financialErrorMessage";
@@ -46,4 +48,13 @@ it("SHOULD map AccountArchived to its copy", () => {
   expect(getFinancialErrorMessageKey(new AccountArchived())).toBe(
     "financial.errors.accountArchived",
   );
+});
+
+it("SHOULD map the spec 096 errors: a stale confirm has its copy, the projected list is shown by its own UI", () => {
+  expect(getFinancialErrorMessageKey(new TransactionNotProjected())).toBe(
+    "financial.errors.notProjected",
+  );
+  expect(
+    getFinancialErrorMessageKey(new InvoiceHasProjected([])),
+  ).toBeUndefined();
 });

@@ -471,6 +471,15 @@ function InvoiceModal() {
     return formatDayMonth(toIsoDate(credit.date));
   }
 
+  const nextMonthLabel = invoice
+    ? new Intl.DateTimeFormat(localeTag, { month: "long" }).format(
+        new Date(
+          invoice.referenceMonthDate.getFullYear(),
+          invoice.referenceMonthDate.getMonth() + 1,
+          1,
+        ),
+      )
+    : "";
   const month = invoice
     ? new Intl.DateTimeFormat(localeTag, { month: "long" }).format(
         invoice.referenceMonthDate,
@@ -502,16 +511,34 @@ function InvoiceModal() {
           currency={invoice.currency}
           errorKey={vm.formErrorKey}
           isPaying={vm.isPaying}
+          isResolving={vm.isResolving}
           isSubmitDisabled={vm.isSubmitDisabled}
           method={vm.method}
+          nextMonthLabel={nextMonthLabel}
           onAccountChange={vm.onAccountChange}
           onClose={vm.onPayClose}
           onConfirm={vm.onPayConfirm}
+          onConfirmProjected={vm.onConfirmPress}
+          onDiscardProjected={vm.onProjectedDiscard}
           onMethodChange={vm.onMethodChange}
+          onMoveProjected={vm.onProjectedMove}
           onPaidOnChange={vm.onPaidOnChange}
           paidOn={vm.paidOn}
+          projected={vm.projectedPurchases}
         />
       ) : null}
+      <ConfirmDialog
+        cancelLabel={t("common.actions.cancel")}
+        closeLabel={t("common.actions.close")}
+        confirmLabel={t("financial.projected.pay.discard")}
+        loading={vm.isResolving}
+        message={t("financial.projected.pay.discardSeries")}
+        onCancel={vm.onDiscardCancel}
+        onConfirm={vm.onDiscardConfirm}
+        testID={invoiceTestIds.discardConfirm}
+        title={t("financial.projected.pay.discard")}
+        visible={!!vm.discarding}
+      />
       <ConfirmDialog
         cancelLabel={t("common.actions.cancel")}
         closeLabel={t("common.actions.close")}

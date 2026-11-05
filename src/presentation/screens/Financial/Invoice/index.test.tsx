@@ -385,3 +385,65 @@ describe("wide layout (spec 037)", () => {
     ).toBeUndefined();
   });
 });
+
+describe("paying with projected purchases (spec 096)", () => {
+  function withProjected(recurrenceId?: string) {
+    const invoice = makeInvoiceWithProjected(
+      { status: "CLOSED" },
+      recurrenceId,
+    );
+
+    return { invoice, projectedPurchases: invoice.projectedPurchases };
+  }
+
+  it("SHOULD warn AND list each projected purchase with its three actions, Pay disabled with the count", () => {
+    const vm = setup({
+      ...withProjected("series-1"),
+      isPayOpen: true,
+      isSubmitDisabled: false,
+    });
+
+    expect(screen.getByTestId(invoiceTestIds.payWarning)).toBeOnTheScreen();
+    expect(screen.getAllByTestId(invoiceTestIds.payProjected)).toHaveLength(1);
+    expect(
+      screen.getByText(/financial.projected.pay.remaining/),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(invoiceTestIds.payConfirm).props.accessibilityState,
+    ).toMatchObject({ disabled: true });
+
+    fireEvent.press(screen.getByTestId(invoiceTestIds.payProjectedConfirm));
+    fireEvent.press(screen.getByTestId(invoiceTestIds.payProjectedMove));
+    fireEvent.press(screen.getByTestId(invoiceTestIds.payProjectedDiscard));
+
+    expect(vm.onConfirmPress).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "purchase-3" }),
+    );
+    expect(vm.onProjectedMove).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "purchase-3" }),
+    );
+    expect(vm.onProjectedDiscard).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "purchase-3" }),
+    );
+  });
+
+  it("SHOULD show no warning AND enable Pay WHEN no projected purchase is left", () => {
+    setup({ isPayOpen: true, isSubmitDisabled: false });
+
+    expect(screen.queryByTestId(invoiceTestIds.payWarning)).toBeNull();
+    expect(
+      screen.getByTestId(invoiceTestIds.payConfirm).props.accessibilityState,
+    ).toMatchObject({ disabled: false });
+  });
+
+  it("SHOULD ask before discarding a series occurrence", () => {
+    const { projectedPurchases } = withProjected("series-1");
+    const vm = setup({ discarding: projectedPurchases[0] });
+
+    fireEvent.press(
+      screen.getByTestId(`${invoiceTestIds.discardConfirm}-confirm`),
+    );
+
+    expect(vm.onDiscardConfirm).toHaveBeenCalledTimes(1);
+  });
+});

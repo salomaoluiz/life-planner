@@ -941,6 +941,8 @@ const financial = {
       confirmed: "Confirmed {{value}}",
       discard: "Discard",
       discarded: "Discarded",
+      discardSeries:
+        "Only this occurrence is discarded; the next ones stay projected.",
       move: "Move to {{month}}",
       moved: "Moved to {{month}}",
       remaining: "{{count}} projected left",

@@ -7,6 +7,11 @@ function useStyles() {
 
   return {
     styles: StyleSheet.create({
+      actions: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: theme.sizes.spacing.sm,
+      },
       form: { gap: theme.sizes.spacing.lg },
     }),
   };
