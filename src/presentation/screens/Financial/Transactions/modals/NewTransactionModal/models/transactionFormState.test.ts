@@ -9,8 +9,11 @@ import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import {
   applySuggestion,
+  calendarDayOf,
+  changeCard,
   changeDate,
   changeInstallmentsOn,
+  changeInvoiceMonth,
   changeOwner,
   changePaid,
   changePayWith,
@@ -20,6 +23,8 @@ import {
   createInitialState,
   defaultAccountId,
   defaultCardId,
+  effectiveInvoiceMonth,
+  invoiceMonthToSend,
   isSameState,
   normalizeDate,
   pickNewRecordId,
@@ -1143,5 +1148,196 @@ describe("applySuggestion (spec 060)", () => {
     );
 
     expect(result.categoryId).toBeUndefined();
+  });
+});
+
+describe("invoice month (spec 095)", () => {
+  const owner = user;
+  // A purchase on 30/10 with the card closing on the 31st is computed on October.
+  const purchase = state({
+    creditCardId: "card-1",
+    date: new Date(2026, 9, 30),
+    payWith: "CARD",
+  });
+  const create = { closingDay: 31 };
+  const edit = {
+    closingDay: 31,
+    storedCardId: "card-1",
+    storedDate: "2026-10-30",
+    storedMonth: "2026-10",
+  };
+
+  it("SHOULD follow the date WHEN nothing was chosen", () => {
+    expect(effectiveInvoiceMonth(purchase, 31)).toBe("2026-10");
+    expect(
+      effectiveInvoiceMonth(changeInvoiceMonth(purchase, "2026-11"), 31),
+    ).toBe("2026-11");
+  });
+
+  it("SHOULD send the month on create only WHEN it differs from the computed one", () => {
+    expect(invoiceMonthToSend(purchase, create)).toBeUndefined();
+    expect(
+      invoiceMonthToSend(changeInvoiceMonth(purchase, "2026-10"), create),
+    ).toBeUndefined();
+    expect(
+      invoiceMonthToSend(changeInvoiceMonth(purchase, "2026-11"), create),
+    ).toBe("2026-11");
+    expect(
+      invoiceMonthToSend(changeInvoiceMonth(purchase, "2026-09"), create),
+    ).toBe("2026-09");
+  });
+
+  it("SHOULD send nothing for an account transaction", () => {
+    expect(
+      invoiceMonthToSend(state({ invoiceMonth: "2026-11" }), create),
+    ).toBeUndefined();
+    expect(invoiceMonthToSend(purchase, undefined)).toBeUndefined();
+  });
+
+  it("SHOULD NOT send the month WHEN only the text of a row moved by hand changes (edit)", () => {
+    const moved = state({
+      ...purchase,
+      description: "New text",
+      invoiceMonth: "2026-11",
+    });
+
+    expect(
+      invoiceMonthToSend(moved, { ...edit, storedMonth: "2026-11" }),
+    ).toBeUndefined();
+  });
+
+  it("SHOULD send the computed month WHEN the user resets a row moved by hand (edit)", () => {
+    const reset = changeInvoiceMonth(purchase, undefined);
+
+    expect(invoiceMonthToSend(reset, { ...edit, storedMonth: "2026-11" })).toBe(
+      "2026-10",
+    );
+  });
+
+  it("SHOULD send nothing WHEN the date changed and the computed month is the result (edit)", () => {
+    const moved = changeDate(
+      state({ ...purchase, invoiceMonth: "2026-11" }),
+      new Date(2026, 9, 29),
+      true,
+    );
+
+    expect(
+      invoiceMonthToSend(moved, { ...edit, storedMonth: "2026-11" }),
+    ).toBeUndefined();
+  });
+
+  it("SHOULD send the pick WHEN the date changed and the user chose another month (edit)", () => {
+    const moved = changeInvoiceMonth(
+      changeDate(purchase, new Date(2026, 9, 29), true),
+      "2026-09",
+    );
+
+    expect(invoiceMonthToSend(moved, edit)).toBe("2026-09");
+  });
+
+  it("SHOULD restart from the date WHEN the date, the card or Pay with changes", () => {
+    const chosen = changeInvoiceMonth(purchase, "2026-11");
+
+    expect(
+      changeDate(chosen, new Date(2026, 10, 2), false).invoiceMonth,
+    ).toBeUndefined();
+    expect(changeCard(chosen, "card-family").invoiceMonth).toBeUndefined();
+    expect(changeCard(chosen, "card-1").invoiceMonth).toBe("2026-11");
+    expect(
+      changePayWith(chosen, "ACCOUNT", categories, []).invoiceMonth,
+    ).toBeUndefined();
+  });
+
+  it("SHOULD restart WHEN the owner change swaps the card", () => {
+    const cards = [
+      new CreditCardDTO({
+        brand: "VISA",
+        closingDay: 31,
+        color: "#2B3A8C",
+        dueDay: 10,
+        id: "card-family",
+        limit: 1000,
+        owner: "FAMILY",
+        ownerId: "family-1",
+        status: "ACTIVE",
+        title: "Family",
+      }),
+    ];
+
+    expect(
+      changeOwner(
+        changeInvoiceMonth(purchase, "2026-11"),
+        "family-1",
+        categories,
+        accounts,
+        cards,
+      ).invoiceMonth,
+    ).toBeUndefined();
+  });
+
+  it("SHOULD wrap the year WHEN the computed invoice is December", () => {
+    const december = state({ ...purchase, date: new Date(2026, 11, 20) });
+
+    expect(effectiveInvoiceMonth(december, 10)).toBe("2027-01");
+    expect(
+      invoiceMonthToSend(changeInvoiceMonth(december, "2027-02"), {
+        closingDay: 10,
+      }),
+    ).toBe("2027-02");
+  });
+
+  it("SHOULD put the chosen month in the create, update and installment params", () => {
+    const chosen = changeInvoiceMonth(purchase, "2026-11");
+
+    expect(toCreateParams(chosen, owner, "Food", create).invoiceMonth).toBe(
+      "2026-11",
+    );
+    expect(
+      toCreateParams(purchase, owner, "Food", create).invoiceMonth,
+    ).toBeUndefined();
+    expect(toUpdateParams("t1", chosen, owner, "Food", edit).invoiceMonth).toBe(
+      "2026-11",
+    );
+    expect(
+      toCreateInstallmentParams(
+        state({ ...chosen, installmentsCount: 6, installmentsOn: true }),
+        owner,
+        create,
+      ).firstInvoiceMonth,
+    ).toBe("2026-11");
+    expect(
+      toCreateInstallmentParams(purchase, owner, create).firstInvoiceMonth,
+    ).toBeUndefined();
+  });
+
+  it("SHOULD forget the manual invoice on Save and add another, keeping the date", () => {
+    const next = resetForNext(changeInvoiceMonth(purchase, "2026-11"));
+
+    expect(next.invoiceMonth).toBeUndefined();
+    expect(next.date).toEqual(purchase.date);
+  });
+
+  it("SHOULD count the invoice in the dirty check AND load the stored one from the row", () => {
+    expect(isSameState(purchase, changeInvoiceMonth(purchase, "2026-11"))).toBe(
+      false,
+    );
+
+    const dto = new TransactionDTO({
+      category: "Food",
+      categoryId: "food",
+      creditCardId: "card-1",
+      date: new Date(2026, 9, 30).toISOString(),
+      description: "Market",
+      id: "t1",
+      invoiceMonth: "2026-11",
+      owner: "USER",
+      ownerId: "user-id",
+      tags: [],
+      type: "EXPENSE",
+      value: "10.00",
+    });
+
+    expect(stateFromDto(dto).invoiceMonth).toBe("2026-11");
+    expect(calendarDayOf(new Date(2026, 0, 5))).toBe("2026-01-05");
   });
 });

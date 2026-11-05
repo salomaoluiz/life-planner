@@ -4,10 +4,12 @@ import {
   HasRefunds,
   InstallmentPaid,
   InvoiceIsPaid,
+  InvoiceNotAvailable,
   OverAmountDue,
   PrepaymentBlocksEdit,
   RecurrenceFrequencyBlocked,
   RecurrencePaidAfterEnd,
+  RecurringFollowsDate,
   RefundOverPurchase,
 } from "@domain/entities/errors";
 
@@ -25,6 +27,8 @@ it.each([
   ["Occurrences after the new end date are paid", RecurrencePaidAfterEnd],
   ["An occurrence is paid", RecurrenceFrequencyBlocked],
   ["An occurrence is in a paid invoice", InvoiceIsPaid],
+  ["Invoice is not available for this date", InvoiceNotAvailable],
+  ["Recurring transactions follow the date", RecurringFollowsDate],
   ["anything else", AccountArchived],
 ])("SHOULD map the 422 message %s", (message, expected) => {
   expect(unprocessableError(message)).toBeInstanceOf(expected);

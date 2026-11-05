@@ -559,6 +559,161 @@ describe("card mode (spec 029)", () => {
     );
   });
 
+  describe("choosing the invoice (spec 095)", () => {
+    function movedRow(overrides = {}) {
+      // Bought on 30/09 (computed September) but stored on October by hand.
+      givenLoaded({
+        cards: [mainCard],
+        overview: overviewWith(50000),
+        params: { id: "p1" },
+        transactions: [
+          tx("p1", {
+            accountId: undefined,
+            creditCardId: "c1",
+            invoiceMonth: "2026-10",
+            ...overrides,
+          }),
+        ],
+      });
+
+      return setup();
+    }
+
+    it("SHOULD offer the previous, computed and next invoice with the computed one selected", () => {
+      const { result } = inCardMode(
+        overviewWith(50000, [invoice("2026-09", "PAID")]),
+      );
+
+      expect(result.current.invoiceField?.options.map((o) => o.month)).toEqual([
+        "2026-09",
+        "2026-10",
+        "2026-11",
+      ]);
+      expect(result.current.invoiceField).toMatchObject({
+        computedMonth: "2026-10",
+        value: "2026-10",
+      });
+      expect(result.current.invoiceField?.options[0]).toMatchObject({
+        disabled: true,
+        status: "PAID",
+      });
+    });
+
+    it("SHOULD follow the chosen invoice in the hint, send it on create AND send nothing when the computed one is picked back", () => {
+      const { result } = inCardMode();
+
+      act(() => result.current.onInvoiceChange("2026-11"));
+      expect(result.current.invoiceHint).toEqual({
+        due: "2026-12-10",
+        month: "2026-11",
+      });
+
+      act(() => result.current.onAmountChange(1000));
+      act(() => result.current.onDescriptionChange("Market"));
+      act(() => result.current.onCategorySelect("food"));
+      act(() => result.current.onSave());
+      expect(
+        useCases.createFinancialTransactionUseCase.execute,
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({ invoiceMonth: "2026-11" }),
+      );
+
+      jest.clearAllMocks();
+      act(() => result.current.onInvoiceChange("2026-10"));
+      act(() => result.current.onSave());
+      expect(
+        useCases.createFinancialTransactionUseCase.execute,
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({ invoiceMonth: undefined }),
+      );
+    });
+
+    it("SHOULD restart from the date WHEN the date changes", () => {
+      const { result } = inCardMode();
+
+      act(() => result.current.onInvoiceChange("2026-11"));
+      act(() => result.current.onDateChange(new Date(2026, 9, 29)));
+
+      expect(result.current.invoiceField?.value).toBe("2026-10");
+    });
+
+    it("SHOULD hide the field WHEN Repeat is on", () => {
+      const { result } = inCardMode();
+
+      expect(result.current.invoiceField).toBeDefined();
+      act(() => result.current.onRepeatToggle(true));
+
+      expect(result.current.invoiceField).toBeUndefined();
+    });
+
+    it("SHOULD start the installments on the chosen invoice AND send firstInvoiceMonth", () => {
+      const { result } = inCardMode();
+
+      act(() => result.current.onAmountChange(10000));
+      act(() => result.current.onDescriptionChange("Notebook"));
+      act(() => result.current.onCategorySelect("food"));
+      act(() => result.current.onInstallmentsToggle(true));
+      act(() => result.current.onInstallmentsCountChange("6"));
+      act(() => result.current.onInvoiceChange("2026-11"));
+
+      expect(result.current.installments.range).toEqual({
+        first: "2026-11",
+        last: "2027-04",
+      });
+
+      act(() => result.current.onSave());
+      expect(mutations.create_plan.value.mutate).toHaveBeenCalledWith(
+        expect.objectContaining({ firstInvoiceMonth: "2026-11" }),
+      );
+    });
+
+    it("SHOULD show the stored invoice of a row moved by hand AND leave it alone when only the text changes", () => {
+      const { result } = movedRow();
+
+      expect(result.current.invoiceField).toMatchObject({
+        computedMonth: "2026-09",
+        value: "2026-10",
+      });
+
+      act(() => result.current.onDescriptionChange("Only the text"));
+      act(() => result.current.onSave());
+
+      expect(
+        useCases.updateFinancialTransactionUseCase.execute,
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({ invoiceMonth: undefined }),
+      );
+    });
+
+    it("SHOULD send the computed invoice WHEN the user resets a row moved by hand", () => {
+      const { result } = movedRow();
+
+      act(() => result.current.onInvoiceReset());
+      act(() => result.current.onSave());
+
+      expect(
+        useCases.updateFinancialTransactionUseCase.execute,
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({ invoiceMonth: "2026-09" }),
+      );
+    });
+
+    it("SHOULD show an old stored invoice outside the three options as a read-only fourth one", () => {
+      const { result } = movedRow({ invoiceMonth: "2026-01" });
+
+      expect(result.current.invoiceField?.options.map((o) => o.month)).toEqual([
+        "2026-01",
+        "2026-08",
+        "2026-09",
+        "2026-10",
+      ]);
+      expect(result.current.invoiceField?.options[0]).toMatchObject({
+        readOnly: true,
+      });
+      expect(result.current.invoiceField?.value).toBe("2026-01");
+    });
+  });
+
   describe("installments (spec 030)", () => {
     it("SHOULD be off by default, only in Card mode AND show nothing until turned on", () => {
       givenLoaded({ cards: [mainCard] });

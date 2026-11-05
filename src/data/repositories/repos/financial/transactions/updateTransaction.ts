@@ -15,6 +15,7 @@ async function updateTransaction(params: Params, datasources: Datasources) {
     date: params.date,
     description: params.description,
     id: params.id,
+    invoiceMonth: params.invoiceMonth,
     notes: params.notes,
     owner: params.owner,
     ownerId: params.ownerId,

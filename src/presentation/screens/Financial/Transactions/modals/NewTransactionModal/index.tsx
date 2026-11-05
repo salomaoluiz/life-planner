@@ -11,6 +11,7 @@ import {
   ErrorState,
   FormColumns,
   IconTile,
+  InvoiceField,
   RadioGroup,
   SegmentedControl,
   SelectField,
@@ -27,9 +28,9 @@ import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { useBreakpoint } from "@presentation/theme";
-import { formatDayMonth } from "@screens/Financial/Cards/models/cardList";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 import { RECURRENCE_FREQUENCIES } from "@screens/Financial/models/recurrence";
+import { toInvoiceFieldOption } from "@screens/Financial/utils/invoiceFieldOption";
 
 import CategoryChips from "./components/CategoryChips";
 import CategoryPickerSheet from "./components/CategoryPickerSheet";
@@ -339,14 +340,42 @@ function NewTransactionModal() {
                       value={vm.selectedCardId}
                     />
                   )}
-                  {vm.invoiceHint && vm.invoiceMonthLabelDate ? (
-                    <Text.Caption
-                      testID={transactionFormTestIds.invoiceHint}
-                      tone={"secondary"}
-                      value={t("financial.transactions.form.invoiceHint", {
-                        due: formatDayMonth(vm.invoiceHint.due),
-                        month: monthName(vm.invoiceMonthLabelDate, localeTag),
-                      })}
+                  {vm.invoiceField ? (
+                    <InvoiceField
+                      closeLabel={t("common.actions.close")}
+                      hint={
+                        vm.invoiceField.value !== vm.invoiceField.computedMonth
+                          ? {
+                              actionLabel: t(
+                                "financial.transactions.form.invoiceUseDate",
+                              ),
+                              onAction: vm.onInvoiceReset,
+                              text: t(
+                                "financial.transactions.form.invoiceChosenHint",
+                                {
+                                  month: monthName(
+                                    monthDateOf(vm.invoiceField.computedMonth),
+                                    localeTag,
+                                  ),
+                                },
+                              ),
+                            }
+                          : undefined
+                      }
+                      label={t(
+                        vm.installments.enabled
+                          ? "financial.transactions.form.invoiceFieldFirst"
+                          : "financial.transactions.form.invoiceField",
+                      )}
+                      onChange={vm.onInvoiceChange}
+                      options={vm.invoiceField.options.map((option) =>
+                        toInvoiceFieldOption(option, t, localeTag),
+                      )}
+                      sheetTitle={t(
+                        "financial.transactions.form.invoiceSheetTitle",
+                      )}
+                      testID={transactionFormTestIds.invoiceField}
+                      value={vm.invoiceField.value}
                     />
                   ) : null}
                   {vm.overLimitCents > 0 ? (

@@ -4,6 +4,7 @@ import { RecurrenceHasPaidOccurrences } from "@domain/entities/errors";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { useBreakpoint } from "@presentation/theme";
+import type { InvoiceOption } from "@screens/Financial/models/invoiceOptions";
 
 import NewTransactionModal from "../";
 import { useNewTransactionViewModel } from "../hooks";
@@ -45,6 +46,13 @@ const defaultViewModel: ReturnType<typeof useNewTransactionViewModel> = {
     range: undefined,
     visible: false,
   },
+  invoiceField: undefined as
+    | undefined
+    | {
+        computedMonth: string;
+        options: InvoiceOption[];
+        value: string;
+      },
   invoiceHint: undefined,
   invoiceMonthLabelDate: undefined,
   isBlocking: false,
@@ -81,6 +89,8 @@ const defaultViewModel: ReturnType<typeof useNewTransactionViewModel> = {
   onDiscardConfirm: jest.fn(),
   onInstallmentsCountChange: jest.fn(),
   onInstallmentsToggle: jest.fn(),
+  onInvoiceChange: jest.fn(),
+  onInvoiceReset: jest.fn(),
   onNotesChange: jest.fn(),
   onOwnerChange: jest.fn(),
   onPaidChange: jest.fn(),

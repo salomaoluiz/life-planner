@@ -24,6 +24,7 @@ async function createInstallmentPlan(params: Params): Response {
     creditCardId: params.creditCardId,
     date: isoToCalendarDate(params.date),
     description: params.description,
+    firstInvoiceMonth: params.firstInvoiceMonth,
     installments: params.installments,
     notes: params.notes,
     owner: params.owner,

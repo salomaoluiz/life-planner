@@ -24,6 +24,7 @@ async function createTransaction(params: Params): Response {
     creditCardId: params.creditCardId,
     date: isoToCalendarDate(params.date),
     description: params.description,
+    invoiceMonth: params.invoiceMonth,
     notes: params.notes,
     owner: params.owner,
     ownerId: params.ownerId,

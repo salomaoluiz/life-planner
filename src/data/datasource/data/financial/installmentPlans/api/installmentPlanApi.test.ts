@@ -281,3 +281,25 @@ describe("notes (spec 059)", () => {
     );
   });
 });
+
+describe("first invoice (spec 095)", () => {
+  it("SHOULD send firstInvoiceMonth on create AND on update", async () => {
+    jest.mocked(api.post).mockResolvedValueOnce(apiInstallmentPlan);
+    jest.mocked(api.patch).mockResolvedValueOnce(apiInstallmentPlan);
+
+    await createInstallmentPlan({
+      ...createParams,
+      firstInvoiceMonth: "2026-11",
+    });
+    await updateInstallmentPlan({ firstInvoiceMonth: "2026-12", id: "plan-1" });
+
+    expect(api.post).toHaveBeenCalledWith(
+      "/v1/finance/installment-plans",
+      expect.objectContaining({ firstInvoiceMonth: "2026-11" }),
+    );
+    expect(api.patch).toHaveBeenCalledWith(
+      "/v1/finance/installment-plans/plan-1?today=2026-10-16",
+      expect.objectContaining({ firstInvoiceMonth: "2026-12" }),
+    );
+  });
+});

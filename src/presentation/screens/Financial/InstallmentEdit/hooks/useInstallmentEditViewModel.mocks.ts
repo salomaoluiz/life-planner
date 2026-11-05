@@ -117,6 +117,7 @@ function makeRow(number = 2) {
     installmentCount: 3,
     installmentNumber: number,
     installmentPlanId: "plan-1",
+    invoiceMonth: `2026-1${number - 1}`,
     owner: "USER",
     ownerId: "user-id",
     type: "EXPENSE",

@@ -53,6 +53,7 @@ interface CreateTransactionDatasourceParams {
   creditCardId?: string;
   date: string;
   description: string;
+  invoiceMonth?: string;
   notes?: null | string;
   owner: OwnerType;
   ownerId: string;
@@ -89,6 +90,7 @@ interface UpdateTransactionDatasourceParams {
   date?: string;
   description?: string;
   id: string;
+  invoiceMonth?: string;
   notes?: null | string;
   owner?: OwnerType;
   ownerId?: string;

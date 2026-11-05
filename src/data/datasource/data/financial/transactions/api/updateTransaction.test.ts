@@ -103,3 +103,23 @@ it("SHOULD send notes: null to clear the notes AND nothing else (spec 059)", asy
     notes: null,
   });
 });
+
+it("SHOULD send an invoice-only update (spec 095)", async () => {
+  spies.patch.mockResolvedValueOnce({});
+
+  await setup({
+    accountId: undefined,
+    categoryId: undefined,
+    date: undefined,
+    description: undefined,
+    invoiceMonth: "2026-11",
+    owner: undefined,
+    ownerId: undefined,
+    type: undefined,
+    value: undefined,
+  });
+
+  expect(spies.patch).toHaveBeenCalledWith(expect.any(String), {
+    invoiceMonth: "2026-11",
+  });
+});

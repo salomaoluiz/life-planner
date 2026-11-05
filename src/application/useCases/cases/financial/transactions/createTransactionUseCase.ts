@@ -17,6 +17,8 @@ export interface CreateTransactionUseCaseParams {
   creditCardId?: string;
   date: string;
   description: string;
+  // Spec 095: card purchases only; omitted = the invoice of the date.
+  invoiceMonth?: string;
   notes?: null | string;
   owner: string;
   ownerId: string;
@@ -54,6 +56,7 @@ function createTransactionUseCase(
             creditCardId: params.creditCardId,
             date: params.date,
             description: params.description,
+            invoiceMonth: params.invoiceMonth,
             notes: params.notes,
             owner,
             ownerId: params.ownerId,

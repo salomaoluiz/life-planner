@@ -1,0 +1,10 @@
+url: ${E2E_WEB_URL}
+---
+# Needs TOKEN, CARD_ID, ACCOUNT_ID and INVOICE_MONTH (YYYY-MM) from the caller.
+- runScript:
+    file: ../../scripts/setup/pay-invoice.js
+    env:
+      TOKEN: ${TOKEN}
+      CARD_ID: ${CARD_ID}
+      ACCOUNT_ID: ${ACCOUNT_ID}
+      INVOICE_MONTH: ${INVOICE_MONTH}

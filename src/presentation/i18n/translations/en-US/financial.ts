@@ -314,6 +314,8 @@ const financial = {
     close: "OK",
     deleteRefundsFirst: "Delete its refunds first.",
     installmentPaid: "An installment is in a paid invoice.",
+    invoiceNotAvailable:
+      "This invoice is not available for this date. Pick another one.",
     invoiceNotPayable:
       "This invoice can't be paid right now. Reload and try again.",
     invoicePaid: "This invoice is paid. Undo the payment to change it.",
@@ -323,6 +325,8 @@ const financial = {
     recurrenceFrequencyBlocked:
       "Some occurrences are already paid, so the frequency can't change.",
     recurrencePaidAfterEnd: "Occurrences after the new end date are paid.",
+    recurringFollowsDate:
+      "Recurring transactions follow the date, so they have no invoice choice.",
     refundOverPurchase: "Refunds can't exceed the purchase value.",
     title: "We couldn't complete this action",
     undoPrepaymentFirst: "Undo the prepayment first.",
@@ -1139,13 +1143,27 @@ const financial = {
       },
       installments: "Installments",
       installmentsCount: "Number of installments",
-      installmentsInvoices:
-        "1st installment on the {{first}} invoice, last on {{last}}",
+      installmentsInvoices: "Invoices from {{first}} to {{last}}",
       installmentsPreview: "{{n}}x of {{value}}",
       installmentsPreviewFirst: "First of {{value}}",
       installmentsRange: "2 to 48",
-      invoiceHint: "Goes to the {{month}} invoice · due {{due}}",
+      invoiceByDate: "{{month}} · by date",
+      invoiceChosenHint: "By date it would be {{month}}.",
+      invoiceClosedOn: "Closed {{closing}} · due {{due}}",
+      invoiceCloses: "Closes {{closing}} · due {{due}}",
+      invoiceField: "Invoice",
+      invoiceFieldFirst: "1st installment invoice",
+      invoiceFieldValue: "{{month}} · due {{due}}",
       invoicePaid: "The {{month}} invoice is already paid",
+      invoicePaidOption: "Invoice paid, no new purchases",
+      invoiceSheetTitle: "Which invoice does it go on?",
+      invoiceStatus: {
+        closed: "Closed",
+        future: "Upcoming",
+        open: "Open",
+        paid: "Paid",
+      },
+      invoiceUseDate: "Use the date's",
       moreCategories: "More",
       newTitle: "New transaction",
       noAccounts: "No accounts for this owner yet.",

@@ -2,6 +2,7 @@ import { render } from "@tests";
 
 import InstallmentPlanDTO from "@application/dto/financial/InstallmentPlanDTO";
 import { useBreakpoint } from "@presentation/theme";
+import type { InvoiceOption } from "@screens/Financial/models/invoiceOptions";
 
 import { InstallmentEditModal } from "../";
 import { useInstallmentEditViewModel } from "../hooks";
@@ -49,10 +50,18 @@ const defaultViewModel: ReturnType<typeof useInstallmentEditViewModel> = {
     count: false,
     date: false,
     description: true,
+    invoice: false,
   },
   formErrorKey: undefined,
   installmentCount: 3,
   installmentNumber: 2,
+  invoiceField: undefined as
+    | undefined
+    | {
+        computedMonth: string;
+        options: InvoiceOption[];
+        value: string;
+      },
   isDeleteOpen: false,
   isDeleting: false,
   isLoading: false,
@@ -73,6 +82,8 @@ const defaultViewModel: ReturnType<typeof useInstallmentEditViewModel> = {
   onDeleteConfirm: jest.fn(),
   onDeletePress: jest.fn(),
   onDescriptionChange: jest.fn(),
+  onInvoiceChange: jest.fn(),
+  onInvoiceReset: jest.fn(),
   onNotesChange: jest.fn(),
   onPlanClose: jest.fn(),
   onPlanOpen: jest.fn(),

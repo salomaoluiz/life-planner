@@ -3,6 +3,13 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.10.0] - 2026-11-05
+
+### Added
+
+- You can choose the invoice of a card purchase or of the first installment (the previous, the one of the date or the next), for example when the bank closed the invoice earlier than the card's closing day. Paid invoices cannot be picked (spec 095).
+- Installments can be moved to another invoice from the installment sheet, for one installment or from it on (spec 095).
+
 ## [1.9.1] - 2026-11-05
 
 ### Fixed

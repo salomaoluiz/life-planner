@@ -19,6 +19,7 @@ async function createTransaction(params: Params, datasources: Datasources) {
       creditCardId: params.creditCardId,
       date: params.date,
       description: params.description,
+      invoiceMonth: params.invoiceMonth,
       notes: params.notes,
       owner: params.owner,
       ownerId: params.ownerId,

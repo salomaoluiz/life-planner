@@ -312,6 +312,8 @@ const financial = {
     close: "OK",
     deleteRefundsFirst: "Exclua os estornos dela antes.",
     installmentPaid: "Uma parcela está numa fatura paga.",
+    invoiceNotAvailable:
+      "Esta fatura não está disponível para esta data. Escolha outra.",
     invoiceNotPayable:
       "Esta fatura não pode ser paga agora. Recarregue e tente de novo.",
     invoicePaid: "Esta fatura está paga. Desfaça o pagamento para alterar.",
@@ -321,6 +323,8 @@ const financial = {
     recurrenceFrequencyBlocked:
       "Há ocorrências já pagas, então a frequência não pode mudar.",
     recurrencePaidAfterEnd: "Há ocorrências pagas depois da nova data final.",
+    recurringFollowsDate:
+      "Transações recorrentes seguem a data, então não têm escolha de fatura.",
     refundOverPurchase: "Os estornos não podem passar do valor da compra.",
     title: "Não foi possível concluir a ação",
     undoPrepaymentFirst: "Desfaça o adiantamento antes.",
@@ -1139,13 +1143,27 @@ const financial = {
       },
       installments: "Parcelar",
       installmentsCount: "Número de parcelas",
-      installmentsInvoices:
-        "1ª parcela na fatura de {{first}}, última em {{last}}",
+      installmentsInvoices: "Faturas de {{first}} a {{last}}",
       installmentsPreview: "{{n}}x de {{value}}",
       installmentsPreviewFirst: "1ª de {{value}}",
       installmentsRange: "2 a 48",
-      invoiceHint: "Entra na fatura de {{month}} · vence {{due}}",
+      invoiceByDate: "{{month}} · pela data",
+      invoiceChosenHint: "Pela data seria {{month}}.",
+      invoiceClosedOn: "Fechou {{closing}} · vence {{due}}",
+      invoiceCloses: "Fecha {{closing}} · vence {{due}}",
+      invoiceField: "Fatura",
+      invoiceFieldFirst: "Fatura da 1ª parcela",
+      invoiceFieldValue: "{{month}} · vence {{due}}",
       invoicePaid: "A fatura de {{month}} já está paga",
+      invoicePaidOption: "Fatura paga, não recebe compras",
+      invoiceSheetTitle: "Em qual fatura entra?",
+      invoiceStatus: {
+        closed: "Fechada",
+        future: "Futura",
+        open: "Aberta",
+        paid: "Paga",
+      },
+      invoiceUseDate: "Usar a da data",
       moreCategories: "Mais",
       newTitle: "Nova transação",
       noAccounts: "Ainda não há contas para este dono.",

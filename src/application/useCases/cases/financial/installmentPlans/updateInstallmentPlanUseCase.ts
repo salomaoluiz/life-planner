@@ -13,6 +13,7 @@ export interface UpdateInstallmentPlanUseCaseParams {
   creditCardId?: string;
   date?: string;
   description?: string;
+  firstInvoiceMonth?: string;
   id: string;
   installments?: number;
   notes?: null | string;
@@ -46,6 +47,7 @@ function updateInstallmentPlanUseCase(
               creditCardId: params.creditCardId,
               date: params.date,
               description: params.description,
+              firstInvoiceMonth: params.firstInvoiceMonth,
               id: params.id,
               installments: params.installments,
               notes: params.notes,

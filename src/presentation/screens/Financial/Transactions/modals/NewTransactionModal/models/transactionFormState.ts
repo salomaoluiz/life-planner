@@ -13,6 +13,7 @@ import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { categoryInScope } from "@screens/Financial/models/categoryTree";
 import { isValidInstallmentCount } from "@screens/Financial/models/installments";
+import { invoiceMonthOf } from "@screens/Financial/models/invoiceMonth";
 import {
   centsToDecimalString,
   decimalStringToCents,
@@ -51,6 +52,9 @@ interface TransactionFormState {
   // Card purchases only (spec 030): the amount is then the TOTAL split in `installmentsCount` parts.
   installmentsCount: number;
   installmentsOn: boolean;
+  // Spec 095: the invoice chosen by hand among the previous, computed and next one of the date. `undefined`
+  // follows the date. On edit it holds the stored invoice when that differs from the computed one.
+  invoiceMonth?: string;
   // Spec 059: free text, up to MAX_NOTES characters; empty means no note.
   notes: string;
   // Origin of the transaction being edited: true/false = its stored status, undefined while creating.
@@ -121,13 +125,27 @@ function applySuggestion(
   };
 }
 
+// Spec 095 FR 15: another card has another closing day, so the choice restarts from the date.
+function changeCard(
+  state: TransactionFormState,
+  creditCardId: string | undefined,
+): TransactionFormState {
+  return {
+    ...state,
+    creditCardId,
+    invoiceMonth:
+      creditCardId === state.creditCardId ? state.invoiceMonth : undefined,
+  };
+}
+
 // Create: the switch follows the date until the user touches it. Edit: it shows the stored status and never follows.
 function changeDate(
   state: TransactionFormState,
   date: Date,
   isEditing: boolean,
 ): TransactionFormState {
-  const next = { ...state, date: normalizeDate(date) };
+  // Spec 095 FR 15: a new date recomputes the invoice; the user can pick again afterwards.
+  const next = { ...state, date: normalizeDate(date), invoiceMonth: undefined };
 
   return isEditing || state.paidTouched
     ? next
@@ -146,6 +164,14 @@ function changeInstallmentsOn(
   };
 }
 
+// Spec 095 FR 14: the choice, or `undefined` to follow the date.
+function changeInvoiceMonth(
+  state: TransactionFormState,
+  month: string | undefined,
+): TransactionFormState {
+  return { ...state, invoiceMonth: month };
+}
+
 function changeOwner(
   state: TransactionFormState,
   ownerId: string,
@@ -157,6 +183,11 @@ function changeOwner(
   const account = accounts.find((item) => item.id === state.accountId);
   const card = cards.find((item) => item.id === state.creditCardId);
 
+  const creditCardId =
+    card && card.ownerId === ownerId
+      ? state.creditCardId
+      : defaultCardId(cards, ownerId);
+
   return {
     ...state,
     accountId:
@@ -167,10 +198,9 @@ function changeOwner(
       category && categoryInScope(category, ownerId)
         ? state.categoryId
         : undefined,
-    creditCardId:
-      card && card.ownerId === ownerId
-        ? state.creditCardId
-        : defaultCardId(cards, ownerId),
+    creditCardId,
+    invoiceMonth:
+      creditCardId === state.creditCardId ? state.invoiceMonth : undefined,
     ownerId,
   };
 }
@@ -206,6 +236,7 @@ function changePayWith(
       ...state,
       installmentsCount: 2,
       installmentsOn: false,
+      invoiceMonth: undefined,
       // Coming back from a card the status restarts from the date.
       paid: state.payWith === "CARD" ? !isAfterToday(state.date) : state.paid,
       paidTouched: state.payWith === "CARD" ? false : state.paidTouched,
@@ -214,7 +245,11 @@ function changePayWith(
   }
 
   return {
-    ...changeType({ ...state, payWith }, TransactionType.EXPENSE, categories),
+    ...changeType(
+      { ...state, invoiceMonth: undefined, payWith },
+      TransactionType.EXPENSE,
+      categories,
+    ),
     creditCardId: state.creditCardId ?? defaultCardId(cards, state.ownerId),
   };
 }
@@ -275,6 +310,21 @@ const REPEAT_AND_INSTALLMENTS_DEFAULTS = {
   | "repeatOn"
 >;
 
+// What the invoice rules need beyond the form: the card's closing day and, when editing, what is stored.
+interface InvoiceContext {
+  closingDay: number;
+  storedCardId?: string;
+  // `YYYY-MM-DD` of the stored row.
+  storedDate?: string;
+  storedMonth?: string;
+}
+
+// Installments (spec 030): the form amount is the TOTAL, the API splits it.
+// `YYYY-MM-DD` of a local date, the format the billing rules work on.
+function calendarDayOf(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
 function createInitialState(params: {
   accounts: AccountDTO[];
   // A card to start on ("Add purchase" from an invoice): opens in Card mode with the card's owner.
@@ -314,6 +364,46 @@ function defaultCardId(cards: CreditCardDTO[], ownerId: string) {
   )?.id;
 }
 
+// Spec 095 FR 3, 14: the invoice the form shows as selected.
+function effectiveInvoiceMonth(
+  state: TransactionFormState,
+  closingDay: number,
+): string {
+  return (
+    state.invoiceMonth ?? invoiceMonthOf(calendarDayOf(state.date), closingDay)
+  );
+}
+
+// Spec 095 FR 16: the month goes to the API only when it differs from what the API would pick anyway.
+// Create: the computed month. Edit: the stored month, or the computed one once the date or the card changed
+// (the API recomputes then), so "Usar a da data" on a row moved by hand sends the computed month.
+function invoiceMonthToSend(
+  state: TransactionFormState,
+  invoice: InvoiceContext | undefined,
+): string | undefined {
+  if (!invoice || state.payWith !== "CARD") {
+    return undefined;
+  }
+
+  const computed = invoiceMonthOf(
+    calendarDayOf(state.date),
+    invoice.closingDay,
+  );
+  const effective = effectiveInvoiceMonth(state, invoice.closingDay);
+
+  if (invoice.storedMonth === undefined) {
+    return effective === computed ? undefined : effective;
+  }
+
+  const recomputed =
+    state.creditCardId !== invoice.storedCardId ||
+    calendarDayOf(state.date) !== invoice.storedDate;
+
+  return effective === (recomputed ? computed : invoice.storedMonth)
+    ? undefined
+    : effective;
+}
+
 function isAfterToday(date: Date) {
   return normalizeDate(date).getTime() > normalizeDate(new Date()).getTime();
 }
@@ -328,6 +418,7 @@ function isSameState(a: TransactionFormState, b: TransactionFormState) {
     a.description === b.description &&
     a.installmentsCount === b.installmentsCount &&
     a.installmentsOn === b.installmentsOn &&
+    a.invoiceMonth === b.invoiceMonth &&
     a.notes === b.notes &&
     a.ownerId === b.ownerId &&
     a.paid === b.paid &&
@@ -362,6 +453,8 @@ function resetForNext(state: TransactionFormState): TransactionFormState {
     ...REPEAT_AND_INSTALLMENTS_DEFAULTS,
     amountCents: 0,
     description: "",
+    // The date is kept, the manual invoice is not (spec 095 FR 19).
+    invoiceMonth: undefined,
     notes: "",
     originalPaid: undefined,
     paid: !isAfterToday(state.date),
@@ -382,6 +475,8 @@ function stateFromDto(
     description: dto.description,
     installmentsCount: dto.installmentCount ?? 2,
     installmentsOn: false,
+    // Spec 095 FR 17: the stored invoice is the selected one; the form drops it when it equals the computed one.
+    invoiceMonth: dto.creditCardId ? dto.invoiceMonth : undefined,
     notes: dto.notes ?? "",
     originalPaid: dto.paid,
     ownerId: dto.ownerId,
@@ -398,16 +493,18 @@ function stateFromDto(
   };
 }
 
-// Installments (spec 030): the form amount is the TOTAL, the API splits it.
 function toCreateInstallmentParams(
   state: TransactionFormState,
   owner: OwnerDTO,
+  invoice?: InvoiceContext,
 ): CreateInstallmentPlanUseCaseParams {
   return {
     categoryId: state.categoryId!,
     creditCardId: state.creditCardId!,
     date: state.date.toISOString(),
     description: state.description.trim(),
+    // Spec 095 FR 16, 18: the invoice of the 1st installment, only when it is not the computed one.
+    firstInvoiceMonth: invoiceMonthToSend(state, invoice),
     installments: state.installmentsCount,
     notes: notesToCreate(state),
     owner: owner.type,
@@ -421,6 +518,7 @@ function toCreateParams(
   state: TransactionFormState,
   owner: OwnerDTO,
   categoryName: string,
+  invoice?: InvoiceContext,
 ): CreateTransactionUseCaseParams {
   const isCard = state.payWith === "CARD";
 
@@ -431,6 +529,7 @@ function toCreateParams(
     creditCardId: isCard ? state.creditCardId : undefined,
     date: state.date.toISOString(),
     description: state.description.trim(),
+    invoiceMonth: invoiceMonthToSend(state, invoice),
     notes: notesToCreate(state),
     owner: owner.type,
     ownerId: owner.id,
@@ -472,10 +571,11 @@ function toUpdateParams(
   state: TransactionFormState,
   owner: OwnerDTO,
   categoryName: string,
+  invoice?: InvoiceContext,
 ): UpdateTransactionUseCaseParams {
   // An edit clears the notes with `null` (absent would leave them).
   return {
-    ...toCreateParams(state, owner, categoryName),
+    ...toCreateParams(state, owner, categoryName, invoice),
     id,
     notes: state.notes.trim() || null,
   };
@@ -532,11 +632,19 @@ function validate(state: TransactionFormState): TransactionFormErrors {
   return errors;
 }
 
-export type { PayWith, TransactionFormErrors, TransactionFormState };
+export type {
+  InvoiceContext,
+  PayWith,
+  TransactionFormErrors,
+  TransactionFormState,
+};
 export {
   applySuggestion,
+  calendarDayOf,
+  changeCard,
   changeDate,
   changeInstallmentsOn,
+  changeInvoiceMonth,
   changeOwner,
   changePaid,
   changePayWith,
@@ -546,6 +654,8 @@ export {
   createInitialState,
   defaultAccountId,
   defaultCardId,
+  effectiveInvoiceMonth,
+  invoiceMonthToSend,
   isSameState,
   MAX_NOTES,
   MAX_TAG_NAME,
