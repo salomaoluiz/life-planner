@@ -216,13 +216,7 @@ function LineChart(props: LineChartProps) {
                   fill={colors.surface}
                   key={seriesIndex}
                   r={item.emphasis === "muted" ? 4 : 5}
-                  stroke={
-                    item.emphasis === "muted"
-                      ? colors.accent
-                      : value < 0
-                        ? colors.expense
-                        : colors.income
-                  }
+                  stroke={markerColor(item.emphasis, value, colors)}
                   strokeWidth={2}
                 />
               ) : null;
@@ -254,6 +248,18 @@ function LineChart(props: LineChartProps) {
       </View>
     </View>
   );
+}
+
+function markerColor(
+  emphasis: LineChartSeries["emphasis"],
+  value: number,
+  colors: { accent: string; expense: string; income: string },
+) {
+  if (emphasis === "muted") {
+    return colors.accent;
+  }
+
+  return value < 0 ? colors.expense : colors.income;
 }
 
 // The value a slot reads out: the first series that has one at this point (spec 094).
