@@ -3,7 +3,13 @@ import { RecurrenceScope } from "@domain/entities/financial/RecurrenceEntity";
 import { TranslationKeys } from "@presentation/i18n/types";
 import type { TransactionFormState } from "@screens/Financial/Transactions/modals/NewTransactionModal/models/transactionFormState";
 
+// Spec 061: changes the user confirmed whose request is still running. They live outside any screen, so the modal
+// can close (and unmount) while the request goes on; the transactions list merges them into what it shows.
+type PendingAction = "pay" | "receive";
+
 interface PendingChange {
+  // Spec 097: an edit that settles a bill ("pay") or an income ("receive"); the error toast names it.
+  action?: PendingAction;
   description: string;
   id: string;
   kind: PendingKind;
@@ -16,6 +22,7 @@ interface PendingChange {
 }
 
 interface PendingFailure {
+  action?: PendingAction;
   description: string;
   id: string;
   kind: PendingKind;
@@ -24,8 +31,6 @@ interface PendingFailure {
   retry: () => void;
 }
 
-// Spec 061: changes the user confirmed whose request is still running. They live outside any screen, so the modal
-// can close (and unmount) while the request goes on; the transactions list merges them into what it shows.
 type PendingKind = "create" | "delete" | "edit";
 
 interface PendingTarget {
@@ -119,7 +124,13 @@ function subscribe(listener: () => void) {
   };
 }
 
-export type { PendingChange, PendingFailure, PendingKind, PendingTarget };
+export type {
+  PendingAction,
+  PendingChange,
+  PendingFailure,
+  PendingKind,
+  PendingTarget,
+};
 export {
   addChange,
   addFailure,

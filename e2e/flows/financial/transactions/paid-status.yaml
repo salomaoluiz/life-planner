@@ -70,9 +70,13 @@ onFlowComplete:
     id: "financial.transactions.summary.toPay"
     text: ".*50[.,]00.*"
 - runFlow: ../../../subflows/financial/scroll-list-down.yaml
-# One tap pays it: it moves to today's date, so it leaves last month
+# The pay button opens the confirmation modal (spec 097); paying it today moves it to today's date, so it leaves last month
 - tapOn:
     id: "financial.transactions.row.pay"
+- tapOn:
+    id: "financial.transactions.confirm-pay.date-today"
+- tapOn:
+    id: "financial.transactions.confirm-pay.submit"
 - extendedWaitUntil:
     notVisible:
       id: "financial.transactions.row.pay"

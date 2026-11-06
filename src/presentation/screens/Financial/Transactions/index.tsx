@@ -74,7 +74,7 @@ function FinancialTransactions() {
   const localeTag = useLocaleTag();
   const vm = useTransactionsViewModel();
   const adjustment = useAdjustmentSheet();
-  const pay = usePayTransaction({ onPaid: vm.onRefresh });
+  const pay = usePayTransaction();
   const csv = useCsvActions();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [filtersStep, setFiltersStep] = useState<"period" | "root">("root");
@@ -129,7 +129,7 @@ function FinancialTransactions() {
 
   // Spec 087: handlers by item, with a stable identity, so the memoized rows keep their render.
   const onPayRow = useStableCallback((item: TransactionUIModel) =>
-    vm.readOnly ? vm.onReadOnlyAttempt() : pay.onPay(item),
+    vm.readOnly ? vm.onReadOnlyAttempt() : pay.openFor(item),
   );
   const onAdjustmentPress = useStableCallback((item: TransactionUIModel) =>
     vm.readOnly ? vm.onReadOnlyAttempt() : adjustment.onOpen(item),
@@ -156,7 +156,6 @@ function FinancialTransactions() {
 
       return (
         <TransactionRow
-          isPaying={pay.payingId === transaction.id}
           item={transaction}
           onAdjustmentPress={onAdjustmentPress}
           onPay={onPayRow}
@@ -502,9 +501,6 @@ function FinancialTransactions() {
           updating={vm.isTotalsUpdating}
         />
       )}
-      {pay.hasError ? (
-        <Text.Body tone={"expense"} value={t("common.errors.generic")} />
-      ) : null}
       {vm.invoicesError ? (
         <ErrorState
           message={t("financial.transactions.cardInvoice.error")}
@@ -620,7 +616,7 @@ function FinancialTransactions() {
         data={vm.entries}
         estimatedItemSize={64}
         // Expanding an invoice only changes this id: without it the virtualized row keeps its old render.
-        extraData={`${vm.expandedInvoiceId ?? ""}|${vm.expandedDayKey ?? ""}|${vm.isTotalsUpdating}|${pay.payingId ?? ""}|${vm.readOnly}|${localeTag}|${wide}`}
+        extraData={`${vm.expandedInvoiceId ?? ""}|${vm.expandedDayKey ?? ""}|${vm.isTotalsUpdating}|${vm.readOnly}|${localeTag}|${wide}`}
         getItemType={entryType}
         keyExtractor={entryKey}
         ListEmptyComponent={empty}

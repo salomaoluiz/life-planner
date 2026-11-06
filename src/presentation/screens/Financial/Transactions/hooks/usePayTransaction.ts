@@ -1,48 +1,22 @@
-import { useEffect, useState } from "react";
-
-import { useCases } from "@application/useCases";
-import { useMutation } from "@infrastructure/fetcher";
 import useStableCallback from "@presentation/hooks/useStableCallback";
-import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
+import { setPayRequest } from "@screens/Financial/ConfirmPayment/models/payRequest";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import TransactionUIModel from "../models/TransactionUIModel";
 
-interface Props {
-  onPaid: () => void;
-}
-
-// One tap on the row sends `{ paid: true }` without opening the form (spec 033 FR 17): the API moves
-// the date to today. There is no unpay action here, only the form can turn the status off (FR 18).
-function usePayTransaction(props: Props) {
-  const [payingId, setPayingId] = useState<string>();
-  const [hasError, setHasError] = useState(false);
-
-  const payMutation = useMutation({
-    cacheKey: [useCases.updateFinancialTransactionUseCase.uniqueName, "pay"],
-    fetch: useCases.updateFinancialTransactionUseCase.execute,
-  });
-
-  useEffect(() => {
-    if (payMutation.status === "success") {
-      setPayingId(undefined);
-      // The row moves to today's date, so it leaves its month and joins another one that may be cached.
-      void invalidateFinanceData();
-      props.onPaid();
-    }
-    if (payMutation.status === "error") {
-      setPayingId(undefined);
-      setHasError(true);
-    }
-  }, [payMutation.status]);
+// Spec 097: the ✓ on an unpaid account row opens the confirmation modal (value and date). Nothing is saved until the
+// user confirms there; the confirmed payment then goes through the 061 pending queue. There is no unpay action here,
+// only the form can turn the status off (spec 033 FR 18).
+function usePayTransaction() {
+  const { openModal } = useModalNavigation();
 
   // A stable identity: the memoized rows do not render again when the screen does.
-  const onPay = useStableCallback((item: TransactionUIModel) => {
-    setHasError(false);
-    setPayingId(item.id);
-    payMutation.mutate({ id: item.id, ownerId: item.ownerId, paid: true });
+  const openFor = useStableCallback((item: TransactionUIModel) => {
+    setPayRequest({ item: item.dto });
+    openModal("confirm_payment");
   });
 
-  return { hasError, onPay, payingId };
+  return { openFor };
 }
 
 export default usePayTransaction;

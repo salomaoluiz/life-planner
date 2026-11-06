@@ -77,3 +77,37 @@ it("SHOULD show failures one after another, each hiding after 6 seconds", () => 
   act(() => jest.advanceTimersByTime(6000));
   expect(screen.queryByTestId(transactionsTestIds.errorToast)).toBeNull();
 });
+
+it("SHOULD name the payment WHEN a pay or receive change fails", () => {
+  render(<ErrorToastHost />);
+  act(() =>
+    addFailure({
+      action: "pay",
+      description: "Conta de luz",
+      id: "1",
+      kind: "edit",
+      retry: jest.fn(),
+    }),
+  );
+  expect(
+    screen.getByText(
+      'financial.transactions.error.pay {"description":"Conta de luz"}',
+    ),
+  ).toBeTruthy();
+
+  act(() => jest.advanceTimersByTime(6000));
+  act(() =>
+    addFailure({
+      action: "receive",
+      description: "Salário",
+      id: "2",
+      kind: "edit",
+      retry: jest.fn(),
+    }),
+  );
+  expect(
+    screen.getByText(
+      'financial.transactions.error.receive {"description":"Salário"}',
+    ),
+  ).toBeTruthy();
+});

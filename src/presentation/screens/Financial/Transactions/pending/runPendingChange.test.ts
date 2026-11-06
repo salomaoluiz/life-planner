@@ -179,6 +179,15 @@ it("SHOULD keep the copy key of a business error", async () => {
   expect(getFailures()[0].messageKey).toBeDefined();
 });
 
+it("SHOULD carry the pay action of the change into its failure", async () => {
+  await runPendingChange(
+    { ...base, action: "pay" },
+    async () => Promise.reject(new Error("x")),
+    jest.fn(),
+  );
+  expect(getFailures()[0].action).toBe("pay");
+});
+
 it("SHOULD end with no change and one failure when one of two quick creates fails", async () => {
   await Promise.all([
     runPendingChange(
