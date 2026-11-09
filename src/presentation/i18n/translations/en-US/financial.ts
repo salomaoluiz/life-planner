@@ -49,6 +49,13 @@ const financial = {
     projectedBalance: "End of month: {{value}}",
     total: "Total in accounts",
     totalProjected: "End of month",
+    types: {
+      BROKERAGE: "Brokerage",
+      CASH: "Cash",
+      CHECKING: "Checking",
+      OTHER: "Other",
+      SAVINGS: "Savings",
+    },
   },
   cardForm: {
     archive: "Archive card",

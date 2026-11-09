@@ -27,7 +27,7 @@ import { translateChoices } from "@screens/Financial/models/ownerOptions";
 
 import ProjectedBalance from "../components/ProjectedBalance";
 import { AccountsVM } from "../hooks";
-import { AccountEntry } from "../models/accountList";
+import { AccountEntry, totalAmount } from "../models/accountList";
 import useStyles from "../styles";
 import accountsTestIds from "../testIds";
 
@@ -93,8 +93,21 @@ function Wide({ vm }: AdaptiveViewProps<AccountsVM>) {
   );
 
   function renderItem({ item }: { item: AccountEntry }) {
-    if (item.kind === "section") {
-      return <GroupHeader title={t(item.titleKey)} />;
+    if (item.kind === "typeSection") {
+      return (
+        <GroupHeader
+          testID={accountsTestIds.typeSection(item.type)}
+          title={`${t(item.titleKey)} · ${item.count}`}
+          trailing={
+            <AmountText
+              currency={DEFAULT_CURRENCY}
+              size={"body"}
+              testID={accountsTestIds.typeSectionSubtotal(item.type)}
+              {...totalAmount(item.subtotalCents)}
+            />
+          }
+        />
+      );
     }
 
     if (item.kind === "archivedToggle") {

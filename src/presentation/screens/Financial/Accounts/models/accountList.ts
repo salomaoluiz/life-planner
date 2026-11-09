@@ -1,3 +1,4 @@
+import { AccountType } from "@domain/entities/financial/AccountEntity";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { ALL_OWNERS } from "@screens/Financial/models/ownerOptions";
 
@@ -6,7 +7,31 @@ import AccountUIModel from "./AccountUIModel";
 export type AccountEntry =
   | { account: AccountUIModel; key: string; kind: "row" }
   | { count: number; expanded: boolean; key: string; kind: "archivedToggle" }
-  | { key: string; kind: "section"; titleKey: TranslationKeys };
+  | {
+      count: number;
+      key: string;
+      kind: "typeSection";
+      subtotalCents: number;
+      titleKey: TranslationKeys;
+      type: AccountType;
+    };
+
+// Spec 101: the order of the sections of the active accounts.
+const ACCOUNT_TYPE_ORDER: AccountType[] = [
+  AccountType.CHECKING,
+  AccountType.SAVINGS,
+  AccountType.BROKERAGE,
+  AccountType.CASH,
+  AccountType.OTHER,
+];
+
+const ACCOUNT_TYPE_LABEL_KEYS: Record<AccountType, TranslationKeys> = {
+  [AccountType.BROKERAGE]: "financial.accounts.types.BROKERAGE",
+  [AccountType.CASH]: "financial.accounts.types.CASH",
+  [AccountType.CHECKING]: "financial.accounts.types.CHECKING",
+  [AccountType.OTHER]: "financial.accounts.types.OTHER",
+  [AccountType.SAVINGS]: "financial.accounts.types.SAVINGS",
+};
 
 function buildAccountEntries(
   accounts: AccountUIModel[],
@@ -20,15 +45,22 @@ function buildAccountEntries(
     .sort(byName);
   const entries: AccountEntry[] = [];
 
-  if (active.length > 0) {
-    entries.push(
-      {
-        key: "section-active",
-        kind: "section",
-        titleKey: "financial.accounts.active",
-      },
-      ...rows(active),
-    );
+  for (const type of ACCOUNT_TYPE_ORDER) {
+    const ofType = active.filter((account) => account.type === type);
+
+    if (ofType.length > 0) {
+      entries.push(
+        {
+          count: ofType.length,
+          key: `type-section-${type}`,
+          kind: "typeSection",
+          subtotalCents: totalActiveCents(ofType),
+          titleKey: ACCOUNT_TYPE_LABEL_KEYS[type],
+          type,
+        },
+        ...rows(ofType),
+      );
+    }
   }
 
   if (archived.length > 0) {
@@ -103,6 +135,8 @@ function totalProjectedCents(accounts: AccountUIModel[]) {
 }
 
 export {
+  ACCOUNT_TYPE_LABEL_KEYS,
+  ACCOUNT_TYPE_ORDER,
   buildAccountEntries,
   filterByOwner,
   totalActiveCents,

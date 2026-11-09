@@ -1,5 +1,7 @@
 import { render } from "@tests";
 
+import { AccountType } from "@domain/entities/financial/AccountEntity";
+
 import FinancialAccounts from "../";
 import { useAccountsViewModel } from "../hooks";
 import { AccountEntry } from "../models/accountList";
@@ -70,9 +72,12 @@ function makeEntries(expanded = false): AccountEntry[] {
   );
   const entries: AccountEntry[] = [
     {
-      key: "section-active",
-      kind: "section",
-      titleKey: "financial.accounts.active",
+      count: 2,
+      key: "type-section-CHECKING",
+      kind: "typeSection",
+      subtotalCents: 129450,
+      titleKey: "financial.accounts.types.CHECKING",
+      type: AccountType.CHECKING,
     },
     { account: card, key: "row-acc-2", kind: "row" },
     { account: checking, key: "row-acc-1", kind: "row" },
