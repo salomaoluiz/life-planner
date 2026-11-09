@@ -77,6 +77,7 @@ const account = {
   owner: "USER",
   ownerId: "user-id",
   status: "ACTIVE",
+  type: "CHECKING",
 };
 
 function mocked(execute: unknown) {

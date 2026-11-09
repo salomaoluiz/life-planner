@@ -1,4 +1,7 @@
-import AccountEntity from "@domain/entities/financial/AccountEntity";
+import AccountEntity, {
+  AccountType,
+  DEFAULT_ACCOUNT_TYPE,
+} from "@domain/entities/financial/AccountEntity";
 import {
   CurrencyCode,
   DEFAULT_CURRENCY,
@@ -15,6 +18,7 @@ export interface IAccountDTO {
   ownerId: string;
   projectedBalance?: number;
   status: string;
+  type?: AccountType;
 }
 
 class AccountDTO {
@@ -28,6 +32,7 @@ class AccountDTO {
   ownerId: string;
   projectedBalance: number;
   status: string;
+  type: AccountType;
 
   constructor(params: IAccountDTO) {
     this.balance = params.balance;
@@ -40,6 +45,7 @@ class AccountDTO {
     this.ownerId = params.ownerId;
     this.projectedBalance = params.projectedBalance ?? params.balance;
     this.status = params.status;
+    this.type = params.type ?? DEFAULT_ACCOUNT_TYPE;
   }
 
   static fromEntity(entity: AccountEntity) {
@@ -54,6 +60,7 @@ class AccountDTO {
       ownerId: entity.ownerId,
       projectedBalance: entity.projectedBalance,
       status: entity.status,
+      type: entity.type,
     });
   }
 }

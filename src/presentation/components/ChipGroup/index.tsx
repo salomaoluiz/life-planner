@@ -20,6 +20,8 @@ export type ChipOption = Pick<
   ChipProps,
   "colorDot" | "count" | "icon" | "label" | "variant"
 > & {
+  /** Overrides `<group testID>-<value>` for this chip. */
+  testID?: string;
   value: string;
 };
 
@@ -64,7 +66,7 @@ function ChipGroup(props: ChipGroupProps) {
       label={option.label}
       onPress={() => onPress(option)}
       selected={isSelected(option.value)}
-      testID={testID && `${testID}-${option.value}`}
+      testID={option.testID ?? (testID && `${testID}-${option.value}`)}
       variant={option.variant}
     />
   ));

@@ -59,6 +59,10 @@ class AccountUIModel {
     return decimalToCents(this.dto.projectedBalance);
   }
 
+  get type() {
+    return this.dto.type;
+  }
+
   constructor(
     private readonly dto: AccountDTO,
     private readonly owners: OwnerDTO[],

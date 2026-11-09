@@ -42,6 +42,15 @@ const financial = {
       negative: "Negative",
       positive: "Positive",
       save: "Save account",
+      type: "Type",
+      typeHints: {
+        BROKERAGE:
+          "Cash held at your broker. Asset purchases will come out of here later.",
+        CASH: "Cash in hand.",
+        CHECKING: "Everyday account.",
+        OTHER: "Any other account.",
+        SAVINGS: "Savings, boxes and piggy banks.",
+      },
     },
     name: "Name",
     nameRequired: "Name is required",
@@ -49,6 +58,13 @@ const financial = {
     projectedBalance: "End of month: {{value}}",
     total: "Total in accounts",
     totalProjected: "End of month",
+    types: {
+      BROKERAGE: "Brokerage",
+      CASH: "Cash",
+      CHECKING: "Checking",
+      OTHER: "Other",
+      SAVINGS: "Savings",
+    },
   },
   cardForm: {
     archive: "Archive card",

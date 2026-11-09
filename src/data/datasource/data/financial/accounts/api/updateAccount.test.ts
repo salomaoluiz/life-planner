@@ -3,6 +3,7 @@ import {
   FinancialNotFound,
   GenericError,
 } from "@domain/entities/errors";
+import { AccountType } from "@domain/entities/financial/AccountEntity";
 
 import {
   mocks,
@@ -30,6 +31,15 @@ it("SHOULD send isFavorite alone WHEN it is the only change (spec 094)", async (
 
   const [, body] = spies.patch.mock.calls[0];
   expect(JSON.parse(JSON.stringify(body))).toEqual({ isFavorite: true });
+});
+
+it("SHOULD send the type alone WHEN it is the only change (spec 101)", async () => {
+  spies.patch.mockResolvedValueOnce({});
+
+  await setup({ ...mocks.onlyId, type: AccountType.SAVINGS });
+
+  const [, body] = spies.patch.mock.calls[0];
+  expect(JSON.parse(JSON.stringify(body))).toEqual({ type: "SAVINGS" });
 });
 
 it("SHOULD send only the fields that are defined", async () => {

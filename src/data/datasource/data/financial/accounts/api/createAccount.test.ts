@@ -5,6 +5,7 @@ import {
   FinancialOwnerNotAllowed,
   GenericError,
 } from "@domain/entities/errors";
+import { AccountType } from "@domain/entities/financial/AccountEntity";
 
 import {
   mocks,
@@ -37,6 +38,17 @@ it("SHOULD send isFavorite WHEN the new account is marked as favorite (spec 094)
   expect(spies.post).toHaveBeenCalledWith(
     "/v1/finance/accounts",
     expect.objectContaining({ isFavorite: true }),
+  );
+});
+
+it("SHOULD send the type WHEN one is chosen (spec 101)", async () => {
+  spies.post.mockResolvedValueOnce(mocks.apiAccount);
+
+  await setup({ type: AccountType.BROKERAGE });
+
+  expect(spies.post).toHaveBeenCalledWith(
+    "/v1/finance/accounts",
+    expect.objectContaining({ type: "BROKERAGE" }),
   );
 });
 

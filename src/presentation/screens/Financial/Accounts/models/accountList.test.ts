@@ -1,4 +1,5 @@
 import AccountDTO from "@application/dto/financial/AccountDTO";
+import { AccountType } from "@domain/entities/financial/AccountEntity";
 
 import {
   buildAccountEntries,
@@ -14,6 +15,7 @@ function model(
   balance: number,
   status = "ACTIVE",
   ownerId = "user-id",
+  type = AccountType.CHECKING,
 ) {
   return new AccountUIModel(
     new AccountDTO({
@@ -24,6 +26,7 @@ function model(
       owner: "USER",
       ownerId,
       status,
+      type,
     }),
     [],
   );
@@ -55,17 +58,22 @@ it("SHOULD format the total as amount parts", () => {
   expect(totalAmount(4000)).toEqual({ value: 4000 });
 });
 
-it("SHOULD list the Active section by name, then a collapsed Archived toggle", () => {
+it("SHOULD list the type section by name, then a collapsed Archived toggle", () => {
   const entries = buildAccountEntries(accounts, false);
 
   expect(entries.map((e) => e.kind)).toEqual([
-    "section",
+    "typeSection",
     "row",
     "row",
     "row",
     "archivedToggle",
   ]);
-  expect(entries[0]).toMatchObject({ titleKey: "financial.accounts.active" });
+  expect(entries[0]).toMatchObject({
+    count: 3,
+    subtotalCents: 10000 - 3050 + 5000,
+    titleKey: "financial.accounts.types.CHECKING",
+    type: AccountType.CHECKING,
+  });
   expect(
     entries
       .map((e) => (e.kind === "row" ? e.account.id : undefined))
@@ -91,7 +99,7 @@ it("SHOULD omit empty groups", () => {
   ).toEqual(["archivedToggle"]);
   expect(
     buildAccountEntries([model("only-active", 1)], false).map((e) => e.kind),
-  ).toEqual(["section", "row"]);
+  ).toEqual(["typeSection", "row"]);
   expect(buildAccountEntries([], false)).toEqual([]);
 });
 
@@ -173,4 +181,102 @@ it("SHOULD NOT pin an archived favorite", () => {
     .filter(Boolean);
 
   expect(ids).toEqual(["a-active", "b-active", "family"]);
+});
+
+describe("sections by type (spec 101)", () => {
+  const typed = [
+    model("cash", 10, "ACTIVE", "user-id", AccountType.CASH),
+    model("broker-b", 200, "ACTIVE", "user-id", AccountType.BROKERAGE),
+    model("broker-a", -50.25, "ACTIVE", "user-id", AccountType.BROKERAGE),
+    model("check", 1),
+    model("other", 5, "ACTIVE", "user-id", AccountType.OTHER),
+    model("saving", 7, "ACTIVE", "user-id", AccountType.SAVINGS),
+    model("old-broker", 999, "ARCHIVED", "user-id", AccountType.BROKERAGE),
+  ];
+
+  it("SHOULD emit the sections in the order Checking, Savings, Brokerage, Cash, Other", () => {
+    const sections = buildAccountEntries(typed, false).flatMap((e) =>
+      e.kind === "typeSection" ? [e.type] : [],
+    );
+
+    expect(sections).toEqual([
+      AccountType.CHECKING,
+      AccountType.SAVINGS,
+      AccountType.BROKERAGE,
+      AccountType.CASH,
+      AccountType.OTHER,
+    ]);
+  });
+
+  it("SHOULD hide a type without active accounts AND count and total only the active ones", () => {
+    const entries = buildAccountEntries(
+      [
+        model("only-archived", 1, "ARCHIVED", "user-id", AccountType.CASH),
+        ...typed.slice(1, 3),
+      ],
+      false,
+    );
+    const sections = entries.filter((e) => e.kind === "typeSection");
+
+    expect(sections).toHaveLength(1);
+    expect(sections[0]).toMatchObject({
+      count: 2,
+      key: "type-section-BROKERAGE",
+      subtotalCents: 20000 - 5025,
+      titleKey: "financial.accounts.types.BROKERAGE",
+    });
+  });
+
+  it("SHOULD keep rows by name inside their section AND the archived group ungrouped", () => {
+    const entries = buildAccountEntries(typed, true);
+    const order = entries.map((e) => {
+      if (e.kind === "row") {
+        return e.account.id;
+      }
+
+      return e.kind === "typeSection" ? e.type : e.kind;
+    });
+
+    expect(order).toEqual([
+      "CHECKING",
+      "check",
+      "SAVINGS",
+      "saving",
+      "BROKERAGE",
+      "broker-a",
+      "broker-b",
+      "CASH",
+      "cash",
+      "OTHER",
+      "other",
+      "archivedToggle",
+      "old-broker",
+    ]);
+  });
+
+  it("SHOULD pin the favorite first inside its own section", () => {
+    const favorite = new AccountUIModel(
+      new AccountDTO({
+        balance: 1,
+        icon: "bank",
+        id: "z-fav",
+        isFavorite: true,
+        name: "z-fav",
+        owner: "USER",
+        ownerId: "user-id",
+        status: "ACTIVE",
+        type: AccountType.BROKERAGE,
+      }),
+      [],
+    );
+    const ids = buildAccountEntries([...typed, favorite], false).flatMap((e) =>
+      e.kind === "row" ? [e.account.id] : [],
+    );
+
+    expect(ids.slice(ids.indexOf("z-fav"), ids.indexOf("z-fav") + 3)).toEqual([
+      "z-fav",
+      "broker-a",
+      "broker-b",
+    ]);
+  });
 });

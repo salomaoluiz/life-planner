@@ -1,5 +1,6 @@
 import AccountModel from "@data/models/financial/AccountModel";
 import DailyBalanceModel from "@data/models/financial/DailyBalanceModel";
+import { AccountType } from "@domain/entities/financial/AccountEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 export interface AccountDatasource {
@@ -29,6 +30,7 @@ interface CreateAccountDatasourceParams {
   owner: OwnerType;
   ownerId: string;
   status: string;
+  type?: AccountType;
 }
 
 interface DeleteAccountDatasourceParams {
@@ -48,6 +50,7 @@ interface UpdateAccountDatasourceParams {
   owner?: OwnerType;
   ownerId?: string;
   status?: string;
+  type?: AccountType;
 }
 
 export {

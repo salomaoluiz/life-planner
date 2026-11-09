@@ -1,4 +1,6 @@
-import AccountEntity from "@domain/entities/financial/AccountEntity";
+import AccountEntity, {
+  AccountType,
+} from "@domain/entities/financial/AccountEntity";
 import DailyBalanceEntity from "@domain/entities/financial/DailyBalanceEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
@@ -29,6 +31,7 @@ interface CreateAccountRepositoryParams {
   owner: OwnerType;
   ownerId: string;
   status: string;
+  type?: AccountType;
 }
 
 interface DeleteAccountRepositoryParams {
@@ -49,6 +52,7 @@ interface UpdateAccountRepositoryParams {
   owner?: OwnerType;
   ownerId?: string;
   status?: string;
+  type?: AccountType;
 }
 
 export {

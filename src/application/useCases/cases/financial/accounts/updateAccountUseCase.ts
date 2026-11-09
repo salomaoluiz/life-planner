@@ -1,5 +1,6 @@
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
-import { DefaultError } from "@domain/entities/errors";
+import { DefaultError, FieldInvalid } from "@domain/entities/errors";
+import { AccountType } from "@domain/entities/financial/AccountEntity";
 import Repositories from "@domain/repositories";
 
 export interface UpdateAccountUseCaseParams {
@@ -10,6 +11,20 @@ export interface UpdateAccountUseCaseParams {
   owner?: string;
   ownerId?: string;
   status?: string;
+  type?: string;
+}
+
+function toType(value: string | undefined): AccountType | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  const type = AccountType[value as keyof typeof AccountType];
+
+  if (!type) {
+    throw new FieldInvalid({ type: value });
+  }
+
+  return type;
 }
 
 function updateAccountUseCase(
@@ -17,6 +32,8 @@ function updateAccountUseCase(
 ): IUseCaseFactoryWithParamResponse<UpdateAccountUseCaseParams, void> {
   return {
     execute: async (params: UpdateAccountUseCaseParams) => {
+      const type = toType(params.type);
+
       try {
         await repositories.financialRepository.account.updateAccount({
           icon: params.icon,
@@ -25,6 +42,7 @@ function updateAccountUseCase(
           name: params.name,
           ownerId: params.ownerId,
           status: params.status,
+          type,
         });
       } catch (error) {
         if (error instanceof DefaultError) {

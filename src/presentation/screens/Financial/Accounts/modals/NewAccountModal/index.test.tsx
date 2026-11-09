@@ -288,3 +288,24 @@ describe("favorite account (spec 094)", () => {
     ).toBeOnTheScreen();
   });
 });
+
+describe("account type (spec 101)", () => {
+  it.each(["compact", "medium", "expanded"] as const)(
+    "SHOULD show the type options, the selected hint AND report a change on %s",
+    (breakpoint) => {
+      const { onTypeChange } = setup({}, breakpoint);
+
+      expect(
+        screen.getByText("financial.accounts.form.typeHints.CHECKING"),
+      ).toBeOnTheScreen();
+      fireEvent.press(
+        screen.getByTestId(accountFormTestIds.typeOption("BROKERAGE")),
+      );
+      expect(onTypeChange).toHaveBeenCalledWith("BROKERAGE");
+      expect(
+        screen.getByTestId(accountFormTestIds.typeOption("CHECKING")).props
+          .accessibilityState.selected,
+      ).toBe(true);
+    },
+  );
+});

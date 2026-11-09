@@ -10,6 +10,10 @@ const accountsTestIds = {
   row: "financial.accounts.row",
   screen: "financial.accounts.screen",
   totalProjected: "financial.accounts.total-projected",
+  // Spec 101: one header per account type, with its subtotal.
+  typeSection: (type: string) => `financial.accounts.typeSection.${type}`,
+  typeSectionSubtotal: (type: string) =>
+    `financial.accounts.typeSection.${type}.subtotal`,
 } as const;
 
 export default accountsTestIds;

@@ -1,5 +1,6 @@
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import { DefaultError, FieldInvalid } from "@domain/entities/errors";
+import { AccountType } from "@domain/entities/financial/AccountEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import Repositories from "@domain/repositories";
 
@@ -11,6 +12,7 @@ export interface CreateAccountUseCaseParams {
   owner: string;
   ownerId: string;
   status: string;
+  type?: string;
 }
 
 function createAccountUseCase(
@@ -24,6 +26,8 @@ function createAccountUseCase(
         throw new FieldInvalid({ owner });
       }
 
+      const type = toType(params.type);
+
       try {
         await repositories.financialRepository.account.createAccount({
           balance: params.balance,
@@ -33,6 +37,7 @@ function createAccountUseCase(
           owner,
           ownerId: params.ownerId,
           status: params.status,
+          type,
         });
       } catch (error) {
         if (error instanceof DefaultError) {
@@ -46,6 +51,19 @@ function createAccountUseCase(
     },
     uniqueName: "financial.create_account_use_case",
   };
+}
+
+function toType(value: string | undefined): AccountType | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  const type = AccountType[value as keyof typeof AccountType];
+
+  if (!type) {
+    throw new FieldInvalid({ type: value });
+  }
+
+  return type;
 }
 
 export default createAccountUseCase;

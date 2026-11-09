@@ -30,6 +30,11 @@ export { default as Checkbox, CheckboxProps } from "./Checkbox";
 export { default as Chip, ChipProps } from "./Chip";
 export { default as ChipGroup, ChipGroupProps, ChipOption } from "./ChipGroup";
 export {
+  default as ChoiceTileGroup,
+  ChoiceTileGroupProps,
+  ChoiceTileOption,
+} from "./ChoiceTileGroup";
+export {
   default as ColorSwatchGroup,
   ColorSwatchGroupProps,
 } from "./ColorSwatchGroup";

@@ -48,7 +48,13 @@ it("SHOULD show the total label and amount and call onAddPress from the plus but
 it("SHOULD render the section, rows with owner and balance", () => {
   setup({ entries: makeEntries() });
 
-  expect(hasText("financial.accounts.active")).toBe(true);
+  expect(hasText("financial.accounts.types.CHECKING · 2")).toBe(true);
+  expect(
+    screen.getByTestId(accountsTestIds.typeSection("CHECKING")),
+  ).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(accountsTestIds.typeSectionSubtotal("CHECKING")),
+  ).toBeOnTheScreen();
   expect(hasText("Checking")).toBe(true);
   expect(hasText("Card")).toBe(true);
   expect(screen.getAllByText("Alice Test")).toHaveLength(2);

@@ -1,8 +1,16 @@
 import AccountDTO from "@application/dto/financial/AccountDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
-import { ACCOUNT_ICONS } from "@presentation/constants/accountIcons";
+import { AccountType } from "@domain/entities/financial/AccountEntity";
+import {
+  ACCOUNT_ICONS,
+  DEFAULT_ICON_BY_TYPE,
+} from "@presentation/constants/accountIcons";
 import { iconLabel } from "@presentation/constants/categoryIcons";
 import { TranslationKeys } from "@presentation/i18n/types";
+import {
+  ACCOUNT_TYPE_LABEL_KEYS,
+  ACCOUNT_TYPE_ORDER,
+} from "@screens/Financial/Accounts/models/accountList";
 import {
   buildOwnerChoices,
   ChoiceOption,
@@ -35,6 +43,19 @@ class NewAccountUIModel {
     ];
   }
 
+  // Spec 101: the five types in list order, each with the icon it suggests.
+  get typeOptions(): {
+    icon: string;
+    labelKey: TranslationKeys;
+    value: AccountType;
+  }[] {
+    return ACCOUNT_TYPE_ORDER.map((type) => ({
+      icon: DEFAULT_ICON_BY_TYPE[type],
+      labelKey: ACCOUNT_TYPE_LABEL_KEYS[type],
+      value: type,
+    }));
+  }
+
   constructor(private readonly params: Params) {}
 
   account(id: string): AccountDTO | undefined {
@@ -53,6 +74,10 @@ class NewAccountUIModel {
     const favorite = this.params.accounts.find((account) => account.isFavorite);
 
     return favorite && favorite.id !== accountId ? favorite.name : undefined;
+  }
+
+  typeHintKey(type: AccountType): TranslationKeys {
+    return `financial.accounts.form.typeHints.${type}`;
   }
 }
 

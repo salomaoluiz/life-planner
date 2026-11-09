@@ -85,3 +85,17 @@ it("SHOULD read isFavorite from the API AND default to false WHEN it is missing 
     AccountModel.fromJSON({ ...mocks.json, isFavorite: true }).toJSON(),
   ).toHaveProperty("isFavorite", true);
 });
+
+it("SHOULD read the type AND fall back to CHECKING WHEN it is missing or unknown (spec 101)", () => {
+  const { type, ...withoutType } = mocks.json;
+
+  expect(type).toBe("BROKERAGE");
+  expect(AccountModel.fromJSON(mocks.json).type).toBe("BROKERAGE");
+  expect(AccountModel.fromJSON(withoutType).type).toBe("CHECKING");
+  expect(AccountModel.fromJSON({ ...mocks.json, type: "FOO" }).type).toBe(
+    "CHECKING",
+  );
+  expect(
+    AccountModel.fromJSON({ ...mocks.json, type: "SAVINGS" }).toJSON().type,
+  ).toBe("SAVINGS");
+});

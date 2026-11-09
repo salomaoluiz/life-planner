@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
+import { AccountType } from "@domain/entities/financial/AccountEntity";
 import {
   invalidateFetcherData,
   useMutation,
@@ -26,6 +27,8 @@ import {
   toUpdateParams,
   validate,
   withArchived,
+  withIcon,
+  withType,
 } from "../models/accountFormState";
 import NewAccountUIModel from "../models/NewAccountUIModel";
 
@@ -262,7 +265,7 @@ function useNewAccountViewModel() {
     },
     onIconChange: (value: string) => {
       if (state) {
-        update({ ...state, icon: value });
+        update(withIcon(state, value));
       }
     },
     onNameChange: (value: string) => {
@@ -279,6 +282,11 @@ function useNewAccountViewModel() {
     onSignChange: (value: string) => {
       if (state) {
         update({ ...state, isNegative: value === "NEGATIVE" });
+      }
+    },
+    onTypeChange: (value: string) => {
+      if (state) {
+        update(withType(state, value as AccountType));
       }
     },
     ownerChoices: uiModel?.ownerChoices ?? [],
@@ -299,5 +307,9 @@ function useNewAccountViewModel() {
     titleKey: (isEditing
       ? "financial.accounts.edit"
       : "financial.accounts.new") as TranslationKeys,
+    type: state?.type ?? AccountType.CHECKING,
+    typeHintKey: (uiModel?.typeHintKey(state?.type ?? AccountType.CHECKING) ??
+      "financial.accounts.form.typeHints.CHECKING") as TranslationKeys,
+    typeOptions: uiModel?.typeOptions ?? [],
   };
 }

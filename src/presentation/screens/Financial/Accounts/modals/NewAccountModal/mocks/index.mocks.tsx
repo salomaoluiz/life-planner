@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, within } from "@tests";
 
+import { AccountType } from "@domain/entities/financial/AccountEntity";
 import { useBreakpoint } from "@presentation/theme";
 
 import NewAccountModal from "../";
@@ -47,6 +48,7 @@ const defaultViewModel: ReturnType<typeof useNewAccountViewModel> = {
   onOwnerChange: jest.fn(),
   onSave: jest.fn(),
   onSignChange: jest.fn(),
+  onTypeChange: jest.fn(),
   ownerChoices: [{ label: "Personal", labelKey: undefined, value: "user-id" }],
   ownerHelperKey: undefined,
   ownerId: "user-id",
@@ -58,6 +60,20 @@ const defaultViewModel: ReturnType<typeof useNewAccountViewModel> = {
     { labelKey: "financial.accounts.form.negative", value: "NEGATIVE" },
   ],
   titleKey: "financial.accounts.new",
+  type: AccountType.CHECKING,
+  typeHintKey: "financial.accounts.form.typeHints.CHECKING",
+  typeOptions: [
+    {
+      icon: "bank",
+      labelKey: "financial.accounts.types.CHECKING",
+      value: AccountType.CHECKING,
+    },
+    {
+      icon: "chart-line",
+      labelKey: "financial.accounts.types.BROKERAGE",
+      value: AccountType.BROKERAGE,
+    },
+  ],
 };
 
 function setup(

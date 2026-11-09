@@ -1,4 +1,9 @@
-import { AccountStatus } from "@domain/entities/financial/AccountEntity";
+import {
+  AccountStatus,
+  AccountType,
+  DEFAULT_ACCOUNT_TYPE,
+  toAccountType,
+} from "@domain/entities/financial/AccountEntity";
 import {
   CurrencyCode,
   DEFAULT_CURRENCY,
@@ -19,6 +24,7 @@ interface IAccountModel {
   ownerId: string;
   projectedBalance?: number;
   status: AccountStatus;
+  type?: AccountType;
 }
 
 class AccountModel implements IAccountModel {
@@ -32,6 +38,7 @@ class AccountModel implements IAccountModel {
   ownerId: string;
   projectedBalance: number;
   status: AccountStatus;
+  type: AccountType;
 
   constructor(params: IAccountModel) {
     this.currency = params.currency ?? DEFAULT_CURRENCY;
@@ -44,6 +51,7 @@ class AccountModel implements IAccountModel {
     this.ownerId = params.ownerId;
     this.projectedBalance = params.projectedBalance ?? params.balance;
     this.status = params.status;
+    this.type = params.type ?? DEFAULT_ACCOUNT_TYPE;
   }
 
   static fromJSON(data: Record<string, unknown>): AccountModel {
@@ -63,6 +71,7 @@ class AccountModel implements IAccountModel {
           ? balance
           : centsToDecimal(Number(data.projectedBalance)),
       status: data.status as AccountStatus,
+      type: toAccountType(data.type),
     });
   }
 
@@ -79,6 +88,7 @@ class AccountModel implements IAccountModel {
       ownerId: this.ownerId,
       projectedBalance: decimalToCents(this.projectedBalance),
       status: this.status,
+      type: this.type,
     };
   }
 }

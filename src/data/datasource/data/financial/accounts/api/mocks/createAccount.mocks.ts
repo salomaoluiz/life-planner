@@ -1,4 +1,7 @@
-import { AccountStatus } from "@domain/entities/financial/AccountEntity";
+import {
+  AccountStatus,
+  AccountType,
+} from "@domain/entities/financial/AccountEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { api } from "@infrastructure/api";
 
@@ -37,7 +40,10 @@ beforeEach(() => {
 });
 
 async function setup(
-  override: Partial<typeof params> & { isFavorite?: boolean } = {},
+  override: Partial<typeof params> & {
+    isFavorite?: boolean;
+    type?: AccountType;
+  } = {},
 ) {
   return createAccount({ ...params, ...override });
 }

@@ -62,6 +62,15 @@ const financial = {
       negative: "Negativo",
       positive: "Positivo",
       save: "Salvar conta",
+      type: "Tipo",
+      typeHints: {
+        BROKERAGE:
+          "Dinheiro parado na corretora. Depois, as compras de ativos saem daqui.",
+        CASH: "Dinheiro em espécie.",
+        CHECKING: "Conta do dia a dia.",
+        OTHER: "Qualquer outra conta.",
+        SAVINGS: "Poupança, caixinhas e cofrinhos.",
+      },
     },
     name: "Nome",
     nameRequired: "Nome é obrigatório",
@@ -69,6 +78,13 @@ const financial = {
     projectedBalance: "Fim do mês: {{value}}",
     total: "Total nas contas",
     totalProjected: "Fim do mês",
+    types: {
+      BROKERAGE: "Corretora",
+      CASH: "Dinheiro",
+      CHECKING: "Corrente",
+      OTHER: "Outra",
+      SAVINGS: "Poupança e caixinhas",
+    },
   },
   cardForm: {
     archive: "Arquivar cartão",
