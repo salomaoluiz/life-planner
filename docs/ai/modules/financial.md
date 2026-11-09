@@ -17,6 +17,7 @@ entities:
       - ownerId
       - projectedBalance # balance at the end of the current month (defaults to balance)
       - status
+      - type # spec 101: AccountType CHECKING | SAVINGS | BROKERAGE | CASH | OTHER (defaults to CHECKING; `toAccountType` falls back for an old API)
   CategoryEntity:
     path: src/domain/entities/financial/CategoryEntity.ts
     properties:
@@ -272,13 +273,15 @@ Categories:
     - components/{CustomColorSheet,IconPickerSheet}/index.tsx # the archive / reactivate action sits at the end of the form body; the blockers use the shared `@components` PendingItemsDialog (spec 041, reused by families in spec 042)
 
 Accounts:
-  view: Accounts/views/Wide.tsx (+ styles.ts) # total, owner chips, active list, collapsible archived section
+  view: Accounts/views/Wide.tsx (+ styles.ts) # total, owner chips, active accounts in one section per type with count and subtotal (spec 101), collapsible archived section
   hooks: Accounts/hooks/useAccountsViewModel.ts (+ index.ts, fetchAccounts)
   models: [Accounts/models/AccountUIModel.ts, Accounts/models/accountList.ts]
   form: Accounts/modals/NewAccountModal/
     - index.tsx, styles.ts
     - hooks/useNewAccountViewModel.ts
     - models/{accountFormState.ts,NewAccountUIModel.ts}
+
+Account types (spec 101): `buildAccountEntries` emits one `typeSection` entry (`ACCOUNT_TYPE_ORDER`: Checking, Savings, Brokerage, Cash, Other; hidden when empty; `count`, `subtotalCents` via `totalActiveCents`) before the rows of that type; archived accounts stay in the single toggle group, ungrouped; the favorite leads its own section. The modal has a "Type" field at the top of the first column: `ChoiceTileGroup` (2-column tiles) on regular density, `ChipGroup layout="scroll"` on compact (`useDensity`), hint under it (`financial.accounts.form.typeHints.<TYPE>`). `AccountFormState.type` + `iconTouched`: `withType` suggests `DEFAULT_ICON_BY_TYPE` (`constants/accountIcons`) until `withIcon` (a manual pick) sets `iconTouched`; `stateFromDto` starts touched, so editing never moves the icon. `toUpdateParams` sends `type` when changed (a type-only edit is a real PATCH). testIDs: `financial.accounts.typeSection.<TYPE>[.subtotal]`, `financial.accounts.modal.type.<TYPE>`. The canvas' Currency select is not part of this spec, so the form has none.
 
 Cards (spec 026):
   view: Cards/views/Wide.tsx (+ styles.ts, testIds.ts) # aggregate Card (total limit, ProgressBar, used/available MetricBlocks), owner chips, CreditCardTile carousel, selected-card header with Edit, Open|Closed SegmentedControl, invoice rows, collapsible Archived list
@@ -325,6 +328,7 @@ testIDs: `Financial/Layout/testIds.ts`, `Financial/Accounts/testIds.ts`, `Financ
 - `create-account` (spec-006, spec-013, smoke), `create-account-validation` (spec-013)
 - `edit-account` (spec-006, spec-013), `archive-account` (spec-013, spec-023, includes the un-archive round trip), `delete-account` (spec-006, spec-013)
 - `delete-account-with-transactions` (spec-006)
+- `account-types` (spec-101): create a brokerage account, see its section and subtotal, change it to savings and see it move
 
 ## E2E flows: categories (spec 019)
 
@@ -560,7 +564,7 @@ On `medium`/`expanded` these modals are `BottomSheet size="form"` with `FormColu
 
 ## Favorite account on the list and the month summary (spec 094.2)
 
-- Accounts list: `buildAccountEntries` pins the favorite (`AccountUIModel.isFavorite`, active only) first in "Active"; its row has the star (`titleTrailing`), a tinted background (`highlight`) and, by breakpoint, a "Favorite" `Badge` (web/tablet) or the "Favorite · owner" subtitle (compact). The Total card is unchanged.
+- Accounts list: `buildAccountEntries` pins the favorite (`AccountUIModel.isFavorite`, active only) first in its type section (spec 101 replaced the single "Active" section); its row has the star (`titleTrailing`), a tinted background (`highlight`) and, by breakpoint, a "Favorite" `Badge` (web/tablet) or the "Favorite · owner" subtitle (compact). The Total card is unchanged.
 - Transactions: `useTransactionsViewModel` returns `summaryColumns` (favorite + muted total, or the favorite alone when it is the only active account of the scope) when `resolveFavoriteAccount` finds one and the month and the cards are loaded; otherwise `undefined` and `MonthSummary` is the single-figure card. `models/favoriteMonthSummary.ts` computes the favorite column from the month data already loaded (account rows + the invoices it pays or paid; the cards query, same key as the filter options, tells who pays an open invoice). `MonthSummary` renders `FavoriteTable` when it gets `columns`. While a filter is active the filtered summary shows instead, so the table never appears then.
 
 ## Choose the card invoice (spec 095)

@@ -3,6 +3,13 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.15.0] - 2026-11-09
+
+### Added
+
+- Accounts have a type (Checking, Savings, Brokerage, Cash, Other): pick it when creating or editing an account, and the account list is grouped by type with a subtotal per group (spec 101).
+- Choosing a type suggests its icon until you pick one yourself (spec 101).
+
 ## [1.14.2] - 2026-11-09
 
 ### Changed

@@ -1,0 +1,80 @@
+url: ${E2E_WEB_URL}
+name: financial/accounts/account-types
+tags:
+  - financial
+  - spec-101
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Broker
+      KEY: ACCOUNT_NAME
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../../subflows/financial/open-accounts.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.empty-state"
+    timeout: 20000
+# create a brokerage account: it lands under "Brokerage" with its subtotal
+- tapOn:
+    id: "financial.accounts.add-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.account-form.name-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.accounts.modal.type.BROKERAGE"
+- tapOn:
+    id: "financial.account-form.name-input"
+- inputText: ${output.ACCOUNT_NAME}
+- tapOn:
+    id: "financial.account-form.balance-input"
+- eraseText
+- inputText: "123456"
+- tapOn:
+    id: "financial.account-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.row-title"
+      text: ${output.ACCOUNT_NAME}
+    timeout: 20000
+- assertVisible:
+    id: "financial.accounts.typeSection.BROKERAGE"
+- assertVisible:
+    id: "financial.accounts.typeSection.BROKERAGE.subtotal"
+    text: ".*1[.,]234[.,]56.*"
+- assertNotVisible:
+    id: "financial.accounts.typeSection.CHECKING"
+# change it to Savings: it moves to the other section, balance kept
+- tapOn:
+    id: "financial.accounts.row-title"
+    text: ${output.ACCOUNT_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.modal.type.SAVINGS"
+    timeout: 20000
+- tapOn:
+    id: "financial.accounts.modal.type.SAVINGS"
+- tapOn:
+    id: "financial.account-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.typeSection.SAVINGS"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.accounts.typeSection.BROKERAGE"
+- assertVisible:
+    id: "financial.accounts.row-title"
+    text: ${output.ACCOUNT_NAME}
+- assertVisible:
+    id: "financial.accounts.row-balance"
+    text: ".*1[.,]234[.,]56.*"
