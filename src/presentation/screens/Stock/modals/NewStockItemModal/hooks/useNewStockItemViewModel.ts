@@ -10,6 +10,10 @@ import NewStockItemUIModel from "@screens/Stock/modals/NewStockItemModal/models/
 
 import useForm from "./useForm";
 
+export type NewStockItemVM = ReturnType<typeof useNewStockItemViewModel>;
+
+export default useNewStockItemViewModel;
+
 function useNewStockItemViewModel() {
   const { closeModal } = useModalNavigation();
   const params = useLocalSearchParams<{ ownerId?: string }>();
@@ -81,5 +85,3 @@ function useNewStockItemViewModel() {
     values: form.values,
   };
 }
-
-export default useNewStockItemViewModel;

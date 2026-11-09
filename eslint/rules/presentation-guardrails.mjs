@@ -25,7 +25,7 @@ export const shellBreakpointAllowList = [
 // ("Compaction already in the wide View"); each compact spec removes its entries.
 export const legacyCompactionAllowList = [
   "src/presentation/screens/Config/modals/Versions/components/ChangesList.tsx",
-  "src/presentation/screens/Config/modals/Versions/index.tsx",
+  "src/presentation/screens/Config/modals/Versions/views/Wide.tsx",
   "src/presentation/screens/Financial/Accounts/index.tsx",
   "src/presentation/screens/Financial/Categories/modals/NewCategoryModal/index.tsx",
   "src/presentation/screens/Financial/ConfirmPayment/index.tsx",

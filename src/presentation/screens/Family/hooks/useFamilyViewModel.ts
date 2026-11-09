@@ -11,6 +11,10 @@ import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import useFamilies from "./useFamilies";
 
+export type FamilyVM = ReturnType<typeof useFamilyViewModel>;
+
+export default useFamilyViewModel;
+
 function useFamilyViewModel() {
   const { openModal } = useModalNavigation();
   const { error, families, isFetching, refetch } = useFamilies();
@@ -67,5 +71,3 @@ function useFamilyViewModel() {
     subtitleKey,
   };
 }
-
-export default useFamilyViewModel;

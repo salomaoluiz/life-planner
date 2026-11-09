@@ -40,6 +40,8 @@ export interface BlockState<T> {
   onRetry: () => void;
 }
 
+export type HomeVM = ReturnType<typeof useHomeViewModel>;
+
 // A block that needs several queries: loading until all arrive, an error when any fails with nothing to show.
 function combineBlocks<U>(
   queries: { data?: unknown; error: unknown; refetch: () => unknown }[],
@@ -128,6 +130,8 @@ function toBlock<D, U>(
     },
   };
 }
+
+export default useHomeViewModel;
 
 function useHomeViewModel() {
   const isFocused = useIsFocused();
@@ -342,5 +346,3 @@ function useHomeViewModel() {
     upcoming: upcomingState,
   };
 }
-
-export default useHomeViewModel;

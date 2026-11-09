@@ -1,31 +1,12 @@
-import { BottomSheet, IconTile, ListItem } from "@components";
+import { AdaptiveLayout } from "@components";
 
 import { useQuickAddViewModel } from "./hooks";
+import { Wide } from "./views";
 
 function QuickAdd() {
   const vm = useQuickAddViewModel();
 
-  return (
-    <BottomSheet
-      closeLabel={vm.closeLabel}
-      onClose={vm.onClose}
-      presentation={"inline"}
-      testID={"quick-add-sheet"}
-      title={vm.title}
-      visible
-    >
-      {vm.options.map((option) => (
-        <ListItem
-          inset
-          key={option.testID}
-          leading={<IconTile name={option.icon} tone={"accent"} />}
-          onPress={option.onPress}
-          testID={option.testID}
-          title={option.title}
-        />
-      ))}
-    </BottomSheet>
-  );
+  return <AdaptiveLayout vm={vm} wide={Wide} />;
 }
 
 export default QuickAdd;

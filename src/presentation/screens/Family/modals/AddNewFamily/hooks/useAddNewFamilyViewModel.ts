@@ -6,8 +6,14 @@ import { invalidateFetcherData, useMutation } from "@infrastructure/fetcher";
 import { TranslationKeys } from "@presentation/i18n/types";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
+import { FAMILY_NAME_MAX } from "../constants";
+
 export const COUNTER_FROM = 40;
-export const FAMILY_NAME_MAX = 50;
+export { FAMILY_NAME_MAX };
+
+export type AddNewFamilyVM = ReturnType<typeof useAddNewFamilyViewModel>;
+
+export default useAddNewFamilyViewModel;
 
 function useAddNewFamilyViewModel() {
   const { closeModal } = useModalNavigation();
@@ -52,5 +58,3 @@ function useAddNewFamilyViewModel() {
     onSubmit,
   };
 }
-
-export default useAddNewFamilyViewModel;

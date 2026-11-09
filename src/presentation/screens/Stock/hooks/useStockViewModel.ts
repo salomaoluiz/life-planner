@@ -21,6 +21,8 @@ const FILTER_PARAMS: string[] = [
   StockFilters.EXPIRING,
 ];
 
+export type StockVM = ReturnType<typeof useStockViewModel>;
+
 interface StockData {
   items: StockDTO[];
   owners: OwnerDTO[];
@@ -33,6 +35,8 @@ export async function fetchStock(owners: OwnerDTO[]): Promise<StockData> {
 
   return { items, owners };
 }
+
+export default useStockViewModel;
 
 function useStockViewModel() {
   const isFocused = useIsFocused();
@@ -166,5 +170,3 @@ function useStockViewModel() {
     toastVisible: scope.toastVisible,
   };
 }
-
-export default useStockViewModel;

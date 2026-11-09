@@ -2,11 +2,6 @@
 // Spec 100 moves them to views/Wide.tsx + AdaptiveLayout and empties this list.
 // Paths are relative to src/presentation/screens.
 export const legacyAdaptiveAllowList = [
-  "Config",
-  "Config/modals/Versions",
-  "Family",
-  "Family/modals/AddNewFamily",
-  "Family/modals/AddNewFamilyMember",
   "Feedback/BusinessFeedback",
   "Financial/Accounts",
   "Financial/Accounts/modals/NewAccountModal",
@@ -31,13 +26,6 @@ export const legacyAdaptiveAllowList = [
   "Financial/Transactions/modals/FiltersModal",
   "Financial/Transactions/modals/ImportWizard",
   "Financial/Transactions/modals/NewTransactionModal",
-  "Home",
-  "Invite",
-  "Login",
-  "QuickAdd",
-  "Signup",
-  "Stock",
-  "Stock/modals/NewStockItemModal",
 ];
 
 // Routed through app/** or rendered by a screen (not routed) and not a screen of their own.

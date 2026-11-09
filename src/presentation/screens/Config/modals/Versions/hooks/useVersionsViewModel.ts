@@ -57,6 +57,11 @@ const APP_LABEL: Record<string, TranslationKeys> = {
   web: "versions.card.appWeb",
 };
 
+export type VersionsVM = ReturnType<typeof useVersionsViewModel>;
+
+export default useVersionsViewModel;
+export type { CardField, CardModel, Service };
+
 function useVersionsViewModel() {
   const { closeModal } = useModalNavigation();
   const localeTag = useLocaleTag();
@@ -222,6 +227,3 @@ function useVersionsViewModel() {
     onWhatChanged: (service: Service) => setChanges(service),
   };
 }
-
-export default useVersionsViewModel;
-export type { CardField, CardModel, Service };
