@@ -41,6 +41,7 @@ const recurrences = resource("recurrences");
 const tags = resource("tags");
 const transactions = resource("transactions");
 const transactionsFiltered = resource("transactionsFiltered");
+const transfers = resource("transfers");
 const upcoming = resource("upcoming");
 const dailyBalances = monthly("dailyBalances");
 const summary = monthly("summary");
@@ -79,6 +80,7 @@ const financeKeys = {
   tags,
   transactions,
   transactionsFiltered,
+  transfers,
   upcoming,
 };
 

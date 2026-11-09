@@ -21,11 +21,13 @@ import { useBreakpoint } from "@presentation/theme";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
 import { useConfirmPaymentViewModel } from "./hooks";
+import { getPayRequest } from "./models/payRequest";
 import useStyles from "./styles";
+import ConfirmTransferModal from "./transfer";
 
 // Spec 097: confirms ("Efetivar" / "Receber") an unpaid account row from the list. Two columns on wide screens
 // (the open item | value and date), a bottom sheet on mobile.
-function ConfirmPaymentModal() {
+function ConfirmPaymentForm() {
   const { styles } = useStyles();
   const { t } = useTranslation();
   const localeTag = useLocaleTag();
@@ -225,6 +227,15 @@ function ConfirmPaymentModal() {
         />
       </View>
     </BottomSheet>
+  );
+}
+
+// Spec 098 FR 7: the ✓ of a transfer row opens this same modal; a transfer is confirmed by its own body.
+function ConfirmPaymentModal() {
+  return getPayRequest()?.item.transferId ? (
+    <ConfirmTransferModal />
+  ) : (
+    <ConfirmPaymentForm />
   );
 }
 

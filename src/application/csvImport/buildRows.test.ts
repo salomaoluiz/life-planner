@@ -479,3 +479,23 @@ describe("notes (spec 059)", () => {
     expect(rows[1].payload?.notes).toBeUndefined();
   });
 });
+
+describe("transfer id (spec 098)", () => {
+  it("SHOULD carry the Transfer ID column of a transfer row AND leave it out WHEN empty", () => {
+    const { rows } = buildRows(
+      withRows(
+        [
+          ["02/10/2026", "Send", "-100,00", "Mercado", "", "", "t-1"],
+          ["03/10/2026", "Padaria", "-5,00", "Mercado", "", "", ""],
+        ],
+        {
+          fixed: { accountOrCard: { id: "acc-1", kind: "account" } },
+          mapping: { ...base.mapping, 6: "transferId" },
+        },
+      ),
+    );
+
+    expect(rows[0].payload?.transferId).toBe("t-1");
+    expect(rows[1].payload?.transferId).toBeUndefined();
+  });
+});

@@ -16,6 +16,7 @@ import {
   ownerOfRow,
 } from "@application/csvImport/owner";
 import { parseAmountCents } from "@application/csvImport/parseValues";
+import { matchTransferCategory } from "@application/csvImport/transfers";
 import {
   ColumnMapping,
   ColumnTarget,
@@ -177,7 +178,9 @@ function autoSelection(
       // Spec 048 FR 11: a value of card rows can name a card credit category.
       (type !== undefined && cardRows > 0
         ? matchCreditCategory(value, type)
-        : undefined)
+        : undefined) ??
+      // Spec 098: the rows of a transfer (account rows) name a transfer category.
+      (type !== undefined ? matchTransferCategory(value, type) : undefined)
     );
   }
 

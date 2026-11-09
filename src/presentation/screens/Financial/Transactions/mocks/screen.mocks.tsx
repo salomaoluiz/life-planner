@@ -106,6 +106,7 @@ const defaultViewModel: ReturnType<typeof useTransactionsViewModel> = {
   onSearchChange: jest.fn(),
   onSummaryRetry: jest.fn(),
   onToastHide: jest.fn(),
+  onTransferPress: jest.fn(),
   onTypeFilterChange: jest.fn(),
   ownerFilter: "ALL",
   owners: [],

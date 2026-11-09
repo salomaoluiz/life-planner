@@ -387,3 +387,131 @@ describe("memoized row (spec 087)", () => {
     expect(onPress).not.toHaveBeenCalled();
   });
 });
+
+describe("transfer rows (spec 098)", () => {
+  const transfer = {
+    amountIn: "920.00",
+    amountOut: "5000.00",
+    counterpartHidden: false,
+    currencyIn: "USD" as const,
+    currencyOut: "BRL" as const,
+    dateIn: new Date(2026, 10, 6).toISOString(),
+    dateOut: new Date(2026, 10, 4).toISOString(),
+    fromAccountId: "acc-1",
+    toAccountId: "acc-2",
+  };
+
+  function transferRow(systemKey: string, overrides = {}) {
+    return new TransactionUIModel(
+      makeTransactionDTO({
+        accountName: "Checking",
+        paid: false,
+        systemKey,
+        transfer,
+        transferCounterpartName: "Global",
+        transferId: "transfer-1",
+        type: systemKey === "TRANSFER_IN" ? "INCOME" : "EXPENSE",
+        ...overrides,
+      }),
+      categories[0],
+    );
+  }
+
+  it("SHOULD show the destination AND 'outside totals' on the out row, and open the transfer on press", () => {
+    const onPress = jest.fn();
+    const onTransferPress = jest.fn();
+    const item = transferRow("TRANSFER_OUT");
+
+    render(
+      <TransactionRow
+        item={item}
+        onPress={onPress}
+        onTransferPress={onTransferPress}
+      />,
+    );
+
+    expect(
+      screen.getByText(/list\.to \{"name":"Global"\} · Checking/),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(transactionsTestIds.rowTransferOutside),
+    ).toBeOnTheScreen();
+
+    fireEvent.press(screen.getByTestId(transactionsTestIds.rowTransfer));
+
+    expect(onTransferPress).toHaveBeenCalledWith(item);
+    expect(onPress).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD show the origin AND the rate on the in row between currencies", () => {
+    render(
+      <TransactionRow item={transferRow("TRANSFER_IN")} onPress={jest.fn()} />,
+    );
+
+    expect(
+      screen.getByText(/list\.from \{"name":"Global"\} · Checking/),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(transactionsTestIds.rowTransferRate),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD show the badge of an amount to inform on the out row", () => {
+    render(
+      <TransactionRow
+        item={transferRow("TRANSFER_OUT", {
+          transfer: { ...transfer, amountIn: undefined },
+        })}
+        onPress={jest.fn()}
+      />,
+    );
+
+    expect(
+      screen.getByTestId(transactionsTestIds.rowTransferPending),
+    ).toBeOnTheScreen();
+    expect(
+      screen.queryByTestId(transactionsTestIds.rowTransferOutside),
+    ).toBeNull();
+  });
+
+  it("SHOULD say 'other owner' for a hidden side AND 'removed account' WHEN the name is unknown", () => {
+    const { rerender } = render(
+      <TransactionRow
+        item={transferRow("TRANSFER_OUT", {
+          transfer: { ...transfer, counterpartHidden: true },
+        })}
+        onPress={jest.fn()}
+      />,
+    );
+
+    expect(
+      screen.getByText(/counterpartHidden.* · Checking/),
+    ).toBeOnTheScreen();
+
+    rerender(
+      <TransactionRow
+        item={transferRow("TRANSFER_OUT", {
+          transferCounterpartName: undefined,
+        })}
+        onPress={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByText(/removedAccount.* · Checking/)).toBeOnTheScreen();
+  });
+
+  it("SHOULD leave the fee row as a plain row with its own subtitle AND press through onPress without a transfer handler", () => {
+    const onPress = jest.fn();
+
+    render(
+      <TransactionRow item={transferRow("TRANSFER_FEE")} onPress={onPress} />,
+    );
+
+    expect(
+      screen.queryByTestId(transactionsTestIds.rowTransferOutside),
+    ).toBeNull();
+    fireEvent.press(screen.getByTestId(transactionsTestIds.rowTransfer));
+
+    expect(onPress).toHaveBeenCalled();
+  });
+});

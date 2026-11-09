@@ -14,6 +14,7 @@ import {
   FinancialRecurrenceRepository,
   FinancialTagRepository,
   FinancialTransactionRepository,
+  FinancialTransferRepository,
   FinancialUpcomingRepository,
 } from "./financial";
 import { StockRepository } from "./stock";
@@ -35,6 +36,7 @@ interface Repositories {
     recurrence: FinancialRecurrenceRepository;
     tag: FinancialTagRepository;
     transaction: FinancialTransactionRepository;
+    transfer: FinancialTransferRepository;
     upcoming: FinancialUpcomingRepository;
   };
   loginRepository: LoginRepository;

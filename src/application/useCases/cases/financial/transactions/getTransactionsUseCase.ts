@@ -45,6 +45,7 @@ function getTransactionsUseCase(
             transaction,
             category?.name,
             account?.name,
+            accounts,
           );
         });
       } catch (error) {

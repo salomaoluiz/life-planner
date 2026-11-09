@@ -7,4 +7,5 @@ export * from "./financialInstallmentPlanRepository";
 export * from "./financialRecurrenceRepository";
 export * from "./financialTagRepository";
 export * from "./financialTransactionRepository";
+export * from "./financialTransferRepository";
 export * from "./financialUpcomingRepository";

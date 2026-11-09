@@ -62,6 +62,8 @@ async function createTransaction(params: Params, datasources: Datasources) {
     recurrenceId: transaction.recurrenceId,
     systemKey: transaction.systemKey,
     tags: transaction.tags,
+    transfer: transaction.transfer,
+    transferId: transaction.transferId,
     type: TransactionType[transaction.type],
     value: transaction.value,
   });

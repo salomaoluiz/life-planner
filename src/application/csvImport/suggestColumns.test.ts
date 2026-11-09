@@ -128,3 +128,12 @@ describe("suggestMapping", () => {
     expect(suggestMapping(["Entrada"], [["1,00"]])).toEqual({ 0: "ignore" });
   });
 });
+
+describe("spec 098 transfer id header", () => {
+  it.each(["Transfer ID", "ID da transferência", "id transferencia"])(
+    "SHOULD suggest Transfer ID for %s",
+    (header) => {
+      expect(suggestTarget(header, ["a1b2"])).toBe("transferId");
+    },
+  );
+});

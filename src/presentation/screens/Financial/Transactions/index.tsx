@@ -161,6 +161,7 @@ function FinancialTransactions() {
           onPay={onPayRow}
           onPress={vm.onRowPress}
           onProjectedPress={vm.onProjectedPress}
+          onTransferPress={vm.onTransferPress}
         />
       );
     }

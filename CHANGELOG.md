@@ -3,6 +3,15 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.14.0] - 2026-11-09
+
+### Added
+
+- Transfers between accounts: a third type, "Transferência", in the new transaction modal moves money from one account to another (any currency, personal or family), with the amount received or the exchange rate, a date of entry, an optional fee and an optional series (spec 098).
+- The transactions list shows the out and the in side of a transfer ("fora dos totais", the rate, "Entrada a informar"); tapping a transfer opens it to edit or delete both sides at once (spec 098).
+- "Efetivar transferência" confirms a transfer from the list, asking for the amount received when it is still unknown (spec 098).
+- The filters have a "Transferências" kind, and the CSV import recognizes the transfer rows and the Transfer ID column (spec 098).
+
 ## [1.13.0] - 2026-11-09
 
 ### Added

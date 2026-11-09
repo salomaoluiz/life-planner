@@ -12,6 +12,8 @@ export interface TransactionQueryFilter {
   creditCardIds?: string[];
   // `YYYY-MM-DD`, both inclusive and always together.
   from?: string;
+  // Spec 098: only the rows of transfers (the transactions list).
+  kind?: "TRANSFER";
   paid?: boolean;
   q?: string;
   tagIds?: string[];

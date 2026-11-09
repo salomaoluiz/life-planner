@@ -53,6 +53,7 @@ function clearedDraft() {
     period: undefined,
     situation: undefined,
     tagIds: [],
+    transfersOnly: undefined,
   };
 }
 
@@ -345,6 +346,11 @@ function useFiltersModalViewModel(params: FiltersModalParams) {
     onSourceToggle: toggleSource,
     onStepChange: setStep,
     onTagsChange: setTagNames,
+    onTransfersOnlyChange: () =>
+      setDraft({
+        ...draft,
+        transfersOnly: draft.transfersOnly ? undefined : true,
+      }),
     periodError,
     periodMode,
     selectedCategoryChips,

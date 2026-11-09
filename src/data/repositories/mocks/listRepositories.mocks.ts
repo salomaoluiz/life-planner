@@ -103,6 +103,12 @@ const repositoriesMocks: Repositories = {
       updateTransaction: jest.fn(),
       validateImport: jest.fn(),
     },
+    transfer: {
+      createTransfer: jest.fn(),
+      deleteTransfer: jest.fn(),
+      getTransfer: jest.fn(),
+      updateTransfer: jest.fn(),
+    },
     upcoming: {
       getUpcoming: jest.fn(),
     },

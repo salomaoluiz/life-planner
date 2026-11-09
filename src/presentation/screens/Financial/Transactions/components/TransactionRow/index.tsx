@@ -8,6 +8,7 @@ import {
   IconButton,
   IconTile,
   ListItem,
+  Text,
 } from "@components";
 import { useTranslation } from "@presentation/i18n";
 import NoteIcon from "@screens/Financial/Transactions/components/NoteIcon";
@@ -24,6 +25,8 @@ interface Props {
   onPay?: (item: TransactionUIModel) => void;
   onPress: (id: string) => void;
   onProjectedPress?: (item: TransactionUIModel) => void;
+  // Spec 098: a transfer row opens the transfer (both sides), not the single row.
+  onTransferPress?: (item: TransactionUIModel) => void;
 }
 
 function sameRowProps(prev: Props, next: Props) {
@@ -32,6 +35,7 @@ function sameRowProps(prev: Props, next: Props) {
     prev.onPay === next.onPay &&
     prev.onPress === next.onPress &&
     prev.onProjectedPress === next.onProjectedPress &&
+    prev.onTransferPress === next.onTransferPress &&
     sameTransaction(prev.item, next.item)
   );
 }
@@ -63,6 +67,8 @@ function sameTransaction(a: TransactionUIModel, b: TransactionUIModel) {
   );
 }
 
+const TRANSFER_ICON = "swap-horizontal";
+
 function TransactionRow(props: Props) {
   const { t } = useTranslation();
   const { styles } = useStyles();
@@ -71,15 +77,18 @@ function TransactionRow(props: Props) {
   const title = item.counter
     ? `${item.description} ${item.counter}`
     : item.description;
+  const baseSubtitle = transferSubtitle(item, t) ?? item.subtitle;
   const subtitle = item.frequency
-    ? [item.subtitle, t(`financial.recurrence.frequency.${item.frequency}`)]
+    ? [baseSubtitle, t(`financial.recurrence.frequency.${item.frequency}`)]
         .filter(Boolean)
         .join(" · ")
-    : item.subtitle;
+    : baseSubtitle;
   let rowTestID: string = transactionsTestIds.row;
 
   if (item.isAdjustment) {
     rowTestID = transactionsTestIds.adjustmentRow;
+  } else if (item.isTransfer) {
+    rowTestID = transactionsTestIds.rowTransfer;
   } else if (item.isProjected) {
     rowTestID = transactionsTestIds.rowProjected;
   } else if (item.isRecurring) {
@@ -116,7 +125,16 @@ function TransactionRow(props: Props) {
   const row = (
     <ListItem
       inset
-      leading={<IconTile color={item.categoryColor} name={item.categoryIcon} />}
+      leading={
+        <IconTile
+          color={item.categoryColor}
+          name={
+            item.transferSide === "OUT" || item.transferSide === "IN"
+              ? TRANSFER_ICON
+              : item.categoryIcon
+          }
+        />
+      }
       meta={
         item.pendingState && Platform.OS !== "web" ? (
           <PendingChip state={item.pendingState} />
@@ -131,6 +149,8 @@ function TransactionRow(props: Props) {
         }
         if (item.isAdjustment && props.onAdjustmentPress) {
           props.onAdjustmentPress(item);
+        } else if (item.isTransfer && props.onTransferPress) {
+          props.onTransferPress(item);
         } else if (item.isProjected && props.onProjectedPress) {
           props.onProjectedPress(item);
         } else {
@@ -148,12 +168,15 @@ function TransactionRow(props: Props) {
             <PendingChip state={item.pendingState} />
           ) : null}
           {item.notes ? <NoteIcon note={item.notes} /> : null}
-          <AmountText
-            currency={item.currency}
-            strikethrough={item.pendingState === "deleting"}
-            type={item.amountType}
-            value={item.amountCents}
-          />
+          <View style={styles.amountColumn}>
+            <AmountText
+              currency={item.currency}
+              strikethrough={item.pendingState === "deleting"}
+              type={item.amountType}
+              value={item.amountCents}
+            />
+            {transferCaption(item, t)}
+          </View>
           {item.canPay && props.onPay && !item.isPending ? (
             <IconButton
               accessibilityLabel={t("financial.transactions.pay")}
@@ -173,6 +196,68 @@ function TransactionRow(props: Props) {
   }
 
   return item.isProjected ? <View style={styles.muted}>{row}</View> : row;
+}
+
+// Under the amount: "fora dos totais" (out row), the rate (in row between currencies) or the badge of an amount in that
+// is still to be informed.
+function transferCaption(
+  item: TransactionUIModel,
+  t: ReturnType<typeof useTranslation>["t"],
+) {
+  if (item.isTransferAmountPending) {
+    return (
+      <Badge
+        label={t("financial.transfers.list.amountToInform")}
+        testID={transactionsTestIds.rowTransferPending}
+        tone={"warning"}
+      />
+    );
+  }
+  if (item.transferSide === "OUT") {
+    return (
+      <Text.Caption
+        testID={transactionsTestIds.rowTransferOutside}
+        tone="secondary"
+        value={t("financial.transfers.list.outsideTotals")}
+      />
+    );
+  }
+  const rate = item.transferRate;
+
+  return rate ? (
+    <Text.Caption
+      testID={transactionsTestIds.rowTransferRate}
+      tone="secondary"
+      value={t("financial.transfers.list.rate", {
+        currency: rate.currency,
+        perCurrency: rate.perCurrency,
+        value: String(rate.value).replace(".", ","),
+      })}
+    />
+  ) : null;
+}
+
+// "Transferência para X" on the out row, "Transferência de Y" on the in row; the other side of a transfer the caller
+// cannot read is "Conta de outro dono" and a removed account is "Conta removida" (spec 098 FR 5).
+function transferSubtitle(
+  item: TransactionUIModel,
+  t: ReturnType<typeof useTranslation>["t"],
+) {
+  if (item.transferSide !== "OUT" && item.transferSide !== "IN") {
+    return undefined;
+  }
+  const name = item.isTransferReadOnly
+    ? t("financial.transfers.list.counterpartHidden")
+    : (item.dto.transferCounterpartName ??
+      t("financial.transfers.list.removedAccount"));
+  const text = t(
+    item.transferSide === "OUT"
+      ? "financial.transfers.list.to"
+      : "financial.transfers.list.from",
+    { name },
+  );
+
+  return [text, item.accountName].filter(Boolean).join(" · ");
 }
 
 export { sameTransaction };

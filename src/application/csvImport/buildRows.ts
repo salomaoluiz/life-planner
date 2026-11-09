@@ -174,6 +174,7 @@ function buildRow(
   const currency = cell(row, "currency").toUpperCase();
   const tags = splitTags(cell(row, "tags"));
   const notes = cell(row, "notes");
+  const transferId = cell(row, "transferId");
 
   return {
     display,
@@ -193,6 +194,7 @@ function buildRow(
       paid: typeof paidValue === "boolean" ? paidValue : undefined,
       paidFromAccountId: payment ? target.accountId : undefined,
       tags: tags.length > 0 ? tags : undefined,
+      transferId: transferId === "" ? undefined : transferId,
       type: amount.type,
       value: amount.value,
     },

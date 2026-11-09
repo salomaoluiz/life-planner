@@ -245,3 +245,38 @@ describe("matchesPendingFilters (spec 061)", () => {
     ).toBe(false);
   });
 });
+
+describe("transfers only (spec 098)", () => {
+  const filters = { ...EMPTY_FILTERS, transfersOnly: true };
+  const base = {
+    category: "x",
+    categoryId: "c",
+    date: new Date(2026, 10, 4).toISOString(),
+    description: "Send",
+    id: "r1",
+    owner: "USER",
+    ownerId: "u",
+    type: "EXPENSE",
+    value: "10.00",
+  };
+
+  it("SHOULD count as the kind group, clear with it AND be sent as kind=TRANSFER", () => {
+    expect(activeGroups(filters)).toEqual(["kind"]);
+    expect(isFiltering(filters)).toBe(true);
+    expect(clearGroup(filters, "kind").transfersOnly).toBeUndefined();
+    expect(toQueryFilter(filters).kind).toBe("TRANSFER");
+    expect(toQueryFilter(EMPTY_FILTERS).kind).toBeUndefined();
+  });
+
+  it("SHOULD keep only rows of a transfer WHEN a pending row is matched", () => {
+    expect(
+      matchesPendingFilters(
+        new TransactionDTO({ ...base, transferId: "t1" }),
+        filters,
+      ),
+    ).toBe(true);
+    expect(matchesPendingFilters(new TransactionDTO(base), filters)).toBe(
+      false,
+    );
+  });
+});

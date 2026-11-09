@@ -253,6 +253,24 @@ function FiltersModal(props: FiltersModalParams) {
     );
   }
 
+  // Spec 098 FR 8: "Transferências" as a kind of row.
+  function kindSection() {
+    return (
+      <View style={styles.section} testID={`${ids.filtersSection}.kind`}>
+        {sectionTitle(t("financial.transfers.filters.title"))}
+        <ChipGroup
+          mode={"single"}
+          onChange={vm.onTransfersOnlyChange}
+          options={[
+            { label: t("financial.transfers.filters.kind"), value: "TRANSFER" },
+          ]}
+          testID={`${ids.filtersSection}.kind-option`}
+          value={draft.transfersOnly ? "TRANSFER" : undefined}
+        />
+      </View>
+    );
+  }
+
   function situationSection() {
     return (
       <View style={styles.section} testID={`${ids.filtersSection}.situation`}>
@@ -328,6 +346,7 @@ function FiltersModal(props: FiltersModalParams) {
         {categoriesSection()}
         {tagsSection()}
         {situationSection()}
+        {kindSection()}
       </View>
     );
   }
@@ -378,6 +397,7 @@ function FiltersModal(props: FiltersModalParams) {
             {originSection()}
             {sourcesSection()}
             {situationSection()}
+            {kindSection()}
           </>
         }
         leftPaneTestID={`${ids.filtersSheet}-pane-left`}

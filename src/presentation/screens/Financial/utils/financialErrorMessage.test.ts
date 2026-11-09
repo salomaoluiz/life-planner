@@ -8,6 +8,12 @@ import {
   GenericError,
   InvoiceHasProjected,
   TransactionNotProjected,
+  TransferAccountArchived,
+  TransferAmountInRequired,
+  TransferAmountMismatch,
+  TransferDateInBeforeOut,
+  TransferRowUseTransfer,
+  TransferSameAccount,
 } from "@domain/entities/errors";
 
 import { getFinancialErrorMessageKey } from "./financialErrorMessage";
@@ -57,4 +63,15 @@ it("SHOULD map the spec 096 errors: a stale confirm has its copy, the projected 
   expect(
     getFinancialErrorMessageKey(new InvoiceHasProjected([])),
   ).toBeUndefined();
+});
+
+it.each([
+  [new TransferSameAccount(), "financial.errors.transferSameAccount"],
+  [new TransferAccountArchived(), "financial.errors.transferAccountArchived"],
+  [new TransferAmountMismatch(), "financial.errors.transferAmountMismatch"],
+  [new TransferAmountInRequired(), "financial.errors.transferAmountInRequired"],
+  [new TransferDateInBeforeOut(), "financial.errors.transferDateInBeforeOut"],
+  [new TransferRowUseTransfer(), "financial.errors.transferRowUseTransfer"],
+])("SHOULD map the spec 098 error %#  to its copy key", (error, key) => {
+  expect(getFinancialErrorMessageKey(error)).toBe(key);
 });

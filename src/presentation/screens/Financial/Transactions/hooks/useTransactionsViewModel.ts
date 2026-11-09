@@ -687,6 +687,15 @@ function useTransactionsViewModel() {
     ),
   );
   const onReadOnlyAttempt = useStableCallback(scope.notifyReadOnly);
+  // Spec 098: a transfer row opens the transfer with both sides; the one whose other side the caller cannot read is
+  // read-only (the same notice as any read-only view).
+  const onTransferPress = useStableCallback(
+    scope.guard((item: TransactionUIModel) =>
+      item.isTransferReadOnly
+        ? scope.notifyReadOnly()
+        : openModal("add_new_transaction", { transferId: item.dto.transferId }),
+    ),
+  );
   const onRowPress = useStableCallback(
     scope.guard((id: string) => openModal("add_new_transaction", { id })),
   );
@@ -782,6 +791,7 @@ function useTransactionsViewModel() {
     onSearchChange: filterStore.setSearch,
     onSummaryRetry: async () => monthQuery.refetch(),
     onToastHide: scope.onToastHide,
+    onTransferPress,
     onTypeFilterChange: (value: string) => setTypeFilter(value as TypeFilter),
     ownerFilter,
     owners: owners ?? [],

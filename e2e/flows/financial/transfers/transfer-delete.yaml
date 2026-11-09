@@ -1,0 +1,78 @@
+url: ${E2E_WEB_URL}
+name: financial/transfers/transfer-delete
+tags:
+  - financial
+  - spec-098
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- evalScript: ${output.FROM_ACCOUNT_ID = output.ACCOUNT_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Destination
+      KEY: TO_ACCOUNT_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: ${output.TO_ACCOUNT_NAME}
+      CURRENCY: BRL
+- evalScript: ${output.TO_ACCOUNT_ID = output.ACCOUNT_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Transfer
+      KEY: TRANSFER_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-transfer.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      FROM_ACCOUNT_ID: ${output.FROM_ACCOUNT_ID}
+      TO_ACCOUNT_ID: ${output.TO_ACCOUNT_ID}
+      DESCRIPTION: ${output.TRANSFER_NAME}
+      AMOUNT_OUT_CENTS: "25000"
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-title"
+      text: ${output.TRANSFER_NAME}
+    timeout: 20000
+# Tapping a transfer row opens the transfer with both sides
+- tapOn:
+    id: "financial.transactions.row-title"
+    text: ${output.TRANSFER_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.transfer-form.delete-button"
+    timeout: 20000
+- tapOn:
+    id: "financial.transfer-form.delete-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transfer-form.delete-dialog-confirm"
+    timeout: 20000
+- tapOn:
+    id: "financial.transfer-form.delete-dialog-confirm"
+# Deleting removes the out, the in and the fee: the month is empty again
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.empty-month"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.transactions.row-title"

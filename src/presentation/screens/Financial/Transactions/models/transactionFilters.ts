@@ -12,6 +12,7 @@ export interface FilteredSummary {
 }
 export type FilterGroup =
   | "categories"
+  | "kind"
   | "origin"
   | "period"
   | "situation"
@@ -38,6 +39,8 @@ export interface TransactionFilters {
   search: string;
   situation?: FilterSituation;
   tagIds: string[];
+  // Spec 098: only the rows of transfers (the API `kind=TRANSFER` filter).
+  transfersOnly?: boolean;
 }
 
 export const EMPTY_FILTERS: TransactionFilters = {
@@ -72,6 +75,9 @@ function activeGroups(filters: TransactionFilters): FilterGroup[] {
   if (filters.situation) {
     groups.push("situation");
   }
+  if (filters.transfersOnly) {
+    groups.push("kind");
+  }
 
   return groups;
 }
@@ -83,6 +89,8 @@ function clearGroup(
   switch (group) {
     case "categories":
       return { ...filters, categoryIds: [] };
+    case "kind":
+      return { ...filters, transfersOnly: undefined };
     case "origin":
       return { ...filters, origin: undefined };
     case "period":
@@ -160,6 +168,9 @@ function matchesPendingFilters(
     return false;
   }
   if (filters.situation && (filters.situation === "PAID") !== row.paid) {
+    return false;
+  }
+  if (filters.transfersOnly && !row.transferId) {
     return false;
   }
   const search = normalizeText(filters.search.trim());
@@ -245,6 +256,7 @@ function toQueryFilter(filters: TransactionFilters): TransactionQueryFilter {
     categoryIds: filters.categoryIds,
     creditCardIds: filters.cardIds,
     from: filters.period?.from,
+    kind: filters.transfersOnly ? "TRANSFER" : undefined,
     paid:
       filters.situation === undefined
         ? undefined

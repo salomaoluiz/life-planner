@@ -32,6 +32,7 @@ const TARGETS: ColumnTarget[] = [
   "paid",
   "tags",
   "currency",
+  "transferId",
   "ignore",
 ];
 
@@ -112,6 +113,7 @@ function useColumnsStepViewModel(wizard: ImportWizardState) {
       owner: has("owner"),
       paid: has("paid"),
       tags: has("tags"),
+      transferId: has("transferId"),
     },
     missingAccountRows: accountOrCard?.missingRows ?? 0,
     onFixedAccountOrCardChange: (value: string) => {

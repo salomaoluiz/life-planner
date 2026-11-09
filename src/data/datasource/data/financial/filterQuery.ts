@@ -34,6 +34,9 @@ function appendFilterParams(
     query.append("from", filter.from);
     query.append("to", filter.to);
   }
+  if (allowed.has("kind") && filter.kind) {
+    query.append("kind", filter.kind);
+  }
   if (allowed.has("paid") && filter.paid !== undefined) {
     query.append("paid", String(filter.paid));
   }

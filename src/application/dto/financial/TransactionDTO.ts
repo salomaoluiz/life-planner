@@ -7,6 +7,7 @@ import { TagRefEntity } from "@domain/entities/financial/TagEntity";
 import TransactionEntity, {
   EarlyPaymentRefEntity,
 } from "@domain/entities/financial/TransactionEntity";
+import { TransferRefEntity } from "@domain/entities/financial/TransferEntity";
 
 export interface ITransactionDTO {
   accountId?: string;
@@ -38,6 +39,10 @@ export interface ITransactionDTO {
   recurrenceId?: string;
   systemKey?: string;
   tags?: TagRefEntity[];
+  transfer?: TransferRefEntity;
+  // Spec 098: the name of the other account of a transfer row (the one it was sent to / came from).
+  transferCounterpartName?: string;
+  transferId?: string;
   type: string;
   value: string;
 }
@@ -71,6 +76,9 @@ class TransactionDTO {
   recurrenceId?: string;
   systemKey?: string;
   tags: TagRefEntity[];
+  transfer?: TransferRefEntity;
+  transferCounterpartName?: string;
+  transferId?: string;
   type: string;
   value: string;
 
@@ -103,6 +111,9 @@ class TransactionDTO {
     this.excludeFromTotals = params.excludeFromTotals ?? false;
     this.systemKey = params.systemKey;
     this.tags = params.tags ?? [];
+    this.transfer = params.transfer;
+    this.transferCounterpartName = params.transferCounterpartName;
+    this.transferId = params.transferId;
     this.type = params.type;
     this.value = params.value;
   }
@@ -111,6 +122,7 @@ class TransactionDTO {
     entity: TransactionEntity,
     categoryName?: string,
     accountName?: string,
+    accounts?: { id: string; name: string }[],
   ) {
     return new TransactionDTO({
       accountId: entity.accountId,
@@ -140,10 +152,34 @@ class TransactionDTO {
       recurrenceId: entity.recurrenceId,
       systemKey: entity.systemKey,
       tags: entity.tags,
+      transfer: entity.transfer,
+      transferCounterpartName: transferCounterpartName(entity, accounts),
+      transferId: entity.transferId,
       type: entity.type,
       value: entity.value,
     });
   }
+}
+
+// Spec 098: the other account of a transfer row, by name: the destination of the out row, the origin of the in row.
+function transferCounterpartName(
+  entity: TransactionEntity,
+  accounts?: { id: string; name: string }[],
+) {
+  const transfer = entity.transfer;
+
+  if (!transfer || !accounts || transfer.counterpartHidden) {
+    return undefined;
+  }
+  let counterpartId: string | undefined;
+
+  if (entity.systemKey === "TRANSFER_OUT") {
+    counterpartId = transfer.toAccountId;
+  } else if (entity.systemKey === "TRANSFER_IN") {
+    counterpartId = transfer.fromAccountId;
+  }
+
+  return accounts.find((account) => account.id === counterpartId)?.name;
 }
 
 export default TransactionDTO;

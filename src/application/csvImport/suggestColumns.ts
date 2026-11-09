@@ -34,6 +34,15 @@ const HEADER_TARGETS: [ColumnTarget, string[]][] = [
     "invoice",
     ["fatura", "invoice", "mes da fatura", "mes fatura", "invoice month"],
   ],
+  [
+    "transferId",
+    [
+      "id da transferencia",
+      "transfer id",
+      "id transferencia",
+      "transfer identifier",
+    ],
+  ],
   ["ignore", ["parcela", "installment", "recorrente", "recurring"]],
 ];
 const AMOUNT_WORDS = ["valor", "amount", "value", "quantia"];
