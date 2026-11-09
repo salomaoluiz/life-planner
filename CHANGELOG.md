@@ -3,6 +3,12 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.13.0] - 2026-11-09
+
+### Added
+
+- The web app can be installed from the browser ("Add to Home Screen" on iPhone): it opens full screen with its own icon, without the browser's address bar.
+
 ## [1.12.0] - 2026-11-05
 
 ### Changed
