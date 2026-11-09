@@ -1,5 +1,5 @@
 import { repositoriesMocks } from "@data/repositories/mocks/index.mocks";
-import { BusinessError } from "@domain/entities/errors";
+import { BusinessError, FieldInvalid } from "@domain/entities/errors";
 
 import updateAccountUseCase from "./updateAccountUseCase";
 
@@ -75,4 +75,33 @@ it("SHOULD pass isFavorite to the repository (spec 094)", async () => {
   ).toHaveBeenCalledWith(
     expect.objectContaining({ id: "acc-id", isFavorite: true }),
   );
+});
+
+describe("type (spec 101)", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("SHOULD forward a valid type", async () => {
+    await updateAccountUseCase(repositoriesMocks).execute({
+      id: "acc-id",
+      type: "SAVINGS",
+    });
+
+    expect(
+      repositoriesMocks.financialRepository.account.updateAccount,
+    ).toHaveBeenCalledWith(expect.objectContaining({ type: "SAVINGS" }));
+  });
+
+  it("SHOULD throw FieldInvalid WHEN the type is not valid", async () => {
+    await expect(
+      updateAccountUseCase(repositoriesMocks).execute({
+        id: "acc-id",
+        type: "FOO",
+      }),
+    ).rejects.toBeInstanceOf(FieldInvalid);
+    expect(
+      repositoriesMocks.financialRepository.account.updateAccount,
+    ).not.toHaveBeenCalled();
+  });
 });

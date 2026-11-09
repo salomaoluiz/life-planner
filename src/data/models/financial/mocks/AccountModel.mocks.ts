@@ -1,4 +1,7 @@
-import { AccountStatus } from "@domain/entities/financial/AccountEntity";
+import {
+  AccountStatus,
+  AccountType,
+} from "@domain/entities/financial/AccountEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import AccountModel from "../AccountModel";
@@ -15,6 +18,7 @@ const jsonMock = {
   ownerId: "9e6cd00a-f854-48c0-be6d-c2e904bfd9b7",
   projectedBalance: 150000,
   status: "ACTIVE",
+  type: "BROKERAGE",
 };
 
 beforeEach(() => {
@@ -31,6 +35,7 @@ function setup() {
     ownerId: jsonMock.ownerId,
     projectedBalance: 1500,
     status: jsonMock.status as AccountStatus,
+    type: AccountType.BROKERAGE,
   });
 }
 

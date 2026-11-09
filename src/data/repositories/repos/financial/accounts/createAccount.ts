@@ -15,6 +15,7 @@ async function createAccount(params: Params, datasources: Datasources) {
     owner: params.owner,
     ownerId: params.ownerId,
     status: params.status,
+    type: params.type,
   });
 
   cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_ACCOUNT_DATA);
@@ -30,6 +31,7 @@ async function createAccount(params: Params, datasources: Datasources) {
     ownerId: account.ownerId,
     projectedBalance: account.projectedBalance,
     status: account.status,
+    type: account.type,
   });
 }
 

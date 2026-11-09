@@ -13,6 +13,7 @@ async function updateAccount(params: Params, datasources: Datasources) {
     owner: params.owner,
     ownerId: params.ownerId,
     status: params.status,
+    type: params.type,
   });
 
   cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_ACCOUNT_DATA);

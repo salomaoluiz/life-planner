@@ -18,6 +18,7 @@ async function createAccount(params: Params): Response {
     owner: params.owner,
     ownerId: params.ownerId,
     status: params.status,
+    type: params.type,
   };
 
   try {

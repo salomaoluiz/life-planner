@@ -90,3 +90,41 @@ it("SHOULD throw FieldInvalid WHEN the owner is not valid", async () => {
     repositoriesMocks.financialRepository.account.createAccount,
   ).not.toHaveBeenCalled();
 });
+
+describe("type (spec 101)", () => {
+  const params = {
+    balance: 1,
+    icon: "icon",
+    name: "Acc",
+    owner: "USER",
+    ownerId: "user-id",
+    status: "ACTIVE",
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("SHOULD forward a valid type", async () => {
+    await createAccountUseCase(repositoriesMocks).execute({
+      ...params,
+      type: "BROKERAGE",
+    });
+
+    expect(
+      repositoriesMocks.financialRepository.account.createAccount,
+    ).toHaveBeenCalledWith(expect.objectContaining({ type: "BROKERAGE" }));
+  });
+
+  it("SHOULD throw FieldInvalid WHEN the type is not valid", async () => {
+    await expect(
+      createAccountUseCase(repositoriesMocks).execute({
+        ...params,
+        type: "FOO",
+      }),
+    ).rejects.toBeInstanceOf(FieldInvalid);
+    expect(
+      repositoriesMocks.financialRepository.account.createAccount,
+    ).not.toHaveBeenCalled();
+  });
+});

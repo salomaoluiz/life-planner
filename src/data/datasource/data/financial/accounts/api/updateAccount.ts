@@ -13,6 +13,7 @@ async function updateAccount(params: Params): Response {
     isFavorite: params.isFavorite,
     name: params.name,
     status: params.status,
+    type: params.type,
   };
 
   if (Object.values(body).every((value) => value === undefined)) {
