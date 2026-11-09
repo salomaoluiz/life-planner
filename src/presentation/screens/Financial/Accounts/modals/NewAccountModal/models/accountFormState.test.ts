@@ -1,5 +1,6 @@
 import AccountDTO from "@application/dto/financial/AccountDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
+import { AccountType } from "@domain/entities/financial/AccountEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import {
@@ -12,6 +13,8 @@ import {
   toUpdateParams,
   validate,
   withArchived,
+  withIcon,
+  withType,
 } from "./accountFormState";
 
 const user = new OwnerDTO({
@@ -22,22 +25,26 @@ const user = new OwnerDTO({
 const base: AccountFormState = {
   amountCents: 152075,
   icon: "bank",
+  iconTouched: true,
   isArchived: false,
   isFavorite: false,
   isNegative: false,
   name: "Checking",
   ownerId: "user-id",
+  type: AccountType.CHECKING,
 };
 
 it("SHOULD start with the bank icon, zero positive balance, active", () => {
   expect(createInitialState({ ownerId: "user-id" })).toEqual({
     amountCents: 0,
     icon: "bank",
+    iconTouched: false,
     isArchived: false,
     isFavorite: false,
     isNegative: false,
     name: "",
     ownerId: "user-id",
+    type: AccountType.CHECKING,
   });
 });
 
@@ -55,11 +62,13 @@ it("SHOULD split a negative decimal balance into amount and sign", () => {
   expect(stateFromDto(dto)).toEqual({
     amountCents: 1230,
     icon: "wallet",
+    iconTouched: true,
     isArchived: true,
     isFavorite: false,
     isNegative: true,
     name: "Wallet",
     ownerId: "user-id",
+    type: AccountType.CHECKING,
   });
 });
 
@@ -100,6 +109,7 @@ it("SHOULD build create params as an ACTIVE account with a decimal balance", () 
     owner: "USER",
     ownerId: "user-id",
     status: "ACTIVE",
+    type: "CHECKING",
   });
 });
 
@@ -197,5 +207,73 @@ describe("favorite account (spec 094)", () => {
       isFavorite: false,
     });
     expect(withArchived({ ...base, isArchived: true }, false)).toEqual(base);
+  });
+});
+
+describe("account type (spec 101)", () => {
+  const fresh = createInitialState({ ownerId: "user-id" });
+
+  it("SHOULD read the type of the account AND treat its icon as chosen", () => {
+    const dto = new AccountDTO({
+      balance: 1,
+      icon: "bank",
+      id: "a1",
+      name: "Broker",
+      owner: "USER",
+      ownerId: "user-id",
+      status: "ACTIVE",
+      type: AccountType.BROKERAGE,
+    });
+
+    expect(stateFromDto(dto)).toMatchObject({
+      iconTouched: true,
+      type: AccountType.BROKERAGE,
+    });
+  });
+
+  it("SHOULD suggest the icon of the type while the icon was not picked by hand", () => {
+    expect(withType(fresh, AccountType.SAVINGS)).toMatchObject({
+      icon: "piggy-bank",
+      type: AccountType.SAVINGS,
+    });
+    expect(withType(fresh, AccountType.BROKERAGE).icon).toBe("chart-line");
+    expect(withType(fresh, AccountType.CASH).icon).toBe("cash");
+    expect(withType(fresh, AccountType.OTHER).icon).toBe("wallet");
+    expect(withType(fresh, AccountType.CHECKING).icon).toBe("bank");
+  });
+
+  it("SHOULD keep an icon picked by hand when the type changes, even if it equals the default", () => {
+    const picked = withIcon(fresh, "safe");
+
+    expect(picked.iconTouched).toBe(true);
+    expect(withType(picked, AccountType.CASH)).toMatchObject({
+      icon: "safe",
+      type: AccountType.CASH,
+    });
+    expect(withType(withIcon(fresh, "bank"), AccountType.CASH).icon).toBe(
+      "bank",
+    );
+  });
+
+  it("SHOULD NOT change the icon when editing an existing account", () => {
+    expect(withType(base, AccountType.SAVINGS).icon).toBe("bank");
+  });
+
+  it("SHOULD send a type-only change on update AND nothing when it did not change", () => {
+    expect(
+      toUpdateParams("a1", { ...base, type: AccountType.SAVINGS }, base),
+    ).toEqual({ id: "a1", type: AccountType.SAVINGS });
+    expect(toUpdateParams("a1", base, base)).toEqual({ id: "a1" });
+  });
+
+  it("SHOULD send the type on create", () => {
+    expect(
+      toCreateParams(withType(fresh, AccountType.BROKERAGE), user),
+    ).toMatchObject({ icon: "chart-line", type: "BROKERAGE" });
+  });
+
+  it("SHOULD compare the type but not whether the icon was picked", () => {
+    expect(isSameState(base, { ...base, type: AccountType.CASH })).toBe(false);
+    expect(isSameState(base, { ...base, iconTouched: false })).toBe(true);
   });
 });

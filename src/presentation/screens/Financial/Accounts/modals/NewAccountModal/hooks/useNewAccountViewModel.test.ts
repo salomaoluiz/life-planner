@@ -4,6 +4,7 @@ import queryName from "@tests/queryName";
 
 import { financeKeys } from "@application/queryKeys/financeKeys";
 import { AccountHasTransactions } from "@domain/entities/errors";
+import { AccountType } from "@domain/entities/financial/AccountEntity";
 
 import {
   acc,
@@ -110,6 +111,7 @@ it("SHOULD create an ACTIVE account with a decimal balance", () => {
     owner: "USER",
     ownerId: "user-id",
     status: "ACTIVE",
+    type: "CHECKING",
   });
 });
 
@@ -472,5 +474,71 @@ describe("favorite account (spec 094)", () => {
     act(() => result.current.onFavoriteChange(true));
 
     expect(result.current.isFavorite).toBe(false);
+  });
+});
+
+describe("account type (spec 101)", () => {
+  it("SHOULD start as Checking AND list the five types with their hint", () => {
+    givenLoaded();
+    const { result } = setup();
+
+    expect(result.current.type).toBe(AccountType.CHECKING);
+    expect(result.current.typeOptions.map((option) => option.value)).toEqual([
+      "CHECKING",
+      "SAVINGS",
+      "BROKERAGE",
+      "CASH",
+      "OTHER",
+    ]);
+    expect(result.current.typeHintKey).toBe(
+      "financial.accounts.form.typeHints.CHECKING",
+    );
+  });
+
+  it("SHOULD suggest the icon of the type on create until an icon is picked by hand", () => {
+    givenLoaded();
+    const { result } = setup();
+
+    act(() => result.current.onTypeChange(AccountType.BROKERAGE));
+    expect(result.current.icon).toBe("chart-line");
+    expect(result.current.typeHintKey).toBe(
+      "financial.accounts.form.typeHints.BROKERAGE",
+    );
+
+    act(() => result.current.onIconChange("safe"));
+    act(() => result.current.onTypeChange(AccountType.CASH));
+    expect(result.current.icon).toBe("safe");
+    expect(result.current.type).toBe(AccountType.CASH);
+  });
+
+  it("SHOULD create with the chosen type AND its suggested icon", () => {
+    givenLoaded();
+    const { result } = setup();
+
+    act(() => result.current.onNameChange("Broker"));
+    act(() => result.current.onTypeChange(AccountType.BROKERAGE));
+    act(() => result.current.onSave());
+
+    expect(mutations.create.value.mutate).toHaveBeenCalledWith(
+      expect.objectContaining({ icon: "chart-line", type: "BROKERAGE" }),
+    );
+  });
+
+  it("SHOULD save a type-only change on edit without touching the icon", () => {
+    givenLoaded({
+      accounts: [acc("a1", 10, { type: AccountType.CHECKING })],
+      params: { id: "a1" },
+    });
+    const { result } = setup();
+
+    act(() => result.current.onTypeChange(AccountType.SAVINGS));
+    expect(result.current.icon).toBe("bank");
+    act(() => result.current.onSave());
+
+    expect(modalNavigation.closeModal).not.toHaveBeenCalled();
+    expect(mutations.update.value.mutate).toHaveBeenCalledWith({
+      id: "a1",
+      type: "SAVINGS",
+    });
   });
 });

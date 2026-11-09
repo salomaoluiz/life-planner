@@ -6,6 +6,7 @@ import {
   BottomSheet,
   Button,
   ChipGroup,
+  ChoiceTileGroup,
   ConfirmDialog,
   ErrorState,
   FormColumns,
@@ -16,6 +17,7 @@ import {
   Switch,
   Text,
   TextField,
+  useDensity,
 } from "@components";
 import Skeleton from "@components/Skeleton";
 import { useKitTheme } from "@components/utils/useKitTheme";
@@ -35,6 +37,13 @@ function Wide({ vm }: AdaptiveViewProps<NewAccountVM>) {
   const { styles } = useStyles();
   const { t } = useTranslation();
   const { colors } = useKitTheme();
+  const { density } = useDensity();
+  const typeOptions = vm.typeOptions.map((option) => ({
+    icon: option.icon,
+    label: t(option.labelKey),
+    testID: accountFormTestIds.typeOption(option.value),
+    value: option.value,
+  }));
 
   function err(key?: TranslationKeys) {
     return key ? t(key) : undefined;
@@ -66,6 +75,28 @@ function Wide({ vm }: AdaptiveViewProps<NewAccountVM>) {
         <FormColumns
           left={
             <>
+              <View style={styles.helper}>
+                {density === "compact" ? (
+                  <ChipGroup
+                    label={t("financial.accounts.form.type")}
+                    layout={"scroll"}
+                    mode={"single"}
+                    onChange={vm.onTypeChange}
+                    options={typeOptions}
+                    testID={accountFormTestIds.type}
+                    value={vm.type}
+                  />
+                ) : (
+                  <ChoiceTileGroup
+                    label={t("financial.accounts.form.type")}
+                    onChange={vm.onTypeChange}
+                    options={typeOptions}
+                    testID={accountFormTestIds.type}
+                    value={vm.type}
+                  />
+                )}
+                <Text.Caption tone={"secondary"} value={t(vm.typeHintKey)} />
+              </View>
               <View style={styles.preview}>
                 <IconTile name={vm.icon} size={"lg"} tone={"accent"} />
                 <Text.Heading

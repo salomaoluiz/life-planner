@@ -11,6 +11,9 @@ const accountFormTestIds = {
   owner: "financial.account-form.owner",
   saveButton: "financial.account-form.save-button",
   sheet: "financial.account-form.sheet",
+  type: "financial.accounts.modal.type",
+  // Spec 101: one tile (web/tablet) or chip (mobile) per type.
+  typeOption: (type: string) => `financial.accounts.modal.type.${type}`,
 } as const;
 
 export default accountFormTestIds;

@@ -1,5 +1,6 @@
-import { fireEvent, screen } from "@tests";
+import { fireEvent, render, screen } from "@tests";
 
+import ChipGroup from "./index";
 import { onChange, setupMultiple, setupSingle } from "./mocks/index.mocks";
 
 it("SHOULD select another option in single mode and ignore the already selected one", () => {
@@ -11,6 +12,20 @@ it("SHOULD select another option in single mode and ignore the already selected 
   expect(
     screen.getByTestId("group-all").props.accessibilityState.selected,
   ).toBe(true);
+});
+
+it("SHOULD use the testID of an option WHEN it has one", () => {
+  render(
+    <ChipGroup
+      mode={"single"}
+      onChange={onChange}
+      options={[{ label: "A", testID: "custom.a", value: "a" }]}
+      testID={"group"}
+      value={"a"}
+    />,
+  );
+
+  expect(screen.getByTestId("custom.a")).toBeOnTheScreen();
 });
 
 it("SHOULD add and remove values in multiple mode", () => {
