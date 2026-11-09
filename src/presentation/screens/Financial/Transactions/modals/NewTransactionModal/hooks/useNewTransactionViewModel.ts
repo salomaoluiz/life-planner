@@ -94,6 +94,11 @@ import {
   validate,
 } from "../models/transactionFormState";
 
+// The entry adds `onTransferType` (the modal owns the swap to the transfer form).
+export type NewTransactionVM = ReturnType<typeof useNewTransactionViewModel> & {
+  onTransferType: () => void;
+};
+
 // The months the Transactions screen holds in memory (one entry per month and owner set). Never fetches.
 function cachedMonthLists() {
   return getCachedFetcherData<TransactionsData>(

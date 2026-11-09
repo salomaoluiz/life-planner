@@ -311,6 +311,7 @@ function useFiltersModalViewModel(params: FiltersModalParams) {
     customFrom,
     customTo,
     draft,
+    hidePeriod: params.hidePeriod,
     onApply: () => {
       params.onApply(applied());
       params.onClose();
@@ -334,6 +335,7 @@ function useFiltersModalViewModel(params: FiltersModalParams) {
       setCustomFrom(undefined);
       setCustomTo(undefined);
     },
+    onClose: params.onClose,
     onCustomFromChange: setCustomFrom,
     onCustomToChange: setCustomTo,
     onModeChange: chooseMode,
