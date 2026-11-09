@@ -1,4 +1,11 @@
 export { default as Accordion, AccordionProps } from "./Accordion";
+export {
+  default as AdaptiveLayout,
+  AdaptiveLayoutProps,
+  AdaptiveViewProps,
+  Density,
+  useDensity,
+} from "./AdaptiveLayout";
 export { default as AmountInput, AmountInputProps } from "./AmountInput";
 export { default as AmountText, AmountTextProps } from "./AmountText";
 export {
