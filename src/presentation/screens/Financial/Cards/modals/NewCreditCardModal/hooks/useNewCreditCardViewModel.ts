@@ -29,6 +29,10 @@ import {
 } from "../models/cardFormState";
 import NewCreditCardUIModel from "../models/NewCreditCardUIModel";
 
+export type NewCreditCardVM = ReturnType<typeof useNewCreditCardViewModel>;
+
+export default useNewCreditCardViewModel;
+
 function useNewCreditCardViewModel() {
   const { closeModal } = useModalNavigation();
   const params = useLocalSearchParams<{ id?: string }>();
@@ -252,5 +256,3 @@ function useNewCreditCardViewModel() {
       : "financial.cardForm.titleNew") as TranslationKeys,
   };
 }
-
-export default useNewCreditCardViewModel;

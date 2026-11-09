@@ -23,6 +23,8 @@ import {
 } from "../models/accountList";
 import AccountUIModel from "../models/AccountUIModel";
 
+export type AccountsVM = ReturnType<typeof useAccountsViewModel>;
+
 interface AccountsData {
   accounts: AccountDTO[];
   owners: OwnerDTO[];
@@ -35,6 +37,9 @@ async function fetchAccounts(owners: OwnerDTO[]): Promise<AccountsData> {
 
   return { accounts, owners };
 }
+
+export { fetchAccounts };
+export default useAccountsViewModel;
 
 function useAccountsViewModel() {
   const isFocused = useIsFocused();
@@ -92,6 +97,3 @@ function useAccountsViewModel() {
     totalProjectedAmount: totalAmount(totalProjectedCents(filtered)),
   };
 }
-
-export { fetchAccounts };
-export default useAccountsViewModel;

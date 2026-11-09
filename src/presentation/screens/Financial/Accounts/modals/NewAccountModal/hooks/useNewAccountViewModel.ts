@@ -29,6 +29,8 @@ import {
 } from "../models/accountFormState";
 import NewAccountUIModel from "../models/NewAccountUIModel";
 
+export type NewAccountVM = ReturnType<typeof useNewAccountViewModel>;
+
 async function fetchByOwners<T>(
   owners: OwnerDTO[],
   execute: (ownerIds: string[]) => Promise<T>,
@@ -64,6 +66,9 @@ async function saveAccountChanges({ balance, ...fields }: AccountChanges) {
   await adjust();
   await patch();
 }
+
+export { saveAccountChanges };
+export default useNewAccountViewModel;
 
 function useNewAccountViewModel() {
   const { closeModal } = useModalNavigation();
@@ -296,6 +301,3 @@ function useNewAccountViewModel() {
       : "financial.accounts.new") as TranslationKeys,
   };
 }
-
-export { saveAccountChanges };
-export default useNewAccountViewModel;

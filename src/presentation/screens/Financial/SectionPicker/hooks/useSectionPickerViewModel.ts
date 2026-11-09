@@ -10,6 +10,10 @@ import { screenPath } from "@screens/Navigation/models/modalPath";
 
 import sectionPickerTestIds from "../testIds";
 
+export type SectionPickerVM = ReturnType<typeof useSectionPickerViewModel>;
+
+export default useSectionPickerViewModel;
+
 function useSectionPickerViewModel() {
   const { t } = useTranslation();
   const { closeModal } = useModalNavigation();
@@ -45,5 +49,3 @@ function useSectionPickerViewModel() {
     title: t("financial.sections.pickerTitle"),
   };
 }
-
-export default useSectionPickerViewModel;

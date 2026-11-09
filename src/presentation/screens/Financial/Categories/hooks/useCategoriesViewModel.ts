@@ -33,6 +33,8 @@ const TYPE_OPTIONS: { labelKey: TranslationKeys; value: string }[] = [
   { labelKey: "financial.common.income", value: "INCOME" },
 ];
 
+export type CategoriesVM = ReturnType<typeof useCategoriesViewModel>;
+
 async function fetchCategories(owners: OwnerDTO[]): Promise<CategoriesData> {
   const categories = await useCases.getFinancialCategoriesUseCase.execute(
     owners.map((owner) => owner.id),
@@ -46,6 +48,9 @@ function toRows(categories: CategoryDTO[]) {
     (row) => new CategoryRowUIModel(row),
   );
 }
+
+export { fetchCategories };
+export default useCategoriesViewModel;
 
 function useCategoriesViewModel() {
   const isFocused = useIsFocused();
@@ -125,6 +130,3 @@ function useCategoriesViewModel() {
     typeOptions: TYPE_OPTIONS,
   };
 }
-
-export { fetchCategories };
-export default useCategoriesViewModel;

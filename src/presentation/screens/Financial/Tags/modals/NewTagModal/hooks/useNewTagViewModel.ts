@@ -25,6 +25,10 @@ import {
   validate,
 } from "../models/tagFormState";
 
+export type NewTagVM = ReturnType<typeof useNewTagViewModel>;
+
+export default useNewTagViewModel;
+
 function useNewTagViewModel() {
   const { closeModal } = useModalNavigation();
   const params = useLocalSearchParams<{ id?: string; ownerId?: string }>();
@@ -202,5 +206,3 @@ function useNewTagViewModel() {
     usage,
   };
 }
-
-export default useNewTagViewModel;

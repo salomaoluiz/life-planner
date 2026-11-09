@@ -34,10 +34,14 @@ import {
   validate,
 } from "../models/installmentEditState";
 
+export type InstallmentEditVM = ReturnType<typeof useInstallmentEditViewModel>;
+
 // Plan writes move card purchases, invoices, the limit and the month lists (spec 030).
 function invalidateAfterWrite() {
   void invalidateFinanceData();
 }
+
+export default useInstallmentEditViewModel;
 
 function useInstallmentEditViewModel() {
   const { closeModal, replaceModal } = useModalNavigation();
@@ -341,5 +345,3 @@ function useInstallmentEditViewModel() {
     state,
   };
 }
-
-export default useInstallmentEditViewModel;

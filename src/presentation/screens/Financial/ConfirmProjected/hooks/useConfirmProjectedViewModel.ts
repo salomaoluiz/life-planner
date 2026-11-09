@@ -18,6 +18,10 @@ import {
   isValidCharge,
 } from "../models/confirmProjectedState";
 
+export type ConfirmProjectedVM = ReturnType<
+  typeof useConfirmProjectedViewModel
+>;
+
 type ConfirmParams = {
   creditCardId: string;
   // `YYYY-MM-DD` of the projected purchase.
@@ -41,6 +45,8 @@ function parseDate(value?: string) {
 
   return new Date(year, month - 1, day);
 }
+
+export default useConfirmProjectedViewModel;
 
 // Spec 096 FR 18: the real value and date of a projected card purchase.
 function useConfirmProjectedViewModel() {
@@ -115,5 +121,3 @@ function useConfirmProjectedViewModel() {
     projectedDate: parseDate(params.date),
   };
 }
-
-export default useConfirmProjectedViewModel;

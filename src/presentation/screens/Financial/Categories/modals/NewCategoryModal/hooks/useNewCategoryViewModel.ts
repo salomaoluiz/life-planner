@@ -45,6 +45,8 @@ import {
 import NewCategoryUIModel from "../models/NewCategoryUIModel";
 import useIconSearch from "./useIconSearch";
 
+export type NewCategoryVM = ReturnType<typeof useNewCategoryViewModel>;
+
 async function fetchByOwners<T>(
   owners: OwnerDTO[],
   execute: (ownerIds: string[]) => Promise<T>,
@@ -61,6 +63,8 @@ function formatShortDate(calendarDate: string, localeTag: string) {
     month: "2-digit",
   }).format(new Date(year, month - 1, day));
 }
+
+export default useNewCategoryViewModel;
 
 function useNewCategoryViewModel() {
   const { closeModal } = useModalNavigation();
@@ -560,5 +564,3 @@ function useNewCategoryViewModel() {
     typeOptions: uiModel?.typeOptions ?? [],
   };
 }
-
-export default useNewCategoryViewModel;

@@ -29,6 +29,8 @@ import {
   validate,
 } from "../models/refundState";
 
+export type RefundVM = ReturnType<typeof useRefundViewModel>;
+
 type RefundParams = {
   creditCardId: string;
   // Edit mode when set; the fields below then describe the stored refund.
@@ -52,6 +54,9 @@ function parseDate(value: string) {
 
   return new Date(year, month - 1, day);
 }
+
+export type { RefundParams };
+export default useRefundViewModel;
 
 function useRefundViewModel() {
   const { closeModal } = useModalNavigation();
@@ -229,6 +234,3 @@ function useRefundViewModel() {
     onSave,
   };
 }
-
-export type { RefundParams };
-export default useRefundViewModel;
