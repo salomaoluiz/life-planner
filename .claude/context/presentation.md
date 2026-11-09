@@ -18,7 +18,10 @@ Every View has its own ViewModel hook: **screens, containers and modals**. Dumb 
 
 ```
 screens/<Area>/<Screen>/
-  index.tsx                            View (default export)
+  index.tsx                            entry: calls the ViewModel once, renders <AdaptiveLayout vm wide={Wide} compact={Compact?} />
+  views/Wide.tsx                       default View (every width)
+  views/Compact.tsx                    only when the owner asks for a phone layout
+  views/index.ts                       export { default as Wide } from "./Wide";
   styles.ts                            useStyles() (see theme.md)
   hooks/use<Screen>ViewModel.ts        ViewModel
   hooks/index.ts                       barrel
@@ -38,7 +41,7 @@ screens/<Area>/<Screen>/
       styles.ts
 ```
 
-`index.web.tsx` variants (Metro picks them automatically) reuse the same ViewModel hook; only the rendering differs.
+Layouts are chosen by width through `AdaptiveLayout`, never by platform; `*.web.tsx` only for platform APIs (for example `TooltipBubble.web.tsx`).
 Register the screen in `screens/index.tsx`.
 
 > **Legacy code:** many screens still have logic in `index.tsx`, `containers/*/hooks/index.tsx` (`useListItem`) and classes named `*ViewModel` (`FamilyViewModel`). Closest to the target: `Family` (`useFamilies` + `index.tsx`). Write new code with this pattern. When you touch a legacy screen, migrate it: move the logic into `use<Name>ViewModel` and rename the classes to `*UIModel`.
@@ -249,3 +252,11 @@ A list that can hold years of rows loads one month: key `[...financeKeys.transac
 - **Stable handlers:** every handler given to a row (`onRowPress`, `onProjectedPress`, `onInvoiceOpen`, `onInvoiceToggle`, `onReadOnlyAttempt`, pay `onPay`, adjustment `onOpen`) goes through `useStableCallback` (`@presentation/hooks/useStableCallback`): the identity never changes and each call reads the latest render (so the read-only scope is always current). Handlers take an id or the item, never a per-row closure. `renderItem` is a stable callback too; what a row shows besides its entry goes in the `FlashList` `extraData` string.
 - **Per-row cost:** `StyleSheet.create` once per theme (`useStyles` with `useMemo`), `Intl.DateTimeFormat` once per locale and options (`models/formatters.ts` `getDateTimeFormat`), `TransactionUIModel.date`/`dateKey` computed once.
 - **Prefetch:** `usePrefetchAdjacentMonths` fetches month −1 and +1 into the cache after the visible month settled, the screen has been idle `PREFETCH_IDLE_MS` and the interactions ended; never while loading, filtering, unfocused, with a write pending or on a slow connection (`isSlowConnection`). It uses `monthCacheKey`, the same key as the month query, through `prefetchFetcherData` (no persistence; the warmed month is marked stale, so switching shows it at once and revalidates in the background), so the spec 076 refreshes reach prefetched months.
+
+## Adaptive layout (spec 099)
+
+- `AdaptiveLayout` (`@components`) picks the View by width: `compact` is rendered only when the width is < 768 **and** a `compact` View was given; `medium`/`expanded` always render `wide`. Both Views receive the same `vm` object (`AdaptiveViewProps<VM>`), and the container renders no element of its own (the frame, `Screen` or `BottomSheet`, stays inside each View).
+- The entry (`index.tsx`) calls `use<Screen>ViewModel()` once, above the container, so switching Views (window resize, tablet rotation) keeps the state. Export the type: `export type <Screen>VM = ReturnType<typeof use<Screen>ViewModel>`; type Views as `function Wide({ vm }: AdaptiveViewProps<<Screen>VM>)`.
+- Views use only presentational hooks (`useStyles`, `useTranslation`, `useKitTheme`/`useTheme`, `useLocaleTag`, `useDensity`, purely visual local state). Lint (`views/**`): no `@application/useCases`, `@infrastructure/*`, `expo-router`, `@react-navigation/*` or `use*ViewModel` imports.
+- Screens never read the width (`useBreakpoint`, `useWindowDimensions`, `breakpoint` from `useKitTheme`): `shellBreakpointAllowList` (permanent: `Financial/Layout`, `Navigation/containers/AppTabBar`) and `legacyCompactionAllowList` (temporary, spec 100 refines it; each compact spec removes its entries) in `eslint/rules/presentation-guardrails.mjs`.
+- **Every new screen or modal** uses `AdaptiveLayout` with only `views/Wide.tsx`; `views/Compact.tsx` only when the owner asks. `src/presentation/components/AdaptiveLayout/coverage.test.ts` fails otherwise: existing folders sit in `legacyAdaptiveAllowList` (`allowLists.ts`) until spec 100 empties it.

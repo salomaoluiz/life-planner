@@ -24,6 +24,7 @@ Module folder names: `financial/accounts`, `stock`, `family`, `familyMember`, `u
 - `no-console`, `no-nested-ternary`, `no-plusplus`, `no-duplicate-imports`, `@typescript-eslint/prefer-nullish-coalescing` (`??` not `||`), `promise-function-async`, `no-deprecated`.
 - `import-x/no-cycle` (maxDepth 3).
 - `no-restricted-imports`: no `../../`; external libs only via wrappers: `@infrastructure/supabase`, `@infrastructure/fetcher`, `@infrastructure/monitoring`, `@infrastructure/storage`, `@infrastructure/googleOAuth`, `@presentation/i18n`.
+- **Adaptive layout (spec 099)**: files under `screens/**/views/**` may not import use cases, `@infrastructure/*`, `expo-router`, `@react-navigation/*` or a `use*ViewModel`; screen files may not read the width (`useBreakpoint`, `useWindowDimensions`, `breakpoint`). Allow-lists and rule tests: `eslint/rules/presentation-guardrails.{mjs,test.ts}`.
 - Prettier formatting (double quotes, trailing commas).
 - Default exports for single-unit files; barrels re-export with `export { default as X } from "./X"`.
 
