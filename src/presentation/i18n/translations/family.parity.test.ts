@@ -11,7 +11,7 @@ function keysOf(value: unknown, prefix = ""): string[] {
   );
 }
 
-it.each(["family", "invite"] as const)(
+it.each(["family", "investment", "invite"] as const)(
   "SHOULD pt-BR have exactly the same %s keys as en-US",
   (namespace) => {
     expect(keysOf(ptBR.translation[namespace]).sort()).toEqual(

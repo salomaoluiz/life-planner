@@ -11,6 +11,7 @@ const navigation = {
     family: "Família",
     finances: "Finanças",
     home: "Início",
+    investments: "Investimentos",
     stock: "Estoque",
   },
 };

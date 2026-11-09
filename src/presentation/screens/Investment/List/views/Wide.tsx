@@ -1,0 +1,261 @@
+import { FlashList } from "@shopify/flash-list";
+import { View } from "react-native";
+
+import {
+  AdaptiveViewProps,
+  Button,
+  ChipGroup,
+  EmptyState,
+  ErrorState,
+  GroupHeader,
+  IconButton,
+  ReadOnlyNotice,
+  Screen,
+  ScreenHeader,
+  SearchField,
+  SegmentedControl,
+  Text,
+  Toast,
+  useDensity,
+} from "@components";
+import Skeleton from "@components/Skeleton";
+import { InvestmentAssetStatus } from "@domain/entities/investment/enums";
+import { useLocaleTag, useTranslation } from "@presentation/i18n";
+import { translateChoices } from "@screens/Financial/models/ownerOptions";
+import { ListEntry } from "@screens/Investment/models/assetList";
+import { formatMoney } from "@screens/Investment/models/format";
+import investmentTestIds from "@screens/Investment/testIds";
+
+import AssetRowItem from "../components/AssetRowItem";
+import { InvestmentListVM } from "../hooks";
+import useStyles from "../styles";
+
+const SKELETON_ROWS = [0, 1, 2, 3, 4];
+
+function ColumnsHeader() {
+  const { styles } = useStyles();
+  const { t } = useTranslation();
+
+  return (
+    <View style={styles.headerRow}>
+      <View style={styles.cellAsset}>
+        <Text.Overline
+          tone="secondary"
+          value={t("investment.list.columns.asset")}
+        />
+      </View>
+      {(
+        [
+          ["quantity", styles.cellNumber],
+          ["averagePrice", styles.cellNumber],
+          ["cost", styles.cellNumber],
+          ["currentValue", styles.cellNumber],
+          ["openResult", styles.cellNumberWide],
+          ["realized", styles.cellNumber],
+        ] as const
+      ).map(([key, style]) => (
+        <View key={key} style={style}>
+          <Text.Overline
+            tone="secondary"
+            value={t(`investment.list.columns.${key}`)}
+          />
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function Wide({ vm }: AdaptiveViewProps<InvestmentListVM>) {
+  const { styles } = useStyles();
+  const { t } = useTranslation();
+  const localeTag = useLocaleTag();
+  const compact = useDensity().density === "compact";
+  const archivedTab = vm.tab === InvestmentAssetStatus.ARCHIVED;
+  const hasContent = !vm.isLoading && !vm.errorMessage && !vm.isEmpty;
+
+  function renderItem({ item }: { item: ListEntry }) {
+    if (item.kind === "group") {
+      const current =
+        item.current === null
+          ? "—"
+          : formatMoney(item.current, item.currency, localeTag);
+
+      return (
+        <GroupHeader
+          meta={
+            <Text.Caption
+              tone="secondary"
+              value={t("investment.list.groupSubtitle", {
+                cost: formatMoney(item.cost, item.currency, localeTag),
+                current,
+              })}
+            />
+          }
+          testID={investmentTestIds.list.group(item.key)}
+          title={`${t(`investment.classGroup.${item.assetClass}`)} · ${item.currency}`}
+        />
+      );
+    }
+
+    return <AssetRowItem onPress={vm.onRowPress} row={item.row} />;
+  }
+
+  function renderEmpty() {
+    if (vm.isLoading) {
+      return (
+        <View testID={investmentTestIds.list.skeleton}>
+          {SKELETON_ROWS.map((key) => (
+            <Skeleton.ListItem key={key} />
+          ))}
+        </View>
+      );
+    }
+
+    if (vm.errorMessage) {
+      return (
+        <ErrorState
+          message={t("investment.errors.generic")}
+          onRetry={vm.onRetry}
+          retryLabel={t("common.actions.tryAgain")}
+        />
+      );
+    }
+
+    if (vm.isEmpty) {
+      return (
+        <EmptyState
+          actionLabel={
+            vm.readOnly || archivedTab
+              ? undefined
+              : t("investment.list.newAsset")
+          }
+          icon="chart-line"
+          message={
+            archivedTab
+              ? t("investment.list.emptyArchivedBody")
+              : t("investment.list.emptyBody")
+          }
+          onAction={vm.readOnly || archivedTab ? undefined : vm.onAddPress}
+          testID={investmentTestIds.list.emptyState}
+          title={
+            archivedTab
+              ? t("investment.list.emptyArchivedTitle")
+              : t("investment.list.emptyTitle")
+          }
+        />
+      );
+    }
+
+    return (
+      <View style={styles.noResults} testID={investmentTestIds.list.noResults}>
+        <Text.Body align="center" value={t("investment.list.noResults")} />
+        <Button.Ghost
+          label={t("common.actions.clear")}
+          onPress={() => vm.onSearchChange("")}
+        />
+      </View>
+    );
+  }
+
+  return (
+    <Screen
+      list={
+        <FlashList
+          data={vm.entries}
+          estimatedItemSize={compact ? 96 : 64}
+          getItemType={(entry: ListEntry) => entry.kind}
+          keyExtractor={(entry: ListEntry) => entry.key}
+          ListEmptyComponent={renderEmpty()}
+          ListFooterComponent={
+            hasContent ? (
+              <View style={styles.footnote}>
+                <Text.Caption
+                  testID={investmentTestIds.list.footnote}
+                  tone="secondary"
+                  value={t("investment.list.footnote")}
+                />
+              </View>
+            ) : null
+          }
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+          testID="flashList"
+        />
+      }
+      onRefresh={vm.onRefresh}
+      refreshing={vm.isRefreshing}
+      testID={investmentTestIds.list.screen}
+    >
+      <View style={styles.header}>
+        <ScreenHeader
+          actions={
+            vm.readOnly ? null : (
+              <IconButton
+                accessibilityLabel={t("investment.list.newAsset")}
+                name="plus"
+                onPress={vm.onAddPress}
+                testID={investmentTestIds.list.addButton}
+              />
+            )
+          }
+          title={t("investment.list.title")}
+        />
+        <ChipGroup
+          layout="scroll"
+          mode="single"
+          onChange={vm.onOwnerFilterChange}
+          options={translateChoices(vm.ownerChoices, t)}
+          testID={investmentTestIds.list.ownerFilter}
+          value={vm.ownerFilter}
+        />
+        <SegmentedControl
+          accessibilityLabel={t("investment.list.title")}
+          onChange={vm.onTabChange}
+          options={[
+            {
+              label: t("investment.list.tabs.assets", {
+                count: vm.assetsCount,
+              }),
+              value: InvestmentAssetStatus.ACTIVE,
+            },
+            {
+              label: t("investment.list.tabs.archived", {
+                count: vm.archivedCount,
+              }),
+              value: InvestmentAssetStatus.ARCHIVED,
+            },
+          ]}
+          testID="investment.list.tabs"
+          value={vm.tab}
+        />
+        {vm.hasAny ? (
+          <SearchField
+            clearLabel={t("common.actions.clear")}
+            onChangeText={vm.onSearchChange}
+            placeholder={t("investment.list.search")}
+            testID={investmentTestIds.list.search}
+            value={vm.search}
+          />
+        ) : null}
+        {vm.readOnly ? (
+          <ReadOnlyNotice
+            message={t("family.archived.banner")}
+            testID={investmentTestIds.list.readOnlyBanner}
+          />
+        ) : null}
+        {hasContent && !compact && vm.entries.length > 0 ? (
+          <ColumnsHeader />
+        ) : null}
+      </View>
+      <Toast
+        icon="lock-outline"
+        message={t("family.archived.readOnly")}
+        onHide={vm.onToastHide}
+        testID={investmentTestIds.list.readOnlyToast}
+        visible={vm.toastVisible}
+      />
+    </Screen>
+  );
+}
+
+export default Wide;
