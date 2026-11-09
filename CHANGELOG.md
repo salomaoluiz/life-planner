@@ -3,6 +3,12 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.14.1] - 2026-11-09
+
+### Changed
+
+- Internal: adaptive layout container for separate phone layouts (spec 099).
+
 ## [1.14.0] - 2026-11-09
 
 ### Added

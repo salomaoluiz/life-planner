@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@tests";
+import { fireEvent, hasText, render, screen } from "@tests";
 
 import { ThemeMode } from "@domain/entities/configs/ConfigsEntity";
 import { useTheme } from "@presentation/theme";
@@ -19,6 +19,7 @@ it("SHOULD render a section for every component group", () => {
     "gallery-inputs",
     "gallery-display",
     "gallery-containers",
+    "gallery-adaptive",
   ].forEach((id) => expect(screen.getByTestId(id)).toBeTruthy());
 });
 
@@ -41,4 +42,10 @@ it("SHOULD open and close the sheet and the confirm dialog", () => {
 
   fireEvent.press(screen.getByTestId("gallery-open-confirm"));
   expect(screen.getByTestId("gallery-confirm")).toBeTruthy();
+});
+
+it("SHOULD show the adaptive layout demo with the active View and density", () => {
+  render(<ComponentGallery />);
+
+  expect(hasText("Demo View · density: compact · view: compact")).toBe(true);
 });

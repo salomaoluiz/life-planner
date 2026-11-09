@@ -43,9 +43,9 @@ Placeholders: `<module>` (e.g. `financial`), `<sub>` (e.g. `accounts`, optional)
 
 ## 5. Presentation → `.claude/context/presentation.md`, `components.md`, `theme.md`, `i18n.md`
 
-- [ ] Screen, hook-based MVVM: `index.tsx` (View, render only), `hooks/use<Screen>ViewModel.ts` (fetching, logic, navigation), `models/<X>UIModel.ts` (DTO to display mapping), `styles.ts`
+- [ ] Screen, hook-based MVVM: `index.tsx` (entry: `<AdaptiveLayout vm wide={Wide} />`, spec 099), `views/Wide.tsx` + `views/index.ts` (render only; `views/Compact.tsx` only when the owner asks), `hooks/use<Screen>ViewModel.ts` (fetching, logic, navigation), `models/<X>UIModel.ts` (DTO to display mapping), `styles.ts`
 - [ ] `containers/ListItem/{index.tsx,styles.ts,hooks/useListItemViewModel.ts}` (edit/delete)
-- [ ] `modals/NewXModal/{index.tsx,styles.ts,hooks/useNewXViewModel.ts,hooks/useForm.ts,models/NewXUIModel.ts}` + `modals/index.ts`
+- [ ] `modals/NewXModal/{index.tsx,views/Wide.tsx,styles.ts,hooks/useNewXViewModel.ts,hooks/useForm.ts,models/NewXUIModel.ts}` + `modals/index.ts`
 - [ ] Export screen in `screens/index.tsx`
 - [ ] i18n keys in `en-US` AND `pt-BR`
 

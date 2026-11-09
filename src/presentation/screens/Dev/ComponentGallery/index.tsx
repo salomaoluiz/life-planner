@@ -3,6 +3,8 @@ import { useState } from "react";
 import { View } from "react-native";
 
 import {
+  AdaptiveLayout,
+  AdaptiveViewProps,
   AmountInput,
   AmountText,
   AutocompleteField,
@@ -39,6 +41,7 @@ import {
   Text,
   TextField,
   Toast,
+  useDensity,
 } from "@components";
 import { IconButton } from "@components/Icon";
 import Skeleton from "@components/Skeleton";
@@ -70,6 +73,20 @@ const SEGMENTS = [
   { label: "Expense", tone: "expense" as const, value: "expense" },
   { label: "Income", tone: "income" as const, value: "income" },
 ];
+const ADAPTIVE_DEMO_VM = { name: "Demo" };
+
+function AdaptiveDemoView({ vm }: AdaptiveViewProps<{ name: string }>) {
+  const { density, view } = useDensity();
+
+  return (
+    <Card testID={`gallery-adaptive-${vm.name}`}>
+      <Text.Body
+        value={`${vm.name} View · density: ${density} · view: ${view}`}
+      />
+    </Card>
+  );
+}
+
 function ComponentGallery() {
   const { isDark, setThemeMode, theme } = useTheme();
   const [text, setText] = useState("");
@@ -447,6 +464,15 @@ function ComponentGallery() {
         <Card variant="dashed">
           <Text.Body value="Dashed card" />
         </Card>
+      </Section>
+
+      <Section testID="gallery-adaptive" title="Adaptive layout">
+        <Text.Caption value="Resize the window below 768 px: the compact View replaces the wide one, same ViewModel." />
+        <AdaptiveLayout
+          compact={AdaptiveDemoView}
+          vm={ADAPTIVE_DEMO_VM}
+          wide={AdaptiveDemoView}
+        />
       </Section>
 
       <BottomSheet
