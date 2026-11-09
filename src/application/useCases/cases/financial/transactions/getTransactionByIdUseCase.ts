@@ -36,6 +36,7 @@ function getTransactionByIdUseCase(
           transaction,
           categories.find((c) => c.id === transaction.categoryId)?.name,
           accounts.find((a) => a.id === transaction.accountId)?.name,
+          accounts,
         );
       } catch (error) {
         if (error instanceof DefaultError) {

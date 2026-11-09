@@ -1,0 +1,11 @@
+url: ${E2E_WEB_URL}
+---
+# Params read by the script: FROM_ACCOUNT_ID, TO_ACCOUNT_ID, DESCRIPTION, AMOUNT_OUT_CENTS, optional AMOUNT_IN_CENTS.
+- runScript:
+    file: ../../scripts/setup/create-transfer.js
+    env:
+      TOKEN: ${TOKEN}
+      FROM_ACCOUNT_ID: ${FROM_ACCOUNT_ID}
+      TO_ACCOUNT_ID: ${TO_ACCOUNT_ID}
+      DESCRIPTION: ${DESCRIPTION}
+      AMOUNT_OUT_CENTS: ${AMOUNT_OUT_CENTS}

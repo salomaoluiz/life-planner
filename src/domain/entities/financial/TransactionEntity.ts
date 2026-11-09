@@ -6,6 +6,7 @@ import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import type { RecurrenceFrequency } from "./RecurrenceEntity";
 import type { TagRefEntity } from "./TagEntity";
+import type { TransferRefEntity } from "./TransferEntity";
 
 export enum TransactionType {
   EXPENSE = "EXPENSE",
@@ -51,6 +52,9 @@ interface ITransactionEntity {
   recurrenceId?: string;
   systemKey?: string;
   tags?: TagRefEntity[];
+  // Spec 098: the row belongs to a transfer; `transfer` is its lookup (absent when the API did not send it).
+  transfer?: TransferRefEntity;
+  transferId?: string;
   type: TransactionType;
   value: string;
 }
@@ -82,6 +86,8 @@ class TransactionEntity {
   recurrenceId?: string;
   systemKey?: string;
   tags: TagRefEntity[];
+  transfer?: TransferRefEntity;
+  transferId?: string;
   type: TransactionType;
   value: string;
 
@@ -111,6 +117,8 @@ class TransactionEntity {
     this.excludeFromTotals = params.excludeFromTotals ?? false;
     this.systemKey = params.systemKey;
     this.tags = params.tags ?? [];
+    this.transfer = params.transfer;
+    this.transferId = params.transferId;
     this.type = params.type;
     this.value = params.value;
   }

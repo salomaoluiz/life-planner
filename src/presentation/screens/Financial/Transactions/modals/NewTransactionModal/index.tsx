@@ -1,3 +1,5 @@
+import { useLocalSearchParams } from "expo-router";
+import { useState } from "react";
 import { View } from "react-native";
 
 import {
@@ -32,6 +34,7 @@ import { translateChoices } from "@screens/Financial/models/ownerOptions";
 import { RECURRENCE_FREQUENCIES } from "@screens/Financial/models/recurrence";
 import { toInvoiceFieldOption } from "@screens/Financial/utils/invoiceFieldOption";
 
+import TransferForm from "../TransferForm";
 import CategoryChips from "./components/CategoryChips";
 import CategoryPickerSheet from "./components/CategoryPickerSheet";
 import MissingRecordHint from "./components/MissingRecordHint";
@@ -45,6 +48,11 @@ import transactionFormTestIds from "./testIds";
 const SKELETON_ROWS = [0, 1, 2];
 // Compact: the notice floats just above the two stacked footer buttons; wide: near the bottom of the window.
 const TOAST_BOTTOM = { compact: 176, wide: 32 };
+
+interface FormProps {
+  // Spec 098: picking "Transferência" in the type control swaps the form for the transfer form.
+  onTransferType: () => void;
+}
 
 function monthDateOf(month: string) {
   const [year, value] = month.split("-").map(Number);
@@ -63,7 +71,20 @@ function monthYearName(month: Date, localeTag: string) {
   }).format(month);
 }
 
+// The transfer form is a sibling body of the same modal: new transfers start from the type control, and a transfer row
+// opens it directly (`transferId`). The transaction form (and its many queries) mounts only when it is the one shown.
 function NewTransactionModal() {
+  const params = useLocalSearchParams<{ transferId?: string }>();
+  const [isTransfer, setTransfer] = useState(!!params.transferId);
+
+  return isTransfer ? (
+    <TransferForm onSwitchType={() => setTransfer(false)} />
+  ) : (
+    <TransactionForm onTransferType={() => setTransfer(true)} />
+  );
+}
+
+function TransactionForm(props: FormProps) {
   const { styles } = useStyles();
   const { t } = useTranslation();
   const vm = useNewTransactionViewModel();
@@ -193,12 +214,30 @@ function NewTransactionModal() {
                 <SegmentedControl
                   accessibilityLabel={t("financial.categories.type")}
                   disabled={vm.recurrence.isRecurring}
-                  onChange={(value) => vm.onTypeChange(value as typeof vm.type)}
-                  options={vm.typeOptions.map((option) => ({
-                    label: t(option.labelKey),
-                    tone: option.value === "EXPENSE" ? "expense" : "income",
-                    value: option.value,
-                  }))}
+                  onChange={(value) =>
+                    value === "TRANSFER"
+                      ? props.onTransferType()
+                      : vm.onTypeChange(value as typeof vm.type)
+                  }
+                  options={[
+                    ...vm.typeOptions.map((option) => ({
+                      label: t(option.labelKey),
+                      tone:
+                        option.value === "EXPENSE"
+                          ? ("expense" as const)
+                          : ("income" as const),
+                      value: option.value as string,
+                    })),
+                    // A transfer is only created here; editing a transaction keeps its type.
+                    ...(vm.isEditing
+                      ? []
+                      : [
+                          {
+                            label: t("financial.transfers.type"),
+                            value: "TRANSFER",
+                          },
+                        ]),
+                  ]}
                   testID={transactionFormTestIds.type}
                   value={vm.type}
                 />

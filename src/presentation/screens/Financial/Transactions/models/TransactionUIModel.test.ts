@@ -230,3 +230,104 @@ describe("cached values", () => {
     expect(model.dateKey).toBe(model.dateKey);
   });
 });
+
+describe("transfer rows (spec 098)", () => {
+  const transfer = {
+    amountIn: "920.00",
+    amountOut: "5000.00",
+    counterpartHidden: false,
+    currencyIn: "USD" as const,
+    currencyOut: "BRL" as const,
+    dateIn: new Date(2026, 10, 6).toISOString(),
+    dateOut: new Date(2026, 10, 4).toISOString(),
+    fromAccountId: "acc-1",
+    toAccountId: "acc-2",
+  };
+
+  function row(systemKey: string, overrides = {}) {
+    return new TransactionUIModel(
+      dto({
+        paid: false,
+        systemKey,
+        transfer,
+        transferId: "transfer-1",
+        ...overrides,
+      }),
+    );
+  }
+
+  it("SHOULD name the side of the row AND mark it a transfer", () => {
+    expect(row("TRANSFER_OUT").transferSide).toBe("OUT");
+    expect(row("TRANSFER_IN").transferSide).toBe("IN");
+    expect(row("TRANSFER_FEE").transferSide).toBe("FEE");
+    expect(row("TRANSFER_OUT").isTransfer).toBe(true);
+    expect(new TransactionUIModel(dto()).transferSide).toBeUndefined();
+    expect(new TransactionUIModel(dto()).isTransfer).toBe(false);
+    expect(row("OTHER").transferSide).toBeUndefined();
+  });
+
+  it("SHOULD let the out and in rows be paid, but not the fee row nor other system rows", () => {
+    expect(row("TRANSFER_OUT").canPay).toBe(true);
+    expect(row("TRANSFER_IN").canPay).toBe(true);
+    expect(row("TRANSFER_FEE").canPay).toBe(false);
+    expect(row("TRANSFER_OUT", { paid: true }).canPay).toBe(false);
+    expect(
+      new TransactionUIModel(dto({ paid: false, systemKey: "INVOICE_PAYMENT" }))
+        .canPay,
+    ).toBe(false);
+  });
+
+  it("SHOULD be read-only WHEN the other side is hidden", () => {
+    expect(row("TRANSFER_OUT").isTransferReadOnly).toBe(false);
+    expect(
+      row("TRANSFER_OUT", {
+        transfer: { ...transfer, counterpartHidden: true },
+      }).isTransferReadOnly,
+    ).toBe(true);
+  });
+
+  it("SHOULD flag an out row whose amount in is still to be informed", () => {
+    const pending = { ...transfer, amountIn: undefined };
+
+    expect(
+      row("TRANSFER_OUT", { transfer: pending }).isTransferAmountPending,
+    ).toBe(true);
+    expect(
+      row("TRANSFER_IN", { transfer: pending }).isTransferAmountPending,
+    ).toBe(false);
+    expect(row("TRANSFER_OUT").isTransferAmountPending).toBe(false);
+    expect(
+      row("TRANSFER_OUT", { transfer: { ...pending, currencyIn: "BRL" } })
+        .isTransferAmountPending,
+    ).toBe(false);
+    expect(
+      row("TRANSFER_OUT", { transfer: { ...pending, counterpartHidden: true } })
+        .isTransferAmountPending,
+    ).toBe(false);
+  });
+
+  it("SHOULD show the rate on the in row between currencies only", () => {
+    expect(row("TRANSFER_IN").transferRate).toEqual({
+      currency: "USD",
+      perCurrency: "BRL",
+      value: 5.4348,
+    });
+    expect(row("TRANSFER_OUT").transferRate).toBeUndefined();
+    expect(
+      row("TRANSFER_IN", { transfer: { ...transfer, currencyIn: "BRL" } })
+        .transferRate,
+    ).toBeUndefined();
+    expect(
+      row("TRANSFER_IN", { transfer: { ...transfer, amountIn: undefined } })
+        .transferRate,
+    ).toBeUndefined();
+  });
+
+  it("SHOULD flip the rate WHEN the amount in is the larger one", () => {
+    expect(
+      row("TRANSFER_IN", {
+        transfer: { ...transfer, amountIn: "5000.00", amountOut: "920.00" },
+      }).transferRate,
+    ).toEqual({ currency: "BRL", perCurrency: "USD", value: 5.4348 });
+  });
+});

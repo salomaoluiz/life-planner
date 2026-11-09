@@ -3,6 +3,7 @@ import { ScrollView } from "react-native";
 
 import { matchCreditCategory } from "@application/csvImport/cardCredits";
 import { autoMatch } from "@application/csvImport/distinctValues";
+import { matchTransferCategory } from "@application/csvImport/transfers";
 import { RowType } from "@application/csvImport/types";
 import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
@@ -368,7 +369,9 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
         ) ||
         (!!entry.type &&
           (entry.cardRows ?? 0) > 0 &&
-          !!matchCreditCategory(entry.value, entry.type))
+          !!matchCreditCategory(entry.value, entry.type)) ||
+        // Spec 098: a transfer category needs no mapping.
+        (!!entry.type && !!matchTransferCategory(entry.value, entry.type))
       );
     }
 

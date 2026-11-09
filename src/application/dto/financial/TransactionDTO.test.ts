@@ -58,3 +58,92 @@ it("SHOULD carry the projected flag from the entity (spec 096)", () => {
     ).projected,
   ).toBe(false);
 });
+
+describe("transfer rows (spec 098)", () => {
+  const transfer = {
+    amountOut: "5000.00",
+    counterpartHidden: false,
+    currencyIn: "USD" as const,
+    currencyOut: "BRL" as const,
+    dateIn: "2026-11-06",
+    dateOut: "2026-11-04",
+    fromAccountId: "acc-1",
+    toAccountId: "acc-2",
+  };
+  const accounts = [
+    { id: "acc-1", name: "Checking" },
+    { id: "acc-2", name: "Global" },
+  ];
+
+  function entity(systemKey: string, overrides = {}) {
+    return new TransactionEntity({
+      ...mocks.defaultProps,
+      owner: OwnerType.USER,
+      systemKey,
+      transfer,
+      transferId: "transfer-1",
+      type: TransactionType.EXPENSE,
+      ...overrides,
+    } as never);
+  }
+
+  it("SHOULD carry the transfer ids AND name the destination of the out row and the origin of the in row", () => {
+    const out = TransactionDTO.fromEntity(
+      entity("TRANSFER_OUT"),
+      undefined,
+      undefined,
+      accounts,
+    );
+    const incoming = TransactionDTO.fromEntity(
+      entity("TRANSFER_IN"),
+      undefined,
+      undefined,
+      accounts,
+    );
+
+    expect(out.transferId).toBe("transfer-1");
+    expect(out.transfer).toEqual(transfer);
+    expect(out.transferCounterpartName).toBe("Global");
+    expect(incoming.transferCounterpartName).toBe("Checking");
+  });
+
+  it("SHOULD name nobody for the fee row, a hidden side, missing accounts or an unknown account", () => {
+    expect(
+      TransactionDTO.fromEntity(
+        entity("TRANSFER_FEE"),
+        undefined,
+        undefined,
+        accounts,
+      ).transferCounterpartName,
+    ).toBeUndefined();
+    expect(
+      TransactionDTO.fromEntity(
+        entity("TRANSFER_OUT", {
+          transfer: { ...transfer, counterpartHidden: true },
+        }),
+        undefined,
+        undefined,
+        accounts,
+      ).transferCounterpartName,
+    ).toBeUndefined();
+    expect(
+      TransactionDTO.fromEntity(entity("TRANSFER_OUT")).transferCounterpartName,
+    ).toBeUndefined();
+    expect(
+      TransactionDTO.fromEntity(
+        entity("TRANSFER_OUT"),
+        undefined,
+        undefined,
+        [],
+      ).transferCounterpartName,
+    ).toBeUndefined();
+    expect(
+      TransactionDTO.fromEntity(
+        new TransactionEntity({ ...mocks.defaultProps } as never),
+        undefined,
+        undefined,
+        accounts,
+      ).transferCounterpartName,
+    ).toBeUndefined();
+  });
+});

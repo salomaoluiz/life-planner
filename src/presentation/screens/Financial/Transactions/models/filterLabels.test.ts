@@ -85,3 +85,18 @@ describe("buildActiveChips", () => {
     );
   });
 });
+
+describe("transfers chip (spec 098)", () => {
+  it("SHOULD show a Transfers chip in the kind group", () => {
+    const chips = buildActiveChips(
+      { ...EMPTY_FILTERS, transfersOnly: true },
+      { categories: new Map(), sources: new Map(), tags: new Map() },
+      "en-US",
+      ((key: string) => key) as never,
+    );
+
+    expect(chips).toEqual([
+      { group: "kind", label: "financial.transfers.filters.kind" },
+    ]);
+  });
+});

@@ -18,13 +18,14 @@ export type OwnerType = "FAMILY" | "USER";
 
 export type RecurrenceFrequency = "BIWEEKLY" | "MONTHLY" | "WEEKLY" | "YEARLY";
 
-// Spec 079: the entities a lean transaction response references, once each, by id.
 export interface TransactionLookups {
   categories: Record<
     string,
     { excludeFromTotals?: boolean; name?: string; systemKey?: string }
   >;
   tags: Record<string, { name: string }>;
+  // Spec 098: only present when a row of the response belongs to a transfer (amounts in cents).
+  transfers?: Record<string, Record<string, unknown>>;
 }
 
 export type TransactionType = "EXPENSE" | "INCOME";
@@ -33,6 +34,22 @@ export type TransactionType = "EXPENSE" | "INCOME";
 export interface TransactionWithLookups {
   item: Record<string, unknown>;
   lookups: TransactionLookups;
+}
+
+// Spec 079: the entities a lean transaction response references, once each, by id.
+// Spec 098: a transfer a row belongs to; the amounts are decimal text, `counterpartHidden` marks the side the caller cannot read.
+export interface TransferRefModel {
+  amountIn?: string;
+  amountOut?: string;
+  counterpartHidden: boolean;
+  currencyIn: CurrencyCode;
+  currencyOut: CurrencyCode;
+  dateIn: string;
+  dateOut: string;
+  feeTransactionId?: string;
+  fromAccountId?: string;
+  recurrenceId?: string;
+  toAccountId?: string;
 }
 
 interface ITransactionModel {
@@ -61,6 +78,8 @@ interface ITransactionModel {
   recurrenceId?: string;
   systemKey?: string;
   tags?: TagRefModel[];
+  transfer?: TransferRefModel;
+  transferId?: string;
   type: TransactionType;
   value: string;
 }
@@ -92,6 +111,8 @@ class TransactionModel implements ITransactionModel {
   recurrenceId?: string;
   systemKey?: string;
   tags: TagRefModel[];
+  transfer?: TransferRefModel;
+  transferId?: string;
   type: TransactionType;
   value: string;
 
@@ -121,6 +142,8 @@ class TransactionModel implements ITransactionModel {
     this.excludeFromTotals = params.excludeFromTotals ?? false;
     this.systemKey = params.systemKey;
     this.tags = params.tags ?? [];
+    this.transfer = params.transfer;
+    this.transferId = params.transferId;
     this.type = params.type;
     this.value = params.value;
   }
@@ -163,6 +186,8 @@ class TransactionModel implements ITransactionModel {
       recurrenceId: (data.recurrenceId as null | string) ?? undefined,
       systemKey: category?.systemKey ?? undefined,
       tags: tagRefsFromJSON(data.tags),
+      transfer: (data.transfer as TransferRefModel | undefined) ?? undefined,
+      transferId: (data.transferId as null | string) ?? undefined,
       type: data.type as TransactionType,
       value: centsToDecimalString(Number(data.value)),
     });
@@ -185,6 +210,7 @@ class TransactionModel implements ITransactionModel {
         systemKey: category.systemKey,
       },
       tags: tagIds.map((id) => ({ id, name: lookups.tags?.[id]?.name ?? "" })),
+      transfer: toTransferRef(lookups.transfers?.[item.transferId as string]),
     });
   }
 
@@ -219,10 +245,40 @@ class TransactionModel implements ITransactionModel {
       recurrenceFrequency: this.recurrenceFrequency ?? null,
       recurrenceId: this.recurrenceId ?? null,
       tags: this.tags,
+      // Spec 098: kept so a cached row still draws its transfer.
+      ...(this.transfer ? { transfer: this.transfer } : {}),
+      ...(this.transferId ? { transferId: this.transferId } : {}),
       type: this.type,
       value: decimalStringToCents(this.value),
     };
   }
+}
+
+function optionalCents(value: unknown) {
+  return typeof value === "number" ? centsToDecimalString(value) : undefined;
+}
+
+// A transfer lookup of the API (cents, calendar days) as the row model keeps it (decimal text, ISO instants).
+function toTransferRef(
+  lookup?: Record<string, unknown>,
+): TransferRefModel | undefined {
+  if (!lookup) {
+    return undefined;
+  }
+
+  return {
+    amountIn: optionalCents(lookup.amountIn),
+    amountOut: optionalCents(lookup.amountOut),
+    counterpartHidden: lookup.counterpartHidden === true,
+    currencyIn: toCurrencyCode(lookup.currencyIn),
+    currencyOut: toCurrencyCode(lookup.currencyOut),
+    dateIn: calendarDateToIso(lookup.dateIn as string),
+    dateOut: calendarDateToIso(lookup.dateOut as string),
+    feeTransactionId: (lookup.feeTransactionId as string) ?? undefined,
+    fromAccountId: (lookup.fromAccountId as string) ?? undefined,
+    recurrenceId: (lookup.recurrenceId as string) ?? undefined,
+    toAccountId: (lookup.toAccountId as string) ?? undefined,
+  };
 }
 
 export default TransactionModel;

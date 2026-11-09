@@ -71,6 +71,12 @@ function buildActiveChips(
       }),
     });
   }
+  if (filters.transfersOnly) {
+    chips.push({
+      group: "kind",
+      label: t("financial.transfers.filters.kind"),
+    });
+  }
   if (filters.situation) {
     chips.push({
       group: "situation",

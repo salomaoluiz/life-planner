@@ -2,7 +2,7 @@ url: ${E2E_WEB_URL}
 env:
   ICON: bank
 ---
-# Optional caller-scoped params read by the script: OWNER (USER default, or FAMILY), BALANCE_CENTS (the INITIAL balance, 0 default), STATUS (ACTIVE default).
+# Optional caller-scoped params read by the script: OWNER (USER default, or FAMILY), BALANCE_CENTS (the INITIAL balance, 0 default), STATUS (ACTIVE default), CURRENCY (the API default).
 - runScript:
     file: ../../scripts/setup/create-account.js
     env:

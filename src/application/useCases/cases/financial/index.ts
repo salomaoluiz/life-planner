@@ -90,3 +90,10 @@ export {
   updateTransactionUseCase as updateFinancialTransactionUseCase,
   validateImportUseCase as validateFinancialImportUseCase,
 } from "./transactions";
+
+export {
+  createTransferUseCase as createFinancialTransferUseCase,
+  deleteTransferUseCase as deleteFinancialTransferUseCase,
+  getTransferUseCase as getFinancialTransferUseCase,
+  updateTransferUseCase as updateFinancialTransferUseCase,
+} from "./transfers";

@@ -12,6 +12,12 @@ import {
   RecurrencePaidAfterEnd,
   RecurringFollowsDate,
   RefundOverPurchase,
+  TransferAccountArchived,
+  TransferAmountInRequired,
+  TransferAmountMismatch,
+  TransferDateInBeforeOut,
+  TransferRowUseTransfer,
+  TransferSameAccount,
 } from "@domain/entities/errors";
 
 // The API answers 422 for several reasons on a transaction or card-credit write; the message tells them apart.
@@ -48,6 +54,31 @@ function unprocessableError(message: string): BusinessError {
 
   if (message.includes("Credit card is archived")) {
     return new CreditCardArchived();
+  }
+
+  // Spec 098: the API answers the code of the rule in the message.
+  if (message.includes("TRANSFER_SAME_ACCOUNT")) {
+    return new TransferSameAccount();
+  }
+
+  if (message.includes("TRANSFER_ACCOUNT_ARCHIVED")) {
+    return new TransferAccountArchived();
+  }
+
+  if (message.includes("TRANSFER_AMOUNT_MISMATCH")) {
+    return new TransferAmountMismatch();
+  }
+
+  if (message.includes("TRANSFER_AMOUNT_IN_REQUIRED")) {
+    return new TransferAmountInRequired();
+  }
+
+  if (message.includes("TRANSFER_DATE_IN_BEFORE_OUT")) {
+    return new TransferDateInBeforeOut();
+  }
+
+  if (message.includes("TRANSFER_ROW_USE_TRANSFER")) {
+    return new TransferRowUseTransfer();
   }
 
   if (message.includes("Undo the prepayment first")) {

@@ -1,6 +1,6 @@
 // Maestro runScript (GraalJS). Creates a financial account through the API.
 // Reads E2E_API_URL, TOKEN, NAME, ICON, OWNER_ID from env, plus the optional caller-scoped params
-// OWNER (undefined = USER), BALANCE_CENTS (the INITIAL balance, undefined = 0) and STATUS (undefined = ACTIVE).
+// OWNER (undefined = USER), BALANCE_CENTS (the INITIAL balance, undefined = 0), STATUS (undefined = ACTIVE) and CURRENCY (undefined = the API default).
 // Never logs the token.
 function param(value, fallback) {
   return typeof value !== "undefined" && value ? value : fallback;
@@ -11,6 +11,10 @@ var response = http.post(E2E_API_URL + "/v1/finance/accounts", {
     Authorization: "Bearer " + TOKEN,
   },
   body: JSON.stringify({
+    currency: param(
+      typeof CURRENCY === "undefined" ? undefined : CURRENCY,
+      undefined,
+    ),
     icon: ICON,
     initialBalance: Number(
       param(

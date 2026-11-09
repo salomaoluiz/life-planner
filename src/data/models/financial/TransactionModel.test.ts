@@ -246,3 +246,93 @@ describe("fromLeanJSON (spec 079)", () => {
     ).toBe("");
   });
 });
+
+describe("transfer rows (spec 098)", () => {
+  const item = {
+    accountId: "acc-1",
+    categoryId: "cat-out",
+    currency: "BRL",
+    date: "2026-11-04",
+    description: "Send",
+    id: "row-out",
+    owner: "USER",
+    ownerId: "owner-1",
+    paid: true,
+    transferId: "transfer-1",
+    type: "EXPENSE",
+    value: 500000,
+  };
+  const lookups = {
+    categories: {
+      "cat-out": { excludeFromTotals: true, name: "Transfer out" },
+    },
+    tags: {},
+    transfers: {
+      "transfer-1": {
+        amountIn: 92000,
+        amountOut: 500000,
+        currencyIn: "USD",
+        currencyOut: "BRL",
+        dateIn: "2026-11-06",
+        dateOut: "2026-11-04",
+        feeTransactionId: "row-fee",
+        fromAccountId: "acc-1",
+        toAccountId: "acc-2",
+      },
+    },
+  };
+
+  it("SHOULD join the transfer lookup with decimal amounts AND keep the ids", () => {
+    const model = TransactionModel.fromLeanJSON(item, lookups);
+
+    expect(model.transferId).toBe("transfer-1");
+    expect(model.transfer).toMatchObject({
+      amountIn: "920.00",
+      amountOut: "5000.00",
+      counterpartHidden: false,
+      currencyIn: "USD",
+      feeTransactionId: "row-fee",
+      fromAccountId: "acc-1",
+      toAccountId: "acc-2",
+    });
+  });
+
+  it("SHOULD flag a hidden counterpart AND leave its fields empty", () => {
+    const model = TransactionModel.fromLeanJSON(item, {
+      ...lookups,
+      transfers: {
+        "transfer-1": {
+          amountIn: null,
+          amountOut: 500000,
+          counterpartHidden: true,
+          currencyIn: "USD",
+          currencyOut: "BRL",
+          dateIn: "2026-11-06",
+          dateOut: "2026-11-04",
+          fromAccountId: "acc-1",
+        },
+      },
+    });
+
+    expect(model.transfer).toMatchObject({
+      amountIn: undefined,
+      counterpartHidden: true,
+      toAccountId: undefined,
+    });
+  });
+
+  it("SHOULD have no transfer WHEN the row is not one AND round-trip it through the cache JSON", () => {
+    expect(
+      TransactionModel.fromLeanJSON({ ...item, transferId: undefined }, lookups)
+        .transfer,
+    ).toBeUndefined();
+
+    const model = TransactionModel.fromLeanJSON(item, lookups);
+    const again = TransactionModel.fromJSON(
+      JSON.parse(JSON.stringify(model.toJSON())),
+    );
+
+    expect(again.transferId).toBe("transfer-1");
+    expect(again.transfer).toEqual(model.transfer);
+  });
+});

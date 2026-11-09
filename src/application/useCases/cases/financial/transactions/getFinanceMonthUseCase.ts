@@ -50,6 +50,7 @@ function getFinanceMonthUseCase(
               transaction,
               categories.find((c) => c.id === transaction.categoryId)?.name,
               accounts.find((a) => a.id === transaction.accountId)?.name,
+              accounts,
             ),
           ),
           projections: month.projections.map((item) =>

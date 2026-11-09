@@ -3,6 +3,7 @@ import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import { BALANCE_ADJUSTMENT } from "@domain/entities/financial/TransactionEntity";
 import { normalizeCategoryColor } from "@presentation/constants/categoryColors";
 import { decimalStringToCents } from "@utils/money";
+import { computeRate } from "@utils/transferRate";
 
 // Spec 061: a row whose create/edit ("saving") or delete ("deleting") request is still running.
 export type PendingState = "deleting" | "saving";
@@ -32,7 +33,9 @@ class TransactionUIModel {
     return (
       !this.dto.paid &&
       !this.dto.creditCardId &&
-      !this.dto.systemKey &&
+      (!this.dto.systemKey ||
+        this.transferSide === "IN" ||
+        this.transferSide === "OUT") &&
       !this.dto.isProjected
     );
   }
@@ -140,6 +143,29 @@ class TransactionUIModel {
     return !!this.dto.recurrenceId;
   }
 
+  // Spec 098: the row belongs to a transfer (out, in or fee).
+  get isTransfer() {
+    return !!this.dto.transferId;
+  }
+
+  // The out row of a transfer between currencies whose amount in is still to be informed (series occurrence).
+  get isTransferAmountPending() {
+    const transfer = this.dto.transfer;
+
+    return (
+      this.transferSide === "OUT" &&
+      !!transfer &&
+      !transfer.counterpartHidden &&
+      transfer.currencyIn !== transfer.currencyOut &&
+      transfer.amountIn === undefined
+    );
+  }
+
+  // The caller reads only one side of the transfer: the row is read-only ("Conta de outro dono").
+  get isTransferReadOnly() {
+    return this.dto.transfer?.counterpartHidden === true;
+  }
+
   // `YYYY-MM` of the day the row is shown on.
   get monthKey() {
     return this.dateKey.slice(0, 7);
@@ -172,6 +198,50 @@ class TransactionUIModel {
     }
 
     return [this.categoryName, this.accountName].filter(Boolean).join(" · ");
+  }
+
+  // The rate shown on the in row of a transfer between currencies: `{ value, currency }` reads "value <currency of the
+  // out side> per <unit>" (spec 098 FR 5).
+  get transferRate() {
+    const transfer = this.dto.transfer;
+
+    if (
+      this.transferSide !== "IN" ||
+      !transfer?.amountOut ||
+      !transfer.amountIn ||
+      transfer.currencyIn === transfer.currencyOut
+    ) {
+      return undefined;
+    }
+    const rate = computeRate(
+      decimalStringToCents(transfer.amountOut),
+      decimalStringToCents(transfer.amountIn),
+    );
+
+    return rate
+      ? {
+          // IN base: 1 <in> = value <out>; OUT base: 1 <out> = value <in>.
+          currency:
+            rate.base === "IN" ? transfer.currencyIn : transfer.currencyOut,
+          perCurrency:
+            rate.base === "IN" ? transfer.currencyOut : transfer.currencyIn,
+          value: rate.value,
+        }
+      : undefined;
+  }
+
+  get transferSide(): "FEE" | "IN" | "OUT" | undefined {
+    if (!this.dto.transferId) {
+      return undefined;
+    }
+    if (this.dto.systemKey === "TRANSFER_OUT") {
+      return "OUT";
+    }
+    if (this.dto.systemKey === "TRANSFER_IN") {
+      return "IN";
+    }
+
+    return this.dto.systemKey === "TRANSFER_FEE" ? "FEE" : undefined;
   }
 
   private cachedDate?: Date;

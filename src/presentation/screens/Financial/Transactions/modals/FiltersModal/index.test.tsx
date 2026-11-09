@@ -229,3 +229,18 @@ describe("hidePeriod (spec 046)", () => {
     ).toBeOnTheScreen();
   });
 });
+
+describe("transfers kind (spec 098)", () => {
+  it("SHOULD show the kind section AND apply transfers only when it is toggled", () => {
+    setup();
+
+    expect(screen.getByTestId(`${ids.filtersSection}.kind`)).toBeOnTheScreen();
+    fireEvent.press(screen.getByText("financial.transfers.filters.kind"));
+    fireEvent.press(screen.getByTestId(ids.filtersApply));
+
+    expect(params.onApply).toHaveBeenCalledWith({
+      ...EMPTY_FILTERS,
+      transfersOnly: true,
+    });
+  });
+});

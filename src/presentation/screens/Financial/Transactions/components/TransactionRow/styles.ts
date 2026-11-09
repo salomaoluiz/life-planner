@@ -12,6 +12,7 @@ function useStyles() {
     styles: useMemo(
       () =>
         StyleSheet.create({
+          amountColumn: { alignItems: "flex-end", gap: 2 },
           muted: { opacity: 0.6 },
           pending: { opacity: 0.5 },
           trailing: { alignItems: "center", flexDirection: "row", gap },

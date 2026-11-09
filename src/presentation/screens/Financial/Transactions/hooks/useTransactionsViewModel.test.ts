@@ -363,6 +363,28 @@ it("SHOULD open the form to add and the edit sheet for a row", () => {
   );
 });
 
+it("SHOULD open the transfer of a transfer row AND show the read-only notice WHEN the other side is hidden (spec 098)", () => {
+  givenData([]);
+  const { result } = setup();
+  function row(counterpartHidden: boolean) {
+    return {
+      dto: { transferId: "transfer-1" },
+      isTransferReadOnly: counterpartHidden,
+    } as never;
+  }
+
+  act(() => result.current.onTransferPress(row(false)));
+  expect(modalNavigation.openModal).toHaveBeenCalledWith(
+    "add_new_transaction",
+    { transferId: "transfer-1" },
+  );
+
+  modalNavigation.openModal.mockClear();
+  act(() => result.current.onTransferPress(row(true)));
+  expect(modalNavigation.openModal).not.toHaveBeenCalled();
+  expect(result.current.toastVisible).toBe(true);
+});
+
 it("SHOULD refetch only the stale queries WHEN the screen is focused", () => {
   givenData([]);
   spies.isFocused.mockReturnValue(true);

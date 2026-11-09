@@ -18,6 +18,7 @@ type ColumnTarget =
   | "paid"
   | "signedAmount"
   | "tags"
+  | "transferId"
   | "type";
 
 type CsvSeparator = "," | ";" | "\t";
@@ -53,6 +54,8 @@ interface ImportRowPayload {
   // Spec 048: the account an early payment or an invoice payment is paid from.
   paidFromAccountId?: string;
   tags?: string[];
+  // Spec 098: the `Transfer ID` column; groups the out, in and fee rows of one transfer.
+  transferId?: string;
   type: RowType;
   value: number;
 }

@@ -24,6 +24,12 @@ import {
   RefundOverPurchase,
   TagNameInUse,
   TransactionNotProjected,
+  TransferAccountArchived,
+  TransferAmountInRequired,
+  TransferAmountMismatch,
+  TransferDateInBeforeOut,
+  TransferRowUseTransfer,
+  TransferSameAccount,
 } from "@domain/entities/errors";
 import { TranslationKeys } from "@presentation/i18n/types";
 
@@ -71,6 +77,30 @@ function getFinancialErrorMessageKey(
 
   if (error instanceof InvoiceIsPaid) {
     return "financial.errors.invoicePaid";
+  }
+
+  if (error instanceof TransferSameAccount) {
+    return "financial.errors.transferSameAccount";
+  }
+
+  if (error instanceof TransferAccountArchived) {
+    return "financial.errors.transferAccountArchived";
+  }
+
+  if (error instanceof TransferAmountMismatch) {
+    return "financial.errors.transferAmountMismatch";
+  }
+
+  if (error instanceof TransferAmountInRequired) {
+    return "financial.errors.transferAmountInRequired";
+  }
+
+  if (error instanceof TransferDateInBeforeOut) {
+    return "financial.errors.transferDateInBeforeOut";
+  }
+
+  if (error instanceof TransferRowUseTransfer) {
+    return "financial.errors.transferRowUseTransfer";
   }
 
   if (error instanceof InvoiceNotAvailable) {

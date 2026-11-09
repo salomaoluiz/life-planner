@@ -47,3 +47,16 @@ describe("appendFilterParams", () => {
     expect(query.toString()).toBe("");
   });
 });
+
+describe("kind filter (spec 098)", () => {
+  it("SHOULD append kind=TRANSFER only when the endpoint understands it", () => {
+    const allowed = new URLSearchParams();
+    const denied = new URLSearchParams();
+
+    appendFilterParams(allowed, { kind: "TRANSFER" }, ["kind"]);
+    appendFilterParams(denied, { kind: "TRANSFER" }, ["q"]);
+
+    expect(allowed.toString()).toBe("kind=TRANSFER");
+    expect(denied.toString()).toBe("");
+  });
+});

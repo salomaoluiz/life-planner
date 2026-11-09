@@ -39,6 +39,7 @@ function getFilteredTransactionsUseCase(
             transaction,
             category?.name,
             account?.name,
+            accounts,
           );
         });
       } catch (error) {
