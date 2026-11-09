@@ -113,6 +113,18 @@ const repositoriesMocks: Repositories = {
       getUpcoming: jest.fn(),
     },
   },
+  investmentRepository: {
+    createAsset: jest.fn(),
+    createOperation: jest.fn(),
+    deleteAsset: jest.fn(),
+    deleteOperation: jest.fn(),
+    deleteValuation: jest.fn(),
+    getAsset: jest.fn(),
+    getAssets: jest.fn(),
+    updateAsset: jest.fn(),
+    updateOperation: jest.fn(),
+    upsertValuation: jest.fn(),
+  },
   loginRepository: {
     loginWithEmail: jest.fn(),
     logout: jest.fn(),

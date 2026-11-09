@@ -4,6 +4,7 @@ import * as familyUseCases from "./family";
 import * as familyMemberUseCases from "./familyMember";
 import * as financialUseCases from "./financial";
 import * as homeUseCases from "./home";
+import * as investmentUseCases from "./investment";
 import * as stockUseCases from "./stock";
 import * as userUseCases from "./user";
 import * as versionUseCases from "./version";
@@ -17,6 +18,7 @@ const listUseCases = {
   ...familyMemberUseCases,
   ...stockUseCases,
   ...financialUseCases,
+  ...investmentUseCases,
   ...versionUseCases,
 };
 

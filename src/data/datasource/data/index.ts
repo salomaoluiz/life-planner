@@ -2,6 +2,7 @@ import * as auth from "./auth";
 import * as families from "./families";
 import * as familyMembers from "./familyMember";
 import * as financial from "./financial";
+import * as investment from "./investment";
 import * as storage from "./storage";
 import * as user from "./user";
 import * as version from "./version";
@@ -12,6 +13,7 @@ const listDatasources = {
   ...families,
   ...familyMembers,
   ...financial,
+  ...investment,
   ...storage,
   ...version,
 };

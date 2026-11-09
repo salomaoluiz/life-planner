@@ -4,6 +4,7 @@ import * as configs from "./configs";
 import * as family from "./family";
 import * as familyMember from "./familyMember";
 import * as financial from "./financial";
+import * as investment from "./investment";
 import * as stock from "./stock";
 import * as user from "./user";
 import * as version from "./version";
@@ -15,6 +16,7 @@ const listRepositories = {
   ...family,
   ...familyMember,
   ...financial,
+  ...investment,
   ...stock,
   ...user,
   ...version,
