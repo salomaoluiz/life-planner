@@ -1,5 +1,7 @@
 # Family Module Context
 
+> Screens and modals render through `AdaptiveLayout` (spec 100): each folder has an `index.tsx` entry (calls the ViewModel once) and `views/Wide.tsx` (the View). View paths below point to `views/Wide.tsx`.
+
 ## Domain
 
 ```yaml
@@ -98,7 +100,7 @@ datasources:
 ```yaml
 screens:
   Family:
-    path: src/presentation/screens/Family/index.tsx
+    path: src/presentation/screens/Family/views/Wide.tsx
     note: View; own ScreenHeader (new-family IconButton), list of cards, loading / error / empty states
 hooks:
   - name: useFamilyViewModel
@@ -120,10 +122,10 @@ components:
     path: src/presentation/screens/Family/components/NoticeSheet/index.tsx
 modals:
   - name: AddNewFamily
-    path: src/presentation/screens/Family/modals/AddNewFamily/index.tsx
+    path: src/presentation/screens/Family/modals/AddNewFamily/views/Wide.tsx
     note: useAddNewFamilyViewModel, name 1-50 chars, counter from 40
   - name: AddNewFamilyMember
-    path: src/presentation/screens/Family/modals/AddNewFamilyMember/index.tsx
+    path: src/presentation/screens/Family/modals/AddNewFamilyMember/views/Wide.tsx
     note: see familyMember.md
 models:
   - name: FamilyViewModel

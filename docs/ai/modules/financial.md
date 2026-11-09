@@ -1,5 +1,7 @@
 # Financial Module Context
 
+> Screens and modals render through `AdaptiveLayout` (spec 100): each folder has an `index.tsx` entry (calls the ViewModel once) and `views/Wide.tsx` (the View). View paths below point to `views/Wide.tsx`.
+
 ## Domain
 
 ```yaml
@@ -243,12 +245,12 @@ All paths below are under `src/presentation/screens/Financial/` unless noted. Fi
 
 ```yaml
 layout:
-  SectionPicker: SectionPicker/index.tsx (+ hooks/useSectionPickerViewModel.ts, testIds.ts) # BottomSheet (modal route financial/section_picker) with one ListItem per FINANCIAL_SECTIONS entry (spec 044)
+  SectionPicker: SectionPicker/views/Wide.tsx (+ hooks/useSectionPickerViewModel.ts, testIds.ts) # BottomSheet (modal route financial/section_picker) with one ListItem per FINANCIAL_SECTIONS entry (spec 044)
   Layout: Layout/index.tsx # FinancialLayout: Screen, header (overline + section title, pressable below `expanded`), 720 column; sections render plain Views
   files: [Layout/headerActions.tsx, Layout/hooks/useFinancialLayoutViewModel.ts, Layout/models/financialSections.ts, Layout/styles.ts]
 
 Transactions:
-  view: Transactions/index.tsx (+ styles.ts) # header: month switcher, scope chips (owner), summary card, type SegmentedControl; then FlashList of day groups (spec 025)
+  view: Transactions/views/Wide.tsx (+ styles.ts) # header: month switcher, scope chips (owner), summary card, type SegmentedControl; then FlashList of day groups (spec 025)
   hooks: Transactions/hooks/useTransactionsViewModel.ts (+ index.ts, fetchTransactions, fetchSummary)
   cacheKeys: `financeKeys` in `src/application/queryKeys/financeKeys.ts` (spec 076: every finance query key under `["finance", resource, ...]`; `list` is the composed shape a list screen caches, `raw` the use-case output the forms cache; `invalidationRoots()` is the prefix set of `invalidateFinanceData`)
   models: [Transactions/models/TransactionUIModel.ts, Transactions/models/transactionList.ts]
@@ -260,7 +262,7 @@ Transactions:
     - components/{CategoryChips,CategoryPickerSheet,MissingRecordHint}/index.tsx
 
 Categories:
-  view: Categories/index.tsx (+ styles.ts) # type SegmentedControl, owner ChipGroup, FlashList of TreeItem rows
+  view: Categories/views/Wide.tsx (+ styles.ts) # type SegmentedControl, owner ChipGroup, FlashList of TreeItem rows
   hooks: Categories/hooks/useCategoriesViewModel.ts (+ index.ts, fetchCategories)
   models: [Categories/models/CategoryRowUIModel.ts, Categories/models/categoryEntries.ts] # entries = active tree, then the collapsed "Archived (N)" group (spec 041)
   form: Categories/modals/NewCategoryModal/
@@ -270,7 +272,7 @@ Categories:
     - components/{CustomColorSheet,IconPickerSheet}/index.tsx # the archive / reactivate action sits at the end of the form body; the blockers use the shared `@components` PendingItemsDialog (spec 041, reused by families in spec 042)
 
 Accounts:
-  view: Accounts/index.tsx (+ styles.ts) # total, owner chips, active list, collapsible archived section
+  view: Accounts/views/Wide.tsx (+ styles.ts) # total, owner chips, active list, collapsible archived section
   hooks: Accounts/hooks/useAccountsViewModel.ts (+ index.ts, fetchAccounts)
   models: [Accounts/models/AccountUIModel.ts, Accounts/models/accountList.ts]
   form: Accounts/modals/NewAccountModal/
@@ -279,7 +281,7 @@ Accounts:
     - models/{accountFormState.ts,NewAccountUIModel.ts}
 
 Cards (spec 026):
-  view: Cards/index.tsx (+ styles.ts, testIds.ts) # aggregate Card (total limit, ProgressBar, used/available MetricBlocks), owner chips, CreditCardTile carousel, selected-card header with Edit, Open|Closed SegmentedControl, invoice rows, collapsible Archived list
+  view: Cards/views/Wide.tsx (+ styles.ts, testIds.ts) # aggregate Card (total limit, ProgressBar, used/available MetricBlocks), owner chips, CreditCardTile carousel, selected-card header with Edit, Open|Closed SegmentedControl, invoice rows, collapsible Archived list
   hooks: Cards/hooks/useCardsViewModel.ts (fetchCards: owners + overview + list)
   models: Cards/models/cardList.ts (aggregateOf follows the owner filter, buildCardEntries, formatDayMonth, formatReferenceMonth)
   components: Cards/components/InvoiceRow/
