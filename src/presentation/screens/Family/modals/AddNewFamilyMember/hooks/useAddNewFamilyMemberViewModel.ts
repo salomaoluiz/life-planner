@@ -14,6 +14,12 @@ import { validateEmail } from "@utils/authValidation";
 
 const COPIED_MS = 2000;
 
+export type AddNewFamilyMemberVM = ReturnType<
+  typeof useAddNewFamilyMemberViewModel
+>;
+
+export default useAddNewFamilyMemberViewModel;
+
 function useAddNewFamilyMemberViewModel() {
   const { closeModal } = useModalNavigation();
   const { familyId, familyName } = useLocalSearchParams<{
@@ -124,5 +130,3 @@ function useAddNewFamilyMemberViewModel() {
     shareAvailable: isShareAvailable(),
   };
 }
-
-export default useAddNewFamilyMemberViewModel;

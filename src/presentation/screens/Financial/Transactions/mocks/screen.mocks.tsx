@@ -13,7 +13,7 @@ import { ListEntry } from "../models/transactionList";
 import TransactionUIModel from "../models/TransactionUIModel";
 import { categories, makeTransactionDTO } from "./index.mocks";
 
-jest.mock("../hooks");
+jest.mock("../hooks/useTransactionsViewModel");
 jest.mock("../hooks/useAdjustmentSheet");
 jest.mock("../hooks/usePayTransaction");
 jest.mock("../hooks/useFilterOptions", () => ({

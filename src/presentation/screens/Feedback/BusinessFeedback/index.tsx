@@ -1,107 +1,12 @@
-import { useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
-import { View } from "react-native";
+import { AdaptiveLayout } from "@components";
 
-import { Button, Text } from "@components";
-import Icon, { IconButton } from "@components/Icon";
-import { useTranslation } from "@presentation/i18n";
-import handleAction from "@screens/Feedback/BusinessFeedback/actions";
-
-import getStyles from "./styles";
-import { FeedbackType, RouteDecryptedProps } from "./types";
-import { decodeRouteParams } from "./utils";
+import { useBusinessFeedbackViewModel } from "./hooks";
+import { Wide } from "./views";
 
 function BusinessFeedback() {
-  const { t } = useTranslation();
-  const [params, setParams] = useState<null | RouteDecryptedProps>(null);
-  const { styles, theme } = getStyles();
-  const routeParams = useLocalSearchParams<{ feedback: string }>();
+  const vm = useBusinessFeedbackViewModel();
 
-  async function decodeParams() {
-    const decoded = await decodeRouteParams(routeParams);
-    setParams(decoded);
-  }
-
-  useEffect(() => {
-    if (routeParams) {
-      decodeParams();
-    }
-  }, []);
-
-  if (!params) {
-    return (
-      <View>
-        <Text.Title value={"Loading..."} />
-      </View>
-    );
-  }
-
-  async function onPrimaryButtonPress() {
-    if (params) {
-      await handleAction(params.primaryButton);
-    }
-  }
-
-  function getIconName() {
-    switch (params!.type) {
-      case FeedbackType.Error:
-        return "close-circle";
-      case FeedbackType.Information:
-        return "information";
-      case FeedbackType.Success:
-        return "check-circle";
-      case FeedbackType.Warning:
-        return "alert";
-    }
-  }
-
-  function getIconColor() {
-    switch (params!.type) {
-      case FeedbackType.Error:
-        return theme.colors.expense;
-      case FeedbackType.Information:
-        return theme.colors.accent;
-      case FeedbackType.Success:
-        return theme.colors.income;
-      case FeedbackType.Warning:
-        return theme.colors.warning;
-    }
-  }
-
-  function onCloseButtonPress() {
-    handleAction(params!.closeButton);
-  }
-
-  return (
-    <View style={styles.container}>
-      <View style={styles.closeContainer}>
-        <IconButton
-          accessibilityLabel={t("common.actions.close")}
-          color={theme.colors.textPrimary}
-          name={"close-circle"}
-          onPress={onCloseButtonPress}
-          size={theme.sizes.spacing.xl}
-        />
-      </View>
-      <View style={styles.iconContainer}>
-        <Icon
-          color={getIconColor()}
-          name={getIconName()}
-          size={theme.sizes.spacing.xxxl}
-        />
-      </View>
-      <View style={styles.headerContainer}>
-        <Text.Title value={params.title} />
-        <Text.Body value={params.message} />
-      </View>
-      <View style={styles.buttonsContainer}>
-        <Button.Filled
-          label={params.primaryButton.label}
-          onPress={onPrimaryButtonPress}
-        />
-      </View>
-    </View>
-  );
+  return <AdaptiveLayout vm={vm} wide={Wide} />;
 }
 
 export default BusinessFeedback;

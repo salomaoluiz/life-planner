@@ -16,6 +16,8 @@ import {
   validateNewPassword,
 } from "@utils/authValidation";
 
+export type SignupVM = ReturnType<typeof useSignupViewModel>;
+
 interface SubmitParams {
   email: string;
   name: string;
@@ -43,6 +45,8 @@ async function submitSignUp(params: SubmitParams): Promise<SubmitResult> {
     return { errorKey };
   }
 }
+
+export default useSignupViewModel;
 
 function useSignupViewModel() {
   const { t } = useTranslation();
@@ -168,5 +172,3 @@ function useSignupViewModel() {
     refs,
   };
 }
-
-export default useSignupViewModel;

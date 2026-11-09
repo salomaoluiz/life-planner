@@ -50,6 +50,8 @@ import useOverviewFilters from "./useOverviewFilters";
 
 export type OverviewViewModel = ReturnType<typeof useOverviewViewModel>;
 
+export type OverviewVM = ReturnType<typeof useOverviewViewModel>;
+
 export interface ParentCategory {
   id: string;
   name: string;
@@ -57,6 +59,7 @@ export interface ParentCategory {
   percent: string;
   value: number;
 }
+export default useOverviewViewModel;
 
 function useOverviewViewModel() {
   const { openModal } = useModalNavigation();
@@ -401,4 +404,3 @@ function useOverviewViewModel() {
     type,
   };
 }
-export default useOverviewViewModel;

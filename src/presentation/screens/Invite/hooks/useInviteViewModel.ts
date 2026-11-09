@@ -19,11 +19,15 @@ import InviteUIModel from "../models/InviteUIModel";
 
 const HOME = "/(app)/(tabs)/index";
 
+export type InviteVM = ReturnType<typeof useInviteViewModel>;
+
 async function fetchInvite(token: string) {
   const dto = await useCases.getFamilyInviteUseCase.execute(token);
 
   return new InviteUIModel(dto);
 }
+
+export default useInviteViewModel;
 
 function useInviteViewModel() {
   const params = useLocalSearchParams<{ token?: string | string[] }>();
@@ -145,5 +149,3 @@ function useInviteViewModel() {
     status: getStatus(),
   };
 }
-
-export default useInviteViewModel;

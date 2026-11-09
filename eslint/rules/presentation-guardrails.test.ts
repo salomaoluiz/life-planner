@@ -19,7 +19,7 @@ const view = "src/presentation/screens/Fake/Thing/views/Wide.tsx";
 const entry = "src/presentation/screens/Fake/Thing/index.tsx";
 const block = "src/presentation/screens/Fake/Thing/Block.tsx";
 const shell = "src/presentation/screens/Financial/Layout/hooks/useX.ts";
-const legacy = "src/presentation/screens/Financial/Accounts/index.tsx";
+const legacy = "src/presentation/screens/Financial/Accounts/views/Wide.tsx";
 const viewImports = [
   'import { useCases } from "@application/useCases";',
   'import { useQuery } from "@infrastructure/fetcher";',

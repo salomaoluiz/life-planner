@@ -1,5 +1,7 @@
 # Stock Module Context
 
+> Screens and modals render through `AdaptiveLayout` (spec 100): each folder has an `index.tsx` entry (calls the ViewModel once) and `views/Wide.tsx` (the View). View paths below point to `views/Wide.tsx`.
+
 ## Domain
 
 ```yaml
@@ -84,7 +86,7 @@ models:
 ```yaml
 screens:
   Stock (list):
-    path: src/presentation/screens/Stock/index.tsx
+    path: src/presentation/screens/Stock/views/Wide.tsx
     composition: Screen + FlashList (ScreenHeader, SearchField, ChipGroup filters, grouped rows with ListItem/IconTile/Badge); sort sheet; states Skeleton/ErrorState/EmptyState/no-results; route param `/stock?filter=EXPIRING|EXPIRED|ALL` preselects the filter; toolbar add button; testIDs in `Stock/testIds.ts` (`stock.list.*`), form ids in `NewStockItemModal/testIds.ts` (`stock.item-form.*`), details ids in `StockItemDetails/testIds.ts` (`stock.item-details.*`)
   Home: see home.md
 
@@ -95,7 +97,7 @@ containers:
 
 modals:
   - name: NewStockItemModal
-    path: src/presentation/screens/Stock/modals/NewStockItemModal/index.tsx
+    path: src/presentation/screens/Stock/modals/NewStockItemModal/views/Wide.tsx
     behavior: BottomSheet modal `add_new_stock_item` (URL `/stock/add_new_stock_item` from Stock) (optional `ownerId` param preselects the owner); "More details" collapsed; quantity is digits-only (number-pad, >= 1); discard confirm when dirty
 
 view_models:

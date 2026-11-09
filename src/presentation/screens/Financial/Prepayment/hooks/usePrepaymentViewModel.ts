@@ -20,10 +20,14 @@ import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import { resultingTotal, summaryOf, validate } from "../models/prepaymentState";
 
+export type PrepaymentVM = ReturnType<typeof usePrepaymentViewModel>;
+
 // A prepayment moves installments between invoices: refresh everything that shows them (spec 032).
 function invalidateAfterWrite() {
   void invalidateFinanceData();
 }
+
+export default usePrepaymentViewModel;
 
 function usePrepaymentViewModel() {
   const { closeModal } = useModalNavigation();
@@ -137,5 +141,3 @@ function usePrepaymentViewModel() {
     targetMonth: resolvedMonth,
   };
 }
-
-export default usePrepaymentViewModel;

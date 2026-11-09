@@ -1,5 +1,7 @@
 # Home Module Context
 
+> Screens and modals render through `AdaptiveLayout` (spec 100): each folder has an `index.tsx` entry (calls the ViewModel once) and `views/Wide.tsx` (the View). View paths below point to `views/Wide.tsx`.
+
 ## Application
 
 ```yaml
@@ -41,7 +43,7 @@ rules:
 
 ```yaml
 screen:
-  path: src/presentation/screens/Home/index.tsx
+  path: src/presentation/screens/Home/views/Wide.tsx
   testIds: src/presentation/screens/Home/testIds.ts (screen id `home.home.screen`, section ids `home.finance.section` / `home.stock.section`, used by E2E flows)
   layout: Screen (maxWidth 960, pull to refresh) with two sections, Finance then Stock (spec 062). Each section is two columns on the `expanded` breakpoint (Finance = balance card + lowest-balance card | upcoming card; Stock = summary card | attention list card), stacked otherwise.
   uses: ScreenHeader (with ProfileButton), ChipGroup (owner filter), Section, Skeleton, kit cards, ScrollBox (the upcoming list scrolls inside its card, 440 px on web / 320 px compact)

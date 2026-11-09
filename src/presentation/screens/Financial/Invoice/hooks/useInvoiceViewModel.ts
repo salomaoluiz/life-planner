@@ -18,6 +18,8 @@ import TransactionUIModel from "@screens/Financial/Transactions/models/Transacti
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
+export type InvoiceVM = ReturnType<typeof useInvoiceViewModel>;
+
 type PayMethod = "ACCOUNT" | "EXTERNAL";
 
 // Everything the invoice, the balances and the lists show changes with a payment (spec 029 FR 19-21).
@@ -40,6 +42,8 @@ function todayDate() {
 function toMonthKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 }
+
+export default useInvoiceViewModel;
 
 function useInvoiceViewModel() {
   const { closeModal, replaceModal } = useModalNavigation();
@@ -316,5 +320,3 @@ function useInvoiceViewModel() {
     projectedPurchases: data?.projectedPurchases ?? [],
   };
 }
-
-export default useInvoiceViewModel;

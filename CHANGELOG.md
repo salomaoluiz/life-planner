@@ -3,6 +3,12 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.14.2] - 2026-11-09
+
+### Changed
+
+- Internal: every screen and modal uses the adaptive layout container (spec 100).
+
 ## [1.14.1] - 2026-11-09
 
 ### Changed

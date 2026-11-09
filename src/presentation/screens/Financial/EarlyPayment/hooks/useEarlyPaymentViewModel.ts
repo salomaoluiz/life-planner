@@ -20,6 +20,8 @@ import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import { leftToPay, PayMethod, validate } from "../models/earlyPaymentState";
 
+export type EarlyPaymentVM = ReturnType<typeof useEarlyPaymentViewModel>;
+
 type EarlyPaymentParams = {
   creditCardId: string;
   // Edit mode when set; the stored payment is read from `invoiceMonth`'s invoice.
@@ -46,6 +48,9 @@ function parseDate(value: string) {
 
   return new Date(year, month - 1, day);
 }
+
+export type { EarlyPaymentParams };
+export default useEarlyPaymentViewModel;
 
 function useEarlyPaymentViewModel() {
   const { closeModal } = useModalNavigation();
@@ -248,6 +253,3 @@ function useEarlyPaymentViewModel() {
     remainingCents: Math.max(0, leftCents - amountCents),
   };
 }
-
-export type { EarlyPaymentParams };
-export default useEarlyPaymentViewModel;

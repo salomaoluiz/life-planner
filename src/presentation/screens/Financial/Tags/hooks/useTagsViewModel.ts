@@ -16,6 +16,8 @@ import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import { buildTagRows, tagInActiveScope, tagInScope } from "../models/tagRows";
 
+export type TagsVM = ReturnType<typeof useTagsViewModel>;
+
 interface TagsData {
   owners: OwnerDTO[];
   tags: TagDTO[];
@@ -28,6 +30,9 @@ async function fetchTags(owners: OwnerDTO[]): Promise<TagsData> {
 
   return { owners, tags };
 }
+
+export { fetchTags };
+export default useTagsViewModel;
 
 function useTagsViewModel() {
   const isFocused = useIsFocused();
@@ -80,6 +85,3 @@ function useTagsViewModel() {
     toastVisible: scope.toastVisible,
   };
 }
-
-export { fetchTags };
-export default useTagsViewModel;

@@ -14,11 +14,15 @@ import {
 import { clearPayRequest, getPayRequest } from "../models/payRequest";
 import submitPayment from "./submitPayment";
 
+export type ConfirmPaymentVM = ReturnType<typeof useConfirmPaymentViewModel>;
+
 function startOfToday() {
   const now = new Date();
 
   return new Date(now.getFullYear(), now.getMonth(), now.getDate());
 }
+
+export default useConfirmPaymentViewModel;
 
 // Spec 097: confirms ("Efetivar" / "Receber") an unpaid account row with the value and date really paid.
 function useConfirmPaymentViewModel() {
@@ -101,5 +105,3 @@ function useConfirmPaymentViewModel() {
     transactionDate,
   };
 }
-
-export default useConfirmPaymentViewModel;

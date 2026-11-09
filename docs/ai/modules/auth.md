@@ -1,5 +1,7 @@
 # Auth Module Context
 
+> Screens and modals render through `AdaptiveLayout` (spec 100): each folder has an `index.tsx` entry (calls the ViewModel once) and `views/Wide.tsx` (the View). View paths below point to `views/Wide.tsx`.
+
 Email + password against the NestJS API (`../life-planner-back`). Google Sign-In and `supabase.auth.*` were removed (spec 002). Sessions (spec 027): login also returns a rotating refresh token; the app renews the access token on 401 and on app open, so a user who opens the app at least every 2 days stays logged in. Only when the refresh is refused (401: idle > 2 days, copied token, deleted user) the session-expired flow sends the user back to `/login`.
 
 ## Domain
@@ -82,8 +84,8 @@ wrappers:
 ```yaml
 routes: /login (app/login.tsx), /signup (app/signup.tsx) — both public; a logged user is redirected to "/"
 screens:
-  Login: src/presentation/screens/Login (testIds.ts, index.tsx View, hooks/useLoginViewModel.ts, utils/mapAuthError.ts)
-  Signup: src/presentation/screens/Signup (testIds.ts, index.tsx View, hooks/useSignupViewModel.ts)
+  Login: src/presentation/screens/Login (testIds.ts, index.tsx entry, views/Wide.tsx View, hooks/useLoginViewModel.ts, utils/mapAuthError.ts)
+  Signup: src/presentation/screens/Signup (testIds.ts, index.tsx entry, views/Wide.tsx View, hooks/useSignupViewModel.ts)
 validation: src/utils/authValidation.ts (returns i18n keys)
 copy: i18n keys auth.*, login.*, signup.* (en-US + pt-BR)
 ```

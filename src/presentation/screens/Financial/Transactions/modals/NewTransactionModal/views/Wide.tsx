@@ -1,0 +1,812 @@
+import { View } from "react-native";
+
+import {
+  AdaptiveViewProps,
+  AmountInput,
+  AutocompleteField,
+  BottomSheet,
+  Button,
+  ChipGroup,
+  ConfirmDialog,
+  DateField,
+  ErrorState,
+  FormColumns,
+  IconTile,
+  InvoiceField,
+  RadioGroup,
+  SegmentedControl,
+  SelectField,
+  Switch,
+  SwitchRow,
+  Text,
+  TextField,
+  Toast,
+  ToneDot,
+} from "@components";
+import { formatAmount } from "@components/AmountText/formatAmount";
+import Skeleton from "@components/Skeleton";
+import { useLocaleTag, useTranslation } from "@presentation/i18n";
+import pluralKey from "@presentation/i18n/pluralKey";
+import { TranslationKeys } from "@presentation/i18n/types";
+import { useBreakpoint } from "@presentation/theme";
+import { translateChoices } from "@screens/Financial/models/ownerOptions";
+import { RECURRENCE_FREQUENCIES } from "@screens/Financial/models/recurrence";
+import { toInvoiceFieldOption } from "@screens/Financial/utils/invoiceFieldOption";
+
+import CategoryChips from "../components/CategoryChips";
+import CategoryPickerSheet from "../components/CategoryPickerSheet";
+import MissingRecordHint from "../components/MissingRecordHint";
+import NotesField from "../components/NotesField";
+import RecurrenceDeleteSheet from "../components/RecurrenceDeleteSheet";
+import { NewTransactionVM } from "../hooks";
+import { MAX_TAG_NAME, MAX_TAGS } from "../models/transactionFormState";
+import useStyles from "../styles";
+import transactionFormTestIds from "../testIds";
+
+const SKELETON_ROWS = [0, 1, 2];
+// Compact: the notice floats just above the two stacked footer buttons; wide: near the bottom of the window.
+const TOAST_BOTTOM = { compact: 176, wide: 32 };
+
+function monthDateOf(month: string) {
+  const [year, value] = month.split("-").map(Number);
+
+  return new Date(year, value - 1, 1);
+}
+
+function monthName(month: Date, localeTag: string) {
+  return new Intl.DateTimeFormat(localeTag, { month: "long" }).format(month);
+}
+
+function monthYearName(month: Date, localeTag: string) {
+  return new Intl.DateTimeFormat(localeTag, {
+    month: "long",
+    year: "numeric",
+  }).format(month);
+}
+
+function Wide({ vm }: AdaptiveViewProps<NewTransactionVM>) {
+  const { styles } = useStyles();
+  const { t } = useTranslation();
+  const localeTag = useLocaleTag();
+  const isCard = vm.payWith === "CARD";
+  const toastBottom =
+    useBreakpoint() === "compact" ? TOAST_BOTTOM.compact : TOAST_BOTTOM.wide;
+
+  function renderPreview(installments: NonNullable<typeof vm.installments>) {
+    const { first, hasRemainder, others } = installments.preview!;
+
+    if (!hasRemainder) {
+      return t("financial.transactions.form.installmentsPreview", {
+        n: installments.count,
+        value: formatAmount(first, localeTag, vm.currency),
+      });
+    }
+
+    return `${t("financial.transactions.form.installmentsPreviewFirst", {
+      value: formatAmount(first, localeTag, vm.currency),
+    })} + ${t("financial.transactions.form.installmentsPreview", {
+      n: installments.count - 1,
+      value: formatAmount(others, localeTag, vm.currency),
+    })}`;
+  }
+
+  function lockedCaption(key?: TranslationKeys) {
+    return key ? <Text.Caption tone={"secondary"} value={t(key)} /> : null;
+  }
+
+  function renderRepeatPreview(
+    preview: NonNullable<typeof vm.recurrence.preview>,
+  ) {
+    if (preview.kind === "forever") {
+      return t("financial.transactions.form.repeatForever", {
+        frequency: t(
+          `financial.recurrence.frequencyEvery.${preview.frequency}`,
+        ),
+      });
+    }
+    if (preview.kind === "times") {
+      return t("financial.transactions.form.repeatPreview", {
+        date: new Intl.DateTimeFormat(localeTag, {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        }).format(preview.last),
+        n: preview.count,
+      });
+    }
+
+    return "";
+  }
+
+  function err(key?: TranslationKeys) {
+    return key ? t(key) : undefined;
+  }
+
+  function renderBody() {
+    if (vm.isNotFound) {
+      return (
+        <ErrorState
+          message={t("financial.errors.notFound")}
+          onRetry={vm.onClose}
+          retryLabel={t("common.actions.close")}
+        />
+      );
+    }
+
+    if (vm.isLoading) {
+      return (
+        <View>
+          {SKELETON_ROWS.map((row) => (
+            <Skeleton.ListItem key={row} testID={"transaction-form-skeleton"} />
+          ))}
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.form}>
+        <FormColumns
+          left={
+            <>
+              {vm.recurrence.isRecurring ? (
+                <RadioGroup
+                  accessibilityLabel={t("financial.recurrence.editScope")}
+                  onChange={vm.onScopeChange}
+                  options={[
+                    {
+                      label: t("financial.recurrence.scope.onlyThis"),
+                      value: "ONLY_THIS",
+                    },
+                    {
+                      label: t("financial.recurrence.scope.thisAndNext"),
+                      value: "THIS_AND_NEXT",
+                    },
+                    {
+                      label: t("financial.recurrence.scope.all"),
+                      value: "ALL",
+                    },
+                  ]}
+                  testID={transactionFormTestIds.recurrenceEditScope}
+                  value={vm.recurrence.scope}
+                />
+              ) : null}
+              {vm.hasCards ? (
+                <SegmentedControl
+                  accessibilityLabel={t("financial.transactions.form.payWith")}
+                  disabled={vm.recurrence.isRecurring}
+                  onChange={vm.onPayWithChange}
+                  options={[
+                    {
+                      label: t("financial.transactions.form.payWithAccount"),
+                      value: "ACCOUNT",
+                    },
+                    {
+                      label: t("financial.transactions.form.payWithCard"),
+                      value: "CARD",
+                    },
+                  ]}
+                  testID={transactionFormTestIds.payWith}
+                  value={vm.payWith}
+                />
+              ) : null}
+              {isCard ? null : (
+                <SegmentedControl
+                  accessibilityLabel={t("financial.categories.type")}
+                  disabled={vm.recurrence.isRecurring}
+                  onChange={(value) =>
+                    value === "TRANSFER"
+                      ? vm.onTransferType()
+                      : vm.onTypeChange(value as typeof vm.type)
+                  }
+                  options={[
+                    ...vm.typeOptions.map((option) => ({
+                      label: t(option.labelKey),
+                      tone:
+                        option.value === "EXPENSE"
+                          ? ("expense" as const)
+                          : ("income" as const),
+                      value: option.value as string,
+                    })),
+                    // A transfer is only created here; editing a transaction keeps its type.
+                    ...(vm.isEditing
+                      ? []
+                      : [
+                          {
+                            label: t("financial.transfers.type"),
+                            value: "TRANSFER",
+                          },
+                        ]),
+                  ]}
+                  testID={transactionFormTestIds.type}
+                  value={vm.type}
+                />
+              )}
+              <AmountInput
+                currency={vm.currency}
+                error={err(vm.amountError)}
+                inputRef={vm.amountInputRef}
+                label={t(amountLabelKey)}
+                onChange={vm.onAmountChange}
+                testID={transactionFormTestIds.amountInput}
+                tone={vm.typeTone}
+                value={vm.amountCents}
+              />
+              <AutocompleteField
+                error={err(vm.descriptionError)}
+                label={t("financial.transactions.form.description")}
+                maxLength={200}
+                maxSuggestions={6}
+                mode={"text"}
+                onChangeText={vm.onDescriptionChange}
+                onSelect={(suggestion) => vm.onDescriptionSelect(suggestion.id)}
+                placeholder={t(
+                  "financial.transactions.form.descriptionPlaceholder",
+                )}
+                prefiltered
+                resultsLabel={(count) =>
+                  t(pluralKey("common.autocompleteField.results", count), {
+                    count,
+                  })
+                }
+                suggestions={vm.descriptionSuggestions.map((item) => ({
+                  id: item.id,
+                  label: item.label,
+                  leading: (
+                    <IconTile
+                      color={item.categoryColor}
+                      name={item.categoryIcon}
+                      size="sm"
+                    />
+                  ),
+                  matchRange: item.matchRange,
+                  trailing: (
+                    <ToneDot
+                      accessibilityLabel={t(
+                        item.type === "EXPENSE"
+                          ? "financial.common.expense"
+                          : "financial.common.income",
+                      )}
+                      tone={item.type === "EXPENSE" ? "expense" : "income"}
+                    />
+                  ),
+                }))}
+                testID={transactionFormTestIds.description}
+                value={vm.description}
+              />
+              {vm.hasNoCategories ? (
+                <MissingRecordHint
+                  actionLabel={t("financial.transactions.form.createCategory")}
+                  message={t("financial.transactions.form.noCategories")}
+                  onCreate={vm.onCreateCategoryPress}
+                  testID={transactionFormTestIds.missingCategoryHint}
+                />
+              ) : (
+                <CategoryChips
+                  categories={vm.categoryChips}
+                  error={err(vm.categoryError)}
+                  label={t("financial.transactions.form.category")}
+                  moreLabel={t("financial.transactions.form.moreCategories")}
+                  onMore={vm.onCategoryPickerOpen}
+                  onSelect={vm.onCategorySelect}
+                  selected={vm.selectedCategoryId}
+                />
+              )}
+              <AutocompleteField
+                allowCreate
+                createLabel={(name) =>
+                  t("financial.transactions.form.tagsCreate", { name })
+                }
+                label={t("financial.transactions.form.tags")}
+                maxLabel={t("financial.transactions.form.tagsMax")}
+                maxLength={MAX_TAG_NAME}
+                maxValues={MAX_TAGS}
+                mode={"chips"}
+                onChange={vm.onTagsChange}
+                placeholder={t("financial.transactions.form.tagsPlaceholder")}
+                removeLabel={(label) =>
+                  t("common.autocompleteField.remove", { label })
+                }
+                resultsLabel={(count) =>
+                  t(pluralKey("common.autocompleteField.results", count), {
+                    count,
+                  })
+                }
+                suggestions={vm.tagSuggestions}
+                testID={transactionFormTestIds.tags}
+                tooLongLabel={t("financial.transactions.form.tagsTooLong")}
+                values={vm.tags}
+              />
+              {vm.showNotes ? (
+                <NotesField
+                  onChange={vm.onNotesChange}
+                  placement={"left"}
+                  value={vm.notes}
+                />
+              ) : null}
+            </>
+          }
+          right={
+            <>
+              {isCard ? (
+                <View style={styles.form}>
+                  {vm.hasNoCards ? (
+                    <Text.Caption
+                      testID={transactionFormTestIds.missingCardHint}
+                      tone={"secondary"}
+                      value={t("financial.transactions.form.noCards")}
+                    />
+                  ) : (
+                    <SelectField
+                      closeLabel={t("common.actions.close")}
+                      disabled={vm.scopeLocks?.account}
+                      error={err(vm.cardError)}
+                      label={t("financial.transactions.form.card")}
+                      onChange={vm.onCardChange}
+                      options={vm.cardOptions.map((option) => ({
+                        description: option.descriptionKey
+                          ? t(option.descriptionKey)
+                          : undefined,
+                        label: option.label,
+                        value: option.value,
+                      }))}
+                      sheetTitle={t("financial.transactions.form.card")}
+                      testID={transactionFormTestIds.cardSelect}
+                      value={vm.selectedCardId}
+                    />
+                  )}
+                  {vm.invoiceField ? (
+                    <InvoiceField
+                      closeLabel={t("common.actions.close")}
+                      hint={
+                        vm.invoiceField.value !== vm.invoiceField.computedMonth
+                          ? {
+                              actionLabel: t(
+                                "financial.transactions.form.invoiceUseDate",
+                              ),
+                              onAction: vm.onInvoiceReset,
+                              text: t(
+                                "financial.transactions.form.invoiceChosenHint",
+                                {
+                                  month: monthName(
+                                    monthDateOf(vm.invoiceField.computedMonth),
+                                    localeTag,
+                                  ),
+                                },
+                              ),
+                            }
+                          : undefined
+                      }
+                      label={t(
+                        vm.installments.enabled
+                          ? "financial.transactions.form.invoiceFieldFirst"
+                          : "financial.transactions.form.invoiceField",
+                      )}
+                      onChange={vm.onInvoiceChange}
+                      options={vm.invoiceField.options.map((option) =>
+                        toInvoiceFieldOption(option, t, localeTag),
+                      )}
+                      sheetTitle={t(
+                        "financial.transactions.form.invoiceSheetTitle",
+                      )}
+                      testID={transactionFormTestIds.invoiceField}
+                      value={vm.invoiceField.value}
+                    />
+                  ) : null}
+                  {vm.overLimitCents > 0 ? (
+                    <Text.Caption
+                      testID={transactionFormTestIds.overLimit}
+                      tone={"expense"}
+                      value={t("financial.transactions.form.overLimit", {
+                        amount: formatAmount(
+                          vm.overLimitCents,
+                          localeTag,
+                          vm.currency,
+                        ),
+                      })}
+                    />
+                  ) : null}
+                  {vm.isInvoicePaid && vm.invoiceMonthLabelDate ? (
+                    <Text.Caption
+                      testID={transactionFormTestIds.invoicePaid}
+                      tone={"expense"}
+                      value={t("financial.transactions.form.invoicePaid", {
+                        month: monthName(vm.invoiceMonthLabelDate, localeTag),
+                      })}
+                    />
+                  ) : null}
+                </View>
+              ) : null}
+              {vm.projected.visible ? (
+                <SwitchRow
+                  hint={t("financial.projected.form.hint")}
+                  label={t("financial.projected.form.title")}
+                  onToggle={vm.onProjectedToggle}
+                  testID={transactionFormTestIds.projectedSwitch}
+                  value={vm.projected.on}
+                />
+              ) : null}
+              {vm.projected.on ? (
+                <Text.Caption
+                  testID={transactionFormTestIds.projectedNote}
+                  tone="secondary"
+                  value={t("financial.projected.form.installmentsOff")}
+                />
+              ) : null}
+              {vm.installments.visible ? (
+                <View style={styles.form}>
+                  <View style={styles.switchRow}>
+                    <Text.BodyStrong
+                      value={t("financial.transactions.form.installments")}
+                    />
+                    <Switch
+                      initialStatus={vm.installments.enabled}
+                      onToggle={vm.onInstallmentsToggle}
+                      testID={transactionFormTestIds.installmentsSwitch}
+                    />
+                  </View>
+                  {vm.installments.enabled ? (
+                    <TextField
+                      error={err(vm.installments.error)}
+                      helper={t(
+                        "financial.transactions.form.installmentsRange",
+                      )}
+                      keyboardType="number-pad"
+                      label={t("financial.transactions.form.installmentsCount")}
+                      maxLength={2}
+                      onChangeText={vm.onInstallmentsCountChange}
+                      testID={transactionFormTestIds.installmentsCount}
+                      value={vm.installments.countText}
+                    />
+                  ) : null}
+                  {vm.installments.preview ? (
+                    <Text.Caption
+                      testID={transactionFormTestIds.installmentsPreview}
+                      tone={"secondary"}
+                      value={renderPreview(vm.installments)}
+                    />
+                  ) : null}
+                  {vm.installments.range ? (
+                    <Text.Caption
+                      testID={transactionFormTestIds.installmentsInvoices}
+                      tone={"secondary"}
+                      value={t(
+                        "financial.transactions.form.installmentsInvoices",
+                        {
+                          first: monthName(
+                            monthDateOf(vm.installments.range.first),
+                            localeTag,
+                          ),
+                          last: monthYearName(
+                            monthDateOf(vm.installments.range.last),
+                            localeTag,
+                          ),
+                        },
+                      )}
+                    />
+                  ) : null}
+                </View>
+              ) : null}
+              {vm.recurrence.isRepeatToggleVisible ? (
+                <SwitchRow
+                  hint={
+                    vm.projected.on
+                      ? t("financial.projected.form.repeatNote")
+                      : undefined
+                  }
+                  label={t("financial.transactions.form.repeat")}
+                  onToggle={vm.onRepeatToggle}
+                  testID={transactionFormTestIds.repeat}
+                  value={vm.repeatOn}
+                />
+              ) : null}
+              {vm.repeatOn ? (
+                <View style={styles.form}>
+                  <ChipGroup
+                    disabled={vm.recurrence.isFrequencyLocked}
+                    label={t("financial.transactions.form.repeatFrequency")}
+                    layout={"wrap"}
+                    mode={"single"}
+                    onChange={vm.onRepeatFrequencyChange}
+                    options={RECURRENCE_FREQUENCIES.map((frequency) => ({
+                      label: t(`financial.recurrence.frequency.${frequency}`),
+                      value: frequency,
+                    }))}
+                    testID={transactionFormTestIds.repeatFrequency}
+                    value={vm.repeatFrequency}
+                  />
+                  {vm.recurrence.frequencyHelperKey ? (
+                    <Text.Caption
+                      tone={"secondary"}
+                      value={t(vm.recurrence.frequencyHelperKey)}
+                    />
+                  ) : null}
+                  <DateField
+                    clearable
+                    clearLabel={t("financial.transactions.form.repeatEndClear")}
+                    disabled={vm.recurrence.isEndLocked}
+                    error={err(vm.recurrence.endError)}
+                    label={t("financial.transactions.form.repeatEnd")}
+                    onChange={vm.onRepeatEndChange}
+                    placeholder={t("financial.recurrence.noEnd")}
+                    testID={transactionFormTestIds.repeatEnd}
+                    todayLabel={t("common.date.today")}
+                    value={vm.repeatEnd}
+                    yesterdayLabel={t("common.date.yesterday")}
+                  />
+                  {vm.recurrence.endHelperKey ? (
+                    <Text.Caption
+                      tone={"secondary"}
+                      value={t(vm.recurrence.endHelperKey)}
+                    />
+                  ) : null}
+                  {vm.recurrence.preview ? (
+                    <Text.Caption
+                      testID={transactionFormTestIds.repeatPreview}
+                      tone={"secondary"}
+                      value={renderRepeatPreview(vm.recurrence.preview)}
+                    />
+                  ) : null}
+                </View>
+              ) : null}
+              {vm.isEditing && vm.showPaid ? (
+                <>
+                  {isCard ? null : (
+                    <View style={styles.row}>{accountField}</View>
+                  )}
+                  {lockedCaption(vm.scopeLocks?.accountHelperKey)}
+                  {paidRow}
+                  <View style={styles.row}>{dateField}</View>
+                  {lockedCaption(vm.scopeLocks?.dateHelperKey)}
+                  <Text.Caption tone={"secondary"} value={t(vm.paidHelpKey)} />
+                </>
+              ) : (
+                <>
+                  <View style={styles.row}>
+                    {isCard ? null : accountField}
+                    {dateField}
+                  </View>
+                  {vm.showPaid ? (
+                    <>
+                      {paidRow}
+                      <Text.Caption
+                        tone={"secondary"}
+                        value={t(
+                          vm.repeatOn
+                            ? "financial.transactions.form.paidFirstOnly"
+                            : vm.paidHelpKey,
+                        )}
+                      />
+                    </>
+                  ) : null}
+                </>
+              )}
+              <ChipGroup
+                disabled={vm.recurrence.isRecurring}
+                label={t("financial.common.belongsTo")}
+                layout={"wrap"}
+                mode={"single"}
+                onChange={vm.onOwnerChange}
+                options={translateChoices(vm.ownerChoices, t)}
+                testID={transactionFormTestIds.owner}
+                value={vm.ownerId}
+              />
+              {vm.showNotes ? (
+                <NotesField
+                  onChange={vm.onNotesChange}
+                  placement={"right"}
+                  value={vm.notes}
+                />
+              ) : null}
+            </>
+          }
+          testID={transactionFormTestIds.sheet}
+        />
+        {vm.formErrorKey && (
+          <Text.Body
+            testID={transactionFormTestIds.formError}
+            tone={"expense"}
+            value={t(vm.formErrorKey)}
+          />
+        )}
+        {vm.canRefund && (
+          <Button.Secondary
+            fullWidth
+            label={t("financial.refund.ofPurchase")}
+            onPress={vm.onRefundPress}
+            testID={transactionFormTestIds.refundButton}
+          />
+        )}
+      </View>
+    );
+  }
+
+  const accountField = (
+    <View style={styles.field}>
+      {vm.hasNoAccounts ? (
+        <MissingRecordHint
+          actionLabel={t("financial.transactions.form.createAccount")}
+          message={t("financial.transactions.form.noAccounts")}
+          onCreate={vm.onCreateAccountPress}
+          testID={transactionFormTestIds.missingAccountHint}
+        />
+      ) : (
+        <SelectField
+          closeLabel={t("common.actions.close")}
+          disabled={vm.scopeLocks?.account}
+          error={err(vm.accountError)}
+          label={t("financial.transactions.form.account")}
+          onChange={vm.onAccountChange}
+          options={vm.accountOptions.map((option) => ({
+            description: option.descriptionKey
+              ? t(option.descriptionKey)
+              : undefined,
+            label: option.label,
+            value: option.value,
+          }))}
+          sheetTitle={t("financial.transactions.form.account")}
+          testID={transactionFormTestIds.accountSelect}
+          value={vm.selectedAccountId}
+        />
+      )}
+    </View>
+  );
+  function amountLabelKeyOf(): TranslationKeys {
+    if (vm.projected.on) {
+      return "financial.projected.form.amountLabel";
+    }
+
+    return vm.installments.enabled
+      ? "financial.transactions.form.totalValue"
+      : "financial.transactions.form.amount";
+  }
+  const amountLabelKey = amountLabelKeyOf();
+  const dateField = (
+    <View style={styles.field}>
+      <DateField
+        disabled={vm.scopeLocks?.date}
+        error={err(vm.dateError)}
+        label={t(
+          vm.projected.on
+            ? "financial.projected.form.dateLabel"
+            : vm.dateLabelKey,
+        )}
+        onChange={(date) => date && vm.onDateChange(date)}
+        testID={transactionFormTestIds.dateField}
+        todayLabel={t("common.date.today")}
+        value={vm.date}
+        yesterdayLabel={t("common.date.yesterday")}
+      />
+    </View>
+  );
+  const paidRow =
+    vm.showPaid && !vm.scopeLocks?.paid ? (
+      <SwitchRow
+        hint={vm.paidHintKey ? t(vm.paidHintKey) : undefined}
+        label={t(vm.paidLabelKey)}
+        onToggle={vm.onPaidChange}
+        testID={transactionFormTestIds.paid}
+        value={vm.paid}
+      />
+    ) : null;
+
+  return (
+    <>
+      <BottomSheet
+        closeLabel={t("common.actions.close")}
+        footer={
+          <Button.Primary
+            disabled={vm.isSaveDisabled || vm.isBlocking}
+            fullWidth
+            label={
+              vm.isBlocking
+                ? t("financial.transactionModal.saving")
+                : t(vm.saveLabelKey)
+            }
+            loading={vm.isBlocking && !vm.isSavingNext}
+            onPress={vm.onSave}
+            size={"lg"}
+            testID={transactionFormTestIds.saveButton}
+          />
+        }
+        footerSecondary={
+          vm.canSaveAndNew && (
+            <Button.Secondary
+              disabled={vm.isSaveDisabled || vm.isBlocking}
+              fullWidth
+              label={t("financial.transactions.form.saveAndNew")}
+              loading={vm.isSavingNext}
+              onPress={vm.onSaveAndNew}
+              size={"lg"}
+              testID={transactionFormTestIds.saveAndNewButton}
+            />
+          )
+        }
+        footerStart={
+          vm.isEditing && (
+            <Button.Ghost
+              disabled={vm.isBlocking}
+              label={t("financial.transactions.delete")}
+              onPress={vm.onDeletePress}
+              testID={transactionFormTestIds.deleteButton}
+              tone={"expense"}
+            />
+          )
+        }
+        onClose={vm.onClose}
+        presentation={"inline"}
+        size={"form"}
+        testID={transactionFormTestIds.sheet}
+        title={t(vm.titleKey)}
+        visible
+      >
+        {/* Spec 061 FR 2: the fields are disabled while a blocking request runs. */}
+        <View
+          pointerEvents={vm.isBlocking ? "none" : "auto"}
+          style={vm.isBlocking ? { opacity: 0.6 } : undefined}
+        >
+          {renderBody()}
+        </View>
+      </BottomSheet>
+      <Toast
+        bottom={toastBottom}
+        message={t("financial.transactions.form.saved")}
+        onHide={vm.onSavedHide}
+        testID={transactionFormTestIds.savedToast}
+        visible={vm.isSaved}
+      />
+      {vm.isCategoryPickerOpen && (
+        <CategoryPickerSheet
+          archivedLabel={t("financial.accounts.archivedLabel")}
+          closeLabel={t("common.actions.close")}
+          onClose={vm.onCategoryPickerClose}
+          onQueryChange={vm.onCategoryQueryChange}
+          onSelect={vm.onCategorySelect}
+          query={vm.categoryQuery}
+          rows={vm.categoryPickerRows}
+          searchPlaceholder={t("common.search.placeholder")}
+          selected={vm.selectedCategoryId}
+          title={t("financial.transactions.form.chooseCategory")}
+        />
+      )}
+      <ConfirmDialog
+        cancelLabel={t("common.form.keepEditing")}
+        closeLabel={t("common.actions.close")}
+        confirmLabel={t("common.form.discard")}
+        message={t("common.form.discardMessage")}
+        onCancel={vm.onDiscardCancel}
+        onConfirm={vm.onDiscardConfirm}
+        title={t("common.form.discardTitle")}
+        visible={vm.isDiscardDialogOpen}
+      />
+      <RecurrenceDeleteSheet
+        currency={vm.currency}
+        isAllConfirmOpen={vm.recurrence.isAllDeleteOpen}
+        isDeleting={vm.isDeleting}
+        onAllCancel={vm.onRecurrenceDeleteCancel}
+        onAllConfirm={vm.onRecurrenceDeleteConfirm}
+        onClose={vm.onDeleteCancel}
+        onDelete={vm.onRecurrenceDeletePress}
+        onPaidCancel={vm.onRecurrenceDeleteCancel}
+        onPaidConfirm={vm.onRecurrenceDeletePaidConfirm}
+        onScopeChange={vm.onRecurrenceDeleteScopeChange}
+        paidConflict={vm.paidConflict}
+        scope={vm.recurrence.deleteScope}
+        visible={vm.recurrence.isRecurring && vm.isDeleteDialogOpen}
+      />
+      <ConfirmDialog
+        cancelLabel={t("common.actions.cancel")}
+        closeLabel={t("common.actions.close")}
+        confirmLabel={t("common.actions.delete")}
+        loading={vm.isDeleting}
+        message={""}
+        onCancel={vm.onDeleteCancel}
+        onConfirm={vm.onDeleteConfirm}
+        testID={transactionFormTestIds.deleteDialog}
+        title={t("financial.transactions.deleteTitle")}
+        visible={!vm.recurrence.isRecurring && vm.isDeleteDialogOpen}
+      />
+    </>
+  );
+}
+
+export default Wide;

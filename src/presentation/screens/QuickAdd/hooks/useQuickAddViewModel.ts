@@ -1,6 +1,10 @@
 import { useTranslation } from "@presentation/i18n";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
+export type QuickAddVM = ReturnType<typeof useQuickAddViewModel>;
+
+export default useQuickAddViewModel;
+
 function useQuickAddViewModel() {
   const { t } = useTranslation();
   const { closeModal, replaceModal } = useModalNavigation();
@@ -26,5 +30,3 @@ function useQuickAddViewModel() {
     title: t("navigation.quickAdd.title"),
   };
 }
-
-export default useQuickAddViewModel;

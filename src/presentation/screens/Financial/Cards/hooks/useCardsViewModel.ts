@@ -25,6 +25,8 @@ import {
   usedProgress,
 } from "../models/cardList";
 
+export type CardsVM = ReturnType<typeof useCardsViewModel>;
+
 interface CardsData {
   cards: CreditCardDTO[];
   overview: CreditCardOverviewDTO;
@@ -40,6 +42,9 @@ async function fetchCards(owners: OwnerDTO[]): Promise<CardsData> {
 
   return { cards, overview, owners };
 }
+
+export { fetchCards };
+export default useCardsViewModel;
 
 function useCardsViewModel() {
   const isFocused = useIsFocused();
@@ -147,6 +152,3 @@ function useCardsViewModel() {
     usedProgress: usedProgress(aggregate),
   };
 }
-
-export { fetchCards };
-export default useCardsViewModel;

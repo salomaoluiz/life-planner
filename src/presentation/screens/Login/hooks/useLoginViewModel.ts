@@ -17,6 +17,8 @@ import { validateEmail, validateLoginPassword } from "@utils/authValidation";
 
 import mapAuthError, { AuthErrorKey } from "../utils/mapAuthError";
 
+export type LoginVM = ReturnType<typeof useLoginViewModel>;
+
 interface SubmitParams {
   email: string;
   password: string;
@@ -39,6 +41,8 @@ async function submitLogin(params: SubmitParams): Promise<SubmitResult> {
     return { errorKey };
   }
 }
+
+export default useLoginViewModel;
 
 function useLoginViewModel() {
   const { t } = useTranslation();
@@ -162,5 +166,3 @@ function useLoginViewModel() {
     passwordRef,
   };
 }
-
-export default useLoginViewModel;

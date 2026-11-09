@@ -1,44 +1,6 @@
-// TEMPORARY (spec 099 FR 14): every screen and modal that existed before the adaptive layout.
-// Spec 100 moves them to views/Wide.tsx + AdaptiveLayout and empties this list.
-// Paths are relative to src/presentation/screens.
-export const legacyAdaptiveAllowList = [
-  "Config",
-  "Config/modals/Versions",
-  "Family",
-  "Family/modals/AddNewFamily",
-  "Family/modals/AddNewFamilyMember",
-  "Feedback/BusinessFeedback",
-  "Financial/Accounts",
-  "Financial/Accounts/modals/NewAccountModal",
-  "Financial/Cards",
-  "Financial/Cards/modals/NewCreditCardModal",
-  "Financial/Categories",
-  "Financial/Categories/modals/NewCategoryModal",
-  "Financial/ConfirmPayment",
-  "Financial/ConfirmProjected",
-  "Financial/EarlyPayment",
-  "Financial/InstallmentEdit",
-  "Financial/Invoice",
-  "Financial/Layout",
-  "Financial/Overview",
-  "Financial/Prepayment",
-  "Financial/Refund",
-  "Financial/SectionPicker",
-  "Financial/Tags",
-  "Financial/Tags/modals/NewTagModal",
-  "Financial/Transactions",
-  "Financial/Transactions/modals/ExportModal",
-  "Financial/Transactions/modals/FiltersModal",
-  "Financial/Transactions/modals/ImportWizard",
-  "Financial/Transactions/modals/NewTransactionModal",
-  "Home",
-  "Invite",
-  "Login",
-  "QuickAdd",
-  "Signup",
-  "Stock",
-  "Stock/modals/NewStockItemModal",
-];
+// Empty since spec 100: every screen and modal uses views/Wide.tsx + AdaptiveLayout. The list stays so the coverage
+// test keeps its shape; a new screen never goes here (paths are relative to src/presentation/screens).
+export const legacyAdaptiveAllowList: string[] = [];
 
 // Routed through app/** or rendered by a screen (not routed) and not a screen of their own.
 export const inlineModals = [
@@ -53,6 +15,7 @@ export const neverAdaptive: Record<string, string> = {
   "Feedback/GenericErrorBoundary": "error boundary",
   "Feedback/GlobalBoundary": "error boundary",
   "Financial/IndexRedirect": "redirect",
+  "Financial/Layout": "navigation shell (section header), not a screen",
   "Financial/Transactions/pending/ErrorToastHost": "layout host, not a screen",
   "Navigation/containers/AppTabBar": "navigation shell, not a screen",
   "Navigation/containers/LegacyConfigRedirect": "redirect",
