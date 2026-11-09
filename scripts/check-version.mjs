@@ -10,6 +10,7 @@ const SHIPPED_PREFIXES = [
   "src/",
   "app/",
   "assets/",
+  "public/",
   "plugins/",
   "app.config.ts",
   "Dockerfile.web",
