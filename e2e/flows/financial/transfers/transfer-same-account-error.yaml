@@ -68,6 +68,7 @@ onFlowComplete:
 - eraseText
 - inputText: "100000"
 # The same account as origin and destination is refused in the form
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
 - tapOn:
     id: "financial.transfer-form.to"
 - tapOn:

@@ -67,6 +67,7 @@ onFlowComplete:
     id: "financial.transfer-form.amount-out"
 - eraseText
 - inputText: "500000"
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
 - tapOn:
     id: "financial.transfer-form.to"
 - tapOn:
@@ -76,13 +77,15 @@ onFlowComplete:
     visible:
       id: "financial.transfer-form.amount-in"
     timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
 - tapOn:
     id: "financial.transfer-form.amount-in"
 - eraseText
 - inputText: "92000"
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
 - assertVisible:
     id: "financial.transfer-form.rate-text"
-- runFlow: ../../../subflows/financial/scroll-form-down.yaml
+- runFlow: ../../../subflows/financial/scroll-form-up.yaml
 - tapOn:
     id: "financial.transfer-form.fee"
 - eraseText
@@ -91,7 +94,7 @@ onFlowComplete:
     id: "financial.transfer-form.save-button"
 - extendedWaitUntil:
     visible:
-      id: "financial.transactions.row-title"
+      id: "financial.transactions.row-transfer-title"
       text: ${output.TRANSFER_NAME}
     timeout: 20000
 # The in row shows the rate AND the fee counts in the month expenses

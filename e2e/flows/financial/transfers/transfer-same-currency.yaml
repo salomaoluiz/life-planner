@@ -67,6 +67,7 @@ onFlowComplete:
     id: "financial.transfer-form.amount-out"
 - eraseText
 - inputText: "100000"
+- runFlow: ../../../subflows/financial/scroll-form-down.yaml
 - tapOn:
     id: "financial.transfer-form.to"
 - tapOn:
@@ -75,7 +76,7 @@ onFlowComplete:
     id: "financial.transfer-form.save-button"
 - extendedWaitUntil:
     visible:
-      id: "financial.transactions.row-title"
+      id: "financial.transactions.row-transfer-title"
       text: ${output.TRANSFER_NAME}
     timeout: 20000
 # Two rows (out and in) are listed AND the month totals do not move

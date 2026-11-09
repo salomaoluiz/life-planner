@@ -50,12 +50,12 @@ onFlowComplete:
 - runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:
-      id: "financial.transactions.row-title"
+      id: "financial.transactions.row-transfer-title"
       text: ${output.TRANSFER_NAME}
     timeout: 20000
 # Tapping a transfer row opens the transfer with both sides
 - tapOn:
-    id: "financial.transactions.row-title"
+    id: "financial.transactions.row-transfer-title"
     text: ${output.TRANSFER_NAME}
 - extendedWaitUntil:
     visible:
@@ -75,4 +75,4 @@ onFlowComplete:
       id: "financial.transactions.empty-month"
     timeout: 20000
 - assertNotVisible:
-    id: "financial.transactions.row-title"
+    id: "financial.transactions.row-transfer-title"
