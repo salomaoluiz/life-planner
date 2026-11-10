@@ -39,16 +39,11 @@ onFlowComplete:
       TOKEN: ${output.TOKEN}
       REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - runFlow: ../../../subflows/financial/open-transactions.yaml
-# Spec 103: with a USD account the currency dropdown shows up and pushes the empty state below the fold.
-- extendedWaitUntil:
-    visible:
-      id: "financial.transactions.currency"
-    timeout: 20000
-- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.empty-month"
     timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - tapOn:
     id: "financial.transactions.empty-month-action"
 - extendedWaitUntil:
@@ -106,9 +101,17 @@ onFlowComplete:
 # the month expenses
 - runFlow: ../../../subflows/financial/scroll-list-up.yaml
 - tapOn:
+    id: "financial.transactions.filters-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.currency"
+    timeout: 20000
+- tapOn:
     id: "financial.transactions.currency"
 - tapOn:
     id: "financial.transactions.currency-option-USD"
+- tapOn:
+    id: "financial.transactions.filters.apply"
 - assertVisible:
     id: "financial.transactions.summary-expense"
     text: ".*3[.,]50.*"

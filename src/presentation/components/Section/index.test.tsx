@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Text } from "react-native";
 
 import { fireEvent, screen } from "@tests";
 
@@ -52,4 +52,15 @@ it("SHOULD give the action side padding for its focus ring WHEN actionInset", ()
   );
 
   expect(inset.paddingHorizontal).toBeGreaterThan(0);
+});
+
+it("SHOULD render the leading action content before the action", () => {
+  setup({
+    actionLabel: "See all",
+    actionLeading: <Text>leading</Text>,
+    onActionPress,
+  });
+
+  expect(screen.getByText("leading")).toBeTruthy();
+  expect(screen.getByText("See all")).toBeTruthy();
 });

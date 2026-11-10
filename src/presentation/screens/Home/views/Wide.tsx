@@ -61,24 +61,29 @@ function Wide({ vm }: AdaptiveViewProps<HomeVM>) {
       <Section
         actionInset
         actionLabel={t("home.finance.overview")}
+        actionLeading={
+          vm.currency.visible ? (
+            <View style={styles.currency}>
+              <SelectField
+                closeLabel={t("common.actions.close")}
+                hideLabel
+                label={t("home.finance.currency")}
+                onChange={vm.currency.onChange}
+                options={vm.currency.options.map((code) => ({
+                  label: code,
+                  value: code,
+                }))}
+                sheetTitle={t("home.finance.currency")}
+                testID={homeTestIds.financeCurrency}
+                value={vm.currency.value}
+              />
+            </View>
+          ) : undefined
+        }
         onActionPress={vm.onOverviewPress}
         testID={homeTestIds.financeSection}
         title={t("home.finance.title")}
       >
-        {vm.currency.visible ? (
-          <SelectField
-            closeLabel={t("common.actions.close")}
-            label={t("home.finance.currency")}
-            onChange={vm.currency.onChange}
-            options={vm.currency.options.map((code) => ({
-              label: t(`financial.accounts.currencyOption.${code}`),
-              value: code,
-            }))}
-            sheetTitle={t("home.finance.currency")}
-            testID={homeTestIds.financeCurrency}
-            value={vm.currency.value}
-          />
-        ) : null}
         <View style={rowStyle}>
           <View style={[columnStyle, styles.stack]}>
             <FinanceBalanceCard

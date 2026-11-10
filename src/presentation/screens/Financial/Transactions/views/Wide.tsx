@@ -14,7 +14,6 @@ import {
   Icon,
   ReadOnlyNotice,
   SegmentedControl,
-  SelectField,
   Text,
   Toast,
 } from "@components";
@@ -428,20 +427,6 @@ function Wide({ vm }: AdaptiveViewProps<TransactionsScreenVM>) {
         />
       )}
       {wide ? null : scopeChips}
-      {vm.currencyVisible ? (
-        <SelectField
-          closeLabel={t("common.actions.close")}
-          label={t("financial.transactions.currency")}
-          onChange={vm.onCurrencyChange}
-          options={vm.currencyOptions.map((code) => ({
-            label: t(`financial.accounts.currencyOption.${code}`),
-            value: code,
-          }))}
-          sheetTitle={t("financial.transactions.currency")}
-          testID={transactionsTestIds.currency}
-          value={vm.currency}
-        />
-      ) : null}
       <FilterToolbar
         chips={filterChips}
         clearAllLabel={t("financial.transactions.filters.clearAll")}
@@ -710,6 +695,15 @@ function Wide({ vm }: AdaptiveViewProps<TransactionsScreenVM>) {
       {filtersOpen && (
         <FiltersModal
           archivedOwnerIds={vm.archivedOwnerIds}
+          currency={
+            vm.currencyVisible
+              ? {
+                  onChange: (code) => vm.onCurrencyChange(code),
+                  options: vm.currencyOptions,
+                  value: vm.currency,
+                }
+              : undefined
+          }
           filters={vm.filters}
           initialStep={filtersStep}
           onApply={vm.onFiltersApply}

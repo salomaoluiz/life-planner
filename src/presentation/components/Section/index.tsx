@@ -8,6 +8,8 @@ export interface SectionProps {
   /** Keeps the horizontal padding of the action button, so its focus ring does not touch the edge (default: the label lines up with the content edge) */
   actionInset?: boolean;
   actionLabel?: string;
+  /** Rendered just before the action button, e.g. a compact select */
+  actionLeading?: React.ReactNode;
   children: React.ReactNode;
   onActionPress?: () => void;
   testID?: string;
@@ -40,6 +42,7 @@ function Section(props: SectionProps) {
             value={props.title}
           />
         </View>
+        {props.actionLeading}
         {props.actionLabel && props.onActionPress ? (
           <Button.Ghost
             inline={!props.actionInset}

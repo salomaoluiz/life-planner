@@ -180,7 +180,7 @@ it("SHOULD show the currency dropdown only WHEN there are accounts in more than 
   render(<Home />);
 
   fireEvent.press(screen.getByTestId(homeTestIds.financeCurrency));
-  fireEvent.press(screen.getByText("financial.accounts.currencyOption.USD"));
+  fireEvent.press(screen.getByText("USD"));
 
   expect(onChange).toHaveBeenCalledWith("USD");
 });

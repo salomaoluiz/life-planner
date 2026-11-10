@@ -8,6 +8,7 @@ function useStyles() {
   return {
     styles: StyleSheet.create({
       column: { flex: 1 },
+      currency: { width: 96 },
       split: {
         alignItems: "stretch",
         flexDirection: "row",

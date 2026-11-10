@@ -694,29 +694,3 @@ describe("favorite month summary (spec 094.2)", () => {
     expect(screen.queryByTestId(transactionsTestIds.summaryTable)).toBeNull();
   });
 });
-
-describe("currency dropdown (spec 103)", () => {
-  it("SHOULD NOT show the dropdown WHEN every account is in BRL", () => {
-    setup({ entries: makeEntries() });
-
-    expect(
-      screen.queryByTestId(transactionsTestIds.currency),
-    ).not.toBeOnTheScreen();
-  });
-
-  it("SHOULD show the dropdown AND report the chosen currency WHEN there are accounts in more than one currency", () => {
-    const onCurrencyChange = jest.fn();
-    setup({
-      currency: "BRL",
-      currencyOptions: ["BRL", "USD"],
-      currencyVisible: true,
-      entries: makeEntries(),
-      onCurrencyChange,
-    });
-
-    fireEvent.press(screen.getByTestId(transactionsTestIds.currency));
-    fireEvent.press(screen.getByText("financial.accounts.currencyOption.USD"));
-
-    expect(onCurrencyChange).toHaveBeenCalledWith("USD");
-  });
-});

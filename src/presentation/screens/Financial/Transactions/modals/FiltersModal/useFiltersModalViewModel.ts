@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 
+import { CurrencyCode } from "@domain/entities/financial/Currency";
 import { useLocaleTag } from "@presentation/i18n";
 import { useBreakpoint } from "@presentation/theme";
 import useFilterOptions, {
@@ -25,6 +26,12 @@ import {
 
 export interface FiltersModalParams {
   archivedOwnerIds: ReadonlySet<string>;
+  // Spec 103: the currency the screen shows, offered only when there is more than one; applied with the filters.
+  currency?: {
+    onChange: (code: CurrencyCode) => void;
+    options: CurrencyCode[];
+    value: CurrencyCode;
+  };
   filters: TransactionFilters;
   // The overview (spec 046) has its own period: the Period section is left out.
   hidePeriod?: boolean;
@@ -92,6 +99,7 @@ function useFiltersModalViewModel(params: FiltersModalParams) {
   const localeTag = useLocaleTag();
   const wide = useBreakpoint() !== "compact";
   const [draft, setDraft] = useState(params.filters);
+  const [currencyDraft, setCurrencyDraft] = useState(params.currency?.value);
   const [step, setStep] = useState<FiltersStep>(params.initialStep ?? "root");
   const [categoryQuery, setCategoryQuery] = useState("");
   const [periodMode, setPeriodMode] = useState<PeriodMode>(
@@ -308,11 +316,22 @@ function useFiltersModalViewModel(params: FiltersModalParams) {
     canApply,
     categoryQuery,
     categoryResults,
+    currency:
+      params.currency && currencyDraft
+        ? {
+            onChange: setCurrencyDraft,
+            options: params.currency.options,
+            value: currencyDraft,
+          }
+        : undefined,
     customFrom,
     customTo,
     draft,
     hidePeriod: params.hidePeriod,
     onApply: () => {
+      if (params.currency && currencyDraft !== params.currency.value) {
+        params.currency.onChange(currencyDraft ?? params.currency.value);
+      }
       params.onApply(applied());
       params.onClose();
     },

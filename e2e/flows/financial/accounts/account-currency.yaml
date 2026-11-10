@@ -77,17 +77,20 @@ onFlowComplete:
     id: "navigation-rail-financial-transactions"
 - extendedWaitUntil:
     visible:
+      id: "financial.transactions.filters-button"
+    timeout: 20000
+- tapOn:
+    id: "financial.transactions.filters-button"
+- extendedWaitUntil:
+    visible:
       id: "financial.transactions.currency"
     timeout: 20000
 - tapOn:
     id: "financial.transactions.currency"
 - tapOn:
     id: "financial.transactions.currency-option-USD"
-- extendedWaitUntil:
-    visible:
-      id: "financial.transactions.currency-value"
-      text: ".*USD.*"
-    timeout: 20000
+- tapOn:
+    id: "financial.transactions.filters.apply"
 # the month summary is in US$ (nothing recorded yet)
 - extendedWaitUntil:
     visible:

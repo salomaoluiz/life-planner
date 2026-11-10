@@ -106,6 +106,7 @@ function OverviewToolbar(props: { vm: OverviewViewModel }) {
         {showCurrency ? (
           <SelectField
             closeLabel={t("common.actions.close")}
+            hideLabel
             label={t("financial.overview.currency")}
             onChange={vm.onCurrencyChange}
             options={vm.currencies.map((option) => ({
