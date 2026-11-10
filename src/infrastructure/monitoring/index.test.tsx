@@ -130,7 +130,7 @@ it("SHOULD call SentryErrorBoundary", () => {
   );
 });
 
-it('SHOULD call setContext in beforeCapture with "error-boundary-context"', () => {
+it("SHOULD prepare the scope of the boundary event in beforeCapture", () => {
   const Children = <View />;
 
   function FallbackComponent() {
@@ -143,19 +143,18 @@ it('SHOULD call setContext in beforeCapture with "error-boundary-context"', () =
     </ErrorBoundary>,
   );
 
+  const scope = {};
   const genericError = new GenericError();
-  genericError.addContext({ fake: "context" });
 
   act(() =>
     (Sentry.SentryErrorBoundary as jest.Mock).mock.calls[0][0].beforeCapture(
-      {},
+      scope,
       genericError,
     ),
   );
 
-  expect(Sentry.sentrySetContext).toHaveBeenCalledTimes(1);
-  expect(Sentry.sentrySetContext).toHaveBeenCalledWith(
-    "error-boundary-context",
-    { fake: "context" },
+  expect(Sentry.sentryPrepareBoundaryScope).toHaveBeenCalledWith(
+    scope,
+    genericError,
   );
 });

@@ -21,6 +21,10 @@ jest.mock("expo-router", () => ({
   useLocalSearchParams: jest.fn(),
 }));
 jest.mock("@infrastructure/fetcher");
+jest.mock("@infrastructure/monitoring", () => ({
+  addBreadcrumb: jest.fn(),
+  captureException: jest.fn(),
+}));
 jest.mock("@infrastructure/clipboard", () => ({ copyText: jest.fn() }));
 jest.mock("@infrastructure/share", () => ({
   isShareAvailable: jest.fn(),

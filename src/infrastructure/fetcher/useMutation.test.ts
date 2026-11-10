@@ -33,7 +33,7 @@ it("SHOULD fetch and return in error", async () => {
     expect(error.stack).toEqual(expect.any(String));
     expect(error.context).toEqual({
       cacheString: "CacheKey1-CacheKey2",
-      variables: mocks.errorResponse.variables,
+      variableKeys: Object.keys(mocks.errorResponse.variables),
     });
   }
 });
@@ -54,7 +54,7 @@ it("SHOULD fetch and return in business error", async () => {
   expect(result.current.error!.message).toEqual(businessError.message);
   expect(result.current.error!.context).toEqual({
     cacheString: "CacheKey1-CacheKey2",
-    variables: mocks.businessErrorResponse.variables,
+    variableKeys: Object.keys(mocks.businessErrorResponse.variables),
   });
   expect(result.current.data).toBeNull();
   expect(result.current.isFetching).toBeFalsy();
@@ -77,7 +77,7 @@ it("SHOULD fetch and return in error without message", async () => {
     expect(error.message).toEqual("Without error message");
     expect(error.context).toEqual({
       cacheString: "CacheKey1-CacheKey2",
-      variables: mocks.errorWithoutMessageResponse.variables,
+      variableKeys: Object.keys(mocks.errorWithoutMessageResponse.variables),
     });
     expect(error.stack).toEqual(expect.any(String));
   }

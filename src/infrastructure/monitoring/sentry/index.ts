@@ -1,4 +1,5 @@
 export { default as sentryAddBreadcrumb } from "./addBreadcrumb";
+export { default as sentryPrepareBoundaryScope } from "./boundaryScope";
 export * from "./capture";
 export { default as SentryErrorBoundary } from "./errorBoundary";
 export { default as sentryInitialize } from "./initialize";

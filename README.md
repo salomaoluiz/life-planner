@@ -49,6 +49,8 @@ Stacks → Add stack → Repository: `https://github.com/salomaoluiz/life-planne
 | `EXPO_PUBLIC_SENTRY_ENVIRONMENT` / `EXPO_PUBLIC_SENTRY_ENABLED`                  | `production` / `true`                                        |
 | `EXPO_PUBLIC_SENTRY_ORGANIZATION`, `_PROJECT`, `_DSN`, `_URL`, `_TRACES_SAMPLER` | same Sentry project as development (values from your `.env`) |
 
+Source maps (spec 106): add `SENTRY_AUTH_TOKEN` (scopes: release and source map upload only; no `EXPO_PUBLIC_` prefix) to the same stack environment. It is used only in the builder stage to upload the maps for release `life-planner@<version>` and is never written to the bundle or the runtime image; without it the build still succeeds and prints one warning. Renamed from `EXPO_PUBLIC_SENTRY_AUTH_TOKEN`: remove the old variable wherever it was set. Deploy the API first (CORS must accept the trace headers). Details: `.claude/context/monitoring.md`.
+
 The image is built on the server (Expo web export, `Dockerfile.web`, served by nginx on host port `1016`). The export needs more memory than the container limit, which only applies to the running container. No Supabase variables are needed. After deploying, `scripts/web/test-nginx.sh` is the local check for the nginx rules (SPA fallback, 404 for missing assets, cache headers).
 
 ### Android APK (local, sideload)

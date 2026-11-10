@@ -1,5 +1,6 @@
 import * as SecureStore from "expo-secure-store";
 
+import { setUser } from "@infrastructure/monitoring";
 import { asyncStorage, StorageKeys } from "@infrastructure/storage";
 import { isWeb } from "@utils/platform";
 
@@ -15,6 +16,7 @@ let memoryToken: null | string = null;
 
 async function clearToken(): Promise<void> {
   memoryToken = null;
+  identifyUser(null);
   if (isWeb()) {
     asyncStorage.deleteItem(WEB_KEY);
     asyncStorage.deleteItem(WEB_REFRESH_KEY);
@@ -40,7 +42,19 @@ async function getToken(): Promise<null | string> {
     ? asyncStorage.getString(WEB_KEY)
     : await SecureStore.getItemAsync(NATIVE_KEY);
 
+  if (memoryToken) {
+    identifyUser(memoryToken);
+  }
+
   return memoryToken;
+}
+
+// Spec 106: monitoring knows the user by id only. Every login, signup, refresh and session restore goes through
+// setToken/getToken and every logout, expiry and account deletion through clearToken, so the id is read here.
+function identifyUser(token: null | string) {
+  const userId = token ? userIdFromToken(token) : null;
+
+  setUser(userId ? { id: userId } : null);
 }
 
 async function setRefreshToken(token: string): Promise<void> {
@@ -53,11 +67,24 @@ async function setRefreshToken(token: string): Promise<void> {
 
 async function setToken(token: string): Promise<void> {
   memoryToken = token;
+  identifyUser(token);
   if (isWeb()) {
     asyncStorage.setString(WEB_KEY, token);
     return;
   }
   await SecureStore.setItemAsync(NATIVE_KEY, token);
+}
+
+function userIdFromToken(token: string): null | string {
+  try {
+    const payload = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const id = (JSON.parse(atob(payload)) as { user?: { id?: unknown } }).user
+      ?.id;
+
+    return typeof id === "string" ? id : null;
+  } catch {
+    return null;
+  }
 }
 
 const tokenStorage = {

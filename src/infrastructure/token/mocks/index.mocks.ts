@@ -1,5 +1,6 @@
 import * as SecureStore from "expo-secure-store";
 
+import { setUser } from "@infrastructure/monitoring";
 import { asyncStorage } from "@infrastructure/storage";
 import { isWeb } from "@utils/platform";
 
@@ -11,6 +12,7 @@ jest.mock("expo-secure-store", () => ({
   setItemAsync: jest.fn().mockResolvedValue(undefined),
 }));
 jest.mock("@utils/platform");
+jest.mock("@infrastructure/monitoring", () => ({ setUser: jest.fn() }));
 jest.mock("@infrastructure/storage", () => ({
   asyncStorage: {
     deleteItem: jest.fn(),
@@ -38,6 +40,7 @@ function setup() {
 const spies = {
   asyncStorage: jest.mocked(asyncStorage),
   secureStore: jest.mocked(SecureStore),
+  setUser: jest.mocked(setUser),
 };
 
 const mocks = {

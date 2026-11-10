@@ -35,9 +35,9 @@ export interface NavigationIntegration {
 }
 export type SetContext = (key: string, value: Record<string, unknown>) => void;
 
-export type SetTag = (key: string, value: string) => void;
+export type SetTag = (key: string, value: string | undefined) => void;
 
-export type SetUser = (props: SetUserProps) => void;
+export type SetUser = (props: null | SetUserProps) => void;
 
 interface SetUserProps {
   id: string;

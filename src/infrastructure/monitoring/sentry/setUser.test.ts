@@ -10,3 +10,9 @@ it("SHOULD set tag", () => {
     id: "66d3d177-7d66-4d19-9742-ecb283ca829e",
   });
 });
+
+it("SHOULD clear the user", () => {
+  setup(null);
+
+  expect(spies.setUser).toHaveBeenCalledWith(null);
+});

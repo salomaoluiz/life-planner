@@ -131,10 +131,42 @@ it("SHOULD map 5xx to GenericError WITHOUT the response body in the context", as
 
   expect(error).toBeInstanceOf(GenericError);
   expect(error.context).toEqual({
+    fingerprint: ["api", "POST", "/v1/auth/login/email", 500],
     method: "POST",
     path: "/v1/auth/login/email",
     statusCode: 500,
   });
+});
+
+it("SHOULD title a 5xx with the route template so two ids group into one issue", async () => {
+  const first = "0b9f2c1e-8a47-4f6e-9d3b-5a1c7e2f4d60";
+  const second = "7d1e5a90-3c2b-4e8f-a6b1-9f0d2c4e8a13";
+  spies.fetch.mockResolvedValueOnce(mocks.json(500, {}));
+  spies.fetch.mockResolvedValueOnce(mocks.json(500, {}));
+
+  const a = (await setupThrowable(
+    "GET",
+    `/v1/finance/transactions/${first}?q=milk`,
+  )) as GenericError;
+  const b = (await setupThrowable(
+    "GET",
+    `/v1/finance/transactions/${second}`,
+  )) as GenericError;
+
+  expect(a.message).toBe("HTTP 500 GET /v1/finance/transactions/:id");
+  expect(b.message).toBe(a.message);
+  expect(b.context.fingerprint).toEqual(a.context.fingerprint);
+});
+
+it("SHOULD keep the invite token out of the title", async () => {
+  spies.fetch.mockResolvedValueOnce(mocks.json(500, {}));
+
+  const error = (await setupThrowable(
+    "POST",
+    "/v1/family-invites/secret-token/accept",
+  )) as GenericError;
+
+  expect(error.message).toBe("HTTP 500 POST /v1/family-invites/:token/accept");
 });
 
 it("SHOULD map a non-JSON 502 (proxy HTML) to GenericError", async () => {
@@ -230,6 +262,7 @@ it("SHOULD redact the invite token from the GenericError context path on a 5xx",
 
   expect(error).toBeInstanceOf(GenericError);
   expect(error).toHaveProperty("context", {
+    fingerprint: ["api", "POST", "/v1/family-invites/:token/accept", 500],
     method: "POST",
     path: "/v1/family-invites/:token/accept",
     statusCode: 500,
@@ -243,6 +276,7 @@ it("SHOULD keep other paths untouched in the GenericError context", async () => 
   const error = await setupThrowable("GET", "/v1/families/1/members");
 
   expect(error).toHaveProperty("context", {
+    fingerprint: ["api", "GET", "/v1/families/:id/members", 500],
     method: "GET",
     path: "/v1/families/1/members",
     statusCode: 500,

@@ -27,6 +27,7 @@ Clean Architecture: `app/` (expo-router routes) → `src/presentation` → `src/
 | What already exists in a module (file inventory per layer)                       | `docs/ai/modules/<auth\|family\|familyMember\|financial\|home\|investment\|stock>.md` |
 | Backend API (`../life-planner-back`): endpoints, auth, contract, Supabase → API  | `.claude/context/backend.md`                                                          |
 | E2E flows, testIDs, running the suite                                            | `.claude/context/e2e.md`                                                              |
+| Sentry: errors, release, source maps, privacy of events (spec 106)               | `.claude/context/monitoring.md`                                                       |
 | Performance budgets, `yarn perf`, PR performance block, `perf-report/summary.md` | `.claude/context/performance.md`                                                      |
 | Building a whole new feature / CRUD slice end-to-end                             | skill `new-feature-slice` (`.claude/skills/new-feature-slice/`)                       |
 
