@@ -17,10 +17,26 @@ function investmentRepositoryImpl(
 
   return {
     createAsset: async (params) => investmentDatasource.createAsset(params),
+    createFixedIncomeContribution: async (params) =>
+      withFinanceCaches(
+        investmentDatasource.createFixedIncomeContribution(params),
+      ),
+    createFixedIncomeRate: async (assetId, rate) =>
+      investmentDatasource.createFixedIncomeRate(assetId, rate),
+    createFixedIncomeRedemption: async (params) =>
+      withFinanceCaches(
+        investmentDatasource.createFixedIncomeRedemption(params),
+      ),
+    createFixedIncomeTitle: async (params) =>
+      withFinanceCaches(investmentDatasource.createFixedIncomeTitle(params)),
     createOperation: async (params) =>
       withFinanceCaches(investmentDatasource.createOperation(params)),
     deleteAsset: async (id) =>
       withFinanceCaches(investmentDatasource.deleteAsset(id)),
+    deleteFixedIncomeAdjustment: async (id) =>
+      investmentDatasource.deleteFixedIncomeAdjustment(id),
+    deleteFixedIncomeRate: async (id) =>
+      investmentDatasource.deleteFixedIncomeRate(id),
     deleteOperation: async (id) =>
       withFinanceCaches(investmentDatasource.deleteOperation(id)),
     deleteValuation: async (id) => investmentDatasource.deleteValuation(id),
@@ -30,11 +46,21 @@ function investmentRepositoryImpl(
       investmentDatasource.getOperationLink(transactionId),
     getPriceHistory: async (params) =>
       investmentDatasource.getPriceHistory(params),
+    previewFixedIncomeRedemption: async (params) =>
+      investmentDatasource.previewFixedIncomeRedemption(params),
     refreshQuotes: async (params) => investmentDatasource.refreshQuotes(params),
     searchTickers: async (params) => investmentDatasource.searchTickers(params),
+    simulateFixedIncome: async (params) =>
+      investmentDatasource.simulateFixedIncome(params),
     updateAsset: async (params) => investmentDatasource.updateAsset(params),
+    updateFixedIncomeRate: async (params) =>
+      investmentDatasource.updateFixedIncomeRate(params),
     updateOperation: async (params) =>
       withFinanceCaches(investmentDatasource.updateOperation(params)),
+    upsertFixedIncomeAdjustment: async (params) =>
+      investmentDatasource.upsertFixedIncomeAdjustment(params),
+    upsertFixedIncomeTerms: async (params) =>
+      investmentDatasource.upsertFixedIncomeTerms(params),
     upsertValuation: async (params) =>
       investmentDatasource.upsertValuation(params),
   };

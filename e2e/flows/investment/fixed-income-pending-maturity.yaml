@@ -1,0 +1,54 @@
+url: ${E2E_WEB_URL}
+name: investment/fixed-income-pending-maturity
+tags:
+  - investment
+  - spec-105
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: E2E Broker
+      BALANCE_CENTS: "1000000"
+- evalScript: ${output.BROKER_ACCOUNT_ID = output.ACCOUNT_ID}
+# A title that already matured: it comes first in the list, asking to confirm the real amount.
+- runFlow:
+    file: ../../subflows/setup/create-fixed-income-title.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: E2E Matured CDB
+      DATE: "2026-01-15"
+      MATURITY_DATE: "2026-02-15"
+      AMOUNT_CENTS: "1000000"
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/investment/open-investments.yaml
+- extendedWaitUntil:
+    visible:
+      id: "investment.list.pending-card-${output.ASSET_ID}"
+    timeout: 20000
+- tapOn:
+    id: "investment.list.pending-confirm-${output.ASSET_ID}"
+# A total redemption on the maturity date, with the estimated net already filled in.
+- extendedWaitUntil:
+    visible:
+      id: "investment.redeem-modal.net"
+    timeout: 20000
+- tapOn:
+    id: "investment.redeem-modal.save"
+- extendedWaitUntil:
+    visible:
+      id: "investment.list.screen"
+    timeout: 20000
+- assertNotVisible:
+    id: "investment.list.pending-card-${output.ASSET_ID}"

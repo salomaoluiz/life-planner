@@ -7,6 +7,17 @@ export const investmentKeys = {
   all: (): Key => [ROOT],
   asset: (id: string): Key => [ROOT, "asset", id],
   assets: (status: string): Key => [ROOT, "assets", status],
+  fixedIncomePreview: (id: string, key: string): Key => [
+    ROOT,
+    "fixed-income-preview",
+    id,
+    key,
+  ],
+  fixedIncomeSimulation: (key: string): Key => [
+    ROOT,
+    "fixed-income-simulation",
+    key,
+  ],
   priceHistory: (id: string, range: string): Key => [
     ROOT,
     "price-history",

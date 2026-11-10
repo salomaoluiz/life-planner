@@ -3,6 +3,10 @@ import {
   InvestmentAssetClass,
   InvestmentAssetStatus,
   InvestmentFeeKind,
+  InvestmentFixedIncomeLiquidity,
+  InvestmentFixedIncomeProduct,
+  InvestmentFixedIncomeRateMode,
+  InvestmentFixedIncomeRedemptionKind,
   InvestmentOperationType,
   InvestmentPriceKind,
   InvestmentPriceSource,
@@ -13,6 +17,12 @@ import {
   InvestmentAsset,
   InvestmentAssetDetail,
   InvestmentBrlResult,
+  InvestmentFixedIncome,
+  InvestmentFixedIncomeAdjustmentResult,
+  InvestmentFixedIncomeRedemptionPreview,
+  InvestmentFixedIncomeSimulation,
+  InvestmentFixedIncomeTotals,
+  InvestmentFixedIncomeWriteResult,
   InvestmentFx,
   InvestmentOperation,
   InvestmentOperationResult,
@@ -37,6 +47,9 @@ class InvestmentModel {
       averageFxRate: (data.averageFxRate as null | string) ?? null,
       brl: InvestmentModel.toBrlResult(data),
       currency: toCurrencyCode(data.currency),
+      fixedIncome: data.fixedIncome
+        ? InvestmentModel.toFixedIncome(data.fixedIncome as Json)
+        : null,
       fx: data.fx ? InvestmentModel.toFx(data.fx as Json) : null,
       id: data.id as string,
       name: data.name as string,
@@ -80,6 +93,120 @@ class InvestmentModel {
     };
   }
 
+  // Spec 105 FR 26: the list sends the summary, the detail also the history, lots and projection.
+  static toFixedIncome(data: Json): InvestmentFixedIncome {
+    return {
+      adjustments: ((data.adjustments as Json[]) ?? []).map((row) => ({
+        date: row.date as string,
+        grossAmount: Number(row.grossAmount),
+        id: row.id as string,
+      })),
+      atMaturity: InvestmentModel.toFixedIncomeTotals(data.atMaturity as Json),
+      currentEffectiveRate:
+        (data.currentEffectiveRate as null | string) ?? null,
+      liquidity: data.liquidity as InvestmentFixedIncomeLiquidity,
+      liquidityDate: (data.liquidityDate as null | string) ?? null,
+      lots: ((data.lots as Json[]) ?? []).map((lot) => ({
+        date: lot.date as string,
+        days: Number(lot.days),
+        gross: Number(lot.gross),
+        iof: Number(lot.iof),
+        iofRate: lot.iofRate as string,
+        ir: Number(lot.ir),
+        irRate: lot.irRate as string,
+        net: Number(lot.net),
+        operationId: lot.operationId as string,
+        principal: Number(lot.principal),
+        remainingPrincipal: Number(lot.remainingPrincipal),
+      })),
+      maturityDate: data.maturityDate as string,
+      maturityPending: data.maturityPending === true,
+      product: data.product as InvestmentFixedIncomeProduct,
+      rates: ((data.rates as Json[]) ?? []).map((rate) => ({
+        annualRate: (rate.annualRate as null | string) ?? null,
+        cdiPercent: (rate.cdiPercent as null | string) ?? null,
+        effectiveRate: rate.effectiveRate as string,
+        id: rate.id as string,
+        indexRate: (rate.indexRate as null | string) ?? null,
+        mode: rate.mode as InvestmentFixedIncomeRateMode,
+        spread: (rate.spread as null | string) ?? null,
+        startDate: rate.startDate as string,
+      })),
+      taxExempt: data.taxExempt === true,
+      today: InvestmentModel.toFixedIncomeTotals(data.today as Json),
+    };
+  }
+
+  static toFixedIncomeAdjustmentResult(
+    data: Json,
+  ): InvestmentFixedIncomeAdjustmentResult {
+    const item = data.item as Json;
+
+    return {
+      computedGross: Number(item.computedGross),
+      detail: InvestmentModel.toAssetDetail(data.detail as Json),
+      item: {
+        date: item.date as string,
+        grossAmount: Number(item.grossAmount),
+        id: item.id as string,
+      },
+    };
+  }
+
+  static toFixedIncomeRedemptionPreview(
+    data: Json,
+  ): InvestmentFixedIncomeRedemptionPreview {
+    const remaining = data.remaining as Json;
+
+    return {
+      gross: Number(data.gross),
+      iof: Number(data.iof),
+      ir: Number(data.ir),
+      liquidityWarning:
+        (data.liquidityWarning as InvestmentFixedIncomeLiquidity) ?? null,
+      lots: ((data.lots as Json[]) ?? []).map((lot) => ({
+        date: lot.date as string,
+        gross: Number(lot.gross),
+        operationId: lot.operationId as string,
+        principalUsed: Number(lot.principalUsed),
+      })),
+      net: Number(data.net),
+      remaining: {
+        gross: Number(remaining.gross),
+        principal: Number(remaining.principal),
+      },
+    };
+  }
+
+  static toFixedIncomeSimulation(data: Json): InvestmentFixedIncomeSimulation {
+    return {
+      atMaturity: InvestmentModel.toFixedIncomeTotals(data.atMaturity as Json),
+      effectiveRate: data.effectiveRate as string,
+    };
+  }
+
+  static toFixedIncomeTotals(
+    data: Json | undefined,
+  ): InvestmentFixedIncomeTotals {
+    return {
+      gross: Number(data?.gross ?? 0),
+      iof: Number(data?.iof ?? 0),
+      ir: Number(data?.ir ?? 0),
+      net: Number(data?.net ?? 0),
+    };
+  }
+
+  static toFixedIncomeWriteResult(
+    data: Json,
+  ): InvestmentFixedIncomeWriteResult {
+    return {
+      detail: InvestmentModel.toAssetDetail(data.detail as Json),
+      liquidityWarning:
+        (data.liquidityWarning as InvestmentFixedIncomeLiquidity) ?? null,
+      operation: InvestmentModel.toOperation(data.item as Json),
+    };
+  }
+
   static toFx(data: Json): InvestmentFx {
     return {
       quotedAt: data.quotedAt as string,
@@ -103,8 +230,11 @@ class InvestmentModel {
       generateTransaction: data.generateTransaction === true,
       gross: Number(data.gross ?? 0),
       id: data.id as string,
+      netAmount: (data.netAmount as null | number) ?? null,
       quantity: data.quantity as string,
       realizedResult: (data.realizedResult as null | number) ?? null,
+      redemptionKind:
+        (data.redemptionKind as InvestmentFixedIncomeRedemptionKind) ?? null,
       total: Number(data.total ?? 0),
       transactionId: (data.transactionId as null | string) ?? null,
       type: data.type as InvestmentOperationType,

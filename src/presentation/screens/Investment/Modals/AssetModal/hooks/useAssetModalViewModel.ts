@@ -62,7 +62,7 @@ function tickerErrorKey(
 }
 
 function useAssetModalViewModel() {
-  const { closeModal } = useModalNavigation();
+  const { closeModal, replaceModal } = useModalNavigation();
   const params = useLocalSearchParams<{ id?: string }>();
   const isEditing = !!params.id;
   const activeOwners = useActiveOwners();
@@ -92,6 +92,8 @@ function useAssetModalViewModel() {
   const [edited, setEdited] = useState<AssetFormState>();
   const [submitted, setSubmitted] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
+  // Spec 105 FR 29: a new fixed income asset is calculated from the rate by default.
+  const [calculated, setCalculated] = useState(true);
   const state = edited ?? initial;
   const market = state ? marketOf(state.assetClass) : undefined;
   const typed = state?.ticker.trim() ?? "";
@@ -160,6 +162,16 @@ function useAssetModalViewModel() {
   }
 
   function onSave() {
+    // The calculated flow has its own modal with the terms, the rate and the first contribution.
+    if (
+      !isEditing &&
+      state?.assetClass === InvestmentAssetClass.FIXED_INCOME &&
+      calculated
+    ) {
+      replaceModal("investment_fixed_income");
+      return;
+    }
+
     setSubmitted(true);
 
     if (!state || !initial || Object.keys(validate(state, initial)).length) {
@@ -193,8 +205,12 @@ function useAssetModalViewModel() {
     closeModal();
   }
 
+  const showCalculated =
+    !isEditing && state?.assetClass === InvestmentAssetClass.FIXED_INCOME;
+
   return {
     assetClass: state?.assetClass ?? InvestmentAssetClass.BR_STOCK,
+    calculated: showCalculated && calculated,
     classLocked,
     classOptions: CLASS_OPTIONS.map((value) => ({
       labelKey: `investment.class.${value}` as TranslationKeys,
@@ -215,6 +231,7 @@ function useAssetModalViewModel() {
     nameError: errors.name,
     onAssetClassChange: (value: string) =>
       state && update(withAssetClass(state, value as InvestmentAssetClass)),
+    onCalculatedChange: setCalculated,
     onClose,
     onCurrencyChange: (value: string) =>
       state && update(withCurrency(state, value as AssetFormState["currency"])),
@@ -240,6 +257,7 @@ function useAssetModalViewModel() {
     pickedQuote: state?.picked ?? null,
     quotedMarket: market ?? null,
     searchUnavailable: search.error instanceof QuoteSourceUnavailable,
+    showCalculated,
     suggestions,
     ticker: state?.ticker ?? "",
     tickerError: tickerErrorKey(tickerExists, tickerNotFound, errors.ticker),

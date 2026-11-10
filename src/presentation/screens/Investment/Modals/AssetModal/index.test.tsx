@@ -70,3 +70,20 @@ it("SHOULD show the discard dialog", () => {
 
   expect(vm.onDiscardConfirm).toHaveBeenCalledTimes(1);
 });
+
+it("SHOULD show the calculated switch AND the continue label for a new fixed income asset", () => {
+  const { vm } = setup({ calculated: true, showCalculated: true });
+
+  expect(screen.getByTestId(ids.calculated)).toBeOnTheScreen();
+  expect(hasText("investment.fixedIncome.new.continue")).toBe(true);
+
+  fireEvent(screen.getByTestId(ids.calculated), "valueChange", false);
+
+  expect(vm.onCalculatedChange).toHaveBeenCalledWith(false);
+});
+
+it("SHOULD not show the calculated switch for any other asset", () => {
+  setup();
+
+  expect(screen.queryByTestId(ids.calculated)).toBeNull();
+});

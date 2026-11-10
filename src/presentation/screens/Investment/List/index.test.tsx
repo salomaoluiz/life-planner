@@ -3,7 +3,12 @@ import { fireEvent, screen } from "@testing-library/react-native";
 import { hasText } from "@tests";
 
 import * as theme from "@presentation/theme";
-import { makeUsdAsset, owners } from "@screens/Investment/mocks/fixtures";
+import {
+  makeAsset,
+  makeFixedIncome,
+  makeUsdAsset,
+  owners,
+} from "@screens/Investment/mocks/fixtures";
 import {
   buildEntries,
   filterAssets,
@@ -189,5 +194,82 @@ describe("quotes (spec 104)", () => {
     setup({ entries: unavailable });
 
     expect(hasText("investment.quote.unavailable")).toBe(true);
+  });
+});
+
+describe("fixed income (spec 105)", () => {
+  const fixedAsset = makeAsset({
+    assetClass: "FIXED_INCOME" as never,
+    fixedIncome: makeFixedIncome({ maturityPending: true }),
+    id: "asset-fi",
+    name: "CDB Banco Exemplo 2028",
+    ticker: null,
+  });
+
+  function entriesOf(assets = [fixedAsset]) {
+    return buildEntries(filterAssets(assets, owners, "ALL", ""));
+  }
+
+  it("SHOULD show the pending card first with the confirm action", () => {
+    const { vm } = setup({
+      entries: entriesOf(),
+      pendingAssets: [fixedAsset],
+    });
+
+    expect(
+      screen.getByTestId(`${investmentTestIds.list.pendingCard}-asset-fi`),
+    ).toBeOnTheScreen();
+
+    fireEvent.press(
+      screen.getByTestId(`${investmentTestIds.list.pendingConfirm}-asset-fi`),
+    );
+
+    expect(vm.onConfirmMaturity).toHaveBeenCalledWith("asset-fi");
+  });
+
+  it("SHOULD not offer the confirm action WHEN read-only", () => {
+    setup({
+      entries: entriesOf(),
+      pendingAssets: [fixedAsset],
+      readOnly: true,
+    });
+
+    expect(
+      screen.queryByTestId(`${investmentTestIds.list.pendingConfirm}-asset-fi`),
+    ).toBeNull();
+  });
+
+  it.each(["expanded", "compact"] as const)(
+    "SHOULD show the maturity AND liquidity chips on a %s width",
+    (breakpoint) => {
+      jest.spyOn(theme, "useBreakpoint").mockReturnValue(breakpoint);
+
+      setup({ entries: entriesOf() });
+
+      expect(
+        screen.getByTestId(
+          `${investmentTestIds.list.fixedIncomeChips}-asset-fi`,
+        ),
+      ).toBeOnTheScreen();
+      expect(
+        screen.getByText(/investment\.fixedIncome\.liquidity\.AT_MATURITY/),
+      ).toBeTruthy();
+    },
+  );
+
+  it("SHOULD mark a grace period in the warning tone", () => {
+    setup({
+      entries: entriesOf([
+        {
+          ...fixedAsset,
+          fixedIncome: makeFixedIncome({
+            liquidity: "GRACE_PERIOD" as never,
+            liquidityDate: "2026-12-10",
+          }),
+        },
+      ]),
+    });
+
+    expect(screen.getByText(/investment\.fixedIncome\.chipGrace/)).toBeTruthy();
   });
 });

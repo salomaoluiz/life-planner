@@ -91,3 +91,25 @@ operation modal: "Exchange rate (BRL per USD)" for non-BRL assets, placeholder =
 ```
 
 Design deviations (spec 104): the purchase markers of the chart are not drawn (the shared `LineChart` has no markers; the dashed segment and the legend carry the history start); the "fee breakdown" panel of spec 102 is unchanged; the asset list drops the Cost, Average price and Realized columns (they stay on the detail) to fit Price, Today and Updated.
+
+## Fixed income calculated (spec 105)
+
+```yaml
+entities: InvestmentAsset.fixedIncome (InvestmentFixedIncome: product, taxExempt, maturityDate, liquidity, liquidityDate, currentEffectiveRate, maturityPending, today {gross, iof, ir, net}; the detail adds rates, adjustments, lots, atMaturity), InvestmentOperation.netAmount/redemptionKind; results InvestmentFixedIncomeWriteResult, InvestmentFixedIncomeAdjustmentResult, InvestmentFixedIncomeRedemptionPreview, InvestmentFixedIncomeSimulation; enums InvestmentFixedIncomeProduct/Liquidity/RateMode/RedemptionKind, InvestmentFeeKind.INCOME_TAX/IOF, TAX_EXEMPT_PRODUCTS
+errors: InvestmentRedemptionTooLarge(availableNet | date) (422 with details), InvestmentUseFixedIncomeActions (422)
+repository/use cases: createFixedIncomeTitle/Rate/Contribution/Redemption, upsertFixedIncomeTerms/Adjustment, updateFixedIncomeRate, deleteFixedIncomeRate/Adjustment, simulateFixedIncome, previewFixedIncomeRedemption (use cases createInvestmentFixedIncome*UseCase and friends, one per method); the datasource lives in data/datasource/data/investment/api/fixedIncomeApi.ts (percentages "14,90" -> "14.9", the mode decides which rate fields go)
+query keys: investmentKeys.fixedIncomePreview / fixedIncomeSimulation
+```
+
+```yaml
+presentation:
+  models: Investment/FixedIncome/models/fixedIncome.ts (defaultTaxExempt, rate form + previewEffectiveRate, rateSummary/rateEntry, chipsOf, liquidityWarningOf, lotTaxesKey); hooks useEligibleAccounts (active BRL accounts of a writable owner, brokerage first), useDebouncedValue (400 ms); components RateFields (mode control + fields + effective rate)
+  new title: AssetModal "Calculate from the rate" switch (new FIXED_INCOME asset, on by default) -> replaceModal investment_fixed_income -> Modals/FixedIncomeTitleModal (product, owner, name, tax exempt, amount, date, account, maturity, liquidity (+ grace date), rate, estimate at maturity from simulate)
+  detail: Detail/components/FixedIncomeSection (rate line, five cards, pending banner, tabs Lots/Rates/Operations with edit/delete, "At maturity" panel; the header shows the four actions, Redeem + "More actions" on compact); the manual price/quote/valuation sections are not rendered for a calculated title
+  modals (MODAL_ROUTES): investment_fixed_income, investment_fixed_income_contribution, investment_fixed_income_redeem (partial/total, liquidity warning, debounced preview, opens as TOTAL on the maturity date from the pending card), investment_fixed_income_rate (update, or edit with rateId), investment_fixed_income_adjust (compares with the gross of today)
+  list: PendingMaturityCard first (confirm redemption), maturity + liquidity chips on the rows (grace period in the warning tone)
+testIds: investment.fixed-income-modal.*, investment.redeem-modal.*, investment.contribution-modal.*, investment.rate-modal.*, investment.adjust-modal.*, investment.detail.fi-*, investment.list.pending-*
+e2e: e2e/flows/investment/fixed-income-calculated.yaml, fixed-income-pending-maturity.yaml (spec-105)
+```
+
+Design deviations (spec 105): the adjust modal compares the statement with the app only for today (the detail has no curve for other dates; the API returns `computedGross` after saving); the operations tab of a calculated title lists contributions and redemptions read-only with delete (editing goes through new actions); the estimate of the rate in the forms is a client preview, the API derives and stores the real effective rate.

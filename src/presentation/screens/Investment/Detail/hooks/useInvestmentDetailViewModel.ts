@@ -19,13 +19,16 @@ import {
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { useMutation } from "@infrastructure/fetcher";
 import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
+import { useLocaleTag } from "@presentation/i18n";
 import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
 import invalidateInvestments from "@screens/Investment/hooks/invalidateInvestments";
 import useQuoteRefresh from "@screens/Investment/hooks/useQuoteRefresh";
+import { formatDay } from "@screens/Investment/models/format";
 import getInvestmentErrorMessage from "@screens/Investment/utils/investmentErrorMessage";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import { deleteSummary, sellCount } from "../models/detailModel";
+import { FixedIncomeTab } from "../models/fixedIncomeTab";
 import { ChartMode } from "../models/priceChart";
 
 export type InvestmentDetailVM = ReturnType<
@@ -54,10 +57,13 @@ function useInvestmentDetailViewModel() {
   const isFocused = useIsFocused();
   const { openModal } = useModalNavigation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [fixedIncomeMenuOpen, setFixedIncomeMenuOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [range, setRange] = useState(InvestmentPriceRange.ONE_YEAR);
   const [chartMode, setChartMode] = useState<ChartMode>("price");
+  const [fixedIncomeTab, setFixedIncomeTab] = useState<FixedIncomeTab>("lots");
   const quoteRefresh = useQuoteRefresh([id]);
+  const localeTag = useLocaleTag();
 
   const query = useOwnerScopedQuery<DetailData>({
     cacheKey: investmentKeys.asset(id),
@@ -86,6 +92,15 @@ function useInvestmentDetailViewModel() {
   const deleteMutation = useMutation({
     cacheKey: [useCases.deleteInvestmentAssetUseCase.uniqueName],
     fetch: useCases.deleteInvestmentAssetUseCase.execute,
+  });
+  // Spec 105: the rates and the operations of a calculated title are deleted from its tabs.
+  const rateMutation = useMutation({
+    cacheKey: [useCases.deleteInvestmentFixedIncomeRateUseCase.uniqueName],
+    fetch: useCases.deleteInvestmentFixedIncomeRateUseCase.execute,
+  });
+  const operationMutation = useMutation({
+    cacheKey: [useCases.deleteInvestmentOperationUseCase.uniqueName],
+    fetch: useCases.deleteInvestmentOperationUseCase.execute,
   });
   const valuationMutation = useMutation({
     cacheKey: [useCases.deleteInvestmentValuationUseCase.uniqueName],
@@ -132,6 +147,20 @@ function useInvestmentDetailViewModel() {
   }, [archiveMutation.status]);
 
   useEffect(() => {
+    if (rateMutation.status === "success") {
+      void invalidateInvestments();
+      rateMutation.reset();
+    }
+  }, [rateMutation.status]);
+
+  useEffect(() => {
+    if (operationMutation.status === "success") {
+      void invalidateInvestments();
+      operationMutation.reset();
+    }
+  }, [operationMutation.status]);
+
+  useEffect(() => {
     if (valuationMutation.status === "success") {
       void invalidateInvestments();
       valuationMutation.reset();
@@ -148,7 +177,11 @@ function useInvestmentDetailViewModel() {
   const ownerLabel = ownerLabelOf(asset, query.data?.owners ?? []);
   const summary = asset ? deleteSummary(asset) : { entries: 0, operations: 0 };
   const error =
-    archiveMutation.error ?? deleteMutation.error ?? valuationMutation.error;
+    archiveMutation.error ??
+    deleteMutation.error ??
+    valuationMutation.error ??
+    rateMutation.error ??
+    operationMutation.error;
 
   function onArchiveToggle() {
     setMenuOpen(false);
@@ -167,7 +200,12 @@ function useInvestmentDetailViewModel() {
     asset,
     chartMode,
     deleteSummary: summary,
-    errorMessage: getInvestmentErrorMessage(error),
+    errorMessage: getInvestmentErrorMessage(error, (day) =>
+      formatDay(day, localeTag),
+    ),
+    fixedIncome: asset?.fixedIncome ?? null,
+    fixedIncomeMenuOpen,
+    fixedIncomeTab,
     history: history.data,
     historyLoading: history.isFetching && !history.data,
     isDeleteOpen: deleteOpen,
@@ -181,6 +219,9 @@ function useInvestmentDetailViewModel() {
     onAddOperation: scope.guard(() =>
       openModal("investment_operation", { assetId: id }),
     ),
+    onAdjust: scope.guard(() =>
+      openModal("investment_fixed_income_adjust", { assetId: id }),
+    ),
     onArchiveToggle: scope.guard(onArchiveToggle),
     onBack: () => router.replace("/investments"),
     onBackToAutomatic: scope.guard(() => {
@@ -191,6 +232,16 @@ function useInvestmentDetailViewModel() {
       }
     }),
     onChartModeChange: setChartMode,
+    onConfirmMaturity: scope.guard(() =>
+      openModal("investment_fixed_income_redeem", {
+        assetId: id,
+        date: asset?.fixedIncome?.maturityDate,
+        kind: "TOTAL",
+      }),
+    ),
+    onContribute: scope.guard(() =>
+      openModal("investment_fixed_income_contribution", { assetId: id }),
+    ),
     onDeleteCancel: () => setDeleteOpen(false),
     onDeleteConfirm: () => deleteMutation.mutate(id),
     onDeleteOpen: scope.guard(() => {
@@ -204,15 +255,32 @@ function useInvestmentDetailViewModel() {
       setMenuOpen(false);
       openModal("investment_asset", { id });
     }),
+    onFixedIncomeMenuClose: () => setFixedIncomeMenuOpen(false),
+    onFixedIncomeMore: () => setFixedIncomeMenuOpen(true),
+    onFixedIncomeOperationDelete: scope.guard((operationId: string) =>
+      operationMutation.mutate(operationId),
+    ),
+    onFixedIncomeTabChange: (value: string) =>
+      setFixedIncomeTab(value as FixedIncomeTab),
     onMenuClose: () => setMenuOpen(false),
     onMenuOpen: () => setMenuOpen(true),
     onOperationPress: (operationId: string) =>
       openModal("investment_operation", { assetId: id, id: operationId }),
     onQuotesRefresh: quoteRefresh.onRefresh,
     onRangeChange: setRange,
+    onRateDelete: scope.guard((rateId: string) => rateMutation.mutate(rateId)),
+    onRateEdit: scope.guard((rateId: string) =>
+      openModal("investment_fixed_income_rate", { assetId: id, rateId }),
+    ),
+    onRedeem: scope.guard(() =>
+      openModal("investment_fixed_income_redeem", { assetId: id }),
+    ),
     onRefresh: async () => query.refetch(),
     onRetry: async () => query.refetch(),
     onToastHide: scope.onToastHide,
+    onUpdateRate: scope.guard(() =>
+      openModal("investment_fixed_income_rate", { assetId: id }),
+    ),
     onUpdateValue: scope.guard(() =>
       openModal("investment_valuation", { assetId: id }),
     ),

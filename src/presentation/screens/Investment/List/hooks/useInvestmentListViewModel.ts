@@ -92,6 +92,11 @@ function useInvestmentListViewModel() {
     (row) => row.asset,
   );
 
+  // Spec 105 FR 25: matured titles with principal left come first, with their own card.
+  const pendingAssets = activeAssets.filter(
+    (asset) => asset.fixedIncome?.maturityPending,
+  );
+
   async function refetch() {
     await Promise.all([active.refetch(), archived.refetch()]);
   }
@@ -109,6 +114,14 @@ function useInvestmentListViewModel() {
     isRefreshing: current.isFetching && !!current.data,
     noResults: hasAny && entries.length === 0,
     onAddPress: scope.guard(() => openModal("investment_asset")),
+    onConfirmMaturity: scope.guard((id: string) =>
+      openModal("investment_fixed_income_redeem", {
+        assetId: id,
+        date: pendingAssets.find((asset) => asset.id === id)?.fixedIncome
+          ?.maturityDate,
+        kind: "TOTAL",
+      }),
+    ),
     onOwnerFilterChange: setOwnerFilter,
     onQuotesRefresh: quoteRefresh.onRefresh,
     onRefresh: refetch,
@@ -119,6 +132,7 @@ function useInvestmentListViewModel() {
     onToastHide: scope.onToastHide,
     ownerChoices: buildOwnerFilterChoices(owners),
     ownerFilter,
+    pendingAssets: tab === InvestmentAssetStatus.ACTIVE ? pendingAssets : [],
     quotesDisabled: quoteRefresh.disabled,
     quotesRefreshing: quoteRefresh.isRefreshing,
     quotesSecondsLeft: quoteRefresh.secondsLeft,

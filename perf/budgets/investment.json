@@ -17,6 +17,51 @@
   "investment.detail.render.mount": {
     "maxCommits": 3
   },
+  "investment.fixedIncomeAdjust.mount.cold": {
+    "maxDepth": 1,
+    "maxDuplicates": 0,
+    "maxRequests": 1,
+    "modal": "investment_fixed_income_adjust"
+  },
+  "investment.fixedIncomeAdjust.render.mount": {
+    "maxCommits": 4
+  },
+  "investment.fixedIncomeContribution.mount.cold": {
+    "maxDepth": 2,
+    "maxDuplicates": 0,
+    "maxRequests": 3,
+    "modal": "investment_fixed_income_contribution"
+  },
+  "investment.fixedIncomeContribution.render.mount": {
+    "maxCommits": 4
+  },
+  "investment.fixedIncomeRate.mount.cold": {
+    "maxDepth": 1,
+    "maxDuplicates": 0,
+    "maxRequests": 1,
+    "modal": "investment_fixed_income_rate"
+  },
+  "investment.fixedIncomeRate.render.mount": {
+    "maxCommits": 4
+  },
+  "investment.fixedIncomeRedeem.mount.cold": {
+    "maxDepth": 2,
+    "maxDuplicates": 0,
+    "maxRequests": 3,
+    "modal": "investment_fixed_income_redeem"
+  },
+  "investment.fixedIncomeRedeem.render.mount": {
+    "maxCommits": 4
+  },
+  "investment.fixedIncomeTitle.mount.cold": {
+    "maxDepth": 2,
+    "maxDuplicates": 0,
+    "maxRequests": 3,
+    "modal": "investment_fixed_income"
+  },
+  "investment.fixedIncomeTitle.render.mount": {
+    "maxCommits": 4
+  },
   "investment.list.mount.cold": {
     "maxDepth": 2,
     "maxDuplicates": 0,

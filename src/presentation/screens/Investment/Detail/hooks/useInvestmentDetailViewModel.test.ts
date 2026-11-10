@@ -16,6 +16,7 @@ import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import invalidateInvestments from "@screens/Investment/hooks/invalidateInvestments";
 import {
   makeDetail,
+  makeFixedIncomeDetail,
   makeQuote,
   makeValuation,
   owners,
@@ -44,6 +45,14 @@ jest.mock("@screens/Investment/hooks/invalidateInvestments");
 jest.mock("@application/useCases", () => ({
   useCases: {
     deleteInvestmentAssetUseCase: { execute: jest.fn(), uniqueName: "delete" },
+    deleteInvestmentFixedIncomeRateUseCase: {
+      execute: jest.fn(),
+      uniqueName: "delRate",
+    },
+    deleteInvestmentOperationUseCase: {
+      execute: jest.fn(),
+      uniqueName: "delOp",
+    },
     deleteInvestmentValuationUseCase: {
       execute: jest.fn(),
       uniqueName: "delVal",
@@ -69,6 +78,8 @@ const historyQuery = new UseQueryFixture<unknown>();
 const archiveMutation = new UseMutationFixture();
 const deleteMutation = new UseMutationFixture();
 const valuationMutation = new UseMutationFixture();
+const rateMutation = new UseMutationFixture();
+const operationMutation = new UseMutationFixture();
 
 const spies = {
   isFocused: jest.mocked(useIsFocused),
@@ -97,12 +108,16 @@ beforeEach(() => {
   archiveMutation.reset();
   deleteMutation.reset();
   valuationMutation.reset();
+  rateMutation.reset();
+  operationMutation.reset();
   spies.isFocused.mockReturnValue(false);
   spies.params.mockReturnValue({ id: "asset-1" });
   spies.useQuery.mockImplementation(queryFor as never);
   spies.useMutation.mockImplementation(((props: { cacheKey: string[] }) =>
     ({
       delete: deleteMutation,
+      delOp: operationMutation,
+      delRate: rateMutation,
       delVal: valuationMutation,
       update: archiveMutation,
     })[props.cacheKey[0]]?.build()) as never);
@@ -382,5 +397,82 @@ describe("quotes (spec 104)", () => {
     act(() => result.current.onBackToAutomatic());
 
     expect(valuationMutation.value.mutate).not.toHaveBeenCalled();
+  });
+});
+
+describe("fixed income (spec 105)", () => {
+  it("SHOULD expose the fixed income, open the actions with the asset id AND confirm the maturity", () => {
+    givenDetail(makeFixedIncomeDetail());
+
+    const { result } = setup();
+
+    expect(result.current.fixedIncome?.product).toBe("CDB");
+    expect(result.current.fixedIncomeTab).toBe("lots");
+
+    act(() => result.current.onRedeem());
+    act(() => result.current.onContribute());
+    act(() => result.current.onUpdateRate());
+    act(() => result.current.onAdjust());
+    act(() => result.current.onRateEdit("rate-1"));
+    act(() => result.current.onConfirmMaturity());
+
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "investment_fixed_income_redeem",
+      { assetId: "asset-1" },
+    );
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "investment_fixed_income_contribution",
+      { assetId: "asset-1" },
+    );
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "investment_fixed_income_rate",
+      { assetId: "asset-1" },
+    );
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "investment_fixed_income_adjust",
+      { assetId: "asset-1" },
+    );
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "investment_fixed_income_rate",
+      { assetId: "asset-1", rateId: "rate-1" },
+    );
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "investment_fixed_income_redeem",
+      { assetId: "asset-1", date: "2028-01-15", kind: "TOTAL" },
+    );
+  });
+
+  it("SHOULD switch the tab AND the more-actions menu", () => {
+    givenDetail(makeFixedIncomeDetail());
+
+    const { result } = setup();
+
+    act(() => result.current.onFixedIncomeTabChange("rates"));
+    act(() => result.current.onFixedIncomeMore());
+
+    expect(result.current.fixedIncomeTab).toBe("rates");
+    expect(result.current.fixedIncomeMenuOpen).toBe(true);
+
+    act(() => result.current.onFixedIncomeMenuClose());
+
+    expect(result.current.fixedIncomeMenuOpen).toBe(false);
+  });
+
+  it("SHOULD delete a rate AND an operation, then invalidate", () => {
+    givenDetail(makeFixedIncomeDetail());
+
+    const { result } = setup();
+
+    act(() => result.current.onRateDelete("rate-2"));
+    act(() => result.current.onFixedIncomeOperationDelete("lot-1"));
+
+    expect(rateMutation.value.mutate).toHaveBeenCalledWith("rate-2");
+    expect(operationMutation.value.mutate).toHaveBeenCalledWith("lot-1");
+
+    rateMutation.withStatus("success");
+    operationMutation.withStatus("success");
+    setup();
+
+    expect(invalidateInvestments).toHaveBeenCalled();
   });
 });

@@ -30,6 +30,7 @@ function asset(
     averageFxRate: null,
     brl: null,
     currency: "BRL",
+    fixedIncome: null,
     fx: null,
     id,
     name: `Name ${id}`,

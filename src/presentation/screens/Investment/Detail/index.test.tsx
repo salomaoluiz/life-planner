@@ -9,6 +9,8 @@ import {
 import * as theme from "@presentation/theme";
 import {
   makeDetail,
+  makeFixedIncome,
+  makeFixedIncomeDetail,
   makePosition,
   makeQuote,
   makeUsdAsset,
@@ -276,5 +278,206 @@ describe("quotes (spec 104)", () => {
     setup({ asset: usd(), historyLoading: true });
 
     expect(screen.getByTestId(ids.chart)).toBeOnTheScreen();
+  });
+});
+
+describe("fixed income (spec 105)", () => {
+  const fi = investmentTestIds.detail.fixedIncome;
+
+  function setupFixedIncome(overrides = {}, fixedIncome = makeFixedIncome()) {
+    return setup({
+      asset: makeFixedIncomeDetail({ fixedIncome }),
+      fixedIncome,
+      ...overrides,
+    });
+  }
+
+  it("SHOULD render the rate line, the five cards, the lots AND the projection at maturity", () => {
+    setupFixedIncome();
+
+    expect(screen.getByTestId(fi.rateLine)).toBeOnTheScreen();
+    for (const id of [
+      fi.cardApplied,
+      fi.cardGross,
+      fi.cardIr,
+      fi.cardIof,
+      fi.cardNet,
+      fi.atMaturity,
+      fi.tabs,
+    ]) {
+      expect(screen.getByTestId(id)).toBeOnTheScreen();
+    }
+    expect(screen.getByTestId(`${fi.lotRow}-lot-1`)).toBeOnTheScreen();
+    expect(screen.getByTestId(`${fi.lotRow}-lot-2`)).toBeOnTheScreen();
+    expect(screen.queryByTestId(ids.quantity)).toBeNull();
+    expect(screen.queryByTestId(ids.updateValue)).toBeNull();
+  });
+
+  it("SHOULD show the four actions on a wide screen AND call them", () => {
+    const { vm } = setupFixedIncome();
+
+    fireEvent.press(screen.getByTestId(fi.actionAdjust));
+    fireEvent.press(screen.getByTestId(fi.actionRates));
+    fireEvent.press(screen.getByTestId(fi.actionContribute));
+    fireEvent.press(screen.getByTestId(fi.actionRedeem));
+
+    expect(vm.onAdjust).toHaveBeenCalledTimes(1);
+    expect(vm.onUpdateRate).toHaveBeenCalledTimes(1);
+    expect(vm.onContribute).toHaveBeenCalledTimes(1);
+    expect(vm.onRedeem).toHaveBeenCalledTimes(1);
+  });
+
+  it("SHOULD show Redeem AND More actions on mobile, with the other three in the menu", () => {
+    jest.spyOn(theme, "useBreakpoint").mockReturnValue("compact");
+
+    const { vm } = setupFixedIncome({ fixedIncomeMenuOpen: true });
+
+    fireEvent.press(screen.getByTestId(fi.actionRedeem));
+    fireEvent.press(screen.getByTestId(fi.more));
+    fireEvent.press(screen.getByTestId(`${fi.moreMenu}-adjust`));
+    fireEvent.press(screen.getByTestId(`${fi.moreMenu}-updateRate`));
+    fireEvent.press(screen.getByTestId(`${fi.moreMenu}-contribute`));
+
+    expect(screen.queryByTestId(fi.actionAdjust)).toBeNull();
+    expect(vm.onRedeem).toHaveBeenCalledTimes(1);
+    expect(vm.onFixedIncomeMore).toHaveBeenCalledTimes(1);
+    expect(vm.onFixedIncomeMenuClose).toHaveBeenCalledTimes(3);
+    expect(vm.onAdjust).toHaveBeenCalledTimes(1);
+    expect(vm.onUpdateRate).toHaveBeenCalledTimes(1);
+    expect(vm.onContribute).toHaveBeenCalledTimes(1);
+  });
+
+  it("SHOULD hide the actions WHEN the title is archived", () => {
+    setupFixedIncome({ archived: true });
+
+    expect(screen.queryByTestId(fi.actionRedeem)).toBeNull();
+  });
+
+  it("SHOULD change the tab", () => {
+    const { vm } = setupFixedIncome();
+
+    fireEvent.press(screen.getByText("investment.fixedIncome.tab.rates"));
+
+    expect(vm.onFixedIncomeTabChange).toHaveBeenCalledWith("rates");
+  });
+
+  it("SHOULD list the rates with edit AND delete (never delete the only one)", () => {
+    const base = makeFixedIncome();
+    const second = {
+      ...base.rates[0],
+      id: "rate-2",
+      startDate: "2026-10-01",
+    };
+    const { vm } = setupFixedIncome(
+      { fixedIncomeTab: "rates" },
+      { ...base, rates: [base.rates[0], second] },
+    );
+
+    fireEvent.press(screen.getByTestId(`${fi.rateEdit}-rate-2`));
+    fireEvent.press(screen.getByTestId(`${fi.rateDelete}-rate-2`));
+
+    expect(vm.onRateEdit).toHaveBeenCalledWith("rate-2");
+    expect(vm.onRateDelete).toHaveBeenCalledWith("rate-2");
+
+    setupFixedIncome({ fixedIncomeTab: "rates" });
+
+    expect(screen.queryByTestId(`${fi.rateDelete}-rate-1`)).toBeNull();
+  });
+
+  it("SHOULD list the operations with the withheld taxes AND delete one", () => {
+    const detail = makeFixedIncomeDetail();
+    const { vm } = setupFixedIncome({ fixedIncomeTab: "operations" });
+
+    fireEvent.press(
+      screen.getByTestId(`${fi.operationDelete}-${detail.operations[0].id}`),
+    );
+
+    expect(vm.onFixedIncomeOperationDelete).toHaveBeenCalledWith("lot-2");
+  });
+
+  it("SHOULD show the sell with its IR AND IOF fees", () => {
+    const detail = makeFixedIncomeDetail();
+
+    setup({
+      asset: {
+        ...detail,
+        operations: [
+          {
+            ...detail.operations[0],
+            fees: [
+              {
+                amount: 13935,
+                description: null,
+                id: "f-ir",
+                kind: "INCOME_TAX" as never,
+              },
+              {
+                amount: 100,
+                description: null,
+                id: "f-iof",
+                kind: "IOF" as never,
+              },
+            ],
+            id: "sell-1",
+            type: "SELL" as never,
+          },
+        ],
+      },
+      fixedIncome: detail.fixedIncome,
+      fixedIncomeTab: "operations",
+    });
+
+    expect(hasText("investment.operation.SELL")).toBe(true);
+    expect(screen.getByTestId(`${fi.tabOperations}-sell-1`)).toBeOnTheScreen();
+  });
+
+  it("SHOULD show the empty states of the lots AND the operations", () => {
+    setupFixedIncome({}, makeFixedIncome({ lots: [] }));
+
+    expect(hasText("investment.fixedIncome.lotsEmpty")).toBe(true);
+
+    setup({
+      asset: makeFixedIncomeDetail({ operations: [] }),
+      fixedIncome: makeFixedIncome(),
+      fixedIncomeTab: "operations",
+    });
+
+    expect(hasText("investment.detail.operationsEmpty")).toBe(true);
+  });
+
+  it("SHOULD show the pending maturity banner with the confirm action", () => {
+    const { vm } = setupFixedIncome(
+      {},
+      makeFixedIncome({ maturityPending: true }),
+    );
+
+    expect(screen.getByTestId(fi.pendingBanner)).toBeOnTheScreen();
+
+    fireEvent.press(screen.getByText("investment.fixedIncome.pending.action"));
+
+    expect(vm.onConfirmMaturity).toHaveBeenCalledTimes(1);
+  });
+
+  it("SHOULD not offer the confirm action to a read-only viewer", () => {
+    setupFixedIncome(
+      { readOnly: true },
+      makeFixedIncome({ maturityPending: true }),
+    );
+
+    expect(
+      screen.queryByText("investment.fixedIncome.pending.action"),
+    ).toBeNull();
+    expect(screen.queryByTestId(fi.actionRedeem)).toBeNull();
+  });
+
+  it("SHOULD hide the edit AND delete icons of the rates WHEN read-only", () => {
+    const base = makeFixedIncome();
+
+    setupFixedIncome(
+      { fixedIncomeTab: "rates", readOnly: true },
+      { ...base, rates: [base.rates[0], { ...base.rates[0], id: "rate-2" }] },
+    );
+
+    expect(screen.queryByTestId(`${fi.rateEdit}-rate-2`)).toBeNull();
   });
 });

@@ -29,6 +29,7 @@ import { formatMoney, formatTime } from "@screens/Investment/models/format";
 import investmentTestIds from "@screens/Investment/testIds";
 
 import AssetRowItem from "../components/AssetRowItem";
+import PendingMaturityCard from "../components/PendingMaturityCard";
 import { InvestmentListVM } from "../hooks";
 import useStyles from "../styles";
 
@@ -287,6 +288,14 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentListVM>) {
             testID={investmentTestIds.list.readOnlyBanner}
           />
         ) : null}
+        {vm.pendingAssets.map((asset) => (
+          <PendingMaturityCard
+            asset={asset}
+            key={asset.id}
+            onConfirm={vm.onConfirmMaturity}
+            readOnly={vm.readOnly}
+          />
+        ))}
         {hasContent && !compact && vm.entries.length > 0 ? (
           <ColumnsHeader />
         ) : null}
