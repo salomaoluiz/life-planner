@@ -3,6 +3,14 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.20.0] - 2026-11-10
+
+### Added
+
+- Readable error reports (spec 106): unexpected web errors are sent with the original file and line, release, environment, the signed-in user id and the owner in view, so they can be fixed quickly.
+- API failures are grouped by route (`HTTP 500 GET /v1/finance/transactions/:id`) and linked to the API error behind them; expected errors (4xx, offline) are never sent.
+- No personal or financial data leaves the device: search text, form values, emails and names are stripped from every report.
+
 ## [1.19.0] - 2026-11-10
 
 ### Added

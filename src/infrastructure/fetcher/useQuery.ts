@@ -4,6 +4,7 @@ import {
   useReactQuery,
 } from "@infrastructure/fetcher/reactQuery";
 import { UseQuery } from "@infrastructure/fetcher/types";
+import { addBreadcrumb } from "@infrastructure/monitoring";
 
 function definedOptions<T extends Record<string, unknown>>(options: T) {
   return Object.fromEntries(
@@ -48,6 +49,14 @@ function useQuery<Response>(
     genericError.addContext({
       ...error.context,
       cacheString: props.cacheKey.join("-"),
+    });
+
+    // Spec 106: the failed query is a breadcrumb of the event the boundary captures next.
+    addBreadcrumb({
+      category: "query",
+      data: { cacheString: props.cacheKey.join("-"), code: genericError.code },
+      level: "error",
+      message: `query failed`,
     });
 
     throw genericError;

@@ -28,7 +28,7 @@ it("SHOULD pass the fallback as props correctly", () => {
   );
 });
 
-it('SHOULD call "beforeCapture" correctly if the error is an instance of "GenericError"', () => {
+it('SHOULD call "beforeCapture" with the scope and the error', () => {
   setup();
 
   const sentryErrorBoundary = screen.getByTestId("sentry-error-boundary");
@@ -41,7 +41,7 @@ it('SHOULD call "beforeCapture" correctly if the error is an instance of "Generi
   expect(spies.beforeCapture).toHaveBeenCalledWith(fakeScope, fakeError);
 });
 
-it('SHOULD NOT call "beforeCapture" if the error is NOT an instance of "GenericError"', () => {
+it('SHOULD call "beforeCapture" for any error', () => {
   setup();
 
   const sentryErrorBoundary = screen.getByTestId("sentry-error-boundary");
@@ -50,5 +50,5 @@ it('SHOULD NOT call "beforeCapture" if the error is NOT an instance of "GenericE
 
   sentryErrorBoundary.props.beforeCapture(fakeScope, fakeError);
 
-  expect(spies.beforeCapture).not.toHaveBeenCalled();
+  expect(spies.beforeCapture).toHaveBeenCalledWith(fakeScope, fakeError);
 });

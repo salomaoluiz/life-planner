@@ -22,6 +22,8 @@ ARG EXPO_PUBLIC_SENTRY_URL
 ARG EXPO_PUBLIC_SENTRY_TRACES_SAMPLER
 ARG EXPO_PUBLIC_SENTRY_ENVIRONMENT
 ARG EXPO_PUBLIC_SENTRY_ENABLED
+# Spec 106: build time only, builder stage only (source maps upload). Not an ENV, not EXPO_PUBLIC_.
+ARG SENTRY_AUTH_TOKEN
 ENV EXPO_PUBLIC_API_URL=$EXPO_PUBLIC_API_URL \
     EXPO_PUBLIC_PROJECT_WEBSITE_URL=$EXPO_PUBLIC_PROJECT_WEBSITE_URL \
     EXPO_PUBLIC_SENTRY_ORGANIZATION=$EXPO_PUBLIC_SENTRY_ORGANIZATION \
@@ -35,8 +37,21 @@ ENV EXPO_PUBLIC_API_URL=$EXPO_PUBLIC_API_URL \
 # One build id per build: the bundle (app.config.ts extra.builtAt) and version.json share BUILT_AT.
 # version.json lets an open tab detect a newer deploy (served with Cache-Control: no-store).
 RUN BUILT_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ) && export BUILT_AT \
-    && npx expo export -p web \
+    && npx expo export -p web --source-maps \
     && node -e "require('fs').writeFileSync('dist/version.json', JSON.stringify({ builtAt: process.env.BUILT_AT, version: require('./package.json').version }))"
+
+# Spec 106: upload the source maps with debug ids for this release, then delete every .map so nginx never serves
+# them. Without the token the build still succeeds (one warning).
+RUN if [ -n "$SENTRY_AUTH_TOKEN" ] && [ -n "$EXPO_PUBLIC_SENTRY_ORGANIZATION" ] && [ -n "$EXPO_PUBLIC_SENTRY_PROJECT" ]; then \
+      VERSION=$(node -p "require('./package.json').version") && \
+      SENTRY_ORG="$EXPO_PUBLIC_SENTRY_ORGANIZATION" SENTRY_PROJECT="$EXPO_PUBLIC_SENTRY_PROJECT" SENTRY_URL="$EXPO_PUBLIC_SENTRY_URL" \
+        npx sentry-cli sourcemaps inject dist && \
+      SENTRY_ORG="$EXPO_PUBLIC_SENTRY_ORGANIZATION" SENTRY_PROJECT="$EXPO_PUBLIC_SENTRY_PROJECT" SENTRY_URL="$EXPO_PUBLIC_SENTRY_URL" \
+        npx sentry-cli sourcemaps upload --release "life-planner@$VERSION" --dist web dist; \
+    else \
+      echo "WARNING: SENTRY_AUTH_TOKEN, organization or project not set: source maps were not uploaded"; \
+    fi \
+    && find dist -name '*.map' -delete
 
 FROM nginx:alpine AS runtime
 

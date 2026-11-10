@@ -16,6 +16,8 @@ services:
         EXPO_PUBLIC_SENTRY_TRACES_SAMPLER: ${EXPO_PUBLIC_SENTRY_TRACES_SAMPLER:-1}
         EXPO_PUBLIC_SENTRY_ENVIRONMENT: ${EXPO_PUBLIC_SENTRY_ENVIRONMENT:-production}
         EXPO_PUBLIC_SENTRY_ENABLED: ${EXPO_PUBLIC_SENTRY_ENABLED:-true}
+        # Build time only (source map upload): used in the builder stage, never a runtime variable.
+        SENTRY_AUTH_TOKEN: ${SENTRY_AUTH_TOKEN:-}
     ports:
       - "1016:80"
     restart: unless-stopped

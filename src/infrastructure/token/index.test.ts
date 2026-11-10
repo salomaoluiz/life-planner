@@ -142,3 +142,38 @@ describe("GIVEN the access token is read repeatedly", () => {
     expect(await setup().getToken()).toBe("late");
   });
 });
+
+describe("GIVEN the monitoring user (spec 106)", () => {
+  // payload {"user":{"id":"user-id"}}
+  const jwt = `header.${btoa(JSON.stringify({ user: { id: "user-id" } }))}.sig`;
+
+  beforeEach(() => {
+    mocks.platform.isWeb.mockReturnValue(false);
+  });
+
+  it("SHOULD identify the user by id WHEN a token is stored", async () => {
+    await setup().setToken(jwt);
+
+    expect(spies.setUser).toHaveBeenCalledWith({ id: "user-id" });
+  });
+
+  it("SHOULD identify the user WHEN a stored session is restored", async () => {
+    spies.secureStore.getItemAsync.mockResolvedValueOnce(jwt);
+
+    await setup().getToken();
+
+    expect(spies.setUser).toHaveBeenCalledWith({ id: "user-id" });
+  });
+
+  it("SHOULD clear the user WHEN the token is cleared", async () => {
+    await setup().clearToken();
+
+    expect(spies.setUser).toHaveBeenCalledWith(null);
+  });
+
+  it("SHOULD clear the user WHEN the token is not a readable JWT", async () => {
+    await setup().setToken("jwt");
+
+    expect(spies.setUser).toHaveBeenCalledWith(null);
+  });
+});

@@ -1,6 +1,5 @@
+import type { Scope } from "@sentry/react-native";
 import React from "react";
-
-import { GenericError } from "@domain/entities/errors";
 
 import {
   sentryAddBreadcrumb,
@@ -9,6 +8,7 @@ import {
   SentryErrorBoundary,
   sentryInitialize,
   sentryNavigationIntegration,
+  sentryPrepareBoundaryScope,
   sentrySetContext,
   sentrySetTag,
   sentrySetUser,
@@ -28,8 +28,8 @@ function addBreadcrumb(...params: Parameters<AddBreadcrumb>) {
   sentryAddBreadcrumb(params[0]);
 }
 
-function beforeCaptureBoundary(_: unknown, error: GenericError) {
-  setContext("error-boundary-context", error.context);
+function beforeCaptureBoundary(scope: Scope, error: unknown) {
+  sentryPrepareBoundaryScope(scope, error);
 }
 
 function captureException(...params: Parameters<CaptureException>) {

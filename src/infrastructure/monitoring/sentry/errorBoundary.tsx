@@ -1,13 +1,12 @@
 import { FallbackRender } from "@sentry/react";
-import { ErrorBoundary } from "@sentry/react-native";
+import { ErrorBoundary, type Scope } from "@sentry/react-native";
 import React from "react";
 
-import { GenericError } from "@domain/entities/errors";
 import { ErrorBoundaryProps } from "@infrastructure/monitoring/types";
 
 function SentryErrorBoundary(
   props: ErrorBoundaryProps & {
-    beforeCapture: (scope: unknown, error: GenericError) => void;
+    beforeCapture: (scope: Scope, error: unknown) => void;
   },
 ) {
   const { beforeCapture, children, FallbackComponent } = props;
@@ -19,10 +18,8 @@ function SentryErrorBoundary(
     return <FallbackComponent error={error} retry={resetError} />;
   }
 
-  function handleBeforeCapture(scope: unknown, error: unknown) {
-    if (error instanceof GenericError) {
-      beforeCapture(scope, error);
-    }
+  function handleBeforeCapture(scope: Scope, error: unknown) {
+    beforeCapture(scope, error);
   }
 
   return (

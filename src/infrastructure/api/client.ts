@@ -9,6 +9,8 @@ import * as refresh from "./refresh";
 import * as session from "./session";
 import { getBaseUrl, type Method, send, type SendResult } from "./transport";
 
+const ID_SEGMENT =
+  /^(\d+|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
 const INVITE_TOKEN_SEGMENT = /(\/family-invites\/)[^/?#]+/;
 
 async function execute(
@@ -41,8 +43,16 @@ async function execute(
 
   if (status >= 500 || status < 400) {
     const error = new GenericError();
+    const route = routeTemplate(path);
+    // Spec 106: a title and a fingerprint per route, so two ids of one route are one issue.
+    error.message = `HTTP ${status} ${method} ${route}`;
     // Never include the request/response body: it can hold credentials or personal data.
-    error.addContext({ method, path: redactPath(path), statusCode: status });
+    error.addContext({
+      fingerprint: ["api", method, route, status],
+      method,
+      path: redactPath(path),
+      statusCode: status,
+    });
     throw error;
   }
 
@@ -61,6 +71,14 @@ function numericDetails(json?: Record<string, unknown>) {
 // The invite token is a secret that travels in the URL path: keep it out of error contexts.
 function redactPath(path: string) {
   return path.replace(INVITE_TOKEN_SEGMENT, "$1:token");
+}
+
+// `/v1/finance/transactions/<uuid>?q=x` → `/v1/finance/transactions/:id`: no query string, no ids, no secrets.
+function routeTemplate(path: string) {
+  return redactPath(path.split(/[?#]/)[0])
+    .split("/")
+    .map((segment) => (ID_SEGMENT.test(segment) ? ":id" : segment))
+    .join("/");
 }
 
 // Identical GETs in flight at the same time share one request (e.g. a list and the month summary asking for the

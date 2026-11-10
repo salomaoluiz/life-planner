@@ -1,6 +1,8 @@
 import { useSyncExternalStore } from "react";
 
-import { ALL_FILTER } from "../models/ownerFilter";
+import { setTag } from "@infrastructure/monitoring";
+
+import { ALL_FILTER, PERSONAL_FILTER } from "../models/ownerFilter";
 
 // Session-only selection (not persisted): module state outlives the Home screen.
 let selection = ALL_FILTER;
@@ -16,6 +18,7 @@ function notify() {
 
 function resetHomeOwnerFilter() {
   selection = ALL_FILTER;
+  tagOwner(selection);
   notify();
 }
 
@@ -25,6 +28,7 @@ function setSelection(value: string) {
   }
 
   selection = value;
+  tagOwner(value);
   notify();
 }
 
@@ -34,6 +38,18 @@ function subscribe(listener: () => void) {
   return () => {
     listeners.delete(listener);
   };
+}
+
+// Spec 106: events carry the owner in view: USER (personal), FAMILY (+ its id) or ALL.
+function tagOwner(value: string) {
+  const ownerTypes: Record<string, string> = {
+    [ALL_FILTER]: "ALL",
+    [PERSONAL_FILTER]: "USER",
+  };
+  const ownerType = ownerTypes[value];
+
+  setTag("owner_type", ownerType ?? "FAMILY");
+  setTag("family_id", ownerType ? undefined : value);
 }
 
 function useHomeOwnerFilter(): [string, (value: string) => void] {

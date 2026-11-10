@@ -1,6 +1,7 @@
 import { BusinessError, GenericError } from "@domain/entities/errors";
 import { useReactMutation } from "@infrastructure/fetcher/reactQuery";
 import { UseMutation } from "@infrastructure/fetcher/types";
+import { addBreadcrumb } from "@infrastructure/monitoring";
 
 function useMutation<Params, Response>(
   props: Parameters<UseMutation<Params, Response>>[0],
@@ -25,7 +26,7 @@ function useMutation<Params, Response>(
       error.addContext({
         ...error.context,
         cacheString: props.cacheKey.join("-"),
-        variables,
+        variableKeys: variableKeys(variables),
       });
       return error;
     }
@@ -35,7 +36,15 @@ function useMutation<Params, Response>(
     genericError.addContext({
       ...error.context,
       cacheString: props.cacheKey.join("-"),
-      variables,
+      variableKeys: variableKeys(variables),
+    });
+
+    // Spec 106: the failed mutation is a breadcrumb of the event the boundary captures next.
+    addBreadcrumb({
+      category: "mutation",
+      data: { cacheString: props.cacheKey.join("-"), code: genericError.code },
+      level: "error",
+      message: `mutation failed`,
     });
 
     throw genericError;
@@ -49,6 +58,13 @@ function useMutation<Params, Response>(
     reset,
     status,
   };
+}
+
+// Form values (amounts, descriptions, notes) never reach monitoring: only the names of the fields do (spec 106).
+function variableKeys(variables: unknown) {
+  return typeof variables === "object" && variables !== null
+    ? Object.keys(variables)
+    : [];
 }
 
 export default useMutation;
