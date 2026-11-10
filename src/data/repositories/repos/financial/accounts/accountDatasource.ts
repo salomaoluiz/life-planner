@@ -1,6 +1,7 @@
 import AccountModel from "@data/models/financial/AccountModel";
 import DailyBalanceModel from "@data/models/financial/DailyBalanceModel";
 import { AccountType } from "@domain/entities/financial/AccountEntity";
+import { CurrencyCode } from "@domain/entities/financial/Currency";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 export interface AccountDatasource {
@@ -24,6 +25,7 @@ interface AdjustAccountBalanceDatasourceParams {
 
 interface CreateAccountDatasourceParams {
   balance: number;
+  currency?: CurrencyCode;
   icon: string;
   isFavorite?: boolean;
   name: string;
@@ -39,6 +41,8 @@ interface DeleteAccountDatasourceParams {
 }
 
 interface GetDailyBalancesDatasourceParams {
+  // Spec 103: only the accounts in this currency; the API default (BRL) when omitted.
+  currency?: CurrencyCode;
   month: string;
   ownerIds: string[];
 }

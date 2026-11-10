@@ -41,6 +41,7 @@ beforeEach(() => {
 
 async function setup(
   override: Partial<typeof params> & {
+    currency?: "BRL" | "EUR" | "USD";
     isFavorite?: boolean;
     type?: AccountType;
   } = {},

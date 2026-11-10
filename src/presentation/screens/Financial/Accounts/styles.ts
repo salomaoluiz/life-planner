@@ -9,6 +9,12 @@ function useStyles() {
     styles: StyleSheet.create({
       balanceColumn: { alignItems: "flex-end" },
       root: { flex: 1 },
+      subtotals: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: theme.sizes.spacing.sm,
+        justifyContent: "flex-end",
+      },
       toolbar: {
         gap: theme.sizes.spacing.lg,
         paddingBottom: theme.sizes.spacing.lg,

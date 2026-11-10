@@ -52,6 +52,17 @@ it("SHOULD send the type WHEN one is chosen (spec 101)", async () => {
   );
 });
 
+it("SHOULD send the currency WHEN one is chosen (spec 103)", async () => {
+  spies.post.mockResolvedValueOnce(mocks.apiAccount);
+
+  await setup({ currency: "USD" });
+
+  expect(spies.post).toHaveBeenCalledWith(
+    "/v1/finance/accounts",
+    expect.objectContaining({ currency: "USD" }),
+  );
+});
+
 it("SHOULD send a negative balance in cents", async () => {
   spies.post.mockResolvedValueOnce(mocks.apiAccount);
 

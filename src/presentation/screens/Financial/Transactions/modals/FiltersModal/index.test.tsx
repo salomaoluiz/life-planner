@@ -244,3 +244,40 @@ describe("transfers kind (spec 098)", () => {
     });
   });
 });
+
+describe("currency (spec 103)", () => {
+  it("SHOULD NOT offer the currency WHEN the screen has only one", () => {
+    setup();
+
+    expect(screen.queryByTestId(ids.currency)).toBeNull();
+  });
+
+  it("SHOULD apply the chosen currency with the filters, on wide and compact", () => {
+    ["expanded", "compact"].forEach((breakpoint) => {
+      const onChange = jest.fn();
+      const { unmount } = setup(
+        { currency: { onChange, options: ["BRL", "USD"], value: "BRL" } },
+        breakpoint as "compact" | "expanded",
+      );
+
+      fireEvent.press(screen.getByTestId(ids.currency));
+      fireEvent.press(
+        screen.getByText("financial.accounts.currencyOption.USD"),
+      );
+      expect(onChange).not.toHaveBeenCalled();
+
+      fireEvent.press(screen.getByTestId(ids.filtersApply));
+      expect(onChange).toHaveBeenCalledWith("USD");
+      unmount();
+    });
+  });
+
+  it("SHOULD NOT report the currency WHEN it did not change", () => {
+    const onChange = jest.fn();
+
+    setup({ currency: { onChange, options: ["BRL", "USD"], value: "USD" } });
+    fireEvent.press(screen.getByTestId(ids.filtersApply));
+
+    expect(onChange).not.toHaveBeenCalled();
+  });
+});

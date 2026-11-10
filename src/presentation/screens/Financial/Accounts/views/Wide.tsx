@@ -46,7 +46,7 @@ function Wide({ vm }: AdaptiveViewProps<AccountsVM>) {
           <Card testID={"accounts-total-card"}>
             <Text.Overline
               tone={"secondary"}
-              value={t("financial.accounts.total")}
+              value={t("financial.accounts.totalInBrl")}
             />
             <AmountText
               currency={DEFAULT_CURRENCY}
@@ -110,6 +110,35 @@ function Wide({ vm }: AdaptiveViewProps<AccountsVM>) {
       );
     }
 
+    if (item.kind === "otherCurrencies") {
+      return (
+        <View testID={accountsTestIds.otherCurrencies}>
+          <GroupHeader
+            title={`${t("financial.accounts.otherCurrencies")} · ${item.count}`}
+            trailing={
+              <View style={styles.subtotals}>
+                {item.subtotals.map((subtotal) => (
+                  <AmountText
+                    currency={subtotal.code}
+                    key={subtotal.code}
+                    size={"body"}
+                    testID={accountsTestIds.otherCurrenciesSubtotal(
+                      subtotal.code,
+                    )}
+                    {...totalAmount(subtotal.cents)}
+                  />
+                ))}
+              </View>
+            }
+          />
+          <Text.Caption
+            tone={"secondary"}
+            value={t("financial.accounts.otherCurrenciesHint")}
+          />
+        </View>
+      );
+    }
+
     if (item.kind === "archivedToggle") {
       return (
         <ListItem
@@ -142,6 +171,26 @@ function Wide({ vm }: AdaptiveViewProps<AccountsVM>) {
       });
     }
 
+    const foreign = account.currency !== DEFAULT_CURRENCY;
+    const meta =
+      (favorite && !compact) || foreign ? (
+        <>
+          {favorite && !compact ? (
+            <Badge
+              label={t("financial.accounts.favoriteTag")}
+              testID={accountsTestIds.favoriteTag}
+              tone={"warning"}
+            />
+          ) : null}
+          {foreign ? (
+            <Badge
+              label={account.currency}
+              testID={accountsTestIds.currencyChip}
+            />
+          ) : null}
+        </>
+      ) : undefined;
+
     return (
       <ListItem
         accessibilityLabel={
@@ -152,15 +201,7 @@ function Wide({ vm }: AdaptiveViewProps<AccountsVM>) {
         highlight={favorite}
         inset
         leading={<IconTile name={account.icon} tone={tone} />}
-        meta={
-          favorite && !compact ? (
-            <Badge
-              label={t("financial.accounts.favoriteTag")}
-              testID={accountsTestIds.favoriteTag}
-              tone={"warning"}
-            />
-          ) : undefined
-        }
+        meta={meta}
         onPress={() => vm.onRowPress(account.id)}
         subtitle={subtitle}
         testID={accountsTestIds.row}

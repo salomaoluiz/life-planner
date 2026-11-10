@@ -97,9 +97,26 @@ onFlowComplete:
       id: "financial.transactions.row-transfer-title"
       text: ${output.TRANSFER_NAME}
     timeout: 20000
-# The in row shows the rate AND the fee counts in the month expenses
-- assertVisible:
-    id: "financial.transactions.row.transfer-rate"
+# Spec 103: the BRL view shows the out leg; the USD view shows the in leg with the rate AND the fee counts in
+# the month expenses
+- runFlow: ../../../subflows/financial/scroll-list-up.yaml
+- tapOn:
+    id: "financial.transactions.filters-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.currency"
+    timeout: 20000
+- tapOn:
+    id: "financial.transactions.currency"
+- tapOn:
+    id: "financial.transactions.currency-option-USD"
+- tapOn:
+    id: "financial.transactions.filters.apply"
 - assertVisible:
     id: "financial.transactions.summary-expense"
     text: ".*3[.,]50.*"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row.transfer-rate"
+    timeout: 20000

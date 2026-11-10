@@ -31,6 +31,7 @@ it("SHOULD enable the block queries once the owners are loaded", () => {
   expect(optionsOf("summary").cacheKey).toEqual([
     ...financeKeys.summary.ofMonth("2026-10", "home"),
     "family-1,user-id",
+    "BRL",
   ]);
 });
 
@@ -60,6 +61,7 @@ describe("owner filter", () => {
 
     await optionsOf("summary").fetch();
     expect(spies.getMonthSummary).toHaveBeenCalledWith({
+      currency: "BRL",
       month: expect.any(Date),
       ownerIds: ["user-id"],
     });
@@ -375,4 +377,51 @@ describe("layout", () => {
       expect(setup(loaded).result.current.isSplitLayout).toBe(expected);
     },
   );
+});
+
+describe("currency (spec 103)", () => {
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date(2026, 9, 5, 10, 0));
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it("SHOULD hide the dropdown WHEN every account is in BRL", () => {
+    const { result } = setup(loaded);
+
+    expect(result.current.currency).toMatchObject({
+      options: ["BRL"],
+      value: "BRL",
+      visible: false,
+    });
+  });
+
+  it("SHOULD show the dropdown WHEN there is an active USD account AND read the summary and balances in the chosen currency", async () => {
+    const usd = new AccountDTO({
+      balance: 1250,
+      currency: "USD",
+      icon: "bank",
+      id: "account-usd",
+      name: "Abroad",
+      owner: "USER",
+      ownerId: "user-id",
+      status: "ACTIVE",
+    });
+    const { result } = setup({
+      ...loaded,
+      accounts: [...mocks.accounts, usd],
+    });
+
+    expect(result.current.currency.visible).toBe(true);
+    expect(result.current.currency.options).toEqual(["BRL", "USD"]);
+
+    act(() => result.current.currency.onChange("USD"));
+
+    expect(optionsOf("summary").cacheKey.at(-1)).toBe("USD");
+    await optionsOf("summary").fetch();
+    expect(spies.getMonthSummary).toHaveBeenLastCalledWith(
+      expect.objectContaining({ currency: "USD" }),
+    );
+  });
 });

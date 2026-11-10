@@ -88,3 +88,10 @@ it("SHOULD show the error with red border and not open WHEN disabled", () => {
   fireEvent.press(screen.getByTestId("select"));
   expect(screen.queryByTestId("select-sheet")).toBeNull();
 });
+
+it("SHOULD hide the visible label WHEN hideLabel is set but keep it for screen readers", () => {
+  setup({ hideLabel: true });
+
+  expect(screen.queryByTestId("select-label")).toBeNull();
+  expect(screen.getByLabelText("Unit, Kilogram")).toBeTruthy();
+});

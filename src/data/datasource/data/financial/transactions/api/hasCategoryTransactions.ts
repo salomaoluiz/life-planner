@@ -1,5 +1,6 @@
 import { todayCalendarDate } from "@data/models/financial/calendarDate";
 import { TransactionDatasource } from "@data/repositories/repos/financial/transactions/transactionDatasource";
+import { SUPPORTED_CURRENCIES } from "@domain/entities/financial/Currency";
 import { lastTwoYearsRange } from "@domain/entities/financial/TransactionQueryFilter";
 import { api } from "@infrastructure/api";
 
@@ -41,12 +42,20 @@ async function hasCategoryTransactions(
   const path = `/v1/finance/transactions?${query.toString()}`;
 
   try {
-    const [accountRows, cardRows] = await Promise.all([
-      api.get<Page>(`${path}&limit=1`),
+    // Spec 103: the API lists one currency at a time (BRL by default), and any currency counts here. Cards bill in
+    // BRL only, so their purchases are read once.
+    const [cardRows, ...accountRows] = await Promise.all([
       api.get<Page>(`${path}&source=CARD&limit=1`),
+      ...SUPPORTED_CURRENCIES.map(async (currency) =>
+        api.get<Page>(`${path}&currency=${currency}&limit=1`),
+      ),
     ]);
 
-    return accountRows.items.length + cardRows.items.length > 0;
+    return (
+      cardRows.items.length +
+        accountRows.reduce((sum, page) => sum + page.items.length, 0) >
+      0
+    );
   } catch (error) {
     return handleFinancialApiError(error, {
       categoryId,

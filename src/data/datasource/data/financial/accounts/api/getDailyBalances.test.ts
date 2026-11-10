@@ -36,6 +36,20 @@ it("SHOULD GET the daily balances with the month, repeated owners and today", as
   expect(result).toEqual(DailyBalanceModel.fromJSON(payload));
 });
 
+it("SHOULD send the currency WHEN one is chosen (spec 103)", async () => {
+  jest.mocked(api.get).mockResolvedValueOnce(payload);
+
+  await getDailyBalances({
+    currency: "USD",
+    month: "2026-11",
+    ownerIds: ["o1"],
+  });
+
+  expect(api.get).toHaveBeenCalledWith(
+    "/v1/finance/accounts/daily-balances?month=2026-11&today=2026-10-15&ownerId=o1&currency=USD",
+  );
+});
+
 it("SHOULD map a 400 to FieldInvalid AND re-throw connectivity errors", async () => {
   jest
     .mocked(api.get)

@@ -1,3 +1,5 @@
+import { CurrencyCode } from "@domain/entities/financial/Currency";
+
 import CardInvoiceEntity from "./CardInvoiceEntity";
 import DailyBalanceEntity from "./DailyBalanceEntity";
 import ProjectedOccurrenceEntity from "./ProjectedOccurrenceEntity";
@@ -6,6 +8,8 @@ import TransactionEntity from "./TransactionEntity";
 // Spec 080: money in cents. The first four are the real figures of the month; the projected pair is what the series
 // still add to a month after the current one.
 export interface FinanceMonthSummaryEntity {
+  // Spec 103: the currency of every figure (the one the month was asked in).
+  currency?: CurrencyCode;
   expense: number;
   income: number;
   projectedExpense: number;

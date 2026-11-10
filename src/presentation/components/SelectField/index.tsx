@@ -16,6 +16,8 @@ export interface SelectFieldProps {
   disabled?: boolean;
   error?: string;
   helper?: string;
+  /** Keeps the label for screen readers only, for a select that sits inline next to other controls */
+  hideLabel?: boolean;
   label: string;
   onChange: (value: string) => void;
   options: SelectOption[];
@@ -77,7 +79,7 @@ function SelectField(props: SelectFieldProps) {
       disabled={props.disabled}
       error={props.error}
       helper={props.helper}
-      label={props.label}
+      label={props.hideLabel ? undefined : props.label}
       testID={testID}
     >
       <Touchable

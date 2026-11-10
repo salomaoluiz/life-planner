@@ -3,7 +3,10 @@ import { View } from "react-native";
 
 import { AmountText, GroupBodyRow, Icon, IconTile, Text } from "@components";
 import { useKitTheme } from "@components/utils/useKitTheme";
-import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
 import { useTranslation } from "@presentation/i18n";
 import UpdatingTotal from "@screens/Financial/Transactions/components/UpdatingTotal";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
@@ -13,6 +16,8 @@ import useStyles from "./styles";
 interface Props {
   accountId?: string;
   balanceCents: number;
+  // Spec 103: the currency of every figure (BRL when omitted).
+  currency?: CurrencyCode;
   // Spec 094: the favorite account of the user, highlighted.
   favorite?: boolean;
   icon: string;
@@ -75,7 +80,7 @@ function DayBalanceLine(props: Props) {
         </View>
         <UpdatingTotal updating={props.updating}>
           <AmountText
-            currency={DEFAULT_CURRENCY}
+            currency={props.currency ?? DEFAULT_CURRENCY}
             size="body"
             type={negative ? "EXPENSE" : undefined}
             value={Math.abs(props.balanceCents)}

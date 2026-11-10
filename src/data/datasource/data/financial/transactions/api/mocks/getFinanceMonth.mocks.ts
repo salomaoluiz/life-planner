@@ -53,8 +53,11 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-async function setup(ownerIds: string[] = [ownerId]) {
-  return getFinanceMonth({ month: "2026-11", ownerIds });
+async function setup(
+  ownerIds: string[] = [ownerId],
+  currency?: "BRL" | "EUR" | "USD",
+) {
+  return getFinanceMonth({ currency, month: "2026-11", ownerIds });
 }
 
 async function setupThrowable() {

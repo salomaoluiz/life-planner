@@ -106,6 +106,7 @@ it("SHOULD create an ACTIVE account with a decimal balance", () => {
 
   expect(mutations.create.value.mutate).toHaveBeenCalledWith({
     balance: 1520.75,
+    currency: "BRL",
     icon: "bank",
     name: "Checking",
     owner: "USER",
@@ -541,4 +542,43 @@ describe("account type (spec 101)", () => {
       type: "SAVINGS",
     });
   });
+});
+
+it("SHOULD create the account in the chosen currency AND lock the field on edit (spec 103)", () => {
+  givenLoaded();
+  const { result } = setup();
+
+  expect(result.current.currency).toBe("BRL");
+  expect(result.current.isCurrencyLocked).toBe(false);
+  expect(result.current.currencyOptions.map((option) => option.value)).toEqual([
+    "BRL",
+    "USD",
+    "EUR",
+  ]);
+
+  act(() => result.current.onCurrencyChange("USD"));
+  act(() => result.current.onNameChange("Brokerage abroad"));
+  act(() => result.current.onSave());
+
+  expect(mutations.create.value.mutate).toHaveBeenCalledWith(
+    expect.objectContaining({ currency: "USD" }),
+  );
+});
+
+it("SHOULD show the account currency disabled AND ignore a change in edit mode (spec 103)", () => {
+  givenLoaded({
+    accounts: [acc("a1", 0, { currency: "EUR" })],
+    params: { id: "a1" },
+  });
+  const { result } = setup();
+
+  expect(result.current.currency).toBe("EUR");
+  expect(result.current.isCurrencyLocked).toBe(true);
+  expect(result.current.currencyHintKey).toBe(
+    "financial.accounts.currencyHintEdit",
+  );
+
+  act(() => result.current.onCurrencyChange("USD"));
+
+  expect(result.current.currency).toBe("EUR");
 });

@@ -1,5 +1,6 @@
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import { financeKeys } from "@application/queryKeys/financeKeys";
+import { SUPPORTED_CURRENCIES } from "@domain/entities/financial/Currency";
 import {
   invalidateFetcherData,
   markFetcherDataStale,
@@ -127,9 +128,13 @@ function patchMonthLists(change: ChangeShape, resolvedId?: string) {
       if (!data.items) {
         return data;
       }
-      // [finance, transactions, list, month, scope owner ids joined by "," (spec 080), ...every owner id]
+      // [finance, transactions, list, month, scope owner ids joined by "," (spec 080), currency (spec 103), ...every owner id]
       const month = String(queryKey[3]);
       const ownerIds = String(queryKey[4]).split(",");
+      // Spec 103: a month is cached per currency (after the scope); a row only belongs to its own currency's list.
+      const keyCurrency = SUPPORTED_CURRENCIES.find(
+        (code) => code === queryKey[5],
+      );
 
       if (change.kind === "delete") {
         return {
@@ -141,7 +146,9 @@ function patchMonthLists(change: ChangeShape, resolvedId?: string) {
       }
       const replacedId = change.previous?.id ?? saved!.id;
       const belongs =
-        listMonthOf(saved!) === month && ownerIds.includes(saved!.ownerId);
+        listMonthOf(saved!) === month &&
+        ownerIds.includes(saved!.ownerId) &&
+        (!keyCurrency || keyCurrency === saved!.currency);
       const uiModel = new TransactionUIModel(
         saved!,
         data.categories?.find((category) => category.id === saved!.categoryId),

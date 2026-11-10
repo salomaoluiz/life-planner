@@ -1,4 +1,9 @@
 import { AccountType } from "@domain/entities/financial/AccountEntity";
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+  SUPPORTED_CURRENCIES,
+} from "@domain/entities/financial/Currency";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { ALL_OWNERS } from "@screens/Financial/models/ownerOptions";
 
@@ -7,6 +12,13 @@ import AccountUIModel from "./AccountUIModel";
 export type AccountEntry =
   | { account: AccountUIModel; key: string; kind: "row" }
   | { count: number; expanded: boolean; key: string; kind: "archivedToggle" }
+  // Spec 103: active accounts in a currency other than BRL, apart from the BRL total.
+  | {
+      count: number;
+      key: string;
+      kind: "otherCurrencies";
+      subtotals: CurrencySubtotal[];
+    }
   | {
       count: number;
       key: string;
@@ -15,6 +27,11 @@ export type AccountEntry =
       titleKey: TranslationKeys;
       type: AccountType;
     };
+
+interface CurrencySubtotal {
+  cents: number;
+  code: CurrencyCode;
+}
 
 // Spec 101: the order of the sections of the active accounts.
 const ACCOUNT_TYPE_ORDER: AccountType[] = [
@@ -37,9 +54,12 @@ function buildAccountEntries(
   accounts: AccountUIModel[],
   archivedExpanded: boolean,
 ): AccountEntry[] {
-  const active = favoriteFirst(
+  const allActive = favoriteFirst(
     accounts.filter((account) => !account.isArchived).sort(byName),
   );
+  // Spec 103: the type sections and every total are in BRL; other currencies are listed apart.
+  const active = allActive.filter(isDefaultCurrency);
+  const foreign = allActive.filter((account) => !isDefaultCurrency(account));
   const archived = accounts
     .filter((account) => account.isArchived)
     .sort(byName);
@@ -61,6 +81,18 @@ function buildAccountEntries(
         ...rows(ofType),
       );
     }
+  }
+
+  if (foreign.length > 0) {
+    entries.push(
+      {
+        count: foreign.length,
+        key: "other-currencies",
+        kind: "otherCurrencies",
+        subtotals: subtotalsByCurrency(foreign),
+      },
+      ...rows(foreign),
+    );
   }
 
   if (archived.length > 0) {
@@ -106,6 +138,10 @@ function filterByOwner(
   return accounts.filter((account) => account.ownerId === ownerFilter);
 }
 
+function isDefaultCurrency(account: AccountUIModel) {
+  return account.currency === DEFAULT_CURRENCY;
+}
+
 function rows(accounts: AccountUIModel[]): AccountEntry[] {
   return accounts.map((account) => ({
     account,
@@ -114,9 +150,23 @@ function rows(accounts: AccountUIModel[]): AccountEntry[] {
   }));
 }
 
+// Spec 103: one subtotal per currency, never summed across currencies.
+function subtotalsByCurrency(accounts: AccountUIModel[]): CurrencySubtotal[] {
+  return SUPPORTED_CURRENCIES.filter((code) => code !== DEFAULT_CURRENCY)
+    .map((code) => ({
+      cents: accounts
+        .filter((account) => account.currency === code)
+        .reduce((sum, account) => sum + account.balanceCents, 0),
+      code,
+      count: accounts.filter((account) => account.currency === code).length,
+    }))
+    .filter(({ count }) => count > 0)
+    .map(({ cents, code }) => ({ cents, code }));
+}
+
 function totalActiveCents(accounts: AccountUIModel[]) {
   return accounts
-    .filter((account) => !account.isArchived)
+    .filter((account) => !account.isArchived && isDefaultCurrency(account))
     .reduce((sum, account) => sum + account.balanceCents, 0);
 }
 
@@ -130,7 +180,7 @@ function totalAmount(cents: number): { type?: "EXPENSE"; value: number } {
 
 function totalProjectedCents(accounts: AccountUIModel[]) {
   return accounts
-    .filter((account) => !account.isArchived)
+    .filter((account) => !account.isArchived && isDefaultCurrency(account))
     .reduce((sum, account) => sum + account.projectedBalanceCents, 0);
 }
 
@@ -139,6 +189,7 @@ export {
   ACCOUNT_TYPE_ORDER,
   buildAccountEntries,
   filterByOwner,
+  subtotalsByCurrency,
   totalActiveCents,
   totalAmount,
   totalProjectedCents,

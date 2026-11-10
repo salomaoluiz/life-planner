@@ -10,7 +10,10 @@ import {
 } from "@components";
 import { formatAmount } from "@components/AmountText/formatAmount";
 import Skeleton from "@components/Skeleton";
-import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { BlockState } from "@screens/Home/hooks/useHomeViewModel";
 import FinanceBalanceUIModel from "@screens/Home/models/FinanceBalanceUIModel";
@@ -19,13 +22,15 @@ import homeTestIds from "@screens/Home/testIds";
 import useStyles from "./styles";
 
 interface Props {
+  // Spec 103: the currency of every figure (BRL when omitted).
+  currency?: CurrencyCode;
   fill?: boolean;
   onPress: () => void;
   state: BlockState<FinanceBalanceUIModel>;
 }
 
 // The projected balance at the end of the month and what it is made of (spec 062 FR 4-7).
-function FinanceBalanceCard({ fill, onPress, state }: Props) {
+function FinanceBalanceCard({ currency, fill, onPress, state }: Props) {
   const { styles } = useStyles();
   const { t } = useTranslation();
   const localeTag = useLocaleTag();
@@ -49,7 +54,7 @@ function FinanceBalanceCard({ fill, onPress, state }: Props) {
   const { currentCents, toPayCents, toReceiveCents } = data.breakdown;
 
   function money(cents: number) {
-    return formatAmount(cents, localeTag, DEFAULT_CURRENCY);
+    return formatAmount(cents, localeTag, currency ?? DEFAULT_CURRENCY);
   }
 
   return (
@@ -74,7 +79,7 @@ function FinanceBalanceCard({ fill, onPress, state }: Props) {
             ) : null}
           </View>
           <AmountText
-            currency={DEFAULT_CURRENCY}
+            currency={currency ?? DEFAULT_CURRENCY}
             size="display"
             testID={homeTestIds.financeProjectedBalance}
             type={data.projectedType}
@@ -92,7 +97,7 @@ function FinanceBalanceCard({ fill, onPress, state }: Props) {
               value={formatAmount(
                 toReceiveCents,
                 localeTag,
-                DEFAULT_CURRENCY,
+                currency ?? DEFAULT_CURRENCY,
                 "INCOME",
               )}
             />
@@ -103,7 +108,7 @@ function FinanceBalanceCard({ fill, onPress, state }: Props) {
               value={formatAmount(
                 toPayCents,
                 localeTag,
-                DEFAULT_CURRENCY,
+                currency ?? DEFAULT_CURRENCY,
                 "EXPENSE",
               )}
             />
@@ -126,7 +131,7 @@ function FinanceBalanceCard({ fill, onPress, state }: Props) {
               trend="income"
               value={
                 <AmountText
-                  currency={DEFAULT_CURRENCY}
+                  currency={currency ?? DEFAULT_CURRENCY}
                   size="body"
                   tone="income"
                   value={data.income}
@@ -140,7 +145,7 @@ function FinanceBalanceCard({ fill, onPress, state }: Props) {
               trend="expense"
               value={
                 <AmountText
-                  currency={DEFAULT_CURRENCY}
+                  currency={currency ?? DEFAULT_CURRENCY}
                   size="body"
                   tone="expense"
                   value={data.expense}

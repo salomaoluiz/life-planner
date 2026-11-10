@@ -26,6 +26,7 @@ async function getFilteredTransactions(params: Params): Response {
   appendFilterParams(query, params.filter, [
     "accountIds",
     "categoryIds",
+    "currency",
     "kind",
     "from",
     "paid",

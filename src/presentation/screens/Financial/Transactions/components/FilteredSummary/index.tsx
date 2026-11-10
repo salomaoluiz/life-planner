@@ -2,13 +2,18 @@ import { StyleSheet, View } from "react-native";
 
 import { AmountText, Card, Text } from "@components";
 import { useKitTheme } from "@components/utils/useKitTheme";
-import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
 import UpdatingTotal from "@screens/Financial/Transactions/components/UpdatingTotal";
 import { FilteredSummary as FilteredSummaryData } from "@screens/Financial/Transactions/models/transactionFilters";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
 interface Props {
   caption: string;
+  // Spec 103: the currency of every figure (BRL when omitted).
+  currency?: CurrencyCode;
   expensesLabel: string;
   incomesLabel: string;
   resultLabel: string;
@@ -32,7 +37,7 @@ function FilteredSummary(props: Props) {
         <View style={styles.column}>
           <Text.Overline tone={"secondary"} value={props.incomesLabel} />
           <AmountText
-            currency={DEFAULT_CURRENCY}
+            currency={props.currency ?? DEFAULT_CURRENCY}
             tone={"income"}
             value={summary.incomeCents}
           />
@@ -40,7 +45,7 @@ function FilteredSummary(props: Props) {
         <View style={styles.column}>
           <Text.Overline tone={"secondary"} value={props.expensesLabel} />
           <AmountText
-            currency={DEFAULT_CURRENCY}
+            currency={props.currency ?? DEFAULT_CURRENCY}
             tone={"expense"}
             value={summary.expenseCents}
           />
@@ -48,7 +53,7 @@ function FilteredSummary(props: Props) {
         <View style={styles.column}>
           <Text.Overline tone={"secondary"} value={props.resultLabel} />
           <AmountText
-            currency={DEFAULT_CURRENCY}
+            currency={props.currency ?? DEFAULT_CURRENCY}
             type={summary.resultCents < 0 ? "EXPENSE" : undefined}
             value={Math.abs(summary.resultCents)}
           />

@@ -3,6 +3,10 @@ import MonthSummaryDTO, {
 } from "@application/dto/home/MonthSummaryDTO";
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import { DefaultError } from "@domain/entities/errors";
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
 import { InvoiceStatus } from "@domain/entities/financial/InvoiceEntity";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { monthDateRange } from "@domain/entities/financial/TransactionQueryFilter";
@@ -10,6 +14,8 @@ import Repositories from "@domain/repositories";
 import { decimalStringToCents } from "@utils/money";
 
 export interface GetMonthSummaryUseCaseParams {
+  // Spec 103: only the data in this currency (BRL when omitted); amounts of different currencies are never summed.
+  currency?: CurrencyCode;
   // Any date inside the wanted month: only the local year and month are read.
   month: Date;
   ownerIds: string[];
@@ -24,23 +30,31 @@ function getMonthSummaryUseCase(
   return {
     execute: async (params) => {
       try {
+        const currency = params.currency ?? DEFAULT_CURRENCY;
         const [transactions, invoices] = await Promise.all([
           repositories.financialRepository.transaction.getTransactions(
             params.ownerIds,
             // Only the month: the totals never need the rest of the history.
             monthDateRange(toMonthKey(params.month)),
+            { currency },
           ),
-          // Card purchases count on the month their invoice is paid (spec 029 FR 25).
-          repositories.financialRepository.creditCard.getCardInvoicesForMonth({
-            month: toMonthKey(params.month),
-            ownerIds: params.ownerIds,
-          }),
+          // Card purchases count on the month their invoice is paid (spec 029 FR 25). Cards bill in BRL only, so
+          // another currency has no invoices (spec 103).
+          currency === DEFAULT_CURRENCY
+            ? repositories.financialRepository.creditCard.getCardInvoicesForMonth(
+                {
+                  month: toMonthKey(params.month),
+                  ownerIds: params.ownerIds,
+                },
+              )
+            : Promise.resolve([]),
         ]);
 
         // Only the months after the current one have projected occurrences (spec 034 FR 15).
         const { projectedExpense, projectedIncome } = await projectedTotals(
           repositories,
           params,
+          currency,
         );
         let income = 0;
         let expense = 0;
@@ -149,6 +163,7 @@ function laterMonth(a: string, b: string) {
 async function projectedTotals(
   repositories: Repositories,
   params: GetMonthSummaryUseCaseParams,
+  currency: CurrencyCode,
 ) {
   const monthKey = toMonthKey(params.month);
   const currentKey = toMonthKey(new Date());
@@ -172,7 +187,11 @@ async function projectedTotals(
     });
 
   items
-    .filter((item) => params.ownerIds.includes(item.ownerId))
+    .filter(
+      (item) =>
+        params.ownerIds.includes(item.ownerId) &&
+        (item.currency ?? DEFAULT_CURRENCY) === currency,
+    )
     .forEach((item) => {
       const cents = decimalStringToCents(item.value);
 

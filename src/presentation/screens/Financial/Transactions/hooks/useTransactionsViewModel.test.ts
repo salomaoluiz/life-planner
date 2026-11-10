@@ -57,6 +57,7 @@ describe("fetchMonth (spec 080)", () => {
 
     expect(spies.getOwners).not.toHaveBeenCalled();
     expect(spies.getMonth).toHaveBeenCalledWith({
+      currency: "BRL",
       month: "2026-10",
       ownerIds: ["user-id"],
     });
@@ -68,6 +69,42 @@ describe("fetchMonth (spec 080)", () => {
     expect(result.items[0].id).toBe("tx-1");
     expect(result.categories).toEqual(categories);
     expect(result.summary).toMatchObject({ balance: 4000, income: 5000 });
+  });
+});
+
+describe("fetchMonth currency (spec 103)", () => {
+  it("SHOULD ask the month in the chosen currency", async () => {
+    spies.getMonth.mockResolvedValue({
+      dailyBalances: { accounts: [], days: [], month: "2026-10" },
+      invoices: [],
+      items: [],
+      projections: [],
+      summary: {
+        expense: 0,
+        income: 0,
+        projectedExpense: 0,
+        projectedIncome: 0,
+        toPay: 0,
+        toReceive: 0,
+      },
+    } as never);
+    spies.getCategories.mockResolvedValue([]);
+
+    await fetchMonth(["user-id"], "2026-10", ["user-id"], "USD");
+
+    expect(spies.getMonth).toHaveBeenCalledWith({
+      currency: "USD",
+      month: "2026-10",
+      ownerIds: ["user-id"],
+    });
+  });
+
+  it("SHOULD put the currency in the month key, after the scope", () => {
+    expect(monthCacheKey("2026-10", ["user-id"], [], "USD")).toEqual([
+      ...financeKeys.transactions.list("2026-10"),
+      "user-id",
+      "USD",
+    ]);
   });
 });
 
@@ -167,13 +204,14 @@ it("SHOULD use the month query's key for the prefetch, owner ids last (spec 087)
   givenData([]);
   setup();
 
-  const [scope] = lastMonthKey().slice(-1);
+  const [scope] = lastMonthKey().slice(-2, -1);
 
   expect(monthCacheKey("2026-10", scope.split(","))).toEqual(lastMonthKey());
   // Under the month prefix every write refresh (spec 076) reaches a prefetched month too.
   expect(monthCacheKey("2026-09", ["user-id"], ["user-id"])).toEqual([
     ...financeKeys.transactions.list("2026-09"),
     "user-id",
+    "BRL",
     "user-id",
   ]);
 });
@@ -263,6 +301,7 @@ it("SHOULD summarize for the selected owner only and ignore the type filter", ()
   expect(lastMonthKey()).toEqual([
     ...financeKeys.transactions.list("2026-10"),
     "family-1",
+    "BRL",
   ]);
 });
 
@@ -273,6 +312,7 @@ it("SHOULD summarize every owner WHEN the scope is All", () => {
   expect(lastMonthKey()).toEqual([
     ...financeKeys.transactions.list("2026-10"),
     "user-id,family-1",
+    "BRL",
   ]);
 });
 
@@ -291,6 +331,7 @@ it("SHOULD fall back to All WHEN the selected family is no longer an owner", () 
   expect(lastMonthKey()).toEqual([
     ...financeKeys.transactions.list("2026-10"),
     "user-id",
+    "BRL",
   ]);
 });
 
@@ -772,12 +813,14 @@ describe("day balances (spec 035)", () => {
     expect(lastMonthKey()).toEqual([
       ...financeKeys.transactions.list("2026-10"),
       "user-id,family-1",
+      "BRL",
     ]);
 
     act(() => result.current.onOwnerFilterChange("family-1"));
     expect(lastMonthKey()).toEqual([
       ...financeKeys.transactions.list("2026-10"),
       "family-1",
+      "BRL",
     ]);
   });
 });
@@ -931,6 +974,7 @@ describe("archived family (spec 042)", () => {
     expect(lastMonthKey()).toEqual([
       ...financeKeys.transactions.list("2026-10"),
       "user-id",
+      "BRL",
     ]);
     expect(result.current.readOnly).toBe(false);
   });
@@ -1003,6 +1047,7 @@ describe("month-scoped list (spec 075)", () => {
       ...financeKeys.transactions.list(),
       "2026-10",
       "",
+      "BRL",
     ]);
     expect(listOptions().keepPreviousData).toBe(true);
   });
@@ -1033,6 +1078,7 @@ describe("month-scoped list (spec 075)", () => {
 
     expect(spies.getMonth).toHaveBeenCalledTimes(1);
     expect(spies.getMonth).toHaveBeenCalledWith({
+      currency: "BRL",
       month: "2026-10",
       ownerIds: ["user-id", "family-1"],
     });
@@ -1049,6 +1095,7 @@ describe("month-scoped list (spec 075)", () => {
       ...financeKeys.transactions.list(),
       "2026-11",
       "user-id,family-1",
+      "BRL",
     ]);
   });
 

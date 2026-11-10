@@ -51,7 +51,7 @@ function page(
 async function setup(
   ids: string[] = ownerIds,
   range: { from: string; to: string } = defaultRange,
-  options?: { creditCardId?: string },
+  options?: { creditCardId?: string; currency?: "BRL" | "EUR" | "USD" },
 ) {
   return getTransactions(ids, range, options);
 }

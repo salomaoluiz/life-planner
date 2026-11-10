@@ -29,19 +29,30 @@ function dto(id: string, overrides: Partial<TransactionDTO> = {}) {
   });
 }
 
-function idsOf(month: string, owners = ["owner-1"]) {
+function idsOf(month: string, owners = ["owner-1"], currency = "BRL") {
   return queryClient
     .getQueryData<TransactionsData>([
       ...financeKeys.transactions.list(month),
       owners.join(","),
+      currency,
       ...owners,
     ])
     ?.items.map((item) => item.id);
 }
 
-function seed(month: string, ids: string[], owners = ["owner-1"]) {
+function seed(
+  month: string,
+  ids: string[],
+  owners = ["owner-1"],
+  currency = "BRL",
+) {
   queryClient.setQueryData<TransactionsData>(
-    [...financeKeys.transactions.list(month), owners.join(","), ...owners],
+    [
+      ...financeKeys.transactions.list(month),
+      owners.join(","),
+      currency,
+      ...owners,
+    ],
     { items: ids.map((id) => new TransactionUIModel(dto(id))) },
   );
 }
@@ -97,6 +108,28 @@ describe("patchMonthLists", () => {
     expect(idsOf("2026-10", ["owner-2"])).toEqual(["a"]);
   });
 
+  it("SHOULD NOT add the row to the month cached for another currency (spec 103)", () => {
+    seed("2026-10", ["a"], ["owner-1"], "USD");
+
+    patchMonthLists(
+      change({ kind: "create", row: dto("b", { currency: "BRL" }) }),
+      "b",
+    );
+
+    expect(idsOf("2026-10", ["owner-1"], "USD")).toEqual(["a"]);
+  });
+
+  it("SHOULD add the row to the month cached for its own currency (spec 103)", () => {
+    seed("2026-10", ["a"], ["owner-1"], "USD");
+
+    patchMonthLists(
+      change({ kind: "create", row: dto("b", { currency: "USD" }) }),
+      "b",
+    );
+
+    expect(idsOf("2026-10", ["owner-1"], "USD")).toEqual(["a", "b"]);
+  });
+
   it("SHOULD move an edited row to its new month", () => {
     seed("2026-10", ["a", "b"]);
     seed("2026-11", ["c"]);
@@ -129,6 +162,7 @@ describe("patchMonthLists", () => {
       queryClient.getQueryData<TransactionsData>([
         ...financeKeys.transactions.list("2026-10"),
         "owner-1",
+        "BRL",
         "owner-1",
       ])?.items[0].description,
     ).toBe("new");

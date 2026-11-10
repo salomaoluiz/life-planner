@@ -24,7 +24,8 @@ async function getTransactions(
     // Account rows (the API default) and card purchases (source=CARD): the form edits both kinds.
     // `today` lets the API derive the paid status of card purchases from their invoice.
     // Only the period comes back: account rows by date, card purchases by their invoice list date (spec 078: a period is required).
-    const query = `${toOwnerQuery(ownerIds)}&today=${todayCalendarDate()}&from=${range.from}&to=${range.to}`;
+    const currency = options?.currency ? `&currency=${options.currency}` : "";
+    const query = `${toOwnerQuery(ownerIds)}&today=${todayCalendarDate()}&from=${range.from}&to=${range.to}${currency}`;
     // One card's purchases only (spec 077): a single source, a single read.
     if (options?.creditCardId) {
       return await fetchTransactionPages(

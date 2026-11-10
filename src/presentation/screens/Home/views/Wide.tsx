@@ -6,6 +6,7 @@ import {
   Screen,
   ScreenHeader,
   Section,
+  SelectField,
 } from "@components";
 import { useTranslation } from "@presentation/i18n";
 import ProfileButton from "@screens/Navigation/containers/ProfileButton";
@@ -60,6 +61,25 @@ function Wide({ vm }: AdaptiveViewProps<HomeVM>) {
       <Section
         actionInset
         actionLabel={t("home.finance.overview")}
+        actionLeading={
+          vm.currency.visible ? (
+            <View style={styles.currency}>
+              <SelectField
+                closeLabel={t("common.actions.close")}
+                hideLabel
+                label={t("home.finance.currency")}
+                onChange={vm.currency.onChange}
+                options={vm.currency.options.map((code) => ({
+                  label: code,
+                  value: code,
+                }))}
+                sheetTitle={t("home.finance.currency")}
+                testID={homeTestIds.financeCurrency}
+                value={vm.currency.value}
+              />
+            </View>
+          ) : undefined
+        }
         onActionPress={vm.onOverviewPress}
         testID={homeTestIds.financeSection}
         title={t("home.finance.title")}
@@ -67,10 +87,12 @@ function Wide({ vm }: AdaptiveViewProps<HomeVM>) {
         <View style={rowStyle}>
           <View style={[columnStyle, styles.stack]}>
             <FinanceBalanceCard
+              currency={vm.currency.value}
               onPress={vm.onOverviewPress}
               state={vm.balance}
             />
             <LowestBalanceTiles
+              currency={vm.currency.value}
               onCreateAccountPress={vm.onCreateAccountPress}
               onPress={vm.onOverviewPress}
               state={vm.lowest}

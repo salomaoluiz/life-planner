@@ -39,7 +39,7 @@ it("SHOULD show the total label and amount and call onAddPress from the plus but
   const onAddPress = jest.fn();
   setup({ entries: makeEntries(), onAddPress, totalAmount: { value: 12345 } });
 
-  expect(hasText("financial.accounts.total")).toBe(true);
+  expect(hasText("financial.accounts.totalInBrl")).toBe(true);
   expect(screen.getByTestId("accounts-total")).toBeTruthy();
   fireEvent.press(screen.getByTestId(accountsTestIds.addButton));
   expect(onAddPress).toHaveBeenCalledTimes(1);
@@ -214,4 +214,41 @@ describe("favorite account (spec 094.2)", () => {
 
     expect(screen.queryByTestId(accountsTestIds.favoriteStar)).toBeNull();
   });
+});
+
+it("SHOULD show the other currencies section with one subtotal per currency, the hint AND a chip on the row (spec 103)", () => {
+  const usd = new AccountUIModel(
+    makeAccountDTO({
+      balance: 1250,
+      currency: "USD",
+      id: "acc-usd",
+      name: "Brokerage abroad",
+    }),
+    owners,
+  );
+
+  setup({
+    entries: [
+      {
+        count: 1,
+        key: "other-currencies",
+        kind: "otherCurrencies",
+        subtotals: [
+          { cents: 125000, code: "USD" },
+          { cents: 30000, code: "EUR" },
+        ],
+      },
+      { account: usd, key: "row-acc-usd", kind: "row" },
+    ],
+  });
+
+  expect(screen.getByTestId(accountsTestIds.otherCurrencies)).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(accountsTestIds.otherCurrenciesSubtotal("USD")),
+  ).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(accountsTestIds.otherCurrenciesSubtotal("EUR")),
+  ).toBeOnTheScreen();
+  expect(hasText("financial.accounts.otherCurrenciesHint")).toBe(true);
+  expect(hasText("USD")).toBe(true);
 });

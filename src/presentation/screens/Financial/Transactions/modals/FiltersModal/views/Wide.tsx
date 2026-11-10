@@ -11,9 +11,11 @@ import {
   FormColumns,
   Icon,
   ListItem,
+  SelectField,
   Text,
   Touchable,
 } from "@components";
+import { CurrencyCode } from "@domain/entities/financial/Currency";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
 import { SourceOption } from "@screens/Financial/Transactions/hooks/useFilterOptions";
@@ -56,6 +58,30 @@ function Wide({ vm }: AdaptiveViewProps<FiltersModalVM>) {
 
   function sectionTitle(text: string) {
     return <Text.BodyStrong value={text} />;
+  }
+
+  // Spec 103: the currency the screen shows, only when there is more than one.
+  function currencySection() {
+    if (!vm.currency) {
+      return null;
+    }
+
+    return (
+      <View style={styles.section} testID={`${ids.filtersSection}.currency`}>
+        <SelectField
+          closeLabel={t("common.actions.close")}
+          label={t("financial.transactions.currency")}
+          onChange={(value) => vm.currency?.onChange(value as CurrencyCode)}
+          options={vm.currency.options.map((code) => ({
+            label: t(`financial.accounts.currencyOption.${code}`),
+            value: code,
+          }))}
+          sheetTitle={t("financial.transactions.currency")}
+          testID={ids.currency}
+          value={vm.currency.value}
+        />
+      </View>
+    );
   }
 
   function periodSection() {
@@ -320,6 +346,7 @@ function Wide({ vm }: AdaptiveViewProps<FiltersModalVM>) {
   function compactRoot() {
     return (
       <View style={styles.stack}>
+        {currencySection()}
         {vm.hidePeriod
           ? null
           : pickerRow(
@@ -389,6 +416,7 @@ function Wide({ vm }: AdaptiveViewProps<FiltersModalVM>) {
       <FormColumns
         left={
           <>
+            {currencySection()}
             {vm.hidePeriod ? null : periodSection()}
             {originSection()}
             {sourcesSection()}

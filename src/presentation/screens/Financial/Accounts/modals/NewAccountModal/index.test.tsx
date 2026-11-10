@@ -309,3 +309,30 @@ describe("account type (spec 101)", () => {
     },
   );
 });
+
+describe("account currency (spec 103)", () => {
+  it("SHOULD show the currency field with its hint AND let a new account pick another one", () => {
+    const vm = setup({ currency: "USD" });
+
+    expect(screen.getByTestId(accountFormTestIds.currency)).toBeOnTheScreen();
+    expect(
+      screen.getByText("financial.accounts.currencyHintCreate"),
+    ).toBeOnTheScreen();
+
+    fireEvent.press(screen.getByTestId(accountFormTestIds.currency));
+    fireEvent.press(screen.getByText("financial.accounts.currencyOption.EUR"));
+
+    expect(vm.onCurrencyChange).toHaveBeenCalledWith("EUR");
+  });
+
+  it("SHOULD show the edit hint WHEN the currency is locked", () => {
+    setup({
+      currencyHintKey: "financial.accounts.currencyHintEdit",
+      isCurrencyLocked: true,
+    });
+
+    expect(
+      screen.getByText("financial.accounts.currencyHintEdit"),
+    ).toBeOnTheScreen();
+  });
+});

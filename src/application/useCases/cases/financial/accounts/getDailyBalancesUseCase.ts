@@ -1,9 +1,11 @@
 import DailyBalanceDTO from "@application/dto/financial/DailyBalanceDTO";
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import { DefaultError } from "@domain/entities/errors";
+import { CurrencyCode } from "@domain/entities/financial/Currency";
 import Repositories from "@domain/repositories";
 
 export interface GetDailyBalancesUseCaseParams {
+  currency?: CurrencyCode;
   // `YYYY-MM`, at most 12 months after the current one.
   month: string;
   ownerIds: string[];

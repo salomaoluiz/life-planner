@@ -280,3 +280,75 @@ describe("sections by type (spec 101)", () => {
     ]);
   });
 });
+
+describe("other currencies (spec 103)", () => {
+  function foreign(id: string, balance: number, currency: "EUR" | "USD") {
+    return new AccountUIModel(
+      new AccountDTO({
+        balance,
+        currency,
+        icon: "bank",
+        id,
+        name: id,
+        owner: "USER",
+        ownerId: "user-id",
+        projectedBalance: balance,
+        status: "ACTIVE",
+        type: AccountType.BROKERAGE,
+      }),
+      [],
+    );
+  }
+
+  it("SHOULD leave foreign accounts out of the BRL totals AND the type sections", () => {
+    const list = [model("brl", 100), foreign("usd", 1250, "USD")];
+
+    expect(totalActiveCents(list)).toBe(10000);
+    expect(totalProjectedCents(list)).toBe(10000);
+    expect(
+      buildAccountEntries(list, false)
+        .filter((entry) => entry.kind === "typeSection")
+        .map((entry) => entry.kind === "typeSection" && entry.subtotalCents),
+    ).toEqual([10000]);
+  });
+
+  it("SHOULD list them in one section with a subtotal per currency, after the type sections and before the archived group", () => {
+    const entries = buildAccountEntries(
+      [
+        model("brl", 100),
+        foreign("usd-1", 1000, "USD"),
+        foreign("usd-2", 250, "USD"),
+        foreign("eur", 300, "EUR"),
+        model("old", 5, "ARCHIVED"),
+      ],
+      false,
+    );
+
+    expect(entries.map((entry) => entry.key)).toEqual([
+      "type-section-CHECKING",
+      "row-brl",
+      "other-currencies",
+      "row-eur",
+      "row-usd-1",
+      "row-usd-2",
+      "archived-toggle",
+    ]);
+    expect(entries.find((entry) => entry.kind === "otherCurrencies")).toEqual({
+      count: 3,
+      key: "other-currencies",
+      kind: "otherCurrencies",
+      subtotals: [
+        { cents: 125000, code: "USD" },
+        { cents: 30000, code: "EUR" },
+      ],
+    });
+  });
+
+  it("SHOULD NOT add the section WHEN every active account is in BRL", () => {
+    expect(
+      buildAccountEntries([model("brl", 100)], false).some(
+        (entry) => entry.kind === "otherCurrencies",
+      ),
+    ).toBe(false);
+  });
+});

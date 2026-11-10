@@ -3,6 +3,10 @@ import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { CreateAccountUseCaseParams } from "@application/useCases/cases/financial/accounts/createAccountUseCase";
 import { UpdateAccountUseCaseParams } from "@application/useCases/cases/financial/accounts/updateAccountUseCase";
 import { AccountType } from "@domain/entities/financial/AccountEntity";
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
 import { DEFAULT_ICON_BY_TYPE } from "@presentation/constants/accountIcons";
 import { TranslationKeys } from "@presentation/i18n/types";
 import {
@@ -20,6 +24,8 @@ type AccountFormErrors = Partial<Record<"amount" | "name", TranslationKeys>>;
 
 interface AccountFormState {
   amountCents: number;
+  // Spec 103: chosen on create, read-only afterwards.
+  currency: CurrencyCode;
   icon: string;
   // Spec 101: false until the user picks an icon by hand; the type suggests the icon meanwhile.
   iconTouched: boolean;
@@ -34,6 +40,7 @@ interface AccountFormState {
 function createInitialState(params: { ownerId: string }): AccountFormState {
   return {
     amountCents: 0,
+    currency: DEFAULT_CURRENCY,
     icon: DEFAULT_ICON_BY_TYPE[AccountType.CHECKING],
     iconTouched: false,
     isArchived: false,
@@ -48,6 +55,7 @@ function createInitialState(params: { ownerId: string }): AccountFormState {
 function isSameState(a: AccountFormState, b: AccountFormState) {
   return (
     a.amountCents === b.amountCents &&
+    a.currency === b.currency &&
     a.icon === b.icon &&
     a.isArchived === b.isArchived &&
     a.isFavorite === b.isFavorite &&
@@ -73,6 +81,7 @@ function stateFromDto(dto: AccountDTO): AccountFormState {
 
   return {
     amountCents: Math.abs(cents),
+    currency: dto.currency,
     icon: dto.icon,
     // Editing never changes the icon by itself.
     iconTouched: true,
@@ -91,6 +100,7 @@ function toCreateParams(
 ): CreateAccountUseCaseParams {
   return {
     balance: signedBalance(state),
+    currency: state.currency,
     icon: state.icon,
     // Spec 094: only a favorite is worth sending.
     ...(state.isFavorite ? { isFavorite: true } : {}),
@@ -171,6 +181,14 @@ function withArchived(
   };
 }
 
+// Spec 103: only a new account picks its currency.
+function withCurrency(
+  state: AccountFormState,
+  currency: CurrencyCode,
+): AccountFormState {
+  return { ...state, currency };
+}
+
 // Spec 101: the icon the user picked stays, even when it equals the default of the type.
 function withIcon(state: AccountFormState, icon: string): AccountFormState {
   return { ...state, icon, iconTouched: true };
@@ -198,6 +216,7 @@ export {
   toUpdateParams,
   validate,
   withArchived,
+  withCurrency,
   withIcon,
   withType,
 };

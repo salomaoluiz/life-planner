@@ -10,6 +10,7 @@ export type Response = ReturnType<AccountDatasource["createAccount"]>;
 
 async function createAccount(params: Params): Response {
   const body = {
+    currency: params.currency,
     icon: params.icon,
     // Spec 028: a new account starts from an initial balance; transactions move it afterwards.
     initialBalance: decimalToCents(params.balance),

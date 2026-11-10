@@ -3,13 +3,18 @@ import { StyleSheet, View } from "react-native";
 import { AmountText, Divider, Highlight, Icon, Text } from "@components";
 import { formatAmount } from "@components/AmountText/formatAmount";
 import { useKitTheme } from "@components/utils/useKitTheme";
-import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
 import { useLocaleTag } from "@presentation/i18n";
 import UpdatingTotal from "@screens/Financial/Transactions/components/UpdatingTotal";
 import { MonthSummaryValues } from "@screens/Financial/Transactions/models/favoriteMonthSummary";
 
 interface Props {
   columns: SummaryTableColumn[];
+  // Spec 103: the currency of every figure (BRL when omitted).
+  currency?: CurrencyCode;
   labels: SummaryTableLabels;
   // Spec 094.2 FR 12: one accessible element per row, "label: favorite value, total value".
   rowA11yLabel: (label: string, values: string[]) => string;
@@ -130,7 +135,7 @@ function FavoriteTable(props: Props) {
     return (
       <UpdatingTotal updating={props.updating}>
         <AmountText
-          currency={DEFAULT_CURRENCY}
+          currency={props.currency ?? DEFAULT_CURRENCY}
           size={size}
           testID={`${props.testID}-${column.key}-${spec.key}`}
           tone={tone}
@@ -147,7 +152,7 @@ function FavoriteTable(props: Props) {
     return formatAmount(
       cents,
       localeTag,
-      DEFAULT_CURRENCY,
+      props.currency ?? DEFAULT_CURRENCY,
       spec.tone === "result" && cents < 0 ? "EXPENSE" : undefined,
     );
   }
@@ -229,7 +234,7 @@ function FavoriteTable(props: Props) {
                 <View style={styles.cell}>
                   {column.values.projectedIncomeCents > 0 ? (
                     <AmountText
-                      currency={DEFAULT_CURRENCY}
+                      currency={props.currency ?? DEFAULT_CURRENCY}
                       size={"caption"}
                       tone={"income"}
                       value={column.values.projectedIncomeCents}
@@ -237,7 +242,7 @@ function FavoriteTable(props: Props) {
                   ) : null}
                   {column.values.projectedExpenseCents > 0 ? (
                     <AmountText
-                      currency={DEFAULT_CURRENCY}
+                      currency={props.currency ?? DEFAULT_CURRENCY}
                       size={"caption"}
                       tone={"expense"}
                       value={column.values.projectedExpenseCents}

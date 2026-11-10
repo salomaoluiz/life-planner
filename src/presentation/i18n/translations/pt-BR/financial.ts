@@ -24,6 +24,15 @@ const financial = {
       valueLabelPay: "Valor pago",
       valueLabelReceive: "Valor recebido",
     },
+    currency: "Moeda",
+    currencyHintCreate:
+      "Escolha com cuidado: a moeda não muda depois de criada.",
+    currencyHintEdit: "A moeda não muda depois de criada.",
+    currencyOption: {
+      BRL: "BRL · Real",
+      EUR: "EUR · Euro",
+      USD: "USD · Dólar",
+    },
     delete: "Excluir conta",
     deleteAlertMsg: "Tem certeza que deseja excluir esta conta?",
     deleteAllConfirm: "Excluir de todas",
@@ -75,8 +84,10 @@ const financial = {
     name: "Nome",
     nameRequired: "Nome é obrigatório",
     new: "Nova conta",
+    otherCurrencies: "Outras moedas",
+    otherCurrenciesHint: "Fora do total em reais.",
     projectedBalance: "Fim do mês: {{value}}",
-    total: "Total nas contas",
+    totalInBrl: "Total em reais",
     totalProjected: "Fim do mês",
     types: {
       BROKERAGE: "Corretora",
@@ -1128,6 +1139,7 @@ const financial = {
       purchaseCount_other: "{{count}} compras",
       title: "Fatura de {{month}}",
     },
+    currency: "Moeda",
     dayBalance: {
       a11y: "Saldo ao fim de {{day}}: {{value}}",
       a11yFavorite: "Saldo de {{name}} ao fim de {{day}}: {{value}}",

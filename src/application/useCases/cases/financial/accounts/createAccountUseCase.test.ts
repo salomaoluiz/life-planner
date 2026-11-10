@@ -128,3 +128,21 @@ describe("type (spec 101)", () => {
     ).not.toHaveBeenCalled();
   });
 });
+
+it("SHOULD forward the currency to the repository (spec 103)", async () => {
+  jest.clearAllMocks();
+
+  await createAccountUseCase(repositoriesMocks).execute({
+    balance: 0,
+    currency: "EUR",
+    icon: "icon",
+    name: "Acc",
+    owner: "USER",
+    ownerId: "user-id",
+    status: "ACTIVE",
+  });
+
+  expect(
+    repositoriesMocks.financialRepository.account.createAccount,
+  ).toHaveBeenCalledWith(expect.objectContaining({ currency: "EUR" }));
+});

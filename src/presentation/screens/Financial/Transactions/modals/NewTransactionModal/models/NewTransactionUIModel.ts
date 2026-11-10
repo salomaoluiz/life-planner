@@ -2,6 +2,7 @@ import AccountDTO from "@application/dto/financial/AccountDTO";
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
 import CreditCardDTO from "@application/dto/financial/CreditCardDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
+import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { TranslationKeys } from "@presentation/i18n/types";
 import {
@@ -55,13 +56,16 @@ class NewTransactionUIModel {
     );
 
     return [
-      ...active.map((account) => ({ label: account.name, value: account.id })),
+      ...active.map((account) => ({
+        label: accountLabel(account),
+        value: account.id,
+      })),
       ...(selectedArchived
         ? [
             {
               descriptionKey:
                 "financial.accounts.archivedLabel" as TranslationKeys,
-              label: selectedArchived.name,
+              label: accountLabel(selectedArchived),
               value: selectedArchived.id,
             },
           ]
@@ -148,6 +152,13 @@ class NewTransactionUIModel {
   private cardsOf(ownerId: string) {
     return (this.props.cards ?? []).filter((card) => card.ownerId === ownerId);
   }
+}
+
+// Spec 103: an account in another currency says so (`Brokerage · USD`), like the transfer form.
+function accountLabel(account: AccountDTO) {
+  return account.currency === DEFAULT_CURRENCY
+    ? account.name
+    : `${account.name} · ${account.currency}`;
 }
 
 function byName(a: AccountDTO, b: AccountDTO) {

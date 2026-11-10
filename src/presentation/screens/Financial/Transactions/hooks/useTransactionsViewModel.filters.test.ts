@@ -1,6 +1,7 @@
 import { act } from "@tests";
 import queryName from "@tests/queryName";
 
+import { makeTransactionDTO } from "../mocks/index.mocks";
 import { makeInvoice } from "../mocks/invoice.mocks";
 import { EMPTY_FILTERS } from "../models/transactionFilters";
 import {
@@ -57,6 +58,31 @@ describe("fetchFilteredTransactions / fetchProjections with a filter", () => {
       ownerIds: ["user-id"],
       to: "2026-12",
     });
+  });
+});
+
+describe("projections in one currency (spec 103)", () => {
+  function projection(id: string, currency: string) {
+    return {
+      categoryId: "cat-1",
+      creditCardId: undefined,
+      currency,
+      toTransactionDTO: () => makeTransactionDTO({ id }),
+    };
+  }
+
+  it("SHOULD keep only the projections of the filter currency", async () => {
+    spies.getProjections.mockResolvedValue([
+      projection("p1", "BRL"),
+      projection("p2", "USD"),
+    ] as never);
+    spies.getCategories.mockResolvedValue([]);
+
+    const result = await fetchProjections("2026-11", "2026-12", ["user-id"], {
+      currency: "USD",
+    });
+
+    expect(result.accountItems.map((item) => item.id)).toEqual(["p2"]);
   });
 });
 

@@ -26,6 +26,12 @@ const state = { isError: false, isLoading: true, onRetry: jest.fn() };
 function givenViewModel(overrides: Record<string, unknown> = {}) {
   jest.mocked(useHomeViewModel).mockReturnValue({
     balance: state,
+    currency: {
+      onChange: jest.fn(),
+      options: ["BRL"],
+      value: "BRL",
+      visible: false,
+    },
     filter: {
       onChange: jest.fn(),
       options: [
@@ -153,4 +159,28 @@ it("SHOULD open the Overview from the section link", () => {
   fireEvent.press(screen.getByTestId(`${homeTestIds.financeSection}-action`));
 
   expect(onOverviewPress).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD show the currency dropdown only WHEN there are accounts in more than one currency (spec 103)", () => {
+  const onChange = jest.fn();
+
+  givenViewModel();
+  const { unmount } = render(<Home />);
+  expect(screen.queryByTestId(homeTestIds.financeCurrency)).toBeNull();
+  unmount();
+
+  givenViewModel({
+    currency: {
+      onChange,
+      options: ["BRL", "USD"],
+      value: "BRL",
+      visible: true,
+    },
+  });
+  render(<Home />);
+
+  fireEvent.press(screen.getByTestId(homeTestIds.financeCurrency));
+  fireEvent.press(screen.getByText("USD"));
+
+  expect(onChange).toHaveBeenCalledWith("USD");
 });

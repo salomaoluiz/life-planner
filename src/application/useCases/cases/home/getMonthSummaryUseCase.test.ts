@@ -17,9 +17,54 @@ it("SHOULD read only the month's transactions of the selected owners", async () 
   await setup();
 
   expect(getTransactions).toHaveBeenCalledTimes(1);
-  expect(getTransactions).toHaveBeenCalledWith(mocks.defaultParams.ownerIds, {
-    from: "2026-10-01",
-    to: "2026-10-31",
+  expect(getTransactions).toHaveBeenCalledWith(
+    mocks.defaultParams.ownerIds,
+    { from: "2026-10-01", to: "2026-10-31" },
+    { currency: "BRL" },
+  );
+});
+
+describe("currency (spec 103)", () => {
+  it("SHOULD read the rows in the requested currency AND skip the card invoices, which bill in BRL", async () => {
+    await setup({ ...mocks.defaultParams, currency: "USD" });
+
+    expect(getTransactions).toHaveBeenCalledWith(
+      mocks.defaultParams.ownerIds,
+      { from: "2026-10-01", to: "2026-10-31" },
+      { currency: "USD" },
+    );
+    expect(
+      spies.creditCardRepository.getCardInvoicesForMonth,
+    ).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD count only the projections of the requested currency", async () => {
+    spies.recurrenceRepository.getProjections.mockResolvedValueOnce([
+      {
+        creditCardId: undefined,
+        currency: "BRL",
+        date: new Date(2026, 10, 5).toISOString(),
+        ownerId: mocks.defaultParams.ownerIds[0],
+        type: TransactionType.EXPENSE,
+        value: "100.00",
+      },
+      {
+        creditCardId: undefined,
+        currency: "USD",
+        date: new Date(2026, 10, 6).toISOString(),
+        ownerId: mocks.defaultParams.ownerIds[0],
+        type: TransactionType.EXPENSE,
+        value: "7.00",
+      },
+    ] as never);
+
+    const result = await setup({
+      ...mocks.defaultParams,
+      currency: "USD",
+      month: new Date(2026, 10, 1),
+    });
+
+    expect(result.projectedExpense).toBe(700);
   });
 });
 
