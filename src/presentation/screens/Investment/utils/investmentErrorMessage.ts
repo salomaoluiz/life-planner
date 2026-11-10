@@ -5,7 +5,10 @@ import {
   InvestmentClassLocked,
   InvestmentFeesAboveSale,
   InvestmentNegativePosition,
+  QuoteRefreshTooSoon,
+  QuoteSourceUnavailable,
   TickerExists,
+  TickerNotFound,
 } from "@domain/entities/errors";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
@@ -32,12 +35,15 @@ function getInvestmentErrorMessage(
     };
   }
 
-  const direct: [new () => unknown, TranslationKeys][] = [
+  const direct: [new (...args: never[]) => unknown, TranslationKeys][] = [
     [InvestmentAccountNotChangeable, "investment.errors.accountNotChangeable"],
     [InvestmentArchived, "investment.errors.archived"],
     [InvestmentClassLocked, "investment.errors.classLocked"],
     [InvestmentFeesAboveSale, "investment.errors.feesAboveSale"],
+    [QuoteRefreshTooSoon, "investment.errors.refreshTooSoon"],
+    [QuoteSourceUnavailable, "investment.errors.sourceUnavailable"],
     [TickerExists, "investment.errors.tickerExists"],
+    [TickerNotFound, "investment.errors.tickerNotFound"],
     [FamilyArchived, "family.errors.archived"],
   ];
   const match = direct.find(([errorClass]) => error instanceof errorClass);

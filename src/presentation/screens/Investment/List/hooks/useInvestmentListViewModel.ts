@@ -13,10 +13,15 @@ import {
   ALL_OWNERS,
   buildOwnerFilterChoices,
 } from "@screens/Financial/models/ownerOptions";
+import useQuoteRefresh from "@screens/Investment/hooks/useQuoteRefresh";
 import {
   buildEntries,
   filterAssets,
 } from "@screens/Investment/models/assetList";
+import {
+  hasQuotedAssets,
+  latestQuoteTime,
+} from "@screens/Investment/models/quoteInfo";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 export type InvestmentListVM = ReturnType<typeof useInvestmentListViewModel>;
@@ -42,6 +47,7 @@ function useInvestmentListViewModel() {
   const [ownerFilter, setOwnerFilter] = useState(ALL_OWNERS);
   const [search, setSearch] = useState("");
   const { openModal } = useModalNavigation();
+  const quoteRefresh = useQuoteRefresh();
 
   const active = useOwnerScopedQuery<AssetsData>({
     cacheKey: investmentKeys.assets(InvestmentAssetStatus.ACTIVE),
@@ -82,6 +88,10 @@ function useInvestmentListViewModel() {
   const hasAny = (current.data?.assets.length ?? 0) > 0;
   const scope = useReadOnlyScope(current.data?.owners, ownerFilter);
 
+  const activeAssets = rowsByTab[InvestmentAssetStatus.ACTIVE].map(
+    (row) => row.asset,
+  );
+
   async function refetch() {
     await Promise.all([active.refetch(), archived.refetch()]);
   }
@@ -92,12 +102,15 @@ function useInvestmentListViewModel() {
     entries,
     errorMessage: current.error?.message,
     hasAny,
+    hasQuotes:
+      tab === InvestmentAssetStatus.ACTIVE && hasQuotedAssets(activeAssets),
     isEmpty: !!current.data && !hasAny,
     isLoading: current.isFetching && !current.data,
     isRefreshing: current.isFetching && !!current.data,
     noResults: hasAny && entries.length === 0,
     onAddPress: scope.guard(() => openModal("investment_asset")),
     onOwnerFilterChange: setOwnerFilter,
+    onQuotesRefresh: quoteRefresh.onRefresh,
     onRefresh: refetch,
     onRetry: refetch,
     onRowPress: (id: string) => router.push(`/investments/asset/${id}`),
@@ -106,6 +119,11 @@ function useInvestmentListViewModel() {
     onToastHide: scope.onToastHide,
     ownerChoices: buildOwnerFilterChoices(owners),
     ownerFilter,
+    quotesDisabled: quoteRefresh.disabled,
+    quotesRefreshing: quoteRefresh.isRefreshing,
+    quotesSecondsLeft: quoteRefresh.secondsLeft,
+    quotesSourceDown: quoteRefresh.sourceDown,
+    quotesTime: latestQuoteTime(activeAssets),
     readOnly: scope.readOnly,
     search,
     tab,

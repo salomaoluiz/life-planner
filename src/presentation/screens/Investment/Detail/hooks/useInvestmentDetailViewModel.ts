@@ -7,17 +7,26 @@ import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { financeKeys } from "@application/queryKeys/financeKeys";
 import { investmentKeys } from "@application/queryKeys/investmentKeys";
 import { useCases } from "@application/useCases";
-import { InvestmentAssetStatus } from "@domain/entities/investment/enums";
-import { InvestmentAssetDetail } from "@domain/entities/investment/InvestmentEntities";
+import {
+  InvestmentAssetStatus,
+  InvestmentPriceRange,
+  InvestmentPriceSource,
+} from "@domain/entities/investment/enums";
+import {
+  InvestmentAssetDetail,
+  InvestmentPriceHistory,
+} from "@domain/entities/investment/InvestmentEntities";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { useMutation } from "@infrastructure/fetcher";
 import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
 import invalidateInvestments from "@screens/Investment/hooks/invalidateInvestments";
+import useQuoteRefresh from "@screens/Investment/hooks/useQuoteRefresh";
 import getInvestmentErrorMessage from "@screens/Investment/utils/investmentErrorMessage";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import { deleteSummary, sellCount } from "../models/detailModel";
+import { ChartMode } from "../models/priceChart";
 
 export type InvestmentDetailVM = ReturnType<
   typeof useInvestmentDetailViewModel
@@ -46,6 +55,9 @@ function useInvestmentDetailViewModel() {
   const { openModal } = useModalNavigation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [range, setRange] = useState(InvestmentPriceRange.ONE_YEAR);
+  const [chartMode, setChartMode] = useState<ChartMode>("price");
+  const quoteRefresh = useQuoteRefresh([id]);
 
   const query = useOwnerScopedQuery<DetailData>({
     cacheKey: investmentKeys.asset(id),
@@ -53,6 +65,11 @@ function useInvestmentDetailViewModel() {
       asset: await useCases.getInvestmentAssetUseCase.execute(id),
       owners,
     }),
+  });
+  const history = useOwnerScopedQuery<InvestmentPriceHistory>({
+    cacheKey: investmentKeys.priceHistory(id, range),
+    fetch: async () =>
+      useCases.getInvestmentPriceHistoryUseCase.execute({ id, range }),
   });
   const accounts = useOwnerScopedQuery<AccountDTO[]>({
     cacheKey: financeKeys.accounts.raw("investment"),
@@ -89,6 +106,7 @@ function useInvestmentDetailViewModel() {
   useEffect(() => {
     if (isFocused) {
       query.refetch();
+      history.refetch();
     }
   }, [isFocused]);
 
@@ -147,19 +165,32 @@ function useInvestmentDetailViewModel() {
     archived,
     archivedAt: asset?.archivedAt ?? null,
     asset,
+    chartMode,
     deleteSummary: summary,
     errorMessage: getInvestmentErrorMessage(error),
+    history: history.data,
+    historyLoading: history.isFetching && !history.data,
     isDeleteOpen: deleteOpen,
     isDeleting: deleteMutation.isFetching,
     isLoading: query.isFetching && !query.data,
     isMenuOpen: menuOpen,
     isNotFound: !!query.error && !query.data,
     isRefreshing: query.isFetching && !!query.data,
+    manualOverQuote:
+      asset?.priceSource === InvestmentPriceSource.MANUAL && !!asset.quote,
     onAddOperation: scope.guard(() =>
       openModal("investment_operation", { assetId: id }),
     ),
     onArchiveToggle: scope.guard(onArchiveToggle),
     onBack: () => router.replace("/investments"),
+    onBackToAutomatic: scope.guard(() => {
+      const manual = asset?.valuations[0];
+
+      if (manual) {
+        valuationMutation.mutate(manual.id);
+      }
+    }),
+    onChartModeChange: setChartMode,
     onDeleteCancel: () => setDeleteOpen(false),
     onDeleteConfirm: () => deleteMutation.mutate(id),
     onDeleteOpen: scope.guard(() => {
@@ -177,6 +208,8 @@ function useInvestmentDetailViewModel() {
     onMenuOpen: () => setMenuOpen(true),
     onOperationPress: (operationId: string) =>
       openModal("investment_operation", { assetId: id, id: operationId }),
+    onQuotesRefresh: quoteRefresh.onRefresh,
+    onRangeChange: setRange,
     onRefresh: async () => query.refetch(),
     onRetry: async () => query.refetch(),
     onToastHide: scope.onToastHide,
@@ -184,6 +217,11 @@ function useInvestmentDetailViewModel() {
       openModal("investment_valuation", { assetId: id }),
     ),
     ownerLabel,
+    quotesDisabled: quoteRefresh.disabled,
+    quotesRefreshing: quoteRefresh.isRefreshing,
+    quotesSecondsLeft: quoteRefresh.secondsLeft,
+    quotesSourceDown: quoteRefresh.sourceDown,
+    range,
     readOnly: scope.readOnly,
     sellCount: asset ? sellCount(asset) : 0,
     toastVisible: scope.toastVisible,

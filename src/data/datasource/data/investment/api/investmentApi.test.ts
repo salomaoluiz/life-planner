@@ -11,13 +11,18 @@ import {
   InvestmentFeesAboveSale,
   InvestmentNegativePosition,
   InvestmentRowUseOperation,
+  QuoteRefreshTooSoon,
+  QuoteSourceUnavailable,
   TickerExists,
+  TickerNotFound,
 } from "@domain/entities/errors";
 import {
   InvestmentAssetClass,
   InvestmentAssetStatus,
   InvestmentFeeKind,
   InvestmentOperationType,
+  InvestmentPriceRange,
+  InvestmentQuoteMarket,
 } from "@domain/entities/investment/enums";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { api } from "@infrastructure/api";
@@ -474,5 +479,309 @@ describe("valuations", () => {
     await expect(investmentApi.deleteValuation("val-1")).rejects.toBeInstanceOf(
       GenericError,
     );
+  });
+});
+
+describe("quotes (spec 104)", () => {
+  const apiQuote = {
+    changePercent: "0.48",
+    dayHigh: "10.6",
+    dayLow: null,
+    market: "B3",
+    previousClose: "10.48",
+    price: "10.53",
+    quotedAt: "2026-11-04T16:00:00.000Z",
+    source: "BRAPI",
+    stale: false,
+    ticker: "ITSA4",
+    unavailable: false,
+  };
+
+  it("SHOULD map the quote, price source, rate AND BRL result of an asset", async () => {
+    jest.mocked(api.get).mockResolvedValue({
+      items: [
+        {
+          ...apiAsset,
+          averageFxRate: "5.2236",
+          costBrl: 1902435,
+          currency: "USD",
+          currentPriceSource: "QUOTE",
+          fx: { quotedAt: "2026-11-04T16:00:00.000Z", rate: "5.5601" },
+          marketValueBrl: 2573214,
+          operationsWithoutFxRate: 1,
+          quote: apiQuote,
+          resultBrl: 670779,
+          resultBrlFromAsset: 515047,
+          resultBrlFromFx: 155732,
+          resultBrlPercent: 0.3526,
+        },
+      ],
+    });
+
+    const [asset] = await investmentApi.getAssets({
+      status: InvestmentAssetStatus.ACTIVE,
+    });
+
+    expect(asset.quote).toMatchObject({
+      dayLow: null,
+      price: "10.53",
+      stale: false,
+      ticker: "ITSA4",
+    });
+    expect(asset.priceSource).toBe("QUOTE");
+    expect(asset.fx).toEqual({
+      quotedAt: "2026-11-04T16:00:00.000Z",
+      rate: "5.5601",
+    });
+    expect(asset.averageFxRate).toBe("5.2236");
+    expect(asset.operationsWithoutFxRate).toBe(1);
+    expect(asset.brl).toEqual({
+      cost: 1902435,
+      marketValue: 2573214,
+      result: 670779,
+      resultFromAsset: 515047,
+      resultFromFx: 155732,
+      resultPercent: 0.3526,
+    });
+  });
+
+  it("SHOULD leave quote, fx AND brl empty for an asset without them", async () => {
+    jest.mocked(api.get).mockResolvedValue({ items: [apiAsset] });
+
+    const [asset] = await investmentApi.getAssets({
+      status: InvestmentAssetStatus.ACTIVE,
+    });
+
+    expect(asset).toMatchObject({
+      averageFxRate: null,
+      brl: null,
+      fx: null,
+      operationsWithoutFxRate: 0,
+      priceSource: null,
+      quote: null,
+    });
+  });
+
+  it("SHOULD search tickers of a market with the encoded query", async () => {
+    jest.mocked(api.get).mockResolvedValue({
+      items: [
+        {
+          changePercent: "0.48",
+          currency: "BRL",
+          exchange: "B3",
+          logoUrl: "https://example.com/logo.svg",
+          market: "B3",
+          name: "Itausa PN",
+          price: "10.53",
+          ticker: "ITSA4",
+        },
+        { currency: "BRL", market: "B3", price: "1", ticker: "X1" },
+      ],
+    });
+
+    const items = await investmentApi.searchTickers({
+      market: InvestmentQuoteMarket.B3,
+      q: "it sa",
+    });
+
+    expect(api.get).toHaveBeenCalledWith(
+      "/v1/investments/tickers/search?market=B3&q=it%20sa",
+    );
+    expect(items[0]).toMatchObject({ name: "Itausa PN", ticker: "ITSA4" });
+    expect(items[1]).toMatchObject({ exchange: "", logoUrl: null, name: null });
+  });
+
+  it("SHOULD refresh quotes with the asset ids AND map the answer", async () => {
+    jest.mocked(api.post).mockResolvedValue({
+      fx: {
+        pair: "USD-BRL",
+        quotedAt: "2026-11-04T16:00:00.000Z",
+        rate: "5.5",
+      },
+      nextRefreshAt: "2026-11-04T16:01:00.000Z",
+      quotes: [apiQuote],
+    });
+
+    const result = await investmentApi.refreshQuotes({ assetIds: ["a1"] });
+
+    expect(api.post).toHaveBeenCalledWith("/v1/investments/quotes/refresh", {
+      assetIds: ["a1"],
+    });
+    expect(result.nextRefreshAt).toBe("2026-11-04T16:01:00.000Z");
+    expect(result.fx?.rate).toBe("5.5");
+    expect(result.quotes[0].ticker).toBe("ITSA4");
+
+    jest.mocked(api.post).mockResolvedValue({ fx: null, nextRefreshAt: "x" });
+    expect((await investmentApi.refreshQuotes({})).quotes).toEqual([]);
+  });
+
+  it("SHOULD map the 429 of the refresh WITH the seconds left", async () => {
+    jest.mocked(api.post).mockRejectedValue(
+      new ApiBusinessError(
+        "Too soon",
+        429,
+        {},
+        {
+          code: "REFRESH_TOO_SOON",
+          retryAfterSeconds: 42,
+        },
+      ),
+    );
+
+    const error = await investmentApi
+      .refreshQuotes({})
+      .catch((caught: unknown) => caught);
+
+    expect(error).toBeInstanceOf(QuoteRefreshTooSoon);
+    expect((error as QuoteRefreshTooSoon).retryAfterSeconds).toBe(42);
+  });
+
+  it("SHOULD map TICKER_NOT_FOUND AND QUOTE_SOURCE_UNAVAILABLE", async () => {
+    jest
+      .mocked(api.post)
+      .mockRejectedValueOnce(
+        new ApiBusinessError("No asset", 422, {}, { code: "TICKER_NOT_FOUND" }),
+      );
+    jest
+      .mocked(api.get)
+      .mockRejectedValueOnce(
+        new ApiBusinessError(
+          "Down",
+          503,
+          {},
+          { code: "QUOTE_SOURCE_UNAVAILABLE" },
+        ),
+      );
+
+    await expect(
+      investmentApi.createAsset({
+        assetClass: InvestmentAssetClass.BR_STOCK,
+        name: "X",
+        owner: OwnerType.USER,
+        ownerId: "o",
+        ticker: "XYZW9",
+      }),
+    ).rejects.toBeInstanceOf(TickerNotFound);
+    await expect(
+      investmentApi.searchTickers({
+        market: InvestmentQuoteMarket.US,
+        q: "ap",
+      }),
+    ).rejects.toBeInstanceOf(QuoteSourceUnavailable);
+  });
+
+  it("SHOULD read the price history of a range", async () => {
+    jest.mocked(api.get).mockResolvedValue({
+      currency: "USD",
+      historyStartsAt: "2026-11-04",
+      points: [
+        {
+          date: "2025-11-04",
+          fxRate: "5.2236",
+          kind: "OPERATION",
+          price: "182.10",
+        },
+        { date: "2026-11-04", kind: "CLOSE", price: "228.57" },
+      ],
+    });
+
+    const history = await investmentApi.getPriceHistory({
+      id: "asset-1",
+      range: InvestmentPriceRange.ONE_YEAR,
+    });
+
+    expect(api.get).toHaveBeenCalledWith(
+      "/v1/investments/assets/asset-1/price-history?range=1Y",
+    );
+    expect(history.historyStartsAt).toBe("2026-11-04");
+    expect(history.points[0]).toMatchObject({
+      fxRate: "5.2236",
+      kind: "OPERATION",
+    });
+    expect(history.points[1].fxRate).toBeNull();
+
+    jest.mocked(api.get).mockResolvedValue({ currency: "BRL" });
+    expect(
+      (
+        await investmentApi.getPriceHistory({
+          id: "a",
+          range: InvestmentPriceRange.ALL,
+        })
+      ).points,
+    ).toEqual([]);
+  });
+
+  it("SHOULD wrap a failing read in a generic error", async () => {
+    jest.mocked(api.get).mockRejectedValue(new Error("boom"));
+
+    await expect(
+      investmentApi.getPriceHistory({
+        id: "a",
+        range: InvestmentPriceRange.ALL,
+      }),
+    ).rejects.toBeInstanceOf(GenericError);
+  });
+});
+
+describe("exchange rate of an operation (spec 104 FR 27)", () => {
+  const base = {
+    assetId: "asset-1",
+    date: "2026-06-10",
+    fees: [],
+    generateTransaction: false,
+    quantity: "20",
+    type: InvestmentOperationType.BUY,
+    unitPrice: "182.10",
+  };
+
+  beforeEach(() => {
+    jest.mocked(api.post).mockResolvedValue({
+      item: { ...apiOperation, fxRate: "5.2236" },
+      position,
+    });
+  });
+
+  it("SHOULD send the rate normalized, null for none AND nothing WHEN omitted", async () => {
+    await investmentApi.createOperation({ ...base, fxRate: "5,2236" });
+    await investmentApi.createOperation({ ...base, fxRate: null });
+    await investmentApi.createOperation({ ...base, fxRate: "" });
+    await investmentApi.createOperation(base);
+
+    const bodies = jest
+      .mocked(api.post)
+      .mock.calls.map(([, body]) => body as { fxRate?: null | string });
+
+    expect(bodies.map((body) => body.fxRate)).toEqual([
+      "5.2236",
+      null,
+      null,
+      undefined,
+    ]);
+  });
+
+  it("SHOULD refuse a rate that is not above zero BEFORE the call", async () => {
+    await expect(
+      investmentApi.createOperation({ ...base, fxRate: "0" }),
+    ).rejects.toBeInstanceOf(FieldInvalid);
+    expect(api.post).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD map the rate of the operation", async () => {
+    const result = await investmentApi.createOperation({
+      ...base,
+      fxRate: "5.2236",
+    });
+
+    expect(result.operation.fxRate).toBe("5.2236");
+  });
+
+  it("SHOULD send the rate on update", async () => {
+    jest.mocked(api.patch).mockResolvedValue({ item: apiOperation, position });
+
+    await investmentApi.updateOperation({ fxRate: "5.5", id: "op-1" });
+
+    expect(jest.mocked(api.patch).mock.calls[0][1]).toMatchObject({
+      fxRate: "5.5",
+    });
   });
 });

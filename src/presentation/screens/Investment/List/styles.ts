@@ -21,6 +21,7 @@ function useStyles() {
       cellAsset: { flex: 2.4, gap: spacing.xxs, minWidth: 0 },
       cellNumber: { alignItems: "flex-end", flex: 1.2, gap: spacing.xxs },
       cellNumberWide: { alignItems: "flex-end", flex: 1.5, gap: spacing.xxs },
+      cellUpdated: { flex: 1.4, gap: spacing.xxs, minWidth: 0 },
       footnote: { paddingVertical: spacing.md },
       header: { gap: spacing.md },
       headerRow: {
@@ -28,6 +29,12 @@ function useStyles() {
         gap: spacing.md,
         paddingHorizontal: spacing.md,
         paddingVertical: spacing.xs,
+      },
+      headerTop: {
+        alignItems: "center",
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: spacing.sm,
       },
       noResults: {
         alignItems: "center",

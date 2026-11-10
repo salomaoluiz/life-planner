@@ -4,9 +4,16 @@ import { act, renderHook } from "@tests";
 import { modalNavigation } from "@tests/modalNavigation";
 
 import OwnerDTO from "@application/dto/user/OwnerDTO";
-import { TickerExists } from "@domain/entities/errors";
+import {
+  QuoteSourceUnavailable,
+  TickerExists,
+  TickerNotFound,
+} from "@domain/entities/errors";
 import { InvestmentAssetClass } from "@domain/entities/investment/enums";
-import { InvestmentAssetDetail } from "@domain/entities/investment/InvestmentEntities";
+import {
+  InvestmentAssetDetail,
+  InvestmentTickerSuggestion,
+} from "@domain/entities/investment/InvestmentEntities";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
 import UseMutationFixture from "@infrastructure/fetcher/mocks/useMutation.fixture";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
@@ -26,6 +33,10 @@ jest.mock("@application/useCases", () => ({
   useCases: {
     createInvestmentAssetUseCase: { execute: jest.fn(), uniqueName: "create" },
     getInvestmentAssetUseCase: { execute: jest.fn(), uniqueName: "get" },
+    searchInvestmentTickersUseCase: {
+      execute: jest.fn(),
+      uniqueName: "search",
+    },
     updateInvestmentAssetUseCase: { execute: jest.fn(), uniqueName: "update" },
   },
 }));
@@ -34,6 +45,7 @@ const detailQuery = new UseQueryFixture<InvestmentAssetDetail>();
 const ownersQuery = new UseQueryFixture<OwnerDTO[]>();
 const createMutation = new UseMutationFixture();
 const updateMutation = new UseMutationFixture();
+const searchQuery = new UseQueryFixture<InvestmentTickerSuggestion[]>();
 
 const spies = {
   activeOwners: jest.mocked(useActiveOwners),
@@ -49,10 +61,14 @@ beforeEach(() => {
   ownersQuery.reset().withData(owners);
   createMutation.reset();
   updateMutation.reset();
+  searchQuery.reset();
   spies.params.mockReturnValue({});
   spies.activeOwners.mockReturnValue(ownersQuery.build() as never);
   spies.allOwners.mockReturnValue(ownersQuery.build() as never);
-  spies.useQuery.mockImplementation((() => detailQuery.build()) as never);
+  spies.useQuery.mockImplementation(((props: { cacheKey: string[] }) =>
+    props.cacheKey.includes("ticker-search")
+      ? searchQuery.build()
+      : detailQuery.build()) as never);
   spies.useMutation.mockImplementation(((props: { cacheKey: string[] }) =>
     (props.cacheKey[0] === "create"
       ? createMutation
@@ -88,13 +104,14 @@ it("SHOULD validate before creating AND create with the typed values", () => {
   expect(result.current.nameError).toBeDefined();
   expect(createMutation.value.mutate).not.toHaveBeenCalled();
 
+  act(() => result.current.onAssetClassChange("PRIVATE"));
   act(() => result.current.onTickerChange("itsa4"));
   act(() => result.current.onCurrentValueChange("10,53"));
   act(() => result.current.onSave());
 
   expect(createMutation.value.mutate).toHaveBeenCalledWith(
     expect.objectContaining({
-      assetClass: "BR_STOCK",
+      assetClass: "PRIVATE",
       currentUnitPrice: "10,53",
       name: "ITSA4",
       owner: "USER",
@@ -111,7 +128,13 @@ it("SHOULD suggest the currency by class AND let the user pick one", () => {
 
   act(() => result.current.onCurrencyChange("EUR"));
   act(() => result.current.onAssetClassChange("BR_STOCK"));
+  // A quoted class takes the currency of its market and locks it (spec 104 FR 24).
+  expect(result.current.currency).toBe("BRL");
+  expect(result.current.currencyReadOnly).toBe(true);
+  act(() => result.current.onAssetClassChange("PRIVATE"));
+  act(() => result.current.onCurrencyChange("EUR"));
   expect(result.current.currency).toBe("EUR");
+  expect(result.current.currencyReadOnly).toBe(false);
   expect(result.current.currencyOptions).toEqual(["BRL", "USD", "EUR"]);
 });
 
@@ -205,5 +228,100 @@ describe("editing", () => {
     detailQuery.withData(makeDetail({ operationCount: 0 }));
 
     expect(setup().result.current.classLocked).toBe(false);
+  });
+});
+
+const itsa: InvestmentTickerSuggestion = {
+  changePercent: "0.48",
+  currency: "BRL",
+  exchange: "B3",
+  logoUrl: null,
+  market: "B3" as InvestmentTickerSuggestion["market"],
+  name: "Itaúsa PN",
+  price: "10.53",
+  ticker: "ITSA4",
+};
+
+describe("ticker search (spec 104)", () => {
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
+  it("SHOULD offer the search results of a typed ticker after the 300 ms debounce", () => {
+    searchQuery.reset().withData([itsa]);
+    const { result } = setup();
+
+    act(() => result.current.onTickerChange("it"));
+    expect(result.current.suggestions).toEqual([]);
+
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+
+    expect(result.current.suggestions).toEqual([itsa]);
+    expect(result.current.quotedMarket).toBe("B3");
+  });
+
+  it("SHOULD block saving a quoted ticker that was not picked AND save the picked one", () => {
+    searchQuery.reset().withData([itsa]);
+    const { result } = setup();
+
+    act(() => result.current.onTickerChange("itsa4"));
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+    act(() => result.current.onNameChange("Itaúsa"));
+    act(() => result.current.onSave());
+
+    expect(createMutation.value.mutate).not.toHaveBeenCalled();
+    expect(result.current.tickerError).toBe("investment.ticker.notFound");
+
+    act(() => result.current.onTickerSelect("ITSA4"));
+    act(() => result.current.onSave());
+
+    expect(result.current.pickedQuote).toEqual(itsa);
+    expect(createMutation.value.mutate).toHaveBeenCalledWith(
+      expect.objectContaining({ currency: "BRL", ticker: "ITSA4" }),
+    );
+  });
+
+  it("SHOULD fill the name from the picked ticker until the name is typed", () => {
+    searchQuery.reset().withData([itsa]);
+    const { result } = setup();
+
+    act(() => result.current.onTickerChange("itsa4"));
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+    act(() => result.current.onTickerSelect("ITSA4"));
+
+    expect(result.current.name).toBe("Itaúsa PN");
+  });
+
+  it("SHOULD ignore a pick that is not in the results", () => {
+    const { result } = setup();
+
+    act(() => result.current.onTickerSelect("NOPE"));
+
+    expect(result.current.pickedQuote).toBeNull();
+  });
+
+  it("SHOULD report the source being unavailable", () => {
+    searchQuery.reset().withError(new QuoteSourceUnavailable() as never);
+    const { result } = setup();
+
+    act(() => result.current.onTickerChange("itsa"));
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+
+    expect(result.current.searchUnavailable).toBe(true);
+  });
+
+  it("SHOULD show the ticker error of a 422 TICKER_NOT_FOUND", () => {
+    createMutation.reset().withError(new TickerNotFound() as never);
+    const { result } = setup();
+
+    expect(result.current.tickerError).toBe("investment.ticker.notFound");
+    expect(result.current.failure).toBeUndefined();
   });
 });

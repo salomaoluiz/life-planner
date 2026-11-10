@@ -4,4 +4,7 @@ export { default as InvestmentClassLocked } from "./InvestmentClassLocked";
 export { default as InvestmentFeesAboveSale } from "./InvestmentFeesAboveSale";
 export { default as InvestmentNegativePosition } from "./InvestmentNegativePosition";
 export { default as InvestmentRowUseOperation } from "./InvestmentRowUseOperation";
+export { default as QuoteRefreshTooSoon } from "./QuoteRefreshTooSoon";
+export { default as QuoteSourceUnavailable } from "./QuoteSourceUnavailable";
 export { default as TickerExists } from "./TickerExists";
+export { default as TickerNotFound } from "./TickerNotFound";

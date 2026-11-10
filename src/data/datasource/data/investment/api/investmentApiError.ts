@@ -9,7 +9,10 @@ import {
   InvestmentFeesAboveSale,
   InvestmentNegativePosition,
   InvestmentRowUseOperation,
+  QuoteRefreshTooSoon,
+  QuoteSourceUnavailable,
   TickerExists,
+  TickerNotFound,
 } from "@domain/entities/errors";
 
 import handleFinancialApiError from "../../financial/financialApiError";
@@ -27,6 +30,20 @@ function handleInvestmentApiError(
     error.message.includes("account you can't change")
   ) {
     throw new InvestmentAccountNotChangeable();
+  }
+
+  if (error instanceof ApiBusinessError) {
+    const code = error.body?.code;
+
+    if (error.statusCode === 429 && code === "REFRESH_TOO_SOON") {
+      throw new QuoteRefreshTooSoon(Number(error.body.retryAfterSeconds ?? 60));
+    }
+    if (error.statusCode === 503 && code === "QUOTE_SOURCE_UNAVAILABLE") {
+      throw new QuoteSourceUnavailable();
+    }
+    if (error.statusCode === 422 && code === "TICKER_NOT_FOUND") {
+      throw new TickerNotFound();
+    }
   }
 
   return handleFinancialApiError(error, context, {

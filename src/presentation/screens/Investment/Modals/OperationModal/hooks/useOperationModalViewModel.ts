@@ -258,6 +258,9 @@ function useOperationModalViewModel() {
     feeErrors: errors?.feeDescriptions ?? {},
     feeKinds: Object.values(InvestmentFeeKind),
     fees: state?.fees ?? ([] as FeeRow[]),
+    fxRate: state?.fxRate ?? "",
+    fxRateError: errors?.fxRate,
+    fxRatePlaceholder: asset?.fx?.rate ?? "",
     generate: state?.generate ?? true,
     insufficient,
     isDeleting: deleteMutation.isFetching,
@@ -287,6 +290,8 @@ function useOperationModalViewModel() {
       state &&
       update(updateFee(state, key, { kind: kind as InvestmentFeeKind })),
     onFeeRemove: (key: string) => state && update(removeFee(state, key)),
+    onFxRateChange: (value: string) =>
+      state && update({ ...state, fxRate: value }),
     onGenerateChange: (value: boolean) =>
       state && update({ ...state, generate: value }),
     onQuantityChange: (value: string) =>
@@ -304,6 +309,7 @@ function useOperationModalViewModel() {
     saveLabelKey: (state?.type === InvestmentOperationType.SELL
       ? "investment.form.operation.saveSell"
       : "investment.form.operation.saveBuy") as TranslationKeys,
+    showFxRate: !!asset && asset.currency !== "BRL",
     titleKey: (isEditing
       ? "investment.form.operation.editTitle"
       : "investment.form.operation.newTitle") as TranslationKeys,

@@ -3,11 +3,16 @@ import {
   InvestmentAssetStatus,
   InvestmentFeeKind,
   InvestmentOperationType,
+  InvestmentPriceRange,
+  InvestmentQuoteMarket,
 } from "@domain/entities/investment/enums";
 import {
   InvestmentAsset,
   InvestmentAssetDetail,
   InvestmentOperationResult,
+  InvestmentPriceHistory,
+  InvestmentQuotesRefresh,
+  InvestmentTickerSuggestion,
   InvestmentValuationResult,
 } from "@domain/entities/investment/InvestmentEntities";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
@@ -29,6 +34,8 @@ export interface CreateInvestmentOperationParams {
   // `YYYY-MM-DD`
   date: string;
   fees: InvestmentFeeParams[];
+  // BRL per USD; omitted = the API defaults it (USD assets).
+  fxRate?: null | string;
   generateTransaction: boolean;
   quantity: string;
   type: InvestmentOperationType;
@@ -38,6 +45,11 @@ export interface CreateInvestmentOperationParams {
 // The app filters All / Personal / Family on the client, so the API call has no owner filter.
 export interface GetInvestmentAssetsParams {
   status: InvestmentAssetStatus;
+}
+
+export interface GetInvestmentPriceHistoryParams {
+  id: string;
+  range: InvestmentPriceRange;
 }
 
 export interface InvestmentFeeParams {
@@ -66,6 +78,15 @@ export type InvestmentRepository = {
   getOperationLink(
     transactionId: string,
   ): Promise<InvestmentOperationLink | undefined>;
+  getPriceHistory(
+    params: GetInvestmentPriceHistoryParams,
+  ): Promise<InvestmentPriceHistory>;
+  refreshQuotes(
+    params: RefreshInvestmentQuotesParams,
+  ): Promise<InvestmentQuotesRefresh>;
+  searchTickers(
+    params: SearchInvestmentTickersParams,
+  ): Promise<InvestmentTickerSuggestion[]>;
   updateAsset(params: UpdateInvestmentAssetParams): Promise<InvestmentAsset>;
   updateOperation(
     params: UpdateInvestmentOperationParams,
@@ -74,6 +95,15 @@ export type InvestmentRepository = {
     params: UpsertInvestmentValuationParams,
   ): Promise<InvestmentValuationResult>;
 };
+
+export interface RefreshInvestmentQuotesParams {
+  assetIds?: string[];
+}
+
+export interface SearchInvestmentTickersParams {
+  market: InvestmentQuoteMarket;
+  q: string;
+}
 
 export interface UpdateInvestmentAssetParams {
   assetClass?: InvestmentAssetClass;
@@ -91,6 +121,7 @@ export interface UpdateInvestmentOperationParams {
   accountId?: null | string;
   date?: string;
   fees?: InvestmentFeeParams[];
+  fxRate?: null | string;
   generateTransaction?: boolean;
   id: string;
   quantity?: string;

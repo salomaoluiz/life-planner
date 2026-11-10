@@ -22,6 +22,7 @@ interface FeeRow {
 interface OperationFormErrors {
   account?: TranslationKeys;
   feeDescriptions: Record<string, TranslationKeys>;
+  fxRate?: TranslationKeys;
   quantity?: TranslationKeys;
   unitPrice?: TranslationKeys;
 }
@@ -30,6 +31,8 @@ interface OperationFormState {
   accountId?: string;
   date: Date;
   fees: FeeRow[];
+  // BRL per USD of a foreign currency asset (decimal text); empty = the API uses the rate of the date.
+  fxRate: string;
   generate: boolean;
   quantity: string;
   type: InvestmentOperationType;
@@ -62,6 +65,7 @@ function createInitialState(accountId?: string): OperationFormState {
     accountId,
     date: new Date(),
     fees: [],
+    fxRate: "",
     generate: true,
     quantity: "",
     type: InvestmentOperationType.BUY,
@@ -76,6 +80,7 @@ function feeSignature(fee: FeeRow) {
 function hasErrors(errors: OperationFormErrors): boolean {
   return (
     !!errors.account ||
+    !!errors.fxRate ||
     !!errors.quantity ||
     !!errors.unitPrice ||
     Object.keys(errors.feeDescriptions).length > 0
@@ -86,6 +91,7 @@ function isSameState(a: OperationFormState, b: OperationFormState) {
   return (
     a.accountId === b.accountId &&
     todayCalendarDate(a.date) === todayCalendarDate(b.date) &&
+    a.fxRate === b.fxRate &&
     a.generate === b.generate &&
     a.quantity === b.quantity &&
     a.type === b.type &&
@@ -119,6 +125,7 @@ function stateFromOperation(
       key: newFeeKey(),
       kind: fee.kind,
     })),
+    fxRate: operation.fxRate ?? "",
     generate: operation.generateTransaction,
     quantity: operation.quantity,
     type: operation.type,
@@ -144,6 +151,7 @@ function toCreateParams(
     assetId,
     date: todayCalendarDate(state.date),
     fees: toApiFees(state),
+    fxRate: state.fxRate.trim() === "" ? undefined : state.fxRate,
     generateTransaction: state.generate,
     quantity: state.quantity,
     type: state.type,
@@ -159,6 +167,7 @@ function toUpdateParams(
     accountId: state.generate ? (state.accountId ?? null) : null,
     date: todayCalendarDate(state.date),
     fees: toApiFees(state),
+    fxRate: state.fxRate.trim() === "" ? undefined : state.fxRate,
     generateTransaction: state.generate,
     id,
     quantity: state.quantity,
@@ -189,6 +198,13 @@ function validate(state: OperationFormState): OperationFormErrors {
   }
   if (price === null || price <= ZERO) {
     errors.unitPrice = "investment.form.operation.unitPriceInvalid";
+  }
+  if (state.fxRate.trim() !== "") {
+    const rate = parseDecimal(state.fxRate);
+
+    if (rate === null || rate <= ZERO) {
+      errors.fxRate = "investment.form.operation.fxRateInvalid";
+    }
   }
   if (state.generate && !state.accountId) {
     errors.account = "investment.form.operation.accountRequired";

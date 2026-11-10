@@ -260,6 +260,24 @@ function Wide({ vm }: AdaptiveViewProps<OperationModalVM>) {
                 testID={ids.unitPrice}
                 value={vm.unitPrice}
               />
+              {vm.showFxRate ? (
+                <View style={styles.feeStack}>
+                  <TextField
+                    disabled={vm.readOnly}
+                    error={err(vm.fxRateError)}
+                    keyboardType="decimal-pad"
+                    label={t("investment.form.operation.fxRate")}
+                    onChangeText={vm.onFxRateChange}
+                    placeholder={vm.fxRatePlaceholder}
+                    testID={ids.fxRate}
+                    value={vm.fxRate}
+                  />
+                  <Text.Caption
+                    tone="secondary"
+                    value={t("investment.form.operation.fxRateHint")}
+                  />
+                </View>
+              ) : null}
               <View style={styles.feeStack}>
                 <Text.BodyStrong value={t("investment.operation.fees")} />
                 {vm.fees.map((fee, index) => (

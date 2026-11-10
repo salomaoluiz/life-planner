@@ -18,6 +18,7 @@ function operation(
     date,
     fees: [],
     feesTotal: 0,
+    fxRate: null,
     generateTransaction: false,
     gross: total,
     id,

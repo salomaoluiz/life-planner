@@ -5,6 +5,9 @@ import {
   CreateInvestmentAssetParams,
   CreateInvestmentOperationParams,
   GetInvestmentAssetsParams,
+  GetInvestmentPriceHistoryParams,
+  RefreshInvestmentQuotesParams,
+  SearchInvestmentTickersParams,
   UpdateInvestmentAssetParams,
   UpdateInvestmentOperationParams,
   UpsertInvestmentValuationParams,
@@ -48,6 +51,7 @@ async function createOperation(params: CreateInvestmentOperationParams) {
     accountId: params.generateTransaction ? params.accountId : undefined,
     date: params.date,
     fees: feesBody(params.fees),
+    fxRate: fxRateBody(params.fxRate),
     generateTransaction: params.generateTransaction,
     quantity: positiveDecimal(params.quantity, "quantity"),
     type: params.type,
@@ -108,6 +112,18 @@ function feesBody(fees: CreateInvestmentOperationParams["fees"]) {
   }));
 }
 
+// "5,2236" -> "5.2236"; undefined = let the API default it, null/"" = no rate.
+function fxRateBody(value: null | string | undefined) {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (value === null || value === "") {
+    return null;
+  }
+
+  return positiveDecimal(value, "fxRate");
+}
+
 async function getAsset(id: string) {
   try {
     const data = await api.get<{ item: Json }>(`/v1/investments/assets/${id}`);
@@ -154,6 +170,20 @@ async function getOperationLink(transactionId: string) {
   }
 }
 
+async function getPriceHistory(params: GetInvestmentPriceHistoryParams) {
+  try {
+    return InvestmentModel.toPriceHistory(
+      await api.get<Json>(
+        `/v1/investments/assets/${params.id}/price-history?range=${params.range}`,
+      ),
+    );
+  } catch (error) {
+    return handleInvestmentApiError(error, {
+      datasource: "InvestmentDatasource - getPriceHistory",
+    });
+  }
+}
+
 // "10,5" -> "10.5". A quantity or price must be a decimal above zero: FieldInvalid BEFORE any network call.
 function positiveDecimal(value: string, field: string): string {
   const parsed = parseDecimal(value);
@@ -163,6 +193,38 @@ function positiveDecimal(value: string, field: string): string {
   }
 
   return formatDecimal(parsed);
+}
+
+// Spec 104 FR 17-19: the API answers 429 with the seconds left; a source failure is a 200 with `stale: true`.
+async function refreshQuotes(params: RefreshInvestmentQuotesParams) {
+  const body = { assetIds: params.assetIds };
+
+  try {
+    return InvestmentModel.toQuotesRefresh(
+      await api.post<Json>("/v1/investments/quotes/refresh", body),
+    );
+  } catch (error) {
+    return handleInvestmentApiError(
+      error,
+      { datasource: "InvestmentDatasource - refreshQuotes" },
+      body,
+    );
+  }
+}
+
+// Spec 104 FR 23: ticker autocomplete of a market.
+async function searchTickers(params: SearchInvestmentTickersParams) {
+  try {
+    const data = await api.get<{ items: Json[] }>(
+      `/v1/investments/tickers/search?market=${params.market}&q=${encodeURIComponent(params.q)}`,
+    );
+
+    return data.items.map((item) => InvestmentModel.toTickerSuggestion(item));
+  } catch (error) {
+    return handleInvestmentApiError(error, {
+      datasource: "InvestmentDatasource - searchTickers",
+    });
+  }
 }
 
 async function updateAsset(params: UpdateInvestmentAssetParams) {
@@ -194,6 +256,7 @@ async function updateOperation(params: UpdateInvestmentOperationParams) {
     accountId: params.accountId,
     date: params.date,
     fees: params.fees === undefined ? undefined : feesBody(params.fees),
+    fxRate: fxRateBody(params.fxRate),
     generateTransaction: params.generateTransaction,
     quantity:
       params.quantity === undefined
@@ -246,6 +309,9 @@ const investmentApi: InvestmentDatasource = {
   getAsset,
   getAssets,
   getOperationLink,
+  getPriceHistory,
+  refreshQuotes,
+  searchTickers,
   updateAsset,
   updateOperation,
   upsertValuation,

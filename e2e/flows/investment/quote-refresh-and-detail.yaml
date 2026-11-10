@@ -1,0 +1,52 @@
+url: ${E2E_WEB_URL}
+name: investment/quote-refresh-and-detail
+tags:
+  - investment
+  - spec-104
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Spec 104: a listed asset shows its quote, "Refresh now" is limited to one per minute and the detail has the quote panel.
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/setup/create-investment-asset.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      TICKER: ITSA4
+      NAME: Itausa PN
+      ASSET_CLASS: BR_STOCK
+- evalScript: ${output.QUOTED_ASSET_ID = output.ASSET_ID}
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/investment/open-investments.yaml
+- extendedWaitUntil:
+    visible:
+      id: "investment.list.row-${output.QUOTED_ASSET_ID}"
+    timeout: 20000
+- assertVisible:
+    id: "investment.list.quotes-info"
+- assertVisible:
+    id: "investment.list.row-${output.QUOTED_ASSET_ID}-updated"
+- tapOn:
+    id: "investment.list.refresh-quotes"
+# The limit is 1 per minute: right after a refresh the button waits and counts down.
+- extendedWaitUntil:
+    visible:
+      id: "investment.list.refresh-countdown"
+    timeout: 60000
+- tapOn:
+    id: "investment.list.row-${output.QUOTED_ASSET_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.price-block"
+    timeout: 20000
+- assertVisible:
+    id: "investment.detail.quote-panel"
+- assertVisible:
+    id: "investment.detail.chart"

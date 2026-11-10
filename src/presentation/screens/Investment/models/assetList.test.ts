@@ -27,10 +27,14 @@ function asset(
   return {
     archivedAt: null,
     assetClass: InvestmentAssetClass.BR_STOCK,
+    averageFxRate: null,
+    brl: null,
     currency: "BRL",
+    fx: null,
     id,
     name: `Name ${id}`,
     operationCount: 1,
+    operationsWithoutFxRate: 0,
     owner: OwnerType.USER,
     ownerId: "user",
     position: {
@@ -45,6 +49,8 @@ function asset(
       realizedResult: 0,
       ...position,
     },
+    priceSource: null,
+    quote: null,
     status: InvestmentAssetStatus.ACTIVE,
     ticker: id.toUpperCase(),
     ...overrides,

@@ -157,3 +157,41 @@ describe("stateFromOperation", () => {
     expect(state).toMatchObject({ accountId: undefined, generate: false });
   });
 });
+
+describe("exchange rate (spec 104 FR 27)", () => {
+  const filled = {
+    ...createInitialState("acc-1"),
+    quantity: "20",
+    unitPrice: "182.10",
+  };
+
+  it("SHOULD send the rate only WHEN typed", () => {
+    expect(toCreateParams("asset-1", filled).fxRate).toBeUndefined();
+    expect(
+      toCreateParams("asset-1", { ...filled, fxRate: "5,2236" }).fxRate,
+    ).toBe("5,2236");
+    expect(
+      toUpdateParams("op-1", { ...filled, fxRate: " " }).fxRate,
+    ).toBeUndefined();
+    expect(toUpdateParams("op-1", { ...filled, fxRate: "5.5" }).fxRate).toBe(
+      "5.5",
+    );
+  });
+
+  it("SHOULD validate a typed rate above zero", () => {
+    expect(validate({ ...filled, fxRate: "5,2" }).fxRate).toBeUndefined();
+    expect(validate({ ...filled, fxRate: "0" }).fxRate).toBe(
+      "investment.form.operation.fxRateInvalid",
+    );
+    expect(validate({ ...filled, fxRate: "x" }).fxRate).toBeDefined();
+    expect(hasErrors(validate({ ...filled, fxRate: "0" }))).toBe(true);
+  });
+
+  it("SHOULD load the rate of an operation AND count it as a change", () => {
+    const state = stateFromOperation(makeOperation({ fxRate: "5.2236" }));
+
+    expect(state.fxRate).toBe("5.2236");
+    expect(isSameState(state, { ...state, fxRate: "5.3" })).toBe(false);
+    expect(stateFromOperation(makeOperation()).fxRate).toBe("");
+  });
+});

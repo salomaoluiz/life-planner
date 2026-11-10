@@ -14,6 +14,7 @@ import {
   ScreenHeader,
   SearchField,
   SegmentedControl,
+  StatusBanner,
   Text,
   Toast,
   useDensity,
@@ -24,7 +25,7 @@ import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 import { INVESTMENT_MAX_WIDTH } from "@screens/Investment/constants";
 import { ListEntry } from "@screens/Investment/models/assetList";
-import { formatMoney } from "@screens/Investment/models/format";
+import { formatMoney, formatTime } from "@screens/Investment/models/format";
 import investmentTestIds from "@screens/Investment/testIds";
 
 import AssetRowItem from "../components/AssetRowItem";
@@ -48,11 +49,11 @@ function ColumnsHeader() {
       {(
         [
           ["quantity", styles.cellNumber],
-          ["averagePrice", styles.cellNumber],
-          ["cost", styles.cellNumber],
-          ["currentValue", styles.cellNumber],
-          ["openResult", styles.cellNumberWide],
-          ["realized", styles.cellNumber],
+          ["price", styles.cellNumber],
+          ["today", styles.cellNumber],
+          ["currentValue", styles.cellNumberWide],
+          ["result", styles.cellNumberWide],
+          ["updated", styles.cellUpdated],
         ] as const
       ).map(([key, style]) => (
         <View key={key} style={style}>
@@ -202,6 +203,47 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentListVM>) {
           }
           title={t("investment.list.title")}
         />
+        {vm.hasQuotes ? (
+          <View style={styles.headerTop}>
+            {vm.quotesTime ? (
+              <Text.Caption
+                testID={investmentTestIds.list.quotesInfo}
+                tone="secondary"
+                value={`${t("investment.quote.asOf", {
+                  time: formatTime(vm.quotesTime, localeTag),
+                })} · ${t("investment.quote.everyHour")}`}
+              />
+            ) : null}
+            <Button.Secondary
+              disabled={vm.quotesDisabled}
+              icon="refresh"
+              label={
+                vm.quotesRefreshing
+                  ? t("investment.quote.refreshing")
+                  : t("investment.quote.refreshNow")
+              }
+              loading={vm.quotesRefreshing}
+              onPress={vm.onQuotesRefresh}
+              testID={investmentTestIds.list.refreshQuotes}
+            />
+            {vm.quotesSecondsLeft > 0 ? (
+              <Text.Caption
+                accessibilityLiveRegion="polite"
+                testID={investmentTestIds.list.refreshCountdown}
+                tone="secondary"
+                value={t("investment.quote.availableIn", {
+                  seconds: vm.quotesSecondsLeft,
+                })}
+              />
+            ) : null}
+          </View>
+        ) : null}
+        {vm.quotesSourceDown ? (
+          <StatusBanner
+            message={t("investment.quote.sourceDown")}
+            testID={investmentTestIds.list.sourceDownBanner}
+          />
+        ) : null}
         <ChipGroup
           layout="scroll"
           mode="single"

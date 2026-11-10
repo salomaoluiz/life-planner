@@ -50,7 +50,11 @@ const investment = {
     feesAboveSale: "As taxas são maiores que o valor da venda.",
     generic: "Algo deu errado. Tente de novo.",
     negativePosition: "Essa mudança deixaria a posição negativa em {{date}}.",
+    refreshTooSoon: "As cotações foram atualizadas agora há pouco.",
+    sourceUnavailable:
+      "Fonte de cotações indisponível. Tente de novo em instantes.",
     tickerExists: "Você já tem esse ticker.",
+    tickerNotFound: "Nenhum ativo encontrado para esse ticker.",
   },
   fee: {
     BROKERAGE: "Corretagem",
@@ -102,6 +106,9 @@ const investment = {
       feesHint:
         "Corretagem, Emolumentos, IOF de câmbio ou Outras (com descrição).",
       feesLine: "Taxas",
+      fxRate: "Câmbio (R$ por US$)",
+      fxRateHint: "Câmbio da data da operação; deixe vazio para usar esse.",
+      fxRateInvalid: "Informe um câmbio maior que zero",
       generate: "Gerar lançamento no finance",
       generateHint: "Desligue para compras antigas ou ativos recebidos.",
       gross: "Bruto ({{quantity}} × {{price}})",
@@ -132,6 +139,21 @@ const investment = {
       unitPrice: "Valor por unidade",
     },
   },
+  history: {
+    allRange: "Tudo",
+    closeLegend: "Preço de fechamento gravado pelo servidor todo dia útil",
+    dashedLegend: "Antes de {{date}}: linha entre os preços das suas operações",
+    empty: "Ainda sem histórico.",
+    modePosition: "Posição em R$",
+    modePrice: "Preço",
+    oneMonth: "1M",
+    oneYear: "1A",
+    purchaseLegend: "Compra",
+    sixMonths: "6M",
+    startsAt:
+      "Cotações automáticas a partir de {{date}}. Antes disso, linha entre suas operações.",
+    title: "Evolução",
+  },
   list: {
     columns: {
       asset: "Ativo",
@@ -139,8 +161,12 @@ const investment = {
       cost: "Custo",
       currentValue: "Valor atual",
       openResult: "Resultado aberto",
+      price: "Preço",
       quantity: "Quantidade",
       realized: "Realizado",
+      result: "Resultado",
+      today: "Hoje",
+      updated: "Atualizado",
     },
     emptyArchivedBody: "Os ativos arquivados aparecem aqui.",
     emptyArchivedTitle: "Nenhum ativo arquivado",
@@ -159,6 +185,7 @@ const investment = {
       assets: "Ativos · {{count}}",
     },
     title: "Investimentos",
+    todayShort: "{{change}} hoje",
   },
   operation: {
     account: "Conta",
@@ -191,9 +218,59 @@ const investment = {
     quantity: "Quantidade",
     realized: "Resultado realizado",
   },
+  quote: {
+    asOf: "Cotações das {{time}}",
+    availableIn: "Disponível de novo em {{seconds}} s",
+    backToAuto: "Voltar à cotação automática",
+    dayChange: "{{change}} hoje",
+    dayRange: "Máx. / mín. do dia",
+    dollar: "Dólar comercial",
+    enterManual: "Informar valor manual",
+    everyHour: "Atualizadas a cada hora no pregão",
+    lastPrice: "Último preço",
+    manualHint:
+      "Um valor manual vale até chegar uma cotação automática mais nova.",
+    manualOn: "Manual em {{date}}",
+    previousClose: "Fechamento anterior",
+    refreshing: "Atualizando…",
+    refreshNow: "Atualizar agora",
+    source: "Fonte",
+    sourceDown:
+      "Não foi possível atualizar agora. Mostrando o último preço conhecido.",
+    sourceLine: "{{source}} · {{time}}",
+    today: "Cotação de hoje",
+    unavailable: "Sem cotação",
+    unavailableBody:
+      "{{ticker}} está sem cotação há vários dias úteis. Informe um valor manual para manter a posição atualizada.",
+    updatedAt: "Atualizado às {{time}}",
+    updatedOn: "Atualizado em {{date}}",
+    updatedYesterday: "Atualizado ontem às {{time}}",
+  },
+  result: {
+    averageFx: "câmbio médio {{rate}}",
+    brl: "Resultado em R$",
+    brlUnavailable:
+      "Resultado em R$ indisponível para {{count}} operações sem câmbio.",
+    split:
+      "Resultado em R$ = variação do ativo {{asset}} + variação do dólar {{fx}}",
+    usd: "Resultado em USD",
+  },
   systemCategory: {
     INVESTMENT_CONTRIBUTION: "Aporte em investimento",
     INVESTMENT_REDEMPTION: "Resgate de investimento",
+  },
+  ticker: {
+    currentQuote: "Cotação atual",
+    notFound:
+      'Nenhum ativo encontrado para "{{q}}". Confira o ticker ou use a classe "Não listado".',
+    pick: "Escolha o ticker na lista.",
+    quoteBox:
+      "Atualizada a cada hora no pregão, com o fechamento gravado todo dia útil.",
+    searchHint:
+      "Busca na brapi (B3) ou na Finnhub (exterior). Só é possível salvar um ticker da lista.",
+    sourceUnavailable:
+      "Não foi possível buscar agora. Tente de novo em instantes.",
+    suggestions: "{{count}} tickers encontrados",
   },
   title: "Investimentos",
 };
