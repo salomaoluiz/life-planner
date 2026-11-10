@@ -706,7 +706,7 @@ function useTransactionsViewModel() {
 
       if (link) {
         router.push(
-          `/investments/${link.assetId}?operation=${link.operationId}` as never,
+          `/investments/asset/${link.assetId}?operation=${link.operationId}` as never,
         );
       }
     }),

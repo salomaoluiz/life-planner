@@ -137,6 +137,20 @@ it("SHOULD offer the active accounts in the asset currency, brokerage first, non
   expect(result.current.accountOptions[0].label).toBe("Broker · BRL");
 });
 
+it("SHOULD take the first eligible account that shows up after the form started", () => {
+  const data = accountsQuery.value.data;
+  accountsQuery.withData({ accounts: [], owners: data!.owners });
+  const { rerender, result } = setup();
+
+  act(() => result.current.onQuantityChange("1"));
+  expect(result.current.accountId).toBeUndefined();
+
+  accountsQuery.withData(data!);
+  rerender({});
+
+  expect(result.current.accountId).toBe("acc-bk");
+});
+
 it("SHOULD start a buy dated today with the finance entry on", () => {
   const { result } = setup();
 

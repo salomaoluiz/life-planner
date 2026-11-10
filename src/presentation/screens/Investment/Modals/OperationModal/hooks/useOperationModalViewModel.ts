@@ -129,7 +129,13 @@ function useOperationModalViewModel() {
   const [submitted, setSubmitted] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const state = edited ?? initial;
+  // The account list can arrive after the form started (a cached list is refreshed): a new operation takes the first
+  // eligible account while none was chosen.
+  const base = edited ?? initial;
+  const state =
+    base && !isEditing && !base.accountId && eligible[0]
+      ? { ...base, accountId: eligible[0].id }
+      : base;
   const isDirty = !!edited && !!initial && !isSameState(edited, initial);
 
   const createMutation = useMutation({

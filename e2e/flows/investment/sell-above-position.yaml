@@ -10,11 +10,6 @@ onFlowComplete:
     clearState: true
 - runFlow: ../../subflows/signup-via-api.yaml
 - runFlow:
-    file: ../../subflows/login-by-token.yaml
-    env:
-      TOKEN: ${output.TOKEN}
-      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
-- runFlow:
     file: ../../subflows/setup/create-investment-asset.yaml
     env:
       TOKEN: ${output.TOKEN}
@@ -29,6 +24,11 @@ onFlowComplete:
       TYPE: BUY
       QUANTITY: "10"
       UNIT_PRICE: "5"
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - runFlow: ../../subflows/investment/open-investments.yaml
 - tapOn:
     id: "investment.list.row-${output.ASSET_ID}"

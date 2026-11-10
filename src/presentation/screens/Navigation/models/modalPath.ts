@@ -36,8 +36,8 @@ export interface ModalPathParts {
 
 const HOME = "/";
 
-// A modal can open over the detail of an asset: `/investments/<id>` (spec 102).
-const INVESTMENT_DETAIL = /^\/investments\/[^/]+$/;
+// A modal can open over the detail of an asset: `/investments/asset/<id>` (spec 102). The detail lives under `asset/` so that `/investments/<modal>` (a modal opened from the list) is never read as an asset id.
+const INVESTMENT_DETAIL = /^\/investments\/asset\/[^/]+$/;
 
 export const VALID_BASES: readonly string[] = [
   HOME,

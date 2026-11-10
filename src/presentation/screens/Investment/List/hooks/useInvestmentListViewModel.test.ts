@@ -154,7 +154,7 @@ it("SHOULD open the asset modal AND the detail route", () => {
   result.current.onRowPress("asset-1");
 
   expect(modalNavigation.openModal).toHaveBeenCalledWith("investment_asset");
-  expect(spies.push).toHaveBeenCalledWith("/investments/asset-1");
+  expect(spies.push).toHaveBeenCalledWith("/investments/asset/asset-1");
 });
 
 it("SHOULD refetch both lists WHEN focused AND on refresh", async () => {

@@ -42,13 +42,14 @@ describe("isValidBase", () => {
   });
 
   it("SHOULD accept the detail of an asset as a base (spec 102)", () => {
-    expect(isValidBase("/investments/asset-1")).toBe(true);
-    expect(isValidBase("/investments/asset-1/")).toBe(true);
-    expect(isValidBase("/investments/asset-1/extra")).toBe(false);
+    expect(isValidBase("/investments/asset/asset-1")).toBe(true);
+    expect(isValidBase("/investments/asset/asset-1/")).toBe(true);
+    expect(isValidBase("/investments/asset/asset-1/extra")).toBe(false);
+    expect(isValidBase("/investments/investment_asset")).toBe(false);
     expect(
-      splitModalPath("/investments/asset-1/investment_operation"),
+      splitModalPath("/investments/asset/asset-1/investment_operation"),
     ).toMatchObject({
-      base: "/investments/asset-1",
+      base: "/investments/asset/asset-1",
       modal: "investment_operation",
     });
   });

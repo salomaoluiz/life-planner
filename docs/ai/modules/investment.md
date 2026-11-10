@@ -58,7 +58,7 @@ model: src/data/models/investment/InvestmentModel.ts (API shape, no toJSON)
 ## Presentation
 
 ```yaml
-routes: app/(app)/(tabs)/investments/{_layout,index,[id]}.tsx (tab "investments" after Finances; the Stack lives in Investment/Layout)
+routes: app/(app)/(tabs)/investments/{_layout,index,asset/[id]}.tsx (tab "investments" after Finances; the Stack lives in Investment/Layout)
 screens:
   List: src/presentation/screens/Investment/List (owner chips via the finance owner filter, All/Archived SegmentedControl with counts, search by ticker/name, rows grouped by class AND currency with "Cost · Current" subtotal, table row on regular width, card on compact, footnote; states skeleton/error/empty/no results; archived family = read-only)
   Detail: src/presentation/screens/Investment/Detail (6 summary cards, operations list -> operation modal, value history with delete, "More actions" sheet: edit / archive-reactivate / delete with a ConfirmDialog that lists operations and finance entries, archived banner with Reactivate; `?operation=<id>` opens that operation once)
@@ -68,7 +68,7 @@ modals (MODAL_ROUTES names):
   investment_valuation: Modals/ValuationModal (date + value per unit, "Position: q x price = value")
 helpers: Investment/models/{assetList,format}.ts, Investment/utils/investmentErrorMessage.ts, Investment/hooks/invalidateInvestments.ts (invalidates investment queries AND finance data)
 testIds: src/presentation/screens/Investment/testIds.ts (investment.list.*, investment.detail.*, investment.asset-modal.*, investment.operation-modal.*, investment.valuation-modal.*)
-finance_integration: Financial/Transactions rows of INVESTMENT_CONTRIBUTION / INVESTMENT_REDEMPTION ("Compra ITSA4", category translated from the key, "outside totals" caption) open the operation (`onInvestmentPress` -> getInvestmentOperationLinkUseCase -> /investments/<assetId>?operation=<id>); they are never edited as transactions
+finance_integration: Financial/Transactions rows of INVESTMENT_CONTRIBUTION / INVESTMENT_REDEMPTION ("Compra ITSA4", category translated from the key, "outside totals" caption) open the operation (`onInvestmentPress` -> getInvestmentOperationLinkUseCase -> /investments/asset/<assetId>?operation=<id>); they are never edited as transactions
 ```
 
 ## Design deviations (spec 102)

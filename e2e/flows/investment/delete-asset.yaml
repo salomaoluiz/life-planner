@@ -10,11 +10,6 @@ onFlowComplete:
     clearState: true
 - runFlow: ../../subflows/signup-via-api.yaml
 - runFlow:
-    file: ../../subflows/login-by-token.yaml
-    env:
-      TOKEN: ${output.TOKEN}
-      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
-- runFlow:
     file: ../../subflows/setup/create-account.yaml
     env:
       TOKEN: ${output.TOKEN}
@@ -45,6 +40,11 @@ onFlowComplete:
       OWNER_ID: ${output.USER_ID}
       ACCOUNT_ID: ${output.BROKER_ACCOUNT_ID}
       EXPECTED_CENTS: "900000"
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - runFlow: ../../subflows/investment/open-investments.yaml
 - tapOn:
     id: "investment.list.row-${output.ASSET_ID}"

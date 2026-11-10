@@ -100,7 +100,7 @@ function useInvestmentListViewModel() {
     onOwnerFilterChange: setOwnerFilter,
     onRefresh: refetch,
     onRetry: refetch,
-    onRowPress: (id: string) => router.push(`/investments/${id}`),
+    onRowPress: (id: string) => router.push(`/investments/asset/${id}`),
     onSearchChange: setSearch,
     onTabChange: (value: string) => setTab(value as InvestmentAssetStatus),
     onToastHide: scope.onToastHide,

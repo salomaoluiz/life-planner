@@ -12,7 +12,7 @@
     "maxDepth": 2,
     "maxDuplicates": 0,
     "maxRequests": 3,
-    "route": "app/(app)/(tabs)/investments/[id].tsx"
+    "route": "app/(app)/(tabs)/investments/asset/[id].tsx"
   },
   "investment.detail.render.mount": {
     "maxCommits": 3

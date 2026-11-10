@@ -11,11 +11,6 @@ onFlowComplete:
     clearState: true
 - runFlow: ../../subflows/signup-via-api.yaml
 - runFlow:
-    file: ../../subflows/login-by-token.yaml
-    env:
-      TOKEN: ${output.TOKEN}
-      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
-- runFlow:
     file: ../../subflows/setup/create-account.yaml
     env:
       TOKEN: ${output.TOKEN}
@@ -39,8 +34,17 @@ onFlowComplete:
       QUANTITY: "100"
       UNIT_PRICE: "10"
       ACCOUNT_ID: ${output.BROKER_ACCOUNT_ID}
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - runFlow: ../../subflows/financial/open-transactions.yaml
 # The system row of the operation is outside the totals and opens the operation, not the transaction form.
+# The row is below the month summary: swipe with explicit coordinates (scrollUntilVisible does not scroll this list).
+- swipe:
+    start: 60%, 80%
+    end: 60%, 25%
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.row-investment"

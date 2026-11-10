@@ -399,7 +399,7 @@ it("SHOULD open the operation of an investment row on the asset detail (spec 102
 
   expect(spies.getOperationLink).toHaveBeenCalledWith("tx-9");
   expect(spies.push).toHaveBeenCalledWith(
-    "/investments/asset-1?operation=op-1",
+    "/investments/asset/asset-1?operation=op-1",
   );
 });
 

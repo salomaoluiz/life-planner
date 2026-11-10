@@ -11,7 +11,7 @@ app/
   (app)/config.tsx               redirect to /settings (old URL)
   (app)/(tabs)/_layout.tsx       Tabs with custom tabBar (AppTabBar): index/index, financial, investments, stock/index, family/index; backBehavior "initialRoute"; tabBarPosition "left" + rail on expanded (>= 1024 px)
   (app)/(tabs)/index/index.tsx   Home
-  (app)/(tabs)/investments/_layout.tsx  Stack (Investment/Layout) with index (asset list) and [id] (asset detail) (spec 102)
+  (app)/(tabs)/investments/_layout.tsx  Stack (Investment/Layout) with index (asset list) and asset/[id] (asset detail; under `asset/` so `/investments/<modal>` is not read as an id) (spec 102)
   (app)/(tabs)/stock/index.tsx, family/index.tsx
   (app)/(tabs)/financial/_layout.tsx   FinancialLayout: ScreenHeader (overline "Finances" + section title; below `expanded` the title opens the section picker) + nested Stack (index, overview, categories, tags, accounts, cards); sections come from `FINANCIAL_SECTIONS` and switching uses router.replace (spec 044)
   (app)/(modals)/_layout.tsx     Stack, presentation "transparentModal", headerShown false; one screen, the catch-all
@@ -38,7 +38,7 @@ Tab screens hide the navigator header (the title comes from `ScreenHeader`). Qui
 
 ## Modals (spec 057)
 
-A modal URL is `<base>/<modal>`: `<base>` is the screen it was opened from, `<modal>` is only the modal name (one segment, no folder), params stay in the query (`/financial/overview/add_new_transaction?id=…`, `/settings/versions`, `/invite?token=…` falls back to Family). Valid bases (`VALID_BASES` in `Navigation/models/modalPath.ts`, derived from `FINANCIAL_SECTIONS`): `/`, `/financial/transaction`, `/financial/overview`, `/financial/categories`, `/financial/tags`, `/financial/accounts`, `/financial/cards`, `/investments`, `/stock`, `/family`, `/settings`, plus the detail of an asset `/investments/<id>` (matched by pattern in `isValidBase`). Transactions is `/financial/transaction`; `/financial` redirects there.
+A modal URL is `<base>/<modal>`: `<base>` is the screen it was opened from, `<modal>` is only the modal name (one segment, no folder), params stay in the query (`/financial/overview/add_new_transaction?id=…`, `/settings/versions`, `/invite?token=…` falls back to Family). Valid bases (`VALID_BASES` in `Navigation/models/modalPath.ts`, derived from `FINANCIAL_SECTIONS`): `/`, `/financial/transaction`, `/financial/overview`, `/financial/categories`, `/financial/tags`, `/financial/accounts`, `/financial/cards`, `/investments`, `/stock`, `/family`, `/settings`, plus the detail of an asset `/investments/asset/<id>` (matched by pattern in `isValidBase`). Transactions is `/financial/transaction`; `/financial` redirects there.
 
 - Pure rules: `splitModalPath`, `buildModalPath`, `isValidBase`, `fallbackBase`, `screenPath` (strips the modal segment; use it before `getFinancialSection(usePathname())`) in `src/presentation/screens/Navigation/models/modalPath.ts`.
 - Open/close only through `useModalNavigation()` (`@screens/Navigation/hooks/useModalNavigation`): `openModal(name, params?)` pushes, `replaceModal(name, params?)` replaces keeping the base, `closeModal()` goes back or, with nothing below, replaces to the base. Never build modal paths by hand or call `router.back()` in a modal. Tests assert `modalNavigation.openModal|replaceModal|closeModal` from `@tests/modalNavigation` (global mock in `tests/setup.tsx`).
