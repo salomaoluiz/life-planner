@@ -22,6 +22,7 @@ import Skeleton from "@components/Skeleton";
 import { InvestmentAssetStatus } from "@domain/entities/investment/enums";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
+import { INVESTMENT_MAX_WIDTH } from "@screens/Investment/constants";
 import { ListEntry } from "@screens/Investment/models/assetList";
 import { formatMoney } from "@screens/Investment/models/format";
 import investmentTestIds from "@screens/Investment/testIds";
@@ -182,6 +183,7 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentListVM>) {
           testID="flashList"
         />
       }
+      maxWidth={INVESTMENT_MAX_WIDTH}
       onRefresh={vm.onRefresh}
       refreshing={vm.isRefreshing}
       testID={investmentTestIds.list.screen}

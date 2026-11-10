@@ -10,6 +10,8 @@ export type PendingState = "deleting" | "saving";
 
 const FALLBACK_ICON = "help-circle-outline";
 const ADJUSTMENT_ICON = "scale-balance";
+// Spec 102: the rows of an investment operation show a rising chart, whatever the stored category icon is.
+const INVESTMENT_ICON = "trending-up";
 
 class TransactionUIModel {
   get accountId() {
@@ -55,6 +57,10 @@ class TransactionUIModel {
   get categoryIcon() {
     if (this.isAdjustment) {
       return ADJUSTMENT_ICON;
+    }
+
+    if (this.isInvestment) {
+      return INVESTMENT_ICON;
     }
 
     return this.category?.icon ?? FALLBACK_ICON;

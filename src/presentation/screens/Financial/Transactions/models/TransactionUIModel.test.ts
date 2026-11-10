@@ -344,3 +344,10 @@ describe("isInvestment (spec 102)", () => {
     );
   });
 });
+
+it("SHOULD show the rising chart icon on an investment row (spec 102)", () => {
+  expect(
+    new TransactionUIModel(dto({ systemKey: "INVESTMENT_REDEMPTION" }))
+      .categoryIcon,
+  ).toBe("trending-up");
+});

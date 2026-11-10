@@ -29,6 +29,7 @@ import {
 } from "@domain/entities/investment/InvestmentEntities";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
+import { INVESTMENT_MAX_WIDTH } from "@screens/Investment/constants";
 import { labelOf } from "@screens/Investment/models/assetList";
 import {
   formatDay,
@@ -380,7 +381,7 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentDetailVM>) {
 
   if (vm.isLoading) {
     return (
-      <Screen testID={ids.screen}>
+      <Screen maxWidth={INVESTMENT_MAX_WIDTH} testID={ids.screen}>
         <Skeleton.Card />
         <Skeleton.ListItem />
         <Skeleton.ListItem />
@@ -390,7 +391,7 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentDetailVM>) {
 
   if (vm.isNotFound || !vm.asset) {
     return (
-      <Screen testID={ids.screen}>
+      <Screen maxWidth={INVESTMENT_MAX_WIDTH} testID={ids.screen}>
         <ErrorState
           message={t("investment.detail.notFound")}
           onRetry={vm.onBack}
@@ -405,6 +406,7 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentDetailVM>) {
 
   return (
     <Screen
+      maxWidth={INVESTMENT_MAX_WIDTH}
       onRefresh={vm.onRefresh}
       refreshing={vm.isRefreshing}
       scroll
