@@ -1,0 +1,61 @@
+url: ${E2E_WEB_URL}
+name: investment/sell-above-position
+tags:
+  - investment
+  - spec-102
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow:
+    file: ../../subflows/setup/create-investment-asset.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      TICKER: E2ETK3
+      NAME: E2E Asset
+- runFlow:
+    file: ../../subflows/setup/create-investment-operation.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      ASSET_ID: ${output.ASSET_ID}
+      TYPE: BUY
+      QUANTITY: "10"
+      UNIT_PRICE: "5"
+- runFlow: ../../subflows/investment/open-investments.yaml
+- tapOn:
+    id: "investment.list.row-${output.ASSET_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.screen"
+    timeout: 20000
+- tapOn:
+    id: "investment.detail.add-operation"
+- extendedWaitUntil:
+    visible:
+      id: "investment.operation-modal.quantity"
+    timeout: 20000
+- tapOn:
+    id: "investment.operation-modal.type-SELL"
+- tapOn:
+    id: "investment.operation-modal.quantity"
+- inputText: "50"
+- tapOn:
+    id: "investment.operation-modal.unit-price"
+- inputText: "6"
+- extendedWaitUntil:
+    visible:
+      id: "investment.operation-modal.quantity-error"
+    timeout: 10000
+# The save button does nothing while the sell is above what was held: the form stays open.
+- tapOn:
+    id: "investment.operation-modal.save"
+- assertVisible:
+    id: "investment.operation-modal.quantity-error"

@@ -1,0 +1,57 @@
+url: ${E2E_WEB_URL}
+name: investment/open-operation-from-transactions
+tags:
+  - investment
+  - spec-102
+  - financial
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow:
+    file: ../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: E2E Broker
+      BALANCE_CENTS: "1000000"
+- evalScript: ${output.BROKER_ACCOUNT_ID = output.ACCOUNT_ID}
+- runFlow:
+    file: ../../subflows/setup/create-investment-asset.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      TICKER: E2ETK3
+      NAME: E2E Asset
+- runFlow:
+    file: ../../subflows/setup/create-investment-operation.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      ASSET_ID: ${output.ASSET_ID}
+      TYPE: BUY
+      QUANTITY: "100"
+      UNIT_PRICE: "10"
+      ACCOUNT_ID: ${output.BROKER_ACCOUNT_ID}
+- runFlow: ../../subflows/financial/open-transactions.yaml
+# The system row of the operation is outside the totals and opens the operation, not the transaction form.
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-investment"
+    timeout: 20000
+- assertVisible:
+    id: "financial.transactions.row.investment-outside"
+- tapOn:
+    id: "financial.transactions.row-investment"
+- extendedWaitUntil:
+    visible:
+      id: "investment.operation-modal.quantity"
+    timeout: 20000
+- assertVisible:
+    id: "investment.operation-modal.save"

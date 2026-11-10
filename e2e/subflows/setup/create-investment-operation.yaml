@@ -1,0 +1,11 @@
+url: ${E2E_WEB_URL}
+---
+# Optional caller-scoped params read by the script: DATE, ACCOUNT_ID (none = no finance entry).
+- runScript:
+    file: ../../scripts/setup/create-investment-operation.js
+    env:
+      TOKEN: ${TOKEN}
+      ASSET_ID: ${ASSET_ID}
+      TYPE: ${TYPE}
+      QUANTITY: ${QUANTITY}
+      UNIT_PRICE: ${UNIT_PRICE}

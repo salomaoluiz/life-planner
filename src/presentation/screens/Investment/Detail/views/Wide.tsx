@@ -259,10 +259,9 @@ function Summary({
       <View style={styles.cardWrap}>
         <MetricBlock
           label={label}
-          testID={testID}
           value={
             <>
-              <Text.Heading tabular tone={tone} value={value} />
+              <Text.Heading tabular testID={testID} tone={tone} value={value} />
               {extra ? (
                 <Text.Caption
                   tone={tone === "primary" ? "secondary" : tone}
