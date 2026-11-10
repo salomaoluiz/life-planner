@@ -17,6 +17,8 @@ export const neverAdaptive: Record<string, string> = {
   "Financial/IndexRedirect": "redirect",
   "Financial/Layout": "navigation shell (section header), not a screen",
   "Financial/Transactions/pending/ErrorToastHost": "layout host, not a screen",
+  "Investment/Layout":
+    "navigation shell (Stack of the list and the detail), not a screen",
   "Navigation/containers/AppTabBar": "navigation shell, not a screen",
   "Navigation/containers/LegacyConfigRedirect": "redirect",
   "Navigation/containers/UpdateBanner": "layout host, not a screen",
