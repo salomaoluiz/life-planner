@@ -11,7 +11,7 @@
   "investment.detail.mount.cold": {
     "maxDepth": 2,
     "maxDuplicates": 0,
-    "maxRequests": 3,
+    "maxRequests": 4,
     "route": "app/(app)/(tabs)/investments/asset/[id].tsx"
   },
   "investment.detail.render.mount": {

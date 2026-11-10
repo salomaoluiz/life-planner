@@ -7,4 +7,16 @@ export const investmentKeys = {
   all: (): Key => [ROOT],
   asset: (id: string): Key => [ROOT, "asset", id],
   assets: (status: string): Key => [ROOT, "assets", status],
+  priceHistory: (id: string, range: string): Key => [
+    ROOT,
+    "price-history",
+    id,
+    range,
+  ],
+  tickerSearch: (market: string, q: string): Key => [
+    ROOT,
+    "ticker-search",
+    market,
+    q,
+  ],
 };

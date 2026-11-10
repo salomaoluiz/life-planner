@@ -23,6 +23,11 @@ function useStyles(compact = false) {
         flexBasis: compact ? "47%" : "15%",
         flexGrow: 1,
       },
+      chartControls: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: spacing.xs,
+      },
       chips: { flexDirection: "row", flexWrap: "wrap", gap: spacing.xs },
       content: { gap: spacing.lg, paddingVertical: spacing.md },
       header: {
@@ -40,6 +45,10 @@ function useStyles(compact = false) {
         paddingVertical: spacing.sm,
       },
       panel: { gap: spacing.xs },
+      priceBlock: { gap: spacing.xxs },
+      quoteActions: { alignItems: "flex-start", gap: spacing.xs },
+      quotePanel: { gap: spacing.sm },
+      quoteRow: { flexDirection: "row", justifyContent: "space-between" },
       sectionMain: { flex: compact ? undefined : 2.3, gap: spacing.xs },
       sections: {
         flexDirection: compact ? "column" : "row",

@@ -14,7 +14,12 @@ import UseMutationFixture from "@infrastructure/fetcher/mocks/useMutation.fixtur
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
 import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import invalidateInvestments from "@screens/Investment/hooks/invalidateInvestments";
-import { makeDetail, owners } from "@screens/Investment/mocks/fixtures";
+import {
+  makeDetail,
+  makeQuote,
+  makeValuation,
+  owners,
+} from "@screens/Investment/mocks/fixtures";
 
 import useInvestmentDetailViewModel from "./useInvestmentDetailViewModel";
 
@@ -24,6 +29,16 @@ jest.mock("expo-router", () => ({
 }));
 jest.mock("@react-navigation/native", () => ({ useIsFocused: jest.fn() }));
 jest.mock("@infrastructure/fetcher");
+jest.mock("@screens/Investment/hooks/useQuoteRefresh", () => ({
+  __esModule: true,
+  default: () => ({
+    disabled: false,
+    isRefreshing: false,
+    onRefresh: jest.fn(),
+    secondsLeft: 0,
+    sourceDown: false,
+  }),
+}));
 jest.mock("@presentation/hooks/useOwnerScopedQuery");
 jest.mock("@screens/Investment/hooks/invalidateInvestments");
 jest.mock("@application/useCases", () => ({
@@ -35,6 +50,10 @@ jest.mock("@application/useCases", () => ({
     },
     getFinancialAccountsUseCase: { execute: jest.fn(), uniqueName: "accounts" },
     getInvestmentAssetUseCase: { execute: jest.fn(), uniqueName: "asset" },
+    getInvestmentPriceHistoryUseCase: {
+      execute: jest.fn(),
+      uniqueName: "history",
+    },
     updateInvestmentAssetUseCase: { execute: jest.fn(), uniqueName: "update" },
   },
 }));
@@ -46,6 +65,7 @@ interface Data {
 
 const detailQuery = new UseQueryFixture<Data>();
 const accountsQuery = new UseQueryFixture<AccountDTO[]>();
+const historyQuery = new UseQueryFixture<unknown>();
 const archiveMutation = new UseMutationFixture();
 const deleteMutation = new UseMutationFixture();
 const valuationMutation = new UseMutationFixture();
@@ -59,19 +79,27 @@ const spies = {
   useQuery: jest.mocked(useOwnerScopedQuery),
 };
 
+function queryFor(props: { cacheKey: string[] }) {
+  if (props.cacheKey.includes("price-history")) {
+    return historyQuery.build();
+  }
+
+  return props.cacheKey.includes("asset") && props.cacheKey[0] === "investment"
+    ? detailQuery.build()
+    : accountsQuery.build();
+}
+
 beforeEach(() => {
   jest.clearAllMocks();
   detailQuery.reset();
   accountsQuery.reset();
+  historyQuery.reset();
   archiveMutation.reset();
   deleteMutation.reset();
   valuationMutation.reset();
   spies.isFocused.mockReturnValue(false);
   spies.params.mockReturnValue({ id: "asset-1" });
-  spies.useQuery.mockImplementation(((props: { cacheKey: string[] }) =>
-    props.cacheKey.includes("asset") && props.cacheKey[0] === "investment"
-      ? detailQuery.build()
-      : accountsQuery.build()) as never);
+  spies.useQuery.mockImplementation(queryFor as never);
   spies.useMutation.mockImplementation(((props: { cacheKey: string[] }) =>
     ({
       delete: deleteMutation,
@@ -289,4 +317,70 @@ it("SHOULD block the actions of a read-only asset with the toast", () => {
   expect(modalNavigation.openModal).not.toHaveBeenCalled();
   expect(result.current.toastVisible).toBe(true);
   act(() => result.current.onToastHide());
+});
+
+describe("quotes (spec 104)", () => {
+  it("SHOULD read the history of the range AND change range and mode", () => {
+    givenDetail();
+    const { result } = setup();
+
+    expect(result.current.range).toBe("1Y");
+    expect(result.current.chartMode).toBe("price");
+    expect(
+      spies.useQuery.mock.calls.some(([props]) =>
+        (props as { cacheKey: string[] }).cacheKey.includes("price-history"),
+      ),
+    ).toBe(true);
+
+    act(() => result.current.onRangeChange("6M" as never));
+    act(() => result.current.onChartModeChange("position"));
+
+    expect(result.current.range).toBe("6M");
+    expect(result.current.chartMode).toBe("position");
+  });
+
+  it("SHOULD expose the refresh state of the quotes", () => {
+    givenDetail();
+    const { result } = setup();
+
+    expect(result.current.quotesDisabled).toBe(false);
+    expect(result.current.quotesSecondsLeft).toBe(0);
+    expect(result.current.quotesSourceDown).toBe(false);
+    expect(result.current.quotesRefreshing).toBe(false);
+    expect(typeof result.current.onQuotesRefresh).toBe("function");
+  });
+
+  it("SHOULD delete the newest manual value to go back to the automatic quote, only over a quote", () => {
+    givenDetail(
+      makeDetail({
+        priceSource: "MANUAL" as never,
+        quote: makeQuote(),
+        valuations: [makeValuation({ id: "val-9" })],
+      }),
+    );
+    const { result } = setup();
+
+    expect(result.current.manualOverQuote).toBe(true);
+
+    act(() => result.current.onBackToAutomatic());
+
+    expect(valuationMutation.value.mutate).toHaveBeenCalledWith("val-9");
+  });
+
+  it("SHOULD not offer to go back WHEN the price already is the quote or there is no value", () => {
+    givenDetail(
+      makeDetail({
+        priceSource: "QUOTE" as never,
+        quote: makeQuote(),
+        valuations: [],
+      }),
+    );
+    const { result } = setup();
+
+    expect(result.current.manualOverQuote).toBe(false);
+
+    act(() => result.current.onBackToAutomatic());
+
+    expect(valuationMutation.value.mutate).not.toHaveBeenCalled();
+  });
 });

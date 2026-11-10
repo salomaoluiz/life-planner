@@ -6,6 +6,9 @@ export { default as deleteInvestmentValuationUseCase } from "./deleteInvestmentV
 export { default as getInvestmentAssetsUseCase } from "./getInvestmentAssetsUseCase";
 export { default as getInvestmentAssetUseCase } from "./getInvestmentAssetUseCase";
 export { default as getInvestmentOperationLinkUseCase } from "./getInvestmentOperationLinkUseCase";
+export { default as getInvestmentPriceHistoryUseCase } from "./getInvestmentPriceHistoryUseCase";
+export { default as refreshInvestmentQuotesUseCase } from "./refreshInvestmentQuotesUseCase";
+export { default as searchInvestmentTickersUseCase } from "./searchInvestmentTickersUseCase";
 export { default as updateInvestmentAssetUseCase } from "./updateInvestmentAssetUseCase";
 export { default as updateInvestmentOperationUseCase } from "./updateInvestmentOperationUseCase";
 export { default as upsertInvestmentValuationUseCase } from "./upsertInvestmentValuationUseCase";

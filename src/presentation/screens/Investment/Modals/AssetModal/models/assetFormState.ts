@@ -4,9 +4,14 @@ import {
 } from "@domain/entities/financial/Currency";
 import {
   InvestmentAssetClass,
+  InvestmentQuoteMarket,
+  QUOTED_CLASS_MARKET,
   TICKER_REQUIRED_CLASSES,
 } from "@domain/entities/investment/enums";
-import { InvestmentAsset } from "@domain/entities/investment/InvestmentEntities";
+import {
+  InvestmentAsset,
+  InvestmentTickerSuggestion,
+} from "@domain/entities/investment/InvestmentEntities";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import {
   CreateInvestmentAssetParams,
@@ -34,6 +39,8 @@ interface AssetFormState {
   // The user typed the name: the ticker stops filling it.
   nameTouched: boolean;
   ownerId: string;
+  // The search result the user picked (spec 104 FR 24): a quoted class only saves a ticker that was picked.
+  picked: InvestmentTickerSuggestion | null;
   ticker: string;
 }
 
@@ -46,6 +53,7 @@ function createInitialState(params: { ownerId: string }): AssetFormState {
     name: "",
     nameTouched: false,
     ownerId: params.ownerId,
+    picked: null,
     ticker: "",
   };
 }
@@ -61,6 +69,33 @@ function isSameState(a: AssetFormState, b: AssetFormState) {
   );
 }
 
+// The market that quotes the class, or undefined for fixed income and unlisted assets.
+function marketOf(
+  assetClass: InvestmentAssetClass,
+): InvestmentQuoteMarket | undefined {
+  return QUOTED_CLASS_MARKET[assetClass];
+}
+
+// A quoted class needs a ticker picked from the search, unless it is the one the asset already has.
+function needsPick(state: AssetFormState, initial?: AssetFormState): boolean {
+  const market = marketOf(state.assetClass);
+
+  if (!market || state.ticker.trim() === "") {
+    return false;
+  }
+  if (
+    initial &&
+    initial.ticker === state.ticker &&
+    initial.assetClass === state.assetClass
+  ) {
+    return false;
+  }
+
+  return !(
+    state.picked?.ticker === state.ticker && state.picked.market === market
+  );
+}
+
 function stateFromAsset(asset: InvestmentAsset): AssetFormState {
   return {
     assetClass: asset.assetClass,
@@ -70,6 +105,7 @@ function stateFromAsset(asset: InvestmentAsset): AssetFormState {
     name: asset.name,
     nameTouched: true,
     ownerId: asset.ownerId,
+    picked: null,
     ticker: asset.ticker ?? "",
   };
 }
@@ -122,7 +158,10 @@ function toUpdateParams(
   return changes;
 }
 
-function validate(state: AssetFormState): AssetFormErrors {
+function validate(
+  state: AssetFormState,
+  initial?: AssetFormState,
+): AssetFormErrors {
   const errors: AssetFormErrors = {};
 
   if (state.name.trim() === "" || state.name.trim().length > MAX_NAME) {
@@ -133,6 +172,8 @@ function validate(state: AssetFormState): AssetFormErrors {
     !TICKER_TEXT.test(state.ticker)
   ) {
     errors.ticker = "investment.form.asset.tickerRequired";
+  } else if (needsPick(state, initial)) {
+    errors.ticker = "investment.ticker.notFound";
   }
   if (state.currentValue.trim() !== "") {
     const value = parseDecimal(state.currentValue);
@@ -155,10 +196,13 @@ function withAssetClass(
       ? "USD"
       : DEFAULT_CURRENCY;
 
+  // A quoted class takes the currency of its market (spec 104 FR 24); the others keep the user's choice.
+  const keepsChoice = !marketOf(assetClass) && state.currencyTouched;
+
   return {
     ...state,
     assetClass,
-    currency: state.currencyTouched ? state.currency : suggested,
+    currency: keepsChoice ? state.currency : suggested,
   };
 }
 
@@ -171,6 +215,20 @@ function withCurrency(
 
 function withName(state: AssetFormState, name: string): AssetFormState {
   return { ...state, name, nameTouched: true };
+}
+
+// Picking a search result fills ticker, name (until typed) and the currency of its market.
+function withPicked(
+  state: AssetFormState,
+  suggestion: InvestmentTickerSuggestion,
+): AssetFormState {
+  return {
+    ...state,
+    currency: suggestion.currency,
+    name: state.nameTouched || !suggestion.name ? state.name : suggestion.name,
+    picked: suggestion,
+    ticker: suggestion.ticker,
+  };
 }
 
 // The ticker is upper-cased as typed; it pre-fills the name until the name was typed.
@@ -188,6 +246,8 @@ export type { AssetFormErrors, AssetFormState };
 export {
   createInitialState,
   isSameState,
+  marketOf,
+  needsPick,
   stateFromAsset,
   tickerRequired,
   toCreateParams,
@@ -196,5 +256,6 @@ export {
   withAssetClass,
   withCurrency,
   withName,
+  withPicked,
   withTicker,
 };

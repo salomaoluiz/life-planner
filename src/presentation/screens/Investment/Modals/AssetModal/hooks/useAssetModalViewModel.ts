@@ -3,9 +3,14 @@ import { useEffect, useMemo, useState } from "react";
 
 import { investmentKeys } from "@application/queryKeys/investmentKeys";
 import { useCases } from "@application/useCases";
-import { TickerExists } from "@domain/entities/errors";
+import {
+  QuoteSourceUnavailable,
+  TickerExists,
+  TickerNotFound,
+} from "@domain/entities/errors";
 import { SUPPORTED_CURRENCIES } from "@domain/entities/financial/Currency";
 import { InvestmentAssetClass } from "@domain/entities/investment/enums";
+import { InvestmentTickerSuggestion } from "@domain/entities/investment/InvestmentEntities";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
 import useOwners from "@presentation/hooks/useOwners";
@@ -23,6 +28,7 @@ import {
   AssetFormState,
   createInitialState,
   isSameState,
+  marketOf,
   stateFromAsset,
   tickerRequired,
   toCreateParams,
@@ -31,14 +37,29 @@ import {
   withAssetClass,
   withCurrency,
   withName,
+  withPicked,
   withTicker,
 } from "../models/assetFormState";
 
 export type AssetModalVM = ReturnType<typeof useAssetModalViewModel>;
 
 const CLASS_OPTIONS = Object.values(InvestmentAssetClass);
+const SEARCH_DEBOUNCE_MS = 300;
+const SEARCH_MIN_LENGTH = 2;
 
 export default useAssetModalViewModel;
+
+function tickerErrorKey(
+  exists: boolean,
+  notFound: boolean,
+  validation?: TranslationKeys,
+): TranslationKeys | undefined {
+  if (exists) {
+    return "investment.errors.tickerExists";
+  }
+
+  return notFound ? "investment.ticker.notFound" : validation;
+}
 
 function useAssetModalViewModel() {
   const { closeModal } = useModalNavigation();
@@ -72,7 +93,35 @@ function useAssetModalViewModel() {
   const [submitted, setSubmitted] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
   const state = edited ?? initial;
+  const market = state ? marketOf(state.assetClass) : undefined;
+  const typed = state?.ticker.trim() ?? "";
+  const [query, setQuery] = useState("");
   const isDirty = !!edited && !!initial && !isSameState(edited, initial);
+
+  // Spec 104 FR 23: the search waits 300 ms after the last key.
+  useEffect(() => {
+    const timer = setTimeout(() => setQuery(typed), SEARCH_DEBOUNCE_MS);
+
+    return () => clearTimeout(timer);
+  }, [typed]);
+
+  const searchable =
+    !!market &&
+    query.length >= SEARCH_MIN_LENGTH &&
+    query === typed &&
+    state?.picked?.ticker !== typed;
+  const search = useQuery({
+    cacheKey: investmentKeys.tickerSearch(market ?? "none", query),
+    enabled: searchable,
+    fetch: async () =>
+      useCases.searchInvestmentTickersUseCase.execute({
+        market: market!,
+        q: query,
+      }),
+  });
+  const suggestions: InvestmentTickerSuggestion[] = searchable
+    ? (search.data ?? [])
+    : [];
 
   const createMutation = useMutation({
     cacheKey: [useCases.createInvestmentAssetUseCase.uniqueName],
@@ -94,9 +143,10 @@ function useAssetModalViewModel() {
   }, [createMutation.status, updateMutation.status]);
 
   const error = createMutation.error ?? updateMutation.error;
-  const errors = submitted && state ? validate(state) : {};
+  const errors = submitted && state ? validate(state, initial) : {};
   const failure = getInvestmentErrorMessage(error);
   const tickerExists = error instanceof TickerExists;
+  const tickerNotFound = error instanceof TickerNotFound;
   const classLocked = isEditing && (existing?.operationCount ?? 0) > 0;
   function ownerOf(ownerId: string) {
     return (
@@ -112,7 +162,7 @@ function useAssetModalViewModel() {
   function onSave() {
     setSubmitted(true);
 
-    if (!state || !initial || Object.keys(validate(state)).length) {
+    if (!state || !initial || Object.keys(validate(state, initial)).length) {
       return;
     }
 
@@ -152,10 +202,11 @@ function useAssetModalViewModel() {
     })),
     currency: state?.currency ?? "BRL",
     currencyOptions: [...SUPPORTED_CURRENCIES],
+    currencyReadOnly: !!market,
     currentValue: state?.currentValue ?? "",
     currentValueError: errors.currentValue,
     discardOpen,
-    failure: tickerExists ? undefined : failure,
+    failure: tickerExists || tickerNotFound ? undefined : failure,
     isEditing,
     isLoading: !state && !isNotFound,
     isNotFound,
@@ -177,12 +228,21 @@ function useAssetModalViewModel() {
     onSave,
     onTickerChange: (value: string) =>
       state && update(withTicker(state, value)),
+    onTickerSelect: (ticker: string) => {
+      const picked = suggestions.find((item) => item.ticker === ticker);
+
+      if (state && picked) {
+        update(withPicked(state, picked));
+      }
+    },
     ownerChoices: buildOwnerChoices(activeOwners.data ?? []),
     ownerId: state?.ownerId ?? "",
+    pickedQuote: state?.picked ?? null,
+    quotedMarket: market ?? null,
+    searchUnavailable: search.error instanceof QuoteSourceUnavailable,
+    suggestions,
     ticker: state?.ticker ?? "",
-    tickerError: tickerExists
-      ? ("investment.errors.tickerExists" as TranslationKeys)
-      : errors.ticker,
+    tickerError: tickerErrorKey(tickerExists, tickerNotFound, errors.ticker),
     tickerRequired: state ? tickerRequired(state.assetClass) : true,
     titleKey: (isEditing
       ? "investment.form.asset.editTitle"

@@ -3,6 +3,16 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.18.0] - 2026-11-10
+
+### Added
+
+- Investments: B3 and foreign assets show an automatic quote (updated every hour while the market trades), the day's change and when it was updated; "Refresh now" updates them on demand, once per minute (spec 104).
+- Asset detail: price block, quote panel, price history chart (1M, 6M, 1Y, All) with a dashed line before the first stored close, and, for USD assets, the result in USD and in BRL split into the asset's move and the dollar's move (spec 104).
+- New asset form: ticker search with suggestions and a quote preview; only a ticker found by the market search can be saved for quoted classes (spec 104).
+- Operations of USD assets take an exchange rate (BRL per USD), filled from the operation date when left empty (spec 104).
+- A manual value holds over the automatic quote until a newer quote arrives; "Back to automatic quote" removes it (spec 104).
+
 ## [1.17.0] - 2026-11-10
 
 ### Added

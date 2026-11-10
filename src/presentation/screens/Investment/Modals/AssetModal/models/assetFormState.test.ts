@@ -5,6 +5,8 @@ import { makeAsset } from "@screens/Investment/mocks/fixtures";
 import {
   createInitialState,
   isSameState,
+  marketOf,
+  needsPick,
   stateFromAsset,
   tickerRequired,
   toCreateParams,
@@ -13,6 +15,7 @@ import {
   withAssetClass,
   withCurrency,
   withName,
+  withPicked,
   withTicker,
 } from "./assetFormState";
 
@@ -29,11 +32,16 @@ describe("class, currency, name and ticker", () => {
         InvestmentAssetClass.BR_STOCK,
       ).currency,
     ).toBe("BRL");
+    // A quoted class takes the currency of its market; an unlisted one keeps the user's choice (spec 104 FR 24).
     expect(
       withAssetClass(
         withCurrency(initial, "EUR"),
         InvestmentAssetClass.FOREIGN_STOCK,
       ).currency,
+    ).toBe("USD");
+    expect(
+      withAssetClass(withCurrency(initial, "EUR"), InvestmentAssetClass.PRIVATE)
+        .currency,
     ).toBe("EUR");
   });
 
@@ -73,7 +81,12 @@ describe("validate", () => {
   });
 
   it("SHOULD validate the optional current value", () => {
-    const valid = { ...initial, name: "x", ticker: "X" };
+    const valid = {
+      ...initial,
+      assetClass: InvestmentAssetClass.PRIVATE,
+      name: "x",
+      ticker: "X",
+    };
 
     expect(validate({ ...valid, currentValue: "10,53" })).toEqual({});
     expect(
@@ -156,5 +169,70 @@ describe("params", () => {
     expect(before.ticker).toBe("");
     expect(isSameState(before, { ...before, nameTouched: false })).toBe(true);
     expect(isSameState(before, { ...before, name: "Other" })).toBe(false);
+  });
+});
+
+describe("ticker pick (spec 104 FR 24)", () => {
+  const suggestion = {
+    changePercent: "0.48",
+    currency: "BRL" as const,
+    exchange: "B3",
+    logoUrl: null,
+    market: "B3" as never,
+    name: "Itaúsa PN",
+    price: "10.53",
+    ticker: "ITSA4",
+  };
+  const typed = withTicker(initial, "itsa4");
+
+  it("SHOULD map the classes to the market that quotes them", () => {
+    expect(marketOf(InvestmentAssetClass.BR_REIT)).toBe("B3");
+    expect(marketOf(InvestmentAssetClass.FOREIGN_STOCK)).toBe("US");
+    expect(marketOf(InvestmentAssetClass.PRIVATE)).toBeUndefined();
+  });
+
+  it("SHOULD require a pick for a quoted class, not for the others", () => {
+    expect(needsPick(typed)).toBe(true);
+    expect(needsPick(initial)).toBe(false);
+    expect(needsPick(withAssetClass(typed, InvestmentAssetClass.PRIVATE))).toBe(
+      false,
+    );
+  });
+
+  it("SHOULD not require it again for the ticker the asset already has", () => {
+    const existing = stateFromAsset(makeAsset({ ticker: "ITSA4" }));
+
+    expect(needsPick(existing, existing)).toBe(false);
+    expect(needsPick({ ...existing, ticker: "HGLG11" }, existing)).toBe(true);
+    expect(
+      needsPick(
+        { ...existing, assetClass: InvestmentAssetClass.FOREIGN_STOCK },
+        existing,
+      ),
+    ).toBe(true);
+  });
+
+  it("SHOULD accept the picked ticker AND fill name and currency, but reject it once edited or in another market", () => {
+    const picked = withPicked(typed, suggestion);
+
+    expect(picked).toMatchObject({
+      currency: "BRL",
+      name: "Itaúsa PN",
+      ticker: "ITSA4",
+    });
+    expect(needsPick(picked)).toBe(false);
+    expect(validate(picked).ticker).toBeUndefined();
+    expect(needsPick(withTicker(picked, "itsa3"))).toBe(true);
+    expect(
+      needsPick(withAssetClass(picked, InvestmentAssetClass.FOREIGN_STOCK)),
+    ).toBe(true);
+    expect(validate(typed).ticker).toBe("investment.ticker.notFound");
+  });
+
+  it("SHOULD keep the typed name WHEN picking", () => {
+    const named = withName(typed, "My Itaú");
+
+    expect(withPicked(named, suggestion).name).toBe("My Itaú");
+    expect(withPicked(typed, { ...suggestion, name: null }).name).toBe("ITSA4");
   });
 });

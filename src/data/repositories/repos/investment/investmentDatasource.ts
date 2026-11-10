@@ -2,13 +2,19 @@ import {
   InvestmentAsset,
   InvestmentAssetDetail,
   InvestmentOperationResult,
+  InvestmentPriceHistory,
+  InvestmentQuotesRefresh,
+  InvestmentTickerSuggestion,
   InvestmentValuationResult,
 } from "@domain/entities/investment/InvestmentEntities";
 import {
   CreateInvestmentAssetParams,
   CreateInvestmentOperationParams,
   GetInvestmentAssetsParams,
+  GetInvestmentPriceHistoryParams,
   InvestmentOperationLink,
+  RefreshInvestmentQuotesParams,
+  SearchInvestmentTickersParams,
   UpdateInvestmentAssetParams,
   UpdateInvestmentOperationParams,
   UpsertInvestmentValuationParams,
@@ -27,6 +33,15 @@ export interface InvestmentDatasource {
   getOperationLink(
     transactionId: string,
   ): Promise<InvestmentOperationLink | undefined>;
+  getPriceHistory(
+    params: GetInvestmentPriceHistoryParams,
+  ): Promise<InvestmentPriceHistory>;
+  refreshQuotes(
+    params: RefreshInvestmentQuotesParams,
+  ): Promise<InvestmentQuotesRefresh>;
+  searchTickers(
+    params: SearchInvestmentTickersParams,
+  ): Promise<InvestmentTickerSuggestion[]>;
   updateAsset(params: UpdateInvestmentAssetParams): Promise<InvestmentAsset>;
   updateOperation(
     params: UpdateInvestmentOperationParams,

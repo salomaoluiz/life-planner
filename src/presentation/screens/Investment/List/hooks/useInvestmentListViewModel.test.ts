@@ -20,6 +20,16 @@ import useInvestmentListViewModel, {
 jest.mock("expo-router", () => ({ router: { push: jest.fn() } }));
 jest.mock("@react-navigation/native", () => ({ useIsFocused: jest.fn() }));
 jest.mock("@infrastructure/fetcher");
+jest.mock("@screens/Investment/hooks/useQuoteRefresh", () => ({
+  __esModule: true,
+  default: () => ({
+    disabled: false,
+    isRefreshing: false,
+    onRefresh: jest.fn(),
+    secondsLeft: 0,
+    sourceDown: false,
+  }),
+}));
 jest.mock("@presentation/hooks/useOwnerScopedQuery");
 jest.mock("@application/useCases", () => ({
   useCases: {

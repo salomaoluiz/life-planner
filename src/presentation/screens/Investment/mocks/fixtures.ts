@@ -4,6 +4,8 @@ import {
   InvestmentAssetStatus,
   InvestmentFeeKind,
   InvestmentOperationType,
+  InvestmentPriceSource,
+  InvestmentQuoteMarket,
   InvestmentValuationSource,
 } from "@domain/entities/investment/enums";
 import {
@@ -11,6 +13,7 @@ import {
   InvestmentAssetDetail,
   InvestmentOperation,
   InvestmentPosition,
+  InvestmentQuote,
   InvestmentValuation,
 } from "@domain/entities/investment/InvestmentEntities";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
@@ -24,13 +27,19 @@ function makeAsset(overrides: Partial<InvestmentAsset> = {}): InvestmentAsset {
   return {
     archivedAt: null,
     assetClass: InvestmentAssetClass.BR_STOCK,
+    averageFxRate: null,
+    brl: null,
     currency: "BRL",
+    fx: null,
     id: "asset-1",
     name: "Itaúsa PN",
     operationCount: 4,
+    operationsWithoutFxRate: 0,
     owner: OwnerType.USER,
     ownerId: "user-1",
     position: makePosition(),
+    priceSource: null,
+    quote: null,
     status: InvestmentAssetStatus.ACTIVE,
     ticker: "ITSA4",
     ...overrides,
@@ -76,6 +85,7 @@ function makeOperation(
       },
     ],
     feesTotal: 490,
+    fxRate: null,
     generateTransaction: true,
     gross: 510000,
     id: "op-1",
@@ -106,6 +116,58 @@ function makePosition(
   };
 }
 
+function makeQuote(overrides: Partial<InvestmentQuote> = {}): InvestmentQuote {
+  return {
+    changePercent: "1.24",
+    dayHigh: "232.1",
+    dayLow: "228.9",
+    market: InvestmentQuoteMarket.US,
+    previousClose: "228.57",
+    price: "231.4",
+    quotedAt: "2026-11-04T16:00:00.000Z",
+    source: "FINNHUB",
+    stale: false,
+    ticker: "AAPL",
+    unavailable: false,
+    ...overrides,
+  };
+}
+
+function makeUsdAsset(
+  overrides: Partial<InvestmentAsset> = {},
+): InvestmentAsset {
+  return makeAsset({
+    assetClass: InvestmentAssetClass.FOREIGN_STOCK,
+    averageFxRate: "5.2236",
+    brl: {
+      cost: 1902435,
+      marketValue: 2573214,
+      result: 670779,
+      resultFromAsset: 515047,
+      resultFromFx: 155732,
+      resultPercent: 0.3526,
+    },
+    currency: "USD",
+    fx: { quotedAt: "2026-11-04T16:00:00.000Z", rate: "5.5601" },
+    id: "asset-usd",
+    name: "Apple Inc.",
+    position: makePosition({
+      averagePrice: "182.1",
+      cost: 364200,
+      currentUnitPrice: "231.4",
+      currentValue: 462800,
+      currentValueDate: "2026-11-04",
+      openResult: 98600,
+      openResultPercent: 0.2707,
+      quantity: "20",
+    }),
+    priceSource: InvestmentPriceSource.QUOTE,
+    quote: makeQuote(),
+    ticker: "AAPL",
+    ...overrides,
+  });
+}
+
 function makeValuation(
   overrides: Partial<InvestmentValuation> = {},
 ): InvestmentValuation {
@@ -123,6 +185,8 @@ export {
   makeDetail,
   makeOperation,
   makePosition,
+  makeQuote,
+  makeUsdAsset,
   makeValuation,
   owners,
 };

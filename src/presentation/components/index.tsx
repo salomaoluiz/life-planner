@@ -140,6 +140,11 @@ export { default as TabBar, TabBarItem, TabBarProps } from "./TabBar";
 export { default as Text, TextProps } from "./Text";
 export { default as TextField, TextFieldProps } from "./TextField";
 export { default as TextInput, TextInputProps } from "./TextInput";
+export {
+  default as TickerAutocomplete,
+  TickerAutocompleteProps,
+  TickerOption,
+} from "./TickerAutocomplete";
 export { default as Toast, ToastProps } from "./Toast";
 export { default as ToneDot, ToneDotProps } from "./ToneDot";
 export { default as Tooltip, TooltipProps } from "./Tooltip";

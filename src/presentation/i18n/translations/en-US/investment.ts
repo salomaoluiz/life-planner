@@ -50,7 +50,10 @@ const investment = {
     generic: "Something went wrong. Try again.",
     negativePosition:
       "This change would make the position negative on {{date}}.",
+    refreshTooSoon: "Quotes were refreshed a moment ago.",
+    sourceUnavailable: "Quote source unavailable. Try again in a moment.",
     tickerExists: "You already have this ticker.",
+    tickerNotFound: "No asset found for this ticker.",
   },
   fee: {
     BROKERAGE: "Brokerage",
@@ -103,6 +106,9 @@ const investment = {
       feesHint:
         "Brokerage, exchange fees, FX IOF or Other (with a description).",
       feesLine: "Fees",
+      fxRate: "Exchange rate (BRL per USD)",
+      fxRateHint: "Rate of the operation date; leave empty to use it.",
+      fxRateInvalid: "Enter a rate above zero",
       generate: "Generate finance entry",
       generateHint: "Turn off for old buys or assets you received.",
       gross: "Gross ({{quantity}} × {{price}})",
@@ -133,6 +139,21 @@ const investment = {
       unitPrice: "Value per unit",
     },
   },
+  history: {
+    allRange: "All",
+    closeLegend: "Closing price saved by the server every business day",
+    dashedLegend: "Before {{date}}: line between the prices of your operations",
+    empty: "No history yet.",
+    modePosition: "Position in BRL",
+    modePrice: "Price",
+    oneMonth: "1M",
+    oneYear: "1Y",
+    purchaseLegend: "Purchase",
+    sixMonths: "6M",
+    startsAt:
+      "Automatic quotes from {{date}}. Before that, a line between your operations.",
+    title: "Evolution",
+  },
   list: {
     columns: {
       asset: "Asset",
@@ -140,8 +161,12 @@ const investment = {
       cost: "Cost",
       currentValue: "Current value",
       openResult: "Open result",
+      price: "Price",
       quantity: "Quantity",
       realized: "Realized",
+      result: "Result",
+      today: "Today",
+      updated: "Updated",
     },
     emptyArchivedBody: "Archived assets show up here.",
     emptyArchivedTitle: "No archived assets",
@@ -149,7 +174,7 @@ const investment = {
       "Add stocks, FIIs, foreign stocks, fixed income or private holdings and record your buys.",
     emptyTitle: "No assets yet",
     footnote:
-      "Manual values until automatic quotes. Currencies are never added together.",
+      "USD assets also show the BRL equivalent at the commercial dollar. Fixed income and unlisted assets keep the manual value. Currencies are never added together.",
     groupSubtitle: "Cost {{cost}} · Current {{current}}",
     newAsset: "New asset",
     noResults: "No assets match your search.",
@@ -160,6 +185,7 @@ const investment = {
       assets: "Assets · {{count}}",
     },
     title: "Investments",
+    todayShort: "{{change}} today",
   },
   operation: {
     account: "Account",
@@ -192,9 +218,55 @@ const investment = {
     quantity: "Quantity",
     realized: "Realized result",
   },
+  quote: {
+    asOf: "Quotes from {{time}}",
+    availableIn: "Available again in {{seconds}} s",
+    backToAuto: "Back to automatic quote",
+    dayChange: "{{change}} today",
+    dayRange: "Day high / low",
+    dollar: "Commercial dollar",
+    enterManual: "Enter manual value",
+    everyHour: "Updated every hour during trading",
+    lastPrice: "Last price",
+    manualHint: "A manual value holds until a newer automatic quote arrives.",
+    manualOn: "Manual on {{date}}",
+    previousClose: "Previous close",
+    refreshing: "Refreshing…",
+    refreshNow: "Refresh now",
+    source: "Source",
+    sourceDown: "Couldn't refresh now. Showing the last known price.",
+    sourceLine: "{{source}} · {{time}}",
+    today: "Today's quote",
+    unavailable: "No quote",
+    unavailableBody:
+      "{{ticker}} has had no quote for several business days. Enter a manual value to keep the position up to date.",
+    updatedAt: "Updated at {{time}}",
+    updatedOn: "Updated {{date}}",
+    updatedYesterday: "Updated yesterday at {{time}}",
+  },
+  result: {
+    averageFx: "average exchange rate {{rate}}",
+    brl: "Result in BRL",
+    brlUnavailable:
+      "BRL result unavailable for {{count}} operations without exchange rate.",
+    split: "Result in BRL = asset move {{asset}} + dollar move {{fx}}",
+    usd: "Result in USD",
+  },
   systemCategory: {
     INVESTMENT_CONTRIBUTION: "Investment contribution",
     INVESTMENT_REDEMPTION: "Investment redemption",
+  },
+  ticker: {
+    currentQuote: "Current quote",
+    notFound:
+      'No asset found for "{{q}}". Check the ticker or use the Non-listed class.',
+    pick: "Pick the ticker from the list.",
+    quoteBox:
+      "Updated every hour during trading, with the close saved every business day.",
+    searchHint:
+      "Search on brapi (B3) or Finnhub (foreign). Only a ticker from the list can be saved.",
+    sourceUnavailable: "Couldn't search right now. Try again in a moment.",
+    suggestions: "{{count}} tickers found",
   },
   title: "Investments",
 };

@@ -24,9 +24,42 @@ export enum InvestmentOperationType {
   SELL = "SELL",
 }
 
+// Spec 104: market-data enums, identical to the API's.
+export enum InvestmentPriceKind {
+  CLOSE = "CLOSE",
+  OPERATION = "OPERATION",
+  VALUATION = "VALUATION",
+}
+
+export enum InvestmentPriceRange {
+  ALL = "ALL",
+  ONE_MONTH = "1M",
+  ONE_YEAR = "1Y",
+  SIX_MONTHS = "6M",
+}
+
+export enum InvestmentPriceSource {
+  MANUAL = "MANUAL",
+  QUOTE = "QUOTE",
+}
+
+export enum InvestmentQuoteMarket {
+  B3 = "B3",
+  US = "US",
+}
+
 export enum InvestmentValuationSource {
   MANUAL = "MANUAL",
 }
+
+// The classes that have an automatic quote and the market that quotes them (spec 104 FR 1).
+export const QUOTED_CLASS_MARKET: Partial<
+  Record<InvestmentAssetClass, InvestmentQuoteMarket>
+> = {
+  [InvestmentAssetClass.BR_REIT]: InvestmentQuoteMarket.B3,
+  [InvestmentAssetClass.BR_STOCK]: InvestmentQuoteMarket.B3,
+  [InvestmentAssetClass.FOREIGN_STOCK]: InvestmentQuoteMarket.US,
+};
 
 // The order of the classes in the list (the API sorts the same way).
 export const ASSET_CLASS_ORDER: InvestmentAssetClass[] = [

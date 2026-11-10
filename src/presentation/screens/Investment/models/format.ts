@@ -49,6 +49,15 @@ function formatResult(
   return `${signOf(cents)}${formatAmount(Math.abs(cents), localeTag, currency)}`;
 }
 
+// "13:05" in the device time zone (the quote time the user sees).
+function formatTime(iso: string, localeTag: string): string {
+  return new Intl.DateTimeFormat(numberLocale(localeTag), {
+    hour: "2-digit",
+    hourCycle: "h23",
+    minute: "2-digit",
+  }).format(new Date(iso));
+}
+
 // A price per unit keeps its decimals: "R$ 10,53", "US$ 114,6345".
 function formatUnitPrice(
   price: string,
@@ -88,6 +97,7 @@ export {
   formatPercent,
   formatQuantity,
   formatResult,
+  formatTime,
   formatUnitPrice,
   resultTone,
 };

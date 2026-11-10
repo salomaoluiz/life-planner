@@ -1,4 +1,4 @@
-# Investment Module Context (spec 102)
+# Investment Module Context (spec 102, quotes: spec 104)
 
 > Born on the NestJS API (no Supabase). Screens and modals render through `AdaptiveLayout` (spec 099): each folder has an `index.tsx` entry (calls the ViewModel once) and `views/Wide.tsx` (the View, which reads `useDensity()` for the compact cards). Money is integer cents in the asset currency; quantities and unit prices are decimal strings (up to 8 places), handled with `@utils/decimal` (scaled `bigint`), never floats.
 
@@ -76,3 +76,18 @@ finance_integration: Financial/Transactions rows of INVESTMENT_CONTRIBUTION / IN
 - One View per screen that adapts through `useDensity()`; the artboard's mobile "fees collapsed into one line with Edit" is not built: the fee list stays expanded on compact.
 - The fee breakdown panel of the detail artboard is not a separate panel: tapping an operation opens the operation modal, which lists its fees.
 - The archive banner and the list use the app's own components (SegmentedControl for the Assets/Archived tabs).
+
+## Automatic quotes (spec 104)
+
+```yaml
+entities: InvestmentAsset gains quote (InvestmentQuote), priceSource (QUOTE|MANUAL), fx (rate of the day, USD assets), averageFxRate, brl (InvestmentBrlResult: cost, marketValue, result, resultFromAsset, resultFromFx, resultPercent) and operationsWithoutFxRate; InvestmentOperation.fxRate; new InvestmentPriceHistory/InvestmentPricePoint, InvestmentQuotesRefresh, InvestmentTickerSuggestion; enums InvestmentPriceKind, InvestmentPriceRange, InvestmentPriceSource, InvestmentQuoteMarket and QUOTED_CLASS_MARKET
+errors: TickerNotFound (422 TICKER_NOT_FOUND), QuoteSourceUnavailable (503 QUOTE_SOURCE_UNAVAILABLE), QuoteRefreshTooSoon(retryAfterSeconds) (429 REFRESH_TOO_SOON); mapped in investmentApiError.ts from the `code` of the body
+repository/use cases: searchTickers, refreshQuotes, getPriceHistory (searchInvestmentTickersUseCase, refreshInvestmentQuotesUseCase, getInvestmentPriceHistoryUseCase); query keys investmentKeys.priceHistory / tickerSearch
+datasource: GET /v1/investments/tickers/search?market=&q=, POST /v1/investments/quotes/refresh { assetIds? }, GET /v1/investments/assets/:id/price-history?range=; operations send fxRate ("5,2236" -> "5.2236"; undefined = the API defaults it, null/"" = none)
+list: columns Asset, Quantity, Price, Today, Current value (BRL below for USD), Result (BRL for USD), Updated (models/quoteInfo.ts: time / yesterday / date / manual, warning color when stale or manual over a quote); header "Quotes from 13:00 · updated every hour" + "Refresh now" (hooks/useQuoteRefresh.ts: 1 per minute, countdown from nextRefreshAt or the 429, source-down banner)
+detail: price block, "Today's quote" panel, ChartPanel (LineChart over detail/models/priceChart.ts: price or "Position in BRL" for USD, ranges 1M/6M/1Y/All, points before the first close dashed), BRL result card + average rate, "Enter manual value" / "Back to automatic quote" (deletes the newest manual value)
+asset modal: TickerAutocomplete (@components, over AutocompleteField, 300 ms debounce, 10 results) for quoted classes; a ticker typed but not picked blocks saving ("No asset found for ..."); the market sets the currency (read-only); quote box with the picked price
+operation modal: "Exchange rate (BRL per USD)" for non-BRL assets, placeholder = the current rate
+```
+
+Design deviations (spec 104): the purchase markers of the chart are not drawn (the shared `LineChart` has no markers; the dashed segment and the legend carry the history start); the "fee breakdown" panel of spec 102 is unchanged; the asset list drops the Cost, Average price and Realized columns (they stay on the detail) to fit Price, Today and Updated.

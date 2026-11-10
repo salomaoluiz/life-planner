@@ -1,6 +1,6 @@
 // Maestro runScript (GraalJS). Creates an investment asset through the API (spec 102).
 // Reads E2E_API_URL, TOKEN, TICKER, NAME, OWNER_ID from env, plus the optional caller-scoped params
-// ASSET_CLASS (BR_STOCK default), CURRENCY (BRL default), CURRENT_UNIT_PRICE (none default) and OWNER (USER default).
+// ASSET_CLASS (PRIVATE default: a quoted class needs a ticker the market source knows, spec 104), CURRENCY (BRL default), CURRENT_UNIT_PRICE (none default) and OWNER (USER default).
 // Never logs the token.
 function param(value, fallback) {
   return typeof value !== "undefined" && value !== "" ? value : fallback;
@@ -13,7 +13,7 @@ var response = http.post(E2E_API_URL + "/v1/investments/assets", {
   body: JSON.stringify({
     assetClass: param(
       typeof ASSET_CLASS === "undefined" ? undefined : ASSET_CLASS,
-      "BR_STOCK",
+      "PRIVATE",
     ),
     currency: param(
       typeof CURRENCY === "undefined" ? undefined : CURRENCY,

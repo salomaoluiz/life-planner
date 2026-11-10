@@ -42,6 +42,12 @@ import {
 } from "@screens/Investment/models/format";
 import investmentTestIds from "@screens/Investment/testIds";
 
+import {
+  ChartPanel,
+  PriceBlock,
+  QuotePanel,
+  RefreshButton,
+} from "../components/QuoteSection";
 import { InvestmentDetailVM } from "../hooks";
 import useStyles from "../styles";
 
@@ -78,6 +84,7 @@ function Header({
         <View style={styles.actions}>
           {vm.archived ? null : (
             <>
+              {asset.quote ? <RefreshButton vm={vm} /> : null}
               <Button.Secondary
                 label={t("investment.asset.updateValue")}
                 onPress={vm.onUpdateValue}
@@ -289,6 +296,11 @@ function Summary({
           ? formatUnitPrice(position.averagePrice, asset.currency, localeTag, 4)
           : "—",
         ids.averagePrice,
+        asset.averageFxRate
+          ? t("investment.result.averageFx", {
+              rate: formatUnitPrice(asset.averageFxRate, "BRL", localeTag, 4),
+            })
+          : undefined,
       )}
       {card(t("investment.position.cost"), money(position.cost), ids.cost)}
       {card(
@@ -298,12 +310,25 @@ function Summary({
         basis,
       )}
       {card(
-        t("investment.position.openResult"),
+        asset.brl
+          ? t("investment.result.usd")
+          : t("investment.position.openResult"),
         open,
         ids.openResult,
         percent,
         resultTone(position.openResult),
       )}
+      {asset.brl
+        ? card(
+            t("investment.result.brl"),
+            formatResult(asset.brl.result, "BRL", localeTag),
+            ids.openResultBrl,
+            asset.brl.resultPercent === null
+              ? undefined
+              : formatPercent(asset.brl.resultPercent, localeTag),
+            resultTone(asset.brl.result),
+          )
+        : null}
       {card(
         t("investment.position.realized"),
         formatResult(position.realizedResult, asset.currency, localeTag),
@@ -442,7 +467,18 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentDetailVM>) {
             value={t(vm.errorMessage.key, vm.errorMessage.params)}
           />
         ) : null}
+        <PriceBlock asset={asset} vm={vm} />
         <Summary asset={asset} compact={compact} sells={vm.sellCount} />
+        {asset.ticker ? (
+          <View style={styles.sections}>
+            <View style={styles.sectionMain}>
+              <ChartPanel asset={asset} vm={vm} />
+            </View>
+            <View style={styles.sectionSide}>
+              <QuotePanel asset={asset} vm={vm} />
+            </View>
+          </View>
+        ) : null}
         <View style={styles.sections}>
           <View style={styles.sectionMain}>
             <Operations asset={asset} vm={vm} />

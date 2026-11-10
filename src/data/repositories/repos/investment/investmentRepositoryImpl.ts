@@ -28,6 +28,10 @@ function investmentRepositoryImpl(
     getAssets: async (params) => investmentDatasource.getAssets(params),
     getOperationLink: async (transactionId) =>
       investmentDatasource.getOperationLink(transactionId),
+    getPriceHistory: async (params) =>
+      investmentDatasource.getPriceHistory(params),
+    refreshQuotes: async (params) => investmentDatasource.refreshQuotes(params),
+    searchTickers: async (params) => investmentDatasource.searchTickers(params),
     updateAsset: async (params) => investmentDatasource.updateAsset(params),
     updateOperation: async (params) =>
       withFinanceCaches(investmentDatasource.updateOperation(params)),
