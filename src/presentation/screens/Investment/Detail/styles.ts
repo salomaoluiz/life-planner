@@ -11,8 +11,10 @@ function useStyles(compact = false) {
       actions: {
         alignItems: "center",
         flexDirection: "row",
+        flexShrink: 1,
         flexWrap: "wrap",
         gap: spacing.xs,
+        justifyContent: compact ? "flex-start" : "flex-end",
       },
       cards: {
         flexDirection: "row",
@@ -44,7 +46,7 @@ function useStyles(compact = false) {
         paddingHorizontal: spacing.md,
         paddingVertical: spacing.sm,
       },
-      panel: { gap: spacing.xs },
+      panel: { flexShrink: 1, gap: spacing.xs },
       priceBlock: { gap: spacing.xxs },
       quoteActions: { alignItems: "flex-start", gap: spacing.xs },
       quotePanel: { gap: spacing.sm },

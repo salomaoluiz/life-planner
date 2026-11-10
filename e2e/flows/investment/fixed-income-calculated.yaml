@@ -40,7 +40,7 @@ onFlowComplete:
 - assertVisible:
     id: "investment.detail.fi-rate-line"
 - assertVisible:
-    id: "investment.detail.fi-at-maturity"
+    id: "investment.detail.fi-tabs"
 - assertVisible:
     id: "investment.detail.fi-card-applied"
     text: ".*10[.,]000.*"
@@ -53,7 +53,7 @@ onFlowComplete:
     timeout: 20000
 - tapOn:
     id: "investment.contribution-modal.amount"
-- inputText: "500000"
+- inputText: "5000"
 - tapOn:
     id: "investment.contribution-modal.save"
 - extendedWaitUntil:
@@ -77,7 +77,7 @@ onFlowComplete:
     timeout: 20000
 - tapOn:
     id: "investment.redeem-modal.net"
-- inputText: "600000"
+- inputText: "6000"
 - extendedWaitUntil:
     visible:
       id: "investment.redeem-modal.preview"
@@ -113,6 +113,6 @@ onFlowComplete:
       id: "investment.detail.fi-card-net"
     timeout: 20000
 - tapOn:
-    id: "investment.detail.fi-tab-rates"
+    id: "investment.detail.fi-tabs-rates"
 - assertVisible:
     id: "investment.detail.fi-rate-row-.*"
