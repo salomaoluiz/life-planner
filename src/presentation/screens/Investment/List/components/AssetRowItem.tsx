@@ -68,9 +68,9 @@ function AssetRowItem({ onPress, row }: Props) {
   );
   const updatedText = updatedLabel(updated, t, localeTag);
   const label = labelOf(asset);
+  const unavailable = isQuoteUnavailable(asset);
   const compactValue = compactValueOf();
   const compactNote = compactNoteOf();
-  const unavailable = isQuoteUnavailable(asset);
   const testID = `${investmentTestIds.list.row}-${asset.id}`;
 
   function compactValueOf(): string {

@@ -25,7 +25,7 @@ onFlowComplete:
     id: "investment.list.add-button"
 - extendedWaitUntil:
     visible:
-      id: "investment.asset-modal.ticker"
+      id: "investment.asset-modal.ticker-input"
     timeout: 20000
 # Saving with the ticker missing keeps the form open and says why.
 - tapOn:
@@ -34,7 +34,7 @@ onFlowComplete:
     id: "investment.asset-modal.ticker-error"
 # Spec 104: a quoted class only saves a ticker picked from the market search.
 - tapOn:
-    id: "investment.asset-modal.ticker"
+    id: "investment.asset-modal.ticker-input"
 - inputText: "itsa"
 - extendedWaitUntil:
     visible:
