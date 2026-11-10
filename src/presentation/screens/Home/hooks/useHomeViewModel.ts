@@ -12,11 +12,13 @@ import UpcomingDTO, {
 import UserDTO from "@application/dto/user/UserDTO";
 import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
+import { CurrencyCode } from "@domain/entities/financial/Currency";
 import { resolveFavoriteAccount } from "@domain/entities/financial/resolveFavoriteAccount";
 import { refetchStaleFetcherData, useQuery } from "@infrastructure/fetcher";
 import useOwners from "@presentation/hooks/useOwners";
 import { useTranslationLocale } from "@presentation/i18n";
 import { useBreakpoint } from "@presentation/theme";
+import useScreenCurrency from "@screens/Financial/hooks/useScreenCurrency";
 import { setTransactionFilters } from "@screens/Financial/Transactions/hooks/useTransactionFilters";
 import { EMPTY_FILTERS } from "@screens/Financial/Transactions/models/transactionFilters";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
@@ -71,16 +73,32 @@ async function fetchAccounts(ownerIds: string[]) {
   return useCases.getFinancialAccountsUseCase.execute(ownerIds);
 }
 
-async function fetchBalances(ownerIds: string[], month: string) {
-  return useCases.getFinancialDailyBalancesUseCase.execute({ month, ownerIds });
+async function fetchBalances(
+  ownerIds: string[],
+  month: string,
+  currency: CurrencyCode,
+) {
+  return useCases.getFinancialDailyBalancesUseCase.execute({
+    currency,
+    month,
+    ownerIds,
+  });
 }
 
 async function fetchStock(ownerIds: string[]) {
   return useCases.getStockAttentionUseCase.execute({ ownerIds });
 }
 
-async function fetchSummary(ownerIds: string[], month: Date) {
-  return useCases.getMonthSummaryUseCase.execute({ month, ownerIds });
+async function fetchSummary(
+  ownerIds: string[],
+  month: Date,
+  currency: CurrencyCode,
+) {
+  return useCases.getMonthSummaryUseCase.execute({
+    currency,
+    month,
+    ownerIds,
+  });
 }
 
 async function fetchUpcoming(ownerIds: string[]) {
@@ -157,39 +175,46 @@ function useHomeViewModel() {
   const ownersReady = !!owners.data;
   const ownersKey = ownerIds.join(",");
 
+  const accounts = useQuery<AccountDTO[]>({
+    cacheKey: financeKeys.accounts.raw(ownersKey),
+    enabled: ownersReady,
+    fetch: async () => fetchAccounts(ownerIds),
+  });
+  // Spec 103: one currency at a time; the dropdown only exists with active accounts in more than one currency.
+  const screenCurrency = useScreenCurrency(accounts.data ?? []);
+  const currency = screenCurrency.currency;
+
   const summary = useQuery<MonthSummaryDTO>({
     cacheKey: [
       ...financeKeys.summary.ofMonth(monthKey(now), "home"),
       ownersKey,
+      currency,
     ],
     enabled: ownersReady,
-    fetch: async () => fetchSummary(ownerIds, now),
+    fetch: async () => fetchSummary(ownerIds, now, currency),
   });
   const stock = useQuery<StockAttentionDTO>({
     cacheKey: [useCases.getStockAttentionUseCase.uniqueName, ownersKey],
     enabled: ownersReady,
     fetch: async () => fetchStock(ownerIds),
   });
-  const accounts = useQuery<AccountDTO[]>({
-    cacheKey: financeKeys.accounts.raw(ownersKey),
-    enabled: ownersReady,
-    fetch: async () => fetchAccounts(ownerIds),
-  });
   const balancesNow = useQuery<DailyBalanceDTO>({
     cacheKey: [
       ...financeKeys.dailyBalances.ofMonth(monthKey(now), "home"),
       ownersKey,
+      currency,
     ],
     enabled: ownersReady,
-    fetch: async () => fetchBalances(ownerIds, monthKey(now)),
+    fetch: async () => fetchBalances(ownerIds, monthKey(now), currency),
   });
   const balancesNext = useQuery<DailyBalanceDTO>({
     cacheKey: [
       ...financeKeys.dailyBalances.ofMonth(nextMonthKey(now), "home"),
       ownersKey,
+      currency,
     ],
     enabled: ownersReady,
-    fetch: async () => fetchBalances(ownerIds, nextMonthKey(now)),
+    fetch: async () => fetchBalances(ownerIds, nextMonthKey(now), currency),
   });
   const upcoming = useQuery<UpcomingDTO>({
     cacheKey: financeKeys.upcoming.raw(ownersKey),
@@ -245,7 +270,7 @@ function useHomeViewModel() {
     (accounts.data ?? []).filter((account) =>
       balanceAccountIds.has(account.id),
     ),
-    {},
+    { currency },
   );
   const ownersFailed = !!owners.error && !ownersReady;
   const balanceState = combineBlocks(
@@ -323,6 +348,13 @@ function useHomeViewModel() {
 
   return {
     balance: balanceState,
+    currency: {
+      onChange: (value: string) =>
+        screenCurrency.setCurrency(value as CurrencyCode),
+      options: screenCurrency.options,
+      value: currency,
+      visible: screenCurrency.visible,
+    },
     filter: {
       onChange: setSelection,
       options: buildOwnerFilterOptions(ownerList),

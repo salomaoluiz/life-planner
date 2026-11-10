@@ -122,3 +122,18 @@ it("SHOULD read only the card source filtered by creditCardId WHEN options.credi
   );
   expect(result.map((item) => item.id)).toEqual([mocks.apiTransactions[0].id]);
 });
+
+it("SHOULD add the currency to both reads WHEN one is given (spec 103)", async () => {
+  spies.get.mockResolvedValue(page([]));
+
+  await setup(
+    mocks.ownerIds,
+    { from: "2026-10-01", to: "2026-10-31" },
+    { currency: "USD" },
+  );
+
+  expect(spies.get).toHaveBeenCalledTimes(2);
+  spies.get.mock.calls.forEach(([url]) =>
+    expect(url).toContain("&to=2026-10-31&currency=USD"),
+  );
+});

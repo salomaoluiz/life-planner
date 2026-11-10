@@ -14,6 +14,7 @@ import {
   IconChoiceGroup,
   IconTile,
   SegmentedControl,
+  SelectField,
   Switch,
   Text,
   TextField,
@@ -21,7 +22,6 @@ import {
 } from "@components";
 import Skeleton from "@components/Skeleton";
 import { useKitTheme } from "@components/utils/useKitTheme";
-import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
 import { TranslationKeys } from "@presentation/i18n/types";
@@ -124,8 +124,24 @@ function Wide({ vm }: AdaptiveViewProps<NewAccountVM>) {
           right={
             <>
               <View style={styles.helper}>
+                <SelectField
+                  closeLabel={t("common.actions.close")}
+                  disabled={vm.isCurrencyLocked}
+                  helper={t(vm.currencyHintKey)}
+                  label={t("financial.accounts.currency")}
+                  onChange={vm.onCurrencyChange}
+                  options={vm.currencyOptions.map((option) => ({
+                    label: t(option.labelKey),
+                    value: option.value,
+                  }))}
+                  sheetTitle={t("financial.accounts.currency")}
+                  testID={accountFormTestIds.currency}
+                  value={vm.currency}
+                />
+              </View>
+              <View style={styles.helper}>
                 <AmountInput
-                  currency={DEFAULT_CURRENCY}
+                  currency={vm.currency}
                   error={err(vm.amountError)}
                   label={t(vm.balanceLabelKey)}
                   onChange={vm.onAmountChange}

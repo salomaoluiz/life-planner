@@ -1,11 +1,13 @@
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import { DefaultError, FieldInvalid } from "@domain/entities/errors";
 import { AccountType } from "@domain/entities/financial/AccountEntity";
+import { CurrencyCode } from "@domain/entities/financial/Currency";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import Repositories from "@domain/repositories";
 
 export interface CreateAccountUseCaseParams {
   balance: number;
+  currency?: CurrencyCode;
   icon: string;
   isFavorite?: boolean;
   name: string;
@@ -31,6 +33,7 @@ function createAccountUseCase(
       try {
         await repositories.financialRepository.account.createAccount({
           balance: params.balance,
+          currency: params.currency,
           icon: params.icon,
           isFavorite: params.isFavorite,
           name: params.name,

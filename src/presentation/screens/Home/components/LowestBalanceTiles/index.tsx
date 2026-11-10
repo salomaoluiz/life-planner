@@ -12,7 +12,10 @@ import {
   Touchable,
 } from "@components";
 import Skeleton from "@components/Skeleton";
-import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
 import { useTranslation } from "@presentation/i18n";
 import { useTheme } from "@presentation/theme";
 import DayBalanceLine from "@screens/Financial/Transactions/components/DayBalanceLine";
@@ -26,6 +29,8 @@ import { isWeb } from "@utils/platform";
 import useStyles from "./styles";
 
 interface Props {
+  // Spec 103: the currency of every figure (BRL when omitted).
+  currency?: CurrencyCode;
   fill?: boolean;
   onCreateAccountPress: () => void;
   onPress: () => void;
@@ -42,7 +47,13 @@ function EmptyTile() {
   );
 }
 
-function Lines({ tile }: { tile: LowestBalanceTile }) {
+function Lines({
+  currency,
+  tile,
+}: {
+  currency?: CurrencyCode;
+  tile: LowestBalanceTile;
+}) {
   const { t } = useTranslation();
   const { styles } = useStyles();
 
@@ -57,6 +68,7 @@ function Lines({ tile }: { tile: LowestBalanceTile }) {
         <DayBalanceLine
           accountId={line.accountId}
           balanceCents={line.balanceCents}
+          currency={currency}
           favorite={line.favorite}
           icon={line.icon}
           isCards={false}
@@ -69,7 +81,7 @@ function Lines({ tile }: { tile: LowestBalanceTile }) {
       <View style={styles.total}>
         <Text.Caption value={t("home.finance.lowest.total")} />
         <AmountText
-          currency={DEFAULT_CURRENCY}
+          currency={currency ?? DEFAULT_CURRENCY}
           size="body"
           type={tile.filterTotalCents < 0 ? "EXPENSE" : undefined}
           value={Math.abs(tile.filterTotalCents)}
@@ -81,6 +93,7 @@ function Lines({ tile }: { tile: LowestBalanceTile }) {
 
 // The lowest balance day of this month (from today) and of next month, with the balance by account (spec 062 FR 8-11).
 function LowestBalanceTiles({
+  currency,
   fill,
   onCreateAccountPress,
   onPress,
@@ -121,7 +134,12 @@ function LowestBalanceTiles({
         <View style={styles.tiles}>
           {data.hasAccounts ? (
             data.tiles.map((tile) => (
-              <Tile key={tile.id} onPress={onPress} tile={tile} />
+              <Tile
+                currency={currency}
+                key={tile.id}
+                onPress={onPress}
+                tile={tile}
+              />
             ))
           ) : (
             <>
@@ -151,9 +169,11 @@ function LowestBalanceTiles({
 }
 
 function Tile({
+  currency,
   onPress,
   tile,
 }: {
+  currency?: CurrencyCode;
   onPress: () => void;
   tile: LowestBalanceTile;
 }) {
@@ -165,7 +185,9 @@ function Tile({
 
   return (
     <View style={styles.tile}>
-      <Tooltip content={web ? <Lines tile={tile} /> : undefined}>
+      <Tooltip
+        content={web ? <Lines currency={currency} tile={tile} /> : undefined}
+      >
         <Card
           onPress={onPress}
           testID={
@@ -183,7 +205,7 @@ function Tile({
                 })}
               />
               <AmountText
-                currency={DEFAULT_CURRENCY}
+                currency={currency ?? DEFAULT_CURRENCY}
                 size="body"
                 type={tile.isNegative ? "EXPENSE" : undefined}
                 value={Math.abs(tile.totalCents)}

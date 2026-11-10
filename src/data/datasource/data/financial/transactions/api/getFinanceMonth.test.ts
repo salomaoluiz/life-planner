@@ -22,6 +22,7 @@ it("SHOULD GET /v1/finance/month with the owners, today and the month AND join t
     id: mocks.apiTransaction.id,
   });
   expect(result.summary).toEqual({
+    currency: "BRL",
     expense: 23490,
     income: 0,
     projectedExpense: 0,
@@ -72,4 +73,24 @@ it("SHOULD wrap unknown errors in GenericError with the month", async () => {
     month: "2026-11",
     ownerIds: [mocks.ownerId],
   });
+});
+
+it("SHOULD send the currency AND keep it on the follow-up pages (spec 103)", async () => {
+  spies.get.mockResolvedValueOnce({
+    ...mocks.apiResponse,
+    rows: { items: [mocks.apiTransaction], nextCursor: "cursor-1" },
+    summary: { ...mocks.apiResponse.summary, currency: "USD" },
+  });
+  spies.fetchTransactionPages.mockResolvedValueOnce([] as never);
+
+  const result = await setup([mocks.ownerId], "USD");
+
+  expect(spies.get).toHaveBeenCalledWith(
+    `/v1/finance/month?ownerId=${mocks.ownerId}&today=${todayCalendarDate()}&currency=USD&month=2026-11`,
+  );
+  expect(spies.fetchTransactionPages).toHaveBeenCalledWith(
+    expect.stringContaining("&currency=USD&from=2026-11-01"),
+    "cursor-1",
+  );
+  expect(result.summary.currency).toBe("USD");
 });

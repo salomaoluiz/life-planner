@@ -2,6 +2,10 @@ import AccountDTO from "@application/dto/financial/AccountDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { AccountType } from "@domain/entities/financial/AccountEntity";
 import {
+  CurrencyCode,
+  SUPPORTED_CURRENCIES,
+} from "@domain/entities/financial/Currency";
+import {
   ACCOUNT_ICONS,
   DEFAULT_ICON_BY_TYPE,
 } from "@presentation/constants/accountIcons";
@@ -22,6 +26,14 @@ interface Params {
 }
 
 class NewAccountUIModel {
+  // Spec 103: the three supported currencies, labelled `BRL · Real`.
+  get currencyOptions(): { labelKey: TranslationKeys; value: CurrencyCode }[] {
+    return SUPPORTED_CURRENCIES.map((code) => ({
+      labelKey: `financial.accounts.currencyOption.${code}` as TranslationKeys,
+      value: code,
+    }));
+  }
+
   get iconOptions(): { label: string; value: string }[] {
     return ACCOUNT_ICONS.map((name) => ({
       label: iconLabel(name),

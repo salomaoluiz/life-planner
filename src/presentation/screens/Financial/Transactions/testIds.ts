@@ -38,6 +38,7 @@ const transactionsTestIds = {
   confirmTransferError: "financial.transactions.confirm-transfer.error",
   confirmTransferModal: "financial.transactions.confirm-transfer.modal",
   confirmTransferRate: "financial.transactions.confirm-transfer.rate",
+  currency: "financial.transactions.currency",
   dayBalance: "financial.transactions.day-balance",
   dayBalanceCards: "financial.transactions.day-balance-cards",
   dayBalanceFavorite: "financial.transactions.day-balance-favorite",

@@ -1,6 +1,7 @@
 import AccountEntity, {
   AccountType,
 } from "@domain/entities/financial/AccountEntity";
+import { CurrencyCode } from "@domain/entities/financial/Currency";
 import DailyBalanceEntity from "@domain/entities/financial/DailyBalanceEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
@@ -25,6 +26,8 @@ interface AdjustAccountBalanceRepositoryParams {
 interface CreateAccountRepositoryParams {
   // The initial balance of the new account.
   balance: number;
+  // Spec 103: chosen once on create; the API never changes it afterwards.
+  currency?: CurrencyCode;
   icon: string;
   isFavorite?: boolean;
   name: string;
@@ -40,6 +43,7 @@ interface DeleteAccountRepositoryParams {
 }
 
 interface GetDailyBalancesRepositoryParams {
+  currency?: CurrencyCode;
   // `YYYY-MM`
   month: string;
   ownerIds: string[];

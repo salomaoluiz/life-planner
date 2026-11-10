@@ -2,6 +2,7 @@ const homeTestIds = {
   financeBalance: "home.finance.balance",
   financeBalanceError: "home.finance.balanceError",
   financeBalanceLoading: "home.finance.balanceLoading",
+  financeCurrency: "home.finance.currency",
   financeFavoriteBadge: "home.finance.favoriteBadge",
   financeLowestCreateAccount: "home.finance.lowestCreateAccount",
   financeLowestCurrent: "home.finance.lowestCurrent",

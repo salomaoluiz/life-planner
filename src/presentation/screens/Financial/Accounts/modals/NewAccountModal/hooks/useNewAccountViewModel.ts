@@ -6,6 +6,10 @@ import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
 import { AccountType } from "@domain/entities/financial/AccountEntity";
 import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
+import {
   invalidateFetcherData,
   useMutation,
   useQuery,
@@ -27,6 +31,7 @@ import {
   toUpdateParams,
   validate,
   withArchived,
+  withCurrency,
   withIcon,
   withType,
 } from "../models/accountFormState";
@@ -225,11 +230,18 @@ function useNewAccountViewModel() {
     balanceLabelKey: (isEditing
       ? "financial.accounts.form.balance"
       : "financial.accounts.form.initialBalance") as TranslationKeys,
+    currency: state?.currency ?? DEFAULT_CURRENCY,
+    // Spec 103: the currency never changes after the account is created.
+    currencyHintKey: (isEditing
+      ? "financial.accounts.currencyHintEdit"
+      : "financial.accounts.currencyHintCreate") as TranslationKeys,
+    currencyOptions: uiModel?.currencyOptions ?? [],
     deleteTitleParams: { name: state?.name ?? "" },
     formErrorKey,
     icon: state?.icon ?? "",
     iconOptions: uiModel?.iconOptions ?? [],
     isArchived: state?.isArchived ?? false,
+    isCurrencyLocked: isEditing,
     isDeleteDialogOpen,
     isDeleting: deleteMutation.isFetching,
     isDiscardDialogOpen,
@@ -253,6 +265,11 @@ function useNewAccountViewModel() {
       }
     },
     onClose,
+    onCurrencyChange: (value: string) => {
+      if (state && !isEditing) {
+        update(withCurrency(state, value as CurrencyCode));
+      }
+    },
     onDeleteCancel: () => setDeleteDialogOpen(false),
     onDeleteConfirm,
     onDeletePress: () => setDeleteDialogOpen(true),

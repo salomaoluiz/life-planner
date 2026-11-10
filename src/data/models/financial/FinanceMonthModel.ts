@@ -1,3 +1,9 @@
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+  toCurrencyCode,
+} from "@domain/entities/financial/Currency";
+
 import CardInvoiceModel from "./CardInvoiceModel";
 import DailyBalanceModel from "./DailyBalanceModel";
 import ProjectedOccurrenceModel from "./ProjectedOccurrenceModel";
@@ -6,6 +12,7 @@ import TransactionModel, { TransactionLookups } from "./TransactionModel";
 // Spec 080: money in cents. `income/expense/toPay/toReceive` are the real figures of the month; the projected pair is
 // what the series still add to a month after the current one.
 interface FinanceMonthSummaryModel {
+  currency?: CurrencyCode;
   expense: number;
   income: number;
   projectedExpense: number;
@@ -47,6 +54,7 @@ class FinanceMonthModel {
       nextCursor: null,
       projections: [],
       summary: {
+        currency: DEFAULT_CURRENCY,
         expense: 0,
         income: 0,
         projectedExpense: 0,
@@ -77,6 +85,9 @@ class FinanceMonthModel {
         ProjectedOccurrenceModel.fromJSON(item),
       ),
       summary: {
+        currency: toCurrencyCode(
+          (data.summary as { currency?: unknown }).currency,
+        ),
         expense: summary.expense,
         income: summary.income,
         projectedExpense: summary.projectedExpense,

@@ -9,7 +9,10 @@ import ProjectedOccurrenceDTO from "@application/dto/financial/ProjectedOccurren
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
-import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
 import { resolveFavoriteAccount } from "@domain/entities/financial/resolveFavoriteAccount";
 import { TransactionQueryFilter } from "@domain/entities/financial/TransactionQueryFilter";
 import { refetchStaleFetcherData, useQuery } from "@infrastructure/fetcher";
@@ -18,6 +21,7 @@ import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import useStableCallback from "@presentation/hooks/useStableCallback";
 import useTranslationLocale from "@presentation/i18n/useTranslationLocale";
 import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
+import useScreenCurrency from "@screens/Financial/hooks/useScreenCurrency";
 import { addMonthsTo } from "@screens/Financial/models/invoiceMonth";
 import {
   activeOwnerIds,
@@ -109,9 +113,11 @@ async function fetchMonth(
   allOwnerIds: string[],
   monthKey: string,
   scopeOwnerIds: string[],
+  currency: CurrencyCode = DEFAULT_CURRENCY,
 ): Promise<MonthData> {
   const [month, categories] = await Promise.all([
     useCases.getFinancialMonthUseCase.execute({
+      currency,
       month: monthKey,
       ownerIds: scopeOwnerIds,
     }),
@@ -156,7 +162,13 @@ async function fetchProjections(
     useCases.getFinancialCategoriesUseCase.execute(ownerIds),
   ]);
 
-  return toProjectedData(items, categories);
+  // Spec 103: the projections endpoint lists every currency; the screen shows one.
+  return toProjectedData(
+    filter?.currency
+      ? items.filter((item) => item.currency === filter.currency)
+      : items,
+    categories,
+  );
 }
 
 // The later of two `YYYY-MM` keys.
@@ -171,11 +183,14 @@ function monthCacheKey(
   monthKey: string,
   scopeOwnerIds: string[],
   allOwnerIds: string[] = [],
+  currency: CurrencyCode = DEFAULT_CURRENCY,
 ) {
+  // Spec 103: the currency is part of the key, right after the scope (the cache patches read the first positions).
   return [
     ...financeKeys.transactions.list(),
     monthKey,
     scopeOwnerIds.join(","),
+    currency,
     ...allOwnerIds,
   ];
 }
@@ -262,28 +277,6 @@ function useTransactionsViewModel() {
       ownerFilter === ALL_FILTER ? activeOwnerIds(owners ?? []) : [ownerFilter],
     [ownerFilter, owners],
   );
-  // Spec 080: the rows, invoices, balances, projections and summary of the month come from ONE request, keyed by the
-  // month and the scope (spec 075); another key keeps the previous data flagged as placeholder until its own arrives,
-  // and the edit form and the description suggestions read these cached months.
-  const monthQuery = useOwnerScopedQuery<MonthData>({
-    cacheKey: monthCacheKey(monthKey, summaryOwnerIds),
-    fetch: async (loadedOwners) =>
-      fetchMonth(
-        loadedOwners.map((owner) => owner.id),
-        monthKey,
-        summaryOwnerIds,
-      ),
-    keepPreviousData: true,
-  });
-  // The month's own data is not here yet (first load, or another month showing the previous one meanwhile).
-  const isListPending = !monthQuery.data || !!monthQuery.isPlaceholderData;
-  // Only the rows may show while the month's own data loads; the invoices, balances and summary never do.
-  const monthData = monthQuery.isPlaceholderData ? undefined : monthQuery.data;
-
-  const archivedIds = useMemo(() => archivedOwnerIds(owners ?? []), [owners]);
-  const scope = useReadOnlyScope(owners, ownerFilter);
-  const { openModal } = useModalNavigation();
-
   const allOwnerIds = useMemo(
     () => (owners ?? []).map((owner) => owner.id),
     [owners],
@@ -296,6 +289,36 @@ function useTransactionsViewModel() {
     fetch: async () =>
       useCases.getFinancialAccountsUseCase.execute(allOwnerIds),
   });
+  // Spec 103: the currency the screen shows; the dropdown only exists with active accounts in more than one currency.
+  const screenCurrency = useScreenCurrency(
+    (accounts.data ?? []).filter((account) =>
+      summaryOwnerIds.includes(account.ownerId),
+    ),
+  );
+  const currency = screenCurrency.currency;
+  // Spec 080: the rows, invoices, balances, projections and summary of the month come from ONE request, keyed by the
+  // month and the scope (spec 075); another key keeps the previous data flagged as placeholder until its own arrives,
+  // and the edit form and the description suggestions read these cached months.
+  const monthQuery = useOwnerScopedQuery<MonthData>({
+    cacheKey: monthCacheKey(monthKey, summaryOwnerIds, [], currency),
+    fetch: async (loadedOwners) =>
+      fetchMonth(
+        loadedOwners.map((owner) => owner.id),
+        monthKey,
+        summaryOwnerIds,
+        currency,
+      ),
+    keepPreviousData: true,
+  });
+  // The month's own data is not here yet (first load, or another month showing the previous one meanwhile).
+  const isListPending = !monthQuery.data || !!monthQuery.isPlaceholderData;
+  // Only the rows may show while the month's own data loads; the invoices, balances and summary never do.
+  const monthData = monthQuery.isPlaceholderData ? undefined : monthQuery.data;
+
+  const archivedIds = useMemo(() => archivedOwnerIds(owners ?? []), [owners]);
+  const scope = useReadOnlyScope(owners, ownerFilter);
+  const { openModal } = useModalNavigation();
+
   // Months after the current one also show what the series will create (the month response carries them).
   const currentMonthKey = toMonthKey(new Date());
   const isFutureMonth = monthKey > currentMonthKey;
@@ -312,7 +335,7 @@ function useTransactionsViewModel() {
     (accounts.data ?? []).filter((account) =>
       summaryOwnerIds.includes(account.ownerId),
     ),
-    { currency: DEFAULT_CURRENCY },
+    { currency },
   );
   // Spec 094.2: the cards say who pays an invoice that is still open. Same key and fetch as the filter options.
   const cards = useQuery<CreditCardDTO[]>({
@@ -325,7 +348,7 @@ function useTransactionsViewModel() {
     (account) =>
       summaryOwnerIds.includes(account.ownerId) &&
       account.status === "ACTIVE" &&
-      account.currency === DEFAULT_CURRENCY,
+      account.currency === currency,
   ).length;
   const cardsReady = !!cards.data || !!cards.error;
   const summaryColumns = useMemo<MonthSummaryColumnData[] | undefined>(() => {
@@ -381,8 +404,13 @@ function useTransactionsViewModel() {
   ]);
   const range = useMemo(() => effectiveRange(applied, month), [applied, month]);
   const queryFilter = useMemo<TransactionQueryFilter>(
-    () => ({ ...toQueryFilter(applied), from: range.from, to: range.to }),
-    [applied, range],
+    () => ({
+      ...toQueryFilter(applied),
+      currency,
+      from: range.from,
+      to: range.to,
+    }),
+    [applied, range, currency],
   );
   const filterKey = JSON.stringify(queryFilter);
   const showAccountRows = wantsAccountRows(applied);
@@ -403,7 +431,9 @@ function useTransactionsViewModel() {
       filterKey,
       ...allOwnerIds,
     ],
-    enabled: !!owners && filtering && showCards,
+    // Cards bill in BRL only (spec 103): no invoices in another currency.
+    enabled:
+      !!owners && filtering && showCards && currency === DEFAULT_CURRENCY,
     fetch: async () =>
       (
         await useCases.getFinancialCardInvoicesForMonthUseCase.execute({
@@ -652,14 +682,16 @@ function useTransactionsViewModel() {
 
   // Spec 087: once the month is settled and the app idle, the previous and next month are fetched into the cache.
   usePrefetchAdjacentMonths({
-    cacheKey: (key) => monthCacheKey(key, summaryOwnerIds, allOwnerIds),
+    cacheKey: (key) =>
+      monthCacheKey(key, summaryOwnerIds, allOwnerIds, currency),
     enabled:
       isFocused &&
       !!monthData &&
       !monthQuery.isFetching &&
       !filtering &&
       !hasPendingChanges(pendingChanges),
-    fetch: async (key) => fetchMonth(allOwnerIds, key, summaryOwnerIds),
+    fetch: async (key) =>
+      fetchMonth(allOwnerIds, key, summaryOwnerIds, currency),
     monthKeys: [
       toMonthKey(shiftMonth(month, -1)),
       toMonthKey(shiftMonth(month, 1)),
@@ -736,6 +768,9 @@ function useTransactionsViewModel() {
     allOwnerIds,
     archivedOwnerIds: archivedIds,
     balances: balanceViews ?? new Map<string, DayBalanceView>(),
+    currency,
+    currencyOptions: screenCurrency.options,
+    currencyVisible: screenCurrency.visible,
     entries,
     errorMessage: monthQuery.error?.message,
     expandedDayKey,
@@ -780,6 +815,8 @@ function useTransactionsViewModel() {
       setTypeFilter("ALL");
       filterStore.clearAll();
     },
+    onCurrencyChange: (value: string) =>
+      screenCurrency.setCurrency(value as CurrencyCode),
     onDayToggle: (dateKey: string) =>
       setExpandedDayKey((current) =>
         current === dateKey ? undefined : dateKey,

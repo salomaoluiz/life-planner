@@ -195,3 +195,26 @@ describe("cards (spec 029)", () => {
     expect(model.hasCards("nobody")).toBe(false);
   });
 });
+
+it("SHOULD name the currency of an account that is not in BRL (spec 103)", () => {
+  const usd = new AccountDTO({
+    balance: 0,
+    currency: "USD",
+    icon: "bank",
+    id: "usd",
+    name: "Abroad",
+    owner: "USER",
+    ownerId: "user-id",
+    status: "ACTIVE",
+  });
+  const withUsd = new NewTransactionUIModel({
+    accounts: [account("a", "Alpha", "user-id"), usd],
+    categories,
+    owners,
+  });
+
+  expect(withUsd.accountOptions("user-id")).toEqual([
+    { label: "Abroad · USD", value: "usd" },
+    { label: "Alpha", value: "a" },
+  ]);
+});

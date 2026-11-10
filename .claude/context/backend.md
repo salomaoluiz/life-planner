@@ -78,7 +78,7 @@ Upcoming items (spec 062, additive): `GET /v1/finance/upcoming?ownerId=…&today
 
 ## Month endpoint (spec 080, backend 3.1.0)
 
-`GET /v1/finance/month?ownerId=&month=YYYY-MM&today=` returns `{ month, rows: { items, nextCursor }, lookups, invoices, dailyBalances, projections, summary }` (lean rows of spec 079; the invoices, balances and projections have the shape of their separate endpoints; `summary` holds `income/expense/toPay/toReceive` without projections plus `projectedIncome/projectedExpense`). The transactions screen reads it through `TransactionDatasource.getFinanceMonth` (it follows `nextCursor` through `GET /transactions`) → `getFinancialMonthUseCase`. The unfiltered month only; the filtered period views (spec 045), Home and the forms keep the separate endpoints.
+`GET /v1/finance/month?ownerId=&month=YYYY-MM&today=` returns `{ month, rows: { items, nextCursor }, lookups, invoices, dailyBalances, projections, summary }` (lean rows of spec 079; the invoices, balances and projections have the shape of their separate endpoints; `summary` holds `income/expense/toPay/toReceive` without projections plus `projectedIncome/projectedExpense`). The transactions screen reads it through `TransactionDatasource.getFinanceMonth` (it follows `nextCursor` through `GET /transactions`) → `getFinancialMonthUseCase`. Spec 103: `currency` (`BRL|USD|EUR`, default BRL) narrows the month, `GET /transactions` and `GET /accounts/daily-balances` to one currency (`summary.currency` is the one asked); the app sends it from the screen currency, and `hasCategoryTransactions` asks once per currency. The unfiltered month only; the filtered period views (spec 045), Home and the forms keep the separate endpoints.
 
 ## Projected card purchases (spec 096)
 

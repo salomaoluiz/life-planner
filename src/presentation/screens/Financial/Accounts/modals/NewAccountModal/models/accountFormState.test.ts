@@ -13,6 +13,7 @@ import {
   toUpdateParams,
   validate,
   withArchived,
+  withCurrency,
   withIcon,
   withType,
 } from "./accountFormState";
@@ -24,6 +25,7 @@ const user = new OwnerDTO({
 });
 const base: AccountFormState = {
   amountCents: 152075,
+  currency: "BRL",
   icon: "bank",
   iconTouched: true,
   isArchived: false,
@@ -37,6 +39,7 @@ const base: AccountFormState = {
 it("SHOULD start with the bank icon, zero positive balance, active", () => {
   expect(createInitialState({ ownerId: "user-id" })).toEqual({
     amountCents: 0,
+    currency: "BRL",
     icon: "bank",
     iconTouched: false,
     isArchived: false,
@@ -61,6 +64,7 @@ it("SHOULD split a negative decimal balance into amount and sign", () => {
 
   expect(stateFromDto(dto)).toEqual({
     amountCents: 1230,
+    currency: "BRL",
     icon: "wallet",
     iconTouched: true,
     isArchived: true,
@@ -104,6 +108,7 @@ it("SHOULD build create params as an ACTIVE account with a decimal balance", () 
     toCreateParams({ ...base, isNegative: true, name: " Checking " }, user),
   ).toEqual({
     balance: -1520.75,
+    currency: "BRL",
     icon: "bank",
     name: "Checking",
     owner: "USER",
@@ -276,4 +281,26 @@ describe("account type (spec 101)", () => {
     expect(isSameState(base, { ...base, type: AccountType.CASH })).toBe(false);
     expect(isSameState(base, { ...base, iconTouched: false })).toBe(true);
   });
+});
+
+it("SHOULD send the chosen currency on create AND never on update (spec 103)", () => {
+  const usd = withCurrency(base, "USD");
+
+  expect(toCreateParams(usd, user).currency).toBe("USD");
+  expect(isSameState(base, usd)).toBe(false);
+  expect(toUpdateParams("a1", usd, base)).toEqual({ id: "a1" });
+  expect(
+    stateFromDto(
+      new AccountDTO({
+        balance: 0,
+        currency: "EUR",
+        icon: "bank",
+        id: "a1",
+        name: "Euro",
+        owner: "USER",
+        ownerId: "user-id",
+        status: "ACTIVE",
+      }),
+    ).currency,
+  ).toBe("EUR");
 });

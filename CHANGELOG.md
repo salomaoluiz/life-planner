@@ -3,6 +3,14 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.17.0] - 2026-11-10
+
+### Added
+
+- Create accounts in BRL, USD or EUR: the new currency field of the account form is chosen once and can't change afterwards (spec 103).
+- The account list total is now "Total in BRL"; accounts in other currencies appear apart under "Other currencies" with one subtotal per currency (spec 103).
+- Transactions and Home get a currency dropdown, shown only when you have active accounts in more than one currency, so a month, daily balance or lowest balance is never summed across currencies (spec 103).
+
 ## [1.16.0] - 2026-11-09
 
 ### Added

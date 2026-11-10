@@ -1,3 +1,5 @@
+import { CurrencyCode } from "./Currency";
+
 // A period of the transactions list, `YYYY-MM-DD`, both inclusive. Account rows belong to it by their date and card
 // purchases by the list date of their invoice (what the month on screen shows).
 export interface TransactionDateRange {
@@ -10,6 +12,8 @@ export interface TransactionQueryFilter {
   accountIds?: string[];
   categoryIds?: string[];
   creditCardIds?: string[];
+  // Spec 103: only the rows in this currency (the transactions list); the API default (BRL) when omitted.
+  currency?: CurrencyCode;
   // `YYYY-MM-DD`, both inclusive and always together.
   from?: string;
   // Spec 098: only the rows of transfers (the transactions list).
@@ -23,6 +27,8 @@ export interface TransactionQueryFilter {
 // Spec 077: narrows a period read. `creditCardId`: only that card's purchases (one source, one request).
 export interface TransactionReadOptions {
   creditCardId?: string;
+  // Spec 103: only the rows in this currency; the API default (BRL) when omitted.
+  currency?: CurrencyCode;
 }
 
 // Spec 078: the longest period the API accepts (2 years) ending on `today` (`YYYY-MM-DD`): what a search without a

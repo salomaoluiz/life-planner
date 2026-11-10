@@ -3,7 +3,10 @@ import { StyleSheet, View } from "react-native";
 import { AmountText, Button, Card, Divider, Text } from "@components";
 import Skeleton from "@components/Skeleton";
 import { useKitTheme } from "@components/utils/useKitTheme";
-import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
+import {
+  CurrencyCode,
+  DEFAULT_CURRENCY,
+} from "@domain/entities/financial/Currency";
 import UpdatingTotal from "@screens/Financial/Transactions/components/UpdatingTotal";
 
 import FavoriteTable, {
@@ -16,6 +19,8 @@ interface Props {
   balanceLabel: string;
   // Spec 094.2: the favorite | total table; without it (or empty) the card is the single-figure one.
   columns?: SummaryTableColumn[];
+  // Spec 103: the currency of every figure (BRL when omitted).
+  currency?: CurrencyCode;
   errorMessage: string;
   expenseCents: number;
   expensesLabel: string;
@@ -96,6 +101,7 @@ function MonthSummary(props: Props) {
         </View>
         <FavoriteTable
           columns={props.columns}
+          currency={props.currency}
           labels={props.tableLabels}
           rowA11yLabel={props.rowA11yLabel}
           testID={props.tableTestID}
@@ -113,7 +119,7 @@ function MonthSummary(props: Props) {
         <Text.Overline tone={"secondary"} value={props.balanceLabel} />
         <UpdatingTotal updating={props.updating}>
           <AmountText
-            currency={DEFAULT_CURRENCY}
+            currency={props.currency ?? DEFAULT_CURRENCY}
             size={"heading"}
             type={negative ? "EXPENSE" : undefined}
             value={Math.abs(props.balanceCents)}
@@ -131,7 +137,7 @@ function MonthSummary(props: Props) {
           <Text.Overline tone={"secondary"} value={props.incomesLabel} />
           <UpdatingTotal updating={props.updating}>
             <AmountText
-              currency={DEFAULT_CURRENCY}
+              currency={props.currency ?? DEFAULT_CURRENCY}
               testID={props.incomeTestID}
               tone={"income"}
               value={props.incomeCents}
@@ -141,7 +147,7 @@ function MonthSummary(props: Props) {
             <View style={styles.pending}>
               <Text.Caption tone={"secondary"} value={props.toReceiveLabel} />
               <AmountText
-                currency={DEFAULT_CURRENCY}
+                currency={props.currency ?? DEFAULT_CURRENCY}
                 size={"caption"}
                 testID={props.toReceiveTestID}
                 tone={"income"}
@@ -155,7 +161,7 @@ function MonthSummary(props: Props) {
           <Text.Overline tone={"secondary"} value={props.expensesLabel} />
           <UpdatingTotal updating={props.updating}>
             <AmountText
-              currency={DEFAULT_CURRENCY}
+              currency={props.currency ?? DEFAULT_CURRENCY}
               testID={props.expenseTestID}
               tone={"expense"}
               value={props.expenseCents}
@@ -165,7 +171,7 @@ function MonthSummary(props: Props) {
             <View style={styles.pending}>
               <Text.Caption tone={"secondary"} value={props.toPayLabel} />
               <AmountText
-                currency={DEFAULT_CURRENCY}
+                currency={props.currency ?? DEFAULT_CURRENCY}
                 size={"caption"}
                 testID={props.toPayTestID}
                 tone={"expense"}
@@ -184,7 +190,7 @@ function MonthSummary(props: Props) {
             <View style={styles.pending}>
               {props.projectedIncomeCents ? (
                 <AmountText
-                  currency={DEFAULT_CURRENCY}
+                  currency={props.currency ?? DEFAULT_CURRENCY}
                   size={"caption"}
                   tone={"income"}
                   value={props.projectedIncomeCents}
@@ -192,7 +198,7 @@ function MonthSummary(props: Props) {
               ) : null}
               {props.projectedExpenseCents ? (
                 <AmountText
-                  currency={DEFAULT_CURRENCY}
+                  currency={props.currency ?? DEFAULT_CURRENCY}
                   size={"caption"}
                   tone={"expense"}
                   value={props.projectedExpenseCents}

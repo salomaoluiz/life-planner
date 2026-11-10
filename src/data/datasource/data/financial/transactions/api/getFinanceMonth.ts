@@ -22,6 +22,9 @@ async function getFinanceMonth(params: Params): Response {
 
     params.ownerIds.forEach((id) => owners.append("ownerId", id));
     owners.append("today", todayCalendarDate());
+    if (params.currency) {
+      owners.append("currency", params.currency);
+    }
 
     const data = await api.get<Record<string, unknown>>(
       `/v1/finance/month?${owners.toString()}&month=${params.month}`,

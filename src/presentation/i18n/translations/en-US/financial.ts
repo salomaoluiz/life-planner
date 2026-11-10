@@ -3,6 +3,15 @@ const financial = {
     active: "Active",
     archived: "Archived ({{count}})",
     archivedLabel: "Archived",
+    currency: "Currency",
+    currencyHintCreate:
+      "Choose carefully: the currency can't change after the account is created.",
+    currencyHintEdit: "The currency can't change after the account is created.",
+    currencyOption: {
+      BRL: "BRL · Real",
+      EUR: "EUR · Euro",
+      USD: "USD · Dollar",
+    },
     delete: "Delete account",
     deleteAlertMsg: "Are you sure you want to delete this account?",
     deleteAllConfirm: "Delete from all",
@@ -55,8 +64,10 @@ const financial = {
     name: "Name",
     nameRequired: "Name is required",
     new: "New account",
+    otherCurrencies: "Other currencies",
+    otherCurrenciesHint: "Not in the BRL total.",
     projectedBalance: "End of month: {{value}}",
-    total: "Total in accounts",
+    totalInBrl: "Total in BRL",
     totalProjected: "End of month",
     types: {
       BROKERAGE: "Brokerage",
@@ -1125,6 +1136,7 @@ const financial = {
       valueLabelPay: "Amount paid",
       valueLabelReceive: "Amount received",
     },
+    currency: "Currency",
     dayBalance: {
       a11y: "Balance at the end of {{day}}: {{value}}",
       a11yFavorite: "Balance of {{name}} at the end of {{day}}: {{value}}",

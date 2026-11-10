@@ -1,0 +1,96 @@
+url: ${E2E_WEB_URL}
+name: financial/accounts/account-currency
+tags:
+  - financial
+  - spec-103
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Reais
+      KEY: BRL_NAME
+- runFlow:
+    file: ../../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: ${output.BRL_NAME}
+      BALANCE_CENTS: "100000"
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Dollars
+      KEY: USD_NAME
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../../subflows/financial/open-accounts.yaml
+- extendedWaitUntil:
+    visible:
+      id: "accounts-total"
+      text: ".*1[.,]000[.,]00.*"
+    timeout: 20000
+- assertNotVisible:
+    id: "financial.accounts.otherCurrencies"
+# create a USD brokerage account
+- tapOn:
+    id: "financial.accounts.add-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.account-form.name-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.accounts.modal.type.BROKERAGE"
+- tapOn:
+    id: "financial.account-form.name-input"
+- inputText: ${output.USD_NAME}
+- tapOn:
+    id: "financial.accounts.modal.currency"
+- tapOn:
+    id: "financial.accounts.modal.currency-option-USD"
+- tapOn:
+    id: "financial.account-form.balance-input"
+- eraseText
+- inputText: "125000"
+- tapOn:
+    id: "financial.account-form.save-button"
+# it lands under "Other currencies" with a US$ subtotal, and the BRL total does not change
+- extendedWaitUntil:
+    visible:
+      id: "financial.accounts.otherCurrencies"
+    timeout: 20000
+- assertVisible:
+    id: "financial.accounts.otherCurrencies.subtotal.USD"
+    text: ".*1[.,]250[.,]00.*"
+- assertVisible:
+    id: "accounts-total"
+    text: ".*1[.,]000[.,]00.*"
+# the Transactions screen offers the currency and switches to it
+- tapOn:
+    id: "navigation-rail-financial-transactions"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.currency"
+    timeout: 20000
+- tapOn:
+    id: "financial.transactions.currency"
+- tapOn:
+    id: "financial.transactions.currency-option-USD"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.currency-value"
+      text: ".*USD.*"
+    timeout: 20000
+# the month summary is in US$ (nothing recorded yet)
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.summary-income"
+      text: ".*\\$.*0[.,]00.*"
+    timeout: 20000

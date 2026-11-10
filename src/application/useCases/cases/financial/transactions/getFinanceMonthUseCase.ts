@@ -4,6 +4,7 @@ import ProjectedOccurrenceDTO from "@application/dto/financial/ProjectedOccurren
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import { DefaultError } from "@domain/entities/errors";
+import { CurrencyCode } from "@domain/entities/financial/Currency";
 import { FinanceMonthSummaryEntity } from "@domain/entities/financial/FinanceMonthEntity";
 import Repositories from "@domain/repositories";
 
@@ -18,6 +19,7 @@ export interface FinanceMonthDTO {
 }
 
 export interface GetFinanceMonthUseCaseParams {
+  currency?: CurrencyCode;
   // `YYYY-MM`
   month: string;
   ownerIds: string[];

@@ -14,13 +14,13 @@ import {
   Icon,
   ReadOnlyNotice,
   SegmentedControl,
+  SelectField,
   Text,
   Toast,
 } from "@components";
 import { formatAmount } from "@components/AmountText/formatAmount";
 import Skeleton from "@components/Skeleton";
 import { useKitTheme } from "@components/utils/useKitTheme";
-import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import useStableCallback from "@presentation/hooks/useStableCallback";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
@@ -184,6 +184,7 @@ function Wide({ vm }: AdaptiveViewProps<TransactionsScreenVM>) {
         <DayBalanceLine
           accountId={item.accountId}
           balanceCents={item.balanceCents}
+          currency={vm.currency}
           favorite={item.favorite}
           icon={item.icon}
           isCards={item.isCards}
@@ -203,7 +204,7 @@ function Wide({ vm }: AdaptiveViewProps<TransactionsScreenVM>) {
           title={dayTitle(item)}
           trailing={
             <AmountText
-              currency={DEFAULT_CURRENCY}
+              currency={vm.currency}
               size={"body"}
               type={net.type}
               value={net.value}
@@ -238,7 +239,7 @@ function Wide({ vm }: AdaptiveViewProps<TransactionsScreenVM>) {
             value: formatAmount(
               Math.abs(shownCents),
               localeTag,
-              DEFAULT_CURRENCY,
+              vm.currency,
               balanceNegative ? "EXPENSE" : undefined,
             ),
           },
@@ -247,7 +248,7 @@ function Wide({ vm }: AdaptiveViewProps<TransactionsScreenVM>) {
         meta={
           <View style={styles.net}>
             <AmountText
-              currency={DEFAULT_CURRENCY}
+              currency={vm.currency}
               size={"caption"}
               type={net.type}
               value={net.value}
@@ -272,6 +273,7 @@ function Wide({ vm }: AdaptiveViewProps<TransactionsScreenVM>) {
                 <DayBalanceLine
                   accountId={account.accountId}
                   balanceCents={account.balanceCents}
+                  currency={vm.currency}
                   favorite={account.accountId === vm.favorite?.id}
                   icon={account.icon}
                   isCards={false}
@@ -284,6 +286,7 @@ function Wide({ vm }: AdaptiveViewProps<TransactionsScreenVM>) {
               {day.cardsDueCents !== 0 ? (
                 <DayBalanceLine
                   balanceCents={day.cardsDueCents}
+                  currency={vm.currency}
                   icon={"credit-card-outline"}
                   isCards
                   name={""}
@@ -297,7 +300,7 @@ function Wide({ vm }: AdaptiveViewProps<TransactionsScreenVM>) {
                     value={t("financial.transactions.dayBalance.total")}
                   />
                   <AmountText
-                    currency={DEFAULT_CURRENCY}
+                    currency={vm.currency}
                     size={"body"}
                     type={day.totalCents < 0 ? "EXPENSE" : undefined}
                     value={Math.abs(day.totalCents)}
@@ -346,7 +349,7 @@ function Wide({ vm }: AdaptiveViewProps<TransactionsScreenVM>) {
                 )}
               </View>
               <AmountText
-                currency={DEFAULT_CURRENCY}
+                currency={vm.currency}
                 size={"body"}
                 type={balanceNegative ? "EXPENSE" : undefined}
                 value={Math.abs(shownCents)}
@@ -425,6 +428,20 @@ function Wide({ vm }: AdaptiveViewProps<TransactionsScreenVM>) {
         />
       )}
       {wide ? null : scopeChips}
+      {vm.currencyVisible ? (
+        <SelectField
+          closeLabel={t("common.actions.close")}
+          label={t("financial.transactions.currency")}
+          onChange={vm.onCurrencyChange}
+          options={vm.currencyOptions.map((code) => ({
+            label: t(`financial.accounts.currencyOption.${code}`),
+            value: code,
+          }))}
+          sheetTitle={t("financial.transactions.currency")}
+          testID={transactionsTestIds.currency}
+          value={vm.currency}
+        />
+      ) : null}
       <FilterToolbar
         chips={filterChips}
         clearAllLabel={t("financial.transactions.filters.clearAll")}
@@ -452,6 +469,7 @@ function Wide({ vm }: AdaptiveViewProps<TransactionsScreenVM>) {
           caption={`${t("financial.transactions.filters.count", {
             count: vm.filteredSummary.count,
           })} · ${t("financial.transactions.filters.resultOf")}`}
+          currency={vm.currency}
           expensesLabel={t("financial.common.expenses")}
           incomesLabel={t("financial.common.incomes")}
           resultLabel={t("financial.transactions.filters.result")}
@@ -471,6 +489,7 @@ function Wide({ vm }: AdaptiveViewProps<TransactionsScreenVM>) {
                 ? (vm.favorite?.name ?? "")
                 : t("financial.transactions.summary.total"),
           }))}
+          currency={vm.currency}
           errorMessage={t("common.errors.generic")}
           expenseCents={vm.summary?.expenseCents ?? 0}
           expensesLabel={t("financial.common.expenses")}

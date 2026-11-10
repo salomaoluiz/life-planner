@@ -15,6 +15,9 @@ async function getDailyBalances(params: Params): Response {
   });
 
   params.ownerIds.forEach((id) => query.append("ownerId", id));
+  if (params.currency) {
+    query.append("currency", params.currency);
+  }
 
   try {
     const data = await api.get<Record<string, unknown>>(

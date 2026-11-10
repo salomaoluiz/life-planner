@@ -30,6 +30,9 @@ function appendFilterParams(
       }
     },
   );
+  if (allowed.has("currency") && filter.currency) {
+    query.append("currency", filter.currency);
+  }
   if (allowed.has("from") && filter.from && filter.to) {
     query.append("from", filter.from);
     query.append("to", filter.to);

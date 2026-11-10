@@ -9,6 +9,7 @@ const home = {
       toPay: "a pagar",
       toReceive: "a receber",
     },
+    currency: "Moeda",
     expenses: "Despesas do mês",
     income: "Receitas do mês",
     lowest: {

@@ -10,26 +10,31 @@ import {
   spies,
 } from "./mocks/hasCategoryTransactions.mocks";
 
-it("SHOULD ask for one row of each source over the last two years, filtered by the category", async () => {
+it("SHOULD ask for one row of the cards AND of each currency over the last two years, filtered by the category", async () => {
   spies.get.mockResolvedValue(page([]));
 
   await setup();
 
   const { from, to } = lastTwoYearsRange(todayCalendarDate());
-  const query = `ownerId=${mocks.ownerIds[0]}&ownerId=${mocks.ownerIds[1]}&today=${todayCalendarDate()}&categoryId=${mocks.categoryId}&from=${from}&to=${to}&limit=1`;
+  const query = `ownerId=${mocks.ownerIds[0]}&ownerId=${mocks.ownerIds[1]}&today=${todayCalendarDate()}&categoryId=${mocks.categoryId}&from=${from}&to=${to}`;
 
-  expect(spies.get).toHaveBeenCalledTimes(2);
-  expect(spies.get).toHaveBeenCalledWith(`/v1/finance/transactions?${query}`);
+  expect(spies.get).toHaveBeenCalledTimes(4);
   expect(spies.get).toHaveBeenCalledWith(
-    `/v1/finance/transactions?${query.replace("&limit", "&source=CARD&limit")}`,
+    `/v1/finance/transactions?${query}&source=CARD&limit=1`,
+  );
+  ["BRL", "USD", "EUR"].forEach((currency) =>
+    expect(spies.get).toHaveBeenCalledWith(
+      `/v1/finance/transactions?${query}&currency=${currency}&limit=1`,
+    ),
   );
 });
 
 it.each([
-  ["an account row", [page([{ id: "a" }]), page([])]],
-  ["a card purchase", [page([]), page([{ id: "c" }])]],
+  ["an account row", [page([]), page([{ id: "a" }]), page([]), page([])]],
+  ["a USD account row", [page([]), page([]), page([{ id: "u" }]), page([])]],
+  ["a card purchase", [page([{ id: "c" }]), page([]), page([]), page([])]],
 ])("SHOULD be true WHEN there is %s", async (_label, pages) => {
-  spies.get.mockResolvedValueOnce(pages[0]).mockResolvedValueOnce(pages[1]);
+  pages.forEach((item) => spies.get.mockResolvedValueOnce(item));
 
   expect(await setup()).toBe(true);
 });

@@ -9,6 +9,7 @@ export type Params = Parameters<FinancialAccountRepository["createAccount"]>[0];
 async function createAccount(params: Params, datasources: Datasources) {
   const account = await datasources.financialAccountDatasource.createAccount({
     balance: params.balance,
+    currency: params.currency,
     icon: params.icon,
     isFavorite: params.isFavorite,
     name: params.name,

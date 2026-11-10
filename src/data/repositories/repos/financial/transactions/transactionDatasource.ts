@@ -3,6 +3,7 @@ import TransactionModel, {
   OwnerType,
   TransactionType,
 } from "@data/models/financial/TransactionModel";
+import { CurrencyCode } from "@domain/entities/financial/Currency";
 import { InstallmentScope } from "@domain/entities/financial/InstallmentPlanEntity";
 import {
   ExportFileEntity,
@@ -87,6 +88,8 @@ interface GetFilteredTransactionsDatasourceParams {
 }
 
 interface GetFinanceMonthDatasourceParams {
+  // Spec 103: only the data in this currency; the API default (BRL) when omitted.
+  currency?: CurrencyCode;
   // `YYYY-MM`
   month: string;
   ownerIds: string[];
