@@ -1,4 +1,5 @@
 import { accountRow, largeAccountRows, overview } from "./fixtures/finance";
+import { investmentAsset, investmentDetail } from "./fixtures/investment";
 import { me } from "./fixtures/user";
 import type { Method } from "./networkHarness";
 
@@ -17,6 +18,13 @@ function respond(method: Method, path: string): unknown {
   }
   if (path === "/v1/user/me") {
     return me;
+  }
+  // Investments (spec 102): the detail of one asset, else the list.
+  if (/^\/v1\/investments\/assets\/[^/?]+(\?|$)/.test(path)) {
+    return { item: investmentDetail };
+  }
+  if (path.startsWith("/v1/investments/assets")) {
+    return { items: [investmentAsset] };
   }
   // One transaction by id (spec 077).
   if (/^\/v1\/finance\/transactions\/[^/?]+(\?|$)/.test(path)) {

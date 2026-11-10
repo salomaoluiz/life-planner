@@ -1,0 +1,47 @@
+{
+  "investment.asset.mount.cold": {
+    "maxDepth": 1,
+    "maxDuplicates": 0,
+    "maxRequests": 1,
+    "modal": "investment_asset"
+  },
+  "investment.asset.render.mount": {
+    "maxCommits": 2
+  },
+  "investment.detail.mount.cold": {
+    "maxDepth": 2,
+    "maxDuplicates": 0,
+    "maxRequests": 3,
+    "route": "app/(app)/(tabs)/investments/[id].tsx"
+  },
+  "investment.detail.render.mount": {
+    "maxCommits": 3
+  },
+  "investment.list.mount.cold": {
+    "maxDepth": 2,
+    "maxDuplicates": 0,
+    "maxRequests": 3,
+    "route": "app/(app)/(tabs)/investments/index.tsx"
+  },
+  "investment.list.render.mount": {
+    "maxCommits": 3
+  },
+  "investment.operation.mount.cold": {
+    "maxDepth": 2,
+    "maxDuplicates": 0,
+    "maxRequests": 3,
+    "modal": "investment_operation"
+  },
+  "investment.operation.render.mount": {
+    "maxCommits": 3
+  },
+  "investment.valuation.mount.cold": {
+    "maxDepth": 1,
+    "maxDuplicates": 0,
+    "maxRequests": 1,
+    "modal": "investment_valuation"
+  },
+  "investment.valuation.render.mount": {
+    "maxCommits": 2
+  }
+}
