@@ -1,6 +1,6 @@
 # Life Planner — Claude Context Router
 
-Expo 52 / React Native 0.76 / TypeScript (strict) app for families: finances, stock (home storage), family members, configs.
+Expo 52 / React Native 0.76 / TypeScript (strict) app for families: finances, investments, stock (home storage), family members, configs.
 Backend: Supabase is the **legacy** backend, being migrated to the new local NestJS API (`../life-planner-back`) — don't add new Supabase-only features without asking; see `.claude/context/backend.md`. Server state: React Query (wrapped). UI: Grafite component kit (`@components`) over React Native Paper. i18n: en-US + pt-BR.
 Clean Architecture: `app/` (expo-router routes) → `src/presentation` → `src/application` → `src/domain` ← `src/data` (← `src/infrastructure`).
 
@@ -10,25 +10,25 @@ Clean Architecture: `app/` (expo-router routes) → `src/presentation` → `src/
 
 ## Context map (read on demand)
 
-| When the task involves…                                                          | Read                                                                      |
-| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Layer boundaries, DI chain, path aliases, where a file belongs                   | `.claude/context/architecture.md`                                         |
-| Entities, enums, domain errors, repository interfaces, cache keys                | `.claude/context/domain.md`                                               |
-| Supabase datasources, models (`fromJSON`/`toJSON`), repository impls, caching    | `.claude/context/data.md`                                                 |
-| Use cases, DTOs, registering use cases, `uniqueName`                             | `.claude/context/application.md`                                          |
-| Screens, containers, modals: hook-based MVVM (View, `use*ViewModel`, `*UIModel`) | `.claude/context/presentation.md`                                         |
-| Routes, tabs, drawer, modal routes (`app/`)                                      | `.claude/context/routing.md`                                              |
-| Shared UI components (`@components`) and their props                             | `.claude/context/components.md`                                           |
-| Colors, sizes, spacing, `useStyles` pattern, dark mode                           | `.claude/context/theme.md`                                                |
-| Any user-facing text                                                             | `.claude/context/i18n.md`                                                 |
-| Writing/updating tests and `mocks/` files                                        | `.claude/context/testing.md`                                              |
-| New table/column, RLS policies, triggers                                         | `.claude/context/database.md`                                             |
-| Lint rules, import order, naming, commit flow                                    | `.claude/context/conventions.md`                                          |
-| What already exists in a module (file inventory per layer)                       | `docs/ai/modules/<auth\|family\|familyMember\|financial\|home\|stock>.md` |
-| Backend API (`../life-planner-back`): endpoints, auth, contract, Supabase → API  | `.claude/context/backend.md`                                              |
-| E2E flows, testIDs, running the suite                                            | `.claude/context/e2e.md`                                                  |
-| Performance budgets, `yarn perf`, PR performance block, `perf-report/summary.md` | `.claude/context/performance.md`                                          |
-| Building a whole new feature / CRUD slice end-to-end                             | skill `new-feature-slice` (`.claude/skills/new-feature-slice/`)           |
+| When the task involves…                                                          | Read                                                                                  |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Layer boundaries, DI chain, path aliases, where a file belongs                   | `.claude/context/architecture.md`                                                     |
+| Entities, enums, domain errors, repository interfaces, cache keys                | `.claude/context/domain.md`                                                           |
+| Supabase datasources, models (`fromJSON`/`toJSON`), repository impls, caching    | `.claude/context/data.md`                                                             |
+| Use cases, DTOs, registering use cases, `uniqueName`                             | `.claude/context/application.md`                                                      |
+| Screens, containers, modals: hook-based MVVM (View, `use*ViewModel`, `*UIModel`) | `.claude/context/presentation.md`                                                     |
+| Routes, tabs, drawer, modal routes (`app/`)                                      | `.claude/context/routing.md`                                                          |
+| Shared UI components (`@components`) and their props                             | `.claude/context/components.md`                                                       |
+| Colors, sizes, spacing, `useStyles` pattern, dark mode                           | `.claude/context/theme.md`                                                            |
+| Any user-facing text                                                             | `.claude/context/i18n.md`                                                             |
+| Writing/updating tests and `mocks/` files                                        | `.claude/context/testing.md`                                                          |
+| New table/column, RLS policies, triggers                                         | `.claude/context/database.md`                                                         |
+| Lint rules, import order, naming, commit flow                                    | `.claude/context/conventions.md`                                                      |
+| What already exists in a module (file inventory per layer)                       | `docs/ai/modules/<auth\|family\|familyMember\|financial\|home\|investment\|stock>.md` |
+| Backend API (`../life-planner-back`): endpoints, auth, contract, Supabase → API  | `.claude/context/backend.md`                                                          |
+| E2E flows, testIDs, running the suite                                            | `.claude/context/e2e.md`                                                              |
+| Performance budgets, `yarn perf`, PR performance block, `perf-report/summary.md` | `.claude/context/performance.md`                                                      |
+| Building a whole new feature / CRUD slice end-to-end                             | skill `new-feature-slice` (`.claude/skills/new-feature-slice/`)                       |
 
 Tip: for a single-layer change read just that layer file + `conventions.md`. Do not open the module inventory unless you need to locate existing files.
 Reference implementation for any new CRUD work: **financial accounts** (smallest complete, modern slice).
