@@ -9,6 +9,7 @@ import deleteInvestmentOperationUseCase from "./deleteInvestmentOperationUseCase
 import deleteInvestmentValuationUseCase from "./deleteInvestmentValuationUseCase";
 import getInvestmentAssetsUseCase from "./getInvestmentAssetsUseCase";
 import getInvestmentAssetUseCase from "./getInvestmentAssetUseCase";
+import getInvestmentOperationLinkUseCase from "./getInvestmentOperationLinkUseCase";
 import updateInvestmentAssetUseCase from "./updateInvestmentAssetUseCase";
 import updateInvestmentOperationUseCase from "./updateInvestmentOperationUseCase";
 import upsertInvestmentValuationUseCase from "./upsertInvestmentValuationUseCase";
@@ -53,6 +54,11 @@ const cases: [Factory, keyof Repositories["investmentRepository"], string][] = [
     getInvestmentAssetsUseCase,
     "getAssets",
     "investment.getInvestmentAssetsUseCase",
+  ],
+  [
+    getInvestmentOperationLinkUseCase,
+    "getOperationLink",
+    "investment.getInvestmentOperationLinkUseCase",
   ],
   [
     updateInvestmentAssetUseCase,

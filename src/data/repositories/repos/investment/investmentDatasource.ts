@@ -8,6 +8,7 @@ import {
   CreateInvestmentAssetParams,
   CreateInvestmentOperationParams,
   GetInvestmentAssetsParams,
+  InvestmentOperationLink,
   UpdateInvestmentAssetParams,
   UpdateInvestmentOperationParams,
   UpsertInvestmentValuationParams,
@@ -23,6 +24,9 @@ export interface InvestmentDatasource {
   deleteValuation(id: string): Promise<void>;
   getAsset(id: string): Promise<InvestmentAssetDetail>;
   getAssets(params: GetInvestmentAssetsParams): Promise<InvestmentAsset[]>;
+  getOperationLink(
+    transactionId: string,
+  ): Promise<InvestmentOperationLink | undefined>;
   updateAsset(params: UpdateInvestmentAssetParams): Promise<InvestmentAsset>;
   updateOperation(
     params: UpdateInvestmentOperationParams,

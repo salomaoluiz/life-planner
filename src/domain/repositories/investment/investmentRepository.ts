@@ -47,6 +47,11 @@ export interface InvestmentFeeParams {
   kind: InvestmentFeeKind;
 }
 
+export interface InvestmentOperationLink {
+  assetId: string;
+  operationId: string;
+}
+
 export type InvestmentRepository = {
   createAsset(params: CreateInvestmentAssetParams): Promise<InvestmentAsset>;
   createOperation(
@@ -57,6 +62,10 @@ export type InvestmentRepository = {
   deleteValuation(id: string): Promise<void>;
   getAsset(id: string): Promise<InvestmentAssetDetail>;
   getAssets(params: GetInvestmentAssetsParams): Promise<InvestmentAsset[]>;
+  // The operation behind a finance row of an investment category; undefined for any other row.
+  getOperationLink(
+    transactionId: string,
+  ): Promise<InvestmentOperationLink | undefined>;
   updateAsset(params: UpdateInvestmentAssetParams): Promise<InvestmentAsset>;
   updateOperation(
     params: UpdateInvestmentOperationParams,

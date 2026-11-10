@@ -120,6 +120,14 @@ class TransactionUIModel {
     return this.dto.type === "EXPENSE";
   }
 
+  // Spec 102: the row of an investment operation; it changes only through the operation.
+  get isInvestment() {
+    return (
+      this.dto.systemKey === "INVESTMENT_CONTRIBUTION" ||
+      this.dto.systemKey === "INVESTMENT_REDEMPTION"
+    );
+  }
+
   // Unpaid and already past: flagged in the list (spec 033 FR 7).
   get isOverdue() {
     return this.canPay && this.dateKey < todayKey();

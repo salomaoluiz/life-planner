@@ -134,6 +134,26 @@ async function getAssets(params: GetInvestmentAssetsParams) {
   }
 }
 
+// Spec 102 FR 22: `GET /finance/transactions/:id` carries `investment` for the rows of an operation.
+async function getOperationLink(transactionId: string) {
+  try {
+    const data = await api.get<{
+      investment?: { assetId: string; operationId: string };
+    }>(`/v1/finance/transactions/${transactionId}`);
+
+    return data.investment
+      ? {
+          assetId: data.investment.assetId,
+          operationId: data.investment.operationId,
+        }
+      : undefined;
+  } catch (error) {
+    return handleInvestmentApiError(error, {
+      datasource: "InvestmentDatasource - getOperationLink",
+    });
+  }
+}
+
 // "10,5" -> "10.5". A quantity or price must be a decimal above zero: FieldInvalid BEFORE any network call.
 function positiveDecimal(value: string, field: string): string {
   const parsed = parseDecimal(value);
@@ -225,6 +245,7 @@ const investmentApi: InvestmentDatasource = {
   deleteValuation,
   getAsset,
   getAssets,
+  getOperationLink,
   updateAsset,
   updateOperation,
   upsertValuation,

@@ -16,6 +16,8 @@ function investmentRepositoryImpl(
     deleteValuation: async (id) => investmentDatasource.deleteValuation(id),
     getAsset: async (id) => investmentDatasource.getAsset(id),
     getAssets: async (params) => investmentDatasource.getAssets(params),
+    getOperationLink: async (transactionId) =>
+      investmentDatasource.getOperationLink(transactionId),
     updateAsset: async (params) => investmentDatasource.updateAsset(params),
     updateOperation: async (params) =>
       investmentDatasource.updateOperation(params),

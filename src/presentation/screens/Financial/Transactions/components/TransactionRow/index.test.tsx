@@ -515,3 +515,73 @@ describe("transfer rows (spec 098)", () => {
     expect(onPress).toHaveBeenCalled();
   });
 });
+
+describe("investment rows (spec 102)", () => {
+  function investmentRow(
+    systemKey: "INVESTMENT_CONTRIBUTION" | "INVESTMENT_REDEMPTION",
+  ) {
+    return new TransactionUIModel(
+      makeTransactionDTO({
+        description: "ITSA4",
+        excludeFromTotals: true,
+        id: "inv-1",
+        systemKey,
+        type: systemKey === "INVESTMENT_CONTRIBUTION" ? "EXPENSE" : "INCOME",
+        value: "5106.50",
+      }),
+    );
+  }
+
+  it.each([
+    ["INVESTMENT_CONTRIBUTION", "investment.operation.BUY"],
+    ["INVESTMENT_REDEMPTION", "investment.operation.SELL"],
+  ] as const)(
+    "SHOULD title a %s row with the verb AND the asset, outside the totals",
+    (systemKey, verbKey) => {
+      render(
+        <TransactionRow item={investmentRow(systemKey)} onPress={jest.fn()} />,
+      );
+
+      expect(screen.getByText(`${verbKey} ITSA4`)).toBeOnTheScreen();
+      expect(
+        screen.getByTestId(transactionsTestIds.rowInvestmentOutside),
+      ).toBeOnTheScreen();
+      expect(
+        screen.getByTestId(transactionsTestIds.rowInvestment),
+      ).toBeOnTheScreen();
+    },
+  );
+
+  it("SHOULD open the operation instead of the transaction form", () => {
+    const onPress = jest.fn();
+    const onInvestmentPress = jest.fn();
+    const item = investmentRow("INVESTMENT_CONTRIBUTION");
+
+    render(
+      <TransactionRow
+        item={item}
+        onInvestmentPress={onInvestmentPress}
+        onPress={onPress}
+      />,
+    );
+    fireEvent.press(screen.getByTestId(transactionsTestIds.rowInvestment));
+
+    expect(onInvestmentPress).toHaveBeenCalledWith(item);
+    expect(onPress).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD fall back to the form WHEN no investment handler is given AND not offer to pay", () => {
+    const onPress = jest.fn();
+
+    render(
+      <TransactionRow
+        item={investmentRow("INVESTMENT_REDEMPTION")}
+        onPress={onPress}
+      />,
+    );
+    fireEvent.press(screen.getByTestId(transactionsTestIds.rowInvestment));
+
+    expect(onPress).toHaveBeenCalledWith("inv-1");
+    expect(screen.queryByTestId(transactionsTestIds.rowPay)).toBeNull();
+  });
+});

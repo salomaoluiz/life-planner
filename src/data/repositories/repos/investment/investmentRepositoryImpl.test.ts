@@ -18,6 +18,7 @@ it("SHOULD forward every method to the datasource and return its result", async 
     ["deleteValuation", ["v"]],
     ["getAsset", ["a"]],
     ["getAssets", [{ status: InvestmentAssetStatus.ACTIVE }]],
+    ["getOperationLink", ["tx"]],
     ["updateAsset", [{ id: "a" }]],
     ["updateOperation", [{ id: "o" }]],
     ["upsertValuation", [{ assetId: "a" }]],

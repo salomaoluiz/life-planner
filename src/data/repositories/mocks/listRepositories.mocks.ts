@@ -121,6 +121,7 @@ const repositoriesMocks: Repositories = {
     deleteValuation: jest.fn(),
     getAsset: jest.fn(),
     getAssets: jest.fn(),
+    getOperationLink: jest.fn(),
     updateAsset: jest.fn(),
     updateOperation: jest.fn(),
     upsertValuation: jest.fn(),

@@ -112,6 +112,7 @@ const datasourcesMocks: jest.MockedObjectDeep<Datasources> = {
     deleteValuation: jest.fn(),
     getAsset: jest.fn(),
     getAssets: jest.fn(),
+    getOperationLink: jest.fn(),
     updateAsset: jest.fn(),
     updateOperation: jest.fn(),
     upsertValuation: jest.fn(),

@@ -165,6 +165,31 @@ describe("reads", () => {
   });
 });
 
+describe("getOperationLink", () => {
+  it("SHOULD read the investment link of a finance row", async () => {
+    jest.mocked(api.get).mockResolvedValue({
+      investment: { assetId: "asset-1", operationId: "op-1" },
+      item: {},
+    });
+
+    expect(await investmentApi.getOperationLink("tx-1")).toEqual({
+      assetId: "asset-1",
+      operationId: "op-1",
+    });
+    expect(api.get).toHaveBeenCalledWith("/v1/finance/transactions/tx-1");
+  });
+
+  it("SHOULD return undefined for a row without operation AND map failures", async () => {
+    jest.mocked(api.get).mockResolvedValue({ item: {} });
+    expect(await investmentApi.getOperationLink("tx-1")).toBeUndefined();
+
+    jest.mocked(api.get).mockRejectedValue(new Error("boom"));
+    await expect(investmentApi.getOperationLink("tx-1")).rejects.toBeInstanceOf(
+      GenericError,
+    );
+  });
+});
+
 describe("assets", () => {
   const createParams = {
     assetClass: InvestmentAssetClass.BR_STOCK,

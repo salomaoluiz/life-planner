@@ -22,6 +22,8 @@ interface Props {
   item: TransactionUIModel;
   // A balance adjustment cannot be edited: its row opens the delete sheet instead of the form.
   onAdjustmentPress?: (item: TransactionUIModel) => void;
+  // Spec 102: an investment row opens its operation, not the transaction form.
+  onInvestmentPress?: (item: TransactionUIModel) => void;
   onPay?: (item: TransactionUIModel) => void;
   onPress: (id: string) => void;
   onProjectedPress?: (item: TransactionUIModel) => void;
@@ -32,6 +34,7 @@ interface Props {
 function sameRowProps(prev: Props, next: Props) {
   return (
     prev.onAdjustmentPress === next.onAdjustmentPress &&
+    prev.onInvestmentPress === next.onInvestmentPress &&
     prev.onPay === next.onPay &&
     prev.onPress === next.onPress &&
     prev.onProjectedPress === next.onProjectedPress &&
@@ -69,15 +72,52 @@ function sameTransaction(a: TransactionUIModel, b: TransactionUIModel) {
 
 const TRANSFER_ICON = "swap-horizontal";
 
+// "Aporte em investimento · Conta Corretora": the system category name is translated from its key.
+function investmentSubtitle(
+  item: TransactionUIModel,
+  t: ReturnType<typeof useTranslation>["t"],
+) {
+  if (!item.isInvestment) {
+    return undefined;
+  }
+  const category = t(
+    item.dto.systemKey === "INVESTMENT_REDEMPTION"
+      ? "investment.systemCategory.INVESTMENT_REDEMPTION"
+      : "investment.systemCategory.INVESTMENT_CONTRIBUTION",
+  );
+
+  return [category, item.accountName].filter(Boolean).join(" · ");
+}
+
+// "Compra ITSA4" / "Venda ITSA4": the stored description is the asset label; the verb comes from the category key.
+function rowTitle(
+  item: TransactionUIModel,
+  t: ReturnType<typeof useTranslation>["t"],
+) {
+  if (item.isAdjustment) {
+    return t("financial.transactions.adjustment");
+  }
+  if (item.isInvestment) {
+    return `${t(
+      item.dto.systemKey === "INVESTMENT_REDEMPTION"
+        ? "investment.operation.SELL"
+        : "investment.operation.BUY",
+    )} ${item.description}`;
+  }
+
+  return item.counter
+    ? `${item.description} ${item.counter}`
+    : item.description;
+}
+
 function TransactionRow(props: Props) {
   const { t } = useTranslation();
   const { styles } = useStyles();
   const { item } = props;
 
-  const title = item.counter
-    ? `${item.description} ${item.counter}`
-    : item.description;
-  const baseSubtitle = transferSubtitle(item, t) ?? item.subtitle;
+  const title = rowTitle(item, t);
+  const baseSubtitle =
+    transferSubtitle(item, t) ?? investmentSubtitle(item, t) ?? item.subtitle;
   const subtitle = item.frequency
     ? [baseSubtitle, t(`financial.recurrence.frequency.${item.frequency}`)]
         .filter(Boolean)
@@ -87,6 +127,8 @@ function TransactionRow(props: Props) {
 
   if (item.isAdjustment) {
     rowTestID = transactionsTestIds.adjustmentRow;
+  } else if (item.isInvestment) {
+    rowTestID = transactionsTestIds.rowInvestment;
   } else if (item.isTransfer) {
     rowTestID = transactionsTestIds.rowTransfer;
   } else if (item.isProjected) {
@@ -149,6 +191,8 @@ function TransactionRow(props: Props) {
         }
         if (item.isAdjustment && props.onAdjustmentPress) {
           props.onAdjustmentPress(item);
+        } else if (item.isInvestment && props.onInvestmentPress) {
+          props.onInvestmentPress(item);
         } else if (item.isTransfer && props.onTransferPress) {
           props.onTransferPress(item);
         } else if (item.isProjected && props.onProjectedPress) {
@@ -161,7 +205,7 @@ function TransactionRow(props: Props) {
       subtitle={subtitle}
       testID={rowTestID}
       // The stored description is English text; the app shows its own translated label.
-      title={item.isAdjustment ? t("financial.transactions.adjustment") : title}
+      title={title}
       trailing={
         <View style={styles.trailing}>
           {item.pendingState && Platform.OS === "web" ? (
@@ -210,6 +254,15 @@ function transferCaption(
         label={t("financial.transfers.list.amountToInform")}
         testID={transactionsTestIds.rowTransferPending}
         tone={"warning"}
+      />
+    );
+  }
+  if (item.isInvestment) {
+    return (
+      <Text.Caption
+        testID={transactionsTestIds.rowInvestmentOutside}
+        tone="secondary"
+        value={t("financial.transfers.list.outsideTotals")}
       />
     );
   }

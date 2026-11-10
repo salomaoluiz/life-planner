@@ -170,6 +170,7 @@ function Wide({ vm }: AdaptiveViewProps<TransactionsScreenVM>) {
         <TransactionRow
           item={transaction}
           onAdjustmentPress={onAdjustmentPress}
+          onInvestmentPress={vm.onInvestmentPress}
           onPay={onPayRow}
           onPress={vm.onRowPress}
           onProjectedPress={vm.onProjectedPress}

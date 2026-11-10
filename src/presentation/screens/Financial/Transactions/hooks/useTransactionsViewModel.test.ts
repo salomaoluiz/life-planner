@@ -385,6 +385,36 @@ it("SHOULD open the transfer of a transfer row AND show the read-only notice WHE
   expect(result.current.toastVisible).toBe(true);
 });
 
+it("SHOULD open the operation of an investment row on the asset detail (spec 102)", async () => {
+  givenData([]);
+  spies.getOperationLink.mockResolvedValueOnce({
+    assetId: "asset-1",
+    operationId: "op-1",
+  });
+  const { result } = setup();
+
+  await act(async () => {
+    await result.current.onInvestmentPress({ id: "tx-9" } as never);
+  });
+
+  expect(spies.getOperationLink).toHaveBeenCalledWith("tx-9");
+  expect(spies.push).toHaveBeenCalledWith(
+    "/investments/asset-1?operation=op-1",
+  );
+});
+
+it("SHOULD stay put WHEN the investment row has no operation any more", async () => {
+  givenData([]);
+  spies.getOperationLink.mockResolvedValueOnce(undefined);
+  const { result } = setup();
+
+  await act(async () => {
+    await result.current.onInvestmentPress({ id: "tx-9" } as never);
+  });
+
+  expect(spies.push).not.toHaveBeenCalled();
+});
+
 it("SHOULD refetch only the stale queries WHEN the screen is focused", () => {
   givenData([]);
   spies.isFocused.mockReturnValue(true);
