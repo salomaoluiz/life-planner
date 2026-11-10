@@ -1,0 +1,72 @@
+url: ${E2E_WEB_URL}
+name: investment/delete-asset
+tags:
+  - investment
+  - spec-102
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: E2E Broker
+      BALANCE_CENTS: "1000000"
+- evalScript: ${output.BROKER_ACCOUNT_ID = output.ACCOUNT_ID}
+- runFlow:
+    file: ../../subflows/setup/create-investment-asset.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      TICKER: E2ETK3
+      NAME: E2E Asset
+- runFlow:
+    file: ../../subflows/setup/create-investment-operation.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      ASSET_ID: ${output.ASSET_ID}
+      TYPE: BUY
+      QUANTITY: "100"
+      UNIT_PRICE: "10"
+      ACCOUNT_ID: ${output.BROKER_ACCOUNT_ID}
+- runFlow:
+    file: ../../subflows/assert/assert-account-balance.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.BROKER_ACCOUNT_ID}
+      EXPECTED_CENTS: "900000"
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/investment/open-investments.yaml
+- tapOn:
+    id: "investment.list.row-${output.ASSET_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.screen"
+    timeout: 20000
+- tapOn:
+    id: "investment.detail.actions-menu"
+- tapOn:
+    id: "investment.detail.menu-delete"
+- tapOn:
+    id: "investment.detail.delete-dialog-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "investment.list.empty-state"
+    timeout: 20000
+# Deleting the asset deletes its finance entry and the balance comes back.
+- runFlow:
+    file: ../../subflows/assert/assert-account-balance.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.BROKER_ACCOUNT_ID}
+      EXPECTED_CENTS: "1000000"

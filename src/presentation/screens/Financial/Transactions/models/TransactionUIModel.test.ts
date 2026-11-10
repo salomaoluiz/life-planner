@@ -331,3 +331,23 @@ describe("transfer rows (spec 098)", () => {
     ).toEqual({ currency: "BRL", perCurrency: "USD", value: 5.4348 });
   });
 });
+
+describe("isInvestment (spec 102)", () => {
+  it.each([
+    ["INVESTMENT_CONTRIBUTION", true],
+    ["INVESTMENT_REDEMPTION", true],
+    ["TRANSFER_OUT", false],
+    [undefined, false],
+  ])("SHOULD be %s -> %s", (systemKey, expected) => {
+    expect(new TransactionUIModel(dto({ systemKey })).isInvestment).toBe(
+      expected,
+    );
+  });
+});
+
+it("SHOULD show the rising chart icon on an investment row (spec 102)", () => {
+  expect(
+    new TransactionUIModel(dto({ systemKey: "INVESTMENT_REDEMPTION" }))
+      .categoryIcon,
+  ).toBe("trending-up");
+});

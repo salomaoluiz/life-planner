@@ -3,6 +3,15 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.16.0] - 2026-11-09
+
+### Added
+
+- Investments tab: register stocks, FIIs, foreign stocks, fixed income and private holdings as yours or your family's, and see quantity, average price with fees, cost, current value and open and realized result for each (spec 102).
+- Record buys and sells with detailed fees; each one can add one entry to a finance account that moves the balance but stays out of income and expense (spec 102).
+- Update an asset's value per unit by date, archive an asset, or delete it together with its operations and finance entries (spec 102).
+- Investment entries in the Transactions list open their operation instead of the transaction form (spec 102).
+
 ## [1.15.0] - 2026-11-09
 
 ### Added

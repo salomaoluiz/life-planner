@@ -1,6 +1,6 @@
 # Life Planner — Claude Context Router
 
-Expo 52 / React Native 0.76 / TypeScript (strict) app for families: finances, stock (home storage), family members, configs.
+Expo 52 / React Native 0.76 / TypeScript (strict) app for families: finances, investments, stock (home storage), family members, configs.
 Backend: Supabase is the **legacy** backend, being migrated to the new local NestJS API (`../life-planner-back`) — don't add new Supabase-only features without asking; see `.claude/context/backend.md`. Server state: React Query (wrapped). UI: Grafite component kit (`@components`) over React Native Paper. i18n: en-US + pt-BR.
 Clean Architecture: `app/` (expo-router routes) → `src/presentation` → `src/application` → `src/domain` ← `src/data` (← `src/infrastructure`).
 
@@ -10,25 +10,25 @@ Clean Architecture: `app/` (expo-router routes) → `src/presentation` → `src/
 
 ## Context map (read on demand)
 
-| When the task involves…                                                          | Read                                                                      |
-| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Layer boundaries, DI chain, path aliases, where a file belongs                   | `.claude/context/architecture.md`                                         |
-| Entities, enums, domain errors, repository interfaces, cache keys                | `.claude/context/domain.md`                                               |
-| Supabase datasources, models (`fromJSON`/`toJSON`), repository impls, caching    | `.claude/context/data.md`                                                 |
-| Use cases, DTOs, registering use cases, `uniqueName`                             | `.claude/context/application.md`                                          |
-| Screens, containers, modals: hook-based MVVM (View, `use*ViewModel`, `*UIModel`) | `.claude/context/presentation.md`                                         |
-| Routes, tabs, drawer, modal routes (`app/`)                                      | `.claude/context/routing.md`                                              |
-| Shared UI components (`@components`) and their props                             | `.claude/context/components.md`                                           |
-| Colors, sizes, spacing, `useStyles` pattern, dark mode                           | `.claude/context/theme.md`                                                |
-| Any user-facing text                                                             | `.claude/context/i18n.md`                                                 |
-| Writing/updating tests and `mocks/` files                                        | `.claude/context/testing.md`                                              |
-| New table/column, RLS policies, triggers                                         | `.claude/context/database.md`                                             |
-| Lint rules, import order, naming, commit flow                                    | `.claude/context/conventions.md`                                          |
-| What already exists in a module (file inventory per layer)                       | `docs/ai/modules/<auth\|family\|familyMember\|financial\|home\|stock>.md` |
-| Backend API (`../life-planner-back`): endpoints, auth, contract, Supabase → API  | `.claude/context/backend.md`                                              |
-| E2E flows, testIDs, running the suite                                            | `.claude/context/e2e.md`                                                  |
-| Performance budgets, `yarn perf`, PR performance block, `perf-report/summary.md` | `.claude/context/performance.md`                                          |
-| Building a whole new feature / CRUD slice end-to-end                             | skill `new-feature-slice` (`.claude/skills/new-feature-slice/`)           |
+| When the task involves…                                                          | Read                                                                                  |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Layer boundaries, DI chain, path aliases, where a file belongs                   | `.claude/context/architecture.md`                                                     |
+| Entities, enums, domain errors, repository interfaces, cache keys                | `.claude/context/domain.md`                                                           |
+| Supabase datasources, models (`fromJSON`/`toJSON`), repository impls, caching    | `.claude/context/data.md`                                                             |
+| Use cases, DTOs, registering use cases, `uniqueName`                             | `.claude/context/application.md`                                                      |
+| Screens, containers, modals: hook-based MVVM (View, `use*ViewModel`, `*UIModel`) | `.claude/context/presentation.md`                                                     |
+| Routes, tabs, drawer, modal routes (`app/`)                                      | `.claude/context/routing.md`                                                          |
+| Shared UI components (`@components`) and their props                             | `.claude/context/components.md`                                                       |
+| Colors, sizes, spacing, `useStyles` pattern, dark mode                           | `.claude/context/theme.md`                                                            |
+| Any user-facing text                                                             | `.claude/context/i18n.md`                                                             |
+| Writing/updating tests and `mocks/` files                                        | `.claude/context/testing.md`                                                          |
+| New table/column, RLS policies, triggers                                         | `.claude/context/database.md`                                                         |
+| Lint rules, import order, naming, commit flow                                    | `.claude/context/conventions.md`                                                      |
+| What already exists in a module (file inventory per layer)                       | `docs/ai/modules/<auth\|family\|familyMember\|financial\|home\|investment\|stock>.md` |
+| Backend API (`../life-planner-back`): endpoints, auth, contract, Supabase → API  | `.claude/context/backend.md`                                                          |
+| E2E flows, testIDs, running the suite                                            | `.claude/context/e2e.md`                                                              |
+| Performance budgets, `yarn perf`, PR performance block, `perf-report/summary.md` | `.claude/context/performance.md`                                                      |
+| Building a whole new feature / CRUD slice end-to-end                             | skill `new-feature-slice` (`.claude/skills/new-feature-slice/`)                       |
 
 Tip: for a single-layer change read just that layer file + `conventions.md`. Do not open the module inventory unless you need to locate existing files.
 Reference implementation for any new CRUD work: **financial accounts** (smallest complete, modern slice).
@@ -50,7 +50,7 @@ Reference implementation for any new CRUD work: **financial accounts** (smallest
     - Tests and mocks use fake data (`"user-id"`, random UUIDs, `test@example.com`).
     - **This is an open source project.** Nothing that identifies the owner or their infrastructure may be committed, in code, tests, docs, scripts, commit messages or PR descriptions: real domains/hostnames, IP addresses, server or host names, local paths and usernames, personal or company emails and names, account and project identifiers. Use placeholders (`example.com`, `your-...`, `<HOST_IP>`, `/Users/<you>/`). Re-read the staged diff and the commit message for these before every commit and PR. If one was already pushed, stop and tell the user (history rewriting needs their approval).
     - Before every commit run `git diff --cached` and check it; stage files explicitly (no `git add -A` / `git add .`). If anything looks secret or personal, unstage it, don't commit, and tell the user. If a secret was already committed, stop and tell the user (the key must be rotated); don't try to rewrite history yourself.
-11. **Always branch from the latest `main`, to keep history linear.** Before creating any new branch run `git fetch origin main` and create it from `origin/main` (`git checkout -b <branch> origin/main`) — never from a stale local `main` or from another feature branch. Before opening a PR, rebase onto the latest `origin/main` (`git fetch origin main && git rebase origin/main`) rather than merging `main` into the branch; no merge commits on feature branches.
+11. **Always branch from the latest `main`, to keep history linear.** Before creating any new branch run `git fetch origin main` and create it from `origin/main` (`git checkout -b <branch> origin/main`) — never from a stale local `main` or from another feature branch. Before opening a PR, rebase onto the latest `origin/main` (`git fetch origin main && git rebase origin/main`) rather than merging `main` into the branch; no merge commits on feature branches. **Stay on the branch when the work ends.** Creating the branch is the only checkout a task does: when the work is finished (PR opened, E2E, perf, final report) leave the checkout on that branch. Never `git checkout main` (or any other branch) afterwards "to clean up"; the next task starts from `origin/main` with `git checkout -b <branch> origin/main` (rule above), so the checkout never needs to go back. Switch to another branch only when a check requires it (e.g. the perf check or E2E of that spec) and switch back to the spec branch right after.
     - **No worktree when the current branch is already merged.** If the checkout is on a branch whose PR is merged into `main` (check with `gh pr view`) and its working tree is clean, do not create a worktree: `git fetch origin main` and `git checkout -b <new-branch> origin/main` in the repo checkout itself. Use a worktree (`.claude/worktrees/<name>`) only when the checkout holds unmerged or uncommitted work that must stay untouched.
 12. **E2E guardrail (Maestro).**
     - Every feature or fix that changes user-visible behavior ships with at least one flow in `e2e/flows/<module>/`, tagged with its module and `spec-NNN`. It covers the happy path and the main error or empty state from the spec's acceptance criteria. New interactive elements get testIDs (`<module>.<screen>.<element>`) from the module's `testIds.ts`.

@@ -88,6 +88,7 @@ const defaultViewModel: ReturnType<typeof useTransactionsViewModel> = {
   onFilterRemove: jest.fn(),
   onFiltersApply: jest.fn(),
   onFiltersClear: jest.fn(),
+  onInvestmentPress: jest.fn(),
   onInvoiceOpen: jest.fn(),
   onInvoiceRetry: jest.fn(),
   onInvoiceToggle: jest.fn(),

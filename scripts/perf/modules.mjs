@@ -1,5 +1,6 @@
 const PERF_MODULES = [
   "financial",
+  "investment",
   "stock",
   "family",
   "familyMember",
@@ -22,6 +23,8 @@ const SEGMENT_TO_MODULE = {
   feedback: "home",
   financial: "financial",
   home: "home",
+  investment: "investment",
+  investments: "investment",
   invite: "auth",
   login: "auth",
   quickadd: "home",
@@ -37,6 +40,7 @@ const MODULE_SCREENS = {
   familyMember: "Family",
   financial: "Financial",
   home: "(Home|QuickAdd|Feedback)",
+  investment: "Investment",
   stock: "Stock",
 };
 

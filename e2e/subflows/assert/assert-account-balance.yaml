@@ -1,0 +1,10 @@
+url: ${E2E_WEB_URL}
+---
+# Caller env: TOKEN, OWNER_ID, ACCOUNT_ID, EXPECTED_CENTS
+- runScript:
+    file: ../../scripts/assert/assert-account-balance.js
+    env:
+      TOKEN: ${TOKEN}
+      OWNER_ID: ${OWNER_ID}
+      ACCOUNT_ID: ${ACCOUNT_ID}
+      EXPECTED_CENTS: ${EXPECTED_CENTS}

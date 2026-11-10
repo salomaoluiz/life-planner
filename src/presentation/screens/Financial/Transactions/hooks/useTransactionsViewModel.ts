@@ -1,4 +1,5 @@
 import { useIsFocused } from "@react-navigation/native";
+import { router } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import AccountDTO from "@application/dto/financial/AccountDTO";
@@ -696,6 +697,20 @@ function useTransactionsViewModel() {
         : openModal("add_new_transaction", { transferId: item.dto.transferId }),
     ),
   );
+  // Spec 102 FR 39: an investment row opens its operation on the asset detail.
+  const onInvestmentPress = useStableCallback(
+    scope.guard(async (item: TransactionUIModel) => {
+      const link = await useCases.getInvestmentOperationLinkUseCase.execute(
+        item.id,
+      );
+
+      if (link) {
+        router.push(
+          `/investments/asset/${link.assetId}?operation=${link.operationId}` as never,
+        );
+      }
+    }),
+  );
   const onRowPress = useStableCallback(
     scope.guard((id: string) => openModal("add_new_transaction", { id })),
   );
@@ -772,6 +787,7 @@ function useTransactionsViewModel() {
     onFilterRemove: filterStore.removeGroup,
     onFiltersApply: filterStore.replace,
     onFiltersClear: filterStore.clearAll,
+    onInvestmentPress,
     onInvoiceOpen,
     onInvoiceRetry: async () => monthQuery.refetch(),
     onInvoiceToggle,

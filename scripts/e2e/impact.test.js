@@ -61,6 +61,15 @@ describe("selectImpact", () => {
     expect(result.reasons).toHaveLength(3);
   });
 
+  it("SHOULD map the investment screens and API modules to the investment tag (spec 102)", () => {
+    const result = selectImpact({
+      back: ["src/modules/investment/a.ts", "src/api/investment/v1/b.ts"],
+      front: ["src/presentation/screens/Investment/List/index.tsx"],
+    });
+
+    expect(result.tags).toEqual(["investment", "smoke"]);
+  });
+
   it("SHOULD map auth screens to auth + account", () => {
     const result = selectImpact({
       back: [],

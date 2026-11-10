@@ -5,6 +5,7 @@ import errors from "./errors";
 import family from "./family";
 import financial from "./financial";
 import home from "./home";
+import investment from "./investment";
 import invite from "./invite";
 import login from "./login";
 import navigation from "./navigation";
@@ -21,6 +22,7 @@ const enUS = {
     family,
     financial,
     home,
+    investment,
     invite,
     login,
     navigation,

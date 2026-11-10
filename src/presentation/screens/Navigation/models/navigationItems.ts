@@ -21,6 +21,7 @@ export type TabRouteName =
   | "family/index"
   | "financial"
   | "index/index"
+  | "investments"
   | "stock/index";
 
 export const SETTINGS_PATH = "/settings";
@@ -39,6 +40,12 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     labelKey: "navigation.tabs.finances",
     routeName: "financial",
     testID: "tab-finances",
+  },
+  {
+    icon: "chart-line",
+    labelKey: "navigation.tabs.investments",
+    routeName: "investments",
+    testID: "tab-investments",
   },
   {
     icon: "package-variant-closed",

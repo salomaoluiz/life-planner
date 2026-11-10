@@ -1,11 +1,12 @@
 import { NAVIGATION_ITEMS, SETTINGS_PATH } from "./navigationItems";
 
-it("SHOULD list the 4 destinations in the spec order with their icons", () => {
+it("SHOULD list the 5 destinations in the spec order with their icons", () => {
   expect(
     NAVIGATION_ITEMS.map(({ icon, routeName }) => [routeName, icon]),
   ).toEqual([
     ["index/index", "home-outline"],
     ["financial", "wallet-outline"],
+    ["investments", "chart-line"],
     ["stock/index", "package-variant-closed"],
     ["family/index", "account-group-outline"],
   ]);
@@ -15,10 +16,11 @@ it("SHOULD use the navigation.tabs translation keys AND unique testIDs", () => {
   expect(NAVIGATION_ITEMS.map((item) => item.labelKey)).toEqual([
     "navigation.tabs.home",
     "navigation.tabs.finances",
+    "navigation.tabs.investments",
     "navigation.tabs.stock",
     "navigation.tabs.family",
   ]);
-  expect(new Set(NAVIGATION_ITEMS.map((item) => item.testID)).size).toBe(4);
+  expect(new Set(NAVIGATION_ITEMS.map((item) => item.testID)).size).toBe(5);
 });
 
 it("SHOULD expose the path the settings entry navigates to", () => {

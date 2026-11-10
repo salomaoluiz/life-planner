@@ -1,0 +1,10 @@
+url: ${E2E_WEB_URL}
+---
+# Optional caller-scoped params read by the script: ASSET_CLASS, CURRENCY, CURRENT_UNIT_PRICE, OWNER.
+- runScript:
+    file: ../../scripts/setup/create-investment-asset.js
+    env:
+      TOKEN: ${TOKEN}
+      OWNER_ID: ${OWNER_ID}
+      TICKER: ${TICKER}
+      NAME: ${NAME}

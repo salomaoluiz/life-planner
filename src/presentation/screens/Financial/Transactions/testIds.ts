@@ -145,6 +145,8 @@ const transactionsTestIds = {
   readOnlyBanner: "financial.transactions.readonly-banner",
   readOnlyToast: "financial.transactions.readonly-toast",
   row: "financial.transactions.row",
+  rowInvestment: "financial.transactions.row-investment",
+  rowInvestmentOutside: "financial.transactions.row.investment-outside",
   rowNoteIcon: "financial.transactions.rowNoteIcon",
   rowNoteTooltip: "financial.transactions.rowNoteTooltip",
   rowOverdue: "financial.transactions.row.overdue",

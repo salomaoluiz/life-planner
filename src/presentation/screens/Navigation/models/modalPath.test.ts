@@ -34,11 +34,24 @@ describe("splitModalPath", () => {
 });
 
 describe("isValidBase", () => {
-  it("SHOULD accept exactly the ten bases", () => {
-    expect(VALID_BASES).toHaveLength(10);
+  it("SHOULD accept exactly the eleven bases", () => {
+    expect(VALID_BASES).toHaveLength(11);
     VALID_BASES.forEach((base) => expect(isValidBase(base)).toBe(true));
     expect(isValidBase("")).toBe(true);
     expect(isValidBase("/stock/")).toBe(true);
+  });
+
+  it("SHOULD accept the detail of an asset as a base (spec 102)", () => {
+    expect(isValidBase("/investments/asset/asset-1")).toBe(true);
+    expect(isValidBase("/investments/asset/asset-1/")).toBe(true);
+    expect(isValidBase("/investments/asset/asset-1/extra")).toBe(false);
+    expect(isValidBase("/investments/investment_asset")).toBe(false);
+    expect(
+      splitModalPath("/investments/asset/asset-1/investment_operation"),
+    ).toMatchObject({
+      base: "/investments/asset/asset-1",
+      modal: "investment_operation",
+    });
   });
 
   it.each(["/foo", "/financial/account", "/financial"])(
@@ -72,9 +85,9 @@ describe("fallbackBase", () => {
   });
 });
 
-it("SHOULD have 20 unique modal names", () => {
-  expect(MODAL_NAMES).toHaveLength(20);
-  expect(new Set(MODAL_NAMES).size).toBe(20);
+it("SHOULD have 23 unique modal names", () => {
+  expect(MODAL_NAMES).toHaveLength(23);
+  expect(new Set(MODAL_NAMES).size).toBe(23);
 });
 
 describe("screenPath", () => {

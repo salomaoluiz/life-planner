@@ -12,6 +12,7 @@ const FRONT_RULES = [
   [/(^|\/)(auth|login|signup)(\/|$)/i, ["auth", "account"]],
   [/^src\/presentation\/screens\/Config(\/|$)/, ["account"]],
   [/(^|\/)financial(\/|$)/i, ["financial"]],
+  [/(^|\/)investments?(\/|$)/i, ["investment"]],
   [/(^|\/)stock(\/|$)/i, ["stock"]],
   [/(^|\/)(family|familyMember|invite)(\/|$)/i, ["family"]],
 ];
@@ -19,6 +20,7 @@ const FRONT_RULES = [
 const BACK_RULES = [
   [DOCS, IGNORE],
   [/^src\/(modules|api)\/finance(\/|$)/, ["financial"]],
+  [/^src\/(modules|api)\/investment(\/|$)/, ["investment"]],
   [/^src\/(modules|api)\/stock(\/|$)/, ["stock"]],
   [/^src\/(modules|api)\/(family|family-member)(\/|$)/, ["family"]],
 ];

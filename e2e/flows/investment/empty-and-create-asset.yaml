@@ -1,0 +1,47 @@
+url: ${E2E_WEB_URL}
+name: investment/empty-and-create-asset
+tags:
+  - investment
+  - spec-102
+  - smoke
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/investment/open-investments.yaml
+- extendedWaitUntil:
+    visible:
+      id: "investment.list.empty-state"
+    timeout: 20000
+- tapOn:
+    id: "investment.list.add-button"
+- extendedWaitUntil:
+    visible:
+      id: "investment.asset-modal.ticker"
+    timeout: 20000
+# Saving with the ticker missing keeps the form open and says why.
+- tapOn:
+    id: "investment.asset-modal.save"
+- assertVisible:
+    id: "investment.asset-modal.ticker-error"
+- tapOn:
+    id: "investment.asset-modal.ticker"
+- inputText: "E2ETK3"
+- tapOn:
+    id: "investment.asset-modal.current-value"
+- inputText: "10,50"
+- tapOn:
+    id: "investment.asset-modal.save"
+- extendedWaitUntil:
+    visible:
+      id: "investment.list.group.BR_STOCK-BRL"
+    timeout: 20000
+- assertNotVisible:
+    id: "investment.list.empty-state"

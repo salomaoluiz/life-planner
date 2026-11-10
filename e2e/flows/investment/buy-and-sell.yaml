@@ -1,0 +1,101 @@
+url: ${E2E_WEB_URL}
+name: investment/buy-and-sell
+tags:
+  - investment
+  - spec-102
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: E2E Broker
+      BALANCE_CENTS: "1000000"
+- evalScript: ${output.BROKER_ACCOUNT_ID = output.ACCOUNT_ID}
+- runFlow:
+    file: ../../subflows/setup/create-investment-asset.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      TICKER: E2ETK3
+      NAME: E2E Asset
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/investment/open-investments.yaml
+- tapOn:
+    id: "investment.list.row-${output.ASSET_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.screen"
+    timeout: 20000
+# Buy 100 x 10,00 paid from the account.
+- tapOn:
+    id: "investment.detail.add-operation"
+- extendedWaitUntil:
+    visible:
+      id: "investment.operation-modal.quantity"
+    timeout: 20000
+- tapOn:
+    id: "investment.operation-modal.quantity"
+- inputText: "100"
+- tapOn:
+    id: "investment.operation-modal.unit-price"
+- inputText: "10"
+- extendedWaitUntil:
+    visible:
+      id: "investment.operation-modal.summary-total"
+    timeout: 10000
+- tapOn:
+    id: "investment.operation-modal.save"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.quantity"
+      text: ".*100.*"
+    timeout: 20000
+- runFlow:
+    file: ../../subflows/assert/assert-account-balance.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.BROKER_ACCOUNT_ID}
+      EXPECTED_CENTS: "900000"
+# Sell 40 x 12,00: realized result +80,00 and the account receives 480,00.
+- tapOn:
+    id: "investment.detail.add-operation"
+- extendedWaitUntil:
+    visible:
+      id: "investment.operation-modal.quantity"
+    timeout: 20000
+- tapOn:
+    id: "investment.operation-modal.type-SELL"
+- tapOn:
+    id: "investment.operation-modal.quantity"
+- inputText: "40"
+- tapOn:
+    id: "investment.operation-modal.unit-price"
+- inputText: "12"
+- tapOn:
+    id: "investment.operation-modal.save"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.realized"
+      text: ".*80[.,]00.*"
+    timeout: 20000
+- assertVisible:
+    id: "investment.detail.quantity"
+    text: ".*60.*"
+- runFlow:
+    file: ../../subflows/assert/assert-account-balance.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.BROKER_ACCOUNT_ID}
+      EXPECTED_CENTS: "948000"

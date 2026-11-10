@@ -61,6 +61,10 @@ jest.mock("@application/useCases", () => ({
       execute: jest.fn(),
       uniqueName: "transactions",
     },
+    getInvestmentOperationLinkUseCase: {
+      execute: jest.fn(),
+      uniqueName: "operationLink",
+    },
     getMonthSummaryUseCase: { execute: jest.fn(), uniqueName: "summary" },
     getOwnersUseCase: { execute: jest.fn(), uniqueName: "owners" },
   },
@@ -146,6 +150,9 @@ const spies = {
     useCases.getFinancialCardInvoicesForMonthUseCase.execute,
   ),
   getMonth: jest.mocked(useCases.getFinancialMonthUseCase.execute),
+  getOperationLink: jest.mocked(
+    useCases.getInvestmentOperationLinkUseCase.execute,
+  ),
   getOwners: jest.mocked(useCases.getOwnersUseCase.execute),
   getProjections: jest.mocked(useCases.getFinancialProjectionsUseCase.execute),
   getSummary: jest.mocked(useCases.getMonthSummaryUseCase.execute),

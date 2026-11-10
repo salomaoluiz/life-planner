@@ -17,6 +17,7 @@ import {
   FinancialTransferRepository,
   FinancialUpcomingRepository,
 } from "./financial";
+import { InvestmentRepository } from "./investment";
 import { StockRepository } from "./stock";
 import { UserRepository } from "./user";
 import { VersionRepository } from "./version";
@@ -39,6 +40,7 @@ interface Repositories {
     transfer: FinancialTransferRepository;
     upcoming: FinancialUpcomingRepository;
   };
+  investmentRepository: InvestmentRepository;
   loginRepository: LoginRepository;
   stockRepository: StockRepository;
   userRepository: UserRepository;
