@@ -42,6 +42,10 @@ import {
 } from "@screens/Investment/models/format";
 import investmentTestIds from "@screens/Investment/testIds";
 
+import FixedIncomeSection, {
+  FixedIncomeActions,
+  FixedIncomeChips,
+} from "../components/FixedIncomeSection";
 import {
   ChartPanel,
   PriceBlock,
@@ -76,13 +80,17 @@ function Header({
         </View>
         <View style={styles.chips}>
           <Badge label={t(`investment.class.${asset.assetClass}`)} />
+          {asset.fixedIncome ? (
+            <FixedIncomeChips fixedIncome={asset.fixedIncome} />
+          ) : null}
           <Badge label={vm.ownerLabel || t("financial.common.personal")} />
           <Badge label={asset.currency} />
         </View>
       </View>
       {vm.readOnly ? null : (
         <View style={styles.actions}>
-          {vm.archived ? null : (
+          {asset.fixedIncome ? <FixedIncomeActions vm={vm} /> : null}
+          {vm.archived || asset.fixedIncome ? null : (
             <>
               {asset.quote ? <RefreshButton vm={vm} /> : null}
               <Button.Secondary
@@ -467,26 +475,36 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentDetailVM>) {
             value={t(vm.errorMessage.key, vm.errorMessage.params)}
           />
         ) : null}
-        <PriceBlock asset={asset} vm={vm} />
-        <Summary asset={asset} compact={compact} sells={vm.sellCount} />
-        {asset.ticker ? (
-          <View style={styles.sections}>
-            <View style={styles.sectionMain}>
-              <ChartPanel asset={asset} vm={vm} />
+        {asset.fixedIncome ? (
+          <FixedIncomeSection
+            asset={asset}
+            fixedIncome={asset.fixedIncome}
+            vm={vm}
+          />
+        ) : (
+          <>
+            <PriceBlock asset={asset} vm={vm} />
+            <Summary asset={asset} compact={compact} sells={vm.sellCount} />
+            {asset.ticker ? (
+              <View style={styles.sections}>
+                <View style={styles.sectionMain}>
+                  <ChartPanel asset={asset} vm={vm} />
+                </View>
+                <View style={styles.sectionSide}>
+                  <QuotePanel asset={asset} vm={vm} />
+                </View>
+              </View>
+            ) : null}
+            <View style={styles.sections}>
+              <View style={styles.sectionMain}>
+                <Operations asset={asset} vm={vm} />
+              </View>
+              <View style={styles.sectionSide}>
+                <Valuations asset={asset} vm={vm} />
+              </View>
             </View>
-            <View style={styles.sectionSide}>
-              <QuotePanel asset={asset} vm={vm} />
-            </View>
-          </View>
-        ) : null}
-        <View style={styles.sections}>
-          <View style={styles.sectionMain}>
-            <Operations asset={asset} vm={vm} />
-          </View>
-          <View style={styles.sectionSide}>
-            <Valuations asset={asset} vm={vm} />
-          </View>
-        </View>
+          </>
+        )}
       </View>
       <BottomSheet
         closeLabel={t("common.actions.close")}
@@ -526,6 +544,32 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentDetailVM>) {
           testID={ids.deleteMenu}
           title={t("investment.asset.delete")}
         />
+      </BottomSheet>
+      <BottomSheet
+        closeLabel={t("common.actions.close")}
+        onClose={vm.onFixedIncomeMenuClose}
+        title={t("investment.fixedIncome.action.more")}
+        visible={vm.fixedIncomeMenuOpen}
+      >
+        {(
+          [
+            ["adjust", vm.onAdjust, "calculator-variant-outline"],
+            ["updateRate", vm.onUpdateRate, "chart-line"],
+            ["contribute", vm.onContribute, "plus-circle-outline"],
+          ] as const
+        ).map(([action, onPress, icon]) => (
+          <ListItem
+            inset
+            key={action}
+            leading={<Icon name={icon} size={sizes.iconMd} />}
+            onPress={() => {
+              vm.onFixedIncomeMenuClose();
+              onPress();
+            }}
+            testID={`${investmentTestIds.detail.fixedIncome.moreMenu}-${action}`}
+            title={t(`investment.fixedIncome.action.${action}`)}
+          />
+        ))}
       </BottomSheet>
       <ConfirmDialog
         cancelLabel={t("investment.form.cancel")}

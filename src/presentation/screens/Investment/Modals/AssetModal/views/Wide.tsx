@@ -10,6 +10,7 @@ import {
   ErrorState,
   FormColumns,
   SelectField,
+  SwitchRow,
   Text,
   TextField,
   TickerAutocomplete,
@@ -93,6 +94,14 @@ function Wide({ vm }: AdaptiveViewProps<AssetModalVM>) {
                   )}
                 />
               </View>
+              {vm.showCalculated ? (
+                <SwitchRow
+                  label={t("investment.fixedIncome.calculated")}
+                  onToggle={vm.onCalculatedChange}
+                  testID={ids.calculated}
+                  value={vm.calculated}
+                />
+              ) : null}
               <View style={styles.field}>
                 {vm.quotedMarket ? (
                   <TickerAutocomplete
@@ -252,7 +261,11 @@ function Wide({ vm }: AdaptiveViewProps<AssetModalVM>) {
         footer={
           <Button.Primary
             fullWidth
-            label={t("investment.form.asset.save")}
+            label={t(
+              vm.calculated
+                ? "investment.fixedIncome.new.continue"
+                : "investment.form.asset.save",
+            )}
             loading={vm.isSaving}
             onPress={vm.onSave}
             size="lg"

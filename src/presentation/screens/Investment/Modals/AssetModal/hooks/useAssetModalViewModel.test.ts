@@ -325,3 +325,44 @@ describe("ticker search (spec 104)", () => {
     expect(result.current.failure).toBeUndefined();
   });
 });
+
+describe("fixed income (spec 105)", () => {
+  it("SHOULD offer the calculated flow only for a NEW fixed income asset, on by default", () => {
+    const { result } = setup();
+
+    expect(result.current.showCalculated).toBe(false);
+    expect(result.current.calculated).toBe(false);
+
+    act(() => result.current.onAssetClassChange("FIXED_INCOME"));
+
+    expect(result.current.showCalculated).toBe(true);
+    expect(result.current.calculated).toBe(true);
+  });
+
+  it("SHOULD continue into the fixed income modal instead of creating the asset", () => {
+    const { result } = setup();
+
+    act(() => result.current.onAssetClassChange("FIXED_INCOME"));
+    act(() => result.current.onSave());
+
+    expect(modalNavigation.replaceModal).toHaveBeenCalledWith(
+      "investment_fixed_income",
+    );
+    expect(createMutation.value.mutate).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD keep the manual flow WHEN the switch is off", () => {
+    const { result } = setup();
+
+    act(() => result.current.onAssetClassChange("FIXED_INCOME"));
+    act(() => result.current.onCalculatedChange(false));
+    act(() => result.current.onNameChange("CDB manual"));
+    act(() => result.current.onCurrentValueChange("10000"));
+    act(() => result.current.onSave());
+
+    expect(modalNavigation.replaceModal).not.toHaveBeenCalled();
+    expect(createMutation.value.mutate).toHaveBeenCalledWith(
+      expect.objectContaining({ assetClass: "FIXED_INCOME" }),
+    );
+  });
+});

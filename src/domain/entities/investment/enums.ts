@@ -16,7 +16,40 @@ export enum InvestmentFeeKind {
   BROKERAGE = "BROKERAGE",
   EXCHANGE_FEES = "EXCHANGE_FEES",
   FX_IOF = "FX_IOF",
+  // Spec 105: withheld taxes of a fixed income redemption, written by the API only.
+  INCOME_TAX = "INCOME_TAX",
+  IOF = "IOF",
   OTHER = "OTHER",
+}
+
+// Spec 105: fixed income calculated from the rate, enum values identical to the API's.
+export enum InvestmentFixedIncomeLiquidity {
+  AT_MATURITY = "AT_MATURITY",
+  DAILY = "DAILY",
+  GRACE_PERIOD = "GRACE_PERIOD",
+}
+
+export enum InvestmentFixedIncomeProduct {
+  CDB = "CDB",
+  CRA = "CRA",
+  CRI = "CRI",
+  DEBENTURE = "DEBENTURE",
+  INCENTIVIZED_DEBENTURE = "INCENTIVIZED_DEBENTURE",
+  LCA = "LCA",
+  LCI = "LCI",
+  OTHER = "OTHER",
+  TREASURY = "TREASURY",
+}
+
+export enum InvestmentFixedIncomeRateMode {
+  CDI_PERCENT = "CDI_PERCENT",
+  IPCA_PLUS = "IPCA_PLUS",
+  PREFIXED = "PREFIXED",
+}
+
+export enum InvestmentFixedIncomeRedemptionKind {
+  PARTIAL = "PARTIAL",
+  TOTAL = "TOTAL",
 }
 
 export enum InvestmentOperationType {
@@ -78,3 +111,12 @@ export const TICKER_REQUIRED_CLASSES: InvestmentAssetClass[] = [
 ];
 
 export const MAX_FEES_PER_OPERATION = 10;
+
+// Spec 105 FR 2: the products whose income tax is exempt by default (the owner can change it).
+export const TAX_EXEMPT_PRODUCTS: InvestmentFixedIncomeProduct[] = [
+  InvestmentFixedIncomeProduct.CRA,
+  InvestmentFixedIncomeProduct.CRI,
+  InvestmentFixedIncomeProduct.INCENTIVIZED_DEBENTURE,
+  InvestmentFixedIncomeProduct.LCA,
+  InvestmentFixedIncomeProduct.LCI,
+];

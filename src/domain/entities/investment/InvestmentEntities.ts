@@ -3,6 +3,10 @@ import {
   InvestmentAssetClass,
   InvestmentAssetStatus,
   InvestmentFeeKind,
+  InvestmentFixedIncomeLiquidity,
+  InvestmentFixedIncomeProduct,
+  InvestmentFixedIncomeRateMode,
+  InvestmentFixedIncomeRedemptionKind,
   InvestmentOperationType,
   InvestmentPriceKind,
   InvestmentPriceSource,
@@ -19,6 +23,8 @@ export interface InvestmentAsset {
   // BRL numbers of a USD asset; null without a current rate or an average rate.
   brl: InvestmentBrlResult | null;
   currency: CurrencyCode;
+  // Spec 105: the computed numbers of a calculated title; null on any other asset.
+  fixedIncome: InvestmentFixedIncome | null;
   fx: InvestmentFx | null;
   id: string;
   name: string;
@@ -36,6 +42,8 @@ export interface InvestmentAsset {
 }
 
 export interface InvestmentAssetDetail extends InvestmentAsset {
+  // The detail adds the history, the lots and the projection to the summary of `fixedIncome`.
+  fixedIncome: InvestmentFixedIncome | null;
   operations: InvestmentOperation[];
   valuations: InvestmentValuation[];
 }
@@ -59,6 +67,94 @@ export interface InvestmentFee {
   kind: InvestmentFeeKind;
 }
 
+// Spec 105 FR 26: cents everywhere; `rates`, `adjustments`, `lots` and `atMaturity` come with the detail only.
+export interface InvestmentFixedIncome {
+  adjustments: InvestmentFixedIncomeAdjustment[];
+  atMaturity: InvestmentFixedIncomeTotals;
+  currentEffectiveRate: null | string;
+  liquidity: InvestmentFixedIncomeLiquidity;
+  liquidityDate: null | string;
+  lots: InvestmentFixedIncomeLot[];
+  maturityDate: string;
+  maturityPending: boolean;
+  product: InvestmentFixedIncomeProduct;
+  rates: InvestmentFixedIncomeRate[];
+  taxExempt: boolean;
+  today: InvestmentFixedIncomeTotals;
+}
+
+export interface InvestmentFixedIncomeAdjustment {
+  date: string;
+  grossAmount: number;
+  id: string;
+}
+
+export interface InvestmentFixedIncomeAdjustmentResult {
+  // The gross the curve gave on that date before the adjustment.
+  computedGross: number;
+  detail: InvestmentAssetDetail;
+  item: InvestmentFixedIncomeAdjustment;
+}
+
+export interface InvestmentFixedIncomeLot {
+  date: string;
+  days: number;
+  gross: number;
+  iof: number;
+  iofRate: string;
+  ir: number;
+  irRate: string;
+  net: number;
+  operationId: string;
+  principal: number;
+  remainingPrincipal: number;
+}
+
+export interface InvestmentFixedIncomeRate {
+  annualRate: null | string;
+  cdiPercent: null | string;
+  effectiveRate: string;
+  id: string;
+  indexRate: null | string;
+  mode: InvestmentFixedIncomeRateMode;
+  spread: null | string;
+  startDate: string;
+}
+
+export interface InvestmentFixedIncomeRedemptionPreview {
+  gross: number;
+  iof: number;
+  ir: number;
+  liquidityWarning: InvestmentFixedIncomeLiquidity | null;
+  lots: {
+    date: string;
+    gross: number;
+    operationId: string;
+    principalUsed: number;
+  }[];
+  net: number;
+  remaining: { gross: number; principal: number };
+}
+
+export interface InvestmentFixedIncomeSimulation {
+  atMaturity: InvestmentFixedIncomeTotals;
+  effectiveRate: string;
+}
+
+export interface InvestmentFixedIncomeTotals {
+  gross: number;
+  iof: number;
+  ir: number;
+  net: number;
+}
+
+// A contribution or a redemption: the operation, the refreshed detail and the liquidity warning.
+export interface InvestmentFixedIncomeWriteResult {
+  detail: InvestmentAssetDetail;
+  liquidityWarning: InvestmentFixedIncomeLiquidity | null;
+  operation: InvestmentOperation;
+}
+
 export interface InvestmentFx {
   quotedAt: string;
   // BRL per 1 USD, decimal string.
@@ -77,9 +173,12 @@ export interface InvestmentOperation {
   generateTransaction: boolean;
   gross: number;
   id: string;
+  // Spec 105: the real net of a redemption of a calculated title.
+  netAmount: null | number;
   quantity: string;
   // Realized result of a sell; null on a buy.
   realizedResult: null | number;
+  redemptionKind: InvestmentFixedIncomeRedemptionKind | null;
   total: number;
   transactionId: null | string;
   type: InvestmentOperationType;

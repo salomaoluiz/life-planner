@@ -5,6 +5,8 @@ import {
   InvestmentClassLocked,
   InvestmentFeesAboveSale,
   InvestmentNegativePosition,
+  InvestmentRedemptionTooLarge,
+  InvestmentUseFixedIncomeActions,
   QuoteRefreshTooSoon,
   QuoteSourceUnavailable,
   TickerExists,
@@ -35,11 +37,23 @@ function getInvestmentErrorMessage(
     };
   }
 
+  // Spec 105 FR 21: an edit that makes a redemption larger than the title names the redemption date.
+  if (error instanceof InvestmentRedemptionTooLarge) {
+    return {
+      key: "investment.fixedIncome.errors.redemptionTooLarge",
+      params: { date: formatDate(error.date ?? "") },
+    };
+  }
+
   const direct: [new (...args: never[]) => unknown, TranslationKeys][] = [
     [InvestmentAccountNotChangeable, "investment.errors.accountNotChangeable"],
     [InvestmentArchived, "investment.errors.archived"],
     [InvestmentClassLocked, "investment.errors.classLocked"],
     [InvestmentFeesAboveSale, "investment.errors.feesAboveSale"],
+    [
+      InvestmentUseFixedIncomeActions,
+      "investment.fixedIncome.errors.useActions",
+    ],
     [QuoteRefreshTooSoon, "investment.errors.refreshTooSoon"],
     [QuoteSourceUnavailable, "investment.errors.sourceUnavailable"],
     [TickerExists, "investment.errors.tickerExists"],

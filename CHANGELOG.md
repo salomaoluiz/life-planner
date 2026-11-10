@@ -3,6 +3,14 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.19.0] - 2026-11-10
+
+### Added
+
+- Fixed income calculated from the rate (spec 105): register a CDB, LCI, LCA, Tesouro or debenture with its rate (prefixed, % of the CDI or IPCA + x), maturity and liquidity, and see its gross, estimated income tax, estimated IOF and net today without typing the value.
+- Every contribution is a lot with its own date; redemptions record the amount that really landed, use the oldest lots first and estimate the withheld IR and IOF.
+- "Update rate" keeps the past with the old rate, "Adjust by statement" corrects the computed value, and a matured title shows up first in the list asking to confirm the redemption.
+
 ## [1.18.0] - 2026-11-10
 
 ### Added

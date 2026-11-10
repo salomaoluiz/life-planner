@@ -13,6 +13,17 @@ it("SHOULD forward every method to the datasource and return its result", async 
   const datasource = jest.mocked(datasourcesMocks.investmentDatasource);
   const results: [keyof typeof datasource, unknown[]][] = [
     ["createAsset", [{ name: "x" }]],
+    ["createFixedIncomeContribution", [{ assetId: "a" }]],
+    ["createFixedIncomeRate", ["a", { mode: "PREFIXED" }]],
+    ["createFixedIncomeRedemption", [{ assetId: "a" }]],
+    ["createFixedIncomeTitle", [{ name: "x" }]],
+    ["deleteFixedIncomeAdjustment", ["adj"]],
+    ["deleteFixedIncomeRate", ["rate"]],
+    ["previewFixedIncomeRedemption", [{ assetId: "a" }]],
+    ["simulateFixedIncome", [{ amount: 1 }]],
+    ["updateFixedIncomeRate", [{ id: "rate" }]],
+    ["upsertFixedIncomeAdjustment", [{ assetId: "a" }]],
+    ["upsertFixedIncomeTerms", [{ assetId: "a" }]],
     ["createOperation", [{ assetId: "a" }]],
     ["deleteAsset", ["a"]],
     ["deleteOperation", ["o"]],
@@ -45,6 +56,9 @@ it("SHOULD drop the finance caches after an operation write or an asset delete, 
   datasource.updateOperation.mockResolvedValue("r" as never);
   datasource.deleteOperation.mockResolvedValue(undefined);
   datasource.deleteAsset.mockResolvedValue(undefined);
+  datasource.createFixedIncomeContribution.mockResolvedValue("r" as never);
+  datasource.createFixedIncomeRedemption.mockResolvedValue("r" as never);
+  datasource.createFixedIncomeTitle.mockResolvedValue("r" as never);
   datasource.getAssets.mockResolvedValue([]);
   datasource.upsertValuation.mockResolvedValue("r" as never);
 
@@ -57,6 +71,9 @@ it("SHOULD drop the finance caches after an operation write or an asset delete, 
     async () => repository.updateOperation({ id: "o" }),
     async () => repository.deleteOperation("o"),
     async () => repository.deleteAsset("a"),
+    async () => repository.createFixedIncomeContribution({} as never),
+    async () => repository.createFixedIncomeRedemption({} as never),
+    async () => repository.createFixedIncomeTitle({} as never),
   ]) {
     invalidate.mockClear();
     await write();

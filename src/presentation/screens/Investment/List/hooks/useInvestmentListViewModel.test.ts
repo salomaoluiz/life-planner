@@ -11,7 +11,11 @@ import { InvestmentAsset } from "@domain/entities/investment/InvestmentEntities"
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
 import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
-import { makeAsset, owners } from "@screens/Investment/mocks/fixtures";
+import {
+  makeAsset,
+  makeFixedIncome,
+  owners,
+} from "@screens/Investment/mocks/fixtures";
 
 import useInvestmentListViewModel, {
   fetchAssets,
@@ -203,4 +207,52 @@ it("SHOULD block the add action on an archived family with the read-only toast",
 
   act(() => result.current.onToastHide());
   expect(result.current.toastVisible).toBe(false);
+});
+
+describe("fixed income (spec 105)", () => {
+  const pending = makeAsset({
+    assetClass: "FIXED_INCOME" as never,
+    fixedIncome: makeFixedIncome({ maturityPending: true }),
+    id: "asset-fi",
+    ticker: null,
+  });
+
+  it("SHOULD expose the matured titles first, only on the active tab", () => {
+    givenData([makeAsset(), pending]);
+
+    const { result } = setup();
+
+    expect(result.current.pendingAssets.map((asset) => asset.id)).toEqual([
+      "asset-fi",
+    ]);
+
+    act(() => result.current.onTabChange(InvestmentAssetStatus.ARCHIVED));
+
+    expect(result.current.pendingAssets).toEqual([]);
+  });
+
+  it("SHOULD open the redeem modal as a total redemption on the maturity date", () => {
+    givenData([pending]);
+
+    const { result } = setup();
+
+    act(() => result.current.onConfirmMaturity("asset-fi"));
+
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "investment_fixed_income_redeem",
+      { assetId: "asset-fi", date: "2028-01-15", kind: "TOTAL" },
+    );
+  });
+
+  it("SHOULD expose no pending title WHEN none matured", () => {
+    givenData([
+      makeAsset({
+        assetClass: "FIXED_INCOME" as never,
+        fixedIncome: makeFixedIncome(),
+        id: "asset-fi",
+      }),
+    ]);
+
+    expect(setup().result.current.pendingAssets).toEqual([]);
+  });
 });

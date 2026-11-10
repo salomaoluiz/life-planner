@@ -3,6 +3,9 @@ import {
   InvestmentAssetClass,
   InvestmentAssetStatus,
   InvestmentFeeKind,
+  InvestmentFixedIncomeLiquidity,
+  InvestmentFixedIncomeProduct,
+  InvestmentFixedIncomeRateMode,
   InvestmentOperationType,
   InvestmentPriceSource,
   InvestmentQuoteMarket,
@@ -11,6 +14,7 @@ import {
 import {
   InvestmentAsset,
   InvestmentAssetDetail,
+  InvestmentFixedIncome,
   InvestmentOperation,
   InvestmentPosition,
   InvestmentQuote,
@@ -30,6 +34,7 @@ function makeAsset(overrides: Partial<InvestmentAsset> = {}): InvestmentAsset {
     averageFxRate: null,
     brl: null,
     currency: "BRL",
+    fixedIncome: null,
     fx: null,
     id: "asset-1",
     name: "Itaúsa PN",
@@ -69,6 +74,98 @@ function makeDetail(
   };
 }
 
+// Spec 105: a calculated CDB of R$ 15.000 in two lots (cents).
+function makeFixedIncome(
+  overrides: Partial<InvestmentFixedIncome> = {},
+): InvestmentFixedIncome {
+  return {
+    adjustments: [],
+    atMaturity: { gross: 1907132, iof: 0, ir: 61070, net: 1846062 },
+    currentEffectiveRate: "16.510000",
+    liquidity: InvestmentFixedIncomeLiquidity.AT_MATURITY,
+    liquidityDate: null,
+    lots: [
+      {
+        date: "2026-01-15",
+        days: 293,
+        gross: 1128046,
+        iof: 0,
+        iofRate: "0",
+        ir: 25609,
+        irRate: "0.2",
+        net: 1102437,
+        operationId: "lot-1",
+        principal: 1000000,
+        remainingPrincipal: 1000000,
+      },
+      {
+        date: "2026-10-20",
+        days: 15,
+        gross: 503020,
+        iof: 1510,
+        iofRate: "0.5",
+        ir: 340,
+        irRate: "0.225",
+        net: 501170,
+        operationId: "lot-2",
+        principal: 500000,
+        remainingPrincipal: 500000,
+      },
+    ],
+    maturityDate: "2028-01-15",
+    maturityPending: false,
+    product: InvestmentFixedIncomeProduct.CDB,
+    rates: [
+      {
+        annualRate: null,
+        cdiPercent: "110.0000",
+        effectiveRate: "16.510000",
+        id: "rate-1",
+        indexRate: "14.9000",
+        mode: InvestmentFixedIncomeRateMode.CDI_PERCENT,
+        spread: null,
+        startDate: "2026-01-15",
+      },
+    ],
+    taxExempt: false,
+    today: { gross: 1631066, iof: 1510, ir: 25949, net: 1603607 },
+    ...overrides,
+  };
+}
+
+function makeFixedIncomeDetail(
+  overrides: Partial<InvestmentAssetDetail> = {},
+): InvestmentAssetDetail {
+  return {
+    ...makeAsset({
+      assetClass: InvestmentAssetClass.FIXED_INCOME,
+      fixedIncome: makeFixedIncome(),
+      id: "asset-fi",
+      name: "CDB Banco Exemplo 2028",
+      ticker: null,
+    }),
+    fixedIncome: makeFixedIncome(),
+    operations: [
+      makeOperation({
+        date: "2026-10-20",
+        id: "lot-2",
+        quantity: "5000",
+        total: 500000,
+        unitPrice: "1",
+      }),
+      makeOperation({
+        date: "2026-01-15",
+        id: "lot-1",
+        quantity: "10000",
+        total: 1000000,
+        unitPrice: "1",
+      }),
+    ],
+    valuations: [],
+    ...overrides,
+  };
+}
+
 function makeOperation(
   overrides: Partial<InvestmentOperation> = {},
 ): InvestmentOperation {
@@ -89,8 +186,10 @@ function makeOperation(
     generateTransaction: true,
     gross: 510000,
     id: "op-1",
+    netAmount: null,
     quantity: "500",
     realizedResult: null,
+    redemptionKind: null,
     total: 510490,
     transactionId: "tx-1",
     type: InvestmentOperationType.BUY,
@@ -183,6 +282,8 @@ function makeValuation(
 export {
   makeAsset,
   makeDetail,
+  makeFixedIncome,
+  makeFixedIncomeDetail,
   makeOperation,
   makePosition,
   makeQuote,

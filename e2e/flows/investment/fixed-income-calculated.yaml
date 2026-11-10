@@ -1,0 +1,118 @@
+url: ${E2E_WEB_URL}
+name: investment/fixed-income-calculated
+tags:
+  - investment
+  - spec-105
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: E2E Broker
+      BALANCE_CENTS: "1000000"
+- evalScript: ${output.BROKER_ACCOUNT_ID = output.ACCOUNT_ID}
+# A CDB of R$ 10.000,00 at 12% a.a. prefixed, daily liquidity, no finance entry (the account stays at R$ 10.000,00).
+- runFlow:
+    file: ../../subflows/setup/create-fixed-income-title.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: E2E CDB
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/investment/open-investments.yaml
+- tapOn:
+    id: "investment.list.row-${output.ASSET_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.fi-card-net"
+    timeout: 20000
+# The calculated title shows the curve, the lots and the projection, not a manual price.
+- assertVisible:
+    id: "investment.detail.fi-rate-line"
+- assertVisible:
+    id: "investment.detail.fi-at-maturity"
+- assertVisible:
+    id: "investment.detail.fi-card-applied"
+    text: ".*10[.,]000.*"
+# New contribution of R$ 5.000,00 paid from the account (-5.000,00).
+- tapOn:
+    id: "investment.detail.fi-action-contribute"
+- extendedWaitUntil:
+    visible:
+      id: "investment.contribution-modal.amount"
+    timeout: 20000
+- tapOn:
+    id: "investment.contribution-modal.amount"
+- inputText: "500000"
+- tapOn:
+    id: "investment.contribution-modal.save"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.fi-card-applied"
+      text: ".*15[.,]000.*"
+    timeout: 20000
+- runFlow:
+    file: ../../subflows/assert/assert-account-balance.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.BROKER_ACCOUNT_ID}
+      EXPECTED_CENTS: "500000"
+# Partial redemption of R$ 6.000,00: the estimate appears AND the account receives what really landed.
+- tapOn:
+    id: "investment.detail.fi-action-redeem"
+- extendedWaitUntil:
+    visible:
+      id: "investment.redeem-modal.net"
+    timeout: 20000
+- tapOn:
+    id: "investment.redeem-modal.net"
+- inputText: "600000"
+- extendedWaitUntil:
+    visible:
+      id: "investment.redeem-modal.preview"
+    timeout: 30000
+- tapOn:
+    id: "investment.redeem-modal.save"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.fi-card-net"
+    timeout: 20000
+- runFlow:
+    file: ../../subflows/assert/assert-account-balance.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.BROKER_ACCOUNT_ID}
+      EXPECTED_CENTS: "1100000"
+# Update the rate: the new entry shows in the history tab.
+- tapOn:
+    id: "investment.detail.fi-action-rates"
+- extendedWaitUntil:
+    visible:
+      id: "investment.rate-modal.field-annualRate"
+    timeout: 20000
+- tapOn:
+    id: "investment.rate-modal.field-annualRate"
+- eraseText: 10
+- inputText: "13"
+- tapOn:
+    id: "investment.rate-modal.save"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.fi-card-net"
+    timeout: 20000
+- tapOn:
+    id: "investment.detail.fi-tab-rates"
+- assertVisible:
+    id: "investment.detail.fi-rate-row-.*"

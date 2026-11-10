@@ -8,7 +8,9 @@ import {
   InvestmentClassLocked,
   InvestmentFeesAboveSale,
   InvestmentNegativePosition,
+  InvestmentRedemptionTooLarge,
   InvestmentRowUseOperation,
+  InvestmentUseFixedIncomeActions,
   QuoteRefreshTooSoon,
   QuoteSourceUnavailable,
   TickerExists,
@@ -44,6 +46,24 @@ function handleInvestmentApiError(
     if (error.statusCode === 422 && code === "TICKER_NOT_FOUND") {
       throw new TickerNotFound();
     }
+    // Spec 105 FR 20-21: the 422 carries `details` (availableNet of a redemption, or the date it stopped fitting).
+    if (error.statusCode === 422 && error.body?.details) {
+      const details = error.body.details as {
+        availableNet?: number;
+        date?: string;
+      };
+
+      if (
+        typeof details.availableNet === "number" ||
+        (typeof details.date === "string" &&
+          String(error.message).includes("larger than the title"))
+      ) {
+        throw new InvestmentRedemptionTooLarge({
+          availableNet: details.availableNet,
+          date: details.date,
+        });
+      }
+    }
   }
 
   return handleFinancialApiError(error, context, {
@@ -68,6 +88,9 @@ function investmentUnprocessable(message: string): BusinessError | undefined {
   }
   if (message.includes("Fees are higher than the sale value")) {
     return new InvestmentFeesAboveSale();
+  }
+  if (message.includes("Use the fixed income actions")) {
+    return new InvestmentUseFixedIncomeActions();
   }
   if (message.includes("Edit this transaction through its investment")) {
     return new InvestmentRowUseOperation();

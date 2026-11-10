@@ -3,18 +3,29 @@ import { BusinessError, GenericError } from "@domain/entities/errors";
 import Repositories from "@domain/repositories";
 
 import createInvestmentAssetUseCase from "./createInvestmentAssetUseCase";
+import createInvestmentFixedIncomeContributionUseCase from "./createInvestmentFixedIncomeContributionUseCase";
+import createInvestmentFixedIncomeRateUseCase from "./createInvestmentFixedIncomeRateUseCase";
+import createInvestmentFixedIncomeRedemptionUseCase from "./createInvestmentFixedIncomeRedemptionUseCase";
+import createInvestmentFixedIncomeTitleUseCase from "./createInvestmentFixedIncomeTitleUseCase";
 import createInvestmentOperationUseCase from "./createInvestmentOperationUseCase";
 import deleteInvestmentAssetUseCase from "./deleteInvestmentAssetUseCase";
+import deleteInvestmentFixedIncomeAdjustmentUseCase from "./deleteInvestmentFixedIncomeAdjustmentUseCase";
+import deleteInvestmentFixedIncomeRateUseCase from "./deleteInvestmentFixedIncomeRateUseCase";
 import deleteInvestmentOperationUseCase from "./deleteInvestmentOperationUseCase";
 import deleteInvestmentValuationUseCase from "./deleteInvestmentValuationUseCase";
 import getInvestmentAssetsUseCase from "./getInvestmentAssetsUseCase";
 import getInvestmentAssetUseCase from "./getInvestmentAssetUseCase";
 import getInvestmentOperationLinkUseCase from "./getInvestmentOperationLinkUseCase";
 import getInvestmentPriceHistoryUseCase from "./getInvestmentPriceHistoryUseCase";
+import previewInvestmentFixedIncomeRedemptionUseCase from "./previewInvestmentFixedIncomeRedemptionUseCase";
 import refreshInvestmentQuotesUseCase from "./refreshInvestmentQuotesUseCase";
 import searchInvestmentTickersUseCase from "./searchInvestmentTickersUseCase";
+import simulateInvestmentFixedIncomeUseCase from "./simulateInvestmentFixedIncomeUseCase";
 import updateInvestmentAssetUseCase from "./updateInvestmentAssetUseCase";
+import updateInvestmentFixedIncomeRateUseCase from "./updateInvestmentFixedIncomeRateUseCase";
 import updateInvestmentOperationUseCase from "./updateInvestmentOperationUseCase";
+import upsertInvestmentFixedIncomeAdjustmentUseCase from "./upsertInvestmentFixedIncomeAdjustmentUseCase";
+import upsertInvestmentFixedIncomeTermsUseCase from "./upsertInvestmentFixedIncomeTermsUseCase";
 import upsertInvestmentValuationUseCase from "./upsertInvestmentValuationUseCase";
 
 type Factory = (repositories: Repositories) => {
@@ -93,6 +104,56 @@ const cases: [Factory, keyof Repositories["investmentRepository"], string][] = [
     "upsertValuation",
     "investment.upsertInvestmentValuationUseCase",
   ],
+  [
+    createInvestmentFixedIncomeContributionUseCase,
+    "createFixedIncomeContribution",
+    "investment.createInvestmentFixedIncomeContributionUseCase",
+  ],
+  [
+    createInvestmentFixedIncomeRedemptionUseCase,
+    "createFixedIncomeRedemption",
+    "investment.createInvestmentFixedIncomeRedemptionUseCase",
+  ],
+  [
+    createInvestmentFixedIncomeTitleUseCase,
+    "createFixedIncomeTitle",
+    "investment.createInvestmentFixedIncomeTitleUseCase",
+  ],
+  [
+    deleteInvestmentFixedIncomeAdjustmentUseCase,
+    "deleteFixedIncomeAdjustment",
+    "investment.deleteInvestmentFixedIncomeAdjustmentUseCase",
+  ],
+  [
+    deleteInvestmentFixedIncomeRateUseCase,
+    "deleteFixedIncomeRate",
+    "investment.deleteInvestmentFixedIncomeRateUseCase",
+  ],
+  [
+    previewInvestmentFixedIncomeRedemptionUseCase,
+    "previewFixedIncomeRedemption",
+    "investment.previewInvestmentFixedIncomeRedemptionUseCase",
+  ],
+  [
+    simulateInvestmentFixedIncomeUseCase,
+    "simulateFixedIncome",
+    "investment.simulateInvestmentFixedIncomeUseCase",
+  ],
+  [
+    updateInvestmentFixedIncomeRateUseCase,
+    "updateFixedIncomeRate",
+    "investment.updateInvestmentFixedIncomeRateUseCase",
+  ],
+  [
+    upsertInvestmentFixedIncomeAdjustmentUseCase,
+    "upsertFixedIncomeAdjustment",
+    "investment.upsertInvestmentFixedIncomeAdjustmentUseCase",
+  ],
+  [
+    upsertInvestmentFixedIncomeTermsUseCase,
+    "upsertFixedIncomeTerms",
+    "investment.upsertInvestmentFixedIncomeTermsUseCase",
+  ],
 ] as never;
 
 beforeEach(() => {
@@ -146,4 +207,56 @@ it("SHOULD give every use case its own unique name", () => {
 
   expect(unique.size).toBe(cases.length);
   expect(GenericError).toBeDefined();
+});
+
+describe("createInvestmentFixedIncomeRateUseCase", () => {
+  it("SHOULD pass the asset id AND the rate to the repository", async () => {
+    const repository = repositoriesMocks.investmentRepository;
+
+    (repository.createFixedIncomeRate as jest.Mock).mockResolvedValue("detail");
+
+    expect(
+      await createInvestmentFixedIncomeRateUseCase(repositoriesMocks).execute({
+        assetId: "asset-1",
+        rate: { mode: "PREFIXED" as never },
+      }),
+    ).toBe("detail");
+    expect(repository.createFixedIncomeRate).toHaveBeenCalledWith("asset-1", {
+      mode: "PREFIXED",
+    });
+  });
+
+  it("SHOULD add the context AND rethrow a default error", async () => {
+    const error = new BusinessError();
+    const addContext = jest.spyOn(error, "addContext");
+
+    (
+      repositoriesMocks.investmentRepository.createFixedIncomeRate as jest.Mock
+    ).mockRejectedValue(error);
+
+    await expect(
+      createInvestmentFixedIncomeRateUseCase(repositoriesMocks).execute({
+        assetId: "asset-1",
+        rate: { mode: "PREFIXED" as never },
+      }),
+    ).rejects.toBe(error);
+    expect(addContext).toHaveBeenCalledWith({
+      useCase: "investment.createInvestmentFixedIncomeRateUseCase",
+    });
+  });
+
+  it("SHOULD rethrow an unknown error untouched", async () => {
+    const error = new Error("boom");
+
+    (
+      repositoriesMocks.investmentRepository.createFixedIncomeRate as jest.Mock
+    ).mockRejectedValue(error);
+
+    await expect(
+      createInvestmentFixedIncomeRateUseCase(repositoriesMocks).execute({
+        assetId: "asset-1",
+        rate: { mode: "PREFIXED" as never },
+      }),
+    ).rejects.toBe(error);
+  });
 });

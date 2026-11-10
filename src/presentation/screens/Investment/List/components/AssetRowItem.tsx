@@ -3,8 +3,10 @@ import { Pressable, View } from "react-native";
 import { Badge, Card, Text, useDensity } from "@components";
 import { CurrencyCode } from "@domain/entities/financial/Currency";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
+import { chipsOf } from "@screens/Investment/FixedIncome/models/fixedIncome";
 import { AssetRow, labelOf } from "@screens/Investment/models/assetList";
 import {
+  formatDay,
   formatMoney,
   formatPercent,
   formatQuantity,
@@ -72,6 +74,25 @@ function AssetRowItem({ onPress, row }: Props) {
   const compactValue = compactValueOf();
   const compactNote = compactNoteOf();
   const testID = `${investmentTestIds.list.row}-${asset.id}`;
+  // Spec 105 FR 33: the maturity and the liquidity of a calculated title (grace period in the warning tone).
+  const chips = asset.fixedIncome
+    ? chipsOf(asset.fixedIncome, (day) => formatDay(day, localeTag))
+    : [];
+  const chipRow =
+    chips.length > 0 ? (
+      <View
+        style={styles.tickerRow}
+        testID={`${investmentTestIds.list.fixedIncomeChips}-${asset.id}`}
+      >
+        {chips.map((chip) => (
+          <Badge
+            key={chip.key}
+            label={t(chip.key, chip.params)}
+            tone={chip.tone === "default" ? "neutral" : chip.tone}
+          />
+        ))}
+      </View>
+    ) : null;
 
   function compactValueOf(): string {
     if (asset.brl) {
@@ -100,14 +121,16 @@ function AssetRowItem({ onPress, row }: Props) {
           </View>
           <Text.BodyStrong tabular value={compactValue} />
         </View>
-        <View style={styles.cardLine}>
-          <Text.Caption tone="secondary" value={`${quantity} · ${price}`} />
-          <Text.Caption
-            tabular
-            tone={unavailable ? "warning" : resultTone(change)}
-            value={compactNote}
-          />
-        </View>
+        {chipRow ?? (
+          <View style={styles.cardLine}>
+            <Text.Caption tone="secondary" value={`${quantity} · ${price}`} />
+            <Text.Caption
+              tabular
+              tone={unavailable ? "warning" : resultTone(change)}
+              value={compactNote}
+            />
+          </View>
+        )}
       </Card>
     );
   }
@@ -127,7 +150,7 @@ function AssetRowItem({ onPress, row }: Props) {
               <Badge label={t("investment.quote.unavailable")} />
             ) : null}
           </View>
-          <Text.Caption tone="secondary" value={asset.name} />
+          {chipRow ?? <Text.Caption tone="secondary" value={asset.name} />}
         </View>
         <View style={styles.cellNumber}>
           <Text.Body tabular value={quantity} />

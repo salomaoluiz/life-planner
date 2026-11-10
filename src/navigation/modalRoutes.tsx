@@ -77,6 +77,22 @@ export const MODAL_ROUTES: Record<ModalName, ComponentType> = {
   investment_asset: lazyModal(
     async () => import("@screens/Investment/Modals/AssetModal"),
   ),
+  investment_fixed_income: lazyModal(
+    async () => import("@screens/Investment/Modals/FixedIncomeTitleModal"),
+  ),
+  investment_fixed_income_adjust: lazyModal(
+    async () => import("@screens/Investment/Modals/FixedIncomeAdjustModal"),
+  ),
+  investment_fixed_income_contribution: lazyModal(
+    async () =>
+      import("@screens/Investment/Modals/FixedIncomeContributionModal"),
+  ),
+  investment_fixed_income_rate: lazyModal(
+    async () => import("@screens/Investment/Modals/FixedIncomeRateModal"),
+  ),
+  investment_fixed_income_redeem: lazyModal(
+    async () => import("@screens/Investment/Modals/FixedIncomeRedeemModal"),
+  ),
   investment_operation: lazyModal(
     async () => import("@screens/Investment/Modals/OperationModal"),
   ),
