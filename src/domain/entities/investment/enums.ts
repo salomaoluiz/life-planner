@@ -67,8 +67,11 @@ export enum InvestmentIncomeType {
 }
 
 export enum InvestmentOperationType {
+  BONUS = "BONUS",
   BUY = "BUY",
+  REVERSE_SPLIT = "REVERSE_SPLIT",
   SELL = "SELL",
+  SPLIT = "SPLIT",
 }
 
 // Spec 104: market-data enums, identical to the API's.
@@ -125,6 +128,27 @@ export const TICKER_REQUIRED_CLASSES: InvestmentAssetClass[] = [
 ];
 
 export const MAX_FEES_PER_OPERATION = 10;
+
+// Spec 108 FR 1: operations that change the position without moving money, in the order of the picker.
+export const INVESTMENT_EVENT_TYPES: InvestmentOperationType[] = [
+  InvestmentOperationType.SPLIT,
+  InvestmentOperationType.REVERSE_SPLIT,
+  InvestmentOperationType.BONUS,
+];
+
+export function isInvestmentEvent(type: InvestmentOperationType): boolean {
+  return INVESTMENT_EVENT_TYPES.includes(type);
+}
+
+// Spec 108 FR 9: B3 stocks and REITs hold whole units after an event; the other classes keep 8 places.
+export function wholeUnitsAfterEvent(
+  assetClass: InvestmentAssetClass,
+): boolean {
+  return (
+    assetClass === InvestmentAssetClass.BR_STOCK ||
+    assetClass === InvestmentAssetClass.BR_REIT
+  );
+}
 
 // Spec 105 FR 2: the products whose income tax is exempt by default (the owner can change it).
 export const TAX_EXEMPT_PRODUCTS: InvestmentFixedIncomeProduct[] = [

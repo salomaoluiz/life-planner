@@ -1,6 +1,7 @@
 import {
   InvestmentAsset,
   InvestmentAssetDetail,
+  InvestmentEventSuggestion,
   InvestmentFixedIncomeAdjustmentResult,
   InvestmentFixedIncomeRedemptionPreview,
   InvestmentFixedIncomeSimulation,
@@ -17,15 +18,19 @@ import {
   InvestmentValuationResult,
 } from "@domain/entities/investment/InvestmentEntities";
 import {
+  ApproveInvestmentEventSuggestionParams,
   ApproveInvestmentIncomeSuggestionParams,
   CreateFixedIncomeContributionParams,
   CreateFixedIncomeRedemptionParams,
   CreateFixedIncomeTitleParams,
   CreateInvestmentAssetParams,
+  CreateInvestmentEventParams,
+  CreateInvestmentFractionSaleParams,
   CreateInvestmentIncomeParams,
   CreateInvestmentOperationParams,
   FixedIncomeRateParams,
   GetInvestmentAssetsParams,
+  GetInvestmentEventSuggestionsParams,
   GetInvestmentIncomeDefaultsParams,
   GetInvestmentIncomesParams,
   GetInvestmentIncomeSuggestionsParams,
@@ -46,10 +51,16 @@ import {
 } from "@domain/repositories/investment";
 
 export interface InvestmentDatasource {
+  approveEventSuggestion(
+    params: ApproveInvestmentEventSuggestionParams,
+  ): Promise<InvestmentOperationResult>;
   approveIncomeSuggestion(
     params: ApproveInvestmentIncomeSuggestionParams,
   ): Promise<InvestmentIncome>;
   createAsset(params: CreateInvestmentAssetParams): Promise<InvestmentAsset>;
+  createEvent(
+    params: CreateInvestmentEventParams,
+  ): Promise<InvestmentOperationResult>;
   createFixedIncomeContribution(
     params: CreateFixedIncomeContributionParams,
   ): Promise<InvestmentFixedIncomeWriteResult>;
@@ -63,6 +74,9 @@ export interface InvestmentDatasource {
   createFixedIncomeTitle(
     params: CreateFixedIncomeTitleParams,
   ): Promise<InvestmentAssetDetail>;
+  createFractionSale(
+    params: CreateInvestmentFractionSaleParams,
+  ): Promise<InvestmentOperationResult>;
   createIncome(params: CreateInvestmentIncomeParams): Promise<InvestmentIncome>;
   createOperation(
     params: CreateInvestmentOperationParams,
@@ -75,6 +89,9 @@ export interface InvestmentDatasource {
   deleteValuation(id: string): Promise<void>;
   getAsset(id: string): Promise<InvestmentAssetDetail>;
   getAssets(params: GetInvestmentAssetsParams): Promise<InvestmentAsset[]>;
+  getEventSuggestions(
+    params: GetInvestmentEventSuggestionsParams,
+  ): Promise<InvestmentEventSuggestion[]>;
   getIncome(id: string): Promise<InvestmentIncome>;
   getIncomeDefaults(
     params: GetInvestmentIncomeDefaultsParams,
@@ -101,6 +118,7 @@ export interface InvestmentDatasource {
   refreshQuotes(
     params: RefreshInvestmentQuotesParams,
   ): Promise<InvestmentQuotesRefresh>;
+  rejectEventSuggestion(id: string): Promise<void>;
   rejectIncomeSuggestion(id: string): Promise<void>;
   searchTickers(
     params: SearchInvestmentTickersParams,

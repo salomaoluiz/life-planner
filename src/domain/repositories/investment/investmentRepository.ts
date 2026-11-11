@@ -15,6 +15,7 @@ import {
 import {
   InvestmentAsset,
   InvestmentAssetDetail,
+  InvestmentEventSuggestion,
   InvestmentFixedIncomeAdjustmentResult,
   InvestmentFixedIncomeRedemptionPreview,
   InvestmentFixedIncomeSimulation,
@@ -31,6 +32,17 @@ import {
   InvestmentValuationResult,
 } from "@domain/entities/investment/InvestmentEntities";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
+
+// Spec 108: the id of the suggestion; any other field overrides what the provider announced (the edit path).
+export interface ApproveInvestmentEventSuggestionParams {
+  bonusPercent?: string;
+  bonusUnitCost?: null | string;
+  date?: string;
+  id: string;
+  ratioFrom?: string;
+  ratioTo?: string;
+  type?: InvestmentOperationType;
+}
 
 // Spec 107: the fields the owner types; nullish optional ones are sent as `null` to clear them on edit.
 export interface ApproveInvestmentIncomeSuggestionParams extends Partial<InvestmentIncomeFields> {
@@ -81,6 +93,28 @@ export interface CreateInvestmentAssetParams {
   ticker?: string;
 }
 
+// Spec 108 FR 4-5: a split / reverse split needs the ratio, a bonus the percent (and optionally the cost per share).
+export interface CreateInvestmentEventParams {
+  assetId: string;
+  bonusPercent?: string;
+  bonusUnitCost?: string;
+  // `YYYY-MM-DD`, the data-com.
+  date: string;
+  ratioFrom?: string;
+  ratioTo?: string;
+  type: InvestmentOperationType;
+}
+
+// Spec 108 FR 15: the cash of a fraction auction (`grossAmount` in cents; 0 writes the fraction off).
+export interface CreateInvestmentFractionSaleParams {
+  accountId?: string;
+  date: string;
+  eventId: string;
+  fees: InvestmentFeeParams[];
+  generateTransaction: boolean;
+  grossAmount: number;
+}
+
 export interface CreateInvestmentIncomeParams extends InvestmentIncomeFields {
   assetId: string;
 }
@@ -123,6 +157,10 @@ export interface FixedIncomeTermsParams {
 // The app filters All / Personal / Family on the client, so the API call has no owner filter.
 export interface GetInvestmentAssetsParams {
   status: InvestmentAssetStatus;
+}
+
+export interface GetInvestmentEventSuggestionsParams {
+  assetId?: string;
 }
 
 export interface GetInvestmentIncomeDefaultsParams {
@@ -178,10 +216,16 @@ export interface InvestmentOperationLink {
 }
 
 export type InvestmentRepository = {
+  approveEventSuggestion(
+    params: ApproveInvestmentEventSuggestionParams,
+  ): Promise<InvestmentOperationResult>;
   approveIncomeSuggestion(
     params: ApproveInvestmentIncomeSuggestionParams,
   ): Promise<InvestmentIncome>;
   createAsset(params: CreateInvestmentAssetParams): Promise<InvestmentAsset>;
+  createEvent(
+    params: CreateInvestmentEventParams,
+  ): Promise<InvestmentOperationResult>;
   createFixedIncomeContribution(
     params: CreateFixedIncomeContributionParams,
   ): Promise<InvestmentFixedIncomeWriteResult>;
@@ -195,6 +239,9 @@ export type InvestmentRepository = {
   createFixedIncomeTitle(
     params: CreateFixedIncomeTitleParams,
   ): Promise<InvestmentAssetDetail>;
+  createFractionSale(
+    params: CreateInvestmentFractionSaleParams,
+  ): Promise<InvestmentOperationResult>;
   createIncome(params: CreateInvestmentIncomeParams): Promise<InvestmentIncome>;
   createOperation(
     params: CreateInvestmentOperationParams,
@@ -207,6 +254,9 @@ export type InvestmentRepository = {
   deleteValuation(id: string): Promise<void>;
   getAsset(id: string): Promise<InvestmentAssetDetail>;
   getAssets(params: GetInvestmentAssetsParams): Promise<InvestmentAsset[]>;
+  getEventSuggestions(
+    params: GetInvestmentEventSuggestionsParams,
+  ): Promise<InvestmentEventSuggestion[]>;
   getIncome(id: string): Promise<InvestmentIncome>;
   getIncomeDefaults(
     params: GetInvestmentIncomeDefaultsParams,
@@ -235,6 +285,7 @@ export type InvestmentRepository = {
   refreshQuotes(
     params: RefreshInvestmentQuotesParams,
   ): Promise<InvestmentQuotesRefresh>;
+  rejectEventSuggestion(id: string): Promise<void>;
   rejectIncomeSuggestion(id: string): Promise<void>;
   searchTickers(
     params: SearchInvestmentTickersParams,
@@ -317,12 +368,18 @@ export interface UpdateInvestmentIncomeParams extends Partial<InvestmentIncomeFi
 
 export interface UpdateInvestmentOperationParams {
   accountId?: null | string;
+  // Spec 108: the fields of an event (null clears the cost per new share) and the auction amount of a fraction sale.
+  bonusPercent?: string;
+  bonusUnitCost?: null | string;
   date?: string;
   fees?: InvestmentFeeParams[];
   fxRate?: null | string;
   generateTransaction?: boolean;
+  grossAmount?: number;
   id: string;
   quantity?: string;
+  ratioFrom?: string;
+  ratioTo?: string;
   unitPrice?: string;
 }
 

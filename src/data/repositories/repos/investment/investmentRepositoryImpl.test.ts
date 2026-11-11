@@ -25,6 +25,11 @@ it("SHOULD forward every method to the datasource and return its result", async 
     ["upsertFixedIncomeAdjustment", [{ assetId: "a" }]],
     ["upsertFixedIncomeTerms", [{ assetId: "a" }]],
     ["createOperation", [{ assetId: "a" }]],
+    ["createEvent", [{ assetId: "a" }]],
+    ["createFractionSale", [{ eventId: "e" }]],
+    ["approveEventSuggestion", [{ id: "sug" }]],
+    ["getEventSuggestions", [{ assetId: "a" }]],
+    ["rejectEventSuggestion", ["sug"]],
     ["deleteAsset", ["a"]],
     ["deleteOperation", ["o"]],
     ["deleteValuation", ["v"]],
@@ -75,11 +80,17 @@ it("SHOULD drop the finance caches after an operation write or an asset delete, 
   datasource.receiveIncome.mockResolvedValue("r" as never);
   datasource.approveIncomeSuggestion.mockResolvedValue("r" as never);
   datasource.deleteIncome.mockResolvedValue(undefined);
+  datasource.createFractionSale.mockResolvedValue("r" as never);
+  datasource.createEvent.mockResolvedValue("r" as never);
+  datasource.approveEventSuggestion.mockResolvedValue("r" as never);
   datasource.getAssets.mockResolvedValue([]);
   datasource.upsertValuation.mockResolvedValue("r" as never);
 
   await repository.getAssets({ status: InvestmentAssetStatus.ACTIVE });
   await repository.upsertValuation({ assetId: "a", date: "d", unitPrice: "1" });
+  // An event moves no money: only the fraction sale touches the finance rows.
+  await repository.createEvent({} as never);
+  await repository.approveEventSuggestion({ id: "s" });
   expect(invalidate).not.toHaveBeenCalled();
 
   for (const write of [
@@ -95,6 +106,7 @@ it("SHOULD drop the finance caches after an operation write or an asset delete, 
     async () => repository.receiveIncome({ id: "i" }),
     async () => repository.approveIncomeSuggestion({ id: "s" }),
     async () => repository.deleteIncome("i"),
+    async () => repository.createFractionSale({} as never),
   ]) {
     invalidate.mockClear();
     await write();

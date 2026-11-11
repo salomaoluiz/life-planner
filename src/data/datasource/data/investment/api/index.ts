@@ -15,6 +15,7 @@ import {
 import { api } from "@infrastructure/api";
 import { formatDecimal, parseDecimal, ZERO } from "@utils/decimal";
 
+import eventApi, { eventFieldsBody } from "./eventApi";
 import fixedIncomeApi from "./fixedIncomeApi";
 import incomeApi from "./incomeApi";
 import handleInvestmentApiError from "./investmentApiError";
@@ -260,6 +261,8 @@ async function updateOperation(params: UpdateInvestmentOperationParams) {
     fees: params.fees === undefined ? undefined : feesBody(params.fees),
     fxRate: fxRateBody(params.fxRate),
     generateTransaction: params.generateTransaction,
+    // Spec 108: the fields of an event and the auction amount of a fraction sale go through the same PATCH.
+    ...eventFieldsBody(params),
     quantity:
       params.quantity === undefined
         ? undefined
@@ -304,6 +307,7 @@ async function upsertValuation(params: UpsertInvestmentValuationParams) {
 
 const investmentApi: InvestmentDatasource = {
   ...fixedIncomeApi,
+  ...eventApi,
   ...incomeApi,
   createAsset,
   createOperation,

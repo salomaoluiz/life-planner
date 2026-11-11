@@ -38,6 +38,8 @@ function asset(
     operationsWithoutFxRate: 0,
     owner: OwnerType.USER,
     ownerId: "user",
+    pendingEventSuggestions: 0,
+    pendingFractionCount: 0,
     position: {
       averagePrice: null,
       cost: 1000,
@@ -46,6 +48,7 @@ function asset(
       currentValueDate: null,
       openResult: 500,
       openResultPercent: 0.5,
+      pendingFractions: [],
       quantity: "1",
       realizedResult: 0,
       ...position,

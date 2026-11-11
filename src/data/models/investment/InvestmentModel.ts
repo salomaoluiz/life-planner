@@ -19,6 +19,7 @@ import {
   InvestmentAsset,
   InvestmentAssetDetail,
   InvestmentBrlResult,
+  InvestmentEventSuggestion,
   InvestmentFixedIncome,
   InvestmentFixedIncomeAdjustmentResult,
   InvestmentFixedIncomeRedemptionPreview,
@@ -32,6 +33,7 @@ import {
   InvestmentIncomeSuggestion,
   InvestmentIncomeSummary,
   InvestmentOperation,
+  InvestmentOperationEvent,
   InvestmentOperationResult,
   InvestmentPosition,
   InvestmentPriceHistory,
@@ -64,6 +66,8 @@ class InvestmentModel {
       operationsWithoutFxRate: Number(data.operationsWithoutFxRate ?? 0),
       owner: data.owner as OwnerType,
       ownerId: data.ownerId as string,
+      pendingEventSuggestions: Number(data.pendingEventSuggestions ?? 0),
+      pendingFractionCount: Number(data.pendingFractionCount ?? 0),
       position: InvestmentModel.toPosition(data.position as Json),
       priceSource: (data.currentPriceSource as InvestmentPriceSource) ?? null,
       quote: data.quote ? InvestmentModel.toQuote(data.quote as Json) : null,
@@ -101,6 +105,29 @@ class InvestmentModel {
   }
 
   // Spec 105 FR 26: the list sends the summary, the detail also the history, lots and projection.
+  // Spec 108: nulls are left out of the payload; the optional fields stay undefined.
+  static toEventSuggestion(data: Json): InvestmentEventSuggestion {
+    return {
+      assetId: data.assetId as string,
+      averagePriceAfter:
+        (data.averagePriceAfter as string | undefined) ?? undefined,
+      averagePriceBefore:
+        (data.averagePriceBefore as string | undefined) ?? undefined,
+      bonusPercent: (data.bonusPercent as string | undefined) ?? undefined,
+      bonusUnitCost: (data.bonusUnitCost as string | undefined) ?? undefined,
+      currency: toCurrencyCode(data.currency),
+      date: data.date as string,
+      fractionQuantity: (data.fractionQuantity as string) ?? "0",
+      id: data.id as string,
+      quantityAfter: data.quantityAfter as string,
+      quantityBefore: data.quantityBefore as string,
+      ratioFrom: (data.ratioFrom as string | undefined) ?? undefined,
+      ratioTo: (data.ratioTo as string | undefined) ?? undefined,
+      ticker: data.ticker as string,
+      type: data.type as InvestmentOperationType,
+    };
+  }
+
   static toFixedIncome(data: Json): InvestmentFixedIncome {
     return {
       adjustments: ((data.adjustments as Json[]) ?? []).map((row) => ({
@@ -297,6 +324,7 @@ class InvestmentModel {
   static toOperation(data: Json): InvestmentOperation {
     return {
       accountId: (data.accountId as null | string) ?? null,
+      corporateEvent: InvestmentModel.toOperationEvent(data),
       costRemoved: (data.costRemoved as null | number) ?? null,
       date: data.date as string,
       fees: ((data.fees as Json[]) ?? []).map((fee) => ({
@@ -306,19 +334,41 @@ class InvestmentModel {
         kind: fee.kind as InvestmentFeeKind,
       })),
       feesTotal: Number(data.feesTotal ?? 0),
+      fractionOfOperationId:
+        (data.fractionOfOperationId as string | undefined) ?? undefined,
       fxRate: (data.fxRate as null | string) ?? null,
       generateTransaction: data.generateTransaction === true,
       gross: Number(data.gross ?? 0),
       id: data.id as string,
       netAmount: (data.netAmount as null | number) ?? null,
-      quantity: data.quantity as string,
+      quantity: (data.quantity as string | undefined) ?? "0",
       realizedResult: (data.realizedResult as null | number) ?? null,
       redemptionKind:
         (data.redemptionKind as InvestmentFixedIncomeRedemptionKind) ?? null,
       total: Number(data.total ?? 0),
       transactionId: (data.transactionId as null | string) ?? null,
       type: data.type as InvestmentOperationType,
-      unitPrice: data.unitPrice as string,
+      unitPrice: (data.unitPrice as string | undefined) ?? "0",
+    };
+  }
+
+  // Spec 108: only an event carries `quantityBefore`; the money fields of an event are left out of the payload.
+  static toOperationEvent(data: Json): InvestmentOperationEvent | undefined {
+    if (data.quantityBefore === undefined) {
+      return undefined;
+    }
+
+    return {
+      averagePriceAfter: (data.averagePriceAfter as null | string) ?? null,
+      averagePriceBefore: (data.averagePriceBefore as null | string) ?? null,
+      bonusPercent: (data.bonusPercent as string | undefined) ?? undefined,
+      bonusUnitCost: (data.bonusUnitCost as string | undefined) ?? undefined,
+      fractionCost: Number(data.fractionCost ?? 0),
+      fractionQuantity: (data.fractionQuantity as string) ?? "0",
+      quantityAfter: data.quantityAfter as string,
+      quantityBefore: data.quantityBefore as string,
+      ratioFrom: (data.ratioFrom as string | undefined) ?? undefined,
+      ratioTo: (data.ratioTo as string | undefined) ?? undefined,
     };
   }
 
@@ -338,6 +388,14 @@ class InvestmentModel {
       currentValueDate: (data.currentValueDate as null | string) ?? null,
       openResult: (data.openResult as null | number) ?? null,
       openResultPercent: (data.openResultPercent as null | number) ?? null,
+      pendingFractions: ((data.pendingFractions as Json[]) ?? []).map(
+        (fraction) => ({
+          cost: Number(fraction.cost),
+          date: fraction.date as string,
+          eventId: fraction.eventId as string,
+          quantity: fraction.quantity as string,
+        }),
+      ),
       quantity: (data.quantity as string) ?? "0",
       realizedResult: Number(data.realizedResult ?? 0),
     };

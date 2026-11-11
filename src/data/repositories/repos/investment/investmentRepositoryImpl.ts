@@ -16,9 +16,12 @@ function investmentRepositoryImpl(
   const { investmentDatasource } = datasources;
 
   return {
+    approveEventSuggestion: async (params) =>
+      investmentDatasource.approveEventSuggestion(params),
     approveIncomeSuggestion: async (params) =>
       withFinanceCaches(investmentDatasource.approveIncomeSuggestion(params)),
     createAsset: async (params) => investmentDatasource.createAsset(params),
+    createEvent: async (params) => investmentDatasource.createEvent(params),
     createFixedIncomeContribution: async (params) =>
       withFinanceCaches(
         investmentDatasource.createFixedIncomeContribution(params),
@@ -31,6 +34,8 @@ function investmentRepositoryImpl(
       ),
     createFixedIncomeTitle: async (params) =>
       withFinanceCaches(investmentDatasource.createFixedIncomeTitle(params)),
+    createFractionSale: async (params) =>
+      withFinanceCaches(investmentDatasource.createFractionSale(params)),
     createIncome: async (params) =>
       withFinanceCaches(investmentDatasource.createIncome(params)),
     createOperation: async (params) =>
@@ -48,6 +53,8 @@ function investmentRepositoryImpl(
     deleteValuation: async (id) => investmentDatasource.deleteValuation(id),
     getAsset: async (id) => investmentDatasource.getAsset(id),
     getAssets: async (params) => investmentDatasource.getAssets(params),
+    getEventSuggestions: async (params) =>
+      investmentDatasource.getEventSuggestions(params),
     getIncome: async (id) => investmentDatasource.getIncome(id),
     getIncomeDefaults: async (params) =>
       investmentDatasource.getIncomeDefaults(params),
@@ -65,6 +72,8 @@ function investmentRepositoryImpl(
     receiveIncome: async (params) =>
       withFinanceCaches(investmentDatasource.receiveIncome(params)),
     refreshQuotes: async (params) => investmentDatasource.refreshQuotes(params),
+    rejectEventSuggestion: async (id) =>
+      investmentDatasource.rejectEventSuggestion(id),
     rejectIncomeSuggestion: async (id) =>
       investmentDatasource.rejectIncomeSuggestion(id),
     searchTickers: async (params) => investmentDatasource.searchTickers(params),
