@@ -1,7 +1,11 @@
 export { default as InvestmentAccountNotChangeable } from "./InvestmentAccountNotChangeable";
 export { default as InvestmentArchived } from "./InvestmentArchived";
 export { default as InvestmentClassLocked } from "./InvestmentClassLocked";
+export { default as InvestmentCurrencyMismatch } from "./InvestmentCurrencyMismatch";
 export { default as InvestmentFeesAboveSale } from "./InvestmentFeesAboveSale";
+export { default as InvestmentIncomeIncomplete } from "./InvestmentIncomeIncomplete";
+export { default as InvestmentIncomeLocked } from "./InvestmentIncomeLocked";
+export { default as InvestmentIncomeReceived } from "./InvestmentIncomeReceived";
 export { default as InvestmentNegativePosition } from "./InvestmentNegativePosition";
 export { default as InvestmentRedemptionTooLarge } from "./InvestmentRedemptionTooLarge";
 export { default as InvestmentRowUseOperation } from "./InvestmentRowUseOperation";

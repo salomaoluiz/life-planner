@@ -2,27 +2,38 @@ import { repositoriesMocks } from "@data/repositories/mocks/index.mocks";
 import { BusinessError, GenericError } from "@domain/entities/errors";
 import Repositories from "@domain/repositories";
 
+import approveInvestmentIncomeSuggestionUseCase from "./approveInvestmentIncomeSuggestionUseCase";
 import createInvestmentAssetUseCase from "./createInvestmentAssetUseCase";
 import createInvestmentFixedIncomeContributionUseCase from "./createInvestmentFixedIncomeContributionUseCase";
 import createInvestmentFixedIncomeRateUseCase from "./createInvestmentFixedIncomeRateUseCase";
 import createInvestmentFixedIncomeRedemptionUseCase from "./createInvestmentFixedIncomeRedemptionUseCase";
 import createInvestmentFixedIncomeTitleUseCase from "./createInvestmentFixedIncomeTitleUseCase";
+import createInvestmentIncomeUseCase from "./createInvestmentIncomeUseCase";
 import createInvestmentOperationUseCase from "./createInvestmentOperationUseCase";
 import deleteInvestmentAssetUseCase from "./deleteInvestmentAssetUseCase";
 import deleteInvestmentFixedIncomeAdjustmentUseCase from "./deleteInvestmentFixedIncomeAdjustmentUseCase";
 import deleteInvestmentFixedIncomeRateUseCase from "./deleteInvestmentFixedIncomeRateUseCase";
+import deleteInvestmentIncomeUseCase from "./deleteInvestmentIncomeUseCase";
 import deleteInvestmentOperationUseCase from "./deleteInvestmentOperationUseCase";
 import deleteInvestmentValuationUseCase from "./deleteInvestmentValuationUseCase";
 import getInvestmentAssetsUseCase from "./getInvestmentAssetsUseCase";
 import getInvestmentAssetUseCase from "./getInvestmentAssetUseCase";
+import getInvestmentIncomeDefaultsUseCase from "./getInvestmentIncomeDefaultsUseCase";
+import getInvestmentIncomeLinkUseCase from "./getInvestmentIncomeLinkUseCase";
+import getInvestmentIncomeSuggestionsUseCase from "./getInvestmentIncomeSuggestionsUseCase";
+import getInvestmentIncomesUseCase from "./getInvestmentIncomesUseCase";
+import getInvestmentIncomeUseCase from "./getInvestmentIncomeUseCase";
 import getInvestmentOperationLinkUseCase from "./getInvestmentOperationLinkUseCase";
 import getInvestmentPriceHistoryUseCase from "./getInvestmentPriceHistoryUseCase";
 import previewInvestmentFixedIncomeRedemptionUseCase from "./previewInvestmentFixedIncomeRedemptionUseCase";
+import receiveInvestmentIncomeUseCase from "./receiveInvestmentIncomeUseCase";
 import refreshInvestmentQuotesUseCase from "./refreshInvestmentQuotesUseCase";
+import rejectInvestmentIncomeSuggestionUseCase from "./rejectInvestmentIncomeSuggestionUseCase";
 import searchInvestmentTickersUseCase from "./searchInvestmentTickersUseCase";
 import simulateInvestmentFixedIncomeUseCase from "./simulateInvestmentFixedIncomeUseCase";
 import updateInvestmentAssetUseCase from "./updateInvestmentAssetUseCase";
 import updateInvestmentFixedIncomeRateUseCase from "./updateInvestmentFixedIncomeRateUseCase";
+import updateInvestmentIncomeUseCase from "./updateInvestmentIncomeUseCase";
 import updateInvestmentOperationUseCase from "./updateInvestmentOperationUseCase";
 import upsertInvestmentFixedIncomeAdjustmentUseCase from "./upsertInvestmentFixedIncomeAdjustmentUseCase";
 import upsertInvestmentFixedIncomeTermsUseCase from "./upsertInvestmentFixedIncomeTermsUseCase";
@@ -153,6 +164,61 @@ const cases: [Factory, keyof Repositories["investmentRepository"], string][] = [
     upsertInvestmentFixedIncomeTermsUseCase,
     "upsertFixedIncomeTerms",
     "investment.upsertInvestmentFixedIncomeTermsUseCase",
+  ],
+  [
+    approveInvestmentIncomeSuggestionUseCase,
+    "approveIncomeSuggestion",
+    "investment.approveInvestmentIncomeSuggestionUseCase",
+  ],
+  [
+    createInvestmentIncomeUseCase,
+    "createIncome",
+    "investment.createInvestmentIncomeUseCase",
+  ],
+  [
+    deleteInvestmentIncomeUseCase,
+    "deleteIncome",
+    "investment.deleteInvestmentIncomeUseCase",
+  ],
+  [
+    getInvestmentIncomeDefaultsUseCase,
+    "getIncomeDefaults",
+    "investment.getInvestmentIncomeDefaultsUseCase",
+  ],
+  [
+    getInvestmentIncomeLinkUseCase,
+    "getIncomeLink",
+    "investment.getInvestmentIncomeLinkUseCase",
+  ],
+  [
+    getInvestmentIncomesUseCase,
+    "getIncomes",
+    "investment.getInvestmentIncomesUseCase",
+  ],
+  [
+    getInvestmentIncomeSuggestionsUseCase,
+    "getIncomeSuggestions",
+    "investment.getInvestmentIncomeSuggestionsUseCase",
+  ],
+  [
+    getInvestmentIncomeUseCase,
+    "getIncome",
+    "investment.getInvestmentIncomeUseCase",
+  ],
+  [
+    receiveInvestmentIncomeUseCase,
+    "receiveIncome",
+    "investment.receiveInvestmentIncomeUseCase",
+  ],
+  [
+    rejectInvestmentIncomeSuggestionUseCase,
+    "rejectIncomeSuggestion",
+    "investment.rejectInvestmentIncomeSuggestionUseCase",
+  ],
+  [
+    updateInvestmentIncomeUseCase,
+    "updateIncome",
+    "investment.updateInvestmentIncomeUseCase",
   ],
 ] as never;
 

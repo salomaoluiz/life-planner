@@ -52,6 +52,20 @@ export enum InvestmentFixedIncomeRedemptionKind {
   TOTAL = "TOTAL",
 }
 
+// Spec 107: enum values are identical to the API's.
+export enum InvestmentIncomeStatus {
+  PLANNED = "PLANNED",
+  RECEIVED = "RECEIVED",
+}
+
+export enum InvestmentIncomeType {
+  DIVIDEND = "DIVIDEND",
+  INTEREST = "INTEREST",
+  JCP = "JCP",
+  OTHER = "OTHER",
+  YIELD = "YIELD",
+}
+
 export enum InvestmentOperationType {
   BUY = "BUY",
   SELL = "SELL",
@@ -120,3 +134,25 @@ export const TAX_EXEMPT_PRODUCTS: InvestmentFixedIncomeProduct[] = [
   InvestmentFixedIncomeProduct.LCA,
   InvestmentFixedIncomeProduct.LCI,
 ];
+
+// Spec 107 FR 1: the types in the order of the dropdown.
+export const INVESTMENT_INCOME_TYPES: InvestmentIncomeType[] = [
+  InvestmentIncomeType.DIVIDEND,
+  InvestmentIncomeType.JCP,
+  InvestmentIncomeType.YIELD,
+  InvestmentIncomeType.INTEREST,
+  InvestmentIncomeType.OTHER,
+];
+
+// Spec 107 FR 2: the type the form starts with, per asset class.
+export function defaultIncomeType(
+  assetClass: InvestmentAssetClass,
+): InvestmentIncomeType {
+  if (assetClass === InvestmentAssetClass.BR_REIT) {
+    return InvestmentIncomeType.YIELD;
+  }
+
+  return assetClass === InvestmentAssetClass.FIXED_INCOME
+    ? InvestmentIncomeType.INTEREST
+    : InvestmentIncomeType.DIVIDEND;
+}

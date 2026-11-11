@@ -16,6 +16,7 @@ import { api } from "@infrastructure/api";
 import { formatDecimal, parseDecimal, ZERO } from "@utils/decimal";
 
 import fixedIncomeApi from "./fixedIncomeApi";
+import incomeApi from "./incomeApi";
 import handleInvestmentApiError from "./investmentApiError";
 
 type Json = Record<string, unknown>;
@@ -303,6 +304,7 @@ async function upsertValuation(params: UpsertInvestmentValuationParams) {
 
 const investmentApi: InvestmentDatasource = {
   ...fixedIncomeApi,
+  ...incomeApi,
   createAsset,
   createOperation,
   deleteAsset,

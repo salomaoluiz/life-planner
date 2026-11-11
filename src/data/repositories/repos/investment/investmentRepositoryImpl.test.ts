@@ -31,6 +31,17 @@ it("SHOULD forward every method to the datasource and return its result", async 
     ["getAsset", ["a"]],
     ["getAssets", [{ status: InvestmentAssetStatus.ACTIVE }]],
     ["getOperationLink", ["tx"]],
+    ["getIncome", ["inc"]],
+    ["getIncomeDefaults", [{ assetId: "a" }]],
+    ["getIncomeLink", ["tx"]],
+    ["getIncomes", [{ assetId: "a" }]],
+    ["getIncomeSuggestions", [{}]],
+    ["rejectIncomeSuggestion", ["sug"]],
+    ["createIncome", [{ assetId: "a" }]],
+    ["updateIncome", [{ id: "inc" }]],
+    ["receiveIncome", [{ id: "inc" }]],
+    ["approveIncomeSuggestion", [{ id: "sug" }]],
+    ["deleteIncome", ["inc"]],
     ["updateAsset", [{ id: "a" }]],
     ["updateOperation", [{ id: "o" }]],
     ["upsertValuation", [{ assetId: "a" }]],
@@ -59,6 +70,11 @@ it("SHOULD drop the finance caches after an operation write or an asset delete, 
   datasource.createFixedIncomeContribution.mockResolvedValue("r" as never);
   datasource.createFixedIncomeRedemption.mockResolvedValue("r" as never);
   datasource.createFixedIncomeTitle.mockResolvedValue("r" as never);
+  datasource.createIncome.mockResolvedValue("r" as never);
+  datasource.updateIncome.mockResolvedValue("r" as never);
+  datasource.receiveIncome.mockResolvedValue("r" as never);
+  datasource.approveIncomeSuggestion.mockResolvedValue("r" as never);
+  datasource.deleteIncome.mockResolvedValue(undefined);
   datasource.getAssets.mockResolvedValue([]);
   datasource.upsertValuation.mockResolvedValue("r" as never);
 
@@ -74,6 +90,11 @@ it("SHOULD drop the finance caches after an operation write or an asset delete, 
     async () => repository.createFixedIncomeContribution({} as never),
     async () => repository.createFixedIncomeRedemption({} as never),
     async () => repository.createFixedIncomeTitle({} as never),
+    async () => repository.createIncome({} as never),
+    async () => repository.updateIncome({ id: "i" }),
+    async () => repository.receiveIncome({ id: "i" }),
+    async () => repository.approveIncomeSuggestion({ id: "s" }),
+    async () => repository.deleteIncome("i"),
   ]) {
     invalidate.mockClear();
     await write();
