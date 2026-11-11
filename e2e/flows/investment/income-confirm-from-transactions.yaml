@@ -37,6 +37,10 @@ onFlowComplete:
       REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - runFlow: ../../subflows/financial/open-transactions.yaml
 # The planned income is a locked row: it carries the income tag and its check opens the receive modal.
+# The row is below the month summary: swipe with explicit coordinates (scrollUntilVisible does not scroll this list).
+- swipe:
+    start: 60%, 80%
+    end: 60%, 25%
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.row.income-tag"

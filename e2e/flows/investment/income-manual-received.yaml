@@ -33,6 +33,13 @@ onFlowComplete:
     visible:
       id: "investment.detail.screen"
     timeout: 20000
+# The income section is below the operations: swipe down to reach it.
+- swipe:
+    start: 60%, 80%
+    end: 60%, 20%
+- swipe:
+    start: 60%, 80%
+    end: 60%, 20%
 # Record a received income of 71,40 in the account and category picked in the form.
 - tapOn:
     id: "investment.income.section-action"
@@ -42,6 +49,7 @@ onFlowComplete:
     timeout: 20000
 - tapOn:
     id: "investment.income-modal.net-amount"
+- eraseText
 - inputText: "7140"
 - tapOn:
     id: "investment.income-modal.account"
@@ -56,10 +64,10 @@ onFlowComplete:
 - tapOn:
     id: "investment.income-modal.save"
 - extendedWaitUntil:
-    visible:
-      id: "investment.income.summary-received"
-      text: ".*71[.,]40.*"
+    visible: ".*71[.,]40.*"
     timeout: 20000
+- assertVisible:
+    id: "investment.income.summary-received"
 - runFlow:
     file: ../../subflows/assert/assert-account-balance.yaml
     env:
