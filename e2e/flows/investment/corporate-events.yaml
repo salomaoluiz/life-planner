@@ -1,0 +1,117 @@
+url: ${E2E_WEB_URL}
+name: investment/corporate-events
+tags:
+  - investment
+  - spec-108
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: E2E Broker
+      BALANCE_CENTS: "1000000"
+- evalScript: ${output.BROKER_ACCOUNT_ID = output.ACCOUNT_ID}
+- runFlow:
+    file: ../../subflows/setup/create-investment-asset.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      TICKER: E2ETK3
+      NAME: E2E Asset
+# 3.005 shares at R$ 1,00 (no finance entry): a 10:1 reverse split leaves 300 shares and a fraction of 0,5 (cost R$ 5,00).
+- runFlow:
+    file: ../../subflows/setup/create-investment-operation.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      ASSET_ID: ${output.ASSET_ID}
+      TYPE: BUY
+      QUANTITY: "3005"
+      UNIT_PRICE: "1"
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/investment/open-investments.yaml
+- tapOn:
+    id: "investment.list.row-${output.ASSET_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.screen"
+    timeout: 20000
+# Record the reverse split through the Evento segment of the operation modal.
+- tapOn:
+    id: "investment.detail.add-operation"
+- extendedWaitUntil:
+    visible:
+      id: "investment.operation-modal.quantity"
+    timeout: 20000
+- tapOn:
+    id: "investment.operation-modal.type-EVENT"
+- extendedWaitUntil:
+    visible:
+      id: "investment.event.type"
+    timeout: 10000
+- tapOn:
+    id: "investment.event.type"
+- tapOn:
+    id: "investment.event.type-option-REVERSE_SPLIT"
+- tapOn:
+    id: "investment.event.ratio-from"
+- inputText: "10"
+- tapOn:
+    id: "investment.event.ratio-to"
+- inputText: "1"
+- extendedWaitUntil:
+    visible:
+      id: "investment.event.preview"
+    timeout: 10000
+- tapOn:
+    id: "investment.event.save"
+# The position shrinks to 300 shares and the fraction waits for its sale.
+- extendedWaitUntil:
+    visible:
+      id: "investment.fraction.pending"
+    timeout: 20000
+- assertVisible:
+    id: "investment.detail.quantity"
+    text: ".*300.*"
+# Sell the fraction for R$ 5,20 in the broker account: realized +R$ 0,20 and the account receives 5,20.
+- tapOn:
+    text: ".*(Sell fraction|Vender fração).*"
+- extendedWaitUntil:
+    visible:
+      id: "investment.fraction.gross"
+    timeout: 20000
+- tapOn:
+    id: "investment.fraction.gross"
+- inputText: "520"
+- tapOn:
+    id: "investment.fraction.account"
+- tapOn:
+    id: "investment.fraction.account-option-${output.BROKER_ACCOUNT_ID}"
+- tapOn:
+    id: "investment.fraction.save"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.realized"
+      text: ".*0[.,]20.*"
+    timeout: 20000
+- assertNotVisible:
+    id: "investment.fraction.pending"
+- assertVisible:
+    id: "investment.detail.quantity"
+    text: ".*300.*"
+- runFlow:
+    file: ../../subflows/assert/assert-account-balance.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.BROKER_ACCOUNT_ID}
+      EXPECTED_CENTS: "1000520"

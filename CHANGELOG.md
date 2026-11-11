@@ -3,6 +3,15 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.22.0] - 2026-11-11
+
+### Added
+
+- Corporate events (spec 108): record a split, reverse split or bonus on an asset from the new "Event" tab of the operation form, with the position and average price after it previewed before you save.
+- Announced events appear in the suggestions inbox (new All / Income / Events tabs) and on the asset, with a warning while one is pending; approve, edit or reject them.
+- The fraction a reverse split or bonus leaves is shown on the asset and can be sold ("Sell fraction"), recording the auction cash and the realized result without changing the position.
+- Deleting an event also deletes its fraction sale and that sale's finance entry; a dialog lists what goes with it.
+
 ## [1.21.0] - 2026-11-11
 
 ### Added

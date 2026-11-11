@@ -1,0 +1,54 @@
+url: ${E2E_WEB_URL}
+name: investment/corporate-event-no-position
+tags:
+  - investment
+  - spec-108
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/setup/create-investment-asset.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      TICKER: E2ETK3
+      NAME: E2E Asset
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/investment/open-investments.yaml
+- tapOn:
+    id: "investment.list.row-${output.ASSET_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.screen"
+    timeout: 20000
+# An asset without shares cannot receive an event: the form says so and nothing is saved.
+- tapOn:
+    id: "investment.detail.add-operation"
+- extendedWaitUntil:
+    visible:
+      id: "investment.operation-modal.quantity"
+    timeout: 20000
+- tapOn:
+    id: "investment.operation-modal.type-EVENT"
+- extendedWaitUntil:
+    visible:
+      id: "investment.event.type"
+    timeout: 10000
+- tapOn:
+    id: "investment.event.ratio-from"
+- inputText: "1"
+- tapOn:
+    id: "investment.event.ratio-to"
+- inputText: "4"
+- extendedWaitUntil:
+    visible: ".*(There is no position|Não há posição).*"
+    timeout: 10000
+- assertNotVisible:
+    id: "investment.fraction.pending"
