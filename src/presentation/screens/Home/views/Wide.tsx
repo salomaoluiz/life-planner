@@ -12,6 +12,7 @@ import { useTranslation } from "@presentation/i18n";
 import ProfileButton from "@screens/Navigation/containers/ProfileButton";
 
 import FinanceBalanceCard from "../components/FinanceBalanceCard";
+import InvestmentsSection from "../components/InvestmentsSection";
 import LowestBalanceTiles from "../components/LowestBalanceTiles";
 import StockAttentionListCard from "../components/StockAttentionListCard";
 import StockSummaryCard from "../components/StockSummaryCard";
@@ -109,6 +110,23 @@ function Wide({ vm }: AdaptiveViewProps<HomeVM>) {
             />
           </View>
         </View>
+      </Section>
+      <Section
+        actionInset
+        actionLabel={t("home.investments.seeAll")}
+        onActionPress={vm.onInvestmentsPress}
+        testID={homeTestIds.investmentsSection}
+        title={t("home.investments.title")}
+      >
+        <InvestmentsSection
+          canAddAsset={vm.canAddInvestmentAsset}
+          isSplitLayout={vm.isSplitLayout}
+          onAddAssetPress={vm.onInvestmentsAddAssetPress}
+          onMaturityPress={vm.onInvestmentsMaturityPress}
+          onPortfolioPress={vm.onInvestmentsPress}
+          onSuggestionsPress={vm.onInvestmentsSuggestionsPress}
+          state={vm.investments}
+        />
       </Section>
       <Section
         actionInset

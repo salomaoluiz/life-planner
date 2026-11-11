@@ -28,6 +28,7 @@ import {
   InvestmentOperationResult,
   InvestmentPriceHistory,
   InvestmentQuotesRefresh,
+  InvestmentsHomeSummary,
   InvestmentTickerSuggestion,
   InvestmentValuationResult,
 } from "@domain/entities/investment/InvestmentEntities";
@@ -189,6 +190,12 @@ export interface GetInvestmentPriceHistoryParams {
   range: InvestmentPriceRange;
 }
 
+export interface GetInvestmentsHomeSummaryParams {
+  ownerIds: string[];
+  // The client's local calendar date, `YYYY-MM-DD`.
+  today: string;
+}
+
 export interface InvestmentFeeParams {
   // Cents.
   amount: number;
@@ -257,6 +264,9 @@ export type InvestmentRepository = {
   getEventSuggestions(
     params: GetInvestmentEventSuggestionsParams,
   ): Promise<InvestmentEventSuggestion[]>;
+  getHomeSummary(
+    params: GetInvestmentsHomeSummaryParams,
+  ): Promise<InvestmentsHomeSummary>;
   getIncome(id: string): Promise<InvestmentIncome>;
   getIncomeDefaults(
     params: GetInvestmentIncomeDefaultsParams,

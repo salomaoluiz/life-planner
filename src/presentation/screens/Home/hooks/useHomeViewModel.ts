@@ -11,9 +11,11 @@ import UpcomingDTO, {
 } from "@application/dto/home/UpcomingDTO";
 import UserDTO from "@application/dto/user/UserDTO";
 import { financeKeys } from "@application/queryKeys/financeKeys";
+import { investmentKeys } from "@application/queryKeys/investmentKeys";
 import { useCases } from "@application/useCases";
 import { CurrencyCode } from "@domain/entities/financial/Currency";
 import { resolveFavoriteAccount } from "@domain/entities/financial/resolveFavoriteAccount";
+import { InvestmentsHomeSummary } from "@domain/entities/investment/InvestmentEntities";
 import { refetchStaleFetcherData, useQuery } from "@infrastructure/fetcher";
 import useOwners from "@presentation/hooks/useOwners";
 import { useTranslationLocale } from "@presentation/i18n";
@@ -25,6 +27,7 @@ import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import FinanceBalanceUIModel from "../models/FinanceBalanceUIModel";
 import HomeHeaderUIModel from "../models/HomeHeaderUIModel";
+import InvestmentsSummaryUIModel from "../models/InvestmentsSummaryUIModel";
 import LowestBalanceUIModel from "../models/LowestBalanceUIModel";
 import {
   buildOwnerFilterOptions,
@@ -85,6 +88,10 @@ async function fetchBalances(
   });
 }
 
+async function fetchInvestments(ownerIds: string[], today: string) {
+  return useCases.getInvestmentsSummaryUseCase.execute({ ownerIds, today });
+}
+
 async function fetchStock(ownerIds: string[]) {
   return useCases.getStockAttentionUseCase.execute({ ownerIds });
 }
@@ -107,6 +114,11 @@ async function fetchUpcoming(ownerIds: string[]) {
 
 async function fetchUser() {
   return useCases.getUserUseCase.execute();
+}
+
+// The local calendar date (`YYYY-MM-DD`) the API counts the month and the maturities from.
+function localDateKey(date: Date) {
+  return `${monthKey(date)}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
 function monthKey(date: Date) {
@@ -193,6 +205,11 @@ function useHomeViewModel() {
     enabled: ownersReady,
     fetch: async () => fetchSummary(ownerIds, now, currency),
   });
+  const investments = useQuery<InvestmentsHomeSummary>({
+    cacheKey: investmentKeys.homeSummary(ownersKey),
+    enabled: ownersReady,
+    fetch: async () => fetchInvestments(ownerIds, localDateKey(now)),
+  });
   const stock = useQuery<StockAttentionDTO>({
     cacheKey: [useCases.getStockAttentionUseCase.uniqueName, ownersKey],
     enabled: ownersReady,
@@ -229,6 +246,7 @@ function useHomeViewModel() {
       ...(ownersReady
         ? [
             summary.refetch(),
+            investments.refetch(),
             stock.refetch(),
             accounts.refetch(),
             balancesNow.refetch(),
@@ -245,6 +263,7 @@ function useHomeViewModel() {
       refetchStaleFetcherData([
         [useCases.getOwnersUseCase.uniqueName],
         financeKeys.summary.all(),
+        [...investmentKeys.all(), "home-summary"],
         [useCases.getStockAttentionUseCase.uniqueName],
         financeKeys.accounts.all(),
         financeKeys.dailyBalances.all(),
@@ -300,6 +319,13 @@ function useHomeViewModel() {
         favorite && { id: favorite.id, name: favorite.name },
       ),
   );
+  const investmentsState = toBlock(
+    investments,
+    ownersFailed,
+    owners.refetch,
+    (dto) => new InvestmentsSummaryUIModel(dto, now, languageTag),
+  );
+  const filterOptions = buildOwnerFilterOptions(ownerList);
   const stockState = toBlock(
     stock,
     ownersFailed,
@@ -348,6 +374,10 @@ function useHomeViewModel() {
 
   return {
     balance: balanceState,
+    // An archived family is read-only: the empty state offers no "Add asset" for it.
+    canAddInvestmentAsset: !filterOptions.find(
+      (option) => option.value === selection,
+    )?.archived,
     currency: {
       onChange: (value: string) =>
         screenCurrency.setCurrency(value as CurrencyCode),
@@ -357,16 +387,22 @@ function useHomeViewModel() {
     },
     filter: {
       onChange: setSelection,
-      options: buildOwnerFilterOptions(ownerList),
+      options: filterOptions,
       value: selection,
     },
     header: new HomeHeaderUIModel(user.data, now, languageTag),
+    investments: investmentsState,
     isRefreshing,
     isSplitLayout: breakpoint === "expanded",
     lowest: lowestState,
     onAddStockItemPress: () => openModal("add_new_stock_item"),
     onAddTransactionPress: () => openModal("add_new_transaction"),
     onCreateAccountPress: () => openModal("add_new_account"),
+    onInvestmentsAddAssetPress: () => openModal("investment_asset"),
+    onInvestmentsMaturityPress: (assetId: string) =>
+      push(`/investments/asset/${assetId}`),
+    onInvestmentsPress: () => push("/investments"),
+    onInvestmentsSuggestionsPress: () => push("/investments/suggestions"),
     onInvoicePress,
     onOverviewPress: () => push("/financial/overview"),
     onRefresh,

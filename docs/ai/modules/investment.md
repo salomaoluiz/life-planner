@@ -131,6 +131,10 @@ e2e: e2e/flows/investment/income-manual-received.yaml, income-confirm-from-trans
 
 Design deviations (spec 107): the detail lists the first 50 incomes (no "load more" yet; the API pages by keyset); the web modal uses the app's `form` sheet, whose width follows `formDialogMaxWidth` (880 px).
 
+## Home summary (spec 109)
+
+`getHomeSummary({ ownerIds, today })` on the repository and datasource (`GET /v1/investments/summary`), consumed only by the home section (`home.getInvestmentsSummaryUseCase`, see `home.md`); entity `InvestmentsHomeSummary`.
+
 ## Corporate events (spec 108)
 
 ```yaml

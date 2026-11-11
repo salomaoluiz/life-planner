@@ -360,6 +360,34 @@ export interface InvestmentQuotesRefresh {
   quotes: InvestmentQuote[];
 }
 
+// Spec 109: the home section in BRL cents. `resultBasisPoints` 1315 = 13.15%, undefined at zero cost.
+export interface InvestmentsHomeSummary {
+  currentValueCents: number;
+  hasPositions: boolean;
+  income: {
+    count: number;
+    month: string;
+    pendingSuggestions: number;
+    totalCents: number;
+  };
+  investedCents: number;
+  nextMaturity?: {
+    assetId: string;
+    currency: CurrencyCode;
+    maturityDate: string;
+    name: string;
+    netEstimatedCents: number;
+  };
+  quotes: {
+    asOf?: Date;
+    manualCount: number;
+    stale: boolean;
+    withoutPrice: number;
+  };
+  resultBasisPoints?: number;
+  resultCents: number;
+}
+
 export interface InvestmentTickerSuggestion {
   changePercent: null | string;
   currency: CurrencyCode;

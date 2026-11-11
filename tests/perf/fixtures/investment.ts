@@ -50,4 +50,17 @@ const investmentDetail = {
   ],
 };
 
-export { investmentAsset, investmentDetail, position };
+// Spec 109: the home section answer (API shape).
+const investmentsSummary = {
+  currency: "BRL",
+  currentValueCents: 1263600,
+  hasPositions: true,
+  income: { count: 0, month: "2026-11", pendingSuggestions: 0, totalCents: 0 },
+  investedCents: 1178640,
+  nextMaturity: null,
+  quotes: { asOf: null, manualCount: 1, stale: false, withoutPrice: 0 },
+  resultBasisPoints: 721,
+  resultCents: 84960,
+};
+
+export { investmentAsset, investmentDetail, investmentsSummary, position };

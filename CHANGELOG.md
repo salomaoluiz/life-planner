@@ -3,6 +3,14 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.23.0] - 2026-11-11
+
+### Added
+
+- Investments on the home (spec 109): a new section between Finance and Stock shows the portfolio value, the cost and the result in R$ and %, the income received this month and the next fixed income maturity.
+- The section follows the home owner filter, links to the suggestions to confirm and to the asset of the next maturity, warns when the quotes are old and offers "Add asset" when there is nothing yet.
+- Two columns on web and tablet, one compact card on the phone.
+
 ## [1.22.0] - 2026-11-11
 
 ### Added

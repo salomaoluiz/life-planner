@@ -26,6 +26,7 @@ const state = { isError: false, isLoading: true, onRetry: jest.fn() };
 function givenViewModel(overrides: Record<string, unknown> = {}) {
   jest.mocked(useHomeViewModel).mockReturnValue({
     balance: state,
+    canAddInvestmentAsset: true,
     currency: {
       onChange: jest.fn(),
       options: ["BRL"],
@@ -47,12 +48,17 @@ function givenViewModel(overrides: Record<string, unknown> = {}) {
       greetingParams: { name: "Ana" },
       overline: "Saturday, October 3",
     },
+    investments: state,
     isRefreshing: false,
     isSplitLayout: false,
     lowest: state,
     onAddStockItemPress: jest.fn(),
     onAddTransactionPress: jest.fn(),
     onCreateAccountPress: jest.fn(),
+    onInvestmentsAddAssetPress: jest.fn(),
+    onInvestmentsMaturityPress: jest.fn(),
+    onInvestmentsPress: jest.fn(),
+    onInvestmentsSuggestionsPress: jest.fn(),
     onInvoicePress: jest.fn(),
     onOverviewPress: jest.fn(),
     onRefresh: jest.fn(),
@@ -65,7 +71,7 @@ function givenViewModel(overrides: Record<string, unknown> = {}) {
   } as never);
 }
 
-it("SHOULD render the header, the filter and the Finance and Stock sections", () => {
+it("SHOULD render the header, the filter and the Finance, Investments and Stock sections", () => {
   givenViewModel();
 
   render(<Home />);
@@ -84,9 +90,54 @@ it("SHOULD render the header, the filter and the Finance and Stock sections", ()
   expect(
     screen.getAllByTestId(homeTestIds.financeUpcomingLoading),
   ).toHaveLength(3);
+  expect(screen.getByTestId(homeTestIds.investmentsLoading)).toBeOnTheScreen();
   expect(
     screen.getAllByTestId(homeTestIds.stockAttentionLoading).length,
   ).toBeGreaterThan(0);
+});
+
+// The testIDs of the tree in document order.
+function testIdsInOrder(node: unknown, found: string[] = []): string[] {
+  if (Array.isArray(node)) {
+    node.forEach((child) => testIdsInOrder(child, found));
+  } else if (node && typeof node === "object") {
+    const { children, props } = node as {
+      children?: unknown;
+      props?: { testID?: string };
+    };
+
+    if (props?.testID) found.push(props.testID);
+    testIdsInOrder(children, found);
+  }
+
+  return found;
+}
+
+it("SHOULD show the Investments section between Finance and Stock (spec 109)", () => {
+  givenViewModel();
+
+  render(<Home />);
+
+  const ids = testIdsInOrder(screen.toJSON());
+  const finance = ids.indexOf(homeTestIds.financeSection);
+  const investments = ids.indexOf(homeTestIds.investmentsSection);
+  const stock = ids.indexOf(homeTestIds.stockSection);
+
+  expect(finance).toBeGreaterThanOrEqual(0);
+  expect(investments).toBeGreaterThan(finance);
+  expect(stock).toBeGreaterThan(investments);
+});
+
+it("SHOULD open the investments module from the section link (spec 109)", () => {
+  const onInvestmentsPress = jest.fn();
+  givenViewModel({ onInvestmentsPress });
+
+  render(<Home />);
+  fireEvent.press(
+    screen.getByTestId(`${homeTestIds.investmentsSection}-action`),
+  );
+
+  expect(onInvestmentsPress).toHaveBeenCalledTimes(1);
 });
 
 it("SHOULD expose the screen testID used by the E2E flows", () => {

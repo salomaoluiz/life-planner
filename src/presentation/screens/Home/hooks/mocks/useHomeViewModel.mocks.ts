@@ -12,6 +12,7 @@ import UpcomingDTO from "@application/dto/home/UpcomingDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import UserDTO from "@application/dto/user/UserDTO";
 import { useCases } from "@application/useCases";
+import { InvestmentsHomeSummary } from "@domain/entities/investment/InvestmentEntities";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { refetchStaleFetcherData, useQuery } from "@infrastructure/fetcher";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
@@ -35,6 +36,10 @@ jest.mock("@application/useCases", () => ({
     getFinancialDailyBalancesUseCase: {
       execute: jest.fn(),
       uniqueName: "balances",
+    },
+    getInvestmentsSummaryUseCase: {
+      execute: jest.fn(),
+      uniqueName: "investments",
     },
     getMonthSummaryUseCase: { execute: jest.fn(), uniqueName: "summary" },
     getOwnersUseCase: { execute: jest.fn(), uniqueName: "owners" },
@@ -132,10 +137,26 @@ const upcoming = new UpcomingDTO({
   overdueExpenseCents: 240000,
 });
 
+const investment: InvestmentsHomeSummary = {
+  currentValueCents: 18432055,
+  hasPositions: true,
+  income: {
+    count: 6,
+    month: "2026-10",
+    pendingSuggestions: 2,
+    totalCents: 128430,
+  },
+  investedCents: 16290000,
+  quotes: { manualCount: 0, stale: false, withoutPrice: 0 },
+  resultBasisPoints: 1315,
+  resultCents: 2142055,
+};
+
 const mocks = {
   accounts,
   balances,
   family,
+  investment,
   owners,
   person,
   stock,
@@ -147,6 +168,7 @@ const mocks = {
 const queries = {
   accounts: new UseQueryFixture<AccountDTO[]>(),
   balances: new UseQueryFixture<DailyBalanceDTO>(),
+  investment: new UseQueryFixture<InvestmentsHomeSummary>(),
   owners: new UseQueryFixture<OwnerDTO[]>(),
   stock: new UseQueryFixture<StockAttentionDTO>(),
   summary: new UseQueryFixture<MonthSummaryDTO>(),
@@ -161,6 +183,7 @@ const queries = {
 const spies = {
   getAccounts: jest.mocked(useCases.getFinancialAccountsUseCase.execute),
   getBalances: jest.mocked(useCases.getFinancialDailyBalancesUseCase.execute),
+  getInvestments: jest.mocked(useCases.getInvestmentsSummaryUseCase.execute),
   getMonthSummary: jest.mocked(useCases.getMonthSummaryUseCase.execute),
   getStockAttention: jest.mocked(useCases.getStockAttentionUseCase.execute),
   getUpcoming: jest.mocked(useCases.getUpcomingItemsUseCase.execute),
@@ -239,6 +262,7 @@ function setup(data: Partial<Record<QueryName, unknown>> = {}) {
 const loaded = {
   accounts,
   balances,
+  investment,
   owners,
   stock,
   summary,

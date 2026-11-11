@@ -80,6 +80,20 @@ routes_opened:
   - /add_new_stock_item (modal over Home)
 ```
 
+## Investments section (spec 109)
+
+```yaml
+use_case: getInvestmentsSummaryUseCase (src/application/useCases/cases/home, uniqueName home.get_investments_summary_use_case, params { ownerIds, today }) -> InvestmentsHomeSummary (BRL cents), one call to GET /v1/investments/summary through investmentRepository.getHomeSummary (datasource investment/api/summaryApi.ts, model InvestmentModel.toHomeSummary); query key investmentKeys.homeSummary(ownersKey)
+view_model: useHomeViewModel adds `investments` (own BlockState, refetched on pull to refresh and, when stale, on focus through [...investmentKeys.all(), "home-summary"], so every investment write refreshes it), `canAddInvestmentAsset` (false for an archived-family filter) and the handlers onInvestmentsPress (/investments), onInvestmentsSuggestionsPress (/investments/suggestions), onInvestmentsMaturityPress(assetId) (/investments/asset/<id>), onInvestmentsAddAssetPress (modal investment_asset)
+ui_model: models/InvestmentsSummaryUIModel (result tone and signed percentage from basis points, quotes footer `when` kind today|yesterday|date, income month, maturity date label and days left)
+components: components/InvestmentsSection (index decides loading / error / empty / two cards on `expanded` / one compact card; PortfolioBlock = value, cost MetricBlock, result HighlightRow, footer or amber Highlight; IncomeBlock = income, suggestions link, maturity ListItem)
+testIds: home.investments.{section,currentValue,invested,result,quotesFooter,income,suggestions,nextMaturity,empty,empty-action (the Add asset button),loading,error}
+e2e: flows/financial/home/investments-section and investments-section-empty (tags financial, home, investment, spec-109); the result tile is asserted by its label (an accessible row does not expose its testID on web)
+perf: home.home.mount.cold maxRequests 9 -> 10 (the new summary request); tests/perf/respond.ts answers /v1/investments/summary
+```
+
+Design deviations (spec 109): the result tile sits under the cost tile (full width) instead of beside it, the section title has no icon, and the maturity row has no chevron (kit components only; screens do not style visual details).
+
 ## Removed
 
 ```yaml

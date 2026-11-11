@@ -1,0 +1,35 @@
+url: ${E2E_WEB_URL}
+name: financial/home/investments-section-empty
+tags:
+  - financial
+  - home
+  - investment
+  - spec-109
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# No asset with an open position: the Investments section offers "Add asset" (spec 109 FR 11),
+# which opens the asset form.
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "home.investments.empty"
+    timeout: 20000
+- tapOn:
+    id: "home.investments.empty-action"
+- extendedWaitUntil:
+    visible:
+      id: "investment.asset-modal.ticker-input"
+    timeout: 20000
