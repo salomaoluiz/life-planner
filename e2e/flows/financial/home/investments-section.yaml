@@ -1,0 +1,72 @@
+url: ${E2E_WEB_URL}
+name: financial/home/investments-section
+tags:
+  - financial
+  - home
+  - investment
+  - spec-109
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# The Investments section sits between Finance and Stock (spec 109): value, cost, result and the next fixed income
+# maturity. The stock is quoted by the market source, so only its cost is asserted (100 x R$ 10 + a R$ 10.000 CDB).
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/create-investment-asset.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      TICKER: ITSA4
+      NAME: Itausa PN
+      ASSET_CLASS: BR_STOCK
+- runFlow:
+    file: ../../../subflows/setup/create-investment-operation.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      ASSET_ID: ${output.ASSET_ID}
+      TYPE: BUY
+      QUANTITY: "100"
+      UNIT_PRICE: "10"
+- runFlow:
+    file: ../../../subflows/setup/create-fixed-income-title.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: E2E Home CDB
+      AMOUNT_CENTS: "1000000"
+- evalScript: ${output.CDB_ID = output.ASSET_ID}
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "home.investments.currentValue"
+    timeout: 20000
+# The result tile is an accessible row (its testID is not an id on web): asserted by its label.
+- assertVisible:
+    text: "Result|Resultado"
+- assertVisible:
+    id: "home.investments.income"
+# Cost = R$ 1.000,00 (stock) + R$ 10.000,00 (CDB).
+- assertVisible:
+    text: ".*11[.,]000[.,]00.*"
+- assertVisible:
+    id: "home.investments.nextMaturity"
+- assertVisible:
+    text: "E2E Home CDB"
+# The maturity row opens the asset.
+- tapOn:
+    id: "home.investments.nextMaturity"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.screen"
+    timeout: 20000
