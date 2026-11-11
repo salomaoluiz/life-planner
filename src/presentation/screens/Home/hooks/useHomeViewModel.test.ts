@@ -1,8 +1,11 @@
 import { modalNavigation } from "@tests/modalNavigation";
 
 import AccountDTO from "@application/dto/financial/AccountDTO";
+import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { financeKeys } from "@application/queryKeys/financeKeys";
+import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
+import InvestmentsSummaryUIModel from "../models/InvestmentsSummaryUIModel";
 import { ALL_FILTER, PERSONAL_FILTER } from "../models/ownerFilter";
 import {
   act,
@@ -245,6 +248,7 @@ describe("refresh", () => {
     expect(spies.refetchStale).toHaveBeenCalledWith([
       ["owners"],
       financeKeys.summary.all(),
+      ["investment", "home-summary"],
       ["stock"],
       financeKeys.accounts.all(),
       financeKeys.dailyBalances.all(),
@@ -423,5 +427,87 @@ describe("currency (spec 103)", () => {
     expect(spies.getMonthSummary).toHaveBeenLastCalledWith(
       expect.objectContaining({ currency: "USD" }),
     );
+  });
+});
+
+describe("investments section (spec 109)", () => {
+  it("SHOULD read the summary of the selected owners with the local date", async () => {
+    const { result } = setup(loaded);
+
+    await optionsOf("investment").fetch();
+    expect(spies.getInvestments).toHaveBeenLastCalledWith({
+      ownerIds: ["family-1", "user-id"],
+      today: "2026-10-15",
+    });
+
+    act(() => result.current.filter.onChange(PERSONAL_FILTER));
+    await optionsOf("investment").fetch();
+    expect(spies.getInvestments).toHaveBeenLastCalledWith({
+      ownerIds: ["user-id"],
+      today: "2026-10-15",
+    });
+  });
+
+  it("SHOULD map the summary to its UI model, loading until it arrives", () => {
+    const { result } = setup({ ...loaded, investment: undefined });
+
+    expect(result.current.investments.isLoading).toBe(true);
+
+    queries.investment.withData(mocks.investment);
+    const { result: ready } = setup(loaded);
+
+    expect(ready.current.investments.data).toBeInstanceOf(
+      InvestmentsSummaryUIModel,
+    );
+  });
+
+  it("SHOULD fail only its own block WHEN the summary query fails", () => {
+    queries.investment.withError();
+    const { result } = setup({
+      accounts: mocks.accounts,
+      balances: mocks.balances,
+      owners: mocks.owners,
+      stock: mocks.stock,
+      summary: mocks.summary,
+      upcoming: mocks.upcoming,
+    });
+
+    expect(result.current.investments.isError).toBe(true);
+    expect(result.current.stock.isError).toBe(false);
+    expect(result.current.balance.isError).toBe(false);
+
+    result.current.investments.onRetry();
+    expect(queries.investment.value.refetch).toHaveBeenCalledTimes(1);
+    expect(queries.stock.value.refetch).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD open the module, the suggestions inbox, an asset and the asset form", () => {
+    const { result } = setup(loaded);
+
+    result.current.onInvestmentsPress();
+    result.current.onInvestmentsSuggestionsPress();
+    result.current.onInvestmentsMaturityPress("asset-1");
+    result.current.onInvestmentsAddAssetPress();
+
+    expect(spies.push).toHaveBeenNthCalledWith(1, "/investments");
+    expect(spies.push).toHaveBeenNthCalledWith(2, "/investments/suggestions");
+    expect(spies.push).toHaveBeenNthCalledWith(3, "/investments/asset/asset-1");
+    expect(modalNavigation.openModal).toHaveBeenCalledWith("investment_asset");
+  });
+
+  it("SHOULD offer Add asset except for an archived family", () => {
+    const archived = new OwnerDTO({
+      archived: true,
+      id: "family-old",
+      name: "Old",
+      type: OwnerType.FAMILY,
+    });
+    const { result } = setup({ ...loaded, owners: [archived, mocks.person] });
+
+    expect(result.current.canAddInvestmentAsset).toBe(true);
+
+    act(() => result.current.filter.onChange("family-old"));
+
+    expect(result.current.canAddInvestmentAsset).toBe(false);
   });
 });

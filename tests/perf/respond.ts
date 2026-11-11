@@ -1,5 +1,9 @@
 import { accountRow, largeAccountRows, overview } from "./fixtures/finance";
-import { investmentAsset, investmentDetail } from "./fixtures/investment";
+import {
+  investmentAsset,
+  investmentDetail,
+  investmentsSummary,
+} from "./fixtures/investment";
 import { me } from "./fixtures/user";
 import type { Method } from "./networkHarness";
 
@@ -18,6 +22,10 @@ function respond(method: Method, path: string): unknown {
   }
   if (path === "/v1/user/me") {
     return me;
+  }
+  // Spec 109: the home section.
+  if (path.startsWith("/v1/investments/summary")) {
+    return investmentsSummary;
   }
   // Investments (spec 102): the detail of one asset, else the list.
   if (/^\/v1\/investments\/assets\/[^/?]+(\?|$)/.test(path)) {

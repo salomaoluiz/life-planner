@@ -11,7 +11,7 @@
   "home.home.mount.cold": {
     "maxDepth": 2,
     "maxDuplicates": 0,
-    "maxRequests": 9,
+    "maxRequests": 10,
     "route": "app/(app)/(tabs)/index/index.tsx"
   },
   "home.home.render.mount": {
