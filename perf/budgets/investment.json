@@ -110,7 +110,7 @@
   "investment.suggestions.mount.cold": {
     "maxDepth": 3,
     "maxDuplicates": 0,
-    "maxRequests": 1,
+    "maxRequests": 2,
     "route": "app/(app)/(tabs)/investments/suggestions.tsx"
   },
   "investment.suggestions.render.mount": {

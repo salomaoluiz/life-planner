@@ -272,9 +272,7 @@ const investmentTestIds = {
     reject: "investment.suggestions.reject",
     row: "investment.suggestions.row",
     screen: "investment.suggestions.screen",
-    tabAll: "investment.suggestions.tab-all",
-    tabEvents: "investment.suggestions.tab-events",
-    tabIncome: "investment.suggestions.tab-income",
+    tabs: "investment.suggestions.tabs",
   },
 } as const;
 

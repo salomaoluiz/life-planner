@@ -4,7 +4,7 @@ import { hasText } from "@tests";
 
 import investmentTestIds from "@screens/Investment/testIds";
 
-import { setup } from "./mocks/index.mocks";
+import { makeEventSuggestion, setup } from "./mocks/index.mocks";
 
 const ids = investmentTestIds.suggestions;
 
@@ -49,4 +49,52 @@ it("SHOULD show the failure of a decision", () => {
   });
 
   expect(hasText("investment.income.errors.incomplete")).toBe(true);
+});
+
+describe("corporate events (spec 108)", () => {
+  it("SHOULD show the three tabs with their counts AND change the filter", () => {
+    const { vm } = setup({ counts: { all: 3, events: 2, income: 1 } });
+
+    expect(screen.getByTestId(ids.tabs)).toBeOnTheScreen();
+    expect(screen.getByText(/investment.suggestions.tabAll/)).toBeOnTheScreen();
+    expect(
+      screen.getByText(/investment.suggestions.tabEvents/),
+    ).toBeOnTheScreen();
+
+    fireEvent.press(screen.getByText(/investment.suggestions.tabEvents/));
+
+    expect(vm.onFilterChange).toHaveBeenCalledWith("EVENT");
+  });
+
+  it("SHOULD list the event suggestions AND decide them", () => {
+    const { vm } = setup({ eventItems: [makeEventSuggestion()], items: [] });
+
+    fireEvent.press(screen.getByTestId(`${ids.event.approve}-esug-1`));
+
+    expect(screen.getByTestId(`${ids.event.row}-esug-1`)).toBeOnTheScreen();
+    expect(vm.eventActions.onApprove).toHaveBeenCalledWith(
+      makeEventSuggestion(),
+    );
+  });
+
+  it("SHOULD use the event copy WHEN the events tab is open AND is empty", () => {
+    setup({ eventItems: [], filter: "EVENT", isEmpty: true, items: [] });
+
+    expect(hasText("investment.suggestions.eventsEmpty")).toBe(true);
+    expect(hasText("investment.suggestions.eventsSubtitle")).toBe(true);
+  });
+
+  it("SHOULD show the failure of an event decision", () => {
+    setup({
+      eventActions: {
+        failure: { key: "investment.event.noPosition", params: { date: "x" } },
+        isBusy: false,
+        onApprove: jest.fn(),
+        onEdit: jest.fn(),
+        onReject: jest.fn(),
+      },
+    });
+
+    expect(screen.getByText(/investment.event.noPosition/)).toBeOnTheScreen();
+  });
 });
