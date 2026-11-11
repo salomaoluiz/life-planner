@@ -66,10 +66,9 @@ const investmentTestIds = {
     valuationRow: "investment.detail.valuation-row",
   },
   income: {
-    addButton: "investment.income.add-button",
     approve: "investment.income.approve",
     edit: "investment.income.edit",
-    filter: (key: string) => `investment.income.filter-${key}`,
+    filter: "investment.income.filter",
     receive: "investment.income.receive",
     reject: "investment.income.reject",
     row: "investment.income.row",

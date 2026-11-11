@@ -147,10 +147,10 @@ function IncomeSection({ accountNames, asset }: Props) {
     <Section
       actionLabel={t("investment.income.addButton")}
       onActionPress={vm.onAdd}
-      testID={ids.addButton}
+      testID={ids.section}
       title={t("investment.income.section.title")}
     >
-      <View style={{ gap: spacing.md }} testID={ids.section}>
+      <View style={{ gap: spacing.md }}>
         {vm.suggestions.length > 0 ? (
           <View style={{ gap: spacing.sm }}>
             <Text.BodyStrong
@@ -205,7 +205,7 @@ function IncomeSection({ accountNames, asset }: Props) {
             label: t(`investment.income.filter.${key}`),
             value: key,
           }))}
-          testID={ids.filter("all")}
+          testID={ids.filter}
           value={vm.filter}
         />
         {vm.items.length === 0 && !vm.isLoading ? (

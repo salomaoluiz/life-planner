@@ -38,6 +38,7 @@ function SuggestionsCard({ count, onPress }: Props) {
         <Button.Secondary
           label={t("investment.suggestions.title")}
           onPress={onPress}
+          testID={`${investmentTestIds.list.suggestionsCard}-open`}
         />
       </View>
     </Card>

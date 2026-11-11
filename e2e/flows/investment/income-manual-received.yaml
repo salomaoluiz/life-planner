@@ -1,0 +1,69 @@
+url: ${E2E_WEB_URL}
+name: investment/income-manual-received
+tags:
+  - investment
+  - spec-107
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runFlow:
+    file: ../../subflows/setup/create-investment-asset.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      TICKER: E2ETK3
+      NAME: E2E Asset
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/investment/open-investments.yaml
+- tapOn:
+    id: "investment.list.row-${output.ASSET_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.screen"
+    timeout: 20000
+# Record a received income of 71,40 in the account and category picked in the form.
+- tapOn:
+    id: "investment.income.section-action"
+- extendedWaitUntil:
+    visible:
+      id: "investment.income-modal.net-amount"
+    timeout: 20000
+- tapOn:
+    id: "investment.income-modal.net-amount"
+- inputText: "7140"
+- tapOn:
+    id: "investment.income-modal.account"
+- tapOn:
+    id: "investment.income-modal.account-option-${output.ACCOUNT_ID}"
+- tapOn:
+    id: "investment.income-modal.category"
+- tapOn:
+    id: "investment.income-modal.category-option-${output.INCOME_CATEGORY_ID}"
+- tapOn:
+    id: "investment.income-modal.status-RECEIVED"
+- tapOn:
+    id: "investment.income-modal.save"
+- extendedWaitUntil:
+    visible:
+      id: "investment.income.summary-received"
+      text: ".*71[.,]40.*"
+    timeout: 20000
+- runFlow:
+    file: ../../subflows/assert/assert-account-balance.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      EXPECTED_CENTS: "7140"

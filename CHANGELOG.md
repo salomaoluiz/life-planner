@@ -3,6 +3,14 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.21.0] - 2026-11-11
+
+### Added
+
+- Investment income (spec 107): record dividends, JCP, yields and interest per asset, planned or received, with the account and category already filled from what you used before; the income lands in your finances.
+- Suggestions inbox: announced incomes for the assets you hold can be approved, edited or rejected, with the estimated net amount and the withheld tax estimate.
+- Confirm a planned income with the amount that really landed in the account, from the asset or from the transactions list, where income rows now carry an "Income" tag.
+
 ## [1.20.0] - 2026-11-10
 
 ### Added
