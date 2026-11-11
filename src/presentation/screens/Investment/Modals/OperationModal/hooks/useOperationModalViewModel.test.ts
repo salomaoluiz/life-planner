@@ -392,6 +392,31 @@ it("SHOULD report a missing asset", () => {
   expect(setup().result.current.isNotFound).toBe(true);
 });
 
+describe("the preview after an event (spec 108)", () => {
+  it("SHOULD hold whole units after a reverse split of a B3 stock", () => {
+    detailQuery.reset().withData(
+      makeDetail({
+        operations: [
+          makeEventOperation({ date: "2026-03-10" }),
+          makeOperation({
+            date: "2026-01-10",
+            id: "buy-1",
+            quantity: "3155",
+            total: 319100,
+          }),
+        ],
+      }),
+    );
+    const { result } = setup();
+
+    act(() => result.current.onTypeChange("SELL"));
+    act(() => result.current.onQuantityChange("1"));
+    act(() => result.current.onUnitPriceChange("10"));
+
+    expect(result.current.availableQuantity).toBe("315");
+  });
+});
+
 describe("the Evento segment (spec 108)", () => {
   it("SHOULD start in the trade form AND offer the event segment", () => {
     const { result } = setup();

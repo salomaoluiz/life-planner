@@ -197,6 +197,8 @@ function useOperationModalViewModel() {
         type: state.type,
         unitPrice: state.unitPrice,
       },
+      // Spec 108: the events of the history floor to whole units for B3 stocks and REITs.
+      asset.assetClass,
     );
   }, [asset, state, params.id]);
 
