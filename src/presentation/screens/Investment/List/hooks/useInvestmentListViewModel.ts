@@ -147,7 +147,13 @@ function useInvestmentListViewModel() {
     quotesTime: latestQuoteTime(activeAssets),
     readOnly: scope.readOnly,
     search,
-    suggestionsCount: suggestions.data ?? 0,
+    // Incomes (their own request) plus the events the asset list already counts (spec 108 FR 32).
+    suggestionsCount:
+      (suggestions.data ?? 0) +
+      (active.data?.assets ?? []).reduce(
+        (sum, asset) => sum + asset.pendingEventSuggestions,
+        0,
+      ),
     tab,
     toastVisible: scope.toastVisible,
   };

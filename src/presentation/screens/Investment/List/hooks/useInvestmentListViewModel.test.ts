@@ -299,3 +299,13 @@ it("SHOULD show no suggestions before they arrive (spec 107)", () => {
 
   expect(setup().result.current.suggestionsCount).toBe(0);
 });
+
+it("SHOULD add the pending event suggestions of the assets to the inbox count (spec 108 FR 32)", () => {
+  givenData([
+    makeAsset({ id: "a", pendingEventSuggestions: 2 }),
+    makeAsset({ id: "b", pendingEventSuggestions: 1 }),
+  ]);
+  suggestionsQuery.withData(3);
+
+  expect(setup().result.current.suggestionsCount).toBe(6);
+});

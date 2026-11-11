@@ -1,6 +1,9 @@
 import { render } from "@tests";
 
-import { makeSuggestion } from "@screens/Investment/mocks/fixtures";
+import {
+  makeEventSuggestion,
+  makeSuggestion,
+} from "@screens/Investment/mocks/fixtures";
 
 import Suggestions from "../";
 import { SuggestionsVM, useSuggestionsViewModel } from "../hooks";
@@ -20,11 +23,22 @@ const defaultViewModel: SuggestionsVM = {
     onReject: jest.fn(),
   },
   count: 1,
+  counts: { all: 1, events: 0, income: 1 },
   errorMessage: undefined,
+  eventActions: {
+    failure: undefined,
+    isBusy: false,
+    onApprove: jest.fn(),
+    onEdit: jest.fn(),
+    onReject: jest.fn(),
+  },
+  eventItems: [],
+  filter: "ALL",
   isEmpty: false,
   isLoading: false,
   items: [makeSuggestion()],
   onBack: jest.fn(),
+  onFilterChange: jest.fn(),
   onRetry: jest.fn(),
   today: "2026-11-11",
 };
@@ -36,4 +50,4 @@ function setup(overrides: Partial<SuggestionsVM> = {}) {
   return { vm, ...render(<Suggestions />) };
 }
 
-export { defaultViewModel, setup };
+export { defaultViewModel, makeEventSuggestion, setup };

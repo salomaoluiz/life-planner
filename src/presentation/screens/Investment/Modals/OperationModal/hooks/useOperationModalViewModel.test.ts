@@ -8,6 +8,7 @@ import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { InvestmentNegativePosition } from "@domain/entities/errors";
 import { AccountType } from "@domain/entities/financial/AccountEntity";
 import {
+  InvestmentAssetClass,
   InvestmentAssetStatus,
   InvestmentFeeKind,
 } from "@domain/entities/investment/enums";
@@ -19,7 +20,9 @@ import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
 import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import invalidateInvestments from "@screens/Investment/hooks/invalidateInvestments";
 import {
+  makeAsset,
   makeDetail,
+  makeEventOperation,
   makeOperation,
   owners,
 } from "@screens/Investment/mocks/fixtures";
@@ -387,4 +390,93 @@ it("SHOULD report a missing asset", () => {
   detailQuery.reset().withError();
 
   expect(setup().result.current.isNotFound).toBe(true);
+});
+
+describe("the preview after an event (spec 108)", () => {
+  it("SHOULD hold whole units after a reverse split of a B3 stock", () => {
+    detailQuery.reset().withData(
+      makeDetail({
+        operations: [
+          makeEventOperation({ date: "2026-03-10" }),
+          makeOperation({
+            date: "2026-01-10",
+            id: "buy-1",
+            quantity: "3155",
+            total: 319100,
+          }),
+        ],
+      }),
+    );
+    const { result } = setup();
+
+    act(() => result.current.onTypeChange("SELL"));
+    act(() => result.current.onQuantityChange("1"));
+    act(() => result.current.onUnitPriceChange("10"));
+
+    expect(result.current.availableQuantity).toBe("315");
+  });
+});
+
+describe("the Evento segment (spec 108)", () => {
+  it("SHOULD start in the trade form AND offer the event segment", () => {
+    const { result } = setup();
+
+    expect(result.current).toMatchObject({
+      canPickEvent: true,
+      eventMode: false,
+      type: "BUY",
+    });
+  });
+
+  it("SHOULD switch to the event form AND back without losing the trade type", () => {
+    const { result } = setup();
+
+    act(() => result.current.onTypeChange("EVENT"));
+    expect(result.current).toMatchObject({ eventMode: true, type: "EVENT" });
+
+    act(() => result.current.onTypeChange("SELL"));
+    expect(result.current).toMatchObject({ eventMode: false, type: "SELL" });
+  });
+
+  it("SHOULD not offer events for fixed income", () => {
+    detailQuery.reset().withData(
+      makeDetail({
+        ...makeAsset({ assetClass: InvestmentAssetClass.FIXED_INCOME }),
+        operations: [],
+      }),
+    );
+
+    expect(setup().result.current.canPickEvent).toBe(false);
+  });
+
+  it("SHOULD open straight into the event form for a suggestion", () => {
+    spies.params.mockReturnValue({
+      assetId: "asset-1",
+      suggestionId: "esug-1",
+    });
+
+    expect(setup().result.current.eventMode).toBe(true);
+  });
+
+  it("SHOULD open an event being edited in the event form AND a buy in the trade form", () => {
+    const event = makeEventOperation();
+    detailQuery
+      .reset()
+      .withData(
+        makeDetail({ operations: [event, makeOperation({ id: "buy-1" })] }),
+      );
+
+    spies.params.mockReturnValue({ assetId: "asset-1", id: "event-1" });
+    const editingEvent = setup().result.current;
+
+    expect(editingEvent).toMatchObject({ canPickEvent: true, eventMode: true });
+    expect(editingEvent.operation?.id).toBe("event-1");
+
+    spies.params.mockReturnValue({ assetId: "asset-1", id: "buy-1" });
+
+    expect(setup().result.current).toMatchObject({
+      canPickEvent: false,
+      eventMode: false,
+    });
+  });
 });

@@ -21,6 +21,7 @@ export const MODAL_NAMES = [
   "investment_fixed_income_contribution",
   "investment_fixed_income_rate",
   "investment_fixed_income_redeem",
+  "investment_fraction_sale",
   "investment_income",
   "investment_income_receive",
   "investment_operation",

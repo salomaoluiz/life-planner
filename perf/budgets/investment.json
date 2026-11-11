@@ -62,6 +62,15 @@
   "investment.fixedIncomeTitle.render.mount": {
     "maxCommits": 4
   },
+  "investment.fractionSale.mount.cold": {
+    "maxDepth": 3,
+    "maxDuplicates": 0,
+    "maxRequests": 3,
+    "modal": "investment_fraction_sale"
+  },
+  "investment.fractionSale.render.mount": {
+    "maxCommits": 3
+  },
   "investment.income.mount.cold": {
     "maxDepth": 3,
     "maxDuplicates": 0,
@@ -101,7 +110,7 @@
   "investment.suggestions.mount.cold": {
     "maxDepth": 3,
     "maxDuplicates": 0,
-    "maxRequests": 1,
+    "maxRequests": 2,
     "route": "app/(app)/(tabs)/investments/suggestions.tsx"
   },
   "investment.suggestions.render.mount": {

@@ -8,10 +8,13 @@ import {
   InvestmentClassLocked,
   InvestmentCurrencyMismatch,
   InvestmentFeesAboveSale,
+  InvestmentFractionAlreadySold,
+  InvestmentFractionBreaks,
   InvestmentIncomeIncomplete,
   InvestmentIncomeLocked,
   InvestmentIncomeReceived,
   InvestmentNegativePosition,
+  InvestmentNoPosition,
   InvestmentRedemptionTooLarge,
   InvestmentRowUseOperation,
   InvestmentUseFixedIncomeActions,
@@ -24,6 +27,8 @@ import {
 import handleFinancialApiError from "../../financial/financialApiError";
 
 const NEGATIVE_POSITION = /negative on (\d{4}-\d{2}-\d{2})/;
+const NO_POSITION = /no position on (\d{4}-\d{2}-\d{2})/;
+const FRACTION_BREAKS = /removes the fraction sold on (\d{4}-\d{2}-\d{2})/;
 
 function handleInvestmentApiError(
   error: unknown,
@@ -67,6 +72,10 @@ function handleInvestmentApiError(
     if (error.statusCode === 409 && code === "ALREADY_RECEIVED") {
       throw new InvestmentIncomeReceived();
     }
+    // Spec 108 section 7: a second sale of the same fraction.
+    if (error.statusCode === 409 && code === "FRACTION_ALREADY_SOLD") {
+      throw new InvestmentFractionAlreadySold();
+    }
     // Spec 105 FR 20-21: the 422 carries `details` (availableNet of a redemption, or the date it stopped fitting).
     if (error.statusCode === 422 && error.body?.details) {
       const details = error.body.details as {
@@ -100,6 +109,17 @@ function investmentUnprocessable(message: string): BusinessError | undefined {
 
   if (negative) {
     return new InvestmentNegativePosition(negative[1]);
+  }
+  const noPosition = NO_POSITION.exec(message);
+
+  if (noPosition) {
+    return new InvestmentNoPosition(noPosition[1]);
+  }
+
+  const fractionBreaks = FRACTION_BREAKS.exec(message);
+
+  if (fractionBreaks) {
+    return new InvestmentFractionBreaks(fractionBreaks[1]);
   }
   if (message.includes("Class and currency can't change")) {
     return new InvestmentClassLocked();

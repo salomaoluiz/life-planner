@@ -1,6 +1,9 @@
 import { render } from "@tests";
 
 import { InvestmentPriceRange } from "@domain/entities/investment/enums";
+import { InvestmentEventSuggestion } from "@domain/entities/investment/InvestmentEntities";
+import useEventSuggestionActions from "@screens/Investment/Events/hooks/useEventSuggestionActions";
+import useEventSuggestions from "@screens/Investment/Events/hooks/useEventSuggestions";
 import { makeDetail } from "@screens/Investment/mocks/fixtures";
 
 import InvestmentDetail from "../";
@@ -12,6 +15,8 @@ import {
 } from "../hooks";
 
 jest.mock("../hooks");
+jest.mock("@screens/Investment/Events/hooks/useEventSuggestions");
+jest.mock("@screens/Investment/Events/hooks/useEventSuggestionActions");
 jest.mock(
   "react-native-safe-area-context",
   () => jest.requireActual("react-native-safe-area-context/jest/mock").default,
@@ -64,6 +69,7 @@ const defaultViewModel: InvestmentDetailVM = {
   onRedeem: jest.fn(),
   onRefresh: jest.fn(),
   onRetry: jest.fn(),
+  onSellFraction: jest.fn(),
   onToastHide: jest.fn(),
   onUpdateRate: jest.fn(),
   onUpdateValue: jest.fn(),
@@ -98,7 +104,20 @@ const defaultIncomeViewModel: IncomeSectionVM = {
   today: "2026-11-11",
 };
 
-function setup(overrides: Partial<InvestmentDetailVM> = {}) {
+const eventActions = {
+  failure: undefined,
+  isBusy: false,
+  onApprove: jest.fn(),
+  onEdit: jest.fn(),
+  onReject: jest.fn(),
+};
+
+function setup(
+  overrides: Partial<InvestmentDetailVM> = {},
+  eventSuggestions: InvestmentEventSuggestion[] = [],
+) {
+  jest.mocked(useEventSuggestions).mockReturnValue(eventSuggestions);
+  jest.mocked(useEventSuggestionActions).mockReturnValue(eventActions);
   jest
     .mocked(useIncomeSectionViewModel)
     .mockReturnValue(defaultIncomeViewModel);
@@ -108,4 +127,4 @@ function setup(overrides: Partial<InvestmentDetailVM> = {}) {
   return { vm, ...render(<InvestmentDetail />) };
 }
 
-export { defaultIncomeViewModel, defaultViewModel, setup };
+export { defaultIncomeViewModel, defaultViewModel, eventActions, setup };

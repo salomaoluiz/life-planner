@@ -9,8 +9,10 @@ import { useCases } from "@application/useCases";
 import { todayCalendarDate } from "@data/models/financial/calendarDate";
 import { AccountType } from "@domain/entities/financial/AccountEntity";
 import {
+  InvestmentAssetClass,
   InvestmentFeeKind,
   InvestmentOperationType,
+  isInvestmentEvent,
 } from "@domain/entities/investment/enums";
 import { previewOperation } from "@domain/entities/investment/position";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
@@ -23,6 +25,7 @@ import getInvestmentErrorMessage from "@screens/Investment/utils/investmentError
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 import { parseDecimal, ZERO } from "@utils/decimal";
 
+import { EVENT_SEGMENT } from "../models/eventFormState";
 import {
   addFee,
   createInitialState,
@@ -69,7 +72,11 @@ function readOnlyKeyOf(
 function useOperationModalViewModel() {
   const { closeModal } = useModalNavigation();
   const localeTag = useLocaleTag();
-  const params = useLocalSearchParams<{ assetId: string; id?: string }>();
+  const params = useLocalSearchParams<{
+    assetId: string;
+    id?: string;
+    suggestionId?: string;
+  }>();
   const isEditing = !!params.id;
 
   const detail = useQuery({
@@ -125,6 +132,8 @@ function useOperationModalViewModel() {
     return createInitialState(eligible[0]?.id);
   }, [asset, accountsQuery.data, isEditing, operation, eligible]);
 
+  // Spec 108: the "Evento" segment. An event being edited and a suggestion open straight into it.
+  const [eventPicked, setEventPicked] = useState(false);
   const [edited, setEdited] = useState<OperationFormState>();
   const [submitted, setSubmitted] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
@@ -188,9 +197,20 @@ function useOperationModalViewModel() {
         type: state.type,
         unitPrice: state.unitPrice,
       },
+      // Spec 108: the events of the history floor to whole units for B3 stocks and REITs.
+      asset.assetClass,
     );
   }, [asset, state, params.id]);
 
+  const eventMode =
+    eventPicked ||
+    !!params.suggestionId ||
+    (!!operation && isInvestmentEvent(operation.type));
+  // Fixed income has no events (FR 2) and a buy or sell being edited cannot become one.
+  const canPickEvent =
+    !!asset &&
+    asset.assetClass !== InvestmentAssetClass.FIXED_INCOME &&
+    (!isEditing || eventMode);
   // An operation that points to an account the user cannot reach is read-only (spec 102 section 4).
   const accountUnreachable =
     isEditing &&
@@ -250,10 +270,12 @@ function useOperationModalViewModel() {
     })),
     asset,
     availableQuantity: preview?.availableQuantity,
+    canPickEvent,
     currency: asset?.currency ?? "BRL",
     date: state?.date ?? new Date(),
     deleteOpen,
     discardOpen,
+    eventMode,
     failure,
     feeErrors: errors?.feeDescriptions ?? {},
     feeKinds: Object.values(InvestmentFeeKind),
@@ -297,10 +319,16 @@ function useOperationModalViewModel() {
     onQuantityChange: (value: string) =>
       state && update({ ...state, quantity: value }),
     onSave,
-    onTypeChange: (value: string) =>
-      state && update({ ...state, type: value as InvestmentOperationType }),
+    onTypeChange: (value: string) => {
+      setEventPicked(value === EVENT_SEGMENT);
+
+      if (state && value !== EVENT_SEGMENT) {
+        update({ ...state, type: value as InvestmentOperationType });
+      }
+    },
     onUnitPriceChange: (value: string) =>
       state && update({ ...state, unitPrice: value }),
+    operation,
     preview,
     quantity: state?.quantity ?? "",
     quantityError: errors?.quantity,
@@ -313,7 +341,9 @@ function useOperationModalViewModel() {
     titleKey: (isEditing
       ? "investment.form.operation.editTitle"
       : "investment.form.operation.newTitle") as TranslationKeys,
-    type: state?.type ?? InvestmentOperationType.BUY,
+    type: eventMode
+      ? EVENT_SEGMENT
+      : (state?.type ?? InvestmentOperationType.BUY),
     unitPrice: state?.unitPrice ?? "",
     unitPriceError: errors?.unitPrice,
   };

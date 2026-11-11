@@ -35,6 +35,9 @@ export interface InvestmentAsset {
   operationsWithoutFxRate: number;
   owner: OwnerType;
   ownerId: string;
+  // Spec 108 FR 32: event suggestions waiting for a decision (list only, 0 elsewhere) and fractions still to sell.
+  pendingEventSuggestions: number;
+  pendingFractionCount: number;
   position: InvestmentPosition;
   // What the current price is: the automatic quote or a manual valuation (null without a price).
   priceSource: InvestmentPriceSource | null;
@@ -62,6 +65,25 @@ export interface InvestmentBrlResult {
 }
 
 // Money is integer cents in the asset currency; quantities and unit prices are decimal strings (up to 8 places).
+// Spec 108: an announced event suggested for an asset. Ratios and percent are decimal strings, `date` is the data-com.
+export interface InvestmentEventSuggestion {
+  assetId: string;
+  averagePriceAfter?: string;
+  averagePriceBefore?: string;
+  bonusPercent?: string;
+  bonusUnitCost?: string;
+  currency: CurrencyCode;
+  date: string;
+  fractionQuantity: string;
+  id: string;
+  quantityAfter: string;
+  quantityBefore: string;
+  ratioFrom?: string;
+  ratioTo?: string;
+  ticker: string;
+  type: InvestmentOperationType;
+}
+
 export interface InvestmentFee {
   amount: number;
   description: null | string;
@@ -234,11 +256,16 @@ export interface InvestmentIncomeSummary {
 
 export interface InvestmentOperation {
   accountId: null | string;
+  // Spec 108: the numbers of a split, reverse split or bonus; undefined on any other operation. The money fields
+  // below are zero for an event.
+  corporateEvent?: InvestmentOperationEvent;
   // Cost removed by a sell; null on a buy.
   costRemoved: null | number;
   date: string;
   fees: InvestmentFee[];
   feesTotal: number;
+  // Spec 108 FR 15: set on the sale of the fraction an event left; the id of that event.
+  fractionOfOperationId?: string;
   // BRL per USD at the operation date (USD assets only).
   fxRate: null | string;
   generateTransaction: boolean;
@@ -256,9 +283,32 @@ export interface InvestmentOperation {
   unitPrice: string;
 }
 
+// Spec 108 FR 12: what the event did to the position, as the API computed it.
+export interface InvestmentOperationEvent {
+  averagePriceAfter: null | string;
+  averagePriceBefore: null | string;
+  bonusPercent?: string;
+  bonusUnitCost?: string;
+  // Cents of the cost that left the position with the fraction.
+  fractionCost: number;
+  fractionQuantity: string;
+  quantityAfter: string;
+  quantityBefore: string;
+  ratioFrom?: string;
+  ratioTo?: string;
+}
+
 export interface InvestmentOperationResult {
   operation: InvestmentOperation;
   position: InvestmentPosition;
+}
+
+// Spec 108 FR 12: a fraction that left the position and waits for its sale.
+export interface InvestmentPendingFraction {
+  cost: number;
+  date: string;
+  eventId: string;
+  quantity: string;
 }
 
 export interface InvestmentPosition {
@@ -270,6 +320,7 @@ export interface InvestmentPosition {
   openResult: null | number;
   // Fraction of the cost (0.0721 = 7.21%).
   openResultPercent: null | number;
+  pendingFractions: InvestmentPendingFraction[];
   quantity: string;
   realizedResult: number;
 }

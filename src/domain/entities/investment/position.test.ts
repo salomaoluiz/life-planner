@@ -1,7 +1,15 @@
-import { InvestmentOperationType } from "@domain/entities/investment/enums";
+import {
+  InvestmentAssetClass,
+  InvestmentOperationType,
+} from "@domain/entities/investment/enums";
 import { InvestmentOperation } from "@domain/entities/investment/InvestmentEntities";
 
-import { computeTotals, feeAmounts, previewOperation } from "./position";
+import {
+  computeTotals,
+  feeAmounts,
+  previewEvent,
+  previewOperation,
+} from "./position";
 
 const { BUY, SELL } = InvestmentOperationType;
 
@@ -168,5 +176,187 @@ describe("previewOperation", () => {
 describe("feeAmounts", () => {
   it("SHOULD list the amounts", () => {
     expect(feeAmounts([{ amount: 1 }, { amount: 5 }])).toEqual([1, 5]);
+  });
+});
+
+describe("corporate events (spec 108)", () => {
+  const { BONUS, REVERSE_SPLIT, SPLIT } = InvestmentOperationType;
+
+  function eventOperation(
+    id: string,
+    type: InvestmentOperationType,
+    date: string,
+    fields: Partial<NonNullable<InvestmentOperation["corporateEvent"]>>,
+  ): InvestmentOperation {
+    return {
+      ...operation(id, type, date, "0", 0),
+      corporateEvent: {
+        averagePriceAfter: null,
+        averagePriceBefore: null,
+        fractionCost: 0,
+        fractionQuantity: "0",
+        quantityAfter: "0",
+        quantityBefore: "0",
+        ...fields,
+      },
+      gross: 0,
+      unitPrice: "0",
+    };
+  }
+  const mglu = [operation("a", BUY, "2026-01-10", "3155", 319100)];
+
+  it("SHOULD preview a reverse split with the fraction leaving at its share of the cost", () => {
+    expect(
+      previewEvent(mglu, InvestmentAssetClass.BR_STOCK, {
+        date: "2026-03-10",
+        ratioFrom: "10",
+        ratioTo: "1",
+        type: REVERSE_SPLIT,
+      }),
+    ).toEqual({
+      averagePriceAfter: "10.11409524",
+      averagePriceBefore: "1.01141046",
+      costAfter: 318594,
+      costBefore: 319100,
+      fractionCost: 506,
+      fractionQuantity: "0.5",
+      quantityAfter: "315",
+      quantityBefore: "3155",
+    });
+  });
+
+  it("SHOULD keep the decimals of a foreign stock on a 1:4 split", () => {
+    const preview = previewEvent(
+      [operation("a", BUY, "2026-01-10", "12.5", 230500)],
+      InvestmentAssetClass.FOREIGN_STOCK,
+      { date: "2026-08-25", ratioFrom: "1", ratioTo: "4", type: SPLIT },
+    );
+
+    expect(preview).toMatchObject({
+      averagePriceAfter: "46.1",
+      costAfter: 230500,
+      fractionQuantity: "0",
+      quantityAfter: "50",
+    });
+  });
+
+  it("SHOULD add the cost of the bonus shares AND take the fraction out", () => {
+    const preview = previewEvent(
+      [operation("a", BUY, "2026-01-10", "315", 318594)],
+      InvestmentAssetClass.BR_STOCK,
+      {
+        bonusPercent: "10",
+        bonusUnitCost: "4.50",
+        date: "2026-11-18",
+        type: BONUS,
+      },
+    );
+
+    expect(preview).toMatchObject({
+      averagePriceAfter: "9.61109827",
+      costAfter: 332544,
+      fractionCost: 225,
+      fractionQuantity: "0.5",
+      quantityAfter: "346",
+    });
+  });
+
+  it("SHOULD keep the cost of a bonus without a unit cost", () => {
+    const preview = previewEvent(
+      [operation("a", BUY, "2026-01-10", "315", 318594)],
+      InvestmentAssetClass.BR_STOCK,
+      { bonusPercent: "10", date: "2026-11-18", type: BONUS },
+    );
+
+    expect(preview).toMatchObject({ costAfter: 318594, quantityAfter: "346" });
+  });
+
+  it("SHOULD return null WHEN no shares are held on the date OR the fields are not valid", () => {
+    expect(
+      previewEvent([], InvestmentAssetClass.BR_STOCK, {
+        date: "2026-03-10",
+        ratioFrom: "1",
+        ratioTo: "2",
+        type: SPLIT,
+      }),
+    ).toBeNull();
+    expect(
+      previewEvent(mglu, InvestmentAssetClass.BR_STOCK, {
+        date: "2026-03-10",
+        ratioFrom: "0",
+        ratioTo: "2",
+        type: SPLIT,
+      }),
+    ).toBeNull();
+    expect(
+      previewEvent(mglu, InvestmentAssetClass.BR_STOCK, {
+        date: "2026-03-10",
+        type: BONUS,
+      }),
+    ).toBeNull();
+  });
+
+  it("SHOULD ignore the operations after the data-com", () => {
+    const later = [operation("b", BUY, "2026-12-01", "1000", 1), ...mglu];
+    const preview = previewEvent(later, InvestmentAssetClass.BR_STOCK, {
+      date: "2026-03-10",
+      ratioFrom: "10",
+      ratioTo: "1",
+      type: REVERSE_SPLIT,
+    });
+
+    expect(preview?.quantityBefore).toBe("3155");
+  });
+
+  it("SHOULD replay an event AND a fraction sale when previewing a later buy", () => {
+    const existing = [
+      {
+        ...operation("f", SELL, "2026-04-04", "0.5", 520),
+        fractionOfOperationId: "e",
+      },
+      eventOperation("e", REVERSE_SPLIT, "2026-03-10", {
+        ratioFrom: "10",
+        ratioTo: "1",
+      }),
+      ...mglu,
+    ];
+    const preview = previewOperation(
+      existing,
+      {
+        date: "2026-05-01",
+        fees: [],
+        quantity: "100",
+        type: BUY,
+        unitPrice: "10",
+      },
+      InvestmentAssetClass.BR_STOCK,
+    );
+
+    expect(preview.availableQuantity).toBe("315");
+    expect(preview.quantityAfter).toBe("415");
+  });
+
+  it("SHOULD give a buy on the data-com the event even when it is listed after it", () => {
+    const existing = [
+      operation("b", BUY, "2026-03-10", "50", 5000),
+      eventOperation("e", SPLIT, "2026-03-10", {
+        ratioFrom: "1",
+        ratioTo: "2",
+      }),
+      operation("a", BUY, "2026-01-10", "100", 10000),
+    ];
+    const preview = previewOperation(
+      existing,
+      {
+        date: "2026-03-11",
+        fees: [],
+        quantity: "1",
+        type: BUY,
+        unitPrice: "1",
+      },
+      InvestmentAssetClass.BR_STOCK,
+    );
+
+    expect(preview.availableQuantity).toBe("300");
   });
 });

@@ -16,7 +16,9 @@ import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import invalidateInvestments from "@screens/Investment/hooks/invalidateInvestments";
 import {
   makeDetail,
+  makeEventOperation,
   makeFixedIncomeDetail,
+  makeFractionSale,
   makeQuote,
   makeValuation,
   owners,
@@ -474,5 +476,62 @@ describe("fixed income (spec 105)", () => {
     setup();
 
     expect(invalidateInvestments).toHaveBeenCalled();
+  });
+});
+
+describe("corporate events (spec 108)", () => {
+  function givenEvents() {
+    givenDetail(
+      makeDetail({
+        operations: [makeFractionSale(), makeEventOperation()],
+      }),
+    );
+  }
+
+  it("SHOULD open the fraction sale modal for the row of a fraction sale AND the operation form for any other", () => {
+    givenEvents();
+    const { result } = setup();
+
+    result.current.onOperationPress("sale-1");
+    result.current.onOperationPress("event-1");
+
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "investment_fraction_sale",
+      { assetId: "asset-1", eventId: "event-1", id: "sale-1" },
+    );
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "investment_operation",
+      { assetId: "asset-1", id: "event-1" },
+    );
+  });
+
+  it("SHOULD open the fraction sale modal for an event", () => {
+    givenEvents();
+    const { result } = setup();
+
+    result.current.onSellFraction("event-1");
+
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "investment_fraction_sale",
+      { assetId: "asset-1", eventId: "event-1" },
+    );
+  });
+
+  it("SHOULD not count a fraction sale as a sell", () => {
+    givenEvents();
+
+    expect(setup().result.current.sellCount).toBe(0);
+  });
+
+  it("SHOULD open the fraction sale named by the route param", () => {
+    spies.params.mockReturnValue({ id: "asset-1", operation: "sale-1" });
+    givenEvents();
+
+    setup();
+
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "investment_fraction_sale",
+      { assetId: "asset-1", eventId: "event-1", id: "sale-1" },
+    );
   });
 });

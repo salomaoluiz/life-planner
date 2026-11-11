@@ -16,6 +16,7 @@ import {
 import {
   InvestmentAsset,
   InvestmentAssetDetail,
+  InvestmentEventSuggestion,
   InvestmentFixedIncome,
   InvestmentIncome,
   InvestmentIncomeSuggestion,
@@ -46,6 +47,8 @@ function makeAsset(overrides: Partial<InvestmentAsset> = {}): InvestmentAsset {
     operationsWithoutFxRate: 0,
     owner: OwnerType.USER,
     ownerId: "user-1",
+    pendingEventSuggestions: 0,
+    pendingFractionCount: 0,
     position: makePosition(),
     priceSource: null,
     quote: null,
@@ -78,7 +81,61 @@ function makeDetail(
   };
 }
 
+// Spec 108: the 10:1 reverse split of the design (3.155 -> 315, fraction of 0,5 costing R$ 5,06).
+function makeEventOperation(
+  overrides: Partial<InvestmentOperation> = {},
+): InvestmentOperation {
+  return makeOperation({
+    accountId: null,
+    corporateEvent: {
+      averagePriceAfter: "10.11409524",
+      averagePriceBefore: "1.01141046",
+      fractionCost: 506,
+      fractionQuantity: "0.5",
+      quantityAfter: "315",
+      quantityBefore: "3155",
+      ratioFrom: "10",
+      ratioTo: "1",
+    },
+    costRemoved: null,
+    date: "2026-03-10",
+    fees: [],
+    feesTotal: 0,
+    generateTransaction: false,
+    gross: 0,
+    id: "event-1",
+    quantity: "0",
+    total: 0,
+    transactionId: null,
+    type: InvestmentOperationType.REVERSE_SPLIT,
+    unitPrice: "0",
+    ...overrides,
+  });
+}
+
 // Spec 105: a calculated CDB of R$ 15.000 in two lots (cents).
+// Spec 108: an announced 10% bonus on 315 shares (data-com 18/11), the card of the design.
+function makeEventSuggestion(
+  overrides: Partial<InvestmentEventSuggestion> = {},
+): InvestmentEventSuggestion {
+  return {
+    assetId: "asset-1",
+    averagePriceAfter: "9.61109827",
+    averagePriceBefore: "10.11409524",
+    bonusPercent: "10",
+    bonusUnitCost: "4.5",
+    currency: "BRL",
+    date: "2026-11-18",
+    fractionQuantity: "0.5",
+    id: "esug-1",
+    quantityAfter: "346",
+    quantityBefore: "315",
+    ticker: "MGLU3",
+    type: InvestmentOperationType.BONUS,
+    ...overrides,
+  };
+}
+
 function makeFixedIncome(
   overrides: Partial<InvestmentFixedIncome> = {},
 ): InvestmentFixedIncome {
@@ -170,6 +227,27 @@ function makeFixedIncomeDetail(
   };
 }
 
+// Spec 108: the sale of that fraction for R$ 5,20 (realized +R$ 0,14).
+function makeFractionSale(
+  overrides: Partial<InvestmentOperation> = {},
+): InvestmentOperation {
+  return makeOperation({
+    costRemoved: 506,
+    date: "2026-04-04",
+    fees: [],
+    feesTotal: 0,
+    fractionOfOperationId: "event-1",
+    gross: 520,
+    id: "sale-1",
+    quantity: "0.5",
+    realizedResult: 14,
+    total: 520,
+    type: InvestmentOperationType.SELL,
+    unitPrice: "10.4",
+    ...overrides,
+  });
+}
+
 function makeIncome(
   overrides: Partial<InvestmentIncome> = {},
 ): InvestmentIncome {
@@ -238,6 +316,7 @@ function makePosition(
     currentValueDate: "2026-11-01",
     openResult: 84960,
     openResultPercent: 0.0721,
+    pendingFractions: [],
     quantity: "1200",
     realizedResult: 31790,
     ...overrides,
@@ -332,8 +411,11 @@ function makeValuation(
 export {
   makeAsset,
   makeDetail,
+  makeEventOperation,
+  makeEventSuggestion,
   makeFixedIncome,
   makeFixedIncomeDetail,
+  makeFractionSale,
   makeIncome,
   makeOperation,
   makePosition,

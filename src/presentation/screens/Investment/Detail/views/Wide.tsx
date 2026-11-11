@@ -30,6 +30,13 @@ import {
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
 import { INVESTMENT_MAX_WIDTH } from "@screens/Investment/constants";
+import EventBanner from "@screens/Investment/Events/components/EventBanner";
+import EventSuggestionsSection from "@screens/Investment/Events/components/EventSuggestionsSection";
+import {
+  isEventOperation,
+  isFractionSale,
+  pendingFractionTotal,
+} from "@screens/Investment/Events/models/eventInfo";
 import { labelOf } from "@screens/Investment/models/assetList";
 import {
   formatDay,
@@ -42,6 +49,7 @@ import {
 } from "@screens/Investment/models/format";
 import investmentTestIds from "@screens/Investment/testIds";
 
+import EventRow from "../components/EventRow";
 import FixedIncomeSection, {
   FixedIncomeActions,
   FixedIncomeChips,
@@ -134,6 +142,7 @@ function OperationRow({
   const localeTag = useLocaleTag();
   const { colors, sizes } = useKitTheme();
   const sell = operation.type === InvestmentOperationType.SELL;
+  const fraction = isFractionSale(operation);
   function money(cents: number) {
     return formatMoney(cents, asset.currency, localeTag);
   }
@@ -155,7 +164,11 @@ function OperationRow({
         <View style={styles.opCell}>
           <Text.BodyStrong
             tone={sell ? "warning" : "accent"}
-            value={t(`investment.operation.${operation.type}`)}
+            value={
+              fraction
+                ? t("investment.fraction.rowType")
+                : t(`investment.operation.${operation.type}`)
+            }
           />
           <Text.Caption
             tone="secondary"
@@ -200,6 +213,7 @@ function Operations({
   vm: InvestmentDetailVM;
 }) {
   const { t } = useTranslation();
+  const compact = useDensity().density === "compact";
 
   return (
     <Section title={t("investment.detail.operations")}>
@@ -211,14 +225,24 @@ function Operations({
         />
       ) : (
         <Card padding="sm">
-          {asset.operations.map((operation) => (
-            <OperationRow
-              asset={asset}
-              key={operation.id}
-              operation={operation}
-              vm={vm}
-            />
-          ))}
+          {asset.operations.map((operation) =>
+            isEventOperation(operation) ? (
+              <EventRow
+                asset={asset}
+                compact={compact}
+                key={operation.id}
+                operation={operation}
+                vm={vm}
+              />
+            ) : (
+              <OperationRow
+                asset={asset}
+                key={operation.id}
+                operation={operation}
+                vm={vm}
+              />
+            ),
+          )}
         </Card>
       )}
     </Section>
@@ -241,6 +265,20 @@ function Summary({
   function money(cents: number) {
     return formatMoney(cents, asset.currency, localeTag);
   }
+  const pendingTotal = pendingFractionTotal(position.pendingFractions);
+  const pendingCount = Number(pendingTotal) === 1 ? 1 : 2;
+  const fractionOwner =
+    position.pendingFractions.length === 1
+      ? asset.operations.find(
+          (operation) => operation.id === position.pendingFractions[0].eventId,
+        )
+      : undefined;
+  const fractionCaption = fractionOwner
+    ? t("investment.fraction.pendingFrom", {
+        date: formatDay(fractionOwner.date, localeTag),
+        type: t(`investment.operation.${fractionOwner.type}`).toLowerCase(),
+      })
+    : undefined;
   const noValue = t("investment.position.noValue");
   const current =
     position.currentValue === null ? noValue : money(position.currentValue);
@@ -336,6 +374,16 @@ function Summary({
               ? undefined
               : formatPercent(asset.brl.resultPercent, localeTag),
             resultTone(asset.brl.result),
+          )
+        : null}
+      {position.pendingFractions.length > 0
+        ? card(
+            t("investment.fraction.pending"),
+            t(pluralKey("investment.fraction.pendingQuantity", pendingCount), {
+              quantity: formatQuantity(pendingTotal, localeTag),
+            }),
+            investmentTestIds.fraction.pendingCard,
+            fractionCaption,
           )
         : null}
       {card(
@@ -484,8 +532,10 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentDetailVM>) {
           />
         ) : (
           <>
+            <EventBanner asset={asset} />
             <PriceBlock asset={asset} vm={vm} />
             <Summary asset={asset} compact={compact} sells={vm.sellCount} />
+            <EventSuggestionsSection asset={asset} />
             {asset.ticker ? (
               <View style={styles.sections}>
                 <View style={styles.sectionMain}>
