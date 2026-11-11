@@ -14,7 +14,10 @@ export function deleteSummary(asset: InvestmentAssetDetail): {
 }
 
 export function sellCount(asset: InvestmentAssetDetail): number {
+  // A fraction sale is the cash of an event, not a sell the owner decided (spec 108 FR 15).
   return asset.operations.filter(
-    (operation) => operation.type === InvestmentOperationType.SELL,
+    (operation) =>
+      operation.type === InvestmentOperationType.SELL &&
+      operation.fractionOfOperationId === undefined,
   ).length;
 }

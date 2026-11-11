@@ -5,10 +5,13 @@ import {
   InvestmentClassLocked,
   InvestmentCurrencyMismatch,
   InvestmentFeesAboveSale,
+  InvestmentFractionAlreadySold,
+  InvestmentFractionBreaks,
   InvestmentIncomeIncomplete,
   InvestmentIncomeLocked,
   InvestmentIncomeReceived,
   InvestmentNegativePosition,
+  InvestmentNoPosition,
   InvestmentRedemptionTooLarge,
   InvestmentUseFixedIncomeActions,
   QuoteRefreshTooSoon,
@@ -41,6 +44,20 @@ function getInvestmentErrorMessage(
     };
   }
 
+  // Spec 108 section 8: the 422 errors of the event rules name the date they stopped fitting.
+  if (error instanceof InvestmentNoPosition) {
+    return {
+      key: "investment.event.noPosition",
+      params: { date: formatDate(error.date) },
+    };
+  }
+  if (error instanceof InvestmentFractionBreaks) {
+    return {
+      key: "investment.event.fractionBreaks",
+      params: { date: formatDate(error.date) },
+    };
+  }
+
   // Spec 105 FR 21: an edit that makes a redemption larger than the title names the redemption date.
   if (error instanceof InvestmentRedemptionTooLarge) {
     return {
@@ -55,6 +72,7 @@ function getInvestmentErrorMessage(
     [InvestmentClassLocked, "investment.errors.classLocked"],
     [InvestmentCurrencyMismatch, "investment.income.errors.currencyMismatch"],
     [InvestmentFeesAboveSale, "investment.errors.feesAboveSale"],
+    [InvestmentFractionAlreadySold, "investment.errors.fractionAlreadySold"],
     [InvestmentIncomeIncomplete, "investment.income.errors.incomplete"],
     [InvestmentIncomeLocked, "investment.income.errors.locked"],
     [InvestmentIncomeReceived, "investment.income.errors.received"],

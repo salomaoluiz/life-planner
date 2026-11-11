@@ -93,6 +93,9 @@ export const MODAL_ROUTES: Record<ModalName, ComponentType> = {
   investment_fixed_income_redeem: lazyModal(
     async () => import("@screens/Investment/Modals/FixedIncomeRedeemModal"),
   ),
+  investment_fraction_sale: lazyModal(
+    async () => import("@screens/Investment/Modals/FractionSaleModal"),
+  ),
   investment_income: lazyModal(
     async () => import("@screens/Investment/Modals/IncomeModal"),
   ),

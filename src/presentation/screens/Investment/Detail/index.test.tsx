@@ -9,15 +9,18 @@ import {
 import * as theme from "@presentation/theme";
 import {
   makeDetail,
+  makeEventOperation,
+  makeEventSuggestion,
   makeFixedIncome,
   makeFixedIncomeDetail,
+  makeFractionSale,
   makePosition,
   makeQuote,
   makeUsdAsset,
 } from "@screens/Investment/mocks/fixtures";
 import investmentTestIds from "@screens/Investment/testIds";
 
-import { setup } from "./mocks/index.mocks";
+import { eventActions, setup } from "./mocks/index.mocks";
 
 const ids = investmentTestIds.detail;
 
@@ -479,5 +482,112 @@ describe("fixed income (spec 105)", () => {
     );
 
     expect(screen.queryByTestId(`${fi.rateEdit}-rate-2`)).toBeNull();
+  });
+});
+
+describe("corporate events (spec 108)", () => {
+  const pending = {
+    cost: 506,
+    date: "2026-03-10",
+    eventId: "event-1",
+    quantity: "0.5",
+  };
+  const withPending = makeDetail({
+    operations: [makeEventOperation()],
+    position: makePosition({ pendingFractions: [pending] }),
+  });
+
+  it("SHOULD show the pending banner AND the suggestions section WHEN an event is announced", () => {
+    setup({}, [makeEventSuggestion()]);
+
+    expect(
+      screen.getByTestId(investmentTestIds.event.banner),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(investmentTestIds.suggestions.event.section),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(
+        `${investmentTestIds.suggestions.event.approve}-esug-1`,
+      ),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD open the first suggestion from the banner", () => {
+    setup({}, [makeEventSuggestion()]);
+
+    fireEvent.press(
+      screen.getByTestId(`${investmentTestIds.event.banner}-action`),
+    );
+
+    expect(eventActions.onEdit).toHaveBeenCalledWith(makeEventSuggestion());
+  });
+
+  it("SHOULD show neither the banner nor the section without suggestions", () => {
+    setup();
+
+    expect(screen.queryByTestId(investmentTestIds.event.banner)).toBeNull();
+    expect(
+      screen.queryByTestId(investmentTestIds.suggestions.event.section),
+    ).toBeNull();
+  });
+
+  it("SHOULD show the fraction card WHEN a fraction is pending AND sell it from the event row", () => {
+    const { vm } = setup({ asset: withPending });
+
+    fireEvent.press(
+      screen.getByTestId(`${investmentTestIds.event.sellFraction}-event-1`),
+    );
+
+    expect(
+      screen.getByTestId(investmentTestIds.fraction.pendingCard),
+    ).toBeOnTheScreen();
+    expect(vm.onSellFraction).toHaveBeenCalledWith("event-1");
+    expect(hasText("investment.operation.REVERSE_SPLIT")).toBe(true);
+    expect(screen.getByText(/investment.event.detailRatio/)).toBeOnTheScreen();
+    expect(
+      screen.getByText(/investment.event.detailFraction/),
+    ).toBeOnTheScreen();
+    expect(hasText("investment.event.noFinanceShort")).toBe(true);
+  });
+
+  it("SHOULD open the event from its row AND hide the sell action WHEN read-only, archived or sold", () => {
+    const { vm } = setup({ asset: withPending });
+
+    fireEvent.press(screen.getByTestId(`${ids.operationRow}-event-1`));
+    expect(vm.onOperationPress).toHaveBeenCalledWith("event-1");
+
+    setup({ asset: withPending, readOnly: true });
+    expect(
+      screen.queryByTestId(`${investmentTestIds.event.sellFraction}-event-1`),
+    ).toBeNull();
+
+    setup({ archived: true, asset: withPending });
+    expect(
+      screen.queryByTestId(`${investmentTestIds.event.sellFraction}-event-1`),
+    ).toBeNull();
+
+    setup({
+      asset: makeDetail({
+        operations: [makeFractionSale(), makeEventOperation()],
+        position: makePosition({ pendingFractions: [] }),
+      }),
+    });
+    expect(
+      screen.queryByTestId(`${investmentTestIds.event.sellFraction}-event-1`),
+    ).toBeNull();
+    expect(
+      screen.queryByTestId(investmentTestIds.fraction.pendingCard),
+    ).toBeNull();
+  });
+
+  it("SHOULD label the sale of a fraction AND leave it out of the sells count", () => {
+    setup({
+      asset: makeDetail({
+        operations: [makeFractionSale(), makeEventOperation()],
+      }),
+    });
+
+    expect(hasText("investment.fraction.rowType")).toBe(true);
   });
 });

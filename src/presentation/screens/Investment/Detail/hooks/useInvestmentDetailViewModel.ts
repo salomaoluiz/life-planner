@@ -131,13 +131,27 @@ function useInvestmentDetailViewModel() {
       params.operation &&
       asset?.operations.some((operation) => operation.id === params.operation)
     ) {
-      openModal("investment_operation", {
-        assetId: id,
-        id: params.operation,
-      });
+      openOperation(params.operation);
       router.setParams({ operation: undefined });
     }
   }, [params.operation, asset?.id]);
+
+  // A fraction sale (spec 108) has its own modal; every other operation opens the operation form.
+  function openOperation(operationId: string) {
+    const fraction = asset?.operations.find(
+      (operation) => operation.id === operationId,
+    )?.fractionOfOperationId;
+
+    if (fraction) {
+      openModal("investment_fraction_sale", {
+        assetId: id,
+        eventId: fraction,
+        id: operationId,
+      });
+    } else {
+      openModal("investment_operation", { assetId: id, id: operationId });
+    }
+  }
 
   useEffect(() => {
     if (archiveMutation.status === "success") {
@@ -264,8 +278,7 @@ function useInvestmentDetailViewModel() {
       setFixedIncomeTab(value as FixedIncomeTab),
     onMenuClose: () => setMenuOpen(false),
     onMenuOpen: () => setMenuOpen(true),
-    onOperationPress: (operationId: string) =>
-      openModal("investment_operation", { assetId: id, id: operationId }),
+    onOperationPress: openOperation,
     onQuotesRefresh: quoteRefresh.onRefresh,
     onRangeChange: setRange,
     onRateDelete: scope.guard((rateId: string) => rateMutation.mutate(rateId)),
@@ -277,6 +290,9 @@ function useInvestmentDetailViewModel() {
     ),
     onRefresh: async () => query.refetch(),
     onRetry: async () => query.refetch(),
+    onSellFraction: scope.guard((eventId: string) =>
+      openModal("investment_fraction_sale", { assetId: id, eventId }),
+    ),
     onToastHide: scope.onToastHide,
     onUpdateRate: scope.guard(() =>
       openModal("investment_fixed_income_rate", { assetId: id }),
