@@ -18,6 +18,7 @@ export const investmentKeys = {
     "fixed-income-simulation",
     key,
   ],
+  homeSummary: (ownersKey: string): Key => [ROOT, "home-summary", ownersKey],
   priceHistory: (id: string, range: string): Key => [
     ROOT,
     "price-history",

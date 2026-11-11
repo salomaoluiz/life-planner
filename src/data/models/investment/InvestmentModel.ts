@@ -39,6 +39,7 @@ import {
   InvestmentPriceHistory,
   InvestmentQuote,
   InvestmentQuotesRefresh,
+  InvestmentsHomeSummary,
   InvestmentTickerSuggestion,
   InvestmentValuation,
   InvestmentValuationResult,
@@ -245,6 +246,44 @@ class InvestmentModel {
     return {
       quotedAt: data.quotedAt as string,
       rate: data.rate as string,
+    };
+  }
+
+  static toHomeSummary(data: Json): InvestmentsHomeSummary {
+    const income = data.income as Json;
+    const maturity = data.nextMaturity as Json | null | undefined;
+    const quotes = data.quotes as Json;
+
+    return {
+      currentValueCents: Number(data.currentValueCents),
+      hasPositions: data.hasPositions === true,
+      income: {
+        count: Number(income.count),
+        month: income.month as string,
+        pendingSuggestions: Number(income.pendingSuggestions),
+        totalCents: Number(income.totalCents),
+      },
+      investedCents: Number(data.investedCents),
+      nextMaturity: maturity
+        ? {
+            assetId: maturity.assetId as string,
+            currency: toCurrencyCode(maturity.currency),
+            maturityDate: maturity.maturityDate as string,
+            name: maturity.name as string,
+            netEstimatedCents: Number(maturity.netEstimatedCents),
+          }
+        : undefined,
+      quotes: {
+        asOf: quotes.asOf ? new Date(quotes.asOf as string) : undefined,
+        manualCount: Number(quotes.manualCount),
+        stale: quotes.stale === true,
+        withoutPrice: Number(quotes.withoutPrice),
+      },
+      resultBasisPoints:
+        data.resultBasisPoints === null || data.resultBasisPoints === undefined
+          ? undefined
+          : Number(data.resultBasisPoints),
+      resultCents: Number(data.resultCents),
     };
   }
 

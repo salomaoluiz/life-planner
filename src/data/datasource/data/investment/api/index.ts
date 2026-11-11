@@ -19,6 +19,7 @@ import eventApi, { eventFieldsBody } from "./eventApi";
 import fixedIncomeApi from "./fixedIncomeApi";
 import incomeApi from "./incomeApi";
 import handleInvestmentApiError from "./investmentApiError";
+import summaryApi from "./summaryApi";
 
 type Json = Record<string, unknown>;
 
@@ -309,6 +310,7 @@ const investmentApi: InvestmentDatasource = {
   ...fixedIncomeApi,
   ...eventApi,
   ...incomeApi,
+  ...summaryApi,
   createAsset,
   createOperation,
   deleteAsset,

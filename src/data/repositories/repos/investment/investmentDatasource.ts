@@ -14,6 +14,7 @@ import {
   InvestmentOperationResult,
   InvestmentPriceHistory,
   InvestmentQuotesRefresh,
+  InvestmentsHomeSummary,
   InvestmentTickerSuggestion,
   InvestmentValuationResult,
 } from "@domain/entities/investment/InvestmentEntities";
@@ -35,6 +36,7 @@ import {
   GetInvestmentIncomesParams,
   GetInvestmentIncomeSuggestionsParams,
   GetInvestmentPriceHistoryParams,
+  GetInvestmentsHomeSummaryParams,
   InvestmentOperationLink,
   PreviewFixedIncomeRedemptionParams,
   ReceiveInvestmentIncomeParams,
@@ -92,6 +94,9 @@ export interface InvestmentDatasource {
   getEventSuggestions(
     params: GetInvestmentEventSuggestionsParams,
   ): Promise<InvestmentEventSuggestion[]>;
+  getHomeSummary(
+    params: GetInvestmentsHomeSummaryParams,
+  ): Promise<InvestmentsHomeSummary>;
   getIncome(id: string): Promise<InvestmentIncome>;
   getIncomeDefaults(
     params: GetInvestmentIncomeDefaultsParams,

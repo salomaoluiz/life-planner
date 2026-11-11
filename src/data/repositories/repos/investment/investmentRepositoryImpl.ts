@@ -55,6 +55,8 @@ function investmentRepositoryImpl(
     getAssets: async (params) => investmentDatasource.getAssets(params),
     getEventSuggestions: async (params) =>
       investmentDatasource.getEventSuggestions(params),
+    getHomeSummary: async (params) =>
+      investmentDatasource.getHomeSummary(params),
     getIncome: async (id) => investmentDatasource.getIncome(id),
     getIncomeDefaults: async (params) =>
       investmentDatasource.getIncomeDefaults(params),

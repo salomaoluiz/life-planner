@@ -83,6 +83,7 @@ const useCases = {
   getInvestmentIncomeUseCase: expect.any(Function),
   getInvestmentOperationLinkUseCase: expect.any(Function),
   getInvestmentPriceHistoryUseCase: expect.any(Function),
+  getInvestmentsSummaryUseCase: expect.any(Function),
   getMonthSummaryUseCase: expect.any(Function),
   getMostUsedFinancialCategoriesUseCase: expect.any(Function),
   getOwnersUseCase: expect.any(Function),
