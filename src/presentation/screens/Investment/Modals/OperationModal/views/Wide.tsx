@@ -33,8 +33,10 @@ import {
 } from "@screens/Investment/models/format";
 import investmentTestIds from "@screens/Investment/testIds";
 
-import { OperationModalVM } from "../hooks";
+import { OperationModalVM, useEventFormViewModel } from "../hooks";
+import { EVENT_SEGMENT } from "../models/eventFormState";
 import useStyles from "../styles";
+import EventForm from "./EventForm";
 
 const ids = investmentTestIds.modal.operation;
 
@@ -42,6 +44,7 @@ function Wide({ vm }: AdaptiveViewProps<OperationModalVM>) {
   const { styles } = useStyles();
   const { t } = useTranslation();
   const localeTag = useLocaleTag();
+  const eventForm = useEventFormViewModel(vm.asset, vm.operation, vm.readOnly);
   const sell = vm.type === InvestmentOperationType.SELL;
   const currency = vm.currency as CurrencyCode;
 
@@ -198,6 +201,14 @@ function Wide({ vm }: AdaptiveViewProps<OperationModalVM>) {
                     tone: "expense",
                     value: InvestmentOperationType.SELL,
                   },
+                  ...(vm.canPickEvent
+                    ? [
+                        {
+                          label: t("investment.operation.EVENT"),
+                          value: EVENT_SEGMENT,
+                        },
+                      ]
+                    : []),
                 ]}
                 testID={ids.type}
                 value={vm.type}
@@ -393,6 +404,10 @@ function Wide({ vm }: AdaptiveViewProps<OperationModalVM>) {
         ) : null}
       </View>
     );
+  }
+
+  if (vm.eventMode && !vm.isNotFound && vm.asset) {
+    return <EventForm form={eventForm} parent={vm} />;
   }
 
   return (

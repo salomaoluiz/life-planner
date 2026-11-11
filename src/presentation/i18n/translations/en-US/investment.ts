@@ -76,7 +76,7 @@ const investment = {
     deleteBody:
       "The position will be recalculated without this event. Also deleted:",
     deleteConfirm: "Delete event",
-    deleteEntry: "the finance entry of that sale ({{account}})",
+    deleteEntry: "the finance entry of that sale",
     deleteFraction:
       "the sale of the {{quantity}} fraction ({{date}}, {{value}})",
     deleteSuggestionNote:
@@ -86,6 +86,14 @@ const investment = {
     detailFraction:
       "Fraction of {{fraction}} leaves the position (cost {{cost}}) · avg. {{before}} → {{after}}",
     detailRatio: "{{from}} for {{to}} · {{before}} → {{after}} shares",
+    errors: {
+      percent: "Enter a percentage above zero",
+      ratio: "Enter a number above zero",
+      reverseDirection:
+        "A reverse split needs the second number smaller than the first",
+      splitDirection: "A split needs the second number greater than the first",
+      unitCost: "Enter a valid cost",
+    },
     fractionBreaks:
       "This change removes the fraction sold on {{date}}. Delete the fraction sale first.",
     fractionInfo:
@@ -561,6 +569,7 @@ const investment = {
     BONUS: "Bonus shares",
     BUY: "Buy",
     date: "Date",
+    EVENT: "Event",
     feeBreakdown: "Fees of the {{type}} on {{date}}",
     fees: "Fees",
     financeNote:

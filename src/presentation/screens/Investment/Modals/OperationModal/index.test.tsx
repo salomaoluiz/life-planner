@@ -152,3 +152,124 @@ it("SHOULD show the discard dialog", () => {
 
   expect(vm.onDiscardConfirm).toHaveBeenCalledTimes(1);
 });
+
+describe("corporate events (spec 108)", () => {
+  const eventIds = investmentTestIds.modal.event;
+
+  it("SHOULD offer the Evento segment WHEN the asset allows events AND pick it", () => {
+    const { vm } = setup();
+
+    fireEvent.press(screen.getByText("investment.operation.EVENT"));
+
+    expect(vm.onTypeChange).toHaveBeenCalledWith("EVENT");
+  });
+
+  it("SHOULD hide the Evento segment WHEN events do not apply", () => {
+    setup({ canPickEvent: false });
+
+    expect(screen.queryByText("investment.operation.EVENT")).toBeNull();
+  });
+
+  it("SHOULD show the event form: bonus fields, the position before and after AND the fraction box", () => {
+    const { form } = setup({ eventMode: true, type: "EVENT" as never });
+
+    fireEvent.press(screen.getByTestId(eventIds.save));
+
+    expect(screen.getByTestId(eventIds.bonusPercent)).toBeOnTheScreen();
+    expect(screen.getByTestId(eventIds.bonusUnitCost)).toBeOnTheScreen();
+    expect(screen.queryByTestId(eventIds.ratioFrom)).toBeNull();
+    expect(screen.getByTestId(eventIds.preview)).toBeOnTheScreen();
+    expect(hasText("R$ 3.325,44")).toBe(true);
+    expect(screen.getByText(/investment.event.fractionInfo/)).toBeOnTheScreen();
+    expect(hasText("investment.event.noFinanceEntry")).toBe(true);
+    expect(hasText("investment.event.bonusUnitCostHint")).toBe(true);
+    expect(form.onSave).toHaveBeenCalledTimes(1);
+  });
+
+  it("SHOULD show the ratio fields AND the hint of a split", () => {
+    setup(
+      { eventMode: true },
+      {
+        fractionQuantity: "0",
+        hasFraction: false,
+        ratioFrom: "1",
+        ratioTo: "4",
+        type: "SPLIT" as never,
+      },
+    );
+
+    expect(screen.getByTestId(eventIds.ratioFrom)).toBeOnTheScreen();
+    expect(screen.getByTestId(eventIds.ratioTo)).toBeOnTheScreen();
+    expect(screen.queryByTestId(eventIds.bonusPercent)).toBeNull();
+    expect(screen.getByText(/investment.event.splitHint/)).toBeOnTheScreen();
+    expect(screen.queryByText(/investment.event.fractionInfo/)).toBeNull();
+  });
+
+  it("SHOULD show Aprovar evento AND Recusar sugestão for a suggestion", () => {
+    const { form } = setup(
+      { eventMode: true },
+      { isSuggestion: true, saveKey: "investment.event.approve" },
+    );
+
+    fireEvent.press(screen.getByTestId(eventIds.approve));
+    fireEvent.press(screen.getByTestId(eventIds.rejectSuggestion));
+
+    expect(form.onSave).toHaveBeenCalledTimes(1);
+    expect(form.onReject).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId(eventIds.delete)).toBeNull();
+  });
+
+  it("SHOULD offer to delete an event WHEN editing AND list what goes with it", () => {
+    const { form } = setup(
+      { eventMode: true },
+      {
+        deleteBodyLines: [
+          {
+            key: "investment.event.deleteFraction",
+            params: { date: "04/04/2026", quantity: "0,5", value: "R$ 5,20" },
+          },
+        ],
+        deleteOpen: true,
+        deleteType: "REVERSE_SPLIT" as never,
+        isEditing: true,
+      },
+    );
+
+    fireEvent.press(screen.getByTestId(eventIds.delete));
+
+    expect(form.onDeleteOpen).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId(eventIds.deleteDialog)).toBeOnTheScreen();
+    expect(
+      screen.getByText(/investment.event.deleteFraction/),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD show the errors, the 422 AND no position", () => {
+    setup(
+      { eventMode: true },
+      {
+        errors: { bonusPercent: "investment.event.errors.percent" },
+        failure: {
+          key: "investment.event.fractionBreaks",
+          params: { date: "x" },
+        },
+        noPosition: true,
+        preview: null,
+      },
+    );
+
+    expect(hasText("investment.event.errors.percent")).toBe(true);
+    expect(
+      screen.getByText(/investment.event.fractionBreaks/),
+    ).toBeOnTheScreen();
+    expect(screen.getByText(/investment.event.noPosition/)).toBeOnTheScreen();
+    expect(screen.queryByTestId(eventIds.preview)).toBeNull();
+  });
+
+  it("SHOULD hide the actions WHEN read-only", () => {
+    setup({ eventMode: true }, { readOnly: true });
+
+    expect(screen.queryByTestId(eventIds.save)).toBeNull();
+    expect(screen.queryByTestId(eventIds.delete)).toBeNull();
+  });
+});

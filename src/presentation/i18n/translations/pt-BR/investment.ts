@@ -77,7 +77,7 @@ const investment = {
     deleteBody:
       "A posição será recalculada sem este evento. Também será apagado:",
     deleteConfirm: "Apagar evento",
-    deleteEntry: "o lançamento dessa venda no finance ({{account}})",
+    deleteEntry: "o lançamento dessa venda no finance",
     deleteFraction: "a venda da fração de {{quantity}} ({{date}}, {{value}})",
     deleteSuggestionNote:
       "Se o evento veio de uma sugestão, ela não volta a aparecer.",
@@ -86,6 +86,15 @@ const investment = {
     detailFraction:
       "Fração de {{fraction}} fora da posição (custo {{cost}}) · PM {{before}} → {{after}}",
     detailRatio: "{{from}} para {{to}} · {{before}} → {{after}} ações",
+    errors: {
+      percent: "Informe um percentual maior que zero",
+      ratio: "Informe um número maior que zero",
+      reverseDirection:
+        "Um grupamento precisa do segundo número menor que o primeiro",
+      splitDirection:
+        "Um desdobramento precisa do segundo número maior que o primeiro",
+      unitCost: "Informe um custo válido",
+    },
     fractionBreaks:
       "Esta mudança remove a fração vendida em {{date}}. Apague a venda da fração antes.",
     fractionInfo:
@@ -559,6 +568,7 @@ const investment = {
     BONUS: "Bonificação",
     BUY: "Compra",
     date: "Data",
+    EVENT: "Evento",
     feeBreakdown: "{{type}} de {{date}} · taxas detalhadas",
     fees: "Taxas",
     financeNote:
