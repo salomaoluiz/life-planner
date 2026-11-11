@@ -7,6 +7,8 @@ import {
   InvestmentFixedIncomeProduct,
   InvestmentFixedIncomeRateMode,
   InvestmentFixedIncomeRedemptionKind,
+  InvestmentIncomeStatus,
+  InvestmentIncomeType,
   InvestmentOperationType,
   InvestmentPriceKind,
   InvestmentPriceSource,
@@ -24,6 +26,11 @@ import {
   InvestmentFixedIncomeTotals,
   InvestmentFixedIncomeWriteResult,
   InvestmentFx,
+  InvestmentIncome,
+  InvestmentIncomeDefaults,
+  InvestmentIncomePage,
+  InvestmentIncomeSuggestion,
+  InvestmentIncomeSummary,
   InvestmentOperation,
   InvestmentOperationResult,
   InvestmentPosition,
@@ -211,6 +218,79 @@ class InvestmentModel {
     return {
       quotedAt: data.quotedAt as string,
       rate: data.rate as string,
+    };
+  }
+
+  static toIncome(data: Json): InvestmentIncome {
+    return {
+      accountId: (data.accountId as string | undefined) ?? undefined,
+      amountPerUnit: (data.amountPerUnit as string | undefined) ?? undefined,
+      assetId: data.assetId as string,
+      categoryId: (data.categoryId as string | undefined) ?? undefined,
+      currency: toCurrencyCode(data.currency),
+      estimatedGross: Number(data.estimatedGross ?? data.netAmount ?? 0),
+      estimatedWithheld: Number(data.estimatedWithheld ?? 0),
+      exDate: (data.exDate as string | undefined) ?? undefined,
+      id: data.id as string,
+      netAmount: Number(data.netAmount),
+      notes: (data.notes as string | undefined) ?? undefined,
+      overdue: data.overdue === true,
+      paymentDate: data.paymentDate as string,
+      quantity: (data.quantity as string | undefined) ?? undefined,
+      status: data.status as InvestmentIncomeStatus,
+      suggestionId: (data.suggestionId as string | undefined) ?? undefined,
+      transactionId: (data.transactionId as string | undefined) ?? undefined,
+      type: data.type as InvestmentIncomeType,
+      withholdingRate: (data.withholdingRate as string | undefined) ?? "0",
+    };
+  }
+
+  static toIncomeDefaults(data: Json): InvestmentIncomeDefaults {
+    return {
+      accountId: (data.accountId as null | string) ?? null,
+      categoryId: (data.categoryId as null | string) ?? null,
+      currency: toCurrencyCode(data.currency),
+      quantity: (data.quantity as string) ?? "0",
+      withholdingRate: (data.withholdingRate as string) ?? "0",
+    };
+  }
+
+  static toIncomePage(data: Json): InvestmentIncomePage {
+    return {
+      items: ((data.items as Json[]) ?? []).map((item) =>
+        InvestmentModel.toIncome(item),
+      ),
+      nextCursor: (data.nextCursor as null | string) ?? null,
+      summary: data.summary
+        ? InvestmentModel.toIncomeSummary(data.summary as Json)
+        : undefined,
+    };
+  }
+
+  static toIncomeSuggestion(data: Json): InvestmentIncomeSuggestion {
+    return {
+      amountPerUnit: data.amountPerUnit as string,
+      assetId: data.assetId as string,
+      canApproveDirectly: data.canApproveDirectly === true,
+      currency: toCurrencyCode(data.currency),
+      estimatedGross: Number(data.estimatedGross),
+      estimatedNet: Number(data.estimatedNet),
+      exDate: data.exDate as string,
+      id: data.id as string,
+      paymentDate: (data.paymentDate as string | undefined) ?? undefined,
+      quantity: data.quantity as string,
+      ticker: data.ticker as string,
+      type: data.type as InvestmentIncomeType,
+      withholdingRate: (data.withholdingRate as string) ?? "0",
+    };
+  }
+
+  static toIncomeSummary(data: Json): InvestmentIncomeSummary {
+    return {
+      currency: toCurrencyCode(data.currency),
+      pendingSuggestions: Number(data.pendingSuggestions ?? 0),
+      plannedTotal: Number(data.plannedTotal ?? 0),
+      receivedThisYear: Number(data.receivedThisYear ?? 0),
     };
   }
 

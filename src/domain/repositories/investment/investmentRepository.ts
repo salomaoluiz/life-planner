@@ -6,6 +6,8 @@ import {
   InvestmentFixedIncomeProduct,
   InvestmentFixedIncomeRateMode,
   InvestmentFixedIncomeRedemptionKind,
+  InvestmentIncomeStatus,
+  InvestmentIncomeType,
   InvestmentOperationType,
   InvestmentPriceRange,
   InvestmentQuoteMarket,
@@ -17,6 +19,11 @@ import {
   InvestmentFixedIncomeRedemptionPreview,
   InvestmentFixedIncomeSimulation,
   InvestmentFixedIncomeWriteResult,
+  InvestmentIncome,
+  InvestmentIncomeDefaults,
+  InvestmentIncomeLink,
+  InvestmentIncomePage,
+  InvestmentIncomeSuggestion,
   InvestmentOperationResult,
   InvestmentPriceHistory,
   InvestmentQuotesRefresh,
@@ -24,6 +31,11 @@ import {
   InvestmentValuationResult,
 } from "@domain/entities/investment/InvestmentEntities";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
+
+// Spec 107: the fields the owner types; nullish optional ones are sent as `null` to clear them on edit.
+export interface ApproveInvestmentIncomeSuggestionParams extends Partial<InvestmentIncomeFields> {
+  id: string;
+}
 
 export interface CreateFixedIncomeContributionParams {
   accountId?: string;
@@ -69,6 +81,10 @@ export interface CreateInvestmentAssetParams {
   ticker?: string;
 }
 
+export interface CreateInvestmentIncomeParams extends InvestmentIncomeFields {
+  assetId: string;
+}
+
 export interface CreateInvestmentOperationParams {
   accountId?: string;
   assetId: string;
@@ -109,6 +125,27 @@ export interface GetInvestmentAssetsParams {
   status: InvestmentAssetStatus;
 }
 
+export interface GetInvestmentIncomeDefaultsParams {
+  assetId: string;
+  exDate?: string;
+  type?: InvestmentIncomeType;
+}
+
+export interface GetInvestmentIncomesParams {
+  assetId?: string;
+  cursor?: string;
+  // Period of the cross-asset list (`YYYY-MM-DD`, up to 2 years).
+  from?: string;
+  limit?: number;
+  status?: InvestmentIncomeStatus;
+  to?: string;
+  type?: InvestmentIncomeType;
+}
+
+export interface GetInvestmentIncomeSuggestionsParams {
+  assetId?: string;
+}
+
 export interface GetInvestmentPriceHistoryParams {
   id: string;
   range: InvestmentPriceRange;
@@ -121,12 +158,29 @@ export interface InvestmentFeeParams {
   kind: InvestmentFeeKind;
 }
 
+export interface InvestmentIncomeFields {
+  accountId: string;
+  amountPerUnit?: null | string;
+  categoryId: string;
+  exDate?: null | string;
+  // Cents that landed (or will land) in the account.
+  netAmount: number;
+  notes?: null | string;
+  paymentDate: string;
+  quantity?: null | string;
+  status: InvestmentIncomeStatus;
+  type: InvestmentIncomeType;
+}
+
 export interface InvestmentOperationLink {
   assetId: string;
   operationId: string;
 }
 
 export type InvestmentRepository = {
+  approveIncomeSuggestion(
+    params: ApproveInvestmentIncomeSuggestionParams,
+  ): Promise<InvestmentIncome>;
   createAsset(params: CreateInvestmentAssetParams): Promise<InvestmentAsset>;
   createFixedIncomeContribution(
     params: CreateFixedIncomeContributionParams,
@@ -141,16 +195,30 @@ export type InvestmentRepository = {
   createFixedIncomeTitle(
     params: CreateFixedIncomeTitleParams,
   ): Promise<InvestmentAssetDetail>;
+  createIncome(params: CreateInvestmentIncomeParams): Promise<InvestmentIncome>;
   createOperation(
     params: CreateInvestmentOperationParams,
   ): Promise<InvestmentOperationResult>;
   deleteAsset(id: string): Promise<void>;
   deleteFixedIncomeAdjustment(id: string): Promise<void>;
   deleteFixedIncomeRate(id: string): Promise<void>;
+  deleteIncome(id: string): Promise<void>;
   deleteOperation(id: string): Promise<void>;
   deleteValuation(id: string): Promise<void>;
   getAsset(id: string): Promise<InvestmentAssetDetail>;
   getAssets(params: GetInvestmentAssetsParams): Promise<InvestmentAsset[]>;
+  getIncome(id: string): Promise<InvestmentIncome>;
+  getIncomeDefaults(
+    params: GetInvestmentIncomeDefaultsParams,
+  ): Promise<InvestmentIncomeDefaults>;
+  // The income behind a locked finance row (spec 107 FR 16); undefined for any other row.
+  getIncomeLink(
+    transactionId: string,
+  ): Promise<InvestmentIncomeLink | undefined>;
+  getIncomes(params: GetInvestmentIncomesParams): Promise<InvestmentIncomePage>;
+  getIncomeSuggestions(
+    params: GetInvestmentIncomeSuggestionsParams,
+  ): Promise<InvestmentIncomeSuggestion[]>;
   // The operation behind a finance row of an investment category; undefined for any other row.
   getOperationLink(
     transactionId: string,
@@ -161,9 +229,13 @@ export type InvestmentRepository = {
   previewFixedIncomeRedemption(
     params: PreviewFixedIncomeRedemptionParams,
   ): Promise<InvestmentFixedIncomeRedemptionPreview>;
+  receiveIncome(
+    params: ReceiveInvestmentIncomeParams,
+  ): Promise<InvestmentIncome>;
   refreshQuotes(
     params: RefreshInvestmentQuotesParams,
   ): Promise<InvestmentQuotesRefresh>;
+  rejectIncomeSuggestion(id: string): Promise<void>;
   searchTickers(
     params: SearchInvestmentTickersParams,
   ): Promise<InvestmentTickerSuggestion[]>;
@@ -174,6 +246,7 @@ export type InvestmentRepository = {
   updateFixedIncomeRate(
     params: UpdateFixedIncomeRateParams,
   ): Promise<InvestmentAssetDetail>;
+  updateIncome(params: UpdateInvestmentIncomeParams): Promise<InvestmentIncome>;
   updateOperation(
     params: UpdateInvestmentOperationParams,
   ): Promise<InvestmentOperationResult>;
@@ -193,6 +266,15 @@ export interface PreviewFixedIncomeRedemptionParams {
   date: string;
   kind: InvestmentFixedIncomeRedemptionKind;
   netAmount: number;
+}
+
+export interface ReceiveInvestmentIncomeParams {
+  accountId?: string;
+  id: string;
+  // Cents that really landed; the planned value when omitted.
+  netAmount?: number;
+  // `YYYY-MM-DD`, today when omitted.
+  receivedOn?: string;
 }
 
 export interface RefreshInvestmentQuotesParams {
@@ -227,6 +309,10 @@ export interface UpdateInvestmentAssetParams {
   status?: InvestmentAssetStatus;
   // `null` clears it.
   ticker?: null | string;
+}
+
+export interface UpdateInvestmentIncomeParams extends Partial<InvestmentIncomeFields> {
+  id: string;
 }
 
 export interface UpdateInvestmentOperationParams {

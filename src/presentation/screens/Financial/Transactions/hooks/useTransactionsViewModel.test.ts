@@ -444,6 +444,56 @@ it("SHOULD open the operation of an investment row on the asset detail (spec 102
   );
 });
 
+it("SHOULD open the income modal of a locked income row (spec 107)", async () => {
+  givenData([]);
+  spies.getIncomeLink.mockResolvedValueOnce({
+    assetId: "asset-1",
+    incomeId: "income-1",
+  });
+  const { result } = setup();
+
+  await act(async () => {
+    await result.current.onIncomePress({ id: "tx-9" } as never);
+  });
+
+  expect(spies.getIncomeLink).toHaveBeenCalledWith("tx-9");
+  expect(modalNavigation.openModal).toHaveBeenCalledWith("investment_income", {
+    assetId: "asset-1",
+    id: "income-1",
+  });
+});
+
+it("SHOULD open the receive modal from the check of a locked income row (spec 107)", async () => {
+  givenData([]);
+  spies.getIncomeLink.mockResolvedValueOnce({
+    assetId: "asset-1",
+    incomeId: "income-1",
+  });
+  const { result } = setup();
+
+  await act(async () => {
+    await result.current.onIncomeReceive({ id: "tx-9" } as never);
+  });
+
+  expect(modalNavigation.openModal).toHaveBeenCalledWith(
+    "investment_income_receive",
+    { id: "income-1" },
+  );
+});
+
+it("SHOULD open nothing WHEN the locked row has no income any more (spec 107)", async () => {
+  givenData([]);
+  spies.getIncomeLink.mockResolvedValue(undefined);
+  const { result } = setup();
+
+  await act(async () => {
+    await result.current.onIncomePress({ id: "tx-9" } as never);
+    await result.current.onIncomeReceive({ id: "tx-9" } as never);
+  });
+
+  expect(modalNavigation.openModal).not.toHaveBeenCalled();
+});
+
 it("SHOULD stay put WHEN the investment row has no operation any more", async () => {
   givenData([]);
   spies.getOperationLink.mockResolvedValueOnce(undefined);

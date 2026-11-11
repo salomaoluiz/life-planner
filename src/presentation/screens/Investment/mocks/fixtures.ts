@@ -6,6 +6,8 @@ import {
   InvestmentFixedIncomeLiquidity,
   InvestmentFixedIncomeProduct,
   InvestmentFixedIncomeRateMode,
+  InvestmentIncomeStatus,
+  InvestmentIncomeType,
   InvestmentOperationType,
   InvestmentPriceSource,
   InvestmentQuoteMarket,
@@ -15,6 +17,8 @@ import {
   InvestmentAsset,
   InvestmentAssetDetail,
   InvestmentFixedIncome,
+  InvestmentIncome,
+  InvestmentIncomeSuggestion,
   InvestmentOperation,
   InvestmentPosition,
   InvestmentQuote,
@@ -166,6 +170,31 @@ function makeFixedIncomeDetail(
   };
 }
 
+function makeIncome(
+  overrides: Partial<InvestmentIncome> = {},
+): InvestmentIncome {
+  return {
+    accountId: "acc-1",
+    amountPerUnit: "0.28",
+    assetId: "asset-1",
+    categoryId: "cat-1",
+    currency: "BRL",
+    estimatedGross: 8400,
+    estimatedWithheld: 1260,
+    exDate: "2026-09-10",
+    id: "income-1",
+    netAmount: 7140,
+    overdue: false,
+    paymentDate: "2026-10-30",
+    quantity: "300",
+    status: InvestmentIncomeStatus.RECEIVED,
+    transactionId: "tx-1",
+    type: InvestmentIncomeType.JCP,
+    withholdingRate: "0.15",
+    ...overrides,
+  };
+}
+
 function makeOperation(
   overrides: Partial<InvestmentOperation> = {},
 ): InvestmentOperation {
@@ -232,6 +261,27 @@ function makeQuote(overrides: Partial<InvestmentQuote> = {}): InvestmentQuote {
   };
 }
 
+function makeSuggestion(
+  overrides: Partial<InvestmentIncomeSuggestion> = {},
+): InvestmentIncomeSuggestion {
+  return {
+    amountPerUnit: "0.47",
+    assetId: "asset-1",
+    canApproveDirectly: true,
+    currency: "BRL",
+    estimatedGross: 14100,
+    estimatedNet: 14100,
+    exDate: "2026-11-21",
+    id: "sug-1",
+    paymentDate: "2026-12-19",
+    quantity: "300",
+    ticker: "PETR4",
+    type: InvestmentIncomeType.DIVIDEND,
+    withholdingRate: "0",
+    ...overrides,
+  };
+}
+
 function makeUsdAsset(
   overrides: Partial<InvestmentAsset> = {},
 ): InvestmentAsset {
@@ -284,9 +334,11 @@ export {
   makeDetail,
   makeFixedIncome,
   makeFixedIncomeDetail,
+  makeIncome,
   makeOperation,
   makePosition,
   makeQuote,
+  makeSuggestion,
   makeUsdAsset,
   makeValuation,
   owners,

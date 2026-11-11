@@ -1,0 +1,11 @@
+url: ${E2E_WEB_URL}
+---
+# Optional caller-scoped params read by the script: STATUS (PLANNED default), TYPE (DIVIDEND default).
+- runScript:
+    file: ../../scripts/setup/create-investment-income.js
+    env:
+      TOKEN: ${TOKEN}
+      ASSET_ID: ${ASSET_ID}
+      ACCOUNT_ID: ${ACCOUNT_ID}
+      CATEGORY_ID: ${CATEGORY_ID}
+      NET_CENTS: ${NET_CENTS}

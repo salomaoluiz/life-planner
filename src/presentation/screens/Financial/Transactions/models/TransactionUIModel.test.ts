@@ -332,6 +332,35 @@ describe("transfer rows (spec 098)", () => {
   });
 });
 
+describe("investment income rows (spec 107)", () => {
+  it("SHOULD flag a locked row AND keep the regular pay button away from it", () => {
+    const locked = new TransactionUIModel(
+      dto({ externalLock: "INVESTMENT", paid: false, type: "INCOME" }),
+    );
+
+    expect(locked.isInvestmentIncome).toBe(true);
+    expect(locked.canPay).toBe(false);
+    expect(
+      new TransactionUIModel(dto({ paid: false })).isInvestmentIncome,
+    ).toBe(false);
+  });
+
+  it("SHOULD flag an unpaid locked row in the past as overdue, never a paid one", () => {
+    const past = new Date(2020, 0, 5).toISOString();
+
+    expect(
+      new TransactionUIModel(
+        dto({ date: past, externalLock: "INVESTMENT", paid: false }),
+      ).isOverdue,
+    ).toBe(true);
+    expect(
+      new TransactionUIModel(
+        dto({ date: past, externalLock: "INVESTMENT", paid: true }),
+      ).isOverdue,
+    ).toBe(false);
+  });
+});
+
 describe("isInvestment (spec 102)", () => {
   it.each([
     ["INVESTMENT_CONTRIBUTION", true],

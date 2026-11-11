@@ -34,6 +34,7 @@ class TransactionUIModel {
   get canPay() {
     return (
       !this.dto.paid &&
+      !this.isInvestmentIncome &&
       !this.dto.creditCardId &&
       (!this.dto.systemKey ||
         this.transferSide === "IN" ||
@@ -134,9 +135,17 @@ class TransactionUIModel {
     );
   }
 
+  // Spec 107: the row of an investment income; it opens the income modal and its check confirms the income.
+  get isInvestmentIncome() {
+    return this.dto.externalLock === "INVESTMENT";
+  }
+
   // Unpaid and already past: flagged in the list (spec 033 FR 7).
   get isOverdue() {
-    return this.canPay && this.dateKey < todayKey();
+    return (
+      (this.canPay || (this.isInvestmentIncome && !this.dto.paid)) &&
+      this.dateKey < todayKey()
+    );
   }
 
   // Stored status of an account row (spec 033); a projected occurrence is never paid.

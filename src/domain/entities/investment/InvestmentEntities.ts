@@ -7,6 +7,8 @@ import {
   InvestmentFixedIncomeProduct,
   InvestmentFixedIncomeRateMode,
   InvestmentFixedIncomeRedemptionKind,
+  InvestmentIncomeStatus,
+  InvestmentIncomeType,
   InvestmentOperationType,
   InvestmentPriceKind,
   InvestmentPriceSource,
@@ -159,6 +161,75 @@ export interface InvestmentFx {
   quotedAt: string;
   // BRL per 1 USD, decimal string.
   rate: string;
+}
+
+// Spec 107: money in integer cents, quantity and per-unit value as decimal strings, dates `YYYY-MM-DD`.
+export interface InvestmentIncome {
+  accountId?: string;
+  amountPerUnit?: string;
+  assetId: string;
+  categoryId?: string;
+  currency: CurrencyCode;
+  // Display only: estimated gross and withheld tax from the net amount.
+  estimatedGross: number;
+  estimatedWithheld: number;
+  exDate?: string;
+  id: string;
+  netAmount: number;
+  notes?: string;
+  // Planned with a payment date before today.
+  overdue: boolean;
+  paymentDate: string;
+  quantity?: string;
+  status: InvestmentIncomeStatus;
+  suggestionId?: string;
+  transactionId?: string;
+  type: InvestmentIncomeType;
+  // Decimal string, "0.15" = 15%.
+  withholdingRate: string;
+}
+
+export interface InvestmentIncomeDefaults {
+  accountId: null | string;
+  categoryId: null | string;
+  currency: CurrencyCode;
+  quantity: string;
+  withholdingRate: string;
+}
+
+export interface InvestmentIncomeLink {
+  assetId: string;
+  incomeId: string;
+}
+
+export interface InvestmentIncomePage {
+  items: InvestmentIncome[];
+  nextCursor: null | string;
+  summary?: InvestmentIncomeSummary;
+}
+
+export interface InvestmentIncomeSuggestion {
+  amountPerUnit: string;
+  assetId: string;
+  // A payment date, a default account and a default category exist: "Aprovar" creates the income right away.
+  canApproveDirectly: boolean;
+  currency: CurrencyCode;
+  estimatedGross: number;
+  estimatedNet: number;
+  exDate: string;
+  id: string;
+  paymentDate?: string;
+  quantity: string;
+  ticker: string;
+  type: InvestmentIncomeType;
+  withholdingRate: string;
+}
+
+export interface InvestmentIncomeSummary {
+  currency: CurrencyCode;
+  pendingSuggestions: number;
+  plannedTotal: number;
+  receivedThisYear: number;
 }
 
 export interface InvestmentOperation {

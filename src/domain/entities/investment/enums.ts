@@ -52,6 +52,20 @@ export enum InvestmentFixedIncomeRedemptionKind {
   TOTAL = "TOTAL",
 }
 
+// Spec 107: enum values are identical to the API's.
+export enum InvestmentIncomeStatus {
+  PLANNED = "PLANNED",
+  RECEIVED = "RECEIVED",
+}
+
+export enum InvestmentIncomeType {
+  DIVIDEND = "DIVIDEND",
+  INTEREST = "INTEREST",
+  JCP = "JCP",
+  OTHER = "OTHER",
+  YIELD = "YIELD",
+}
+
 export enum InvestmentOperationType {
   BUY = "BUY",
   SELL = "SELL",
@@ -120,3 +134,41 @@ export const TAX_EXEMPT_PRODUCTS: InvestmentFixedIncomeProduct[] = [
   InvestmentFixedIncomeProduct.LCA,
   InvestmentFixedIncomeProduct.LCI,
 ];
+
+// Spec 107 FR 1: the types in the order of the dropdown.
+export const INVESTMENT_INCOME_TYPES: InvestmentIncomeType[] = [
+  InvestmentIncomeType.DIVIDEND,
+  InvestmentIncomeType.JCP,
+  InvestmentIncomeType.YIELD,
+  InvestmentIncomeType.INTEREST,
+  InvestmentIncomeType.OTHER,
+];
+
+// Spec 107 FR 2: the type the form starts with, per asset class.
+export function defaultIncomeType(
+  assetClass: InvestmentAssetClass,
+): InvestmentIncomeType {
+  if (assetClass === InvestmentAssetClass.BR_REIT) {
+    return InvestmentIncomeType.YIELD;
+  }
+
+  return assetClass === InvestmentAssetClass.FIXED_INCOME
+    ? InvestmentIncomeType.INTEREST
+    : InvestmentIncomeType.DIVIDEND;
+}
+
+// Spec 107 FR 6: the estimated withholding of an income, in basis points of the gross (display only; the API's
+// `IncomeWithholding` is the source of truth for the value it returns).
+export function incomeWithholdingBps(
+  type: InvestmentIncomeType,
+  assetClass: InvestmentAssetClass,
+): number {
+  if (type === InvestmentIncomeType.JCP) {
+    return 1500;
+  }
+
+  return type === InvestmentIncomeType.DIVIDEND &&
+    assetClass === InvestmentAssetClass.FOREIGN_STOCK
+    ? 3000
+    : 0;
+}

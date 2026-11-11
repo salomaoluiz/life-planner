@@ -38,6 +38,10 @@ jest.mock("@presentation/hooks/useOwnerScopedQuery");
 jest.mock("@application/useCases", () => ({
   useCases: {
     getInvestmentAssetsUseCase: { execute: jest.fn(), uniqueName: "assets" },
+    getInvestmentIncomeSuggestionsUseCase: {
+      execute: jest.fn(),
+      uniqueName: "suggestions",
+    },
   },
 }));
 
@@ -48,6 +52,7 @@ interface Data {
 
 const activeQuery = new UseQueryFixture<Data>();
 const archivedQuery = new UseQueryFixture<Data>();
+const suggestionsQuery = new UseQueryFixture<number>();
 
 const spies = {
   getAssets: jest.mocked(useCases.getInvestmentAssetsUseCase.execute),
@@ -60,11 +65,17 @@ beforeEach(() => {
   jest.clearAllMocks();
   activeQuery.reset();
   archivedQuery.reset();
+  suggestionsQuery.reset();
   spies.isFocused.mockReturnValue(false);
-  spies.useQuery.mockImplementation(((props: { cacheKey: string[] }) =>
-    props.cacheKey.includes(InvestmentAssetStatus.ARCHIVED)
+  spies.useQuery.mockImplementation(((props: { cacheKey: string[] }) => {
+    if (props.cacheKey.includes("income-suggestions")) {
+      return suggestionsQuery.build();
+    }
+
+    return props.cacheKey.includes(InvestmentAssetStatus.ARCHIVED)
       ? archivedQuery.build()
-      : activeQuery.build()) as never);
+      : activeQuery.build();
+  }) as never);
 });
 
 function givenData(
@@ -255,4 +266,36 @@ describe("fixed income (spec 105)", () => {
 
     expect(setup().result.current.pendingAssets).toEqual([]);
   });
+});
+
+it("SHOULD count the announced incomes AND open the inbox (spec 107)", async () => {
+  givenData([]);
+  suggestionsQuery.withData(3);
+  jest
+    .mocked(useCases.getInvestmentIncomeSuggestionsUseCase.execute)
+    .mockResolvedValue([{}, {}] as never);
+  const { result } = setup();
+
+  expect(result.current.suggestionsCount).toBe(3);
+  result.current.onSuggestionsPress();
+
+  expect(spies.push).toHaveBeenCalledWith("/investments/suggestions");
+
+  const count = spies.useQuery.mock.calls
+    .map(
+      ([props]) =>
+        props as {
+          cacheKey: string[];
+          fetch: (o: OwnerDTO[]) => Promise<unknown>;
+        },
+    )
+    .find((props) => props.cacheKey.includes("income-suggestions"));
+
+  expect(await count?.fetch(owners)).toBe(2);
+});
+
+it("SHOULD show no suggestions before they arrive (spec 107)", () => {
+  givenData([]);
+
+  expect(setup().result.current.suggestionsCount).toBe(0);
 });

@@ -1,0 +1,30 @@
+url: ${E2E_WEB_URL}
+name: investment/suggestions-inbox-empty
+tags:
+  - investment
+  - spec-107
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/investment/open-investments.yaml
+# The inbox card is on the list; a user without announced income sees the empty state.
+- extendedWaitUntil:
+    visible:
+      id: "investment.list.suggestions-card"
+    timeout: 20000
+- tapOn:
+    id: "investment.list.suggestions-card-open"
+- extendedWaitUntil:
+    visible:
+      id: "investment.suggestions.screen"
+    timeout: 20000
+- assertVisible:
+    id: "investment.suggestions.empty"

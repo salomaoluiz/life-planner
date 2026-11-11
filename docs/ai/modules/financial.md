@@ -606,3 +606,7 @@ On `medium`/`expanded` these modals are `BottomSheet size="form"` with `FormColu
 ## Investment system rows (spec 102)
 
 Rows of the system categories `INVESTMENT_CONTRIBUTION` / `INVESTMENT_REDEMPTION` (created by an investment operation, excluded from the totals) render in the Transactions list as "Compra/Venda <asset>" with the translated category and "outside totals"; `TransactionUIModel.isInvestment` marks them, `TransactionRow` has `onInvestmentPress` (the list VM resolves the operation with `getInvestmentOperationLinkUseCase` and opens `/investments/asset/<assetId>?operation=<id>`); they are never edited or deleted as transactions (the API answers 422). See `investment.md`.
+
+## Rows locked by an investment income (spec 107)
+
+`TransactionEntity`/`TransactionDTO`/`TransactionModel` carry `externalLock` (`"INVESTMENT"`, omitted when null). `TransactionUIModel.isInvestmentIncome` rows show the "Income" tag (`investment.income.linkedTag`), are never offered the regular pay button (`canPay` is false) and open the investment income modals (see `investment.md`). Editing or deleting such a row through the transaction form answers `422 EXTERNALLY_LOCKED`.

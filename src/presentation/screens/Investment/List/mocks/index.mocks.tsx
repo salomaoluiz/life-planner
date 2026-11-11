@@ -86,6 +86,7 @@ const defaultViewModel: InvestmentListVM = {
   onRetry: jest.fn(),
   onRowPress: jest.fn(),
   onSearchChange: jest.fn(),
+  onSuggestionsPress: jest.fn(),
   onTabChange: jest.fn(),
   onToastHide: jest.fn(),
   ownerChoices: [{ labelKey: "financial.common.all", value: "ALL" }],
@@ -98,6 +99,7 @@ const defaultViewModel: InvestmentListVM = {
   quotesTime: null,
   readOnly: false,
   search: "",
+  suggestionsCount: 0,
   tab: InvestmentAssetStatus.ACTIVE,
   toastVisible: false,
 };

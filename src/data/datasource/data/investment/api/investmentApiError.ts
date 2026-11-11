@@ -6,7 +6,11 @@ import {
   InvestmentAccountNotChangeable,
   InvestmentArchived,
   InvestmentClassLocked,
+  InvestmentCurrencyMismatch,
   InvestmentFeesAboveSale,
+  InvestmentIncomeIncomplete,
+  InvestmentIncomeLocked,
+  InvestmentIncomeReceived,
   InvestmentNegativePosition,
   InvestmentRedemptionTooLarge,
   InvestmentRowUseOperation,
@@ -45,6 +49,23 @@ function handleInvestmentApiError(
     }
     if (error.statusCode === 422 && code === "TICKER_NOT_FOUND") {
       throw new TickerNotFound();
+    }
+    // Spec 107: the income rules answer a code (section 7).
+    if (error.statusCode === 422 && code === "CURRENCY_MISMATCH") {
+      throw new InvestmentCurrencyMismatch();
+    }
+    if (error.statusCode === 422 && code === "EXTERNALLY_LOCKED") {
+      throw new InvestmentIncomeLocked();
+    }
+    if (error.statusCode === 422 && code === "INCOME_INCOMPLETE") {
+      throw new InvestmentIncomeIncomplete(
+        Array.isArray(error.body.missing)
+          ? (error.body.missing as string[])
+          : [],
+      );
+    }
+    if (error.statusCode === 409 && code === "ALREADY_RECEIVED") {
+      throw new InvestmentIncomeReceived();
     }
     // Spec 105 FR 20-21: the 422 carries `details` (availableNet of a redemption, or the date it stopped fitting).
     if (error.statusCode === 422 && error.body?.details) {

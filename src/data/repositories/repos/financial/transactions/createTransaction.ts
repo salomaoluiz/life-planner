@@ -46,6 +46,7 @@ async function createTransaction(params: Params, datasources: Datasources) {
     description: transaction.description,
     earlyPayment: transaction.earlyPayment,
     excludeFromTotals: transaction.excludeFromTotals,
+    externalLock: transaction.externalLock,
     id: transaction.id,
     installmentCount: transaction.installmentCount,
     installmentNumber: transaction.installmentNumber,

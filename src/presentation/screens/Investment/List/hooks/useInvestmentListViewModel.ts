@@ -65,6 +65,12 @@ function useInvestmentListViewModel() {
     }
   }, [isFocused]);
 
+  // Spec 107: the number of announced incomes waiting for a decision (stored, no provider call).
+  const suggestions = useOwnerScopedQuery({
+    cacheKey: [...investmentKeys.all(), "income-suggestions", "count"],
+    fetch: async () =>
+      (await useCases.getInvestmentIncomeSuggestionsUseCase.execute({})).length,
+  });
   const owners = active.data?.owners ?? archived.data?.owners ?? [];
   const rowsByTab = useMemo(
     () => ({
@@ -128,6 +134,7 @@ function useInvestmentListViewModel() {
     onRetry: refetch,
     onRowPress: (id: string) => router.push(`/investments/asset/${id}`),
     onSearchChange: setSearch,
+    onSuggestionsPress: () => router.push("/investments/suggestions"),
     onTabChange: (value: string) => setTab(value as InvestmentAssetStatus),
     onToastHide: scope.onToastHide,
     ownerChoices: buildOwnerFilterChoices(owners),
@@ -140,6 +147,7 @@ function useInvestmentListViewModel() {
     quotesTime: latestQuoteTime(activeAssets),
     readOnly: scope.readOnly,
     search,
+    suggestionsCount: suggestions.data ?? 0,
     tab,
     toastVisible: scope.toastVisible,
   };

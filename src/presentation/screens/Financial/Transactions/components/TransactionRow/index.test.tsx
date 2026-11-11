@@ -27,6 +27,63 @@ it("SHOULD call onPress with the id WHEN pressed", () => {
   expect(onPress).toHaveBeenCalledWith("tx-1");
 });
 
+describe("investment income row (spec 107)", () => {
+  const locked = new TransactionUIModel(
+    makeTransactionDTO({
+      externalLock: "INVESTMENT",
+      id: "inc-tx",
+      paid: false,
+      type: "INCOME",
+      value: "71.40",
+    }),
+  );
+
+  it("SHOULD show the income tag, open the income on press AND confirm it from the check", () => {
+    const onIncomePress = jest.fn();
+    const onIncomeReceive = jest.fn();
+    const onPay = jest.fn();
+
+    render(
+      <TransactionRow
+        item={locked}
+        onIncomePress={onIncomePress}
+        onIncomeReceive={onIncomeReceive}
+        onPay={onPay}
+        onPress={jest.fn()}
+      />,
+    );
+    fireEvent.press(screen.getByTestId(transactionsTestIds.row));
+    fireEvent.press(screen.getByTestId(transactionsTestIds.rowPay));
+
+    expect(
+      screen.getByTestId(transactionsTestIds.rowIncomeTag),
+    ).toBeOnTheScreen();
+    expect(onIncomePress).toHaveBeenCalledWith(locked);
+    expect(onIncomeReceive).toHaveBeenCalledWith(locked);
+    expect(onPay).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD offer no check on a received income", () => {
+    const received = new TransactionUIModel(
+      makeTransactionDTO({
+        externalLock: "INVESTMENT",
+        paid: true,
+        type: "INCOME",
+      }),
+    );
+
+    render(
+      <TransactionRow
+        item={received}
+        onIncomeReceive={jest.fn()}
+        onPress={jest.fn()}
+      />,
+    );
+
+    expect(screen.queryByTestId(transactionsTestIds.rowPay)).toBeNull();
+  });
+});
+
 it("SHOULD show the translated adjustment label AND its own testID for a balance adjustment", () => {
   const onPress = jest.fn();
   const adjustment = new TransactionUIModel(

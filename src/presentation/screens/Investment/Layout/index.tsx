@@ -6,6 +6,7 @@ function InvestmentLayout() {
     <Stack screenOptions={{ animation: "none", headerShown: false }}>
       <Stack.Screen name={"index"} />
       <Stack.Screen name={"asset/[id]"} />
+      <Stack.Screen name={"suggestions"} />
     </Stack>
   );
 }

@@ -1,0 +1,66 @@
+url: ${E2E_WEB_URL}
+name: investment/income-confirm-from-transactions
+tags:
+  - investment
+  - spec-107
+  - financial
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runFlow:
+    file: ../../subflows/setup/create-investment-asset.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      TICKER: E2ETK3
+      NAME: E2E Asset
+- runFlow:
+    file: ../../subflows/setup/create-investment-income.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      ASSET_ID: ${output.ASSET_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.INCOME_CATEGORY_ID}
+      NET_CENTS: "7140"
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/financial/open-transactions.yaml
+# The planned income is a locked row: it carries the income tag and its check opens the receive modal.
+# The row is below the month summary: swipe with explicit coordinates (scrollUntilVisible does not scroll this list).
+- swipe:
+    start: 60%, 80%
+    end: 60%, 25%
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row.income-tag"
+    timeout: 20000
+- tapOn:
+    id: "financial.transactions.row.pay"
+- extendedWaitUntil:
+    visible:
+      id: "investment.income-receive-modal.net-amount"
+    timeout: 20000
+- tapOn:
+    id: "investment.income-receive-modal.save"
+- extendedWaitUntil:
+    notVisible:
+      id: "investment.income-receive-modal.save"
+    timeout: 20000
+- runFlow:
+    file: ../../subflows/assert/assert-account-balance.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      EXPECTED_CENTS: "7140"

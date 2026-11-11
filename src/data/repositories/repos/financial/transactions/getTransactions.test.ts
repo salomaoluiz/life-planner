@@ -32,6 +32,19 @@ it("SHOULD read the period straight from the datasource (spec 078: a period is a
   ]);
 });
 
+it("SHOULD keep the external lock of an income row from the model (spec 107)", async () => {
+  spies.financialTransactionDatasource.getTransactions.mockResolvedValueOnce([
+    new TransactionModel({
+      ...mocks.firstTransaction,
+      externalLock: "INVESTMENT",
+    }),
+  ]);
+
+  const [result] = await setup();
+
+  expect(result.externalLock).toBe("INVESTMENT");
+});
+
 it("SHOULD keep the projected flag from the model (spec 096)", async () => {
   spies.financialTransactionDatasource.getTransactions.mockResolvedValueOnce([
     new TransactionModel({ ...mocks.firstTransaction, projected: true }),
