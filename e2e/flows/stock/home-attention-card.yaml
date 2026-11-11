@@ -48,6 +48,8 @@ onFlowComplete:
       id: "home.home.screen"
     timeout: 20000
 - runFlow: ../../subflows/financial/scroll-list-down.yaml
+# Spec 109: the Investments section now sits between Finance and Stock, one more scroll down
+- runFlow: ../../subflows/financial/scroll-list-down.yaml
 - extendedWaitUntil:
     visible:
       id: "home.stock-attention.card"
