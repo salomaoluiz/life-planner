@@ -22,9 +22,10 @@ onFlowComplete:
     env:
       TOKEN: ${output.TOKEN}
       OWNER_ID: ${output.USER_ID}
-      TICKER: E2ETK3
-      NAME: E2E Asset
-# 3.005 shares at R$ 1,00 (no finance entry): a 10:1 reverse split leaves 300 shares and a fraction of 0,5 (cost R$ 5,00).
+      TICKER: ITSA4
+      NAME: Itausa PN
+      ASSET_CLASS: BR_STOCK
+# A B3 stock (whole units after an event): 3.005 shares at R$ 1,00 (no finance entry): a 10:1 reverse split leaves 300 shares and a fraction of 0,5 (cost R$ 5,00).
 - runFlow:
     file: ../../subflows/setup/create-investment-operation.yaml
     env:
@@ -83,14 +84,22 @@ onFlowComplete:
     id: "investment.detail.quantity"
     text: ".*300.*"
 # Sell the fraction for R$ 5,20 in the broker account: realized +R$ 0,20 and the account receives 5,20.
+# The sell action is in the operations table, below the fold: swipe down to reach it.
+- swipe:
+    start: 60%, 80%
+    end: 60%, 20%
+- swipe:
+    start: 60%, 80%
+    end: 60%, 20%
 - tapOn:
-    text: ".*(Sell fraction|Vender fração).*"
+    id: "investment.event.sell-fraction-.*"
 - extendedWaitUntil:
     visible:
       id: "investment.fraction.gross"
     timeout: 20000
 - tapOn:
     id: "investment.fraction.gross"
+- eraseText
 - inputText: "520"
 - tapOn:
     id: "investment.fraction.account"
@@ -98,16 +107,12 @@ onFlowComplete:
     id: "investment.fraction.account-option-${output.BROKER_ACCOUNT_ID}"
 - tapOn:
     id: "investment.fraction.save"
+# The page stays scrolled: the sale row shows its realized result and the sell action is gone.
 - extendedWaitUntil:
-    visible:
-      id: "investment.detail.realized"
-      text: ".*0[.,]20.*"
+    visible: ".*\\+R\\$0[.,]20.*"
     timeout: 20000
 - assertNotVisible:
-    id: "investment.fraction.pending"
-- assertVisible:
-    id: "investment.detail.quantity"
-    text: ".*300.*"
+    id: "investment.event.sell-fraction-.*"
 - runFlow:
     file: ../../subflows/assert/assert-account-balance.yaml
     env:
