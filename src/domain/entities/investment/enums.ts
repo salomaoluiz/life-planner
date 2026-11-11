@@ -156,3 +156,19 @@ export function defaultIncomeType(
     ? InvestmentIncomeType.INTEREST
     : InvestmentIncomeType.DIVIDEND;
 }
+
+// Spec 107 FR 6: the estimated withholding of an income, in basis points of the gross (display only; the API's
+// `IncomeWithholding` is the source of truth for the value it returns).
+export function incomeWithholdingBps(
+  type: InvestmentIncomeType,
+  assetClass: InvestmentAssetClass,
+): number {
+  if (type === InvestmentIncomeType.JCP) {
+    return 1500;
+  }
+
+  return type === InvestmentIncomeType.DIVIDEND &&
+    assetClass === InvestmentAssetClass.FOREIGN_STOCK
+    ? 3000
+    : 0;
+}

@@ -22,6 +22,9 @@ interface Props {
   item: TransactionUIModel;
   // A balance adjustment cannot be edited: its row opens the delete sheet instead of the form.
   onAdjustmentPress?: (item: TransactionUIModel) => void;
+  // Spec 107: a locked income row opens the income modal; its check opens the receive modal.
+  onIncomePress?: (item: TransactionUIModel) => void;
+  onIncomeReceive?: (item: TransactionUIModel) => void;
   // Spec 102: an investment row opens its operation, not the transaction form.
   onInvestmentPress?: (item: TransactionUIModel) => void;
   onPay?: (item: TransactionUIModel) => void;
@@ -34,6 +37,8 @@ interface Props {
 function sameRowProps(prev: Props, next: Props) {
   return (
     prev.onAdjustmentPress === next.onAdjustmentPress &&
+    prev.onIncomePress === next.onIncomePress &&
+    prev.onIncomeReceive === next.onIncomeReceive &&
     prev.onInvestmentPress === next.onInvestmentPress &&
     prev.onPay === next.onPay &&
     prev.onPress === next.onPress &&
@@ -138,13 +143,23 @@ function TransactionRow(props: Props) {
   }
 
   const flags =
-    item.isOverdue || item.isProjected || item.isRecurring ? (
+    item.isOverdue ||
+    item.isProjected ||
+    item.isRecurring ||
+    item.isInvestmentIncome ? (
       <View style={styles.trailing}>
         {item.isRecurring ? (
           <Icon
             name={"repeat"}
             size={16}
             testID={transactionsTestIds.rowRepeat}
+          />
+        ) : null}
+        {item.isInvestmentIncome ? (
+          <Badge
+            label={t("investment.income.linkedTag")}
+            testID={transactionsTestIds.rowIncomeTag}
+            tone={"income"}
           />
         ) : null}
         {item.isOverdue ? (
@@ -191,6 +206,8 @@ function TransactionRow(props: Props) {
         }
         if (item.isAdjustment && props.onAdjustmentPress) {
           props.onAdjustmentPress(item);
+        } else if (item.isInvestmentIncome && props.onIncomePress) {
+          props.onIncomePress(item);
         } else if (item.isInvestment && props.onInvestmentPress) {
           props.onInvestmentPress(item);
         } else if (item.isTransfer && props.onTransferPress) {
@@ -221,6 +238,18 @@ function TransactionRow(props: Props) {
             />
             {transferCaption(item, t)}
           </View>
+          {item.isInvestmentIncome &&
+          !item.dto.paid &&
+          props.onIncomeReceive &&
+          !item.isPending ? (
+            <IconButton
+              accessibilityLabel={t("financial.transactions.pay")}
+              name={"check-circle-outline"}
+              onPress={() => props.onIncomeReceive?.(item)}
+              testID={transactionsTestIds.rowPay}
+              variant={"plain"}
+            />
+          ) : null}
           {item.canPay && props.onPay && !item.isPending ? (
             <IconButton
               accessibilityLabel={t("financial.transactions.pay")}

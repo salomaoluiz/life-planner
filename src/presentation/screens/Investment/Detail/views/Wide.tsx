@@ -46,6 +46,7 @@ import FixedIncomeSection, {
   FixedIncomeActions,
   FixedIncomeChips,
 } from "../components/FixedIncomeSection";
+import IncomeSection from "../components/IncomeSection";
 import {
   ChartPanel,
   PriceBlock,
@@ -505,6 +506,7 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentDetailVM>) {
             </View>
           </>
         )}
+        <IncomeSection accountNames={vm.accountNames} asset={asset} />
       </View>
       <BottomSheet
         closeLabel={t("common.actions.close")}

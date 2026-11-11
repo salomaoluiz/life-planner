@@ -62,10 +62,28 @@
   "investment.fixedIncomeTitle.render.mount": {
     "maxCommits": 4
   },
+  "investment.income.mount.cold": {
+    "maxDepth": 3,
+    "maxDuplicates": 0,
+    "maxRequests": 5,
+    "modal": "investment_income"
+  },
+  "investment.income.render.mount": {
+    "maxCommits": 3
+  },
+  "investment.incomeReceive.mount.cold": {
+    "maxDepth": 3,
+    "maxDuplicates": 0,
+    "maxRequests": 3,
+    "modal": "investment_income_receive"
+  },
+  "investment.incomeReceive.render.mount": {
+    "maxCommits": 3
+  },
   "investment.list.mount.cold": {
     "maxDepth": 2,
     "maxDuplicates": 0,
-    "maxRequests": 3,
+    "maxRequests": 4,
     "route": "app/(app)/(tabs)/investments/index.tsx"
   },
   "investment.list.render.mount": {
@@ -79,6 +97,15 @@
   },
   "investment.operation.render.mount": {
     "maxCommits": 3
+  },
+  "investment.suggestions.mount.cold": {
+    "maxDepth": 3,
+    "maxDuplicates": 0,
+    "maxRequests": 1,
+    "route": "app/(app)/(tabs)/investments/suggestions.tsx"
+  },
+  "investment.suggestions.render.mount": {
+    "maxCommits": 2
   },
   "investment.valuation.mount.cold": {
     "maxDepth": 1,

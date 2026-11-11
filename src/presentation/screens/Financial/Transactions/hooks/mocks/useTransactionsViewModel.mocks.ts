@@ -61,6 +61,10 @@ jest.mock("@application/useCases", () => ({
       execute: jest.fn(),
       uniqueName: "transactions",
     },
+    getInvestmentIncomeLinkUseCase: {
+      execute: jest.fn(),
+      uniqueName: "incomeLink",
+    },
     getInvestmentOperationLinkUseCase: {
       execute: jest.fn(),
       uniqueName: "operationLink",
@@ -146,6 +150,7 @@ const spies = {
   getFilteredTransactions: jest.mocked(
     useCases.getFinancialFilteredTransactionsUseCase.execute,
   ),
+  getIncomeLink: jest.mocked(useCases.getInvestmentIncomeLinkUseCase.execute),
   getInvoices: jest.mocked(
     useCases.getFinancialCardInvoicesForMonthUseCase.execute,
   ),

@@ -62,6 +62,7 @@ interface ITransactionModel {
   description: string;
   earlyPayment?: EarlyPaymentRefModel;
   excludeFromTotals?: boolean;
+  externalLock?: string;
   id: string;
   installmentCount?: number;
   installmentNumber?: number;
@@ -94,6 +95,7 @@ class TransactionModel implements ITransactionModel {
   description: string;
   earlyPayment?: EarlyPaymentRefModel;
   excludeFromTotals: boolean;
+  externalLock?: string;
   id: string;
   installmentCount?: number;
   installmentNumber?: number;
@@ -140,6 +142,7 @@ class TransactionModel implements ITransactionModel {
     this.recurrenceFrequency = params.recurrenceFrequency;
     this.recurrenceId = params.recurrenceId;
     this.excludeFromTotals = params.excludeFromTotals ?? false;
+    this.externalLock = params.externalLock;
     this.systemKey = params.systemKey;
     this.tags = params.tags ?? [];
     this.transfer = params.transfer;
@@ -168,6 +171,7 @@ class TransactionModel implements ITransactionModel {
       earlyPayment:
         (data.earlyPayment as EarlyPaymentRefModel | null) ?? undefined,
       excludeFromTotals: category?.excludeFromTotals === true,
+      externalLock: (data.externalLock as null | string) ?? undefined,
       id: data.id as string,
       installmentCount: (data.installmentCount as null | number) ?? undefined,
       installmentNumber: (data.installmentNumber as null | number) ?? undefined,
@@ -247,6 +251,7 @@ class TransactionModel implements ITransactionModel {
       tags: this.tags,
       // Spec 098: kept so a cached row still draws its transfer.
       ...(this.transfer ? { transfer: this.transfer } : {}),
+      ...(this.externalLock ? { externalLock: this.externalLock } : {}),
       ...(this.transferId ? { transferId: this.transferId } : {}),
       type: this.type,
       value: decimalStringToCents(this.value),

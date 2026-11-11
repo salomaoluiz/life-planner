@@ -21,6 +21,7 @@ export interface ITransactionDTO {
   description: string;
   earlyPayment?: EarlyPaymentRefEntity;
   excludeFromTotals?: boolean;
+  externalLock?: string;
   id: string;
   installmentCount?: number;
   installmentNumber?: number;
@@ -59,6 +60,7 @@ class TransactionDTO {
   description: string;
   earlyPayment?: EarlyPaymentRefEntity;
   excludeFromTotals: boolean;
+  externalLock?: string;
   id: string;
   installmentCount?: number;
   installmentNumber?: number;
@@ -109,6 +111,7 @@ class TransactionDTO {
     this.paid = params.paid ?? true;
     this.projected = params.projected ?? false;
     this.excludeFromTotals = params.excludeFromTotals ?? false;
+    this.externalLock = params.externalLock;
     this.systemKey = params.systemKey;
     this.tags = params.tags ?? [];
     this.transfer = params.transfer;
@@ -136,6 +139,7 @@ class TransactionDTO {
       description: entity.description,
       earlyPayment: entity.earlyPayment,
       excludeFromTotals: entity.excludeFromTotals,
+      externalLock: entity.externalLock,
       id: entity.id,
       installmentCount: entity.installmentCount,
       installmentNumber: entity.installmentNumber,

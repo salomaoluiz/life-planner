@@ -30,6 +30,7 @@ import investmentTestIds from "@screens/Investment/testIds";
 
 import AssetRowItem from "../components/AssetRowItem";
 import PendingMaturityCard from "../components/PendingMaturityCard";
+import SuggestionsCard from "../components/SuggestionsCard";
 import { InvestmentListVM } from "../hooks";
 import useStyles from "../styles";
 
@@ -286,6 +287,12 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentListVM>) {
           <ReadOnlyNotice
             message={t("family.archived.banner")}
             testID={investmentTestIds.list.readOnlyBanner}
+          />
+        ) : null}
+        {vm.tab === InvestmentAssetStatus.ACTIVE ? (
+          <SuggestionsCard
+            count={vm.suggestionsCount}
+            onPress={vm.onSuggestionsPress}
           />
         ) : null}
         {vm.pendingAssets.map((asset) => (

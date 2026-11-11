@@ -70,6 +70,19 @@ it("SHOULD throw FieldInvalid WHEN the stored value text cannot be converted to 
   expect(() => model.toJSON()).toThrow(FieldInvalid);
 });
 
+it("SHOULD read the external lock of an income row AND write it back (spec 107)", () => {
+  const model = TransactionModel.fromJSON({
+    ...mocks.json,
+    externalLock: "INVESTMENT",
+  });
+
+  expect(model.externalLock).toBe("INVESTMENT");
+  expect(model.toJSON()).toMatchObject({ externalLock: "INVESTMENT" });
+  expect(TransactionModel.fromJSON(mocks.json).toJSON()).not.toHaveProperty(
+    "externalLock",
+  );
+});
+
 it("SHOULD read the system category key and excludeFromTotals from the embedded category AND write them back", () => {
   const model = TransactionModel.fromJSON({
     ...mocks.json,

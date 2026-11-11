@@ -34,6 +34,8 @@ interface ITransactionEntity {
   description: string;
   earlyPayment?: EarlyPaymentRefEntity;
   excludeFromTotals?: boolean;
+  // Spec 107: the module that managed the row (`INVESTMENT`); the row changes only through it.
+  externalLock?: string;
   id: string;
   installmentCount?: number;
   installmentNumber?: number;
@@ -69,6 +71,8 @@ class TransactionEntity {
   description: string;
   earlyPayment?: EarlyPaymentRefEntity;
   excludeFromTotals: boolean;
+  // Spec 107: the module that managed the row (`INVESTMENT`); the row changes only through it.
+  externalLock?: string;
   id: string;
   installmentCount?: number;
   installmentNumber?: number;
@@ -115,6 +119,7 @@ class TransactionEntity {
     this.recurrenceFrequency = params.recurrenceFrequency;
     this.recurrenceId = params.recurrenceId;
     this.excludeFromTotals = params.excludeFromTotals ?? false;
+    this.externalLock = params.externalLock;
     this.systemKey = params.systemKey;
     this.tags = params.tags ?? [];
     this.transfer = params.transfer;

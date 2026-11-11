@@ -743,6 +743,32 @@ function useTransactionsViewModel() {
       }
     }),
   );
+  // Spec 107 FR 16: a locked income row opens the income modal (or, from its check, the receive modal).
+  const onIncomePress = useStableCallback(
+    scope.guard(async (item: TransactionUIModel) => {
+      const link = await useCases.getInvestmentIncomeLinkUseCase.execute(
+        item.id,
+      );
+
+      if (link) {
+        openModal("investment_income", {
+          assetId: link.assetId,
+          id: link.incomeId,
+        });
+      }
+    }),
+  );
+  const onIncomeReceive = useStableCallback(
+    scope.guard(async (item: TransactionUIModel) => {
+      const link = await useCases.getInvestmentIncomeLinkUseCase.execute(
+        item.id,
+      );
+
+      if (link) {
+        openModal("investment_income_receive", { id: link.incomeId });
+      }
+    }),
+  );
   const onRowPress = useStableCallback(
     scope.guard((id: string) => openModal("add_new_transaction", { id })),
   );
@@ -824,6 +850,8 @@ function useTransactionsViewModel() {
     onFilterRemove: filterStore.removeGroup,
     onFiltersApply: filterStore.replace,
     onFiltersClear: filterStore.clearAll,
+    onIncomePress,
+    onIncomeReceive,
     onInvestmentPress,
     onInvoiceOpen,
     onInvoiceRetry: async () => monthQuery.refetch(),

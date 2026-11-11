@@ -4,7 +4,12 @@ import { InvestmentPriceRange } from "@domain/entities/investment/enums";
 import { makeDetail } from "@screens/Investment/mocks/fixtures";
 
 import InvestmentDetail from "../";
-import { InvestmentDetailVM, useInvestmentDetailViewModel } from "../hooks";
+import {
+  IncomeSectionVM,
+  InvestmentDetailVM,
+  useIncomeSectionViewModel,
+  useInvestmentDetailViewModel,
+} from "../hooks";
 
 jest.mock("../hooks");
 jest.mock(
@@ -73,11 +78,34 @@ const defaultViewModel: InvestmentDetailVM = {
   toastVisible: false,
 };
 
+const defaultIncomeViewModel: IncomeSectionVM = {
+  filter: "ALL",
+  isLoading: false,
+  items: [],
+  onAdd: jest.fn(),
+  onEdit: jest.fn(),
+  onFilterChange: jest.fn(),
+  onReceive: jest.fn(),
+  suggestionActions: {
+    failure: undefined,
+    isBusy: false,
+    onApprove: jest.fn(),
+    onEdit: jest.fn(),
+    onReject: jest.fn(),
+  },
+  suggestions: [],
+  summary: undefined,
+  today: "2026-11-11",
+};
+
 function setup(overrides: Partial<InvestmentDetailVM> = {}) {
+  jest
+    .mocked(useIncomeSectionViewModel)
+    .mockReturnValue(defaultIncomeViewModel);
   const vm = { ...defaultViewModel, ...overrides };
   jest.mocked(useInvestmentDetailViewModel).mockReturnValue(vm);
 
   return { vm, ...render(<InvestmentDetail />) };
 }
 
-export { defaultViewModel, setup };
+export { defaultIncomeViewModel, defaultViewModel, setup };
