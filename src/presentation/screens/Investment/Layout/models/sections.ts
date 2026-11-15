@@ -21,11 +21,3 @@ export const INVESTMENT_SECTIONS: InvestmentSectionEntry[] = [
     section: "assets",
   },
 ];
-
-export function getInvestmentSection(pathname: string): InvestmentSection {
-  const parts = pathname.split("/").filter(Boolean);
-
-  return parts.includes("assets") || parts.includes("asset")
-    ? "assets"
-    : "overview";
-}

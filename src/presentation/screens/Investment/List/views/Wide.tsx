@@ -76,7 +76,7 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentListVM>) {
   const { t } = useTranslation();
   const localeTag = useLocaleTag();
   const compact = useDensity().density === "compact";
-  const sections = useInvestmentSections();
+  const sections = useInvestmentSections("assets");
   const archivedTab = vm.tab === InvestmentAssetStatus.ARCHIVED;
   const hasContent = !vm.isLoading && !vm.errorMessage && !vm.isEmpty;
 

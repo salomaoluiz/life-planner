@@ -95,3 +95,7 @@ Additive: `POST /v1/investments/fixed-income`, `PUT /v1/investments/assets/:id/f
 ## Transfers between accounts (spec 098, backend 3.5.0)
 
 Additive: `POST|GET|PATCH|DELETE /v1/finance/transfers[/:id]` answering `{ item, rows, lookups }` (`recurrence` on create; `scope` on PATCH and `?scope=` on DELETE for a series occurrence); transaction items carry `transferId` and `lookups.transfers[id]` (cents; `counterpartHidden` when only one side is readable); `GET /transactions?kind=TRANSFER`; CSV export column `Transfer ID` and import rows with `transferId` (errors `TRANSFER_INCOMPLETE|SAME_ACCOUNT|AMOUNT_MISMATCH|DATE_IN_BEFORE_OUT`); `422` codes `TRANSFER_SAME_ACCOUNT|ACCOUNT_ARCHIVED|AMOUNT_MISMATCH|AMOUNT_IN_REQUIRED|DATE_IN_BEFORE_OUT|ROW_USE_TRANSFER` (the message is the code). Deploy the backend first. The app does not write the in/out/fee rows through `/transactions/:id` any more (422).
+
+## Investments dashboard (spec 110)
+
+`GET /api/v1/investments/dashboard?ownerId=..&from=..&to=..&today=..` (owner id repeats; `from <= to <= today`, at most 10 years) returns `period { from, to, bucket }`, the `summary` numbers, `series`, `allocation` (with the foreign US$ split), `ranking` and `incomes`, all in BRL cents and decimal strings. Bad period → 400, an owner the user cannot read → 403. Consumed by `investment.getInvestmentDashboardUseCase` on the Overview screen.

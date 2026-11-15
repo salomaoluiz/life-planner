@@ -3,6 +3,14 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.24.0] - 2026-11-15
+
+### Added
+
+- Investments overview (spec 110): opening Investimentos now lands on a dashboard with the period selector, the portfolio value, the invested cost, the open and realized result and the income of the period.
+- New blocks: the invested vs market value evolution chart, the allocation by class (tap a class to filter the ranking) and the income by month, with the planned amounts dashed.
+- The module has two sections, Overview and Assets; the asset list and the detail are unchanged.
+
 ## [1.23.0] - 2026-11-11
 
 ### Added

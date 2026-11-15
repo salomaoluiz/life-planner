@@ -361,7 +361,7 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentOverviewVM>) {
   const { styles } = useStyles();
   const { t } = useTranslation();
   const localeTag = useLocaleTag();
-  const sections = useInvestmentSections();
+  const sections = useInvestmentSections("overview");
 
   if (vm.status === "pending") {
     return (

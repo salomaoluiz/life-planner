@@ -70,3 +70,7 @@ Kit components read `useKitTheme()` (`@components/utils/useKitTheme`: colors, sp
 Flat surfaces: `surface` + 1 px `border`; no shadows except the quick-add button (spec 009); glass/blur is removed by spec 008.
 
 Layout helpers: `@utils/device` (`getScreenSizes()`, `getWindowsSizes()`), `@utils/platform` (`isWeb()`, …).
+
+## Investment class palette (spec 110)
+
+`investmentClassColors` / `investmentClassColor(isDark, assetClass)` in `theme/constants/investmentClasses.ts` (exported from `@presentation/theme`): one fixed data color per `InvestmentAssetClass`, light and dark, distinct by lightness and hue. Screens never write those hex values: they pass the color to `ColorMark`, `ShareBar` or `DonutChart`.

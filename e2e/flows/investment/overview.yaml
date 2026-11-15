@@ -1,0 +1,77 @@
+url: ${E2E_WEB_URL}
+name: investment/overview
+tags:
+  - investment
+  - spec-110
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+# One bought asset, so the overview has a position to show.
+- runFlow:
+    file: ../../subflows/setup/create-investment-asset.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      TICKER: E2ETK3
+      NAME: E2E Asset
+- runFlow:
+    file: ../../subflows/setup/create-investment-operation.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      ASSET_ID: ${output.ASSET_ID}
+      TYPE: BUY
+      QUANTITY: "100"
+      UNIT_PRICE: "10"
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+# Opening Investimentos lands on the overview (spec 110 FR 1).
+- tapOn:
+    id: "tab-investments"
+- extendedWaitUntil:
+    visible:
+      id: "investment.overview.screen"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "investment.overview.tile-current-value"
+    timeout: 20000
+- assertVisible:
+    id: "investment.overview.tile-invested"
+- assertVisible:
+    id: "investment.overview.evolution-chart"
+- assertVisible:
+    id: "investment.overview.allocation-chart"
+- assertVisible:
+    id: "investment.overview.income-chart"
+# The period moves to 3M without ever going to the future.
+- tapOn: "3M"
+- assertVisible:
+    id: "investment.overview.period-range"
+# Filtering by class is screen state; clearing restores the ranking.
+- tapOn:
+    id: "investment.overview.allocation-class-BR_STOCK"
+- assertVisible:
+    id: "investment.overview.ranking-filter-clear"
+- tapOn:
+    id: "investment.overview.ranking-filter-clear"
+- assertNotVisible:
+    id: "investment.overview.ranking-filter-clear"
+# Assets keeps the 102 list.
+- tapOn:
+    id: "investment.sections.assets"
+- extendedWaitUntil:
+    visible:
+      id: "investment.list.screen"
+    timeout: 20000
+- tapOn:
+    id: "investment.sections.overview"
+- extendedWaitUntil:
+    visible:
+      id: "investment.overview.screen"
+    timeout: 20000
