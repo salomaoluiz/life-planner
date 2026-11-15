@@ -62,7 +62,7 @@ export interface DashboardRankingRowUI {
   subline: string;
   swatch: string;
   ticker: string;
-  tone: "expense" | "income";
+  tone: "expense" | "income" | "secondary";
   valueText: string;
 }
 
@@ -201,7 +201,7 @@ export function buildRanking(input: {
         subline: rankingSubline(row, shareText, input.t),
         swatch: investmentClassColor(input.isDark, row.assetClass),
         ticker: row.ticker ?? row.name,
-        tone: row.openResult < 0 ? "expense" : "income",
+        tone: rankingTone(row.openResult),
         valueText: formatAmount(row.value, input.localeTag, "BRL"),
       };
     }),
@@ -316,6 +316,15 @@ export function rankingSubline(
   ]
     .filter(Boolean)
     .join(" · ");
+}
+
+// A zero result carries no colour: income/expense only by sign (spec 110 FR 11).
+export function rankingTone(value: number): "expense" | "income" | "secondary" {
+  if (value === 0) {
+    return "secondary";
+  }
+
+  return value > 0 ? "income" : "expense";
 }
 
 // "+ R$ 21.420,55" / "− R$ 312,40": the sign carries the direction (spec 110 FR 11).

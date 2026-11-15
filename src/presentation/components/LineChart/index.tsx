@@ -178,6 +178,16 @@ function LineChart(props: LineChartProps) {
             opacity={item.emphasis === "muted" ? MUTED_OPACITY : 1}
             testID={props.testID && `${props.testID}-series-${seriesIndex}`}
           >
+            {/* A single period has no segment to draw: the point itself carries the value (spec 110). */}
+            {item.coords.filter(Boolean).length === 1 ? (
+              <Circle
+                cx={item.coords.find(Boolean)?.x}
+                cy={item.coords.find(Boolean)?.y}
+                fill={flatColorOf(item, colors) ?? colors.income}
+                r={4}
+                testID={props.testID && `${props.testID}-single-${seriesIndex}`}
+              />
+            ) : null}
             {item.segments.map((segment, index) => (
               <G key={index}>
                 {segment.dashed || item.dashed || multi ? null : (

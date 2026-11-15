@@ -134,6 +134,7 @@ function Evolution(props: { vm: InvestmentOverviewVM }) {
       })}
       testID={overviewTestIds.evolution}
       title={t("investment.overview.evolution.title")}
+      titleTestID={overviewTestIds.evolutionTitle}
     >
       <View style={styles.pairs}>
         <View style={styles.growth}>
@@ -158,24 +159,33 @@ function Evolution(props: { vm: InvestmentOverviewVM }) {
         {point ? (
           <View style={styles.detail} testID={overviewTestIds.evolutionDetail}>
             <Text.BodyStrong value={formatDay(point.date, localeTag)} />
-            <View style={styles.detailRow}>
+            {point.marketValue === undefined ? (
               <Text.Caption
                 tone="secondary"
-                value={t("investment.overview.evolution.market")}
+                value={t("investment.overview.evolution.noPosition")}
               />
-              <Text.Caption
-                value={formatAmount(point.marketValue ?? 0, localeTag, "BRL")}
-              />
-            </View>
-            <View style={styles.detailRow}>
-              <Text.Caption
-                tone="secondary"
-                value={t("investment.overview.evolution.invested")}
-              />
-              <Text.Caption
-                value={formatAmount(point.invested ?? 0, localeTag, "BRL")}
-              />
-            </View>
+            ) : (
+              <>
+                <View style={styles.detailRow}>
+                  <Text.Caption
+                    tone="secondary"
+                    value={t("investment.overview.evolution.market")}
+                  />
+                  <Text.Caption
+                    value={formatAmount(point.marketValue, localeTag, "BRL")}
+                  />
+                </View>
+                <View style={styles.detailRow}>
+                  <Text.Caption
+                    tone="secondary"
+                    value={t("investment.overview.evolution.invested")}
+                  />
+                  <Text.Caption
+                    value={formatAmount(point.invested ?? 0, localeTag, "BRL")}
+                  />
+                </View>
+              </>
+            )}
           </View>
         ) : null}
       </View>
@@ -208,6 +218,7 @@ function Income(props: { vm: InvestmentOverviewVM }) {
       subtitle={t("investment.overview.income.subtitle")}
       testID={overviewTestIds.income}
       title={t("investment.overview.income.title")}
+      titleTestID={overviewTestIds.incomeTitle}
     >
       <ColumnChart
         accessibilityLabel={t("investment.overview.income.title")}
@@ -313,7 +324,9 @@ function RankingRow(props: {
       <View style={{ flex: 1 }}>
         <View style={styles.row}>
           <Text.BodyStrong value={row.ticker} />
-          <Text.Caption numberOfLines={1} tone="secondary" value={row.name} />
+          <View style={{ flexShrink: 1 }}>
+            <Text.Caption numberOfLines={1} tone="secondary" value={row.name} />
+          </View>
         </View>
         <ShareBar
           accessibilityLabel={`${row.ticker}, ${row.valueText}`}
@@ -325,7 +338,7 @@ function RankingRow(props: {
       <View style={styles.rankValues}>
         <Text.BodyStrong value={row.valueText} />
         <Text.Caption
-          tone={row.tone === "expense" ? "expense" : "income"}
+          tone={row.tone}
           value={`${row.resultText}${row.resultPercent ? ` (${row.resultPercent})` : ""}`}
         />
       </View>

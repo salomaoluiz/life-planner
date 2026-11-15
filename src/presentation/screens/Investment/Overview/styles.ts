@@ -13,7 +13,7 @@ function useStyles() {
       blocks: { gap: spacing.md },
       center: { width: "100%" },
       content: { gap: spacing.md, paddingBottom: spacing.xxl },
-      detail: { gap: spacing.xs },
+      detail: { flexShrink: 0, gap: spacing.xs, width: 210 },
       detailRow: {
         alignItems: "center",
         flexDirection: "row",
@@ -55,11 +55,10 @@ function useStyles() {
       rankValues: { alignItems: "flex-end", flexShrink: 0, minWidth: 120 },
       root: { flex: 1 },
       row: {
-        alignItems: "center",
+        alignItems: "baseline",
         flexDirection: "row",
-        flexWrap: "wrap",
         gap: spacing.sm,
-        justifyContent: "space-between",
+        minWidth: 0,
       },
       stack: { gap: spacing.xs },
       tileFive: { flexBasis: 200, flexGrow: 1, minWidth: 180 },

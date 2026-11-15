@@ -183,7 +183,7 @@ function useInvestmentOverviewViewModel() {
     allocation,
     bucketUnit: dashboard
       ? t(
-          `investment.overview.unit.${bucketUnitKey(dashboard.period.bucket)}` as TranslationKeys,
+          `investment.overview.period.unit.${bucketUnitKey(dashboard.period.bucket)}` as TranslationKeys,
         )
       : "",
     canGoNext:

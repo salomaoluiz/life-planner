@@ -44,25 +44,66 @@ onFlowComplete:
 - assertVisible:
     id: "investment.overview.tile-invested"
 - assertVisible:
-    id: "investment.overview.evolution-chart"
-- assertVisible:
-    id: "investment.overview.allocation-chart"
-- assertVisible:
-    id: "investment.overview.income-chart"
-# The period moves to 3M without ever going to the future.
+    id: "investment.overview.tile-open-result"
+# The period moves to 3M and never goes to the future.
 - tapOn: "3M"
 - assertVisible:
     id: "investment.overview.period-range"
+# The blocks are below the tiles: swipe the page (scrollUntilVisible does not scroll it on web).
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+- extendedWaitUntil:
+    visible:
+      id: "investment.overview.evolution-title"
+    timeout: 20000
 # Filtering by class is screen state; clearing restores the ranking.
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+- extendedWaitUntil:
+    visible:
+      id: "investment.overview.allocation-class-PRIVATE"
+    timeout: 20000
 - tapOn:
-    id: "investment.overview.allocation-class-BR_STOCK"
-- assertVisible:
-    id: "investment.overview.ranking-filter-clear"
+    id: "investment.overview.allocation-class-PRIVATE"
+- extendedWaitUntil:
+    visible:
+      id: "investment.overview.ranking-filter-clear"
+    timeout: 20000
 - tapOn:
     id: "investment.overview.ranking-filter-clear"
 - assertNotVisible:
     id: "investment.overview.ranking-filter-clear"
-# Assets keeps the 102 list.
+- extendedWaitUntil:
+    visible:
+      id: "investment.overview.ranking-row-${output.ASSET_ID}"
+    timeout: 20000
+# The income block closes the page.
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+- extendedWaitUntil:
+    visible:
+      id: "investment.overview.income-title"
+    timeout: 20000
+# Back to the top, then Assets keeps the 102 list.
+- swipe:
+    start: 50%, 20%
+    end: 50%, 80%
+- swipe:
+    start: 50%, 20%
+    end: 50%, 80%
+- swipe:
+    start: 50%, 20%
+    end: 50%, 80%
+- extendedWaitUntil:
+    visible:
+      id: "investment.sections.assets"
+    timeout: 20000
 - tapOn:
     id: "investment.sections.assets"
 - extendedWaitUntil:
