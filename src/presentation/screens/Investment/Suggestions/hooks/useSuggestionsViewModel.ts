@@ -54,7 +54,7 @@ function useSuggestionsViewModel() {
       (incomeQuery.isFetching && !incomeQuery.data) ||
       (eventQuery.isFetching && !eventQuery.data),
     items,
-    onBack: () => router.replace("/investments"),
+    onBack: () => router.replace("/investments/assets"),
     onFilterChange: (value: string) => setFilter(value as SuggestionFilter),
     onRetry: async () => {
       await Promise.all([incomeQuery.refetch(), eventQuery.refetch()]);
