@@ -23,6 +23,11 @@ import { parseDecimal, ZERO } from "@utils/decimal";
 const MAX_NAME = 100;
 const MAX_TICKER = 20;
 const TICKER_TEXT = /^[A-Z0-9.-]*$/;
+// Spec 111 rule 11: only the two B3 classes follow a ticker.
+const B3_CLASS_PAIR = [
+  InvestmentAssetClass.BR_STOCK,
+  InvestmentAssetClass.BR_REIT,
+];
 
 type AssetFormErrors = Partial<
   Record<"currentValue" | "name" | "ticker", TranslationKeys>
@@ -30,6 +35,8 @@ type AssetFormErrors = Partial<
 
 interface AssetFormState {
   assetClass: InvestmentAssetClass;
+  // Spec 111: the class was switched to follow the picked ticker; shown until the ticker or the class changes.
+  classNotice: InvestmentAssetClass | null;
   currency: CurrencyCode;
   // The user typed the currency: the class stops suggesting one.
   currencyTouched: boolean;
@@ -44,9 +51,21 @@ interface AssetFormState {
   ticker: string;
 }
 
+// The class the picked ticker requires when the owner forced the other B3 class back (spec 111 rule 14).
+function classMismatch(state: AssetFormState): InvestmentAssetClass | null {
+  const picked = state.picked?.assetClass;
+
+  if (!picked || !isB3Pair(state.assetClass, picked)) {
+    return null;
+  }
+
+  return picked;
+}
+
 function createInitialState(params: { ownerId: string }): AssetFormState {
   return {
     assetClass: InvestmentAssetClass.BR_STOCK,
+    classNotice: null,
     currency: DEFAULT_CURRENCY,
     currencyTouched: false,
     currentValue: "",
@@ -56,6 +75,10 @@ function createInitialState(params: { ownerId: string }): AssetFormState {
     picked: null,
     ticker: "",
   };
+}
+
+function isB3Pair(a: InvestmentAssetClass, b: InvestmentAssetClass) {
+  return a !== b && B3_CLASS_PAIR.includes(a) && B3_CLASS_PAIR.includes(b);
 }
 
 function isSameState(a: AssetFormState, b: AssetFormState) {
@@ -99,6 +122,7 @@ function needsPick(state: AssetFormState, initial?: AssetFormState): boolean {
 function stateFromAsset(asset: InvestmentAsset): AssetFormState {
   return {
     assetClass: asset.assetClass,
+    classNotice: null,
     currency: asset.currency,
     currencyTouched: true,
     currentValue: "",
@@ -174,6 +198,8 @@ function validate(
     errors.ticker = "investment.form.asset.tickerRequired";
   } else if (needsPick(state, initial)) {
     errors.ticker = "investment.ticker.notFound";
+  } else if (classMismatch(state)) {
+    errors.ticker = "investment.ticker.classMismatch";
   }
   if (state.currentValue.trim() !== "") {
     const value = parseDecimal(state.currentValue);
@@ -202,6 +228,7 @@ function withAssetClass(
   return {
     ...state,
     assetClass,
+    classNotice: null,
     currency: keepsChoice ? state.currency : suggested,
   };
 }
@@ -217,13 +244,20 @@ function withName(state: AssetFormState, name: string): AssetFormState {
   return { ...state, name, nameTouched: true };
 }
 
-// Picking a search result fills ticker, name (until typed) and the currency of its market.
+// Picking a search result fills ticker, name (until typed) and the currency of its market; a B3 ticker also brings
+// its class (spec 111 rule 11-12).
 function withPicked(
   state: AssetFormState,
   suggestion: InvestmentTickerSuggestion,
 ): AssetFormState {
+  const followsTicker =
+    !!suggestion.assetClass &&
+    isB3Pair(state.assetClass, suggestion.assetClass);
+
   return {
     ...state,
+    assetClass: followsTicker ? suggestion.assetClass! : state.assetClass,
+    classNotice: followsTicker ? suggestion.assetClass : null,
     currency: suggestion.currency,
     name: state.nameTouched || !suggestion.name ? state.name : suggestion.name,
     picked: suggestion,
@@ -237,6 +271,7 @@ function withTicker(state: AssetFormState, ticker: string): AssetFormState {
 
   return {
     ...state,
+    classNotice: null,
     name: state.nameTouched ? state.name : next,
     ticker: next,
   };
@@ -244,6 +279,7 @@ function withTicker(state: AssetFormState, ticker: string): AssetFormState {
 
 export type { AssetFormErrors, AssetFormState };
 export {
+  classMismatch,
   createInitialState,
   isSameState,
   marketOf,

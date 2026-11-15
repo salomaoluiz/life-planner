@@ -3,6 +3,7 @@ import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { makeAsset } from "@screens/Investment/mocks/fixtures";
 
 import {
+  classMismatch,
   createInitialState,
   isSameState,
   marketOf,
@@ -235,5 +236,89 @@ describe("ticker pick (spec 104 FR 24)", () => {
 
     expect(withPicked(named, suggestion).name).toBe("My Itaú");
     expect(withPicked(typed, { ...suggestion, name: null }).name).toBe("ITSA4");
+  });
+});
+
+describe("class from the picked ticker (spec 111)", () => {
+  const suggestion = {
+    assetClass: null,
+    changePercent: "1.2",
+    currency: "BRL" as const,
+    exchange: "B3",
+    logoUrl: null,
+    market: "B3" as never,
+    name: "Kinea Renda Imobiliária",
+    price: "152.3",
+    ticker: "KNRI11",
+  };
+  const fii = {
+    ...suggestion,
+    assetClass: InvestmentAssetClass.BR_REIT,
+    ticker: "KNRI11",
+  };
+  const stock = { ...suggestion, assetClass: InvestmentAssetClass.BR_STOCK };
+
+  it("SHOULD switch to the class of the picked ticker AND flag the notice", () => {
+    const picked = withPicked(withTicker(initial, "knr"), fii);
+
+    expect(picked).toMatchObject({
+      assetClass: InvestmentAssetClass.BR_REIT,
+      classNotice: InvestmentAssetClass.BR_REIT,
+      currency: "BRL",
+      ticker: "KNRI11",
+    });
+
+    const back = withPicked(withTicker(initial, "pet"), {
+      ...stock,
+      ticker: "PETR4",
+    });
+
+    expect(back.assetClass).toBe(InvestmentAssetClass.BR_STOCK);
+    expect(back.classNotice).toBeNull();
+  });
+
+  it("SHOULD keep the class WHEN the ticker has no class rule", () => {
+    const fiagro = withPicked(withTicker(initial, "rza"), {
+      ...fii,
+      assetClass: null,
+      ticker: "RZAG11",
+    });
+
+    expect(fiagro.assetClass).toBe(InvestmentAssetClass.BR_STOCK);
+    expect(fiagro.classNotice).toBeNull();
+  });
+
+  it("SHOULD keep the class WHEN it is not one of the B3 pair", () => {
+    const foreign = withAssetClass(initial, InvestmentAssetClass.FOREIGN_STOCK);
+
+    expect(withPicked(withTicker(foreign, "knr"), fii).assetClass).toBe(
+      InvestmentAssetClass.FOREIGN_STOCK,
+    );
+  });
+
+  it("SHOULD drop the notice on the next ticker edit AND when the class is picked by hand", () => {
+    const picked = withPicked(withTicker(initial, "knr"), fii);
+
+    expect(withTicker(picked, "knri1").classNotice).toBeNull();
+    expect(
+      withAssetClass(picked, InvestmentAssetClass.BR_STOCK).classNotice,
+    ).toBeNull();
+  });
+
+  it("SHOULD block saving WHEN the owner forces the other B3 class back", () => {
+    const picked = withPicked(withTicker(initial, "knr"), fii);
+    const forced = withAssetClass(picked, InvestmentAssetClass.BR_STOCK);
+
+    expect(classMismatch(forced)).toBe(InvestmentAssetClass.BR_REIT);
+    expect(validate(forced).ticker).toBe("investment.ticker.classMismatch");
+    expect(validate(picked).ticker).toBeUndefined();
+    expect(classMismatch(picked)).toBeNull();
+  });
+
+  it("SHOULD start an edited asset without a notice", () => {
+    expect(
+      stateFromAsset(makeAsset({ assetClass: InvestmentAssetClass.BR_REIT }))
+        .classNotice,
+    ).toBeNull();
   });
 });
