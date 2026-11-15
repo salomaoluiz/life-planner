@@ -16,7 +16,7 @@ import {
   TickerAutocomplete,
 } from "@components";
 import Skeleton from "@components/Skeleton";
-import { InvestmentAssetClass } from "@domain/entities/investment/enums";
+import type { InvestmentAssetClass } from "@domain/entities/investment/enums";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
