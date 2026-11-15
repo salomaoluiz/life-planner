@@ -11,8 +11,17 @@ describe("TickerAutocomplete", () => {
     setup();
     open();
 
-    expect(screen.getByText("R$ 10,53")).toBeTruthy();
+    expect(screen.getByText("R$ 152,30")).toBeTruthy();
     expect(screen.getByText("R$ 10,61")).toBeTruthy();
+  });
+
+  it("SHOULD show the class badge of a suggestion AND nothing WHEN it has none", () => {
+    setup();
+    open();
+
+    expect(screen.getByTestId("tk-suggestion-KNRI11-badge")).toBeTruthy();
+    expect(screen.getByText("FII")).toBeTruthy();
+    expect(screen.queryByTestId("tk-suggestion-ITSA3-badge")).toBeNull();
   });
 
   it("SHOULD tell which ticker was picked", () => {
@@ -36,6 +45,6 @@ describe("TickerAutocomplete", () => {
     setup({ suggestions: [] });
     open();
 
-    expect(screen.queryByText("R$ 10,53")).toBeNull();
+    expect(screen.queryByText("R$ 152,30")).toBeNull();
   });
 });

@@ -2,6 +2,7 @@ import { fireEvent, screen } from "@testing-library/react-native";
 
 import { hasText } from "@tests";
 
+import { InvestmentAssetClass } from "@domain/entities/investment/enums";
 import investmentTestIds from "@screens/Investment/testIds";
 
 import { setup } from "./mocks/index.mocks";
@@ -33,6 +34,7 @@ it("SHOULD render the form fields AND save", () => {
 
 it("SHOULD hide the current value WHEN editing AND show the locked hint", () => {
   setup({
+    classHintKey: "investment.errors.classLocked",
     classLocked: true,
     isEditing: true,
     titleKey: "investment.form.asset.editTitle",
@@ -86,4 +88,62 @@ it("SHOULD not show the calculated switch for any other asset", () => {
   setup();
 
   expect(screen.queryByTestId(ids.calculated)).toBeNull();
+});
+
+describe("class from the ticker (spec 111)", () => {
+  it("SHOULD show the notice of a class that followed the ticker", () => {
+    setup({
+      classNotice: InvestmentAssetClass.BR_REIT,
+      ticker: "KNRI11",
+    });
+
+    expect(screen.getByTestId(ids.classNotice)).toBeOnTheScreen();
+    expect(
+      hasText(
+        'investment.ticker.classAdjusted {"class":"investment.ticker.classNames.BR_REIT","kind":"investment.ticker.classKinds.BR_REIT","ticker":"KNRI11"}',
+      ),
+    ).toBe(true);
+  });
+
+  it("SHOULD hide the notice WHEN there is none", () => {
+    setup();
+
+    expect(screen.queryByTestId(ids.classNotice)).toBeNull();
+  });
+
+  it("SHOULD explain the limited class AND disable the field for other classes", () => {
+    setup({
+      classDisabled: true,
+      classHintKey: "investment.form.asset.classLockedPairHint",
+      isEditing: true,
+    });
+
+    expect(hasText("investment.form.asset.classLockedPairHint")).toBe(true);
+    expect(hasText("investment.errors.classLocked")).toBe(false);
+  });
+
+  it("SHOULD show the class mismatch on the ticker field", () => {
+    setup({
+      ticker: "KNRI11",
+      tickerError: "investment.ticker.classMismatch",
+      tickerErrorClass: InvestmentAssetClass.BR_REIT,
+    });
+
+    expect(
+      hasText(
+        'investment.ticker.classMismatch {"class":"investment.ticker.classNames.BR_REIT","kind":"investment.ticker.classKinds.BR_REIT","ticker":"KNRI11"}',
+      ),
+    ).toBe(true);
+  });
+
+  it("SHOULD ask before swapping the class of an asset with operations", () => {
+    const { vm } = setup({ classConfirmOpen: true, isEditing: true });
+
+    expect(screen.getByTestId(ids.classConfirm)).toBeOnTheScreen();
+    fireEvent.press(screen.getByTestId(`${ids.classConfirm}-confirm`));
+    expect(vm.onClassConfirm).toHaveBeenCalledTimes(1);
+
+    fireEvent.press(screen.getByTestId(`${ids.classConfirm}-cancel`));
+    expect(vm.onClassCancel).toHaveBeenCalledTimes(1);
+  });
 });
