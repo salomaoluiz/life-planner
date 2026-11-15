@@ -9,8 +9,8 @@ function setup(props: Partial<React.ComponentProps<typeof DonutChart>> = {}) {
       centerLabel="Total"
       centerValue="R$ 184,3 mil"
       slices={[
-        { color: "#4F5BD5", share: 0.6, testID: "slice-br" },
-        { color: "#F29A4A", share: 0.4, testID: "slice-fiis" },
+        { share: 0.6, swatch: "#4F5BD5", testID: "slice-br" },
+        { share: 0.4, swatch: "#F29A4A", testID: "slice-fiis" },
       ]}
       testID="donut"
       {...props}

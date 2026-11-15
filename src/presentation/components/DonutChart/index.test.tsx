@@ -32,7 +32,7 @@ it("SHOULD show the center label and value", () => {
 });
 
 it("SHOULD normalize the shares WHEN they do not add up to one", () => {
-  setup({ slices: [{ color: "#4F5BD5", share: 0, testID: "slice-br" }] });
+  setup({ slices: [{ share: 0, swatch: "#4F5BD5", testID: "slice-br" }] });
 
   expect(screen.getByTestId("slice-br").props.strokeDasharray).toContain("0");
 });

@@ -15,10 +15,10 @@ export interface DonutChartProps {
 }
 
 export interface DonutSlice {
-  /** `#RRGGBB` from the theme palette of the caller */
-  color: string;
   /** 0..1 share of the whole; the slices are normalised together */
   share: number;
+  /** A data color (`#RRGGBB`) from the palette of the caller */
+  swatch: string;
   testID?: string;
 }
 
@@ -76,7 +76,7 @@ function DonutChart(props: DonutChartProps) {
                 cy={VIEW / 2}
                 key={`${slice.testID ?? index}`}
                 r={RADIUS}
-                stroke={slice.color}
+                stroke={slice.swatch}
                 strokeDasharray={dash}
                 strokeDashoffset={-offset}
                 testID={slice.testID}

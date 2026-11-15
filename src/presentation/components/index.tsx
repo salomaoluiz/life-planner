@@ -35,6 +35,12 @@ export {
   ChoiceTileOption,
 } from "./ChoiceTileGroup";
 export {
+  ColorMark,
+  ColorMarkProps,
+  ShareBar,
+  ShareBarProps,
+} from "./ColorMark";
+export {
   default as ColorSwatchGroup,
   ColorSwatchGroupProps,
 } from "./ColorSwatchGroup";
