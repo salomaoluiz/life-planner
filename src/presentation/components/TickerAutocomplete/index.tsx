@@ -3,7 +3,6 @@ import { View } from "react-native";
 import AutocompleteField, {
   AutocompleteSuggestion,
 } from "@components/AutocompleteField";
-import Badge from "@components/Badge";
 import Text from "@components/Text";
 import { useKitTheme } from "@components/utils/useKitTheme";
 
@@ -65,12 +64,19 @@ function TickerAutocomplete(props: TickerAutocompleteProps) {
       matchRange: props.value ? matchOf(option.ticker, props.value) : undefined,
       meta: option.priceText,
       trailing: option.badge ? (
-        <Badge
-          label={option.badge}
+        // A tiny pill, the same shape as the ticker tile (a `Badge` would duplicate a chunk).
+        <View
+          style={{
+            backgroundColor: colors.surfaceRaised,
+            borderRadius: radius.full,
+            paddingHorizontal: spacing.xs,
+          }}
           testID={
             props.testID && `${props.testID}-suggestion-${option.ticker}-badge`
           }
-        />
+        >
+          <Text.Caption value={option.badge} />
+        </View>
       ) : undefined,
     }),
   );
