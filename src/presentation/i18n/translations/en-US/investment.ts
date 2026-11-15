@@ -336,6 +336,8 @@ const investment = {
       class: "Class",
       classHint:
         "Stock / ETF, FII, foreign stock / ETF, fixed income or private / option.",
+      classLockedPairHint:
+        "With operations you can only switch between Stocks and FIIs. The currency doesn't change.",
       currency: "Currency",
       currencyHint: "Can't change after the first operation.",
       currentValue: "Current value per unit (optional)",
@@ -757,6 +759,18 @@ const investment = {
     INVESTMENT_REDEMPTION: "Investment redemption",
   },
   ticker: {
+    classAdjusted: "{{ticker}} is a {{kind}}. The class was set to {{class}}.",
+    classBadge: { BR_REIT: "FII", BR_STOCK: "Stock" },
+    classChange: {
+      cancel: "Keep class",
+      confirm: "Change class",
+      message:
+        "Operations, income and values stay the same; the asset shows up under {{class}} from now on.",
+      title: "Change {{ticker}} to {{class}}?",
+    },
+    classKinds: { BR_REIT: "FII", BR_STOCK: "stock" },
+    classMismatch: "{{ticker}} is a {{kind}}. Choose the class {{class}}.",
+    classNames: { BR_REIT: "FIIs", BR_STOCK: "Stocks" },
     currentQuote: "Current quote",
     notFound:
       'No asset found for "{{q}}". Check the ticker or use the Non-listed class.',
