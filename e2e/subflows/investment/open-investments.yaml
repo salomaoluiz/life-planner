@@ -6,6 +6,13 @@ url: ${E2E_WEB_URL}
     timeout: 20000
 - tapOn:
     id: "tab-investments"
+# Spec 110: the tab lands on the overview; the flows below work on the Assets section.
+- extendedWaitUntil:
+    visible:
+      id: "investment.sections.assets"
+    timeout: 20000
+- tapOn:
+    id: "investment.sections.assets"
 - extendedWaitUntil:
     visible:
       id: "investment.list.screen"

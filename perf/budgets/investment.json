@@ -93,7 +93,7 @@
     "maxDepth": 2,
     "maxDuplicates": 0,
     "maxRequests": 4,
-    "route": "app/(app)/(tabs)/investments/index.tsx"
+    "route": "app/(app)/(tabs)/investments/assets.tsx"
   },
   "investment.list.render.mount": {
     "maxCommits": 3
@@ -106,6 +106,21 @@
   },
   "investment.operation.render.mount": {
     "maxCommits": 3
+  },
+  "investment.overview.mount.cold": {
+    "maxDepth": 2,
+    "maxDuplicates": 0,
+    "maxRequests": 2,
+    "route": "app/(app)/(tabs)/investments/overview.tsx"
+  },
+  "investment.overview.mount.entry": {
+    "maxDepth": 2,
+    "maxDuplicates": 0,
+    "maxRequests": 2,
+    "route": "app/(app)/(tabs)/investments/index.tsx"
+  },
+  "investment.overview.render.mount": {
+    "maxCommits": 4
   },
   "investment.suggestions.mount.cold": {
     "maxDepth": 3,

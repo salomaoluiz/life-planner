@@ -36,9 +36,13 @@ export interface LineChartProps {
 
 /** One line; every series has the same number of points, at the same x positions (spec 094) */
 export interface LineChartSeries {
+  /** Draws the line with gaps, for a reference series such as the invested cost (spec 110) */
+  dashed?: boolean;
   /** `primary` = thick line on top, `muted` = thin and faded line behind it */
   emphasis: "muted" | "primary";
   points: LineChartPoint[];
+  /** `secondary` draws the line in the secondary text color (spec 110); default follows the value sign */
+  tone?: "accent" | "secondary";
 }
 
 const MIN_LEFT = 52;
@@ -49,6 +53,18 @@ const PRIMARY_WIDTH = 3.5;
 const MUTED_WIDTH = 2;
 const MUTED_OPACITY = 0.75;
 const SINGLE_WIDTH = 2;
+
+// The single color of a reference series (spec 110): secondary text, or the accent of the muted series.
+function flatColorOf(
+  item: LineChartSeries,
+  colors: { accent: string; textSecondary: string },
+): null | string {
+  if (item.tone === "secondary") {
+    return colors.textSecondary;
+  }
+
+  return item.emphasis === "muted" ? colors.accent : null;
+}
 
 // Balance over time (spec 046 FR 12): a line that is green above zero and red below it, the projected part dashed, a crosshair on the selected point.
 function LineChart(props: LineChartProps) {
@@ -84,17 +100,21 @@ function LineChart(props: LineChartProps) {
         : { x: xs[index], y: scaleY(point.value, domain, plotHeight, TOP) },
     );
 
+    const flat = flatColorOf(item, colors);
+
     return {
       coords,
+      dashed: item.dashed === true,
       emphasis: item.emphasis,
       points: item.points,
       segments: buildSegments(
         coords,
         item.points,
         baseline,
-        item.emphasis === "muted" ? colors.accent : colors.income,
-        item.emphasis === "muted" ? colors.accent : colors.expense,
+        flat ?? colors.income,
+        flat ?? colors.expense,
       ),
+      tone: item.tone,
     };
   });
   const step = Math.max(1, Math.ceil(points.length / (props.maxLabels ?? 6)));
@@ -158,9 +178,19 @@ function LineChart(props: LineChartProps) {
             opacity={item.emphasis === "muted" ? MUTED_OPACITY : 1}
             testID={props.testID && `${props.testID}-series-${seriesIndex}`}
           >
+            {/* A single period has no segment to draw: the point itself carries the value (spec 110). */}
+            {item.coords.filter(Boolean).length === 1 ? (
+              <Circle
+                cx={item.coords.find(Boolean)?.x}
+                cy={item.coords.find(Boolean)?.y}
+                fill={flatColorOf(item, colors) ?? colors.income}
+                r={4}
+                testID={props.testID && `${props.testID}-single-${seriesIndex}`}
+              />
+            ) : null}
             {item.segments.map((segment, index) => (
               <G key={index}>
-                {segment.dashed || multi ? null : (
+                {segment.dashed || item.dashed || multi ? null : (
                   <Path
                     d={`M${segment.x1} ${segment.y1} L${segment.x2} ${segment.y2} L${segment.x2} ${baseline} L${segment.x1} ${baseline} Z`}
                     fill={segment.color}
@@ -171,7 +201,9 @@ function LineChart(props: LineChartProps) {
                   d={`M${segment.x1} ${segment.y1} L${segment.x2} ${segment.y2}`}
                   fill="none"
                   stroke={segment.color}
-                  strokeDasharray={segment.dashed ? "5 4" : undefined}
+                  strokeDasharray={
+                    segment.dashed || item.dashed ? "6 5" : undefined
+                  }
                   strokeLinecap="round"
                   strokeOpacity={item.emphasis === "muted" ? MUTED_OPACITY : 1}
                   strokeWidth={strokeWidth(item.emphasis, multi)}
@@ -216,7 +248,7 @@ function LineChart(props: LineChartProps) {
                   fill={colors.surface}
                   key={seriesIndex}
                   r={item.emphasis === "muted" ? 4 : 5}
-                  stroke={markerColor(item.emphasis, value, colors)}
+                  stroke={markerColor(item.emphasis, value, colors, item.tone)}
                   strokeWidth={2}
                 />
               ) : null;
@@ -253,8 +285,18 @@ function LineChart(props: LineChartProps) {
 function markerColor(
   emphasis: LineChartSeries["emphasis"],
   value: number,
-  colors: { accent: string; expense: string; income: string },
+  colors: {
+    accent: string;
+    expense: string;
+    income: string;
+    textSecondary: string;
+  },
+  tone?: LineChartSeries["tone"],
 ) {
+  if (tone === "secondary") {
+    return colors.textSecondary;
+  }
+
   if (emphasis === "muted") {
     return colors.accent;
   }

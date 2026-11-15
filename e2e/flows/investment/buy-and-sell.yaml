@@ -30,6 +30,10 @@ onFlowComplete:
       TOKEN: ${output.TOKEN}
       REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - runFlow: ../../subflows/investment/open-investments.yaml
+# Spec 110: the module header (title + sections) pushes the rows down; scroll them into view.
+- swipe:
+    start: 50%, 80%
+    end: 50%, 55%
 - tapOn:
     id: "investment.list.row-${output.ASSET_ID}"
 - extendedWaitUntil:

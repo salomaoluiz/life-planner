@@ -32,3 +32,22 @@ it("SHOULD draw the Today marker only WHEN asked (spec 053)", () => {
   setup({ today: { index: 0, label: "Today" } });
   expect(screen.getByTestId("columns-today")).toBeTruthy();
 });
+
+it("SHOULD outline the projected part with a dashed stroke WHEN asked (spec 110)", () => {
+  setup({ projectedStyle: "dashed" });
+
+  const dashed = screen.UNSAFE_root.findAll(
+    (node) => node.props.strokeDasharray === "5 4",
+  );
+
+  expect(dashed.length).toBeGreaterThan(0);
+  expect(dashed.every((node) => node.props.strokeWidth === 2)).toBe(true);
+});
+
+it("SHOULD keep the faded projected part by default", () => {
+  setup();
+
+  expect(
+    screen.UNSAFE_root.findAll((node) => node.props.fillOpacity === 0.5).length,
+  ).toBeGreaterThan(0);
+});

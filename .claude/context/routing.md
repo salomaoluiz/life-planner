@@ -50,3 +50,7 @@ A modal URL is `<base>/<modal>`: `<base>` is the screen it was opened from, `<mo
 2. Open it with `openModal("<name>", params)` and close it with `closeModal()` from `useModalNavigation()`.
 
 - The signed-in layout `app/(app)/_layout.tsx` renders `UpdateBanner` above the stack (spec 056); the versions modal is `versions` (opened from the Settings footer).
+
+## Investments sections (spec 110)
+
+`app/(app)/(tabs)/investments/{index,overview,assets}.tsx`: `index` and `overview` render `Investment/Overview` (the landing section) and `assets` renders the 102 List. The tab row is `Investment/Layout/components/SectionTabs` fed by `Layout/models/sections.ts` + `Layout/hooks/useInvestmentSections`; the asset detail (`asset/[id]`) and the suggestions inbox keep their sections. Old links to `/investments` land on the overview.

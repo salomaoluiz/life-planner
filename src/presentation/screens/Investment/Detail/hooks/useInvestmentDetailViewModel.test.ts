@@ -262,7 +262,7 @@ it("SHOULD confirm the delete AND go back to the list after it", () => {
   deleteMutation.withStatus("success");
   rerender({});
   expect(invalidateInvestments).toHaveBeenCalled();
-  expect(spies.replace).toHaveBeenCalledWith("/investments");
+  expect(spies.replace).toHaveBeenCalledWith("/investments/assets");
 });
 
 it("SHOULD delete a valuation AND invalidate after it", () => {
@@ -309,7 +309,7 @@ it("SHOULD refetch WHEN focused AND on refresh, back and menu", async () => {
   act(() => result.current.onMenuOpen());
   expect(result.current.isMenuOpen).toBe(true);
   act(() => result.current.onMenuClose());
-  expect(spies.replace).toHaveBeenCalledWith("/investments");
+  expect(spies.replace).toHaveBeenCalledWith("/investments/assets");
 });
 
 it("SHOULD block the actions of a read-only asset with the toast", () => {
