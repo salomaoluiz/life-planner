@@ -3,6 +3,7 @@ import { View } from "react-native";
 import AutocompleteField, {
   AutocompleteSuggestion,
 } from "@components/AutocompleteField";
+import Badge from "@components/Badge";
 import Text from "@components/Text";
 import { useKitTheme } from "@components/utils/useKitTheme";
 
@@ -23,6 +24,8 @@ export interface TickerAutocompleteProps {
 }
 
 export interface TickerOption {
+  /** Short label of the class the ticker requires, e.g. "FII" (spec 111) */
+  badge?: string;
   /** "B3", "NASDAQ"... shown after the name */
   exchange?: string;
   name: null | string;
@@ -61,6 +64,14 @@ function TickerAutocomplete(props: TickerAutocompleteProps) {
       ),
       matchRange: props.value ? matchOf(option.ticker, props.value) : undefined,
       meta: option.priceText,
+      trailing: option.badge ? (
+        <Badge
+          label={option.badge}
+          testID={
+            props.testID && `${props.testID}-suggestion-${option.ticker}-badge`
+          }
+        />
+      ) : undefined,
     }),
   );
 

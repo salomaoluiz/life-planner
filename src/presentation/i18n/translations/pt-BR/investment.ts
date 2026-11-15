@@ -761,7 +761,13 @@ const investment = {
   ticker: {
     classAdjusted:
       "{{ticker}} é {{kind}}. A classe foi ajustada para {{class}}.",
-    classBadge: { BR_REIT: "FII", BR_STOCK: "Ação" },
+    classBadge: {
+      BR_REIT: "FII",
+      BR_STOCK: "Ação",
+      FIXED_INCOME: "Renda fixa",
+      FOREIGN_STOCK: "Exterior",
+      PRIVATE: "Não listado",
+    },
     classChange: {
       cancel: "Manter classe",
       confirm: "Mudar classe",
@@ -769,9 +775,21 @@ const investment = {
         "Operações, proventos e valores continuam iguais; o ativo passa a aparecer em {{class}}.",
       title: "Mudar {{ticker}} para {{class}}?",
     },
-    classKinds: { BR_REIT: "FII", BR_STOCK: "ação" },
+    classKinds: {
+      BR_REIT: "FII",
+      BR_STOCK: "ação",
+      FIXED_INCOME: "título de renda fixa",
+      FOREIGN_STOCK: "ação",
+      PRIVATE: "ativo não listado",
+    },
     classMismatch: "{{ticker}} é {{kind}}. Escolha a classe {{class}}.",
-    classNames: { BR_REIT: "FIIs", BR_STOCK: "Ações" },
+    classNames: {
+      BR_REIT: "FIIs",
+      BR_STOCK: "Ações",
+      FIXED_INCOME: "Renda fixa",
+      FOREIGN_STOCK: "Stocks e ETFs do exterior",
+      PRIVATE: "Não listados e opções",
+    },
     currentQuote: "Cotação atual",
     notFound:
       'Nenhum ativo encontrado para "{{q}}". Confira o ticker ou use a classe "Não listado".',

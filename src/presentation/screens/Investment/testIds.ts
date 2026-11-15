@@ -120,6 +120,8 @@ const investmentTestIds = {
     asset: {
       calculated: "investment.asset-modal.calculated",
       class: "investment.asset-modal.class",
+      classConfirm: "investment.asset-modal.class-confirm",
+      classNotice: "investment.asset-modal.class-notice",
       currency: "investment.asset-modal.currency",
       currentValue: "investment.asset-modal.current-value",
       name: "investment.asset-modal.name",

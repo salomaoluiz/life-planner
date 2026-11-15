@@ -16,6 +16,7 @@ import {
   TickerAutocomplete,
 } from "@components";
 import Skeleton from "@components/Skeleton";
+import { InvestmentAssetClass } from "@domain/entities/investment/enums";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
@@ -41,9 +42,23 @@ function Wide({ vm }: AdaptiveViewProps<AssetModalVM>) {
       return undefined;
     }
 
-    return key === "investment.ticker.notFound"
-      ? t(key, { q: vm.ticker })
-      : t(key);
+    if (key === "investment.ticker.notFound") {
+      return t(key, { q: vm.ticker });
+    }
+    if (key === "investment.ticker.classMismatch" && vm.tickerErrorClass) {
+      return t(key, classParams(vm.tickerErrorClass, vm.ticker));
+    }
+
+    return t(key);
+  }
+
+  // Spec 111: the copy names the ticker and the class it belongs to ("KNRI11 is a FII…").
+  function classParams(assetClass: InvestmentAssetClass, ticker: string) {
+    return {
+      class: t(`investment.ticker.classNames.${assetClass}`),
+      kind: t(`investment.ticker.classKinds.${assetClass}`),
+      ticker,
+    };
   }
 
   function renderBody() {
@@ -74,7 +89,7 @@ function Wide({ vm }: AdaptiveViewProps<AssetModalVM>) {
               <View style={styles.field}>
                 <SelectField
                   closeLabel={t("investment.form.close")}
-                  disabled={vm.classLocked}
+                  disabled={vm.classDisabled}
                   label={t("investment.form.asset.class")}
                   onChange={vm.onAssetClassChange}
                   options={vm.classOptions.map((option) => ({
@@ -85,14 +100,7 @@ function Wide({ vm }: AdaptiveViewProps<AssetModalVM>) {
                   testID={ids.class}
                   value={vm.assetClass}
                 />
-                <Text.Caption
-                  tone="secondary"
-                  value={t(
-                    vm.classLocked
-                      ? "investment.errors.classLocked"
-                      : "investment.form.asset.classHint",
-                  )}
-                />
+                <Text.Caption tone="secondary" value={t(vm.classHintKey)} />
               </View>
               {vm.showCalculated ? (
                 <SwitchRow
@@ -119,6 +127,9 @@ function Wide({ vm }: AdaptiveViewProps<AssetModalVM>) {
                       t("investment.ticker.suggestions", { count })
                     }
                     suggestions={vm.suggestions.map((item) => ({
+                      badge: item.assetClass
+                        ? t(`investment.ticker.classBadge.${item.assetClass}`)
+                        : undefined,
                       exchange: item.exchange,
                       name: item.name,
                       priceText: formatUnitPrice(
@@ -148,6 +159,16 @@ function Wide({ vm }: AdaptiveViewProps<AssetModalVM>) {
                     />
                   </>
                 )}
+                {vm.classNotice ? (
+                  <Text.Caption
+                    testID={ids.classNotice}
+                    tone="secondary"
+                    value={t(
+                      "investment.ticker.classAdjusted",
+                      classParams(vm.classNotice, vm.ticker),
+                    )}
+                  />
+                ) : null}
               </View>
             </>
           }
@@ -280,6 +301,22 @@ function Wide({ vm }: AdaptiveViewProps<AssetModalVM>) {
       >
         {renderBody()}
       </BottomSheet>
+      <ConfirmDialog
+        cancelLabel={t("investment.ticker.classChange.cancel")}
+        closeLabel={t("investment.form.close")}
+        confirmLabel={t("investment.ticker.classChange.confirm")}
+        message={t("investment.ticker.classChange.message", {
+          class: t(`investment.ticker.classNames.${vm.assetClass}`),
+        })}
+        onCancel={vm.onClassCancel}
+        onConfirm={vm.onClassConfirm}
+        testID={ids.classConfirm}
+        title={t("investment.ticker.classChange.title", {
+          class: t(`investment.ticker.classNames.${vm.assetClass}`),
+          ticker: vm.ticker,
+        })}
+        visible={vm.classConfirmOpen}
+      />
       <ConfirmDialog
         cancelLabel={t("common.form.keepEditing")}
         closeLabel={t("investment.form.close")}
