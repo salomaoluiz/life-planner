@@ -1,0 +1,118 @@
+url: ${E2E_WEB_URL}
+name: investment/asset-class-from-ticker
+tags:
+  - investment
+  - spec-111
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Spec 111: picking a B3 ticker brings its class, and an asset with operations can be moved between Ações and FIIs.
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: E2E Broker
+      BALANCE_CENTS: "1000000"
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/investment/open-investments.yaml
+- extendedWaitUntil:
+    visible:
+      id: "investment.list.empty-state"
+    timeout: 20000
+- tapOn:
+    id: "investment.list.add-button"
+- extendedWaitUntil:
+    visible:
+      id: "investment.asset-modal.ticker-input"
+    timeout: 20000
+# The form starts as Ações; a FII ticker switches it and says so.
+- tapOn:
+    id: "investment.asset-modal.ticker-input"
+- inputText: "knri"
+- extendedWaitUntil:
+    visible:
+      id: "investment.asset-modal.ticker-suggestion-KNRI11.*"
+    timeout: 30000
+- tapOn:
+    id: "investment.asset-modal.ticker-suggestion-KNRI11.*"
+- extendedWaitUntil:
+    visible:
+      id: "investment.asset-modal.class-notice"
+    timeout: 10000
+- extendedWaitUntil:
+    visible:
+      id: "investment.asset-modal.quote-box"
+    timeout: 10000
+- tapOn:
+    id: "investment.asset-modal.save"
+- extendedWaitUntil:
+    visible:
+      id: "investment.list.group.BR_REIT-BRL"
+    timeout: 20000
+# One operation, so the class field is limited to the B3 pair and asks before the switch.
+- swipe:
+    start: 50%, 80%
+    end: 50%, 55%
+- tapOn:
+    id: "investment.list.row-.*"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.screen"
+    timeout: 20000
+- tapOn:
+    id: "investment.detail.add-operation"
+- extendedWaitUntil:
+    visible:
+      id: "investment.operation-modal.quantity"
+    timeout: 20000
+- tapOn:
+    id: "investment.operation-modal.quantity"
+- inputText: "10"
+- tapOn:
+    id: "investment.operation-modal.unit-price"
+- inputText: "100"
+- tapOn:
+    id: "investment.operation-modal.save"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.quantity"
+      text: ".*10.*"
+    timeout: 20000
+- tapOn:
+    id: "investment.detail.actions-menu"
+- tapOn:
+    id: "investment.detail.menu-edit"
+- extendedWaitUntil:
+    visible:
+      id: "investment.asset-modal.class"
+    timeout: 20000
+- tapOn:
+    id: "investment.asset-modal.class"
+- tapOn:
+    id: "investment.asset-modal.class-option-BR_STOCK"
+- tapOn:
+    id: "investment.asset-modal.save"
+- extendedWaitUntil:
+    visible:
+      id: "investment.asset-modal.class-confirm"
+    timeout: 10000
+- tapOn:
+    id: "investment.asset-modal.class-confirm-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.screen"
+    timeout: 20000
+- tapOn:
+    id: "investment.detail.back"
+- extendedWaitUntil:
+    visible:
+      id: "investment.list.group.BR_STOCK-BRL"
+    timeout: 20000
