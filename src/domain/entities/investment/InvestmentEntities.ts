@@ -17,20 +17,6 @@ import {
 } from "@domain/entities/investment/enums";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
-// Spec 110: the investments overview, already consolidated in BRL by the API.
-export enum InvestmentDashboardBucket {
-  DAY = "DAY",
-  MONTH = "MONTH",
-  WEEK = "WEEK",
-}
-
-export enum InvestmentValueKind {
-  COST = "COST",
-  FIXED_INCOME_NET = "FIXED_INCOME_NET",
-  MANUAL = "MANUAL",
-  QUOTE = "QUOTE",
-}
-
 export interface InvestmentAsset {
   archivedAt: null | string;
   assetClass: InvestmentAssetClass;
@@ -76,75 +62,6 @@ export interface InvestmentBrlResult {
   resultFromFx: number;
   // Fraction of the BRL cost (0.3526 = 35.26%).
   resultPercent: null | number;
-}
-
-export interface InvestmentDashboard {
-  allocation: InvestmentDashboardAllocation[];
-  incomes: InvestmentDashboardIncomeBucket[];
-  period: {
-    bucket: InvestmentDashboardBucket;
-    from: string;
-    to: string;
-  };
-  ranking: InvestmentDashboardRankingRow[];
-  series: InvestmentDashboardSeriesPoint[];
-  summary: InvestmentDashboardSummary;
-}
-
-export interface InvestmentDashboardAllocation {
-  assetClass: InvestmentAssetClass;
-  // Fraction of the total market value (0.34 = 34%).
-  share: number;
-  usd?: {
-    fxRate: string;
-    resultFromAsset: number;
-    resultFromFx: number;
-    value: string;
-  };
-  value: number;
-}
-
-export interface InvestmentDashboardIncomeBucket {
-  byType: Record<InvestmentIncomeType, number>;
-  date: string;
-  planned: number;
-  received: number;
-}
-
-export interface InvestmentDashboardRankingRow {
-  assetClass: InvestmentAssetClass;
-  assetId: string;
-  currency: CurrencyCode;
-  name: string;
-  openResult: number;
-  openResultPercent?: number;
-  share: number;
-  ticker?: string;
-  usdValue?: string;
-  value: number;
-  valueKind: InvestmentValueKind;
-}
-
-export interface InvestmentDashboardSeriesPoint {
-  date: string;
-  // Undefined before the first operation of the filtered owners.
-  invested?: number;
-  marketValue?: number;
-}
-
-export interface InvestmentDashboardSummary {
-  assetsWithoutValue: number;
-  currentValue: number;
-  historyStartsAt?: string;
-  incomePlanned: number;
-  incomeReceived: number;
-  invested: number;
-  openResult: number;
-  openResultPercent?: number;
-  operationsWithoutFxRate: number;
-  realizedResult: number;
-  salesCount: number;
-  staleQuotes: number;
 }
 
 // Money is integer cents in the asset currency; quantities and unit prices are decimal strings (up to 8 places).

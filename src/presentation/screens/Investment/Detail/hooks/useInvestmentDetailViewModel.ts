@@ -184,7 +184,7 @@ function useInvestmentDetailViewModel() {
   useEffect(() => {
     if (deleteMutation.status === "success") {
       void invalidateInvestments();
-      router.replace("/investments/assets");
+      router.replace("/investments");
     }
   }, [deleteMutation.status]);
 
@@ -237,7 +237,7 @@ function useInvestmentDetailViewModel() {
       openModal("investment_fixed_income_adjust", { assetId: id }),
     ),
     onArchiveToggle: scope.guard(onArchiveToggle),
-    onBack: () => router.replace("/investments/assets"),
+    onBack: () => router.replace("/investments"),
     onBackToAutomatic: scope.guard(() => {
       const manual = asset?.valuations[0];
 

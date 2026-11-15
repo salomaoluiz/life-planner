@@ -19,8 +19,6 @@ export interface ColumnChartProps {
   height?: number;
   maxLabels?: number;
   onSelect?: (index: number) => void;
-  /** How the stacked projected part is drawn: lighter (spec 046) or outlined and dashed (spec 110) */
-  projectedStyle?: "dashed" | "faded";
   selectedIndex?: number;
   testID?: string;
   /** Draws the "Today" line in this group (spec 053 FR 18) */
@@ -104,15 +102,10 @@ function ColumnChart(props: ColumnChartProps) {
         />
         {amounts.projected > 0 ? (
           <Rect
-            fill={props.projectedStyle === "dashed" ? colors.surface : color}
-            fillOpacity={props.projectedStyle === "dashed" ? 1 : 0.5}
+            fill={color}
+            fillOpacity={0.5}
             height={Math.max(realizedY - topY, 0)}
             rx={3}
-            stroke={props.projectedStyle === "dashed" ? color : undefined}
-            strokeDasharray={
-              props.projectedStyle === "dashed" ? "5 4" : undefined
-            }
-            strokeWidth={props.projectedStyle === "dashed" ? 2 : undefined}
             width={barWidth}
             x={x}
             y={topY}
