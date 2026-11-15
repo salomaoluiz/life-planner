@@ -20,9 +20,11 @@ import {
   InvestmentUseFixedIncomeActions,
   QuoteRefreshTooSoon,
   QuoteSourceUnavailable,
+  TickerClassMismatch,
   TickerExists,
   TickerNotFound,
 } from "@domain/entities/errors";
+import { InvestmentAssetClass } from "@domain/entities/investment/enums";
 
 import handleFinancialApiError from "../../financial/financialApiError";
 
@@ -54,6 +56,13 @@ function handleInvestmentApiError(
     }
     if (error.statusCode === 422 && code === "TICKER_NOT_FOUND") {
       throw new TickerNotFound();
+    }
+    // Spec 111: the ticker belongs to another B3 class; the answer says which one.
+    if (error.statusCode === 422 && code === "TICKER_CLASS_MISMATCH") {
+      throw new TickerClassMismatch(
+        (error.body?.details as { expectedClass?: InvestmentAssetClass })
+          ?.expectedClass ?? InvestmentAssetClass.BR_STOCK,
+      );
     }
     // Spec 107: the income rules answer a code (section 7).
     if (error.statusCode === 422 && code === "CURRENCY_MISMATCH") {
