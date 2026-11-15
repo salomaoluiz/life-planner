@@ -232,6 +232,7 @@ describe("editing", () => {
 });
 
 const itsa: InvestmentTickerSuggestion = {
+  assetClass: null,
   changePercent: "0.48",
   currency: "BRL",
   exchange: "B3",

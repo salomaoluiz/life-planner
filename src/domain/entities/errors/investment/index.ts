@@ -15,5 +15,6 @@ export { default as InvestmentRowUseOperation } from "./InvestmentRowUseOperatio
 export { default as InvestmentUseFixedIncomeActions } from "./InvestmentUseFixedIncomeActions";
 export { default as QuoteRefreshTooSoon } from "./QuoteRefreshTooSoon";
 export { default as QuoteSourceUnavailable } from "./QuoteSourceUnavailable";
+export { default as TickerClassMismatch } from "./TickerClassMismatch";
 export { default as TickerExists } from "./TickerExists";
 export { default as TickerNotFound } from "./TickerNotFound";

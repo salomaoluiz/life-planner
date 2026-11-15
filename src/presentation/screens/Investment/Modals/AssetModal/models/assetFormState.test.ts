@@ -174,6 +174,7 @@ describe("params", () => {
 
 describe("ticker pick (spec 104 FR 24)", () => {
   const suggestion = {
+    assetClass: null,
     changePercent: "0.48",
     currency: "BRL" as const,
     exchange: "B3",
