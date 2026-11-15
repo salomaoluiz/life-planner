@@ -315,6 +315,15 @@ describe("class from the picked ticker (spec 111)", () => {
     expect(classMismatch(picked)).toBeNull();
   });
 
+  it("SHOULD keep the edited ticker valid WHEN only the B3 class changes", () => {
+    const initial = stateFromAsset(makeAsset({ ticker: "KNRI11" }));
+    const swapped = withAssetClass(initial, InvestmentAssetClass.BR_REIT);
+    const other = withAssetClass(initial, InvestmentAssetClass.FOREIGN_STOCK);
+
+    expect(needsPick(swapped, initial)).toBe(false);
+    expect(needsPick(other, initial)).toBe(true);
+  });
+
   it("SHOULD start an edited asset without a notice", () => {
     expect(
       stateFromAsset(makeAsset({ assetClass: InvestmentAssetClass.BR_REIT }))

@@ -5,6 +5,7 @@ import { investmentKeys } from "@application/queryKeys/investmentKeys";
 import { useCases } from "@application/useCases";
 import {
   QuoteSourceUnavailable,
+  TickerClassMismatch,
   TickerExists,
   TickerNotFound,
 } from "@domain/entities/errors";
@@ -26,6 +27,7 @@ import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import {
   AssetFormState,
+  classMismatch,
   createInitialState,
   isSameState,
   marketOf,
@@ -44,6 +46,11 @@ import {
 export type AssetModalVM = ReturnType<typeof useAssetModalViewModel>;
 
 const CLASS_OPTIONS = Object.values(InvestmentAssetClass);
+// Spec 111 rule 15: with operations only the B3 pair may change.
+const B3_CLASS_PAIR: InvestmentAssetClass[] = [
+  InvestmentAssetClass.BR_STOCK,
+  InvestmentAssetClass.BR_REIT,
+];
 const SEARCH_DEBOUNCE_MS = 300;
 const SEARCH_MIN_LENGTH = 2;
 
@@ -92,6 +99,7 @@ function useAssetModalViewModel() {
   const [edited, setEdited] = useState<AssetFormState>();
   const [submitted, setSubmitted] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
+  const [classConfirmOpen, setClassConfirmOpen] = useState(false);
   // Spec 105 FR 29: a new fixed income asset is calculated from the rate by default.
   const [calculated, setCalculated] = useState(true);
   const state = edited ?? initial;
@@ -150,6 +158,23 @@ function useAssetModalViewModel() {
   const tickerExists = error instanceof TickerExists;
   const tickerNotFound = error instanceof TickerNotFound;
   const classLocked = isEditing && (existing?.operationCount ?? 0) > 0;
+  const pairClass = !!state && B3_CLASS_PAIR.includes(state.assetClass);
+  const classDisabled = classLocked && !pairClass;
+  let mismatchClass: InvestmentAssetClass | null = state
+    ? classMismatch(state)
+    : null;
+
+  if (error instanceof TickerClassMismatch) {
+    mismatchClass = error.expectedClass;
+  }
+
+  let classHintKey: TranslationKeys = "investment.form.asset.classHint";
+
+  if (classDisabled) {
+    classHintKey = "investment.errors.classLocked";
+  } else if (classLocked) {
+    classHintKey = "investment.form.asset.classLockedPairHint";
+  }
   function ownerOf(ownerId: string) {
     return (
       allOwners.data?.find((owner) => owner.id === ownerId)?.type ??
@@ -159,6 +184,32 @@ function useAssetModalViewModel() {
 
   function update(next: AssetFormState) {
     setEdited(next);
+  }
+
+  // Spec 111 rule 16: swapping the class of an asset with operations asks first.
+  function needsClassConfirm(): boolean {
+    return (
+      isEditing &&
+      classLocked &&
+      !!state &&
+      !!initial &&
+      state.assetClass !== initial.assetClass
+    );
+  }
+
+  function submitUpdate() {
+    const changes = toUpdateParams(
+      params.id!,
+      state!,
+      initial!,
+      ownerOf(state!.ownerId),
+    );
+
+    if (Object.keys(changes).length === 1) {
+      closeModal();
+      return;
+    }
+    updateMutation.mutate(changes);
   }
 
   function onSave() {
@@ -179,18 +230,11 @@ function useAssetModalViewModel() {
     }
 
     if (isEditing) {
-      const changes = toUpdateParams(
-        params.id!,
-        state,
-        initial,
-        ownerOf(state.ownerId),
-      );
-
-      if (Object.keys(changes).length === 1) {
-        closeModal();
+      if (needsClassConfirm()) {
+        setClassConfirmOpen(true);
         return;
       }
-      updateMutation.mutate(changes);
+      submitUpdate();
       return;
     }
 
@@ -211,8 +255,15 @@ function useAssetModalViewModel() {
   return {
     assetClass: state?.assetClass ?? InvestmentAssetClass.BR_STOCK,
     calculated: showCalculated && calculated,
+    classConfirmOpen,
+    classDisabled,
+    classHintKey,
     classLocked,
-    classOptions: CLASS_OPTIONS.map((value) => ({
+    classNotice: state?.classNotice ?? null,
+    classOptions: (classLocked && pairClass
+      ? B3_CLASS_PAIR
+      : CLASS_OPTIONS
+    ).map((value) => ({
       labelKey: `investment.class.${value}` as TranslationKeys,
       value,
     })),
@@ -222,7 +273,10 @@ function useAssetModalViewModel() {
     currentValue: state?.currentValue ?? "",
     currentValueError: errors.currentValue,
     discardOpen,
-    failure: tickerExists || tickerNotFound ? undefined : failure,
+    failure:
+      tickerExists || tickerNotFound || error instanceof TickerClassMismatch
+        ? undefined
+        : failure,
     isEditing,
     isLoading: !state && !isNotFound,
     isNotFound,
@@ -232,6 +286,11 @@ function useAssetModalViewModel() {
     onAssetClassChange: (value: string) =>
       state && update(withAssetClass(state, value as InvestmentAssetClass)),
     onCalculatedChange: setCalculated,
+    onClassCancel: () => setClassConfirmOpen(false),
+    onClassConfirm: () => {
+      setClassConfirmOpen(false);
+      submitUpdate();
+    },
     onClose,
     onCurrencyChange: (value: string) =>
       state && update(withCurrency(state, value as AssetFormState["currency"])),
@@ -260,7 +319,14 @@ function useAssetModalViewModel() {
     showCalculated,
     suggestions,
     ticker: state?.ticker ?? "",
-    tickerError: tickerErrorKey(tickerExists, tickerNotFound, errors.ticker),
+    tickerError: tickerErrorKey(
+      tickerExists,
+      tickerNotFound,
+      error instanceof TickerClassMismatch
+        ? "investment.ticker.classMismatch"
+        : errors.ticker,
+    ),
+    tickerErrorClass: mismatchClass,
     tickerRequired: state ? tickerRequired(state.assetClass) : true,
     titleKey: (isEditing
       ? "investment.form.asset.editTitle"

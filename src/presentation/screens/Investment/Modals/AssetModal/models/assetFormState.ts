@@ -109,7 +109,9 @@ function needsPick(state: AssetFormState, initial?: AssetFormState): boolean {
   if (
     initial &&
     initial.ticker === state.ticker &&
-    initial.assetClass === state.assetClass
+    (initial.assetClass === state.assetClass ||
+      // Spec 111 rule 15: the same B3 ticker may swap between stocks and FIIs without picking it again.
+      isB3Pair(initial.assetClass, state.assetClass))
   ) {
     return false;
   }
