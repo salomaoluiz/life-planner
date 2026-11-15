@@ -40,6 +40,10 @@ onFlowComplete:
     visible:
       id: "investment.list.refresh-countdown"
     timeout: 60000
+# Spec 110: the module header (title + sections) pushes the rows down; scroll them into view.
+- swipe:
+    start: 50%, 80%
+    end: 50%, 55%
 - tapOn:
     id: "investment.list.row-${output.QUOTED_ASSET_ID}"
 - extendedWaitUntil:
