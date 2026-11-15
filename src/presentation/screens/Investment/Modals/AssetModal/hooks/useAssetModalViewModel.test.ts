@@ -388,9 +388,37 @@ describe("asset class from the ticker (spec 111)", () => {
     act(() => result.current.onClassConfirm());
 
     expect(result.current.classConfirmOpen).toBe(false);
+    expect(updateMutation.value.mutate).toHaveBeenCalledTimes(1);
     expect(updateMutation.value.mutate).toHaveBeenCalledWith(
       expect.objectContaining({ assetClass: "BR_REIT" }),
     );
+  });
+
+  it("SHOULD drop the notice WHEN the ticker or the class changes", () => {
+    searchQuery.reset().withData([knri]);
+    const { result } = setup();
+
+    act(() => result.current.onTickerChange("knri"));
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+    act(() => result.current.onTickerSelect("KNRI11"));
+    expect(result.current.classNotice).toBe(InvestmentAssetClass.BR_REIT);
+
+    act(() => result.current.onTickerChange("knri1"));
+    expect(result.current.classNotice).toBeNull();
+
+    act(() => result.current.onTickerSelect("KNRI11"));
+    act(() => result.current.onAssetClassChange("BR_STOCK"));
+    expect(result.current.classNotice).toBeNull();
+  });
+
+  it("SHOULD keep the failure generic WHEN the API does not name the class", () => {
+    createMutation.reset().withError(new TickerClassMismatch(null) as never);
+    const { result } = setup();
+
+    expect(result.current.tickerError).toBeUndefined();
+    expect(result.current.failure).toBeDefined();
   });
 
   it("SHOULD show the API class mismatch on the ticker field", () => {

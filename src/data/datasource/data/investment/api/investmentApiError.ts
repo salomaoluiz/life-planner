@@ -61,7 +61,7 @@ function handleInvestmentApiError(
     if (error.statusCode === 422 && code === "TICKER_CLASS_MISMATCH") {
       throw new TickerClassMismatch(
         (error.body?.details as { expectedClass?: InvestmentAssetClass })
-          ?.expectedClass ?? InvestmentAssetClass.BR_STOCK,
+          ?.expectedClass ?? null,
       );
     }
     // Spec 107: the income rules answer a code (section 7).

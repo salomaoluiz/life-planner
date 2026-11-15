@@ -120,6 +120,12 @@ export const ASSET_CLASS_ORDER: InvestmentAssetClass[] = [
   InvestmentAssetClass.PRIVATE,
 ];
 
+// The two B3 classes that share market, currency and unit rule, so a ticker may move between them (spec 111).
+export const B3_CLASS_PAIR: InvestmentAssetClass[] = [
+  InvestmentAssetClass.BR_STOCK,
+  InvestmentAssetClass.BR_REIT,
+];
+
 // Classes whose ticker is required (spec 102 FR 3).
 export const TICKER_REQUIRED_CLASSES: InvestmentAssetClass[] = [
   InvestmentAssetClass.BR_STOCK,

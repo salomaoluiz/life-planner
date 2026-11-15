@@ -6,7 +6,8 @@ tags:
 onFlowComplete:
   - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
 ---
-# Spec 111: picking a B3 ticker brings its class, and an asset with operations can be moved between Ações and FIIs.
+# Spec 111: a B3 ticker brings its class, forcing the other class blocks Save, and an asset with operations can move
+# between Ações and FIIs (a Fiagro has no class rule, so the API accepts the swap both ways).
 - launchApp:
     clearState: true
 - runFlow: ../../subflows/signup-via-api.yaml
@@ -47,6 +48,26 @@ onFlowComplete:
     visible:
       id: "investment.asset-modal.class-notice"
     timeout: 10000
+# Picking the other B3 class by hand blocks Save and says why (spec 111 rule 14).
+- tapOn:
+    id: "investment.asset-modal.class"
+- tapOn:
+    id: "investment.asset-modal.class-option-BR_STOCK"
+- extendedWaitUntil:
+    visible:
+      id: "investment.asset-modal.ticker-error"
+    timeout: 10000
+- tapOn:
+    id: "investment.asset-modal.save"
+- assertVisible:
+    id: "investment.asset-modal.ticker-error"
+# Back to FIIs: the notice is gone and the asset saves under FIIs.
+- tapOn:
+    id: "investment.asset-modal.class"
+- tapOn:
+    id: "investment.asset-modal.class-option-BR_REIT"
+- assertNotVisible:
+    id: "investment.asset-modal.class-notice"
 - extendedWaitUntil:
     visible:
       id: "investment.asset-modal.quote-box"
@@ -57,12 +78,40 @@ onFlowComplete:
     visible:
       id: "investment.list.group.BR_REIT-BRL"
     timeout: 20000
-# One operation, so the class field is limited to the B3 pair and asks before the switch.
+# A Fiagro has no class rule: it stays in Ações and gets no badge or notice.
+- tapOn:
+    id: "investment.list.add-button"
+- extendedWaitUntil:
+    visible:
+      id: "investment.asset-modal.ticker-input"
+    timeout: 20000
+- tapOn:
+    id: "investment.asset-modal.ticker-input"
+- inputText: "rzag"
+- extendedWaitUntil:
+    visible:
+      id: "investment.asset-modal.ticker-suggestion-RZAG11.*"
+    timeout: 30000
+- tapOn:
+    id: "investment.asset-modal.ticker-suggestion-RZAG11.*"
+- assertNotVisible:
+    id: "investment.asset-modal.class-notice"
+- extendedWaitUntil:
+    visible:
+      id: "investment.asset-modal.quote-box"
+    timeout: 10000
+- tapOn:
+    id: "investment.asset-modal.save"
+- extendedWaitUntil:
+    visible:
+      id: "investment.list.group.BR_STOCK-BRL"
+    timeout: 20000
+# One operation, then the class moves to FIIs through the confirmation.
 - swipe:
     start: 50%, 80%
     end: 50%, 55%
 - tapOn:
-    id: "investment.list.row-.*"
+    text: ".*RZAG11.*"
 - extendedWaitUntil:
     visible:
       id: "investment.detail.screen"
@@ -97,7 +146,7 @@ onFlowComplete:
 - tapOn:
     id: "investment.asset-modal.class"
 - tapOn:
-    id: "investment.asset-modal.class-option-BR_STOCK"
+    id: "investment.asset-modal.class-option-BR_REIT"
 - tapOn:
     id: "investment.asset-modal.save"
 - extendedWaitUntil:
@@ -114,5 +163,7 @@ onFlowComplete:
     id: "investment.detail.back"
 - extendedWaitUntil:
     visible:
-      id: "investment.list.group.BR_STOCK-BRL"
+      id: "investment.list.group.BR_REIT-BRL"
     timeout: 20000
+- assertVisible:
+    text: ".*RZAG11.*"

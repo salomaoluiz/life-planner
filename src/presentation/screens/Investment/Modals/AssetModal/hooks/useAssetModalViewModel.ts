@@ -10,7 +10,10 @@ import {
   TickerNotFound,
 } from "@domain/entities/errors";
 import { SUPPORTED_CURRENCIES } from "@domain/entities/financial/Currency";
-import { InvestmentAssetClass } from "@domain/entities/investment/enums";
+import {
+  B3_CLASS_PAIR,
+  InvestmentAssetClass,
+} from "@domain/entities/investment/enums";
 import { InvestmentTickerSuggestion } from "@domain/entities/investment/InvestmentEntities";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
@@ -46,11 +49,6 @@ import {
 export type AssetModalVM = ReturnType<typeof useAssetModalViewModel>;
 
 const CLASS_OPTIONS = Object.values(InvestmentAssetClass);
-// Spec 111 rule 15: with operations only the B3 pair may change.
-const B3_CLASS_PAIR: InvestmentAssetClass[] = [
-  InvestmentAssetClass.BR_STOCK,
-  InvestmentAssetClass.BR_REIT,
-];
 const SEARCH_DEBOUNCE_MS = 300;
 const SEARCH_MIN_LENGTH = 2;
 
@@ -160,12 +158,15 @@ function useAssetModalViewModel() {
   const classLocked = isEditing && (existing?.operationCount ?? 0) > 0;
   const pairClass = !!state && B3_CLASS_PAIR.includes(state.assetClass);
   const classDisabled = classLocked && !pairClass;
+  // The API names the class it expects; without it there is no message to show, so the failure stays generic.
+  const apiMismatch =
+    error instanceof TickerClassMismatch ? error.expectedClass : null;
   let mismatchClass: InvestmentAssetClass | null = state
     ? classMismatch(state)
     : null;
 
-  if (error instanceof TickerClassMismatch) {
-    mismatchClass = error.expectedClass;
+  if (apiMismatch) {
+    mismatchClass = apiMismatch;
   }
 
   let classHintKey: TranslationKeys = "investment.form.asset.classHint";
@@ -274,9 +275,7 @@ function useAssetModalViewModel() {
     currentValueError: errors.currentValue,
     discardOpen,
     failure:
-      tickerExists || tickerNotFound || error instanceof TickerClassMismatch
-        ? undefined
-        : failure,
+      tickerExists || tickerNotFound || apiMismatch ? undefined : failure,
     isEditing,
     isLoading: !state && !isNotFound,
     isNotFound,
@@ -322,9 +321,7 @@ function useAssetModalViewModel() {
     tickerError: tickerErrorKey(
       tickerExists,
       tickerNotFound,
-      error instanceof TickerClassMismatch
-        ? "investment.ticker.classMismatch"
-        : errors.ticker,
+      apiMismatch ? "investment.ticker.classMismatch" : errors.ticker,
     ),
     tickerErrorClass: mismatchClass,
     tickerRequired: state ? tickerRequired(state.assetClass) : true,

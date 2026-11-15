@@ -686,11 +686,11 @@ const investment = {
       title: "Mudar {{ticker}} para {{class}}?",
     },
     classKinds: {
-      BR_REIT: "FII",
-      BR_STOCK: "ação",
-      FIXED_INCOME: "título de renda fixa",
-      FOREIGN_STOCK: "ação",
-      PRIVATE: "ativo não listado",
+      BR_REIT: "um FII",
+      BR_STOCK: "uma ação",
+      FIXED_INCOME: "um título de renda fixa",
+      FOREIGN_STOCK: "uma ação",
+      PRIVATE: "um ativo não listado",
     },
     classMismatch: "{{ticker}} é {{kind}}. Escolha a classe {{class}}.",
     classNames: {

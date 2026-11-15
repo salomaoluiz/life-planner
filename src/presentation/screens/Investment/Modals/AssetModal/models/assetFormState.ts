@@ -3,6 +3,7 @@ import {
   DEFAULT_CURRENCY,
 } from "@domain/entities/financial/Currency";
 import {
+  B3_CLASS_PAIR,
   InvestmentAssetClass,
   InvestmentQuoteMarket,
   QUOTED_CLASS_MARKET,
@@ -23,11 +24,8 @@ import { parseDecimal, ZERO } from "@utils/decimal";
 const MAX_NAME = 100;
 const MAX_TICKER = 20;
 const TICKER_TEXT = /^[A-Z0-9.-]*$/;
+
 // Spec 111 rule 11: only the two B3 classes follow a ticker.
-const B3_CLASS_PAIR = [
-  InvestmentAssetClass.BR_STOCK,
-  InvestmentAssetClass.BR_REIT,
-];
 
 type AssetFormErrors = Partial<
   Record<"currentValue" | "name" | "ticker", TranslationKeys>
