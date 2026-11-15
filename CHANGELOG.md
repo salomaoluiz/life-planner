@@ -3,6 +3,13 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.24.1] - 2026-11-15
+
+### Fixed
+
+- Asset class follows the ticker on B3 (spec 111): picking a FII or a stock in the search sets its class and says so, the search rows show a class badge, and saving the other class is blocked with the reason.
+- An asset that already has operations can be moved between Ações and FIIs (with a confirmation); any other class or currency change stays locked.
+
 ## [1.24.0] - 2026-11-15
 
 ### Added
