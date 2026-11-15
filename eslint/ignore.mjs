@@ -21,5 +21,7 @@ export default {
     "eslint/**/*",
     "e2e/scripts/**/*",
     ".claude/worktrees/**",
+    // Local design-artifact exports (git-ignored) are not source code.
+    "docs/superpowers/**",
   ],
 };
