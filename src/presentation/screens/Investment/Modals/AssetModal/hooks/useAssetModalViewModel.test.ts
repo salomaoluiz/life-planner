@@ -6,6 +6,7 @@ import { modalNavigation } from "@tests/modalNavigation";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import {
   QuoteSourceUnavailable,
+  TickerClassMismatch,
   TickerExists,
   TickerNotFound,
 } from "@domain/entities/errors";
@@ -324,6 +325,99 @@ describe("ticker search (spec 104)", () => {
 
     expect(result.current.tickerError).toBe("investment.ticker.notFound");
     expect(result.current.failure).toBeUndefined();
+  });
+});
+
+describe("asset class from the ticker (spec 111)", () => {
+  const knri: InvestmentTickerSuggestion = {
+    ...itsa,
+    assetClass: InvestmentAssetClass.BR_REIT,
+    name: "Kinea Renda Imobiliária",
+    ticker: "KNRI11",
+  };
+
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
+  it("SHOULD offer only the B3 pair AND say why WHEN the asset has operations", () => {
+    spies.params.mockReturnValue({ id: "asset-1" });
+    detailQuery.withData(makeDetail({ operationCount: 2 }));
+
+    const { result } = setup();
+
+    expect(result.current.classOptions.map((option) => option.value)).toEqual([
+      InvestmentAssetClass.BR_STOCK,
+      InvestmentAssetClass.BR_REIT,
+    ]);
+    expect(result.current.classDisabled).toBe(false);
+    expect(result.current.classHintKey).toBe(
+      "investment.form.asset.classLockedPairHint",
+    );
+  });
+
+  it("SHOULD keep the class field disabled for any other class with operations", () => {
+    spies.params.mockReturnValue({ id: "asset-1" });
+    detailQuery.withData(
+      makeDetail({ assetClass: InvestmentAssetClass.FIXED_INCOME }),
+    );
+
+    const { result } = setup();
+
+    expect(result.current.classDisabled).toBe(true);
+    expect(result.current.classOptions).toHaveLength(5);
+    expect(result.current.classHintKey).toBe("investment.errors.classLocked");
+  });
+
+  it("SHOULD ask for confirmation before the class switch AND send it once confirmed", () => {
+    spies.params.mockReturnValue({ id: "asset-1" });
+    detailQuery.withData(makeDetail({ operationCount: 2 }));
+
+    const { result } = setup();
+
+    act(() => result.current.onAssetClassChange("BR_REIT"));
+    act(() => result.current.onSave());
+
+    expect(result.current.classConfirmOpen).toBe(true);
+    expect(updateMutation.value.mutate).not.toHaveBeenCalled();
+
+    act(() => result.current.onClassCancel());
+    expect(result.current.classConfirmOpen).toBe(false);
+    expect(updateMutation.value.mutate).not.toHaveBeenCalled();
+
+    act(() => result.current.onSave());
+    act(() => result.current.onClassConfirm());
+
+    expect(result.current.classConfirmOpen).toBe(false);
+    expect(updateMutation.value.mutate).toHaveBeenCalledWith(
+      expect.objectContaining({ assetClass: "BR_REIT" }),
+    );
+  });
+
+  it("SHOULD show the API class mismatch on the ticker field", () => {
+    createMutation
+      .reset()
+      .withError(
+        new TickerClassMismatch(InvestmentAssetClass.BR_REIT) as never,
+      );
+    const { result } = setup();
+
+    expect(result.current.tickerError).toBe("investment.ticker.classMismatch");
+    expect(result.current.tickerErrorClass).toBe(InvestmentAssetClass.BR_REIT);
+    expect(result.current.failure).toBeUndefined();
+  });
+
+  it("SHOULD switch the class AND flag the notice when a FII is picked under Ações", () => {
+    searchQuery.reset().withData([knri]);
+    const { result } = setup();
+
+    act(() => result.current.onTickerChange("knri"));
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+    act(() => result.current.onTickerSelect("KNRI11"));
+
+    expect(result.current.assetClass).toBe(InvestmentAssetClass.BR_REIT);
+    expect(result.current.classNotice).toBe(InvestmentAssetClass.BR_REIT);
   });
 });
 
