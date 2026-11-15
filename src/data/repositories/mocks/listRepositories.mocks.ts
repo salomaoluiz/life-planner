@@ -133,7 +133,6 @@ const repositoriesMocks: Repositories = {
     deleteValuation: jest.fn(),
     getAsset: jest.fn(),
     getAssets: jest.fn(),
-    getDashboard: jest.fn(),
     getEventSuggestions: jest.fn(),
     getHomeSummary: jest.fn(),
     getIncome: jest.fn(),

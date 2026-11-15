@@ -1,1 +1,1 @@
-export { default } from "@screens/Investment/Overview";
+export { default } from "@screens/Investment/List";

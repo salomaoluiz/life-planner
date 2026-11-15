@@ -19,10 +19,6 @@ import {
   InvestmentAsset,
   InvestmentAssetDetail,
   InvestmentBrlResult,
-  InvestmentDashboard,
-  InvestmentDashboardBucket,
-  InvestmentDashboardIncomeBucket,
-  InvestmentDashboardRankingRow,
   InvestmentEventSuggestion,
   InvestmentFixedIncome,
   InvestmentFixedIncomeAdjustmentResult,
@@ -47,7 +43,6 @@ import {
   InvestmentTickerSuggestion,
   InvestmentValuation,
   InvestmentValuationResult,
-  InvestmentValueKind,
 } from "@domain/entities/investment/InvestmentEntities";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
@@ -107,80 +102,6 @@ class InvestmentModel {
       resultFromAsset: Number(data.resultBrlFromAsset ?? 0),
       resultFromFx: Number(data.resultBrlFromFx ?? 0),
       resultPercent: (data.resultBrlPercent as null | number) ?? null,
-    };
-  }
-
-  // Spec 110 section 7: the whole overview in one response; every money field is integer cents.
-  static toDashboard(data: Json): InvestmentDashboard {
-    const period = data.period as Json;
-    const summary = data.summary as Json;
-
-    return {
-      allocation: (data.allocation as Json[]).map((row) => ({
-        assetClass: row.assetClass as InvestmentAssetClass,
-        share: Number(row.share),
-        usd: row.usd
-          ? {
-              fxRate: (row.usd as Json).fxRate as string,
-              resultFromAsset: Number((row.usd as Json).resultFromAsset),
-              resultFromFx: Number((row.usd as Json).resultFromFx),
-              value: (row.usd as Json).value as string,
-            }
-          : undefined,
-        value: Number(row.value),
-      })),
-      incomes: (data.incomes as Json[]).map((row) =>
-        InvestmentModel.toDashboardIncome(row),
-      ),
-      period: {
-        bucket: period.bucket as InvestmentDashboardBucket,
-        from: period.from as string,
-        to: period.to as string,
-      },
-      ranking: (data.ranking as Json[]).map(
-        (row): InvestmentDashboardRankingRow => ({
-          assetClass: row.assetClass as InvestmentAssetClass,
-          assetId: row.assetId as string,
-          currency: toCurrencyCode(row.currency),
-          name: row.name as string,
-          openResult: Number(row.openResult),
-          openResultPercent:
-            row.openResultPercent === null ||
-            row.openResultPercent === undefined
-              ? undefined
-              : Number(row.openResultPercent),
-          share: Number(row.share),
-          ticker: (row.ticker as null | string) ?? undefined,
-          usdValue: (row.usdValue as null | string) ?? undefined,
-          value: Number(row.value),
-          valueKind: row.valueKind as InvestmentValueKind,
-        }),
-      ),
-      series: (data.series as Json[]).map((row) => ({
-        date: row.date as string,
-        invested: row.invested === null ? undefined : Number(row.invested),
-        marketValue:
-          row.marketValue === null ? undefined : Number(row.marketValue),
-      })),
-      summary: {
-        assetsWithoutValue: Number(summary.assetsWithoutValue),
-        currentValue: Number(summary.currentValue),
-        historyStartsAt:
-          (summary.historyStartsAt as null | string) ?? undefined,
-        incomePlanned: Number(summary.incomePlanned),
-        incomeReceived: Number(summary.incomeReceived),
-        invested: Number(summary.invested),
-        openResult: Number(summary.openResult),
-        openResultPercent:
-          summary.openResultPercent === null ||
-          summary.openResultPercent === undefined
-            ? undefined
-            : Number(summary.openResultPercent),
-        operationsWithoutFxRate: Number(summary.operationsWithoutFxRate),
-        realizedResult: Number(summary.realizedResult),
-        salesCount: Number(summary.salesCount),
-        staleQuotes: Number(summary.staleQuotes),
-      },
     };
   }
 
@@ -592,23 +513,6 @@ class InvestmentModel {
     return {
       position: InvestmentModel.toPosition(data.position as Json),
       valuation: InvestmentModel.toValuation(data.item as Json),
-    };
-  }
-
-  private static toDashboardIncome(row: Json): InvestmentDashboardIncomeBucket {
-    const byType = row.byType as Json;
-
-    return {
-      byType: {
-        DIVIDEND: Number(byType.DIVIDEND ?? 0),
-        INTEREST: Number(byType.INTEREST ?? 0),
-        JCP: Number(byType.JCP ?? 0),
-        OTHER: Number(byType.OTHER ?? 0),
-        YIELD: Number(byType.YIELD ?? 0),
-      } as InvestmentDashboardIncomeBucket["byType"],
-      date: row.date as string,
-      planned: Number(row.planned),
-      received: Number(row.received),
     };
   }
 }

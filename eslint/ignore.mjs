@@ -21,7 +21,5 @@ export default {
     "eslint/**/*",
     "e2e/scripts/**/*",
     ".claude/worktrees/**",
-    // Spec artboards are exported reference HTML/JS, not source of the app (spec 110).
-    "docs/superpowers/specs/artboards/**",
   ],
 };

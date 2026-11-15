@@ -24,8 +24,6 @@ import { InvestmentAssetStatus } from "@domain/entities/investment/enums";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 import { INVESTMENT_MAX_WIDTH } from "@screens/Investment/constants";
-import SectionTabs from "@screens/Investment/Layout/components/SectionTabs";
-import useInvestmentSections from "@screens/Investment/Layout/hooks/useInvestmentSections";
 import { ListEntry } from "@screens/Investment/models/assetList";
 import { formatMoney, formatTime } from "@screens/Investment/models/format";
 import investmentTestIds from "@screens/Investment/testIds";
@@ -76,7 +74,6 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentListVM>) {
   const { t } = useTranslation();
   const localeTag = useLocaleTag();
   const compact = useDensity().density === "compact";
-  const sections = useInvestmentSections("assets");
   const archivedTab = vm.tab === InvestmentAssetStatus.ARCHIVED;
   const hasContent = !vm.isLoading && !vm.errorMessage && !vm.isEmpty;
 
@@ -207,13 +204,6 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentListVM>) {
             )
           }
           title={t("investment.list.title")}
-        />
-        <SectionTabs
-          accessibilityLabel={t("investment.title")}
-          active={sections.section}
-          onSelect={sections.onSelect}
-          tabs={sections.tabs}
-          testID="investment.sections"
         />
         {vm.hasQuotes ? (
           <View style={styles.headerTop}>

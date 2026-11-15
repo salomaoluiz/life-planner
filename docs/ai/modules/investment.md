@@ -151,21 +151,3 @@ e2e: e2e/flows/investment/corporate-events.yaml, corporate-event-no-position.yam
 ```
 
 Design deviations (spec 108): "Ver sugestão" opens the suggestion in the event modal instead of scrolling (the screen has no scroll anchors); the inbox card has no past-sells hint (the inbox has no operations; the detail shows it); fee rows of the fraction sale are Brokerage / Exchange fees only; the delete confirmation lists the sale and its finance entry without the account name (no extra request).
-
-## Investments overview (spec 110)
-
-```yaml
-entities: InvestmentDashboard { period { from, to, bucket }, summary { currentValue, invested, openResult, openResultPercent?, realizedResult, salesCount, incomeReceived, incomePlanned, staleQuotes, assetsWithoutValue, operationsWithoutFxRate, historyStartsAt? }, series [{ date, marketValue?, invested? }], allocation [{ assetClass, value, share, usd? { value, fxRate, resultFromAsset, resultFromFx } }], ranking [{ assetId, assetClass, ticker?, name, currency, value, share, openResult, openResultPercent?, valueKind, usdValue? }], incomes [{ date, received, planned, byType }] }; enums InvestmentDashboardBucket (DAY|WEEK|MONTH) and InvestmentValueKind (QUOTE|MANUAL|FIXED_INCOME_NET|COST)
-repository/use cases: getDashboard (getInvestmentDashboardUseCase); query key investmentKeys.dashboard(ownersKey, from, to)
-datasource: data/datasource/data/investment/api/dashboardApi.ts (spread into investmentApi): GET /v1/investments/dashboard?ownerId=..&from=..&to=..&today=.. (the owner id repeats; `null` numbers become undefined in the model)
-period: Overview/models/investmentsPeriod.ts (presets 1M, 3M, 6M, 12M, YEAR, CUSTOM; every preset ends at most today, 1M = the 1st -> today; canGoNext refuses a step that would start in the future; CUSTOM defaults to Jan 1 of last year -> today, at most 10 years, shift by its months or by its days)
-screen: Overview (index.tsx -> AdaptiveLayout -> views/Wide.tsx with useDensity; hooks/useInvestmentOverviewViewModel.ts owns owner filter, preset/offset/custom range, class filter, see-all and the selected chart point); components/OverviewToolbar (owner chips, presets, arrows with the "no future" hint, custom period BottomSheet)
-blocks: five StatTiles (current value, invested, open result, realized, income), evolution LineChart (market solid accent + invested dashed secondary, gaps before the first operation), allocation DonutChart + legend buttons (filter the ranking) + the foreign US$ detail, ranking (first 10 + "See all", row opens the asset), income ColumnChart (received solid, planned dashed)
-kit: DonutChart (new), ColorMark + ShareBar (new, data colors), LineChart series `dashed`/`tone: "secondary"` and ColumnChart `projectedStyle: "dashed"` (spec 110)
-layout: Layout/components/SectionTabs (Overview / Assets) + Layout/models/sections.ts + Layout/hooks/useInvestmentSections; routes app/(app)/(tabs)/investments/{index,overview,assets}.tsx (index and overview render the Overview; assets renders the 102 List)
-testIds: investment.overview.* (tiles, charts, allocation-class-<CLASS>, allocation-slice-<CLASS>, ranking-row-<id>, ranking-see-all, ranking-filter-clear, period-*, stale, no-value, empty, error-retry) + investment.sections.{overview,assets}
-perf: investment.overview.mount.cold (route overview, 2 requests) + investment.overview.render.mount
-e2e: e2e/flows/investment/overview.yaml (spec-110); the shared subflow subflows/investment/open-investments.yaml now taps the Assets tab, since the tab lands on the Overview
-```
-
-Design deviations (spec 110): the custom period uses two stacked `DateField`s in the `form` sheet (the `FormColumns` split is only applied by sheets that call it); the allocation class labels reuse the 102 group names ("Stocks", "FIIs", ... ) with "Fixed income (net)" for fixed income; the ranking row's second line joins the US$ value, the value note and the share with "·"; the artboard's hover detail card for the allocation's foreign slice is shown for the selected class in the ranking filter (the legend row is the hit target on both web and mobile); the tabs are a small `Touchable` row with a `ColorMark` underline instead of a kit `SegmentedControl` (they are navigation, not a control).

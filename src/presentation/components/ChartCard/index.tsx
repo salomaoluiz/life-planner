@@ -20,8 +20,6 @@ export interface ChartCardProps {
   subtitle?: string;
   testID?: string;
   title: string;
-  /** Id of the title only, for flows that must assert a small, fully visible element (spec 110) */
-  titleTestID?: string;
 }
 
 export interface ChartLegendItem {
@@ -74,11 +72,7 @@ function ChartCard(props: ChartCardProps) {
     <View style={styles.root} testID={testID}>
       <View style={styles.header}>
         <View style={styles.titles}>
-          <Text.Heading
-            accessibilityRole="header"
-            testID={props.titleTestID}
-            value={props.title}
-          />
+          <Text.Heading accessibilityRole="header" value={props.title} />
           {props.subtitle ? (
             <Text.Caption tone="secondary" value={props.subtitle} />
           ) : null}

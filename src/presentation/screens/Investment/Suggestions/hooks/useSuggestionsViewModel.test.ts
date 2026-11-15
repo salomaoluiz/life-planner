@@ -95,7 +95,7 @@ it("SHOULD expose the error, retry AND go back to the list", async () => {
   result.current.onBack();
 
   expect(query.value.refetch).toHaveBeenCalled();
-  expect(router.replace).toHaveBeenCalledWith("/investments/assets");
+  expect(router.replace).toHaveBeenCalledWith("/investments");
 });
 
 describe("corporate events (spec 108)", () => {

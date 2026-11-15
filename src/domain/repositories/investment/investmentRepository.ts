@@ -15,7 +15,6 @@ import {
 import {
   InvestmentAsset,
   InvestmentAssetDetail,
-  InvestmentDashboard,
   InvestmentEventSuggestion,
   InvestmentFixedIncomeAdjustmentResult,
   InvestmentFixedIncomeRedemptionPreview,
@@ -161,15 +160,6 @@ export interface GetInvestmentAssetsParams {
   status: InvestmentAssetStatus;
 }
 
-export interface GetInvestmentDashboardParams {
-  // `YYYY-MM-DD`, `from <= to <= today`.
-  from: string;
-  ownerIds: string[];
-  to: string;
-  // The client's local calendar date, `YYYY-MM-DD`.
-  today: string;
-}
-
 export interface GetInvestmentEventSuggestionsParams {
   assetId?: string;
 }
@@ -271,10 +261,6 @@ export type InvestmentRepository = {
   deleteValuation(id: string): Promise<void>;
   getAsset(id: string): Promise<InvestmentAssetDetail>;
   getAssets(params: GetInvestmentAssetsParams): Promise<InvestmentAsset[]>;
-  // Spec 110: the investments overview of the owners in the period.
-  getDashboard(
-    params: GetInvestmentDashboardParams,
-  ): Promise<InvestmentDashboard>;
   getEventSuggestions(
     params: GetInvestmentEventSuggestionsParams,
   ): Promise<InvestmentEventSuggestion[]>;
