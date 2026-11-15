@@ -1,6 +1,7 @@
 import {
   InvestmentAsset,
   InvestmentAssetDetail,
+  InvestmentDashboard,
   InvestmentEventSuggestion,
   InvestmentFixedIncomeAdjustmentResult,
   InvestmentFixedIncomeRedemptionPreview,
@@ -31,6 +32,7 @@ import {
   CreateInvestmentOperationParams,
   FixedIncomeRateParams,
   GetInvestmentAssetsParams,
+  GetInvestmentDashboardParams,
   GetInvestmentEventSuggestionsParams,
   GetInvestmentIncomeDefaultsParams,
   GetInvestmentIncomesParams,
@@ -91,6 +93,9 @@ export interface InvestmentDatasource {
   deleteValuation(id: string): Promise<void>;
   getAsset(id: string): Promise<InvestmentAssetDetail>;
   getAssets(params: GetInvestmentAssetsParams): Promise<InvestmentAsset[]>;
+  getDashboard(
+    params: GetInvestmentDashboardParams,
+  ): Promise<InvestmentDashboard>;
   getEventSuggestions(
     params: GetInvestmentEventSuggestionsParams,
   ): Promise<InvestmentEventSuggestion[]>;

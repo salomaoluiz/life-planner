@@ -53,6 +53,7 @@ function investmentRepositoryImpl(
     deleteValuation: async (id) => investmentDatasource.deleteValuation(id),
     getAsset: async (id) => investmentDatasource.getAsset(id),
     getAssets: async (params) => investmentDatasource.getAssets(params),
+    getDashboard: async (params) => investmentDatasource.getDashboard(params),
     getEventSuggestions: async (params) =>
       investmentDatasource.getEventSuggestions(params),
     getHomeSummary: async (params) =>
