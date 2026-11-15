@@ -1,10 +1,10 @@
 {
   "entry": {
-    "brotliBytes": 755592,
-    "gzipBytes": 982112
+    "brotliBytes": 762000,
+    "gzipBytes": 992000
   },
   "total": {
-    "brotliBytes": 919969,
-    "gzipBytes": 1210596
+    "brotliBytes": 915000,
+    "gzipBytes": 1201500
   }
 }
