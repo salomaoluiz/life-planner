@@ -614,7 +614,6 @@ const investment = {
       hint: "Hover (or tap) a point to see the values of its last day.",
       invested: "Invested",
       market: "Market value",
-      noPosition: "No position",
       noPositionUntil:
         "No position until {{date}}. Those points stay empty, without a zero drawn.",
       openResult: "Result",
@@ -633,7 +632,6 @@ const investment = {
     },
     period: {
       customHint: "Up to 10 years, ending today at the latest",
-      customSummary: "{{from}} to {{to}}",
       error: "Pick an end on or before {{date}}",
       noFuture: "No future periods in investments",
     },
@@ -668,7 +666,6 @@ const investment = {
       realized: "Realized result",
       realizedCaption: "sales in the period: {{count}}",
     },
-    title: "Overview",
   },
   position: {
     averagePrice: "Average price (with fees)",

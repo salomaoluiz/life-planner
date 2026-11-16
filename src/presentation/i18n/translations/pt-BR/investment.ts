@@ -613,7 +613,6 @@ const investment = {
       hint: "Passe o mouse (ou toque) num ponto para ver os valores do último dia dele.",
       invested: "Investido",
       market: "Valor de mercado",
-      noPosition: "Sem posição",
       noPositionUntil:
         "Sem posição até {{date}}. Esses pontos ficam vazios, sem zero desenhado.",
       openResult: "Resultado",
@@ -631,7 +630,6 @@ const investment = {
     },
     period: {
       customHint: "Até 10 anos, terminando hoje no máximo",
-      customSummary: "{{from}} a {{to}}",
       error: "Escolha um fim até {{date}}",
       noFuture: "Sem períodos futuros em investimentos",
     },
@@ -667,7 +665,6 @@ const investment = {
       realized: "Resultado realizado",
       realizedCaption: "vendas no período: {{count}}",
     },
-    title: "Visão geral",
   },
   position: {
     averagePrice: "Preço médio (com taxas)",
