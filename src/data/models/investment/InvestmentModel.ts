@@ -19,6 +19,9 @@ import {
   InvestmentAsset,
   InvestmentAssetDetail,
   InvestmentBrlResult,
+  InvestmentConversion,
+  InvestmentConversionLink,
+  InvestmentConversionResult,
   InvestmentDashboardBucket,
   InvestmentDashboardValueKind,
   InvestmentEventSuggestion,
@@ -35,6 +38,7 @@ import {
   InvestmentIncomeSuggestion,
   InvestmentIncomeSummary,
   InvestmentOperation,
+  InvestmentOperationConversion,
   InvestmentOperationEvent,
   InvestmentOperationResult,
   InvestmentPosition,
@@ -59,6 +63,12 @@ class InvestmentModel {
       assetClass: data.assetClass as InvestmentAssetClass,
       averageFxRate: (data.averageFxRate as null | string) ?? null,
       brl: InvestmentModel.toBrlResult(data),
+      convertedFrom: ((data.convertedFrom as Json[]) ?? []).map((link) =>
+        InvestmentModel.toConversionLink(link),
+      ),
+      convertedTo: data.convertedTo
+        ? InvestmentModel.toConversionLink(data.convertedTo as Json)
+        : null,
       currency: toCurrencyCode(data.currency),
       fixedIncome: data.fixedIncome
         ? InvestmentModel.toFixedIncome(data.fixedIncome as Json)
@@ -105,6 +115,56 @@ class InvestmentModel {
       resultFromAsset: Number(data.resultBrlFromAsset ?? 0),
       resultFromFx: Number(data.resultBrlFromFx ?? 0),
       resultPercent: (data.resultBrlPercent as null | number) ?? null,
+    };
+  }
+
+  // Spec 112: a conversion item as the API sends it (nulls left out).
+  static toConversion(data: Json): InvestmentConversion {
+    const from = data.from as Json;
+    const to = data.to as Json;
+
+    return {
+      cashAmount: (data.cashAmount as number | undefined) ?? undefined,
+      cashReferenceUnitValue:
+        (data.cashReferenceUnitValue as string | undefined) ?? undefined,
+      date: data.date as string,
+      from: {
+        assetId: from.assetId as string,
+        cost: Number(from.cost),
+        operationId: from.operationId as string,
+        quantity: from.quantity as string,
+        ticker: (from.ticker as string | undefined) ?? undefined,
+      },
+      id: data.id as string,
+      locked: data.locked === true,
+      ratioFrom: data.ratioFrom as string,
+      ratioTo: data.ratioTo as string,
+      to: {
+        assetId: to.assetId as string,
+        cost: Number(to.cost),
+        fractionCost: Number(to.fractionCost ?? 0),
+        fractionQuantity: (to.fractionQuantity as string) ?? "0",
+        operationId: to.operationId as string,
+        quantity: to.quantity as string,
+        ticker: (to.ticker as string | undefined) ?? undefined,
+      },
+    };
+  }
+
+  static toConversionLink(data: Json): InvestmentConversionLink {
+    return {
+      assetId: data.assetId as string,
+      conversionId: data.conversionId as string,
+      date: data.date as string,
+      ticker: (data.ticker as string | undefined) ?? undefined,
+    };
+  }
+
+  static toConversionResult(data: Json): InvestmentConversionResult {
+    return {
+      conversion: InvestmentModel.toConversion(data.item as Json),
+      fromPosition: InvestmentModel.toPosition(data.fromPosition as Json),
+      toPosition: InvestmentModel.toPosition(data.toPosition as Json),
     };
   }
 
@@ -443,6 +503,10 @@ class InvestmentModel {
   static toOperation(data: Json): InvestmentOperation {
     return {
       accountId: (data.accountId as null | string) ?? null,
+      conversion: data.conversion
+        ? InvestmentModel.toOperationConversion(data.conversion as Json)
+        : undefined,
+      conversionCost: (data.conversionCost as number | undefined) ?? undefined,
       corporateEvent: InvestmentModel.toOperationEvent(data),
       costRemoved: (data.costRemoved as null | number) ?? null,
       date: data.date as string,
@@ -468,6 +532,21 @@ class InvestmentModel {
       transactionId: (data.transactionId as null | string) ?? null,
       type: data.type as InvestmentOperationType,
       unitPrice: (data.unitPrice as string | undefined) ?? "0",
+    };
+  }
+
+  // Spec 112 FR 22: the counterpart, ratio and cash part of a conversion operation.
+  static toOperationConversion(data: Json): InvestmentOperationConversion {
+    return {
+      assetId: data.assetId as string,
+      cashAmount: (data.cashAmount as number | undefined) ?? undefined,
+      cashReferenceUnitValue:
+        (data.cashReferenceUnitValue as string | undefined) ?? undefined,
+      conversionId: data.conversionId as string,
+      locked: data.locked === true,
+      ratioFrom: data.ratioFrom as string,
+      ratioTo: data.ratioTo as string,
+      ticker: (data.ticker as string | undefined) ?? undefined,
     };
   }
 

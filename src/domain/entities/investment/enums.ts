@@ -69,6 +69,8 @@ export enum InvestmentIncomeType {
 export enum InvestmentOperationType {
   BONUS = "BONUS",
   BUY = "BUY",
+  CONVERSION_IN = "CONVERSION_IN",
+  CONVERSION_OUT = "CONVERSION_OUT",
   REVERSE_SPLIT = "REVERSE_SPLIT",
   SELL = "SELL",
   SPLIT = "SPLIT",
@@ -135,6 +137,14 @@ export const INVESTMENT_EVENT_TYPES: InvestmentOperationType[] = [
   InvestmentOperationType.REVERSE_SPLIT,
   InvestmentOperationType.BONUS,
 ];
+
+// Spec 112: the two operations of a conversion; they change only through the conversion.
+export function isInvestmentConversion(type: InvestmentOperationType): boolean {
+  return (
+    type === InvestmentOperationType.CONVERSION_OUT ||
+    type === InvestmentOperationType.CONVERSION_IN
+  );
+}
 
 export function isInvestmentEvent(type: InvestmentOperationType): boolean {
   return INVESTMENT_EVENT_TYPES.includes(type);

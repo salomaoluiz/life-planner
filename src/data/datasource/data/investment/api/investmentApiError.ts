@@ -5,7 +5,11 @@ import {
   FieldInvalid,
   InvestmentAccountNotChangeable,
   InvestmentArchived,
+  InvestmentArchivedDestination,
   InvestmentClassLocked,
+  InvestmentConversionChainLocked,
+  InvestmentConversionLaterOperations,
+  InvestmentConvertedOrigin,
   InvestmentCurrencyMismatch,
   InvestmentFeesAboveSale,
   InvestmentFractionAlreadySold,
@@ -17,6 +21,7 @@ import {
   InvestmentNoPosition,
   InvestmentRedemptionTooLarge,
   InvestmentRowUseOperation,
+  InvestmentUseConversionRoute,
   InvestmentUseFixedIncomeActions,
   QuoteRefreshTooSoon,
   QuoteSourceUnavailable,
@@ -31,6 +36,10 @@ import handleFinancialApiError from "../../financial/financialApiError";
 const NEGATIVE_POSITION = /negative on (\d{4}-\d{2}-\d{2})/;
 const NO_POSITION = /no position on (\d{4}-\d{2}-\d{2})/;
 const FRACTION_BREAKS = /removes the fraction sold on (\d{4}-\d{2}-\d{2})/;
+
+const CHAIN_LOCKED = /from (.+) on (\d{4}-\d{2}-\d{2}) first/;
+const CONVERTED_INTO = /converted into (.+)\. Delete the conversion/;
+const LATER_OPERATIONS = /^(.+) has operations after (\d{4}-\d{2}-\d{2})\./;
 
 function handleInvestmentApiError(
   error: unknown,
@@ -85,6 +94,25 @@ function handleInvestmentApiError(
     if (error.statusCode === 409 && code === "ALREADY_RECEIVED") {
       throw new InvestmentIncomeReceived();
     }
+    // Spec 112 section 7: the conversion rules answer a code, or the date list of the later operations.
+    if (error.statusCode === 422 && code === "CONVERSION_CHAIN_LOCKED") {
+      const locked = CHAIN_LOCKED.exec(String(error.message));
+
+      throw new InvestmentConversionChainLocked(
+        locked?.[1] ?? "",
+        locked?.[2] ?? "",
+      );
+    }
+    if (error.statusCode === 422 && code === "USE_CONVERSION_ROUTE") {
+      throw new InvestmentUseConversionRoute();
+    }
+    if (error.statusCode === 422 && error.body?.details) {
+      const later = laterOperations(error);
+
+      if (later) {
+        throw later;
+      }
+    }
     // Spec 108 section 7: a second sale of the same fraction.
     if (error.statusCode === 409 && code === "FRACTION_ALREADY_SOLD") {
       throw new InvestmentFractionAlreadySold();
@@ -134,6 +162,14 @@ function investmentUnprocessable(message: string): BusinessError | undefined {
   if (fractionBreaks) {
     return new InvestmentFractionBreaks(fractionBreaks[1]);
   }
+  const converted = CONVERTED_INTO.exec(message);
+
+  if (converted) {
+    return new InvestmentConvertedOrigin(converted[1]);
+  }
+  if (message.includes("can't receive a conversion")) {
+    return new InvestmentArchivedDestination();
+  }
   if (message.includes("Class and currency can't change")) {
     return new InvestmentClassLocked();
   }
@@ -157,6 +193,23 @@ function investmentUnprocessable(message: string): BusinessError | undefined {
   }
 
   return undefined;
+}
+
+function laterOperations(error: ApiBusinessError) {
+  const matched = LATER_OPERATIONS.exec(String(error.message));
+  const operations = (
+    error.body?.details as { operations?: { date: string }[] }
+  )?.operations;
+
+  if (!matched || !Array.isArray(operations)) {
+    return undefined;
+  }
+
+  return new InvestmentConversionLaterOperations(
+    matched[1],
+    matched[2],
+    operations.map((operation) => operation.date).sort(),
+  );
 }
 
 export default handleInvestmentApiError;

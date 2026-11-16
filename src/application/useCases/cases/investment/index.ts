@@ -1,6 +1,7 @@
 export { default as approveInvestmentEventSuggestionUseCase } from "./approveInvestmentEventSuggestionUseCase";
 export { default as approveInvestmentIncomeSuggestionUseCase } from "./approveInvestmentIncomeSuggestionUseCase";
 export { default as createInvestmentAssetUseCase } from "./createInvestmentAssetUseCase";
+export { default as createInvestmentConversionUseCase } from "./createInvestmentConversionUseCase";
 export { default as createInvestmentEventUseCase } from "./createInvestmentEventUseCase";
 export { default as createInvestmentFixedIncomeContributionUseCase } from "./createInvestmentFixedIncomeContributionUseCase";
 export { default as createInvestmentFixedIncomeRateUseCase } from "./createInvestmentFixedIncomeRateUseCase";
@@ -10,6 +11,7 @@ export { default as createInvestmentFractionSaleUseCase } from "./createInvestme
 export { default as createInvestmentIncomeUseCase } from "./createInvestmentIncomeUseCase";
 export { default as createInvestmentOperationUseCase } from "./createInvestmentOperationUseCase";
 export { default as deleteInvestmentAssetUseCase } from "./deleteInvestmentAssetUseCase";
+export { default as deleteInvestmentConversionUseCase } from "./deleteInvestmentConversionUseCase";
 export { default as deleteInvestmentFixedIncomeAdjustmentUseCase } from "./deleteInvestmentFixedIncomeAdjustmentUseCase";
 export { default as deleteInvestmentFixedIncomeRateUseCase } from "./deleteInvestmentFixedIncomeRateUseCase";
 export { default as deleteInvestmentIncomeUseCase } from "./deleteInvestmentIncomeUseCase";
@@ -17,6 +19,7 @@ export { default as deleteInvestmentOperationUseCase } from "./deleteInvestmentO
 export { default as deleteInvestmentValuationUseCase } from "./deleteInvestmentValuationUseCase";
 export { default as getInvestmentAssetsUseCase } from "./getInvestmentAssetsUseCase";
 export { default as getInvestmentAssetUseCase } from "./getInvestmentAssetUseCase";
+export { default as getInvestmentConversionUseCase } from "./getInvestmentConversionUseCase";
 export { default as getInvestmentEventSuggestionsUseCase } from "./getInvestmentEventSuggestionsUseCase";
 export { default as getInvestmentIncomeDefaultsUseCase } from "./getInvestmentIncomeDefaultsUseCase";
 export { default as getInvestmentIncomeLinkUseCase } from "./getInvestmentIncomeLinkUseCase";
@@ -34,6 +37,7 @@ export { default as rejectInvestmentIncomeSuggestionUseCase } from "./rejectInve
 export { default as searchInvestmentTickersUseCase } from "./searchInvestmentTickersUseCase";
 export { default as simulateInvestmentFixedIncomeUseCase } from "./simulateInvestmentFixedIncomeUseCase";
 export { default as updateInvestmentAssetUseCase } from "./updateInvestmentAssetUseCase";
+export { default as updateInvestmentConversionUseCase } from "./updateInvestmentConversionUseCase";
 export { default as updateInvestmentFixedIncomeRateUseCase } from "./updateInvestmentFixedIncomeRateUseCase";
 export { default as updateInvestmentIncomeUseCase } from "./updateInvestmentIncomeUseCase";
 export { default as updateInvestmentOperationUseCase } from "./updateInvestmentOperationUseCase";

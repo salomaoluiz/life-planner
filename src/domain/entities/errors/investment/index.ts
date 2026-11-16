@@ -1,6 +1,10 @@
 export { default as InvestmentAccountNotChangeable } from "./InvestmentAccountNotChangeable";
 export { default as InvestmentArchived } from "./InvestmentArchived";
+export { default as InvestmentArchivedDestination } from "./InvestmentArchivedDestination";
 export { default as InvestmentClassLocked } from "./InvestmentClassLocked";
+export { default as InvestmentConversionChainLocked } from "./InvestmentConversionChainLocked";
+export { default as InvestmentConversionLaterOperations } from "./InvestmentConversionLaterOperations";
+export { default as InvestmentConvertedOrigin } from "./InvestmentConvertedOrigin";
 export { default as InvestmentCurrencyMismatch } from "./InvestmentCurrencyMismatch";
 export { default as InvestmentFeesAboveSale } from "./InvestmentFeesAboveSale";
 export { default as InvestmentFractionAlreadySold } from "./InvestmentFractionAlreadySold";
@@ -12,6 +16,7 @@ export { default as InvestmentNegativePosition } from "./InvestmentNegativePosit
 export { default as InvestmentNoPosition } from "./InvestmentNoPosition";
 export { default as InvestmentRedemptionTooLarge } from "./InvestmentRedemptionTooLarge";
 export { default as InvestmentRowUseOperation } from "./InvestmentRowUseOperation";
+export { default as InvestmentUseConversionRoute } from "./InvestmentUseConversionRoute";
 export { default as InvestmentUseFixedIncomeActions } from "./InvestmentUseFixedIncomeActions";
 export { default as QuoteRefreshTooSoon } from "./QuoteRefreshTooSoon";
 export { default as QuoteSourceUnavailable } from "./QuoteSourceUnavailable";

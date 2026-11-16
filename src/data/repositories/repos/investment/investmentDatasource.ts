@@ -1,6 +1,8 @@
 import {
   InvestmentAsset,
   InvestmentAssetDetail,
+  InvestmentConversion,
+  InvestmentConversionResult,
   InvestmentEventSuggestion,
   InvestmentFixedIncomeAdjustmentResult,
   InvestmentFixedIncomeRedemptionPreview,
@@ -26,6 +28,7 @@ import {
   CreateFixedIncomeRedemptionParams,
   CreateFixedIncomeTitleParams,
   CreateInvestmentAssetParams,
+  CreateInvestmentConversionParams,
   CreateInvestmentEventParams,
   CreateInvestmentFractionSaleParams,
   CreateInvestmentIncomeParams,
@@ -47,6 +50,7 @@ import {
   SimulateFixedIncomeParams,
   UpdateFixedIncomeRateParams,
   UpdateInvestmentAssetParams,
+  UpdateInvestmentConversionParams,
   UpdateInvestmentIncomeParams,
   UpdateInvestmentOperationParams,
   UpsertFixedIncomeAdjustmentParams,
@@ -62,6 +66,9 @@ export interface InvestmentDatasource {
     params: ApproveInvestmentIncomeSuggestionParams,
   ): Promise<InvestmentIncome>;
   createAsset(params: CreateInvestmentAssetParams): Promise<InvestmentAsset>;
+  createConversion(
+    params: CreateInvestmentConversionParams,
+  ): Promise<InvestmentConversionResult>;
   createEvent(
     params: CreateInvestmentEventParams,
   ): Promise<InvestmentOperationResult>;
@@ -86,6 +93,7 @@ export interface InvestmentDatasource {
     params: CreateInvestmentOperationParams,
   ): Promise<InvestmentOperationResult>;
   deleteAsset(id: string): Promise<void>;
+  deleteConversion(id: string): Promise<void>;
   deleteFixedIncomeAdjustment(id: string): Promise<void>;
   deleteFixedIncomeRate(id: string): Promise<void>;
   deleteIncome(id: string): Promise<void>;
@@ -93,6 +101,7 @@ export interface InvestmentDatasource {
   deleteValuation(id: string): Promise<void>;
   getAsset(id: string): Promise<InvestmentAssetDetail>;
   getAssets(params: GetInvestmentAssetsParams): Promise<InvestmentAsset[]>;
+  getConversion(id: string): Promise<InvestmentConversion>;
   getDashboard(
     params: GetInvestmentsDashboardParams,
   ): Promise<InvestmentsDashboard>;
@@ -137,6 +146,9 @@ export interface InvestmentDatasource {
     params: SimulateFixedIncomeParams,
   ): Promise<InvestmentFixedIncomeSimulation>;
   updateAsset(params: UpdateInvestmentAssetParams): Promise<InvestmentAsset>;
+  updateConversion(
+    params: UpdateInvestmentConversionParams,
+  ): Promise<InvestmentConversionResult>;
   updateFixedIncomeRate(
     params: UpdateFixedIncomeRateParams,
   ): Promise<InvestmentAssetDetail>;

@@ -15,6 +15,8 @@ import {
 import {
   InvestmentAsset,
   InvestmentAssetDetail,
+  InvestmentConversion,
+  InvestmentConversionResult,
   InvestmentEventSuggestion,
   InvestmentFixedIncomeAdjustmentResult,
   InvestmentFixedIncomeRedemptionPreview,
@@ -93,6 +95,23 @@ export interface CreateInvestmentAssetParams {
   owner: OwnerType;
   ownerId: string;
   ticker?: string;
+}
+
+// Spec 112 FR 1, 6, 14: the origin converts into an existing asset or a new one (class and currency come from the
+// origin). `cashAmount` is in cents; the reference value is the value of one destination quota on the date.
+export interface CreateInvestmentConversionParams {
+  accountId?: string;
+  assetId: string;
+  cashAmount?: number;
+  cashReferenceUnitValue?: string;
+  // `YYYY-MM-DD`, the record date.
+  date: string;
+  destination:
+    | { assetId: string }
+    | { newAsset: { name: string; ticker: string } };
+  generateTransaction: boolean;
+  ratioFrom: string;
+  ratioTo: string;
 }
 
 // Spec 108 FR 4-5: a split / reverse split needs the ratio, a bonus the percent (and optionally the cost per share).
@@ -240,6 +259,9 @@ export type InvestmentRepository = {
     params: ApproveInvestmentIncomeSuggestionParams,
   ): Promise<InvestmentIncome>;
   createAsset(params: CreateInvestmentAssetParams): Promise<InvestmentAsset>;
+  createConversion(
+    params: CreateInvestmentConversionParams,
+  ): Promise<InvestmentConversionResult>;
   createEvent(
     params: CreateInvestmentEventParams,
   ): Promise<InvestmentOperationResult>;
@@ -264,6 +286,7 @@ export type InvestmentRepository = {
     params: CreateInvestmentOperationParams,
   ): Promise<InvestmentOperationResult>;
   deleteAsset(id: string): Promise<void>;
+  deleteConversion(id: string): Promise<void>;
   deleteFixedIncomeAdjustment(id: string): Promise<void>;
   deleteFixedIncomeRate(id: string): Promise<void>;
   deleteIncome(id: string): Promise<void>;
@@ -271,6 +294,7 @@ export type InvestmentRepository = {
   deleteValuation(id: string): Promise<void>;
   getAsset(id: string): Promise<InvestmentAssetDetail>;
   getAssets(params: GetInvestmentAssetsParams): Promise<InvestmentAsset[]>;
+  getConversion(id: string): Promise<InvestmentConversion>;
   getDashboard(
     params: GetInvestmentsDashboardParams,
   ): Promise<InvestmentsDashboard>;
@@ -317,6 +341,9 @@ export type InvestmentRepository = {
     params: SimulateFixedIncomeParams,
   ): Promise<InvestmentFixedIncomeSimulation>;
   updateAsset(params: UpdateInvestmentAssetParams): Promise<InvestmentAsset>;
+  updateConversion(
+    params: UpdateInvestmentConversionParams,
+  ): Promise<InvestmentConversionResult>;
   updateFixedIncomeRate(
     params: UpdateFixedIncomeRateParams,
   ): Promise<InvestmentAssetDetail>;
@@ -383,6 +410,18 @@ export interface UpdateInvestmentAssetParams {
   status?: InvestmentAssetStatus;
   // `null` clears it.
   ticker?: null | string;
+}
+
+// Spec 112 FR 18: any subset; `cashAmount: null` removes the cash part. The destination can't change.
+export interface UpdateInvestmentConversionParams {
+  accountId?: string;
+  cashAmount?: null | number;
+  cashReferenceUnitValue?: string;
+  date?: string;
+  generateTransaction?: boolean;
+  id: string;
+  ratioFrom?: string;
+  ratioTo?: string;
 }
 
 export interface UpdateInvestmentIncomeParams extends Partial<InvestmentIncomeFields> {

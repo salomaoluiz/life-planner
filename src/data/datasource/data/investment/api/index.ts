@@ -15,6 +15,7 @@ import {
 import { api } from "@infrastructure/api";
 import { formatDecimal, parseDecimal, ZERO } from "@utils/decimal";
 
+import conversionApi from "./conversionApi";
 import dashboardApi from "./dashboardApi";
 import eventApi, { eventFieldsBody } from "./eventApi";
 import fixedIncomeApi from "./fixedIncomeApi";
@@ -309,6 +310,7 @@ async function upsertValuation(params: UpsertInvestmentValuationParams) {
 
 const investmentApi: InvestmentDatasource = {
   ...fixedIncomeApi,
+  ...conversionApi,
   ...eventApi,
   ...incomeApi,
   ...dashboardApi,

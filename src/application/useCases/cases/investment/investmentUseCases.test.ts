@@ -5,6 +5,7 @@ import Repositories from "@domain/repositories";
 import approveInvestmentEventSuggestionUseCase from "./approveInvestmentEventSuggestionUseCase";
 import approveInvestmentIncomeSuggestionUseCase from "./approveInvestmentIncomeSuggestionUseCase";
 import createInvestmentAssetUseCase from "./createInvestmentAssetUseCase";
+import createInvestmentConversionUseCase from "./createInvestmentConversionUseCase";
 import createInvestmentEventUseCase from "./createInvestmentEventUseCase";
 import createInvestmentFixedIncomeContributionUseCase from "./createInvestmentFixedIncomeContributionUseCase";
 import createInvestmentFixedIncomeRateUseCase from "./createInvestmentFixedIncomeRateUseCase";
@@ -14,6 +15,7 @@ import createInvestmentFractionSaleUseCase from "./createInvestmentFractionSaleU
 import createInvestmentIncomeUseCase from "./createInvestmentIncomeUseCase";
 import createInvestmentOperationUseCase from "./createInvestmentOperationUseCase";
 import deleteInvestmentAssetUseCase from "./deleteInvestmentAssetUseCase";
+import deleteInvestmentConversionUseCase from "./deleteInvestmentConversionUseCase";
 import deleteInvestmentFixedIncomeAdjustmentUseCase from "./deleteInvestmentFixedIncomeAdjustmentUseCase";
 import deleteInvestmentFixedIncomeRateUseCase from "./deleteInvestmentFixedIncomeRateUseCase";
 import deleteInvestmentIncomeUseCase from "./deleteInvestmentIncomeUseCase";
@@ -21,6 +23,7 @@ import deleteInvestmentOperationUseCase from "./deleteInvestmentOperationUseCase
 import deleteInvestmentValuationUseCase from "./deleteInvestmentValuationUseCase";
 import getInvestmentAssetsUseCase from "./getInvestmentAssetsUseCase";
 import getInvestmentAssetUseCase from "./getInvestmentAssetUseCase";
+import getInvestmentConversionUseCase from "./getInvestmentConversionUseCase";
 import getInvestmentEventSuggestionsUseCase from "./getInvestmentEventSuggestionsUseCase";
 import getInvestmentIncomeDefaultsUseCase from "./getInvestmentIncomeDefaultsUseCase";
 import getInvestmentIncomeLinkUseCase from "./getInvestmentIncomeLinkUseCase";
@@ -38,6 +41,7 @@ import rejectInvestmentIncomeSuggestionUseCase from "./rejectInvestmentIncomeSug
 import searchInvestmentTickersUseCase from "./searchInvestmentTickersUseCase";
 import simulateInvestmentFixedIncomeUseCase from "./simulateInvestmentFixedIncomeUseCase";
 import updateInvestmentAssetUseCase from "./updateInvestmentAssetUseCase";
+import updateInvestmentConversionUseCase from "./updateInvestmentConversionUseCase";
 import updateInvestmentFixedIncomeRateUseCase from "./updateInvestmentFixedIncomeRateUseCase";
 import updateInvestmentIncomeUseCase from "./updateInvestmentIncomeUseCase";
 import updateInvestmentOperationUseCase from "./updateInvestmentOperationUseCase";
@@ -51,6 +55,26 @@ type Factory = (repositories: Repositories) => {
 };
 
 const cases: [Factory, keyof Repositories["investmentRepository"], string][] = [
+  [
+    createInvestmentConversionUseCase,
+    "createConversion",
+    "investment.createInvestmentConversionUseCase",
+  ],
+  [
+    deleteInvestmentConversionUseCase,
+    "deleteConversion",
+    "investment.deleteInvestmentConversionUseCase",
+  ],
+  [
+    getInvestmentConversionUseCase,
+    "getConversion",
+    "investment.getInvestmentConversionUseCase",
+  ],
+  [
+    updateInvestmentConversionUseCase,
+    "updateConversion",
+    "investment.updateInvestmentConversionUseCase",
+  ],
   [
     createInvestmentAssetUseCase,
     "createAsset",

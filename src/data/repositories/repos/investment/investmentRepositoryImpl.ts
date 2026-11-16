@@ -21,6 +21,8 @@ function investmentRepositoryImpl(
     approveIncomeSuggestion: async (params) =>
       withFinanceCaches(investmentDatasource.approveIncomeSuggestion(params)),
     createAsset: async (params) => investmentDatasource.createAsset(params),
+    createConversion: async (params) =>
+      withFinanceCaches(investmentDatasource.createConversion(params)),
     createEvent: async (params) => investmentDatasource.createEvent(params),
     createFixedIncomeContribution: async (params) =>
       withFinanceCaches(
@@ -42,6 +44,8 @@ function investmentRepositoryImpl(
       withFinanceCaches(investmentDatasource.createOperation(params)),
     deleteAsset: async (id) =>
       withFinanceCaches(investmentDatasource.deleteAsset(id)),
+    deleteConversion: async (id) =>
+      withFinanceCaches(investmentDatasource.deleteConversion(id)),
     deleteFixedIncomeAdjustment: async (id) =>
       investmentDatasource.deleteFixedIncomeAdjustment(id),
     deleteFixedIncomeRate: async (id) =>
@@ -53,6 +57,7 @@ function investmentRepositoryImpl(
     deleteValuation: async (id) => investmentDatasource.deleteValuation(id),
     getAsset: async (id) => investmentDatasource.getAsset(id),
     getAssets: async (params) => investmentDatasource.getAssets(params),
+    getConversion: async (id) => investmentDatasource.getConversion(id),
     getDashboard: async (params) => investmentDatasource.getDashboard(params),
     getEventSuggestions: async (params) =>
       investmentDatasource.getEventSuggestions(params),
@@ -83,6 +88,8 @@ function investmentRepositoryImpl(
     simulateFixedIncome: async (params) =>
       investmentDatasource.simulateFixedIncome(params),
     updateAsset: async (params) => investmentDatasource.updateAsset(params),
+    updateConversion: async (params) =>
+      withFinanceCaches(investmentDatasource.updateConversion(params)),
     updateFixedIncomeRate: async (params) =>
       investmentDatasource.updateFixedIncomeRate(params),
     updateIncome: async (params) =>
