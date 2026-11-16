@@ -51,6 +51,11 @@ export {
 export { default as DateField, DateFieldProps } from "./DateField";
 export { default as DatePicker, DatePickerProps } from "./DatePicker";
 export { default as Divider, DividerProps } from "./Divider";
+export {
+  default as DonutChart,
+  DonutChartProps,
+  DonutSlice,
+} from "./DonutChart";
 export { default as EmptyState, EmptyStateProps } from "./EmptyState";
 export { default as ErrorState, ErrorStateProps } from "./ErrorState";
 export { default as Fab, FabProps } from "./Fab";

@@ -17,6 +17,8 @@ export interface ColumnChartProps {
   formatValue: (value: number) => string;
   groups: ColumnGroup[];
   height?: number;
+  /** Only the income column, centered, its projected part dashed; the expense is ignored (spec 110) */
+  incomeOnly?: boolean;
   maxLabels?: number;
   onSelect?: (index: number) => void;
   selectedIndex?: number;
@@ -48,10 +50,11 @@ function ColumnChart(props: ColumnChartProps) {
   const plotHeight = height - top - BOTTOM;
   const max = Math.max(
     0,
-    ...props.groups.flatMap((group) => [
-      total(group.income),
-      total(group.expense),
-    ]),
+    ...props.groups.flatMap((group) =>
+      props.incomeOnly
+        ? [total(group.income)]
+        : [total(group.income), total(group.expense)],
+    ),
   );
   const ticks = niceTicks(0, max);
   const domain = { max: ticks[ticks.length - 1], min: 0 };
@@ -103,9 +106,11 @@ function ColumnChart(props: ColumnChartProps) {
         {amounts.projected > 0 ? (
           <Rect
             fill={color}
-            fillOpacity={0.5}
+            fillOpacity={props.incomeOnly ? 0.2 : 0.5}
             height={Math.max(realizedY - topY, 0)}
             rx={3}
+            stroke={props.incomeOnly ? color : undefined}
+            strokeDasharray={props.incomeOnly ? "4 3" : undefined}
             width={barWidth}
             x={x}
             y={topY}
@@ -166,11 +171,15 @@ function ColumnChart(props: ColumnChartProps) {
               ) : null}
               {column(
                 group.income,
-                center - barWidth - 1,
+                props.incomeOnly
+                  ? center - barWidth / 2
+                  : center - barWidth - 1,
                 colors.income,
                 "income",
               )}
-              {column(group.expense, center + 1, colors.expense, "expense")}
+              {props.incomeOnly
+                ? null
+                : column(group.expense, center + 1, colors.expense, "expense")}
               {index % step === 0 ? (
                 <SvgText
                   fill={colors.textSecondary}
@@ -200,7 +209,11 @@ function ColumnChart(props: ColumnChartProps) {
       <View style={styles.overlay}>
         {props.groups.map((group, index) => (
           <Pressable
-            accessibilityLabel={`${group.label}, ${props.formatValue(total(group.income))}, ${props.formatValue(total(group.expense))}`}
+            accessibilityLabel={
+              props.incomeOnly
+                ? `${group.label}, ${props.formatValue(total(group.income))}`
+                : `${group.label}, ${props.formatValue(total(group.income))}, ${props.formatValue(total(group.expense))}`
+            }
             accessibilityRole="button"
             key={`${group.label}-${index}`}
             onHoverIn={() => props.onSelect?.(index)}
