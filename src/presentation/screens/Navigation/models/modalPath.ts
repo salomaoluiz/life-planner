@@ -1,4 +1,5 @@
 import { FINANCIAL_SECTIONS } from "@screens/Financial/Layout/models/financialSections";
+import { INVESTMENT_SECTIONS } from "@screens/Investment/Layout/models/investmentSections";
 
 export const MODAL_NAMES = [
   "add_new_transaction",
@@ -48,12 +49,15 @@ const HOME = "/";
 const INVESTMENT_DETAIL = /^\/investments\/asset\/[^/]+$/;
 
 export const VALID_BASES: readonly string[] = [
-  HOME,
-  "/investments",
-  "/stock",
-  "/family",
-  "/settings",
-  ...FINANCIAL_SECTIONS.map((section) => section.path),
+  ...new Set([
+    "/family",
+    "/investments",
+    "/settings",
+    "/stock",
+    HOME,
+    ...FINANCIAL_SECTIONS.map((section) => section.path),
+    ...INVESTMENT_SECTIONS.map((section) => section.path),
+  ]),
 ];
 
 export function buildModalPath(base: string, modal: ModalName): string {

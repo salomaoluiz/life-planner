@@ -18,6 +18,7 @@ export const migrationAllowList = [
 // PERMANENT: navigation shells that pick their own frame.
 export const shellBreakpointAllowList = [
   "src/presentation/screens/Financial/Layout/**",
+  "src/presentation/screens/Investment/Layout/**",
   "src/presentation/screens/Navigation/containers/AppTabBar/**",
 ];
 

@@ -27,10 +27,17 @@ it("SHOULD expose the path the settings entry navigates to", () => {
   expect(SETTINGS_PATH).toBe("/settings");
 });
 
-it("SHOULD give only the Finances item its 6 section children", () => {
+it("SHOULD give the Finances AND Investments items their section children (spec 110)", () => {
   const withChildren = NAVIGATION_ITEMS.filter((item) => item.children);
 
-  expect(withChildren.map((item) => item.routeName)).toEqual(["financial"]);
+  expect(withChildren.map((item) => item.routeName)).toEqual([
+    "financial",
+    "investments",
+  ]);
+  expect(withChildren[1].children?.map((child) => child.testID)).toEqual([
+    "navigation-rail-investment-overview",
+    "navigation-rail-investment-assets",
+  ]);
   expect(withChildren[0].children?.map((child) => child.testID)).toEqual([
     "navigation-rail-financial-overview",
     "navigation-rail-financial-transactions",

@@ -631,6 +631,13 @@ const investment = {
     split: "Result in BRL = asset move {{asset}} + dollar move {{fx}}",
     usd: "Result in USD",
   },
+  sections: {
+    assets: "Assets",
+    overview: "Overview",
+    pickerA11yLabel: "{{section}}, change Investments section",
+    pickerClose: "Close",
+    pickerTitle: "Investments",
+  },
   suggestions: {
     approve: "Approve",
     card: "Suggestions",

@@ -34,8 +34,8 @@ describe("splitModalPath", () => {
 });
 
 describe("isValidBase", () => {
-  it("SHOULD accept exactly the eleven bases", () => {
-    expect(VALID_BASES).toHaveLength(11);
+  it("SHOULD accept exactly the twelve bases (the investments Overview joined, spec 110)", () => {
+    expect(VALID_BASES).toHaveLength(12);
     VALID_BASES.forEach((base) => expect(isValidBase(base)).toBe(true));
     expect(isValidBase("")).toBe(true);
     expect(isValidBase("/stock/")).toBe(true);
@@ -98,4 +98,15 @@ describe("screenPath", () => {
     expect(screenPath("/financial/cards")).toBe("/financial/cards");
     expect(screenPath("/quick_add")).toBe("/");
   });
+});
+
+it("SHOULD accept a modal opened over the investments Overview AND keep the asset list base (spec 110)", () => {
+  expect(isValidBase("/investments/overview")).toBe(true);
+  expect(isValidBase("/investments")).toBe(true);
+  expect(
+    splitModalPath("/investments/overview/investment_asset"),
+  ).toMatchObject({ base: "/investments/overview", modal: "investment_asset" });
+  expect(buildModalPath("/investments/overview", "investment_asset")).toBe(
+    "/investments/overview/investment_asset",
+  );
 });

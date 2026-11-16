@@ -633,6 +633,13 @@ const investment = {
       "Resultado em R$ = variação do ativo {{asset}} + variação do dólar {{fx}}",
     usd: "Resultado em USD",
   },
+  sections: {
+    assets: "Ativos",
+    overview: "Visão geral",
+    pickerA11yLabel: "{{section}}, trocar seção de Investimentos",
+    pickerClose: "Fechar",
+    pickerTitle: "Investimentos",
+  },
   suggestions: {
     approve: "Aprovar",
     card: "Sugestões",
