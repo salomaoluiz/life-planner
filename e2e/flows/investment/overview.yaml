@@ -61,25 +61,6 @@ onFlowComplete:
     id: "investment.overview.tile-realized"
 - assertVisible:
     id: "investment.overview.tile-income"
-- assertVisible:
-    id: "investment.overview.evolution-chart"
-- assertVisible:
-    id: "investment.overview.income-chart"
-# Tapping a class filters the ranking AND the chip clears it (FR 18).
-- extendedWaitUntil:
-    visible:
-      id: "investment.overview.allocation-class-BR_STOCK"
-    timeout: 20000
-- tapOn:
-    id: "investment.overview.allocation-class-BR_STOCK"
-- extendedWaitUntil:
-    visible:
-      id: "investment.overview.ranking-filter-clear"
-    timeout: 10000
-- tapOn:
-    id: "investment.overview.ranking-filter-clear"
-- assertNotVisible:
-    id: "investment.overview.ranking-filter-clear"
 # The period moves back and a button brings it to today; there is no way forward from the current one (FR 4).
 - tapOn:
     id: "investment.overview.period-3M"
@@ -93,7 +74,34 @@ onFlowComplete:
     id: "investment.overview.period-today"
 - assertNotVisible:
     id: "investment.overview.period-today"
+- tapOn:
+    id: "investment.overview.period-12M"
+# The blocks are below the tiles on a short window.
+- scrollUntilVisible:
+    element:
+      id: "investment.overview.allocation-class-BR_STOCK"
+    timeout: 20000
+# Tapping a class filters the ranking AND the chip clears it (FR 18).
+- tapOn:
+    id: "investment.overview.allocation-class-BR_STOCK"
+- scrollUntilVisible:
+    element:
+      id: "investment.overview.ranking-filter-clear"
+    timeout: 10000
+- tapOn:
+    id: "investment.overview.ranking-filter-clear"
+- assertNotVisible:
+    id: "investment.overview.ranking-filter-clear"
+- scrollUntilVisible:
+    element:
+      id: "investment.overview.income-chart"
+    timeout: 10000
 # A ranking row opens the asset detail.
+- scrollUntilVisible:
+    element:
+      id: "investment.overview.ranking-row-${output.ASSET_ID}"
+    direction: UP
+    timeout: 10000
 - tapOn:
     id: "investment.overview.ranking-row-${output.ASSET_ID}"
 - extendedWaitUntil:
