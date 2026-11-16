@@ -1,0 +1,83 @@
+url: ${E2E_WEB_URL}
+name: investment/swap-class-with-operations
+tags:
+  - investment
+  - spec-111
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Spec 111 rules 8 and 15-16: an asset with operations saved as Ações moves to FIIs after the confirmation.
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+# A Fiagro has no class rule, so the API takes it as Ações.
+- runFlow:
+    file: ../../subflows/setup/create-investment-asset.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      TICKER: RZAG11
+      NAME: E2E Fiagro
+      ASSET_CLASS: BR_STOCK
+- evalScript: ${output.SWAP_ASSET_ID = output.ASSET_ID}
+- runFlow:
+    file: ../../subflows/setup/create-investment-operation.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      ASSET_ID: ${output.SWAP_ASSET_ID}
+      TYPE: BUY
+      QUANTITY: "10"
+      UNIT_PRICE: "90"
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/investment/open-investments.yaml
+- extendedWaitUntil:
+    visible:
+      id: "investment.list.group.BR_STOCK-BRL"
+    timeout: 20000
+- tapOn:
+    id: "investment.list.row-${output.SWAP_ASSET_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.screen"
+    timeout: 20000
+- tapOn:
+    id: "investment.detail.actions-menu"
+- tapOn:
+    id: "investment.detail.menu-edit"
+- extendedWaitUntil:
+    visible:
+      id: "investment.asset-modal.class"
+    timeout: 20000
+- tapOn:
+    id: "investment.asset-modal.class"
+# Only the two B3 classes are offered once there are operations.
+- assertVisible:
+    id: "investment.asset-modal.class-option-BR_REIT"
+- assertNotVisible:
+    id: "investment.asset-modal.class-option-FIXED_INCOME"
+- tapOn:
+    id: "investment.asset-modal.class-option-BR_REIT"
+- tapOn:
+    id: "investment.asset-modal.save"
+- extendedWaitUntil:
+    visible:
+      id: "investment.asset-modal.class-change"
+    timeout: 10000
+- tapOn:
+    id: "investment.asset-modal.class-change-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.screen"
+    timeout: 20000
+- tapOn:
+    id: "investment.detail.back"
+- extendedWaitUntil:
+    visible:
+      id: "investment.list.group.BR_REIT-BRL"
+    timeout: 20000
+- assertNotVisible:
+    id: "investment.list.group.BR_STOCK-BRL"

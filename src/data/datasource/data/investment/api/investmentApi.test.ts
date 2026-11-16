@@ -13,6 +13,7 @@ import {
   InvestmentRowUseOperation,
   QuoteRefreshTooSoon,
   QuoteSourceUnavailable,
+  TickerClassMismatch,
   TickerExists,
   TickerNotFound,
 } from "@domain/entities/errors";
@@ -566,6 +567,7 @@ describe("quotes (spec 104)", () => {
     jest.mocked(api.get).mockResolvedValue({
       items: [
         {
+          assetClass: "BR_STOCK",
           changePercent: "0.48",
           currency: "BRL",
           exchange: "B3",
@@ -587,8 +589,17 @@ describe("quotes (spec 104)", () => {
     expect(api.get).toHaveBeenCalledWith(
       "/v1/investments/tickers/search?market=B3&q=it%20sa",
     );
-    expect(items[0]).toMatchObject({ name: "Itausa PN", ticker: "ITSA4" });
-    expect(items[1]).toMatchObject({ exchange: "", logoUrl: null, name: null });
+    expect(items[0]).toMatchObject({
+      assetClass: "BR_STOCK",
+      name: "Itausa PN",
+      ticker: "ITSA4",
+    });
+    expect(items[1]).toMatchObject({
+      assetClass: null,
+      exchange: "",
+      logoUrl: null,
+      name: null,
+    });
   });
 
   it("SHOULD refresh quotes with the asset ids AND map the answer", async () => {
@@ -634,6 +645,33 @@ describe("quotes (spec 104)", () => {
 
     expect(error).toBeInstanceOf(QuoteRefreshTooSoon);
     expect((error as QuoteRefreshTooSoon).retryAfterSeconds).toBe(42);
+  });
+
+  it("SHOULD map TICKER_CLASS_MISMATCH with the expected class (spec 111)", async () => {
+    jest.mocked(api.post).mockRejectedValueOnce(
+      new ApiBusinessError(
+        "BTHF11 is a FII",
+        422,
+        {},
+        {
+          code: "TICKER_CLASS_MISMATCH",
+          details: { expectedClass: "BR_REIT" },
+        },
+      ),
+    );
+
+    const error = await investmentApi
+      .createAsset({
+        assetClass: InvestmentAssetClass.BR_STOCK,
+        name: "Fund",
+        owner: OwnerType.USER,
+        ownerId: "o",
+        ticker: "BTHF11",
+      })
+      .catch((caught: unknown) => caught);
+
+    expect(error).toBeInstanceOf(TickerClassMismatch);
+    expect((error as TickerClassMismatch).expectedClass).toBe("BR_REIT");
   });
 
   it("SHOULD map TICKER_NOT_FOUND AND QUOTE_SOURCE_UNAVAILABLE", async () => {

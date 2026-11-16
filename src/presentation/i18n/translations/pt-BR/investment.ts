@@ -335,8 +335,17 @@ const investment = {
   form: {
     asset: {
       class: "Classe",
+      classChange: {
+        cancel: "Cancelar",
+        confirm: "Mudar classe",
+        message:
+          "Mudar {{ticker}} para {{class}}? Operações, proventos e valores continuam iguais; o ativo passa a aparecer em {{class}}.",
+        title: "Mudar classe",
+      },
       classHint:
         "Ação / ETF B3, FII, Stock / ETF exterior, Renda fixa ou Não listado / option.",
+      classHintLocked:
+        "Com operações, só dá para trocar entre Ações e FIIs. A moeda não muda.",
       currency: "Moeda",
       currencyHint: "Não muda depois da primeira operação.",
       currentValue: "Valor atual por unidade (opcional)",
@@ -755,6 +764,18 @@ const investment = {
     INVESTMENT_REDEMPTION: "Resgate de investimento",
   },
   ticker: {
+    badge: {
+      BR_REIT: "FII",
+      BR_STOCK: "Ação",
+    },
+    classAdjusted: {
+      BR_REIT: "{{ticker}} é um FII. A classe foi ajustada para FIIs.",
+      BR_STOCK: "{{ticker}} é uma ação. A classe foi ajustada para Ações.",
+    },
+    classMismatch: {
+      BR_REIT: "{{ticker}} é um FII. Escolha a classe FIIs.",
+      BR_STOCK: "{{ticker}} é uma ação. Escolha a classe Ações.",
+    },
     currentQuote: "Cotação atual",
     notFound:
       'Nenhum ativo encontrado para "{{q}}". Confira o ticker ou use a classe "Não listado".',

@@ -23,6 +23,8 @@ export interface TickerAutocompleteProps {
 }
 
 export interface TickerOption {
+  /** Short class label ("Ação", "FII") shown at the end of the row; none when the class is unknown */
+  badge?: string;
   /** "B3", "NASDAQ"... shown after the name */
   exchange?: string;
   name: null | string;
@@ -61,6 +63,9 @@ function TickerAutocomplete(props: TickerAutocompleteProps) {
       ),
       matchRange: props.value ? matchOf(option.ticker, props.value) : undefined,
       meta: option.priceText,
+      trailing: option.badge ? (
+        <Text.Caption value={option.badge} />
+      ) : undefined,
     }),
   );
 

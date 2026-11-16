@@ -6,6 +6,7 @@ import { modalNavigation } from "@tests/modalNavigation";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import {
   QuoteSourceUnavailable,
+  TickerClassMismatch,
   TickerExists,
   TickerNotFound,
 } from "@domain/entities/errors";
@@ -178,13 +179,80 @@ describe("editing", () => {
     detailQuery.withData(makeDetail());
   });
 
-  it("SHOULD load the asset AND lock class and currency after the first operation", () => {
+  it("SHOULD load the asset AND offer only Ações and FIIs after the first operation (spec 111)", () => {
     const { result } = setup();
 
     expect(result.current.isEditing).toBe(true);
     expect(result.current.ticker).toBe("ITSA4");
-    expect(result.current.classLocked).toBe(true);
+    expect(result.current.classLocked).toBe(false);
+    expect(result.current.classOptions.map((option) => option.value)).toEqual([
+      InvestmentAssetClass.BR_REIT,
+      InvestmentAssetClass.BR_STOCK,
+    ]);
+    expect(result.current.classHintKey).toBe(
+      "investment.form.asset.classHintLocked",
+    );
+    expect(result.current.currencyReadOnly).toBe(true);
     expect(result.current.titleKey).toBe("investment.form.asset.editTitle");
+  });
+
+  it("SHOULD keep the class locked after the first operation for the other classes", () => {
+    detailQuery.withData(
+      makeDetail({ assetClass: InvestmentAssetClass.FIXED_INCOME }),
+    );
+    const { result } = setup();
+
+    expect(result.current.classLocked).toBe(true);
+    expect(result.current.classHintKey).toBe("investment.errors.classLocked");
+  });
+
+  it("SHOULD confirm before saving a class swap WITH operations, then send it (spec 111)", () => {
+    const { result } = setup();
+
+    act(() => result.current.onAssetClassChange(InvestmentAssetClass.BR_REIT));
+    act(() => result.current.onSave());
+
+    expect(updateMutation.value.mutate).not.toHaveBeenCalled();
+    expect(result.current.classChange).toEqual({
+      classKey: "investment.class.BR_REIT",
+      ticker: "ITSA4",
+    });
+
+    act(() => result.current.onClassChangeCancel());
+    expect(result.current.classChange).toBeNull();
+    expect(updateMutation.value.mutate).not.toHaveBeenCalled();
+
+    act(() => result.current.onSave());
+    act(() => result.current.onClassChangeConfirm());
+
+    expect(updateMutation.value.mutate).toHaveBeenCalledWith({
+      assetClass: InvestmentAssetClass.BR_REIT,
+      id: "asset-1",
+    });
+  });
+
+  it("SHOULD NOT ask WHEN the class does not change", () => {
+    const { result } = setup();
+
+    act(() => result.current.onNameChange("Itaúsa ON"));
+    act(() => result.current.onSave());
+
+    expect(result.current.classChange).toBeNull();
+    expect(updateMutation.value.mutate).toHaveBeenCalled();
+  });
+
+  it("SHOULD show the mismatch of a 422 TICKER_CLASS_MISMATCH on the ticker field (spec 111)", () => {
+    updateMutation
+      .reset()
+      .withError(
+        new TickerClassMismatch(InvestmentAssetClass.BR_REIT) as never,
+      );
+    const { result } = setup();
+
+    expect(result.current.tickerError).toBe(
+      "investment.ticker.classMismatch.BR_REIT",
+    );
+    expect(result.current.failure).toBeUndefined();
   });
 
   it("SHOULD send only the changes AND close without a request WHEN nothing changed", () => {
@@ -232,6 +300,7 @@ describe("editing", () => {
 });
 
 const itsa: InvestmentTickerSuggestion = {
+  assetClass: InvestmentAssetClass.BR_STOCK,
   changePercent: "0.48",
   currency: "BRL",
   exchange: "B3",
@@ -323,6 +392,84 @@ describe("ticker search (spec 104)", () => {
 
     expect(result.current.tickerError).toBe("investment.ticker.notFound");
     expect(result.current.failure).toBeUndefined();
+  });
+});
+
+describe("class follows the ticker (spec 111)", () => {
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
+  const bthf11: InvestmentTickerSuggestion = {
+    ...itsa,
+    assetClass: InvestmentAssetClass.BR_REIT,
+    name: "BTG Real Estate",
+    ticker: "BTHF11",
+  };
+
+  function pick() {
+    searchQuery.reset().withData([bthf11]);
+    const hook = setup();
+
+    act(() => hook.result.current.onTickerChange("bthf11"));
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+    act(() => hook.result.current.onTickerSelect("BTHF11"));
+
+    return hook;
+  }
+
+  it("SHOULD switch to FIIs WHEN a FII is picked, with a notice that goes away WHEN the class is picked again", () => {
+    const { result } = pick();
+
+    expect(result.current.assetClass).toBe(InvestmentAssetClass.BR_REIT);
+    expect(result.current.classNotice).toEqual({
+      key: "investment.ticker.classAdjusted.BR_REIT",
+      ticker: "BTHF11",
+    });
+
+    act(() => result.current.onAssetClassChange(InvestmentAssetClass.BR_STOCK));
+
+    expect(result.current.classNotice).toBeNull();
+    expect(result.current.tickerError).toBeUndefined();
+  });
+
+  it("SHOULD block saving WHEN the class is changed by hand against the picked ticker", () => {
+    const { result } = pick();
+
+    act(() => result.current.onAssetClassChange(InvestmentAssetClass.BR_STOCK));
+    act(() => result.current.onSave());
+
+    expect(createMutation.value.mutate).not.toHaveBeenCalled();
+    expect(result.current.tickerError).toBe(
+      "investment.ticker.classMismatch.BR_REIT",
+    );
+  });
+
+  it("SHOULD show the mismatch of a 422 from the API on the ticker field", () => {
+    createMutation
+      .reset()
+      .withError(
+        new TickerClassMismatch(InvestmentAssetClass.BR_STOCK) as never,
+      );
+
+    expect(setup().result.current.tickerError).toBe(
+      "investment.ticker.classMismatch.BR_STOCK",
+    );
+  });
+
+  it("SHOULD add a badge-less row WHEN the class is unknown", () => {
+    searchQuery.reset().withData([{ ...bthf11, assetClass: null }]);
+    const { result } = setup();
+
+    act(() => result.current.onTickerChange("bthf"));
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+    act(() => result.current.onTickerSelect("BTHF11"));
+
+    expect(result.current.assetClass).toBe(InvestmentAssetClass.BR_STOCK);
+    expect(result.current.classNotice).toBeNull();
   });
 });
 

@@ -8,6 +8,7 @@ const baseProps: TickerAutocompleteProps = {
   onSelect: jest.fn(),
   suggestions: [
     {
+      badge: "Ação",
       exchange: "B3",
       name: "Itaúsa PN",
       priceText: "R$ 10,53",

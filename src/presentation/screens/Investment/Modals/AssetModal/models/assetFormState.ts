@@ -20,6 +20,11 @@ import {
 import { TranslationKeys } from "@presentation/i18n/types";
 import { parseDecimal, ZERO } from "@utils/decimal";
 
+// Spec 111: the two classes of the B3 market, the only ones a ticker can move between.
+const B3_CLASSES = [
+  InvestmentAssetClass.BR_STOCK,
+  InvestmentAssetClass.BR_REIT,
+];
 const MAX_NAME = 100;
 const MAX_TICKER = 20;
 const TICKER_TEXT = /^[A-Z0-9.-]*$/;
@@ -30,6 +35,8 @@ type AssetFormErrors = Partial<
 
 interface AssetFormState {
   assetClass: InvestmentAssetClass;
+  // Spec 111: the class the last picked ticker set (the notice under the ticker field), `null` otherwise.
+  classNotice: InvestmentAssetClass | null;
   currency: CurrencyCode;
   // The user typed the currency: the class stops suggesting one.
   currencyTouched: boolean;
@@ -44,9 +51,24 @@ interface AssetFormState {
   ticker: string;
 }
 
+// Spec 111 rule 14: the picked B3 ticker belongs to the other B3 class than the one selected.
+function classMismatch(state: AssetFormState): boolean {
+  const picked = state.picked;
+
+  return (
+    !!picked &&
+    picked.ticker === state.ticker &&
+    !!picked.assetClass &&
+    B3_CLASSES.includes(picked.assetClass) &&
+    B3_CLASSES.includes(state.assetClass) &&
+    picked.assetClass !== state.assetClass
+  );
+}
+
 function createInitialState(params: { ownerId: string }): AssetFormState {
   return {
     assetClass: InvestmentAssetClass.BR_STOCK,
+    classNotice: null,
     currency: DEFAULT_CURRENCY,
     currencyTouched: false,
     currentValue: "",
@@ -83,10 +105,11 @@ function needsPick(state: AssetFormState, initial?: AssetFormState): boolean {
   if (!market || state.ticker.trim() === "") {
     return false;
   }
+  // The asset's own ticker needs no new pick while it stays in the same market (spec 111 swaps Ações and FIIs).
   if (
     initial &&
     initial.ticker === state.ticker &&
-    initial.assetClass === state.assetClass
+    marketOf(initial.assetClass) === market
   ) {
     return false;
   }
@@ -99,6 +122,7 @@ function needsPick(state: AssetFormState, initial?: AssetFormState): boolean {
 function stateFromAsset(asset: InvestmentAsset): AssetFormState {
   return {
     assetClass: asset.assetClass,
+    classNotice: null,
     currency: asset.currency,
     currencyTouched: true,
     currentValue: "",
@@ -174,6 +198,9 @@ function validate(
     errors.ticker = "investment.form.asset.tickerRequired";
   } else if (needsPick(state, initial)) {
     errors.ticker = "investment.ticker.notFound";
+  } else if (classMismatch(state)) {
+    errors.ticker =
+      `investment.ticker.classMismatch.${state.picked!.assetClass}` as TranslationKeys;
   }
   if (state.currentValue.trim() !== "") {
     const value = parseDecimal(state.currentValue);
@@ -202,6 +229,7 @@ function withAssetClass(
   return {
     ...state,
     assetClass,
+    classNotice: null,
     currency: keepsChoice ? state.currency : suggested,
   };
 }
@@ -217,13 +245,22 @@ function withName(state: AssetFormState, name: string): AssetFormState {
   return { ...state, name, nameTouched: true };
 }
 
-// Picking a search result fills ticker, name (until typed) and the currency of its market.
+// Picking a search result fills ticker, name (until typed) and the currency of its market; between the two B3
+// classes it also moves the class to the ticker's (spec 111 rule 11).
 function withPicked(
   state: AssetFormState,
   suggestion: InvestmentTickerSuggestion,
 ): AssetFormState {
+  const adjusts =
+    !!suggestion.assetClass &&
+    B3_CLASSES.includes(suggestion.assetClass) &&
+    B3_CLASSES.includes(state.assetClass) &&
+    suggestion.assetClass !== state.assetClass;
+
   return {
     ...state,
+    assetClass: adjusts ? suggestion.assetClass! : state.assetClass,
+    classNotice: adjusts ? suggestion.assetClass : null,
     currency: suggestion.currency,
     name: state.nameTouched || !suggestion.name ? state.name : suggestion.name,
     picked: suggestion,
@@ -237,6 +274,7 @@ function withTicker(state: AssetFormState, ticker: string): AssetFormState {
 
   return {
     ...state,
+    classNotice: null,
     name: state.nameTouched ? state.name : next,
     ticker: next,
   };

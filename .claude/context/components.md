@@ -104,7 +104,7 @@ Kept only so unmigrated screens compile, marked with a "Legacy, kept until spec 
 
 ## TickerAutocomplete (spec 104)
 
-`@components/TickerAutocomplete`: ticker search of the asset form, a thin wrapper over `AutocompleteField` (text mode, `prefiltered`, up to 10 rows). Props: `label`, `value`, `onChangeText`, `onSelect(ticker)` (the ticker of the picked row), `suggestions: { ticker; name; priceText; exchange? }[]` (already filtered by the market source), `error?`, `helper?`, `placeholder?`, `maxLength?`, `disabled?`, `resultsLabel?(count)`, `testID?` (rows: `<testID>-suggestion-<ticker> · <name>`). Each row has a ticker-initials tile, the label and the last price at the end.
+`@components/TickerAutocomplete`: ticker search of the asset form, a thin wrapper over `AutocompleteField` (text mode, `prefiltered`, up to 10 rows). Props: `label`, `value`, `onChangeText`, `onSelect(ticker)` (the ticker of the picked row), `suggestions: { ticker; name; priceText; exchange?; badge? }[]` (already filtered by the market source), `error?`, `helper?`, `placeholder?`, `maxLength?`, `disabled?`, `resultsLabel?(count)`, `testID?` (rows: `<testID>-suggestion-<ticker> · <name>`). Each row has a ticker-initials tile, the label, the last price and, when `badge` is set (spec 111, the short class label), a caption at the end.
 
 ## AutocompleteField (spec 043)
 

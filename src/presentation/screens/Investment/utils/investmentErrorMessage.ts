@@ -16,6 +16,7 @@ import {
   InvestmentUseFixedIncomeActions,
   QuoteRefreshTooSoon,
   QuoteSourceUnavailable,
+  TickerClassMismatch,
   TickerExists,
   TickerNotFound,
 } from "@domain/entities/errors";
@@ -63,6 +64,13 @@ function getInvestmentErrorMessage(
     return {
       key: "investment.fixedIncome.errors.redemptionTooLarge",
       params: { date: formatDate(error.date ?? "") },
+    };
+  }
+
+  // Spec 111: the copy names the ticker, which only the form knows, so the caller adds it as `ticker`.
+  if (error instanceof TickerClassMismatch) {
+    return {
+      key: `investment.ticker.classMismatch.${error.expectedClass}` as TranslationKeys,
     };
   }
 
