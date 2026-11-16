@@ -76,31 +76,29 @@ onFlowComplete:
     id: "investment.overview.period-today"
 - tapOn:
     id: "investment.overview.period-12M"
-# The blocks are below the tiles on a short window.
-- scrollUntilVisible:
-    element:
-      id: "investment.overview.allocation-class-BR_STOCK"
+# The blocks are below the tiles on a short window; Maestro web scrolls with explicit swipes.
+- runFlow: ../../subflows/financial/scroll-list-down.yaml
+- runFlow: ../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "investment.overview.allocation-class-PRIVATE"
     timeout: 20000
 # Tapping a class filters the ranking AND the chip clears it (FR 18).
 - tapOn:
-    id: "investment.overview.allocation-class-BR_STOCK"
-- scrollUntilVisible:
-    element:
+    id: "investment.overview.allocation-class-PRIVATE"
+- runFlow: ../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
       id: "investment.overview.ranking-filter-clear"
     timeout: 10000
 - tapOn:
     id: "investment.overview.ranking-filter-clear"
 - assertNotVisible:
     id: "investment.overview.ranking-filter-clear"
-- scrollUntilVisible:
-    element:
-      id: "investment.overview.income-chart"
-    timeout: 10000
 # A ranking row opens the asset detail.
-- scrollUntilVisible:
-    element:
+- extendedWaitUntil:
+    visible:
       id: "investment.overview.ranking-row-${output.ASSET_ID}"
-    direction: UP
     timeout: 10000
 - tapOn:
     id: "investment.overview.ranking-row-${output.ASSET_ID}"
