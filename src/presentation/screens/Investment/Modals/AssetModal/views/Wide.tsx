@@ -41,8 +41,12 @@ function Wide({ vm }: AdaptiveViewProps<AssetModalVM>) {
       return undefined;
     }
 
-    return key === "investment.ticker.notFound"
-      ? t(key, { q: vm.ticker })
+    if (key === "investment.ticker.notFound") {
+      return t(key, { q: vm.ticker });
+    }
+
+    return key.startsWith("investment.ticker.classMismatch.")
+      ? t(key, { ticker: vm.ticker })
       : t(key);
   }
 
@@ -85,14 +89,7 @@ function Wide({ vm }: AdaptiveViewProps<AssetModalVM>) {
                   testID={ids.class}
                   value={vm.assetClass}
                 />
-                <Text.Caption
-                  tone="secondary"
-                  value={t(
-                    vm.classLocked
-                      ? "investment.errors.classLocked"
-                      : "investment.form.asset.classHint",
-                  )}
-                />
+                <Text.Caption tone="secondary" value={t(vm.classHintKey)} />
               </View>
               {vm.showCalculated ? (
                 <SwitchRow
@@ -119,6 +116,11 @@ function Wide({ vm }: AdaptiveViewProps<AssetModalVM>) {
                       t("investment.ticker.suggestions", { count })
                     }
                     suggestions={vm.suggestions.map((item) => ({
+                      badge: item.assetClass
+                        ? t(
+                            `investment.ticker.badge.${item.assetClass}` as TranslationKeys,
+                          )
+                        : undefined,
                       exchange: item.exchange,
                       name: item.name,
                       priceText: formatUnitPrice(
@@ -148,6 +150,15 @@ function Wide({ vm }: AdaptiveViewProps<AssetModalVM>) {
                     />
                   </>
                 )}
+                {vm.classNotice ? (
+                  <Text.Caption
+                    testID={ids.classNotice}
+                    tone="secondary"
+                    value={t(vm.classNotice.key, {
+                      ticker: vm.classNotice.ticker,
+                    })}
+                  />
+                ) : null}
               </View>
             </>
           }
@@ -280,6 +291,20 @@ function Wide({ vm }: AdaptiveViewProps<AssetModalVM>) {
       >
         {renderBody()}
       </BottomSheet>
+      <ConfirmDialog
+        cancelLabel={t("investment.form.asset.classChange.cancel")}
+        closeLabel={t("investment.form.close")}
+        confirmLabel={t("investment.form.asset.classChange.confirm")}
+        message={t("investment.form.asset.classChange.message", {
+          class: vm.classChange ? t(vm.classChange.classKey) : "",
+          ticker: vm.classChange?.ticker ?? "",
+        })}
+        onCancel={vm.onClassChangeCancel}
+        onConfirm={vm.onClassChangeConfirm}
+        testID={ids.classChange}
+        title={t("investment.form.asset.classChange.title")}
+        visible={!!vm.classChange}
+      />
       <ConfirmDialog
         cancelLabel={t("common.form.keepEditing")}
         closeLabel={t("investment.form.close")}

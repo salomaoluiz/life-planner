@@ -2,6 +2,7 @@ import { fireEvent, screen } from "@testing-library/react-native";
 
 import { hasText } from "@tests";
 
+import { InvestmentAssetClass } from "@domain/entities/investment/enums";
 import investmentTestIds from "@screens/Investment/testIds";
 
 import { setup } from "./mocks/index.mocks";
@@ -33,6 +34,7 @@ it("SHOULD render the form fields AND save", () => {
 
 it("SHOULD hide the current value WHEN editing AND show the locked hint", () => {
   setup({
+    classHintKey: "investment.errors.classLocked",
     classLocked: true,
     isEditing: true,
     titleKey: "investment.form.asset.editTitle",
@@ -86,4 +88,70 @@ it("SHOULD not show the calculated switch for any other asset", () => {
   setup();
 
   expect(screen.queryByTestId(ids.calculated)).toBeNull();
+});
+
+it("SHOULD show the class notice under the ticker (spec 111)", () => {
+  setup({
+    classNotice: {
+      key: "investment.ticker.classAdjusted.BR_REIT",
+      ticker: "BTHF11",
+    },
+    quotedMarket: "B3" as never,
+  });
+
+  expect(screen.getByTestId(ids.classNotice)).toBeOnTheScreen();
+  expect(
+    hasText('investment.ticker.classAdjusted.BR_REIT {"ticker":"BTHF11"}'),
+  ).toBe(true);
+});
+
+it("SHOULD show the swap hint AND the badge of the suggestions (spec 111)", () => {
+  setup({
+    classHintKey: "investment.form.asset.classHintLocked",
+    quotedMarket: "B3" as never,
+    suggestions: [
+      {
+        assetClass: InvestmentAssetClass.BR_REIT,
+        changePercent: null,
+        currency: "BRL",
+        exchange: "B3",
+        logoUrl: null,
+        market: "B3" as never,
+        name: "BTG Real Estate",
+        price: "9.1",
+        ticker: "BTHF11",
+      },
+      {
+        assetClass: null,
+        changePercent: null,
+        currency: "BRL",
+        exchange: "B3",
+        logoUrl: null,
+        market: "B3" as never,
+        name: null,
+        price: "1",
+        ticker: "ZZZZ11",
+      },
+    ],
+    ticker: "bthf",
+  });
+
+  expect(hasText("investment.form.asset.classHintLocked")).toBe(true);
+
+  fireEvent(screen.getByTestId(`${ids.ticker}-input`), "focus");
+
+  expect(screen.getAllByText("investment.ticker.badge.BR_REIT")).toHaveLength(
+    1,
+  );
+});
+
+it("SHOULD confirm the class change (spec 111)", () => {
+  const { vm } = setup({
+    classChange: { classKey: "investment.class.BR_REIT", ticker: "BTHF11" },
+  });
+
+  expect(hasText("investment.form.asset.classChange.title")).toBe(true);
+
+  fireEvent.press(screen.getByTestId(`${ids.classChange}-confirm`));
+  expect(vm.onClassChangeConfirm).toHaveBeenCalledTimes(1);
 });

@@ -174,6 +174,7 @@ describe("params", () => {
 
 describe("ticker pick (spec 104 FR 24)", () => {
   const suggestion = {
+    assetClass: InvestmentAssetClass.BR_STOCK as InvestmentAssetClass | null,
     changePercent: "0.48",
     currency: "BRL" as const,
     exchange: "B3",
@@ -234,5 +235,115 @@ describe("ticker pick (spec 104 FR 24)", () => {
 
     expect(withPicked(named, suggestion).name).toBe("My Itaú");
     expect(withPicked(typed, { ...suggestion, name: null }).name).toBe("ITSA4");
+  });
+});
+
+describe("class follows the picked ticker (spec 111)", () => {
+  const fii = {
+    assetClass: InvestmentAssetClass.BR_REIT as InvestmentAssetClass | null,
+    changePercent: "0.1",
+    currency: "BRL" as const,
+    exchange: "B3",
+    logoUrl: null,
+    market: "B3" as never,
+    name: "BTG Real Estate",
+    price: "9.1",
+    ticker: "BTHF11",
+  };
+  const typed = withTicker(initial, "bthf11");
+
+  it("SHOULD switch Ações to FIIs WHEN a FII is picked, with the BRL currency AND a notice", () => {
+    const picked = withPicked(typed, fii);
+
+    expect(picked).toMatchObject({
+      assetClass: InvestmentAssetClass.BR_REIT,
+      classNotice: InvestmentAssetClass.BR_REIT,
+      currency: "BRL",
+      ticker: "BTHF11",
+    });
+    expect(validate(picked).ticker).toBeUndefined();
+  });
+
+  it("SHOULD switch FIIs to Ações WHEN a stock is picked", () => {
+    const onReit = withAssetClass(typed, InvestmentAssetClass.BR_REIT);
+    const picked = withPicked(onReit, {
+      ...fii,
+      assetClass: InvestmentAssetClass.BR_STOCK,
+      ticker: "PETR4",
+    });
+
+    expect(picked.assetClass).toBe(InvestmentAssetClass.BR_STOCK);
+    expect(picked.classNotice).toBe(InvestmentAssetClass.BR_STOCK);
+  });
+
+  it("SHOULD keep the class AND show no notice WHEN the pick has the same class OR none", () => {
+    const same = withPicked(
+      withAssetClass(typed, InvestmentAssetClass.BR_REIT),
+      fii,
+    );
+
+    expect(same.classNotice).toBeNull();
+    expect(withPicked(typed, { ...fii, assetClass: null })).toMatchObject({
+      assetClass: InvestmentAssetClass.BR_STOCK,
+      classNotice: null,
+    });
+    expect(
+      validate(withPicked(typed, { ...fii, assetClass: null })).ticker,
+    ).toBeUndefined();
+  });
+
+  it("SHOULD never change the class of a foreign pick", () => {
+    const us = withAssetClass(typed, InvestmentAssetClass.FOREIGN_STOCK);
+    const picked = withPicked(us, {
+      ...fii,
+      assetClass: InvestmentAssetClass.FOREIGN_STOCK,
+      currency: "USD",
+      ticker: "AAPL",
+    });
+
+    expect(picked.assetClass).toBe(InvestmentAssetClass.FOREIGN_STOCK);
+    expect(picked.classNotice).toBeNull();
+  });
+
+  it("SHOULD drop the notice WHEN the class is picked again OR the ticker is typed", () => {
+    const picked = withPicked(typed, fii);
+
+    expect(
+      withAssetClass(picked, InvestmentAssetClass.BR_STOCK).classNotice,
+    ).toBeNull();
+    expect(withTicker(picked, "bthf1").classNotice).toBeNull();
+  });
+
+  it("SHOULD block saving WHEN the class is changed by hand against the picked ticker", () => {
+    const picked = withPicked(typed, fii);
+    const wrong = withAssetClass(picked, InvestmentAssetClass.BR_STOCK);
+
+    expect(validate(wrong).ticker).toBe(
+      "investment.ticker.classMismatch.BR_REIT",
+    );
+    expect(
+      validate(
+        withPicked(wrong, {
+          ...fii,
+          assetClass: InvestmentAssetClass.BR_STOCK,
+          ticker: "PETR4",
+        }),
+      ).ticker,
+    ).toBeUndefined();
+  });
+
+  it("SHOULD drop the mismatch error once the ticker is edited by hand", () => {
+    const wrong = withAssetClass(
+      withPicked(typed, fii),
+      InvestmentAssetClass.BR_STOCK,
+    );
+
+    expect(validate(withTicker(wrong, "bthf1")).ticker).toBe(
+      "investment.ticker.notFound",
+    );
+  });
+
+  it("SHOULD start an existing asset without a notice", () => {
+    expect(stateFromAsset(makeAsset()).classNotice).toBeNull();
   });
 });

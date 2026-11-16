@@ -569,6 +569,7 @@ class InvestmentModel {
 
   static toTickerSuggestion(data: Json): InvestmentTickerSuggestion {
     return {
+      assetClass: (data.assetClass as InvestmentAssetClass | null) ?? null,
       changePercent: (data.changePercent as null | string) ?? null,
       currency: toCurrencyCode(data.currency),
       exchange: (data.exchange as string) ?? "",

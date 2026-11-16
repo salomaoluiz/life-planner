@@ -15,6 +15,13 @@ describe("TickerAutocomplete", () => {
     expect(screen.getByText("R$ 10,61")).toBeTruthy();
   });
 
+  it("SHOULD show the class badge only on the rows that have one (spec 111)", () => {
+    setup();
+    open();
+
+    expect(screen.getAllByText("Ação")).toHaveLength(1);
+  });
+
   it("SHOULD tell which ticker was picked", () => {
     setup();
     open();

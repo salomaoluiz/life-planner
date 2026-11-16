@@ -9,8 +9,10 @@ import {
   InvestmentNegativePosition,
   InvestmentRedemptionTooLarge,
   InvestmentUseFixedIncomeActions,
+  TickerClassMismatch,
   TickerExists,
 } from "@domain/entities/errors";
+import { InvestmentAssetClass } from "@domain/entities/investment/enums";
 
 import getInvestmentErrorMessage from "./investmentErrorMessage";
 
@@ -36,6 +38,15 @@ it.each([
   [new GenericError(), "common.errors.generic"],
 ])("SHOULD map %p to %s", (error, key) => {
   expect(getInvestmentErrorMessage(error)).toEqual({ key });
+});
+
+it.each([
+  [InvestmentAssetClass.BR_REIT, "investment.ticker.classMismatch.BR_REIT"],
+  [InvestmentAssetClass.BR_STOCK, "investment.ticker.classMismatch.BR_STOCK"],
+])("SHOULD name the expected class %s of a mismatch (spec 111)", (cls, key) => {
+  expect(getInvestmentErrorMessage(new TickerClassMismatch(cls))).toEqual({
+    key,
+  });
 });
 
 it("SHOULD carry the formatted date of a negative position", () => {

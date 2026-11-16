@@ -462,6 +462,8 @@ export interface InvestmentsHomeSummary {
 }
 
 export interface InvestmentTickerSuggestion {
+  // Spec 111: the class the ticker belongs to, `null` when none applies or the kind is unknown.
+  assetClass: InvestmentAssetClass | null;
   changePercent: null | string;
   currency: CurrencyCode;
   exchange: string;

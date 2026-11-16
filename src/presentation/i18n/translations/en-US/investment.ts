@@ -334,8 +334,17 @@ const investment = {
   form: {
     asset: {
       class: "Class",
+      classChange: {
+        cancel: "Cancel",
+        confirm: "Change class",
+        message:
+          "Change {{ticker}} to {{class}}? Operations, income and values stay the same; the asset will show under {{class}}.",
+        title: "Change class",
+      },
       classHint:
         "Stock / ETF, FII, foreign stock / ETF, fixed income or private / option.",
+      classHintLocked:
+        "With operations, you can only switch between Stock and FII. The currency doesn't change.",
       currency: "Currency",
       currencyHint: "Can't change after the first operation.",
       currentValue: "Current value per unit (optional)",
@@ -753,6 +762,18 @@ const investment = {
     INVESTMENT_REDEMPTION: "Investment redemption",
   },
   ticker: {
+    badge: {
+      BR_REIT: "FII",
+      BR_STOCK: "Stock",
+    },
+    classAdjusted: {
+      BR_REIT: "{{ticker}} is a FII. The class was set to FII.",
+      BR_STOCK: "{{ticker}} is a stock. The class was set to Stock / ETF (B3).",
+    },
+    classMismatch: {
+      BR_REIT: "{{ticker}} is a FII. Pick the class FII.",
+      BR_STOCK: "{{ticker}} is a stock. Pick the class Stock / ETF (B3).",
+    },
     currentQuote: "Current quote",
     notFound:
       'No asset found for "{{q}}". Check the ticker or use the Non-listed class.',

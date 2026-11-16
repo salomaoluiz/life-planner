@@ -5,6 +5,7 @@ import { investmentKeys } from "@application/queryKeys/investmentKeys";
 import { useCases } from "@application/useCases";
 import {
   QuoteSourceUnavailable,
+  TickerClassMismatch,
   TickerExists,
   TickerNotFound,
 } from "@domain/entities/errors";
@@ -12,6 +13,7 @@ import { SUPPORTED_CURRENCIES } from "@domain/entities/financial/Currency";
 import { InvestmentAssetClass } from "@domain/entities/investment/enums";
 import { InvestmentTickerSuggestion } from "@domain/entities/investment/InvestmentEntities";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
+import { UpdateInvestmentAssetParams } from "@domain/repositories/investment";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
 import useOwners from "@presentation/hooks/useOwners";
 import { TranslationKeys } from "@presentation/i18n/types";
@@ -44,21 +46,31 @@ import {
 export type AssetModalVM = ReturnType<typeof useAssetModalViewModel>;
 
 const CLASS_OPTIONS = Object.values(InvestmentAssetClass);
+// Spec 111 rule 15: with operations only the two B3 classes can swap.
+const B3_CLASSES = [
+  InvestmentAssetClass.BR_STOCK,
+  InvestmentAssetClass.BR_REIT,
+];
 const SEARCH_DEBOUNCE_MS = 300;
 const SEARCH_MIN_LENGTH = 2;
 
 export default useAssetModalViewModel;
 
 function tickerErrorKey(
-  exists: boolean,
-  notFound: boolean,
+  error: unknown,
   validation?: TranslationKeys,
 ): TranslationKeys | undefined {
-  if (exists) {
+  if (error instanceof TickerExists) {
     return "investment.errors.tickerExists";
   }
+  if (error instanceof TickerNotFound) {
+    return "investment.ticker.notFound";
+  }
+  if (error instanceof TickerClassMismatch) {
+    return `investment.ticker.classMismatch.${error.expectedClass}` as TranslationKeys;
+  }
 
-  return notFound ? "investment.ticker.notFound" : validation;
+  return validation;
 }
 
 function useAssetModalViewModel() {
@@ -92,6 +104,9 @@ function useAssetModalViewModel() {
   const [edited, setEdited] = useState<AssetFormState>();
   const [submitted, setSubmitted] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
+  // Spec 111 rule 16: the update waiting for the "change class" confirmation.
+  const [pendingChange, setPendingChange] =
+    useState<UpdateInvestmentAssetParams>();
   // Spec 105 FR 29: a new fixed income asset is calculated from the rate by default.
   const [calculated, setCalculated] = useState(true);
   const state = edited ?? initial;
@@ -147,9 +162,21 @@ function useAssetModalViewModel() {
   const error = createMutation.error ?? updateMutation.error;
   const errors = submitted && state ? validate(state, initial) : {};
   const failure = getInvestmentErrorMessage(error);
-  const tickerExists = error instanceof TickerExists;
-  const tickerNotFound = error instanceof TickerNotFound;
-  const classLocked = isEditing && (existing?.operationCount ?? 0) > 0;
+  const tickerFailure =
+    error instanceof TickerExists ||
+    error instanceof TickerNotFound ||
+    error instanceof TickerClassMismatch;
+  const hasOperations = isEditing && (existing?.operationCount ?? 0) > 0;
+  const swapsOnly =
+    hasOperations && !!existing && B3_CLASSES.includes(existing.assetClass);
+  const classLocked = hasOperations && !swapsOnly;
+  let classHintKey: TranslationKeys = "investment.form.asset.classHint";
+
+  if (classLocked) {
+    classHintKey = "investment.errors.classLocked";
+  } else if (swapsOnly) {
+    classHintKey = "investment.form.asset.classHintLocked";
+  }
   function ownerOf(ownerId: string) {
     return (
       allOwners.data?.find((owner) => owner.id === ownerId)?.type ??
@@ -190,11 +217,23 @@ function useAssetModalViewModel() {
         closeModal();
         return;
       }
+      // Moving an asset with operations to the other class asks first (spec 111 rule 16).
+      if (changes.assetClass && hasOperations) {
+        setPendingChange(changes);
+        return;
+      }
       updateMutation.mutate(changes);
       return;
     }
 
     createMutation.mutate(toCreateParams(state, ownerOf(state.ownerId)));
+  }
+
+  function onClassChangeConfirm() {
+    if (pendingChange) {
+      updateMutation.mutate(pendingChange);
+    }
+    setPendingChange(undefined);
   }
 
   function onClose() {
@@ -211,8 +250,24 @@ function useAssetModalViewModel() {
   return {
     assetClass: state?.assetClass ?? InvestmentAssetClass.BR_STOCK,
     calculated: showCalculated && calculated,
+    classChange: pendingChange?.assetClass
+      ? {
+          classKey:
+            `investment.class.${pendingChange.assetClass}` as TranslationKeys,
+          ticker: state?.ticker ?? "",
+        }
+      : null,
+    classHintKey,
     classLocked,
-    classOptions: CLASS_OPTIONS.map((value) => ({
+    classNotice: state?.classNotice
+      ? {
+          key: `investment.ticker.classAdjusted.${state.classNotice}` as TranslationKeys,
+          ticker: state.ticker,
+        }
+      : null,
+    classOptions: CLASS_OPTIONS.filter(
+      (value) => !swapsOnly || B3_CLASSES.includes(value),
+    ).map((value) => ({
       labelKey: `investment.class.${value}` as TranslationKeys,
       value,
     })),
@@ -222,7 +277,7 @@ function useAssetModalViewModel() {
     currentValue: state?.currentValue ?? "",
     currentValueError: errors.currentValue,
     discardOpen,
-    failure: tickerExists || tickerNotFound ? undefined : failure,
+    failure: tickerFailure ? undefined : failure,
     isEditing,
     isLoading: !state && !isNotFound,
     isNotFound,
@@ -232,6 +287,8 @@ function useAssetModalViewModel() {
     onAssetClassChange: (value: string) =>
       state && update(withAssetClass(state, value as InvestmentAssetClass)),
     onCalculatedChange: setCalculated,
+    onClassChangeCancel: () => setPendingChange(undefined),
+    onClassChangeConfirm,
     onClose,
     onCurrencyChange: (value: string) =>
       state && update(withCurrency(state, value as AssetFormState["currency"])),
@@ -260,7 +317,7 @@ function useAssetModalViewModel() {
     showCalculated,
     suggestions,
     ticker: state?.ticker ?? "",
-    tickerError: tickerErrorKey(tickerExists, tickerNotFound, errors.ticker),
+    tickerError: tickerErrorKey(error, errors.ticker),
     tickerRequired: state ? tickerRequired(state.assetClass) : true,
     titleKey: (isEditing
       ? "investment.form.asset.editTitle"

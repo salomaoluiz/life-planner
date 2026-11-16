@@ -10,7 +10,10 @@ jest.mock("../hooks");
 const defaultViewModel: AssetModalVM = {
   assetClass: InvestmentAssetClass.BR_STOCK,
   calculated: false,
+  classChange: null,
+  classHintKey: "investment.form.asset.classHint",
   classLocked: false,
+  classNotice: null,
   classOptions: [
     {
       labelKey: "investment.class.BR_STOCK",
@@ -32,6 +35,8 @@ const defaultViewModel: AssetModalVM = {
   nameError: undefined,
   onAssetClassChange: jest.fn(),
   onCalculatedChange: jest.fn(),
+  onClassChangeCancel: jest.fn(),
+  onClassChangeConfirm: jest.fn(),
   onClose: jest.fn(),
   onCurrencyChange: jest.fn(),
   onCurrentValueChange: jest.fn(),
