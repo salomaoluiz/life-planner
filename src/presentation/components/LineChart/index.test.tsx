@@ -165,13 +165,13 @@ describe("styled series (spec 110)", () => {
     setup({
       series: [
         {
-          color: "accent",
           emphasis: "primary",
           points: [
             { label: "Nov", projected: false, value: -300 },
             { label: "Dec", projected: false, value: 400 },
             { label: "Jan", projected: false, value: 200 },
           ],
+          tone: "accent",
         },
       ],
     });
@@ -188,7 +188,7 @@ describe("styled series (spec 110)", () => {
   it("SHOULD fill the area under a series only WHEN it asks, even beside another series", () => {
     setup({
       series: [
-        { area: true, color: "accent", emphasis: "primary", points: market },
+        { area: true, emphasis: "primary", points: market, tone: "accent" },
         { dashed: true, emphasis: "muted", points: invested },
       ],
     });

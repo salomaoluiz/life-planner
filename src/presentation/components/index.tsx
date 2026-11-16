@@ -34,6 +34,7 @@ export {
   ChoiceTileGroupProps,
   ChoiceTileOption,
 } from "./ChoiceTileGroup";
+export { default as ColorDot, ColorDotProps } from "./ColorDot";
 export {
   default as ColorSwatchGroup,
   ColorSwatchGroupProps,

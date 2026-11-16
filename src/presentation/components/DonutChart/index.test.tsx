@@ -17,9 +17,9 @@ it("SHOULD describe the chart AND show the centre", () => {
 it("SHOULD draw one slice per class with a positive value", () => {
   setup({
     slices: [
-      { color: "#111111", id: "A", label: "A", value: 10 },
-      { color: "#222222", id: "B", label: "B", value: 0 },
-      { color: "#333333", id: "C", label: "C", value: -5 },
+      { id: "A", label: "A", swatch: "#111111", value: 10 },
+      { id: "B", label: "B", swatch: "#222222", value: 0 },
+      { id: "C", label: "C", swatch: "#333333", value: -5 },
     ],
   });
 
@@ -48,8 +48,8 @@ it("SHOULD outline only the selected slice", () => {
 
 it("SHOULD draw empty, all-zero and single-slice data without NaN", () => {
   setup({ slices: [] });
-  setup({ slices: [{ color: "#111111", id: "A", label: "A", value: 0 }] });
-  setup({ slices: [{ color: "#111111", id: "A", label: "A", value: 7 }] });
+  setup({ slices: [{ id: "A", label: "A", swatch: "#111111", value: 0 }] });
+  setup({ slices: [{ id: "A", label: "A", swatch: "#111111", value: 7 }] });
 
   expect(JSON.stringify(screen.toJSON())).not.toContain("NaN");
 });

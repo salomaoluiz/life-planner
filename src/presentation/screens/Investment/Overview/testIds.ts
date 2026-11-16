@@ -1,0 +1,30 @@
+const overviewTestIds = {
+  allocationChart: "investment.overview.allocation-chart",
+  allocationClass: (assetClass: string) =>
+    `investment.overview.allocation-class-${assetClass}`,
+  customPrefix: "investment.overview",
+  empty: "investment.overview.empty",
+  emptyAdd: "investment.overview.empty-add",
+  errorRetry: "investment.overview.error-retry",
+  evolutionChart: "investment.overview.evolution-chart",
+  evolutionDetail: "investment.overview.evolution-detail",
+  incomeChart: "investment.overview.income-chart",
+  incomeDetail: "investment.overview.income-detail",
+  ownerFilter: "investment.overview.owner-filter",
+  period: (preset: string) => `investment.overview.period-${preset}`,
+  periodLimitHint: "investment.overview.period-limit-hint",
+  periodNext: "investment.overview.period-next",
+  periodPrevious: "investment.overview.period-previous",
+  periodRange: "investment.overview.period-range",
+  periodToday: "investment.overview.period-today",
+  rankingFilterClear: "investment.overview.ranking-filter-clear",
+  rankingRow: (assetId: string) => `investment.overview.ranking-row-${assetId}`,
+  rankingSeeAll: "investment.overview.ranking-see-all",
+  screen: "investment.overview.screen",
+  staleQuotes: "investment.overview.stale-quotes",
+  tile: (name: string) => `investment.overview.tile-${name}`,
+  usdDetail: "investment.overview.usd-detail",
+  withoutValue: "investment.overview.without-value",
+} as const;
+
+export default overviewTestIds;

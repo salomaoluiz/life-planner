@@ -63,4 +63,53 @@ const investmentsSummary = {
   resultCents: 84960,
 };
 
-export { investmentAsset, investmentDetail, investmentsSummary, position };
+// Spec 110: the investments overview, one asset and one month of data.
+const investmentsDashboard = {
+  allocation: [{ assetClass: "BR_STOCK", share: 1, value: 120000 }],
+  incomes: [
+    {
+      byType: { DIVIDEND: 1, INTEREST: 0, JCP: 0, OTHER: 0, YIELD: 0 },
+      date: "2026-11-30",
+      planned: 0,
+      received: 5000,
+    },
+  ],
+  period: { bucket: "MONTH", from: "2025-12-01", to: "2026-11-04" },
+  ranking: [
+    {
+      assetClass: "BR_STOCK",
+      assetId: "asset-1",
+      currency: "BRL",
+      name: "Itausa PN",
+      openResult: 20000,
+      openResultPercent: 0.2,
+      share: 1,
+      ticker: "ITSA4",
+      value: 120000,
+      valueKind: "QUOTE",
+    },
+  ],
+  series: [{ date: "2026-11-04", invested: 100000, marketValue: 120000 }],
+  summary: {
+    assetsWithoutValue: 0,
+    currentValue: 120000,
+    historyStartsAt: null,
+    incomePlanned: 0,
+    incomeReceived: 5000,
+    invested: 100000,
+    openResult: 20000,
+    openResultPercent: 0.2,
+    operationsWithoutFxRate: 0,
+    realizedResult: 0,
+    salesCount: 0,
+    staleQuotes: 0,
+  },
+};
+
+export {
+  investmentAsset,
+  investmentDetail,
+  investmentsDashboard,
+  investmentsSummary,
+  position,
+};

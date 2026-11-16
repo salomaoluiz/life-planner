@@ -38,13 +38,13 @@ export interface LineChartProps {
 export interface LineChartSeries {
   /** Fills the area under the line, also beside other series (a lone series always has it) (spec 110) */
   area?: boolean;
-  /** Its own colour instead of income/expense by sign (spec 110) */
-  color?: "accent" | "textSecondary";
   /** Every segment dashed, not only the projected ones (spec 110) */
   dashed?: boolean;
   /** `primary` = thick line on top, `muted` = thin and faded line behind it */
   emphasis: "muted" | "primary";
   points: LineChartPoint[];
+  /** Its own look instead of income/expense by sign: the accent or the secondary text colour (spec 110) */
+  tone?: "accent" | "neutral";
 }
 
 const MIN_LEFT = 52;
@@ -90,7 +90,9 @@ function LineChart(props: LineChartProps) {
         : { x: xs[index], y: scaleY(point.value, domain, plotHeight, TOP) },
     );
 
-    const own = item.color ? colors[item.color] : undefined;
+    const own = item.tone
+      ? colors[item.tone === "accent" ? "accent" : "textSecondary"]
+      : undefined;
 
     return {
       area: item.area ?? !multi,

@@ -2,6 +2,7 @@ import { accountRow, largeAccountRows, overview } from "./fixtures/finance";
 import {
   investmentAsset,
   investmentDetail,
+  investmentsDashboard,
   investmentsSummary,
 } from "./fixtures/investment";
 import { me } from "./fixtures/user";
@@ -22,6 +23,10 @@ function respond(method: Method, path: string): unknown {
   }
   if (path === "/v1/user/me") {
     return me;
+  }
+  // Spec 110: the investments overview.
+  if (path.startsWith("/v1/investments/dashboard")) {
+    return investmentsDashboard;
   }
   // Spec 109: the home section.
   if (path.startsWith("/v1/investments/summary")) {

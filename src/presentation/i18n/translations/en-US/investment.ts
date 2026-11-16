@@ -611,12 +611,12 @@ const investment = {
     error: "Couldn't load the overview",
     evolution: {
       beforePrices: "Before {{date}} some prices come from your operations",
-      firstOperation:
-        "First operation on {{date}}. Earlier points stay empty, without a zero drawn.",
       hint: "Hover (or tap) a point to see the values of its last day.",
       invested: "Invested",
       market: "Market value",
       noPosition: "No position",
+      noPositionUntil:
+        "No position until {{date}}. Those points stay empty, without a zero drawn.",
       openResult: "Result",
       subtitle: "Invested vs market value, one point per {{unit}} · in R$",
       title: "Portfolio evolution",

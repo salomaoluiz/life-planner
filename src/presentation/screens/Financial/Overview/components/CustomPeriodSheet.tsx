@@ -16,10 +16,24 @@ import {
 import useStyles from "../styles";
 
 interface Props {
+  // The message under the end date WHEN the range is refused (default: the finance one)
+  errorText?: (maxTo: string) => string;
+  // The note under the fields (default: the finance one)
+  hint?: string;
   initial: OverviewPeriod;
+  // The latest end the date picker offers (default: the finance 24-month limit)
+  maxDate?: string;
   onApply: (period: OverviewPeriod) => void;
   onClose: () => void;
+  // Prefix of the testIDs (default: financial.overview)
+  testIdPrefix?: string;
   today: string;
+  // The range rule (default: the finance one)
+  validate?: (
+    from: string,
+    to: string,
+    today: string,
+  ) => { maxTo: string; ok: false } | { ok: true };
 }
 
 // The exact range of the dashboard: the 045 period rule (up to 2 years), an end up to 24 months after the current
@@ -33,9 +47,11 @@ function CustomPeriodSheet(props: Props) {
     toDate(props.initial.from),
   );
   const [to, setTo] = useState<Date | undefined>(toDate(props.initial.to));
+  const prefix = props.testIdPrefix ?? "financial.overview";
+  const validate = props.validate ?? validateCustomPeriod;
   const validation =
     from && to
-      ? validateCustomPeriod(toDateKey(from), toDateKey(to), props.today)
+      ? validate(toDateKey(from), toDateKey(to), props.today)
       : undefined;
 
   function apply() {
@@ -49,34 +65,37 @@ function CustomPeriodSheet(props: Props) {
       label={t("financial.transactions.filters.period.from")}
       maxDate={to}
       onChange={setFrom}
-      testID="financial.overview.custom-from"
+      testID={`${prefix}.custom-from`}
       value={from}
     />
   );
   const toField = (
     <DateField
       label={t("financial.transactions.filters.period.to")}
-      maxDate={toDate(maxFutureDate(props.today))}
+      maxDate={toDate(props.maxDate ?? maxFutureDate(props.today))}
       minDate={from}
       onChange={setTo}
-      testID="financial.overview.custom-to"
+      testID={`${prefix}.custom-to`}
       value={to}
     />
   );
   const error =
     validation && !validation.ok ? (
       <Text.Caption
-        testID="financial.overview.custom-error"
+        testID={`${prefix}.custom-error`}
         tone="expense"
-        value={t("financial.transactions.filters.period.error", {
-          date: validation.maxTo,
-        })}
+        value={
+          props.errorText?.(validation.maxTo) ??
+          t("financial.transactions.filters.period.error", {
+            date: validation.maxTo,
+          })
+        }
       />
     ) : null;
   const hint = (
     <Text.Caption
       tone="secondary"
-      value={t("financial.overview.period.customHint")}
+      value={props.hint ?? t("financial.overview.period.customHint")}
     />
   );
 
@@ -89,7 +108,7 @@ function CustomPeriodSheet(props: Props) {
           fullWidth
           label={t("financial.overview.period.apply")}
           onPress={apply}
-          testID="financial.overview.custom-apply"
+          testID={`${prefix}.custom-apply`}
         />
       }
       footerSecondary={
@@ -98,7 +117,7 @@ function CustomPeriodSheet(props: Props) {
             fullWidth
             label={t("common.actions.cancel")}
             onPress={props.onClose}
-            testID="financial.overview.custom-cancel"
+            testID={`${prefix}.custom-cancel`}
           />
         ) : undefined
       }
@@ -119,7 +138,7 @@ function CustomPeriodSheet(props: Props) {
       }
       onClose={props.onClose}
       size={wide ? "form" : "dialog"}
-      testID="financial.overview.custom-sheet"
+      testID={`${prefix}.custom-sheet`}
       title={t("financial.overview.period.customTitle")}
       visible
     >
@@ -132,7 +151,7 @@ function CustomPeriodSheet(props: Props) {
               {error}
             </View>
           }
-          testID="financial.overview.custom-sheet"
+          testID={`${prefix}.custom-sheet`}
         />
       ) : (
         <View style={styles.dates}>

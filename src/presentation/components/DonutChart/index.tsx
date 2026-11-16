@@ -18,9 +18,10 @@ export interface DonutChartProps {
 }
 
 export interface DonutSlice {
-  color: string;
   id: string;
   label: string;
+  /** A data colour (the class of an asset), not a theme token */
+  swatch: string;
   value: number;
 }
 
@@ -81,7 +82,7 @@ function DonutChart(props: DonutChartProps) {
     const { slice } = arc;
     const common = {
       onPress: () => props.onSelect?.(slice.id),
-      stroke: slice.color,
+      stroke: slice.swatch,
       strokeWidth: ring,
       testID: props.testID && `${props.testID}-slice-${slice.id}`,
     };

@@ -4,9 +4,9 @@ import { DonutChart } from "@components";
 
 const onSelect = jest.fn();
 const slices = [
-  { color: "#4F5BD5", id: "BR_STOCK", label: "Stocks", value: 34 },
-  { color: "#F29A4A", id: "BR_REIT", label: "REITs", value: 18 },
-  { color: "#1E9B9C", id: "FOREIGN_STOCK", label: "Foreign", value: 22 },
+  { id: "BR_STOCK", label: "Stocks", swatch: "#4F5BD5", value: 34 },
+  { id: "BR_REIT", label: "REITs", swatch: "#F29A4A", value: 18 },
+  { id: "FOREIGN_STOCK", label: "Foreign", swatch: "#1E9B9C", value: 22 },
 ];
 
 function setup(props: Partial<React.ComponentProps<typeof DonutChart>> = {}) {

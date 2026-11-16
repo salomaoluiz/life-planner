@@ -610,12 +610,12 @@ const investment = {
     error: "Não foi possível carregar a visão geral",
     evolution: {
       beforePrices: "Antes de {{date}} alguns preços vêm das suas operações",
-      firstOperation:
-        "Primeira operação em {{date}}. Os pontos antes ficam vazios, sem zero desenhado.",
       hint: "Passe o mouse (ou toque) num ponto para ver os valores do último dia dele.",
       invested: "Investido",
       market: "Valor de mercado",
       noPosition: "Sem posição",
+      noPositionUntil:
+        "Sem posição até {{date}}. Esses pontos ficam vazios, sem zero desenhado.",
       openResult: "Resultado",
       subtitle: "Investido x valor de mercado, um ponto por {{unit}} · em R$",
       title: "Evolução do patrimônio",

@@ -4,6 +4,7 @@ import { Stack } from "expo-router";
 function InvestmentLayout() {
   return (
     <Stack screenOptions={{ animation: "none", headerShown: false }}>
+      <Stack.Screen name={"overview"} />
       <Stack.Screen name={"index"} />
       <Stack.Screen name={"asset/[id]"} />
       <Stack.Screen name={"suggestions"} />
