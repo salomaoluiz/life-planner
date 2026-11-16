@@ -1,4 +1,5 @@
 const overviewTestIds = {
+  addButton: "investment.overview.add-button",
   allocationChart: "investment.overview.allocation-chart",
   allocationClass: (assetClass: string) =>
     `investment.overview.allocation-class-${assetClass}`,

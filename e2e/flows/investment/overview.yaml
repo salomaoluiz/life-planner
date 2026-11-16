@@ -1,0 +1,103 @@
+url: ${E2E_WEB_URL}
+name: investment/overview
+tags:
+  - investment
+  - spec-110
+  - wip
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: E2E Broker
+      BALANCE_CENTS: "1000000"
+- evalScript: ${output.BROKER_ACCOUNT_ID = output.ACCOUNT_ID}
+- runFlow:
+    file: ../../subflows/setup/create-investment-asset.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      TICKER: E2ETK3
+      NAME: E2E Asset
+- runFlow:
+    file: ../../subflows/setup/create-investment-operation.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      ASSET_ID: ${output.ASSET_ID}
+      TYPE: BUY
+      QUANTITY: "100"
+      UNIT_PRICE: "10"
+      ACCOUNT_ID: ${output.BROKER_ACCOUNT_ID}
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+# The Investments tab lands on the Overview (spec 110 FR 1).
+- tapOn:
+    id: "tab-investments"
+- extendedWaitUntil:
+    visible:
+      id: "investment.overview.screen"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "investment.overview.tile-current-value"
+    timeout: 20000
+- assertVisible:
+    id: "investment.overview.tile-invested"
+- assertVisible:
+    id: "investment.overview.tile-open-result"
+- assertVisible:
+    id: "investment.overview.tile-realized"
+- assertVisible:
+    id: "investment.overview.tile-income"
+- assertVisible:
+    id: "investment.overview.evolution-chart"
+- assertVisible:
+    id: "investment.overview.income-chart"
+# Tapping a class filters the ranking AND the chip clears it (FR 18).
+- extendedWaitUntil:
+    visible:
+      id: "investment.overview.allocation-class-BR_STOCK"
+    timeout: 20000
+- tapOn:
+    id: "investment.overview.allocation-class-BR_STOCK"
+- extendedWaitUntil:
+    visible:
+      id: "investment.overview.ranking-filter-clear"
+    timeout: 10000
+- tapOn:
+    id: "investment.overview.ranking-filter-clear"
+- assertNotVisible:
+    id: "investment.overview.ranking-filter-clear"
+# The period moves back and a button brings it to today; there is no way forward from the current one (FR 4).
+- tapOn:
+    id: "investment.overview.period-3M"
+- tapOn:
+    id: "investment.overview.period-previous"
+- extendedWaitUntil:
+    visible:
+      id: "investment.overview.period-today"
+    timeout: 10000
+- tapOn:
+    id: "investment.overview.period-today"
+- assertNotVisible:
+    id: "investment.overview.period-today"
+# A ranking row opens the asset detail.
+- tapOn:
+    id: "investment.overview.ranking-row-${output.ASSET_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.screen"
+    timeout: 20000

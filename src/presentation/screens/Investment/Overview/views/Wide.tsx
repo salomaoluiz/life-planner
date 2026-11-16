@@ -92,6 +92,7 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentOverviewVM>) {
               accessibilityLabel={t("investment.overview.emptyAdd")}
               name="plus"
               onPress={vm.onAddAsset}
+              testID={overviewTestIds.addButton}
             />
           )
         }

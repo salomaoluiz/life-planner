@@ -1,0 +1,34 @@
+url: ${E2E_WEB_URL}
+name: investment/overview-empty
+tags:
+  - investment
+  - spec-110
+  - wip
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+- tapOn:
+    id: "tab-investments"
+# Without any asset the Overview says so and offers to add one (FR 24).
+- extendedWaitUntil:
+    visible:
+      id: "investment.overview.empty"
+    timeout: 20000
+- tapOn:
+    id: "investment.overview.add-button"
+- extendedWaitUntil:
+    visible:
+      id: "investment.asset-modal.ticker-input"
+    timeout: 20000
