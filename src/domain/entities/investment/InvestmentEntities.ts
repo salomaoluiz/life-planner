@@ -64,6 +64,71 @@ export interface InvestmentBrlResult {
   resultPercent: null | number;
 }
 
+export interface InvestmentDashboardAllocation {
+  assetClass: InvestmentAssetClass;
+  share: number;
+  // The foreign currency assets of the class, at the rate of the period end.
+  usd?: {
+    fxRate: string;
+    resultFromAsset: number;
+    resultFromFx: number;
+    value: string;
+  };
+  value: number;
+}
+
+// Spec 110: the investments overview of a period, everything in BRL cents. Shares and percents are fractions (0.1315 = 13.15%).
+export type InvestmentDashboardBucket = "DAY" | "MONTH" | "WEEK";
+
+export interface InvestmentDashboardIncome {
+  byType: Record<InvestmentIncomeType, number>;
+  date: string;
+  planned: number;
+  received: number;
+}
+
+// `null` before the first operation of the filtered assets (a gap in the chart, never a zero).
+export interface InvestmentDashboardPoint {
+  date: string;
+  invested: null | number;
+  marketValue: null | number;
+}
+
+export interface InvestmentDashboardRanking {
+  assetClass: InvestmentAssetClass;
+  assetId: string;
+  currency: CurrencyCode;
+  name: string;
+  openResult: number;
+  openResultPercent: null | number;
+  share: number;
+  ticker: null | string;
+  usdValue?: string;
+  value: number;
+  valueKind: InvestmentDashboardValueKind;
+}
+
+export interface InvestmentDashboardSummary {
+  assetsWithoutValue: number;
+  currentValue: number;
+  historyStartsAt: null | string;
+  incomePlanned: number;
+  incomeReceived: number;
+  invested: number;
+  openResult: number;
+  openResultPercent: null | number;
+  operationsWithoutFxRate: number;
+  realizedResult: number;
+  salesCount: number;
+  staleQuotes: number;
+}
+
+export type InvestmentDashboardValueKind =
+  | "COST"
+  | "FIXED_INCOME_NET"
+  | "MANUAL"
+  | "QUOTE";
+
 // Money is integer cents in the asset currency; quantities and unit prices are decimal strings (up to 8 places).
 // Spec 108: an announced event suggested for an asset. Ratios and percent are decimal strings, `date` is the data-com.
 export interface InvestmentEventSuggestion {
@@ -302,7 +367,6 @@ export interface InvestmentOperationResult {
   operation: InvestmentOperation;
   position: InvestmentPosition;
 }
-
 // Spec 108 FR 12: a fraction that left the position and waits for its sale.
 export interface InvestmentPendingFraction {
   cost: number;
@@ -358,6 +422,15 @@ export interface InvestmentQuotesRefresh {
   fx: null | { pair: string; quotedAt: string; rate: string };
   nextRefreshAt: string;
   quotes: InvestmentQuote[];
+}
+
+export interface InvestmentsDashboard {
+  allocation: InvestmentDashboardAllocation[];
+  incomes: InvestmentDashboardIncome[];
+  period: { bucket: InvestmentDashboardBucket; from: string; to: string };
+  ranking: InvestmentDashboardRanking[];
+  series: InvestmentDashboardPoint[];
+  summary: InvestmentDashboardSummary;
 }
 
 // Spec 109: the home section in BRL cents. `resultBasisPoints` 1315 = 13.15%, undefined at zero cost.

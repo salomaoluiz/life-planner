@@ -19,6 +19,8 @@ import {
   InvestmentAsset,
   InvestmentAssetDetail,
   InvestmentBrlResult,
+  InvestmentDashboardBucket,
+  InvestmentDashboardValueKind,
   InvestmentEventSuggestion,
   InvestmentFixedIncome,
   InvestmentFixedIncomeAdjustmentResult,
@@ -39,6 +41,7 @@ import {
   InvestmentPriceHistory,
   InvestmentQuote,
   InvestmentQuotesRefresh,
+  InvestmentsDashboard,
   InvestmentsHomeSummary,
   InvestmentTickerSuggestion,
   InvestmentValuation,
@@ -102,6 +105,83 @@ class InvestmentModel {
       resultFromAsset: Number(data.resultBrlFromAsset ?? 0),
       resultFromFx: Number(data.resultBrlFromFx ?? 0),
       resultPercent: (data.resultBrlPercent as null | number) ?? null,
+    };
+  }
+
+  static toDashboard(data: Json): InvestmentsDashboard {
+    const period = data.period as Json;
+    const summary = data.summary as Json;
+
+    return {
+      allocation: (data.allocation as Json[]).map((slice) => {
+        const usd = slice.usd as Json | undefined;
+
+        return {
+          assetClass: slice.assetClass as InvestmentAssetClass,
+          share: Number(slice.share),
+          usd: usd
+            ? {
+                fxRate: usd.fxRate as string,
+                resultFromAsset: Number(usd.resultFromAsset),
+                resultFromFx: Number(usd.resultFromFx),
+                value: usd.value as string,
+              }
+            : undefined,
+          value: Number(slice.value),
+        };
+      }),
+      incomes: (data.incomes as Json[]).map((bucket) => {
+        const byType = bucket.byType as Record<string, number>;
+
+        return {
+          byType: Object.fromEntries(
+            Object.values(InvestmentIncomeType).map((type) => [
+              type,
+              Number(byType[type] ?? 0),
+            ]),
+          ) as Record<InvestmentIncomeType, number>,
+          date: bucket.date as string,
+          planned: Number(bucket.planned),
+          received: Number(bucket.received),
+        };
+      }),
+      period: {
+        bucket: period.bucket as InvestmentDashboardBucket,
+        from: period.from as string,
+        to: period.to as string,
+      },
+      ranking: (data.ranking as Json[]).map((row) => ({
+        assetClass: row.assetClass as InvestmentAssetClass,
+        assetId: row.assetId as string,
+        currency: toCurrencyCode(row.currency),
+        name: row.name as string,
+        openResult: Number(row.openResult),
+        openResultPercent: toNullableNumber(row.openResultPercent),
+        share: Number(row.share),
+        ticker: (row.ticker as null | string) ?? null,
+        usdValue: (row.usdValue as string | undefined) ?? undefined,
+        value: Number(row.value),
+        valueKind: row.valueKind as InvestmentDashboardValueKind,
+      })),
+      series: (data.series as Json[]).map((point) => ({
+        date: point.date as string,
+        invested: toNullableNumber(point.invested),
+        marketValue: toNullableNumber(point.marketValue),
+      })),
+      summary: {
+        assetsWithoutValue: Number(summary.assetsWithoutValue),
+        currentValue: Number(summary.currentValue),
+        historyStartsAt: (summary.historyStartsAt as null | string) ?? null,
+        incomePlanned: Number(summary.incomePlanned),
+        incomeReceived: Number(summary.incomeReceived),
+        invested: Number(summary.invested),
+        openResult: Number(summary.openResult),
+        openResultPercent: toNullableNumber(summary.openResultPercent),
+        operationsWithoutFxRate: Number(summary.operationsWithoutFxRate),
+        realizedResult: Number(summary.realizedResult),
+        salesCount: Number(summary.salesCount),
+        staleQuotes: Number(summary.staleQuotes),
+      },
     };
   }
 
@@ -518,3 +598,7 @@ class InvestmentModel {
 }
 
 export default InvestmentModel;
+
+function toNullableNumber(value: unknown): null | number {
+  return value === null || value === undefined ? null : Number(value);
+}

@@ -42,6 +42,17 @@ it("SHOULD forward every method to the datasource and return its result", async 
     ["getIncomes", [{ assetId: "a" }]],
     ["getIncomeSuggestions", [{}]],
     ["getHomeSummary", [{ ownerIds: ["a"], today: "2026-11-04" }]],
+    [
+      "getDashboard",
+      [
+        {
+          from: "2025-12-01",
+          ownerIds: ["a"],
+          to: "2026-11-04",
+          today: "2026-11-04",
+        },
+      ],
+    ],
     ["rejectIncomeSuggestion", ["sug"]],
     ["createIncome", [{ assetId: "a" }]],
     ["updateIncome", [{ id: "inc" }]],

@@ -21,5 +21,7 @@ export default {
     "eslint/**/*",
     "e2e/scripts/**/*",
     ".claude/worktrees/**",
+    // Design artboards and plans (git-ignored, spec 110) hold exported JS that is not source.
+    "docs/**",
   ],
 };

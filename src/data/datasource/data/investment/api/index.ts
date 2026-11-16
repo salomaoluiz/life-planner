@@ -15,6 +15,7 @@ import {
 import { api } from "@infrastructure/api";
 import { formatDecimal, parseDecimal, ZERO } from "@utils/decimal";
 
+import dashboardApi from "./dashboardApi";
 import eventApi, { eventFieldsBody } from "./eventApi";
 import fixedIncomeApi from "./fixedIncomeApi";
 import incomeApi from "./incomeApi";
@@ -310,6 +311,7 @@ const investmentApi: InvestmentDatasource = {
   ...fixedIncomeApi,
   ...eventApi,
   ...incomeApi,
+  ...dashboardApi,
   ...summaryApi,
   createAsset,
   createOperation,
