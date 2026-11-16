@@ -11,6 +11,8 @@ export interface RemovableChipProps {
   label: string;
   onRemove: () => void;
   removeLabel: string;
+  // The id of the remove button when it must differ from `${testID}-remove` (spec 110)
+  removeTestID?: string;
   testID?: string;
   // A fixed-color bullet after the label: expense or income (spec 051).
   typeDot?: "expense" | "income";
@@ -81,7 +83,7 @@ function RemovableChip(props: RemovableChipProps) {
         }}
         minTouchTarget={false}
         onPress={props.onRemove}
-        testID={testID && `${testID}-remove`}
+        testID={props.removeTestID ?? (testID && `${testID}-remove`)}
       >
         <Icon color={colors.accentText} name="close" size={sizes.iconSm} />
       </Touchable>

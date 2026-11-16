@@ -136,3 +136,5 @@ Drawn with `react-native-svg` (works on iOS, Android and web), Grafite tokens on
 
 - `Spinner` (small inline activity indicator, `accessibilityLabel?`, `testID?`) and `ProgressChip` (`label`, `testID?`: pill with spinner and label, polite live region).
 - `strikethrough?` on `Text` (all modes), `AmountText` and `ListItem` (title): a row being deleted.
+
+- `DonutChart` (spec 110): `slices: { id; label; swatch; value }[]` (a slice without a positive value is not drawn), `selectedId?` (accent outline, `<testID>-selected`), `onSelect?(id)` (press on a slice, `<testID>-slice-<id>`), `centerLabel?`, `centerValue?`, `size?`; the legend with the values is the screen's (real buttons). `ColorDot` (`color`, `size?`, `accessibilityLabel?`): the small rounded square that ties a row to a slice or a bar. `LineChart` series take `tone?: "accent" | "neutral"` (own colour instead of income/expense), `dashed?` (every segment) and `area?` (fill under the line beside other series); `ColumnChart` takes `incomeOnly` (one centered column, the projected part dashed, the expense ignored); `RemovableChip` takes `removeTestID`.

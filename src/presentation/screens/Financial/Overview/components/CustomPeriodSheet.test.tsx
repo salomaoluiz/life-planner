@@ -81,3 +81,45 @@ it("SHOULD keep the compact stack on phones (spec 053)", () => {
     screen.queryByTestId("financial.overview.custom-sheet-column-left"),
   ).toBeNull();
 });
+
+describe("a module with its own rule (spec 110)", () => {
+  function setupCustom(initial: { from: string; to: string }) {
+    jest.mocked(useBreakpoint).mockReturnValue("compact");
+    render(
+      <CustomPeriodSheet
+        errorText={(date) => `until ${date}`}
+        hint="Up to 10 years"
+        initial={initial}
+        maxDate="2026-10-29"
+        onApply={onApply}
+        onClose={jest.fn()}
+        testIdPrefix="investment.overview"
+        today="2026-10-29"
+        validate={(from, to) =>
+          to > "2026-10-29" ? { maxTo: "2026-10-29", ok: false } : { ok: true }
+        }
+      />,
+    );
+  }
+
+  it("SHOULD apply a range its rule accepts, with its own testIDs AND hint", () => {
+    setupCustom({ from: "2020-01-01", to: "2026-10-29" });
+
+    expect(screen.getByText("Up to 10 years")).toBeOnTheScreen();
+    fireEvent.press(screen.getByTestId("investment.overview.custom-apply"));
+
+    expect(onApply).toHaveBeenCalledWith({
+      from: "2020-01-01",
+      to: "2026-10-29",
+    });
+  });
+
+  it("SHOULD refuse a range its rule rejects AND say until when", () => {
+    setupCustom({ from: "2026-01-01", to: "2026-12-31" });
+
+    expect(screen.getByText("until 2026-10-29")).toBeOnTheScreen();
+    fireEvent.press(screen.getByTestId("investment.overview.custom-apply"));
+
+    expect(onApply).not.toHaveBeenCalled();
+  });
+});

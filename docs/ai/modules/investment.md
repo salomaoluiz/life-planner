@@ -151,3 +151,17 @@ e2e: e2e/flows/investment/corporate-events.yaml, corporate-event-no-position.yam
 ```
 
 Design deviations (spec 108): "Ver sugestão" opens the suggestion in the event modal instead of scrolling (the screen has no scroll anchors); the inbox card has no past-sells hint (the inbox has no operations; the detail shows it); fee rows of the fraction sale are Brokerage / Exchange fees only; the delete confirmation lists the sale and its finance entry without the account name (no extra request).
+
+## Investments overview (spec 110)
+
+```yaml
+sections: Overview and Assets are DRAWER sections like finance (owner decision, the artboard's in-page tabs are not built): Investment/Layout/models/investmentSections.ts (INVESTMENT_SECTIONS, getInvestmentSection, getInvestmentSectionPath), rail children in Navigation/models/navigationItems.ts, `section_picker` shared with finance (Financial/SectionPicker picks the module from the path, testIDs investment.layout.section-sheet-*), the investments tab opens /investments/overview (AppTabBar) and a re-press on the bottom bar opens the picker; Investment/Layout/components/SectionHeader (overline "Investimentos" + section title, title opens the picker below expanded) is used by the Overview and the asset list
+owner filter: hooks/useInvestmentOwnerFilter.ts (module store shared by both sections)
+data: GET /v1/investments/dashboard -> InvestmentsDashboard (InvestmentEntities.ts), investmentApi.getDashboard (api/dashboardApi.ts), InvestmentModel.toDashboard, getInvestmentsDashboardUseCase, investmentKeys.dashboard
+screen: Investment/Overview (route app/(app)/(tabs)/investments/overview.tsx): hooks/useInvestmentOverviewViewModel (period from models/investmentPeriod.ts: no future, 10-year custom range; selections reset with the owner or the period), components OverviewToolbar (reuses the finance PeriodArrows and CustomPeriodSheet through optional props), Tiles, EvolutionBlock (LineChart: market accent with area + invested dashed), AllocationBlock (DonutChart + legend buttons + USD detail of the selected class), RankingBlock (10 rows, See all, class chip), IncomeBlock (ColumnChart incomeOnly), StateBanners; models seriesModel / allocationModel / rankingModel / incomeModel
+testIds: investment.overview.* (Overview/testIds.ts)
+e2e: e2e/flows/investment/overview.yaml, overview-empty.yaml (spec-110); the subflow open-investments now taps the Assets section
+perf: investment.overview.mount.cold / render.mount (perf/budgets/investment.json)
+```
+
+Design deviations (spec 110): Overview and Assets are drawer sections, not tabs (owner); the phone shows the same five tiles in two columns instead of one combined card; the USD detail opens when the Foreign class is selected (no web hover); the preset is kept in memory like the finance Overview; slice and legend colours come from `investmentClassPalette` (light and dark).

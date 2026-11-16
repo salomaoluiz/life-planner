@@ -50,3 +50,36 @@ it("SHOULD only close WHEN the close button is pressed", () => {
   expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
   expect(spies.replace).not.toHaveBeenCalled();
 });
+
+describe("on an investments path (spec 110)", () => {
+  it("SHOULD list the 2 investments sections AND mark the current one as selected", () => {
+    setup("/investments/overview");
+
+    expect(
+      screen.getByText("investment.sections.pickerTitle"),
+    ).toBeOnTheScreen();
+    ["overview", "assets"].forEach((section) =>
+      expect(
+        screen.getByTestId(`investment.layout.section-sheet-${section}`),
+      ).toBeOnTheScreen(),
+    );
+    expect(
+      screen.queryByTestId("financial.layout.section-sheet-cards"),
+    ).toBeNull();
+    expect(
+      screen.getByTestId("investment.layout.section-sheet-overview").props
+        .accessibilityState,
+    ).toMatchObject({ selected: true });
+  });
+
+  it("SHOULD close AND replace to the section WHEN another one is chosen", () => {
+    setup("/investments/asset/asset-1");
+
+    fireEvent.press(
+      screen.getByTestId("investment.layout.section-sheet-overview"),
+    );
+
+    expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
+    expect(spies.replace).toHaveBeenCalledWith("/investments/overview");
+  });
+});

@@ -11,6 +11,7 @@ import { InvestmentAsset } from "@domain/entities/investment/InvestmentEntities"
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
 import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
+import { resetInvestmentOwnerFilter } from "@screens/Investment/hooks/useInvestmentOwnerFilter";
 import {
   makeAsset,
   makeFixedIncome,
@@ -62,6 +63,7 @@ const spies = {
 };
 
 beforeEach(() => {
+  resetInvestmentOwnerFilter();
   jest.clearAllMocks();
   activeQuery.reset();
   archivedQuery.reset();

@@ -9,6 +9,10 @@ import {
   getFinancialSection,
   getFinancialSectionPath,
 } from "@screens/Financial/Layout/models/financialSections";
+import {
+  getInvestmentSection,
+  getInvestmentSectionPath,
+} from "@screens/Investment/Layout/models/investmentSections";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 import { screenPath } from "@screens/Navigation/models/modalPath";
 import {
@@ -18,6 +22,24 @@ import {
 
 const FINANCES_ROUTE = "financial";
 const FINANCES_PATH = "/financial/transaction";
+const INVESTMENTS_ROUTE = "investments";
+// Spec 110 FR 1: Investments opens its Overview, like Finances opens Transactions.
+const INVESTMENTS_PATH = "/investments/overview";
+
+const SECTIONED_LANDINGS: Record<string, string> = {
+  [FINANCES_ROUTE]: FINANCES_PATH,
+  [INVESTMENTS_ROUTE]: INVESTMENTS_PATH,
+};
+
+function activeChildPathOf(routeName: string, pathname: string) {
+  if (routeName === FINANCES_ROUTE) {
+    return getFinancialSectionPath(getFinancialSection(screenPath(pathname)));
+  }
+
+  return routeName === INVESTMENTS_ROUTE
+    ? getInvestmentSectionPath(getInvestmentSection(screenPath(pathname)))
+    : undefined;
+}
 
 function useAppTabBarViewModel({ navigation, state }: BottomTabBarProps) {
   const { t } = useTranslation();
@@ -28,10 +50,7 @@ function useAppTabBarViewModel({ navigation, state }: BottomTabBarProps) {
   const isWide = breakpoint === "expanded";
 
   const activeRouteName = state.routes[state.index].name;
-  const activeChildPath =
-    activeRouteName === FINANCES_ROUTE
-      ? getFinancialSectionPath(getFinancialSection(screenPath(pathname)))
-      : undefined;
+  const activeChildPath = activeChildPathOf(activeRouteName, pathname);
 
   const items: NavigationRailItem[] = NAVIGATION_ITEMS.map((item) => ({
     children: item.children?.map((child) => ({
@@ -46,12 +65,14 @@ function useAppTabBarViewModel({ navigation, state }: BottomTabBarProps) {
   }));
 
   function onTabPress(routeName: string) {
-    if (routeName === FINANCES_ROUTE) {
-      // Finances always opens Transactions; a re-press on the bottom bar opens the section picker.
-      if (!isWide && activeRouteName === FINANCES_ROUTE) {
+    const landing = SECTIONED_LANDINGS[routeName];
+
+    if (landing) {
+      // A module with sections always opens its first one; a re-press on the bottom bar opens the section picker.
+      if (!isWide && activeRouteName === routeName) {
         openModal("section_picker");
       } else {
-        router.navigate(FINANCES_PATH as never);
+        router.navigate(landing as never);
       }
 
       return;

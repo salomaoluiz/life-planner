@@ -150,3 +150,59 @@ it("SHOULD hide the Finances children WHEN another tab is active", () => {
     screen.queryByTestId("navigation-rail-financial-categories"),
   ).toBeNull();
 });
+
+describe("WHEN the Investments tab is pressed (spec 110)", () => {
+  it("SHOULD open the Overview, also from another tab", () => {
+    setup(0);
+
+    fireEvent.press(screen.getByTestId("tab-investments"));
+
+    expect(spies.navigate).toHaveBeenCalledWith("/investments/overview");
+    expect(spies.dispatch).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD open the Overview on the rail even when already inside Investments", () => {
+    setBreakpoint("expanded");
+    setup(5, "/investments");
+
+    fireEvent.press(screen.getByTestId("tab-investments"));
+
+    expect(spies.navigate).toHaveBeenCalledWith("/investments/overview");
+  });
+
+  it("SHOULD open the section picker WHEN Investments is already active on the bottom bar", () => {
+    setup(5, "/investments");
+
+    fireEvent.press(screen.getByTestId("tab-investments"));
+
+    expect(modalNavigation.openModal).toHaveBeenCalledWith("section_picker");
+    expect(spies.navigate).not.toHaveBeenCalled();
+  });
+});
+
+it("SHOULD highlight the investments section of the pathname AND replace the route WHEN a child is pressed", () => {
+  setBreakpoint("expanded");
+  setup(5, "/investments/asset/asset-1");
+
+  expect(
+    screen.getByTestId("navigation-rail-investment-assets").props
+      .accessibilityState,
+  ).toMatchObject({ selected: true });
+  expect(
+    screen.getByTestId("navigation-rail-investment-overview").props
+      .accessibilityState,
+  ).toMatchObject({ selected: false });
+
+  fireEvent.press(screen.getByTestId("navigation-rail-investment-overview"));
+
+  expect(spies.replace).toHaveBeenCalledWith("/investments/overview");
+});
+
+it("SHOULD hide the Investments children WHEN another tab is active", () => {
+  setBreakpoint("expanded");
+  setup(1);
+
+  expect(
+    screen.queryByTestId("navigation-rail-investment-overview"),
+  ).toBeNull();
+});

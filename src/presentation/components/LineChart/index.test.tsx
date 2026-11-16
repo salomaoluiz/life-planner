@@ -122,3 +122,99 @@ describe("several series (spec 094)", () => {
     expect(screen.getByLabelText("Dec, R$ -200")).toBeTruthy();
   });
 });
+
+describe("styled series (spec 110)", () => {
+  const market = [
+    { label: "Nov", projected: false, value: 1000 },
+    { label: "Dec", projected: false, value: 1500 },
+    { label: "Jan", projected: false, value: 1200 },
+  ];
+  const invested = [
+    { label: "Nov", projected: false, value: 900 },
+    { label: "Dec", projected: false, value: 900 },
+    { label: "Jan", projected: false, value: 1000 },
+  ];
+  function paths(testID: string) {
+    return screen
+      .getByTestId(testID)
+      .findAll(
+        (node) =>
+          typeof node.props.d === "string" && node.props.d.startsWith("M"),
+      );
+  }
+
+  it("SHOULD draw every segment of a dashed series dashed", () => {
+    setup({
+      series: [
+        { emphasis: "primary", points: market },
+        { dashed: true, emphasis: "muted", points: invested },
+      ],
+    });
+
+    const lines = paths("line-series-1").filter(
+      (node) => node.props.fill === "none",
+    );
+
+    expect(lines.length).toBeGreaterThan(0);
+    expect(lines.every((node) => node.props.strokeDasharray === "5 4")).toBe(
+      true,
+    );
+  });
+
+  it("SHOULD give a series its own colour, whatever the sign of its values", () => {
+    setup({
+      series: [
+        {
+          emphasis: "primary",
+          points: [
+            { label: "Nov", projected: false, value: -300 },
+            { label: "Dec", projected: false, value: 400 },
+            { label: "Jan", projected: false, value: 200 },
+          ],
+          tone: "accent",
+        },
+      ],
+    });
+
+    const strokes = new Set(
+      paths("line-series-0")
+        .filter((node) => node.props.fill === "none")
+        .map((node) => node.props.stroke),
+    );
+
+    expect(strokes.size).toBe(1);
+  });
+
+  it("SHOULD fill the area under a series only WHEN it asks, even beside another series", () => {
+    setup({
+      series: [
+        { area: true, emphasis: "primary", points: market, tone: "accent" },
+        { dashed: true, emphasis: "muted", points: invested },
+      ],
+    });
+
+    function area(testID: string) {
+      return paths(testID).filter((node) => node.props.fillOpacity === 0.08);
+    }
+
+    expect(area("line-series-0").length).toBeGreaterThan(0);
+    expect(area("line-series-1")).toHaveLength(0);
+  });
+
+  it("SHOULD keep a gap for a null point AND draw no NaN", () => {
+    setup({
+      series: [
+        {
+          emphasis: "primary",
+          points: [
+            { label: "Nov", projected: false, value: undefined },
+            { label: "Dec", projected: false, value: 400 },
+            { label: "Jan", projected: false, value: 200 },
+          ],
+        },
+      ],
+    });
+
+    expect(JSON.stringify(screen.toJSON())).not.toContain("NaN");
+  });
+});

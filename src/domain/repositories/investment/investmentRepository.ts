@@ -28,6 +28,7 @@ import {
   InvestmentOperationResult,
   InvestmentPriceHistory,
   InvestmentQuotesRefresh,
+  InvestmentsDashboard,
   InvestmentsHomeSummary,
   InvestmentTickerSuggestion,
   InvestmentValuationResult,
@@ -190,6 +191,15 @@ export interface GetInvestmentPriceHistoryParams {
   range: InvestmentPriceRange;
 }
 
+export interface GetInvestmentsDashboardParams {
+  // `YYYY-MM-DD`, inclusive; `from <= to <= today`, at most 10 years.
+  from: string;
+  ownerIds: string[];
+  to: string;
+  // The client's local calendar date.
+  today: string;
+}
+
 export interface GetInvestmentsHomeSummaryParams {
   ownerIds: string[];
   // The client's local calendar date, `YYYY-MM-DD`.
@@ -261,6 +271,9 @@ export type InvestmentRepository = {
   deleteValuation(id: string): Promise<void>;
   getAsset(id: string): Promise<InvestmentAssetDetail>;
   getAssets(params: GetInvestmentAssetsParams): Promise<InvestmentAsset[]>;
+  getDashboard(
+    params: GetInvestmentsDashboardParams,
+  ): Promise<InvestmentsDashboard>;
   getEventSuggestions(
     params: GetInvestmentEventSuggestionsParams,
   ): Promise<InvestmentEventSuggestion[]>;

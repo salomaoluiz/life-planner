@@ -6,6 +6,13 @@ url: ${E2E_WEB_URL}
     timeout: 20000
 - tapOn:
     id: "tab-investments"
+# Spec 110: the tab opens the Overview; the asset list is the Assets section of the side menu.
+- extendedWaitUntil:
+    visible:
+      id: "navigation-rail-investment-assets"
+    timeout: 20000
+- tapOn:
+    id: "navigation-rail-investment-assets"
 - extendedWaitUntil:
     visible:
       id: "investment.list.screen"

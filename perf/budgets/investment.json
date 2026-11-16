@@ -107,6 +107,15 @@
   "investment.operation.render.mount": {
     "maxCommits": 3
   },
+  "investment.overview.mount.cold": {
+    "maxDepth": 2,
+    "maxDuplicates": 0,
+    "maxRequests": 2,
+    "route": "app/(app)/(tabs)/investments/overview.tsx"
+  },
+  "investment.overview.render.mount": {
+    "maxCommits": 4
+  },
   "investment.suggestions.mount.cold": {
     "maxDepth": 3,
     "maxDuplicates": 0,

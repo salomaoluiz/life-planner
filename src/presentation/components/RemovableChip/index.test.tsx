@@ -39,3 +39,21 @@ it("SHOULD show a 10 px color bullet only when dotColor is given", () => {
     screen.queryByTestId("chip-dot", { includeHiddenElements: true }),
   ).toBeNull();
 });
+
+it("SHOULD expose the remove button under the id the caller gives (spec 110)", () => {
+  const onRemove = jest.fn();
+
+  render(
+    <RemovableChip
+      label="Stocks"
+      onRemove={onRemove}
+      removeLabel="Clear"
+      removeTestID="custom-remove"
+      testID="chip"
+    />,
+  );
+  fireEvent.press(screen.getByTestId("custom-remove"));
+
+  expect(onRemove).toHaveBeenCalledTimes(1);
+  expect(screen.queryByTestId("chip-remove")).toBeNull();
+});

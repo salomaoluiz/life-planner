@@ -36,9 +36,15 @@ export interface LineChartProps {
 
 /** One line; every series has the same number of points, at the same x positions (spec 094) */
 export interface LineChartSeries {
+  /** Fills the area under the line, also beside other series (a lone series always has it) (spec 110) */
+  area?: boolean;
+  /** Every segment dashed, not only the projected ones (spec 110) */
+  dashed?: boolean;
   /** `primary` = thick line on top, `muted` = thin and faded line behind it */
   emphasis: "muted" | "primary";
   points: LineChartPoint[];
+  /** Its own look instead of income/expense by sign: the accent or the secondary text colour (spec 110) */
+  tone?: "accent" | "neutral";
 }
 
 const MIN_LEFT = 52;
@@ -84,16 +90,23 @@ function LineChart(props: LineChartProps) {
         : { x: xs[index], y: scaleY(point.value, domain, plotHeight, TOP) },
     );
 
+    const own = item.tone
+      ? colors[item.tone === "accent" ? "accent" : "textSecondary"]
+      : undefined;
+
     return {
+      area: item.area ?? !multi,
       coords,
+      dashed: item.dashed ?? false,
       emphasis: item.emphasis,
+      own,
       points: item.points,
       segments: buildSegments(
         coords,
         item.points,
         baseline,
-        item.emphasis === "muted" ? colors.accent : colors.income,
-        item.emphasis === "muted" ? colors.accent : colors.expense,
+        own ?? (item.emphasis === "muted" ? colors.accent : colors.income),
+        own ?? (item.emphasis === "muted" ? colors.accent : colors.expense),
       ),
     };
   });
@@ -160,7 +173,7 @@ function LineChart(props: LineChartProps) {
           >
             {item.segments.map((segment, index) => (
               <G key={index}>
-                {segment.dashed || multi ? null : (
+                {segment.dashed || item.dashed || !item.area ? null : (
                   <Path
                     d={`M${segment.x1} ${segment.y1} L${segment.x2} ${segment.y2} L${segment.x2} ${baseline} L${segment.x1} ${baseline} Z`}
                     fill={segment.color}
@@ -171,7 +184,9 @@ function LineChart(props: LineChartProps) {
                   d={`M${segment.x1} ${segment.y1} L${segment.x2} ${segment.y2}`}
                   fill="none"
                   stroke={segment.color}
-                  strokeDasharray={segment.dashed ? "5 4" : undefined}
+                  strokeDasharray={
+                    segment.dashed || item.dashed ? "5 4" : undefined
+                  }
                   strokeLinecap="round"
                   strokeOpacity={item.emphasis === "muted" ? MUTED_OPACITY : 1}
                   strokeWidth={strokeWidth(item.emphasis, multi)}
@@ -216,7 +231,7 @@ function LineChart(props: LineChartProps) {
                   fill={colors.surface}
                   key={seriesIndex}
                   r={item.emphasis === "muted" ? 4 : 5}
-                  stroke={markerColor(item.emphasis, value, colors)}
+                  stroke={item.own ?? markerColor(item.emphasis, value, colors)}
                   strokeWidth={2}
                 />
               ) : null;

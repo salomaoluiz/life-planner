@@ -70,3 +70,5 @@ Kit components read `useKitTheme()` (`@components/utils/useKitTheme`: colors, sp
 Flat surfaces: `surface` + 1 px `border`; no shadows except the quick-add button (spec 009); glass/blur is removed by spec 008.
 
 Layout helpers: `@utils/device` (`getScreenSizes()`, `getWindowsSizes()`), `@utils/platform` (`isWeb()`, …).
+
+- Investment class colours (spec 110): `investmentClassPalette` in `theme/constants/investmentClassPalette.ts` (`light` and `dark` maps for `BR_STOCK`, `BR_REIT`, `FOREIGN_STOCK`, `FIXED_INCOME`, `PRIVATE`), data like `chartPalette`; every pair differs in lightness (ratio >= 1.2) and stands out from its surface (>= 1.5), pinned by its test.

@@ -25,6 +25,7 @@ export { default as getInvestmentIncomesUseCase } from "./getInvestmentIncomesUs
 export { default as getInvestmentIncomeUseCase } from "./getInvestmentIncomeUseCase";
 export { default as getInvestmentOperationLinkUseCase } from "./getInvestmentOperationLinkUseCase";
 export { default as getInvestmentPriceHistoryUseCase } from "./getInvestmentPriceHistoryUseCase";
+export { default as getInvestmentsDashboardUseCase } from "./getInvestmentsDashboardUseCase";
 export { default as previewInvestmentFixedIncomeRedemptionUseCase } from "./previewInvestmentFixedIncomeRedemptionUseCase";
 export { default as receiveInvestmentIncomeUseCase } from "./receiveInvestmentIncomeUseCase";
 export { default as refreshInvestmentQuotesUseCase } from "./refreshInvestmentQuotesUseCase";

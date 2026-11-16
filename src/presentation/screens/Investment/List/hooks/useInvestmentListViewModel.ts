@@ -9,10 +9,8 @@ import { InvestmentAssetStatus } from "@domain/entities/investment/enums";
 import { InvestmentAsset } from "@domain/entities/investment/InvestmentEntities";
 import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
-import {
-  ALL_OWNERS,
-  buildOwnerFilterChoices,
-} from "@screens/Financial/models/ownerOptions";
+import { buildOwnerFilterChoices } from "@screens/Financial/models/ownerOptions";
+import useInvestmentOwnerFilter from "@screens/Investment/hooks/useInvestmentOwnerFilter";
 import useQuoteRefresh from "@screens/Investment/hooks/useQuoteRefresh";
 import {
   buildEntries,
@@ -44,7 +42,7 @@ export default useInvestmentListViewModel;
 function useInvestmentListViewModel() {
   const isFocused = useIsFocused();
   const [tab, setTab] = useState(InvestmentAssetStatus.ACTIVE);
-  const [ownerFilter, setOwnerFilter] = useState(ALL_OWNERS);
+  const [ownerFilter, setOwnerFilter] = useInvestmentOwnerFilter();
   const [search, setSearch] = useState("");
   const { openModal } = useModalNavigation();
   const quoteRefresh = useQuoteRefresh();

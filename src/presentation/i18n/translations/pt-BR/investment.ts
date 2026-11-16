@@ -585,6 +585,87 @@ const investment = {
     total: "Total",
     type: "Tipo",
   },
+  overview: {
+    a11y: {
+      allocationChart: "Alocação de {{total}} por classe: {{items}}",
+      evolutionChart:
+        "Carteira de {{from}} a {{to}}: valor de mercado {{market}}, investido {{invested}}",
+      incomeChart: "Proventos recebidos de {{from}} a {{to}}: {{total}}",
+    },
+    allocation: {
+      fixedIncome: "Renda fixa (líquido)",
+      fromAsset: "Do ativo",
+      fromDollar: "Do dólar",
+      fxRate: "Câmbio em {{date}}",
+      inUsd: "Em US$",
+      subtitle: "No fim do período · toque numa classe para filtrar o ranking",
+      title: "Alocação por classe",
+      total: "Total",
+    },
+    empty: "Nenhum investimento ainda",
+    emptyAdd: "Adicionar ativo",
+    emptyDescription:
+      "Cadastre um ativo e lance as compras para ver a evolução e a alocação aqui.",
+    emptyOwner: "Nenhum investimento em {{owner}}",
+    error: "Não foi possível carregar a visão geral",
+    evolution: {
+      beforePrices: "Antes de {{date}} alguns preços vêm das suas operações",
+      hint: "Passe o mouse (ou toque) num ponto para ver os valores do último dia dele.",
+      invested: "Investido",
+      market: "Valor de mercado",
+      noPositionUntil:
+        "Sem posição até {{date}}. Esses pontos ficam vazios, sem zero desenhado.",
+      openResult: "Resultado",
+      subtitle: "Investido x valor de mercado, um ponto por {{unit}} · em R$",
+      title: "Evolução do patrimônio",
+      units: { day: "dia", month: "mês", week: "semana" },
+    },
+    income: {
+      average: "Média: {{amount}}/{{unit}}",
+      planned: "Previsto",
+      received: "Recebido",
+      subtitle: "Dividendos, JCP, rendimentos e juros · líquido em R$",
+      title: "Proventos por mês",
+      units: { month: "mês", week: "semana" },
+    },
+    period: {
+      customHint: "Até 10 anos, terminando hoje no máximo",
+      error: "Escolha um fim até {{date}}",
+      noFuture: "Sem períodos futuros em investimentos",
+    },
+    ranking: {
+      atCost: "contado pelo custo",
+      clearFilter: "Limpar filtro",
+      estimatedNet: "líquido estimado",
+      footnote:
+        "Ativos em US$ entram convertidos pelo câmbio do fim do período; o valor em US$ fica na segunda linha e no detalhe do ativo.",
+      manualValue: "valor manual",
+      seeAll: "Ver todos ({{count}})",
+      subtitle: "Maior valor primeiro · toque abre o ativo",
+      title: "Ranking por ativo",
+      usdValue: "US$ {{value}}",
+    },
+    retry: "Tentar de novo",
+    state: {
+      staleQuotes:
+        "Cotações de {{count}} ativos não atualizaram hoje. Usando o último preço conhecido.",
+      withoutValue:
+        "{{count}} ativos ainda não têm valor; contados pelo custo.",
+    },
+    tile: {
+      currentValue: "Valor atual",
+      currentValueCaption: "em {{date}}, consolidado em R$",
+      income: "Proventos",
+      incomeCaption: "recebidos no período",
+      incomePlanned: "+ {{amount}} previstos",
+      invested: "Total investido",
+      investedCaption: "custo da posição aberta",
+      openResult: "Resultado em aberto",
+      openResultCaption: "{{percent}} sobre o investido",
+      realized: "Resultado realizado",
+      realizedCaption: "vendas no período: {{count}}",
+    },
+  },
   position: {
     averagePrice: "Preço médio (com taxas)",
     averagePriceShort: "Preço médio",
@@ -632,6 +713,13 @@ const investment = {
     split:
       "Resultado em R$ = variação do ativo {{asset}} + variação do dólar {{fx}}",
     usd: "Resultado em USD",
+  },
+  sections: {
+    assets: "Ativos",
+    overview: "Visão geral",
+    pickerA11yLabel: "{{section}}, trocar seção de Investimentos",
+    pickerClose: "Fechar",
+    pickerTitle: "Investimentos",
   },
   suggestions: {
     approve: "Aprovar",

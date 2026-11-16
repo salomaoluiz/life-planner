@@ -1,5 +1,6 @@
 import { TranslationKeys } from "@presentation/i18n/types";
 import { FINANCIAL_SECTIONS } from "@screens/Financial/Layout/models/financialSections";
+import { INVESTMENT_SECTIONS } from "@screens/Investment/Layout/models/investmentSections";
 
 export interface NavigationChild {
   icon: string;
@@ -42,6 +43,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     testID: "tab-finances",
   },
   {
+    children: INVESTMENT_SECTIONS.map((item) => ({ ...item })),
     icon: "chart-line",
     labelKey: "navigation.tabs.investments",
     routeName: "investments",

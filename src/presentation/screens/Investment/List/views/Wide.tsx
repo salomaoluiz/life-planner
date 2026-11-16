@@ -11,7 +11,6 @@ import {
   IconButton,
   ReadOnlyNotice,
   Screen,
-  ScreenHeader,
   SearchField,
   SegmentedControl,
   StatusBanner,
@@ -24,6 +23,7 @@ import { InvestmentAssetStatus } from "@domain/entities/investment/enums";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 import { INVESTMENT_MAX_WIDTH } from "@screens/Investment/constants";
+import SectionHeader from "@screens/Investment/Layout/components/SectionHeader";
 import { ListEntry } from "@screens/Investment/models/assetList";
 import { formatMoney, formatTime } from "@screens/Investment/models/format";
 import investmentTestIds from "@screens/Investment/testIds";
@@ -192,7 +192,7 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentListVM>) {
       testID={investmentTestIds.list.screen}
     >
       <View style={styles.header}>
-        <ScreenHeader
+        <SectionHeader
           actions={
             vm.readOnly ? null : (
               <IconButton
@@ -203,7 +203,7 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentListVM>) {
               />
             )
           }
-          title={t("investment.list.title")}
+          section="assets"
         />
         {vm.hasQuotes ? (
           <View style={styles.headerTop}>

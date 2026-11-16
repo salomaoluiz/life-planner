@@ -74,3 +74,36 @@ it("SHOULD hide Today WHEN the period is not moved", () => {
 
   expect(screen.queryByTestId("financial.overview.period-today")).toBeNull();
 });
+
+describe("a module with its own limit and testIDs (spec 110)", () => {
+  const testIDs = {
+    limitHint: "investment.overview.period-limit-hint",
+    next: "investment.overview.period-next",
+    previous: "investment.overview.period-previous",
+    range: "investment.overview.period-range",
+    today: "investment.overview.period-today",
+  };
+
+  it("SHOULD use its testIDs AND its own hint instead of the finance limit", () => {
+    setup(
+      { canGoNext: false, hint: "No future periods", showToday: true, testIDs },
+      true,
+    );
+
+    expect(screen.getByTestId(testIDs.range)).toBeTruthy();
+    expect(screen.getByTestId(testIDs.previous)).toBeTruthy();
+    expect(screen.getByTestId(testIDs.today)).toBeTruthy();
+    expect(screen.getByTestId(testIDs.limitHint)).toHaveTextContent(
+      "No future periods",
+    );
+    expect(screen.queryByTestId("financial.overview.period-next")).toBeNull();
+  });
+
+  it("SHOULD disable the next arrow WHEN there is nothing ahead", () => {
+    setup({ canGoNext: false, hint: "No future periods", testIDs });
+
+    fireEvent.press(screen.getByTestId(testIDs.next));
+
+    expect(handlers.onNext).not.toHaveBeenCalled();
+  });
+});
