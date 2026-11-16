@@ -3,6 +3,13 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.24.1] - 2026-11-16
+
+### Fixed
+
+- Picking a FII in the new asset form now moves the class to FIIs (and a stock to Ações), with a notice and a class badge on each search result (spec 111).
+- Stocks and FIIs can be swapped on an asset that already has operations, after a confirmation (spec 111).
+
 ## [1.24.0] - 2026-11-16
 
 ### Added
