@@ -165,3 +165,19 @@ perf: investment.overview.mount.cold / render.mount (perf/budgets/investment.jso
 ```
 
 Design deviations (spec 110): Overview and Assets are drawer sections, not tabs (owner); the phone shows the same five tiles in two columns instead of one combined card; the USD detail opens when the Foreign class is selected (no web hover); the preset is kept in memory like the finance Overview; slice and legend colours come from `investmentClassPalette` (light and dark).
+
+## Asset conversion (spec 112)
+
+```yaml
+entities: InvestmentOperationType gains CONVERSION_OUT | CONVERSION_IN (isInvestmentConversion in enums.ts); InvestmentOperation gains conversion (InvestmentOperationConversion: counterpart assetId/ticker, ratio, cash part, locked) and conversionCost; InvestmentAsset gains convertedTo / convertedFrom (InvestmentConversionLink); InvestmentConversion (+ side, result) in InvestmentEntities.ts
+position: domain/entities/investment/conversion.ts previewConversion(draft) ports the API's ConversionMath (raw = quantity x ratioTo / ratioFrom, whole units for BR_STOCK/BR_REIT, fraction cost, cash cost) for the modal preview
+errors: InvestmentConversionChainLocked(ticker, date), InvestmentConversionLaterOperations(ticker, date, dates), InvestmentConvertedOrigin(ticker), InvestmentUseConversionRoute, InvestmentArchivedDestination (mapped in investmentApiError.ts and investmentErrorMessage.ts)
+repository/use cases: createConversion, getConversion, updateConversion, deleteConversion (createInvestmentConversionUseCase, getInvestmentConversionUseCase, updateInvestmentConversionUseCase, deleteInvestmentConversionUseCase); datasource api/conversionApi.ts: POST /v1/investments/assets/:id/conversions, GET|PATCH|DELETE /v1/investments/conversions/:id
+modal (MODAL_ROUTES): investment_conversion (params assetId, id to edit) - Modals/ConversionModal: two columns on web/tablet (FormColumns), bottom sheet on mobile; destination = existing asset (same owner, class, currency, active, not the origin) or a new one (TickerAutocomplete + name); ratio, optional cash (account + reference value prefilled from the stored close); right column = before/after of both positions, fraction box, finance strip
+detail: Detail/components/ConversionRow (row menu: edit, sell fraction, delete; edit/delete disabled with the reason while locked), ConversionBanners ("Convertido em" with Abrir, one "Veio de" per incoming conversion), ConversionMenu and ConversionDeleteDialog in views/Wide.tsx; models/conversionModel.ts (canConvert, conversionOutcome, conversionDeleteSummary); the actions menu gains "Converter em outro ativo" (active, non-fixed-income asset with a position)
+testIds: investment.conversion.* (modal fields in testIds.modal.conversion, detail items in testIds.conversion)
+e2e: e2e/flows/investment/asset-conversion.yaml, asset-conversion-empty.yaml, asset-conversion-delete.yaml (spec-112); subflow setup/create-investment-conversion.yaml
+perf: investment.conversion.mount.cold / render.mount (perf/budgets/investment.json)
+```
+
+Design deviations (spec 112): the banners use the app's StatusBanner (warning tone) instead of the artboard's blue notice; the disabled menu items show the locked reason as their subtitle; the ticker search of "Criar novo" is the same TickerAutocomplete as the asset modal.

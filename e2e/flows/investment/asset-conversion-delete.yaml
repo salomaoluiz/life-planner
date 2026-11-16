@@ -1,0 +1,92 @@
+url: ${E2E_WEB_URL}
+name: investment/asset-conversion-delete
+tags:
+  - investment
+  - spec-112
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Spec 112 FR 20: deleting the conversion confirms what goes with it, then both positions are back.
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/setup/create-investment-asset.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      TICKER: KNRI11
+      NAME: E2E Origin Fund
+      ASSET_CLASS: BR_REIT
+- evalScript: ${output.ORIGIN_ID = output.ASSET_ID}
+- runFlow:
+    file: ../../subflows/setup/create-investment-operation.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      ASSET_ID: ${output.ORIGIN_ID}
+      TYPE: BUY
+      QUANTITY: "100"
+      UNIT_PRICE: "78.5"
+- runFlow:
+    file: ../../subflows/setup/create-investment-asset.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      TICKER: HGLG11
+      NAME: E2E Destination Fund
+      ASSET_CLASS: BR_REIT
+- evalScript: ${output.DESTINATION_ID = output.ASSET_ID}
+- runFlow:
+    file: ../../subflows/setup/create-investment-operation.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      ASSET_ID: ${output.DESTINATION_ID}
+      TYPE: BUY
+      QUANTITY: "50"
+      UNIT_PRICE: "10"
+- runFlow:
+    file: ../../subflows/setup/create-investment-conversion.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      ASSET_ID: ${output.ORIGIN_ID}
+      DESTINATION_ID: ${output.DESTINATION_ID}
+      RATIO_FROM: "1"
+      RATIO_TO: "2"
+- evalScript: ${output.IN_ID = output.CONVERSION_IN_ID}
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/investment/open-investments.yaml
+- tapOn:
+    id: "investment.list.row-${output.DESTINATION_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.screen"
+    timeout: 20000
+# 50 + 200 converted quotas.
+- assertVisible:
+    id: "investment.detail.quantity"
+    text: ".*250.*"
+- scrollUntilVisible:
+    element:
+      id: "investment.conversion.row-menu-${output.IN_ID}"
+- tapOn:
+    id: "investment.conversion.row-menu-${output.IN_ID}"
+- tapOn:
+    id: "investment.conversion.delete"
+- extendedWaitUntil:
+    visible:
+      id: "investment.conversion.delete-dialog"
+    timeout: 10000
+- tapOn:
+    id: "investment.conversion.delete-dialog-confirm"
+# The destination goes back to its own 50 quotas and the banner is gone.
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.quantity"
+      text: ".*50.*"
+    timeout: 20000
+- assertNotVisible:
+    id: "investment.conversion.banner-from-.*"

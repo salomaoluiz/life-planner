@@ -157,7 +157,6 @@ const investmentTestIds = {
       cash: "investment.conversion.cash",
       date: "investment.conversion.date",
       destinationExisting: "investment.conversion.destination-existing",
-      destinationNew: "investment.conversion.destination-new",
       destinationPicker: "investment.conversion.destination-picker",
       error: "investment.conversion.error",
       name: "investment.conversion.name",
