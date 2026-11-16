@@ -3,6 +3,14 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.24.0] - 2026-11-16
+
+### Added
+
+- Investments Overview (spec 110): value, invested, open and realized result and income of a period, the evolution of invested vs market value, allocation by class, ranking by asset and income by month, with the same period selector as the finance Overview (without future periods).
+- Investments now has two sections in the side menu and the section picker, like Finances: Overview (opened first) and Assets.
+- New donut chart and colour dots in the component kit.
+
 ## [1.23.0] - 2026-11-11
 
 ### Added
