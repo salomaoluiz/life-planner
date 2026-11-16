@@ -89,6 +89,38 @@ function makeConversion(
   };
 }
 
+// Spec 112: the OUT row of an origin or the IN row of a destination.
+function makeConversionOperation(side: "IN" | "OUT"): InvestmentOperation {
+  const out = side === "OUT";
+
+  return makeOperation({
+    conversion: {
+      assetId: out ? "asset-to" : "asset-from",
+      conversionId: "conv-1",
+      locked: false,
+      ratioFrom: "1",
+      ratioTo: "7.4",
+      ticker: out ? "BTHF11" : "BCFF11",
+    },
+    conversionCost: 808550,
+    corporateEvent: out
+      ? undefined
+      : {
+          averagePriceAfter: "10.61",
+          averagePriceBefore: null,
+          fractionCost: 212,
+          fractionQuantity: "0.2",
+          quantityAfter: "762",
+          quantityBefore: "0",
+        },
+    id: out ? "op-out" : "op-in",
+    quantity: out ? "103" : "762",
+    type: out
+      ? InvestmentOperationType.CONVERSION_OUT
+      : InvestmentOperationType.CONVERSION_IN,
+  });
+}
+
 function makeDetail(
   overrides: Partial<InvestmentAssetDetail> = {},
 ): InvestmentAssetDetail {
@@ -442,6 +474,7 @@ function makeValuation(
 export {
   makeAsset,
   makeConversion,
+  makeConversionOperation,
   makeDetail,
   makeEventOperation,
   makeEventSuggestion,

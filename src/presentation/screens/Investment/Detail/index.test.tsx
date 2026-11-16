@@ -8,6 +8,7 @@ import {
 } from "@domain/entities/investment/enums";
 import * as theme from "@presentation/theme";
 import {
+  makeConversionOperation,
   makeDetail,
   makeEventOperation,
   makeEventSuggestion,
@@ -589,5 +590,143 @@ describe("corporate events (spec 108)", () => {
     });
 
     expect(hasText("investment.fraction.rowType")).toBe(true);
+  });
+});
+
+describe("conversions (spec 112)", () => {
+  const conv = investmentTestIds.conversion;
+
+  it("SHOULD show the conversion row, the banner of the origin AND open the row menu", () => {
+    const out = makeConversionOperation("OUT");
+    const { vm } = setup({
+      archived: true,
+      archivedAt: "2026-10-16T00:00:00Z",
+      asset: makeDetail({
+        assetClass: "BR_REIT" as never,
+        convertedTo: {
+          assetId: "asset-to",
+          conversionId: "conv-1",
+          date: "2026-10-15",
+          ticker: "BTHF11",
+        },
+        operations: [out],
+        status: InvestmentAssetStatus.ARCHIVED,
+      }),
+    });
+
+    expect(screen.getByText(/investment.conversion.rowOut/)).toBeOnTheScreen();
+    expect(
+      screen.getByText(/investment.conversion.convertedTo/),
+    ).toBeOnTheScreen();
+
+    fireEvent.press(screen.getByTestId(`${conv.rowMenu}-${out.id}`));
+    fireEvent.press(screen.getByText(/investment.conversion.open/));
+
+    expect(vm.onConversionMenuOpen).toHaveBeenCalledWith(out.id);
+    expect(vm.onOpenAsset).toHaveBeenCalledWith("asset-to");
+  });
+
+  it("SHOULD show one banner per conversion that came into the destination", () => {
+    const { vm } = setup({
+      asset: makeDetail({
+        convertedFrom: [
+          {
+            assetId: "asset-from",
+            conversionId: "conv-1",
+            date: "2026-10-15",
+            ticker: "BCFF11",
+          },
+        ],
+        operations: [makeConversionOperation("IN")],
+      }),
+    });
+
+    expect(
+      screen.getByText(/investment.conversion.cameFrom/),
+    ).toBeOnTheScreen();
+    expect(screen.getByText(/investment.conversion.rowIn/)).toBeOnTheScreen();
+
+    expect(screen.getByTestId(`${conv.bannerFrom}-conv-1`)).toBeOnTheScreen();
+    fireEvent.press(screen.getByText(/investment.conversion.open/));
+    expect(vm.onOpenAsset).toHaveBeenCalledWith("asset-from");
+  });
+
+  it("SHOULD offer to convert from the actions menu only WHEN the asset can", () => {
+    const { vm } = setup({ canConvert: true, isMenuOpen: true });
+
+    fireEvent.press(screen.getByTestId(conv.menu));
+    expect(vm.onConversionStart).toHaveBeenCalledTimes(1);
+  });
+
+  it("SHOULD not offer to convert WHEN the asset cannot", () => {
+    setup({ canConvert: false, isMenuOpen: true });
+
+    expect(screen.queryByTestId(conv.menu)).toBeNull();
+  });
+
+  it("SHOULD edit, sell the fraction AND delete from the row menu", () => {
+    const { vm } = setup({
+      conversionMenu: {
+        canSellFraction: true,
+        isOpen: true,
+        locked: false,
+        lockedHint: undefined,
+      },
+    });
+
+    fireEvent.press(screen.getByTestId(conv.edit));
+    fireEvent.press(screen.getByTestId(conv.sellFraction));
+    fireEvent.press(screen.getByTestId(conv.remove));
+
+    expect(vm.onConversionEdit).toHaveBeenCalledTimes(1);
+    expect(vm.onConversionSellFraction).toHaveBeenCalledTimes(1);
+    expect(vm.onConversionDeleteOpen).toHaveBeenCalledTimes(1);
+  });
+
+  it("SHOULD disable edit AND delete with the reason WHEN the conversion is locked", () => {
+    const { vm } = setup({
+      conversionMenu: {
+        canSellFraction: false,
+        isOpen: true,
+        locked: true,
+        lockedHint: { date: "20/11/2026", from: "BTHF11", to: "XPTO11" },
+      },
+    });
+
+    fireEvent.press(screen.getByTestId(conv.edit));
+    fireEvent.press(screen.getByTestId(conv.remove));
+
+    expect(vm.onConversionEdit).not.toHaveBeenCalled();
+    expect(vm.onConversionDeleteOpen).not.toHaveBeenCalled();
+    expect(
+      screen.getAllByText(/investment.conversion.locked/).length,
+    ).toBeGreaterThan(0);
+  });
+
+  it("SHOULD list what the delete removes AND confirm it", () => {
+    const { vm } = setup({
+      conversionDelete: {
+        after: [
+          {
+            key: "investment.conversion.deleteAfterOrigin",
+            params: { quantity: "103", ticker: "BCFF11" },
+          },
+        ],
+        also: [{ key: "investment.conversion.deleteSaleEntry" }],
+        fromTicker: "BCFF11",
+        isLoading: false,
+        isOpen: true,
+        isSaving: false,
+        toTicker: "BTHF11",
+      },
+    });
+
+    expect(screen.getByTestId(conv.deleteDialog)).toBeOnTheScreen();
+    expect(
+      screen.getByText(/investment.conversion.deleteSaleEntry/),
+    ).toBeOnTheScreen();
+
+    fireEvent.press(screen.getByText("investment.conversion.deleteConfirm"));
+    expect(vm.onConversionDeleteConfirm).toHaveBeenCalledTimes(1);
   });
 });

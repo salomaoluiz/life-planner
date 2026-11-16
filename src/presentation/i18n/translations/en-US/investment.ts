@@ -39,6 +39,8 @@ const investment = {
     cash: "Cash amount",
     cashHint: "Optional. When the conversion pays part in cash.",
     cashLabel: "Conversion {{from}} → {{to}} · cash part",
+    convertedTo:
+      "Converted into {{ticker}} on {{date}} ({{from}} to {{to}}). The position and the cost went to the destination.",
     cost: "Cost",
     createNew: "Create new",
     date: "Conversion record date",
@@ -86,6 +88,7 @@ const investment = {
       "{{ticker}} has operations after {{date}}. Delete them or pick another date.",
     locked: "Delete the conversion {{from}} → {{to}} of {{date}} first.",
     menu: "Convert into another asset",
+    menuLabel: "Conversion actions",
     name: "Name",
     noFinanceEntry: "Finance entry: none (no cash part)",
     open: "Open {{ticker}}",

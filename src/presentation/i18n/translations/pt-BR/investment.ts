@@ -39,6 +39,8 @@ const investment = {
     cash: "Valor em dinheiro",
     cashHint: "Opcional. Quando a conversão paga uma parte em dinheiro.",
     cashLabel: "Conversão {{from}} → {{to}} · parte em dinheiro",
+    convertedTo:
+      "Convertido em {{ticker}} em {{date}} ({{from}} para {{to}}). A posição e o custo foram para o destino.",
     cost: "Custo",
     createNew: "Criar novo",
     date: "Data-com da conversão",
@@ -86,6 +88,7 @@ const investment = {
       "{{ticker}} tem operações depois de {{date}}. Apague-as ou escolha outra data.",
     locked: "Apague antes a conversão {{from}} → {{to}} de {{date}}.",
     menu: "Converter em outro ativo",
+    menuLabel: "Ações da conversão",
     name: "Nome",
     noFinanceEntry: "Lançamento no finance: nenhum (sem valor em dinheiro)",
     open: "Abrir {{ticker}}",
