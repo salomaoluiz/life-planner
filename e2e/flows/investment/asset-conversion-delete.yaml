@@ -69,11 +69,14 @@ onFlowComplete:
 - assertVisible:
     id: "investment.detail.quantity"
     text: ".*250.*"
-- scrollUntilVisible:
-    element:
-      id: "investment.conversion.row-menu-${output.IN_ID}"
-- tapOn:
-    id: "investment.conversion.row-menu-${output.IN_ID}"
+# The operations table is below the fold: swipe down to reach it.
+- swipe:
+    start: 60%, 80%
+    end: 60%, 20%
+- swipe:
+    start: 60%, 80%
+    end: 60%, 20%
+- tapOn: "Conversion from KNRI11"
 - tapOn:
     id: "investment.conversion.delete"
 - extendedWaitUntil:
@@ -82,11 +85,8 @@ onFlowComplete:
     timeout: 10000
 - tapOn:
     id: "investment.conversion.delete-dialog-confirm"
-# The destination goes back to its own 50 quotas and the banner is gone.
+# The conversion row is gone and only the original buy is left (the page stays scrolled to the table).
 - extendedWaitUntil:
-    visible:
-      id: "investment.detail.quantity"
-      text: ".*50.*"
+    notVisible: "Conversion from KNRI11"
     timeout: 20000
-- assertNotVisible:
-    id: "investment.conversion.banner-from-.*"
+- assertVisible: ".*50 × .*"

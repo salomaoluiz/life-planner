@@ -51,6 +51,10 @@ onFlowComplete:
       TOKEN: ${output.TOKEN}
       REFRESH_TOKEN: ${output.REFRESH_TOKEN}
 - runFlow: ../../subflows/investment/open-investments.yaml
+# The origin row sits below the destination: scroll the list to reach it.
+- swipe:
+    start: 60%, 80%
+    end: 60%, 30%
 - tapOn:
     id: "investment.list.row-${output.ORIGIN_ID}"
 - extendedWaitUntil:
@@ -93,10 +97,7 @@ onFlowComplete:
     id: "investment.detail.quantity"
     text: ".*0.*"
 # The destination holds the converted quotas, shows where they came from and waits for the fraction sale.
-- tapOn:
-    id: "investment.detail.back"
-- tapOn:
-    id: "investment.list.row-${output.DESTINATION_ID}"
+- tapOn: "Open HGLG11"
 - extendedWaitUntil:
     visible:
       id: "investment.detail.screen"
