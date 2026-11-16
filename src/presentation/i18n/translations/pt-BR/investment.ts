@@ -61,6 +61,7 @@ const investment = {
     destination: "Ativo de destino",
     destinationHint:
       "Só ativos da mesma classe ({{class}}). Para uma troca de ticker, crie o novo e use 1 para 1.",
+    destinationLabel: "destino",
     edit: "Editar conversão",
     editTitle: "Editar a conversão {{from}} → {{to}}",
     errors: {
@@ -71,6 +72,8 @@ const investment = {
       laterOperations:
         "{{ticker}} tem operações depois de {{date}}. Apague-as ou escolha outra data.",
       laterOperationsDates: "Operações em: {{dates}}",
+      ratio: "Informe uma proporção maior que zero",
+      ticker: "Informe o ticker",
       useRoute: "Edite a conversão em vez disso.",
     },
     existing: "Ativo que já tenho",
@@ -87,6 +90,7 @@ const investment = {
     noFinanceEntry: "Lançamento no finance: nenhum (sem valor em dinheiro)",
     open: "Abrir {{ticker}}",
     originAfter: "{{ticker}} depois: arquivado, com histórico",
+    originLabel: "origem",
     pickerEmpty: "Nenhum ativo da mesma classe. Crie um novo.",
     quantity: "Quantidade",
     ratio: "Proporção",

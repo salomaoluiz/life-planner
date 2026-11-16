@@ -61,6 +61,7 @@ const investment = {
     destination: "Destination asset",
     destinationHint:
       "Only assets of the same class ({{class}}). For a ticker change, create the new one and use 1 to 1.",
+    destinationLabel: "destination",
     edit: "Edit conversion",
     editTitle: "Edit the conversion {{from}} → {{to}}",
     errors: {
@@ -71,6 +72,8 @@ const investment = {
       laterOperations:
         "{{ticker}} has operations after {{date}}. Delete them or pick another date.",
       laterOperationsDates: "Operations on: {{dates}}",
+      ratio: "Enter a ratio above zero",
+      ticker: "Enter the ticker",
       useRoute: "Edit the conversion instead.",
     },
     existing: "An asset I already have",
@@ -87,6 +90,7 @@ const investment = {
     noFinanceEntry: "Finance entry: none (no cash part)",
     open: "Open {{ticker}}",
     originAfter: "{{ticker}} afterwards: archived, with history",
+    originLabel: "origin",
     pickerEmpty: "No asset of the same class. Create a new one.",
     quantity: "Quantity",
     ratio: "Ratio",

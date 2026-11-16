@@ -16,6 +16,7 @@ import {
 import {
   InvestmentAsset,
   InvestmentAssetDetail,
+  InvestmentConversion,
   InvestmentEventSuggestion,
   InvestmentFixedIncome,
   InvestmentIncome,
@@ -54,6 +55,36 @@ function makeAsset(overrides: Partial<InvestmentAsset> = {}): InvestmentAsset {
     quote: null,
     status: InvestmentAssetStatus.ACTIVE,
     ticker: "ITSA4",
+    ...overrides,
+  };
+}
+
+// Spec 112: BCFF11 (103 quotas, cost R$ 8.085,50) converted into BTHF11 at 1 for 7,4, with the fraction of 0,2 pending.
+function makeConversion(
+  overrides: Partial<InvestmentConversion> = {},
+): InvestmentConversion {
+  return {
+    date: "2026-10-15",
+    from: {
+      assetId: "asset-from",
+      cost: 808550,
+      operationId: "op-out",
+      quantity: "103",
+      ticker: "BCFF11",
+    },
+    id: "conv-1",
+    locked: false,
+    ratioFrom: "1",
+    ratioTo: "7.4",
+    to: {
+      assetId: "asset-to",
+      cost: 808550,
+      fractionCost: 212,
+      fractionQuantity: "0.2",
+      operationId: "op-in",
+      quantity: "762",
+      ticker: "BTHF11",
+    },
     ...overrides,
   };
 }
@@ -410,6 +441,7 @@ function makeValuation(
 
 export {
   makeAsset,
+  makeConversion,
   makeDetail,
   makeEventOperation,
   makeEventSuggestion,
