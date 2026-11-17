@@ -195,6 +195,40 @@ describe("buildRecurringSave - this and the next ones", () => {
     });
   });
 
+  it("SHOULD send the frequency WHEN only the interval changes (2 months to 3 months)", () => {
+    const result = buildRecurringSave(
+      "THIS_AND_NEXT",
+      { ...initial, repeatFrequency: { interval: 3, unit: "MONTH" } },
+      { ...initial, repeatFrequency: { interval: 2, unit: "MONTH" } },
+      real,
+    );
+
+    expect(result).toEqual({
+      kind: "split",
+      params: expect.objectContaining({
+        frequency: { interval: 3, unit: "MONTH" },
+      }),
+    });
+  });
+
+  it("SHOULD NOT send the frequency WHEN unit and interval are the same objects by value", () => {
+    const result = buildRecurringSave(
+      "THIS_AND_NEXT",
+      {
+        ...initial,
+        amountCents: 220000,
+        repeatFrequency: { ...initial.repeatFrequency },
+      },
+      initial,
+      real,
+    );
+
+    expect(result).toEqual({
+      kind: "split",
+      params: expect.objectContaining({ frequency: undefined }),
+    });
+  });
+
   it("SHOULD send the card of a card series AND an end date as a date", () => {
     const result = buildRecurringSave(
       "THIS_AND_NEXT",
