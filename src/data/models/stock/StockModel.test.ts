@@ -1,94 +1,68 @@
 import { mocks, setup } from "./mocks/StockModel.mocks";
 import StockModel from "./StockModel";
 
-const nullOptionals = {
-  barcode: null,
-  brand: null,
-  expirationDate: null,
-  notes: null,
-  openingDate: null,
-  purchaseDate: null,
-};
-
-it("SHOULD the StockModel has all params AND no status", () => {
+it("SHOULD read every field of the API shape, days as local calendar days AND the lots of the detail", () => {
   const result = setup();
 
-  expect(result).toHaveProperty("id", mocks.json.id);
-  expect(result).toHaveProperty("barcode", mocks.json.barcode);
-  expect(result).toHaveProperty("brand", mocks.json.brand);
-  expect(result).toHaveProperty("description", mocks.json.description);
-  expect(result).toHaveProperty(
-    "expirationDate",
-    new Date(mocks.json.expirationDate),
-  );
-  expect(result).toHaveProperty("notes", mocks.json.notes);
-  expect(result).toHaveProperty(
-    "openingDate",
-    new Date(mocks.json.openingDate),
-  );
-  expect(result).toHaveProperty("owner", mocks.json.owner);
-  expect(result).toHaveProperty("ownerId", mocks.json.ownerId);
-  expect(result).toHaveProperty(
-    "purchaseDate",
-    new Date(mocks.json.purchaseDate),
-  );
-  expect(result).toHaveProperty("quantity", mocks.json.quantity);
-  expect(result).toHaveProperty("unit", mocks.json.unit);
-  expect(result).not.toHaveProperty("status");
-});
-
-it("SHOULD fromJSON create a StockModel from the API shape (extra API fields are ignored)", () => {
-  const model = StockModel.fromJSON({
-    ...mocks.json,
-    updatedAt: "2026-09-30T12:01:00.000Z",
+  expect(result).toMatchObject({
+    barcode: mocks.json.barcode,
+    brand: mocks.json.brand,
+    category: mocks.json.category,
+    categoryId: mocks.json.categoryId,
+    description: mocks.json.description,
+    expirationStatus: "EXPIRING",
+    hasOpenLot: true,
+    id: mocks.json.id,
+    idealQuantity: 5,
+    location: mocks.json.location,
+    minQuantity: 1,
+    needsRestock: false,
+    openedShelfLifeDays: 5,
+    owner: "FAMILY",
+    quantity: 3,
+    restockQuantity: 2,
+    stockOnly: false,
+    unit: "kilogram",
+    warnDaysClosed: 7,
+    warnDaysOpened: 1,
   });
-
-  expect(model).toStrictEqual(setup());
+  expect(result.nearestExpiration).toEqual(new Date(2026, 10, 15));
+  expect(result.createdAt).toEqual(new Date(mocks.json.createdAt));
+  expect(result.lots?.[0]).toMatchObject({
+    expirationStatus: "EXPIRING",
+    quantity: 1.5,
+  });
+  expect(result.lots?.[0].openedAt).toEqual(new Date(2026, 10, 10));
 });
 
-it("SHOULD fromJSON turn API null optionals into undefined", () => {
-  const model = StockModel.fromJSON({ ...mocks.json, ...nullOptionals });
+it("SHOULD leave every null of the API undefined", () => {
+  const result = StockModel.fromJSON(mocks.jsonMinimal);
 
-  expect(model.barcode).toBeUndefined();
-  expect(model.brand).toBeUndefined();
-  expect(model.expirationDate).toBeUndefined();
-  expect(model.notes).toBeUndefined();
-  expect(model.openingDate).toBeUndefined();
-  expect(model.purchaseDate).toBeUndefined();
+  expect(result.barcode).toBeUndefined();
+  expect(result.category).toBeUndefined();
+  expect(result.createdAt).toBeUndefined();
+  expect(result.idealQuantity).toBeUndefined();
+  expect(result.location).toBeUndefined();
+  expect(result.minQuantity).toBeUndefined();
+  expect(result.nearestExpiration).toBeUndefined();
+  expect(result.lots).toBeUndefined();
+  expect(result.openedShelfLifeDays).toBeUndefined();
 });
 
-it("SHOULD toJSON return the camelCase API shape with ISO dates", () => {
-  expect(setup().toJSON()).toStrictEqual(mocks.json);
+it("SHOULD toJSON the list shape (no lots, calendar days) AND round-trip through fromJSON", () => {
+  const json = setup().toJSON();
+
+  expect(json).not.toHaveProperty("lots");
+  expect(json.nearestExpiration).toBe("2026-11-15");
+  expect(json.category).toEqual(mocks.json.category);
+  expect(StockModel.fromJSON(json).toJSON()).toEqual(json);
 });
 
-it("SHOULD toJSON serialize absent optionals as null", () => {
-  const model = StockModel.fromJSON({ ...mocks.json, ...nullOptionals });
-
-  expect(model.toJSON()).toMatchObject(nullOptionals);
-});
-
-it("SHOULD survive a toJSON -> fromJSON cache round trip", () => {
-  const original = setup();
-
-  expect(StockModel.fromJSON(original.toJSON())).toStrictEqual(original);
-});
-
-it("SHOULD fromJSON read createdAt as a Date", () => {
-  expect(StockModel.fromJSON(mocks.json).createdAt).toStrictEqual(
-    new Date(mocks.json.createdAt),
-  );
-});
-
-it("SHOULD fromJSON leave createdAt undefined WHEN the cache entry has none", () => {
-  const withoutCreatedAt: Record<string, unknown> = { ...mocks.json };
-  delete withoutCreatedAt.createdAt;
-
-  expect(StockModel.fromJSON(withoutCreatedAt).createdAt).toBeUndefined();
-});
-
-it("SHOULD toJSON write createdAt as ISO or null", () => {
-  expect(setup().toJSON().createdAt).toBe(mocks.json.createdAt);
-  expect(
-    StockModel.fromJSON({ ...mocks.json, createdAt: null }).toJSON().createdAt,
-  ).toBeNull();
+it("SHOULD write nulls for the absent optionals", () => {
+  expect(StockModel.fromJSON(mocks.jsonMinimal).toJSON()).toMatchObject({
+    barcode: null,
+    category: null,
+    createdAt: null,
+    nearestExpiration: null,
+  });
 });

@@ -1,266 +1,215 @@
-import StockDTO from "@application/dto/stock/StockDTO";
-import OwnerDTO from "@application/dto/user/OwnerDTO";
-import { StockOwners, StockUnits } from "@domain/entities/stock/StockEntity";
-import { OwnerType } from "@domain/entities/user/OwnerEntity";
+import StockListUIModel, { StockFilters } from "./StockListUIModel";
+import {
+  dto,
+  expired,
+  expiring,
+  familyItem,
+  fine,
+  low,
+  owners,
+} from "./stockUi.fixtures";
 
-import StockListUIModel, { StockSort } from "./StockListUIModel";
-
-const now = new Date(2026, 9, 5, 12);
-const owners = [
-  new OwnerDTO({ id: "user-id", name: "Alice Test", type: OwnerType.USER }),
-  new OwnerDTO({
-    id: "family-id",
-    name: "Test Family",
-    type: OwnerType.FAMILY,
-  }),
-];
-
-function day(offset: number) {
-  return new Date(2026, 9, 5 + offset);
+const base = { filter: "ALL", search: "", sort: "EXPIRATION" as const };
+function ids(rows: Array<{ id: string }>) {
+  return rows.map((row) => row.id);
 }
-
-function dto(
-  id: string,
-  description: string,
-  params: Partial<ConstructorParameters<typeof StockDTO>[0]> = {},
+function model(
+  items = [fine("fine"), expired("exp"), low("low"), expiring("soon")],
 ) {
-  const isFamily = params.owner === StockOwners.FAMILY;
-
-  return new StockDTO({
-    description,
-    id,
-    owner: StockOwners.USER,
-    ownerId: isFamily ? "family-id" : "user-id",
-    quantity: 1,
-    unit: StockUnits.UNIT,
-    ...params,
-  });
+  return new StockListUIModel(items, owners, "en-US");
 }
 
-function fixture() {
-  return [
-    dto("milk", "Leite integral", {
-      brand: "Italac",
-      expirationDate: day(2),
-    }),
-    dto("powder", "Leite em pó", {
-      expirationDate: day(30),
-      owner: StockOwners.FAMILY,
-    }),
-    dto("rice", "Arroz", { expirationDate: day(-3) }),
-    dto("beans", "Feijão", {
-      openingDate: day(-1),
-      owner: StockOwners.FAMILY,
-    }),
-    dto("sugar", "Açúcar", {
-      createdAt: new Date(2026, 8, 1),
-      expirationDate: day(-10),
-    }),
-    dto("coffee", "Café", {
-      createdAt: new Date(2026, 9, 1),
-      expirationDate: day(20),
-    }),
-    dto("zebra", "Zebra Item"),
-  ];
-}
+describe("grouping and sorting", () => {
+  it("SHOULD group attention first (by nearest expiration, dated before undated) and the rest after", () => {
+    const rows = model().view(base).rows;
 
-function ids(
-  params: { filter?: string; search?: string; sort?: StockSort },
-  list = model(),
-) {
-  return list
-    .view({ filter: "ALL", search: "", sort: "EXPIRATION", ...params })
-    .rows.map((row) => row.id);
-}
-
-function model(dtos = fixture()) {
-  return new StockListUIModel(dtos, owners, now, "en-US");
-}
-
-describe("StockListUIModel", () => {
-  it("SHOULD count total and attention items", () => {
-    expect(model().total).toBe(7);
-    expect(model().attentionCount).toBe(3);
-    expect(model().items).toHaveLength(7);
-  });
-
-  it("SHOULD group by attention then OK sorted by expiration", () => {
-    expect(ids({})).toEqual([
+    expect(ids(rows)).toEqual([
       "header-attention",
-      "sugar",
-      "rice",
-      "milk",
+      "exp",
+      "soon",
+      "low",
       "header-ok",
-      "coffee",
-      "powder",
-      "beans",
-      "zebra",
+      "fine",
     ]);
   });
 
-  it("SHOULD omit an empty section header", () => {
-    expect(ids({ filter: "EXPIRED" })).toEqual([
+  it("SHOULD omit an empty group", () => {
+    expect(ids(model([fine("a")]).view(base).rows)).toEqual(["header-ok", "a"]);
+    expect(ids(model([expired("a")]).view(base).rows)).toEqual([
       "header-attention",
-      "sugar",
-      "rice",
+      "a",
     ]);
   });
 
-  it("SHOULD sort by name without headers ignoring accents", () => {
-    expect(ids({ sort: "NAME" })).toEqual([
-      "sugar",
-      "rice",
-      "coffee",
-      "beans",
-      "powder",
-      "milk",
-      "zebra",
+  it("SHOULD sort by name and by recent without groups", () => {
+    const items = [
+      dto((f) =>
+        f
+          .withId("b")
+          .withDescription("Banana")
+          .withCreatedAt(new Date(2026, 0, 1)),
+      ),
+      dto((f) =>
+        f
+          .withId("a")
+          .withDescription("apple")
+          .withCreatedAt(new Date(2026, 0, 2)),
+      ),
+      dto((f) => f.withId("c").withDescription("Cherry")),
+    ];
+
+    expect(ids(model(items).view({ ...base, sort: "NAME" }).rows)).toEqual([
+      "a",
+      "b",
+      "c",
+    ]);
+    expect(ids(model(items).view({ ...base, sort: "RECENT" }).rows)).toEqual([
+      "a",
+      "b",
+      "c",
     ]);
   });
 
-  it("SHOULD sort by most recent with undated items last", () => {
-    expect(ids({ sort: "RECENT" })).toEqual([
-      "coffee",
-      "sugar",
-      "rice",
-      "beans",
-      "powder",
-      "milk",
-      "zebra",
-    ]);
-  });
+  it("SHOULD break ties by description", () => {
+    const same = new Date(2026, 9, 8);
+    const items = [
+      dto((f) =>
+        f.withId("b").withDescription("B").withNearestExpiration(same),
+      ),
+      dto((f) =>
+        f.withId("a").withDescription("A").withNearestExpiration(same),
+      ),
+    ];
 
-  it("SHOULD search ignoring case, accents and brand", () => {
-    expect(ids({ search: "lei" })).toEqual([
-      "header-attention",
-      "milk",
-      "header-ok",
-      "powder",
-    ]);
-    expect(ids({ search: "LEI" })).toEqual(ids({ search: "lei" }));
-    expect(ids({ search: "acucar" })).toEqual(["header-attention", "sugar"]);
-    expect(ids({ search: "italac" })).toEqual(["header-attention", "milk"]);
-  });
-
-  it("SHOULD treat a blank search as empty", () => {
-    expect(ids({ search: "   " })).toEqual(ids({}));
-  });
-
-  it("SHOULD make the Expiring filter include expired items", () => {
-    expect(ids({ filter: "EXPIRING" })).toEqual([
-      "header-attention",
-      "sugar",
-      "rice",
-      "milk",
-    ]);
-  });
-
-  it("SHOULD filter by personal and by family", () => {
-    expect(ids({ filter: "PERSONAL", sort: "NAME" })).toEqual([
-      "sugar",
-      "rice",
-      "coffee",
-      "milk",
-      "zebra",
-    ]);
-    expect(ids({ filter: "family-id", sort: "NAME" })).toEqual([
-      "beans",
-      "powder",
-    ]);
-  });
-
-  it("SHOULD fall back to ALL for an unknown filter", () => {
-    const view = model().view({
-      filter: "gone-id",
-      search: "",
-      sort: "NAME",
-    });
-
-    expect(view.activeFilter).toBe("ALL");
-    expect(view.rows).toHaveLength(7);
-  });
-
-  it("SHOULD build the filter options with counts", () => {
-    const { filterOptions } = model().view({
-      filter: "ALL",
-      search: "",
-      sort: "NAME",
-    });
-
-    expect(filterOptions).toEqual([
-      { count: 7, labelKey: "stock.list.filter.all", value: "ALL" },
-      { count: 3, labelKey: "stock.list.filter.expiring", value: "EXPIRING" },
-      { count: 2, labelKey: "stock.list.filter.expired", value: "EXPIRED" },
-      { labelKey: "stock.list.filter.personal", value: "PERSONAL" },
-      { label: "Test Family", value: "family-id" },
-    ]);
-  });
-
-  it("SHOULD make the counts follow the search text", () => {
-    const { filterOptions } = model().view({
-      filter: "ALL",
-      search: "leite",
-      sort: "NAME",
-    });
-
-    expect(filterOptions.slice(0, 3).map((option) => option.count)).toEqual([
-      2, 1, 0,
-    ]);
-  });
-
-  it("SHOULD report no results only when items exist", () => {
-    expect(
-      model().view({ filter: "ALL", search: "zzz", sort: "NAME" }).hasNoResults,
-    ).toBe(true);
-
-    const empty = model([]).view({ filter: "ALL", search: "", sort: "NAME" });
-
-    expect(empty.hasNoResults).toBe(false);
-    expect(empty.rows).toEqual([]);
-  });
-
-  it("SHOULD break expiration ties by description", () => {
-    const list = model([
-      dto("b", "Bravo", { expirationDate: day(20) }),
-      dto("a", "Alpha", { expirationDate: day(20) }),
-    ]);
-
-    expect(ids({}, list)).toEqual(["header-ok", "a", "b"]);
+    expect(ids(model(items).view(base).rows)).toEqual(["header-ok", "a", "b"]);
   });
 });
 
-describe("archived family (spec 042)", () => {
-  const withArchived = [
-    owners[0],
-    new OwnerDTO({
-      archived: true,
-      id: "family-id",
-      name: "Test Family",
-      type: OwnerType.FAMILY,
-    }),
-  ];
+describe("counters", () => {
+  it("SHOULD count attention and total WITHOUT the archived families", () => {
+    const list = model([
+      expired("a"),
+      low("b"),
+      fine("c"),
+      { ...familyItem("old", "family-2"), needsRestock: true } as never,
+    ]);
 
-  it("SHOULD leave its items out of All, the counters AND the other filters", () => {
-    const list = new StockListUIModel(fixture(), withArchived, now);
-    const view = list.view({ filter: "ALL", search: "", sort: "NAME" });
-    const ids = view.rows.flatMap((row) =>
-      row.kind === "item" ? [row.id] : [],
+    expect(list.total).toBe(3);
+    expect(list.attentionCount).toBe(2);
+  });
+});
+
+describe("filters", () => {
+  it("SHOULD count the filters, with expiring including expired", () => {
+    const options = model().view(base).filterOptions;
+
+    expect(options.find((o) => o.value === StockFilters.ALL)?.count).toBe(4);
+    expect(options.find((o) => o.value === StockFilters.EXPIRING)?.count).toBe(
+      2,
     );
-
-    expect(ids).not.toContain("powder");
-    expect(ids).not.toContain("beans");
-    expect(list.total).toBe(list.items.length - 2);
+    expect(options.find((o) => o.value === StockFilters.EXPIRED)?.count).toBe(
+      1,
+    );
   });
 
-  it("SHOULD list the archived family last with the marker AND show its items when selected", () => {
-    const list = new StockListUIModel(fixture(), withArchived, now);
-    const view = list.view({ filter: "family-id", search: "", sort: "NAME" });
-    const last = view.filterOptions[view.filterOptions.length - 1];
+  it("SHOULD filter expired, expiring, personal and one family", () => {
+    const items = [expired("e"), expiring("x"), familyItem("f")];
+    const list = model(items);
 
-    expect(last).toMatchObject({ archived: true, value: "family-id" });
-    expect(view.activeFilter).toBe("family-id");
     expect(
-      view.rows.flatMap((row) => (row.kind === "item" ? [row.id] : [])),
-    ).toEqual(["beans", "powder"]);
+      ids(list.view({ ...base, filter: StockFilters.EXPIRED }).rows),
+    ).toEqual(["header-attention", "e"]);
+    expect(
+      ids(list.view({ ...base, filter: StockFilters.EXPIRING }).rows),
+    ).toEqual(["header-attention", "e", "x"]);
+    expect(
+      ids(list.view({ ...base, filter: StockFilters.PERSONAL }).rows).filter(
+        (id) => id === "f",
+      ),
+    ).toEqual([]);
+    expect(ids(list.view({ ...base, filter: "family-1" }).rows)).toEqual([
+      "header-ok",
+      "f",
+    ]);
+  });
+
+  it("SHOULD list personal, active families and then archived ones", () => {
+    const options = model().view(base).filterOptions;
+
+    expect(options.slice(3).map((option) => option.value)).toEqual([
+      StockFilters.PERSONAL,
+      "family-1",
+      "family-2",
+    ]);
+    expect(options[options.length - 1].archived).toBe(true);
+  });
+
+  it("SHOULD fall back to ALL for an unknown filter and leave archived items out of scope filters", () => {
+    const list = model([familyItem("old", "family-2"), fine("a")]);
+
+    expect(list.view({ ...base, filter: "ghost" }).activeFilter).toBe(
+      StockFilters.ALL,
+    );
+    expect(ids(list.view(base).rows)).toEqual(["header-ok", "a"]);
+    expect(ids(list.view({ ...base, filter: "family-2" }).rows)).toEqual([
+      "header-ok",
+      "old",
+    ]);
+  });
+});
+
+describe("search, category and location", () => {
+  it("SHOULD search by name, brand and barcode ignoring accents", () => {
+    const items = [
+      dto((f) => f.withId("a").withDescription("Muçarela")),
+      dto((f) => f.withId("b").withDescription("Rice").withBrand("Tio João")),
+      dto((f) => f.withId("c").withDescription("Salt").withBarcode("12345")),
+    ];
+    const list = model(items);
+
+    expect(ids(list.view({ ...base, search: "mucar" }).rows)).toEqual([
+      "header-ok",
+      "a",
+    ]);
+    expect(ids(list.view({ ...base, search: "joao" }).rows)).toEqual([
+      "header-ok",
+      "b",
+    ]);
+    expect(ids(list.view({ ...base, search: "123" }).rows)).toEqual([
+      "header-ok",
+      "c",
+    ]);
+    expect(list.view({ ...base, search: "zzz" }).hasNoResults).toBe(true);
+  });
+
+  it("SHOULD filter by the categories and locations chosen (an empty choice filters nothing)", () => {
+    const items = [
+      dto((f) =>
+        f
+          .withId("a")
+          .withCategory({ archived: false, id: "c1", name: "A", path: "A" })
+          .withLocation({ archived: false, id: "l1", name: "L" }),
+      ),
+      dto((f) =>
+        f
+          .withId("b")
+          .withCategory({ archived: false, id: "c2", name: "B", path: "B" }),
+      ),
+      dto((f) => f.withId("c")),
+    ];
+    const list = model(items);
+
+    expect(
+      ids(list.view({ ...base, categoryIds: new Set(["c1", "c2"]) }).rows),
+    ).toEqual(["header-ok", "a", "b"]);
+    expect(
+      ids(list.view({ ...base, locationIds: new Set(["l1"]) }).rows),
+    ).toEqual(["header-ok", "a"]);
+    expect(
+      ids(
+        list.view({ ...base, categoryIds: new Set(), locationIds: new Set() })
+          .rows,
+      ),
+    ).toEqual(["header-ok", "a", "b", "c"]);
   });
 });

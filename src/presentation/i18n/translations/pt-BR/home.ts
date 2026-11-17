@@ -85,6 +85,7 @@ const home = {
     expiresTomorrow: "Amanhã",
     inStock: "{{count}} no estoque",
     nothingExpiring: "Nada vencendo em breve",
+    restock: "Repor",
     seeAll: "Ver estoque",
     subtitle: "{{quantity}} {{unit}} · {{ownerName}}",
     title: "Estoque",

@@ -41,6 +41,21 @@ it.each([400, 403, 404, 409])(
   },
 );
 
+it("SHOULD keep an unrelated 409 as GenericError, not one of the stock conflicts", () => {
+  expect(
+    run(new ApiBusinessError("Something else", 409, {}, {})),
+  ).toBeInstanceOf(GenericError);
+  expect(
+    run(new ApiBusinessError("Category is in use", 409, {}, {})),
+  ).toBeInstanceOf(GenericError);
+  expect(
+    run(new ApiBusinessError("Location is in use", 409, {}, {})),
+  ).toBeInstanceOf(GenericError);
+  expect(
+    run(new ApiBusinessError("Not enough quantity", 422, {}, {})),
+  ).toBeInstanceOf(GenericError);
+});
+
 it("SHOULD wrap unknown errors in GenericError", () => {
   expect(run(new Error("boom"))).toBeInstanceOf(GenericError);
 });

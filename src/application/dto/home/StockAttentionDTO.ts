@@ -3,6 +3,8 @@ import StockDTO from "@application/dto/stock/StockDTO";
 export enum StockAttentionStatus {
   EXPIRED = "EXPIRED",
   EXPIRING = "EXPIRING",
+  // Spec 116: at or below the minimum (never for a stock-only item).
+  RESTOCK = "RESTOCK",
 }
 
 export interface IStockAttentionDTO {
@@ -12,8 +14,8 @@ export interface IStockAttentionDTO {
 }
 
 export interface IStockAttentionItemDTO {
-  // < 0 expired, 0 today, 1 tomorrow, n days left (local calendar days).
-  daysLeft: number;
+  // < 0 expired, 0 today, 1 tomorrow, n days left (local calendar days); absent for a restock-only row.
+  daysLeft?: number;
   status: StockAttentionStatus;
   stock: StockDTO;
 }

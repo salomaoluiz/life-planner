@@ -1,179 +1,159 @@
-import StockDTO from "@application/dto/stock/StockDTO";
-import OwnerDTO from "@application/dto/user/OwnerDTO";
-import { StockOwners, StockUnits } from "@domain/entities/stock/StockEntity";
-import { StockExpirationStatus } from "@domain/entities/stock/stockExpiration";
-import { OwnerType } from "@domain/entities/user/OwnerEntity";
+import {
+  StockExpirationStatus,
+  StockUnits,
+} from "@domain/entities/stock/StockEntity";
 
 import StockItemUIModel, { normalizeSearchText } from "./StockItemUIModel";
+import { dto, expired, expiring, fine, low, owners } from "./stockUi.fixtures";
 
-const now = new Date(2026, 9, 5, 12);
-const owners = [
-  new OwnerDTO({ id: "user-id", name: "Alice Test", type: OwnerType.USER }),
-  new OwnerDTO({
-    id: "family-id",
-    name: "Test Family",
-    type: OwnerType.FAMILY,
-  }),
-];
-
-function build(
-  params: Partial<ConstructorParameters<typeof StockDTO>[0]> = {},
-) {
-  return new StockItemUIModel(
-    new StockDTO({
-      description: "Milk",
-      id: "stock-id",
-      owner: StockOwners.USER,
-      ownerId: "user-id",
-      quantity: 5,
-      unit: StockUnits.KILOGRAM,
-      ...params,
-    }),
-    owners,
-    now,
-    "en-US",
-  );
+function model(item = dto()) {
+  return new StockItemUIModel(item, owners, "en-US");
 }
 
-describe("StockItemUIModel", () => {
-  it("SHOULD flag an expired item as attention with the expense tile", () => {
-    const item = build({ expirationDate: new Date(2026, 9, 1) });
-
-    expect(item.status).toBe(StockExpirationStatus.EXPIRED);
-    expect(item.isAttention).toBe(true);
-    expect(item.iconTile).toEqual({
-      icon: "alert-circle-outline",
-      tone: "expense",
-    });
-    expect(item.badge).toEqual({
-      labelKey: "stock.status.expired",
-      tone: "expense",
-    });
-    expect(item.dateInfo?.key).toBe("stock.list.date.expired");
-  });
-
-  it("SHOULD show the today badge for an item expiring today", () => {
-    const item = build({ expirationDate: new Date(2026, 9, 5) });
-
-    expect(item.badge).toEqual({
-      labelKey: "stock.status.today",
-      tone: "warning",
-    });
-    expect(item.iconTile).toEqual({ icon: "clock-outline", tone: "warning" });
-    expect(item.dateInfo?.key).toBe("stock.list.date.expires");
-  });
-
-  it("SHOULD show the tomorrow badge", () => {
-    const item = build({ expirationDate: new Date(2026, 9, 6) });
-
-    expect(item.badge?.labelKey).toBe("stock.status.tomorrow");
-  });
-
-  it("SHOULD show the days badge with a count", () => {
-    const item = build({ expirationDate: new Date(2026, 9, 7) });
-
-    expect(item.badge).toEqual({
-      labelKey: "stock.status.days",
-      params: { count: 2 },
-      tone: "warning",
-    });
-  });
-
-  it("SHOULD have no badge and the opened date for an OK opened item", () => {
-    const item = build({ openingDate: new Date(2026, 9, 1) });
-
-    expect(item.badge).toBeUndefined();
-    expect(item.isAttention).toBe(false);
-    expect(item.iconTile).toEqual({
-      icon: "package-variant-closed",
-      tone: "neutral",
-    });
-    expect(item.dateInfo?.key).toBe("stock.list.date.opened");
-  });
-
-  it("SHOULD have no date info for an OK item without opening date", () => {
-    expect(build().dateInfo).toBeUndefined();
-  });
-
-  it("SHOULD expose quantity and unit keys", () => {
-    const item = build();
-
-    expect(item.quantityText).toBe("5");
-    expect(item.unitKey).toBe("common.units.kilogram");
-    expect(item.quantityDetail).toEqual({
-      unitKey: "stock.units.kilogram",
-      value: 5,
-    });
-  });
-
-  it("SHOULD resolve the owner name and kind", () => {
-    expect(build().ownerName).toBe("Alice Test");
-    expect(build().ownerKind).toBe(StockOwners.USER);
-    expect(build({ ownerId: "gone-id" }).ownerName).toBe("");
-  });
-
-  it("SHOULD list only filled detail rows in order", () => {
-    const item = build({ brand: "Brand X", notes: "Fridge" });
-
-    expect(item.detailRows).toEqual([
-      { labelKey: "stock.details.owner", value: "Alice Test" },
-      { labelKey: "stock.details.brand", value: "Brand X" },
-      { labelKey: "stock.details.notes", value: "Fridge" },
+describe("badges", () => {
+  it("SHOULD show Vencido for an expired item and Vencendo for an expiring one", () => {
+    expect(model(expired("a")).badges).toEqual([
+      { labelKey: "stock.badge.expired", tone: "expense" },
+    ]);
+    expect(model(expiring("a")).badges).toEqual([
+      { labelKey: "stock.badge.expiring", tone: "warning" },
     ]);
   });
 
-  it("SHOULD list every detail row with formatted dates", () => {
-    const item = build({
-      barcode: "123",
-      brand: "B",
-      expirationDate: new Date(2026, 9, 1),
-      notes: "N",
-      openingDate: new Date(2026, 9, 2),
-      purchaseDate: new Date(2026, 9, 3),
-    });
-
-    expect(item.detailRows.map((row) => row.labelKey)).toEqual([
-      "stock.details.owner",
-      "stock.details.expiration",
-      "stock.details.opening",
-      "stock.details.purchase",
-      "stock.details.brand",
-      "stock.details.barcode",
-      "stock.details.notes",
-    ]);
-    expect(item.detailRows[1].value).toBe(
-      new Date(2026, 9, 1).toLocaleDateString("en-US"),
+  it("SHOULD show Repor and Aberto, in that order after the expiration badge", () => {
+    const item = dto((f) =>
+      f
+        .withExpirationStatus(StockExpirationStatus.EXPIRING)
+        .withNeedsRestock()
+        .withHasOpenLot(),
     );
-    expect(item.detailRows[1].value).toBe("10/1/2026");
+
+    expect(model(item).badges.map((badge) => badge.labelKey)).toEqual([
+      "stock.badge.expiring",
+      "stock.badge.restock",
+      "stock.badge.opened",
+    ]);
   });
 
-  it("SHOULD build normalized search text from description and brand", () => {
-    const item = build({ brand: "União", description: "Açúcar" });
-
-    expect(item.searchText).toContain("acucar");
-    expect(item.searchText).toContain("uniao");
-  });
-
-  it("SHOULD expose times and basic fields", () => {
-    const item = build({
-      createdAt: new Date(2026, 8, 1),
-      expirationDate: new Date(2026, 9, 20),
-    });
-
-    expect(item.id).toBe("stock-id");
-    expect(item.ownerId).toBe("user-id");
-    expect(item.description).toBe("Milk");
-    expect(item.expirationTime).toBe(new Date(2026, 9, 20).getTime());
-    expect(item.createdTime).toBe(new Date(2026, 8, 1).getTime());
+  it("SHOULD show no badge for an item in order", () => {
+    expect(model(fine("a")).badges).toEqual([]);
   });
 });
 
-describe("normalizeSearchText", () => {
-  it("SHOULD trim, lowercase and strip accents", () => {
-    expect(normalizeSearchText("  CAFÉ ")).toBe("cafe");
+describe("attention", () => {
+  it.each([
+    ["expired", expired("a"), true],
+    ["expiring", expiring("a"), true],
+    ["low", low("a"), true],
+    ["fine", fine("a"), false],
+  ])("SHOULD flag a %s item as attention = %s", (_label, item, expected) => {
+    expect(model(item).isAttention).toBe(expected);
+  });
+});
+
+describe("quantity", () => {
+  it.each([
+    [0.25, StockUnits.KILOGRAM, "250", "common.units.gram"],
+    [1.5, StockUnits.KILOGRAM, "1.5", "common.units.kilogram"],
+    [3, StockUnits.UNIT, "3", "common.units.unit"],
+  ])("SHOULD show %s of %s as %s %s", (quantity, unit, text, unitKey) => {
+    expect(
+      model(dto((f) => f.withQuantity(quantity).withUnit(unit))).quantity,
+    ).toEqual({ text, unitKey });
+  });
+});
+
+describe("dateInfo", () => {
+  it("SHOULD say when the nearest expiration is, expired or not, opened or not", () => {
+    expect(model(expired("a")).dateInfo).toMatchObject({
+      key: "stock.list.date.expired",
+    });
+    expect(model(expiring("a")).dateInfo).toMatchObject({
+      key: "stock.list.date.expires",
+    });
+    expect(
+      model(
+        dto((f) =>
+          f.withNearestExpiration(new Date(2026, 10, 5)).withHasOpenLot(),
+        ),
+      ).dateInfo,
+    ).toMatchObject({
+      key: "stock.list.date.openedExpires",
+    });
   });
 
-  it("SHOULD handle decomposed input", () => {
-    expect(normalizeSearchText("Café")).toBe("cafe");
+  it("SHOULD show the minimum WHEN the item only needs restock", () => {
+    expect(model(low("a")).dateInfo).toEqual({
+      key: "stock.list.date.minimum",
+      minimum: { text: "300", unitKey: "common.units.gram" },
+    });
+  });
+
+  it("SHOULD show nothing WHEN there is no date and no restock", () => {
+    expect(model(dto()).dateInfo).toBeUndefined();
+  });
+});
+
+describe("presentation", () => {
+  it("SHOULD build the subtitle from the category path, the location and the owner", () => {
+    const item = dto((f) =>
+      f
+        .withCategory({
+          archived: false,
+          id: "c",
+          name: "Cheese",
+          path: "Dairy / Cheese",
+        })
+        .withLocation({ archived: false, id: "l", name: "Fridge" }),
+    );
+
+    expect(model(item).subtitle).toBe("Dairy › Cheese · Fridge · Ana");
+    expect(model(dto()).subtitle).toBe("Ana");
+  });
+
+  it.each([
+    [expired("a"), "alert-circle-outline", "expense"],
+    [expiring("a"), "clock-outline", "warning"],
+    [low("a"), "cart-outline", "accent"],
+    [fine("a"), "package-variant-closed", "neutral"],
+  ])("SHOULD pick the icon tile", (item, icon, tone) => {
+    expect(model(item).iconTile).toEqual({ icon, tone });
+  });
+
+  it("SHOULD expose the ids, times, owner and search text", () => {
+    const item = dto((f) =>
+      f
+        .withBrand("Açaí Brand")
+        .withBarcode("789")
+        .withCreatedAt(new Date(2026, 0, 1))
+        .withNearestExpiration(new Date(2026, 10, 5)),
+    );
+    const ui = model(item);
+
+    expect(ui.id).toBe(item.id);
+    expect(ui.brand).toBe("Açaí Brand");
+    expect(ui.description).toBe(item.description);
+    expect(ui.createdTime).toBe(new Date(2026, 0, 1).getTime());
+    expect(ui.expirationTime).toBe(new Date(2026, 10, 5).getTime());
+    expect(ui.ownerName).toBe("Ana");
+    expect(ui.ownerKind).toBe(item.owner);
+    expect(ui.categoryId).toBeUndefined();
+    expect(ui.locationId).toBeUndefined();
+    expect(ui.searchText).toContain("acai brand");
+    expect(ui.searchText).toContain("789");
+    expect(ui.status).toBe(StockExpirationStatus.NONE);
+  });
+
+  it("SHOULD have an empty owner name for an unknown owner", () => {
+    expect(
+      new StockItemUIModel(
+        dto((f) => f.withOwnerId("ghost")),
+        owners,
+      ).ownerName,
+    ).toBe("");
+  });
+
+  it("SHOULD normalize text for the search", () => {
+    expect(normalizeSearchText("  Muçarela ")).toBe("mucarela");
   });
 });

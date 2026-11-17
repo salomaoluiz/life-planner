@@ -4,6 +4,7 @@ import {
   ConnectivityError,
   GenericError,
 } from "@domain/entities/errors";
+import { formatDay } from "@domain/entities/stock/stockDay";
 
 import {
   mocks,
@@ -12,19 +13,20 @@ import {
   spies,
 } from "./mocks/getStockItems.mocks";
 
+// The device day (the tests run in any time zone).
+const TODAY = formatDay(new Date());
+
 it("SHOULD GET /v1/stock/items filtered by the owner AND return StockModels", async () => {
   spies.get.mockResolvedValueOnce(mocks.apiItems);
 
   const result = await setup();
 
   expect(spies.get).toHaveBeenCalledWith(
-    `/v1/stock/items?ownerId=${mocks.ownerId}`,
+    `/v1/stock/items?ownerId=${mocks.ownerId}&today=${TODAY}`,
   );
   expect(result).toEqual([StockModel.fromJSON(mocks.apiItems[0])]);
   expect(result[0].brand).toBeUndefined();
-  expect(result[0].expirationDate).toEqual(
-    new Date("2026-10-20T00:00:00.000Z"),
-  );
+  expect(result[0].nearestExpiration).toEqual(new Date(2026, 9, 20));
 });
 
 it("SHOULD return an empty list WHEN the API returns []", async () => {

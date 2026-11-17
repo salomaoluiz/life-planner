@@ -1,67 +1,52 @@
-import { StockOwners, StockUnits } from "@domain/entities/stock/StockEntity";
+import { datasourcesMocks } from "@data/datasource/mocks/listDatasources.mocks";
 
-import { mocks, setup, spies } from "./mocks/stockRepositoryImpl.mocks";
+import * as createStockItem from "./createStockItem";
+import * as deleteStockItem from "./deleteStockItem";
+import * as getStockItem from "./getStockItem";
+import * as getStockItems from "./getStockItems";
+import * as catalog from "./stockCatalog";
+import * as movements from "./stockMovements";
+import stockRepositoryImpl from "./stockRepositoryImpl";
+import * as updateStockItem from "./updateStockItem";
 
-it("SHOULD call createStockItem correctly", async () => {
-  const { createStockItem } = setup();
+const modules = {
+  createStockCategory: catalog,
+  createStockCategorySuggestions: catalog,
+  createStockItem,
+  createStockLocation: catalog,
+  createStockLocationSuggestions: catalog,
+  createStockMovement: movements,
+  deleteStockCategory: catalog,
+  deleteStockItem,
+  deleteStockLocation: catalog,
+  getOwnerChangePreview: movements,
+  getStockCategories: catalog,
+  getStockItem,
+  getStockItems,
+  getStockLocations: catalog,
+  getStockMovements: movements,
+  suggestStockItems: movements,
+  updateStockCategory: catalog,
+  updateStockItem,
+  updateStockLocation: catalog,
+} as const;
 
-  const params = {
-    barcode: "1234567890123",
-    brand: "Some Brand",
-    description: "Some Description",
-    expirationDate: new Date(),
-    notes: "Some Notes",
-    openingDate: new Date(),
-    owner: StockOwners.FAMILY,
-    ownerId: "1dcc732e-8886-4a68-b669-ded3f3809c20",
-    purchaseDate: new Date(),
-    quantity: 10,
-    unit: StockUnits.GRAM,
-  };
+it.each(Object.keys(modules) as Array<keyof typeof modules>)(
+  "SHOULD delegate %s with its params and the datasources",
+  async (method) => {
+    const module = modules[method] as Record<string, unknown>;
+    const target = "default" in module ? "default" : method;
+    const spy = jest
+      .spyOn(module as never, target as never)
+      .mockResolvedValue(`${method} response` as never);
+    const repository = stockRepositoryImpl(datasourcesMocks);
 
-  const stock = await createStockItem(params);
+    const result = await (
+      repository[method] as (params: unknown) => Promise<unknown>
+    )({ id: "param" });
 
-  expect(spies.createStockItem).toHaveBeenCalledTimes(1);
-  expect(spies.createStockItem).toHaveBeenCalledWith(params, mocks.datasources);
-  expect(stock).toEqual("createStockItem response");
-});
-
-it("SHOULD call deleteStockItem correctly", async () => {
-  const { deleteStockItem } = setup();
-
-  const params = {
-    id: "bb3443d4-a9bd-401e-9732-d6bf0dca7e83",
-    ownerId: "6eff80a7-e5e2-499d-9e47-5a448a753a03",
-  };
-
-  await deleteStockItem(params);
-
-  expect(spies.deleteStockItem).toHaveBeenCalledTimes(1);
-  expect(spies.deleteStockItem).toHaveBeenCalledWith(params, mocks.datasources);
-});
-
-it("SHOULD call getStockItems correctly", async () => {
-  const { getStockItems } = setup();
-
-  const ownerId = "bb3443d4-a9bd-401e-9732-d6bf0dca7e83";
-
-  const families = await getStockItems(ownerId);
-
-  expect(spies.getStockItems).toHaveBeenCalledTimes(1);
-  expect(spies.getStockItems).toHaveBeenCalledWith(ownerId, mocks.datasources);
-  expect(families).toEqual("getStockItems response");
-});
-
-it("SHOULD call updateStockItem correctly", async () => {
-  const { updateStockItem } = setup();
-
-  const params = {
-    id: "bb3443d4-a9bd-401e-9732-d6bf0dca7e83",
-    ownerId: "bb3443d4-a9bd-401e-9732-d6bf0dca7e83",
-  };
-
-  await updateStockItem(params);
-
-  expect(spies.updateStockItem).toHaveBeenCalledTimes(1);
-  expect(spies.updateStockItem).toHaveBeenCalledWith(params, mocks.datasources);
-});
+    expect(spy).toHaveBeenCalledWith({ id: "param" }, datasourcesMocks);
+    expect(result).toBe(`${method} response`);
+    spy.mockRestore();
+  },
+);

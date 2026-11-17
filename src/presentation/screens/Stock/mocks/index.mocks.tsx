@@ -3,11 +3,14 @@ import { View } from "react-native";
 
 import { render } from "@tests";
 
-import StockDTO from "@application/dto/stock/StockDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
-import { StockOwners, StockUnits } from "@domain/entities/stock/StockEntity";
+import {
+  StockExpirationStatus,
+  StockUnits,
+} from "@domain/entities/stock/StockEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import StockListUIModel from "@screens/Stock/models/StockListUIModel";
+import { dto } from "@screens/Stock/models/stockUi.fixtures";
 
 import Stock from "../";
 import { useStockViewModel } from "../hooks";
@@ -52,56 +55,68 @@ jest.mock("@screens/Stock/containers/StockItemDetails", () => {
 });
 
 // region mocks
-const DAY_MS = 24 * 60 * 60 * 1000;
 const owners = [
   new OwnerDTO({ id: "user-id", name: "Ana", type: OwnerType.USER }),
 ];
 const dtos = [
-  new StockDTO({
-    description: "Leite",
-    expirationDate: new Date(Date.now() + 2 * DAY_MS),
-    id: "stock-1",
-    owner: StockOwners.USER,
-    ownerId: "user-id",
-    quantity: 2,
-    unit: StockUnits.LITER,
-  }),
-  new StockDTO({
-    description: "Arroz",
-    id: "stock-2",
-    owner: StockOwners.USER,
-    ownerId: "user-id",
-    quantity: 5,
-    unit: StockUnits.KILOGRAM,
-  }),
+  dto((f) =>
+    f
+      .withId("stock-1")
+      .withDescription("Leite")
+      .withUnit(StockUnits.LITER)
+      .withQuantity(2)
+      .withExpirationStatus(StockExpirationStatus.EXPIRING)
+      .withNearestExpiration(new Date(2026, 9, 8))
+      .withHasOpenLot()
+      .withNeedsRestock(),
+  ),
+  dto((f) =>
+    f
+      .withId("stock-2")
+      .withDescription("Arroz")
+      .withUnit(StockUnits.KILOGRAM)
+      .withQuantity(5),
+  ),
 ];
-const list = new StockListUIModel(dtos, owners, new Date(), "en-US");
+const list = new StockListUIModel(dtos, owners, "en-US");
 const view = list.view({ filter: "ALL", search: "", sort: "EXPIRATION" });
 // endregion mocks
 
 function givenViewModel(overrides: Record<string, unknown> = {}) {
   const vm = {
     activeFilter: view.activeFilter,
+    categoryIds: [],
+    categoryOptions: [{ id: "c1", label: "Dairy › Cheese" }],
     errorMessageKey: undefined,
     filterOptions: view.filterOptions,
     hasNoResults: false,
+    isCatalogLoading: false,
     isEmpty: false,
     isLoading: false,
     isRefreshing: false,
     isSortOpen: false,
+    locationIds: [],
+    locationOptions: [{ id: "l1", label: "Fridge" }],
     onAddPress: jest.fn(),
+    onCatalogPress: jest.fn(),
+    onCategoriesChange: jest.fn(),
     onClearFilters: jest.fn(),
     onCloseDetails: jest.fn(),
+    onCloseFilterSheet: jest.fn(),
     onCloseSort: jest.fn(),
     onFilterChange: jest.fn(),
     onItemDeleted: jest.fn(),
     onItemPress: jest.fn(),
+    onLocationsChange: jest.fn(),
+    onOpenCategorySheet: jest.fn(),
+    onOpenLocationSheet: jest.fn(),
     onOpenSort: jest.fn(),
     onRefresh: jest.fn(),
     onRetry: jest.fn(),
     onSearchChange: jest.fn(),
     onSortChange: jest.fn(),
     onToastHide: jest.fn(),
+    openFilter: undefined,
     readOnly: false,
     rows: view.rows,
     search: "",
@@ -129,7 +144,7 @@ function setup(overrides: Record<string, unknown> = {}) {
   return vm;
 }
 
-const mocks = { DAY_MS, list, owners, view, View };
+const mocks = { list, owners, view, View };
 
 export { mocks, setup };
 export { fireEvent, screen } from "@tests";

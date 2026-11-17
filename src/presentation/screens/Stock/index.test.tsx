@@ -1,6 +1,6 @@
-import StockDTO from "@application/dto/stock/StockDTO";
-import { StockOwners, StockUnits } from "@domain/entities/stock/StockEntity";
+import { StockExpirationStatus } from "@domain/entities/stock/StockEntity";
 import StockListUIModel from "@screens/Stock/models/StockListUIModel";
+import { dto } from "@screens/Stock/models/stockUi.fixtures";
 
 import { fireEvent, mocks, screen, setup } from "./mocks/index.mocks";
 import stockTestIds from "./testIds";
@@ -75,7 +75,9 @@ describe("content", () => {
     expect(screen.getByText("stock.list.group.ok")).toBeOnTheScreen();
     expect(screen.getByText("Leite")).toBeOnTheScreen();
     expect(screen.getByText("Arroz")).toBeOnTheScreen();
-    expect(screen.getByText('stock.status.days {"count":2}')).toBeOnTheScreen();
+    expect(screen.getByText("stock.badge.expiring")).toBeOnTheScreen();
+    expect(screen.getByText("stock.badge.restock")).toBeOnTheScreen();
+    expect(screen.getByText("stock.badge.opened")).toBeOnTheScreen();
     expect(screen.getByText("5 common.units.kilogram")).toBeOnTheScreen();
     expect(
       screen.getAllByTestId(stockTestIds.row)[1].props.accessibilityLabel,
@@ -157,6 +159,72 @@ it("SHOULD wire pull-to-refresh on the list", () => {
   expect(props.onRefresh).toBe(vm.onRefresh);
 });
 
+describe("catalog", () => {
+  it("SHOULD open the categories and locations screen", () => {
+    const vm = setup();
+
+    fireEvent.press(screen.getByTestId(stockTestIds.catalogButton));
+
+    expect(vm.onCatalogPress).toHaveBeenCalled();
+  });
+
+  it("SHOULD open each filter sheet from its button", () => {
+    const vm = setup();
+
+    fireEvent.press(screen.getByTestId(stockTestIds.categoryFilter));
+    fireEvent.press(screen.getByTestId(stockTestIds.locationFilter));
+
+    expect(vm.onOpenCategorySheet).toHaveBeenCalled();
+    expect(vm.onOpenLocationSheet).toHaveBeenCalled();
+  });
+
+  it("SHOULD name the chosen categories and locations on the buttons", () => {
+    setup({ categoryIds: ["c1"], locationIds: ["l1"] });
+
+    expect(
+      screen.getByText(
+        'stock.list.filter.categoryValue {"names":"Dairy › Cheese"}',
+      ),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByText('stock.list.filter.locationValue {"names":"Fridge"}'),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD offer the categories in the sheet and report the choice", () => {
+    const vm = setup({ openFilter: "category" });
+
+    fireEvent.press(
+      screen.getByTestId(`${stockTestIds.filterSheetOptions}-c1`),
+    );
+
+    expect(vm.onCategoriesChange).toHaveBeenCalledWith(["c1"]);
+  });
+
+  it("SHOULD offer the locations in the sheet and report the choice", () => {
+    const vm = setup({ openFilter: "location" });
+
+    fireEvent.press(
+      screen.getByTestId(`${stockTestIds.filterSheetOptions}-l1`),
+    );
+
+    expect(vm.onLocationsChange).toHaveBeenCalledWith(["l1"]);
+  });
+
+  it("SHOULD explain WHEN there is nothing to choose AND show a skeleton while loading", () => {
+    setup({ categoryOptions: [], locationOptions: [], openFilter: "location" });
+    expect(screen.getByText("stock.list.filter.noLocations")).toBeOnTheScreen();
+
+    setup({ categoryOptions: [], openFilter: "category" });
+    expect(
+      screen.getAllByText("stock.list.filter.noCategories").length,
+    ).toBeGreaterThan(0);
+
+    setup({ isCatalogLoading: true, openFilter: "category" });
+    expect(screen.queryByTestId(stockTestIds.filterSheetOptions)).toBeNull();
+  });
+});
+
 describe("details", () => {
   it("SHOULD render the details only WHEN an item is selected", () => {
     setup();
@@ -187,26 +255,25 @@ describe("test ids", () => {
     expect(screen.getAllByTestId(stockTestIds.row)).toHaveLength(2);
     expect(screen.getByTestId(stockTestIds.statusExpiring)).toBeOnTheScreen();
     expect(screen.queryByTestId(stockTestIds.statusExpired)).toBeNull();
-    expect(screen.getByTestId(stockTestIds.rowQuantity)).toHaveTextContent(
-      "5 common.units.kilogram",
-    );
+    expect(
+      screen.getAllByTestId(stockTestIds.rowQuantity)[1],
+    ).toHaveTextContent("5 common.units.kilogram");
+    expect(screen.getByTestId(stockTestIds.statusRestock)).toBeOnTheScreen();
+    expect(screen.getByTestId(stockTestIds.statusOpened)).toBeOnTheScreen();
   });
 
   it("SHOULD expose the expired status for an expired item", () => {
     const expired = new StockListUIModel(
       [
-        new StockDTO({
-          description: "Iogurte",
-          expirationDate: new Date(Date.now() - 3 * mocks.DAY_MS),
-          id: "stock-3",
-          owner: StockOwners.USER,
-          ownerId: "user-id",
-          quantity: 1,
-          unit: StockUnits.UNIT,
-        }),
+        dto((f) =>
+          f
+            .withId("stock-3")
+            .withDescription("Iogurte")
+            .withExpirationStatus(StockExpirationStatus.EXPIRED)
+            .withNearestExpiration(new Date(2026, 9, 1)),
+        ),
       ],
       mocks.owners,
-      new Date(),
       "en-US",
     );
     setup({
@@ -216,6 +283,14 @@ describe("test ids", () => {
 
     expect(screen.getByTestId(stockTestIds.statusExpired)).toBeOnTheScreen();
     expect(screen.queryByTestId(stockTestIds.statusExpiring)).toBeNull();
+  });
+
+  it("SHOULD show no date for a row without one and no restock", () => {
+    setup();
+
+    expect(
+      screen.getAllByTestId(stockTestIds.row)[1].props.subtitle,
+    ).toBeUndefined();
   });
 
   it("SHOULD expose the search input and the sort button", () => {

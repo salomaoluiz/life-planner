@@ -8,7 +8,7 @@ it.each([
   ["CACHE_FINANCIAL_CATEGORY_DATA", "@cache_financial_category_data_v2"],
   ["CACHE_FINANCIAL_TAG_DATA", "@cache_financial_tag_data"],
   ["CACHE_FINANCIAL_TRANSACTION_DATA", "@cache_financial_transaction_data_v2"],
-  ["CACHE_STOCK_DATA", "@cache_stock_data_v2"],
+  ["CACHE_STOCK_DATA", "@cache_stock_data_v3"],
 ] as const)("SHOULD have the versioned key %s", (name, value) => {
   expect(CacheStringKeys[name]).toBe(value);
 });

@@ -16,6 +16,8 @@ export const MODAL_NAMES = [
   "confirm_payment",
   "section_picker",
   "add_new_stock_item",
+  "stock_movement",
+  "stock_catalog",
   "investment_asset",
   "investment_conversion",
   "investment_fixed_income",

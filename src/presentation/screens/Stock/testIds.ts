@@ -1,8 +1,13 @@
 const stockTestIds = {
   addButton: "stock.list.add-button",
+  catalogButton: "stock.list.catalog-button",
+  categoryFilter: "stock.list.category-filter",
   clearFilters: "stock.list.clear-filters",
   emptyState: "stock.list.empty-state",
   filter: "stock.list.filter",
+  filterSheet: "stock.list.filter-sheet",
+  filterSheetOptions: "stock.list.filter-sheet-options",
+  locationFilter: "stock.list.location-filter",
   noResults: "stock.list.no-results",
   readOnlyBanner: "stock.list.readonly-banner",
   readOnlyToast: "stock.list.readonly-toast",
@@ -15,6 +20,8 @@ const stockTestIds = {
   sortOption: "stock.list.sort-option",
   statusExpired: "stock.list.status-expired",
   statusExpiring: "stock.list.status-expiring",
+  statusOpened: "stock.list.status-opened",
+  statusRestock: "stock.list.status-restock",
 } as const;
 
 export default stockTestIds;

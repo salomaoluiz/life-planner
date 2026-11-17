@@ -23,9 +23,10 @@ var body = {
 };
 if (typeof days !== "undefined") {
   // Same wall-clock time N days from now: the app compares local calendar days, so this is exactly N days.
-  body.expirationDate = new Date(
-    Date.now() + Number(days) * DAY_MS,
-  ).toISOString();
+  // Spec 116: lot dates are calendar days (YYYY-MM-DD).
+  body.expirationDate = new Date(Date.now() + Number(days) * DAY_MS)
+    .toISOString()
+    .slice(0, 10);
 }
 var response = http.post(E2E_API_URL + "/v1/stock/items", {
   headers: {

@@ -7,6 +7,7 @@ import {
   marketIndexes,
   marketIndexHistory,
 } from "./fixtures/investment";
+import { stockDetail } from "./fixtures/stock";
 import { me } from "./fixtures/user";
 import type { Method } from "./networkHarness";
 
@@ -47,6 +48,20 @@ function respond(method: Method, path: string): unknown {
   }
   if (path.startsWith("/v1/investments/assets")) {
     return { items: [investmentAsset] };
+  }
+  // Stock (spec 116): categories, locations, suggestions, the history and the detail of one item.
+  if (
+    path.startsWith("/v1/stock/categories") ||
+    path.startsWith("/v1/stock/locations") ||
+    path.startsWith("/v1/stock/items/suggestions")
+  ) {
+    return { items: [] };
+  }
+  if (/^\/v1\/stock\/items\/[^/?]+\/movements/.test(path)) {
+    return { items: [], nextCursor: null };
+  }
+  if (/^\/v1\/stock\/items\/[^/?]+(\?|$)/.test(path)) {
+    return stockDetail;
   }
   // One transaction by id (spec 077).
   if (/^\/v1\/finance\/transactions\/[^/?]+(\?|$)/.test(path)) {

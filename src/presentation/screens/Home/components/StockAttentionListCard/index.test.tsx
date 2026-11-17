@@ -5,12 +5,12 @@ import { fireEvent, render, screen } from "@tests";
 import StockAttentionDTO, {
   StockAttentionStatus,
 } from "@application/dto/home/StockAttentionDTO";
-import StockDTO from "@application/dto/stock/StockDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
-import { StockOwners, StockUnits } from "@domain/entities/stock/StockEntity";
+import { StockUnits } from "@domain/entities/stock/StockEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import StockAttentionUIModel from "@screens/Home/models/StockAttentionUIModel";
 import homeTestIds from "@screens/Home/testIds";
+import { dto } from "@screens/Stock/models/stockUi.fixtures";
 
 import StockAttentionListCard from "./";
 
@@ -45,14 +45,14 @@ function model(totalItems: number, withRows = true) {
 }
 
 function stock(id: string, description: string) {
-  return new StockDTO({
-    description,
-    id,
-    owner: StockOwners.FAMILY,
-    ownerId: "owner-1",
-    quantity: 2,
-    unit: StockUnits.UNIT,
-  });
+  return dto((f) =>
+    f
+      .withId(id)
+      .withDescription(description)
+      .withOwnerId("owner-1")
+      .withQuantity(2)
+      .withUnit(StockUnits.UNIT),
+  );
 }
 
 const handlers = { onAddItemPress: jest.fn(), onRowPress: jest.fn() };
@@ -163,4 +163,23 @@ it("SHOULD expose the row and its title ids", () => {
   expect(
     screen.getAllByTestId(`${homeTestIds.stockAttentionRow}-title`).length,
   ).toBeGreaterThan(0);
+});
+
+it("SHOULD badge a low item as restock with a cart icon", () => {
+  const items = [
+    {
+      daysLeft: undefined,
+      status: StockAttentionStatus.RESTOCK,
+      stock: stock("s-3", "Rice"),
+    },
+  ];
+
+  renderLoaded(
+    new StockAttentionUIModel(
+      new StockAttentionDTO({ attentionCount: 1, items, totalItems: 1 }),
+      owners,
+    ),
+  );
+
+  expect(screen.getByText("home.stock.restock")).toBeOnTheScreen();
 });

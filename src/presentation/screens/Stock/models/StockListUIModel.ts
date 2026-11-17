@@ -1,7 +1,9 @@
 import StockDTO from "@application/dto/stock/StockDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
-import { StockOwners } from "@domain/entities/stock/StockEntity";
-import { StockExpirationStatus } from "@domain/entities/stock/stockExpiration";
+import {
+  StockExpirationStatus,
+  StockOwners,
+} from "@domain/entities/stock/StockEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { TranslationKeys } from "@presentation/i18n/types";
 
@@ -30,7 +32,10 @@ export type StockListRow =
 export type StockSort = "EXPIRATION" | "NAME" | "RECENT";
 
 interface ViewParams {
+  // Spec 116: the category filter already includes the descendants (the screen expands them from the tree).
+  categoryIds?: ReadonlySet<string>;
   filter: string;
+  locationIds?: ReadonlySet<string>;
   search: string;
   sort: StockSort;
 }
@@ -55,15 +60,8 @@ class StockListUIModel {
     return this.items.filter((item) => !this.archivedIds.has(item.ownerId));
   }
 
-  constructor(
-    dtos: StockDTO[],
-    owners: OwnerDTO[],
-    now: Date,
-    locale?: string,
-  ) {
-    this.items = dtos.map(
-      (dto) => new StockItemUIModel(dto, owners, now, locale),
-    );
+  constructor(dtos: StockDTO[], owners: OwnerDTO[], locale?: string) {
+    this.items = dtos.map((dto) => new StockItemUIModel(dto, owners, locale));
     this.families = owners.filter((owner) => owner.type === OwnerType.FAMILY);
     this.archivedIds = new Set(
       this.families.filter((family) => family.archived).map((f) => f.id),
@@ -72,8 +70,11 @@ class StockListUIModel {
 
   view(params: ViewParams) {
     const query = normalizeSearchText(params.search);
-    const searched = this.items.filter((item) =>
-      item.searchText.includes(query),
+    const searched = this.items.filter(
+      (item) =>
+        item.searchText.includes(query) &&
+        matchesSet(params.categoryIds, item.categoryId) &&
+        matchesSet(params.locationIds, item.locationId),
     );
 
     const filterOptions = this.buildFilterOptions(searched);
@@ -195,35 +196,33 @@ function byDescription(a: StockItemUIModel, b: StockItemUIModel) {
 }
 
 function byExpiration(a: StockItemUIModel, b: StockItemUIModel) {
-  if (a.expirationTime === undefined && b.expirationTime === undefined) {
+  const left = a.expirationTime;
+  const right = b.expirationTime;
+
+  if (left !== undefined && right !== undefined) {
+    return left - right || byDescription(a, b);
+  }
+
+  if (left === undefined && right === undefined) {
     return byDescription(a, b);
   }
 
-  if (a.expirationTime === undefined) {
-    return 1;
-  }
-
-  if (b.expirationTime === undefined) {
-    return -1;
-  }
-
-  return a.expirationTime - b.expirationTime || byDescription(a, b);
+  return left === undefined ? 1 : -1;
 }
 
 function byRecent(a: StockItemUIModel, b: StockItemUIModel) {
-  if (a.createdTime === undefined && b.createdTime === undefined) {
+  const left = a.createdTime;
+  const right = b.createdTime;
+
+  if (left !== undefined && right !== undefined) {
+    return right - left || byDescription(a, b);
+  }
+
+  if (left === undefined && right === undefined) {
     return byDescription(a, b);
   }
 
-  if (a.createdTime === undefined) {
-    return 1;
-  }
-
-  if (b.createdTime === undefined) {
-    return -1;
-  }
-
-  return b.createdTime - a.createdTime || byDescription(a, b);
+  return left === undefined ? 1 : -1;
 }
 
 function matchesFilter(item: StockItemUIModel, filter: string) {
@@ -234,12 +233,19 @@ function matchesFilter(item: StockItemUIModel, filter: string) {
       return item.status === StockExpirationStatus.EXPIRED;
     case StockFilters.EXPIRING:
       // Includes expired items, matching Home's attention count
-      return item.isAttention;
+      return (
+        item.status === StockExpirationStatus.EXPIRED ||
+        item.status === StockExpirationStatus.EXPIRING
+      );
     case StockFilters.PERSONAL:
       return item.ownerKind === StockOwners.USER;
     default:
       return item.ownerId === filter;
   }
+}
+
+function matchesSet(set: ReadonlySet<string> | undefined, value?: string) {
+  return !set || set.size === 0 || (value !== undefined && set.has(value));
 }
 
 function toRows(items: StockItemUIModel[]): StockListRow[] {

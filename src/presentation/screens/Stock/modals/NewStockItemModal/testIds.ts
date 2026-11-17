@@ -1,13 +1,26 @@
 const stockItemFormTestIds = {
+  barcodeInput: "stock.item-form.barcode-input",
   brandInput: "stock.item-form.brand-input",
+  categorySelect: "stock.item-form.category-select",
   descriptionInput: "stock.item-form.description-input",
   expirationField: "stock.item-form.expiration-field",
+  idealInput: "stock.item-form.ideal-input",
+  locationSelect: "stock.item-form.location-select",
+  minInput: "stock.item-form.min-input",
   moreToggle: "stock.item-form.more-toggle",
+  notesInput: "stock.item-form.notes-input",
   owner: "stock.item-form.owner",
+  ownerChange: "stock.item-form.owner-change",
   quantityInput: "stock.item-form.quantity-input",
   saveButton: "stock.item-form.save-button",
   sheet: "stock.item-form.sheet",
+  shelfLifeInput: "stock.item-form.shelf-life-input",
+  stockOnly: "stock.item-form.stock-only",
+  suggestion: "stock.item-form.suggestion",
+  suggestionAction: "stock.item-form.suggestion-action",
   unitSelect: "stock.item-form.unit-select",
+  warnClosedInput: "stock.item-form.warn-closed-input",
+  warnOpenedInput: "stock.item-form.warn-opened-input",
 } as const;
 
 export default stockItemFormTestIds;

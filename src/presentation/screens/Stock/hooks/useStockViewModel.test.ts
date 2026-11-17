@@ -4,15 +4,19 @@ import { router, useLocalSearchParams } from "expo-router";
 
 import { modalNavigation } from "@tests/modalNavigation";
 
-import StockDTO from "@application/dto/stock/StockDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
 import { StockOwners, StockUnits } from "@domain/entities/stock/StockEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
 import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
+import { dto } from "@screens/Stock/models/stockUi.fixtures";
 
-import useStockViewModel, { fetchStock } from "./useStockViewModel";
+import useStockViewModel, {
+  expandCategoryIds,
+  fetchCatalog,
+  fetchStock,
+} from "./useStockViewModel";
 
 jest.mock("expo-router", () => ({
   router: { push: jest.fn(), setParams: jest.fn() },
@@ -28,7 +32,15 @@ jest.mock("@presentation/i18n/useTranslationLocale", () => ({
 jest.mock("@application/useCases", () => ({
   useCases: {
     getOwnersUseCase: { execute: jest.fn(), uniqueName: "get_owners" },
+    getStockCategoriesUseCase: {
+      execute: jest.fn(),
+      uniqueName: "get_categories",
+    },
     getStockItemsUseCase: { execute: jest.fn(), uniqueName: "get_stock" },
+    getStockLocationsUseCase: {
+      execute: jest.fn(),
+      uniqueName: "get_locations",
+    },
   },
 }));
 
@@ -37,22 +49,22 @@ const owners = [
   new OwnerDTO({ id: "family-1", name: "Silva", type: OwnerType.FAMILY }),
 ];
 const items = [
-  new StockDTO({
-    description: "Leite",
-    id: "stock-1",
-    owner: StockOwners.USER,
-    ownerId: "user-id",
-    quantity: 2,
-    unit: StockUnits.LITER,
-  }),
-  new StockDTO({
-    description: "Arroz",
-    id: "stock-2",
-    owner: StockOwners.FAMILY,
-    ownerId: "family-1",
-    quantity: 1,
-    unit: StockUnits.KILOGRAM,
-  }),
+  dto((f) =>
+    f
+      .withId("stock-1")
+      .withDescription("Leite")
+      .withUnit(StockUnits.LITER)
+      .withQuantity(2),
+  ),
+  dto((f) =>
+    f
+      .withId("stock-2")
+      .withDescription("Arroz")
+      .withOwner(StockOwners.FAMILY)
+      .withOwnerId("family-1")
+      .withUnit(StockUnits.KILOGRAM)
+      .withQuantity(1),
+  ),
 ];
 const data = { items, owners };
 
@@ -458,5 +470,204 @@ describe("archived family (spec 042)", () => {
     expect(modalNavigation.openModal).not.toHaveBeenCalled();
     expect(result.current.selectedItem).toBeUndefined();
     expect(result.current.toastVisible).toBe(true);
+  });
+});
+
+describe("categories and locations (spec 116)", () => {
+  const catalogData = {
+    categories: [
+      { id: "dairy", label: "Dairy" },
+      { id: "cheese", label: "Dairy › Cheese", parentId: "dairy" },
+      { id: "meat", label: "Meat" },
+    ],
+    locations: [{ id: "fridge", label: "Fridge" }],
+  };
+  const categorized = [
+    dto((f) =>
+      f.withId("a").withDescription("Milk").withCategory({
+        archived: false,
+        id: "dairy",
+        name: "Dairy",
+        path: "Dairy",
+      }),
+    ),
+    dto((f) =>
+      f
+        .withId("b")
+        .withDescription("Mozzarella")
+        .withCategory({
+          archived: false,
+          id: "cheese",
+          name: "Cheese",
+          path: "Dairy / Cheese",
+        })
+        .withLocation({ archived: false, id: "fridge", name: "Fridge" }),
+    ),
+    dto((f) =>
+      f.withId("c").withDescription("Steak").withCategory({
+        archived: false,
+        id: "meat",
+        name: "Meat",
+        path: "Meat",
+      }),
+    ),
+  ];
+
+  function setupCatalog() {
+    const catalogQuery = new UseQueryFixture<typeof catalogData>();
+    const catalogBuilt = catalogQuery.withData(catalogData).build();
+    let call = 0;
+
+    query.reset();
+    query.withData({ items: categorized, owners });
+    built = query.build();
+    // The view model asks for the stock first and the catalog second, on every render.
+    spies.useQuery.mockImplementation(() => {
+      const current = call % 2 === 0 ? built : catalogBuilt;
+
+      call += 1;
+
+      return current as never;
+    });
+
+    return renderHook(() => useStockViewModel());
+  }
+
+  it("SHOULD expand a parent category to its children AND filter the rows by them", () => {
+    const { result } = setupCatalog();
+
+    act(() => result.current.onCategoriesChange(["dairy"]));
+
+    const names = result.current.rows
+      .filter((row) => row.kind === "item")
+      .map((row) => (row.kind === "item" ? row.item.description : ""));
+
+    expect(names.sort()).toEqual(["Milk", "Mozzarella"]);
+    expect(result.current.categoryIds).toEqual(["dairy"]);
+  });
+
+  it("SHOULD filter by location AND clear both with the filters", () => {
+    const { result } = setupCatalog();
+
+    act(() => result.current.onLocationsChange(["fridge"]));
+
+    expect(
+      result.current.rows.filter((row) => row.kind === "item"),
+    ).toHaveLength(1);
+
+    act(() => result.current.onClearFilters());
+
+    expect(result.current.locationIds).toEqual([]);
+    expect(
+      result.current.rows.filter((row) => row.kind === "item"),
+    ).toHaveLength(3);
+  });
+
+  it("SHOULD offer the options AND track which filter sheet is open", () => {
+    const { result } = setupCatalog();
+
+    expect(result.current.categoryOptions).toHaveLength(3);
+    expect(result.current.locationOptions).toEqual(catalogData.locations);
+
+    act(() => result.current.onOpenCategorySheet());
+    expect(result.current.openFilter).toBe("category");
+
+    act(() => result.current.onOpenLocationSheet());
+    expect(result.current.openFilter).toBe("location");
+
+    act(() => result.current.onCloseFilterSheet());
+    expect(result.current.openFilter).toBeUndefined();
+    expect(result.current.isCatalogLoading).toBe(false);
+  });
+
+  it("SHOULD open the categories and locations screen", () => {
+    const { result } = setupCatalog();
+
+    act(() => result.current.onCatalogPress());
+
+    expect(modalNavigation.openModal).toHaveBeenCalledWith("stock_catalog");
+  });
+});
+
+describe("expandCategoryIds", () => {
+  it("SHOULD add every descendant at any depth AND keep unknown ids", () => {
+    const categories = [
+      { id: "a", label: "A" },
+      { id: "b", label: "B", parentId: "a" },
+      { id: "c", label: "C", parentId: "b" },
+      { id: "d", label: "D" },
+    ];
+
+    expect([...expandCategoryIds(["a", "ghost"], categories)].sort()).toEqual([
+      "a",
+      "b",
+      "c",
+      "ghost",
+    ]);
+    expect([...expandCategoryIds([], categories)]).toEqual([]);
+  });
+});
+
+describe("fetchCatalog", () => {
+  function getCategories() {
+    return jest.mocked(useCases.getStockCategoriesUseCase.execute);
+  }
+  function getLocations() {
+    return jest.mocked(useCases.getStockLocationsUseCase.execute);
+  }
+
+  it("SHOULD read the active owners AND flatten the active categories with their path and the owner name WHEN there are several", async () => {
+    getCategories().mockResolvedValue([
+      {
+        children: [
+          {
+            children: [],
+            id: "c",
+            itemCount: 0,
+            name: "Cheese",
+            parentId: "p",
+            status: "ACTIVE",
+          },
+        ],
+        id: "p",
+        itemCount: 0,
+        name: "Dairy",
+        status: "ACTIVE",
+      },
+      { children: [], id: "x", itemCount: 0, name: "Old", status: "ARCHIVED" },
+    ] as never);
+    getLocations().mockResolvedValue([
+      { id: "l", itemCount: 0, name: "Pantry", status: "ACTIVE" },
+    ] as never);
+
+    const result = await fetchCatalog([
+      ...owners,
+      new OwnerDTO({
+        archived: true,
+        id: "old",
+        name: "Old",
+        type: OwnerType.FAMILY,
+      }),
+    ]);
+
+    expect(getCategories()).toHaveBeenCalledTimes(2);
+    expect(getCategories()).toHaveBeenCalledWith({
+      owner: "FAMILY",
+      ownerId: "family-1",
+    });
+    expect(result.categories.slice(0, 2)).toEqual([
+      { id: "p", label: "Dairy · Ana", parentId: undefined },
+      { id: "c", label: "Dairy › Cheese · Ana", parentId: "p" },
+    ]);
+    expect(result.locations[0]).toEqual({ id: "l", label: "Pantry · Ana" });
+  });
+
+  it("SHOULD not add the owner name WHEN there is only one owner", async () => {
+    getCategories().mockResolvedValue([]);
+    getLocations().mockResolvedValue([
+      { id: "l", itemCount: 0, name: "Pantry", status: "ACTIVE" },
+    ] as never);
+
+    expect((await fetchCatalog([owners[0]])).locations[0].label).toBe("Pantry");
   });
 });

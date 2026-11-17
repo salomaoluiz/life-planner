@@ -1,7 +1,9 @@
 import StockEntity, {
+  StockExpirationStatus,
   StockOwners,
   StockUnits,
 } from "@domain/entities/stock/StockEntity";
+import StockLotEntity from "@domain/entities/stock/StockLotEntity";
 
 class StockEntityFixture {
   value = {} as StockEntity;
@@ -29,16 +31,29 @@ class StockEntityFixture {
     this.value = {
       barcode: undefined,
       brand: undefined,
+      category: undefined,
+      categoryId: undefined,
       description: "Product Description",
-      expirationDate: undefined,
+      expirationStatus: StockExpirationStatus.NONE,
+      hasOpenLot: false,
       id: "c6d76166-e7f3-4823-bd5b-f8bbd33912ac",
+      idealQuantity: undefined,
+      location: undefined,
+      locationId: undefined,
+      lots: [],
+      minQuantity: undefined,
+      nearestExpiration: undefined,
+      needsRestock: false,
       notes: undefined,
-      openingDate: undefined,
+      openedShelfLifeDays: undefined,
       owner: StockOwners.USER,
       ownerId: "c6d76166-e7f3-4823-bd5b-f8bbd33912ac",
-      purchaseDate: undefined,
       quantity: 10,
+      restockQuantity: 1,
+      stockOnly: false,
       unit: StockUnits.UNIT,
+      warnDaysClosed: 7,
+      warnDaysOpened: 1,
     };
     return this;
   }
@@ -48,8 +63,8 @@ class StockEntityFixture {
     return this;
   }
 
-  withExpirationDate(expirationDate: Date) {
-    this.value.expirationDate = expirationDate;
+  withExpirationStatus(status: StockExpirationStatus) {
+    this.value.expirationStatus = status;
     return this;
   }
 
@@ -58,13 +73,23 @@ class StockEntityFixture {
     return this;
   }
 
-  withNotes(notes: string) {
-    this.value.notes = notes;
+  withLots(lots: StockLotEntity[]) {
+    this.value.lots = lots;
     return this;
   }
 
-  withOpeningDate(openingDate: Date) {
-    this.value.openingDate = openingDate;
+  withNearestExpiration(date: Date) {
+    this.value.nearestExpiration = date;
+    return this;
+  }
+
+  withNeedsRestock(needsRestock = true) {
+    this.value.needsRestock = needsRestock;
+    return this;
+  }
+
+  withNotes(notes: string) {
+    this.value.notes = notes;
     return this;
   }
 
@@ -75,11 +100,6 @@ class StockEntityFixture {
 
   withOwnerId(ownerId: string) {
     this.value.ownerId = ownerId;
-    return this;
-  }
-
-  withPurchaseDate(purchaseDate: Date) {
-    this.value.purchaseDate = purchaseDate;
     return this;
   }
 

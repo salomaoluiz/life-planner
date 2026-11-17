@@ -3,18 +3,24 @@ import { DefaultError, FieldRequired } from "@domain/entities/errors";
 import Repositories from "@domain/repositories";
 
 export interface UpdateStockItemUseCaseParams {
-  barcode?: string;
-  brand?: string;
+  barcode?: null | string;
+  brand?: null | string;
+  categoryId?: null | string;
   description?: string;
-  expirationDate?: Date;
   id: string;
-  notes?: string;
-  openingDate?: Date;
+  idealQuantity?: null | number;
+  locationId?: null | string;
+  minQuantity?: null | number;
+  notes?: null | string;
+  openedShelfLifeDays?: null | number;
   owner?: string;
   ownerId?: string;
-  purchaseDate?: Date;
-  quantity?: number;
+  // The owner the item is in now (its cached list is refreshed).
+  previousOwnerId: string;
+  stockOnly?: boolean;
   unit?: string;
+  warnDaysClosed?: number;
+  warnDaysOpened?: number;
 }
 
 function updateStockItemUseCase(
@@ -27,20 +33,7 @@ function updateStockItemUseCase(
           throw new FieldRequired({ id: params.id });
         }
 
-        await repositories.stockRepository.updateStockItem({
-          barcode: params.barcode,
-          brand: params.brand,
-          description: params.description,
-          expirationDate: params.expirationDate,
-          id: params.id,
-          notes: params.notes,
-          openingDate: params.openingDate,
-          owner: params.owner,
-          ownerId: params.ownerId,
-          purchaseDate: params.purchaseDate,
-          quantity: params.quantity,
-          unit: params.unit,
-        });
+        await repositories.stockRepository.updateStockItem(params);
       } catch (error) {
         if (error instanceof DefaultError) {
           error.addContext({
