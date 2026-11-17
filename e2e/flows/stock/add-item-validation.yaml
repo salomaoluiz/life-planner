@@ -3,6 +3,7 @@ name: stock/add-item-validation
 tags:
   - stock
   - spec-011
+  - spec-116
 onFlowComplete:
   - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
 ---
@@ -38,16 +39,22 @@ onFlowComplete:
     id: "stock.item-form.save-button"
 - assertVisible:
     id: "stock.item-form.description-input-error"
-# Quantity 0 is rejected
+# Spec 116: an empty quantity is valid (an item with no lot); an ideal not above the minimum is rejected
 - tapOn:
-    id: "stock.item-form.quantity-input"
+    id: "stock.item-form.description-input"
 - eraseText
-- inputText: "0"
+- inputText: "E2E Validation"
+- tapOn:
+    id: "stock.item-form.min-input"
+- inputText: "5"
+- tapOn:
+    id: "stock.item-form.ideal-input"
+- inputText: "3"
 - tapOn:
     id: "stock.item-form.save-button"
 - extendedWaitUntil:
     visible:
-      id: "stock.item-form.quantity-input-error"
+      id: "stock.item-form.ideal-input-error"
     timeout: 20000
 - assertVisible:
     id: "stock.item-form.save-button"
