@@ -35,6 +35,7 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentSettingsVM>) {
       gap: spacing.sm,
       justifyContent: "space-between",
     },
+    root: { flex: 1 },
     section: { gap: spacing.xs },
     stack: { gap: spacing.sm },
   });
@@ -109,38 +110,40 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentSettingsVM>) {
   }
 
   return (
-    <Screen
-      maxWidth={INVESTMENT_OVERVIEW_MAX_WIDTH}
-      scroll
-      testID={settingsTestIds.screen}
-    >
-      <SectionHeader section="settings" />
-      <View style={styles.blocks}>
-        <View style={styles.stack}>
-          <Text.Body
-            tone="secondary"
-            value={t("investment.settings.subtitle")}
-          />
-          <View style={styles.head}>
-            <Text.Caption
-              testID={settingsTestIds.updatedAt}
+    <View style={styles.root}>
+      <Screen
+        maxWidth={INVESTMENT_OVERVIEW_MAX_WIDTH}
+        scroll
+        testID={settingsTestIds.screen}
+      >
+        <SectionHeader section="settings" />
+        <View style={styles.blocks}>
+          <View style={styles.stack}>
+            <Text.Body
               tone="secondary"
-              value={t("investment.settings.updatedAt", { when: updated })}
+              value={t("investment.settings.subtitle")}
             />
-            <Button.Secondary
-              label={
-                vm.refreshing
-                  ? t("investment.settings.refreshing")
-                  : t("investment.settings.refresh")
-              }
-              loading={vm.refreshing}
-              onPress={vm.onRefresh}
-              testID={settingsTestIds.refresh}
-            />
+            <View style={styles.head}>
+              <Text.Caption
+                testID={settingsTestIds.updatedAt}
+                tone="secondary"
+                value={t("investment.settings.updatedAt", { when: updated })}
+              />
+              <Button.Secondary
+                label={
+                  vm.refreshing
+                    ? t("investment.settings.refreshing")
+                    : t("investment.settings.refresh")
+                }
+                loading={vm.refreshing}
+                onPress={vm.onRefresh}
+                testID={settingsTestIds.refresh}
+              />
+            </View>
           </View>
+          {renderBody()}
         </View>
-        {renderBody()}
-      </View>
+      </Screen>
       <Toast
         icon="clock-outline"
         message={t("investment.settings.tooMany")}
@@ -148,7 +151,7 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentSettingsVM>) {
         testID={settingsTestIds.tooMany}
         visible={vm.toastVisible}
       />
-    </Screen>
+    </View>
   );
 }
 

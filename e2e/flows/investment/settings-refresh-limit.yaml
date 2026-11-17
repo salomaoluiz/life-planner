@@ -33,6 +33,9 @@ onFlowComplete:
 # A second refresh within the minute answers 429 and the screen says to wait (FR 9, FR 25).
 - tapOn:
     id: "investment.settings.refresh"
+# The first call may take a few seconds (the stale series are fetched): let it finish before the second one.
+- waitForAnimationToEnd:
+    timeout: 4000
 - extendedWaitUntil:
     notVisible:
       text: "Atualizando…|Refreshing…"

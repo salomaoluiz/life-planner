@@ -47,6 +47,9 @@ onFlowComplete:
     id: "investment.settings.selic-card"
 - assertVisible:
     id: "investment.settings.ipca-card"
+# The source box is below the cards on a short window.
+- runFlow: ../../subflows/financial/scroll-list-down.yaml
+- runFlow: ../../subflows/financial/scroll-list-down.yaml
 - assertVisible:
     id: "investment.settings.source"
 # The history of an index opens in a modal with the period pills and the changes table (FR 22).
