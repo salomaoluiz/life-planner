@@ -40,6 +40,8 @@ function investmentRepositoryImpl(
       withFinanceCaches(investmentDatasource.createFractionSale(params)),
     createIncome: async (params) =>
       withFinanceCaches(investmentDatasource.createIncome(params)),
+    createIncomeSeries: async (params) =>
+      withFinanceCaches(investmentDatasource.createIncomeSeries(params)),
     createOperation: async (params) =>
       withFinanceCaches(investmentDatasource.createOperation(params)),
     deleteAsset: async (id) =>
@@ -50,8 +52,8 @@ function investmentRepositoryImpl(
       investmentDatasource.deleteFixedIncomeAdjustment(id),
     deleteFixedIncomeRate: async (id) =>
       investmentDatasource.deleteFixedIncomeRate(id),
-    deleteIncome: async (id) =>
-      withFinanceCaches(investmentDatasource.deleteIncome(id)),
+    deleteIncome: async (params) =>
+      withFinanceCaches(investmentDatasource.deleteIncome(params)),
     deleteOperation: async (id) =>
       withFinanceCaches(investmentDatasource.deleteOperation(id)),
     deleteValuation: async (id) => investmentDatasource.deleteValuation(id),
@@ -69,6 +71,12 @@ function investmentRepositoryImpl(
     getIncomeLink: async (transactionId) =>
       investmentDatasource.getIncomeLink(transactionId),
     getIncomes: async (params) => investmentDatasource.getIncomes(params),
+    getIncomeSeries: async (assetId) =>
+      investmentDatasource.getIncomeSeries(assetId),
+    getIncomeSeriesById: async (id) =>
+      investmentDatasource.getIncomeSeriesById(id),
+    getIncomeSeriesProjections: async (params) =>
+      investmentDatasource.getIncomeSeriesProjections(params),
     getIncomeSuggestions: async (params) =>
       investmentDatasource.getIncomeSuggestions(params),
     getMarketIndexes: async () => investmentDatasource.getMarketIndexes(),
@@ -80,6 +88,8 @@ function investmentRepositoryImpl(
       investmentDatasource.getPriceHistory(params),
     previewFixedIncomeRedemption: async (params) =>
       investmentDatasource.previewFixedIncomeRedemption(params),
+    previewIncomeSeries: async (params) =>
+      investmentDatasource.previewIncomeSeries(params),
     receiveIncome: async (params) =>
       withFinanceCaches(investmentDatasource.receiveIncome(params)),
     refreshMarketIndexes: async () =>
@@ -99,6 +109,8 @@ function investmentRepositoryImpl(
       investmentDatasource.updateFixedIncomeRate(params),
     updateIncome: async (params) =>
       withFinanceCaches(investmentDatasource.updateIncome(params)),
+    updateIncomeSeries: async (params) =>
+      withFinanceCaches(investmentDatasource.updateIncomeSeries(params)),
     updateOperation: async (params) =>
       withFinanceCaches(investmentDatasource.updateOperation(params)),
     upsertFixedIncomeAdjustment: async (params) =>

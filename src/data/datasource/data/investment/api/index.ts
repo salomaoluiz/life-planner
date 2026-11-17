@@ -20,6 +20,7 @@ import dashboardApi from "./dashboardApi";
 import eventApi, { eventFieldsBody } from "./eventApi";
 import fixedIncomeApi from "./fixedIncomeApi";
 import incomeApi from "./incomeApi";
+import incomeSeriesApi from "./incomeSeriesApi";
 import handleInvestmentApiError from "./investmentApiError";
 import marketIndexApi from "./marketIndexApi";
 import summaryApi from "./summaryApi";
@@ -314,6 +315,7 @@ const investmentApi: InvestmentDatasource = {
   ...conversionApi,
   ...eventApi,
   ...incomeApi,
+  ...incomeSeriesApi,
   ...dashboardApi,
   ...marketIndexApi,
   ...summaryApi,

@@ -3,6 +3,7 @@ import { FieldInvalid } from "@domain/entities/errors";
 import {
   ApproveInvestmentIncomeSuggestionParams,
   CreateInvestmentIncomeParams,
+  DeleteInvestmentIncomeParams,
   GetInvestmentIncomeDefaultsParams,
   GetInvestmentIncomesParams,
   GetInvestmentIncomeSuggestionsParams,
@@ -15,6 +16,16 @@ import { formatDecimal, parseDecimal, ZERO } from "@utils/decimal";
 import handleInvestmentApiError from "./investmentApiError";
 
 type Json = Record<string, unknown>;
+
+export function queryString(
+  values: Record<string, string | undefined>,
+): string {
+  const pairs = Object.entries(values)
+    .filter((entry): entry is [string, string] => entry[1] !== undefined)
+    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`);
+
+  return pairs.length > 0 ? `?${pairs.join("&")}` : "";
+}
 
 // Spec 107 section 7: incomes and the suggestions inbox. Quantity and per-unit value are normalized ("0,47" -> "0.47")
 // and must be above zero BEFORE any call; `undefined` leaves a field alone, `null` clears it.
@@ -76,9 +87,11 @@ function decimalBody(
   return formatDecimal(parsed);
 }
 
-async function deleteIncome(id: string) {
+async function deleteIncome(params: DeleteInvestmentIncomeParams) {
+  const query = queryString({ scope: params.scope });
+
   try {
-    await api.delete(`/v1/investments/incomes/${id}`);
+    await api.delete(`/v1/investments/incomes/${params.id}${query}`);
   } catch (error) {
     return handleInvestmentApiError(error, {
       datasource: "InvestmentDatasource - deleteIncome",
@@ -98,6 +111,7 @@ function fieldsBody(fields: Partial<CreateInvestmentIncomeParams>): Json {
     quantity: decimalBody(fields.quantity, "quantity"),
     status: fields.status,
     type: fields.type,
+    withFinance: fields.withFinance,
   };
 }
 
@@ -191,14 +205,6 @@ async function getIncomeSuggestions(
   }
 }
 
-function queryString(values: Record<string, string | undefined>): string {
-  const pairs = Object.entries(values)
-    .filter((entry): entry is [string, string] => entry[1] !== undefined)
-    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`);
-
-  return pairs.length > 0 ? `?${pairs.join("&")}` : "";
-}
-
 async function receiveIncome(params: ReceiveInvestmentIncomeParams) {
   const body = {
     accountId: params.accountId,
@@ -235,12 +241,18 @@ async function rejectIncomeSuggestion(id: string) {
 }
 
 async function updateIncome(params: UpdateInvestmentIncomeParams) {
-  const { id, ...fields } = params;
-  const body = fieldsBody(fields);
+  const { endDate, exDateOffsetDays, frequency, id, scope, ...fields } = params;
+  const body = {
+    ...fieldsBody(fields),
+    endDate,
+    exDateOffsetDays,
+    frequency,
+  };
+  const query = queryString({ scope });
 
   try {
     return InvestmentModel.toIncome(
-      (await api.patch<Json>(`/v1/investments/incomes/${id}`, body))
+      (await api.patch<Json>(`/v1/investments/incomes/${id}${query}`, body))
         .item as Json,
     );
   } catch (error) {

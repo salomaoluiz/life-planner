@@ -35,6 +35,10 @@ jest.mock("@application/useCases", () => ({
       execute: jest.fn(),
       uniqueName: "approve",
     },
+    createInvestmentIncomeSeriesUseCase: {
+      execute: jest.fn(),
+      uniqueName: "create-series",
+    },
     createInvestmentIncomeUseCase: { execute: jest.fn(), uniqueName: "create" },
     deleteInvestmentIncomeUseCase: { execute: jest.fn(), uniqueName: "delete" },
     getFinancialAccountsUseCase: { execute: jest.fn(), uniqueName: "accounts" },
@@ -47,11 +51,19 @@ jest.mock("@application/useCases", () => ({
       execute: jest.fn(),
       uniqueName: "defaults",
     },
+    getInvestmentIncomeSeriesByIdUseCase: {
+      execute: jest.fn(),
+      uniqueName: "series",
+    },
     getInvestmentIncomeSuggestionsUseCase: {
       execute: jest.fn(),
       uniqueName: "suggestions",
     },
     getInvestmentIncomeUseCase: { execute: jest.fn(), uniqueName: "income" },
+    previewInvestmentIncomeSeriesUseCase: {
+      execute: jest.fn(),
+      uniqueName: "preview",
+    },
     updateInvestmentIncomeUseCase: { execute: jest.fn(), uniqueName: "update" },
   },
 }));
@@ -84,6 +96,8 @@ const queries = {
   asset: new UseQueryFixture(),
   defaults: new UseQueryFixture(),
   income: new UseQueryFixture(),
+  preview: new UseQueryFixture(),
+  series: new UseQueryFixture(),
   suggestions: new UseQueryFixture(),
 };
 const accountsQuery = new UseQueryFixture();
@@ -94,6 +108,12 @@ const deleteMutation = new UseMutationFixture();
 function queryFor(cacheKey: string[]) {
   const key = cacheKey.join("/");
 
+  if (key.includes("income-series-preview")) {
+    return queries.preview;
+  }
+  if (key.includes("income-series")) {
+    return queries.series;
+  }
   if (key.includes("income-suggestions")) {
     return queries.suggestions;
   }
@@ -118,6 +138,8 @@ beforeEach(() => {
     withholdingRate: "0",
   });
   queries.income.reset();
+  queries.preview.reset();
+  queries.series.reset();
   queries.suggestions.reset();
   accountsQuery.reset().withData({
     accounts: [
@@ -299,7 +321,10 @@ it("SHOULD edit an income AND offer to delete it", () => {
   act(() => result.current.onDeleteOpen());
   expect(result.current.isDeleteOpen).toBe(true);
   act(() => result.current.onDelete());
-  expect(deleteMutation.value.mutate).toHaveBeenCalledWith("income-1");
+  expect(deleteMutation.value.mutate).toHaveBeenCalledWith({
+    id: "income-1",
+    scope: undefined,
+  });
   act(() => result.current.onDeleteClose());
   expect(result.current.isDeleteOpen).toBe(false);
 });
@@ -369,4 +394,195 @@ it("SHOULD change the account, the category, the dates, the status AND the per-u
     categoryId: "cat-2",
   });
   expect(result.current.state?.exDate).toEqual(new Date(2026, 8, 10));
+});
+
+describe("recurring incomes (spec 115)", () => {
+  const preview = {
+    endsByPosition: null,
+    firstNetAmount: 11000,
+    firstQuantity: "100",
+    next: ["2026-12-15", "2027-01-15"],
+    occurrences: { currentMonth: 1, max: 600, past: 22 },
+  };
+
+  function startSeries(result: {
+    current: ReturnType<typeof useIncomeModalViewModel>;
+  }) {
+    act(() => result.current.onRepeatChange(true));
+    act(() => result.current.onPerUnitChange("1,10"));
+  }
+
+  it("SHOULD create the whole series from one form with the count in the button", () => {
+    queries.preview.withData(preview);
+
+    const { result } = setup();
+
+    startSeries(result);
+
+    expect(result.current.isSeries).toBe(true);
+    expect(result.current.showSeriesBlock).toBe(true);
+    expect(result.current.occurrenceCount).toBe(23);
+    expect(result.current.saveLabelKey).toBe("investment.income.saveSeries");
+    expect(result.current.saveLabelParams).toEqual({ count: 23 });
+
+    act(() => result.current.onSave());
+
+    expect(saveMutation.value.mutate).toHaveBeenCalledWith({
+      body: expect.objectContaining({
+        accountId: "acc-1",
+        amountPerUnit: "1,10",
+        assetId: "asset-1",
+        categoryId: "cat-1",
+        frequency: { interval: 1, unit: "MONTH" },
+        markPastAsReceived: true,
+        withFinance: true,
+      }),
+      kind: "series",
+    });
+  });
+
+  it("SHOULD block the save WHEN there are too many occurrences OR the preview failed", () => {
+    queries.preview.withData({
+      ...preview,
+      occurrences: { currentMonth: 0, max: 600, past: 729 },
+    });
+
+    const { result } = setup();
+
+    startSeries(result);
+
+    expect(result.current.tooMany).toBe(true);
+    expect(result.current.saveDisabled).toBe(true);
+
+    act(() => result.current.onSave());
+
+    expect(saveMutation.value.mutate).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD need the value per unit AND a valid end date to save a series", () => {
+    queries.preview.withData(preview);
+
+    const { result } = setup();
+
+    act(() => result.current.onRepeatChange(true));
+    act(() => result.current.onSave());
+
+    expect(result.current.errors.amountPerUnit).toBe(
+      "investment.form.operation.unitPriceInvalid",
+    );
+    expect(saveMutation.value.mutate).not.toHaveBeenCalled();
+
+    act(() => result.current.onPerUnitChange("1,10"));
+    act(() => result.current.onEndDateChange(new Date(2020, 0, 1)));
+    act(() => result.current.onExDateOffsetChange("120"));
+    act(() => result.current.onSave());
+
+    expect(result.current.errors.endDate).toBe(
+      "investment.income.endDateInvalid",
+    );
+    expect(result.current.errors.exDateOffset).toBe(
+      "investment.income.exDateOffsetInvalid",
+    );
+  });
+
+  it("SHOULD create an income without finance: no account, no category", () => {
+    const { result } = setup();
+
+    act(() => result.current.onWithFinanceChange(false));
+    act(() => result.current.onNetChange(7140));
+    act(() => result.current.onSave());
+
+    expect(saveMutation.value.mutate).toHaveBeenCalledWith({
+      body: expect.objectContaining({
+        accountId: undefined,
+        categoryId: undefined,
+        withFinance: false,
+      }),
+      kind: "create",
+    });
+  });
+
+  it("SHOULD ask the scope of an income of a series first AND send it with the edit", () => {
+    jest.mocked(useLocalSearchParams).mockReturnValue({ id: "income-1" });
+    queries.income.withData(
+      makeIncome({ occurrenceNumber: 24, seriesId: "series-1" }),
+    );
+    queries.series.withData({
+      amountPerUnit: "1.1",
+      assetId: "asset-1",
+      currency: "BRL",
+      exDateOffsetDays: 8,
+      firstPaymentDate: "2025-01-15",
+      frequency: { interval: 2, unit: "MONTH" },
+      id: "series-1",
+      lastGeneratedNumber: 24,
+      type: InvestmentIncomeType.YIELD,
+      withFinance: true,
+    });
+
+    const { result } = setup();
+
+    expect(result.current.scopeDialogVisible).toBe(true);
+    expect(result.current.isSeriesIncome).toBe(true);
+    expect(result.current.state).toMatchObject({
+      exDateOffset: "8",
+      frequency: { interval: 2, unit: "MONTH" },
+    });
+    expect(result.current.seriesIncomeCount).toBe(24);
+
+    act(() => result.current.onScopeSelect("THIS_AND_NEXT" as never));
+
+    expect(result.current.scopeDialogVisible).toBe(false);
+    expect(result.current.showSeriesBlock).toBe(true);
+
+    act(() => result.current.onSave());
+
+    expect(saveMutation.value.mutate).toHaveBeenCalledWith({
+      body: expect.objectContaining({
+        exDateOffsetDays: 8,
+        frequency: { interval: 2, unit: "MONTH" },
+        scope: "THIS_AND_NEXT",
+      }),
+      kind: "update",
+    });
+
+    act(() => result.current.onDelete());
+
+    expect(deleteMutation.value.mutate).toHaveBeenCalledWith({
+      id: "income-1",
+      scope: "THIS_AND_NEXT",
+    });
+  });
+
+  it("SHOULD edit only the header fields WITH the scope ALL", () => {
+    jest.mocked(useLocalSearchParams).mockReturnValue({ id: "income-1" });
+    queries.income.withData(makeIncome({ seriesId: "series-1" }));
+    queries.series.withData({
+      amountPerUnit: "1.1",
+      assetId: "asset-1",
+      currency: "BRL",
+      endDate: "2027-01-31",
+      firstPaymentDate: "2025-01-15",
+      frequency: { interval: 1, unit: "MONTH" },
+      id: "series-1",
+      lastGeneratedNumber: 24,
+      type: InvestmentIncomeType.YIELD,
+      withFinance: true,
+    });
+
+    const { result } = setup();
+
+    act(() => result.current.onScopeSelect("ALL" as never));
+
+    expect(result.current.isScopeAll).toBe(true);
+    expect(result.current.showSeriesBlock).toBe(false);
+    expect(result.current.state?.endDate).toEqual(new Date(2027, 0, 31));
+
+    act(() => result.current.onSave());
+
+    expect(saveMutation.value.mutate).toHaveBeenCalledWith({
+      body: expect.objectContaining({ scope: "ALL" }),
+      kind: "update",
+    });
+  });
 });

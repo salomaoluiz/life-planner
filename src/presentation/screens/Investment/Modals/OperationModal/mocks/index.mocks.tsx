@@ -66,6 +66,7 @@ const defaultViewModel: OperationModalVM = {
   readOnly: false,
   readOnlyKey: undefined,
   saveLabelKey: "investment.form.operation.saveBuy",
+  seriesWarnings: [],
   showFxRate: false,
   titleKey: "investment.form.operation.newTitle",
   type: InvestmentOperationType.BUY,

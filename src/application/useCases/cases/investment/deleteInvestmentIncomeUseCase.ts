@@ -1,12 +1,13 @@
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import { DefaultError } from "@domain/entities/errors";
 import Repositories from "@domain/repositories";
+import { DeleteInvestmentIncomeParams } from "@domain/repositories/investment";
 
 function deleteInvestmentIncomeUseCase(
   repositories: Repositories,
-): IUseCaseFactoryWithParamResponse<string, void> {
+): IUseCaseFactoryWithParamResponse<DeleteInvestmentIncomeParams, void> {
   return {
-    execute: async (params: string) => {
+    execute: async (params: DeleteInvestmentIncomeParams) => {
       try {
         return await repositories.investmentRepository.deleteIncome(params);
       } catch (error) {

@@ -26,6 +26,7 @@ const defaultViewModel: IncomeReceiveModalVM = {
   planned: "R$ 71,40",
   plannedFor: "28/10/2026",
   receivedOn: new Date(2026, 10, 4),
+  showAccount: true,
   showGross: true,
   typeKey: "investment.income.types.JCP",
 };

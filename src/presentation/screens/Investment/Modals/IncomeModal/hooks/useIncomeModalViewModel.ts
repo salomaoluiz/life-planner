@@ -7,23 +7,28 @@ import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { financeKeys } from "@application/queryKeys/financeKeys";
 import { investmentKeys } from "@application/queryKeys/investmentKeys";
 import { useCases } from "@application/useCases";
+import { todayCalendarDate } from "@data/models/financial/calendarDate";
 import { CategoryType } from "@domain/entities/financial/CategoryEntity";
+import { RecurrenceFrequency } from "@domain/entities/financial/RecurrenceEntity";
 import {
   defaultIncomeType,
   incomeWithholdingBps,
   INVESTMENT_INCOME_TYPES,
+  InvestmentIncomeScope,
   InvestmentIncomeStatus,
   InvestmentIncomeType,
 } from "@domain/entities/investment/enums";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
 import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import { useLocaleTag } from "@presentation/i18n";
+import useDebouncedValue from "@screens/Investment/FixedIncome/hooks/useDebouncedValue";
 import invalidateInvestments from "@screens/Investment/hooks/invalidateInvestments";
 import { formatDay, formatMoney } from "@screens/Investment/models/format";
 import getInvestmentErrorMessage from "@screens/Investment/utils/investmentErrorMessage";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 import {
+  dayToDate,
   effectiveNet,
   estimateOf,
   hasErrors,
@@ -33,6 +38,7 @@ import {
   stateFromIncome,
   stateFromSuggestion,
   toCreateParams,
+  toSeriesParams,
   toUpdateParams,
   validate,
 } from "../models/incomeFormState";
@@ -50,7 +56,17 @@ interface CategoriesData {
 export default useIncomeModalViewModel;
 
 // The sheet title and the save label of the three modes (create, edit, approve).
-function modeKeys(isApproving: boolean, isEditing: boolean) {
+function modeKeys(
+  isApproving: boolean,
+  isEditing: boolean,
+  isSeriesEdit: boolean,
+) {
+  if (isSeriesEdit) {
+    return {
+      save: "investment.income.seriesModal.save",
+      title: "investment.income.seriesModal.title",
+    } as const;
+  }
   if (isApproving) {
     return {
       save: "investment.suggestions.approve",
@@ -76,9 +92,12 @@ function useIncomeModalViewModel() {
   const params = useLocalSearchParams<{
     assetId?: string;
     id?: string;
+    seriesId?: string;
     suggestionId?: string;
   }>();
   const isEditing = !!params.id;
+  // Spec 115: "Edit series" opens the same modal on the series header (the `ALL` scope without an income).
+  const isSeriesEdit = !!params.seriesId && !isEditing;
   const isApproving = !!params.suggestionId;
 
   const income = useQuery({
@@ -86,7 +105,21 @@ function useIncomeModalViewModel() {
     enabled: isEditing,
     fetch: async () => useCases.getInvestmentIncomeUseCase.execute(params.id!),
   });
-  const assetId = income.data?.assetId ?? params.assetId ?? "";
+  // Spec 115 FR 24: an income of a series asks its scope first; the rule fields come from its series.
+  const [scope, setScope] = useState<InvestmentIncomeScope>();
+  const seriesId = income.data?.seriesId ?? params.seriesId;
+  const series = useQuery({
+    cacheKey: [...investmentKeys.all(), "income-series", seriesId ?? "none"],
+    enabled: !!seriesId,
+    fetch: async () =>
+      useCases.getInvestmentIncomeSeriesByIdUseCase.execute(seriesId!),
+  });
+  const isSeriesIncome = isEditing && !!seriesId;
+  const assetId =
+    income.data?.assetId ??
+    (isSeriesEdit ? series.data?.assetId : undefined) ??
+    params.assetId ??
+    "";
   const asset = useQuery({
     cacheKey: [...investmentKeys.asset(assetId), "form"],
     enabled: !!assetId,
@@ -104,6 +137,7 @@ function useIncomeModalViewModel() {
   const startType = asset.data
     ? (suggestion?.type ??
       income.data?.type ??
+      (isSeriesEdit ? series.data?.type : undefined) ??
       defaultIncomeType(asset.data.assetClass))
     : undefined;
   const defaults = useQuery({
@@ -113,7 +147,7 @@ function useIncomeModalViewModel() {
       assetId,
       startType ?? "none",
     ],
-    enabled: !!startType && !isEditing,
+    enabled: !!startType && !isEditing && !isSeriesEdit,
     fetch: async () =>
       useCases.getInvestmentIncomeDefaultsUseCase.execute({
         assetId,
@@ -143,10 +177,20 @@ function useIncomeModalViewModel() {
     cacheKey: [useCases.createInvestmentIncomeUseCase.uniqueName],
     fetch: async (request: {
       body: never;
-      kind: "approve" | "create" | "update";
+      kind: "approve" | "create" | "series" | "update" | "updateSeries";
     }) => {
       if (request.kind === "update") {
         return useCases.updateInvestmentIncomeUseCase.execute(request.body);
+      }
+      if (request.kind === "updateSeries") {
+        return useCases.updateInvestmentIncomeSeriesUseCase.execute(
+          request.body,
+        );
+      }
+      if (request.kind === "series") {
+        return useCases.createInvestmentIncomeSeriesUseCase.execute(
+          request.body,
+        );
       }
 
       return request.kind === "approve"
@@ -197,18 +241,53 @@ function useIncomeModalViewModel() {
     [categoriesQuery.data],
   );
 
+  const hasSource = isEditing
+    ? !!income.data
+    : (isSeriesEdit && !!series.data) || (!isSeriesEdit && !!defaults.data);
   const ready =
     !!asset.data &&
     !!accountsQuery.data &&
     !!categoriesQuery.data &&
-    (isEditing ? !!income.data : !!defaults.data) &&
+    hasSource &&
+    (!seriesId || !!series.data) &&
     (!isApproving || !!suggestion);
   const initial = useMemo<IncomeFormState | undefined>(() => {
     if (!ready || !asset.data || !startType) {
       return undefined;
     }
+    if (isSeriesEdit && series.data) {
+      return {
+        ...initialState({
+          accountId: series.data.accountId,
+          categoryId: series.data.categoryId,
+          paymentDate: series.data.firstPaymentDate,
+          perUnit: series.data.amountPerUnit,
+          type: series.data.type,
+          withFinance: series.data.withFinance,
+        }),
+        endDate: series.data.endDate
+          ? dayToDate(series.data.endDate)
+          : undefined,
+        frequency: series.data.frequency,
+        notes: series.data.notes ?? "",
+      };
+    }
     if (income.data) {
-      return stateFromIncome(income.data);
+      const base = stateFromIncome(income.data);
+
+      return series.data
+        ? {
+            ...base,
+            endDate: series.data.endDate
+              ? dayToDate(series.data.endDate)
+              : undefined,
+            exDateOffset:
+              series.data.exDateOffsetDays === undefined
+                ? ""
+                : String(series.data.exDateOffsetDays),
+            frequency: series.data.frequency,
+          }
+        : base;
     }
 
     const base = {
@@ -228,7 +307,16 @@ function useIncomeModalViewModel() {
           : "",
       type: startType,
     });
-  }, [ready, asset.data, income.data, suggestion, defaults.data, startType]);
+  }, [
+    ready,
+    asset.data,
+    income.data,
+    series.data,
+    isSeriesEdit,
+    suggestion,
+    defaults.data,
+    startType,
+  ]);
 
   const [edited, setEdited] = useState<IncomeFormState>();
   const [submitted, setSubmitted] = useState(false);
@@ -239,8 +327,40 @@ function useIncomeModalViewModel() {
     state && assetClass ? incomeWithholdingBps(state.type, assetClass) : 0;
   const net = state ? effectiveNet(state, bps) : 0;
   const estimate = estimateOf(net, bps);
-  const errors = state && submitted ? validate(state, net) : {};
+  // Spec 115: a new income can repeat; an income of a series edits with a scope.
+  const isSeries =
+    !!state?.repeat && !isEditing && !isApproving && !isSeriesEdit;
+  const showSeriesBlock =
+    isSeries || scope === InvestmentIncomeScope.THIS_AND_NEXT;
+  const scopePending = isSeriesIncome && !scope && !!state;
+  // The series rules (value per unit, end date) replace the single income rules when no single amount is typed.
+  const seriesMode =
+    isSeries || isSeriesEdit || scope === InvestmentIncomeScope.ALL;
+  const errors = state && submitted ? validate(state, net, seriesMode) : {};
   const isDirty = !!edited && !!initial && !isSameState(edited, initial);
+  const previewParams =
+    isSeries && state && asset.data && !hasErrors(validate(state, net, true))
+      ? toSeriesParams(asset.data.id, state)
+      : undefined;
+  const previewKey = useDebouncedValue(
+    previewParams ? JSON.stringify(previewParams) : "",
+  );
+  const preview = useQuery({
+    cacheKey: [...investmentKeys.all(), "income-series-preview", previewKey],
+    enabled:
+      previewKey !== "" &&
+      previewKey === (previewParams ? JSON.stringify(previewParams) : ""),
+    fetch: async () =>
+      useCases.previewInvestmentIncomeSeriesUseCase.execute(
+        JSON.parse(previewKey),
+      ),
+  });
+  const occurrenceCount = preview.data
+    ? preview.data.occurrences.past + preview.data.occurrences.currentMonth
+    : undefined;
+  const tooMany =
+    !!preview.data &&
+    preview.data.occurrences.past > preview.data.occurrences.max;
 
   function patch(change: Partial<IncomeFormState>) {
     if (state) {
@@ -251,11 +371,35 @@ function useIncomeModalViewModel() {
   function onSave() {
     setSubmitted(true);
 
-    if (!state || !asset.data || hasErrors(validate(state, net))) {
+    if (
+      !state ||
+      !asset.data ||
+      hasErrors(validate(state, net, seriesMode)) ||
+      tooMany ||
+      !!preview.error
+    ) {
       return;
     }
 
-    if (isApproving) {
+    if (isSeriesEdit) {
+      save.mutate({
+        body: {
+          accountId: state.withFinance ? state.accountId : undefined,
+          amountPerUnit: state.perUnit,
+          categoryId: state.withFinance ? state.categoryId : undefined,
+          endDate: state.endDate ? todayCalendarDate(state.endDate) : null,
+          id: params.seriesId,
+          notes: state.notes.trim() === "" ? null : state.notes.trim(),
+          withFinance: state.withFinance,
+        } as never,
+        kind: "updateSeries",
+      });
+    } else if (isSeries) {
+      save.mutate({
+        body: toSeriesParams(asset.data.id, state) as never,
+        kind: "series",
+      });
+    } else if (isApproving) {
       const { assetId: ignored, ...fields } = toCreateParams(
         asset.data.id,
         state,
@@ -268,8 +412,24 @@ function useIncomeModalViewModel() {
         kind: "approve",
       });
     } else if (isEditing) {
+      const withSeries =
+        scope === InvestmentIncomeScope.THIS_AND_NEXT
+          ? {
+              endDate: state.endDate ? todayCalendarDate(state.endDate) : null,
+              exDateOffsetDays:
+                state.exDateOffset.trim() === ""
+                  ? null
+                  : Number(state.exDateOffset),
+              frequency: state.frequency,
+            }
+          : {};
+
       save.mutate({
-        body: toUpdateParams(params.id!, state, net) as never,
+        body: {
+          ...toUpdateParams(params.id!, state, net),
+          ...withSeries,
+          scope,
+        } as never,
         kind: "update",
       });
     } else {
@@ -280,7 +440,7 @@ function useIncomeModalViewModel() {
     }
   }
 
-  const keys = modeKeys(isApproving, isEditing);
+  const keys = modeKeys(isApproving, isEditing, isSeriesEdit);
   return {
     accountHint:
       state?.accountId && state.accountId === defaults.data?.accountId
@@ -306,8 +466,9 @@ function useIncomeModalViewModel() {
       rate: `${bps / 100}%`,
       show: bps > 0,
     },
-    failure: getInvestmentErrorMessage(save.error ?? remove.error, (day) =>
-      formatDay(day, localeTag),
+    failure: getInvestmentErrorMessage(
+      save.error ?? remove.error ?? preview.error,
+      (day) => formatDay(day, localeTag),
     ),
     isApproving,
     isDeleteOpen: deleteOpen,
@@ -315,16 +476,28 @@ function useIncomeModalViewModel() {
     isEditing,
     isLoading: !ready && !asset.error && !income.error,
     isNotFound:
-      (!!asset.error && !asset.data) || (!!income.error && !income.data),
+      (!!asset.error && !asset.data) ||
+      (!!income.error && !income.data) ||
+      (isSeriesEdit && !!series.error && !series.data),
     isSaving: save.isFetching || remove.isFetching,
+    // Spec 115 FR 24: ALL edits the series header only (account, category, notes, amount per unit, finance).
+    isScopeAll: scope === InvestmentIncomeScope.ALL || isSeriesEdit,
+    isSeries,
+    isSeriesEdit,
+    isSeriesIncome,
     net,
+    occurrenceCount,
     onAccountChange: (accountId: string) => patch({ accountId }),
     onCategoryChange: (categoryId: string) => patch({ categoryId }),
     onClose: closeModal,
-    onDelete: () => remove.mutate(params.id!),
+    onDelete: () => remove.mutate({ id: params.id!, scope }),
     onDeleteClose: () => setDeleteOpen(false),
     onDeleteOpen: () => setDeleteOpen(true),
+    onEndDateChange: (value?: Date) => patch({ endDate: value }),
     onExDateChange: (value?: Date) => patch({ exDate: value }),
+    onExDateOffsetChange: (exDateOffset: string) => patch({ exDateOffset }),
+    onFrequencyChange: (frequency: RecurrenceFrequency) => patch({ frequency }),
+    onMarkPastChange: (markPast: boolean) => patch({ markPast }),
     onNetChange: (cents: number) =>
       patch({ netAmount: cents, netTouched: true }),
     onNotesChange: (notes: string) => patch({ notes }),
@@ -332,12 +505,48 @@ function useIncomeModalViewModel() {
       value && patch({ paymentDate: value }),
     onPerUnitChange: (perUnit: string) => patch({ perUnit }),
     onQuantityChange: (quantity: string) => patch({ quantity }),
+    onRepeatChange: (repeat: boolean) =>
+      patch({ repeat, status: InvestmentIncomeStatus.PLANNED }),
     onSave,
+    onScopeCancel: closeModal,
+    onScopeSelect: (value: InvestmentIncomeScope) => setScope(value),
     onStatusChange: (status: InvestmentIncomeStatus) => patch({ status }),
     onTypeChange: (type: InvestmentIncomeType) => patch({ type }),
-    saveLabelKey: keys.save,
+    onWithFinanceChange: (withFinance: boolean) => patch({ withFinance }),
+    preview: {
+      count: occurrenceCount,
+      currentMonth: preview.data?.occurrences.currentMonth ?? 0,
+      endsByPosition: preview.data?.endsByPosition
+        ? formatDay(preview.data.endsByPosition, localeTag)
+        : undefined,
+      firstNet:
+        preview.data?.firstNetAmount === null ||
+        preview.data?.firstNetAmount === undefined
+          ? undefined
+          : formatMoney(preview.data.firstNetAmount, currency, localeTag),
+      firstQuantity: preview.data?.firstQuantity ?? undefined,
+      isLoading: preview.isFetching,
+      next: (preview.data?.next ?? []).map((day) => formatDay(day, localeTag)),
+      past: preview.data?.occurrences.past ?? 0,
+    },
+    repeatAllowed: !isEditing && !isApproving && !isSeriesEdit,
+    saveDisabled: isSeries && (tooMany || !!preview.error || !preview.data),
+    saveLabelKey:
+      isSeries && occurrenceCount !== undefined
+        ? ("investment.income.saveSeries" as const)
+        : keys.save,
+    saveLabelParams:
+      occurrenceCount === undefined ? undefined : { count: occurrenceCount },
+    scope,
+    scopeDate: income.data ? formatDay(income.data.paymentDate, localeTag) : "",
+    scopeDialogVisible: scopePending,
+    seriesIncomeCount: series.data
+      ? series.data.lastGeneratedNumber
+      : undefined,
+    showSeriesBlock,
     state,
     titleKey: keys.title,
+    tooMany,
     typeOptions: INVESTMENT_INCOME_TYPES,
   };
 }

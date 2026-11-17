@@ -273,3 +273,17 @@ describe("corporate events (spec 108)", () => {
     expect(screen.queryByTestId(eventIds.delete)).toBeNull();
   });
 });
+
+it("SHOULD warn that a sale which zeroes the position ends the series (spec 115)", () => {
+  setup({
+    preview: previewOf(InvestmentOperationType.SELL, "120"),
+    seriesWarnings: [{ count: 2, type: "YIELD" as never }],
+  });
+
+  expect(
+    screen.getByTestId(investmentTestIds.incomeSeries.sellWarning),
+  ).toBeOnTheScreen();
+  expect(
+    screen.getByText(/investment.income.series.sellWarning/),
+  ).toBeOnTheScreen();
+});

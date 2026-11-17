@@ -1,5 +1,9 @@
 import { todayCalendarDate } from "@data/models/financial/calendarDate";
 import {
+  isRecurrenceFrequency,
+  RecurrenceFrequency,
+} from "@domain/entities/financial/RecurrenceEntity";
+import {
   InvestmentIncomeStatus,
   InvestmentIncomeType,
 } from "@domain/entities/investment/enums";
@@ -9,17 +13,22 @@ import {
 } from "@domain/entities/investment/InvestmentEntities";
 import {
   CreateInvestmentIncomeParams,
+  CreateInvestmentIncomeSeriesParams,
   UpdateInvestmentIncomeParams,
 } from "@domain/repositories/investment";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { mulToCents, parseDecimal, ZERO } from "@utils/decimal";
 
 const BASIS = 10000;
+const MAX_EX_DATE_OFFSET = 90;
 
 export interface IncomeFormErrors {
   accountId?: TranslationKeys;
   amountPerUnit?: TranslationKeys;
   categoryId?: TranslationKeys;
+  endDate?: TranslationKeys;
+  exDateOffset?: TranslationKeys;
+  frequency?: TranslationKeys;
   netAmount?: TranslationKeys;
   quantity?: TranslationKeys;
 }
@@ -27,7 +36,14 @@ export interface IncomeFormErrors {
 export interface IncomeFormState {
   accountId: string;
   categoryId: string;
+  // Spec 115: the end of a series (none = no end date).
+  endDate?: Date;
   exDate?: Date;
+  // Spec 115: days between the ex-date and the payment of each occurrence (text, empty = the payment date).
+  exDateOffset: string;
+  frequency: RecurrenceFrequency;
+  // Spec 115: occurrences before today are created as received.
+  markPast: boolean;
   // Cents typed by the owner; only used once `netTouched` (or when quantity × per unit cannot be computed).
   netAmount: number;
   netTouched: boolean;
@@ -35,8 +51,12 @@ export interface IncomeFormState {
   paymentDate: Date;
   perUnit: string;
   quantity: string;
+  // Spec 115: the income repeats (create only).
+  repeat: boolean;
   status: InvestmentIncomeStatus;
   type: InvestmentIncomeType;
+  // Spec 115: false = no account, no category, no finance row.
+  withFinance: boolean;
 }
 
 function dayToDate(day: string): Date {
@@ -76,11 +96,16 @@ function initialState(params: {
   perUnit?: string;
   quantity?: string;
   type: InvestmentIncomeType;
+  withFinance?: boolean;
 }): IncomeFormState {
   return {
     accountId: params.accountId ?? "",
     categoryId: params.categoryId ?? "",
+    endDate: undefined,
     exDate: params.exDate ? dayToDate(params.exDate) : undefined,
+    exDateOffset: "",
+    frequency: { interval: 1, unit: "MONTH" },
+    markPast: true,
     netAmount: 0,
     netTouched: false,
     notes: "",
@@ -89,8 +114,10 @@ function initialState(params: {
       : new Date(),
     perUnit: params.perUnit ?? "",
     quantity: params.quantity ?? "",
+    repeat: false,
     status: InvestmentIncomeStatus.PLANNED,
     type: params.type,
+    withFinance: params.withFinance ?? true,
   };
 }
 
@@ -110,10 +137,18 @@ function isSameState(a: IncomeFormState, b: IncomeFormState): boolean {
     a.categoryId === b.categoryId &&
     a.netAmount === b.netAmount &&
     a.notes === b.notes &&
+    a.exDateOffset === b.exDateOffset &&
+    a.frequency.interval === b.frequency.interval &&
+    a.frequency.unit === b.frequency.unit &&
+    a.markPast === b.markPast &&
     a.perUnit === b.perUnit &&
     a.quantity === b.quantity &&
+    a.repeat === b.repeat &&
     a.status === b.status &&
     a.type === b.type &&
+    a.withFinance === b.withFinance &&
+    (a.endDate ? todayCalendarDate(a.endDate) : "") ===
+      (b.endDate ? todayCalendarDate(b.endDate) : "") &&
     todayCalendarDate(a.paymentDate) === todayCalendarDate(b.paymentDate) &&
     (a.exDate ? todayCalendarDate(a.exDate) : "") ===
       (b.exDate ? todayCalendarDate(b.exDate) : "")
@@ -130,6 +165,7 @@ function stateFromIncome(income: InvestmentIncome): IncomeFormState {
       perUnit: income.amountPerUnit,
       quantity: income.quantity,
       type: income.type,
+      withFinance: income.withFinance,
     }),
     netAmount: income.netAmount,
     netTouched: true,
@@ -186,9 +222,9 @@ function toCreateParams(
 
 function toFields(state: IncomeFormState, net: number) {
   return {
-    accountId: state.accountId,
+    accountId: state.withFinance ? state.accountId : undefined,
     amountPerUnit: state.perUnit.trim() === "" ? null : state.perUnit,
-    categoryId: state.categoryId,
+    categoryId: state.withFinance ? state.categoryId : undefined,
     exDate: state.exDate ? todayCalendarDate(state.exDate) : null,
     netAmount: net,
     notes: state.notes.trim() === "" ? null : state.notes.trim(),
@@ -196,6 +232,30 @@ function toFields(state: IncomeFormState, net: number) {
     quantity: state.quantity.trim() === "" ? null : state.quantity,
     status: state.status,
     type: state.type,
+    withFinance: state.withFinance,
+  };
+}
+
+// Spec 115 FR 8: the series the form describes; the amount of each occurrence comes from the position.
+function toSeriesParams(
+  assetId: string,
+  state: IncomeFormState,
+): CreateInvestmentIncomeSeriesParams {
+  const offset = state.exDateOffset.trim();
+
+  return {
+    accountId: state.withFinance ? state.accountId : undefined,
+    amountPerUnit: state.perUnit,
+    assetId,
+    categoryId: state.withFinance ? state.categoryId : undefined,
+    endDate: state.endDate ? todayCalendarDate(state.endDate) : null,
+    exDateOffsetDays: offset === "" ? null : Number(offset),
+    firstPaymentDate: todayCalendarDate(state.paymentDate),
+    frequency: state.frequency,
+    markPastAsReceived: state.markPast,
+    notes: state.notes.trim() === "" ? null : state.notes.trim(),
+    type: state.type,
+    withFinance: state.withFinance,
   };
 }
 
@@ -207,18 +267,23 @@ function toUpdateParams(
   return { id, ...toFields(state, net) };
 }
 
-// FR 3-4, 11: the account and the category are required, the net amount is above zero, and the optional quantity and
-// per-unit value are decimals above zero when filled.
-function validate(state: IncomeFormState, net: number): IncomeFormErrors {
+// FR 3-4, 11: the account and the category are required (with finance), the net amount is above zero, and the optional
+// quantity and per-unit value are decimals above zero when filled. Spec 115 FR 8: a series needs a per-unit value, a
+// valid frequency, an end date after the first payment and an offset from 0 to 90 days.
+function validate(
+  state: IncomeFormState,
+  net: number,
+  series = false,
+): IncomeFormErrors {
   const errors: IncomeFormErrors = {};
 
-  if (!state.accountId) {
+  if (state.withFinance && !state.accountId) {
     errors.accountId = "investment.form.operation.accountRequired";
   }
-  if (!state.categoryId) {
+  if (state.withFinance && !state.categoryId) {
     errors.categoryId = "investment.income.errors.incomplete";
   }
-  if (net <= 0) {
+  if (!series && net <= 0) {
     errors.netAmount = "investment.fixedIncome.redeem.invalid";
   }
   if (!isPositiveOrEmpty(state.quantity)) {
@@ -227,11 +292,35 @@ function validate(state: IncomeFormState, net: number): IncomeFormErrors {
   if (!isPositiveOrEmpty(state.perUnit)) {
     errors.amountPerUnit = "investment.form.operation.unitPriceInvalid";
   }
+  if (series) {
+    if (state.perUnit.trim() === "") {
+      errors.amountPerUnit = "investment.form.operation.unitPriceInvalid";
+    }
+    if (!isRecurrenceFrequency(state.frequency)) {
+      errors.frequency = "financial.recurrence.intervalErrorLonger";
+    }
+    if (
+      state.endDate &&
+      todayCalendarDate(state.endDate) < todayCalendarDate(state.paymentDate)
+    ) {
+      errors.endDate = "investment.income.endDateInvalid";
+    }
+
+    const offset = state.exDateOffset.trim();
+
+    if (
+      offset !== "" &&
+      (!/^\d+$/.test(offset) || Number(offset) > MAX_EX_DATE_OFFSET)
+    ) {
+      errors.exDateOffset = "investment.income.exDateOffsetInvalid";
+    }
+  }
 
   return errors;
 }
 
 export {
+  dayToDate,
   effectiveNet,
   estimateOf,
   hasErrors,
@@ -241,6 +330,7 @@ export {
   stateFromSuggestion,
   suggestedNet,
   toCreateParams,
+  toSeriesParams,
   toUpdateParams,
   validate,
 };

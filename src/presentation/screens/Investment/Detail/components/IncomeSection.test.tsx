@@ -23,8 +23,12 @@ const base: IncomeSectionVM = {
   items: [],
   onAdd: jest.fn(),
   onEdit: jest.fn(),
+  onEditSeries: jest.fn(),
   onFilterChange: jest.fn(),
   onReceive: jest.fn(),
+  projected: [],
+  series: [],
+  seriesById: new Map(),
   suggestionActions: {
     failure: undefined,
     isBusy: false,
@@ -123,6 +127,102 @@ it("SHOULD show the pending suggestions on top AND the failure of a decision", (
   ).toBeOnTheScreen();
   expect(
     screen.getByText("investment.income.errors.incomplete"),
+  ).toBeOnTheScreen();
+});
+
+it("SHOULD show the series card with its rule AND edit the series (spec 115)", () => {
+  const { vm } = setup({
+    items: [makeIncome({ occurrenceNumber: 23, seriesId: "series-1" })],
+    series: [
+      {
+        accountId: "acc-1",
+        amountPerUnit: "1.1",
+        assetId: "asset-1",
+        currency: "BRL",
+        firstPaymentDate: "2025-01-15",
+        frequency: { interval: 1, unit: "MONTH" },
+        id: "series-1",
+        lastGeneratedNumber: 23,
+        type: "YIELD" as never,
+        withFinance: true,
+      },
+    ],
+  });
+
+  expect(
+    screen.getByTestId(investmentTestIds.incomeSeries.card),
+  ).toBeOnTheScreen();
+  expect(screen.getByText(/23\/∞/)).toBeOnTheScreen();
+
+  fireEvent.press(
+    screen.getByTestId(`${investmentTestIds.incomeSeries.edit}-series-1`),
+  );
+
+  expect(vm.onEditSeries).toHaveBeenCalledWith("series-1");
+});
+
+it("SHOULD show an ended series with its reason AND the projected rows (spec 115)", () => {
+  const ended = {
+    amountPerUnit: "0.8",
+    assetId: "asset-1",
+    currency: "BRL" as const,
+    endedAt: "2026-09-15",
+    endReason: "POSITION_ZERO" as never,
+    firstPaymentDate: "2021-03-15",
+    frequency: { interval: 1, unit: "MONTH" as const },
+    id: "series-2",
+    lastGeneratedNumber: 68,
+    type: "YIELD" as never,
+    withFinance: false,
+  };
+
+  setup({
+    projected: [
+      {
+        assetId: "asset-1",
+        assetLabel: "HGLG11",
+        currency: "BRL",
+        exDate: "2026-12-07",
+        netAmount: 11000,
+        number: 24,
+        paymentDate: "2026-12-15",
+        quantity: "100",
+        seriesId: "series-1",
+        type: "YIELD" as never,
+        withFinance: true,
+      },
+    ],
+    series: [
+      ended,
+      {
+        ...ended,
+        endDate: "2027-01-31",
+        endedAt: undefined,
+        id: "series-1",
+        withFinance: true,
+      },
+    ],
+    seriesById: new Map([["series-1", { ...ended, id: "series-1" }]]),
+  });
+
+  expect(
+    screen.getByTestId(investmentTestIds.incomeSeries.ended),
+  ).toBeOnTheScreen();
+  expect(
+    screen.getByTestId(`${ids.projectedRow}-series-1-24`),
+  ).toBeOnTheScreen();
+  expect(
+    screen.getByText("investment.income.status.PROJECTED"),
+  ).toBeOnTheScreen();
+});
+
+it("SHOULD show a row of an income without finance with its own caption (spec 115)", () => {
+  setup({
+    items: [makeIncome({ accountId: undefined, withFinance: false })],
+  });
+
+  expect(
+    screen.getByText(/investment.income.series.onlyInvestments/),
   ).toBeOnTheScreen();
 });
 

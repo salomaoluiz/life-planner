@@ -130,7 +130,7 @@ describe("writes", () => {
     });
     await investmentApi.approveIncomeSuggestion({ id: "sug-1", netAmount: 1 });
     await investmentApi.rejectIncomeSuggestion("sug-1");
-    await investmentApi.deleteIncome("inc-1");
+    await investmentApi.deleteIncome({ id: "inc-1" });
 
     expect(api.post).toHaveBeenCalledWith(
       "/v1/investments/incomes/inc-1/receive",

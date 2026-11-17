@@ -11,6 +11,7 @@ import { AccountType } from "@domain/entities/financial/AccountEntity";
 import {
   InvestmentAssetClass,
   InvestmentFeeKind,
+  InvestmentIncomeStatus,
   InvestmentOperationType,
   isInvestmentEvent,
 } from "@domain/entities/investment/enums";
@@ -202,6 +203,47 @@ function useOperationModalViewModel() {
     );
   }, [asset, state, params.id]);
 
+  // Spec 115 section 8: a sale that zeroes the position ends the active series of the asset (the API applies it too).
+  const endsPosition =
+    state?.type === InvestmentOperationType.SELL &&
+    !!preview &&
+    !preview.insufficient &&
+    parseDecimal(preview.quantityAfter) === ZERO;
+  const seriesQuery = useQuery({
+    cacheKey: [...investmentKeys.all(), "income-series-list", params.assetId],
+    enabled: endsPosition,
+    fetch: async () =>
+      useCases.getInvestmentIncomeSeriesUseCase.execute(params.assetId),
+  });
+  const plannedQuery = useQuery({
+    cacheKey: [
+      ...investmentKeys.all(),
+      "incomes",
+      params.assetId,
+      InvestmentIncomeStatus.PLANNED,
+    ],
+    enabled: endsPosition,
+    fetch: async () =>
+      useCases.getInvestmentIncomesUseCase.execute({
+        assetId: params.assetId,
+        limit: 50,
+        status: InvestmentIncomeStatus.PLANNED,
+      }),
+  });
+  const seriesWarnings = endsPosition
+    ? (seriesQuery.data ?? [])
+        .filter((item) => !item.endedAt)
+        .map((item) => ({
+          count: (plannedQuery.data?.items ?? []).filter(
+            (income) =>
+              income.seriesId === item.id &&
+              !!state &&
+              income.paymentDate >= todayCalendarDate(state.date),
+          ).length,
+          type: item.type,
+        }))
+    : [];
+
   const eventMode =
     eventPicked ||
     !!params.suggestionId ||
@@ -337,6 +379,7 @@ function useOperationModalViewModel() {
     saveLabelKey: (state?.type === InvestmentOperationType.SELL
       ? "investment.form.operation.saveSell"
       : "investment.form.operation.saveBuy") as TranslationKeys,
+    seriesWarnings,
     showFxRate: !!asset && asset.currency !== "BRL",
     titleKey: (isEditing
       ? "investment.form.operation.editTitle"

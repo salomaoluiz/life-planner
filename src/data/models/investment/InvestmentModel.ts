@@ -1,4 +1,5 @@
 import { toCurrencyCode } from "@domain/entities/financial/Currency";
+import { RecurrenceUnit } from "@domain/entities/financial/RecurrenceEntity";
 import {
   InvestmentAssetClass,
   InvestmentAssetStatus,
@@ -7,6 +8,7 @@ import {
   InvestmentFixedIncomeProduct,
   InvestmentFixedIncomeRateMode,
   InvestmentFixedIncomeRedemptionKind,
+  InvestmentIncomeSeriesEndReason,
   InvestmentIncomeStatus,
   InvestmentIncomeType,
   InvestmentOperationType,
@@ -36,6 +38,9 @@ import {
   InvestmentIncome,
   InvestmentIncomeDefaults,
   InvestmentIncomePage,
+  InvestmentIncomeSeries,
+  InvestmentIncomeSeriesCreated,
+  InvestmentIncomeSeriesPreview,
   InvestmentIncomeSuggestion,
   InvestmentIncomeSummary,
   InvestmentMarketIndex,
@@ -50,6 +55,7 @@ import {
   InvestmentOperationResult,
   InvestmentPosition,
   InvestmentPriceHistory,
+  InvestmentProjectedIncome,
   InvestmentQuote,
   InvestmentQuotesRefresh,
   InvestmentsDashboard,
@@ -449,13 +455,17 @@ class InvestmentModel {
       id: data.id as string,
       netAmount: Number(data.netAmount),
       notes: (data.notes as string | undefined) ?? undefined,
+      occurrenceNumber:
+        (data.occurrenceNumber as number | undefined) ?? undefined,
       overdue: data.overdue === true,
       paymentDate: data.paymentDate as string,
       quantity: (data.quantity as string | undefined) ?? undefined,
+      seriesId: (data.seriesId as string | undefined) ?? undefined,
       status: data.status as InvestmentIncomeStatus,
       suggestionId: (data.suggestionId as string | undefined) ?? undefined,
       transactionId: (data.transactionId as string | undefined) ?? undefined,
       type: data.type as InvestmentIncomeType,
+      withFinance: data.withFinance !== false,
       withholdingRate: (data.withholdingRate as string | undefined) ?? "0",
     };
   }
@@ -479,6 +489,68 @@ class InvestmentModel {
       summary: data.summary
         ? InvestmentModel.toIncomeSummary(data.summary as Json)
         : undefined,
+    };
+  }
+
+  static toIncomeSeries(data: Json): InvestmentIncomeSeries {
+    const frequency = data.frequency as Json;
+
+    return {
+      accountId: (data.accountId as string | undefined) ?? undefined,
+      amountPerUnit: data.amountPerUnit as string,
+      assetId: data.assetId as string,
+      categoryId: (data.categoryId as string | undefined) ?? undefined,
+      currency: toCurrencyCode(data.currency),
+      endDate: (data.endDate as string | undefined) ?? undefined,
+      endedAt: (data.endedAt as string | undefined) ?? undefined,
+      endReason:
+        (data.endReason as InvestmentIncomeSeriesEndReason | undefined) ??
+        undefined,
+      exDateOffsetDays:
+        (data.exDateOffsetDays as number | undefined) ?? undefined,
+      firstPaymentDate: data.firstPaymentDate as string,
+      frequency: {
+        interval: Number(frequency.interval),
+        unit: frequency.unit as RecurrenceUnit,
+      },
+      id: data.id as string,
+      lastGeneratedNumber: Number(data.lastGeneratedNumber ?? 0),
+      nextPaymentDate:
+        (data.nextPaymentDate as string | undefined) ?? undefined,
+      notes: (data.notes as string | undefined) ?? undefined,
+      type: data.type as InvestmentIncomeType,
+      withFinance: data.withFinance !== false,
+    };
+  }
+
+  static toIncomeSeriesCreated(data: Json): InvestmentIncomeSeriesCreated {
+    const created = data.created as Json;
+
+    return {
+      created: {
+        planned: Number(created.planned ?? 0),
+        received: Number(created.received ?? 0),
+      },
+      series: InvestmentModel.toIncomeSeries(data.item as Json),
+    };
+  }
+
+  static toIncomeSeriesPreview(data: Json): InvestmentIncomeSeriesPreview {
+    const occurrences = data.occurrences as Json;
+
+    return {
+      endsByPosition: (data.endsByPosition as null | string) ?? null,
+      firstNetAmount:
+        data.firstNetAmount === null || data.firstNetAmount === undefined
+          ? null
+          : Number(data.firstNetAmount),
+      firstQuantity: (data.firstQuantity as null | string) ?? null,
+      next: ((data.next as string[]) ?? []).map(String),
+      occurrences: {
+        currentMonth: Number(occurrences.currentMonth ?? 0),
+        max: Number(occurrences.max ?? 600),
+        past: Number(occurrences.past ?? 0),
+      },
     };
   }
 
@@ -689,6 +761,24 @@ class InvestmentModel {
         kind: point.kind as InvestmentPriceKind,
         price: point.price as string,
       })),
+    };
+  }
+
+  static toProjectedIncome(data: Json): InvestmentProjectedIncome {
+    return {
+      accountId: (data.accountId as string | undefined) ?? undefined,
+      assetId: data.assetId as string,
+      assetLabel: data.assetLabel as string,
+      categoryId: (data.categoryId as string | undefined) ?? undefined,
+      currency: toCurrencyCode(data.currency),
+      exDate: data.exDate as string,
+      netAmount: Number(data.netAmount),
+      number: Number(data.number),
+      paymentDate: data.paymentDate as string,
+      quantity: data.quantity as string,
+      seriesId: data.seriesId as string,
+      type: data.type as InvestmentIncomeType,
+      withFinance: data.withFinance !== false,
     };
   }
 

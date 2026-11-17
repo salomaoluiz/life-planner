@@ -16,7 +16,9 @@ import {
   InvestmentIncomeReceived,
   InvestmentNegativePosition,
   InvestmentNoPosition,
+  InvestmentNoPositionAtStart,
   InvestmentRedemptionTooLarge,
+  InvestmentTooManyOccurrences,
   InvestmentUseConversionRoute,
   InvestmentUseFixedIncomeActions,
   QuoteRefreshTooSoon,
@@ -47,6 +49,22 @@ function getInvestmentErrorMessage(
     return {
       key: "investment.errors.negativePosition",
       params: { date: formatDate(error.date) },
+    };
+  }
+
+  // Spec 115 FR 12, 16: the series rules name the first buy date and the limit.
+  if (error instanceof InvestmentNoPositionAtStart) {
+    return error.firstBuyDate
+      ? {
+          key: "investment.income.noPositionAtStart",
+          params: { firstBuy: formatDate(error.firstBuyDate) },
+        }
+      : { key: "investment.income.noPositionAtStartNoBuy" };
+  }
+  if (error instanceof InvestmentTooManyOccurrences) {
+    return {
+      key: "investment.income.seriesTooMany",
+      params: { count: String(error.count), max: String(error.max) },
     };
   }
 

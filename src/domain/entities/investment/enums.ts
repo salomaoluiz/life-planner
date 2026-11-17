@@ -178,6 +178,20 @@ export const INVESTMENT_INCOME_TYPES: InvestmentIncomeType[] = [
   InvestmentIncomeType.OTHER,
 ];
 
+export enum InvestmentIncomeScope {
+  ALL = "ALL",
+  ONLY_THIS = "ONLY_THIS",
+  THIS_AND_NEXT = "THIS_AND_NEXT",
+}
+
+// Spec 115: why a series stopped, and the scope of an edit or delete of an income of a series.
+export enum InvestmentIncomeSeriesEndReason {
+  END_DATE = "END_DATE",
+  MANUAL = "MANUAL",
+  POSITION_ZERO = "POSITION_ZERO",
+  SPLIT = "SPLIT",
+}
+
 // Spec 107 FR 2: the type the form starts with, per asset class.
 export function defaultIncomeType(
   assetClass: InvestmentAssetClass,

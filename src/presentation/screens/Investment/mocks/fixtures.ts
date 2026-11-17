@@ -332,6 +332,7 @@ function makeIncome(
     status: InvestmentIncomeStatus.RECEIVED,
     transactionId: "tx-1",
     type: InvestmentIncomeType.JCP,
+    withFinance: true,
     withholdingRate: "0.15",
     ...overrides,
   };

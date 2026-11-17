@@ -558,6 +558,9 @@ const investment = {
     categoryDefaultHint: "Última usada para {{type}}",
     delete: "Apagar provento",
     editSave: "Salvar alterações",
+    endDate: "Termina em (opcional)",
+    endDateInvalid: "O fim deve ser na data do primeiro pagamento ou depois.",
+    endDateNone: "Sem data final",
     errors: {
       currencyMismatch: "A moeda da conta deve ser a mesma do ativo.",
       incomplete:
@@ -566,20 +569,33 @@ const investment = {
       received: "Este provento já foi efetivado.",
     },
     estimate: "Imposto retido estimado ({{rate}}) · bruto estimado {{gross}}",
+    estimatedNet: "Líquido estimado {{net}}",
     exDate: "Data-com (opcional)",
     exDateHint: "Sua posição nessa data define a quantidade.",
+    exDateOffset: "Data-com (opcional): {{count}} dias antes",
+    exDateOffsetInvalid: "Use de 0 a 90 dias.",
+    exDateOffsetLabel: "Dias antes do pagamento",
     filter: {
       ALL: "Todos",
       PLANNED: "Previstos",
       RECEIVED: "Recebidos",
     },
+    firstOccurrence: "1ª ocorrência: {{quantity}} × {{perUnit}}",
+    firstPaymentDate: "Data de pagamento (1ª ocorrência)",
     linkedTag: "Provento",
+    markPastReceived: "Marcar as passadas como recebidas",
+    markPastReceivedHint: "Ocorrências antes de hoje entram como Recebido",
     netAmount: "Valor líquido",
     netAmountHint:
       "O valor que cai na conta. Preenchido por quantidade × valor por unidade.",
+    noPositionAtStart:
+      "Você não tinha cotas na data-com da 1ª ocorrência. Escolha uma data depois da 1ª compra ({{firstBuy}}).",
+    noPositionAtStartNoBuy:
+      "Você não tinha cotas na data-com da 1ª ocorrência. Lance uma compra antes.",
     notes: "Notas (opcional)",
     paymentDate: "Data de pagamento",
     perUnit: "Valor por unidade (opcional)",
+    positionAtExDate: "Posição na data-com",
     quantity: "Quantidade",
     quantityHint: "Sua posição na data-com",
     receive: {
@@ -593,11 +609,25 @@ const investment = {
       title: "Efetivar provento",
     },
     receivedOn: "Recebido em",
+    repeat: "Repetir",
+    repeatHint: "Lança uma série de proventos a partir da data",
     row: {
       noAccount: "Conta sem acesso",
       perUnit: "{{value}} × {{quantity}}",
       planned: "Pagamento {{date}}",
       received: "Recebido {{date}}",
+    },
+    saveSeries: "Lançar {{count}} proventos",
+    scope: {
+      ALL: "Todas",
+      ALL_HINT: "Conta, categoria e notas em toda a série",
+      cancel: "Cancelar",
+      ONLY_THIS: "Só esta",
+      ONLY_THIS_HINT: "Altera apenas {{date}}",
+      THIS_AND_NEXT: "Esta e as próximas",
+      THIS_AND_NEXT_HINT: "A partir de {{date}}; as recebidas não mudam",
+      titleDelete: "Apagar provento da série",
+      titleEdit: "Editar provento da série",
     },
     section: {
       account: "Conta",
@@ -608,9 +638,46 @@ const investment = {
       receivedYear: "Proventos no ano",
       title: "Proventos",
     },
+    series: {
+      card: "Série · {{type}} {{frequency}}",
+      cardNoEnd: "Desde {{date}} · {{amount}}/cota · sem data final",
+      cardOnlyInvestments:
+        "Desde {{date}} · {{amount}}/cota · só em investimentos",
+      cardWithEnd: "Desde {{date}} · {{amount}}/cota · até {{end}}",
+      deleteAll:
+        "Apagar a série inteira ({{count}} proventos criados até agora).",
+      edit: "Editar série",
+      ended: "Série encerrada em {{date}}",
+      endedByPosition: "Você vendeu todas as cotas em {{date}}.",
+      endedManual: "Série encerrada em {{date}}.",
+      occurrence: "{{date}} · {{number}}/∞",
+      occurrenceOf: "{{date}} · {{number}}/{{total}}",
+      onlyInvestments: "só em investimentos",
+      projected: "Projetado",
+      sellWarning:
+        "Isto encerra a série de {{type}} de {{ticker}} ({{count}} previstas serão apagadas).",
+      title: "Série · {{type}} {{frequency}}",
+    },
+    seriesModal: {
+      endDate: "Termina em (opcional)",
+      endDateHint: "Apague para manter a série ativa.",
+      perUnit: "Valor por cota",
+      save: "Salvar série",
+      title: "Editar série",
+    },
+    seriesPreview: {
+      current: "1 prevista neste mês: {{date}}",
+      endsByPosition: "A série encerra em {{date}}: sem cotas.",
+      next: "Próximas projetadas: {{dates}}",
+      past: "{{count}} passadas como Recebido",
+      positionEnd: "A série encerra sozinha se a posição zerar.",
+    },
+    seriesTooMany:
+      "Até {{max}} ocorrências de uma vez ({{count}} agora). Escolha uma data inicial mais recente.",
     status: {
       OVERDUE: "Atrasado",
       PLANNED: "Previsto",
+      PROJECTED: "Projetado",
       RECEIVED: "Recebido",
     },
     statusLabel: "Situação",
@@ -628,6 +695,12 @@ const investment = {
       OTHER: "Outro",
       YIELD: "Rendimento",
     },
+    withFinance: "Lançar no Finance",
+    withFinanceHint: "Cria a receita vinculada na conta",
+    withoutFinanceBody:
+      "Use quando o valor já está lançado manualmente no Finance. O provento entra no histórico e nos totais do ativo, mas não mexe em saldo, Próximos nem dashboard.",
+    withoutFinanceHint: "Sem conta e sem categoria: fica só em investimentos",
+    withoutFinanceTitle: "Sem conta e sem categoria",
   },
   list: {
     columns: {

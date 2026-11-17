@@ -12,11 +12,15 @@ import {
   InvestmentIncomeDefaults,
   InvestmentIncomeLink,
   InvestmentIncomePage,
+  InvestmentIncomeSeries,
+  InvestmentIncomeSeriesCreated,
+  InvestmentIncomeSeriesPreview,
   InvestmentIncomeSuggestion,
   InvestmentMarketIndexes,
   InvestmentMarketIndexHistory,
   InvestmentOperationResult,
   InvestmentPriceHistory,
+  InvestmentProjectedIncome,
   InvestmentQuotesRefresh,
   InvestmentsDashboard,
   InvestmentsHomeSummary,
@@ -34,11 +38,14 @@ import {
   CreateInvestmentEventParams,
   CreateInvestmentFractionSaleParams,
   CreateInvestmentIncomeParams,
+  CreateInvestmentIncomeSeriesParams,
   CreateInvestmentOperationParams,
+  DeleteInvestmentIncomeParams,
   FixedIncomeRateParams,
   GetInvestmentAssetsParams,
   GetInvestmentEventSuggestionsParams,
   GetInvestmentIncomeDefaultsParams,
+  GetInvestmentIncomeSeriesProjectionsParams,
   GetInvestmentIncomesParams,
   GetInvestmentIncomeSuggestionsParams,
   GetInvestmentMarketIndexHistoryParams,
@@ -55,6 +62,7 @@ import {
   UpdateInvestmentAssetParams,
   UpdateInvestmentConversionParams,
   UpdateInvestmentIncomeParams,
+  UpdateInvestmentIncomeSeriesParams,
   UpdateInvestmentOperationParams,
   UpsertFixedIncomeAdjustmentParams,
   UpsertFixedIncomeTermsParams,
@@ -92,6 +100,9 @@ export interface InvestmentDatasource {
     params: CreateInvestmentFractionSaleParams,
   ): Promise<InvestmentOperationResult>;
   createIncome(params: CreateInvestmentIncomeParams): Promise<InvestmentIncome>;
+  createIncomeSeries(
+    params: CreateInvestmentIncomeSeriesParams,
+  ): Promise<InvestmentIncomeSeriesCreated>;
   createOperation(
     params: CreateInvestmentOperationParams,
   ): Promise<InvestmentOperationResult>;
@@ -99,7 +110,7 @@ export interface InvestmentDatasource {
   deleteConversion(id: string): Promise<void>;
   deleteFixedIncomeAdjustment(id: string): Promise<void>;
   deleteFixedIncomeRate(id: string): Promise<void>;
-  deleteIncome(id: string): Promise<void>;
+  deleteIncome(params: DeleteInvestmentIncomeParams): Promise<void>;
   deleteOperation(id: string): Promise<void>;
   deleteValuation(id: string): Promise<void>;
   getAsset(id: string): Promise<InvestmentAssetDetail>;
@@ -122,6 +133,11 @@ export interface InvestmentDatasource {
     transactionId: string,
   ): Promise<InvestmentIncomeLink | undefined>;
   getIncomes(params: GetInvestmentIncomesParams): Promise<InvestmentIncomePage>;
+  getIncomeSeries(assetId: string): Promise<InvestmentIncomeSeries[]>;
+  getIncomeSeriesById(id: string): Promise<InvestmentIncomeSeries>;
+  getIncomeSeriesProjections(
+    params: GetInvestmentIncomeSeriesProjectionsParams,
+  ): Promise<InvestmentProjectedIncome[]>;
   getIncomeSuggestions(
     params: GetInvestmentIncomeSuggestionsParams,
   ): Promise<InvestmentIncomeSuggestion[]>;
@@ -138,6 +154,9 @@ export interface InvestmentDatasource {
   previewFixedIncomeRedemption(
     params: PreviewFixedIncomeRedemptionParams,
   ): Promise<InvestmentFixedIncomeRedemptionPreview>;
+  previewIncomeSeries(
+    params: CreateInvestmentIncomeSeriesParams,
+  ): Promise<InvestmentIncomeSeriesPreview>;
   receiveIncome(
     params: ReceiveInvestmentIncomeParams,
   ): Promise<InvestmentIncome>;
@@ -161,6 +180,9 @@ export interface InvestmentDatasource {
     params: UpdateFixedIncomeRateParams,
   ): Promise<InvestmentAssetDetail>;
   updateIncome(params: UpdateInvestmentIncomeParams): Promise<InvestmentIncome>;
+  updateIncomeSeries(
+    params: UpdateInvestmentIncomeSeriesParams,
+  ): Promise<InvestmentIncomeSeries>;
   updateOperation(
     params: UpdateInvestmentOperationParams,
   ): Promise<InvestmentOperationResult>;
