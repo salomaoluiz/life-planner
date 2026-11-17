@@ -25,6 +25,7 @@ const transactionFormTestIds = {
   payWith: "financial.transactionForm.payWith",
   projectedNote: "financial.transactionForm.projected.note",
   projectedSwitch: "financial.transactionForm.projected.switch",
+  recurrenceChange: "financial.transactionForm.recurrenceChange",
   recurrenceDeleteAllDialog: "financial.recurrence-delete.confirm",
   recurrenceDeletePaidDialog: "financial.recurrence-delete.paid-confirm",
   recurrenceDeleteScope: "financial.recurrence-delete.scope",

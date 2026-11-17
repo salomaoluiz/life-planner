@@ -502,6 +502,7 @@ describe("repeat and recurring occurrences (spec 034)", () => {
       endError: undefined,
       endHelperKey: undefined,
       frequencyHelperKey: undefined,
+      initialFrequency: undefined,
       isAllDeleteOpen: false,
       isEndLocked: false,
       isFrequencyLocked: false,
@@ -548,6 +549,23 @@ describe("repeat and recurring occurrences (spec 034)", () => {
       interval: 1,
       unit: "WEEK",
     });
+  });
+
+  it("SHOULD summarize the change WHEN a series is edited to another interval", () => {
+    setup({
+      isEditing: true,
+      recurrence: {
+        ...recurring,
+        initialFrequency: { interval: 2, unit: "MONTH" },
+        isRecurring: true,
+      },
+      repeatFrequency: { interval: 3, unit: "MONTH" },
+      repeatOn: true,
+    });
+
+    expect(
+      screen.getByTestId(transactionFormTestIds.recurrenceChange),
+    ).toHaveTextContent(/label.*→.*label/);
   });
 
   it("SHOULD show the range error AND hide the preview WHEN the interval is out of range", () => {

@@ -1288,6 +1288,8 @@ function useNewTransactionViewModel() {
       frequencyHelperKey: isRecurring
         ? lockedHelperKey(locks.frequency, "frequency")
         : undefined,
+      // Edit: the rule the series had when the form opened (the "2 months -> 3 months" summary).
+      initialFrequency: isRecurring ? initial?.repeatFrequency : undefined,
       isAllDeleteOpen,
       isEndLocked: isRecurring && locks.endDate,
       isFrequencyLocked: isRecurring && locks.frequency,

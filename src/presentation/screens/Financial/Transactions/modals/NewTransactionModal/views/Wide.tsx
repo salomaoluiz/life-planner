@@ -32,6 +32,7 @@ import { useBreakpoint } from "@presentation/theme";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
 import RecurrenceBlock from "@screens/Financial/Transactions/components/RecurrenceBlock";
 import { toInvoiceFieldOption } from "@screens/Financial/utils/invoiceFieldOption";
+import { recurrenceLabel } from "@screens/Financial/utils/recurrenceLabel";
 
 import CategoryChips from "../components/CategoryChips";
 import CategoryPickerSheet from "../components/CategoryPickerSheet";
@@ -494,6 +495,16 @@ function Wide({ vm }: AdaptiveViewProps<NewTransactionVM>) {
                       unit: transactionFormTestIds.recurrenceUnit,
                     }}
                   >
+                    {vm.recurrence.initialFrequency &&
+                    (vm.recurrence.initialFrequency.unit !==
+                      vm.repeatFrequency.unit ||
+                      vm.recurrence.initialFrequency.interval !==
+                        vm.repeatFrequency.interval) ? (
+                      <Text.BodyStrong
+                        testID={transactionFormTestIds.recurrenceChange}
+                        value={`${recurrenceLabel(t, vm.recurrence.initialFrequency)} → ${recurrenceLabel(t, vm.repeatFrequency)}`}
+                      />
+                    ) : null}
                     {vm.recurrence.frequencyHelperKey ? (
                       <Text.Caption
                         tone={"secondary"}

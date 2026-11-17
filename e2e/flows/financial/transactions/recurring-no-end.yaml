@@ -54,9 +54,9 @@ onFlowComplete:
 - tapOn:
     id: "financial.transaction-form.repeat"
 - tapOn:
-    id: "financial.transaction-form.repeat-frequency-WEEKLY"
+    id: "financial.transactionForm.recurrenceUnit.WEEK"
 - assertVisible:
-    id: "financial.transaction-form.repeat-preview"
+    id: "financial.transactionForm.recurrencePreview"
 - tapOn:
     id: "financial.transaction-form.save-button"
 # The rows show the repeat icon and no counter: the title is exactly the description

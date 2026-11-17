@@ -127,6 +127,7 @@ const defaultViewModel: ReturnType<typeof useNewTransactionViewModel> = {
     endError: undefined as TranslationKeys | undefined,
     endHelperKey: undefined as TranslationKeys | undefined,
     frequencyHelperKey: undefined as TranslationKeys | undefined,
+    initialFrequency: undefined as RecurrenceFrequency | undefined,
     isAllDeleteOpen: false,
     isEndLocked: false,
     isFrequencyLocked: false,

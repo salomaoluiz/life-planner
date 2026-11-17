@@ -3,6 +3,14 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [2.0.0] - 2026-11-17
+
+### Changed
+
+- **Breaking:** repeated transactions and transfers can repeat every N days, weeks, months or years (spec 114): the repeat block has a number stepper and Days / Weeks / Months / Years chips, a preview of the next dates and a range error. It needs the matching API release, so update the app and the API together.
+- The list and the series screens say "Every 2 months" or "Monthly" instead of the old fixed frequencies ("Every 2 weeks" replaces "Biweekly").
+- Editing "this and the next" shows the change of interval, for example "Every 2 months → Every 3 months".
+
 ## [1.26.0] - 2026-11-16
 
 ### Added
