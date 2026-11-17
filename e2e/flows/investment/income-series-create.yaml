@@ -68,11 +68,15 @@ onFlowComplete:
     id: "investment.income-modal.category"
 - tapOn:
     id: "investment.income-modal.category-option-${output.INCOME_CATEGORY_ID}"
+# The repeat switch sits under the sticky footer on a short viewport: scroll the sheet first.
+- swipe:
+    start: 70%, 70%
+    end: 70%, 30%
 - tapOn:
     id: "investment.income.repeat"
 - extendedWaitUntil:
     visible:
-      id: "investment.income.seriesSummary"
+      id: "investment.income.repeatInterval"
     timeout: 20000
 - tapOn:
     id: "investment.income-modal.save"
