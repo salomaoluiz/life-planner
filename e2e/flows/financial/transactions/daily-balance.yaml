@@ -138,7 +138,7 @@ onFlowComplete:
       CATEGORY_ID: ${output.KEEP_CATEGORY_ID}
       DESCRIPTION: ${output.RENT_NAME}
       VALUE_CENTS: "20000"
-      FREQUENCY: MONTHLY
+      FREQUENCY_UNIT: MONTH
 - runFlow: ../../../subflows/financial/scroll-list-up.yaml
 - tapOn:
     id: "financial.transactions.month-next"

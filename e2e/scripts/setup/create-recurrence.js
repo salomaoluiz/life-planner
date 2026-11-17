@@ -1,5 +1,5 @@
 // Maestro runScript (GraalJS). Creates a recurring series through the API (spec 034).
-// Reads E2E_API_URL, TOKEN, OWNER_ID, ACCOUNT_ID, CATEGORY_ID, DESCRIPTION, VALUE_CENTS, FREQUENCY (default MONTHLY),
+// Reads E2E_API_URL, TOKEN, OWNER_ID, ACCOUNT_ID, CATEGORY_ID, DESCRIPTION, VALUE_CENTS, FREQUENCY_UNIT (DAY|WEEK|MONTH|YEAR, default MONTH), FREQUENCY_INTERVAL (default 1; spec 114),
 // MONTHS_AGO (0 = starts today, n = the 10th of the month n months ago), END_MONTHS_AFTER_START (absent = no end date),
 // PAID ("true"/"false"; absent = the API default for occurrence 1), TYPE and OWNER from env.
 // The API creates the real occurrences up to the end of the current month; later ones are projected.
@@ -50,10 +50,20 @@ var response = http.post(
         "E2E recurring",
       ),
       endDate: end,
-      frequency: param(
-        typeof FREQUENCY === "undefined" ? undefined : FREQUENCY,
-        "MONTHLY",
-      ),
+      frequency: {
+        interval: Number(
+          param(
+            typeof FREQUENCY_INTERVAL === "undefined"
+              ? undefined
+              : FREQUENCY_INTERVAL,
+            1,
+          ),
+        ),
+        unit: param(
+          typeof FREQUENCY_UNIT === "undefined" ? undefined : FREQUENCY_UNIT,
+          "MONTH",
+        ),
+      },
       owner: param(typeof OWNER === "undefined" ? undefined : OWNER, "USER"),
       ownerId: OWNER_ID,
       paid: typeof PAID === "undefined" || !PAID ? undefined : PAID === "true",
