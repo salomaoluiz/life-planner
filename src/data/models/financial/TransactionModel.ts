@@ -4,9 +4,13 @@ import {
   toCurrencyCode,
 } from "@domain/entities/financial/Currency";
 
+import { RecurrenceFrequency } from "@domain/entities/financial/RecurrenceEntity";
+
 import { calendarDateToIso, isoToCalendarDate } from "./calendarDate";
 import { centsToDecimalString, decimalStringToCents } from "./money";
 import { TagRefModel, tagRefsFromJSON } from "./TagModel";
+
+export type { RecurrenceFrequency };
 
 export interface EarlyPaymentRefModel {
   creditCardId: string;
@@ -15,8 +19,6 @@ export interface EarlyPaymentRefModel {
 }
 
 export type OwnerType = "FAMILY" | "USER";
-
-export type RecurrenceFrequency = "BIWEEKLY" | "MONTHLY" | "WEEKLY" | "YEARLY";
 
 export interface TransactionLookups {
   categories: Record<

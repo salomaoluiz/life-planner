@@ -33,7 +33,7 @@ const series = new RecurrenceEntity({
   description: "Rent",
   endDate: "2027-09-05T03:00:00.000Z",
   firstNumber: 1,
-  frequency: "MONTHLY",
+  frequency: { interval: 2, unit: "MONTH" },
   id: "recurrence-1",
   occurrenceCount: 12,
   owner: OwnerType.USER,
@@ -61,7 +61,7 @@ const projected = new ProjectedOccurrenceEntity({
   categoryId: "category-1",
   date: "2026-11-05T03:00:00.000Z",
   description: "Rent",
-  frequency: "MONTHLY",
+  frequency: { interval: 2, unit: "MONTH" },
   occurrenceNumber: 2,
   owner: OwnerType.USER,
   ownerId: "user-id",
@@ -95,7 +95,7 @@ const createParams = {
   date: "2026-10-05T03:00:00.000Z",
   description: "Rent",
   endDate: "2027-09-05T03:00:00.000Z",
-  frequency: "MONTHLY",
+  frequency: { interval: 2, unit: "MONTH" } as const,
   owner: "USER",
   ownerId: "user-id",
   type: "EXPENSE",
@@ -124,7 +124,7 @@ describe("createRecurrenceUseCase", () => {
     expect(result.occurrences[0]).toBeInstanceOf(TransactionDTO);
     expect(recurrences.createRecurrence).toHaveBeenCalledWith(
       expect.objectContaining({
-        frequency: "MONTHLY",
+        frequency: { interval: 2, unit: "MONTH" },
         owner: OwnerType.USER,
         type: TransactionType.EXPENSE,
       }),
@@ -134,7 +134,12 @@ describe("createRecurrenceUseCase", () => {
   it.each([
     ["owner", { owner: "NOBODY" }],
     ["type", { type: "OTHER" }],
-    ["frequency", { frequency: "DAILY" }],
+    ["frequency", { frequency: { interval: 25, unit: "MONTH" as const } }],
+    ["frequency unit", { frequency: { interval: 1, unit: "DAILY" as never } }],
+    [
+      "frequency interval",
+      { frequency: { interval: 1.5, unit: "DAY" as const } },
+    ],
     ["endDate", { endDate: "2026-10-01T03:00:00.000Z" }],
   ])(
     "SHOULD reject an invalid %s WITHOUT calling the repository",
@@ -180,7 +185,7 @@ describe("reads", () => {
       isProjected: true,
       occurrenceNumber: 2,
       paid: false,
-      recurrenceFrequency: "MONTHLY",
+      recurrenceFrequency: { interval: 2, unit: "MONTH" },
       recurrenceId: "recurrence-1",
     });
   });
@@ -224,28 +229,28 @@ describe("writes", () => {
 
     expect(
       await useCase.execute({
-        frequency: "WEEKLY",
+        frequency: { interval: 3, unit: "WEEK" },
         occurrenceNumber: 5,
         recurrenceId: "recurrence-1",
       }),
     ).toBeInstanceOf(RecurrenceResultDTO);
     expect(recurrences.splitRecurrence).toHaveBeenLastCalledWith(
-      expect.objectContaining({ frequency: "WEEKLY" }),
+      expect.objectContaining({ frequency: { interval: 3, unit: "WEEK" } }),
     );
 
     await useCase.execute({
       occurrenceNumber: 5,
       recurrenceId: "recurrence-1",
     });
-    expect(recurrences.splitRecurrence).toHaveBeenLastCalledWith(
-      expect.objectContaining({ frequency: undefined }),
-    );
+    expect(
+      recurrences.splitRecurrence.mock.calls.at(-1)?.[0].frequency,
+    ).toBeUndefined();
   });
 
   it("SHOULD reject an unknown frequency on a split", async () => {
     await expect(
       splitRecurrenceUseCase(repositories).execute({
-        frequency: "DAILY",
+        frequency: { interval: 25, unit: "MONTH" },
         occurrenceNumber: 5,
         recurrenceId: "recurrence-1",
       }),
@@ -426,7 +431,7 @@ describe("ProjectedOccurrenceDTO.toInvoiceCard", () => {
         creditCardTitle: "Main card",
         date: "2026-11-05T03:00:00.000Z",
         description: "Streaming",
-        frequency: "MONTHLY",
+        frequency: { interval: 2, unit: "MONTH" },
         occurrenceNumber: 2,
         owner: OwnerType.USER,
         ownerId: "user-id",

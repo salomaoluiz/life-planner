@@ -114,12 +114,15 @@ describe("createTransfer", () => {
       ...createParams,
       recurrence: {
         endDate: new Date(2027, 10, 4).toISOString(),
-        frequency: "MONTHLY",
+        frequency: { interval: 2, unit: "MONTH" },
       },
     });
 
     expect(spies.post.mock.calls[0][1]).toMatchObject({
-      recurrence: { endDate: "2027-11-04", frequency: "MONTHLY" },
+      recurrence: {
+        endDate: "2027-11-04",
+        frequency: { interval: 2, unit: "MONTH" },
+      },
     });
   });
 

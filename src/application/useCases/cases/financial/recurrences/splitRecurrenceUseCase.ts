@@ -1,10 +1,11 @@
 import RecurrenceResultDTO from "@application/dto/financial/RecurrenceResultDTO";
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import { DefaultError, FieldInvalid } from "@domain/entities/errors";
-import { RecurrenceFrequency } from "@domain/entities/financial/RecurrenceEntity";
+import {
+  isRecurrenceFrequency,
+  RecurrenceFrequency,
+} from "@domain/entities/financial/RecurrenceEntity";
 import Repositories from "@domain/repositories";
-
-import { RECURRENCE_FREQUENCIES } from "./createRecurrenceUseCase";
 
 export interface SplitRecurrenceUseCaseParams {
   accountId?: string;
@@ -13,7 +14,7 @@ export interface SplitRecurrenceUseCaseParams {
   description?: string;
   // `null` removes the end date; omitted keeps it.
   endDate?: null | string;
-  frequency?: string;
+  frequency?: RecurrenceFrequency;
   notes?: null | string;
   occurrenceNumber: number;
   recurrenceId: string;
@@ -30,24 +31,18 @@ function splitRecurrenceUseCase(
 > {
   return {
     execute: async (params) => {
-      let frequency: RecurrenceFrequency | undefined;
-
-      if (params.frequency !== undefined) {
-        frequency = RECURRENCE_FREQUENCIES.find(
-          (item) => item === params.frequency,
-        );
-
-        if (!frequency) {
-          throw new FieldInvalid({ frequency: params.frequency });
-        }
+      if (
+        params.frequency !== undefined &&
+        !isRecurrenceFrequency(params.frequency)
+      ) {
+        throw new FieldInvalid({ frequency: params.frequency });
       }
 
       try {
         const result =
-          await repositories.financialRepository.recurrence.splitRecurrence({
-            ...params,
-            frequency,
-          });
+          await repositories.financialRepository.recurrence.splitRecurrence(
+            params,
+          );
 
         return RecurrenceResultDTO.fromEntity(result);
       } catch (error) {

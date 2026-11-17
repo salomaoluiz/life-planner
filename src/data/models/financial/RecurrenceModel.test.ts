@@ -13,7 +13,7 @@ describe("RecurrenceModel.fromJSON", () => {
       creditCardId: undefined,
       endDate: calendarDateToIso("2027-09-05"),
       firstNumber: 1,
-      frequency: "MONTHLY",
+      frequency: { interval: 2, unit: "MONTH" },
       nextOccurrenceDate: calendarDateToIso("2026-11-05"),
       occurrenceCount: 12,
       startDate: calendarDateToIso("2026-10-05"),
