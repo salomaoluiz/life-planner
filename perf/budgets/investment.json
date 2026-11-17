@@ -98,6 +98,15 @@
   "investment.incomeReceive.render.mount": {
     "maxCommits": 3
   },
+  "investment.indexHistory.mount.cold": {
+    "maxDepth": 2,
+    "maxDuplicates": 0,
+    "maxRequests": 2,
+    "modal": "investment_index_history"
+  },
+  "investment.indexHistory.render.mount": {
+    "maxCommits": 4
+  },
   "investment.list.mount.cold": {
     "maxDepth": 2,
     "maxDuplicates": 0,
@@ -123,6 +132,15 @@
     "route": "app/(app)/(tabs)/investments/overview.tsx"
   },
   "investment.overview.render.mount": {
+    "maxCommits": 4
+  },
+  "investment.settings.mount.cold": {
+    "maxDepth": 2,
+    "maxDuplicates": 0,
+    "maxRequests": 2,
+    "route": "app/(app)/(tabs)/investments/settings.tsx"
+  },
+  "investment.settings.render.mount": {
     "maxCommits": 4
   },
   "investment.suggestions.mount.cold": {

@@ -26,6 +26,7 @@ export const MODAL_NAMES = [
   "investment_fraction_sale",
   "investment_income",
   "investment_income_receive",
+  "investment_index_history",
   "investment_operation",
   "investment_valuation",
   "add_new_family",

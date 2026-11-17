@@ -7,6 +7,11 @@ import investmentTestIds from "@screens/Investment/testIds";
 
 import { setup } from "./mocks/index.mocks";
 
+jest.mock("@screens/Investment/hooks/useMarketIndexes", () => ({
+  __esModule: true,
+  default: () => ({ data: undefined }),
+}));
+
 const ids = investmentTestIds.modal.fixedIncomeTitle;
 
 beforeEach(() => {
@@ -33,11 +38,11 @@ it("SHOULD edit the name AND the rate", () => {
   const { vm } = setup();
 
   fireEvent.changeText(screen.getByTestId(ids.name), "CDB 2030");
-  fireEvent.changeText(screen.getByTestId(ids.field("indexRate")), "15");
+  fireEvent.changeText(screen.getByTestId(ids.field("cdiPercent")), "120");
 
   expect(vm.onNameChange).toHaveBeenCalledWith("CDB 2030");
   expect(vm.onRateChange).toHaveBeenCalledWith(
-    expect.objectContaining({ indexRate: "15" }),
+    expect.objectContaining({ cdiPercent: "120" }),
   );
 });
 

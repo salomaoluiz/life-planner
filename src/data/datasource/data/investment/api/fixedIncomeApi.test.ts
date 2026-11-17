@@ -67,7 +67,6 @@ const apiFixedIncome = {
       cdiPercent: "110.0000",
       effectiveRate: "16.510000",
       id: "rate-1",
-      indexRate: "14.9000",
       mode: "CDI_PERCENT",
       spread: null,
       startDate: "2026-01-15",
@@ -120,7 +119,6 @@ const terms = {
 };
 const cdi = {
   cdiPercent: "110",
-  indexRate: "14,90",
   mode: InvestmentFixedIncomeRateMode.CDI_PERCENT,
 };
 
@@ -171,6 +169,51 @@ describe("the detail mapping", () => {
     });
   });
 
+  it("SHOULD map indexMissing AND needsReview (spec 113) with zero totals while no index is stored", async () => {
+    jest.mocked(api.post).mockResolvedValueOnce({
+      item: {
+        ...apiDetail,
+        fixedIncome: {
+          ...apiFixedIncome,
+          atMaturity: null,
+          indexMissing: true,
+          needsReview: { date: "2026-06-01", operationId: "op-1" },
+          today: null,
+        },
+      },
+    });
+
+    const detail = await investmentApi.createFixedIncomeTitle({
+      contribution: {
+        amount: 1000000,
+        date: "2026-01-15",
+        generateTransaction: false,
+      },
+      name: "CDB",
+      owner: OwnerType.USER,
+      ownerId: "owner-1",
+      rate: { ...cdi, startDate: undefined },
+      terms,
+    });
+
+    expect(detail.fixedIncome).toMatchObject({
+      indexMissing: true,
+      needsReview: { date: "2026-06-01", operationId: "op-1" },
+    });
+    expect(detail.fixedIncome?.today).toEqual({
+      gross: 0,
+      iof: 0,
+      ir: 0,
+      net: 0,
+    });
+    expect(detail.fixedIncome?.atMaturity).toEqual({
+      gross: 0,
+      iof: 0,
+      ir: 0,
+      net: 0,
+    });
+  });
+
   it("SHOULD map a list item with no history (summary only) AND a missing fixedIncome as null", async () => {
     jest.mocked(api.get).mockResolvedValue({
       items: [
@@ -207,19 +250,16 @@ describe("rates", () => {
       cdi,
       {
         cdiPercent: "110",
-        indexRate: "14.9",
         mode: "CDI_PERCENT",
         startDate: "2026-10-01",
       },
     ],
     [
       {
-        indexRate: "4,5",
         mode: InvestmentFixedIncomeRateMode.IPCA_PLUS,
         spread: "6.2",
       },
       {
-        indexRate: "4.5",
         mode: "IPCA_PLUS",
         spread: "6.2",
         startDate: "2026-10-01",
@@ -516,7 +556,6 @@ describe("adjustments, simulation and preview", () => {
       expect.objectContaining({
         rate: {
           cdiPercent: "110",
-          indexRate: "14.9",
           mode: "CDI_PERCENT",
           startDate: undefined,
         },

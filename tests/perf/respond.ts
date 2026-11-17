@@ -4,6 +4,8 @@ import {
   investmentDetail,
   investmentsDashboard,
   investmentsSummary,
+  marketIndexes,
+  marketIndexHistory,
 } from "./fixtures/investment";
 import { me } from "./fixtures/user";
 import type { Method } from "./networkHarness";
@@ -23,6 +25,13 @@ function respond(method: Method, path: string): unknown {
   }
   if (path === "/v1/user/me") {
     return me;
+  }
+  // Spec 113: the stored indexes and the history of one.
+  if (/^\/v1\/investments\/market-indexes\/[A-Z]+\/history/.test(path)) {
+    return marketIndexHistory;
+  }
+  if (path.startsWith("/v1/investments/market-indexes")) {
+    return marketIndexes;
   }
   // Spec 110: the investments overview.
   if (path.startsWith("/v1/investments/dashboard")) {

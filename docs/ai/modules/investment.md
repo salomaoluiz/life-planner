@@ -181,3 +181,17 @@ perf: investment.conversion.mount.cold / render.mount (perf/budgets/investment.j
 ```
 
 Design deviations (spec 112): the banners use the app's StatusBanner (warning tone) instead of the artboard's blue notice; the disabled menu items show the locked reason as their subtitle; the ticker search of "Criar novo" is the same TickerAutocomplete as the asset modal.
+
+## Market indexes and Settings (spec 113)
+
+```yaml
+sections: Settings is the third DRAWER section (Overview, Assets, Settings): INVESTMENT_SECTIONS gains `settings` (path /investments/settings, rail testID navigation-rail-investment-settings), getInvestmentSection maps /investments/settings, Layout Stack gains `settings`; the section header reuses Investment/Layout/components/SectionHeader
+data: GET /v1/investments/market-indexes, GET .../:index/history?from=&to=, POST .../refresh -> InvestmentMarketIndexes / InvestmentMarketIndexHistory (InvestmentEntities.ts), investmentApi marketIndexApi.ts (spread into investmentApi, 429 REFRESH_TOO_SOON -> QuoteRefreshTooSoon), InvestmentModel.toMarketIndexes/toMarketIndexHistory, use cases getInvestmentMarketIndexesUseCase / getInvestmentMarketIndexHistoryUseCase / refreshInvestmentMarketIndexesUseCase, investmentKeys.marketIndexes / marketIndexHistory
+shared hook: Investment/hooks/useMarketIndexes (key shared by Settings, the rate form and the title detail rate line)
+screen: Investment/Settings (route app/(app)/(tabs)/investments/settings.tsx): hooks/useInvestmentSettingsViewModel (refresh mutation, 429 toast, stale notice, history modal), models/settingsModel (percentLabel, updatedWhen, staleNotice, isEmptyIndexes), components IndexCards (CDI, Selic, IPCA cards with "See history"), FxCards (read only), views/Wide (header, subtitle, updated-at + Refresh now, stale StatusBanner, empty state with Fetch now, skeletons, error retry, source box, minute-limit Toast)
+modal: investment_index_history (Modals/IndexHistoryModal, param ?index=CDI|SELIC|IPCA): period chips 6m/12m/5y/first (first = the 30 years the API allows), LineChart of the step points (monthly IPCA), changes table with delta, followers linking to the title; two columns through FormColumns on web/tablet, stacked on mobile; models/historyModel (historyRange, chartPoints, deltaLabel)
+fixed income: the rate form and entities no longer carry indexRate; RateFields shows the CDI/IPCA info box with a link to Settings and "Changes by itself when the CDI changes"; previewEffectiveRate(form, indexes) uses the stored daily CDI / Focus expectation (null until stored); rateSummary(rate, locale, cdiAnnual) writes "110% of the CDI (CDI 14.9% today)"; InvestmentFixedIncome gains indexMissing (totals are zero, the detail shows a banner) and needsReview (banner with the redemption date)
+testIds: investment.settings.* (Settings/testIds.ts), investment.detail.fi-index-missing-banner, fi-needs-review-banner
+e2e: e2e/flows/investment/settings-indexes.yaml, settings-refresh-limit.yaml (spec-113)
+perf: investment.settings.* and investment.indexHistory.* (perf/budgets/investment.json)
+```

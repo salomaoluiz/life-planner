@@ -17,7 +17,6 @@ const defaultViewModel: FixedIncomeRateVM = {
   form: {
     annualRate: "",
     cdiPercent: "110",
-    indexRate: "14,90",
     mode: InvestmentFixedIncomeRateMode.CDI_PERCENT,
     spread: "",
   },

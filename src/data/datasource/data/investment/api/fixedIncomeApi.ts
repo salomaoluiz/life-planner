@@ -194,13 +194,11 @@ function rateBody(rate: FixedIncomeRateParams) {
     case InvestmentFixedIncomeRateMode.CDI_PERCENT:
       return {
         cdiPercent: percent(rate.cdiPercent, "cdiPercent"),
-        indexRate: percent(rate.indexRate, "indexRate"),
         mode: rate.mode,
         startDate,
       };
     case InvestmentFixedIncomeRateMode.IPCA_PLUS:
       return {
-        indexRate: percent(rate.indexRate, "indexRate"),
         mode: rate.mode,
         spread: percent(rate.spread, "spread"),
         startDate,

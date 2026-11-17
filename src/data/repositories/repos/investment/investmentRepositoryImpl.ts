@@ -71,6 +71,9 @@ function investmentRepositoryImpl(
     getIncomes: async (params) => investmentDatasource.getIncomes(params),
     getIncomeSuggestions: async (params) =>
       investmentDatasource.getIncomeSuggestions(params),
+    getMarketIndexes: async () => investmentDatasource.getMarketIndexes(),
+    getMarketIndexHistory: async (params) =>
+      investmentDatasource.getMarketIndexHistory(params),
     getOperationLink: async (transactionId) =>
       investmentDatasource.getOperationLink(transactionId),
     getPriceHistory: async (params) =>
@@ -79,6 +82,8 @@ function investmentRepositoryImpl(
       investmentDatasource.previewFixedIncomeRedemption(params),
     receiveIncome: async (params) =>
       withFinanceCaches(investmentDatasource.receiveIncome(params)),
+    refreshMarketIndexes: async () =>
+      investmentDatasource.refreshMarketIndexes(),
     refreshQuotes: async (params) => investmentDatasource.refreshQuotes(params),
     rejectEventSuggestion: async (id) =>
       investmentDatasource.rejectEventSuggestion(id),

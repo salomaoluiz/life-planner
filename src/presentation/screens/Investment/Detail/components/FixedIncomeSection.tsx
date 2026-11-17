@@ -30,6 +30,7 @@ import {
   rateEntry,
   rateSummary,
 } from "@screens/Investment/FixedIncome/models/fixedIncome";
+import useMarketIndexes from "@screens/Investment/hooks/useMarketIndexes";
 import {
   formatDay,
   formatMoney,
@@ -281,6 +282,22 @@ function FixedIncomeSection({
   return (
     <View style={styles.gap}>
       <RateLine fixedIncome={fixedIncome} />
+      {fixedIncome.indexMissing ? (
+        <StatusBanner
+          icon="timer-sand"
+          message={t("investment.fixedIncome.indexMissing")}
+          testID={ids.indexMissingBanner}
+        />
+      ) : null}
+      {fixedIncome.needsReview ? (
+        <StatusBanner
+          icon="alert-outline"
+          message={t("investment.fixedIncome.needsReview", {
+            date: formatDay(fixedIncome.needsReview.date, localeTag),
+          })}
+          testID={ids.needsReviewBanner}
+        />
+      ) : null}
       {fixedIncome.maturityPending ? (
         <StatusBanner
           actionLabel={
@@ -493,6 +510,7 @@ function Operations({
 function RateLine({ fixedIncome }: { fixedIncome: InvestmentFixedIncome }) {
   const { t } = useTranslation();
   const localeTag = useLocaleTag();
+  const cdiAnnual = useMarketIndexes().data?.cdi?.annual;
   const current = latestRate({
     ...fixedIncome,
     rates: fixedIncome.rates.filter(
@@ -505,7 +523,7 @@ function RateLine({ fixedIncome }: { fixedIncome: InvestmentFixedIncome }) {
     return null;
   }
 
-  const summary = rateSummary(rate, localeTag);
+  const summary = rateSummary(rate, localeTag, cdiAnnual);
 
   return (
     <Text.Body

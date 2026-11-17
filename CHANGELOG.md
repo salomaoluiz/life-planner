@@ -3,6 +3,17 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.26.0] - 2026-11-16
+
+### Added
+
+- Investments > Settings: the CDI, Selic and IPCA come from the Central Bank every business day and are shown with the date of the last update, the FX pairs, the titles that follow each index and a history of their changes; "Refresh now" fetches the stale ones (spec 113).
+- The title detail warns while the indexes are not stored yet and when a redemption must be reviewed after the new CDI history (spec 113).
+
+### Changed
+
+- "% of CDI" and "IPCA + x" titles no longer ask for the index: they follow the real daily CDI and the real IPCA, so the value of existing indexed titles changes to the index of each day (spec 113).
+
 ## [1.25.0] - 2026-11-16
 
 ### Added

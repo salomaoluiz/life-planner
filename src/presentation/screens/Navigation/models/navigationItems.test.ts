@@ -37,6 +37,7 @@ it("SHOULD give the Finances AND Investments items their section children (spec 
   expect(withChildren[1].children?.map((child) => child.testID)).toEqual([
     "navigation-rail-investment-overview",
     "navigation-rail-investment-assets",
+    "navigation-rail-investment-settings",
   ]);
   expect(withChildren[0].children?.map((child) => child.testID)).toEqual([
     "navigation-rail-financial-overview",

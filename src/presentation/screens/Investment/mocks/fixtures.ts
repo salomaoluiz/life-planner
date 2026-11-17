@@ -206,6 +206,7 @@ function makeFixedIncome(
     adjustments: [],
     atMaturity: { gross: 1907132, iof: 0, ir: 61070, net: 1846062 },
     currentEffectiveRate: "16.510000",
+    indexMissing: false,
     liquidity: InvestmentFixedIncomeLiquidity.AT_MATURITY,
     liquidityDate: null,
     lots: [
@@ -238,6 +239,7 @@ function makeFixedIncome(
     ],
     maturityDate: "2028-01-15",
     maturityPending: false,
+    needsReview: null,
     product: InvestmentFixedIncomeProduct.CDB,
     rates: [
       {
@@ -245,7 +247,6 @@ function makeFixedIncome(
         cdiPercent: "110.0000",
         effectiveRate: "16.510000",
         id: "rate-1",
-        indexRate: "14.9000",
         mode: InvestmentFixedIncomeRateMode.CDI_PERCENT,
         spread: null,
         startDate: "2026-01-15",
