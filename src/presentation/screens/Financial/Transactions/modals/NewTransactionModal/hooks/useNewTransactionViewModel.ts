@@ -11,7 +11,10 @@ import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
 import { RecurrenceHasPaidOccurrences } from "@domain/entities/errors";
 import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
-import { RecurrenceScope } from "@domain/entities/financial/RecurrenceEntity";
+import {
+  RecurrenceFrequency,
+  RecurrenceScope,
+} from "@domain/entities/financial/RecurrenceEntity";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import {
   getCachedFetcherData,
@@ -35,11 +38,7 @@ import {
   archivedOwnerIds,
   personalOwnerId,
 } from "@screens/Financial/models/ownerOptions";
-import {
-  RECURRENCE_FREQUENCIES,
-  recurrenceLastDate,
-  recurrenceOccurrenceCount,
-} from "@screens/Financial/models/recurrence";
+import {} from "@screens/Financial/models/recurrence";
 import type { TransactionsData } from "@screens/Financial/Transactions/models/transactionsData";
 import openTransactionModal from "@screens/Financial/Transactions/pending/openTransactionModal";
 import {
@@ -225,31 +224,6 @@ function installmentsOf(
         : undefined,
     visible,
   };
-}
-
-// "12 times, last on 05/09/2027" (with an end date) or "Repeats every month" (without), spec 034 FR 17.
-function repeatPreviewOf(state: TransactionFormState | undefined) {
-  if (!state || !state.repeatOn) {
-    return undefined;
-  }
-  if (!state.repeatEnd) {
-    return { frequency: state.repeatFrequency, kind: "forever" as const };
-  }
-
-  const count = recurrenceOccurrenceCount(
-    state.date,
-    state.repeatEnd,
-    state.repeatFrequency,
-  );
-  const last = recurrenceLastDate(
-    state.date,
-    state.repeatEnd,
-    state.repeatFrequency,
-  );
-
-  return last
-    ? { count, kind: "times" as const, last }
-    : { kind: "none" as const };
 }
 
 // Tags of the chosen owner by usage, then name (spec 043 FR 14/15).
@@ -1248,10 +1222,8 @@ function useNewTransactionViewModel() {
         update({ ...state, repeatEnd: date ? normalizeDate(date) : undefined });
       }
     },
-    onRepeatFrequencyChange: (value: string) => {
-      const frequency = RECURRENCE_FREQUENCIES.find((item) => item === value);
-
-      if (state && frequency) {
+    onRepeatFrequencyChange: (frequency: RecurrenceFrequency) => {
+      if (state) {
         update({ ...state, repeatFrequency: frequency });
       }
     },
@@ -1321,11 +1293,10 @@ function useNewTransactionViewModel() {
       isFrequencyLocked: isRecurring && locks.frequency,
       isRecurring,
       isRepeatToggleVisible: !isEditing,
-      preview: repeatPreviewOf(state),
       scope,
     },
     repeatEnd: state?.repeatEnd,
-    repeatFrequency: state?.repeatFrequency ?? "MONTHLY",
+    repeatFrequency: state?.repeatFrequency ?? { interval: 1, unit: "MONTH" },
     repeatOn: state?.repeatOn ?? false,
     saveLabelKey,
     scopeLocks: isRecurring

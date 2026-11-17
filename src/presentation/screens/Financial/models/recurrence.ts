@@ -17,6 +17,11 @@ function addDays(date: Date, days: number) {
   return new Date(next.getUTCFullYear(), next.getUTCMonth(), next.getUTCDate());
 }
 
+// Switching unit keeps the number when it fits the new unit's range, else uses that unit's maximum.
+function clampIntervalForUnit(unit: RecurrenceUnit, interval: number) {
+  return Math.min(Math.max(interval, 1), RECURRENCE_INTERVAL_MAX[unit]);
+}
+
 function daysInMonth(year: number, monthIndex: number) {
   return new Date(year, monthIndex + 1, 0).getDate();
 }
@@ -45,6 +50,28 @@ function recurrenceLastDate(
   return count > 0
     ? recurrenceOccurrenceDate(start, frequency, count)
     : undefined;
+}
+
+// The occurrences after the first (the "Next:" preview), up to `limit`, honoring the end date.
+function recurrenceNextDates(
+  start: Date,
+  frequency: RecurrenceFrequency,
+  end: Date | undefined,
+  limit: number,
+) {
+  const dates: Date[] = [];
+
+  for (let k = 2; k <= limit + 1; k += 1) {
+    const date = recurrenceOccurrenceDate(start, frequency, k);
+
+    if (end && date > end) {
+      break;
+    }
+
+    dates.push(date);
+  }
+
+  return dates;
 }
 
 // How many occurrences are dated up to `end` (inclusive); 0 when the end is before the start.
@@ -91,33 +118,6 @@ function recurrenceOccurrenceDate(
         start.getDate(),
       );
   }
-}
-
-// The occurrences after the first (the "Next:" preview), up to `limit`, honoring the end date.
-function recurrenceNextDates(
-  start: Date,
-  frequency: RecurrenceFrequency,
-  end: Date | undefined,
-  limit: number,
-) {
-  const dates: Date[] = [];
-
-  for (let k = 2; k <= limit + 1; k += 1) {
-    const date = recurrenceOccurrenceDate(start, frequency, k);
-
-    if (end && date > end) {
-      break;
-    }
-
-    dates.push(date);
-  }
-
-  return dates;
-}
-
-// Switching unit keeps the number when it fits the new unit's range, else uses that unit's maximum.
-function clampIntervalForUnit(unit: RecurrenceUnit, interval: number) {
-  return Math.min(Math.max(interval, 1), RECURRENCE_INTERVAL_MAX[unit]);
 }
 
 export {

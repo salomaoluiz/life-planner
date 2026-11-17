@@ -166,7 +166,7 @@ describe("create params", () => {
       paid: true,
       recurrence: {
         endDate: new Date(2027, 10, 4).toISOString(),
-        frequency: "MONTHLY",
+        frequency: { interval: 1, unit: "MONTH" },
       },
       toAccountId: "acc-2",
     });

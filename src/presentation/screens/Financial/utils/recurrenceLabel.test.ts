@@ -9,7 +9,10 @@ function translator(dictionary: Dictionary) {
   return (key: string, params?: Record<string, number | string>) => {
     const value = key
       .split(".")
-      .reduce<unknown>((node, part) => (node as Dictionary)?.[part], dictionary);
+      .reduce<unknown>(
+        (node, part) => (node as Dictionary)?.[part],
+        dictionary,
+      );
 
     return String(value).replace(/\{\{(\w+)\}\}/g, (_m, name) =>
       String(params?.[name]),
@@ -30,10 +33,13 @@ describe("recurrenceLabel", () => {
     [{ interval: 2, unit: "MONTH" }, "A cada 2 meses", "Every 2 months"],
     [{ interval: 15, unit: "DAY" }, "A cada 15 dias", "Every 15 days"],
     [{ interval: 3, unit: "YEAR" }, "A cada 3 anos", "Every 3 years"],
-  ] as const)("SHOULD read %j as %s / %s", (frequency, expectedPt, expectedEn) => {
-    expect(recurrenceLabel(pt, frequency)).toBe(expectedPt);
-    expect(recurrenceLabel(en, frequency)).toBe(expectedEn);
-  });
+  ] as const)(
+    "SHOULD read %j as %s / %s",
+    (frequency, expectedPt, expectedEn) => {
+      expect(recurrenceLabel(pt, frequency)).toBe(expectedPt);
+      expect(recurrenceLabel(en, frequency)).toBe(expectedEn);
+    },
+  );
 });
 
 describe("recurrenceLabelEvery", () => {

@@ -30,7 +30,7 @@ import pluralKey from "@presentation/i18n/pluralKey";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { useBreakpoint } from "@presentation/theme";
 import { translateChoices } from "@screens/Financial/models/ownerOptions";
-import { RECURRENCE_FREQUENCIES } from "@screens/Financial/models/recurrence";
+import RecurrenceBlock from "@screens/Financial/Transactions/components/RecurrenceBlock";
 import { toInvoiceFieldOption } from "@screens/Financial/utils/invoiceFieldOption";
 
 import CategoryChips from "../components/CategoryChips";
@@ -92,30 +92,6 @@ function Wide({ vm }: AdaptiveViewProps<NewTransactionVM>) {
 
   function lockedCaption(key?: TranslationKeys) {
     return key ? <Text.Caption tone={"secondary"} value={t(key)} /> : null;
-  }
-
-  function renderRepeatPreview(
-    preview: NonNullable<typeof vm.recurrence.preview>,
-  ) {
-    if (preview.kind === "forever") {
-      return t("financial.transactions.form.repeatForever", {
-        frequency: t(
-          `financial.recurrence.frequencyEvery.${preview.frequency}`,
-        ),
-      });
-    }
-    if (preview.kind === "times") {
-      return t("financial.transactions.form.repeatPreview", {
-        date: new Intl.DateTimeFormat(localeTag, {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        }).format(preview.last),
-        n: preview.count,
-      });
-    }
-
-    return "";
   }
 
   function err(key?: TranslationKeys) {
@@ -501,51 +477,51 @@ function Wide({ vm }: AdaptiveViewProps<NewTransactionVM>) {
               ) : null}
               {vm.repeatOn ? (
                 <View style={styles.form}>
-                  <ChipGroup
+                  <RecurrenceBlock
                     disabled={vm.recurrence.isFrequencyLocked}
-                    label={t("financial.transactions.form.repeatFrequency")}
-                    layout={"wrap"}
-                    mode={"single"}
+                    endDate={vm.repeatEnd}
+                    frequency={vm.repeatFrequency}
                     onChange={vm.onRepeatFrequencyChange}
-                    options={RECURRENCE_FREQUENCIES.map((frequency) => ({
-                      label: t(`financial.recurrence.frequency.${frequency}`),
-                      value: frequency,
-                    }))}
-                    testID={transactionFormTestIds.repeatFrequency}
-                    value={vm.repeatFrequency}
-                  />
-                  {vm.recurrence.frequencyHelperKey ? (
-                    <Text.Caption
-                      tone={"secondary"}
-                      value={t(vm.recurrence.frequencyHelperKey)}
+                    startDate={vm.date}
+                    testIDs={{
+                      error: transactionFormTestIds.recurrenceIntervalError,
+                      interval: transactionFormTestIds.recurrenceInterval,
+                      intervalDecrease:
+                        transactionFormTestIds.recurrenceIntervalDecrease,
+                      intervalIncrease:
+                        transactionFormTestIds.recurrenceIntervalIncrease,
+                      preview: transactionFormTestIds.recurrencePreview,
+                      unit: transactionFormTestIds.recurrenceUnit,
+                    }}
+                  >
+                    {vm.recurrence.frequencyHelperKey ? (
+                      <Text.Caption
+                        tone={"secondary"}
+                        value={t(vm.recurrence.frequencyHelperKey)}
+                      />
+                    ) : null}
+                    <DateField
+                      clearable
+                      clearLabel={t(
+                        "financial.transactions.form.repeatEndClear",
+                      )}
+                      disabled={vm.recurrence.isEndLocked}
+                      error={err(vm.recurrence.endError)}
+                      label={t("financial.transactions.form.repeatEnd")}
+                      onChange={vm.onRepeatEndChange}
+                      placeholder={t("financial.recurrence.noEnd")}
+                      testID={transactionFormTestIds.repeatEnd}
+                      todayLabel={t("common.date.today")}
+                      value={vm.repeatEnd}
+                      yesterdayLabel={t("common.date.yesterday")}
                     />
-                  ) : null}
-                  <DateField
-                    clearable
-                    clearLabel={t("financial.transactions.form.repeatEndClear")}
-                    disabled={vm.recurrence.isEndLocked}
-                    error={err(vm.recurrence.endError)}
-                    label={t("financial.transactions.form.repeatEnd")}
-                    onChange={vm.onRepeatEndChange}
-                    placeholder={t("financial.recurrence.noEnd")}
-                    testID={transactionFormTestIds.repeatEnd}
-                    todayLabel={t("common.date.today")}
-                    value={vm.repeatEnd}
-                    yesterdayLabel={t("common.date.yesterday")}
-                  />
-                  {vm.recurrence.endHelperKey ? (
-                    <Text.Caption
-                      tone={"secondary"}
-                      value={t(vm.recurrence.endHelperKey)}
-                    />
-                  ) : null}
-                  {vm.recurrence.preview ? (
-                    <Text.Caption
-                      testID={transactionFormTestIds.repeatPreview}
-                      tone={"secondary"}
-                      value={renderRepeatPreview(vm.recurrence.preview)}
-                    />
-                  ) : null}
+                    {vm.recurrence.endHelperKey ? (
+                      <Text.Caption
+                        tone={"secondary"}
+                        value={t(vm.recurrence.endHelperKey)}
+                      />
+                    ) : null}
+                  </RecurrenceBlock>
                 </View>
               ) : null}
               {vm.isEditing && vm.showPaid ? (

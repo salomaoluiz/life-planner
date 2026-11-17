@@ -165,22 +165,27 @@ describe("paid status (spec 033)", () => {
 });
 
 describe("recurring series (spec 034)", () => {
-  it("SHOULD show the counter WHEN the series has an end date AND the frequency WHEN it has none", () => {
+  it("SHOULD show the counter only WHEN the series has an end date AND the rule of the series in both cases", () => {
     const withEnd = new TransactionUIModel(
-      dto({ occurrenceCount: 10, occurrenceNumber: 3, recurrenceId: "s-1" }),
+      dto({
+        occurrenceCount: 10,
+        occurrenceNumber: 3,
+        recurrenceFrequency: { interval: 2, unit: "MONTH" },
+        recurrenceId: "s-1",
+      }),
     );
     const noEnd = new TransactionUIModel(
       dto({
         occurrenceNumber: 3,
-        recurrenceFrequency: "MONTHLY",
+        recurrenceFrequency: { interval: 1, unit: "MONTH" },
         recurrenceId: "s-1",
       }),
     );
 
     expect(withEnd.counter).toBe("3/10");
-    expect(withEnd.frequency).toBeUndefined();
+    expect(withEnd.frequency).toEqual({ interval: 2, unit: "MONTH" });
     expect(noEnd.counter).toBeUndefined();
-    expect(noEnd.frequency).toBe("MONTHLY");
+    expect(noEnd.frequency).toEqual({ interval: 1, unit: "MONTH" });
     expect(withEnd.isRecurring).toBe(true);
     expect(withEnd.recurrenceId).toBe("s-1");
     expect(withEnd.occurrenceNumber).toBe(3);

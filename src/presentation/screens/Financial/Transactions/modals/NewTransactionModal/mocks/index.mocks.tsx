@@ -1,3 +1,4 @@
+import { RecurrenceFrequency } from "@domain/entities/financial/RecurrenceEntity";
 import { fireEvent, render, screen, within } from "@tests";
 
 import { RecurrenceHasPaidOccurrences } from "@domain/entities/errors";
@@ -131,15 +132,10 @@ const defaultViewModel: ReturnType<typeof useNewTransactionViewModel> = {
     isFrequencyLocked: false,
     isRecurring: false,
     isRepeatToggleVisible: true,
-    preview: undefined as
-      | undefined
-      | { count: number; kind: "times"; last: Date }
-      | { frequency: "MONTHLY"; kind: "forever" }
-      | { kind: "none" },
     scope: "ONLY_THIS" as "ALL" | "ONLY_THIS" | "THIS_AND_NEXT",
   },
   repeatEnd: undefined as Date | undefined,
-  repeatFrequency: "MONTHLY" as "BIWEEKLY" | "MONTHLY" | "WEEKLY" | "YEARLY",
+  repeatFrequency: { interval: 1, unit: "MONTH" } as RecurrenceFrequency,
   repeatOn: false,
   saveLabelKey: "financial.transactions.form.saveExpense",
   scopeLocks: undefined as

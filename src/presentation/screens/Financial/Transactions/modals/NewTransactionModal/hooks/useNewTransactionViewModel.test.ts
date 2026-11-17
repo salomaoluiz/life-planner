@@ -1107,7 +1107,6 @@ describe("repeat on create (spec 034)", () => {
 
     expect(result.current.repeatOn).toBe(false);
     expect(result.current.recurrence.isRepeatToggleVisible).toBe(true);
-    expect(result.current.recurrence.preview).toBeUndefined();
   });
 
   it("SHOULD create a series WHEN Repeat is on, with the frequency and the end date", () => {
@@ -1119,7 +1118,7 @@ describe("repeat on create (spec 034)", () => {
       result.current.onRepeatToggle(true);
     });
     act(() => {
-      result.current.onRepeatFrequencyChange("WEEKLY");
+      result.current.onRepeatFrequencyChange({ interval: 1, unit: "WEEK" });
     });
     act(() => {
       result.current.onRepeatEndChange(new Date(2026, 10, 2, 15));
@@ -1132,7 +1131,7 @@ describe("repeat on create (spec 034)", () => {
       expect.objectContaining({
         accountId: "a1",
         endDate: new Date(2026, 10, 2).toISOString(),
-        frequency: "WEEKLY",
+        frequency: { interval: 1, unit: "WEEK" },
         value: "2000.00",
       }),
     );
@@ -1141,32 +1140,16 @@ describe("repeat on create (spec 034)", () => {
     ).not.toHaveBeenCalled();
   });
 
-  it("SHOULD preview the count and the last date WHEN there is an end date, AND the cadence WHEN there is none", () => {
+  it("SHOULD block saving an end date before the first date", () => {
     givenLoaded();
     const { result } = setup();
 
     act(() => {
       result.current.onRepeatToggle(true);
     });
-    expect(result.current.recurrence.preview).toEqual({
-      frequency: "MONTHLY",
-      kind: "forever",
-    });
-
-    act(() => {
-      result.current.onRepeatEndChange(new Date(2027, 8, 5));
-    });
-    expect(result.current.recurrence.preview).toEqual({
-      count: 12,
-      kind: "times",
-      last: new Date(2027, 8, 5),
-    });
-
     act(() => {
       result.current.onRepeatEndChange(new Date(2026, 9, 1));
     });
-    expect(result.current.recurrence.preview).toEqual({ kind: "none" });
-
     act(() => {
       result.current.onSave();
     });
@@ -1175,7 +1158,7 @@ describe("repeat on create (spec 034)", () => {
     );
   });
 
-  it("SHOULD ignore an unknown frequency AND block saving an end date before the first date", () => {
+  it("SHOULD block saving WHEN the interval is out of the range of its unit", () => {
     givenLoaded();
     const { result } = setup();
 
@@ -1184,7 +1167,7 @@ describe("repeat on create (spec 034)", () => {
       result.current.onRepeatToggle(true);
     });
     act(() => {
-      result.current.onRepeatFrequencyChange("DAILY");
+      result.current.onRepeatFrequencyChange({ interval: 25, unit: "MONTH" });
     });
     act(() => {
       result.current.onRepeatEndChange(new Date(2026, 9, 1));
@@ -1193,7 +1176,10 @@ describe("repeat on create (spec 034)", () => {
       result.current.onSave();
     });
 
-    expect(result.current.repeatFrequency).toBe("MONTHLY");
+    expect(result.current.repeatFrequency).toEqual({
+      interval: 25,
+      unit: "MONTH",
+    });
     expect(mutations.create_recurrence.value.mutate).not.toHaveBeenCalled();
   });
 
@@ -1250,7 +1236,7 @@ describe("editing a recurring occurrence (spec 034)", () => {
     description: "Rent",
     endDate: new Date(2027, 8, 5).toISOString(),
     firstNumber: 1,
-    frequency: "MONTHLY",
+    frequency: { interval: 1, unit: "MONTH" },
     id: "series-1",
     occurrenceCount: 12,
     owner: "USER",
@@ -1265,7 +1251,7 @@ describe("editing a recurring occurrence (spec 034)", () => {
     occurrenceCount: 12,
     occurrenceNumber: 5,
     paid: false,
-    recurrenceFrequency: "MONTHLY",
+    recurrenceFrequency: { interval: 1, unit: "MONTH" },
     recurrenceId: "series-1",
     value: "2000.00",
   });
@@ -1344,7 +1330,7 @@ describe("editing a recurring occurrence (spec 034)", () => {
       result.current.onAmountChange(220000);
     });
     act(() => {
-      result.current.onRepeatFrequencyChange("WEEKLY");
+      result.current.onRepeatFrequencyChange({ interval: 1, unit: "WEEK" });
     });
     act(() => {
       result.current.onSave();
@@ -1353,7 +1339,7 @@ describe("editing a recurring occurrence (spec 034)", () => {
     expect(result.current.recurrence.isFrequencyLocked).toBe(false);
     expect(mutations.split.value.mutate).toHaveBeenCalledWith(
       expect.objectContaining({
-        frequency: "WEEKLY",
+        frequency: { interval: 1, unit: "WEEK" },
         occurrenceNumber: 5,
         recurrenceId: "series-1",
         value: "2200.00",
@@ -1418,7 +1404,7 @@ describe("editing a recurring occurrence (spec 034)", () => {
       categoryId: "food",
       date: new Date(2026, 10, 5).toISOString(),
       description: "Rent",
-      frequency: "MONTHLY",
+      frequency: { interval: 1, unit: "MONTH" },
       occurrenceCount: 12,
       occurrenceNumber: 2,
       owner: "USER",
@@ -1479,7 +1465,7 @@ describe("deleting a recurring occurrence (spec 034 FR 28-31)", () => {
     categoryId: "food",
     description: "Rent",
     firstNumber: 1,
-    frequency: "MONTHLY",
+    frequency: { interval: 1, unit: "MONTH" },
     id: "series-1",
     owner: "USER",
     ownerId: "user-id",
@@ -1490,7 +1476,7 @@ describe("deleting a recurring occurrence (spec 034 FR 28-31)", () => {
   });
   const row = tx("tx-r", {
     occurrenceNumber: 5,
-    recurrenceFrequency: "MONTHLY",
+    recurrenceFrequency: { interval: 1, unit: "MONTH" },
     recurrenceId: "series-1",
   });
 
@@ -1705,7 +1691,10 @@ describe("save and add another (spec 039)", () => {
     succeed(rerender, "create_recurrence");
 
     expect(result.current.repeatOn).toBe(false);
-    expect(result.current.repeatFrequency).toBe("MONTHLY");
+    expect(result.current.repeatFrequency).toEqual({
+      interval: 1,
+      unit: "MONTH",
+    });
     expect(result.current.repeatEnd).toBeUndefined();
   });
 

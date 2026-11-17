@@ -15,6 +15,7 @@ import NoteIcon from "@screens/Financial/Transactions/components/NoteIcon";
 import PendingChip from "@screens/Financial/Transactions/components/PendingChip";
 import TransactionUIModel from "@screens/Financial/Transactions/models/TransactionUIModel";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
+import { recurrenceLabel } from "@screens/Financial/utils/recurrenceLabel";
 
 import useStyles from "./styles";
 
@@ -124,7 +125,7 @@ function TransactionRow(props: Props) {
   const baseSubtitle =
     transferSubtitle(item, t) ?? investmentSubtitle(item, t) ?? item.subtitle;
   const subtitle = item.frequency
-    ? [baseSubtitle, t(`financial.recurrence.frequency.${item.frequency}`)]
+    ? [baseSubtitle, recurrenceLabel(t, item.frequency)]
         .filter(Boolean)
         .join(" · ")
     : baseSubtitle;

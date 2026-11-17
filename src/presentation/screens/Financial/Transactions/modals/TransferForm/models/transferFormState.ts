@@ -1,4 +1,7 @@
-import { RecurrenceFrequency } from "@domain/entities/financial/RecurrenceEntity";
+import {
+  isRecurrenceFrequency,
+  RecurrenceFrequency,
+} from "@domain/entities/financial/RecurrenceEntity";
 import TransferEntity from "@domain/entities/financial/TransferEntity";
 import { CreateTransferRepositoryParams } from "@domain/repositories/financial";
 import { TranslationKeys } from "@presentation/i18n/types";
@@ -28,6 +31,7 @@ type TransferFormErrors = Partial<
     | "description"
     | "fee"
     | "fromAccountId"
+    | "repeatFrequency"
     | "toAccountId",
     TranslationKeys
   >
@@ -89,7 +93,7 @@ function createInitialState(
     paid: true,
     rateMode: "AMOUNT_IN",
     rateText: "",
-    repeatFrequency: "MONTHLY",
+    repeatFrequency: { interval: 1, unit: "MONTH" },
     repeatOn: false,
     toAccountId: undefined,
   };
@@ -175,7 +179,7 @@ function stateFromTransfer(transfer: TransferEntity): TransferFormState {
     paid: transfer.paid,
     rateMode: "AMOUNT_IN",
     rateText: "",
-    repeatFrequency: "MONTHLY",
+    repeatFrequency: { interval: 1, unit: "MONTH" },
     repeatOn: false,
     toAccountId: transfer.toAccountId,
   };
@@ -295,6 +299,9 @@ function validate(
     effectiveAmountInCents(state, ctx) <= 0
   ) {
     errors.amountIn = "financial.transfers.form.errors.amountIn";
+  }
+  if (state.repeatOn && !isRecurrenceFrequency(state.repeatFrequency)) {
+    errors.repeatFrequency = "financial.recurrence.intervalError";
   }
   if (state.dateIn < state.dateOut) {
     errors.dateIn = "financial.errors.transferDateInBeforeOut";

@@ -525,57 +525,44 @@ describe("repeat and recurring occurrences (spec 034)", () => {
     expect(screen.queryByTestId(transactionFormTestIds.repeatEnd)).toBeNull();
   });
 
-  it("SHOULD show the frequency chips, the end date and the preview WHEN Repeat is on", () => {
-    const vm = setup({
-      recurrence: {
-        ...recurring,
-        preview: { count: 12, kind: "times", last: new Date(2027, 8, 5) },
-      },
-      repeatOn: true,
-    });
+  it("SHOULD show the interval block AND the end date WHEN Repeat is on", () => {
+    const vm = setup({ recurrence: { ...recurring }, repeatOn: true });
 
     expect(
       screen.getByTestId(transactionFormTestIds.repeatEnd),
     ).toBeOnTheScreen();
     expect(
-      screen.getByTestId(transactionFormTestIds.repeatPreview),
+      screen.getByTestId(transactionFormTestIds.recurrenceInterval),
     ).toBeOnTheScreen();
     expect(
-      screen.getByTestId(transactionFormTestIds.repeatPreview),
-    ).toHaveTextContent(/form.repeatPreview/);
+      screen.getByTestId(transactionFormTestIds.recurrencePreview),
+    ).toBeOnTheScreen();
     expect(
       screen.getByText("financial.transactions.form.paidFirstOnly"),
     ).toBeOnTheScreen();
 
     fireEvent.press(
-      screen.getByTestId(`${transactionFormTestIds.repeatFrequency}-WEEKLY`),
+      screen.getByTestId(`${transactionFormTestIds.recurrenceUnit}.WEEK`),
     );
-    expect(vm.onRepeatFrequencyChange).toHaveBeenCalledWith("WEEKLY");
+    expect(vm.onRepeatFrequencyChange).toHaveBeenCalledWith({
+      interval: 1,
+      unit: "WEEK",
+    });
   });
 
-  it("SHOULD preview the cadence WHEN there is no end date", () => {
+  it("SHOULD show the range error AND hide the preview WHEN the interval is out of range", () => {
     setup({
-      recurrence: {
-        ...recurring,
-        preview: { frequency: "MONTHLY", kind: "forever" },
-      },
+      recurrence: { ...recurring },
+      repeatFrequency: { interval: 25, unit: "MONTH" },
       repeatOn: true,
     });
 
     expect(
-      screen.getByTestId(transactionFormTestIds.repeatPreview),
-    ).toHaveTextContent(/form.repeatForever/);
-  });
-
-  it("SHOULD show an empty preview text WHEN no occurrence fits the end date", () => {
-    setup({
-      recurrence: { ...recurring, preview: { kind: "none" } },
-      repeatOn: true,
-    });
-
-    expect(
-      screen.getByTestId(transactionFormTestIds.repeatPreview),
+      screen.getByTestId(transactionFormTestIds.recurrenceIntervalError),
     ).toBeOnTheScreen();
+    expect(
+      screen.queryByTestId(transactionFormTestIds.recurrencePreview),
+    ).toBeNull();
   });
 
   it("SHOULD show the scope selector AND lock account, date, frequency and end WHEN editing a recurring row", () => {

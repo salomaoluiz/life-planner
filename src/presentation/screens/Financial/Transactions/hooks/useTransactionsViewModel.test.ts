@@ -612,7 +612,7 @@ describe("projected occurrences (spec 034)", () => {
       categoryId: "cat-1",
       date: new Date(2026, 10, 5).toISOString(),
       description: "Rent",
-      frequency: "MONTHLY",
+      frequency: { interval: 1, unit: "MONTH" },
       occurrenceCount: 12,
       occurrenceNumber: 2,
       owner: "USER",

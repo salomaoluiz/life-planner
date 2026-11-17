@@ -256,7 +256,7 @@ describe("projected purchases (spec 034 FR 14)", () => {
       creditCardId: "card-1",
       date: new Date(2026, 11, 28).toISOString(),
       description: "Streaming",
-      frequency: "MONTHLY",
+      frequency: { interval: 1, unit: "MONTH" },
       invoiceListDate: "2027-01-05",
       invoiceMonth: "2027-01",
       occurrenceCount: 12,
