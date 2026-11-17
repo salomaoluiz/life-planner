@@ -103,6 +103,27 @@ it("SHOULD badge income as to receive and projections as projected, and nothing 
   expect(rows[2].badge).toBeUndefined();
 });
 
+it("SHOULD badge a projection of an investment income series as an income (spec 115)", () => {
+  const [row] = model(
+    [],
+    [
+      item("2026-12-15", {
+        assetId: "asset-1",
+        investmentIncomeSeriesId: "series-1",
+        kind: "PROJECTION",
+        occurrenceNumber: 24,
+        recurrenceId: "series-1",
+        type: "INCOME",
+      }),
+    ],
+  ).next.rows;
+
+  expect(row.badge).toEqual({
+    key: "home.upcoming.investmentIncome",
+    tone: "income",
+  });
+});
+
 it("SHOULD treat an invoice as one row with its purchase count and no to-receive badge", () => {
   const [row] = model(
     [],

@@ -8,6 +8,8 @@ export interface UpcomingEntity {
 
 export interface UpcomingItemEntity {
   accountId: null | string;
+  // Spec 115 FR 22: set on a projection that comes from an investment income series.
+  assetId?: string;
   categoryId: null | string;
   creditCardId: null | string;
   currency: string;
@@ -15,6 +17,7 @@ export interface UpcomingItemEntity {
   description: string;
   // A transaction id, `<cardId>:<YYYY-MM>` for an invoice or `<recurrenceId>:<occurrence>` for a projection.
   id: string;
+  investmentIncomeSeriesId?: string;
   invoiceMonth: null | string;
   kind: UpcomingKind;
   occurrenceNumber: null | number;

@@ -1,0 +1,89 @@
+url: ${E2E_WEB_URL}
+name: investment/income-series-edit-this-and-next
+tags:
+  - investment
+  - spec-115
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript: ../../scripts/today-dates.js
+- runFlow:
+    file: ../../subflows/setup/create-investment-asset.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      TICKER: E2ETK3
+      NAME: E2E Asset
+- runFlow:
+    file: ../../subflows/setup/create-investment-operation.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      ASSET_ID: ${output.ASSET_ID}
+      TYPE: BUY
+      QUANTITY: "100"
+      UNIT_PRICE: "10"
+      DATE: ${output.SIX_MONTHS_AGO_KEY}
+# Three past occurrences received and this month's planned, all at R$ 1,10 per unit.
+- runFlow:
+    file: ../../subflows/setup/create-investment-income-series.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      ASSET_ID: ${output.ASSET_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.INCOME_CATEGORY_ID}
+      FIRST_DATE: ${output.THREE_MONTHS_AGO_KEY}
+      AMOUNT_PER_UNIT: "1.10"
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/investment/open-investments.yaml
+- tapOn:
+    id: "investment.list.row-${output.ASSET_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.screen"
+    timeout: 20000
+- swipe:
+    start: 60%, 80%
+    end: 60%, 20%
+- swipe:
+    start: 60%, 80%
+    end: 60%, 20%
+- extendedWaitUntil:
+    visible:
+      id: "investment.incomeSeries.card"
+    timeout: 20000
+# The planned occurrence of this month is the first row: edit it for "this and the next ones".
+- tapOn:
+    id: "investment.income.edit-.*"
+- extendedWaitUntil:
+    visible:
+      id: "investment.incomeSeries.scope.THIS_AND_NEXT"
+    timeout: 20000
+- tapOn:
+    id: "investment.incomeSeries.scope.THIS_AND_NEXT"
+- extendedWaitUntil:
+    visible:
+      id: "investment.income-modal.per-unit"
+    timeout: 20000
+- tapOn:
+    id: "investment.income-modal.per-unit"
+- eraseText
+- inputText: "1,15"
+- tapOn:
+    id: "investment.income-modal.save"
+# The received ones keep 1,10 (110,00) and the new series pays 1,15 (115,00).
+- extendedWaitUntil:
+    visible: ".*115[.,]00.*"
+    timeout: 20000
+- assertVisible: ".*110[.,]00.*"

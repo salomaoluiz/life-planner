@@ -92,6 +92,7 @@ const home = {
   upcoming: {
     emptyMessage: "Nada vencido nem a pagar ou receber nos próximos 7 dias.",
     emptyTitle: "Tudo em dia",
+    investmentIncome: "Provento",
     invoice: "Fatura · {{card}}",
     listLabel: "Lista de próximas transações",
     newTransaction: "Nova transação",

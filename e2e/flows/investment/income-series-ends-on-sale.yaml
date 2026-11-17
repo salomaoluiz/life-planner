@@ -1,0 +1,89 @@
+url: ${E2E_WEB_URL}
+name: investment/income-series-ends-on-sale
+tags:
+  - investment
+  - spec-115
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript: ../../scripts/today-dates.js
+- runFlow:
+    file: ../../subflows/setup/create-investment-asset.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      TICKER: E2ETK3
+      NAME: E2E Asset
+- runFlow:
+    file: ../../subflows/setup/create-investment-operation.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      ASSET_ID: ${output.ASSET_ID}
+      TYPE: BUY
+      QUANTITY: "100"
+      UNIT_PRICE: "10"
+      DATE: ${output.SIX_MONTHS_AGO_KEY}
+- runFlow:
+    file: ../../subflows/setup/create-investment-income-series.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      ASSET_ID: ${output.ASSET_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.INCOME_CATEGORY_ID}
+      FIRST_DATE: ${output.THREE_MONTHS_AGO_KEY}
+      AMOUNT_PER_UNIT: "1.10"
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/investment/open-investments.yaml
+- tapOn:
+    id: "investment.list.row-${output.ASSET_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.screen"
+    timeout: 20000
+# Selling every unit: the form warns before saving that the series ends and the planned ones go.
+- tapOn:
+    id: "investment.detail.add-operation"
+- extendedWaitUntil:
+    visible:
+      id: "investment.operation-modal.quantity"
+    timeout: 20000
+- tapOn:
+    id: "investment.operation-modal.type-SELL"
+- tapOn:
+    id: "investment.operation-modal.quantity"
+- inputText: "100"
+- tapOn:
+    id: "investment.operation-modal.unit-price"
+- inputText: "12"
+- extendedWaitUntil:
+    visible:
+      id: "investment.incomeSeries.sell-warning"
+    timeout: 20000
+- tapOn:
+    id: "investment.operation-modal.save"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.screen"
+    timeout: 20000
+- swipe:
+    start: 60%, 80%
+    end: 60%, 20%
+- swipe:
+    start: 60%, 80%
+    end: 60%, 20%
+- extendedWaitUntil:
+    visible:
+      id: "investment.incomeSeries.ended"
+    timeout: 20000

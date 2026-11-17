@@ -1,0 +1,12 @@
+url: ${E2E_WEB_URL}
+---
+# Optional caller-scoped params read by the script: WITH_FINANCE ("false" = only in investments), TYPE (YIELD default).
+- runScript:
+    file: ../../scripts/setup/create-investment-income-series.js
+    env:
+      TOKEN: ${TOKEN}
+      ASSET_ID: ${ASSET_ID}
+      ACCOUNT_ID: ${ACCOUNT_ID}
+      CATEGORY_ID: ${CATEGORY_ID}
+      FIRST_DATE: ${FIRST_DATE}
+      AMOUNT_PER_UNIT: ${AMOUNT_PER_UNIT}

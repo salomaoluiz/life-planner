@@ -63,6 +63,9 @@ export class UpcomingRowUIModel {
         tone: "expense",
       };
     }
+    if (this.item.investmentIncomeSeriesId) {
+      return { key: "home.upcoming.investmentIncome", tone: "income" };
+    }
     if (this.item.kind === "PROJECTION") {
       return { key: "home.upcoming.projected", tone: "warning" };
     }

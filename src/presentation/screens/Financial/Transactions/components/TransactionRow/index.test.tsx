@@ -63,6 +63,32 @@ describe("investment income row (spec 107)", () => {
     expect(onPay).not.toHaveBeenCalled();
   });
 
+  it("SHOULD offer no check on an income projected by an investment series AND open its asset (spec 115)", () => {
+    const projected = new TransactionUIModel(
+      makeTransactionDTO({
+        externalLock: "INVESTMENT",
+        investmentAssetId: "asset-1",
+        isProjected: true,
+        paid: false,
+        type: "INCOME",
+      }),
+    );
+    const onIncomePress = jest.fn();
+
+    render(
+      <TransactionRow
+        item={projected}
+        onIncomePress={onIncomePress}
+        onIncomeReceive={jest.fn()}
+        onPress={jest.fn()}
+      />,
+    );
+    fireEvent.press(screen.getByTestId(transactionsTestIds.rowProjected));
+
+    expect(screen.queryByTestId(transactionsTestIds.rowPay)).toBeNull();
+    expect(onIncomePress).toHaveBeenCalledWith(projected);
+  });
+
   it("SHOULD offer no check on a received income", () => {
     const received = new TransactionUIModel(
       makeTransactionDTO({

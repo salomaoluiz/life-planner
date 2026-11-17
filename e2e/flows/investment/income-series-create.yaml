@@ -1,0 +1,84 @@
+url: ${E2E_WEB_URL}
+name: investment/income-series-create
+tags:
+  - investment
+  - spec-115
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript: ../../scripts/today-dates.js
+- runFlow:
+    file: ../../subflows/setup/create-investment-asset.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      TICKER: E2ETK3
+      NAME: E2E Asset
+# The position that gives each occurrence its quantity: 100 units bought six months ago.
+- runFlow:
+    file: ../../subflows/setup/create-investment-operation.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      ASSET_ID: ${output.ASSET_ID}
+      TYPE: BUY
+      QUANTITY: "100"
+      UNIT_PRICE: "10"
+      DATE: ${output.SIX_MONTHS_AGO_KEY}
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/investment/open-investments.yaml
+- tapOn:
+    id: "investment.list.row-${output.ASSET_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.screen"
+    timeout: 20000
+- swipe:
+    start: 60%, 80%
+    end: 60%, 20%
+- swipe:
+    start: 60%, 80%
+    end: 60%, 20%
+# One form creates the whole series: repeat monthly from today (this month's occurrence is planned).
+- tapOn:
+    id: "investment.income.section-action"
+- extendedWaitUntil:
+    visible:
+      id: "investment.income.repeat"
+    timeout: 20000
+- tapOn:
+    id: "investment.income-modal.per-unit"
+- inputText: "1,10"
+- tapOn:
+    id: "investment.income-modal.account"
+- tapOn:
+    id: "investment.income-modal.account-option-${output.ACCOUNT_ID}"
+- tapOn:
+    id: "investment.income-modal.category"
+- tapOn:
+    id: "investment.income-modal.category-option-${output.INCOME_CATEGORY_ID}"
+- tapOn:
+    id: "investment.income.repeat"
+- extendedWaitUntil:
+    visible:
+      id: "investment.income.seriesSummary"
+    timeout: 20000
+- tapOn:
+    id: "investment.income-modal.save"
+- extendedWaitUntil:
+    visible:
+      id: "investment.incomeSeries.card"
+    timeout: 20000
+# The occurrence of this month is on the list (planned: 100 x 1,10 = 110,00).
+- assertVisible: ".*110[.,]00.*"

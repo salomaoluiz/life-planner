@@ -16,6 +16,7 @@ import {
 interface IProjectedOccurrenceModel {
   accountId?: string;
   accountName?: string;
+  assetId?: string;
   category: string;
   categoryId: string;
   creditCardColor?: string;
@@ -26,6 +27,7 @@ interface IProjectedOccurrenceModel {
   date: string;
   description: string;
   frequency: RecurrenceFrequency;
+  investmentIncomeSeriesId?: string;
   invoiceListDate?: string;
   invoiceMonth?: string;
   notes?: string;
@@ -43,6 +45,7 @@ interface IProjectedOccurrenceModel {
 class ProjectedOccurrenceModel implements IProjectedOccurrenceModel {
   accountId?: string;
   accountName?: string;
+  assetId?: string;
   category: string;
   categoryId: string;
   creditCardColor?: string;
@@ -53,6 +56,7 @@ class ProjectedOccurrenceModel implements IProjectedOccurrenceModel {
   date: string;
   description: string;
   frequency: RecurrenceFrequency;
+  investmentIncomeSeriesId?: string;
   invoiceListDate?: string;
   invoiceMonth?: string;
   notes?: string;
@@ -68,6 +72,7 @@ class ProjectedOccurrenceModel implements IProjectedOccurrenceModel {
   constructor(params: IProjectedOccurrenceModel) {
     this.accountId = params.accountId;
     this.accountName = params.accountName;
+    this.assetId = params.assetId;
     this.category = params.category;
     this.categoryId = params.categoryId;
     this.creditCardColor = params.creditCardColor;
@@ -79,6 +84,7 @@ class ProjectedOccurrenceModel implements IProjectedOccurrenceModel {
     this.description = params.description;
     this.notes = params.notes;
     this.frequency = params.frequency;
+    this.investmentIncomeSeriesId = params.investmentIncomeSeriesId;
     this.invoiceListDate = params.invoiceListDate;
     this.invoiceMonth = params.invoiceMonth;
     this.occurrenceCount = params.occurrenceCount;
@@ -107,6 +113,7 @@ class ProjectedOccurrenceModel implements IProjectedOccurrenceModel {
     return new ProjectedOccurrenceModel({
       accountId: account?.id,
       accountName: account?.name,
+      assetId: (data.assetId as string | undefined) ?? undefined,
       category: category?.name ?? "",
       categoryId: category?.id as string,
       creditCardColor: card?.color,
@@ -117,6 +124,8 @@ class ProjectedOccurrenceModel implements IProjectedOccurrenceModel {
       date: calendarDateToIso(data.date as string),
       description: data.description as string,
       frequency: data.frequency as RecurrenceFrequency,
+      investmentIncomeSeriesId:
+        (data.investmentIncomeSeriesId as string | undefined) ?? undefined,
       invoiceListDate: (data.invoiceListDate as null | string) ?? undefined,
       invoiceMonth: (data.invoiceMonth as null | string) ?? undefined,
       notes: (data.notes as null | string) ?? undefined,

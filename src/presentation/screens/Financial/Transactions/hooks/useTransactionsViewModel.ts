@@ -746,6 +746,15 @@ function useTransactionsViewModel() {
   // Spec 107 FR 16: a locked income row opens the income modal (or, from its check, the receive modal).
   const onIncomePress = useStableCallback(
     scope.guard(async (item: TransactionUIModel) => {
+      // Spec 115 FR 22: a projected income of a series opens the asset, where the series lives.
+      if (item.dto.investmentAssetId) {
+        router.push(
+          `/investments/asset/${item.dto.investmentAssetId}` as never,
+        );
+
+        return;
+      }
+
       const link = await useCases.getInvestmentIncomeLinkUseCase.execute(
         item.id,
       );
