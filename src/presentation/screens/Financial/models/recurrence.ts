@@ -1,17 +1,14 @@
-import { RecurrenceFrequency } from "@domain/entities/financial/RecurrenceEntity";
+import {
+  RECURRENCE_INTERVAL_MAX,
+  RecurrenceFrequency,
+  RecurrenceUnit,
+} from "@domain/entities/financial/RecurrenceEntity";
 
-// The schedule of spec 034 FR 3, mirrored from the API so the form can preview "12 times, last on ...".
+// The schedule of spec 034 FR 3 (generalised to unit + interval by spec 114), mirrored from the API so the form can preview "12 times, last on ...".
 // Occurrences always come from the START date and the occurrence number, never from the previous one.
 const MS_PER_DAY = 86_400_000;
 // Safety net for a "last on" preview of an absurd range (the API accepts any end date).
 const MAX_PREVIEW_OCCURRENCES = 2000;
-
-export const RECURRENCE_FREQUENCIES: RecurrenceFrequency[] = [
-  "WEEKLY",
-  "BIWEEKLY",
-  "MONTHLY",
-  "YEARLY",
-];
 
 function addDays(date: Date, days: number) {
   const utc = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
@@ -68,26 +65,26 @@ function recurrenceOccurrenceCount(
   return count;
 }
 
-// Occurrence `k` (1-based) of a series that starts on `start`.
+// Occurrence `k` (1-based) of a series that starts on `start`: `interval * (k - 1)` units after it.
 function recurrenceOccurrenceDate(
   start: Date,
   frequency: RecurrenceFrequency,
   k: number,
 ) {
-  const step = k - 1;
+  const step = (k - 1) * frequency.interval;
 
-  switch (frequency) {
-    case "BIWEEKLY":
-      return addDays(start, step * 14);
-    case "MONTHLY":
+  switch (frequency.unit) {
+    case "DAY":
+      return addDays(start, step);
+    case "MONTH":
       return inMonth(
         start.getFullYear(),
         start.getMonth() + step,
         start.getDate(),
       );
-    case "WEEKLY":
+    case "WEEK":
       return addDays(start, step * 7);
-    case "YEARLY":
+    case "YEAR":
       return inMonth(
         start.getFullYear() + step,
         start.getMonth(),
@@ -96,8 +93,37 @@ function recurrenceOccurrenceDate(
   }
 }
 
+// The occurrences after the first (the "Next:" preview), up to `limit`, honoring the end date.
+function recurrenceNextDates(
+  start: Date,
+  frequency: RecurrenceFrequency,
+  end: Date | undefined,
+  limit: number,
+) {
+  const dates: Date[] = [];
+
+  for (let k = 2; k <= limit + 1; k += 1) {
+    const date = recurrenceOccurrenceDate(start, frequency, k);
+
+    if (end && date > end) {
+      break;
+    }
+
+    dates.push(date);
+  }
+
+  return dates;
+}
+
+// Switching unit keeps the number when it fits the new unit's range, else uses that unit's maximum.
+function clampIntervalForUnit(unit: RecurrenceUnit, interval: number) {
+  return Math.min(Math.max(interval, 1), RECURRENCE_INTERVAL_MAX[unit]);
+}
+
 export {
+  clampIntervalForUnit,
   recurrenceLastDate,
+  recurrenceNextDates,
   recurrenceOccurrenceCount,
   recurrenceOccurrenceDate,
 };
