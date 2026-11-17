@@ -107,6 +107,7 @@ function NumberStepper(props: NumberStepperProps) {
         editable={!props.disabled}
         inputMode="numeric"
         maxLength={3}
+        nativeID={testID}
         onChangeText={type}
         style={styles.input}
         testID={testID}
