@@ -23,6 +23,11 @@ import investmentTestIds from "@screens/Investment/testIds";
 
 import { eventActions, setup } from "./mocks/index.mocks";
 
+jest.mock("@screens/Investment/hooks/useMarketIndexes", () => ({
+  __esModule: true,
+  default: () => ({ data: undefined }),
+}));
+
 const ids = investmentTestIds.detail;
 
 beforeEach(() => {
@@ -460,6 +465,29 @@ describe("fixed income (spec 105)", () => {
     fireEvent.press(screen.getByText("investment.fixedIncome.pending.action"));
 
     expect(vm.onConfirmMaturity).toHaveBeenCalledTimes(1);
+  });
+
+  it("SHOULD wait for the Central Bank AND flag a redemption to review (spec 113)", () => {
+    setupFixedIncome(
+      {},
+      makeFixedIncome({
+        indexMissing: true,
+        needsReview: { date: "2026-06-01", operationId: "op-1" },
+      }),
+    );
+
+    expect(screen.getByTestId(fi.indexMissingBanner)).toBeOnTheScreen();
+    expect(screen.getByTestId(fi.needsReviewBanner)).toBeOnTheScreen();
+    expect(
+      screen.getByText(/investment.fixedIncome.needsReview/),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD show neither notice for a title that follows the stored index", () => {
+    setupFixedIncome({}, makeFixedIncome());
+
+    expect(screen.queryByTestId(fi.indexMissingBanner)).toBeNull();
+    expect(screen.queryByTestId(fi.needsReviewBanner)).toBeNull();
   });
 
   it("SHOULD not offer the confirm action to a read-only viewer", () => {

@@ -1,6 +1,6 @@
 import { TranslationKeys } from "@presentation/i18n/types";
 
-export type InvestmentSection = "assets" | "overview";
+export type InvestmentSection = "assets" | "overview" | "settings";
 
 export interface InvestmentSectionItem {
   icon: string;
@@ -27,14 +27,24 @@ export const INVESTMENT_SECTIONS: readonly InvestmentSectionItem[] = [
     section: "assets",
     testID: "navigation-rail-investment-assets",
   },
+  {
+    icon: "cog-outline",
+    labelKey: "investment.sections.settings",
+    path: "/investments/settings",
+    section: "settings",
+    testID: "navigation-rail-investment-settings",
+  },
 ];
 
-// The asset detail and the suggestions inbox belong to the Assets section.
+// Spec 113: Settings is a section of its own; the asset detail and the suggestions inbox belong to Assets.
 export function getInvestmentSection(pathname: string): InvestmentSection {
   const normalized = pathname.replace(/\/+$/, "");
 
   if (normalized.endsWith("/investments/overview")) {
     return "overview";
+  }
+  if (normalized.endsWith("/investments/settings")) {
+    return "settings";
   }
 
   return normalized === "/investments" || normalized.startsWith("/investments/")

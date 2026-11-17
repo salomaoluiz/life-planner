@@ -31,7 +31,6 @@ const rate: InvestmentFixedIncomeRate = {
   cdiPercent: "110.0000",
   effectiveRate: "16.510000",
   id: "rate-1",
-  indexRate: "14.9000",
   mode: InvestmentFixedIncomeRateMode.CDI_PERCENT,
   spread: null,
   startDate: "2026-10-01",
@@ -45,11 +44,13 @@ function fixedIncome(
     adjustments: [],
     atMaturity: totals,
     currentEffectiveRate: "16.510000",
+    indexMissing: false,
     liquidity: InvestmentFixedIncomeLiquidity.AT_MATURITY,
     liquidityDate: null,
     lots: [],
     maturityDate: "2028-01-15",
     maturityPending: false,
+    needsReview: null,
     product: InvestmentFixedIncomeProduct.CDB,
     rates: [rate],
     taxExempt: false,
@@ -93,11 +94,9 @@ describe("rate form", () => {
     ]);
     expect(rateFieldsOf(InvestmentFixedIncomeRateMode.CDI_PERCENT)).toEqual([
       "cdiPercent",
-      "indexRate",
     ]);
     expect(rateFieldsOf(InvestmentFixedIncomeRateMode.IPCA_PLUS)).toEqual([
       "spread",
-      "indexRate",
     ]);
   });
 
@@ -106,21 +105,15 @@ describe("rate form", () => {
 
     expect(form.mode).toBe(InvestmentFixedIncomeRateMode.CDI_PERCENT);
     expect(isRateFormValid(form)).toBe(false);
-    expect(
-      isRateFormValid({ ...form, cdiPercent: "110", indexRate: "0" }),
-    ).toBe(false);
-    expect(
-      isRateFormValid({ ...form, cdiPercent: "110", indexRate: "14,90" }),
-    ).toBe(true);
+    expect(isRateFormValid({ ...form, cdiPercent: "0" })).toBe(false);
+    expect(isRateFormValid({ ...form, cdiPercent: "110" })).toBe(true);
   });
 
   it("SHOULD pre-fill from the latest entry AND build the params", () => {
     const form = rateFormFrom(rate);
 
-    expect(form).toMatchObject({
-      cdiPercent: "110.0000",
-      indexRate: "14.9000",
-    });
+    expect(form).toMatchObject({ cdiPercent: "110.0000" });
+    expect(form).not.toHaveProperty("indexRate");
     expect(toRateParams(form, "2026-12-01")).toMatchObject({
       mode: "CDI_PERCENT",
       startDate: "2026-12-01",
@@ -139,9 +132,13 @@ describe("rate form", () => {
 
 describe("rate descriptions", () => {
   it("SHOULD describe each mode in the rate line", () => {
-    expect(rateSummary(rate, "pt-BR")).toEqual({
+    expect(rateSummary(rate, "pt-BR", "14.90")).toEqual({
       key: "investment.fixedIncome.rateLineCdi",
       params: { index: "14,9", percent: "110" },
+    });
+    expect(rateSummary(rate, "pt-BR")).toEqual({
+      key: "investment.fixedIncome.rateLineCdiNoIndex",
+      params: { percent: "110" },
     });
     expect(
       rateSummary(
@@ -172,7 +169,7 @@ describe("rate descriptions", () => {
   it("SHOULD describe each mode in the history entry with the effective rate", () => {
     expect(rateEntry(rate, "pt-BR")).toEqual({
       key: "investment.fixedIncome.rateEntryCdi",
-      params: { effective: "16,51", index: "14,9", percent: "110" },
+      params: { effective: "16,51", percent: "110" },
     });
     expect(
       rateEntry(
@@ -275,28 +272,67 @@ describe("liquidityWarningOf", () => {
   });
 });
 
+const indexes = {
+  cdi: {
+    annual: "14.90",
+    daily: "0.0551310",
+    date: "2026-11-11",
+    followers: 1,
+    lastChangeDate: null,
+    stale: false,
+  },
+  fx: [],
+  ipca: {
+    accumulated12m: "4.68",
+    expected12m: "4.50",
+    expectedDate: "2026-11-11",
+    followers: 0,
+    month: "2026-10",
+    monthly: "0.32",
+    stale: false,
+  },
+  lastSuccessAt: null,
+  selic: null,
+};
+
 describe("previewEffectiveRate", () => {
   it("SHOULD be null until the form is valid", () => {
-    expect(previewEffectiveRate(emptyRateForm())).toBeNull();
+    expect(previewEffectiveRate(emptyRateForm(), indexes)).toBeNull();
   });
 
-  it("SHOULD derive 110% of a 14,90 CDI as about 16,51", () => {
+  it("SHOULD be null WHILE the index is not stored yet", () => {
+    const form = { ...emptyRateForm(), cdiPercent: "110" };
+
+    expect(previewEffectiveRate(form)).toBeNull();
+    expect(previewEffectiveRate(form, { ...indexes, cdi: null })).toBeNull();
     expect(
-      previewEffectiveRate({
-        ...emptyRateForm(),
-        cdiPercent: "110",
-        indexRate: "14,90",
-      }),
-    ).toBeCloseTo(16.51, 1);
+      previewEffectiveRate(
+        {
+          ...emptyRateForm(InvestmentFixedIncomeRateMode.IPCA_PLUS),
+          spread: "6.2",
+        },
+        { ...indexes, ipca: null },
+      ),
+    ).toBeNull();
   });
 
-  it("SHOULD compound IPCA and the spread AND return the prefixed rate", () => {
+  it("SHOULD annualize the stored daily CDI by the percent (same as the API)", () => {
+    const expected = (Math.pow(1 + (0.055131 * 1.1) / 100, 252) - 1) * 100;
+
     expect(
-      previewEffectiveRate({
-        ...emptyRateForm(InvestmentFixedIncomeRateMode.IPCA_PLUS),
-        indexRate: "4.5",
-        spread: "6.2",
-      }),
+      previewEffectiveRate({ ...emptyRateForm(), cdiPercent: "110" }, indexes),
+    ).toBeCloseTo(expected, 6);
+  });
+
+  it("SHOULD compound the IPCA expectation and the spread AND return the prefixed rate", () => {
+    expect(
+      previewEffectiveRate(
+        {
+          ...emptyRateForm(InvestmentFixedIncomeRateMode.IPCA_PLUS),
+          spread: "6.2",
+        },
+        indexes,
+      ),
     ).toBeCloseTo(10.979, 3);
     expect(
       previewEffectiveRate({

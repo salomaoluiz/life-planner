@@ -106,10 +106,49 @@ const investmentsDashboard = {
   },
 };
 
+// Spec 113: the stored market indexes and the history of one of them (API shape).
+const marketIndexes = {
+  cdi: {
+    annual: "14.90",
+    daily: "0.05513100",
+    date: "2026-11-11",
+    followers: 1,
+    lastChangeDate: "2026-06-18",
+    stale: false,
+  },
+  fx: [{ pair: "USD-BRL", quotedAt: "2026-11-12T11:05:00Z", rate: "5.350000" }],
+  ipca: {
+    accumulated12m: "4.68",
+    expected12m: "4.20",
+    expectedDate: "2026-11-11",
+    followers: 0,
+    month: "2026-10",
+    monthly: "0.32",
+    stale: false,
+  },
+  lastSuccessAt: "2026-11-12T13:10:00Z",
+  selic: {
+    daily: "0.05546000",
+    date: "2026-11-11",
+    followers: 0,
+    lastChangeDate: "2026-06-18",
+    stale: false,
+    target: "15.00",
+  },
+};
+const marketIndexHistory = {
+  changes: [{ delta: "0.75", since: "2026-06-18", value: "14.90" }],
+  followers: [{ assetId: "asset-1", name: "CDB", percent: "110" }],
+  index: "CDI",
+  points: [{ date: "2026-06-18", value: "14.90" }],
+};
+
 export {
   investmentAsset,
   investmentDetail,
   investmentsDashboard,
   investmentsSummary,
+  marketIndexes,
+  marketIndexHistory,
   position,
 };

@@ -66,18 +66,17 @@ it("SHOULD pre-fill the mode AND the percentages of the latest entry (update rat
   expect(result.current.isEditing).toBe(false);
   expect(result.current.form).toMatchObject({
     cdiPercent: "110.0000",
-    indexRate: "14.9000",
     mode: InvestmentFixedIncomeRateMode.CDI_PERCENT,
   });
   expect(result.current.startText).toBe("2026-11-04");
   expect(result.current.history.map((rate) => rate.id)).toEqual(["rate-1"]);
 });
 
-it("SHOULD add an entry with the new index AND the chosen date", () => {
+it("SHOULD add an entry with the new percent AND the chosen date", () => {
   const { result } = setup();
 
   act(() =>
-    result.current.onFormChange({ ...result.current.form, indexRate: "15,2" }),
+    result.current.onFormChange({ ...result.current.form, cdiPercent: "120" }),
   );
   act(() => result.current.onStartDateChange(new Date(2026, 11, 1, 12)));
   act(() => result.current.onSave());
@@ -85,7 +84,7 @@ it("SHOULD add an entry with the new index AND the chosen date", () => {
   expect(createMutation.value.mutate).toHaveBeenCalledWith({
     assetId: "asset-fi",
     rate: expect.objectContaining({
-      indexRate: "15,2",
+      cdiPercent: "120",
       mode: "CDI_PERCENT",
       startDate: "2026-12-01",
     }),

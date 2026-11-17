@@ -27,6 +27,9 @@ import {
   InvestmentIncomeLink,
   InvestmentIncomePage,
   InvestmentIncomeSuggestion,
+  InvestmentMarketIndex,
+  InvestmentMarketIndexes,
+  InvestmentMarketIndexHistory,
   InvestmentOperationResult,
   InvestmentPriceHistory,
   InvestmentQuotesRefresh,
@@ -159,7 +162,6 @@ export interface FixedIncomeRateParams {
   // Percentages as decimal text ("110", "14,90" is normalized by the datasource).
   annualRate?: string;
   cdiPercent?: string;
-  indexRate?: string;
   mode: InvestmentFixedIncomeRateMode;
   spread?: string;
   // `YYYY-MM-DD`; absent on the first rate of a new title (it starts on the contribution date).
@@ -203,6 +205,13 @@ export interface GetInvestmentIncomesParams {
 
 export interface GetInvestmentIncomeSuggestionsParams {
   assetId?: string;
+}
+
+// Spec 113 FR 19: a period of at most 30 years, `YYYY-MM-DD`.
+export interface GetInvestmentMarketIndexHistoryParams {
+  from: string;
+  index: InvestmentMarketIndex;
+  to: string;
 }
 
 export interface GetInvestmentPriceHistoryParams {
@@ -316,6 +325,10 @@ export type InvestmentRepository = {
   getIncomeSuggestions(
     params: GetInvestmentIncomeSuggestionsParams,
   ): Promise<InvestmentIncomeSuggestion[]>;
+  getMarketIndexes(): Promise<InvestmentMarketIndexes>;
+  getMarketIndexHistory(
+    params: GetInvestmentMarketIndexHistoryParams,
+  ): Promise<InvestmentMarketIndexHistory>;
   // The operation behind a finance row of an investment category; undefined for any other row.
   getOperationLink(
     transactionId: string,
@@ -329,6 +342,7 @@ export type InvestmentRepository = {
   receiveIncome(
     params: ReceiveInvestmentIncomeParams,
   ): Promise<InvestmentIncome>;
+  refreshMarketIndexes(): Promise<InvestmentMarketIndexes>;
   refreshQuotes(
     params: RefreshInvestmentQuotesParams,
   ): Promise<InvestmentQuotesRefresh>;

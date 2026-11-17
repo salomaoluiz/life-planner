@@ -13,6 +13,8 @@ import {
   InvestmentIncomeLink,
   InvestmentIncomePage,
   InvestmentIncomeSuggestion,
+  InvestmentMarketIndexes,
+  InvestmentMarketIndexHistory,
   InvestmentOperationResult,
   InvestmentPriceHistory,
   InvestmentQuotesRefresh,
@@ -39,6 +41,7 @@ import {
   GetInvestmentIncomeDefaultsParams,
   GetInvestmentIncomesParams,
   GetInvestmentIncomeSuggestionsParams,
+  GetInvestmentMarketIndexHistoryParams,
   GetInvestmentPriceHistoryParams,
   GetInvestmentsDashboardParams,
   GetInvestmentsHomeSummaryParams,
@@ -122,6 +125,10 @@ export interface InvestmentDatasource {
   getIncomeSuggestions(
     params: GetInvestmentIncomeSuggestionsParams,
   ): Promise<InvestmentIncomeSuggestion[]>;
+  getMarketIndexes(): Promise<InvestmentMarketIndexes>;
+  getMarketIndexHistory(
+    params: GetInvestmentMarketIndexHistoryParams,
+  ): Promise<InvestmentMarketIndexHistory>;
   getOperationLink(
     transactionId: string,
   ): Promise<InvestmentOperationLink | undefined>;
@@ -134,6 +141,7 @@ export interface InvestmentDatasource {
   receiveIncome(
     params: ReceiveInvestmentIncomeParams,
   ): Promise<InvestmentIncome>;
+  refreshMarketIndexes(): Promise<InvestmentMarketIndexes>;
   refreshQuotes(
     params: RefreshInvestmentQuotesParams,
   ): Promise<InvestmentQuotesRefresh>;

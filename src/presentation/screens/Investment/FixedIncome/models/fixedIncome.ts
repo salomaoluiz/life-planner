@@ -8,6 +8,7 @@ import {
 import {
   InvestmentFixedIncome,
   InvestmentFixedIncomeRate,
+  InvestmentMarketIndexes,
 } from "@domain/entities/investment/InvestmentEntities";
 import { FixedIncomeRateParams } from "@domain/repositories/investment";
 import { TranslationKeys } from "@presentation/i18n/types";
@@ -27,7 +28,6 @@ type LiquidityWarning = "AT_MATURITY" | "GRACE_PERIOD";
 interface RateFormState {
   annualRate: string;
   cdiPercent: string;
-  indexRate: string;
   mode: InvestmentFixedIncomeRateMode;
   spread: string;
 }
@@ -79,7 +79,7 @@ function defaultTaxExempt(product: InvestmentFixedIncomeProduct): boolean {
 function emptyRateForm(
   mode: InvestmentFixedIncomeRateMode = InvestmentFixedIncomeRateMode.CDI_PERCENT,
 ): RateFormState {
-  return { annualRate: "", cdiPercent: "", indexRate: "", mode, spread: "" };
+  return { annualRate: "", cdiPercent: "", mode, spread: "" };
 }
 
 // "0.225" -> "22,5": the rate of a lot as a percentage.
@@ -155,8 +155,12 @@ function percentText(value: null | string, localeTag: string): string {
   }).format(Number(value));
 }
 
-// The effective rate (% per year) the form shows while typing; the API derives and stores the real one (FR 7).
-function previewEffectiveRate(form: RateFormState): null | number {
+// The effective rate (% per year) the form shows while typing, from the stored index (spec 113 FR 23); the API
+// derives and stores the real one. `null` while the form is invalid or the index is not stored yet.
+function previewEffectiveRate(
+  form: RateFormState,
+  indexes?: InvestmentMarketIndexes | null,
+): null | number {
   if (!isRateFormValid(form)) {
     return null;
   }
@@ -167,18 +171,25 @@ function previewEffectiveRate(form: RateFormState): null | number {
 
   switch (form.mode) {
     case InvestmentFixedIncomeRateMode.CDI_PERCENT: {
-      const daily = Math.pow(1 + number(form.indexRate) / 100, 1 / 252) - 1;
+      const daily = indexes?.cdi?.daily;
 
-      return (
-        (Math.pow(1 + (daily * number(form.cdiPercent)) / 100, 252) - 1) * 100
-      );
+      return daily
+        ? (Math.pow(
+            1 + (Number(daily) / 100) * (number(form.cdiPercent) / 100),
+            252,
+          ) -
+            1) *
+            100
+        : null;
     }
-    case InvestmentFixedIncomeRateMode.IPCA_PLUS:
-      return (
-        ((1 + number(form.indexRate) / 100) * (1 + number(form.spread) / 100) -
-          1) *
-        100
-      );
+    case InvestmentFixedIncomeRateMode.IPCA_PLUS: {
+      const expected = indexes?.ipca?.expected12m;
+
+      return expected
+        ? ((1 + Number(expected) / 100) * (1 + number(form.spread) / 100) - 1) *
+            100
+        : null;
+    }
     case InvestmentFixedIncomeRateMode.PREFIXED:
       return number(form.annualRate);
   }
@@ -198,20 +209,12 @@ function rateEntry(
     case InvestmentFixedIncomeRateMode.CDI_PERCENT:
       return {
         key: "investment.fixedIncome.rateEntryCdi",
-        params: {
-          effective,
-          index: pct(rate.indexRate),
-          percent: pct(rate.cdiPercent),
-        },
+        params: { effective, percent: pct(rate.cdiPercent) },
       };
     case InvestmentFixedIncomeRateMode.IPCA_PLUS:
       return {
         key: "investment.fixedIncome.rateEntryIpca",
-        params: {
-          effective,
-          index: pct(rate.indexRate),
-          spread: pct(rate.spread),
-        },
+        params: { effective, spread: pct(rate.spread) },
       };
     case InvestmentFixedIncomeRateMode.PREFIXED:
       return {
@@ -227,9 +230,9 @@ function rateFieldsOf(
 ): (keyof Omit<RateFormState, "mode">)[] {
   switch (mode) {
     case InvestmentFixedIncomeRateMode.CDI_PERCENT:
-      return ["cdiPercent", "indexRate"];
+      return ["cdiPercent"];
     case InvestmentFixedIncomeRateMode.IPCA_PLUS:
-      return ["spread", "indexRate"];
+      return ["spread"];
     case InvestmentFixedIncomeRateMode.PREFIXED:
       return ["annualRate"];
   }
@@ -240,19 +243,19 @@ function rateFormFrom(rate: InvestmentFixedIncomeRate): RateFormState {
   return {
     annualRate: rate.annualRate ?? "",
     cdiPercent: rate.cdiPercent ?? "",
-    indexRate: rate.indexRate ?? "",
     mode: rate.mode,
     spread: rate.spread ?? "",
   };
 }
 
-// "110% do CDI (CDI 14,90%)", "IPCA 4,5% + 6,2%", "13,5% a.a. prefixado".
+// "110% do CDI (CDI 14,90% hoje)", "IPCA + 6,2%", "13,5% a.a. prefixado".
 function rateSummary(
   rate: Pick<
     InvestmentFixedIncomeRate,
-    "annualRate" | "cdiPercent" | "indexRate" | "mode" | "spread"
+    "annualRate" | "cdiPercent" | "mode" | "spread"
   >,
   localeTag: string,
+  cdiAnnual?: null | string,
 ): { key: TranslationKeys; params: Record<string, string> } {
   function pct(value: null | string): string {
     return percentText(value, localeTag);
@@ -260,14 +263,19 @@ function rateSummary(
 
   switch (rate.mode) {
     case InvestmentFixedIncomeRateMode.CDI_PERCENT:
-      return {
-        key: "investment.fixedIncome.rateLineCdi",
-        params: { index: pct(rate.indexRate), percent: pct(rate.cdiPercent) },
-      };
+      return cdiAnnual
+        ? {
+            key: "investment.fixedIncome.rateLineCdi",
+            params: { index: pct(cdiAnnual), percent: pct(rate.cdiPercent) },
+          }
+        : {
+            key: "investment.fixedIncome.rateLineCdiNoIndex",
+            params: { percent: pct(rate.cdiPercent) },
+          };
     case InvestmentFixedIncomeRateMode.IPCA_PLUS:
       return {
         key: "investment.fixedIncome.rateLineIpca",
-        params: { index: pct(rate.indexRate), spread: pct(rate.spread) },
+        params: { spread: pct(rate.spread) },
       };
     case InvestmentFixedIncomeRateMode.PREFIXED:
       return {
@@ -284,7 +292,6 @@ function toRateParams(
   return {
     annualRate: form.annualRate,
     cdiPercent: form.cdiPercent,
-    indexRate: form.indexRate,
     mode: form.mode,
     spread: form.spread,
     startDate,

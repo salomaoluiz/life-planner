@@ -20,6 +20,14 @@ export const investmentKeys = {
     key,
   ],
   homeSummary: (ownersKey: string): Key => [ROOT, "home-summary", ownersKey],
+  marketIndexes: (): Key => [ROOT, "market-indexes"],
+  marketIndexHistory: (index: string, from: string, to: string): Key => [
+    ROOT,
+    "market-index-history",
+    index,
+    from,
+    to,
+  ],
   priceHistory: (id: string, range: string): Key => [
     ROOT,
     "price-history",

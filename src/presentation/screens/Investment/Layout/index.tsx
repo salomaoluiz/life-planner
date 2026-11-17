@@ -8,6 +8,7 @@ function InvestmentLayout() {
       <Stack.Screen name={"index"} />
       <Stack.Screen name={"asset/[id]"} />
       <Stack.Screen name={"suggestions"} />
+      <Stack.Screen name={"settings"} />
     </Stack>
   );
 }

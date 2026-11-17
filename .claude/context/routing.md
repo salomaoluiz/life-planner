@@ -51,4 +51,4 @@ A modal URL is `<base>/<modal>`: `<base>` is the screen it was opened from, `<mo
 
 - The signed-in layout `app/(app)/_layout.tsx` renders `UpdateBanner` above the stack (spec 056); the versions modal is `versions` (opened from the Settings footer).
 
-Investments sections (spec 110): like finance, `INVESTMENT_SECTIONS` (`Investment/Layout/models/investmentSections.ts`: Overview first, then Assets) feeds the side rail children, the shared `section_picker` modal and the bottom-bar re-press; the investments tab opens `/investments/overview`, switching uses `router.replace`; the asset detail and the suggestions inbox belong to the Assets section.
+Investments sections (spec 110, 113): like finance, `INVESTMENT_SECTIONS` (`Investment/Layout/models/investmentSections.ts`: Overview, then Assets, then Settings at `/investments/settings`; the modal `investment_index_history` opens over it) feeds the side rail children, the shared `section_picker` modal and the bottom-bar re-press; the investments tab opens `/investments/overview`, switching uses `router.replace`; the asset detail and the suggestions inbox belong to the Assets section.

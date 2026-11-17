@@ -49,7 +49,6 @@ const defaultViewModel: FixedIncomeTitleVM = {
   rate: {
     annualRate: "",
     cdiPercent: "110",
-    indexRate: "14,90",
     mode: InvestmentFixedIncomeRateMode.CDI_PERCENT,
     spread: "",
   },

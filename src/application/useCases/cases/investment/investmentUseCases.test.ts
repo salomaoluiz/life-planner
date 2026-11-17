@@ -30,6 +30,7 @@ import getInvestmentIncomeLinkUseCase from "./getInvestmentIncomeLinkUseCase";
 import getInvestmentIncomeSuggestionsUseCase from "./getInvestmentIncomeSuggestionsUseCase";
 import getInvestmentIncomesUseCase from "./getInvestmentIncomesUseCase";
 import getInvestmentIncomeUseCase from "./getInvestmentIncomeUseCase";
+import getInvestmentMarketIndexHistoryUseCase from "./getInvestmentMarketIndexHistoryUseCase";
 import getInvestmentOperationLinkUseCase from "./getInvestmentOperationLinkUseCase";
 import getInvestmentPriceHistoryUseCase from "./getInvestmentPriceHistoryUseCase";
 import getInvestmentsDashboardUseCase from "./getInvestmentsDashboardUseCase";
@@ -124,6 +125,11 @@ const cases: [Factory, keyof Repositories["investmentRepository"], string][] = [
     getInvestmentsDashboardUseCase,
     "getDashboard",
     "investment.getInvestmentsDashboardUseCase",
+  ],
+  [
+    getInvestmentMarketIndexHistoryUseCase,
+    "getMarketIndexHistory",
+    "investment.getInvestmentMarketIndexHistoryUseCase",
   ],
   [
     refreshInvestmentQuotesUseCase,

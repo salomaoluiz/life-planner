@@ -1,0 +1,45 @@
+url: ${E2E_WEB_URL}
+name: investment/settings-refresh-limit
+tags:
+  - investment
+  - spec-113
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+- tapOn:
+    id: "tab-investments"
+- extendedWaitUntil:
+    visible:
+      id: "navigation-rail-investment-settings"
+    timeout: 20000
+- tapOn:
+    id: "navigation-rail-investment-settings"
+- extendedWaitUntil:
+    visible:
+      id: "investment.settings.refresh"
+    timeout: 20000
+# A second refresh within the minute answers 429 and the screen says to wait (FR 9, FR 25).
+- tapOn:
+    id: "investment.settings.refresh"
+- extendedWaitUntil:
+    notVisible:
+      text: "Atualizando…|Refreshing…"
+    timeout: 90000
+- tapOn:
+    id: "investment.settings.refresh"
+- extendedWaitUntil:
+    visible:
+      id: "investment.settings.too-many"
+    timeout: 20000

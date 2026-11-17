@@ -72,7 +72,6 @@ function fillValid(result: ReturnType<typeof setup>["result"]) {
     result.current.onRateChange({
       ...result.current.rate,
       cdiPercent: "110",
-      indexRate: "14,90",
     }),
   );
 }
@@ -169,7 +168,6 @@ it("SHOULD create the title with the terms, the first rate AND the first contrib
     ownerId: "user-1",
     rate: expect.objectContaining({
       cdiPercent: "110",
-      indexRate: "14,90",
       mode: "CDI_PERCENT",
       startDate: undefined,
     }),

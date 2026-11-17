@@ -203,11 +203,15 @@ export interface InvestmentFixedIncome {
   adjustments: InvestmentFixedIncomeAdjustment[];
   atMaturity: InvestmentFixedIncomeTotals;
   currentEffectiveRate: null | string;
+  // Spec 113 FR 14: an indexed rate with no stored index; the totals are zero and the screens wait for the Central Bank.
+  indexMissing: boolean;
   liquidity: InvestmentFixedIncomeLiquidity;
   liquidityDate: null | string;
   lots: InvestmentFixedIncomeLot[];
   maturityDate: string;
   maturityPending: boolean;
+  // Spec 113 FR 16: a redemption the recalculated curve no longer covers.
+  needsReview: InvestmentFixedIncomeReview | null;
   product: InvestmentFixedIncomeProduct;
   rates: InvestmentFixedIncomeRate[];
   taxExempt: boolean;
@@ -246,7 +250,6 @@ export interface InvestmentFixedIncomeRate {
   cdiPercent: null | string;
   effectiveRate: string;
   id: string;
-  indexRate: null | string;
   mode: InvestmentFixedIncomeRateMode;
   spread: null | string;
   startDate: string;
@@ -265,6 +268,11 @@ export interface InvestmentFixedIncomeRedemptionPreview {
   }[];
   net: number;
   remaining: { gross: number; principal: number };
+}
+
+export interface InvestmentFixedIncomeReview {
+  date: string;
+  operationId: string;
 }
 
 export interface InvestmentFixedIncomeSimulation {
@@ -361,6 +369,81 @@ export interface InvestmentIncomeSummary {
   receivedThisYear: number;
 }
 
+export type InvestmentMarketIndex = "CDI" | "IPCA" | "SELIC";
+
+export interface InvestmentMarketIndexCdi {
+  annual: null | string;
+  daily: null | string;
+  date: string;
+  followers: number;
+  lastChangeDate: null | string;
+  stale: boolean;
+}
+
+export interface InvestmentMarketIndexChange {
+  // Percentage points since the previous change, `null` for the first one of the period.
+  delta: null | string;
+  since: string;
+  value: string;
+}
+
+// Spec 113 section 7: decimal strings, dates `YYYY-MM-DD`, instants ISO strings; an index is `null` before the first run.
+export interface InvestmentMarketIndexes {
+  cdi: InvestmentMarketIndexCdi | null;
+  fx: InvestmentMarketIndexFx[];
+  ipca: InvestmentMarketIndexIpca | null;
+  lastSuccessAt: null | string;
+  selic: InvestmentMarketIndexSelic | null;
+}
+export interface InvestmentMarketIndexFollower {
+  assetId: string;
+  name: string;
+  // The percent of the CDI, or the spread over the IPCA.
+  percent?: string;
+  spread?: string;
+}
+
+export interface InvestmentMarketIndexFx {
+  pair: string;
+  quotedAt: string;
+  rate: string;
+}
+
+export interface InvestmentMarketIndexHistory {
+  changes: InvestmentMarketIndexChange[];
+  followers: InvestmentMarketIndexFollower[];
+  index: InvestmentMarketIndex;
+  points: InvestmentMarketIndexPoint[];
+}
+
+export interface InvestmentMarketIndexIpca {
+  accumulated12m: null | string;
+  expected12m: null | string;
+  expectedDate: null | string;
+  followers: number;
+  month: null | string;
+  monthly: null | string;
+  stale: boolean;
+}
+
+// A step of the CDI or the Selic (`date`, `value`), or a month of the IPCA (`month`, `monthly`, `accumulated12m`).
+export interface InvestmentMarketIndexPoint {
+  accumulated12m?: null | string;
+  date?: string;
+  month?: string;
+  monthly?: string;
+  value?: string;
+}
+
+export interface InvestmentMarketIndexSelic {
+  daily: null | string;
+  date: string;
+  followers: number;
+  lastChangeDate: null | string;
+  stale: boolean;
+  target: null | string;
+}
+
 export interface InvestmentOperation {
   accountId: null | string;
   // Spec 112 FR 22: set on CONVERSION_OUT / CONVERSION_IN (the counterpart, ratio and cash part).
@@ -425,6 +508,7 @@ export interface InvestmentOperationResult {
   operation: InvestmentOperation;
   position: InvestmentPosition;
 }
+
 // Spec 108 FR 12: a fraction that left the position and waits for its sale.
 export interface InvestmentPendingFraction {
   cost: number;

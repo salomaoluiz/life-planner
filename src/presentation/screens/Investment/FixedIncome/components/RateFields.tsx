@@ -1,10 +1,13 @@
+import { router } from "expo-router";
 import { StyleSheet, View } from "react-native";
 
-import { Card, SegmentedControl, Text, TextField } from "@components";
+import { Button, Card, SegmentedControl, Text, TextField } from "@components";
 import { useKitTheme } from "@components/utils/useKitTheme";
 import { InvestmentFixedIncomeRateMode } from "@domain/entities/investment/enums";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
+import useMarketIndexes from "@screens/Investment/hooks/useMarketIndexes";
+import { formatDay } from "@screens/Investment/models/format";
 
 import {
   percentText,
@@ -29,20 +32,18 @@ const LABELS: Record<
 > = {
   annualRate: () => "investment.fixedIncome.annualRate",
   cdiPercent: () => "investment.fixedIncome.cdiPercent",
-  indexRate: (mode) =>
-    mode === InvestmentFixedIncomeRateMode.IPCA_PLUS
-      ? "investment.fixedIncome.indexRate.ipca"
-      : "investment.fixedIncome.indexRate.cdi",
   spread: () => "investment.fixedIncome.spread",
 };
 
 // The mode control, the fields of the mode and the effective rate used (spec 105 FR 6-7, artboards "novo título" and
-// "atualizar taxa"): the percentages are typed by the owner, nothing comes from a market series.
+// "atualizar taxa"): the owner types the percent of the CDI or the spread; the index itself comes from the Central
+// Bank (spec 113 FR 23).
 function RateFields(props: RateFieldsProps) {
   const { t } = useTranslation();
   const localeTag = useLocaleTag();
   const { spacing } = useKitTheme();
   const styles = StyleSheet.create({
+    info: { gap: spacing.xs },
     line: {
       alignItems: "center",
       flexDirection: "row",
@@ -50,7 +51,54 @@ function RateFields(props: RateFieldsProps) {
     },
     root: { gap: spacing.md },
   });
-  const effective = previewEffectiveRate(props.form);
+  const indexes = useMarketIndexes().data;
+  const effective = previewEffectiveRate(props.form, indexes);
+
+  // Spec 113 FR 23: the index is no longer typed; the box says where it comes from and links to Settings.
+  function renderInfo() {
+    if (props.form.mode === InvestmentFixedIncomeRateMode.PREFIXED) {
+      return null;
+    }
+
+    const cdi = indexes?.cdi;
+    const expected = indexes?.ipca?.expected12m;
+
+    if (props.form.mode === InvestmentFixedIncomeRateMode.IPCA_PLUS) {
+      return expected ? (
+        <Text.Caption
+          testID={props.effectiveId + ".info"}
+          tone="secondary"
+          value={t("investment.fixedIncome.ipcaInfo", {
+            expected: percentText(expected, localeTag),
+          })}
+        />
+      ) : null;
+    }
+
+    return (
+      <Card variant="dashed">
+        <View style={styles.info}>
+          <Text.Caption
+            testID={props.effectiveId + ".info"}
+            tone="secondary"
+            value={
+              cdi?.annual
+                ? t("investment.fixedIncome.cdiInfo", {
+                    annual: percentText(cdi.annual, localeTag),
+                    date: formatDay(cdi.date, localeTag),
+                  })
+                : t("investment.fixedIncome.indexMissing")
+            }
+          />
+          <Button.Ghost
+            inline
+            label={t("investment.fixedIncome.cdiInfoLink")}
+            onPress={() => router.push("/investments/settings")}
+          />
+        </View>
+      </Card>
+    );
+  }
 
   return (
     <View style={styles.root}>
@@ -86,6 +134,7 @@ function RateFields(props: RateFieldsProps) {
           value={props.form[field]}
         />
       ))}
+      {renderInfo()}
       <Card>
         <View style={styles.line}>
           <Text.Body
@@ -105,6 +154,12 @@ function RateFields(props: RateFieldsProps) {
             }
           />
         </View>
+        {props.form.mode === InvestmentFixedIncomeRateMode.CDI_PERCENT ? (
+          <Text.Caption
+            tone="secondary"
+            value={t("investment.fixedIncome.effectiveFollows")}
+          />
+        ) : null}
       </Card>
     </View>
   );

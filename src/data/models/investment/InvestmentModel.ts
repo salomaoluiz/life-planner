@@ -28,6 +28,7 @@ import {
   InvestmentFixedIncome,
   InvestmentFixedIncomeAdjustmentResult,
   InvestmentFixedIncomeRedemptionPreview,
+  InvestmentFixedIncomeReview,
   InvestmentFixedIncomeSimulation,
   InvestmentFixedIncomeTotals,
   InvestmentFixedIncomeWriteResult,
@@ -37,6 +38,12 @@ import {
   InvestmentIncomePage,
   InvestmentIncomeSuggestion,
   InvestmentIncomeSummary,
+  InvestmentMarketIndex,
+  InvestmentMarketIndexCdi,
+  InvestmentMarketIndexes,
+  InvestmentMarketIndexHistory,
+  InvestmentMarketIndexIpca,
+  InvestmentMarketIndexSelic,
   InvestmentOperation,
   InvestmentOperationConversion,
   InvestmentOperationEvent,
@@ -279,6 +286,7 @@ class InvestmentModel {
       atMaturity: InvestmentModel.toFixedIncomeTotals(data.atMaturity as Json),
       currentEffectiveRate:
         (data.currentEffectiveRate as null | string) ?? null,
+      indexMissing: data.indexMissing === true,
       liquidity: data.liquidity as InvestmentFixedIncomeLiquidity,
       liquidityDate: (data.liquidityDate as null | string) ?? null,
       lots: ((data.lots as Json[]) ?? []).map((lot) => ({
@@ -296,13 +304,14 @@ class InvestmentModel {
       })),
       maturityDate: data.maturityDate as string,
       maturityPending: data.maturityPending === true,
+      needsReview:
+        (data.needsReview as InvestmentFixedIncomeReview | null) ?? null,
       product: data.product as InvestmentFixedIncomeProduct,
       rates: ((data.rates as Json[]) ?? []).map((rate) => ({
         annualRate: (rate.annualRate as null | string) ?? null,
         cdiPercent: (rate.cdiPercent as null | string) ?? null,
         effectiveRate: rate.effectiveRate as string,
         id: rate.id as string,
-        indexRate: (rate.indexRate as null | string) ?? null,
         mode: rate.mode as InvestmentFixedIncomeRateMode,
         spread: (rate.spread as null | string) ?? null,
         startDate: rate.startDate as string,
@@ -497,6 +506,77 @@ class InvestmentModel {
       pendingSuggestions: Number(data.pendingSuggestions ?? 0),
       plannedTotal: Number(data.plannedTotal ?? 0),
       receivedThisYear: Number(data.receivedThisYear ?? 0),
+    };
+  }
+
+  static toMarketIndexes(data: Json): InvestmentMarketIndexes {
+    const cdi = data.cdi as Json | null;
+    const ipca = data.ipca as Json | null;
+    const selic = data.selic as Json | null;
+
+    return {
+      cdi: cdi
+        ? ({
+            annual: (cdi.annual as null | string) ?? null,
+            daily: (cdi.daily as null | string) ?? null,
+            date: cdi.date as string,
+            followers: Number(cdi.followers ?? 0),
+            lastChangeDate: (cdi.lastChangeDate as null | string) ?? null,
+            stale: cdi.stale === true,
+          } satisfies InvestmentMarketIndexCdi)
+        : null,
+      fx: ((data.fx as Json[]) ?? []).map((row) => ({
+        pair: row.pair as string,
+        quotedAt: row.quotedAt as string,
+        rate: row.rate as string,
+      })),
+      ipca: ipca
+        ? ({
+            accumulated12m: (ipca.accumulated12m as null | string) ?? null,
+            expected12m: (ipca.expected12m as null | string) ?? null,
+            expectedDate: (ipca.expectedDate as null | string) ?? null,
+            followers: Number(ipca.followers ?? 0),
+            month: (ipca.month as null | string) ?? null,
+            monthly: (ipca.monthly as null | string) ?? null,
+            stale: ipca.stale === true,
+          } satisfies InvestmentMarketIndexIpca)
+        : null,
+      lastSuccessAt: (data.lastSuccessAt as null | string) ?? null,
+      selic: selic
+        ? ({
+            daily: (selic.daily as null | string) ?? null,
+            date: selic.date as string,
+            followers: Number(selic.followers ?? 0),
+            lastChangeDate: (selic.lastChangeDate as null | string) ?? null,
+            stale: selic.stale === true,
+            target: (selic.target as null | string) ?? null,
+          } satisfies InvestmentMarketIndexSelic)
+        : null,
+    };
+  }
+
+  static toMarketIndexHistory(data: Json): InvestmentMarketIndexHistory {
+    return {
+      changes: ((data.changes as Json[]) ?? []).map((row) => ({
+        delta: (row.delta as null | string) ?? null,
+        since: row.since as string,
+        value: row.value as string,
+      })),
+      followers: ((data.followers as Json[]) ?? []).map((row) => ({
+        assetId: row.assetId as string,
+        name: row.name as string,
+        percent: (row.percent as string | undefined) ?? undefined,
+        spread: (row.spread as string | undefined) ?? undefined,
+      })),
+      index: data.index as InvestmentMarketIndex,
+      points: ((data.points as Json[]) ?? []).map((row) => ({
+        accumulated12m:
+          (row.accumulated12m as null | string | undefined) ?? undefined,
+        date: (row.date as string | undefined) ?? undefined,
+        month: (row.month as string | undefined) ?? undefined,
+        monthly: (row.monthly as string | undefined) ?? undefined,
+        value: (row.value as string | undefined) ?? undefined,
+      })),
     };
   }
 

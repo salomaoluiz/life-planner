@@ -26,11 +26,14 @@ export { default as getInvestmentIncomeLinkUseCase } from "./getInvestmentIncome
 export { default as getInvestmentIncomeSuggestionsUseCase } from "./getInvestmentIncomeSuggestionsUseCase";
 export { default as getInvestmentIncomesUseCase } from "./getInvestmentIncomesUseCase";
 export { default as getInvestmentIncomeUseCase } from "./getInvestmentIncomeUseCase";
+export { default as getInvestmentMarketIndexesUseCase } from "./getInvestmentMarketIndexesUseCase";
+export { default as getInvestmentMarketIndexHistoryUseCase } from "./getInvestmentMarketIndexHistoryUseCase";
 export { default as getInvestmentOperationLinkUseCase } from "./getInvestmentOperationLinkUseCase";
 export { default as getInvestmentPriceHistoryUseCase } from "./getInvestmentPriceHistoryUseCase";
 export { default as getInvestmentsDashboardUseCase } from "./getInvestmentsDashboardUseCase";
 export { default as previewInvestmentFixedIncomeRedemptionUseCase } from "./previewInvestmentFixedIncomeRedemptionUseCase";
 export { default as receiveInvestmentIncomeUseCase } from "./receiveInvestmentIncomeUseCase";
+export { default as refreshInvestmentMarketIndexesUseCase } from "./refreshInvestmentMarketIndexesUseCase";
 export { default as refreshInvestmentQuotesUseCase } from "./refreshInvestmentQuotesUseCase";
 export { default as rejectInvestmentEventSuggestionUseCase } from "./rejectInvestmentEventSuggestionUseCase";
 export { default as rejectInvestmentIncomeSuggestionUseCase } from "./rejectInvestmentIncomeSuggestionUseCase";
