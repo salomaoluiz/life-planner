@@ -1,7 +1,7 @@
-import { RecurrenceFrequency } from "@domain/entities/financial/RecurrenceEntity";
 import { fireEvent, render, screen, within } from "@tests";
 
 import { RecurrenceHasPaidOccurrences } from "@domain/entities/errors";
+import { RecurrenceFrequency } from "@domain/entities/financial/RecurrenceEntity";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { useBreakpoint } from "@presentation/theme";

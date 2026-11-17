@@ -3,7 +3,6 @@ import {
   DEFAULT_CURRENCY,
   toCurrencyCode,
 } from "@domain/entities/financial/Currency";
-
 import { RecurrenceFrequency } from "@domain/entities/financial/RecurrenceEntity";
 
 import { calendarDateToIso, isoToCalendarDate } from "./calendarDate";
