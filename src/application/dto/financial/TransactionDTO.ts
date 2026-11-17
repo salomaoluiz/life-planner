@@ -26,6 +26,8 @@ export interface ITransactionDTO {
   installmentCount?: number;
   installmentNumber?: number;
   installmentPlanId?: string;
+  // Spec 115 FR 22: the asset of a projected income that comes from an investment series.
+  investmentAssetId?: string;
   invoiceMonth?: string;
   // Front-only: a projected occurrence of a series (spec 034), not a stored row.
   isProjected?: boolean;
@@ -65,6 +67,8 @@ class TransactionDTO {
   installmentCount?: number;
   installmentNumber?: number;
   installmentPlanId?: string;
+  // Spec 115 FR 22: the asset of a projected income that comes from an investment series.
+  investmentAssetId?: string;
   invoiceMonth?: string;
   isProjected: boolean;
   notes?: string;
@@ -112,6 +116,7 @@ class TransactionDTO {
     this.projected = params.projected ?? false;
     this.excludeFromTotals = params.excludeFromTotals ?? false;
     this.externalLock = params.externalLock;
+    this.investmentAssetId = params.investmentAssetId;
     this.systemKey = params.systemKey;
     this.tags = params.tags ?? [];
     this.transfer = params.transfer;

@@ -157,7 +157,7 @@ it("SHOULD delete the income", () => {
 
   act(() => result.current.onDelete());
 
-  expect(deleteMutation.value.mutate).toHaveBeenCalledWith("income-1");
+  expect(deleteMutation.value.mutate).toHaveBeenCalledWith({ id: "income-1" });
 });
 
 it("SHOULD invalidate AND close WHEN it succeeds, showing the failure otherwise", () => {
@@ -180,4 +180,49 @@ it("SHOULD be loading, then not found WHEN the income fails", () => {
 
   incomeQuery.reset().withError();
   expect(setup().result.current.isNotFound).toBe(true);
+});
+
+describe("spec 115", () => {
+  it("SHOULD confirm an income without finance with the amount and the date only", () => {
+    incomeQuery.reset().withData(
+      makeIncome({
+        accountId: undefined,
+        netAmount: 7140,
+        status: InvestmentIncomeStatus.PLANNED,
+        withFinance: false,
+      }),
+    );
+
+    const { result } = setup();
+
+    expect(result.current.showAccount).toBe(false);
+
+    act(() => result.current.onSave());
+
+    expect(receiveMutation.value.mutate).toHaveBeenCalledWith({
+      accountId: undefined,
+      id: "income-1",
+      netAmount: 7140,
+      receivedOn: "2026-11-04",
+    });
+  });
+
+  it("SHOULD delete only this occurrence WHEN the income belongs to a series", () => {
+    incomeQuery.reset().withData(
+      makeIncome({
+        netAmount: 7140,
+        seriesId: "series-1",
+        status: InvestmentIncomeStatus.PLANNED,
+      }),
+    );
+
+    const { result } = setup();
+
+    act(() => result.current.onDelete());
+
+    expect(deleteMutation.value.mutate).toHaveBeenCalledWith({
+      id: "income-1",
+      scope: "ONLY_THIS",
+    });
+  });
 });

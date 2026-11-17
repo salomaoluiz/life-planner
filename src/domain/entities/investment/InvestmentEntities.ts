@@ -1,4 +1,5 @@
 import { CurrencyCode } from "@domain/entities/financial/Currency";
+import { RecurrenceFrequency } from "@domain/entities/financial/RecurrenceEntity";
 import {
   InvestmentAssetClass,
   InvestmentAssetStatus,
@@ -7,6 +8,7 @@ import {
   InvestmentFixedIncomeProduct,
   InvestmentFixedIncomeRateMode,
   InvestmentFixedIncomeRedemptionKind,
+  InvestmentIncomeSeriesEndReason,
   InvestmentIncomeStatus,
   InvestmentIncomeType,
   InvestmentOperationType,
@@ -314,14 +316,19 @@ export interface InvestmentIncome {
   id: string;
   netAmount: number;
   notes?: string;
+  // Spec 115: the number of this income inside its series.
+  occurrenceNumber?: number;
   // Planned with a payment date before today.
   overdue: boolean;
   paymentDate: string;
   quantity?: string;
+  seriesId?: string;
   status: InvestmentIncomeStatus;
   suggestionId?: string;
   transactionId?: string;
   type: InvestmentIncomeType;
+  // Spec 115: false = lives only in investments (no account, no category, no finance row).
+  withFinance: boolean;
   // Decimal string, "0.15" = 15%.
   withholdingRate: string;
 }
@@ -343,6 +350,41 @@ export interface InvestmentIncomePage {
   items: InvestmentIncome[];
   nextCursor: null | string;
   summary?: InvestmentIncomeSummary;
+}
+
+// Spec 115: a recurring income of an asset.
+export interface InvestmentIncomeSeries {
+  accountId?: string;
+  amountPerUnit: string;
+  assetId: string;
+  categoryId?: string;
+  currency: CurrencyCode;
+  endDate?: string;
+  endedAt?: string;
+  endReason?: InvestmentIncomeSeriesEndReason;
+  exDateOffsetDays?: number;
+  firstPaymentDate: string;
+  frequency: RecurrenceFrequency;
+  id: string;
+  lastGeneratedNumber: number;
+  nextPaymentDate?: string;
+  notes?: string;
+  type: InvestmentIncomeType;
+  withFinance: boolean;
+}
+
+export interface InvestmentIncomeSeriesCreated {
+  created: { planned: number; received: number };
+  series: InvestmentIncomeSeries;
+}
+
+// What the create would do (drives the form preview).
+export interface InvestmentIncomeSeriesPreview {
+  endsByPosition: null | string;
+  firstNetAmount: null | number;
+  firstQuantity: null | string;
+  next: string[];
+  occurrences: { currentMonth: number; max: number; past: number };
 }
 
 export interface InvestmentIncomeSuggestion {
@@ -370,7 +412,6 @@ export interface InvestmentIncomeSummary {
 }
 
 export type InvestmentMarketIndex = "CDI" | "IPCA" | "SELIC";
-
 export interface InvestmentMarketIndexCdi {
   annual: null | string;
   daily: null | string;
@@ -395,6 +436,7 @@ export interface InvestmentMarketIndexes {
   lastSuccessAt: null | string;
   selic: InvestmentMarketIndexSelic | null;
 }
+
 export interface InvestmentMarketIndexFollower {
   assetId: string;
   name: string;
@@ -544,6 +586,23 @@ export interface InvestmentPricePoint {
   fxRate: null | string;
   kind: InvestmentPriceKind;
   price: string;
+}
+
+// An occurrence after the current month, computed by the API.
+export interface InvestmentProjectedIncome {
+  accountId?: string;
+  assetId: string;
+  assetLabel: string;
+  categoryId?: string;
+  currency: CurrencyCode;
+  exDate: string;
+  netAmount: number;
+  number: number;
+  paymentDate: string;
+  quantity: string;
+  seriesId: string;
+  type: InvestmentIncomeType;
+  withFinance: boolean;
 }
 
 export interface InvestmentQuote {

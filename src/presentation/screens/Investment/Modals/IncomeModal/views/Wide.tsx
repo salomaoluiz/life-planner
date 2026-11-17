@@ -10,17 +10,23 @@ import {
   DateField,
   ErrorState,
   FormColumns,
+  OptionRow,
   SegmentedControl,
   SelectField,
+  SwitchRow,
   Text,
   TextField,
 } from "@components";
 import Skeleton from "@components/Skeleton";
 import { useKitTheme } from "@components/utils/useKitTheme";
 import { CurrencyCode } from "@domain/entities/financial/Currency";
-import { InvestmentIncomeStatus } from "@domain/entities/investment/enums";
+import {
+  InvestmentIncomeScope,
+  InvestmentIncomeStatus,
+} from "@domain/entities/investment/enums";
 import { useTranslation } from "@presentation/i18n";
 import { TranslationKeys } from "@presentation/i18n/types";
+import RecurrenceBlock from "@screens/Financial/Transactions/components/RecurrenceBlock";
 import investmentTestIds from "@screens/Investment/testIds";
 
 import { IncomeModalVM } from "../hooks";
@@ -93,89 +99,149 @@ function Wide({ vm }: AdaptiveViewProps<IncomeModalVM>) {
                   />
                 ) : null}
               </View>
-              <View style={styles.row}>
-                <View style={styles.cell}>
-                  <DateField
-                    label={t("investment.income.exDate")}
-                    onChange={vm.onExDateChange}
-                    testID={ids.exDate}
-                    value={state.exDate}
-                  />
+              {vm.isSeriesEdit ? (
+                <DateField
+                  clearable
+                  error={err(vm.errors.endDate)}
+                  label={t("investment.income.seriesModal.endDate")}
+                  onChange={vm.onEndDateChange}
+                  testID={investmentTestIds.modal.incomeSeries.endDate}
+                  value={state.endDate}
+                />
+              ) : null}
+              {!vm.isSeriesEdit && !vm.isScopeAll && vm.isSeries ? (
+                <DateField
+                  label={t("investment.income.firstPaymentDate")}
+                  onChange={vm.onPaymentDateChange}
+                  testID={ids.paymentDate}
+                  value={state.paymentDate}
+                />
+              ) : null}
+              {!vm.isSeriesEdit && !vm.isScopeAll && !vm.isSeries ? (
+                <View style={styles.row}>
+                  <View style={styles.cell}>
+                    <DateField
+                      label={t("investment.income.exDate")}
+                      onChange={vm.onExDateChange}
+                      testID={ids.exDate}
+                      value={state.exDate}
+                    />
+                  </View>
+                  <View style={styles.cell}>
+                    <DateField
+                      label={t(
+                        planned
+                          ? "investment.income.paymentDate"
+                          : "investment.income.receivedOn",
+                      )}
+                      onChange={vm.onPaymentDateChange}
+                      testID={ids.paymentDate}
+                      value={state.paymentDate}
+                    />
+                  </View>
                 </View>
-                <View style={styles.cell}>
-                  <DateField
-                    label={t(
-                      planned
-                        ? "investment.income.paymentDate"
-                        : "investment.income.receivedOn",
-                    )}
-                    onChange={vm.onPaymentDateChange}
-                    testID={ids.paymentDate}
-                    value={state.paymentDate}
-                  />
-                </View>
-              </View>
-              <SegmentedControl
-                accessibilityLabel={t("investment.income.statusLabel")}
-                onChange={(value) =>
-                  vm.onStatusChange(value as InvestmentIncomeStatus)
-                }
-                options={[
-                  {
-                    label: t("investment.income.status.PLANNED"),
-                    value: InvestmentIncomeStatus.PLANNED,
-                  },
-                  {
-                    label: t("investment.income.status.RECEIVED"),
-                    tone: "income",
-                    value: InvestmentIncomeStatus.RECEIVED,
-                  },
-                ]}
-                testID={ids.status}
-                value={state.status}
-              />
+              ) : null}
+              {vm.isScopeAll || vm.isSeries ? null : (
+                <SegmentedControl
+                  accessibilityLabel={t("investment.income.statusLabel")}
+                  onChange={(value) =>
+                    vm.onStatusChange(value as InvestmentIncomeStatus)
+                  }
+                  options={[
+                    {
+                      label: t("investment.income.status.PLANNED"),
+                      value: InvestmentIncomeStatus.PLANNED,
+                    },
+                    {
+                      label: t("investment.income.status.RECEIVED"),
+                      tone: "income",
+                      value: InvestmentIncomeStatus.RECEIVED,
+                    },
+                  ]}
+                  testID={ids.status}
+                  value={state.status}
+                />
+              )}
             </View>
           }
           right={
             <View style={styles.stack}>
               <View style={styles.row}>
                 <View style={styles.cell}>
-                  <TextField
-                    error={err(vm.errors.quantity)}
-                    keyboardType="decimal-pad"
-                    label={t("investment.income.quantity")}
-                    onChangeText={vm.onQuantityChange}
-                    testID={ids.quantity}
-                    value={state.quantity}
-                  />
+                  {vm.isSeries ? (
+                    <TextField
+                      disabled
+                      label={t("investment.income.positionAtExDate")}
+                      onChangeText={vm.onQuantityChange}
+                      testID={ids.quantity}
+                      value={vm.preview.firstQuantity ?? ""}
+                    />
+                  ) : null}
+                  {!vm.isSeries && !vm.isScopeAll ? (
+                    <TextField
+                      error={err(vm.errors.quantity)}
+                      keyboardType="decimal-pad"
+                      label={t("investment.income.quantity")}
+                      onChangeText={vm.onQuantityChange}
+                      testID={ids.quantity}
+                      value={state.quantity}
+                    />
+                  ) : null}
                 </View>
                 <View style={styles.cell}>
                   <TextField
                     error={err(vm.errors.amountPerUnit)}
                     keyboardType="decimal-pad"
-                    label={t("investment.income.perUnit")}
+                    label={t(
+                      vm.isSeries || vm.isScopeAll
+                        ? "investment.income.seriesModal.perUnit"
+                        : "investment.income.perUnit",
+                    )}
                     onChangeText={vm.onPerUnitChange}
                     testID={ids.perUnit}
                     value={state.perUnit}
                   />
                 </View>
               </View>
-              <View style={styles.field}>
-                <AmountInput
-                  currency={vm.currency as CurrencyCode}
-                  error={err(vm.errors.netAmount)}
-                  label={t("investment.income.netAmount")}
-                  onChange={vm.onNetChange}
-                  testID={ids.netAmount}
-                  tone="income"
-                  value={vm.net}
-                />
-                <Text.Caption
-                  tone="secondary"
-                  value={t("investment.income.netAmountHint")}
-                />
-              </View>
-              {vm.estimate.show ? (
+              {vm.isSeries ? (
+                <Card>
+                  <Text.Caption
+                    tone="secondary"
+                    value={t("investment.income.firstOccurrence", {
+                      perUnit: state.perUnit || "—",
+                      quantity: vm.preview.firstQuantity ?? "—",
+                    })}
+                  />
+                  <Text.BodyStrong
+                    tone="income"
+                    value={
+                      vm.preview.firstNet
+                        ? t("investment.income.estimatedNet", {
+                            net: vm.preview.firstNet,
+                          })
+                        : "—"
+                    }
+                  />
+                </Card>
+              ) : null}
+              {!vm.isSeries && !vm.isScopeAll ? (
+                <View style={styles.field}>
+                  <AmountInput
+                    currency={vm.currency as CurrencyCode}
+                    error={err(vm.errors.netAmount)}
+                    label={t("investment.income.netAmount")}
+                    onChange={vm.onNetChange}
+                    testID={ids.netAmount}
+                    tone="income"
+                    value={vm.net}
+                  />
+                  <Text.Caption
+                    tone="secondary"
+                    value={t("investment.income.netAmountHint")}
+                  />
+                </View>
+              ) : null}
+              {vm.estimate.show && !vm.isSeries && !vm.isScopeAll ? (
                 <Card testID={ids.estimate}>
                   <Text.Caption
                     tone="secondary"
@@ -186,40 +252,149 @@ function Wide({ vm }: AdaptiveViewProps<IncomeModalVM>) {
                   />
                 </Card>
               ) : null}
-              <View style={styles.row}>
-                <View style={styles.cell}>
-                  <SelectField
-                    closeLabel={t("investment.form.close")}
-                    error={err(vm.errors.accountId)}
-                    helper={vm.accountHint ? t(vm.accountHint) : undefined}
-                    label={t("investment.form.operation.account")}
-                    onChange={vm.onAccountChange}
-                    options={vm.accountOptions}
-                    sheetTitle={t("investment.form.operation.account")}
-                    testID={ids.account}
-                    value={state.accountId}
+              {vm.isApproving ? null : (
+                <SwitchRow
+                  hint={t("investment.income.withFinanceHint")}
+                  label={t("investment.income.withFinance")}
+                  onToggle={vm.onWithFinanceChange}
+                  testID={ids.withFinance}
+                  value={state.withFinance}
+                />
+              )}
+              {state.withFinance ? null : (
+                <Card>
+                  <Text.BodyStrong
+                    value={t("investment.income.withoutFinanceTitle")}
                   />
-                </View>
-                <View style={styles.cell}>
-                  <SelectField
-                    closeLabel={t("investment.form.close")}
-                    error={err(vm.errors.categoryId)}
-                    helper={
-                      vm.categoryHint
-                        ? t(vm.categoryHint, {
-                            type: t(`investment.income.types.${state.type}`),
-                          })
-                        : undefined
-                    }
-                    label={t("investment.income.category")}
-                    onChange={vm.onCategoryChange}
-                    options={vm.categoryOptions}
-                    sheetTitle={t("investment.income.category")}
-                    testID={ids.category}
-                    value={state.categoryId}
+                  <Text.Caption
+                    tone="secondary"
+                    value={t("investment.income.withoutFinanceBody")}
                   />
+                </Card>
+              )}
+              {state.withFinance ? (
+                <View style={styles.row}>
+                  <View style={styles.cell}>
+                    <SelectField
+                      closeLabel={t("investment.form.close")}
+                      error={err(vm.errors.accountId)}
+                      helper={vm.accountHint ? t(vm.accountHint) : undefined}
+                      label={t("investment.form.operation.account")}
+                      onChange={vm.onAccountChange}
+                      options={vm.accountOptions}
+                      sheetTitle={t("investment.form.operation.account")}
+                      testID={ids.account}
+                      value={state.accountId}
+                    />
+                  </View>
+                  <View style={styles.cell}>
+                    <SelectField
+                      closeLabel={t("investment.form.close")}
+                      error={err(vm.errors.categoryId)}
+                      helper={
+                        vm.categoryHint
+                          ? t(vm.categoryHint, {
+                              type: t(`investment.income.types.${state.type}`),
+                            })
+                          : undefined
+                      }
+                      label={t("investment.income.category")}
+                      onChange={vm.onCategoryChange}
+                      options={vm.categoryOptions}
+                      sheetTitle={t("investment.income.category")}
+                      testID={ids.category}
+                      value={state.categoryId}
+                    />
+                  </View>
                 </View>
-              </View>
+              ) : null}
+              {vm.repeatAllowed ? (
+                <SwitchRow
+                  hint={t("investment.income.repeatHint")}
+                  label={t("investment.income.repeat")}
+                  onToggle={vm.onRepeatChange}
+                  testID={ids.repeat}
+                  value={state.repeat}
+                />
+              ) : null}
+              {vm.showSeriesBlock ? (
+                <RecurrenceBlock
+                  endDate={state.endDate}
+                  frequency={state.frequency}
+                  onChange={vm.onFrequencyChange}
+                  startDate={state.paymentDate}
+                  testIDs={{
+                    error: ids.repeatError,
+                    interval: ids.repeatInterval,
+                    intervalDecrease: ids.repeatIntervalDecrease,
+                    intervalIncrease: ids.repeatIntervalIncrease,
+                    preview: ids.seriesPreview,
+                    unit: ids.repeatUnit,
+                  }}
+                >
+                  <DateField
+                    clearable
+                    error={err(vm.errors.endDate)}
+                    label={t("investment.income.endDate")}
+                    onChange={vm.onEndDateChange}
+                    testID={ids.endDate}
+                    value={state.endDate}
+                  />
+                  <TextField
+                    error={err(vm.errors.exDateOffset)}
+                    helper={t("investment.income.exDateOffsetLabel")}
+                    keyboardType="number-pad"
+                    label={t("investment.income.exDate")}
+                    onChangeText={vm.onExDateOffsetChange}
+                    testID={ids.exDateOffset}
+                    value={state.exDateOffset}
+                  />
+                  {vm.isSeries ? (
+                    <SwitchRow
+                      hint={t("investment.income.markPastReceivedHint")}
+                      label={t("investment.income.markPastReceived")}
+                      onToggle={vm.onMarkPastChange}
+                      testID={ids.markPastReceived}
+                      value={state.markPast}
+                    />
+                  ) : null}
+                  {vm.isSeries ? (
+                    <Card testID={ids.seriesSummary}>
+                      <Text.Caption
+                        tone="secondary"
+                        value={t("investment.income.seriesPreview.past", {
+                          count: vm.preview.past,
+                        })}
+                      />
+                      <Text.Caption
+                        tone="secondary"
+                        value={t("investment.income.seriesPreview.current", {
+                          date: vm.preview.next[0] ?? "",
+                        })}
+                      />
+                      <Text.Caption
+                        tone="secondary"
+                        value={t("investment.income.seriesPreview.next", {
+                          dates: vm.preview.next.join(", "),
+                        })}
+                      />
+                      <Text.Caption
+                        tone="secondary"
+                        value={
+                          vm.preview.endsByPosition
+                            ? t(
+                                "investment.income.seriesPreview.endsByPosition",
+                                {
+                                  date: vm.preview.endsByPosition,
+                                },
+                              )
+                            : t("investment.income.seriesPreview.positionEnd")
+                        }
+                      />
+                    </Card>
+                  ) : null}
+                </RecurrenceBlock>
+              ) : null}
             </View>
           }
           testID={ids.save}
@@ -247,8 +422,9 @@ function Wide({ vm }: AdaptiveViewProps<IncomeModalVM>) {
         closeLabel={t("investment.form.close")}
         footer={
           <Button.Primary
+            disabled={vm.saveDisabled}
             fullWidth
-            label={t(vm.saveLabelKey)}
+            label={t(vm.saveLabelKey, vm.saveLabelParams)}
             loading={vm.isSaving}
             onPress={vm.onSave}
             size="lg"
@@ -273,6 +449,35 @@ function Wide({ vm }: AdaptiveViewProps<IncomeModalVM>) {
         visible
       >
         {renderBody()}
+      </BottomSheet>
+      <BottomSheet
+        closeLabel={t("investment.form.close")}
+        onClose={vm.onScopeCancel}
+        presentation="inline"
+        size="dialog"
+        title={t("investment.income.scope.titleEdit")}
+        visible={vm.scopeDialogVisible}
+      >
+        <View style={styles.stack}>
+          {(
+            [
+              InvestmentIncomeScope.ONLY_THIS,
+              InvestmentIncomeScope.THIS_AND_NEXT,
+              InvestmentIncomeScope.ALL,
+            ] as const
+          ).map((option) => (
+            <OptionRow
+              accessibilityLabel={t(`investment.income.scope.${option}`)}
+              key={option}
+              onPress={() => vm.onScopeSelect(option)}
+              subtitle={t(`investment.income.scope.${option}_HINT`, {
+                date: vm.scopeDate,
+              })}
+              testID={ids.scope(option)}
+              title={t(`investment.income.scope.${option}`)}
+            />
+          ))}
+        </View>
       </BottomSheet>
       <ConfirmDialog
         cancelLabel={t("investment.form.cancel")}

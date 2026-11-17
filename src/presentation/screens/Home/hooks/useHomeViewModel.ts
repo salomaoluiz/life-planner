@@ -348,6 +348,12 @@ function useHomeViewModel() {
   }
 
   function onUpcomingItemPress(item: UpcomingItemDTO) {
+    // Spec 115 FR 22: an income projected by an investment series opens its asset.
+    if (item.investmentIncomeSeriesId && item.assetId) {
+      push(`/investments/asset/${item.assetId}`);
+
+      return;
+    }
     if (item.kind === "PROJECTION") {
       openModal("add_new_transaction", {
         month: item.date.slice(0, 7),

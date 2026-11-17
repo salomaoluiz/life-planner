@@ -84,3 +84,115 @@ it("SHOULD render the loading skeleton WHEN the form state is not ready", () => 
   setup({ state: undefined });
   expect(screen.queryByTestId(ids.quantity)).toBeNull();
 });
+
+describe("recurring incomes (spec 115)", () => {
+  it("SHOULD switch finance off AND show the explanation instead of account and category", () => {
+    const { vm } = setup({
+      state: { ...defaultViewModel.state!, withFinance: false },
+    });
+
+    fireEvent(screen.getByTestId(ids.withFinance), "valueChange", false);
+
+    expect(vm.onWithFinanceChange).toHaveBeenCalled();
+    expect(screen.queryByTestId(ids.account)).toBeNull();
+    expect(hasText("investment.income.withoutFinanceTitle")).toBe(true);
+  });
+
+  it("SHOULD toggle the repetition only WHEN a new income is created", () => {
+    const { vm } = setup();
+
+    fireEvent(screen.getByTestId(ids.repeat), "valueChange", true);
+
+    expect(vm.onRepeatChange).toHaveBeenCalled();
+
+    screen.unmount();
+    setup({ repeatAllowed: false });
+    expect(screen.queryByTestId(ids.repeat)).toBeNull();
+  });
+
+  it("SHOULD show the repetition block, the preview AND the count in the save button", () => {
+    setup({
+      isSeries: true,
+      occurrenceCount: 23,
+      preview: {
+        count: 23,
+        currentMonth: 1,
+        endsByPosition: undefined,
+        firstNet: "R$ 110,00",
+        firstQuantity: "100",
+        isLoading: false,
+        next: ["15/12/2026", "15/01/2027"],
+        past: 22,
+      },
+      saveLabelKey: "investment.income.saveSeries",
+      saveLabelParams: { count: 23 },
+      showSeriesBlock: true,
+      state: { ...defaultViewModel.state!, repeat: true },
+    });
+
+    expect(screen.getByTestId(ids.seriesSummary)).toBeOnTheScreen();
+    expect(screen.getByTestId(ids.endDate)).toBeOnTheScreen();
+    expect(screen.getByTestId(ids.markPastReceived)).toBeOnTheScreen();
+    expect(
+      screen.getByText(/investment.income.firstOccurrence/),
+    ).toBeOnTheScreen();
+    expect(screen.getByText(/investment.income.saveSeries/)).toBeOnTheScreen();
+    expect(screen.queryByTestId(ids.netAmount)).toBeNull();
+    expect(hasText("investment.income.seriesPreview.positionEnd")).toBe(true);
+  });
+
+  it("SHOULD say where the series ends WHEN the position runs out", () => {
+    setup({
+      isSeries: true,
+      preview: {
+        count: 6,
+        currentMonth: 0,
+        endsByPosition: "15/07/2025",
+        firstNet: undefined,
+        firstQuantity: undefined,
+        isLoading: false,
+        next: [],
+        past: 6,
+      },
+      showSeriesBlock: true,
+      state: { ...defaultViewModel.state!, repeat: true },
+    });
+
+    expect(screen.getByText(/seriesPreview.endsByPosition/)).toBeOnTheScreen();
+  });
+
+  it("SHOULD disable the save WHEN the series is not valid yet", () => {
+    setup({ saveDisabled: true });
+
+    expect(screen.getByTestId(ids.save)).toBeDisabled();
+  });
+
+  it("SHOULD ask the scope of an income of a series AND pick one", () => {
+    const { vm } = setup({ scopeDate: "15/11/2026", scopeDialogVisible: true });
+
+    fireEvent.press(screen.getByTestId(ids.scope("THIS_AND_NEXT")));
+    fireEvent.press(screen.getByTestId(ids.scope("ALL")));
+
+    expect(vm.onScopeSelect).toHaveBeenNthCalledWith(1, "THIS_AND_NEXT");
+    expect(vm.onScopeSelect).toHaveBeenNthCalledWith(2, "ALL");
+    expect(hasText("investment.income.scope.titleEdit")).toBe(true);
+  });
+
+  it("SHOULD edit the header of a series without dates, status, quantity or net amount", () => {
+    setup({
+      isScopeAll: true,
+      isSeriesEdit: true,
+      repeatAllowed: false,
+      saveLabelKey: "investment.income.seriesModal.save",
+      state: { ...defaultViewModel.state!, repeat: false },
+    });
+
+    expect(
+      screen.getByTestId(investmentTestIds.modal.incomeSeries.endDate),
+    ).toBeOnTheScreen();
+    expect(screen.queryByTestId(ids.status)).toBeNull();
+    expect(screen.queryByTestId(ids.quantity)).toBeNull();
+    expect(screen.queryByTestId(ids.netAmount)).toBeNull();
+    expect(hasText("investment.income.seriesModal.save")).toBe(true);
+  });
+});

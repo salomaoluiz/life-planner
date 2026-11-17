@@ -92,6 +92,7 @@ const home = {
   upcoming: {
     emptyMessage: "Nothing overdue or due in the next 7 days.",
     emptyTitle: "All set",
+    investmentIncome: "Income",
     invoice: "Invoice · {{card}}",
     listLabel: "Upcoming transactions",
     newTransaction: "New transaction",

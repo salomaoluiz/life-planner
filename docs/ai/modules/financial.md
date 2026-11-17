@@ -610,3 +610,7 @@ Rows of the system categories `INVESTMENT_CONTRIBUTION` / `INVESTMENT_REDEMPTION
 ## Rows locked by an investment income (spec 107)
 
 `TransactionEntity`/`TransactionDTO`/`TransactionModel` carry `externalLock` (`"INVESTMENT"`, omitted when null). `TransactionUIModel.isInvestmentIncome` rows show the "Income" tag (`investment.income.linkedTag`), are never offered the regular pay button (`canPay` is false) and open the investment income modals (see `investment.md`). Editing or deleting such a row through the transaction form answers `422 EXTERNALLY_LOCKED`.
+
+## Incomes projected by an investment series (spec 115)
+
+Projected items of `/finance/upcoming`, `/recurrences/projections` and the month carry optional `assetId` and `investmentIncomeSeriesId` when they come from an investment income series (`UpcomingItemEntity`, `ProjectedOccurrenceEntity`/`Model`/`DTO`). The Home upcoming row shows the "Income" badge (`home.upcoming.investmentIncome`) and opens the asset; `ProjectedOccurrenceDTO.toTransactionDTO` sets `externalLock: "INVESTMENT"` and `investmentAssetId` so the transactions list shows the income tag, opens the asset (`onIncomePress`) and offers no confirm check on a projection.

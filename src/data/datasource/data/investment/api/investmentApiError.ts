@@ -19,8 +19,10 @@ import {
   InvestmentIncomeReceived,
   InvestmentNegativePosition,
   InvestmentNoPosition,
+  InvestmentNoPositionAtStart,
   InvestmentRedemptionTooLarge,
   InvestmentRowUseOperation,
+  InvestmentTooManyOccurrences,
   InvestmentUseConversionRoute,
   InvestmentUseFixedIncomeActions,
   QuoteRefreshTooSoon,
@@ -89,6 +91,21 @@ function handleInvestmentApiError(
         Array.isArray(error.body.missing)
           ? (error.body.missing as string[])
           : [],
+      );
+    }
+    // Spec 115: the series rules answer a code with `details`.
+    if (error.statusCode === 422 && code === "NO_POSITION_AT_START") {
+      const first = (error.body.details as { firstBuyDate?: null | string })
+        ?.firstBuyDate;
+
+      throw new InvestmentNoPositionAtStart(first ?? null);
+    }
+    if (error.statusCode === 422 && code === "TOO_MANY_OCCURRENCES") {
+      const details = error.body.details as { count?: number; max?: number };
+
+      throw new InvestmentTooManyOccurrences(
+        Number(details?.count ?? 0),
+        Number(details?.max ?? 600),
       );
     }
     if (error.statusCode === 409 && code === "ALREADY_RECEIVED") {

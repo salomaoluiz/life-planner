@@ -1,3 +1,4 @@
+import { RecurrenceFrequency } from "@domain/entities/financial/RecurrenceEntity";
 import {
   InvestmentAssetClass,
   InvestmentAssetStatus,
@@ -6,6 +7,7 @@ import {
   InvestmentFixedIncomeProduct,
   InvestmentFixedIncomeRateMode,
   InvestmentFixedIncomeRedemptionKind,
+  InvestmentIncomeScope,
   InvestmentIncomeStatus,
   InvestmentIncomeType,
   InvestmentOperationType,
@@ -26,12 +28,16 @@ import {
   InvestmentIncomeDefaults,
   InvestmentIncomeLink,
   InvestmentIncomePage,
+  InvestmentIncomeSeries,
+  InvestmentIncomeSeriesCreated,
+  InvestmentIncomeSeriesPreview,
   InvestmentIncomeSuggestion,
   InvestmentMarketIndex,
   InvestmentMarketIndexes,
   InvestmentMarketIndexHistory,
   InvestmentOperationResult,
   InvestmentPriceHistory,
+  InvestmentProjectedIncome,
   InvestmentQuotesRefresh,
   InvestmentsDashboard,
   InvestmentsHomeSummary,
@@ -143,6 +149,22 @@ export interface CreateInvestmentIncomeParams extends InvestmentIncomeFields {
   assetId: string;
 }
 
+// Spec 115: the series rule as the form sends it; `accountId` and `categoryId` only with `withFinance`.
+export interface CreateInvestmentIncomeSeriesParams {
+  accountId?: string;
+  amountPerUnit: string;
+  assetId: string;
+  categoryId?: string;
+  endDate?: null | string;
+  exDateOffsetDays?: null | number;
+  firstPaymentDate: string;
+  frequency: RecurrenceFrequency;
+  markPastAsReceived?: boolean;
+  notes?: null | string;
+  type: InvestmentIncomeType;
+  withFinance?: boolean;
+}
+
 export interface CreateInvestmentOperationParams {
   accountId?: string;
   assetId: string;
@@ -155,6 +177,11 @@ export interface CreateInvestmentOperationParams {
   quantity: string;
   type: InvestmentOperationType;
   unitPrice: string;
+}
+
+export interface DeleteInvestmentIncomeParams {
+  id: string;
+  scope?: InvestmentIncomeScope;
 }
 
 // Spec 105: a rate as the owner types it; the API derives the effective rate.
@@ -190,6 +217,11 @@ export interface GetInvestmentIncomeDefaultsParams {
   assetId: string;
   exDate?: string;
   type?: InvestmentIncomeType;
+}
+
+export interface GetInvestmentIncomeSeriesProjectionsParams {
+  from: string;
+  to: string;
 }
 
 export interface GetInvestmentIncomesParams {
@@ -242,9 +274,10 @@ export interface InvestmentFeeParams {
 }
 
 export interface InvestmentIncomeFields {
-  accountId: string;
+  // Spec 115: required with `withFinance` (the default), forbidden without it.
+  accountId?: string;
   amountPerUnit?: null | string;
-  categoryId: string;
+  categoryId?: string;
   exDate?: null | string;
   // Cents that landed (or will land) in the account.
   netAmount: number;
@@ -253,6 +286,7 @@ export interface InvestmentIncomeFields {
   quantity?: null | string;
   status: InvestmentIncomeStatus;
   type: InvestmentIncomeType;
+  withFinance?: boolean;
 }
 
 export interface InvestmentOperationLink {
@@ -291,6 +325,9 @@ export type InvestmentRepository = {
     params: CreateInvestmentFractionSaleParams,
   ): Promise<InvestmentOperationResult>;
   createIncome(params: CreateInvestmentIncomeParams): Promise<InvestmentIncome>;
+  createIncomeSeries(
+    params: CreateInvestmentIncomeSeriesParams,
+  ): Promise<InvestmentIncomeSeriesCreated>;
   createOperation(
     params: CreateInvestmentOperationParams,
   ): Promise<InvestmentOperationResult>;
@@ -298,7 +335,7 @@ export type InvestmentRepository = {
   deleteConversion(id: string): Promise<void>;
   deleteFixedIncomeAdjustment(id: string): Promise<void>;
   deleteFixedIncomeRate(id: string): Promise<void>;
-  deleteIncome(id: string): Promise<void>;
+  deleteIncome(params: DeleteInvestmentIncomeParams): Promise<void>;
   deleteOperation(id: string): Promise<void>;
   deleteValuation(id: string): Promise<void>;
   getAsset(id: string): Promise<InvestmentAssetDetail>;
@@ -322,6 +359,11 @@ export type InvestmentRepository = {
     transactionId: string,
   ): Promise<InvestmentIncomeLink | undefined>;
   getIncomes(params: GetInvestmentIncomesParams): Promise<InvestmentIncomePage>;
+  getIncomeSeries(assetId: string): Promise<InvestmentIncomeSeries[]>;
+  getIncomeSeriesById(id: string): Promise<InvestmentIncomeSeries>;
+  getIncomeSeriesProjections(
+    params: GetInvestmentIncomeSeriesProjectionsParams,
+  ): Promise<InvestmentProjectedIncome[]>;
   getIncomeSuggestions(
     params: GetInvestmentIncomeSuggestionsParams,
   ): Promise<InvestmentIncomeSuggestion[]>;
@@ -339,6 +381,9 @@ export type InvestmentRepository = {
   previewFixedIncomeRedemption(
     params: PreviewFixedIncomeRedemptionParams,
   ): Promise<InvestmentFixedIncomeRedemptionPreview>;
+  previewIncomeSeries(
+    params: CreateInvestmentIncomeSeriesParams,
+  ): Promise<InvestmentIncomeSeriesPreview>;
   receiveIncome(
     params: ReceiveInvestmentIncomeParams,
   ): Promise<InvestmentIncome>;
@@ -362,6 +407,9 @@ export type InvestmentRepository = {
     params: UpdateFixedIncomeRateParams,
   ): Promise<InvestmentAssetDetail>;
   updateIncome(params: UpdateInvestmentIncomeParams): Promise<InvestmentIncome>;
+  updateIncomeSeries(
+    params: UpdateInvestmentIncomeSeriesParams,
+  ): Promise<InvestmentIncomeSeries>;
   updateOperation(
     params: UpdateInvestmentOperationParams,
   ): Promise<InvestmentOperationResult>;
@@ -439,7 +487,24 @@ export interface UpdateInvestmentConversionParams {
 }
 
 export interface UpdateInvestmentIncomeParams extends Partial<InvestmentIncomeFields> {
+  // Spec 115 `THIS_AND_NEXT`: the series rule fields.
+  endDate?: null | string;
+  exDateOffsetDays?: null | number;
+  frequency?: RecurrenceFrequency;
   id: string;
+  // Required for an income of a series.
+  scope?: InvestmentIncomeScope;
+}
+
+export interface UpdateInvestmentIncomeSeriesParams {
+  accountId?: string;
+  amountPerUnit?: string;
+  categoryId?: string;
+  // `null` clears the end date (reopens an ended series).
+  endDate?: null | string;
+  id: string;
+  notes?: null | string;
+  withFinance?: boolean;
 }
 
 export interface UpdateInvestmentOperationParams {

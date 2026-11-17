@@ -115,8 +115,12 @@ const defaultIncomeViewModel: IncomeSectionVM = {
   items: [],
   onAdd: jest.fn(),
   onEdit: jest.fn(),
+  onEditSeries: jest.fn(),
   onFilterChange: jest.fn(),
   onReceive: jest.fn(),
+  projected: [],
+  series: [],
+  seriesById: new Map(),
   suggestionActions: {
     failure: undefined,
     isBusy: false,

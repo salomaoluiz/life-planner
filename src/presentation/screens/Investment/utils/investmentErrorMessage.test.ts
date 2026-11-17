@@ -11,7 +11,9 @@ import {
   InvestmentConvertedOrigin,
   InvestmentFeesAboveSale,
   InvestmentNegativePosition,
+  InvestmentNoPositionAtStart,
   InvestmentRedemptionTooLarge,
+  InvestmentTooManyOccurrences,
   InvestmentUseConversionRoute,
   InvestmentUseFixedIncomeActions,
   TickerClassMismatch,
@@ -131,5 +133,29 @@ describe("conversions (spec 112)", () => {
     ],
   ])("SHOULD map %p to %s", (error, key) => {
     expect(getInvestmentErrorMessage(error)?.key).toBe(key);
+  });
+});
+
+it("SHOULD name the first buy WHEN the series has no position at its start (spec 115)", () => {
+  expect(
+    getInvestmentErrorMessage(
+      new InvestmentNoPositionAtStart("2024-12-01"),
+      (day) => `<${day}>`,
+    ),
+  ).toEqual({
+    key: "investment.income.noPositionAtStart",
+    params: { firstBuy: "<2024-12-01>" },
+  });
+  expect(
+    getInvestmentErrorMessage(new InvestmentNoPositionAtStart(null)),
+  ).toEqual({ key: "investment.income.noPositionAtStartNoBuy" });
+});
+
+it("SHOULD name the count AND the limit WHEN a series creates too many occurrences (spec 115)", () => {
+  expect(
+    getInvestmentErrorMessage(new InvestmentTooManyOccurrences(729, 600)),
+  ).toEqual({
+    key: "investment.income.seriesTooMany",
+    params: { count: "729", max: "600" },
   });
 });

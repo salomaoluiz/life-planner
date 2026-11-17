@@ -312,6 +312,21 @@ describe("navigation", () => {
     );
   });
 
+  it("SHOULD open the asset of an income projected by an investment series (spec 115)", () => {
+    const { result } = setup(loaded);
+
+    result.current.onUpcomingItemPress({
+      ...mocks.upcoming.overdue[0],
+      assetId: "asset-1",
+      investmentIncomeSeriesId: "series-1",
+      kind: "PROJECTION",
+      recurrenceId: "series-1",
+    });
+
+    expect(spies.push).toHaveBeenCalledWith("/investments/asset/asset-1");
+    expect(modalNavigation.openModal).not.toHaveBeenCalled();
+  });
+
   it("SHOULD open the transactions screen filtered by the card and the invoice month", () => {
     const { result } = setup(loaded);
 

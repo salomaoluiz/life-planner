@@ -364,6 +364,23 @@ function Wide({ vm }: AdaptiveViewProps<OperationModalVM>) {
           right={
             <>
               {vm.preview ? renderSummary(vm.preview) : null}
+              {vm.seriesWarnings.map((warning) => (
+                <Card
+                  key={warning.type}
+                  testID={investmentTestIds.incomeSeries.sellWarning}
+                >
+                  <Text.Caption
+                    tone="secondary"
+                    value={t("investment.income.series.sellWarning", {
+                      count: warning.count,
+                      ticker: vm.asset
+                        ? (vm.asset.ticker ?? vm.asset.name)
+                        : "",
+                      type: t(`investment.income.types.${warning.type}`),
+                    })}
+                  />
+                </Card>
+              ))}
               <SwitchRow
                 hint={t("investment.form.operation.generateHint")}
                 label={t("investment.form.operation.generate")}

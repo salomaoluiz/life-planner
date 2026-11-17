@@ -240,6 +240,7 @@ function TransactionRow(props: Props) {
             {transferCaption(item, t)}
           </View>
           {item.isInvestmentIncome &&
+          !item.dto.isProjected &&
           !item.dto.paid &&
           props.onIncomeReceive &&
           !item.isPending ? (

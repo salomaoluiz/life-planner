@@ -11,6 +11,7 @@ import { TransactionType } from "./TransactionEntity";
 interface IProjectedOccurrenceEntity {
   accountId?: string;
   accountName?: string;
+  assetId?: string;
   category: string;
   categoryId: string;
   creditCardColor?: string;
@@ -22,6 +23,7 @@ interface IProjectedOccurrenceEntity {
   date: string;
   description: string;
   frequency: RecurrenceFrequency;
+  investmentIncomeSeriesId?: string;
   // `YYYY-MM-DD` the invoice appears in the list (planned payment day); card series only.
   invoiceListDate?: string;
   // `YYYY-MM`; card series only.
@@ -41,6 +43,7 @@ interface IProjectedOccurrenceEntity {
 class ProjectedOccurrenceEntity {
   accountId?: string;
   accountName?: string;
+  assetId?: string;
   category: string;
   categoryId: string;
   creditCardColor?: string;
@@ -51,6 +54,7 @@ class ProjectedOccurrenceEntity {
   date: string;
   description: string;
   frequency: RecurrenceFrequency;
+  investmentIncomeSeriesId?: string;
   invoiceListDate?: string;
   invoiceMonth?: string;
   notes?: string;
@@ -66,6 +70,7 @@ class ProjectedOccurrenceEntity {
   constructor(params: IProjectedOccurrenceEntity) {
     this.accountId = params.accountId;
     this.accountName = params.accountName;
+    this.assetId = params.assetId;
     this.category = params.category;
     this.categoryId = params.categoryId;
     this.creditCardColor = params.creditCardColor;
@@ -77,6 +82,7 @@ class ProjectedOccurrenceEntity {
     this.description = params.description;
     this.notes = params.notes;
     this.frequency = params.frequency;
+    this.investmentIncomeSeriesId = params.investmentIncomeSeriesId;
     this.invoiceListDate = params.invoiceListDate;
     this.invoiceMonth = params.invoiceMonth;
     this.occurrenceCount = params.occurrenceCount;

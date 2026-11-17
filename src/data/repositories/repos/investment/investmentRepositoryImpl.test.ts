@@ -117,7 +117,7 @@ it("SHOULD drop the finance caches after an operation write or an asset delete, 
     async () => repository.updateIncome({ id: "i" }),
     async () => repository.receiveIncome({ id: "i" }),
     async () => repository.approveIncomeSuggestion({ id: "s" }),
-    async () => repository.deleteIncome("i"),
+    async () => repository.deleteIncome({ id: "i" }),
     async () => repository.createFractionSale({} as never),
   ]) {
     invalidate.mockClear();

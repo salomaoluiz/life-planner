@@ -80,6 +80,9 @@ const createMutation = new UseMutationFixture();
 const updateMutation = new UseMutationFixture();
 const deleteMutation = new UseMutationFixture();
 
+const seriesQuery = new UseQueryFixture();
+const plannedQuery = new UseQueryFixture();
+
 const spies = {
   params: jest.mocked(useLocalSearchParams),
   useMutation: jest.mocked(useMutation),
@@ -113,7 +116,17 @@ beforeEach(() => {
   updateMutation.reset();
   deleteMutation.reset();
   spies.params.mockReturnValue({ assetId: "asset-1" });
-  spies.useQuery.mockImplementation((() => detailQuery.build()) as never);
+  seriesQuery.reset();
+  plannedQuery.reset();
+  spies.useQuery.mockImplementation(((props: { cacheKey: string[] }) => {
+    if (props.cacheKey.includes("income-series-list")) {
+      return seriesQuery.build();
+    }
+
+    return (
+      props.cacheKey.includes("incomes") ? plannedQuery : detailQuery
+    ).build();
+  }) as never);
   spies.useOwnerScoped.mockImplementation((() =>
     accountsQuery.build()) as never);
   spies.useMutation.mockImplementation(((props: { cacheKey: string[] }) =>
@@ -478,5 +491,55 @@ describe("the Evento segment (spec 108)", () => {
       canPickEvent: false,
       eventMode: false,
     });
+  });
+});
+
+describe("a sale that ends the series (spec 115)", () => {
+  const series = {
+    amountPerUnit: "1.1",
+    assetId: "asset-1",
+    firstPaymentDate: "2025-01-15",
+    frequency: { interval: 1, unit: "MONTH" },
+    id: "series-1",
+    lastGeneratedNumber: 23,
+    type: "YIELD",
+  };
+
+  it("SHOULD warn with the planned occurrences that will go WHEN the sale leaves no units", () => {
+    seriesQuery.withData([series]);
+    plannedQuery.withData({
+      items: [
+        { paymentDate: "2099-12-15", seriesId: "series-1" },
+        { paymentDate: "2099-01-15", seriesId: "series-1" },
+        { paymentDate: "2099-01-15", seriesId: "other" },
+      ],
+      nextCursor: null,
+    });
+
+    const { result } = setup();
+
+    act(() => result.current.onTypeChange("SELL"));
+    act(() => result.current.onQuantityChange("200"));
+    act(() => result.current.onUnitPriceChange("10"));
+    expect(result.current.seriesWarnings).toEqual([
+      { count: 2, type: "YIELD" },
+    ]);
+  });
+
+  it("SHOULD not warn for a partial sale, a buy OR a series that is over", () => {
+    seriesQuery.withData([
+      series,
+      { ...series, endedAt: "2026-09-15", id: "series-2" },
+    ]);
+    plannedQuery.withData({ items: [], nextCursor: null });
+
+    const { result } = setup();
+
+    act(() => result.current.onQuantityChange("1"));
+    act(() => result.current.onUnitPriceChange("10"));
+    expect(result.current.seriesWarnings).toEqual([]);
+
+    act(() => result.current.onTypeChange("SELL"));
+    expect(result.current.seriesWarnings).toEqual([]);
   });
 });

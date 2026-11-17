@@ -80,17 +80,19 @@ function Wide({ vm }: AdaptiveViewProps<IncomeReceiveModalVM>) {
               value={vm.receivedOn}
             />
           </View>
-          <View style={styles.cell}>
-            <SelectField
-              closeLabel={t("investment.form.close")}
-              label={t("investment.income.receive.account")}
-              onChange={vm.onAccountChange}
-              options={vm.accountOptions}
-              sheetTitle={t("investment.income.receive.account")}
-              testID={ids.account}
-              value={vm.accountId}
-            />
-          </View>
+          {vm.showAccount ? (
+            <View style={styles.cell}>
+              <SelectField
+                closeLabel={t("investment.form.close")}
+                label={t("investment.income.receive.account")}
+                onChange={vm.onAccountChange}
+                options={vm.accountOptions}
+                sheetTitle={t("investment.income.receive.account")}
+                testID={ids.account}
+                value={vm.accountId}
+              />
+            </View>
+          ) : null}
         </View>
         {vm.showGross ? (
           <Text.Caption

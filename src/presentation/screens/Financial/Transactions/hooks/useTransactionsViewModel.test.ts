@@ -453,7 +453,7 @@ it("SHOULD open the income modal of a locked income row (spec 107)", async () =>
   const { result } = setup();
 
   await act(async () => {
-    await result.current.onIncomePress({ id: "tx-9" } as never);
+    await result.current.onIncomePress({ dto: {}, id: "tx-9" } as never);
   });
 
   expect(spies.getIncomeLink).toHaveBeenCalledWith("tx-9");
@@ -461,6 +461,21 @@ it("SHOULD open the income modal of a locked income row (spec 107)", async () =>
     assetId: "asset-1",
     id: "income-1",
   });
+});
+
+it("SHOULD open the asset of an income projected by an investment series without asking for a link (spec 115)", async () => {
+  givenData([]);
+  const { result } = setup();
+
+  await act(async () => {
+    await result.current.onIncomePress({
+      dto: { investmentAssetId: "asset-1" },
+      id: "projected-series-1-24",
+    } as never);
+  });
+
+  expect(spies.push).toHaveBeenCalledWith("/investments/asset/asset-1");
+  expect(spies.getIncomeLink).not.toHaveBeenCalled();
 });
 
 it("SHOULD open the receive modal from the check of a locked income row (spec 107)", async () => {
@@ -487,7 +502,7 @@ it("SHOULD open nothing WHEN the locked row has no income any more (spec 107)", 
   const { result } = setup();
 
   await act(async () => {
-    await result.current.onIncomePress({ id: "tx-9" } as never);
+    await result.current.onIncomePress({ dto: {}, id: "tx-9" } as never);
     await result.current.onIncomeReceive({ id: "tx-9" } as never);
   });
 

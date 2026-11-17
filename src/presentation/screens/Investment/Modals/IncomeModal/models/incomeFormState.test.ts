@@ -14,6 +14,7 @@ import {
   stateFromSuggestion,
   suggestedNet,
   toCreateParams,
+  toSeriesParams,
   toUpdateParams,
   validate,
 } from "./incomeFormState";
@@ -147,5 +148,109 @@ describe("validate", () => {
       amountPerUnit: "investment.form.operation.unitPriceInvalid",
       quantity: "investment.form.operation.quantityInvalid",
     });
+  });
+});
+
+describe("series (spec 115)", () => {
+  it("SHOULD start without repeating, with finance AND the 114 defaults", () => {
+    expect(base()).toMatchObject({
+      endDate: undefined,
+      exDateOffset: "",
+      frequency: { interval: 1, unit: "MONTH" },
+      markPast: true,
+      repeat: false,
+      withFinance: true,
+    });
+  });
+
+  it("SHOULD describe the series for the API without account or category WHEN there is no finance", () => {
+    const state = {
+      ...base(),
+      endDate: new Date(2027, 0, 31),
+      exDateOffset: "8",
+      perUnit: "1,10",
+      withFinance: false,
+    };
+
+    expect(toSeriesParams("asset-1", state)).toEqual({
+      accountId: undefined,
+      amountPerUnit: "1,10",
+      assetId: "asset-1",
+      categoryId: undefined,
+      endDate: "2027-01-31",
+      exDateOffsetDays: 8,
+      firstPaymentDate: "2026-10-30",
+      frequency: { interval: 1, unit: "MONTH" },
+      markPastAsReceived: true,
+      notes: null,
+      type: InvestmentIncomeType.JCP,
+      withFinance: false,
+    });
+    expect(
+      toSeriesParams("asset-1", { ...base(), exDateOffset: "", perUnit: "1" }),
+    ).toMatchObject({ endDate: null, exDateOffsetDays: null });
+  });
+
+  it("SHOULD not ask for account and category WITHOUT finance AND send none on a single income", () => {
+    const state = {
+      ...base(),
+      accountId: "",
+      categoryId: "",
+      withFinance: false,
+    };
+
+    expect(validate(state, 100)).toEqual({});
+    expect(toCreateParams("asset-1", state, 100)).toMatchObject({
+      accountId: undefined,
+      categoryId: undefined,
+      withFinance: false,
+    });
+    expect(validate({ ...state, withFinance: true }, 100)).toMatchObject({
+      accountId: "investment.form.operation.accountRequired",
+      categoryId: "investment.income.errors.incomplete",
+    });
+  });
+
+  it("SHOULD validate the series: per-unit value, frequency, end date and ex-date offset", () => {
+    const series = { ...base(), perUnit: "1,10" };
+
+    expect(validate(series, 0, true)).toEqual({});
+    expect(
+      validate({ ...series, perUnit: "" }, 0, true).amountPerUnit,
+    ).toBeDefined();
+    expect(
+      validate(
+        { ...series, frequency: { interval: 99, unit: "MONTH" } },
+        0,
+        true,
+      ).frequency,
+    ).toBe("financial.recurrence.intervalErrorLonger");
+    expect(
+      validate({ ...series, endDate: new Date(2020, 0, 1) }, 0, true).endDate,
+    ).toBe("investment.income.endDateInvalid");
+    expect(
+      validate({ ...series, exDateOffset: "91" }, 0, true).exDateOffset,
+    ).toBe("investment.income.exDateOffsetInvalid");
+    expect(
+      validate({ ...series, exDateOffset: "x" }, 0, true).exDateOffset,
+    ).toBeDefined();
+    expect(validate({ ...series, exDateOffset: "0" }, 0, true)).toEqual({});
+  });
+
+  it("SHOULD count the series fields in the dirty check AND read an income without finance", () => {
+    expect(isSameState(base(), { ...base(), repeat: true })).toBe(false);
+    expect(isSameState(base(), { ...base(), exDateOffset: "3" })).toBe(false);
+    expect(isSameState(base(), { ...base(), markPast: false })).toBe(false);
+    expect(isSameState(base(), { ...base(), withFinance: false })).toBe(false);
+    expect(
+      isSameState(base(), {
+        ...base(),
+        frequency: { interval: 2, unit: "MONTH" },
+      }),
+    ).toBe(false);
+    expect(isSameState(base(), { ...base(), endDate: new Date() })).toBe(false);
+    expect(
+      stateFromIncome(makeIncome({ withFinance: false })).withFinance,
+    ).toBe(false);
   });
 });

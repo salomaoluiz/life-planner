@@ -7,7 +7,10 @@ import { financeKeys } from "@application/queryKeys/financeKeys";
 import { investmentKeys } from "@application/queryKeys/investmentKeys";
 import { useCases } from "@application/useCases";
 import { todayCalendarDate } from "@data/models/financial/calendarDate";
-import { incomeWithholdingBps } from "@domain/entities/investment/enums";
+import {
+  incomeWithholdingBps,
+  InvestmentIncomeScope,
+} from "@domain/entities/investment/enums";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
 import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import { useLocaleTag } from "@presentation/i18n";
@@ -103,7 +106,8 @@ function useIncomeReceiveModalViewModel() {
     }
 
     receive.mutate({
-      accountId: currentAccountId || undefined,
+      // Spec 115 FR 3: an income without finance has no account (the API answers 400 when one is sent).
+      accountId: data.withFinance ? currentAccountId || undefined : undefined,
       id: data.id,
       netAmount: netCents,
       receivedOn: todayCalendarDate(receivedOn),
@@ -129,13 +133,20 @@ function useIncomeReceiveModalViewModel() {
     net: netCents,
     onAccountChange: setAccountId,
     onClose: closeModal,
-    onDelete: () => data && remove.mutate(data.id),
+    // Deleting from here removes only this occurrence of a series (the scope dialog lives in the edit modal).
+    onDelete: () =>
+      data &&
+      remove.mutate({
+        id: data.id,
+        scope: data.seriesId ? InvestmentIncomeScope.ONLY_THIS : undefined,
+      }),
     onNetChange: setNet,
     onReceivedOnChange: (value?: Date) => value && setReceivedOn(value),
     onSave,
     planned: data ? formatMoney(data.netAmount, currency, localeTag) : "",
     plannedFor: data ? formatDay(data.paymentDate, localeTag) : "",
     receivedOn,
+    showAccount: data?.withFinance !== false,
     showGross: bps > 0,
     typeKey: data
       ? (`investment.income.types.${data.type}` as const)

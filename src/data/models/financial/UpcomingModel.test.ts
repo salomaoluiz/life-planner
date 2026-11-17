@@ -26,6 +26,27 @@ const payload = {
   overdueTotals: { expenseCents: 317000, incomeCents: 0 },
 };
 
+it("SHOULD keep the series and the asset of a projected investment income (spec 115)", () => {
+  const result = UpcomingModel.fromJSON({
+    ...payload,
+    next: [
+      {
+        ...payload.next[0],
+        assetId: "asset-1",
+        investmentIncomeSeriesId: "series-1",
+        kind: "PROJECTION",
+      },
+      payload.next[0],
+    ],
+  });
+
+  expect(result.next[0]).toMatchObject({
+    assetId: "asset-1",
+    investmentIncomeSeriesId: "series-1",
+  });
+  expect(result.next[1].assetId).toBeUndefined();
+});
+
 it("SHOULD map every field of the API payload keeping cents", () => {
   const result = UpcomingModel.fromJSON(payload);
 

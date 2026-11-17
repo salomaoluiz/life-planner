@@ -31,3 +31,15 @@ output.YESTERDAY_IN_PREVIOUS_MONTH = String(
   yesterday.getMonth() !== now.getMonth(),
 );
 output.NEXT_MONTH_SAME_DAY_KEY = key(next);
+// Spec 115: the same calendar day `n` months ago (clamped to the last day of that month) for series and buys.
+function monthsAgo(n) {
+  var last = new Date(now.getFullYear(), now.getMonth() - n + 1, 0).getDate();
+
+  return new Date(
+    now.getFullYear(),
+    now.getMonth() - n,
+    Math.min(now.getDate(), last),
+  );
+}
+output.THREE_MONTHS_AGO_KEY = key(monthsAgo(3));
+output.SIX_MONTHS_AGO_KEY = key(monthsAgo(6));

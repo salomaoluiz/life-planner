@@ -12,6 +12,7 @@ import createInvestmentFixedIncomeRateUseCase from "./createInvestmentFixedIncom
 import createInvestmentFixedIncomeRedemptionUseCase from "./createInvestmentFixedIncomeRedemptionUseCase";
 import createInvestmentFixedIncomeTitleUseCase from "./createInvestmentFixedIncomeTitleUseCase";
 import createInvestmentFractionSaleUseCase from "./createInvestmentFractionSaleUseCase";
+import createInvestmentIncomeSeriesUseCase from "./createInvestmentIncomeSeriesUseCase";
 import createInvestmentIncomeUseCase from "./createInvestmentIncomeUseCase";
 import createInvestmentOperationUseCase from "./createInvestmentOperationUseCase";
 import deleteInvestmentAssetUseCase from "./deleteInvestmentAssetUseCase";
@@ -27,6 +28,9 @@ import getInvestmentConversionUseCase from "./getInvestmentConversionUseCase";
 import getInvestmentEventSuggestionsUseCase from "./getInvestmentEventSuggestionsUseCase";
 import getInvestmentIncomeDefaultsUseCase from "./getInvestmentIncomeDefaultsUseCase";
 import getInvestmentIncomeLinkUseCase from "./getInvestmentIncomeLinkUseCase";
+import getInvestmentIncomeSeriesByIdUseCase from "./getInvestmentIncomeSeriesByIdUseCase";
+import getInvestmentIncomeSeriesProjectionsUseCase from "./getInvestmentIncomeSeriesProjectionsUseCase";
+import getInvestmentIncomeSeriesUseCase from "./getInvestmentIncomeSeriesUseCase";
 import getInvestmentIncomeSuggestionsUseCase from "./getInvestmentIncomeSuggestionsUseCase";
 import getInvestmentIncomesUseCase from "./getInvestmentIncomesUseCase";
 import getInvestmentIncomeUseCase from "./getInvestmentIncomeUseCase";
@@ -35,6 +39,7 @@ import getInvestmentOperationLinkUseCase from "./getInvestmentOperationLinkUseCa
 import getInvestmentPriceHistoryUseCase from "./getInvestmentPriceHistoryUseCase";
 import getInvestmentsDashboardUseCase from "./getInvestmentsDashboardUseCase";
 import previewInvestmentFixedIncomeRedemptionUseCase from "./previewInvestmentFixedIncomeRedemptionUseCase";
+import previewInvestmentIncomeSeriesUseCase from "./previewInvestmentIncomeSeriesUseCase";
 import receiveInvestmentIncomeUseCase from "./receiveInvestmentIncomeUseCase";
 import refreshInvestmentQuotesUseCase from "./refreshInvestmentQuotesUseCase";
 import rejectInvestmentEventSuggestionUseCase from "./rejectInvestmentEventSuggestionUseCase";
@@ -44,6 +49,7 @@ import simulateInvestmentFixedIncomeUseCase from "./simulateInvestmentFixedIncom
 import updateInvestmentAssetUseCase from "./updateInvestmentAssetUseCase";
 import updateInvestmentConversionUseCase from "./updateInvestmentConversionUseCase";
 import updateInvestmentFixedIncomeRateUseCase from "./updateInvestmentFixedIncomeRateUseCase";
+import updateInvestmentIncomeSeriesUseCase from "./updateInvestmentIncomeSeriesUseCase";
 import updateInvestmentIncomeUseCase from "./updateInvestmentIncomeUseCase";
 import updateInvestmentOperationUseCase from "./updateInvestmentOperationUseCase";
 import upsertInvestmentFixedIncomeAdjustmentUseCase from "./upsertInvestmentFixedIncomeAdjustmentUseCase";
@@ -56,6 +62,36 @@ type Factory = (repositories: Repositories) => {
 };
 
 const cases: [Factory, keyof Repositories["investmentRepository"], string][] = [
+  [
+    createInvestmentIncomeSeriesUseCase,
+    "createIncomeSeries",
+    "investment.createInvestmentIncomeSeriesUseCase",
+  ],
+  [
+    previewInvestmentIncomeSeriesUseCase,
+    "previewIncomeSeries",
+    "investment.previewInvestmentIncomeSeriesUseCase",
+  ],
+  [
+    getInvestmentIncomeSeriesUseCase,
+    "getIncomeSeries",
+    "investment.getInvestmentIncomeSeriesUseCase",
+  ],
+  [
+    getInvestmentIncomeSeriesByIdUseCase,
+    "getIncomeSeriesById",
+    "investment.getInvestmentIncomeSeriesByIdUseCase",
+  ],
+  [
+    getInvestmentIncomeSeriesProjectionsUseCase,
+    "getIncomeSeriesProjections",
+    "investment.getInvestmentIncomeSeriesProjectionsUseCase",
+  ],
+  [
+    updateInvestmentIncomeSeriesUseCase,
+    "updateIncomeSeries",
+    "investment.updateInvestmentIncomeSeriesUseCase",
+  ],
   [
     createInvestmentConversionUseCase,
     "createConversion",

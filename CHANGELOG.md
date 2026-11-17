@@ -3,6 +3,15 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [2.1.0] - 2026-11-17
+
+### Added
+
+- Recurring investment income: one form creates a series of incomes (every N days, weeks, months or years), with the past ones received, this month planned and the next ones projected (spec 115).
+- An income can live only in investments ("Add to Finance" off): no account or category, and receiving it asks for the amount and the date only (spec 115).
+- Edit or delete an income of a series for this one, this and the next ones or all; the asset shows a card per series and warns that a sale of every unit ends it (spec 115).
+- Projected incomes of a series appear in Finance upcoming and open the asset (spec 115).
+
 ## [2.0.0] - 2026-11-17
 
 ### Changed

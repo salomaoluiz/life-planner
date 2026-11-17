@@ -559,6 +559,9 @@ const investment = {
     categoryDefaultHint: "Last used for {{type}}",
     delete: "Delete income",
     editSave: "Save changes",
+    endDate: "Ends on (optional)",
+    endDateInvalid: "The end must be on or after the first payment.",
+    endDateNone: "No end date",
     errors: {
       currencyMismatch:
         "The account currency must be the same as the asset currency.",
@@ -567,20 +570,33 @@ const investment = {
       received: "This income was already confirmed.",
     },
     estimate: "Estimated withheld tax ({{rate}}) · estimated gross {{gross}}",
+    estimatedNet: "Estimated net {{net}}",
     exDate: "Ex-date (optional)",
     exDateHint: "Your position on this date sets the quantity.",
+    exDateOffset: "Ex-date (optional): {{count}} days before",
+    exDateOffsetInvalid: "Use from 0 to 90 days.",
+    exDateOffsetLabel: "Days before the payment",
     filter: {
       ALL: "All",
       PLANNED: "Planned",
       RECEIVED: "Received",
     },
+    firstOccurrence: "1st occurrence: {{quantity}} × {{perUnit}}",
+    firstPaymentDate: "Payment date (1st occurrence)",
     linkedTag: "Income",
+    markPastReceived: "Mark past ones as received",
+    markPastReceivedHint: "Occurrences before today are added as Received",
     netAmount: "Net amount",
     netAmountHint:
       "The amount that lands in the account. Filled by quantity × value per unit.",
+    noPositionAtStart:
+      "You had no units on the ex-date of the first occurrence. Pick a date after your first buy ({{firstBuy}}).",
+    noPositionAtStartNoBuy:
+      "You had no units on the ex-date of the first occurrence. Add a buy first.",
     notes: "Notes (optional)",
     paymentDate: "Payment date",
     perUnit: "Value per unit (optional)",
+    positionAtExDate: "Position on the ex-date",
     quantity: "Quantity",
     quantityHint: "Your position on the ex-date",
     receive: {
@@ -594,11 +610,25 @@ const investment = {
       title: "Confirm income",
     },
     receivedOn: "Received on",
+    repeat: "Repeat",
+    repeatHint: "Adds a series of income from the date",
     row: {
       noAccount: "No account access",
       perUnit: "{{value}} × {{quantity}}",
       planned: "Payment {{date}}",
       received: "Received {{date}}",
+    },
+    saveSeries: "Add {{count}} incomes",
+    scope: {
+      ALL: "All",
+      ALL_HINT: "Account, category and notes of the whole series",
+      cancel: "Cancel",
+      ONLY_THIS: "Only this one",
+      ONLY_THIS_HINT: "Changes only {{date}}",
+      THIS_AND_NEXT: "This and next ones",
+      THIS_AND_NEXT_HINT: "From {{date}} on; received ones don't change",
+      titleDelete: "Delete series income",
+      titleEdit: "Edit series income",
     },
     section: {
       account: "Account",
@@ -609,9 +639,45 @@ const investment = {
       receivedYear: "Income this year",
       title: "Income",
     },
+    series: {
+      card: "Series · {{type}} {{frequency}}",
+      cardNoEnd: "Since {{date}} · {{amount}}/unit · no end date",
+      cardOnlyInvestments:
+        "Since {{date}} · {{amount}}/unit · only in investments",
+      cardWithEnd: "Since {{date}} · {{amount}}/unit · until {{end}}",
+      deleteAll: "Delete the whole series ({{count}} incomes created so far).",
+      edit: "Edit series",
+      ended: "Series ended on {{date}}",
+      endedByPosition: "You sold all units on {{date}}.",
+      endedManual: "Series ended on {{date}}.",
+      occurrence: "{{date}} · {{number}}/∞",
+      occurrenceOf: "{{date}} · {{number}}/{{total}}",
+      onlyInvestments: "only in investments",
+      projected: "Projected",
+      sellWarning:
+        "This ends the {{type}} series of {{ticker}} ({{count}} planned will be deleted).",
+      title: "Series · {{type}} {{frequency}}",
+    },
+    seriesModal: {
+      endDate: "Ends on (optional)",
+      endDateHint: "Clear it to keep the series going.",
+      perUnit: "Value per unit",
+      save: "Save series",
+      title: "Edit series",
+    },
+    seriesPreview: {
+      current: "1 planned this month: {{date}}",
+      endsByPosition: "The series ends on {{date}}: no units left.",
+      next: "Next projected: {{dates}}",
+      past: "{{count}} past as Received",
+      positionEnd: "The series ends by itself if the position reaches zero.",
+    },
+    seriesTooMany:
+      "Up to {{max}} occurrences at once ({{count}} now). Pick a later start date.",
     status: {
       OVERDUE: "Overdue",
       PLANNED: "Planned",
+      PROJECTED: "Projected",
       RECEIVED: "Received",
     },
     statusLabel: "Status",
@@ -629,6 +695,12 @@ const investment = {
       OTHER: "Other",
       YIELD: "Yield",
     },
+    withFinance: "Add to Finance",
+    withFinanceHint: "Creates the linked income in the account",
+    withoutFinanceBody:
+      "Use it when the amount is already in Finance by hand. The income enters the asset history and totals, but doesn't move balances, Upcoming or the dashboard.",
+    withoutFinanceHint: "No account or category: stays only in investments",
+    withoutFinanceTitle: "No account and no category",
   },
   list: {
     columns: {

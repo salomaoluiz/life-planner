@@ -26,12 +26,15 @@ class UpcomingModel {
 function item(data: Json): UpcomingItemEntity {
   return {
     accountId: (data.accountId as null | string) ?? null,
+    assetId: (data.assetId as string | undefined) ?? undefined,
     categoryId: (data.categoryId as null | string) ?? null,
     creditCardId: (data.creditCardId as null | string) ?? null,
     currency: data.currency as string,
     date: data.date as string,
     description: data.description as string,
     id: data.id as string,
+    investmentIncomeSeriesId:
+      (data.investmentIncomeSeriesId as string | undefined) ?? undefined,
     invoiceMonth: (data.invoiceMonth as null | string) ?? null,
     kind: data.kind as UpcomingKind,
     occurrenceNumber:

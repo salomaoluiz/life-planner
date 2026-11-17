@@ -1,0 +1,83 @@
+url: ${E2E_WEB_URL}
+name: investment/income-without-finance
+tags:
+  - investment
+  - spec-115
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runFlow:
+    file: ../../subflows/setup/create-investment-asset.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      TICKER: E2ETK3
+      NAME: E2E Asset
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/investment/open-investments.yaml
+- tapOn:
+    id: "investment.list.row-${output.ASSET_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.screen"
+    timeout: 20000
+- swipe:
+    start: 60%, 80%
+    end: 60%, 20%
+- swipe:
+    start: 60%, 80%
+    end: 60%, 20%
+# A planned income that lives only in investments: no account, no category.
+- tapOn:
+    id: "investment.income.section-action"
+- extendedWaitUntil:
+    visible:
+      id: "investment.income.withFinance"
+    timeout: 20000
+- tapOn:
+    id: "investment.income.withFinance"
+- assertNotVisible:
+    id: "investment.income-modal.account"
+- tapOn:
+    id: "investment.income-modal.net-amount"
+- eraseText
+- inputText: "7140"
+- tapOn:
+    id: "investment.income-modal.save"
+- extendedWaitUntil:
+    visible: ".*71[.,]40.*"
+    timeout: 20000
+# Receiving it asks for the amount and the date only (no account), and the account balance does not move.
+- tapOn:
+    id: "investment.income.receive-.*"
+- extendedWaitUntil:
+    visible:
+      id: "investment.income-receive-modal.net-amount"
+    timeout: 20000
+- assertNotVisible:
+    id: "investment.income-receive-modal.account"
+- tapOn:
+    id: "investment.income-receive-modal.save"
+- extendedWaitUntil:
+    visible:
+      id: "investment.income.summary-received"
+    timeout: 20000
+- runFlow:
+    file: ../../subflows/assert/assert-account-balance.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      EXPECTED_CENTS: "0"
