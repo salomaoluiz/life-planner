@@ -100,6 +100,20 @@ interface Step {
 
 const HUNDRED = BigInt(100);
 
+// cost / quantity / 100 as an 8-place decimal string; null with no quantity.
+export function averagePriceOf(cost: number, quantity: bigint): null | string {
+  if (quantity === ZERO) {
+    return null;
+  }
+
+  const scaled = roundDiv(
+    BigInt(cost) * BigInt(10) ** BigInt(16),
+    quantity * BigInt(100),
+  );
+
+  return formatDecimal(scaled);
+}
+
 export function computeTotals(
   type: InvestmentOperationType,
   quantity: string,
@@ -271,20 +285,6 @@ function applyEvent(
     quantityAfter: kept,
     quantityBefore: quantity,
   };
-}
-
-// cost / quantity / 100 as an 8-place decimal string; null with no quantity.
-function averagePriceOf(cost: number, quantity: bigint): null | string {
-  if (quantity === ZERO) {
-    return null;
-  }
-
-  const scaled = roundDiv(
-    BigInt(cost) * BigInt(10) ** BigInt(16),
-    quantity * BigInt(100),
-  );
-
-  return formatDecimal(scaled);
 }
 
 function floorToStep(value: bigint, whole: boolean): bigint {

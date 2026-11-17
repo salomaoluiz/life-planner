@@ -4,10 +4,15 @@ import {
   GenericError,
   InvestmentAccountNotChangeable,
   InvestmentArchived,
+  InvestmentArchivedDestination,
   InvestmentClassLocked,
+  InvestmentConversionChainLocked,
+  InvestmentConversionLaterOperations,
+  InvestmentConvertedOrigin,
   InvestmentFeesAboveSale,
   InvestmentNegativePosition,
   InvestmentRedemptionTooLarge,
+  InvestmentUseConversionRoute,
   InvestmentUseFixedIncomeActions,
   TickerClassMismatch,
   TickerExists,
@@ -77,4 +82,54 @@ it("SHOULD carry the formatted date of the redemption that stopped fitting (spec
   expect(
     getInvestmentErrorMessage(new InvestmentRedemptionTooLarge({}))?.params,
   ).toEqual({ date: "" });
+});
+
+describe("conversions (spec 112)", () => {
+  it("SHOULD name the ticker AND the date of the later conversion", () => {
+    expect(
+      getInvestmentErrorMessage(
+        new InvestmentConversionChainLocked("BTHF11", "2026-11-20"),
+        (day) => `<${day}>`,
+      ),
+    ).toEqual({
+      key: "investment.conversion.errors.chainLocked",
+      params: { date: "<2026-11-20>", ticker: "BTHF11" },
+    });
+  });
+
+  it("SHOULD list the dates of the operations after the record date", () => {
+    expect(
+      getInvestmentErrorMessage(
+        new InvestmentConversionLaterOperations("BCFF11", "2026-10-15", [
+          "2026-10-20",
+          "2026-11-01",
+        ]),
+        (day) => `<${day}>`,
+      ),
+    ).toEqual({
+      key: "investment.conversion.errors.laterOperations",
+      params: {
+        date: "<2026-10-15>",
+        dates: "<2026-10-20>, <2026-11-01>",
+        ticker: "BCFF11",
+      },
+    });
+  });
+
+  it.each([
+    [
+      new InvestmentConvertedOrigin("BTHF11"),
+      "investment.conversion.errors.convertedOrigin",
+    ],
+    [
+      new InvestmentArchivedDestination(),
+      "investment.conversion.errors.archivedDestination",
+    ],
+    [
+      new InvestmentUseConversionRoute(),
+      "investment.conversion.errors.useRoute",
+    ],
+  ])("SHOULD map %p to %s", (error, key) => {
+    expect(getInvestmentErrorMessage(error)?.key).toBe(key);
+  });
 });

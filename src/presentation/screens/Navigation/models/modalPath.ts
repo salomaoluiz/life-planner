@@ -17,6 +17,7 @@ export const MODAL_NAMES = [
   "section_picker",
   "add_new_stock_item",
   "investment_asset",
+  "investment_conversion",
   "investment_fixed_income",
   "investment_fixed_income_adjust",
   "investment_fixed_income_contribution",

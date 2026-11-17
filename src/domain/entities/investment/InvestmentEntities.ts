@@ -24,6 +24,9 @@ export interface InvestmentAsset {
   averageFxRate: null | string;
   // BRL numbers of a USD asset; null without a current rate or an average rate.
   brl: InvestmentBrlResult | null;
+  // Spec 112 FR 17: where the quotas of a destination came from, and where an origin was converted to.
+  convertedFrom?: InvestmentConversionLink[];
+  convertedTo?: InvestmentConversionLink | null;
   currency: CurrencyCode;
   // Spec 105: the computed numbers of a calculated title; null on any other asset.
   fixedIncome: InvestmentFixedIncome | null;
@@ -62,6 +65,45 @@ export interface InvestmentBrlResult {
   resultFromFx: number;
   // Fraction of the BRL cost (0.3526 = 35.26%).
   resultPercent: null | number;
+}
+
+// Spec 112: `ticker` is undefined when the counterpart has none.
+export interface InvestmentConversion {
+  cashAmount?: number;
+  cashReferenceUnitValue?: string;
+  date: string;
+  from: InvestmentConversionSide;
+  id: string;
+  // Spec 112 FR 19: the destination was converted again, so edit and delete are refused.
+  locked: boolean;
+  ratioFrom: string;
+  ratioTo: string;
+  to: InvestmentConversionSide & {
+    fractionCost: number;
+    fractionQuantity: string;
+  };
+}
+
+export interface InvestmentConversionLink {
+  assetId: string;
+  conversionId: string;
+  date: string;
+  ticker?: string;
+}
+
+export interface InvestmentConversionResult {
+  conversion: InvestmentConversion;
+  fromPosition: InvestmentPosition;
+  toPosition: InvestmentPosition;
+}
+
+export interface InvestmentConversionSide {
+  assetId: string;
+  // Cents (`costOut` / `costIn`).
+  cost: number;
+  operationId: string;
+  quantity: string;
+  ticker?: string;
 }
 
 export interface InvestmentDashboardAllocation {
@@ -321,6 +363,10 @@ export interface InvestmentIncomeSummary {
 
 export interface InvestmentOperation {
   accountId: null | string;
+  // Spec 112 FR 22: set on CONVERSION_OUT / CONVERSION_IN (the counterpart, ratio and cash part).
+  conversion?: InvestmentOperationConversion;
+  // Spec 112 FR 12: `costOut` on the OUT, `costIn` on the IN (cents).
+  conversionCost?: number;
   // Spec 108: the numbers of a split, reverse split or bonus; undefined on any other operation. The money fields
   // below are zero for an event.
   corporateEvent?: InvestmentOperationEvent;
@@ -346,6 +392,18 @@ export interface InvestmentOperation {
   transactionId: null | string;
   type: InvestmentOperationType;
   unitPrice: string;
+}
+
+// Spec 112 FR 22: what a conversion operation says about the other side.
+export interface InvestmentOperationConversion {
+  assetId: string;
+  cashAmount?: number;
+  cashReferenceUnitValue?: string;
+  conversionId: string;
+  locked: boolean;
+  ratioFrom: string;
+  ratioTo: string;
+  ticker?: string;
 }
 
 // Spec 108 FR 12: what the event did to the position, as the API computed it.

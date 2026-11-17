@@ -49,6 +49,7 @@ import {
 } from "@screens/Investment/models/format";
 import investmentTestIds from "@screens/Investment/testIds";
 
+import ConversionRow from "../components/ConversionRow";
 import EventRow from "../components/EventRow";
 import FixedIncomeSection, {
   FixedIncomeActions,
@@ -62,9 +63,139 @@ import {
   RefreshButton,
 } from "../components/QuoteSection";
 import { InvestmentDetailVM } from "../hooks";
+import { isConversionOperation } from "../models/conversionModel";
 import useStyles from "../styles";
 
 const ids = investmentTestIds.detail;
+
+// Spec 112 section 8: the banners of a converted origin ("Convertido em …") and of a destination ("Veio de …").
+function ConversionBanners({
+  asset,
+  vm,
+}: {
+  asset: InvestmentAssetDetail;
+  vm: InvestmentDetailVM;
+}) {
+  const { t } = useTranslation();
+  const localeTag = useLocaleTag();
+  const out = asset.operations.find(
+    (operation) => operation.type === InvestmentOperationType.CONVERSION_OUT,
+  );
+
+  return (
+    <>
+      {asset.convertedTo ? (
+        <StatusBanner
+          actionLabel={t("investment.conversion.open", {
+            ticker: asset.convertedTo.ticker ?? "",
+          })}
+          icon="swap-horizontal"
+          message={t("investment.conversion.convertedTo", {
+            date: formatDay(asset.convertedTo.date, localeTag),
+            from: out?.conversion?.ratioFrom ?? "",
+            ticker: asset.convertedTo.ticker ?? "",
+            to: out?.conversion?.ratioTo ?? "",
+          })}
+          onAction={() => vm.onOpenAsset(asset.convertedTo!.assetId)}
+          testID={investmentTestIds.conversion.bannerTo}
+        />
+      ) : null}
+      {(asset.convertedFrom ?? []).map((link) => (
+        <StatusBanner
+          actionLabel={t("investment.conversion.open", {
+            ticker: link.ticker ?? "",
+          })}
+          icon="swap-horizontal"
+          key={link.conversionId}
+          message={t("investment.conversion.cameFrom", {
+            date: formatDay(link.date, localeTag),
+            ticker: link.ticker ?? "",
+          })}
+          onAction={() => vm.onOpenAsset(link.assetId)}
+          testID={`${investmentTestIds.conversion.bannerFrom}-${link.conversionId}`}
+        />
+      ))}
+    </>
+  );
+}
+
+// Spec 112 FR 20 (artboard "Apagar conversão"): what else is deleted and the positions after.
+function ConversionDeleteDialog({ vm }: { vm: InvestmentDetailVM }) {
+  const { t } = useTranslation();
+  const remove = vm.conversionDelete;
+  const ids = investmentTestIds.conversion;
+  const lines = [
+    ...(remove.also.length > 0 ? [t("investment.conversion.deleteAlso")] : []),
+    ...remove.also.map((line) => `• ${t(line.key, line.params)}`),
+    t("investment.conversion.deleteAfter"),
+    ...remove.after.map((line) => `• ${t(line.key, line.params)}`),
+  ];
+
+  return (
+    <ConfirmDialog
+      cancelLabel={t("investment.form.cancel")}
+      closeLabel={t("common.actions.close")}
+      confirmLabel={t("investment.conversion.deleteConfirm")}
+      loading={remove.isSaving}
+      message={[t("investment.conversion.deleteBody"), "", ...lines].join("\n")}
+      onCancel={vm.onConversionDeleteCancel}
+      onConfirm={vm.onConversionDeleteConfirm}
+      testID={ids.deleteDialog}
+      title={t("investment.conversion.deleteTitle", {
+        from: remove.fromTicker,
+        to: remove.toTicker,
+      })}
+      visible={remove.isOpen}
+    />
+  );
+}
+
+// Spec 112 section 8: the row menu of a conversion; edit and delete are disabled with their reason while locked.
+function ConversionMenu({ vm }: { vm: InvestmentDetailVM }) {
+  const { t } = useTranslation();
+  const { sizes } = useKitTheme();
+  const menu = vm.conversionMenu;
+  const ids = investmentTestIds.conversion;
+  const lockedText =
+    menu.locked && menu.lockedHint
+      ? t("investment.conversion.locked", menu.lockedHint)
+      : undefined;
+
+  return (
+    <BottomSheet
+      closeLabel={t("common.actions.close")}
+      onClose={vm.onConversionMenuClose}
+      title={t("investment.conversion.menuLabel")}
+      visible={menu.isOpen}
+    >
+      <ListItem
+        inset
+        leading={<Icon name="pencil-outline" size={sizes.iconMd} />}
+        onPress={menu.locked ? undefined : vm.onConversionEdit}
+        subtitle={lockedText}
+        testID={ids.edit}
+        title={t("investment.conversion.edit")}
+      />
+      {menu.canSellFraction ? (
+        <ListItem
+          inset
+          leading={<Icon name="cash-plus" size={sizes.iconMd} />}
+          onPress={vm.onConversionSellFraction}
+          testID={ids.sellFraction}
+          title={t("investment.fraction.sell", { quantity: "" }).trim()}
+        />
+      ) : null}
+      <ListItem
+        inset
+        leading={<Icon name="delete-outline" size={sizes.iconMd} />}
+        onPress={menu.locked ? undefined : vm.onConversionDeleteOpen}
+        subtitle={lockedText}
+        testID={ids.remove}
+        title={t("investment.conversion.delete")}
+      />
+    </BottomSheet>
+  );
+}
 
 function Header({
   asset,
@@ -215,6 +346,40 @@ function Operations({
   const { t } = useTranslation();
   const compact = useDensity().density === "compact";
 
+  function renderOperation(operation: InvestmentOperation) {
+    if (isConversionOperation(operation)) {
+      return (
+        <ConversionRow
+          asset={asset}
+          compact={compact}
+          key={operation.id}
+          operation={operation}
+          vm={vm}
+        />
+      );
+    }
+    if (isEventOperation(operation)) {
+      return (
+        <EventRow
+          asset={asset}
+          compact={compact}
+          key={operation.id}
+          operation={operation}
+          vm={vm}
+        />
+      );
+    }
+
+    return (
+      <OperationRow
+        asset={asset}
+        key={operation.id}
+        operation={operation}
+        vm={vm}
+      />
+    );
+  }
+
   return (
     <Section title={t("investment.detail.operations")}>
       {asset.operations.length === 0 ? (
@@ -225,24 +390,7 @@ function Operations({
         />
       ) : (
         <Card padding="sm">
-          {asset.operations.map((operation) =>
-            isEventOperation(operation) ? (
-              <EventRow
-                asset={asset}
-                compact={compact}
-                key={operation.id}
-                operation={operation}
-                vm={vm}
-              />
-            ) : (
-              <OperationRow
-                asset={asset}
-                key={operation.id}
-                operation={operation}
-                vm={vm}
-              />
-            ),
-          )}
+          {asset.operations.map((operation) => renderOperation(operation))}
         </Card>
       )}
     </Section>
@@ -518,6 +666,7 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentDetailVM>) {
             testID={ids.archiveBanner}
           />
         ) : null}
+        <ConversionBanners asset={asset} vm={vm} />
         {vm.errorMessage ? (
           <Text.Caption
             tone="expense"
@@ -571,6 +720,15 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentDetailVM>) {
           testID={ids.editMenu}
           title={t("investment.asset.edit")}
         />
+        {vm.canConvert ? (
+          <ListItem
+            inset
+            leading={<Icon name="swap-horizontal" size={sizes.iconMd} />}
+            onPress={vm.onConversionStart}
+            testID={investmentTestIds.conversion.menu}
+            title={t("investment.conversion.menu")}
+          />
+        ) : null}
         <ListItem
           inset
           leading={
@@ -597,6 +755,8 @@ function Wide({ vm }: AdaptiveViewProps<InvestmentDetailVM>) {
           title={t("investment.asset.delete")}
         />
       </BottomSheet>
+      <ConversionMenu vm={vm} />
+      <ConversionDeleteDialog vm={vm} />
       <BottomSheet
         closeLabel={t("common.actions.close")}
         onClose={vm.onFixedIncomeMenuClose}

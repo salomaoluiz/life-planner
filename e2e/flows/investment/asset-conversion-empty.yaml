@@ -1,0 +1,58 @@
+url: ${E2E_WEB_URL}
+name: investment/asset-conversion-empty
+tags:
+  - investment
+  - spec-112
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Spec 112 section 8: with no other asset of the same class the picker says so and offers to create a new one.
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/setup/create-investment-asset.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      TICKER: KNRI11
+      NAME: E2E Origin Fund
+      ASSET_CLASS: BR_REIT
+- evalScript: ${output.ORIGIN_ID = output.ASSET_ID}
+- runFlow:
+    file: ../../subflows/setup/create-investment-operation.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      ASSET_ID: ${output.ORIGIN_ID}
+      TYPE: BUY
+      QUANTITY: "10"
+      UNIT_PRICE: "78.5"
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/investment/open-investments.yaml
+- tapOn:
+    id: "investment.list.row-${output.ORIGIN_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "investment.detail.screen"
+    timeout: 20000
+- tapOn:
+    id: "investment.detail.actions-menu"
+- tapOn:
+    id: "investment.conversion.menu"
+- extendedWaitUntil:
+    visible:
+      id: "investment.conversion.destination-picker"
+    timeout: 20000
+- assertVisible:
+    id: "investment.conversion.segment"
+# Creating a new destination asks for its ticker and name.
+- tapOn:
+    id: "investment.conversion.segment-new"
+- extendedWaitUntil:
+    visible:
+      id: "investment.conversion.name"
+    timeout: 10000

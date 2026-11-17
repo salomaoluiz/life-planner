@@ -1,0 +1,11 @@
+url: ${E2E_WEB_URL}
+---
+# Optional caller-scoped param read by the script: DATE.
+- runScript:
+    file: ../../scripts/setup/create-investment-conversion.js
+    env:
+      TOKEN: ${TOKEN}
+      ASSET_ID: ${ASSET_ID}
+      DESTINATION_ID: ${DESTINATION_ID}
+      RATIO_FROM: ${RATIO_FROM}
+      RATIO_TO: ${RATIO_TO}

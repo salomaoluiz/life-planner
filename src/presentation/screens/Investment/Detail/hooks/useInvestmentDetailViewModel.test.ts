@@ -6,10 +6,13 @@ import { modalNavigation } from "@tests/modalNavigation";
 
 import AccountDTO from "@application/dto/financial/AccountDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
-import { InvestmentAssetStatus } from "@domain/entities/investment/enums";
+import {
+  InvestmentAssetStatus,
+  InvestmentOperationType,
+} from "@domain/entities/investment/enums";
 import { InvestmentAssetDetail } from "@domain/entities/investment/InvestmentEntities";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
-import { useMutation } from "@infrastructure/fetcher";
+import { useMutation, useQuery } from "@infrastructure/fetcher";
 import UseMutationFixture from "@infrastructure/fetcher/mocks/useMutation.fixture";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
 import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
@@ -19,6 +22,7 @@ import {
   makeEventOperation,
   makeFixedIncomeDetail,
   makeFractionSale,
+  makeOperation,
   makeQuote,
   makeValuation,
   owners,
@@ -47,6 +51,10 @@ jest.mock("@screens/Investment/hooks/invalidateInvestments");
 jest.mock("@application/useCases", () => ({
   useCases: {
     deleteInvestmentAssetUseCase: { execute: jest.fn(), uniqueName: "delete" },
+    deleteInvestmentConversionUseCase: {
+      execute: jest.fn(),
+      uniqueName: "delConv",
+    },
     deleteInvestmentFixedIncomeRateUseCase: {
       execute: jest.fn(),
       uniqueName: "delRate",
@@ -61,6 +69,7 @@ jest.mock("@application/useCases", () => ({
     },
     getFinancialAccountsUseCase: { execute: jest.fn(), uniqueName: "accounts" },
     getInvestmentAssetUseCase: { execute: jest.fn(), uniqueName: "asset" },
+    getInvestmentConversionUseCase: { execute: jest.fn(), uniqueName: "conv" },
     getInvestmentPriceHistoryUseCase: {
       execute: jest.fn(),
       uniqueName: "history",
@@ -82,10 +91,13 @@ const deleteMutation = new UseMutationFixture();
 const valuationMutation = new UseMutationFixture();
 const rateMutation = new UseMutationFixture();
 const operationMutation = new UseMutationFixture();
+const conversionMutation = new UseMutationFixture();
+const plainQuery = new UseQueryFixture<unknown>();
 
 const spies = {
   isFocused: jest.mocked(useIsFocused),
   params: jest.mocked(useLocalSearchParams),
+  plainQuery: jest.mocked(useQuery),
   replace: jest.mocked(router.replace),
   setParams: jest.mocked(router.setParams),
   useMutation: jest.mocked(useMutation),
@@ -112,11 +124,15 @@ beforeEach(() => {
   valuationMutation.reset();
   rateMutation.reset();
   operationMutation.reset();
+  conversionMutation.reset();
+  plainQuery.reset();
+  spies.plainQuery.mockImplementation((() => plainQuery.build()) as never);
   spies.isFocused.mockReturnValue(false);
   spies.params.mockReturnValue({ id: "asset-1" });
   spies.useQuery.mockImplementation(queryFor as never);
   spies.useMutation.mockImplementation(((props: { cacheKey: string[] }) =>
     ({
+      delConv: conversionMutation,
       delete: deleteMutation,
       delOp: operationMutation,
       delRate: rateMutation,
@@ -533,5 +549,161 @@ describe("corporate events (spec 108)", () => {
       "investment_fraction_sale",
       { assetId: "asset-1", eventId: "event-1", id: "sale-1" },
     );
+  });
+});
+
+describe("conversions (spec 112)", () => {
+  const out = makeOperation({
+    conversion: {
+      assetId: "asset-to",
+      conversionId: "conv-1",
+      locked: false,
+      ratioFrom: "1",
+      ratioTo: "7.4",
+      ticker: "BTHF11",
+    },
+    conversionCost: 808550,
+    id: "op-out",
+    type: InvestmentOperationType.CONVERSION_OUT,
+  });
+
+  it("SHOULD offer to convert an active asset with a position AND open the conversion modal", () => {
+    givenDetail();
+    const { result } = setup();
+
+    expect(result.current.canConvert).toBe(true);
+
+    act(() => result.current.onConversionStart());
+
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "investment_conversion",
+      {
+        assetId: "asset-1",
+      },
+    );
+  });
+
+  it("SHOULD not offer to convert an archived asset", () => {
+    givenDetail(makeDetail({ status: InvestmentAssetStatus.ARCHIVED }));
+
+    expect(setup().result.current.canConvert).toBe(false);
+  });
+
+  it("SHOULD open the row menu AND edit the conversion with its origin", () => {
+    givenDetail(makeDetail({ operations: [out] }));
+    const { result } = setup();
+
+    act(() => result.current.onConversionMenuOpen("op-out"));
+    expect(result.current.conversionMenu).toMatchObject({
+      canSellFraction: true,
+      isOpen: true,
+      locked: false,
+    });
+
+    act(() => result.current.onConversionEdit());
+
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "investment_conversion",
+      {
+        assetId: "asset-1",
+        id: "conv-1",
+      },
+    );
+    expect(result.current.conversionMenu.isOpen).toBe(false);
+  });
+
+  it("SHOULD edit from the destination with the counterpart as the origin", () => {
+    const incoming = makeOperation({
+      conversion: {
+        assetId: "asset-from",
+        conversionId: "conv-1",
+        locked: false,
+        ratioFrom: "1",
+        ratioTo: "7.4",
+        ticker: "BCFF11",
+      },
+      id: "op-in",
+      type: InvestmentOperationType.CONVERSION_IN,
+    });
+
+    givenDetail(makeDetail({ operations: [incoming] }));
+    const { result } = setup();
+
+    act(() => result.current.onConversionMenuOpen("op-in"));
+    expect(result.current.conversionMenu.canSellFraction).toBe(false);
+    act(() => result.current.onConversionEdit());
+
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "investment_conversion",
+      {
+        assetId: "asset-from",
+        id: "conv-1",
+      },
+    );
+  });
+
+  it("SHOULD lock the menu AND name the later conversion of this destination", () => {
+    const locked = makeOperation({
+      conversion: {
+        assetId: "asset-from",
+        conversionId: "conv-1",
+        locked: true,
+        ratioFrom: "1",
+        ratioTo: "7.4",
+        ticker: "BCFF11",
+      },
+      id: "op-in",
+      type: InvestmentOperationType.CONVERSION_IN,
+    });
+
+    givenDetail(
+      makeDetail({
+        convertedTo: {
+          assetId: "x",
+          conversionId: "conv-2",
+          date: "2026-11-20",
+          ticker: "XPTO11",
+        },
+        operations: [locked],
+      }),
+    );
+    const { result } = setup();
+
+    act(() => result.current.onConversionMenuOpen("op-in"));
+
+    expect(result.current.conversionMenu.locked).toBe(true);
+    expect(result.current.conversionMenu.lockedHint).toMatchObject({
+      from: "BCFF11",
+      to: "XPTO11",
+    });
+  });
+
+  it("SHOULD confirm AND delete the conversion, then invalidate", () => {
+    givenDetail(makeDetail({ operations: [out] }));
+    const { result } = setup();
+
+    act(() => result.current.onConversionMenuOpen("op-out"));
+    act(() => result.current.onConversionDeleteOpen());
+    expect(result.current.conversionDelete.isOpen).toBe(true);
+
+    act(() => result.current.onConversionDeleteConfirm());
+    expect(conversionMutation.value.mutate).toHaveBeenCalledWith("conv-1");
+
+    conversionMutation.withStatus("success");
+    setup();
+    expect(invalidateInvestments).toHaveBeenCalled();
+  });
+
+  it("SHOULD cancel the delete AND open the other asset of a banner", () => {
+    givenDetail(makeDetail({ operations: [out] }));
+    const { result } = setup();
+
+    act(() => result.current.onConversionMenuOpen("op-out"));
+    act(() => result.current.onConversionDeleteOpen());
+    act(() => result.current.onConversionDeleteCancel());
+    expect(result.current.conversionDelete.isOpen).toBe(false);
+
+    act(() => result.current.onOpenAsset("asset-to"));
+    expect(router.push).toHaveBeenCalledWith("/investments/asset/asset-to");
   });
 });

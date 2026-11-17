@@ -8,6 +8,15 @@
   "investment.asset.render.mount": {
     "maxCommits": 2
   },
+  "investment.conversion.mount.cold": {
+    "maxDepth": 3,
+    "maxDuplicates": 0,
+    "maxRequests": 5,
+    "modal": "investment_conversion"
+  },
+  "investment.conversion.render.mount": {
+    "maxCommits": 3
+  },
   "investment.detail.mount.cold": {
     "maxDepth": 2,
     "maxDuplicates": 0,

@@ -3,6 +3,14 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.25.0] - 2026-11-16
+
+### Added
+
+- Convert an asset into another of the same class (merger or ticker change): pick the destination (or create it), the record date and the ratio, and the whole position and cost move over with no realized result; the fraction left waits for its auction sale (spec 112).
+- An optional cash part of the conversion becomes a redemption in finance, and the origin is archived with a link to the destination (spec 112).
+- Edit or delete a conversion from its row; the middle of a chain stays locked until the later conversion is deleted (spec 112).
+
 ## [1.24.1] - 2026-11-16
 
 ### Fixed

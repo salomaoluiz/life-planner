@@ -2,7 +2,11 @@ import {
   FamilyArchived,
   InvestmentAccountNotChangeable,
   InvestmentArchived,
+  InvestmentArchivedDestination,
   InvestmentClassLocked,
+  InvestmentConversionChainLocked,
+  InvestmentConversionLaterOperations,
+  InvestmentConvertedOrigin,
   InvestmentCurrencyMismatch,
   InvestmentFeesAboveSale,
   InvestmentFractionAlreadySold,
@@ -13,6 +17,7 @@ import {
   InvestmentNegativePosition,
   InvestmentNoPosition,
   InvestmentRedemptionTooLarge,
+  InvestmentUseConversionRoute,
   InvestmentUseFixedIncomeActions,
   QuoteRefreshTooSoon,
   QuoteSourceUnavailable,
@@ -59,6 +64,30 @@ function getInvestmentErrorMessage(
     };
   }
 
+  // Spec 112 section 8: the conversion rules name the ticker and the date they stopped fitting.
+  if (error instanceof InvestmentConversionChainLocked) {
+    return {
+      key: "investment.conversion.errors.chainLocked",
+      params: { date: formatDate(error.date), ticker: error.ticker },
+    };
+  }
+  if (error instanceof InvestmentConversionLaterOperations) {
+    return {
+      key: "investment.conversion.errors.laterOperations",
+      params: {
+        date: formatDate(error.date),
+        dates: error.dates.map((day) => formatDate(day)).join(", "),
+        ticker: error.ticker,
+      },
+    };
+  }
+  if (error instanceof InvestmentConvertedOrigin) {
+    return {
+      key: "investment.conversion.errors.convertedOrigin",
+      params: { ticker: error.ticker },
+    };
+  }
+
   // Spec 105 FR 21: an edit that makes a redemption larger than the title names the redemption date.
   if (error instanceof InvestmentRedemptionTooLarge) {
     return {
@@ -77,6 +106,10 @@ function getInvestmentErrorMessage(
   const direct: [new (...args: never[]) => unknown, TranslationKeys][] = [
     [InvestmentAccountNotChangeable, "investment.errors.accountNotChangeable"],
     [InvestmentArchived, "investment.errors.archived"],
+    [
+      InvestmentArchivedDestination,
+      "investment.conversion.errors.archivedDestination",
+    ],
     [InvestmentClassLocked, "investment.errors.classLocked"],
     [InvestmentCurrencyMismatch, "investment.income.errors.currencyMismatch"],
     [InvestmentFeesAboveSale, "investment.errors.feesAboveSale"],
@@ -84,6 +117,7 @@ function getInvestmentErrorMessage(
     [InvestmentIncomeIncomplete, "investment.income.errors.incomplete"],
     [InvestmentIncomeLocked, "investment.income.errors.locked"],
     [InvestmentIncomeReceived, "investment.income.errors.received"],
+    [InvestmentUseConversionRoute, "investment.conversion.errors.useRoute"],
     [
       InvestmentUseFixedIncomeActions,
       "investment.fixedIncome.errors.useActions",

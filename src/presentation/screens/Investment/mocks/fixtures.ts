@@ -16,6 +16,7 @@ import {
 import {
   InvestmentAsset,
   InvestmentAssetDetail,
+  InvestmentConversion,
   InvestmentEventSuggestion,
   InvestmentFixedIncome,
   InvestmentIncome,
@@ -56,6 +57,68 @@ function makeAsset(overrides: Partial<InvestmentAsset> = {}): InvestmentAsset {
     ticker: "ITSA4",
     ...overrides,
   };
+}
+
+// Spec 112: BCFF11 (103 quotas, cost R$ 8.085,50) converted into BTHF11 at 1 for 7,4, with the fraction of 0,2 pending.
+function makeConversion(
+  overrides: Partial<InvestmentConversion> = {},
+): InvestmentConversion {
+  return {
+    date: "2026-10-15",
+    from: {
+      assetId: "asset-from",
+      cost: 808550,
+      operationId: "op-out",
+      quantity: "103",
+      ticker: "BCFF11",
+    },
+    id: "conv-1",
+    locked: false,
+    ratioFrom: "1",
+    ratioTo: "7.4",
+    to: {
+      assetId: "asset-to",
+      cost: 808550,
+      fractionCost: 212,
+      fractionQuantity: "0.2",
+      operationId: "op-in",
+      quantity: "762",
+      ticker: "BTHF11",
+    },
+    ...overrides,
+  };
+}
+
+// Spec 112: the OUT row of an origin or the IN row of a destination.
+function makeConversionOperation(side: "IN" | "OUT"): InvestmentOperation {
+  const out = side === "OUT";
+
+  return makeOperation({
+    conversion: {
+      assetId: out ? "asset-to" : "asset-from",
+      conversionId: "conv-1",
+      locked: false,
+      ratioFrom: "1",
+      ratioTo: "7.4",
+      ticker: out ? "BTHF11" : "BCFF11",
+    },
+    conversionCost: 808550,
+    corporateEvent: out
+      ? undefined
+      : {
+          averagePriceAfter: "10.61",
+          averagePriceBefore: null,
+          fractionCost: 212,
+          fractionQuantity: "0.2",
+          quantityAfter: "762",
+          quantityBefore: "0",
+        },
+    id: out ? "op-out" : "op-in",
+    quantity: out ? "103" : "762",
+    type: out
+      ? InvestmentOperationType.CONVERSION_OUT
+      : InvestmentOperationType.CONVERSION_IN,
+  });
 }
 
 function makeDetail(
@@ -410,6 +473,8 @@ function makeValuation(
 
 export {
   makeAsset,
+  makeConversion,
+  makeConversionOperation,
   makeDetail,
   makeEventOperation,
   makeEventSuggestion,
