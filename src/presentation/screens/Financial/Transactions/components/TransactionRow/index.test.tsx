@@ -172,7 +172,7 @@ describe("recurring series (spec 034)", () => {
         id: "tx-r",
         occurrenceCount: 10,
         occurrenceNumber: 3,
-        recurrenceFrequency: "MONTHLY",
+        recurrenceFrequency: { interval: 1, unit: "MONTH" },
         recurrenceId: "series-1",
         ...overrides,
       }),
@@ -200,7 +200,7 @@ describe("recurring series (spec 034)", () => {
 
     expect(screen.getByText("Rent")).toBeOnTheScreen();
     expect(
-      screen.getByText(/financial.recurrence.frequency.MONTHLY/),
+      screen.getByText(/financial.recurrence.label.MONTH/),
     ).toBeOnTheScreen();
   });
 

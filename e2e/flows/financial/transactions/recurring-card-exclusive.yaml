@@ -64,7 +64,7 @@ onFlowComplete:
 - assertNotVisible:
     id: "financial.transactionForm.installments.count"
 - assertVisible:
-    id: "financial.transaction-form.repeat-frequency-MONTHLY"
+    id: "financial.transactionForm.recurrenceUnit.MONTH"
 # And the other way around
 - runFlow: ../../../subflows/financial/scroll-form-up.yaml
 - tapOn:
@@ -72,4 +72,4 @@ onFlowComplete:
 - assertVisible:
     id: "financial.transactionForm.installments.count"
 - assertNotVisible:
-    id: "financial.transaction-form.repeat-frequency-MONTHLY"
+    id: "financial.transactionForm.recurrenceUnit.MONTH"

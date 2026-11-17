@@ -8,7 +8,10 @@ import { CreateInstallmentPlanUseCaseParams } from "@application/useCases/cases/
 import { CreateRecurrenceUseCaseParams } from "@application/useCases/cases/financial/recurrences/createRecurrenceUseCase";
 import { CreateTransactionUseCaseParams } from "@application/useCases/cases/financial/transactions/createTransactionUseCase";
 import { UpdateTransactionUseCaseParams } from "@application/useCases/cases/financial/transactions/updateTransactionUseCase";
-import { RecurrenceFrequency } from "@domain/entities/financial/RecurrenceEntity";
+import {
+  isRecurrenceFrequency,
+  RecurrenceFrequency,
+} from "@domain/entities/financial/RecurrenceEntity";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { categoryInScope } from "@screens/Financial/models/categoryTree";
@@ -37,7 +40,8 @@ type TransactionFormErrors = Partial<
     | "date"
     | "description"
     | "installments"
-    | "repeatEnd",
+    | "repeatEnd"
+    | "repeatFrequency",
     TranslationKeys
   >
 >;
@@ -321,7 +325,7 @@ const REPEAT_AND_INSTALLMENTS_DEFAULTS = {
   installmentsCount: 2,
   installmentsOn: false,
   repeatEnd: undefined,
-  repeatFrequency: "MONTHLY",
+  repeatFrequency: { interval: 1, unit: "MONTH" },
   repeatOn: false,
 } as const satisfies Pick<
   TransactionFormState,
@@ -447,7 +451,8 @@ function isSameState(a: TransactionFormState, b: TransactionFormState) {
     a.paid === b.paid &&
     a.payWith === b.payWith &&
     a.repeatEnd?.getTime() === b.repeatEnd?.getTime() &&
-    a.repeatFrequency === b.repeatFrequency &&
+    a.repeatFrequency.unit === b.repeatFrequency.unit &&
+    a.repeatFrequency.interval === b.repeatFrequency.interval &&
     a.repeatOn === b.repeatOn &&
     a.tags.length === b.tags.length &&
     a.tags.every((tag, index) => tag === b.tags[index]) &&
@@ -539,7 +544,8 @@ function stateFromDto(
     repeatEnd: series?.endDate
       ? normalizeDate(new Date(series.endDate))
       : undefined,
-    repeatFrequency: dto.recurrenceFrequency ?? series?.frequency ?? "MONTHLY",
+    repeatFrequency: dto.recurrenceFrequency ??
+      series?.frequency ?? { interval: 1, unit: "MONTH" },
     repeatOn: !!dto.recurrenceId,
     tags: dto.tags.map((tag) => tag.name),
     type: dto.type as TransactionType,
@@ -664,6 +670,9 @@ function validate(state: TransactionFormState): TransactionFormErrors {
   ) {
     errors.repeatEnd =
       "financial.transactions.form.errors.repeatEndBeforeStart";
+  }
+  if (state.repeatOn && !isRecurrenceFrequency(state.repeatFrequency)) {
+    errors.repeatFrequency = "financial.recurrence.intervalError";
   }
   if (Number.isNaN(state.date.getTime())) {
     errors.date = "financial.transactions.form.errors.dateRequired";

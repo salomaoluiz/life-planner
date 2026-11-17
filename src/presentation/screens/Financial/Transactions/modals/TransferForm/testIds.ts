@@ -14,9 +14,16 @@ const transferFormTestIds = {
   rate: "financial.transfer-form.rate",
   rateMode: "financial.transfer-form.rate-mode",
   rateText: "financial.transfer-form.rate-text",
+  recurrenceInterval: "financial.transferForm.recurrenceInterval",
+  recurrenceIntervalDecrease:
+    "financial.transferForm.recurrenceIntervalDecrease",
+  recurrenceIntervalError: "financial.transferForm.recurrenceIntervalError",
+  recurrenceIntervalIncrease:
+    "financial.transferForm.recurrenceIntervalIncrease",
+  recurrencePreview: "financial.transferForm.recurrencePreview",
+  recurrenceUnit: "financial.transferForm.recurrenceUnit",
   repeat: "financial.transfer-form.repeat",
   repeatEnd: "financial.transfer-form.repeat-end",
-  repeatFrequency: "financial.transfer-form.repeat-frequency",
   sameDate: "financial.transfer-form.same-date",
   saveAndNewButton: "financial.transfer-form.save-and-new-button",
   saveButton: "financial.transfer-form.save-button",

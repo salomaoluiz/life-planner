@@ -1,17 +1,13 @@
 import RecurrenceResultDTO from "@application/dto/financial/RecurrenceResultDTO";
 import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import { DefaultError, FieldInvalid } from "@domain/entities/errors";
-import { RecurrenceFrequency } from "@domain/entities/financial/RecurrenceEntity";
+import {
+  isRecurrenceFrequency,
+  RecurrenceFrequency,
+} from "@domain/entities/financial/RecurrenceEntity";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import Repositories from "@domain/repositories";
-
-export const RECURRENCE_FREQUENCIES: RecurrenceFrequency[] = [
-  "WEEKLY",
-  "BIWEEKLY",
-  "MONTHLY",
-  "YEARLY",
-];
 
 export interface CreateRecurrenceUseCaseParams {
   accountId?: string;
@@ -22,7 +18,7 @@ export interface CreateRecurrenceUseCaseParams {
   description: string;
   // ISO date-time; omitted = no end date.
   endDate?: string;
-  frequency: string;
+  frequency: RecurrenceFrequency;
   notes?: null | string;
   owner: string;
   ownerId: string;
@@ -44,17 +40,13 @@ function createRecurrenceUseCase(
     execute: async (params) => {
       const owner = OwnerType[params.owner as keyof typeof OwnerType];
       const type = TransactionType[params.type as keyof typeof TransactionType];
-      const frequency = RECURRENCE_FREQUENCIES.find(
-        (item) => item === params.frequency,
-      );
-
       if (!owner) {
         throw new FieldInvalid({ owner: params.owner });
       }
       if (!type) {
         throw new FieldInvalid({ type: params.type });
       }
-      if (!frequency) {
+      if (!isRecurrenceFrequency(params.frequency)) {
         throw new FieldInvalid({ frequency: params.frequency });
       }
       if (params.endDate && new Date(params.endDate) < new Date(params.date)) {
@@ -70,7 +62,7 @@ function createRecurrenceUseCase(
             date: params.date,
             description: params.description,
             endDate: params.endDate,
-            frequency,
+            frequency: params.frequency,
             notes: params.notes,
             owner,
             ownerId: params.ownerId,

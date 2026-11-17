@@ -46,7 +46,7 @@ const createParams = {
   date: new Date(2026, 9, 5).toISOString(),
   description: "Rent",
   endDate: new Date(2027, 8, 5).toISOString(),
-  frequency: "MONTHLY" as const,
+  frequency: { interval: 2, unit: "MONTH" } as const,
   owner: "USER" as const,
   ownerId: "user-id",
   paid: true,
@@ -88,7 +88,7 @@ describe("createRecurrence", () => {
         date: "2026-10-05",
         description: "Rent",
         endDate: "2027-09-05",
-        frequency: "MONTHLY",
+        frequency: { interval: 2, unit: "MONTH" },
         owner: "USER",
         ownerId: "user-id",
         paid: true,
@@ -373,7 +373,7 @@ describe("writes", () => {
 
     const result = await splitRecurrence({
       endDate: new Date(2027, 11, 5).toISOString(),
-      frequency: "WEEKLY",
+      frequency: { interval: 3, unit: "WEEK" },
       occurrenceNumber: 5,
       recurrenceId: "recurrence-1",
       value: "2200.00",
@@ -383,7 +383,7 @@ describe("writes", () => {
       "/v1/finance/recurrences/recurrence-1/split?today=2026-10-17",
       expect.objectContaining({
         endDate: "2027-12-05",
-        frequency: "WEEKLY",
+        frequency: { interval: 3, unit: "WEEK" },
         occurrenceNumber: 5,
         value: 220000,
       }),

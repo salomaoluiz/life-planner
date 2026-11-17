@@ -107,7 +107,7 @@ it("SHOULD show the series fields WHEN repeat is on", () => {
   });
 
   expect(
-    screen.getByTestId(transferFormTestIds.repeatFrequency),
+    screen.getByTestId(transferFormTestIds.recurrenceInterval),
   ).toBeOnTheScreen();
   expect(screen.getByTestId(transferFormTestIds.repeatEnd)).toBeOnTheScreen();
 });

@@ -24,7 +24,7 @@ const initial: TransactionFormState = {
   payWith: "ACCOUNT",
   projected: false,
   repeatEnd: new Date(2027, 8, 5),
-  repeatFrequency: "MONTHLY",
+  repeatFrequency: { interval: 1, unit: "MONTH" },
   repeatOn: true,
   tags: [],
   type: TransactionType.EXPENSE,
@@ -173,7 +173,7 @@ describe("buildRecurringSave - this and the next ones", () => {
         accountId: "account-2",
         amountCents: 220000,
         repeatEnd: undefined,
-        repeatFrequency: "WEEKLY",
+        repeatFrequency: { interval: 1, unit: "WEEK" },
       },
       initial,
       real,
@@ -187,11 +187,45 @@ describe("buildRecurringSave - this and the next ones", () => {
         creditCardId: undefined,
         description: undefined,
         endDate: null,
-        frequency: "WEEKLY",
+        frequency: { interval: 1, unit: "WEEK" },
         occurrenceNumber: 5,
         recurrenceId: "series-1",
         value: "2200.00",
       },
+    });
+  });
+
+  it("SHOULD send the frequency WHEN only the interval changes (2 months to 3 months)", () => {
+    const result = buildRecurringSave(
+      "THIS_AND_NEXT",
+      { ...initial, repeatFrequency: { interval: 3, unit: "MONTH" } },
+      { ...initial, repeatFrequency: { interval: 2, unit: "MONTH" } },
+      real,
+    );
+
+    expect(result).toEqual({
+      kind: "split",
+      params: expect.objectContaining({
+        frequency: { interval: 3, unit: "MONTH" },
+      }),
+    });
+  });
+
+  it("SHOULD NOT send the frequency WHEN unit and interval are the same objects by value", () => {
+    const result = buildRecurringSave(
+      "THIS_AND_NEXT",
+      {
+        ...initial,
+        amountCents: 220000,
+        repeatFrequency: { ...initial.repeatFrequency },
+      },
+      initial,
+      real,
+    );
+
+    expect(result).toEqual({
+      kind: "split",
+      params: expect.objectContaining({ frequency: undefined }),
     });
   });
 
@@ -252,7 +286,7 @@ describe("buildRecurringSave - all", () => {
     expect(
       buildRecurringSave(
         "ALL",
-        { ...initial, repeatFrequency: "WEEKLY" },
+        { ...initial, repeatFrequency: { interval: 1, unit: "WEEK" } },
         initial,
         real,
       ),

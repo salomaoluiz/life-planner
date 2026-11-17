@@ -104,6 +104,7 @@ export {
   NavigationRailItem,
   NavigationRailProps,
 } from "./NavigationRail";
+export { default as NumberStepper, NumberStepperProps } from "./NumberStepper";
 export { default as OptionRow, OptionRowProps } from "./OptionRow";
 export {
   default as PendingItemsDialog,

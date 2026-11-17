@@ -96,7 +96,7 @@ function state(
     payWith: "ACCOUNT",
     projected: false,
     repeatEnd: undefined,
-    repeatFrequency: "MONTHLY",
+    repeatFrequency: { interval: 1, unit: "MONTH" },
     repeatOn: false,
     tags: [],
     type: TransactionType.EXPENSE,
@@ -128,7 +128,7 @@ it("SHOULD create an expense form for today with the default account", () => {
     paidTouched: false,
     payWith: "ACCOUNT",
     projected: false,
-    repeatFrequency: "MONTHLY",
+    repeatFrequency: { interval: 1, unit: "MONTH" },
     repeatOn: false,
     tags: [],
     type: TransactionType.EXPENSE,
@@ -165,7 +165,7 @@ it("SHOULD build the state of an existing transaction from its DTO", () => {
     paidTouched: true,
     payWith: "ACCOUNT",
     projected: false,
-    repeatFrequency: "MONTHLY",
+    repeatFrequency: { interval: 1, unit: "MONTH" },
     repeatOn: false,
     tags: [],
     type: TransactionType.INCOME,
@@ -679,7 +679,7 @@ describe("repeat (spec 034)", () => {
 
     expect(initial).toMatchObject({
       repeatEnd: undefined,
-      repeatFrequency: "MONTHLY",
+      repeatFrequency: { interval: 1, unit: "MONTH" },
       repeatOn: false,
     });
   });
@@ -711,7 +711,7 @@ describe("repeat (spec 034)", () => {
     const params = toCreateRecurrenceParams(
       state({
         repeatEnd: new Date(2027, 8, 5),
-        repeatFrequency: "WEEKLY",
+        repeatFrequency: { interval: 1, unit: "WEEK" },
         repeatOn: true,
       }),
       user,
@@ -724,7 +724,7 @@ describe("repeat (spec 034)", () => {
       date: new Date(2026, 9, 5).toISOString(),
       description: "Groceries",
       endDate: new Date(2027, 8, 5).toISOString(),
-      frequency: "WEEKLY",
+      frequency: { interval: 1, unit: "WEEK" },
       owner: user.type,
       ownerId: "user-id",
       paid: true,
@@ -770,7 +770,7 @@ describe("repeat (spec 034)", () => {
       description: "Rent",
       endDate: new Date(2027, 8, 5).toISOString(),
       firstNumber: 1,
-      frequency: "BIWEEKLY",
+      frequency: { interval: 2, unit: "WEEK" },
       id: "series-1",
       occurrenceCount: 12,
       owner: "USER",
@@ -796,12 +796,12 @@ describe("repeat (spec 034)", () => {
 
     expect(stateFromDto(dto, series)).toMatchObject({
       repeatEnd: new Date(2027, 8, 5),
-      repeatFrequency: "BIWEEKLY",
+      repeatFrequency: { interval: 2, unit: "WEEK" },
       repeatOn: true,
     });
     expect(stateFromDto(dto)).toMatchObject({
       repeatEnd: undefined,
-      repeatFrequency: "MONTHLY",
+      repeatFrequency: { interval: 1, unit: "MONTH" },
       repeatOn: true,
     });
     expect(
@@ -812,9 +812,12 @@ describe("repeat (spec 034)", () => {
 
   it("SHOULD see a repeat change as a change of the form", () => {
     expect(isSameState(state(), state({ repeatOn: true }))).toBe(false);
-    expect(isSameState(state(), state({ repeatFrequency: "YEARLY" }))).toBe(
-      false,
-    );
+    expect(
+      isSameState(
+        state(),
+        state({ repeatFrequency: { interval: 1, unit: "YEAR" } }),
+      ),
+    ).toBe(false);
     expect(
       isSameState(state(), state({ repeatEnd: new Date(2027, 1, 1) })),
     ).toBe(false);
@@ -856,7 +859,7 @@ describe("resetForNext", () => {
     paid: false,
     paidTouched: true,
     repeatEnd: new Date(2027, 0, 1),
-    repeatFrequency: "WEEKLY",
+    repeatFrequency: { interval: 1, unit: "WEEK" },
     repeatOn: true,
     type: TransactionType.INCOME,
   });

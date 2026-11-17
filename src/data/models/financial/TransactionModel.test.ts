@@ -142,13 +142,13 @@ it("SHOULD read AND write the recurring series fields (spec 034)", () => {
   expect(model).toMatchObject({
     occurrenceCount: 12,
     occurrenceNumber: 1,
-    recurrenceFrequency: "MONTHLY",
+    recurrenceFrequency: { interval: 2, unit: "MONTH" },
     recurrenceId: "recurrence-1",
   });
   expect(model.toJSON()).toMatchObject({
     occurrenceCount: 12,
     occurrenceNumber: 1,
-    recurrenceFrequency: "MONTHLY",
+    recurrenceFrequency: { interval: 2, unit: "MONTH" },
     recurrenceId: "recurrence-1",
   });
 });

@@ -1,0 +1,85 @@
+url: ${E2E_WEB_URL}
+name: financial/transactions/recurring-interval
+tags:
+  - financial
+  - spec-114
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Series
+      KEY: SERIES_NAME
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.empty-month"
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- tapOn:
+    id: "financial.transactions.empty-month-action"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.amount-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.transaction-form.amount-input"
+- eraseText
+- inputText: "15000"
+- tapOn:
+    id: "financial.transaction-form.description-input"
+- inputText: ${output.SERIES_NAME}
+- tapOn:
+    id: "financial.transaction-form.category-${output.EXPENSE_CATEGORY_ID}"
+# Spec 043: the Tags field made the form taller, so the account is picked first (while in view) and Repeat needs no scroll
+- tapOn:
+    id: "financial.transaction-form.account-select"
+- tapOn:
+    id: "financial.transaction-form.account-select-option-${output.ACCOUNT_ID}"
+# Spec 114: every 2 months; the preview and the list say so
+- tapOn:
+    id: "financial.transaction-form.repeat"
+- tapOn:
+    id: "financial.transactionForm.recurrenceUnit.MONTH"
+- tapOn:
+    id: "financial.transactionForm.recurrenceIntervalIncrease"
+- assertVisible:
+    id: "financial.transactionForm.recurrencePreview"
+    text: ".*(2 months|2 meses).*"
+# An interval out of the unit's range shows the error and keeps the series from being saved
+- tapOn:
+    id: "financial.transactionForm.recurrenceInterval"
+- eraseText
+- inputText: "25"
+- assertVisible:
+    id: "financial.transactionForm.recurrenceIntervalError"
+- assertNotVisible:
+    id: "financial.transactionForm.recurrencePreview"
+- eraseText
+- inputText: "2"
+- assertNotVisible:
+    id: "financial.transactionForm.recurrenceIntervalError"
+- tapOn:
+    id: "financial.transaction-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.row-recurring-title"
+      text: ${output.SERIES_NAME}
+    timeout: 20000
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- assertVisible:
+    text: ".*(Every 2 months|A cada 2 meses).*"

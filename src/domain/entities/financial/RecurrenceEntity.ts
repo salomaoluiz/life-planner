@@ -6,7 +6,28 @@ import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import { TransactionType } from "./TransactionEntity";
 
-export type RecurrenceFrequency = "BIWEEKLY" | "MONTHLY" | "WEEKLY" | "YEARLY";
+export interface RecurrenceFrequency {
+  interval: number;
+  unit: RecurrenceUnit;
+}
+
+// Spec 114: a series repeats every `interval` `unit`s.
+export type RecurrenceUnit = "DAY" | "MONTH" | "WEEK" | "YEAR";
+
+export const RECURRENCE_UNITS: RecurrenceUnit[] = [
+  "DAY",
+  "WEEK",
+  "MONTH",
+  "YEAR",
+];
+
+// Inclusive upper bound of the interval per unit (the lower bound is 1); the API refuses anything outside.
+export const RECURRENCE_INTERVAL_MAX: Record<RecurrenceUnit, number> = {
+  DAY: 365,
+  MONTH: 24,
+  WEEK: 52,
+  YEAR: 10,
+};
 
 // Which occurrences an edit or a delete reaches (spec 034 FR 19, 28).
 export type RecurrenceScope = "ALL" | "ONLY_THIS" | "THIS_AND_NEXT";
@@ -80,6 +101,24 @@ class RecurrenceEntity {
     this.type = params.type;
     this.value = params.value;
   }
+}
+
+export function isRecurrenceFrequency(
+  value: unknown,
+): value is RecurrenceFrequency {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const { interval, unit } = value as Partial<RecurrenceFrequency>;
+
+  return (
+    typeof interval === "number" &&
+    Number.isInteger(interval) &&
+    RECURRENCE_UNITS.includes(unit as RecurrenceUnit) &&
+    interval >= 1 &&
+    interval <= RECURRENCE_INTERVAL_MAX[unit as RecurrenceUnit]
+  );
 }
 
 export default RecurrenceEntity;

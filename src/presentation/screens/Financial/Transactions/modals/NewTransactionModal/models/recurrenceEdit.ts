@@ -95,7 +95,8 @@ function buildRecurringSave(
         : undefined,
     endDate,
     frequency:
-      state.repeatFrequency !== initial.repeatFrequency
+      state.repeatFrequency.unit !== initial.repeatFrequency.unit ||
+      state.repeatFrequency.interval !== initial.repeatFrequency.interval
         ? state.repeatFrequency
         : undefined,
   };

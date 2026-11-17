@@ -20,6 +20,7 @@ import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
 import { useBreakpoint } from "@presentation/theme";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
+import { recurrenceLabel } from "@screens/Financial/utils/recurrenceLabel";
 
 import { ConfirmPaymentVM } from "../hooks";
 import useStyles from "../styles";
@@ -163,9 +164,7 @@ function Wide({ vm }: AdaptiveViewProps<ConfirmPaymentVM>) {
                     tone="secondary"
                     value={t("financial.transactions.confirmPay.seriesNote", {
                       frequency: item.recurrenceFrequency
-                        ? t(
-                            `financial.recurrence.frequency.${item.recurrenceFrequency}`,
-                          )
+                        ? recurrenceLabel(t, item.recurrenceFrequency)
                         : "",
                       value: formatAmount(
                         vm.originalCents,

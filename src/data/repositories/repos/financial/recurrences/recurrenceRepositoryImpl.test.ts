@@ -48,7 +48,7 @@ it("SHOULD create a series, return the entities AND invalidate the transaction a
     categoryId: "category-1",
     date: "2026-10-05T03:00:00.000Z",
     description: "Rent",
-    frequency: "MONTHLY",
+    frequency: { interval: 2, unit: "MONTH" },
     owner: OwnerType.USER,
     ownerId: "user-id",
     type: "EXPENSE" as never,

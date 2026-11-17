@@ -248,7 +248,7 @@ describe("new transfer", () => {
       result.current.onPaidChange(false);
       result.current.onNotesChange("note");
       result.current.onRepeatToggle(true);
-      result.current.onRepeatFrequencyChange("WEEKLY");
+      result.current.onRepeatFrequencyChange({ interval: 1, unit: "WEEK" });
       result.current.onRepeatEndChange(new Date(2027, 0, 1));
     });
 
@@ -261,7 +261,7 @@ describe("new transfer", () => {
       feeCents: 350,
       notes: "note",
       paid: false,
-      repeatFrequency: "WEEKLY",
+      repeatFrequency: { interval: 1, unit: "WEEK" },
       repeatOn: true,
     });
   });

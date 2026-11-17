@@ -89,7 +89,10 @@ it("SHOULD note the series WHEN the row is a recurring occurrence", () => {
     item: Object.assign(
       Object.create(Object.getPrototypeOf(vm.item)),
       vm.item,
-      { recurrenceFrequency: "MONTHLY", recurrenceId: "series-1" },
+      {
+        recurrenceFrequency: { interval: 1, unit: "MONTH" },
+        recurrenceId: "series-1",
+      },
     ),
   });
 

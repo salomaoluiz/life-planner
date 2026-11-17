@@ -103,11 +103,9 @@ class TransactionUIModel {
     return this.dto.description;
   }
 
-  // The frequency label of a series WITHOUT an end date (the list shows it instead of a counter).
+  // The rule of the series the row belongs to (spec 114: the list shows it next to the counter).
   get frequency() {
-    return this.dto.recurrenceId && !this.dto.occurrenceCount
-      ? this.dto.recurrenceFrequency
-      : undefined;
+    return this.dto.recurrenceId ? this.dto.recurrenceFrequency : undefined;
   }
 
   get id() {

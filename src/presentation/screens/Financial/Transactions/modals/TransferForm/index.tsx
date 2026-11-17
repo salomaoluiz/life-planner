@@ -16,12 +16,11 @@ import {
   Toast,
 } from "@components";
 import { InstallmentScope } from "@domain/entities/financial/InstallmentPlanEntity";
-import { RecurrenceFrequency } from "@domain/entities/financial/RecurrenceEntity";
 import { useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
 import { TranslationKeys } from "@presentation/i18n/types";
 import { useBreakpoint } from "@presentation/theme";
-import { RECURRENCE_FREQUENCIES } from "@screens/Financial/models/recurrence";
+import RecurrenceBlock from "@screens/Financial/Transactions/components/RecurrenceBlock";
 
 import { useTransferFormViewModel } from "./hooks";
 import { MAX_NOTES } from "./models/transferFormState";
@@ -301,31 +300,36 @@ function TransferForm(props: Props) {
               )}
               {state.repeatOn && !vm.isEditing ? (
                 <>
-                  <SelectField
-                    closeLabel={t("common.actions.close")}
-                    label={t("financial.transfers.form.repeat")}
-                    onChange={(value) =>
-                      vm.onRepeatFrequencyChange(value as RecurrenceFrequency)
-                    }
-                    options={RECURRENCE_FREQUENCIES.map((frequency) => ({
-                      label: t(`financial.recurrence.frequency.${frequency}`),
-                      value: frequency,
-                    }))}
-                    sheetTitle={t("financial.transfers.form.repeat")}
-                    testID={transferFormTestIds.repeatFrequency}
-                    value={state.repeatFrequency}
-                  />
-                  <DateField
-                    clearable
-                    clearLabel={t("financial.transactions.form.repeatEndClear")}
-                    label={t("financial.transactions.form.repeatEnd")}
-                    onChange={vm.onRepeatEndChange}
-                    placeholder={t("financial.recurrence.noEnd")}
-                    testID={transferFormTestIds.repeatEnd}
-                    todayLabel={t("common.date.today")}
-                    value={state.repeatEnd}
-                    yesterdayLabel={t("common.date.yesterday")}
-                  />
+                  <RecurrenceBlock
+                    endDate={state.repeatEnd}
+                    frequency={state.repeatFrequency}
+                    onChange={vm.onRepeatFrequencyChange}
+                    startDate={state.dateOut}
+                    testIDs={{
+                      error: transferFormTestIds.recurrenceIntervalError,
+                      interval: transferFormTestIds.recurrenceInterval,
+                      intervalDecrease:
+                        transferFormTestIds.recurrenceIntervalDecrease,
+                      intervalIncrease:
+                        transferFormTestIds.recurrenceIntervalIncrease,
+                      preview: transferFormTestIds.recurrencePreview,
+                      unit: transferFormTestIds.recurrenceUnit,
+                    }}
+                  >
+                    <DateField
+                      clearable
+                      clearLabel={t(
+                        "financial.transactions.form.repeatEndClear",
+                      )}
+                      label={t("financial.transactions.form.repeatEnd")}
+                      onChange={vm.onRepeatEndChange}
+                      placeholder={t("financial.recurrence.noEnd")}
+                      testID={transferFormTestIds.repeatEnd}
+                      todayLabel={t("common.date.today")}
+                      value={state.repeatEnd}
+                      yesterdayLabel={t("common.date.yesterday")}
+                    />
+                  </RecurrenceBlock>
                 </>
               ) : null}
               <TextField
