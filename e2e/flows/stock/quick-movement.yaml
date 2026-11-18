@@ -6,7 +6,8 @@ tags:
 onFlowComplete:
   - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
 ---
-# Spec 117: − on the row groups the taps into one movement, the notice offers Desfazer and the quantity comes back.
+# Spec 117: − on the row takes one, the notice offers Desfazer and the quantity comes back (Maestro taps are too
+# slow to land inside the 2 s merge window, so one tap is one gesture).
 - launchApp:
     clearState: true
 - runFlow: ../../subflows/signup-via-api.yaml
@@ -35,8 +36,6 @@ onFlowComplete:
     timeout: 20000
 - tapOn:
     id: "stock.list.row.decrement"
-- tapOn:
-    id: "stock.list.row.decrement"
 - extendedWaitUntil:
     visible:
       id: "stock.notice"
@@ -44,7 +43,7 @@ onFlowComplete:
 - extendedWaitUntil:
     visible:
       id: "stock.list.row-quantity"
-      text: "1.*"
+      text: "2.*"
     timeout: 10000
 - tapOn:
     id: "stock.notice.undo"
