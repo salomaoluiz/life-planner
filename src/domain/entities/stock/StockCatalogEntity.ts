@@ -16,6 +16,7 @@ export interface StockLocationDetailEntity {
 export interface StockOwnerChangePreviewEntity {
   category: { from?: string; to?: string };
   location: { from?: string; to?: string };
+  shoppingList: { from?: string; to?: string };
 }
 
 export interface StockSuggestionEntity {

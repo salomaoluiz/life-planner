@@ -1,4 +1,12 @@
 import {
+  RestockSummaryEntity,
+  ShoppingListCardEntity,
+  ShoppingListDetailEntity,
+  ShoppingListEntity,
+  ShoppingListRowEntity,
+  ShoppingListRowResultEntity,
+} from "@domain/entities/stock/ShoppingListEntity";
+import {
   StockCategoryEntity,
   StockLocationDetailEntity,
   StockLocationEntity,
@@ -14,6 +22,12 @@ export interface StockOwnerParams {
 }
 
 export type StockRepository = {
+  addShoppingListRow(
+    params: AddShoppingListRowRepositoryParams,
+  ): Promise<ShoppingListRowResultEntity>;
+  createShoppingList(
+    params: CreateShoppingListRepositoryParams,
+  ): Promise<ShoppingListEntity>;
   createStockCategory(
     params: CreateStockCategoryRepositoryParams,
   ): Promise<void>;
@@ -28,6 +42,7 @@ export type StockRepository = {
   createStockMovement(
     params: CreateStockMovementRepositoryParams,
   ): Promise<{ item: StockEntity; movements: StockMovementEntity[] }>;
+  deleteShoppingListRow(rowId: string): Promise<void>;
   deleteStockCategory(
     params: DeleteStockCatalogRepositoryParams,
   ): Promise<void>;
@@ -39,6 +54,11 @@ export type StockRepository = {
   getOwnerChangePreview(
     params: OwnerChangePreviewRepositoryParams,
   ): Promise<StockOwnerChangePreviewEntity>;
+  getRestockSummary(): Promise<RestockSummaryEntity>;
+  getShoppingList(id: string): Promise<ShoppingListDetailEntity>;
+  getShoppingLists(
+    params: GetShoppingListsRepositoryParams,
+  ): Promise<ShoppingListCardEntity[]>;
   getStockCategories(
     params: GetStockCatalogRepositoryParams,
   ): Promise<StockCategoryEntity[]>;
@@ -58,6 +78,12 @@ export type StockRepository = {
     params: SuggestStockItemsRepositoryParams,
   ): Promise<StockSuggestionEntity[]>;
   undoStockGesture(params: StockGestureRepositoryParams): Promise<StockEntity>;
+  updateShoppingList(
+    params: UpdateShoppingListRepositoryParams,
+  ): Promise<ShoppingListEntity>;
+  updateShoppingListRow(
+    params: UpdateShoppingListRowRepositoryParams,
+  ): Promise<ShoppingListRowEntity>;
   updateStockCategory(
     params: UpdateStockCategoryRepositoryParams,
   ): Promise<void>;
@@ -66,6 +92,24 @@ export type StockRepository = {
     params: UpdateStockLocationRepositoryParams,
   ): Promise<void>;
 };
+
+// Spec 118: shopping lists. `undefined` = unchanged, `null` clears an estimate.
+interface AddShoppingListRowRepositoryParams {
+  description?: string;
+  estimatedUnitPriceCents?: number;
+  itemId?: string;
+  listId: string;
+  origin?: string;
+  quantity: number;
+  restore?: boolean;
+  unit?: string;
+}
+
+interface CreateShoppingListRepositoryParams extends StockOwnerParams {
+  currency?: string;
+  isDefault?: boolean;
+  name: string;
+}
 
 interface CreateStockCategoryRepositoryParams extends StockOwnerParams {
   financeCategoryId?: string;
@@ -79,6 +123,7 @@ interface CreateStockItemRepositoryParams extends StockOwnerParams {
   brand?: string;
   categoryId?: string;
   description: string;
+  estimatedUnitPriceCents?: number;
   expirationDate?: Date;
   idealQuantity?: number;
   locationId?: string;
@@ -88,6 +133,7 @@ interface CreateStockItemRepositoryParams extends StockOwnerParams {
   purchaseDate?: Date;
   quantity: number;
   quickStep?: number;
+  shoppingListId?: string;
   stockOnly: boolean;
   unit: string;
   warnDaysClosed: number;
@@ -124,6 +170,11 @@ interface DeleteStockItemRepositoryParams {
   ownerId: string;
 }
 
+interface GetShoppingListsRepositoryParams {
+  includeArchived?: boolean;
+  ownerId?: string;
+}
+
 interface GetStockCatalogRepositoryParams extends StockOwnerParams {
   includeArchived?: boolean;
 }
@@ -154,6 +205,22 @@ interface SuggestStockItemsRepositoryParams {
   q: string;
 }
 
+interface UpdateShoppingListRepositoryParams {
+  currency?: string;
+  id: string;
+  isDefault?: boolean;
+  name?: string;
+  status?: string;
+}
+
+interface UpdateShoppingListRowRepositoryParams {
+  description?: string;
+  estimatedUnitPriceCents?: null | number;
+  id: string;
+  quantity?: number;
+  unit?: string;
+}
+
 interface UpdateStockCategoryRepositoryParams {
   financeCategoryId?: null | string;
   id: string;
@@ -167,6 +234,7 @@ interface UpdateStockItemRepositoryParams {
   brand?: null | string;
   categoryId?: null | string;
   description?: string;
+  estimatedUnitPriceCents?: null | number;
   id: string;
   idealQuantity?: null | number;
   locationId?: null | string;
@@ -178,6 +246,7 @@ interface UpdateStockItemRepositoryParams {
   // The owner the item is in now: its cached list is invalidated, and the new owner's too.
   previousOwnerId: string;
   quickStep?: null | number;
+  shoppingListId?: null | string;
   stockOnly?: boolean;
   unit?: string;
   warnDaysClosed?: number;
@@ -191,18 +260,23 @@ interface UpdateStockLocationRepositoryParams {
 }
 
 export {
+  AddShoppingListRowRepositoryParams,
+  CreateShoppingListRepositoryParams,
   CreateStockCategoryRepositoryParams,
   CreateStockItemRepositoryParams,
   CreateStockLocationRepositoryParams,
   CreateStockMovementRepositoryParams,
   DeleteStockCatalogRepositoryParams,
   DeleteStockItemRepositoryParams,
+  GetShoppingListsRepositoryParams,
   GetStockCatalogRepositoryParams,
   GetStockMovementsRepositoryParams,
   OwnerChangePreviewRepositoryParams,
   StockGestureExpirationRepositoryParams,
   StockGestureRepositoryParams,
   SuggestStockItemsRepositoryParams,
+  UpdateShoppingListRepositoryParams,
+  UpdateShoppingListRowRepositoryParams,
   UpdateStockCategoryRepositoryParams,
   UpdateStockItemRepositoryParams,
   UpdateStockLocationRepositoryParams,

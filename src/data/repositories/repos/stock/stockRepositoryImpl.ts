@@ -6,6 +6,16 @@ import deleteStockItem from "./deleteStockItem";
 import getStockItem from "./getStockItem";
 import getStockItems from "./getStockItems";
 import {
+  addShoppingListRow,
+  createShoppingList,
+  deleteShoppingListRow,
+  getRestockSummary,
+  getShoppingList,
+  getShoppingLists,
+  updateShoppingList,
+  updateShoppingListRow,
+} from "./shoppingLists";
+import {
   createStockCategory,
   createStockCategorySuggestions,
   createStockLocation,
@@ -33,6 +43,10 @@ import updateStockItem from "./updateStockItem";
 
 function stockRepositoryImpl(datasources: Datasources): StockRepository {
   return {
+    addShoppingListRow: async (params) =>
+      addShoppingListRow(params, datasources),
+    createShoppingList: async (params) =>
+      createShoppingList(params, datasources),
     createStockCategory: async (params) =>
       createStockCategory(params, datasources),
     createStockCategorySuggestions: async (params) =>
@@ -44,6 +58,8 @@ function stockRepositoryImpl(datasources: Datasources): StockRepository {
       createStockLocationSuggestions(params, datasources),
     createStockMovement: async (params) =>
       createStockMovement(params, datasources),
+    deleteShoppingListRow: async (rowId) =>
+      deleteShoppingListRow(rowId, datasources),
     deleteStockCategory: async (params) =>
       deleteStockCategory(params, datasources),
     deleteStockItem: async (params) => deleteStockItem(params, datasources),
@@ -53,6 +69,9 @@ function stockRepositoryImpl(datasources: Datasources): StockRepository {
       getFrequentStockItems(limit, datasources),
     getOwnerChangePreview: async (params) =>
       getOwnerChangePreview(params, datasources),
+    getRestockSummary: async () => getRestockSummary(datasources),
+    getShoppingList: async (id) => getShoppingList(id, datasources),
+    getShoppingLists: async (params) => getShoppingLists(params, datasources),
     getStockCategories: async (params) =>
       getStockCategories(params, datasources),
     getStockItem: async (id) => getStockItem(id, datasources),
@@ -64,6 +83,10 @@ function stockRepositoryImpl(datasources: Datasources): StockRepository {
       setStockGestureExpiration(params, datasources),
     suggestStockItems: async (params) => suggestStockItems(params, datasources),
     undoStockGesture: async (params) => undoStockGesture(params, datasources),
+    updateShoppingList: async (params) =>
+      updateShoppingList(params, datasources),
+    updateShoppingListRow: async (params) =>
+      updateShoppingListRow(params, datasources),
     updateStockCategory: async (params) =>
       updateStockCategory(params, datasources),
     updateStockItem: async (params) => updateStockItem(params, datasources),

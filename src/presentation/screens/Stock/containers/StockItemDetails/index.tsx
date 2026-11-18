@@ -145,6 +145,13 @@ function StockItemDetails(props: Props) {
               onPress={vm.onEdit}
               testID={stockItemDetailsTestIds.editButton}
             />
+            {vm.canAddToList ? (
+              <Button.Secondary
+                label={t("stock.lists.addToList")}
+                onPress={vm.onAddToList}
+                testID={stockItemDetailsTestIds.addToListButton}
+              />
+            ) : null}
             <Button.Secondary
               label={t("stock.details.open")}
               onPress={vm.onOpen}

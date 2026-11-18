@@ -149,6 +149,29 @@ function Wide({ vm }: AdaptiveViewProps<NewStockItemVM>) {
                     />
                   </View>
                 </View>
+                {values.stockOnly ? null : (
+                  <SelectField
+                    closeLabel={t("common.actions.close")}
+                    label={t("stock.form.shoppingList")}
+                    onChange={(value) =>
+                      vm.setField("shoppingListId", value || undefined)
+                    }
+                    options={[
+                      {
+                        label: t("stock.form.shoppingListDefault", {
+                          name:
+                            catalog?.defaultListName ??
+                            t("stock.lists.defaultName"),
+                        }),
+                        value: "",
+                      },
+                      ...(catalog?.shoppingLists ?? []),
+                    ]}
+                    sheetTitle={t("stock.form.shoppingList")}
+                    testID={stockItemFormTestIds.shoppingListSelect}
+                    value={values.shoppingListId ?? ""}
+                  />
+                )}
                 <ChipGroup
                   label={t("stock.form.unit")}
                   mode="single"
@@ -403,6 +426,16 @@ function Wide({ vm }: AdaptiveViewProps<NewStockItemVM>) {
                 ? "stock.form.ownerChange.keepsLocation"
                 : "stock.form.ownerChange.noLocation",
               { name: preview.location.from, owner },
+            )}
+          />
+        ) : null}
+        {preview.shoppingList.from ? (
+          <Text.Caption
+            value={t(
+              preview.shoppingList.to
+                ? "stock.form.ownerChange.keepsList"
+                : "stock.form.ownerChange.noList",
+              { name: preview.shoppingList.from, owner },
             )}
           />
         ) : null}

@@ -242,6 +242,7 @@ describe("suggestions and owner change", () => {
       ownerChangePreview: {
         category: { from: "Dairy", to: undefined },
         location: { from: "Fridge", to: "Fridge" },
+        shoppingList: {},
       },
       values: values({ ownerId: "family-id" }),
     });
@@ -259,6 +260,25 @@ describe("suggestions and owner change", () => {
     ).toBeOnTheScreen();
   });
 
+  it("SHOULD explain what happens to the shopping list WHEN the owner changes (spec 118)", () => {
+    setup({
+      isEdit: true,
+      isMoreOpen: true,
+      ownerChangePreview: {
+        category: {},
+        location: {},
+        shoppingList: { from: "Pharmacy", to: "Pharmacy" },
+      },
+      values: values({ ownerId: "family-id" }),
+    });
+
+    expect(
+      screen.getByText(
+        'stock.form.ownerChange.keepsList {"name":"Pharmacy","owner":"Silva"}',
+      ),
+    ).toBeOnTheScreen();
+  });
+
   it("SHOULD say a category that stays WHEN it exists in the new owner, and say nothing about an empty one", () => {
     setup({
       isEdit: true,
@@ -266,6 +286,7 @@ describe("suggestions and owner change", () => {
       ownerChangePreview: {
         category: { from: "Dairy", to: "Dairy" },
         location: {},
+        shoppingList: {},
       },
     });
 

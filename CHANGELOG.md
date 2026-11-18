@@ -3,6 +3,15 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [3.2.0] - 2026-11-18
+
+### Added
+
+- Stock shopping lists: Estoque now has Itens, Listas and Categorias e locais; each owner (you or a family) has lists with an estimated total, a default list and archive/reactivate (needs API 6.2.0, spec 118).
+- Items below their minimum appear by themselves on their list (Automático); editing the quantity makes the row yours, removing it can be undone, and you can add stock items or text-only rows by hand (spec 118).
+- "Adicionar à lista" on the item and a "Lista de compras" choice in the item form (spec 118).
+- Home shows the "Lista de compras" card with what the stock asked for (spec 118).
+
 ## [3.1.0] - 2026-11-18
 
 ### Added

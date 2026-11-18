@@ -112,6 +112,7 @@ function useStockItemDetailsViewModel(props: Props) {
   }
 
   return {
+    canAddToList: detail.data ? !detail.data.stockOnly : false,
     errorKey:
       deleteItem.status === "error"
         ? ("common.errors.generic" as const)
@@ -129,6 +130,7 @@ function useStockItemDetailsViewModel(props: Props) {
         ? ("stock.details.error" as const)
         : undefined,
     model,
+    onAddToList: () => openModal("stock_add_to_list", { itemId: id }),
     onAdjust: () => openMovement(StockMovementTypes.ADJUST),
     onCancelDelete: () => setIsConfirmOpen(false),
     onConfirmDelete,

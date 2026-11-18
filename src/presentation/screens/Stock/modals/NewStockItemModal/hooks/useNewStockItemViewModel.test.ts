@@ -33,6 +33,7 @@ jest.mock("@application/useCases", () => ({
   useCases: {
     createStockItemUseCase: { execute: jest.fn(), uniqueName: "create_stock" },
     getOwnerChangePreviewUseCase: { execute: jest.fn(), uniqueName: "preview" },
+    getShoppingListsUseCase: { execute: jest.fn(), uniqueName: "lists" },
     getStockCategoriesUseCase: { execute: jest.fn(), uniqueName: "categories" },
     getStockItemUseCase: { execute: jest.fn(), uniqueName: "get_item" },
     getStockLocationsUseCase: { execute: jest.fn(), uniqueName: "locations" },
@@ -287,7 +288,9 @@ describe("edit", () => {
     expect(setup({ itemId: "item-1" }).result.current.isLoading).toBe(true);
 
     queries.get_item = { data: stored };
-    queries.preview = { data: { category: { from: "Dairy" }, location: {} } };
+    queries.preview = {
+      data: { category: { from: "Dairy" }, location: {}, shoppingList: {} },
+    };
     const { result } = setup({ itemId: "item-1" });
 
     expect(result.current.ownerChangePreview).toBeUndefined();
@@ -297,6 +300,7 @@ describe("edit", () => {
     expect(result.current.ownerChangePreview).toEqual({
       category: { from: "Dairy" },
       location: {},
+      shoppingList: {},
     });
   });
 
@@ -341,6 +345,11 @@ describe("query functions", () => {
       { id: "l", itemCount: 0, name: "Pantry", status: "ACTIVE" },
       { id: "z", itemCount: 0, name: "Old", status: "ARCHIVED" },
     ] as never);
+    jest.mocked(useCases.getShoppingListsUseCase.execute).mockResolvedValue([
+      { id: "d", isDefault: true, name: "Mercado", status: "ACTIVE" },
+      { id: "f", isDefault: false, name: "Farmácia", status: "ACTIVE" },
+      { id: "a", isDefault: false, name: "Old", status: "ARCHIVED" },
+    ] as never);
     setup();
 
     expect(await fetcher("categories")()).toEqual({
@@ -348,7 +357,12 @@ describe("query functions", () => {
         { label: "Dairy", value: "p" },
         { label: "Dairy › Cheese", value: "c" },
       ],
+      defaultListName: "Mercado",
       locations: [{ label: "Pantry", value: "l" }],
+      shoppingLists: [{ label: "Farmácia", value: "f" }],
+    });
+    expect(useCases.getShoppingListsUseCase.execute).toHaveBeenCalledWith({
+      ownerId: "user-id",
     });
     expect(useCases.getStockCategoriesUseCase.execute).toHaveBeenCalledWith({
       owner: "USER",

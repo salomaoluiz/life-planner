@@ -30,7 +30,10 @@ const MIN_SUGGESTION_CHARS = 2;
 
 interface OwnerCatalog {
   categories: Array<{ label: string; value: string }>;
+  defaultListName?: string;
   locations: Array<{ label: string; value: string }>;
+  // Active lists of the owner (spec 118 FR 6) and the name of its default one.
+  shoppingLists: Array<{ label: string; value: string }>;
 }
 
 function flatten(
@@ -112,16 +115,24 @@ function useNewStockItemViewModel() {
     enabled: !!ownerId && !!ownerKind,
     fetch: async () => {
       const query = { owner: ownerKind as string, ownerId: ownerId as string };
-      const [categories, locations] = await Promise.all([
+      const [categories, locations, lists] = await Promise.all([
         useCases.getStockCategoriesUseCase.execute(query),
         useCases.getStockLocationsUseCase.execute(query),
+        useCases.getShoppingListsUseCase.execute({
+          ownerId: ownerId as string,
+        }),
       ]);
+      const active = lists.filter((list) => list.status === "ACTIVE");
 
       return {
         categories: flatten(categories),
+        defaultListName: active.find((list) => list.isDefault)?.name,
         locations: locations
           .filter((location) => location.status === "ACTIVE")
           .map((location) => ({ label: location.name, value: location.id })),
+        shoppingLists: active
+          .filter((list) => !list.isDefault)
+          .map((list) => ({ label: list.name, value: list.id })),
       };
     },
   });

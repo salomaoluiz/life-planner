@@ -1,5 +1,6 @@
 import { FINANCIAL_SECTIONS } from "@screens/Financial/Layout/models/financialSections";
 import { INVESTMENT_SECTIONS } from "@screens/Investment/Layout/models/investmentSections";
+import { STOCK_SECTIONS } from "@screens/Stock/Layout/models/stockSections";
 
 export const MODAL_NAMES = [
   "add_new_transaction",
@@ -18,6 +19,8 @@ export const MODAL_NAMES = [
   "add_new_stock_item",
   "stock_movement",
   "stock_catalog",
+  "stock_add_to_list",
+  "stock_shopping_list",
   "investment_asset",
   "investment_conversion",
   "investment_fixed_income",
@@ -61,6 +64,7 @@ export const VALID_BASES: readonly string[] = [
     HOME,
     ...FINANCIAL_SECTIONS.map((section) => section.path),
     ...INVESTMENT_SECTIONS.map((section) => section.path),
+    ...STOCK_SECTIONS.map((section) => section.path),
   ]),
 ];
 

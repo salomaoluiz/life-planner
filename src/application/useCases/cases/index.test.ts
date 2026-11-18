@@ -1,6 +1,7 @@
 import { listUseCases } from "./index";
 
 const useCases = {
+  addShoppingListRowUseCase: expect.any(Function),
   adjustFinancialAccountBalanceUseCase: expect.any(Function),
   approveInvestmentEventSuggestionUseCase: expect.any(Function),
   approveInvestmentIncomeSuggestionUseCase: expect.any(Function),
@@ -27,6 +28,7 @@ const useCases = {
   createInvestmentIncomeSeriesUseCase: expect.any(Function),
   createInvestmentIncomeUseCase: expect.any(Function),
   createInvestmentOperationUseCase: expect.any(Function),
+  createShoppingListUseCase: expect.any(Function),
   createStockCategorySuggestionsUseCase: expect.any(Function),
   createStockCategoryUseCase: expect.any(Function),
   createStockItemUseCase: expect.any(Function),
@@ -54,6 +56,7 @@ const useCases = {
   deleteInvestmentIncomeUseCase: expect.any(Function),
   deleteInvestmentOperationUseCase: expect.any(Function),
   deleteInvestmentValuationUseCase: expect.any(Function),
+  deleteShoppingListRowUseCase: expect.any(Function),
   deleteStockCategoryUseCase: expect.any(Function),
   deleteStockItemUseCase: expect.any(Function),
   deleteStockLocationUseCase: expect.any(Function),
@@ -106,6 +109,9 @@ const useCases = {
   getMostUsedFinancialCategoriesUseCase: expect.any(Function),
   getOwnerChangePreviewUseCase: expect.any(Function),
   getOwnersUseCase: expect.any(Function),
+  getRestockSummaryUseCase: expect.any(Function),
+  getShoppingListsUseCase: expect.any(Function),
+  getShoppingListUseCase: expect.any(Function),
   getStockAttentionUseCase: expect.any(Function),
   getStockCategoriesUseCase: expect.any(Function),
   getStockItemsUseCase: expect.any(Function),
@@ -167,6 +173,8 @@ const useCases = {
   updateInvestmentIncomeSeriesUseCase: expect.any(Function),
   updateInvestmentIncomeUseCase: expect.any(Function),
   updateInvestmentOperationUseCase: expect.any(Function),
+  updateShoppingListRowUseCase: expect.any(Function),
+  updateShoppingListUseCase: expect.any(Function),
   updateStockCategoryUseCase: expect.any(Function),
   updateStockItemUseCase: expect.any(Function),
   updateStockLocationUseCase: expect.any(Function),

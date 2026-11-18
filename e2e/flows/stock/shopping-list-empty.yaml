@@ -1,0 +1,41 @@
+url: ${E2E_WEB_URL}
+name: stock/shopping-list-empty
+tags:
+  - stock
+  - spec-118
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Spec 118: a new owner gets its default list on the first read; with nothing below the minimum it is empty and has no
+# automatic rows, and the Home card is not shown.
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- assertNotVisible:
+    id: "home.shopping-list.card"
+- runFlow: ../../subflows/stock/open-stock.yaml
+- tapOn:
+    id: "navigation-rail-stock-lists"
+- extendedWaitUntil:
+    visible:
+      id: "stock.lists.card-default"
+    timeout: 20000
+- assertNotVisible:
+    id: "stock.lists.card-auto"
+- tapOn:
+    id: "stock.lists.new-button"
+- extendedWaitUntil:
+    visible:
+      id: "stock.list-form.sheet"
+    timeout: 10000
+- tapOn:
+    id: "stock.list-form.submit"
+- extendedWaitUntil:
+    visible:
+      id: "stock.list-form.name-error"
+    timeout: 10000

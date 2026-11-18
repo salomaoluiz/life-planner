@@ -21,7 +21,7 @@ function buildProps(activeIndex = 0): BottomTabBarProps {
   const routes = [
     { key: "index-key", name: "index/index" },
     { key: "financial-key", name: "financial" },
-    { key: "stock-key", name: "stock/index" },
+    { key: "stock-key", name: "stock" },
     { key: "family-key", name: "family/index" },
     { key: "settings-key", name: "settings" },
     { key: "investments-key", name: "investments" },

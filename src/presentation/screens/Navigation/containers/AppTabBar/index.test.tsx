@@ -25,20 +25,20 @@ it("SHOULD render the rail and no bottom bar WHEN the breakpoint is expanded", (
 it("SHOULD emit tabPress AND navigate WHEN an inactive tab is pressed", () => {
   setup(0);
 
-  fireEvent.press(screen.getByTestId("tab-stock"));
+  fireEvent.press(screen.getByTestId("tab-family"));
 
   expect(spies.emit).toHaveBeenCalledWith({
     canPreventDefault: true,
-    target: "stock-key",
+    target: "family-key",
     type: "tabPress",
   });
   expect(spies.dispatch).toHaveBeenCalledTimes(1);
 });
 
 it("SHOULD NOT navigate WHEN the pressed tab is already active", () => {
-  setup(2); // stock
+  setup(3); // family
 
-  fireEvent.press(screen.getByTestId("tab-stock"));
+  fireEvent.press(screen.getByTestId("tab-family"));
 
   expect(spies.dispatch).not.toHaveBeenCalled();
 });
@@ -125,6 +125,38 @@ describe("WHEN the Finances tab is pressed", () => {
 
     expect(modalNavigation.openModal).toHaveBeenCalledWith("section_picker");
     expect(spies.navigate).not.toHaveBeenCalled();
+  });
+});
+
+describe("WHEN the Stock tab is pressed (spec 118)", () => {
+  it("SHOULD open Items from another tab", () => {
+    setup(0);
+
+    fireEvent.press(screen.getByTestId("tab-stock"));
+
+    expect(spies.navigate).toHaveBeenCalledWith("/stock");
+  });
+
+  it("SHOULD open the section picker WHEN Stock is already active on the bottom bar", () => {
+    setup(2, "/stock/lists");
+
+    fireEvent.press(screen.getByTestId("tab-stock"));
+
+    expect(modalNavigation.openModal).toHaveBeenCalledWith("section_picker");
+  });
+
+  it("SHOULD highlight the Lists section of the pathname AND replace the route WHEN a child is pressed", () => {
+    setBreakpoint("expanded");
+    setup(2, "/stock/lists/abc");
+
+    expect(
+      screen.getByTestId("navigation-rail-stock-lists").props
+        .accessibilityState,
+    ).toMatchObject({ selected: true });
+
+    fireEvent.press(screen.getByTestId("navigation-rail-stock-catalog"));
+
+    expect(spies.replace).toHaveBeenCalledWith("/stock/catalog");
   });
 });
 

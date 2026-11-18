@@ -13,6 +13,7 @@ import OwnerDTO from "@application/dto/user/OwnerDTO";
 import UserDTO from "@application/dto/user/UserDTO";
 import { useCases } from "@application/useCases";
 import { InvestmentsHomeSummary } from "@domain/entities/investment/InvestmentEntities";
+import { RestockSummaryEntity } from "@domain/entities/stock/ShoppingListEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { refetchStaleFetcherData, useQuery } from "@infrastructure/fetcher";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
@@ -43,6 +44,10 @@ jest.mock("@application/useCases", () => ({
     },
     getMonthSummaryUseCase: { execute: jest.fn(), uniqueName: "summary" },
     getOwnersUseCase: { execute: jest.fn(), uniqueName: "owners" },
+    getRestockSummaryUseCase: {
+      execute: jest.fn(),
+      uniqueName: "shoppingList",
+    },
     getStockAttentionUseCase: { execute: jest.fn(), uniqueName: "stock" },
     getUpcomingItemsUseCase: { execute: jest.fn(), uniqueName: "upcoming" },
     getUserUseCase: { execute: jest.fn(), uniqueName: "user" },
@@ -170,6 +175,7 @@ const queries = {
   balances: new UseQueryFixture<DailyBalanceDTO>(),
   investment: new UseQueryFixture<InvestmentsHomeSummary>(),
   owners: new UseQueryFixture<OwnerDTO[]>(),
+  shoppingList: new UseQueryFixture<RestockSummaryEntity>(),
   stock: new UseQueryFixture<StockAttentionDTO>(),
   summary: new UseQueryFixture<MonthSummaryDTO>(),
   upcoming: new UseQueryFixture<UpcomingDTO>(),
@@ -185,6 +191,7 @@ const spies = {
   getBalances: jest.mocked(useCases.getFinancialDailyBalancesUseCase.execute),
   getInvestments: jest.mocked(useCases.getInvestmentsSummaryUseCase.execute),
   getMonthSummary: jest.mocked(useCases.getMonthSummaryUseCase.execute),
+  getRestockSummary: jest.mocked(useCases.getRestockSummaryUseCase.execute),
   getStockAttention: jest.mocked(useCases.getStockAttentionUseCase.execute),
   getUpcoming: jest.mocked(useCases.getUpcomingItemsUseCase.execute),
   isFocused: jest.mocked(useIsFocused),
@@ -259,11 +266,18 @@ function setup(data: Partial<Record<QueryName, unknown>> = {}) {
   return renderHook(() => useHomeViewModel());
 }
 
+const shoppingList: RestockSummaryEntity = {
+  count: 0,
+  groups: [],
+  totals: [],
+};
+
 const loaded = {
   accounts,
   balances,
   investment,
   owners,
+  shoppingList,
   stock,
   summary,
   upcoming,
