@@ -20,6 +20,7 @@ export type StockFormErrors = Partial<
     | "ideal"
     | "quantity"
     | "shelfLife"
+    | "step"
     | "warnClosed"
     | "warnOpened",
     TranslationKeys
@@ -40,6 +41,8 @@ export interface StockFormValues {
   ownerId?: string;
   purchaseDate?: Date;
   quantity: QuantityInput;
+  // Spec 117 FR 10: the − / + step; empty = 1 (un, kg or L).
+  step: QuantityInput;
   stockOnly: boolean;
   unit: StockUnits;
   warnDaysClosed: string;
@@ -57,6 +60,7 @@ const INITIAL_VALUES: StockFormValues = {
   notes: "",
   openedShelfLifeDays: "",
   quantity: EMPTY,
+  step: EMPTY,
   stockOnly: false,
   unit: StockUnits.UNIT,
   warnDaysClosed: "7",
@@ -97,6 +101,7 @@ export function buildCreateParams(
     ownerId,
     purchaseDate: values.purchaseDate,
     quantity: toQuantity(values.quantity, values.unit) ?? 0,
+    quickStep: toQuantity(values.step, values.unit),
     stockOnly: values.stockOnly,
     unit: values.unit,
     warnDaysClosed: parseInt(values.warnDaysClosed, 10),
@@ -136,6 +141,7 @@ export function buildUpdateParams(
     owner: moved ? ownerOf(ownerId, owners) : undefined,
     ownerId: moved ? ownerId : undefined,
     previousOwnerId: item.ownerId,
+    quickStep: toQuantity(values.step, values.unit) ?? null,
     stockOnly: values.stockOnly,
     unit: values.unit === item.unit ? undefined : values.unit,
     warnDaysClosed: parseInt(values.warnDaysClosed, 10),
@@ -162,6 +168,12 @@ export function validateStockForm(
     toQuantity(values.quantity, values.unit) === undefined
   ) {
     errors.quantity = "stock.form.quantityInvalid";
+  }
+
+  const step = toQuantity(values.step, values.unit);
+
+  if (values.step.text.trim() !== "" && (step === undefined || step <= 0)) {
+    errors.step = "stock.form.quantityInvalid";
   }
 
   if (min !== undefined && ideal !== undefined && ideal <= min) {
@@ -203,6 +215,7 @@ export function valuesFromItem(item: StockDTO): StockFormValues {
         : String(item.openedShelfLifeDays),
     ownerId: item.ownerId,
     quantity: EMPTY,
+    step: initialInput(item.quickStep, item.unit),
     stockOnly: item.stockOnly,
     unit: item.unit,
     warnDaysClosed: String(item.warnDaysClosed),

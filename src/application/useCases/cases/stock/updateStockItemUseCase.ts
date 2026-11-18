@@ -17,6 +17,7 @@ export interface UpdateStockItemUseCaseParams {
   ownerId?: string;
   // The owner the item is in now (its cached list is refreshed).
   previousOwnerId: string;
+  quickStep?: null | number;
   stockOnly?: boolean;
   unit?: string;
   warnDaysClosed?: number;

@@ -288,3 +288,29 @@ describe("useForm", () => {
     expect(result.current.isDirty).toBe(false);
   });
 });
+
+describe("quick step (spec 117 FR 10)", () => {
+  const base = valuesFromItem(dto((f) => f.withUnit(StockUnits.KILOGRAM)));
+
+  it("SHOULD send the step on create and clear it on edit WHEN the field is empty", () => {
+    const withStep = {
+      ...base,
+      step: { mode: QuantityMode.LARGE, text: "0,5" },
+    };
+
+    expect(buildCreateParams(withStep, owners, "user-id").quickStep).toBe(0.5);
+    expect(
+      buildCreateParams(base, owners, "user-id").quickStep,
+    ).toBeUndefined();
+    expect(buildUpdateParams(base, dto(), owners).quickStep).toBeNull();
+  });
+
+  it("SHOULD refuse a step of 0", () => {
+    const errors = validateStockForm(
+      { ...base, step: { mode: QuantityMode.LARGE, text: "0" } },
+      { isEdit: true },
+    );
+
+    expect(errors.step).toBe("stock.form.quantityInvalid");
+  });
+});

@@ -16,6 +16,7 @@ function values(overrides: Record<string, unknown> = {}) {
     openedShelfLifeDays: "",
     ownerId: "user-id",
     quantity: empty,
+    step: empty,
     stockOnly: false,
     unit: StockUnits.UNIT,
     warnDaysClosed: "7",

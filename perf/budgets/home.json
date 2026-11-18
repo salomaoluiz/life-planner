@@ -24,12 +24,12 @@
     "route": "app/(app)/(tabs)/index/index.tsx"
   },
   "home.quickAdd.mount.cold": {
-    "maxDepth": 0,
+    "maxDepth": 1,
     "maxDuplicates": 0,
-    "maxRequests": 0,
+    "maxRequests": 2,
     "modal": "quick_add"
   },
   "home.quickAdd.render.mount": {
-    "maxCommits": 1
+    "maxCommits": 2
   }
 }

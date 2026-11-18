@@ -3,7 +3,6 @@ import { View } from "react-native";
 
 import {
   AdaptiveViewProps,
-  Badge,
   BottomSheet,
   Button,
   ChipGroup,
@@ -20,13 +19,12 @@ import {
   Toast,
 } from "@components";
 import Skeleton from "@components/Skeleton";
-import { StockExpirationStatus } from "@domain/entities/stock/StockEntity";
 import { useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
 import StockQuickOverlays, {
   OfflineBanner,
 } from "@screens/Stock/components/StockQuickOverlays";
-import StockQuickStepper from "@screens/Stock/components/StockQuickStepper";
+import StockQuickRow from "@screens/Stock/components/StockQuickRow";
 import StockItemDetails from "@screens/Stock/containers/StockItemDetails";
 import { StockListRow } from "@screens/Stock/models/StockListUIModel";
 
@@ -35,17 +33,6 @@ import useStyles from "../styles";
 import stockTestIds from "../testIds";
 
 const SKELETON_ROWS = [0, 1, 2, 3, 4, 5];
-
-function badgeTestId(labelKey: string) {
-  const ids: Record<string, string> = {
-    "stock.badge.expired": stockTestIds.statusExpired,
-    "stock.badge.expiring": stockTestIds.statusExpiring,
-    "stock.badge.opened": stockTestIds.statusOpened,
-    "stock.badge.restock": stockTestIds.statusRestock,
-  };
-
-  return ids[labelKey];
-}
 
 function namesOf(options: Array<{ id: string; label: string }>, ids: string[]) {
   return options
@@ -76,53 +63,11 @@ function Wide({ vm }: AdaptiveViewProps<StockVM>) {
       return <Text.Overline value={t(row.titleKey)} />;
     }
 
-    const { item } = row;
-    const info = item.dateInfo;
-    let date = "";
-
-    if (info?.minimum) {
-      date = t(info.key, {
-        quantity: `${info.minimum.text} ${t(info.minimum.unitKey)}`,
-      });
-    } else if (info) {
-      date = t(info.key, { date: info.date });
-    } else if (item.status === StockExpirationStatus.NONE) {
-      date = t("stock.list.date.noExpiration");
-    }
-
-    const quantity = `${item.quantity.text} ${t(item.quantity.unitKey)}`;
-    const badgeLabels = item.badges.map((badge) => t(badge.labelKey));
-
     return (
-      <ListItem
-        accessibilityLabel={t("stock.list.rowA11y", {
-          name: item.description,
-          quantity,
-          status: badgeLabels.join(", "),
-        })}
-        inset
-        leading={
-          <IconTile name={item.iconTile.icon} tone={item.iconTile.tone} />
-        }
-        meta={
-          item.badges.length > 0 ? (
-            <View style={styles.badges}>
-              {item.badges.map((badge) => (
-                <Badge
-                  key={badge.labelKey}
-                  label={t(badge.labelKey)}
-                  testID={badgeTestId(badge.labelKey)}
-                  tone={badge.tone}
-                />
-              ))}
-            </View>
-          ) : undefined
-        }
-        onPress={() => vm.onItemPress(item.id)}
-        subtitle={[item.subtitle, date].filter(Boolean).join(" · ")}
-        testID={stockTestIds.row}
-        title={item.description}
-        trailing={<StockQuickStepper item={item} quick={vm.quick} />}
+      <StockQuickRow
+        item={row.item}
+        onPress={() => vm.onItemPress(row.item.id)}
+        quick={vm.quick}
       />
     );
   }

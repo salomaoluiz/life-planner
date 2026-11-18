@@ -14,6 +14,7 @@ import { dto } from "@screens/Stock/models/stockUi.fixtures";
 
 import Stock from "../";
 import { useStockViewModel } from "../hooks";
+import { quickMock } from "./quick.mocks";
 
 jest.mock("../hooks");
 jest.mock(
@@ -135,35 +136,6 @@ function givenViewModel(overrides: Record<string, unknown> = {}) {
   jest.mocked(useStockViewModel).mockReturnValue(vm as never);
 
   return vm;
-}
-
-function quickMock(overrides: Record<string, unknown> = {}) {
-  return {
-    commit: jest.fn(),
-    displayQuantity: (item: { quantity: number }) => item.quantity,
-    exact: undefined,
-    expirationFor: undefined,
-    expiredPrompt: undefined,
-    hasExpiredValidLot: jest.fn().mockReturnValue(true),
-    isOpened: jest.fn().mockReturnValue(false),
-    isPending: jest.fn().mockReturnValue(false),
-    notice: undefined,
-    offlineCount: 0,
-    onChooseExpired: jest.fn(),
-    onExactClose: jest.fn(),
-    onExactConfirm: jest.fn(),
-    onExactOpen: jest.fn(),
-    onExpirationClose: jest.fn(),
-    onExpirationOpen: jest.fn(),
-    onExpirationSave: jest.fn(),
-    onExpiredCancel: jest.fn(),
-    onNoticeHide: jest.fn(),
-    onOpen: jest.fn(),
-    onStep: jest.fn(),
-    onUndo: jest.fn(),
-    retryNow: jest.fn(),
-    ...overrides,
-  };
 }
 
 function setup(overrides: Record<string, unknown> = {}) {
