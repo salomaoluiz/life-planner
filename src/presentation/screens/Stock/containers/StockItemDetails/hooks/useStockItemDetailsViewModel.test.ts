@@ -1,3 +1,4 @@
+import { useIsFocused } from "@react-navigation/native";
 import { act, renderHook } from "@testing-library/react-native";
 
 import { modalNavigation } from "@tests/modalNavigation";
@@ -14,6 +15,7 @@ import { dto, owners } from "@screens/Stock/models/stockUi.fixtures";
 import useStockItemDetailsViewModel from "./useStockItemDetailsViewModel";
 
 jest.mock("@infrastructure/fetcher");
+jest.mock("@react-navigation/native", () => ({ useIsFocused: jest.fn() }));
 jest.mock("@presentation/hooks/useOwners");
 jest.mock("@presentation/i18n/useTranslationLocale", () => ({
   __esModule: true,
@@ -91,6 +93,7 @@ function setup(
 
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.mocked(useIsFocused).mockReturnValue(true);
   rebuild("idle");
 });
 
@@ -281,5 +284,18 @@ describe("delete", () => {
 
     expect(result.current.errorKey).toBe("common.errors.generic");
     expect(onDeleted).not.toHaveBeenCalled();
+  });
+});
+
+describe("focus", () => {
+  it("SHOULD report the screen focus so the sheet hides while a modal is open on top", () => {
+    const { result } = setup();
+
+    expect(result.current.isFocused).toBe(true);
+
+    jest.mocked(useIsFocused).mockReturnValue(false);
+    const hidden = setup();
+
+    expect(hidden.result.current.isFocused).toBe(false);
   });
 });

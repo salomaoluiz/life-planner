@@ -106,3 +106,9 @@ it("SHOULD show the delete error with retry and render the confirm dialog", () =
 
   expect(vm.onConfirmDelete).toHaveBeenCalled();
 });
+
+it("SHOULD hide the sheet WHILE another modal is open on top of the screen", () => {
+  setup({ isFocused: false });
+
+  expect(screen.queryByTestId(stockItemDetailsTestIds.sheet)).toBeNull();
+});

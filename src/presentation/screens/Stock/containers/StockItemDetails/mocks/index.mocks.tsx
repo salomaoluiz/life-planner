@@ -61,6 +61,7 @@ function setup(vmOverrides: Record<string, unknown> = {}) {
     ]),
     isConfirmOpen: false,
     isDeleting: false,
+    isFocused: true,
     isHistoryLoading: false,
     isLoading: false,
     isLoadingMore: false,

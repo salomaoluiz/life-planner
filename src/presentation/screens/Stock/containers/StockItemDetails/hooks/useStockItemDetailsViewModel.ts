@@ -1,3 +1,4 @@
+import { useIsFocused } from "@react-navigation/native";
 import { useEffect, useMemo, useState } from "react";
 
 import StockDTO from "@application/dto/stock/StockDTO";
@@ -26,6 +27,8 @@ interface MovementsPage {
 function useStockItemDetailsViewModel(props: Props) {
   const { getLocale } = useTranslationLocale();
   const { openModal } = useModalNavigation();
+  // The details sheet lives in the list screen: while a modal route (edit, movement) is open on top, it is hidden.
+  const isFocused = useIsFocused();
   const owners = useOwners();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [extraPages, setExtraPages] = useState<MovementsPage[]>([]);
@@ -117,6 +120,7 @@ function useStockItemDetailsViewModel(props: Props) {
     history,
     isConfirmOpen,
     isDeleting: deleteItem.isFetching,
+    isFocused,
     isHistoryLoading: firstPage.isFetching && !firstPage.data,
     isLoading: detail.isFetching && !detail.data,
     isLoadingMore,

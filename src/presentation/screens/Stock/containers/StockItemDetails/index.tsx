@@ -127,7 +127,7 @@ function StockItemDetails(props: Props) {
       subtitle={model?.headerLine}
       testID={stockItemDetailsTestIds.sheet}
       title={props.item.description}
-      visible
+      visible={vm.isFocused}
     >
       {vm.isLoading ? <Skeleton.ListItem /> : null}
       {vm.loadErrorKey ? (
