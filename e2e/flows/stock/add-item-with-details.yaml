@@ -4,6 +4,7 @@ tags:
   - stock
   - spec-011
   - spec-037
+  - spec-116
 onFlowComplete:
   - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
 ---
@@ -57,8 +58,8 @@ onFlowComplete:
 - tapOn:
     id: "stock.list.row-title"
     text: ${output.ITEM_NAME}
+# spec 116: the brand sits in the header line of the details
 - extendedWaitUntil:
     visible:
-      id: "stock.item-details.brand-value"
-      text: ${output.BRAND_NAME}
+      text: ".*${output.BRAND_NAME}.*"
     timeout: 20000

@@ -85,9 +85,9 @@ describe("fallbackBase", () => {
   });
 });
 
-it("SHOULD have 33 unique modal names", () => {
-  expect(MODAL_NAMES).toHaveLength(33);
-  expect(new Set(MODAL_NAMES).size).toBe(33);
+it("SHOULD have 35 unique modal names", () => {
+  expect(MODAL_NAMES).toHaveLength(35);
+  expect(new Set(MODAL_NAMES).size).toBe(35);
 });
 
 describe("screenPath", () => {

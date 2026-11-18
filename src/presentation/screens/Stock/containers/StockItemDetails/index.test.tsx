@@ -1,55 +1,101 @@
-import {
-  DAY_MS,
-  fireEvent,
-  givenItem,
-  screen,
-  setup,
-} from "./mocks/index.mocks";
+import { fireEvent, screen, setup } from "./mocks/index.mocks";
 import stockItemDetailsTestIds from "./testIds";
 
-it("SHOULD render the sheet titled with the description and the quantity", () => {
+it("SHOULD render the title, the tiles and the restock badge", () => {
   setup();
 
   expect(screen.getByText("Leite")).toBeOnTheScreen();
-  expect(screen.getByText("5 stock.units.kilogram")).toBeOnTheScreen();
+  expect(screen.getByText("stock.details.total")).toBeOnTheScreen();
+  expect(screen.getAllByText("3 common.units.liter").length).toBeGreaterThan(0);
+  expect(
+    screen.getByText("1 common.units.liter · 4 common.units.liter"),
+  ).toBeOnTheScreen();
+  expect(
+    screen.getByText('stock.details.warnValue {"closed":7,"opened":1}'),
+  ).toBeOnTheScreen();
+  expect(
+    screen.getByText(
+      'stock.details.restock {"quantity":"1 common.units.liter"}',
+    ),
+  ).toBeOnTheScreen();
+  expect(
+    screen.getAllByTestId(new RegExp(`^${stockItemDetailsTestIds.tile}-`)),
+  ).toHaveLength(4);
 });
 
-it("SHOULD show the status badge only for attention items", () => {
-  setup(givenItem({ expirationDate: new Date(Date.now() + 2 * DAY_MS) }));
-
-  expect(screen.getByText('stock.status.days {"count":2}')).toBeOnTheScreen();
-});
-
-it("SHOULD NOT show a badge for an item that is fine", () => {
-  setup();
-
-  expect(screen.queryByText(/stock\.status\./)).toBeNull();
-});
-
-it("SHOULD show only the filled rows", () => {
-  setup(givenItem({ brand: "Piracanjuba" }));
-
-  expect(screen.getByText("stock.details.owner")).toBeOnTheScreen();
-  expect(screen.getByText("Ana")).toBeOnTheScreen();
-  expect(screen.getByText("stock.details.brand")).toBeOnTheScreen();
-  expect(screen.getByText("Piracanjuba")).toBeOnTheScreen();
-  expect(screen.queryByText("stock.details.expiration")).toBeNull();
-  expect(screen.queryByText("stock.details.opening")).toBeNull();
-  expect(screen.queryByText("stock.details.purchase")).toBeNull();
-  expect(screen.queryByText("stock.details.barcode")).toBeNull();
-  expect(screen.queryByText("stock.details.notes")).toBeNull();
-});
-
-it("SHOULD start the delete flow WHEN the delete button is pressed", () => {
+it("SHOULD render the lots (with Descartar on the expired one) AND the history", () => {
   const { vm } = setup();
 
-  fireEvent.press(screen.getByText("stock.details.delete"));
+  expect(screen.getAllByTestId(stockItemDetailsTestIds.lot)).toHaveLength(1);
+  expect(screen.getByText("stock.badge.expired")).toBeOnTheScreen();
+  expect(
+    screen.getAllByTestId(stockItemDetailsTestIds.historyRow),
+  ).toHaveLength(2);
+  expect(screen.getByText("stock.history.type.consume")).toBeOnTheScreen();
+  expect(
+    screen.getByText(
+      "stock.history.reason.purchase · stock.history.formerMember",
+    ),
+  ).toBeOnTheScreen();
 
-  expect(vm.onDeletePress).toHaveBeenCalled();
+  fireEvent.press(screen.getByTestId(stockItemDetailsTestIds.discardButton));
+
+  expect(vm.onDiscard).toHaveBeenCalledWith("lot-1");
 });
 
-it("SHOULD render the confirm dialog and confirm the deletion", () => {
-  const { vm } = setup(givenItem(), { isConfirmOpen: true });
+it.each([
+  [stockItemDetailsTestIds.editButton, "onEdit"],
+  [stockItemDetailsTestIds.openButton, "onOpen"],
+  [stockItemDetailsTestIds.consumeButton, "onConsume"],
+  [stockItemDetailsTestIds.entryButton, "onEntry"],
+  [stockItemDetailsTestIds.loadMore, "onLoadMore"],
+  [stockItemDetailsTestIds.deleteButton, "onDeletePress"],
+] as const)(
+  "SHOULD call the view model WHEN %s is pressed",
+  (testID, handler) => {
+    const { vm } = setup();
+
+    fireEvent.press(screen.getByTestId(testID));
+
+    expect(vm[handler]).toHaveBeenCalled();
+  },
+);
+
+it("SHOULD hide 'load more' WHEN there is no next page AND show the empty states", () => {
+  setup({ hasMore: false, history: [], model: undefined });
+
+  expect(screen.queryByTestId(stockItemDetailsTestIds.loadMore)).toBeNull();
+});
+
+it("SHOULD show the empty lots and history texts", () => {
+  const { vm } = setup({ history: [] });
+
+  expect(screen.getByText("stock.history.empty")).toBeOnTheScreen();
+  expect(vm.history).toEqual([]);
+});
+
+it("SHOULD show skeletons while loading AND the history loading", () => {
+  setup({ history: [], isHistoryLoading: true, isLoading: true });
+
+  expect(screen.queryByText("stock.history.empty")).toBeNull();
+});
+
+it("SHOULD show the load error with retry", () => {
+  const { vm } = setup({
+    loadErrorKey: "stock.details.error",
+    model: undefined,
+  });
+
+  fireEvent.press(screen.getByText("common.actions.tryAgain"));
+
+  expect(vm.onRetry).toHaveBeenCalled();
+});
+
+it("SHOULD show the delete error with retry and render the confirm dialog", () => {
+  const { vm } = setup({
+    errorKey: "common.errors.generic",
+    isConfirmOpen: true,
+  });
 
   expect(
     screen.getByText('stock.details.deleteTitle {"name":"Leite"}'),
@@ -61,56 +107,8 @@ it("SHOULD render the confirm dialog and confirm the deletion", () => {
   expect(vm.onConfirmDelete).toHaveBeenCalled();
 });
 
-it("SHOULD show the error message and retry", () => {
-  const { vm } = setup(givenItem(), { errorKey: "common.errors.generic" });
+it("SHOULD hide the sheet WHILE another modal is open on top of the screen", () => {
+  setup({ isFocused: false });
 
-  expect(screen.getByText("common.errors.generic")).toBeOnTheScreen();
-
-  fireEvent.press(screen.getByText("common.actions.tryAgain"));
-
-  expect(vm.onConfirmDelete).toHaveBeenCalled();
-});
-
-it("SHOULD close the sheet", () => {
-  const { props } = setup();
-
-  fireEvent.press(screen.getAllByLabelText("common.actions.close")[0]);
-
-  expect(props.onClose).toHaveBeenCalled();
-});
-
-it("SHOULD expose the sheet, the brand row and the delete button", () => {
-  setup(givenItem({ brand: "Piracanjuba" }));
-
-  expect(screen.getByTestId(stockItemDetailsTestIds.sheet)).toBeOnTheScreen();
-  expect(
-    screen.getByTestId(`${stockItemDetailsTestIds.brand}-value`),
-  ).toHaveTextContent("Piracanjuba");
-  expect(
-    screen.getByTestId(stockItemDetailsTestIds.deleteButton),
-  ).toBeOnTheScreen();
-});
-
-it("SHOULD NOT expose the brand row WHEN the item has no brand", () => {
-  setup();
-
-  expect(screen.queryByTestId(stockItemDetailsTestIds.brand)).toBeNull();
-});
-
-it("SHOULD start the delete from the delete button id", () => {
-  const { vm } = setup();
-
-  fireEvent.press(screen.getByTestId(stockItemDetailsTestIds.deleteButton));
-
-  expect(vm.onDeletePress).toHaveBeenCalled();
-});
-
-it("SHOULD expose the confirm button of the delete dialog", () => {
-  const { vm } = setup(givenItem(), { isConfirmOpen: true });
-
-  fireEvent.press(
-    screen.getByTestId(`${stockItemDetailsTestIds.deleteDialog}-confirm`),
-  );
-
-  expect(vm.onConfirmDelete).toHaveBeenCalled();
+  expect(screen.queryByTestId(stockItemDetailsTestIds.sheet)).toBeNull();
 });

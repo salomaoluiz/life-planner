@@ -1,10 +1,10 @@
 import StockAttentionDTO, {
   StockAttentionStatus,
 } from "@application/dto/home/StockAttentionDTO";
-import StockDTO from "@application/dto/stock/StockDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
-import { StockOwners, StockUnits } from "@domain/entities/stock/StockEntity";
+import { StockUnits } from "@domain/entities/stock/StockEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
+import { dto } from "@screens/Stock/models/stockUi.fixtures";
 
 import StockAttentionUIModel from "./StockAttentionUIModel";
 
@@ -12,9 +12,20 @@ const owners = [
   new OwnerDTO({ id: "owner-1", name: "Silva", type: OwnerType.FAMILY }),
 ];
 
-function build(daysLeft: number, unit?: StockUnits, ownerId?: string) {
-  const status =
-    daysLeft < 0 ? StockAttentionStatus.EXPIRED : StockAttentionStatus.EXPIRING;
+function build(
+  daysLeft: number | undefined,
+  unit?: StockUnits,
+  ownerId?: string,
+  restock = false,
+) {
+  let status = StockAttentionStatus.EXPIRING;
+
+  if (restock) {
+    status = StockAttentionStatus.RESTOCK;
+  } else if (daysLeft !== undefined && daysLeft < 0) {
+    status = StockAttentionStatus.EXPIRED;
+  }
+
   const dto = new StockAttentionDTO({
     attentionCount: 1,
     items: [{ daysLeft, status, stock: stock(unit, ownerId) }],
@@ -25,14 +36,14 @@ function build(daysLeft: number, unit?: StockUnits, ownerId?: string) {
 }
 
 function stock(unit: StockUnits = StockUnits.UNIT, ownerId = "owner-1") {
-  return new StockDTO({
-    description: "Milk",
-    id: "stock-1",
-    owner: StockOwners.FAMILY,
-    ownerId,
-    quantity: 2,
-    unit,
-  });
+  return dto((f) =>
+    f
+      .withId("stock-1")
+      .withDescription("Milk")
+      .withOwnerId(ownerId)
+      .withQuantity(2)
+      .withUnit(unit),
+  );
 }
 
 it.each([
@@ -54,7 +65,7 @@ it("SHOULD expose the row fields and resolve the owner name", () => {
 
   expect(row.id).toBe("stock-1");
   expect(row.title).toBe("Milk");
-  expect(row.quantity).toBe(2);
+  expect(row.quantityText).toBe("2");
   expect(row.ownerName).toBe("Silva");
   expect(build(1, undefined, "other").ownerName).toBe("");
 });
@@ -65,6 +76,35 @@ it.each(Object.values(StockUnits))(
     expect(build(1, unit).unitKey).toBe(`common.units.${unit}`);
   },
 );
+
+it("SHOULD show kg and L below 1 as g and ml (spec 116)", () => {
+  const row = new StockAttentionUIModel(
+    new StockAttentionDTO({
+      attentionCount: 1,
+      items: [
+        {
+          daysLeft: 1,
+          status: StockAttentionStatus.EXPIRING,
+          stock: dto((f) => f.withQuantity(0.25).withUnit(StockUnits.KILOGRAM)),
+        },
+      ],
+      totalItems: 1,
+    }),
+    owners,
+  ).rows[0];
+
+  expect(row.quantityText).toBe("250");
+  expect(row.unitKey).toBe("common.units.gram");
+});
+
+it("SHOULD badge a low item as restock, without days", () => {
+  const row = build(undefined, undefined, undefined, true);
+
+  expect(row.badge).toEqual({ key: "home.stock.restock" });
+  expect(row.isRestock).toBe(true);
+  expect(row.isExpired).toBe(false);
+  expect(build(1).isRestock).toBe(false);
+});
 
 it("SHOULD report empty stock only WHEN there are no items at all", () => {
   const model = new StockAttentionUIModel(

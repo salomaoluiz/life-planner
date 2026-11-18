@@ -127,6 +127,14 @@ export const MODAL_ROUTES: Record<ModalName, ComponentType> = {
   section_picker: lazyModal(
     async () => import("@screens/Financial/SectionPicker"),
   ),
+  stock_catalog: lazyModal(
+    async () => import("@screens/Stock/modals"),
+    "StockCatalogModal",
+  ),
+  stock_movement: lazyModal(
+    async () => import("@screens/Stock/modals"),
+    "StockMovementModal",
+  ),
   versions: lazyModal(
     async () => import("@screens/Config/modals"),
     "VersionsModal",

@@ -1,87 +1,84 @@
 import StockDTO from "@application/dto/stock/StockDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
-import { StockUnits } from "@domain/entities/stock/StockEntity";
-import {
-  daysUntilExpiration,
-  getStockExpirationStatus,
-  StockExpirationStatus,
-} from "@domain/entities/stock/stockExpiration";
+import { StockExpirationStatus } from "@domain/entities/stock/StockEntity";
 import { TranslationKeys } from "@presentation/i18n/types";
 
-const UnitShortKeys: Record<StockUnits, TranslationKeys> = {
-  [StockUnits.GRAM]: "common.units.gram",
-  [StockUnits.KILOGRAM]: "common.units.kilogram",
-  [StockUnits.LITER]: "common.units.liter",
-  [StockUnits.MILLILITER]: "common.units.milliliter",
-  [StockUnits.UNIT]: "common.units.unit",
-};
+import { formatQuantity } from "./quantityFormat";
 
-const UnitLongKeys: Record<StockUnits, TranslationKeys> = {
-  [StockUnits.GRAM]: "stock.units.gram",
-  [StockUnits.KILOGRAM]: "stock.units.kilogram",
-  [StockUnits.LITER]: "stock.units.liter",
-  [StockUnits.MILLILITER]: "stock.units.milliliter",
-  [StockUnits.UNIT]: "stock.units.unit",
-};
+export interface StockBadge {
+  labelKey: TranslationKeys;
+  tone: StockBadgeTone;
+}
+
+export type StockBadgeTone = "accent" | "expense" | "neutral" | "warning";
 
 class StockItemUIModel {
-  get badge():
-    | undefined
-    | {
-        labelKey: TranslationKeys;
-        params?: { count: number };
-        tone: "expense" | "warning";
-      } {
+  // Spec 116 FR 34: Vencido / Vencendo, Repor and Aberto; text, never color alone.
+  get badges(): StockBadge[] {
+    const badges: StockBadge[] = [];
+
     if (this.status === StockExpirationStatus.EXPIRED) {
-      return { labelKey: "stock.status.expired", tone: "expense" };
+      badges.push({ labelKey: "stock.badge.expired", tone: "expense" });
+    } else if (this.status === StockExpirationStatus.EXPIRING) {
+      badges.push({ labelKey: "stock.badge.expiring", tone: "warning" });
     }
 
-    if (this.status !== StockExpirationStatus.EXPIRING) {
-      return undefined;
+    if (this.dto.needsRestock) {
+      badges.push({ labelKey: "stock.badge.restock", tone: "accent" });
     }
 
-    if (this.days === 0) {
-      return { labelKey: "stock.status.today", tone: "warning" };
+    if (this.dto.hasOpenLot) {
+      badges.push({ labelKey: "stock.badge.opened", tone: "neutral" });
     }
 
-    if (this.days === 1) {
-      return { labelKey: "stock.status.tomorrow", tone: "warning" };
-    }
-
-    return {
-      labelKey: "stock.status.days",
-      params: { count: this.days ?? 0 },
-      tone: "warning",
-    };
+    return badges;
   }
 
   get brand() {
     return this.dto.brand;
   }
 
+  get categoryId() {
+    return this.dto.categoryId;
+  }
+
   get createdTime() {
     return this.dto.createdAt?.getTime();
   }
 
-  get dateInfo(): undefined | { date: string; key: TranslationKeys } {
-    if (this.status === StockExpirationStatus.EXPIRED) {
+  // The nearest expiration, or the minimum when the item only asks to be restocked.
+  get dateInfo():
+    | undefined
+    | {
+        date?: string;
+        key: TranslationKeys;
+        minimum?: { text: string; unitKey: TranslationKeys };
+      } {
+    const { nearestExpiration } = this.dto;
+
+    if (nearestExpiration) {
+      const date = this.shortDate(nearestExpiration);
+
+      if (this.status === StockExpirationStatus.EXPIRED) {
+        return { date, key: "stock.list.date.expired" };
+      }
+
       return {
-        date: this.shortDate(this.dto.expirationDate!),
-        key: "stock.list.date.expired",
+        date,
+        key: this.dto.hasOpenLot
+          ? "stock.list.date.openedExpires"
+          : "stock.list.date.expires",
       };
     }
 
-    if (this.status === StockExpirationStatus.EXPIRING) {
+    if (this.dto.needsRestock && this.dto.minQuantity !== undefined) {
       return {
-        date: this.shortDate(this.dto.expirationDate!),
-        key: "stock.list.date.expires",
-      };
-    }
-
-    if (this.dto.openingDate) {
-      return {
-        date: this.shortDate(this.dto.openingDate),
-        key: "stock.list.date.opened",
+        key: "stock.list.date.minimum",
+        minimum: formatQuantity(
+          this.dto.minQuantity,
+          this.dto.unit,
+          this.locale,
+        ),
       };
     }
 
@@ -92,41 +89,13 @@ class StockItemUIModel {
     return this.dto.description;
   }
 
-  get detailRows() {
-    const rows: Array<{
-      labelKey: TranslationKeys;
-      value: string | undefined;
-    }> = [
-      { labelKey: "stock.details.owner", value: this.ownerName },
-      {
-        labelKey: "stock.details.expiration",
-        value: this.fullDate(this.dto.expirationDate),
-      },
-      {
-        labelKey: "stock.details.opening",
-        value: this.fullDate(this.dto.openingDate),
-      },
-      {
-        labelKey: "stock.details.purchase",
-        value: this.fullDate(this.dto.purchaseDate),
-      },
-      { labelKey: "stock.details.brand", value: this.dto.brand },
-      { labelKey: "stock.details.barcode", value: this.dto.barcode },
-      { labelKey: "stock.details.notes", value: this.dto.notes },
-    ];
-
-    return rows.filter(
-      (row): row is { labelKey: TranslationKeys; value: string } => !!row.value,
-    );
-  }
-
   get expirationTime() {
-    return this.dto.expirationDate?.getTime();
+    return this.dto.nearestExpiration?.getTime();
   }
 
   get iconTile(): {
     icon: string;
-    tone: "expense" | "neutral" | "warning";
+    tone: "accent" | "expense" | "neutral" | "warning";
   } {
     if (this.status === StockExpirationStatus.EXPIRED) {
       return { icon: "alert-circle-outline", tone: "expense" };
@@ -136,6 +105,10 @@ class StockItemUIModel {
       return { icon: "clock-outline", tone: "warning" };
     }
 
+    if (this.dto.needsRestock) {
+      return { icon: "cart-outline", tone: "accent" };
+    }
+
     return { icon: "package-variant-closed", tone: "neutral" };
   }
 
@@ -143,8 +116,17 @@ class StockItemUIModel {
     return this.dto.id;
   }
 
+  // Needs attention: a date warning or a low quantity.
   get isAttention() {
-    return this.status !== StockExpirationStatus.OK;
+    return (
+      this.status === StockExpirationStatus.EXPIRED ||
+      this.status === StockExpirationStatus.EXPIRING ||
+      this.dto.needsRestock
+    );
+  }
+
+  get locationId() {
+    return this.dto.locationId;
   }
 
   get ownerId() {
@@ -161,47 +143,43 @@ class StockItemUIModel {
     );
   }
 
-  get quantityDetail() {
-    return { unitKey: UnitLongKeys[this.dto.unit], value: this.dto.quantity };
-  }
-
-  get quantityText() {
-    return String(this.dto.quantity);
+  get quantity() {
+    return formatQuantity(this.dto.quantity, this.dto.unit, this.locale);
   }
 
   get searchText() {
     return normalizeSearchText(
-      `${this.dto.description} ${this.dto.brand ?? ""}`,
+      `${this.dto.description} ${this.dto.brand ?? ""} ${this.dto.barcode ?? ""}`,
     );
   }
 
   get status() {
-    return getStockExpirationStatus(this.dto.expirationDate, this.now);
+    return this.dto.expirationStatus;
   }
 
-  get unitKey() {
-    return UnitShortKeys[this.dto.unit];
-  }
+  // "Laticínios › Leite · Geladeira · Família" (category path, location and owner).
+  get subtitle() {
+    const { category, location } = this.dto;
 
-  private get days() {
-    return daysUntilExpiration(this.dto.expirationDate, this.now);
+    return [
+      category?.path.split(" / ").join(" › "),
+      location?.name,
+      this.ownerName,
+    ]
+      .filter(Boolean)
+      .join(" · ");
   }
 
   constructor(
     private readonly dto: StockDTO,
     private readonly owners: OwnerDTO[],
-    private readonly now: Date,
     private readonly locale?: string,
   ) {}
 
-  private fullDate(date?: Date) {
-    return date?.toLocaleDateString(this.locale);
-  }
-
   private shortDate(date: Date) {
     return date.toLocaleDateString(this.locale, {
-      day: "numeric",
-      month: "short",
+      day: "2-digit",
+      month: "2-digit",
     });
   }
 }

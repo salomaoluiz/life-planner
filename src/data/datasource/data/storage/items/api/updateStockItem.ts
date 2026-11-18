@@ -8,16 +8,21 @@ export type Response = ReturnType<StockDatasource["updateStockItem"]>;
 
 async function updateStockItem(params: Params): Response {
   try {
+    // `undefined` leaves the field alone, `null` clears it. Quantity and lot dates are not editable here.
     const body = {
       barcode: params.barcode,
       brand: params.brand,
+      categoryId: params.categoryId,
       description: params.description,
-      expirationDate: params.expirationDate?.toISOString(),
+      idealQuantity: params.idealQuantity,
+      locationId: params.locationId,
+      minQuantity: params.minQuantity,
       notes: params.notes,
-      openingDate: params.openingDate?.toISOString(),
-      purchaseDate: params.purchaseDate?.toISOString(),
-      quantity: params.quantity,
+      openedShelfLifeDays: params.openedShelfLifeDays,
+      stockOnly: params.stockOnly,
       unit: params.unit,
+      warnDaysClosed: params.warnDaysClosed,
+      warnDaysOpened: params.warnDaysOpened,
       // The API moves an item only when owner and ownerId travel together.
       ...(params.owner !== undefined &&
         params.ownerId !== undefined && {

@@ -1,224 +1,313 @@
-import { act } from "@testing-library/react-native";
-import { StyleSheet } from "react-native";
+import { StockUnits } from "@domain/entities/stock/StockEntity";
+import { QuantityMode } from "@domain/entities/stock/stockQuantity";
 
-import { fireEvent, screen, setup, within } from "./mocks/index.mocks";
+import { fireEvent, screen, setup } from "./mocks/index.mocks";
 import stockItemFormTestIds from "./testIds";
 
-it("SHOULD render the sheet title and the main fields", () => {
+const empty = { mode: QuantityMode.SMALL, text: "" };
+function values(overrides: Record<string, unknown> = {}) {
+  return {
+    barcode: "",
+    brand: "",
+    description: "",
+    ideal: empty,
+    min: empty,
+    notes: "",
+    openedShelfLifeDays: "",
+    ownerId: "user-id",
+    quantity: empty,
+    stockOnly: false,
+    unit: StockUnits.UNIT,
+    warnDaysClosed: "7",
+    warnDaysOpened: "1",
+    ...overrides,
+  };
+}
+
+it("SHOULD render the sections and the main fields of a new item", () => {
   setup();
 
   expect(screen.getByText("stock.form.title")).toBeOnTheScreen();
+  expect(screen.getByText("stock.form.itemSection")).toBeOnTheScreen();
+  expect(screen.getByText("stock.form.firstLotSection")).toBeOnTheScreen();
   expect(screen.getByText("stock.form.description")).toBeOnTheScreen();
-  expect(screen.getByText("stock.form.quantity")).toBeOnTheScreen();
+  expect(screen.getByText("stock.form.category")).toBeOnTheScreen();
+  expect(screen.getByText("stock.form.location")).toBeOnTheScreen();
   expect(screen.getByText("stock.form.unit")).toBeOnTheScreen();
-  expect(screen.getByText("stock.form.owner")).toBeOnTheScreen();
   expect(screen.getByText("stock.form.expiration")).toBeOnTheScreen();
-  expect(screen.getByText("stock.form.moreDetails")).toBeOnTheScreen();
+  expect(screen.getByText("stock.form.minHintEmpty")).toBeOnTheScreen();
 });
 
-it("SHOULD hide the extra fields until more details is open", () => {
-  setup();
+it("SHOULD render the edit title and hide the first lot WHEN editing", () => {
+  setup({ isEdit: true });
 
-  expect(screen.queryByText("stock.form.purchase")).toBeNull();
-  expect(screen.queryByText("stock.form.brand")).toBeNull();
+  expect(screen.getByText("stock.form.editTitle")).toBeOnTheScreen();
+  expect(screen.queryByText("stock.form.firstLotSection")).toBeNull();
+  expect(screen.getByText("stock.form.quantityEditHint")).toBeOnTheScreen();
 });
 
-it("SHOULD show the extra fields WHEN more details is open", () => {
-  setup({ isMoreOpen: true });
-
-  ["purchase", "opening", "brand", "barcode", "notes"].forEach((key) => {
-    expect(screen.getByText(`stock.form.${key}`)).toBeOnTheScreen();
-  });
-});
-
-it("SHOULD toggle more details", () => {
+it("SHOULD hide the extra fields until more options is open AND toggle it", () => {
   const { vm } = setup();
+
+  expect(screen.queryByText("stock.form.brand")).toBeNull();
 
   fireEvent.press(screen.getByText("stock.form.moreDetails"));
 
   expect(vm.onToggleMore).toHaveBeenCalled();
 });
 
+it("SHOULD show every extra field WHEN more options is open", () => {
+  setup({ isMoreOpen: true });
+
+  [
+    "brand",
+    "shelfLife",
+    "warnClosed",
+    "warnOpened",
+    "barcode",
+    "owner",
+    "notes",
+  ].forEach((key) => {
+    expect(screen.getByText(`stock.form.${key}`)).toBeOnTheScreen();
+  });
+});
+
 it("SHOULD show the translated field errors", () => {
   setup({
     errors: {
       description: "stock.form.descriptionRequired",
-      quantity: "stock.form.quantityRequired",
+      ideal: "stock.form.idealRule",
+      quantity: "stock.form.quantityInvalid",
+      shelfLife: "stock.form.shelfLifeInvalid",
+      warnClosed: "stock.form.warnDaysInvalid",
+      warnOpened: "stock.form.warnDaysInvalid",
     },
-  });
-
-  expect(screen.getByText("stock.form.descriptionRequired")).toBeOnTheScreen();
-  expect(screen.getByText("stock.form.quantityRequired")).toBeOnTheScreen();
-});
-
-it("SHOULD set the description", () => {
-  const { vm } = setup();
-
-  fireEvent.changeText(
-    screen.getByLabelText("stock.form.description"),
-    "Leite",
-  );
-
-  expect(vm.setField).toHaveBeenCalledWith("description", "Leite");
-});
-
-it("SHOULD accept digits and reject other characters in the quantity", () => {
-  const { vm } = setup();
-  const input = screen.getByLabelText("stock.form.quantity");
-
-  fireEvent.changeText(input, "12");
-  expect(vm.setField).toHaveBeenCalledWith("quantity", "12");
-
-  vm.setField.mockClear();
-  fireEvent.changeText(input, "1.5");
-  fireEvent.changeText(input, "a");
-  expect(vm.setField).not.toHaveBeenCalled();
-});
-
-it("SHOULD select the owner chip and change it", () => {
-  const { vm } = setup();
-
-  fireEvent.press(screen.getByText("Silva"));
-
-  expect(screen.getByText("stock.list.filter.personal")).toBeOnTheScreen();
-  expect(vm.setField).toHaveBeenCalledWith("ownerId", "family-id");
-});
-
-it("SHOULD save and show loading state without a Cancel button", () => {
-  const { vm } = setup();
-
-  fireEvent.press(screen.getByText("stock.form.save"));
-
-  expect(vm.onSave).toHaveBeenCalled();
-  expect(screen.queryByText("Cancel")).toBeNull();
-  expect(screen.queryByText("common.actions.cancel")).toBeNull();
-});
-
-it("SHOULD mark the save button busy WHEN saving", () => {
-  setup({ isSaving: true });
-
-  expect(
-    screen.getByRole("button", { busy: true, name: "stock.form.save" }),
-  ).toBeOnTheScreen();
-});
-
-it("SHOULD render the form error", () => {
-  setup({ formErrorKey: "common.errors.generic" });
-
-  expect(screen.getByText("common.errors.generic")).toBeOnTheScreen();
-});
-
-it("SHOULD render the discard dialog wired to the view model", () => {
-  const { vm } = setup({ isDiscardOpen: true });
-
-  expect(screen.getByText("common.form.discardTitle")).toBeOnTheScreen();
-
-  act(() => {
-    fireEvent.press(screen.getByText("common.form.discard"));
-  });
-  expect(vm.onDiscard).toHaveBeenCalled();
-
-  act(() => {
-    fireEvent.press(screen.getByText("common.form.keepEditing"));
-  });
-  expect(vm.onKeepEditing).toHaveBeenCalled();
-});
-
-it("SHOULD close the sheet through the view model", () => {
-  const { vm } = setup();
-
-  fireEvent.press(screen.getAllByLabelText("common.actions.close")[0]);
-
-  expect(vm.onClose).toHaveBeenCalled();
-});
-
-it("SHOULD render a skeleton and no fields WHEN loading", () => {
-  setup({ isLoading: true, model: undefined });
-
-  expect(screen.getByText("stock.form.title")).toBeOnTheScreen();
-  expect(screen.queryByText("stock.form.description")).toBeNull();
-});
-
-it("SHOULD expose the form ids", () => {
-  setup();
-
-  expect(screen.getByTestId(stockItemFormTestIds.sheet)).toBeOnTheScreen();
-  expect(
-    screen.getByTestId(stockItemFormTestIds.descriptionInput),
-  ).toBeOnTheScreen();
-  expect(
-    screen.getByTestId(stockItemFormTestIds.quantityInput),
-  ).toBeOnTheScreen();
-  expect(screen.getByTestId(stockItemFormTestIds.unitSelect)).toBeOnTheScreen();
-  expect(
-    screen.getByTestId(stockItemFormTestIds.expirationField),
-  ).toBeOnTheScreen();
-  expect(screen.getByTestId(stockItemFormTestIds.moreToggle)).toBeOnTheScreen();
-});
-
-it("SHOULD save and toggle more details through their ids", () => {
-  const { vm } = setup();
-
-  fireEvent.press(screen.getByTestId(stockItemFormTestIds.saveButton));
-  fireEvent.press(screen.getByTestId(stockItemFormTestIds.moreToggle));
-
-  expect(vm.onSave).toHaveBeenCalled();
-  expect(vm.onToggleMore).toHaveBeenCalled();
-});
-
-it("SHOULD expose the brand input and the derived error ids", () => {
-  setup({
-    errors: { description: "stock.form.descriptionRequired" },
     isMoreOpen: true,
   });
 
-  expect(screen.getByTestId(stockItemFormTestIds.brandInput)).toBeOnTheScreen();
-  expect(
-    screen.getByTestId(`${stockItemFormTestIds.descriptionInput}-error`),
-  ).toBeOnTheScreen();
+  expect(screen.getByText("stock.form.descriptionRequired")).toBeOnTheScreen();
+  expect(screen.getByText("stock.form.idealRule")).toBeOnTheScreen();
+  expect(screen.getByText("stock.form.quantityInvalid")).toBeOnTheScreen();
+  expect(screen.getByText("stock.form.shelfLifeInvalid")).toBeOnTheScreen();
+  expect(screen.getAllByText("stock.form.warnDaysInvalid")).toHaveLength(2);
 });
 
-it("SHOULD give every owner chip an id from its owner id", () => {
-  setup();
+describe("fields", () => {
+  it("SHOULD set the description, brand, shelf life, warn days, barcode and notes (digits only)", () => {
+    const { vm } = setup({ isMoreOpen: true });
 
-  expect(
-    screen.getByTestId(`${stockItemFormTestIds.owner}-family-id`),
-  ).toBeOnTheScreen();
-});
+    fireEvent.changeText(
+      screen.getByLabelText("stock.form.description"),
+      "Leite",
+    );
+    fireEvent.changeText(screen.getByLabelText("stock.form.brand"), "Brand");
+    fireEvent.changeText(screen.getByLabelText("stock.form.shelfLife"), "5d");
+    fireEvent.changeText(screen.getByLabelText("stock.form.warnClosed"), "3x");
+    fireEvent.changeText(screen.getByLabelText("stock.form.warnOpened"), "0");
+    fireEvent.changeText(screen.getByLabelText("stock.form.barcode"), "789");
+    fireEvent.changeText(screen.getByLabelText("stock.form.notes"), "n");
 
-describe("wide layout (spec 037)", () => {
-  const sheet = stockItemFormTestIds.sheet;
+    expect(vm.setField).toHaveBeenCalledWith("description", "Leite");
+    expect(vm.setField).toHaveBeenCalledWith("brand", "Brand");
+    expect(vm.setField).toHaveBeenCalledWith("openedShelfLifeDays", "5");
+    expect(vm.setField).toHaveBeenCalledWith("warnDaysClosed", "3");
+    expect(vm.setField).toHaveBeenCalledWith("warnDaysOpened", "0");
+    expect(vm.setField).toHaveBeenCalledWith("barcode", "789");
+    expect(vm.setField).toHaveBeenCalledWith("notes", "n");
+  });
 
-  it("SHOULD split the fields: main ones left, the more details toggle and fields right", () => {
-    setup({ isMoreOpen: true }, "expanded");
+  it("SHOULD switch the unit kind WHEN a chip is pressed AND ignore an unknown one", () => {
+    const { vm } = setup();
+
+    fireEvent.press(
+      screen.getByTestId(`${stockItemFormTestIds.unitSelect}-kilogram`),
+    );
+
+    expect(vm.setField).toHaveBeenCalledWith("unit", "kilogram");
+  });
+
+  it("SHOULD type the quantity, the minimum and the ideal in the unit of the item", () => {
+    const { vm } = setup({ values: values({ unit: StockUnits.KILOGRAM }) });
+
+    fireEvent.changeText(
+      screen.getByTestId(stockItemFormTestIds.quantityInput),
+      "1500",
+    );
+    fireEvent.changeText(
+      screen.getByTestId(stockItemFormTestIds.minInput),
+      "300",
+    );
+    fireEvent.changeText(
+      screen.getByTestId(stockItemFormTestIds.idealInput),
+      "2",
+    );
+
+    expect(vm.setField).toHaveBeenCalledWith("quantity", {
+      mode: QuantityMode.LARGE,
+      text: "1,5",
+    });
+    expect(vm.setField).toHaveBeenCalledWith("min", {
+      mode: QuantityMode.SMALL,
+      text: "300",
+    });
+    expect(vm.setField).toHaveBeenCalledWith("ideal", {
+      mode: QuantityMode.SMALL,
+      text: "2",
+    });
+    expect(screen.getByText("stock.form.quantityHintWeight")).toBeOnTheScreen();
+  });
+
+  it.each([
+    [StockUnits.LITER, "stock.form.quantityHintVolume"],
+    [StockUnits.UNIT, "stock.form.quantityHintUnit"],
+  ])("SHOULD hint the quantity of a %s item", (unit, key) => {
+    setup({ values: values({ unit }) });
+
+    expect(screen.getByText(key)).toBeOnTheScreen();
+  });
+
+  it("SHOULD say when the item asks to be restocked", () => {
+    setup({
+      values: values({
+        min: { mode: QuantityMode.SMALL, text: "300" },
+        unit: StockUnits.KILOGRAM,
+      }),
+    });
 
     expect(
-      StyleSheet.flatten(screen.getByTestId(sheet).props.style).maxWidth,
-    ).toBe(880);
-    const left = within(screen.getByTestId(`${sheet}-column-left`));
-    const right = within(screen.getByTestId(`${sheet}-column-right`));
-    expect(
-      left.getByTestId(stockItemFormTestIds.descriptionInput),
-    ).toBeOnTheScreen();
-    expect(
-      left.getByTestId(stockItemFormTestIds.expirationField),
-    ).toBeOnTheScreen();
-    expect(
-      right.getByTestId(stockItemFormTestIds.moreToggle),
-    ).toBeOnTheScreen();
-    expect(
-      right.getByTestId(stockItemFormTestIds.brandInput),
+      screen.getByText(
+        'stock.form.minHintSet {"quantity":"300 common.units.gram"}',
+      ),
     ).toBeOnTheScreen();
   });
 
-  it("SHOULD show the form error after the columns", () => {
-    setup({ formErrorKey: "stock.errors.generic" }, "expanded");
+  it("SHOULD mark and unmark stock only", () => {
+    const { vm } = setup();
 
-    expect(screen.getByText("stock.errors.generic")).toBeOnTheScreen();
+    fireEvent.press(
+      screen.getByTestId(`${stockItemFormTestIds.stockOnly}-stockOnly`),
+    );
+
+    expect(vm.setField).toHaveBeenCalledWith("stockOnly", true);
+  });
+
+  it("SHOULD pick the category and the location (or none)", () => {
+    const { vm } = setup({ values: values({ categoryId: "cat-1" }) });
+
+    fireEvent.press(screen.getByTestId(stockItemFormTestIds.categorySelect));
+    fireEvent.press(screen.getByText("stock.form.noCategory"));
+    fireEvent.press(screen.getByTestId(stockItemFormTestIds.locationSelect));
+    fireEvent.press(screen.getByText("Fridge"));
+
+    expect(vm.setField).toHaveBeenCalledWith("categoryId", undefined);
+    expect(vm.setField).toHaveBeenCalledWith("locationId", "loc-1");
+  });
+
+  it("SHOULD choose the owner AND show the family name", () => {
+    const { vm } = setup({ isMoreOpen: true });
+
+    fireEvent.press(
+      screen.getByTestId(`${stockItemFormTestIds.owner}-family-id`),
+    );
+
+    expect(vm.onOwnerChange).toHaveBeenCalledWith("family-id");
+  });
+});
+
+describe("suggestions and owner change", () => {
+  it("SHOULD offer to add stock to a similar item", () => {
+    const { vm } = setup({
+      suggestion: {
+        name: "Cheese",
+        quantity: { text: "250", unitKey: "common.units.gram" },
+      },
+    });
+
     expect(
-      within(screen.getByTestId(`${sheet}-column-left`)).queryByText(
-        "stock.errors.generic",
+      screen.getByText(
+        'stock.form.suggestion.exists {"name":"Cheese","qty":"250 common.units.gram"}',
       ),
+    ).toBeOnTheScreen();
+
+    fireEvent.press(screen.getByTestId(stockItemFormTestIds.suggestionAction));
+
+    expect(vm.onAddToSuggestion).toHaveBeenCalled();
+  });
+
+  it("SHOULD explain what happens to the category and the location WHEN the owner changes", () => {
+    setup({
+      isEdit: true,
+      isMoreOpen: true,
+      ownerChangePreview: {
+        category: { from: "Dairy", to: undefined },
+        location: { from: "Fridge", to: "Fridge" },
+      },
+      values: values({ ownerId: "family-id" }),
+    });
+
+    expect(screen.getByText("stock.form.ownerChange.title")).toBeOnTheScreen();
+    expect(
+      screen.getByText(
+        'stock.form.ownerChange.noCategory {"name":"Dairy","owner":"Silva"}',
+      ),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByText(
+        'stock.form.ownerChange.keepsLocation {"name":"Fridge","owner":"Silva"}',
+      ),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD say a category that stays WHEN it exists in the new owner, and say nothing about an empty one", () => {
+    setup({
+      isEdit: true,
+      isMoreOpen: true,
+      ownerChangePreview: {
+        category: { from: "Dairy", to: "Dairy" },
+        location: {},
+      },
+    });
+
+    expect(
+      screen.getByText(
+        'stock.form.ownerChange.keepsCategory {"name":"Dairy","owner":"Ana"}',
+      ),
+    ).toBeOnTheScreen();
+    expect(
+      screen.queryByText(/ownerChange\.(noLocation|keepsLocation)/),
     ).toBeNull();
+  });
+});
+
+describe("actions", () => {
+  it("SHOULD save AND show the form error and the discard dialog", () => {
+    const { vm } = setup({
+      formErrorKey: "common.errors.generic",
+      isDiscardOpen: true,
+    });
+
+    fireEvent.press(screen.getByTestId(stockItemFormTestIds.saveButton));
+
+    expect(vm.onSave).toHaveBeenCalled();
+    expect(screen.getByText("common.errors.generic")).toBeOnTheScreen();
+    expect(screen.getByText("common.form.discardTitle")).toBeOnTheScreen();
+
+    fireEvent.press(screen.getByText("common.form.keepEditing"));
+    fireEvent.press(screen.getByText("common.form.discard"));
+
+    expect(vm.onKeepEditing).toHaveBeenCalled();
+    expect(vm.onDiscard).toHaveBeenCalled();
+  });
+
+  it("SHOULD show a skeleton instead of the form while loading", () => {
+    setup({ isLoading: true });
+
+    expect(screen.queryByText("stock.form.description")).toBeNull();
+  });
+
+  it("SHOULD render on a wide screen too", () => {
+    setup({ isMoreOpen: true }, "expanded");
+
+    expect(screen.getByText("stock.form.brand")).toBeOnTheScreen();
   });
 });

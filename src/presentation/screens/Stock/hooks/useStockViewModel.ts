@@ -2,9 +2,11 @@ import { useIsFocused } from "@react-navigation/native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
+import { StockCategoryDTO } from "@application/dto/stock/StockCatalogDTO";
 import StockDTO from "@application/dto/stock/StockDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
+import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import { useTranslationLocale } from "@presentation/i18n";
 import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
@@ -23,9 +25,78 @@ const FILTER_PARAMS: string[] = [
 
 export type StockVM = ReturnType<typeof useStockViewModel>;
 
+interface CatalogData {
+  categories: Array<{ id: string; label: string; parentId?: string }>;
+  locations: Array<{ id: string; label: string }>;
+}
+
 interface StockData {
   items: StockDTO[];
   owners: OwnerDTO[];
+}
+
+// The chosen categories and every category below them (a parent includes its children).
+export function expandCategoryIds(
+  selected: string[],
+  categories: CatalogData["categories"],
+): Set<string> {
+  const ids = new Set(selected);
+  let grew = true;
+
+  while (grew) {
+    grew = false;
+    categories.forEach((category) => {
+      if (
+        category.parentId &&
+        ids.has(category.parentId) &&
+        !ids.has(category.id)
+      ) {
+        ids.add(category.id);
+        grew = true;
+      }
+    });
+  }
+
+  return ids;
+}
+
+// Categories and locations of every active owner, for the two filter chips (read only when a chip is used).
+export async function fetchCatalog(owners: OwnerDTO[]): Promise<CatalogData> {
+  const active = owners.filter((owner) => !owner.archived);
+  const multiple = active.length > 1;
+  const rows = await Promise.all(
+    active.map(async (owner) => {
+      const params = {
+        owner: owner.type === OwnerType.FAMILY ? "FAMILY" : "USER",
+        ownerId: owner.id,
+      };
+      const [categories, locations] = await Promise.all([
+        useCases.getStockCategoriesUseCase.execute(params),
+        useCases.getStockLocationsUseCase.execute(params),
+      ]);
+
+      return { categories, locations, owner };
+    }),
+  );
+  function suffix(owner: OwnerDTO) {
+    return multiple ? ` · ${owner.name}` : "";
+  }
+
+  return {
+    categories: rows.flatMap(({ categories, owner }) =>
+      flattenCategories(categories).map((category) => ({
+        id: category.id,
+        label: `${category.path}${suffix(owner)}`,
+        parentId: category.parentId,
+      })),
+    ),
+    locations: rows.flatMap(({ locations, owner }) =>
+      locations.map((location) => ({
+        id: location.id,
+        label: `${location.name}${suffix(owner)}`,
+      })),
+    ),
+  };
 }
 
 export async function fetchStock(owners: OwnerDTO[]): Promise<StockData> {
@@ -34,6 +105,23 @@ export async function fetchStock(owners: OwnerDTO[]): Promise<StockData> {
   });
 
   return { items, owners };
+}
+
+// Active categories as a flat list with their "Dairy › Cheese" path.
+function flattenCategories(
+  nodes: StockCategoryDTO[],
+  prefix = "",
+): Array<{ id: string; parentId?: string; path: string }> {
+  return nodes
+    .filter((node) => node.status === "ACTIVE")
+    .flatMap((node) => {
+      const path = prefix ? `${prefix} › ${node.name}` : node.name;
+
+      return [
+        { id: node.id, parentId: node.parentId, path },
+        ...flattenCategories(node.children, path),
+      ];
+    });
 }
 
 export default useStockViewModel;
@@ -52,10 +140,22 @@ function useStockViewModel() {
   const [sort, setSort] = useState<StockSort>("EXPIRATION");
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | undefined>();
+  const [categoryIds, setCategoryIds] = useState<string[]>([]);
+  const [locationIds, setLocationIds] = useState<string[]>([]);
+  const [openFilter, setOpenFilter] = useState<
+    "category" | "location" | undefined
+  >();
 
   const { data, error, isFetching, refetch } = useOwnerScopedQuery<StockData>({
     cacheKey: [useCases.getStockItemsUseCase.uniqueName],
     fetch: fetchStock,
+  });
+
+  const catalog = useOwnerScopedQuery<CatalogData>({
+    cacheKey: [useCases.getStockCategoriesUseCase.uniqueName, "filters"],
+    enabled:
+      openFilter !== undefined || categoryIds.length + locationIds.length > 0,
+    fetch: fetchCatalog,
   });
 
   useEffect(() => {
@@ -84,13 +184,17 @@ function useStockViewModel() {
   const locale = getLocale().languageTag;
   const list = useMemo(
     () =>
-      data
-        ? new StockListUIModel(data.items, data.owners, new Date(), locale)
-        : undefined,
+      data ? new StockListUIModel(data.items, data.owners, locale) : undefined,
     [data, locale],
   );
 
-  const view = list?.view({ filter, search: debouncedSearch, sort });
+  const view = list?.view({
+    categoryIds: expandCategoryIds(categoryIds, catalog.data?.categories ?? []),
+    filter,
+    locationIds: new Set(locationIds),
+    search: debouncedSearch,
+    sort,
+  });
   const selectedItem = list?.items.find((item) => item.id === selectedId);
   const activeFilter = view?.activeFilter ?? StockFilters.ALL;
 
@@ -112,6 +216,8 @@ function useStockViewModel() {
     setSearch("");
     setDebouncedSearch("");
     setFilter(StockFilters.ALL);
+    setCategoryIds([]);
+    setLocationIds([]);
   }
 
   function onItemDeleted() {
@@ -126,27 +232,39 @@ function useStockViewModel() {
 
   return {
     activeFilter,
+    categoryIds,
+    categoryOptions: catalog.data?.categories ?? [],
     errorMessageKey:
       error && !data ? ("common.errors.generic" as const) : undefined,
     filterOptions: view?.filterOptions ?? [],
     hasNoResults: view?.hasNoResults ?? false,
+    isCatalogLoading: catalog.isFetching && !catalog.data,
     isEmpty: !!list && list.items.length === 0,
     isLoading: isFetching && !data,
     isRefreshing: isFetching && !!data,
     isSortOpen,
+    locationIds,
+    locationOptions: catalog.data?.locations ?? [],
     onAddPress,
+    onCatalogPress: scope.guard(() => openModal("stock_catalog")),
+    onCategoriesChange: setCategoryIds,
     onClearFilters,
     onCloseDetails: () => setSelectedId(undefined),
+    onCloseFilterSheet: () => setOpenFilter(undefined),
     onCloseSort: () => setIsSortOpen(false),
     onFilterChange: setFilter,
     onItemDeleted,
     onItemPress: scope.guard(setSelectedId),
+    onLocationsChange: setLocationIds,
+    onOpenCategorySheet: () => setOpenFilter("category"),
+    onOpenLocationSheet: () => setOpenFilter("location"),
     onOpenSort: () => setIsSortOpen(true),
     onRefresh: async () => refetch(),
     onRetry: async () => refetch(),
     onSearchChange: setSearch,
     onSortChange,
     onToastHide: scope.onToastHide,
+    openFilter,
     readOnly: scope.readOnly,
     rows: view?.rows ?? [],
     search,

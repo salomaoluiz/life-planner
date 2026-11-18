@@ -7,23 +7,28 @@ import {
   spies,
 } from "./mocks/updateStockItem.mocks";
 
-it("SHOULD PATCH only the defined fields (dates as ISO strings)", async () => {
+it("SHOULD PATCH only the defined fields AND send null to clear an optional", async () => {
   await setup({
+    categoryId: null,
     id: mocks.itemId,
-    openingDate: new Date("2026-10-04T08:00:00.000Z"),
-    quantity: 1,
+    minQuantity: 0.3,
+    stockOnly: false,
   });
 
   expect(spies.patch).toHaveBeenCalledWith(`/v1/stock/items/${mocks.itemId}`, {
     barcode: undefined,
     brand: undefined,
+    categoryId: null,
     description: undefined,
-    expirationDate: undefined,
+    idealQuantity: undefined,
+    locationId: undefined,
+    minQuantity: 0.3,
     notes: undefined,
-    openingDate: "2026-10-04T08:00:00.000Z",
-    purchaseDate: undefined,
-    quantity: 1,
+    openedShelfLifeDays: undefined,
+    stockOnly: false,
     unit: undefined,
+    warnDaysClosed: undefined,
+    warnDaysOpened: undefined,
   });
 });
 
@@ -37,12 +42,12 @@ it("SHOULD send owner and ownerId together", async () => {
 });
 
 it("SHOULD NOT send ownerId alone (the API rejects a half move)", async () => {
-  await setup({ id: mocks.itemId, ownerId: "family-id", quantity: 3 });
+  await setup({ description: "x", id: mocks.itemId, ownerId: "family-id" });
 
   const [, body] = spies.patch.mock.calls[0];
   expect(body).not.toHaveProperty("ownerId");
   expect(body).not.toHaveProperty("owner");
-  expect(body).toHaveProperty("quantity", 3);
+  expect(body).toHaveProperty("description", "x");
 });
 
 it("SHOULD NOT call the API WHEN there is nothing to update", async () => {
@@ -58,7 +63,6 @@ it("SHOULD wrap an API 404 in GenericError with the id only", async () => {
   const error = await setupThrowable({
     id: mocks.itemId,
     notes: "secret",
-    quantity: 1,
   });
 
   expect(error).toBeInstanceOf(GenericError);

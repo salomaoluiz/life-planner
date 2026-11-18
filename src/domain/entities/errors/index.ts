@@ -7,4 +7,5 @@ export * from "./familyMember";
 export * from "./financial";
 export * from "./form";
 export * from "./investment";
+export * from "./stock";
 export * from "./version";

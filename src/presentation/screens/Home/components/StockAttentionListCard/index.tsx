@@ -71,14 +71,14 @@ function StockAttentionListCard({
           key={row.id}
           leading={
             <IconTile
-              name={row.isExpired ? "alert-circle-outline" : "clock-outline"}
+              name={row.iconName}
               tone={row.isExpired ? "expense" : "warning"}
             />
           }
           onPress={onRowPress}
           subtitle={t("home.stock.subtitle", {
             ownerName: row.ownerName,
-            quantity: row.quantity,
+            quantity: row.quantityText,
             unit: t(row.unitKey),
           })}
           testID={homeTestIds.stockAttentionRow}

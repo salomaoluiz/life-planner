@@ -3,6 +3,18 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [3.0.0] - 2026-11-17
+
+### Changed
+
+- **Breaking (needs API 6.0.0):** stock items keep their quantity in lots with their own dates; kg and L take decimals and show in g and ml below 1 (spec 116).
+
+### Added
+
+- Stock item detail with lots, history and the actions Add, Used, Opened, Discard and Adjust (spec 116).
+- Minimum and ideal quantity with the "Restock" badge, per-lot expiration warnings, stock-only items and a name-similarity hint while typing (spec 116).
+- Categories and locations per owner with finance mapping, archive and default suggestions; filters by category and location on the stock list (spec 116).
+
 ## [2.1.0] - 2026-11-17
 
 ### Added

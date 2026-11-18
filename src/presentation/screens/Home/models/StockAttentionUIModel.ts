@@ -3,6 +3,7 @@ import StockAttentionDTO, {
   StockAttentionStatus,
 } from "@application/dto/home/StockAttentionDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
+import { formatAmount, toDisplay } from "@domain/entities/stock/stockQuantity";
 import { TranslationKeys } from "@presentation/i18n/types";
 
 class StockAttentionUIModel {
@@ -40,12 +41,21 @@ class StockAttentionUIModel {
 
 export class StockAttentionRowUIModel {
   get badge(): { key: TranslationKeys; params?: { count: number } } {
-    const days = this.item.daysLeft;
+    const days = this.item.daysLeft ?? 0;
 
     if (this.isExpired) return { key: "home.stock.expired" };
+    if (this.isRestock) return { key: "home.stock.restock" };
     if (days === 0) return { key: "home.stock.expiresToday" };
     if (days === 1) return { key: "home.stock.expiresTomorrow" };
     return { key: "home.stock.expiresIn", params: { count: days } };
+  }
+
+  get iconName() {
+    if (this.isExpired) {
+      return "alert-circle-outline";
+    }
+
+    return this.isRestock ? "cart-outline" : "clock-outline";
   }
 
   get id() {
@@ -56,6 +66,10 @@ export class StockAttentionRowUIModel {
     return this.item.status === StockAttentionStatus.EXPIRED;
   }
 
+  get isRestock() {
+    return this.item.status === StockAttentionStatus.RESTOCK;
+  }
+
   get ownerName() {
     return (
       this.owners.find((owner) => owner.id === this.item.stock.ownerId)?.name ??
@@ -63,8 +77,9 @@ export class StockAttentionRowUIModel {
     );
   }
 
-  get quantity() {
-    return this.item.stock.quantity;
+  // 500 g, 1,5 kg, 3 un (spec 116): kg and L show in g and ml below 1.
+  get quantityText() {
+    return formatAmount(this.display.amount);
   }
 
   get title() {
@@ -72,7 +87,11 @@ export class StockAttentionRowUIModel {
   }
 
   get unitKey(): TranslationKeys {
-    return `common.units.${this.item.stock.unit}` as TranslationKeys;
+    return `common.units.${this.display.unitKey}` as TranslationKeys;
+  }
+
+  private get display() {
+    return toDisplay(this.item.stock.quantity, this.item.stock.unit);
   }
 
   constructor(

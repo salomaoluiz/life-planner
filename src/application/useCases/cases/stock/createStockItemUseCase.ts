@@ -5,19 +5,30 @@ import Repositories from "@domain/repositories";
 export interface CreateStockItemUseCaseParams extends RequiredFields {
   barcode?: string;
   brand?: string;
+  categoryId?: string;
   expirationDate?: Date;
+  idealQuantity?: number;
+  locationId?: string;
+  minQuantity?: number;
   notes?: string;
-  openingDate?: Date;
+  openedShelfLifeDays?: number;
   purchaseDate?: Date;
+  stockOnly?: boolean;
+  warnDaysClosed?: number;
+  warnDaysOpened?: number;
 }
 
 interface RequiredFields {
   description: string;
   owner: string;
   ownerId: string;
+  // 0 creates the item with no lot.
   quantity: number;
   unit: string;
 }
+
+const DEFAULT_WARN_DAYS_CLOSED = 7;
+const DEFAULT_WARN_DAYS_OPENED = 1;
 
 function createStockItemUseCase(
   repositories: Repositories,
@@ -29,15 +40,22 @@ function createStockItemUseCase(
         await repositories.stockRepository.createStockItem({
           barcode: params.barcode,
           brand: params.brand,
+          categoryId: params.categoryId,
           description: params.description,
           expirationDate: params.expirationDate,
+          idealQuantity: params.idealQuantity,
+          locationId: params.locationId,
+          minQuantity: params.minQuantity,
           notes: params.notes,
-          openingDate: params.openingDate,
+          openedShelfLifeDays: params.openedShelfLifeDays,
           owner: params.owner,
           ownerId: params.ownerId,
           purchaseDate: params.purchaseDate,
           quantity: params.quantity,
+          stockOnly: params.stockOnly ?? false,
           unit: params.unit,
+          warnDaysClosed: params.warnDaysClosed ?? DEFAULT_WARN_DAYS_CLOSED,
+          warnDaysOpened: params.warnDaysOpened ?? DEFAULT_WARN_DAYS_OPENED,
         });
       } catch (error) {
         if (error instanceof DefaultError) {
@@ -55,30 +73,30 @@ function createStockItemUseCase(
 }
 
 function validateRequiredFields(params: CreateStockItemUseCaseParams) {
-  const requiredFields: Array<keyof RequiredFields> = [
-    "description",
-    "owner",
-    "ownerId",
-    "quantity",
-    "unit",
-  ];
+  const missing: Record<string, undefined> = {};
 
-  const missingFields = Object.entries(params).filter(([key, value]) => {
-    return (
-      requiredFields.includes(key as (typeof requiredFields)[number]) && !value
-    );
-  });
+  if (!params.description) {
+    missing.description = undefined;
+  }
 
-  if (missingFields.length) {
-    const fieldsObject = missingFields.reduce(
-      (acc, [key, value]) => {
-        acc[key] = value;
-        return acc;
-      },
-      {} as Record<string, undefined>,
-    );
+  if (!params.owner) {
+    missing.owner = undefined;
+  }
 
-    throw new FieldRequired(fieldsObject);
+  if (!params.ownerId) {
+    missing.ownerId = undefined;
+  }
+
+  if (!params.unit) {
+    missing.unit = undefined;
+  }
+
+  if (typeof params.quantity !== "number" || Number.isNaN(params.quantity)) {
+    missing.quantity = undefined;
+  }
+
+  if (Object.keys(missing).length) {
+    throw new FieldRequired(missing);
   }
 }
 

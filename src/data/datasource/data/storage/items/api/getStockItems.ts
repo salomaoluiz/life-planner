@@ -1,5 +1,6 @@
 import StockModel from "@data/models/stock/StockModel";
 import { StockDatasource } from "@data/repositories/repos/stock/stockDatasource";
+import { formatDay } from "@domain/entities/stock/stockDay";
 import { api } from "@infrastructure/api";
 
 import handleStockApiError from "./stockApiError";
@@ -15,7 +16,7 @@ async function getStockItems(ownerId: Params): Response {
 
   try {
     const data = await api.get<Record<string, unknown>[]>(
-      `/v1/stock/items?ownerId=${encodeURIComponent(ownerId)}`,
+      `/v1/stock/items?ownerId=${encodeURIComponent(ownerId)}&today=${formatDay(new Date())}`,
     );
 
     return data.map((item) => StockModel.fromJSON(item));

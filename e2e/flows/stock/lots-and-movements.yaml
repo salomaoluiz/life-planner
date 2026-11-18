@@ -1,0 +1,57 @@
+url: ${E2E_WEB_URL}
+name: stock/lots-and-movements
+tags:
+  - stock
+  - spec-116
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Spec 116: an item has lots; consuming records a movement that shows in the history.
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Lots
+      KEY: ITEM_NAME
+- runFlow:
+    file: ../../subflows/setup/create-stock-item.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      DESCRIPTION: ${output.ITEM_NAME}
+      QUANTITY: "3"
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/stock/open-stock.yaml
+- extendedWaitUntil:
+    visible:
+      id: "stock.list.row-title"
+      text: ${output.ITEM_NAME}
+    timeout: 20000
+- tapOn:
+    id: "stock.list.row-title"
+    text: ${output.ITEM_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "stock.item-details.lot"
+    timeout: 20000
+- tapOn:
+    id: "stock.item-details.consume-button"
+- extendedWaitUntil:
+    visible:
+      id: "stock.movement.quantity-input"
+    timeout: 20000
+- tapOn:
+    id: "stock.movement.quantity-input"
+- inputText: "1"
+- tapOn:
+    id: "stock.movement.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "stock.item-details.history-row"
+    timeout: 20000

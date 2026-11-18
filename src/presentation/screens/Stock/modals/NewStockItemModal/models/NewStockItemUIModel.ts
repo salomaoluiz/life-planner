@@ -3,12 +3,11 @@ import { StockOwners, StockUnits } from "@domain/entities/stock/StockEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { TranslationKeys } from "@presentation/i18n/types";
 
+// Spec 116: Unidade / Peso (g/kg) / Volume (ml/L).
 const UnitOptions: Array<{ labelKey: TranslationKeys; value: StockUnits }> = [
-  { labelKey: "stock.units.unit", value: StockUnits.UNIT },
-  { labelKey: "stock.units.kilogram", value: StockUnits.KILOGRAM },
-  { labelKey: "stock.units.gram", value: StockUnits.GRAM },
-  { labelKey: "stock.units.liter", value: StockUnits.LITER },
-  { labelKey: "stock.units.milliliter", value: StockUnits.MILLILITER },
+  { labelKey: "stock.form.unitKind.unit", value: StockUnits.UNIT },
+  { labelKey: "stock.form.unitKind.weight", value: StockUnits.KILOGRAM },
+  { labelKey: "stock.form.unitKind.volume", value: StockUnits.LITER },
 ];
 
 class NewStockItemUIModel {
@@ -48,6 +47,10 @@ class NewStockItemUIModel {
 
   isUnit(value: string): value is StockUnits {
     return UnitOptions.some((option) => option.value === value);
+  }
+
+  ownerName(ownerId: string) {
+    return this.owners.find((item) => item.id === ownerId)?.name ?? "";
   }
 
   ownerType(ownerId: string): StockOwners {

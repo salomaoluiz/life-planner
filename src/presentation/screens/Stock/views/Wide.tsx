@@ -20,7 +20,7 @@ import {
   Toast,
 } from "@components";
 import Skeleton from "@components/Skeleton";
-import { StockExpirationStatus } from "@domain/entities/stock/stockExpiration";
+import { StockExpirationStatus } from "@domain/entities/stock/StockEntity";
 import { useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
 import StockItemDetails from "@screens/Stock/containers/StockItemDetails";
@@ -31,6 +31,24 @@ import useStyles from "../styles";
 import stockTestIds from "../testIds";
 
 const SKELETON_ROWS = [0, 1, 2, 3, 4, 5];
+
+function badgeTestId(labelKey: string) {
+  const ids: Record<string, string> = {
+    "stock.badge.expired": stockTestIds.statusExpired,
+    "stock.badge.expiring": stockTestIds.statusExpiring,
+    "stock.badge.opened": stockTestIds.statusOpened,
+    "stock.badge.restock": stockTestIds.statusRestock,
+  };
+
+  return ids[labelKey];
+}
+
+function namesOf(options: Array<{ id: string; label: string }>, ids: string[]) {
+  return options
+    .filter((option) => ids.includes(option.id))
+    .map((option) => option.label)
+    .join(", ");
+}
 
 function Wide({ vm }: AdaptiveViewProps<StockVM>) {
   const { styles } = useStyles();
@@ -55,39 +73,85 @@ function Wide({ vm }: AdaptiveViewProps<StockVM>) {
     }
 
     const { item } = row;
-    const date = item.dateInfo
-      ? t(item.dateInfo.key, { date: item.dateInfo.date })
-      : "";
-    const quantity = `${item.quantityText} ${t(item.unitKey)}`;
-    const badge = item.badge;
-    const status = badge ? t(badge.labelKey, badge.params) : "";
-    const statusTestId =
-      item.status === StockExpirationStatus.EXPIRED
-        ? stockTestIds.statusExpired
-        : stockTestIds.statusExpiring;
+    const info = item.dateInfo;
+    let date = "";
+
+    if (info?.minimum) {
+      date = t(info.key, {
+        quantity: `${info.minimum.text} ${t(info.minimum.unitKey)}`,
+      });
+    } else if (info) {
+      date = t(info.key, { date: info.date });
+    } else if (item.status === StockExpirationStatus.NONE) {
+      date = t("stock.list.date.noExpiration");
+    }
+
+    const quantity = `${item.quantity.text} ${t(item.quantity.unitKey)}`;
+    const badgeLabels = item.badges.map((badge) => t(badge.labelKey));
 
     return (
       <ListItem
         accessibilityLabel={t("stock.list.rowA11y", {
           name: item.description,
           quantity,
-          status,
+          status: badgeLabels.join(", "),
         })}
         inset
         leading={
           <IconTile name={item.iconTile.icon} tone={item.iconTile.tone} />
         }
         onPress={() => vm.onItemPress(item.id)}
-        subtitle={[item.ownerName, date].filter(Boolean).join(" · ")}
+        subtitle={[item.subtitle, date].filter(Boolean).join(" · ")}
         testID={stockTestIds.row}
         title={item.description}
         trailing={
-          badge ? (
-            <Badge label={status} testID={statusTestId} tone={badge.tone} />
-          ) : (
-            <Text.Caption testID={stockTestIds.rowQuantity} value={quantity} />
-          )
+          <View style={styles.rowTrailing}>
+            <Text.BodyStrong
+              testID={stockTestIds.rowQuantity}
+              value={quantity}
+            />
+            <View style={styles.badges}>
+              {item.badges.map((badge) => (
+                <Badge
+                  key={badge.labelKey}
+                  label={t(badge.labelKey)}
+                  testID={badgeTestId(badge.labelKey)}
+                  tone={badge.tone}
+                />
+              ))}
+            </View>
+          </View>
         }
+      />
+    );
+  }
+
+  function renderFilterSheet() {
+    const isLocation = vm.openFilter === "location";
+    const options = isLocation ? vm.locationOptions : vm.categoryOptions;
+
+    if (options.length === 0) {
+      return (
+        <Text.Body
+          value={t(
+            isLocation
+              ? "stock.list.filter.noLocations"
+              : "stock.list.filter.noCategories",
+          )}
+        />
+      );
+    }
+
+    return (
+      <ChipGroup
+        mode="multiple"
+        onChange={isLocation ? vm.onLocationsChange : vm.onCategoriesChange}
+        options={options.map((option) => ({
+          label: option.label,
+          value: option.id,
+        }))}
+        testID={stockTestIds.filterSheetOptions}
+        value={isLocation ? vm.locationIds : vm.categoryIds}
       />
     );
   }
@@ -167,6 +231,11 @@ function Wide({ vm }: AdaptiveViewProps<StockVM>) {
                   testID={stockTestIds.sortButton}
                 />
               ) : null}
+              <Button.Secondary
+                label={t("stock.catalog.open")}
+                onPress={vm.onCatalogPress}
+                testID={stockTestIds.catalogButton}
+              />
               {vm.readOnly ? null : (
                 <IconButton
                   accessibilityLabel={t("stock.list.add")}
@@ -204,6 +273,31 @@ function Wide({ vm }: AdaptiveViewProps<StockVM>) {
               testID={stockTestIds.filter}
               value={vm.activeFilter}
             />
+            <View style={styles.catalogChips}>
+              <Button.Secondary
+                label={
+                  vm.categoryIds.length
+                    ? t("stock.list.filter.categoryValue", {
+                        names: namesOf(vm.categoryOptions, vm.categoryIds),
+                      })
+                    : t("stock.list.filter.categories")
+                }
+                onPress={vm.onOpenCategorySheet}
+                testID={stockTestIds.categoryFilter}
+              />
+              <Button.Secondary
+                label={
+                  vm.locationIds.length
+                    ? t("stock.list.filter.locationValue", {
+                        names: namesOf(vm.locationOptions, vm.locationIds),
+                      })
+                    : t("stock.list.filter.locations")
+                }
+                onPress={vm.onOpenLocationSheet}
+                testID={stockTestIds.locationFilter}
+              />
+              <Text.Caption value={t("stock.list.filter.childrenHint")} />
+            </View>
             {vm.readOnly ? (
               <ReadOnlyNotice
                 message={t("family.archived.banner")}
@@ -213,6 +307,19 @@ function Wide({ vm }: AdaptiveViewProps<StockVM>) {
           </>
         ) : null}
       </View>
+      <BottomSheet
+        closeLabel={t("common.actions.close")}
+        onClose={vm.onCloseFilterSheet}
+        testID={stockTestIds.filterSheet}
+        title={
+          vm.openFilter === "location"
+            ? t("stock.list.filter.locations")
+            : t("stock.list.filter.categories")
+        }
+        visible={vm.openFilter !== undefined}
+      >
+        {vm.isCatalogLoading ? <Skeleton.ListItem /> : renderFilterSheet()}
+      </BottomSheet>
       <BottomSheet
         closeLabel={t("common.actions.close")}
         onClose={vm.onCloseSort}

@@ -1,4 +1,13 @@
 {
+  "stock.catalog.mount.cold": {
+    "maxDepth": 2,
+    "maxDuplicates": 0,
+    "maxRequests": 4,
+    "modal": "stock_catalog"
+  },
+  "stock.catalog.render.mount": {
+    "maxCommits": 3
+  },
   "stock.list.mount.cold": {
     "maxDepth": 2,
     "maxDuplicates": 0,
@@ -8,14 +17,23 @@
   "stock.list.render.mount": {
     "maxCommits": 3
   },
-  "stock.newItem.mount.cold": {
+  "stock.movement.mount.cold": {
     "maxDepth": 1,
     "maxDuplicates": 0,
     "maxRequests": 1,
+    "modal": "stock_movement"
+  },
+  "stock.movement.render.mount": {
+    "maxCommits": 2
+  },
+  "stock.newItem.mount.cold": {
+    "maxDepth": 2,
+    "maxDuplicates": 0,
+    "maxRequests": 3,
     "modal": "add_new_stock_item"
   },
   "stock.newItem.render.mount": {
-    "maxCommits": 2
+    "maxCommits": 3
   },
   "stock.write.create": {
     "maxDepth": 1,

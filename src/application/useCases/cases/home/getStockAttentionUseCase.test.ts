@@ -64,6 +64,23 @@ it("SHOULD ignore items without expiration date but still count them in the tota
   expect(result.totalItems).toBe(2);
 });
 
+it("SHOULD list a low item (restock) after the expiring ones, without days left (spec 116)", async () => {
+  givenItems(
+    item("low", undefined, true),
+    item("soon", 3),
+    item("later", 30, true),
+  );
+
+  const result = await setup();
+
+  expect(result.items.map((i) => [i.stock.id, i.status, i.daysLeft])).toEqual([
+    ["soon", StockAttentionStatus.EXPIRING, 3],
+    ["low", StockAttentionStatus.RESTOCK, undefined],
+    ["later", StockAttentionStatus.RESTOCK, 30],
+  ]);
+  expect(result.attentionCount).toBe(3);
+});
+
 it("SHOULD cap the list at 3 items AND keep the real attention count", async () => {
   givenItems(item("a", 5), item("b", -3), item("c", 1), item("d", 0));
 

@@ -4,6 +4,7 @@ tags:
   - stock
   - spec-005
   - spec-011
+  - spec-116
   - smoke
 onFlowComplete:
   - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
@@ -40,9 +41,7 @@ onFlowComplete:
 - eraseText
 - inputText: "3"
 - tapOn:
-    id: "stock.item-form.unit-select"
-- tapOn:
-    id: "stock.item-form.unit-select-option-kilogram"
+    id: "stock.item-form.unit-select-kilogram"
 - tapOn:
     id: "stock.item-form.save-button"
 - extendedWaitUntil:
