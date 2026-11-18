@@ -84,6 +84,11 @@ class StockDTOFixture {
     return this;
   }
 
+  withHasExpiredLot(hasExpiredLot = true) {
+    this.value.hasExpiredLot = hasExpiredLot;
+    return this;
+  }
+
   withHasOpenLot(hasOpenLot = true) {
     this.value.hasOpenLot = hasOpenLot;
     return this;
@@ -143,6 +148,11 @@ class StockDTOFixture {
 
   withQuantity(quantity: number) {
     this.value.quantity = quantity;
+    return this;
+  }
+
+  withQuickStep(quickStep?: number) {
+    this.value.quickStep = quickStep;
     return this;
   }
 

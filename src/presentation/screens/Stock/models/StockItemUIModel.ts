@@ -38,6 +38,15 @@ class StockItemUIModel {
     return this.dto.brand;
   }
 
+  // Spec 117 FR 12: "Abri" shows only with a shelf life, no open lot and something in stock.
+  get canOpen() {
+    return (
+      this.dto.openedShelfLifeDays !== undefined &&
+      !this.dto.hasOpenLot &&
+      this.dto.quantity > 0
+    );
+  }
+
   get categoryId() {
     return this.dto.categoryId;
   }
@@ -125,6 +134,14 @@ class StockItemUIModel {
     );
   }
 
+  // Spec 117 FR 2: an archived family's items show the quantity without buttons.
+  get isReadOnly() {
+    return (
+      this.owners.find((owner) => owner.id === this.dto.ownerId)?.archived ===
+      true
+    );
+  }
+
   get locationId() {
     return this.dto.locationId;
   }
@@ -145,6 +162,11 @@ class StockItemUIModel {
 
   get quantity() {
     return formatQuantity(this.dto.quantity, this.dto.unit, this.locale);
+  }
+
+  // The item as the API sent it (the quick movement needs unit, owner and step).
+  get raw() {
+    return this.dto;
   }
 
   get searchText() {
@@ -175,6 +197,11 @@ class StockItemUIModel {
     private readonly owners: OwnerDTO[],
     private readonly locale?: string,
   ) {}
+
+  // Any quantity of this item formatted in its unit (the stepper shows the optimistic one).
+  quantityFor(quantity: number) {
+    return formatQuantity(quantity, this.dto.unit, this.locale);
+  }
 
   private shortDate(date: Date) {
     return date.toLocaleDateString(this.locale, {

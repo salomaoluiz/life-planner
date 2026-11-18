@@ -117,6 +117,7 @@ function givenViewModel(overrides: Record<string, unknown> = {}) {
     onSortChange: jest.fn(),
     onToastHide: jest.fn(),
     openFilter: undefined,
+    quick: quickMock(),
     readOnly: false,
     rows: view.rows,
     search: "",
@@ -136,6 +137,35 @@ function givenViewModel(overrides: Record<string, unknown> = {}) {
   return vm;
 }
 
+function quickMock(overrides: Record<string, unknown> = {}) {
+  return {
+    commit: jest.fn(),
+    displayQuantity: (item: { quantity: number }) => item.quantity,
+    exact: undefined,
+    expirationFor: undefined,
+    expiredPrompt: undefined,
+    hasExpiredValidLot: jest.fn().mockReturnValue(true),
+    isOpened: jest.fn().mockReturnValue(false),
+    isPending: jest.fn().mockReturnValue(false),
+    notice: undefined,
+    offlineCount: 0,
+    onChooseExpired: jest.fn(),
+    onExactClose: jest.fn(),
+    onExactConfirm: jest.fn(),
+    onExactOpen: jest.fn(),
+    onExpirationClose: jest.fn(),
+    onExpirationOpen: jest.fn(),
+    onExpirationSave: jest.fn(),
+    onExpiredCancel: jest.fn(),
+    onNoticeHide: jest.fn(),
+    onOpen: jest.fn(),
+    onStep: jest.fn(),
+    onUndo: jest.fn(),
+    retryNow: jest.fn(),
+    ...overrides,
+  };
+}
+
 function setup(overrides: Record<string, unknown> = {}) {
   const vm = givenViewModel(overrides);
 
@@ -146,5 +176,5 @@ function setup(overrides: Record<string, unknown> = {}) {
 
 const mocks = { list, owners, view, View };
 
-export { mocks, setup };
+export { mocks, quickMock, setup };
 export { fireEvent, screen } from "@tests";

@@ -11,6 +11,7 @@ import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import { useTranslationLocale } from "@presentation/i18n";
 import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
+import useStockQuickMovement from "@screens/Stock/hooks/useStockQuickMovement";
 import StockListUIModel, {
   StockFilters,
   StockSort,
@@ -198,6 +199,7 @@ function useStockViewModel() {
   const selectedItem = list?.items.find((item) => item.id === selectedId);
   const activeFilter = view?.activeFilter ?? StockFilters.ALL;
 
+  const quick = useStockQuickMovement({ onSettled: async () => refetch() });
   const scope = useReadOnlyScope(data?.owners, activeFilter);
   const { openModal } = useModalNavigation();
 
@@ -265,6 +267,7 @@ function useStockViewModel() {
     onSortChange,
     onToastHide: scope.onToastHide,
     openFilter,
+    quick,
     readOnly: scope.readOnly,
     rows: view?.rows ?? [],
     search,

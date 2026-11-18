@@ -19,6 +19,10 @@ export interface ToastProps {
   /** Makes the toast tappable: the action button calls it. */
   onAction?: () => void;
   onHide: () => void;
+  /** A second action next to the first ("Desfazer" + "Validade", spec 117). */
+  onSecondaryAction?: () => void;
+  secondaryActionLabel?: string;
+  secondaryActionTestID?: string;
   testID?: string;
   visible: boolean;
 }
@@ -105,6 +109,18 @@ function Toast(props: ToastProps) {
             testID={props.actionTestID}
           >
             <RNText style={styles.actionLabel}>{props.actionLabel}</RNText>
+          </Pressable>
+        ) : null}
+        {props.onSecondaryAction && props.secondaryActionLabel ? (
+          <Pressable
+            accessibilityRole={"button"}
+            onPress={props.onSecondaryAction}
+            style={styles.action}
+            testID={props.secondaryActionTestID}
+          >
+            <RNText style={styles.actionLabel}>
+              {props.secondaryActionLabel}
+            </RNText>
           </Pressable>
         ) : null}
       </View>

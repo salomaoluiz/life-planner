@@ -5,8 +5,11 @@ import { DefaultError } from "@domain/entities/errors";
 import Repositories from "@domain/repositories";
 
 export type CreateStockMovementUseCaseParams = {
+  clientId?: string;
   countedQuantity?: number;
   expirationDate?: Date;
+  expiredLots?: string;
+  gestureId?: string;
   itemId: string;
   lotId?: string;
   note?: string;
@@ -14,6 +17,7 @@ export type CreateStockMovementUseCaseParams = {
   purchaseDate?: Date;
   quantity?: number;
   reason?: string;
+  target?: string;
   type: string;
 };
 

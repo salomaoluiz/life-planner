@@ -23,6 +23,10 @@ import Skeleton from "@components/Skeleton";
 import { StockExpirationStatus } from "@domain/entities/stock/StockEntity";
 import { useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
+import StockQuickOverlays, {
+  OfflineBanner,
+} from "@screens/Stock/components/StockQuickOverlays";
+import StockQuickStepper from "@screens/Stock/components/StockQuickStepper";
 import StockItemDetails from "@screens/Stock/containers/StockItemDetails";
 import { StockListRow } from "@screens/Stock/models/StockListUIModel";
 
@@ -100,16 +104,8 @@ function Wide({ vm }: AdaptiveViewProps<StockVM>) {
         leading={
           <IconTile name={item.iconTile.icon} tone={item.iconTile.tone} />
         }
-        onPress={() => vm.onItemPress(item.id)}
-        subtitle={[item.subtitle, date].filter(Boolean).join(" · ")}
-        testID={stockTestIds.row}
-        title={item.description}
-        trailing={
-          <View style={styles.rowTrailing}>
-            <Text.BodyStrong
-              testID={stockTestIds.rowQuantity}
-              value={quantity}
-            />
+        meta={
+          item.badges.length > 0 ? (
             <View style={styles.badges}>
               {item.badges.map((badge) => (
                 <Badge
@@ -120,8 +116,13 @@ function Wide({ vm }: AdaptiveViewProps<StockVM>) {
                 />
               ))}
             </View>
-          </View>
+          ) : undefined
         }
+        onPress={() => vm.onItemPress(item.id)}
+        subtitle={[item.subtitle, date].filter(Boolean).join(" · ")}
+        testID={stockTestIds.row}
+        title={item.description}
+        trailing={<StockQuickStepper item={item} quick={vm.quick} />}
       />
     );
   }
@@ -298,6 +299,7 @@ function Wide({ vm }: AdaptiveViewProps<StockVM>) {
               />
               <Text.Caption value={t("stock.list.filter.childrenHint")} />
             </View>
+            <OfflineBanner quick={vm.quick} />
             {vm.readOnly ? (
               <ReadOnlyNotice
                 message={t("family.archived.banner")}
@@ -352,6 +354,7 @@ function Wide({ vm }: AdaptiveViewProps<StockVM>) {
         testID={stockTestIds.readOnlyToast}
         visible={vm.toastVisible}
       />
+      <StockQuickOverlays quick={vm.quick} />
       {vm.selectedItem ? (
         <StockItemDetails
           item={vm.selectedItem}
