@@ -367,3 +367,72 @@ describe("exact quantity and Abri", () => {
     expect(result.current.isOpened("milk")).toBe(true);
   });
 });
+
+describe("queue flush", () => {
+  function entry(kind: "MOVEMENT" | "UNDO") {
+    return {
+      clientId: "key",
+      createdAt: 1,
+      itemId: "milk",
+      itemName: "Leite",
+      kind,
+      ownerId: "o",
+      payload: {
+        delta: -1,
+        gestureId: "g",
+        itemId: "milk",
+        quantity: 1,
+        type: "CONSUME",
+      },
+    };
+  }
+
+  async function runFlush(
+    queued: ReturnType<typeof entry>,
+    firstFailure: unknown,
+  ) {
+    const queue = jest.mocked(offlineQueue);
+
+    offlineQueue.enqueue(queued as never);
+    queue.flush.mockImplementationOnce(async (processor) => ({
+      dropped: [],
+      outcome: await processor(queued as never),
+      sent: [],
+    })) as never;
+    create.mockRejectedValue(firstFailure);
+    undo.mockRejectedValue(firstFailure);
+
+    const hook = setup();
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    return {
+      hook,
+      outcome: (await queue.flush.mock.results.at(-1)?.value)?.outcome,
+    };
+  }
+
+  function gone() {
+    return Object.assign(new GenericError(), {
+      context: { error: new ApiBusinessError("Not Found", 404) },
+    });
+  }
+
+  it("SHOULD treat an undo that finds no gesture as done AND drop a movement for a deleted item", async () => {
+    expect((await runFlush(entry("UNDO"), gone())).outcome).toEqual({
+      status: "SENT",
+    });
+    expect((await runFlush(entry("MOVEMENT"), gone())).outcome).toEqual({
+      reason: "stock.offline.reasonGone",
+      status: "DROPPED",
+    });
+  });
+
+  it("SHOULD keep the entry WHEN there is still no connection", async () => {
+    expect(
+      (await runFlush(entry("MOVEMENT"), new ConnectivityError())).outcome,
+    ).toEqual({ status: "OFFLINE" });
+  });
+});

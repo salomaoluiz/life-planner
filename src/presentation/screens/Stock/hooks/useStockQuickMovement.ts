@@ -566,6 +566,15 @@ function useStockQuickMovement(options: Options) {
     } catch (error) {
       const failure = classifyFailure(error);
 
+      // An undo that finds no gesture already happened (its first answer was lost): nothing left to do.
+      if (
+        entry.kind === "UNDO" &&
+        failure.kind === "REFUSED" &&
+        failure.reasonKey === "stock.offline.reasonGone"
+      ) {
+        return { status: "SENT" as const };
+      }
+
       return failure.kind === "OFFLINE"
         ? { status: "OFFLINE" as const }
         : { reason: failure.reasonKey, status: "DROPPED" as const };
