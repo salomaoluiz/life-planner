@@ -175,6 +175,7 @@ function Wide({ vm }: AdaptiveViewProps<StockVM>) {
         />
       }
       onRefresh={vm.onRefresh}
+      overlay={<StockQuickOverlays quick={vm.quick} />}
       refreshing={vm.isRefreshing}
       testID={stockTestIds.screen}
     >
@@ -318,7 +319,6 @@ function Wide({ vm }: AdaptiveViewProps<StockVM>) {
         testID={stockTestIds.readOnlyToast}
         visible={vm.toastVisible}
       />
-      <StockQuickOverlays quick={vm.quick} />
       {vm.selectedItem ? (
         <StockItemDetails
           item={vm.selectedItem}
