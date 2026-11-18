@@ -26,6 +26,29 @@ export class StockCategoryModel {
   }
 }
 
+// `GET /stock/locations/:id` (spec 117): the QR route header.
+export class StockLocationDetailModel {
+  constructor(
+    readonly id: string,
+    readonly name: string,
+    readonly status: string,
+    readonly itemCount: number,
+    readonly owner: string,
+    readonly ownerId: string,
+  ) {}
+
+  static fromJSON(data: Record<string, unknown>): StockLocationDetailModel {
+    return new StockLocationDetailModel(
+      data.id as string,
+      data.name as string,
+      data.status as string,
+      (data.itemCount as number | undefined) ?? 0,
+      data.owner as string,
+      data.ownerId as string,
+    );
+  }
+}
+
 export class StockLocationModel {
   constructor(
     readonly id: string,

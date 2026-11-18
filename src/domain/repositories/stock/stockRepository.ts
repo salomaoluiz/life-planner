@@ -1,5 +1,6 @@
 import {
   StockCategoryEntity,
+  StockLocationDetailEntity,
   StockLocationEntity,
   StockOwnerChangePreviewEntity,
   StockSuggestionEntity,
@@ -34,6 +35,7 @@ export type StockRepository = {
   deleteStockLocation(
     params: DeleteStockCatalogRepositoryParams,
   ): Promise<void>;
+  getFrequentStockItems(limit?: number): Promise<StockEntity[]>;
   getOwnerChangePreview(
     params: OwnerChangePreviewRepositoryParams,
   ): Promise<StockOwnerChangePreviewEntity>;
@@ -42,15 +44,20 @@ export type StockRepository = {
   ): Promise<StockCategoryEntity[]>;
   getStockItem(id: string): Promise<StockEntity>;
   getStockItems(ownerId: string): Promise<StockEntity[]>;
+  getStockLocation(id: string): Promise<StockLocationDetailEntity>;
   getStockLocations(
     params: GetStockCatalogRepositoryParams,
   ): Promise<StockLocationEntity[]>;
   getStockMovements(
     params: GetStockMovementsRepositoryParams,
   ): Promise<{ items: StockMovementEntity[]; nextCursor?: string }>;
+  setStockGestureExpiration(
+    params: StockGestureExpirationRepositoryParams,
+  ): Promise<StockEntity>;
   suggestStockItems(
     params: SuggestStockItemsRepositoryParams,
   ): Promise<StockSuggestionEntity[]>;
+  undoStockGesture(params: StockGestureRepositoryParams): Promise<StockEntity>;
   updateStockCategory(
     params: UpdateStockCategoryRepositoryParams,
   ): Promise<void>;
@@ -80,6 +87,7 @@ interface CreateStockItemRepositoryParams extends StockOwnerParams {
   openedShelfLifeDays?: number;
   purchaseDate?: Date;
   quantity: number;
+  quickStep?: number;
   stockOnly: boolean;
   unit: string;
   warnDaysClosed: number;
@@ -91,8 +99,11 @@ interface CreateStockLocationRepositoryParams extends StockOwnerParams {
 }
 
 interface CreateStockMovementRepositoryParams {
+  clientId?: string;
   countedQuantity?: number;
   expirationDate?: Date;
+  expiredLots?: string;
+  gestureId?: string;
   itemId: string;
   lotId?: string;
   note?: string;
@@ -100,6 +111,7 @@ interface CreateStockMovementRepositoryParams {
   purchaseDate?: Date;
   quantity?: number;
   reason?: string;
+  target?: string;
   type: string;
 }
 
@@ -125,7 +137,20 @@ interface OwnerChangePreviewRepositoryParams extends StockOwnerParams {
   itemId: string;
 }
 
-interface SuggestStockItemsRepositoryParams extends StockOwnerParams {
+interface StockGestureExpirationRepositoryParams extends StockGestureRepositoryParams {
+  expirationDate: Date;
+}
+
+interface StockGestureRepositoryParams {
+  clientId?: string;
+  gestureId: string;
+  // The owner whose cached list the change invalidates.
+  ownerId: string;
+}
+
+interface SuggestStockItemsRepositoryParams {
+  owner?: string;
+  ownerId?: string;
   q: string;
 }
 
@@ -152,6 +177,7 @@ interface UpdateStockItemRepositoryParams {
   ownerId?: string;
   // The owner the item is in now: its cached list is invalidated, and the new owner's too.
   previousOwnerId: string;
+  quickStep?: null | number;
   stockOnly?: boolean;
   unit?: string;
   warnDaysClosed?: number;
@@ -174,6 +200,8 @@ export {
   GetStockCatalogRepositoryParams,
   GetStockMovementsRepositoryParams,
   OwnerChangePreviewRepositoryParams,
+  StockGestureExpirationRepositoryParams,
+  StockGestureRepositoryParams,
   SuggestStockItemsRepositoryParams,
   UpdateStockCategoryRepositoryParams,
   UpdateStockItemRepositoryParams,

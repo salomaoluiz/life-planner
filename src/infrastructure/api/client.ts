@@ -18,13 +18,14 @@ async function execute(
   path: string,
   body?: unknown,
   retried = false,
+  headers?: Record<string, string>,
 ): Promise<SendResult> {
   getBaseUrl(); // fail fast on a missing config, before touching storage
   // Auth endpoints are public: never send a (possibly stale) token to them.
   const token = path.startsWith("/v1/auth/")
     ? null
     : await tokenStorage.getToken();
-  const result = await send(method, path, body, token);
+  const result = await send(method, path, body, token, headers);
   const { json, status } = result;
 
   if (status >= 200 && status < 300) {
@@ -35,7 +36,7 @@ async function execute(
     // May throw ConnectivityError/GenericError: the original request then fails with that error
     // and the tokens are kept (being offline must not log the user out).
     if (!retried && (await refresh.refreshAccessToken(token))) {
-      return execute(method, path, body, true);
+      return execute(method, path, body, true, headers);
     }
     await session.handleSessionExpired(token);
     throw new UserNotLoggedError();
@@ -89,6 +90,7 @@ async function request<T>(
   method: Method,
   path: string,
   body?: unknown,
+  headers?: Record<string, string>,
 ): Promise<T> {
   if (method === "GET") {
     return (await execute(method, path, body)).json as T;
@@ -96,7 +98,7 @@ async function request<T>(
   // A write changes what a GET returns: one sent after it must never join a GET that started before it.
   inFlightGets.clear();
   try {
-    return (await execute(method, path, body)).json as T;
+    return (await execute(method, path, body, false, headers)).json as T;
   } finally {
     inFlightGets.clear();
   }
@@ -133,8 +135,12 @@ const api = {
   },
   patch: async <T>(path: string, body?: unknown) =>
     request<T>("PATCH", path, body),
-  post: async <T>(path: string, body?: unknown) =>
-    request<T>("POST", path, body),
+  // `headers`: extra request headers (the `Idempotency-Key` of a queued write, spec 117).
+  post: async <T>(
+    path: string,
+    body?: unknown,
+    headers?: Record<string, string>,
+  ) => request<T>("POST", path, body, headers),
   put: async <T>(path: string, body?: unknown) => request<T>("PUT", path, body),
 };
 

@@ -20,13 +20,17 @@ import createStockMovementUseCase from "./createStockMovementUseCase";
 import deleteStockCategoryUseCase from "./deleteStockCategoryUseCase";
 import deleteStockItemUseCase from "./deleteStockItemUseCase";
 import deleteStockLocationUseCase from "./deleteStockLocationUseCase";
+import getFrequentStockItemsUseCase from "./getFrequentStockItemsUseCase";
 import getOwnerChangePreviewUseCase from "./getOwnerChangePreviewUseCase";
 import getStockCategoriesUseCase from "./getStockCategoriesUseCase";
 import getStockItemsUseCase from "./getStockItemsUseCase";
 import getStockItemUseCase from "./getStockItemUseCase";
 import getStockLocationsUseCase from "./getStockLocationsUseCase";
+import getStockLocationUseCase from "./getStockLocationUseCase";
 import getStockMovementsUseCase from "./getStockMovementsUseCase";
+import setStockGestureExpirationUseCase from "./setStockGestureExpirationUseCase";
 import suggestStockItemsUseCase from "./suggestStockItemsUseCase";
+import undoStockGestureUseCase from "./undoStockGestureUseCase";
 import updateStockCategoryUseCase from "./updateStockCategoryUseCase";
 import updateStockItemUseCase from "./updateStockItemUseCase";
 import updateStockLocationUseCase from "./updateStockLocationUseCase";
@@ -70,6 +74,43 @@ interface Case {
 
 const owner = { owner: "USER", ownerId: "owner" };
 const cases: Case[] = [
+  {
+    check: (result) => expect(result).toHaveLength(1),
+    factory: getFrequentStockItemsUseCase as never,
+    method: "getFrequentStockItems",
+    name: "getFrequentStockItems",
+    params: { limit: 5 },
+    repoParams: 5,
+    repoResult: [entity],
+  },
+  {
+    factory: getStockLocationUseCase as never,
+    method: "getStockLocation",
+    name: "getStockLocation",
+    params: { id: "l" },
+    repoParams: "l",
+    repoResult: { id: "l" },
+  },
+  {
+    check: (result) =>
+      expect(result).toMatchObject({ id: (entity as { id: string }).id }),
+    factory: undoStockGestureUseCase as never,
+    method: "undoStockGesture",
+    name: "undoStockGesture",
+    params: { gestureId: "g", ownerId: "o" },
+    repoResult: entity,
+  },
+  {
+    factory: setStockGestureExpirationUseCase as never,
+    method: "setStockGestureExpiration",
+    name: "setStockGestureExpiration",
+    params: {
+      expirationDate: new Date(2026, 11, 5),
+      gestureId: "g",
+      ownerId: "o",
+    },
+    repoResult: entity,
+  },
   {
     check: (result) =>
       expect(result).toMatchObject({ id: (entity as { id: string }).id }),

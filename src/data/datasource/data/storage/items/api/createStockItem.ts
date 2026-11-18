@@ -25,6 +25,7 @@ async function createStockItem(params: Params): Response {
       ownerId: params.ownerId,
       purchaseDate: params.purchaseDate && formatDay(params.purchaseDate),
       quantity: params.quantity,
+      quickStep: params.quickStep,
       stockOnly: params.stockOnly,
       unit: params.unit,
       warnDaysClosed: params.warnDaysClosed,

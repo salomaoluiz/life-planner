@@ -7,13 +7,17 @@ export { default as createStockMovementUseCase } from "./createStockMovementUseC
 export { default as deleteStockCategoryUseCase } from "./deleteStockCategoryUseCase";
 export { default as deleteStockItemUseCase } from "./deleteStockItemUseCase";
 export { default as deleteStockLocationUseCase } from "./deleteStockLocationUseCase";
+export { default as getFrequentStockItemsUseCase } from "./getFrequentStockItemsUseCase";
 export { default as getOwnerChangePreviewUseCase } from "./getOwnerChangePreviewUseCase";
 export { default as getStockCategoriesUseCase } from "./getStockCategoriesUseCase";
 export { default as getStockItemsUseCase } from "./getStockItemsUseCase";
 export { default as getStockItemUseCase } from "./getStockItemUseCase";
 export { default as getStockLocationsUseCase } from "./getStockLocationsUseCase";
+export { default as getStockLocationUseCase } from "./getStockLocationUseCase";
 export { default as getStockMovementsUseCase } from "./getStockMovementsUseCase";
+export { default as setStockGestureExpirationUseCase } from "./setStockGestureExpirationUseCase";
 export { default as suggestStockItemsUseCase } from "./suggestStockItemsUseCase";
+export { default as undoStockGestureUseCase } from "./undoStockGestureUseCase";
 export { default as updateStockCategoryUseCase } from "./updateStockCategoryUseCase";
 export { default as updateStockItemUseCase } from "./updateStockItemUseCase";
 export { default as updateStockLocationUseCase } from "./updateStockLocationUseCase";

@@ -16,6 +16,7 @@ interface IStockModel {
   createdAt?: Date;
   description: string;
   expirationStatus: string;
+  hasExpiredLot: boolean;
   hasOpenLot: boolean;
   id: string;
   idealQuantity?: number;
@@ -30,6 +31,7 @@ interface IStockModel {
   owner: string;
   ownerId: string;
   quantity: number;
+  quickStep?: number;
   restockQuantity: number;
   stockOnly: boolean;
   unit: string;
@@ -51,6 +53,7 @@ class StockModel implements IStockModel {
   createdAt?: Date;
   description: string;
   expirationStatus: string;
+  hasExpiredLot: boolean;
   hasOpenLot: boolean;
   id: string;
   idealQuantity?: number;
@@ -65,6 +68,7 @@ class StockModel implements IStockModel {
   owner: string;
   ownerId: string;
   quantity: number;
+  quickStep?: number;
   restockQuantity: number;
   stockOnly: boolean;
   unit: string;
@@ -79,6 +83,7 @@ class StockModel implements IStockModel {
     this.createdAt = params.createdAt;
     this.description = params.description;
     this.expirationStatus = params.expirationStatus;
+    this.hasExpiredLot = params.hasExpiredLot;
     this.hasOpenLot = params.hasOpenLot;
     this.id = params.id;
     this.idealQuantity = params.idealQuantity;
@@ -93,6 +98,7 @@ class StockModel implements IStockModel {
     this.owner = params.owner;
     this.ownerId = params.ownerId;
     this.quantity = params.quantity;
+    this.quickStep = params.quickStep;
     this.restockQuantity = params.restockQuantity;
     this.stockOnly = params.stockOnly;
     this.unit = params.unit;
@@ -112,6 +118,7 @@ class StockModel implements IStockModel {
       createdAt: optionalTimestamp(data.createdAt),
       description: data.description as string,
       expirationStatus: data.expirationStatus as string,
+      hasExpiredLot: data.hasExpiredLot === true,
       hasOpenLot: data.hasOpenLot as boolean,
       id: data.id as string,
       idealQuantity: optionalNumber(data.idealQuantity),
@@ -126,6 +133,7 @@ class StockModel implements IStockModel {
       owner: data.owner as string,
       ownerId: data.ownerId as string,
       quantity: data.quantity as number,
+      quickStep: optionalNumber(data.quickStep),
       restockQuantity: data.restockQuantity as number,
       stockOnly: data.stockOnly as boolean,
       unit: data.unit as string,
@@ -144,6 +152,7 @@ class StockModel implements IStockModel {
       createdAt: this.createdAt?.toISOString() ?? null,
       description: this.description,
       expirationStatus: this.expirationStatus,
+      hasExpiredLot: this.hasExpiredLot,
       hasOpenLot: this.hasOpenLot,
       id: this.id,
       idealQuantity: this.idealQuantity ?? null,
@@ -159,6 +168,7 @@ class StockModel implements IStockModel {
       owner: this.owner,
       ownerId: this.ownerId,
       quantity: this.quantity,
+      quickStep: this.quickStep ?? null,
       restockQuantity: this.restockQuantity,
       stockOnly: this.stockOnly,
       unit: this.unit,

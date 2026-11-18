@@ -22,14 +22,18 @@ export async function createStockMovement(
         countedQuantity: params.countedQuantity,
         expirationDate:
           params.expirationDate && formatDay(params.expirationDate),
+        expiredLots: params.expiredLots,
+        gestureId: params.gestureId,
         lotId: params.lotId,
         note: params.note,
         purchaseDate: params.purchaseDate && formatDay(params.purchaseDate),
         quantity: params.quantity,
         reason: params.reason,
+        target: params.target,
         today: formatDay(new Date()),
         type: params.type,
       },
+      params.clientId ? { "Idempotency-Key": params.clientId } : undefined,
     );
 
     return {
@@ -88,8 +92,12 @@ export async function suggestStockItems(
   params: Parameters<StockDatasource["suggestStockItems"]>[0],
 ): Promise<StockSuggestionModel[]> {
   try {
+    const owner =
+      params.owner && params.ownerId
+        ? `owner=${params.owner}&ownerId=${encodeURIComponent(params.ownerId)}&`
+        : "";
     const data = await api.get<{ items: Record_[] }>(
-      `/v1/stock/items/suggestions?owner=${params.owner}&ownerId=${encodeURIComponent(params.ownerId)}&q=${encodeURIComponent(params.q)}`,
+      `/v1/stock/items/suggestions?${owner}q=${encodeURIComponent(params.q)}`,
     );
 
     return data.items.map((row) => StockSuggestionModel.fromJSON(row));

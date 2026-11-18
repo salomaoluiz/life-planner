@@ -6,6 +6,7 @@ import {
   StockLocationInUse,
   StockLotAlreadyOpen,
   StockNotEnoughQuantity,
+  StockUndoTooLate,
 } from "@domain/entities/errors";
 
 // Session/connectivity errors are handled globally; every other failure is a GenericError.
@@ -39,6 +40,10 @@ function mapConflict(error: ApiBusinessError): BusinessError | undefined {
 
   if (error.message.includes("Not enough quantity")) {
     return new StockNotEnoughQuantity();
+  }
+
+  if (error.message.includes("desfazer")) {
+    return new StockUndoTooLate();
   }
 
   if (error.message.includes("already open")) {

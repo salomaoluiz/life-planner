@@ -40,6 +40,7 @@ interface IStockEntity {
   createdAt?: Date;
   description: string;
   expirationStatus: StockExpirationStatus;
+  hasExpiredLot: boolean;
   hasOpenLot: boolean;
   id: string;
   idealQuantity?: number;
@@ -55,6 +56,7 @@ interface IStockEntity {
   owner: StockOwners;
   ownerId: string;
   quantity: number;
+  quickStep?: number;
   restockQuantity: number;
   stockOnly: boolean;
   unit: StockUnits;
@@ -70,6 +72,7 @@ class StockEntity {
   createdAt?: Date;
   description: string;
   expirationStatus: StockExpirationStatus;
+  hasExpiredLot: boolean;
   hasOpenLot: boolean;
   id: string;
   idealQuantity?: number;
@@ -84,6 +87,7 @@ class StockEntity {
   owner: StockOwners;
   ownerId: string;
   quantity: number;
+  quickStep?: number;
   restockQuantity: number;
   stockOnly: boolean;
   unit: StockUnits;
@@ -98,6 +102,7 @@ class StockEntity {
     this.createdAt = params.createdAt;
     this.description = params.description;
     this.expirationStatus = params.expirationStatus;
+    this.hasExpiredLot = params.hasExpiredLot;
     this.hasOpenLot = params.hasOpenLot;
     this.id = params.id;
     this.idealQuantity = params.idealQuantity;
@@ -112,6 +117,7 @@ class StockEntity {
     this.owner = params.owner;
     this.ownerId = params.ownerId;
     this.quantity = params.quantity;
+    this.quickStep = params.quickStep;
     this.restockQuantity = params.restockQuantity;
     this.stockOnly = params.stockOnly;
     this.unit = params.unit;

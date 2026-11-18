@@ -19,6 +19,7 @@ async function updateStockItem(params: Params): Response {
       minQuantity: params.minQuantity,
       notes: params.notes,
       openedShelfLifeDays: params.openedShelfLifeDays,
+      quickStep: params.quickStep,
       stockOnly: params.stockOnly,
       unit: params.unit,
       warnDaysClosed: params.warnDaysClosed,
