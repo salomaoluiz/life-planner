@@ -1,4 +1,4 @@
-import { create } from "qrcode";
+import { create } from "qrcode/lib/core/qrcode";
 
 // The QR code of a text as rows of dark (true) and light (false) modules, generated on the device (spec 117 FR 19).
 function qrMatrix(text: string): boolean[][] {
