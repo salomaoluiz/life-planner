@@ -3,6 +3,15 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [3.1.0] - 2026-11-18
+
+### Added
+
+- Quick stock movement: − and + on every row (one request per series of taps, 2 s idle), per-item step, hold to type an exact quantity, "Abri" on the row and an expired-lot question before taking stock (needs API 6.1.0, spec 117).
+- Undo notice ("Desfazer") and "Validade" after adding stock, and a queue that keeps movements made without connection and sends them later (spec 117).
+- Quick add searches the stock and lists the most moved items (spec 117).
+- QR code per location (share or print an A6 page) and a route that opens the stock filtered by that location (spec 117).
+
 ## [3.0.0] - 2026-11-17
 
 ### Changed

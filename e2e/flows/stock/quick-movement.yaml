@@ -1,0 +1,55 @@
+url: ${E2E_WEB_URL}
+name: stock/quick-movement
+tags:
+  - stock
+  - spec-117
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Spec 117: − on the row groups the taps into one movement, the notice offers Desfazer and the quantity comes back.
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Quick
+      KEY: ITEM_NAME
+- runFlow:
+    file: ../../subflows/setup/create-stock-item.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      DESCRIPTION: ${output.ITEM_NAME}
+      QUANTITY: "3"
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/stock/open-stock.yaml
+- extendedWaitUntil:
+    visible:
+      id: "stock.list.row-title"
+      text: ${output.ITEM_NAME}
+    timeout: 20000
+- tapOn:
+    id: "stock.list.row.decrement"
+- tapOn:
+    id: "stock.list.row.decrement"
+- extendedWaitUntil:
+    visible:
+      id: "stock.notice"
+    timeout: 5000
+- extendedWaitUntil:
+    visible:
+      id: "stock.list.row-quantity"
+      text: "1.*"
+    timeout: 10000
+- tapOn:
+    id: "stock.notice.undo"
+- extendedWaitUntil:
+    visible:
+      id: "stock.list.row-quantity"
+      text: "3.*"
+    timeout: 20000
