@@ -15,6 +15,7 @@ const stockItemFormTestIds = {
   saveButton: "stock.item-form.save-button",
   sheet: "stock.item-form.sheet",
   shelfLifeInput: "stock.item-form.shelf-life-input",
+  stepInput: "stock.item-form.step-input",
   stockOnly: "stock.item-form.stock-only",
   suggestion: "stock.item-form.suggestion",
   suggestionAction: "stock.item-form.suggestion-action",

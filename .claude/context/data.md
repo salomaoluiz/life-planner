@@ -150,3 +150,7 @@ Owners (personal + families) come from the `families` of one `GET /v1/user/me`: 
 ## Month results are not persisted (spec 075)
 
 `financialRepository.transaction.getTransactions(ownerIds, range)` with a `range` (`monthDateRange`) reads straight from the API and writes nothing to the persistent cache: the screens keep months in React Query memory. The persisted whole-history entry (read only by the screens that still load the full history, removed by spec 077) is keyed by the sorted owner ids, and `cache.invalidate(CacheStringKeys.CACHE_FINANCIAL_TRANSACTION_DATA)` without a unique id still clears every entry.
+
+## Offline mutation queue (spec 117)
+
+`@infrastructure/offlineQueue` keeps writes that could not be sent: `enqueue`, `remove`, `list`, `subscribe`, `flush(processor)` (sequential, stops at the first `OFFLINE`, shares one run) and `useOfflineQueue()` (`useSyncExternalStore`, stable snapshot). Persistence is `asyncStorage` (MMKV, localStorage on web) under `StorageKeys.string.OFFLINE_QUEUE`. Each entry carries the `clientId` that is also sent as `Idempotency-Key` (`api.post(path, body, headers)` takes extra headers), so a retry after a lost response returns the original result. The stock quick movement is the first user; the shopping mode (spec 120) reuses it. `api.post` of a movement can throw `ConnectivityError` (queue it) or a business error (refuse it).

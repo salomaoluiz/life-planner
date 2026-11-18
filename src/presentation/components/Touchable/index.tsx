@@ -23,6 +23,8 @@ export interface TouchableProps {
   /** Checkbox state for screen readers: `mixed` is a partly chosen group */
   checked?: "mixed" | boolean;
   children: React.ReactNode;
+  /** Press duration (ms) that triggers `onLongPress`. @default 500 */
+  delayLongPress?: number;
   /** Set false when the caller paints its own disabled look (default: dim to 50%) */
   dimWhenDisabled?: boolean;
   disabled?: boolean;
@@ -33,6 +35,8 @@ export interface TouchableProps {
   focusRingColor?: string;
   hitSlop?: Insets;
   minTouchTarget?: boolean;
+  /** Web only: right click (the keyboard-free way to a long-press action, spec 117) */
+  onContextMenu?: () => void;
   onLongPress?: () => void;
   onPress?: () => void;
   selected?: boolean;
@@ -64,10 +68,19 @@ function Touchable(props: TouchableProps) {
         expanded: props.expanded,
         selected: !!props.selected,
       }}
+      delayLongPress={props.delayLongPress}
       disabled={disabled}
       hitSlop={props.hitSlop}
       nativeID={props.testID}
       onBlur={() => setFocused(false)}
+      {...(onWeb && props.onContextMenu
+        ? {
+            onContextMenu: (event: { preventDefault: () => void }) => {
+              event.preventDefault();
+              props.onContextMenu?.();
+            },
+          }
+        : {})}
       onFocus={(event) => setFocused(isKeyboardFocus(event))}
       onHoverIn={() => setHovered(true)}
       onHoverOut={() => setHovered(false)}

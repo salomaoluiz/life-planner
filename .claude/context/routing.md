@@ -12,7 +12,7 @@ app/
   (app)/(tabs)/_layout.tsx       Tabs with custom tabBar (AppTabBar): index/index, financial, investments, stock/index, family/index; backBehavior "initialRoute"; tabBarPosition "left" + rail on expanded (>= 1024 px)
   (app)/(tabs)/index/index.tsx   Home
   (app)/(tabs)/investments/_layout.tsx  Stack (Investment/Layout) with overview (spec 110, the default: Overview section), index (asset list = Assets section) and asset/[id] (asset detail; under `asset/` so `/investments/<modal>` is not read as an id) (spec 102)
-  (app)/(tabs)/stock/index.tsx, family/index.tsx
+  (app)/(tabs)/stock/index.tsx, (app)/(tabs)/stock/locations/[id].tsx (spec 117: the stock list filtered by one location, QR / deep link target; hidden tab `href: null`), family/index.tsx
   (app)/(tabs)/financial/_layout.tsx   FinancialLayout: ScreenHeader (overline "Finances" + section title; below `expanded` the title opens the section picker) + nested Stack (index, overview, categories, tags, accounts, cards); sections come from `FINANCIAL_SECTIONS` and switching uses router.replace (spec 044)
   (app)/(modals)/_layout.tsx     Stack, presentation "transparentModal", headerShown false; one screen, the catch-all
   (app)/(modals)/[...modal].tsx  ModalRoute (src/navigation): the last URL segment is the modal, resolved through MODAL_ROUTES (src/navigation/modalRoutes.tsx)
@@ -52,3 +52,5 @@ A modal URL is `<base>/<modal>`: `<base>` is the screen it was opened from, `<mo
 - The signed-in layout `app/(app)/_layout.tsx` renders `UpdateBanner` above the stack (spec 056); the versions modal is `versions` (opened from the Settings footer).
 
 Investments sections (spec 110, 113): like finance, `INVESTMENT_SECTIONS` (`Investment/Layout/models/investmentSections.ts`: Overview, then Assets, then Settings at `/investments/settings`; the modal `investment_index_history` opens over it) feeds the side rail children, the shared `section_picker` modal and the bottom-bar re-press; the investments tab opens `/investments/overview`, switching uses `router.replace`; the asset detail and the suggestions inbox belong to the Assets section.
+
+Deep links (spec 117): `app.config.ts` adds `associatedDomains` (iOS) and `intentFilters` (Android, `autoVerify`) for the host of `EXPO_PUBLIC_PROJECT_WEBSITE_URL`, path prefix `/stock/locations`; the web deploy serves `/.well-known/apple-app-site-association` and `assetlinks.json` (`public/.well-known`, placeholders `<APPLE_TEAM_ID>` and `<ANDROID_RELEASE_CERT_SHA256>` to fill at release, `nginx.web.conf` answers them as JSON, never the SPA fallback). Without them the link opens the web app, which logs in and returns to the location.

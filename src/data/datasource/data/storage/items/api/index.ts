@@ -22,6 +22,12 @@ import {
   getStockMovements,
   suggestStockItems,
 } from "./stockMovements";
+import {
+  getFrequentStockItems,
+  getStockLocation,
+  setStockGestureExpiration,
+  undoStockGesture,
+} from "./stockQuick";
 import updateStockItem from "./updateStockItem";
 
 const stockApiDatasource: StockDatasource = {
@@ -34,13 +40,17 @@ const stockApiDatasource: StockDatasource = {
   deleteStockCategory,
   deleteStockItem,
   deleteStockLocation,
+  getFrequentStockItems,
   getOwnerChangePreview,
   getStockCategories,
   getStockItem,
   getStockItems,
+  getStockLocation,
   getStockLocations,
   getStockMovements,
+  setStockGestureExpiration,
   suggestStockItems,
+  undoStockGesture,
   updateStockCategory,
   updateStockItem,
   updateStockLocation,

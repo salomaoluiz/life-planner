@@ -13,6 +13,7 @@ export interface CreateStockItemUseCaseParams extends RequiredFields {
   notes?: string;
   openedShelfLifeDays?: number;
   purchaseDate?: Date;
+  quickStep?: number;
   stockOnly?: boolean;
   warnDaysClosed?: number;
   warnDaysOpened?: number;
@@ -52,6 +53,7 @@ function createStockItemUseCase(
           ownerId: params.ownerId,
           purchaseDate: params.purchaseDate,
           quantity: params.quantity,
+          quickStep: params.quickStep,
           stockOnly: params.stockOnly ?? false,
           unit: params.unit,
           warnDaysClosed: params.warnDaysClosed ?? DEFAULT_WARN_DAYS_CLOSED,

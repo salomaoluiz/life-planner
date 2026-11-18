@@ -14,6 +14,7 @@ import { dto } from "@screens/Stock/models/stockUi.fixtures";
 
 import Stock from "../";
 import { useStockViewModel } from "../hooks";
+import { quickMock } from "./quick.mocks";
 
 jest.mock("../hooks");
 jest.mock(
@@ -98,6 +99,7 @@ function givenViewModel(overrides: Record<string, unknown> = {}) {
     locationIds: [],
     locationOptions: [{ id: "l1", label: "Fridge" }],
     onAddPress: jest.fn(),
+    onBackToStock: jest.fn(),
     onCatalogPress: jest.fn(),
     onCategoriesChange: jest.fn(),
     onClearFilters: jest.fn(),
@@ -117,6 +119,7 @@ function givenViewModel(overrides: Record<string, unknown> = {}) {
     onSortChange: jest.fn(),
     onToastHide: jest.fn(),
     openFilter: undefined,
+    quick: quickMock(),
     readOnly: false,
     rows: view.rows,
     search: "",
@@ -146,5 +149,5 @@ function setup(overrides: Record<string, unknown> = {}) {
 
 const mocks = { list, owners, view, View };
 
-export { mocks, setup };
+export { mocks, quickMock, setup };
 export { fireEvent, screen } from "@tests";

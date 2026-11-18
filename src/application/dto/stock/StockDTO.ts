@@ -17,6 +17,7 @@ export interface IStockDTO {
   createdAt?: Date;
   description: string;
   expirationStatus: StockExpirationStatus;
+  hasExpiredLot: boolean;
   hasOpenLot: boolean;
   id: string;
   idealQuantity?: number;
@@ -31,6 +32,7 @@ export interface IStockDTO {
   owner: StockOwners;
   ownerId: string;
   quantity: number;
+  quickStep?: number;
   restockQuantity: number;
   stockOnly: boolean;
   unit: StockUnits;
@@ -46,6 +48,7 @@ class StockDTO implements IStockDTO {
   createdAt?: Date;
   description: string;
   expirationStatus: StockExpirationStatus;
+  hasExpiredLot: boolean;
   hasOpenLot: boolean;
   id: string;
   idealQuantity?: number;
@@ -60,6 +63,7 @@ class StockDTO implements IStockDTO {
   owner: StockOwners;
   ownerId: string;
   quantity: number;
+  quickStep?: number;
   restockQuantity: number;
   stockOnly: boolean;
   unit: StockUnits;
@@ -74,6 +78,7 @@ class StockDTO implements IStockDTO {
     this.createdAt = params.createdAt;
     this.description = params.description;
     this.expirationStatus = params.expirationStatus;
+    this.hasExpiredLot = params.hasExpiredLot;
     this.hasOpenLot = params.hasOpenLot;
     this.id = params.id;
     this.idealQuantity = params.idealQuantity;
@@ -88,6 +93,7 @@ class StockDTO implements IStockDTO {
     this.owner = params.owner;
     this.ownerId = params.ownerId;
     this.quantity = params.quantity;
+    this.quickStep = params.quickStep;
     this.restockQuantity = params.restockQuantity;
     this.stockOnly = params.stockOnly;
     this.unit = params.unit;
@@ -104,6 +110,7 @@ class StockDTO implements IStockDTO {
       createdAt: entity.createdAt,
       description: entity.description,
       expirationStatus: entity.expirationStatus,
+      hasExpiredLot: entity.hasExpiredLot,
       hasOpenLot: entity.hasOpenLot,
       id: entity.id,
       idealQuantity: entity.idealQuantity,
@@ -118,6 +125,7 @@ class StockDTO implements IStockDTO {
       owner: entity.owner,
       ownerId: entity.ownerId,
       quantity: entity.quantity,
+      quickStep: entity.quickStep,
       restockQuantity: entity.restockQuantity,
       stockOnly: entity.stockOnly,
       unit: entity.unit,

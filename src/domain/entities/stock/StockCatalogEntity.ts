@@ -3,6 +3,16 @@ export enum StockCatalogStatus {
   ARCHIVED = "ARCHIVED",
 }
 
+// `GET /stock/locations/:id` (spec 117).
+export interface StockLocationDetailEntity {
+  id: string;
+  itemCount: number;
+  name: string;
+  owner: string;
+  ownerId: string;
+  status: StockCatalogStatus;
+}
+
 export interface StockOwnerChangePreviewEntity {
   category: { from?: string; to?: string };
   location: { from?: string; to?: string };

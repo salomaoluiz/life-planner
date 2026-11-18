@@ -49,10 +49,22 @@ function respond(method: Method, path: string): unknown {
   if (path.startsWith("/v1/investments/assets")) {
     return { items: [investmentAsset] };
   }
+  // Spec 117: one location (the QR route header).
+  if (/^\/v1\/stock\/locations\/[^/?]+$/.test(path)) {
+    return {
+      id: "location-1",
+      itemCount: 3,
+      name: "Pantry",
+      owner: "USER",
+      ownerId: "user-1",
+      status: "ACTIVE",
+    };
+  }
   // Stock (spec 116): categories, locations, suggestions, the history and the detail of one item.
   if (
     path.startsWith("/v1/stock/categories") ||
     path.startsWith("/v1/stock/locations") ||
+    path.startsWith("/v1/stock/items/frequent") ||
     path.startsWith("/v1/stock/items/suggestions")
   ) {
     return { items: [] };

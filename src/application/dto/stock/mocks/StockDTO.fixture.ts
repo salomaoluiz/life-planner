@@ -48,6 +48,7 @@ class StockDTOFixture {
       createdAt: undefined,
       description: "Product Description",
       expirationStatus: StockExpirationStatus.NONE,
+      hasExpiredLot: false,
       hasOpenLot: false,
       id: "12345678-1234-1234-1234-123456789012",
       idealQuantity: undefined,
@@ -62,6 +63,7 @@ class StockDTOFixture {
       owner: StockOwners.USER,
       ownerId: "12345678-1234-1234-1234-123456789012",
       quantity: 10,
+      quickStep: undefined,
       restockQuantity: 1,
       stockOnly: false,
       unit: StockUnits.UNIT,
@@ -79,6 +81,11 @@ class StockDTOFixture {
 
   withExpirationStatus(status: StockExpirationStatus) {
     this.value.expirationStatus = status;
+    return this;
+  }
+
+  withHasExpiredLot(hasExpiredLot = true) {
+    this.value.hasExpiredLot = hasExpiredLot;
     return this;
   }
 
@@ -141,6 +148,11 @@ class StockDTOFixture {
 
   withQuantity(quantity: number) {
     this.value.quantity = quantity;
+    return this;
+  }
+
+  withQuickStep(quickStep?: number) {
+    this.value.quickStep = quickStep;
     return this;
   }
 

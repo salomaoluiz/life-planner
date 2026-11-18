@@ -23,6 +23,12 @@ import {
   getStockMovements,
   suggestStockItems,
 } from "./stockMovements";
+import {
+  getFrequentStockItems,
+  getStockLocation,
+  setStockGestureExpiration,
+  undoStockGesture,
+} from "./stockQuick";
 import updateStockItem from "./updateStockItem";
 
 function stockRepositoryImpl(datasources: Datasources): StockRepository {
@@ -43,15 +49,21 @@ function stockRepositoryImpl(datasources: Datasources): StockRepository {
     deleteStockItem: async (params) => deleteStockItem(params, datasources),
     deleteStockLocation: async (params) =>
       deleteStockLocation(params, datasources),
+    getFrequentStockItems: async (limit) =>
+      getFrequentStockItems(limit, datasources),
     getOwnerChangePreview: async (params) =>
       getOwnerChangePreview(params, datasources),
     getStockCategories: async (params) =>
       getStockCategories(params, datasources),
     getStockItem: async (id) => getStockItem(id, datasources),
     getStockItems: async (ownerId) => getStockItems(ownerId, datasources),
+    getStockLocation: async (id) => getStockLocation(id, datasources),
     getStockLocations: async (params) => getStockLocations(params, datasources),
     getStockMovements: async (params) => getStockMovements(params, datasources),
+    setStockGestureExpiration: async (params) =>
+      setStockGestureExpiration(params, datasources),
     suggestStockItems: async (params) => suggestStockItems(params, datasources),
+    undoStockGesture: async (params) => undoStockGesture(params, datasources),
     updateStockCategory: async (params) =>
       updateStockCategory(params, datasources),
     updateStockItem: async (params) => updateStockItem(params, datasources),

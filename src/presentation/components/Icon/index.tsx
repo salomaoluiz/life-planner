@@ -8,8 +8,13 @@ export interface IconButtonProps {
   accessibilityLabel: string;
   /** Legacy, kept until spec 014: defaults to textPrimary */
   color?: string;
+  /** Press duration (ms) of `onLongPress` */
+  delayLongPress?: number;
   disabled?: boolean;
   name: string;
+  /** Web: right click (spec 117) */
+  onContextMenu?: () => void;
+  onLongPress?: () => void;
   onPress: () => void;
   /** Legacy, kept until spec 014: defaults to iconMd */
   size?: number;
@@ -49,8 +54,11 @@ function IconButton(props: IconButtonProps) {
     <Touchable
       accessibilityLabel={props.accessibilityLabel}
       accessibilityRole="button"
+      delayLongPress={props.delayLongPress}
       disabled={props.disabled}
       focusRadius={radius.full}
+      onContextMenu={props.onContextMenu}
+      onLongPress={props.onLongPress}
       onPress={props.onPress}
       style={[
         styles.base,

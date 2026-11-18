@@ -4,8 +4,9 @@ import { DefaultError } from "@domain/entities/errors";
 import Repositories from "@domain/repositories";
 
 export type SuggestStockItemsUseCaseParams = {
-  owner: string;
-  ownerId: string;
+  // Both absent: every owner the user can write (quick add).
+  owner?: string;
+  ownerId?: string;
   q: string;
 };
 

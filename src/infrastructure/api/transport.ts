@@ -47,6 +47,7 @@ async function send(
   path: string,
   body: unknown,
   token: null | string,
+  extraHeaders?: Record<string, string>,
 ): Promise<SendResult> {
   const baseUrl = getBaseUrl();
   const controller = new AbortController();
@@ -62,6 +63,7 @@ async function send(
         Accept: "application/json",
         ...(body !== undefined && { "Content-Type": "application/json" }),
         ...(token && { Authorization: `Bearer ${token}` }),
+        ...extraHeaders,
       },
       method,
       signal: controller.signal,

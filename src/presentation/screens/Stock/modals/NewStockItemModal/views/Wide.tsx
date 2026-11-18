@@ -308,6 +308,15 @@ function Wide({ vm }: AdaptiveViewProps<NewStockItemVM>) {
                         />
                       </View>
                     </View>
+                    <QuantityField
+                      error={errors.step ? t(errors.step) : undefined}
+                      helper={t("stock.quick.stepHint")}
+                      input={values.step}
+                      label={t("stock.quick.step")}
+                      onChange={(input) => vm.setField("step", input)}
+                      testID={stockItemFormTestIds.stepInput}
+                      unit={values.unit}
+                    />
                     <TextField
                       label={t("stock.form.barcode")}
                       onChangeText={(value) => vm.setField("barcode", value)}

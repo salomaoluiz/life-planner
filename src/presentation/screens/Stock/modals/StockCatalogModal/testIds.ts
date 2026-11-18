@@ -8,6 +8,7 @@ const stockCatalogTestIds = {
   editor: "stock.catalog.editor",
   financeSelect: "stock.catalog.finance-select",
   inUse: "stock.catalog.in-use",
+  locationQr: "stock.catalog.location-qr",
   locationRow: "stock.catalog.location-row",
   locationsEmpty: "stock.catalog.locations-empty",
   nameInput: "stock.catalog.name-input",

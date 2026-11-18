@@ -50,7 +50,11 @@ export default useNewStockItemViewModel;
 
 function useNewStockItemViewModel() {
   const { closeModal, replaceModal } = useModalNavigation();
-  const params = useLocalSearchParams<{ itemId?: string; ownerId?: string }>();
+  const params = useLocalSearchParams<{
+    description?: string;
+    itemId?: string;
+    ownerId?: string;
+  }>();
   const { getLocale } = useTranslationLocale();
   // Spec 037 FR 13b: the extra fields sit in the right column on wide, so they
   // start open there. Read once on mount; a later resize does not toggle it.
@@ -89,6 +93,12 @@ function useNewStockItemViewModel() {
     [item.data],
   );
   const form = useForm(model?.defaultOwnerId, stored);
+  // Spec 117 FR 18: "Nada encontrado" opens the form with the typed name.
+  useEffect(() => {
+    if (!isEdit && params.description) {
+      form.setField("description", params.description);
+    }
+  }, [params.description]);
   const ownerId = form.values.ownerId ?? model?.defaultOwnerId;
   const ownerKind = ownerId && model ? model.ownerType(ownerId) : undefined;
 

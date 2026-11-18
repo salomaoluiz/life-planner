@@ -1,5 +1,6 @@
 import {
   StockCategoryModel,
+  StockLocationDetailModel,
   StockLocationModel,
   StockOwnerChangePreviewModel,
   StockSuggestionModel,
@@ -27,6 +28,7 @@ export interface StockDatasource {
   deleteStockCategory(id: string): Promise<void>;
   deleteStockItem(id: string): Promise<void>;
   deleteStockLocation(id: string): Promise<void>;
+  getFrequentStockItems(limit?: number): Promise<StockModel[]>;
   getOwnerChangePreview(
     params: OwnerChangePreviewDatasourceParams,
   ): Promise<StockOwnerChangePreviewModel>;
@@ -35,15 +37,20 @@ export interface StockDatasource {
   ): Promise<StockCategoryModel[]>;
   getStockItem(id: string): Promise<StockModel>;
   getStockItems(userId: string): Promise<StockModel[]>;
+  getStockLocation(id: string): Promise<StockLocationDetailModel>;
   getStockLocations(
     params: GetStockCatalogDatasourceParams,
   ): Promise<StockLocationModel[]>;
   getStockMovements(
     params: GetStockMovementsDatasourceParams,
   ): Promise<{ items: StockMovementModel[]; nextCursor?: string }>;
+  setStockGestureExpiration(
+    params: StockGestureExpirationDatasourceParams,
+  ): Promise<StockModel>;
   suggestStockItems(
     params: SuggestStockItemsDatasourceParams,
   ): Promise<StockSuggestionModel[]>;
+  undoStockGesture(params: StockGestureDatasourceParams): Promise<StockModel>;
   updateStockCategory(
     params: UpdateStockCategoryDatasourceParams,
   ): Promise<void>;
@@ -72,6 +79,7 @@ interface CreateStockDatasourceParams extends StockOwnerDatasourceParams {
   openedShelfLifeDays?: number;
   purchaseDate?: Date;
   quantity: number;
+  quickStep?: number;
   stockOnly: boolean;
   unit: string;
   warnDaysClosed: number;
@@ -83,14 +91,19 @@ interface CreateStockLocationDatasourceParams extends StockOwnerDatasourceParams
 }
 
 interface CreateStockMovementDatasourceParams {
+  // Spec 117: the gesture groups the movements of one quick action; the key makes a retry safe.
+  clientId?: string;
   countedQuantity?: number;
   expirationDate?: Date;
+  expiredLots?: string;
+  gestureId?: string;
   itemId: string;
   lotId?: string;
   note?: string;
   purchaseDate?: Date;
   quantity?: number;
   reason?: string;
+  target?: string;
   type: string;
 }
 
@@ -107,12 +120,24 @@ interface OwnerChangePreviewDatasourceParams extends StockOwnerDatasourceParams 
   itemId: string;
 }
 
+interface StockGestureDatasourceParams {
+  clientId?: string;
+  gestureId: string;
+}
+
+interface StockGestureExpirationDatasourceParams extends StockGestureDatasourceParams {
+  expirationDate: Date;
+}
+
 interface StockOwnerDatasourceParams {
   owner: string;
   ownerId: string;
 }
 
-interface SuggestStockItemsDatasourceParams extends StockOwnerDatasourceParams {
+// Without an owner the search covers every owner the user can write (quick add, spec 117).
+interface SuggestStockItemsDatasourceParams {
+  owner?: string;
+  ownerId?: string;
   q: string;
 }
 
@@ -137,6 +162,7 @@ interface UpdateStockDatasourceParams {
   openedShelfLifeDays?: null | number;
   owner?: string;
   ownerId?: string;
+  quickStep?: null | number;
   stockOnly?: boolean;
   unit?: string;
   warnDaysClosed?: number;

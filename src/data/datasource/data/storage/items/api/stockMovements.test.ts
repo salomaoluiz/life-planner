@@ -36,6 +36,32 @@ const apiMovement = {
   user: { id: "u", name: "Ana" },
 };
 
+describe("createStockMovement (spec 117)", () => {
+  it("SHOULD send the gesture, the expired-lot choice and the Idempotency-Key header", async () => {
+    postSpy.mockResolvedValueOnce({ item: apiItemMock, movements: [] });
+
+    await createStockMovement({
+      clientId: "key",
+      expiredLots: "DISCARD_THEN_VALID",
+      gestureId: "gesture",
+      itemId: "item-id",
+      quantity: 3,
+      type: "CONSUME",
+    });
+
+    expect(postSpy).toHaveBeenCalledWith(
+      "/v1/stock/items/item-id/movements",
+      expect.objectContaining({
+        expiredLots: "DISCARD_THEN_VALID",
+        gestureId: "gesture",
+        quantity: 3,
+        type: "CONSUME",
+      }),
+      { "Idempotency-Key": "key" },
+    );
+  });
+});
+
 describe("createStockMovement", () => {
   it("SHOULD POST the movement with calendar days and the device day AND return the item and the movements", async () => {
     postSpy.mockResolvedValueOnce({
@@ -53,17 +79,24 @@ describe("createStockMovement", () => {
       type: "ENTRY",
     });
 
-    expect(postSpy).toHaveBeenCalledWith("/v1/stock/items/item-id/movements", {
-      countedQuantity: undefined,
-      expirationDate: "2026-12-01",
-      lotId: undefined,
-      note: "n",
-      purchaseDate: "2026-11-09",
-      quantity: 2,
-      reason: "PURCHASE",
-      today: TODAY,
-      type: "ENTRY",
-    });
+    expect(postSpy).toHaveBeenCalledWith(
+      "/v1/stock/items/item-id/movements",
+      {
+        countedQuantity: undefined,
+        expirationDate: "2026-12-01",
+        expiredLots: undefined,
+        gestureId: undefined,
+        lotId: undefined,
+        note: "n",
+        purchaseDate: "2026-11-09",
+        quantity: 2,
+        reason: "PURCHASE",
+        target: undefined,
+        today: TODAY,
+        type: "ENTRY",
+      },
+      undefined,
+    );
     expect(result.item.id).toBe(apiItemMock.id);
     expect(result.movements[0]).toMatchObject({
       type: "ENTRY",

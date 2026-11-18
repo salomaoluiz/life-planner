@@ -308,3 +308,32 @@ it("SHOULD show the read-only banner AND toast, without the add button, WHEN an 
   expect(screen.getByTestId(stockTestIds.readOnlyToast)).toBeTruthy();
   expect(screen.queryByTestId(stockTestIds.addButton)).toBeNull();
 });
+
+describe("location route (spec 117 FR 20)", () => {
+  it("SHOULD show 'Local não encontrado' with a way back WHEN the location is missing", () => {
+    const vm = setup({
+      locationRoute: { archived: false, isLoading: false, notFound: true },
+      rows: [],
+    });
+
+    expect(screen.getByTestId("stock.location.not-found")).toBeTruthy();
+
+    fireEvent.press(screen.getByText("stock.location.backToStock"));
+
+    expect(vm.onBackToStock).toHaveBeenCalled();
+  });
+
+  it("SHOULD use the location name as the title AND warn WHEN it is archived", () => {
+    setup({
+      locationRoute: {
+        archived: true,
+        isLoading: false,
+        name: "Despensa",
+        notFound: false,
+      },
+    });
+
+    expect(screen.getByText("Despensa")).toBeTruthy();
+    expect(screen.getByTestId("stock.location.archived-banner")).toBeTruthy();
+  });
+});

@@ -20,6 +20,8 @@ export interface ScreenProps {
   list?: ReactElement<FlashListProps<never>>;
   maxWidth?: number;
   onRefresh?: () => void;
+  /** Drawn over the whole screen (a toast anchors to its bottom), outside the list header the children live in. */
+  overlay?: ReactNode;
   refreshing?: boolean;
   scroll?: boolean;
   testID?: string;
@@ -76,6 +78,7 @@ function Screen(props: ScreenProps) {
           onRefresh: props.onRefresh,
           refreshing: !!props.refreshing,
         })}
+        {props.overlay}
       </View>
     );
   }
@@ -93,6 +96,7 @@ function Screen(props: ScreenProps) {
         >
           {props.children}
         </ScrollView>
+        {props.overlay}
       </View>
     );
   }
@@ -104,6 +108,7 @@ function Screen(props: ScreenProps) {
       testID={testID}
     >
       {props.children}
+      {props.overlay}
     </View>
   );
 }

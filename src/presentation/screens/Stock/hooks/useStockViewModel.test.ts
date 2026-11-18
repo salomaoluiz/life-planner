@@ -6,8 +6,11 @@ import { modalNavigation } from "@tests/modalNavigation";
 
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
+import { ApiBusinessError, GenericError } from "@domain/entities/errors";
+import { StockCatalogStatus } from "@domain/entities/stock/StockCatalogEntity";
 import { StockOwners, StockUnits } from "@domain/entities/stock/StockEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
+import { useQuery } from "@infrastructure/fetcher";
 import UseQueryFixture from "@infrastructure/fetcher/mocks/useQuery.fixture";
 import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import { dto } from "@screens/Stock/models/stockUi.fixtures";
@@ -19,11 +22,15 @@ import useStockViewModel, {
 } from "./useStockViewModel";
 
 jest.mock("expo-router", () => ({
-  router: { push: jest.fn(), setParams: jest.fn() },
+  router: { push: jest.fn(), replace: jest.fn(), setParams: jest.fn() },
   useLocalSearchParams: jest.fn(),
 }));
 jest.mock("@react-navigation/native", () => ({ useIsFocused: jest.fn() }));
 jest.mock("@infrastructure/fetcher");
+jest.mock("@screens/Stock/hooks/useStockQuickMovement", () => ({
+  __esModule: true,
+  default: () => ({}),
+}));
 jest.mock("@presentation/hooks/useOwnerScopedQuery");
 jest.mock("@presentation/i18n/useTranslationLocale", () => ({
   __esModule: true,
@@ -40,6 +47,10 @@ jest.mock("@application/useCases", () => ({
     getStockLocationsUseCase: {
       execute: jest.fn(),
       uniqueName: "get_locations",
+    },
+    getStockLocationUseCase: {
+      execute: jest.fn(),
+      uniqueName: "get_location",
     },
   },
 }));
@@ -85,6 +96,13 @@ beforeEach(() => {
   jest.useFakeTimers().setSystemTime(new Date(2026, 9, 5, 10, 0));
   spies.isFocused.mockReturnValue(false);
   spies.params.mockReturnValue({});
+  jest.mocked(useQuery).mockReturnValue({
+    data: undefined,
+    error: null,
+    isFetching: false,
+    refetch: jest.fn(),
+    status: "pending",
+  } as never);
 });
 afterEach(() => {
   jest.useRealTimers();
@@ -669,5 +687,75 @@ describe("fetchCatalog", () => {
     ] as never);
 
     expect((await fetchCatalog([owners[0]])).locations[0].label).toBe("Pantry");
+  });
+});
+
+describe("location route (spec 117 FR 20)", () => {
+  const location = {
+    id: "loc-1",
+    itemCount: 2,
+    name: "Despensa",
+    owner: "USER",
+    ownerId: "user-id",
+    status: StockCatalogStatus.ACTIVE,
+  };
+
+  function routeSetup(result: { data?: unknown; error?: unknown }) {
+    spies.params.mockReturnValue({ id: "loc-1" });
+    jest.mocked(useQuery).mockReturnValue({
+      data: undefined,
+      error: null,
+      isFetching: false,
+      refetch: jest.fn(),
+      status: "success",
+      ...result,
+    } as never);
+
+    return setup();
+  }
+
+  it("SHOULD filter by the location and use its name as the title", () => {
+    const { result } = routeSetup({ data: location });
+
+    expect(result.current.locationIds).toEqual(["loc-1"]);
+    expect(result.current.locationRoute).toMatchObject({
+      archived: false,
+      name: "Despensa",
+      notFound: false,
+    });
+  });
+
+  it("SHOULD flag an archived location", () => {
+    const { result } = routeSetup({
+      data: { ...location, status: StockCatalogStatus.ARCHIVED },
+    });
+
+    expect(result.current.locationRoute?.archived).toBe(true);
+  });
+
+  it("SHOULD report not found on a 404 AND go back to the stock list", () => {
+    const failure = new GenericError();
+
+    failure.addContext({ error: new ApiBusinessError("Not Found", 404) });
+
+    const { result } = routeSetup({ error: failure });
+
+    expect(result.current.locationRoute?.notFound).toBe(true);
+
+    act(() => result.current.onBackToStock());
+
+    expect(router.replace).toHaveBeenCalledWith("/stock");
+  });
+
+  it("SHOULD NOT report not found on a connectivity failure", () => {
+    const { result } = routeSetup({ error: new GenericError() });
+
+    expect(result.current.locationRoute?.notFound).toBe(false);
+  });
+
+  it("SHOULD have no location route on the plain stock screen", () => {
+    const { result } = setup();
+
+    expect(result.current.locationRoute).toBeUndefined();
   });
 });

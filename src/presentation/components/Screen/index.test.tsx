@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Text } from "react-native";
 
 import { fireEvent, screen } from "@tests";
 
@@ -74,4 +74,13 @@ it("SHOULD keep a lg gap between the header block and the list rows WHEN list", 
   expect(StyleSheet.flatten(header.props.style)).toEqual(
     expect.objectContaining({ gap: 20, paddingBottom: 20 }),
   );
+});
+
+it("SHOULD draw the overlay WHEN one is given", () => {
+  setup({
+    list: listElement(),
+    overlay: <Text testID="overlay">toast</Text>,
+  });
+
+  expect(screen.getByTestId("overlay")).toBeOnTheScreen();
 });
