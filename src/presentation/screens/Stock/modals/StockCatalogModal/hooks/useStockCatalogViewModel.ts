@@ -57,6 +57,10 @@ function useStockCatalogViewModel() {
   const owners = useActiveOwners();
   const [selectedOwnerId, setSelectedOwnerId] = useState<string | undefined>();
   const [editor, setEditor] = useState<Editor | undefined>();
+  // Spec 117 FR 19: the location whose QR sheet is open.
+  const [qrLocation, setQrLocation] = useState<
+    undefined | { id: string; name: string }
+  >();
   const [name, setName] = useState("");
   const [parentId, setParentId] = useState(NO_PARENT);
   const [financeId, setFinanceId] = useState("");
@@ -326,6 +330,9 @@ function useStockCatalogViewModel() {
     onNameChange: setName,
     onOwnerChange: (id: string) => setSelectedOwnerId(id),
     onParentChange: setParentId,
+    onQrClose: () => setQrLocation(undefined),
+    onQrOpen: (id: string, locationName: string) =>
+      setQrLocation({ id, name: locationName }),
     onRetry: async () => catalog.refetch(),
     onSaveEditor,
     onSetStatus: setStatus,
@@ -338,6 +345,7 @@ function useStockCatalogViewModel() {
     ownerOptions: ownerList,
     parentId,
     parentOptions,
+    qrLocation,
     selectedFinanceId: financeId,
     toDelete: deleting,
   };

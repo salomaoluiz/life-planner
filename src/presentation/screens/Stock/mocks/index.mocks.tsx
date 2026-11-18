@@ -99,6 +99,7 @@ function givenViewModel(overrides: Record<string, unknown> = {}) {
     locationIds: [],
     locationOptions: [{ id: "l1", label: "Fridge" }],
     onAddPress: jest.fn(),
+    onBackToStock: jest.fn(),
     onCatalogPress: jest.fn(),
     onCategoriesChange: jest.fn(),
     onClearFilters: jest.fn(),

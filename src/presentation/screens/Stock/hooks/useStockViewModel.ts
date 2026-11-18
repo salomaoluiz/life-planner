@@ -6,7 +6,13 @@ import { StockCategoryDTO } from "@application/dto/stock/StockCatalogDTO";
 import StockDTO from "@application/dto/stock/StockDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
+import { GenericError } from "@domain/entities/errors";
+import {
+  StockCatalogStatus,
+  StockLocationDetailEntity,
+} from "@domain/entities/stock/StockCatalogEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
+import { useQuery } from "@infrastructure/fetcher";
 import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import { useTranslationLocale } from "@presentation/i18n";
 import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
@@ -127,9 +133,22 @@ function flattenCategories(
 
 export default useStockViewModel;
 
+// A location that is missing or not readable answers 404 (no data leaks): "Local não encontrado".
+function isNotFound(error: unknown) {
+  if (!(error instanceof GenericError)) {
+    return false;
+  }
+
+  const cause = error.context.error as undefined | { statusCode?: number };
+
+  return cause?.statusCode === 404;
+}
+
 function useStockViewModel() {
   const isFocused = useIsFocused();
-  const params = useLocalSearchParams<{ filter?: string }>();
+  const params = useLocalSearchParams<{ filter?: string; id?: string }>();
+  // Spec 117 FR 20: `/stock/locations/<id>` is this screen filtered by that location.
+  const routeLocationId = params.id;
   const { getLocale } = useTranslationLocale();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -142,7 +161,9 @@ function useStockViewModel() {
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | undefined>();
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
-  const [locationIds, setLocationIds] = useState<string[]>([]);
+  const [locationIds, setLocationIds] = useState<string[]>(
+    routeLocationId ? [routeLocationId] : [],
+  );
   const [openFilter, setOpenFilter] = useState<
     "category" | "location" | undefined
   >();
@@ -150,6 +171,18 @@ function useStockViewModel() {
   const { data, error, isFetching, refetch } = useOwnerScopedQuery<StockData>({
     cacheKey: [useCases.getStockItemsUseCase.uniqueName],
     fetch: fetchStock,
+  });
+
+  const routeLocation = useQuery<StockLocationDetailEntity>({
+    cacheKey: [
+      useCases.getStockLocationUseCase.uniqueName,
+      routeLocationId ?? "",
+    ],
+    enabled: !!routeLocationId,
+    fetch: async () =>
+      useCases.getStockLocationUseCase.execute({
+        id: routeLocationId as string,
+      }),
   });
 
   const catalog = useOwnerScopedQuery<CatalogData>({
@@ -247,7 +280,16 @@ function useStockViewModel() {
     isSortOpen,
     locationIds,
     locationOptions: catalog.data?.locations ?? [],
+    locationRoute: routeLocationId
+      ? {
+          archived: routeLocation.data?.status === StockCatalogStatus.ARCHIVED,
+          isLoading: !routeLocation.data && !routeLocation.error,
+          name: routeLocation.data?.name,
+          notFound: isNotFound(routeLocation.error),
+        }
+      : undefined,
     onAddPress,
+    onBackToStock: () => router.replace("/stock" as never),
     onCatalogPress: scope.guard(() => openModal("stock_catalog")),
     onCategoriesChange: setCategoryIds,
     onClearFilters,

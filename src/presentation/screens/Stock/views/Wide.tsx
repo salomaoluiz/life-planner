@@ -15,6 +15,7 @@ import {
   Screen,
   ScreenHeader,
   SearchField,
+  StatusBanner,
   Text,
   Toast,
 } from "@components";
@@ -113,6 +114,18 @@ function Wide({ vm }: AdaptiveViewProps<StockVM>) {
       );
     }
 
+    if (vm.locationRoute?.notFound) {
+      return (
+        <EmptyState
+          actionLabel={t("stock.location.backToStock")}
+          message={t("stock.location.notFound")}
+          onAction={vm.onBackToStock}
+          testID={stockTestIds.locationNotFound}
+          title={t("stock.location.notFound")}
+        />
+      );
+    }
+
     if (vm.errorMessageKey) {
       return (
         <ErrorState
@@ -193,7 +206,7 @@ function Wide({ vm }: AdaptiveViewProps<StockVM>) {
             </>
           }
           subtitle={subtitle}
-          title={t("stock.list.title")}
+          title={vm.locationRoute?.name ?? t("stock.list.title")}
         />
         {hasContent ? (
           <>
@@ -245,6 +258,12 @@ function Wide({ vm }: AdaptiveViewProps<StockVM>) {
               <Text.Caption value={t("stock.list.filter.childrenHint")} />
             </View>
             <OfflineBanner quick={vm.quick} />
+            {vm.locationRoute?.archived ? (
+              <StatusBanner
+                message={t("stock.location.archived")}
+                testID={stockTestIds.locationArchived}
+              />
+            ) : null}
             {vm.readOnly ? (
               <ReadOnlyNotice
                 message={t("family.archived.banner")}

@@ -19,6 +19,7 @@ import Skeleton from "@components/Skeleton";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
+import LocationQrSheet from "@screens/Stock/containers/LocationQrSheet";
 
 import { StockCatalogVM } from "../hooks";
 import useStyles from "../styles";
@@ -141,6 +142,11 @@ function Wide({ vm }: AdaptiveViewProps<StockCatalogVM>) {
             }
           />
           <View style={styles.actions}>
+            <Button.Ghost
+              label={t("stock.location.qrTitle")}
+              onPress={() => vm.onQrOpen(location.id, location.name)}
+              testID={`${stockCatalogTestIds.locationQr}-${location.id}`}
+            />
             <Button.Ghost
               label={t("stock.catalog.rename")}
               onPress={() => vm.onEditLocation(location.id)}
@@ -331,6 +337,9 @@ function Wide({ vm }: AdaptiveViewProps<StockCatalogVM>) {
         })}
         visible={vm.toDelete !== undefined}
       />
+      {vm.qrLocation ? (
+        <LocationQrSheet location={vm.qrLocation} onClose={vm.onQrClose} />
+      ) : null}
     </BottomSheet>
   );
 }

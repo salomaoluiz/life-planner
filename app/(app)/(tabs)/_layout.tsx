@@ -25,6 +25,7 @@ export default function TabNavigator() {
       <Tabs.Screen name={"financial"} />
       <Tabs.Screen name={"investments"} />
       <Tabs.Screen name={"stock/index"} />
+      <Tabs.Screen name={"stock/locations/[id]"} options={{ href: null }} />
       <Tabs.Screen name={"family/index"} />
       <Tabs.Screen name={"settings"} options={{ href: null }} />
     </Tabs>
