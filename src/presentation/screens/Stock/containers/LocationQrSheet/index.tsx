@@ -3,11 +3,11 @@ import { View } from "react-native";
 
 import { BottomSheet, Button, QrCode, Text } from "@components";
 import { locationLink } from "@domain/entities/stock/locationLink";
+import { locationQrPrintHtml } from "@domain/entities/stock/locationQrPrint";
 import { printHtml } from "@infrastructure/print";
 import { qrMatrix } from "@infrastructure/qrcode";
 import { shareText } from "@infrastructure/share";
 import { useTranslation } from "@presentation/i18n";
-import { locationQrPrintHtml } from "@screens/Stock/models/locationQrPrint";
 
 interface Props {
   location: { id: string; name: string };
