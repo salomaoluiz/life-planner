@@ -116,7 +116,7 @@ it("SHOULD open a list, toggle the archived block, filter and refresh", async ()
   const { result } = setup();
 
   act(() => result.current.onCardPress("m"));
-  expect(router.push).toHaveBeenCalledWith("/stock/lists/m");
+  expect(router.push).toHaveBeenCalledWith("/stock/list/m");
 
   act(() => result.current.onArchivedToggle());
   expect(result.current.archivedOpen).toBe(true);

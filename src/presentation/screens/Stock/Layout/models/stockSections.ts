@@ -35,11 +35,15 @@ export const STOCK_SECTIONS: readonly StockSectionItem[] = [
   },
 ];
 
-// The list detail belongs to Lists; the location QR route (`/stock/locations/<id>`) belongs to Items.
+// The list detail (`/stock/list/<id>`, singular so `/stock/lists/<modal>` is never read as an id) belongs to Lists; the location QR route (`/stock/locations/<id>`) belongs to Items.
 export function getStockSection(pathname: string): StockSection {
   const normalized = pathname.replace(/\/+$/, "");
 
-  if (normalized === "/stock/lists" || normalized.startsWith("/stock/lists/")) {
+  if (
+    normalized === "/stock/lists" ||
+    normalized.startsWith("/stock/lists/") ||
+    normalized.startsWith("/stock/list/")
+  ) {
     return "lists";
   }
 

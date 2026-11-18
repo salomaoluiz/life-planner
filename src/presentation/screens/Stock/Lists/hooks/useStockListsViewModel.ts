@@ -91,7 +91,7 @@ function useStockListsViewModel() {
     isLoading: isFetching && !data,
     isRefreshing: isFetching && !!data,
     onArchivedToggle: () => setArchivedOpen((open) => !open),
-    onCardPress: (id: string) => router.push(`/stock/lists/${id}` as never),
+    onCardPress: (id: string) => router.push(`/stock/list/${id}` as never),
     onFilterChange: setFilter,
     onNewPress: scope.guard(() =>
       openModal(

@@ -12,7 +12,7 @@ app/
   (app)/(tabs)/_layout.tsx       Tabs with custom tabBar (AppTabBar): index/index, financial, investments, stock/index, family/index; backBehavior "initialRoute"; tabBarPosition "left" + rail on expanded (>= 1024 px)
   (app)/(tabs)/index/index.tsx   Home
   (app)/(tabs)/investments/_layout.tsx  Stack (Investment/Layout) with overview (spec 110, the default: Overview section), index (asset list = Assets section) and asset/[id] (asset detail; under `asset/` so `/investments/<modal>` is not read as an id) (spec 102)
-  (app)/(tabs)/stock/_layout.tsx  StockLayout (spec 118): nested Stack of index (Items), lists/index, lists/[id], catalog and locations/[id] (spec 117: the stock list filtered by one location, QR / deep link target); sections come from `STOCK_SECTIONS`, switching uses router.replace; family/index.tsx
+  (app)/(tabs)/stock/_layout.tsx  StockLayout (spec 118): nested Stack of index (Items), lists/index, list/[id], catalog and locations/[id] (spec 117: the stock list filtered by one location, QR / deep link target); sections come from `STOCK_SECTIONS`, switching uses router.replace; family/index.tsx
   (app)/(tabs)/financial/_layout.tsx   FinancialLayout: ScreenHeader (overline "Finances" + section title; below `expanded` the title opens the section picker) + nested Stack (index, overview, categories, tags, accounts, cards); sections come from `FINANCIAL_SECTIONS` and switching uses router.replace (spec 044)
   (app)/(modals)/_layout.tsx     Stack, presentation "transparentModal", headerShown false; one screen, the catch-all
   (app)/(modals)/[...modal].tsx  ModalRoute (src/navigation): the last URL segment is the modal, resolved through MODAL_ROUTES (src/navigation/modalRoutes.tsx)

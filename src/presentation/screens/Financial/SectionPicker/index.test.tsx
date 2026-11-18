@@ -86,7 +86,7 @@ describe("on an investments path (spec 110)", () => {
 
 describe("on a stock path (spec 118)", () => {
   it("SHOULD list the 3 stock sections AND mark the current one as selected", () => {
-    setup("/stock/lists/list-1");
+    setup("/stock/list/list-1");
 
     expect(screen.getByText("stock.sections.pickerTitle")).toBeOnTheScreen();
     ["items", "lists", "catalog"].forEach((section) =>

@@ -17,7 +17,8 @@ it.each([
   ["/stock/", "items"],
   ["/stock/locations/abc", "items"],
   ["/stock/lists", "lists"],
-  ["/stock/lists/abc", "lists"],
+  ["/stock/list/abc", "lists"],
+  ["/stock/lists/stock_add_to_list", "lists"],
   ["/stock/catalog", "catalog"],
   ["/somewhere", "items"],
 ])("SHOULD read %s as the %s section", (path, section) => {

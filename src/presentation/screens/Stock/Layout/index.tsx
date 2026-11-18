@@ -6,7 +6,7 @@ function StockLayout() {
     <Stack screenOptions={{ animation: "none", headerShown: false }}>
       <Stack.Screen name={"index"} />
       <Stack.Screen name={"lists/index"} />
-      <Stack.Screen name={"lists/[id]"} />
+      <Stack.Screen name={"list/[id]"} />
       <Stack.Screen name={"catalog"} />
       <Stack.Screen name={"locations/[id]"} />
     </Stack>

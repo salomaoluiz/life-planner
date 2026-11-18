@@ -110,3 +110,8 @@ it("SHOULD accept a modal opened over the investments Overview AND keep the asse
     "/investments/overview/investment_asset",
   );
 });
+
+it("SHOULD accept the detail of a shopping list as a modal base (spec 118)", () => {
+  expect(isValidBase("/stock/list/abc")).toBe(true);
+  expect(isValidBase("/stock/list/abc/extra")).toBe(false);
+});

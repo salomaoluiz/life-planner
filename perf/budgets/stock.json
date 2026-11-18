@@ -33,7 +33,7 @@
     "maxDepth": 3,
     "maxDuplicates": 0,
     "maxRequests": 2,
-    "route": "app/(app)/(tabs)/stock/lists/[id].tsx"
+    "route": "app/(app)/(tabs)/stock/list/[id].tsx"
   },
   "stock.lists.mount.cold": {
     "maxDepth": 3,

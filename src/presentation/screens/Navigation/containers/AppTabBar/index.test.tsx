@@ -147,7 +147,7 @@ describe("WHEN the Stock tab is pressed (spec 118)", () => {
 
   it("SHOULD highlight the Lists section of the pathname AND replace the route WHEN a child is pressed", () => {
     setBreakpoint("expanded");
-    setup(2, "/stock/lists/abc");
+    setup(2, "/stock/list/abc");
 
     expect(
       screen.getByTestId("navigation-rail-stock-lists").props
