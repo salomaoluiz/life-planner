@@ -1,0 +1,52 @@
+url: ${E2E_WEB_URL}
+name: investment/foreign-ticker-with-dot
+tags:
+  - investment
+  - spec-fix-1
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+# fix-1: a US symbol with a share-class dot must appear in the ticker search and be saveable.
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/investment/open-investments.yaml
+- extendedWaitUntil:
+    visible:
+      id: "investment.list.empty-state"
+    timeout: 20000
+- tapOn:
+    id: "investment.list.add-button"
+- extendedWaitUntil:
+    visible:
+      id: "investment.asset-modal.ticker-input"
+    timeout: 20000
+# Foreign Stock is the only class of the US market.
+- tapOn:
+    id: "investment.asset-modal.class"
+- tapOn:
+    id: "investment.asset-modal.class-option-FOREIGN_STOCK"
+- tapOn:
+    id: "investment.asset-modal.ticker-input"
+- inputText: "BRK.B"
+- extendedWaitUntil:
+    visible:
+      id: "investment.asset-modal.ticker-suggestion-BRK.B.*"
+    timeout: 30000
+- tapOn:
+    id: "investment.asset-modal.ticker-suggestion-BRK.B.*"
+- extendedWaitUntil:
+    visible:
+      id: "investment.asset-modal.quote-box"
+    timeout: 10000
+- tapOn:
+    id: "investment.asset-modal.save"
+- extendedWaitUntil:
+    visible:
+      id: "investment.list.row-.*"
+    timeout: 20000
