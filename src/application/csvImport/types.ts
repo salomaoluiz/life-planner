@@ -17,6 +17,7 @@ type ColumnTarget =
   | "owner"
   | "paid"
   | "signedAmount"
+  | "splitGroup"
   | "tags"
   | "transferId"
   | "type";
@@ -53,6 +54,8 @@ interface ImportRowPayload {
   paid?: boolean;
   // Spec 048: the account an early payment or an invoice payment is paid from.
   paidFromAccountId?: string;
+  // Spec 119 FR 38: the `Split group` column; the lines with the same value are the parts of one split.
+  splitGroup?: string;
   tags?: string[];
   // Spec 098: the `Transfer ID` column; groups the out, in and fee rows of one transfer.
   transferId?: string;

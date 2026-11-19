@@ -43,6 +43,8 @@ function item(data: Json): UpcomingItemEntity {
         : Number(data.occurrenceNumber),
     owner: data.owner as string,
     ownerId: data.ownerId as string,
+    partCount:
+      data.partCount === undefined ? undefined : Number(data.partCount),
     projectedAmount:
       data.projectedAmount === undefined
         ? undefined
@@ -52,6 +54,7 @@ function item(data: Json): UpcomingItemEntity {
         ? null
         : Number(data.purchaseCount),
     recurrenceId: (data.recurrenceId as null | string) ?? null,
+    splitId: (data.splitId as string | undefined) ?? undefined,
     type: data.type as "EXPENSE" | "INCOME",
     valueCents: Number(data.valueCents),
   };

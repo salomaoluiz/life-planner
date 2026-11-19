@@ -1,0 +1,62 @@
+url: ${E2E_WEB_URL}
+name: financial/splits/split-row-expand-edit
+tags:
+  - financial
+  - spec-119
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Split
+      KEY: SPLIT_financial/splits/split-row-expand-edit
+- runFlow:
+    file: ../../../subflows/setup/create-split.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      ACCOUNT_ID: ${output.ACCOUNT_ID}
+      CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
+      DESCRIPTION: ${output.SPLIT_financial/splits/split-row-expand-edit}
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.split.title"
+      text: ${output.SPLIT_financial/splits/split-row-expand-edit}
+    timeout: 20000
+# One line for the whole group; tapping expands the parts (120,00, 50,00 and the discount)
+- assertVisible:
+    id: "financial.transactions.split.chip"
+- tapOn:
+    id: "financial.transactions.split.toggle"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.split.part"
+    timeout: 20000
+- assertVisible:
+    text: "Detergente"
+# "Editar" opens the form of the whole group with its parts
+- tapOn:
+    id: "financial.transactions.split.edit"
+- extendedWaitUntil:
+    visible:
+      id: "financial.split-form.sheet"
+    timeout: 20000
+- assertVisible:
+    id: "financial.split-form.part-row"
+- assertVisible:
+    id: "financial.split-form.undo-button"

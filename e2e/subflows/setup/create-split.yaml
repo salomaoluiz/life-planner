@@ -1,0 +1,10 @@
+url: ${E2E_WEB_URL}
+---
+# Params read by the script: ACCOUNT_ID, CATEGORY_ID, DESCRIPTION.
+- runScript:
+    file: ../../scripts/setup/create-split.js
+    env:
+      TOKEN: ${TOKEN}
+      ACCOUNT_ID: ${ACCOUNT_ID}
+      CATEGORY_ID: ${CATEGORY_ID}
+      DESCRIPTION: ${DESCRIPTION}

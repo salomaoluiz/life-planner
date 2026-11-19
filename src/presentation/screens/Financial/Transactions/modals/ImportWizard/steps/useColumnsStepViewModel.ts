@@ -32,6 +32,7 @@ const TARGETS: ColumnTarget[] = [
   "paid",
   "tags",
   "currency",
+  "splitGroup",
   "transferId",
   "ignore",
 ];
@@ -112,6 +113,7 @@ function useColumnsStepViewModel(wizard: ImportWizardState) {
       notes: has("notes"),
       owner: has("owner"),
       paid: has("paid"),
+      splitGroup: has("splitGroup"),
       tags: has("tags"),
       transferId: has("transferId"),
     },

@@ -380,6 +380,13 @@ function useHomeViewModel() {
       return;
     }
 
+    // Spec 119: a split is one item; it opens the form of the whole group.
+    if (item.splitId) {
+      openModal("add_new_transaction", { splitId: item.splitId });
+
+      return;
+    }
+
     openModal("add_new_transaction", { id: item.id });
   }
 

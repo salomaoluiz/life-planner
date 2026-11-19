@@ -3,6 +3,7 @@ import { isSystemCategoryName } from "./distinctValues";
 import { columnsOf } from "./mapping";
 import { accountKey, categoryKey, ownerOfRow } from "./owner";
 import { parseAmountCents, parseDate, parseInvoiceMonth } from "./parseValues";
+import { isSplitAdjustmentName, SPLIT_ADJUSTMENT_ID } from "./splitAdjustment";
 import {
   ColumnMapping,
   ColumnTarget,
@@ -112,11 +113,12 @@ function buildRow(
     return { display, error: "INVALID_DATE", line };
   }
 
-  const amount = readAmount(input, cell, row);
+  const read = readAmount(input, cell, row);
 
-  if ("error" in amount) {
-    return { display, error: amount.error, line };
+  if ("error" in read) {
+    return { display, error: read.error, line };
   }
+  let amount: { type: RowType; value: number } = read;
 
   const ownerId = ownerOfRow(
     row,
@@ -124,12 +126,16 @@ function buildRow(
     input.valueMaps.owner,
     input.defaultOwnerId,
   );
-  const categoryId = categoryOf(
-    input,
-    ownerId,
-    cell(row, "category"),
-    amount.type,
-  );
+  const splitGroup = cell(row, "splitGroup");
+  // Spec 119 FR 38: "Desconto/ajuste" is a system category with a signed amount, valid only inside a split group.
+  const isAdjustment =
+    splitGroup !== "" && isSplitAdjustmentName(cell(row, "category"));
+  const categoryId = isAdjustment
+    ? SPLIT_ADJUSTMENT_ID
+    : categoryOf(input, ownerId, cell(row, "category"), amount.type);
+  if (isAdjustment && isNegativeAmount(input, cell, row)) {
+    amount = { type: "EXPENSE", value: -amount.value };
+  }
 
   if (categoryId === undefined) {
     return { display, error: "CATEGORY_MISSING", line };
@@ -193,6 +199,7 @@ function buildRow(
       ownerId,
       paid: typeof paidValue === "boolean" ? paidValue : undefined,
       paidFromAccountId: payment ? target.accountId : undefined,
+      splitGroup: splitGroup === "" ? undefined : splitGroup,
       tags: tags.length > 0 ? tags : undefined,
       transferId: transferId === "" ? undefined : transferId,
       type: amount.type,
@@ -244,6 +251,15 @@ function categoryOf(
     ? input.fixed.categoryId
     : (input.valueMaps.category[categoryKey(ownerId, type, text)] ??
         input.fixed.categoryId);
+}
+
+// The "Amount" column of the app export writes the discount of an adjustment with a minus sign.
+function isNegativeAmount(input: BuildInput, cell: CellReader, row: string[]) {
+  return (
+    parseAmountCents(cell(row, "amount"), input.decimal)?.negative === true ||
+    parseAmountCents(cell(row, "signedAmount"), input.decimal)?.negative ===
+      true
+  );
 }
 
 // FR 16: Amount + Type, Signed amount, or Income + Expense columns.

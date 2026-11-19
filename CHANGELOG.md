@@ -3,6 +3,14 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [3.3.0] - 2026-11-19
+
+### Added
+
+- Split transactions: one purchase in several categories, shown as one expandable line like a card invoice; "Dividir" in the transaction form, "Total pago" with the remaining banner and the Desconto/ajuste part, undo split, delete group (needs API 6.3.0, spec 119).
+- A filtered list shows the matching share of a split ("R$ 50 de R$ 280") and the Home next items show a split as one item.
+- CSV export/import carry the new Split group column.
+
 ## [3.2.0] - 2026-11-18
 
 ### Added
