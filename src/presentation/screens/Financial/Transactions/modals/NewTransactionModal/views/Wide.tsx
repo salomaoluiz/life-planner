@@ -198,13 +198,6 @@ function Wide({ vm }: AdaptiveViewProps<NewTransactionVM>) {
                   value={vm.type}
                 />
               )}
-              {vm.recurrence.isRecurring ? null : (
-                <Button.Ghost
-                  label={t("financial.split.action")}
-                  onPress={vm.onSplit}
-                  testID={transactionFormTestIds.split}
-                />
-              )}
               <AmountInput
                 currency={vm.currency}
                 error={err(vm.amountError)}
@@ -716,15 +709,25 @@ function Wide({ vm }: AdaptiveViewProps<NewTransactionVM>) {
           )
         }
         footerStart={
-          vm.isEditing && (
-            <Button.Ghost
-              disabled={vm.isBlocking}
-              label={t("financial.transactions.delete")}
-              onPress={vm.onDeletePress}
-              testID={transactionFormTestIds.deleteButton}
-              tone={"expense"}
-            />
-          )
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            {vm.recurrence.isRecurring ? null : (
+              <Button.Ghost
+                disabled={vm.isBlocking}
+                label={t("financial.split.action")}
+                onPress={vm.onSplit}
+                testID={transactionFormTestIds.split}
+              />
+            )}
+            {vm.isEditing && (
+              <Button.Ghost
+                disabled={vm.isBlocking}
+                label={t("financial.transactions.delete")}
+                onPress={vm.onDeletePress}
+                testID={transactionFormTestIds.deleteButton}
+                tone={"expense"}
+              />
+            )}
+          </View>
         }
         onClose={vm.onClose}
         presentation={"inline"}

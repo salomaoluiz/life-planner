@@ -18,14 +18,14 @@ onFlowComplete:
     file: ../../../scripts/random-name.js
     env:
       PREFIX: E2E Split
-      KEY: SPLIT_financial/splits/split-delete
+      KEY: SPLIT_NAME
 - runFlow:
     file: ../../../subflows/setup/create-split.yaml
     env:
       TOKEN: ${output.TOKEN}
       ACCOUNT_ID: ${output.ACCOUNT_ID}
       CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
-      DESCRIPTION: ${output.SPLIT_financial/splits/split-delete}
+      DESCRIPTION: ${output.SPLIT_NAME}
 - runFlow:
     file: ../../../subflows/login-by-token.yaml
     env:
@@ -36,10 +36,11 @@ onFlowComplete:
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.split.title"
-      text: ${output.SPLIT_financial/splits/split-delete}
+      text: ${output.SPLIT_NAME}
     timeout: 20000
 - tapOn:
     id: "financial.transactions.split.toggle"
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - tapOn:
     id: "financial.transactions.split.delete"
 - extendedWaitUntil:

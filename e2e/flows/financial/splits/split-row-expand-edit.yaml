@@ -18,14 +18,14 @@ onFlowComplete:
     file: ../../../scripts/random-name.js
     env:
       PREFIX: E2E Split
-      KEY: SPLIT_financial/splits/split-row-expand-edit
+      KEY: SPLIT_NAME
 - runFlow:
     file: ../../../subflows/setup/create-split.yaml
     env:
       TOKEN: ${output.TOKEN}
       ACCOUNT_ID: ${output.ACCOUNT_ID}
       CATEGORY_ID: ${output.EXPENSE_CATEGORY_ID}
-      DESCRIPTION: ${output.SPLIT_financial/splits/split-row-expand-edit}
+      DESCRIPTION: ${output.SPLIT_NAME}
 - runFlow:
     file: ../../../subflows/login-by-token.yaml
     env:
@@ -36,7 +36,7 @@ onFlowComplete:
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.split.title"
-      text: ${output.SPLIT_financial/splits/split-row-expand-edit}
+      text: ${output.SPLIT_NAME}
     timeout: 20000
 # One line for the whole group; tapping expands the parts (120,00, 50,00 and the discount)
 - assertVisible:
@@ -50,6 +50,7 @@ onFlowComplete:
 - assertVisible:
     text: "Detergente"
 # "Editar" opens the form of the whole group with its parts
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
 - tapOn:
     id: "financial.transactions.split.edit"
 - extendedWaitUntil:

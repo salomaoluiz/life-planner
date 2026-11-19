@@ -650,7 +650,7 @@ function Wide({ vm }: AdaptiveViewProps<TransactionsScreenVM>) {
         data={vm.entries}
         estimatedItemSize={64}
         // Expanding an invoice only changes this id: without it the virtualized row keeps its old render.
-        extraData={`${vm.expandedInvoiceId ?? ""}|${vm.expandedDayKey ?? ""}|${vm.isTotalsUpdating}|${vm.readOnly}|${localeTag}|${wide}`}
+        extraData={`${vm.expandedInvoiceId ?? ""}|${vm.splitRows.expandedId ?? ""}|${vm.expandedDayKey ?? ""}|${vm.isTotalsUpdating}|${vm.readOnly}|${localeTag}|${wide}`}
         getItemType={entryType}
         keyExtractor={entryKey}
         ListEmptyComponent={empty}
