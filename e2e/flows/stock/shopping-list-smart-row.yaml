@@ -1,0 +1,65 @@
+url: ${E2E_WEB_URL}
+name: stock/shopping-list-smart-row
+tags:
+  - stock
+  - spec-118
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Spec 118: an item below its minimum appears on the default list by itself (Automático), removing the row offers
+# Desfazer and the undo brings it back.
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Lista
+      KEY: ITEM_NAME
+- runFlow:
+    file: ../../subflows/setup/create-stock-item.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      DESCRIPTION: ${output.ITEM_NAME}
+      QUANTITY: "2"
+      MIN_QUANTITY: "3"
+      IDEAL_QUANTITY: "8"
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/stock/open-stock.yaml
+- tapOn:
+    id: "navigation-rail-stock-lists"
+- extendedWaitUntil:
+    visible:
+      id: "stock.lists.screen"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "stock.lists.card-default"
+    timeout: 20000
+- tapOn:
+    id: "stock.lists.card-[0-9a-f-]{36}"
+- extendedWaitUntil:
+    visible:
+      id: "stock.list-detail.badge-auto"
+    timeout: 20000
+- assertVisible:
+    text: ${output.ITEM_NAME}
+- tapOn:
+    id: "stock.list-detail.remove-[0-9a-f-]{36}"
+- extendedWaitUntil:
+    visible:
+      id: "stock.list-detail.undo"
+    timeout: 10000
+- assertNotVisible:
+    id: "stock.list-detail.badge-auto"
+- tapOn:
+    id: "stock.list-detail.undo"
+- extendedWaitUntil:
+    visible:
+      id: "stock.list-detail.badge-auto"
+    timeout: 20000

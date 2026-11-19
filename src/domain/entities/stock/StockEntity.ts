@@ -39,6 +39,8 @@ interface IStockEntity {
   categoryId?: string;
   createdAt?: Date;
   description: string;
+  effectiveShoppingListId?: string;
+  estimatedUnitPriceCents?: number;
   expirationStatus: StockExpirationStatus;
   hasExpiredLot: boolean;
   hasOpenLot: boolean;
@@ -58,6 +60,7 @@ interface IStockEntity {
   quantity: number;
   quickStep?: number;
   restockQuantity: number;
+  shoppingListId?: string;
   stockOnly: boolean;
   unit: StockUnits;
   warnDaysClosed: number;
@@ -71,6 +74,8 @@ class StockEntity {
   categoryId?: string;
   createdAt?: Date;
   description: string;
+  effectiveShoppingListId?: string;
+  estimatedUnitPriceCents?: number;
   expirationStatus: StockExpirationStatus;
   hasExpiredLot: boolean;
   hasOpenLot: boolean;
@@ -89,6 +94,7 @@ class StockEntity {
   quantity: number;
   quickStep?: number;
   restockQuantity: number;
+  shoppingListId?: string;
   stockOnly: boolean;
   unit: StockUnits;
   warnDaysClosed: number;
@@ -101,6 +107,8 @@ class StockEntity {
     this.categoryId = params.categoryId;
     this.createdAt = params.createdAt;
     this.description = params.description;
+    this.effectiveShoppingListId = params.effectiveShoppingListId;
+    this.estimatedUnitPriceCents = params.estimatedUnitPriceCents;
     this.expirationStatus = params.expirationStatus;
     this.hasExpiredLot = params.hasExpiredLot;
     this.hasOpenLot = params.hasOpenLot;
@@ -119,6 +127,7 @@ class StockEntity {
     this.quantity = params.quantity;
     this.quickStep = params.quickStep;
     this.restockQuantity = params.restockQuantity;
+    this.shoppingListId = params.shoppingListId;
     this.stockOnly = params.stockOnly;
     this.unit = params.unit;
     this.warnDaysClosed = params.warnDaysClosed;

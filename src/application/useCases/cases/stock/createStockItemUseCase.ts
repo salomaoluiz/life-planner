@@ -6,6 +6,7 @@ export interface CreateStockItemUseCaseParams extends RequiredFields {
   barcode?: string;
   brand?: string;
   categoryId?: string;
+  estimatedUnitPriceCents?: number;
   expirationDate?: Date;
   idealQuantity?: number;
   locationId?: string;
@@ -14,6 +15,7 @@ export interface CreateStockItemUseCaseParams extends RequiredFields {
   openedShelfLifeDays?: number;
   purchaseDate?: Date;
   quickStep?: number;
+  shoppingListId?: string;
   stockOnly?: boolean;
   warnDaysClosed?: number;
   warnDaysOpened?: number;
@@ -43,6 +45,7 @@ function createStockItemUseCase(
           brand: params.brand,
           categoryId: params.categoryId,
           description: params.description,
+          estimatedUnitPriceCents: params.estimatedUnitPriceCents,
           expirationDate: params.expirationDate,
           idealQuantity: params.idealQuantity,
           locationId: params.locationId,
@@ -54,6 +57,7 @@ function createStockItemUseCase(
           purchaseDate: params.purchaseDate,
           quantity: params.quantity,
           quickStep: params.quickStep,
+          shoppingListId: params.shoppingListId,
           stockOnly: params.stockOnly ?? false,
           unit: params.unit,
           warnDaysClosed: params.warnDaysClosed ?? DEFAULT_WARN_DAYS_CLOSED,

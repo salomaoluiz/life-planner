@@ -41,6 +41,8 @@ export interface StockFormValues {
   ownerId?: string;
   purchaseDate?: Date;
   quantity: QuantityInput;
+  // Spec 118 FR 6: empty = the owner's default list.
+  shoppingListId?: string;
   // Spec 117 FR 10: the − / + step; empty = 1 (un, kg or L).
   step: QuantityInput;
   stockOnly: boolean;
@@ -73,6 +75,7 @@ const FIELDS = Object.keys(INITIAL_VALUES).concat([
   "locationId",
   "ownerId",
   "purchaseDate",
+  "shoppingListId",
 ]) as Array<keyof StockFormValues>;
 
 export function buildCreateParams(
@@ -102,6 +105,7 @@ export function buildCreateParams(
     purchaseDate: values.purchaseDate,
     quantity: toQuantity(values.quantity, values.unit) ?? 0,
     quickStep: toQuantity(values.step, values.unit),
+    shoppingListId: values.stockOnly ? undefined : values.shoppingListId,
     stockOnly: values.stockOnly,
     unit: values.unit,
     warnDaysClosed: parseInt(values.warnDaysClosed, 10),
@@ -142,6 +146,8 @@ export function buildUpdateParams(
     ownerId: moved ? ownerId : undefined,
     previousOwnerId: item.ownerId,
     quickStep: toQuantity(values.step, values.unit) ?? null,
+    // After an owner change the API replaces the list by the same-name one (or clears it), unless the form picked one.
+    shoppingListId: listForUpdate(values, item, moved),
     stockOnly: values.stockOnly,
     unit: values.unit === item.unit ? undefined : values.unit,
     warnDaysClosed: parseInt(values.warnDaysClosed, 10),
@@ -215,6 +221,7 @@ export function valuesFromItem(item: StockDTO): StockFormValues {
         : String(item.openedShelfLifeDays),
     ownerId: item.ownerId,
     quantity: EMPTY,
+    shoppingListId: item.shoppingListId,
     step: initialInput(item.quickStep, item.unit),
     stockOnly: item.stockOnly,
     unit: item.unit,
@@ -239,6 +246,21 @@ function isSame(a: unknown, b: unknown) {
   }
 
   return a === b;
+}
+
+function listForUpdate(
+  values: StockFormValues,
+  item: StockDTO,
+  moved: boolean,
+): null | string | undefined {
+  if (
+    values.stockOnly ||
+    (moved && values.shoppingListId === item.shoppingListId)
+  ) {
+    return undefined;
+  }
+
+  return values.shoppingListId ?? null;
 }
 
 function optional(value: string) {

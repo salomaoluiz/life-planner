@@ -16,6 +16,8 @@ export interface IStockDTO {
   categoryId?: string;
   createdAt?: Date;
   description: string;
+  effectiveShoppingListId?: string;
+  estimatedUnitPriceCents?: number;
   expirationStatus: StockExpirationStatus;
   hasExpiredLot: boolean;
   hasOpenLot: boolean;
@@ -34,6 +36,7 @@ export interface IStockDTO {
   quantity: number;
   quickStep?: number;
   restockQuantity: number;
+  shoppingListId?: string;
   stockOnly: boolean;
   unit: StockUnits;
   warnDaysClosed: number;
@@ -47,6 +50,8 @@ class StockDTO implements IStockDTO {
   categoryId?: string;
   createdAt?: Date;
   description: string;
+  effectiveShoppingListId?: string;
+  estimatedUnitPriceCents?: number;
   expirationStatus: StockExpirationStatus;
   hasExpiredLot: boolean;
   hasOpenLot: boolean;
@@ -65,6 +70,7 @@ class StockDTO implements IStockDTO {
   quantity: number;
   quickStep?: number;
   restockQuantity: number;
+  shoppingListId?: string;
   stockOnly: boolean;
   unit: StockUnits;
   warnDaysClosed: number;
@@ -77,6 +83,8 @@ class StockDTO implements IStockDTO {
     this.categoryId = params.categoryId;
     this.createdAt = params.createdAt;
     this.description = params.description;
+    this.effectiveShoppingListId = params.effectiveShoppingListId;
+    this.estimatedUnitPriceCents = params.estimatedUnitPriceCents;
     this.expirationStatus = params.expirationStatus;
     this.hasExpiredLot = params.hasExpiredLot;
     this.hasOpenLot = params.hasOpenLot;
@@ -95,6 +103,7 @@ class StockDTO implements IStockDTO {
     this.quantity = params.quantity;
     this.quickStep = params.quickStep;
     this.restockQuantity = params.restockQuantity;
+    this.shoppingListId = params.shoppingListId;
     this.stockOnly = params.stockOnly;
     this.unit = params.unit;
     this.warnDaysClosed = params.warnDaysClosed;
@@ -109,6 +118,8 @@ class StockDTO implements IStockDTO {
       categoryId: entity.categoryId,
       createdAt: entity.createdAt,
       description: entity.description,
+      effectiveShoppingListId: entity.effectiveShoppingListId,
+      estimatedUnitPriceCents: entity.estimatedUnitPriceCents,
       expirationStatus: entity.expirationStatus,
       hasExpiredLot: entity.hasExpiredLot,
       hasOpenLot: entity.hasOpenLot,
@@ -127,6 +138,7 @@ class StockDTO implements IStockDTO {
       quantity: entity.quantity,
       quickStep: entity.quickStep,
       restockQuantity: entity.restockQuantity,
+      shoppingListId: entity.shoppingListId,
       stockOnly: entity.stockOnly,
       unit: entity.unit,
       warnDaysClosed: entity.warnDaysClosed,

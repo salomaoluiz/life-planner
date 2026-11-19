@@ -7,7 +7,7 @@ it("SHOULD list the 5 destinations in the spec order with their icons", () => {
     ["index/index", "home-outline"],
     ["financial", "wallet-outline"],
     ["investments", "chart-line"],
-    ["stock/index", "package-variant-closed"],
+    ["stock", "package-variant-closed"],
     ["family/index", "account-group-outline"],
   ]);
 });
@@ -27,12 +27,18 @@ it("SHOULD expose the path the settings entry navigates to", () => {
   expect(SETTINGS_PATH).toBe("/settings");
 });
 
-it("SHOULD give the Finances AND Investments items their section children (spec 110)", () => {
+it("SHOULD give the Finances, Investments AND Stock items their section children (specs 110 and 118)", () => {
   const withChildren = NAVIGATION_ITEMS.filter((item) => item.children);
 
   expect(withChildren.map((item) => item.routeName)).toEqual([
     "financial",
     "investments",
+    "stock",
+  ]);
+  expect(withChildren[2].children?.map((child) => child.testID)).toEqual([
+    "navigation-rail-stock-items",
+    "navigation-rail-stock-lists",
+    "navigation-rail-stock-catalog",
   ]);
   expect(withChildren[1].children?.map((child) => child.testID)).toEqual([
     "navigation-rail-investment-overview",

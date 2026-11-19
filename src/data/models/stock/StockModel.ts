@@ -15,6 +15,8 @@ interface IStockModel {
   categoryId?: string;
   createdAt?: Date;
   description: string;
+  effectiveShoppingListId?: string;
+  estimatedUnitPriceCents?: number;
   expirationStatus: string;
   hasExpiredLot: boolean;
   hasOpenLot: boolean;
@@ -33,6 +35,7 @@ interface IStockModel {
   quantity: number;
   quickStep?: number;
   restockQuantity: number;
+  shoppingListId?: string;
   stockOnly: boolean;
   unit: string;
   warnDaysClosed: number;
@@ -52,6 +55,8 @@ class StockModel implements IStockModel {
   categoryId?: string;
   createdAt?: Date;
   description: string;
+  effectiveShoppingListId?: string;
+  estimatedUnitPriceCents?: number;
   expirationStatus: string;
   hasExpiredLot: boolean;
   hasOpenLot: boolean;
@@ -70,6 +75,7 @@ class StockModel implements IStockModel {
   quantity: number;
   quickStep?: number;
   restockQuantity: number;
+  shoppingListId?: string;
   stockOnly: boolean;
   unit: string;
   warnDaysClosed: number;
@@ -82,6 +88,8 @@ class StockModel implements IStockModel {
     this.categoryId = params.categoryId;
     this.createdAt = params.createdAt;
     this.description = params.description;
+    this.effectiveShoppingListId = params.effectiveShoppingListId;
+    this.estimatedUnitPriceCents = params.estimatedUnitPriceCents;
     this.expirationStatus = params.expirationStatus;
     this.hasExpiredLot = params.hasExpiredLot;
     this.hasOpenLot = params.hasOpenLot;
@@ -100,6 +108,7 @@ class StockModel implements IStockModel {
     this.quantity = params.quantity;
     this.quickStep = params.quickStep;
     this.restockQuantity = params.restockQuantity;
+    this.shoppingListId = params.shoppingListId;
     this.stockOnly = params.stockOnly;
     this.unit = params.unit;
     this.warnDaysClosed = params.warnDaysClosed;
@@ -117,6 +126,8 @@ class StockModel implements IStockModel {
       categoryId: optionalString(data.categoryId),
       createdAt: optionalTimestamp(data.createdAt),
       description: data.description as string,
+      effectiveShoppingListId: optionalString(data.effectiveShoppingListId),
+      estimatedUnitPriceCents: optionalNumber(data.estimatedUnitPriceCents),
       expirationStatus: data.expirationStatus as string,
       hasExpiredLot: data.hasExpiredLot === true,
       hasOpenLot: data.hasOpenLot as boolean,
@@ -135,6 +146,7 @@ class StockModel implements IStockModel {
       quantity: data.quantity as number,
       quickStep: optionalNumber(data.quickStep),
       restockQuantity: data.restockQuantity as number,
+      shoppingListId: optionalString(data.shoppingListId),
       stockOnly: data.stockOnly as boolean,
       unit: data.unit as string,
       warnDaysClosed: data.warnDaysClosed as number,
@@ -151,6 +163,8 @@ class StockModel implements IStockModel {
       categoryId: this.categoryId ?? null,
       createdAt: this.createdAt?.toISOString() ?? null,
       description: this.description,
+      effectiveShoppingListId: this.effectiveShoppingListId ?? null,
+      estimatedUnitPriceCents: this.estimatedUnitPriceCents ?? null,
       expirationStatus: this.expirationStatus,
       hasExpiredLot: this.hasExpiredLot,
       hasOpenLot: this.hasOpenLot,
@@ -170,6 +184,7 @@ class StockModel implements IStockModel {
       quantity: this.quantity,
       quickStep: this.quickStep ?? null,
       restockQuantity: this.restockQuantity,
+      shoppingListId: this.shoppingListId ?? null,
       stockOnly: this.stockOnly,
       unit: this.unit,
       warnDaysClosed: this.warnDaysClosed,

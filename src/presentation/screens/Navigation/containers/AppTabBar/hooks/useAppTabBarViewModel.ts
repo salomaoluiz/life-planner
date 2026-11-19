@@ -19,6 +19,10 @@ import {
   NAVIGATION_ITEMS,
   SETTINGS_PATH,
 } from "@screens/Navigation/models/navigationItems";
+import {
+  getStockSection,
+  getStockSectionPath,
+} from "@screens/Stock/Layout/models/stockSections";
 
 const FINANCES_ROUTE = "financial";
 const FINANCES_PATH = "/financial/transaction";
@@ -26,14 +30,23 @@ const INVESTMENTS_ROUTE = "investments";
 // Spec 110 FR 1: Investments opens its Overview, like Finances opens Transactions.
 const INVESTMENTS_PATH = "/investments/overview";
 
+const STOCK_ROUTE = "stock";
+// Spec 118 FR 25: Stock opens its Items section.
+const STOCK_PATH = "/stock";
+
 const SECTIONED_LANDINGS: Record<string, string> = {
   [FINANCES_ROUTE]: FINANCES_PATH,
   [INVESTMENTS_ROUTE]: INVESTMENTS_PATH,
+  [STOCK_ROUTE]: STOCK_PATH,
 };
 
 function activeChildPathOf(routeName: string, pathname: string) {
   if (routeName === FINANCES_ROUTE) {
     return getFinancialSectionPath(getFinancialSection(screenPath(pathname)));
+  }
+
+  if (routeName === STOCK_ROUTE) {
+    return getStockSectionPath(getStockSection(screenPath(pathname)));
   }
 
   return routeName === INVESTMENTS_ROUTE

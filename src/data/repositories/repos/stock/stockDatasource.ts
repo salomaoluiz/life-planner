@@ -7,8 +7,22 @@ import {
 } from "@data/models/stock/StockCatalogModels";
 import StockModel from "@data/models/stock/StockModel";
 import StockMovementModel from "@data/models/stock/StockMovementModel";
+import {
+  RestockSummaryEntity,
+  ShoppingListCardEntity,
+  ShoppingListDetailEntity,
+  ShoppingListEntity,
+  ShoppingListRowEntity,
+  ShoppingListRowResultEntity,
+} from "@domain/entities/stock/ShoppingListEntity";
 
 export interface StockDatasource {
+  addShoppingListRow(
+    params: AddShoppingListRowParams,
+  ): Promise<ShoppingListRowResultEntity>;
+  createShoppingList(
+    params: CreateShoppingListParams,
+  ): Promise<ShoppingListEntity>;
   createStockCategory(
     params: CreateStockCategoryDatasourceParams,
   ): Promise<void>;
@@ -25,6 +39,7 @@ export interface StockDatasource {
   createStockMovement(
     params: CreateStockMovementDatasourceParams,
   ): Promise<{ item: StockModel; movements: StockMovementModel[] }>;
+  deleteShoppingListRow(rowId: string): Promise<void>;
   deleteStockCategory(id: string): Promise<void>;
   deleteStockItem(id: string): Promise<void>;
   deleteStockLocation(id: string): Promise<void>;
@@ -32,6 +47,11 @@ export interface StockDatasource {
   getOwnerChangePreview(
     params: OwnerChangePreviewDatasourceParams,
   ): Promise<StockOwnerChangePreviewModel>;
+  getRestockSummary(): Promise<RestockSummaryEntity>;
+  getShoppingList(id: string): Promise<ShoppingListDetailEntity>;
+  getShoppingLists(
+    params: GetShoppingListsParams,
+  ): Promise<ShoppingListCardEntity[]>;
   getStockCategories(
     params: GetStockCatalogDatasourceParams,
   ): Promise<StockCategoryModel[]>;
@@ -51,6 +71,12 @@ export interface StockDatasource {
     params: SuggestStockItemsDatasourceParams,
   ): Promise<StockSuggestionModel[]>;
   undoStockGesture(params: StockGestureDatasourceParams): Promise<StockModel>;
+  updateShoppingList(
+    params: UpdateShoppingListParams,
+  ): Promise<ShoppingListEntity>;
+  updateShoppingListRow(
+    params: UpdateShoppingListRowParams,
+  ): Promise<ShoppingListRowEntity>;
   updateStockCategory(
     params: UpdateStockCategoryDatasourceParams,
   ): Promise<void>;
@@ -58,6 +84,24 @@ export interface StockDatasource {
   updateStockLocation(
     params: UpdateStockLocationDatasourceParams,
   ): Promise<void>;
+}
+
+// Spec 118: shopping lists. `undefined` = unchanged, `null` clears an estimate.
+interface AddShoppingListRowParams {
+  description?: string;
+  estimatedUnitPriceCents?: number;
+  itemId?: string;
+  listId: string;
+  origin?: string;
+  quantity: number;
+  restore?: boolean;
+  unit?: string;
+}
+
+interface CreateShoppingListParams extends StockOwnerDatasourceParams {
+  currency?: string;
+  isDefault?: boolean;
+  name: string;
 }
 
 interface CreateStockCategoryDatasourceParams extends StockOwnerDatasourceParams {
@@ -71,6 +115,7 @@ interface CreateStockDatasourceParams extends StockOwnerDatasourceParams {
   brand?: string;
   categoryId?: string;
   description: string;
+  estimatedUnitPriceCents?: number;
   expirationDate?: Date;
   idealQuantity?: number;
   locationId?: string;
@@ -80,6 +125,7 @@ interface CreateStockDatasourceParams extends StockOwnerDatasourceParams {
   purchaseDate?: Date;
   quantity: number;
   quickStep?: number;
+  shoppingListId?: string;
   stockOnly: boolean;
   unit: string;
   warnDaysClosed: number;
@@ -105,6 +151,11 @@ interface CreateStockMovementDatasourceParams {
   reason?: string;
   target?: string;
   type: string;
+}
+
+interface GetShoppingListsParams {
+  includeArchived?: boolean;
+  ownerId?: string;
 }
 
 interface GetStockCatalogDatasourceParams extends StockOwnerDatasourceParams {
@@ -141,6 +192,22 @@ interface SuggestStockItemsDatasourceParams {
   q: string;
 }
 
+interface UpdateShoppingListParams {
+  currency?: string;
+  id: string;
+  isDefault?: boolean;
+  name?: string;
+  status?: string;
+}
+
+interface UpdateShoppingListRowParams {
+  description?: string;
+  estimatedUnitPriceCents?: null | number;
+  id: string;
+  quantity?: number;
+  unit?: string;
+}
+
 interface UpdateStockCategoryDatasourceParams {
   financeCategoryId?: null | string;
   id: string;
@@ -154,6 +221,7 @@ interface UpdateStockDatasourceParams {
   brand?: null | string;
   categoryId?: null | string;
   description?: string;
+  estimatedUnitPriceCents?: null | number;
   id: string;
   idealQuantity?: null | number;
   locationId?: null | string;
@@ -163,6 +231,7 @@ interface UpdateStockDatasourceParams {
   owner?: string;
   ownerId?: string;
   quickStep?: null | number;
+  shoppingListId?: null | string;
   stockOnly?: boolean;
   unit?: string;
   warnDaysClosed?: number;
@@ -176,15 +245,20 @@ interface UpdateStockLocationDatasourceParams {
 }
 
 export {
+  AddShoppingListRowParams,
+  CreateShoppingListParams,
   CreateStockCategoryDatasourceParams,
   CreateStockDatasourceParams,
   CreateStockLocationDatasourceParams,
   CreateStockMovementDatasourceParams,
+  GetShoppingListsParams,
   GetStockCatalogDatasourceParams,
   GetStockMovementsDatasourceParams,
   OwnerChangePreviewDatasourceParams,
   StockOwnerDatasourceParams,
   SuggestStockItemsDatasourceParams,
+  UpdateShoppingListParams,
+  UpdateShoppingListRowParams,
   UpdateStockCategoryDatasourceParams,
   UpdateStockDatasourceParams,
   UpdateStockLocationDatasourceParams,

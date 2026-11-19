@@ -1,6 +1,7 @@
 import { TranslationKeys } from "@presentation/i18n/types";
 import { FINANCIAL_SECTIONS } from "@screens/Financial/Layout/models/financialSections";
 import { INVESTMENT_SECTIONS } from "@screens/Investment/Layout/models/investmentSections";
+import { STOCK_SECTIONS } from "@screens/Stock/Layout/models/stockSections";
 
 export interface NavigationChild {
   icon: string;
@@ -23,7 +24,7 @@ export type TabRouteName =
   | "financial"
   | "index/index"
   | "investments"
-  | "stock/index";
+  | "stock";
 
 export const SETTINGS_PATH = "/settings";
 
@@ -50,9 +51,10 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     testID: "tab-investments",
   },
   {
+    children: STOCK_SECTIONS.map((item) => ({ ...item })),
     icon: "package-variant-closed",
     labelKey: "navigation.tabs.stock",
-    routeName: "stock/index",
+    routeName: "stock",
     testID: "tab-stock",
   },
   {

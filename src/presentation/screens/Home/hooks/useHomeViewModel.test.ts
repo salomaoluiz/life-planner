@@ -250,6 +250,7 @@ describe("refresh", () => {
       financeKeys.summary.all(),
       ["investment", "home-summary"],
       ["stock"],
+      ["shoppingList"],
       financeKeys.accounts.all(),
       financeKeys.dailyBalances.all(),
       financeKeys.upcoming.all(),
@@ -524,5 +525,48 @@ describe("investments section (spec 109)", () => {
     act(() => result.current.filter.onChange("family-old"));
 
     expect(result.current.canAddInvestmentAsset).toBe(false);
+  });
+});
+
+describe("shopping list block (spec 118)", () => {
+  it("SHOULD read the restock summary once for every readable owner, not by the Home filter", async () => {
+    const { result } = setup(loaded);
+
+    await optionsOf("shoppingList").fetch();
+    expect(spies.getRestockSummary).toHaveBeenCalledWith({});
+
+    act(() => result.current.filter.onChange(PERSONAL_FILTER));
+    await optionsOf("shoppingList").fetch();
+    expect(spies.getRestockSummary).toHaveBeenCalledTimes(2);
+  });
+
+  it("SHOULD map the summary to its UI model, loading until it arrives, and open the lists", () => {
+    const { result } = setup({ ...loaded, shoppingList: undefined });
+
+    expect(result.current.shoppingList.isLoading).toBe(true);
+
+    queries.shoppingList.withData(loaded.shoppingList);
+    const { result: ready } = setup(loaded);
+
+    expect(ready.current.shoppingList.data?.isEmpty).toBe(true);
+
+    ready.current.onShoppingListSeeAllPress();
+    expect(spies.push).toHaveBeenLastCalledWith("/stock/lists");
+  });
+
+  it("SHOULD fail only its own block WHEN the summary query fails", () => {
+    queries.shoppingList.withError();
+    const { result } = setup({
+      accounts: mocks.accounts,
+      balances: mocks.balances,
+      investment: mocks.investment,
+      owners: mocks.owners,
+      stock: mocks.stock,
+      summary: mocks.summary,
+      upcoming: mocks.upcoming,
+    });
+
+    expect(result.current.shoppingList.isError).toBe(true);
+    expect(result.current.stock.isError).toBe(false);
   });
 });

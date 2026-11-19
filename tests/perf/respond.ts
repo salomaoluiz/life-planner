@@ -49,6 +49,33 @@ function respond(method: Method, path: string): unknown {
   if (path.startsWith("/v1/investments/assets")) {
     return { items: [investmentAsset] };
   }
+  // Spec 118: the restock summary, the lists, one list and the rows.
+  if (path.startsWith("/v1/stock/shopping-lists/restock-summary")) {
+    return { count: 0, groups: [], totals: [] };
+  }
+  if (/^\/v1\/stock\/shopping-lists\/[^/?]+(\?|$)/.test(path)) {
+    return {
+      groups: [],
+      list: {
+        currency: "BRL",
+        id: "list-1",
+        isDefault: true,
+        name: "Mercado",
+        owner: "USER",
+        ownerId: "user-1",
+        status: "ACTIVE",
+      },
+      totals: {
+        autoCount: 0,
+        estimatedTotalCents: 0,
+        pricedCount: 0,
+        rowCount: 0,
+      },
+    };
+  }
+  if (path.startsWith("/v1/stock/shopping-lists")) {
+    return { items: [] };
+  }
   // Spec 117: one location (the QR route header).
   if (/^\/v1\/stock\/locations\/[^/?]+$/.test(path)) {
     return {

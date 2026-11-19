@@ -15,6 +15,7 @@ import FinanceBalanceCard from "../components/FinanceBalanceCard";
 import InvestmentsSection from "../components/InvestmentsSection";
 import LowestBalanceTiles from "../components/LowestBalanceTiles";
 import StockAttentionListCard from "../components/StockAttentionListCard";
+import StockShoppingListCard from "../components/StockShoppingListCard";
 import StockSummaryCard from "../components/StockSummaryCard";
 import UpcomingList from "../components/UpcomingList";
 import { HomeVM } from "../hooks";
@@ -145,6 +146,15 @@ function Wide({ vm }: AdaptiveViewProps<HomeVM>) {
               onAddItemPress={vm.onAddStockItemPress}
               onRowPress={vm.onStockSeeAllPress}
               state={vm.stock}
+            />
+          </View>
+        </View>
+        <View style={rowStyle}>
+          <View style={columnStyle}>
+            <StockShoppingListCard
+              fill={vm.isSplitLayout}
+              onSeeAllPress={vm.onShoppingListSeeAllPress}
+              state={vm.shoppingList}
             />
           </View>
         </View>

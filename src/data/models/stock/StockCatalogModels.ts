@@ -71,6 +71,7 @@ export class StockOwnerChangePreviewModel {
   constructor(
     readonly category: { from?: string; to?: string },
     readonly location: { from?: string; to?: string },
+    readonly shoppingList: { from?: string; to?: string },
   ) {}
 
   static fromJSON(data: Record<string, unknown>): StockOwnerChangePreviewModel {
@@ -83,6 +84,7 @@ export class StockOwnerChangePreviewModel {
     return new StockOwnerChangePreviewModel(
       side(data.category),
       side(data.location),
+      side(data.shoppingList),
     );
   }
 }

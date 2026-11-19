@@ -1,4 +1,5 @@
 const stockItemDetailsTestIds = {
+  addToListButton: "stock.item-details.add-to-list-button",
   brand: "stock.item-details.brand",
   columns: "stock.item-details.columns",
   consumeButton: "stock.item-details.consume-button",

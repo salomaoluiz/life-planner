@@ -19,6 +19,7 @@ export const migrationAllowList = [
 export const shellBreakpointAllowList = [
   "src/presentation/screens/Financial/Layout/**",
   "src/presentation/screens/Investment/Layout/**",
+  "src/presentation/screens/Stock/Layout/**",
   "src/presentation/screens/Navigation/containers/AppTabBar/**",
 ];
 

@@ -1,4 +1,10 @@
 {
+  "stock.addToList.mount.cold": {
+    "maxDepth": 3,
+    "maxDuplicates": 0,
+    "maxRequests": 3,
+    "modal": "stock_add_to_list"
+  },
   "stock.catalog.mount.cold": {
     "maxDepth": 2,
     "maxDuplicates": 0,
@@ -8,11 +14,11 @@
   "stock.catalog.render.mount": {
     "maxCommits": 3
   },
-  "stock.location.mount.cold": {
+  "stock.catalogScreen.mount.cold": {
     "maxDepth": 3,
     "maxDuplicates": 0,
-    "maxRequests": 3,
-    "route": "app/(app)/(tabs)/stock/locations/[id].tsx"
+    "maxRequests": 1,
+    "route": "app/(app)/(tabs)/stock/catalog.tsx"
   },
   "stock.list.mount.cold": {
     "maxDepth": 2,
@@ -22,6 +28,24 @@
   },
   "stock.list.render.mount": {
     "maxCommits": 3
+  },
+  "stock.listDetail.mount.cold": {
+    "maxDepth": 3,
+    "maxDuplicates": 0,
+    "maxRequests": 2,
+    "route": "app/(app)/(tabs)/stock/list/[id].tsx"
+  },
+  "stock.lists.mount.cold": {
+    "maxDepth": 3,
+    "maxDuplicates": 0,
+    "maxRequests": 2,
+    "route": "app/(app)/(tabs)/stock/lists/index.tsx"
+  },
+  "stock.location.mount.cold": {
+    "maxDepth": 3,
+    "maxDuplicates": 0,
+    "maxRequests": 3,
+    "route": "app/(app)/(tabs)/stock/locations/[id].tsx"
   },
   "stock.movement.mount.cold": {
     "maxDepth": 1,
@@ -35,11 +59,17 @@
   "stock.newItem.mount.cold": {
     "maxDepth": 2,
     "maxDuplicates": 0,
-    "maxRequests": 3,
+    "maxRequests": 4,
     "modal": "add_new_stock_item"
   },
   "stock.newItem.render.mount": {
     "maxCommits": 3
+  },
+  "stock.shoppingList.mount.cold": {
+    "maxDepth": 3,
+    "maxDuplicates": 0,
+    "maxRequests": 2,
+    "modal": "stock_shopping_list"
   },
   "stock.write.create": {
     "maxDepth": 1,

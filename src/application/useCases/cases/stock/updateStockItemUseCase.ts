@@ -7,6 +7,7 @@ export interface UpdateStockItemUseCaseParams {
   brand?: null | string;
   categoryId?: null | string;
   description?: string;
+  estimatedUnitPriceCents?: null | number;
   id: string;
   idealQuantity?: null | number;
   locationId?: null | string;
@@ -18,6 +19,7 @@ export interface UpdateStockItemUseCaseParams {
   // The owner the item is in now (its cached list is refreshed).
   previousOwnerId: string;
   quickStep?: null | number;
+  shoppingListId?: null | string;
   stockOnly?: boolean;
   unit?: string;
   warnDaysClosed?: number;

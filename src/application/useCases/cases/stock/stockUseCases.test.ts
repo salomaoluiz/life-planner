@@ -11,17 +11,23 @@ import StockMovementEntity, {
 } from "@domain/entities/stock/StockMovementEntity";
 import Repositories from "@domain/repositories";
 
+import addShoppingListRowUseCase from "./addShoppingListRowUseCase";
+import createShoppingListUseCase from "./createShoppingListUseCase";
 import createStockCategorySuggestionsUseCase from "./createStockCategorySuggestionsUseCase";
 import createStockCategoryUseCase from "./createStockCategoryUseCase";
 import createStockItemUseCase from "./createStockItemUseCase";
 import createStockLocationSuggestionsUseCase from "./createStockLocationSuggestionsUseCase";
 import createStockLocationUseCase from "./createStockLocationUseCase";
 import createStockMovementUseCase from "./createStockMovementUseCase";
+import deleteShoppingListRowUseCase from "./deleteShoppingListRowUseCase";
 import deleteStockCategoryUseCase from "./deleteStockCategoryUseCase";
 import deleteStockItemUseCase from "./deleteStockItemUseCase";
 import deleteStockLocationUseCase from "./deleteStockLocationUseCase";
 import getFrequentStockItemsUseCase from "./getFrequentStockItemsUseCase";
 import getOwnerChangePreviewUseCase from "./getOwnerChangePreviewUseCase";
+import getRestockSummaryUseCase from "./getRestockSummaryUseCase";
+import getShoppingListsUseCase from "./getShoppingListsUseCase";
+import getShoppingListUseCase from "./getShoppingListUseCase";
 import getStockCategoriesUseCase from "./getStockCategoriesUseCase";
 import getStockItemsUseCase from "./getStockItemsUseCase";
 import getStockItemUseCase from "./getStockItemUseCase";
@@ -31,6 +37,8 @@ import getStockMovementsUseCase from "./getStockMovementsUseCase";
 import setStockGestureExpirationUseCase from "./setStockGestureExpirationUseCase";
 import suggestStockItemsUseCase from "./suggestStockItemsUseCase";
 import undoStockGestureUseCase from "./undoStockGestureUseCase";
+import updateShoppingListRowUseCase from "./updateShoppingListRowUseCase";
+import updateShoppingListUseCase from "./updateShoppingListUseCase";
 import updateStockCategoryUseCase from "./updateStockCategoryUseCase";
 import updateStockItemUseCase from "./updateStockItemUseCase";
 import updateStockLocationUseCase from "./updateStockLocationUseCase";
@@ -74,6 +82,57 @@ interface Case {
 
 const owner = { owner: "USER", ownerId: "owner" };
 const cases: Case[] = [
+  {
+    factory: addShoppingListRowUseCase as never,
+    method: "addShoppingListRow",
+    name: "addShoppingListRow",
+    params: { itemId: "i", listId: "l", quantity: 2 },
+    repoResult: { merged: false, row: { id: "r" } },
+  },
+  {
+    factory: createShoppingListUseCase as never,
+    method: "createShoppingList",
+    name: "createShoppingList",
+    params: { name: "Pharmacy", owner: "USER", ownerId: "owner" },
+    repoResult: { id: "l" },
+  },
+  {
+    factory: deleteShoppingListRowUseCase as never,
+    method: "deleteShoppingListRow",
+    name: "deleteShoppingListRow",
+    params: { rowId: "r" },
+    repoParams: "r",
+  },
+  {
+    factory: getShoppingListUseCase as never,
+    method: "getShoppingList",
+    name: "getShoppingList",
+    params: { id: "l" },
+    repoParams: "l",
+    repoResult: { list: { id: "l" } },
+  },
+  {
+    check: (result) => expect(result).toHaveLength(1),
+    factory: getShoppingListsUseCase as never,
+    method: "getShoppingLists",
+    name: "getShoppingLists",
+    params: { includeArchived: true },
+    repoResult: [{ id: "l" }],
+  },
+  {
+    factory: updateShoppingListUseCase as never,
+    method: "updateShoppingList",
+    name: "updateShoppingList",
+    params: { id: "l", status: "ARCHIVED" },
+    repoResult: { id: "l" },
+  },
+  {
+    factory: updateShoppingListRowUseCase as never,
+    method: "updateShoppingListRow",
+    name: "updateShoppingListRow",
+    params: { estimatedUnitPriceCents: null, id: "r", quantity: 3 },
+    repoResult: { id: "r" },
+  },
   {
     check: (result) => expect(result).toHaveLength(1),
     factory: getFrequentStockItemsUseCase as never,
@@ -404,5 +463,32 @@ describe("updateStockItemUseCase", () => {
     await expect(
       useCase.execute({ id: "i", previousOwnerId: "o" }),
     ).rejects.toBe(unknown);
+  });
+});
+
+describe("getRestockSummary (spec 118)", () => {
+  it("SHOULD read the summary without params, add the use case to a business error AND re-throw it", async () => {
+    const useCase = getRestockSummaryUseCase(repositoriesMocks);
+
+    repository.getRestockSummary.mockResolvedValueOnce({
+      count: 1,
+      groups: [],
+      totals: [],
+    });
+    expect(await useCase.execute({})).toMatchObject({ count: 1 });
+    expect(repository.getRestockSummary).toHaveBeenCalledWith();
+
+    const error = new BusinessError();
+
+    repository.getRestockSummary.mockRejectedValueOnce(error);
+    await expect(useCase.execute({})).rejects.toBe(error);
+    expect(error.context).toMatchObject({
+      useCase: "getRestockSummaryUseCase",
+    });
+
+    const unknown = new Error("boom");
+
+    repository.getRestockSummary.mockRejectedValueOnce(unknown);
+    await expect(useCase.execute({})).rejects.toBe(unknown);
   });
 });

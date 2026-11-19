@@ -1,4 +1,4 @@
-type Module = "financial" | "investment";
+type Module = "financial" | "investment" | "stock";
 
 const sectionPickerTestIds = {
   option: (section: string, module: Module = "financial") =>

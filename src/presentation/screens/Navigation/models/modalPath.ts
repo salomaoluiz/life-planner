@@ -1,5 +1,6 @@
 import { FINANCIAL_SECTIONS } from "@screens/Financial/Layout/models/financialSections";
 import { INVESTMENT_SECTIONS } from "@screens/Investment/Layout/models/investmentSections";
+import { STOCK_SECTIONS } from "@screens/Stock/Layout/models/stockSections";
 
 export const MODAL_NAMES = [
   "add_new_transaction",
@@ -18,6 +19,8 @@ export const MODAL_NAMES = [
   "add_new_stock_item",
   "stock_movement",
   "stock_catalog",
+  "stock_add_to_list",
+  "stock_shopping_list",
   "investment_asset",
   "investment_conversion",
   "investment_fixed_income",
@@ -50,6 +53,8 @@ export interface ModalPathParts {
 const HOME = "/";
 
 // A modal can open over the detail of an asset: `/investments/asset/<id>` (spec 102). The detail lives under `asset/` so that `/investments/<modal>` (a modal opened from the list) is never read as an asset id.
+// Same for the detail of a shopping list: `/stock/list/<id>` (singular), spec 118.
+const STOCK_LIST_DETAIL = /^\/stock\/list\/[^/]+$/;
 const INVESTMENT_DETAIL = /^\/investments\/asset\/[^/]+$/;
 
 export const VALID_BASES: readonly string[] = [
@@ -61,6 +66,7 @@ export const VALID_BASES: readonly string[] = [
     HOME,
     ...FINANCIAL_SECTIONS.map((section) => section.path),
     ...INVESTMENT_SECTIONS.map((section) => section.path),
+    ...STOCK_SECTIONS.map((section) => section.path),
   ]),
 ];
 
@@ -88,7 +94,11 @@ export function isModalName(value: string): value is ModalName {
 export function isValidBase(base: string): boolean {
   const normalized = normalizeBase(base);
 
-  return VALID_BASES.includes(normalized) || INVESTMENT_DETAIL.test(normalized);
+  return (
+    VALID_BASES.includes(normalized) ||
+    INVESTMENT_DETAIL.test(normalized) ||
+    STOCK_LIST_DETAIL.test(normalized)
+  );
 }
 
 // The path of the screen: the pathname itself, or the base WHEN a modal is open over it.

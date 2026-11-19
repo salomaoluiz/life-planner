@@ -5,6 +5,16 @@ import deleteStockItem from "./deleteStockItem";
 import getStockItem from "./getStockItem";
 import getStockItems from "./getStockItems";
 import {
+  addShoppingListRow,
+  createShoppingList,
+  deleteShoppingListRow,
+  getRestockSummary,
+  getShoppingList,
+  getShoppingLists,
+  updateShoppingList,
+  updateShoppingListRow,
+} from "./shoppingLists";
+import {
   createStockCategory,
   createStockCategorySuggestions,
   createStockLocation,
@@ -31,17 +41,23 @@ import {
 import updateStockItem from "./updateStockItem";
 
 const stockApiDatasource: StockDatasource = {
+  addShoppingListRow,
+  createShoppingList,
   createStockCategory,
   createStockCategorySuggestions,
   createStockItem,
   createStockLocation,
   createStockLocationSuggestions,
   createStockMovement,
+  deleteShoppingListRow,
   deleteStockCategory,
   deleteStockItem,
   deleteStockLocation,
   getFrequentStockItems,
   getOwnerChangePreview,
+  getRestockSummary,
+  getShoppingList,
+  getShoppingLists,
   getStockCategories,
   getStockItem,
   getStockItems,
@@ -51,6 +67,8 @@ const stockApiDatasource: StockDatasource = {
   setStockGestureExpiration,
   suggestStockItems,
   undoStockGesture,
+  updateShoppingList,
+  updateShoppingListRow,
   updateStockCategory,
   updateStockItem,
   updateStockLocation,

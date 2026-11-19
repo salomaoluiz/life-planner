@@ -16,6 +16,7 @@ import { useCases } from "@application/useCases";
 import { CurrencyCode } from "@domain/entities/financial/Currency";
 import { resolveFavoriteAccount } from "@domain/entities/financial/resolveFavoriteAccount";
 import { InvestmentsHomeSummary } from "@domain/entities/investment/InvestmentEntities";
+import { RestockSummaryEntity } from "@domain/entities/stock/ShoppingListEntity";
 import { refetchStaleFetcherData, useQuery } from "@infrastructure/fetcher";
 import useOwners from "@presentation/hooks/useOwners";
 import { useTranslationLocale } from "@presentation/i18n";
@@ -34,6 +35,7 @@ import {
   normalizeSelection,
   resolveOwnerIds,
 } from "../models/ownerFilter";
+import ShoppingListSummaryUIModel from "../models/ShoppingListSummaryUIModel";
 import StockAttentionUIModel from "../models/StockAttentionUIModel";
 import UpcomingUIModel from "../models/UpcomingUIModel";
 import { useHomeOwnerFilter } from "./homeOwnerFilterStore";
@@ -215,6 +217,12 @@ function useHomeViewModel() {
     enabled: ownersReady,
     fetch: async () => fetchStock(ownerIds),
   });
+  // Spec 118 FR 26: the lists the stock asked for (every readable owner, so not keyed by the Home owner filter).
+  const shoppingList = useQuery<RestockSummaryEntity>({
+    cacheKey: [useCases.getRestockSummaryUseCase.uniqueName],
+    enabled: ownersReady,
+    fetch: async () => useCases.getRestockSummaryUseCase.execute({}),
+  });
   const balancesNow = useQuery<DailyBalanceDTO>({
     cacheKey: [
       ...financeKeys.dailyBalances.ofMonth(monthKey(now), "home"),
@@ -248,6 +256,7 @@ function useHomeViewModel() {
             summary.refetch(),
             investments.refetch(),
             stock.refetch(),
+            shoppingList.refetch(),
             accounts.refetch(),
             balancesNow.refetch(),
             balancesNext.refetch(),
@@ -265,6 +274,7 @@ function useHomeViewModel() {
         financeKeys.summary.all(),
         [...investmentKeys.all(), "home-summary"],
         [useCases.getStockAttentionUseCase.uniqueName],
+        [useCases.getRestockSummaryUseCase.uniqueName],
         financeKeys.accounts.all(),
         financeKeys.dailyBalances.all(),
         financeKeys.upcoming.all(),
@@ -331,6 +341,12 @@ function useHomeViewModel() {
     ownersFailed,
     owners.refetch,
     (dto) => new StockAttentionUIModel(dto, ownerList),
+  );
+  const shoppingListState = toBlock(
+    shoppingList,
+    ownersFailed,
+    owners.refetch,
+    (dto) => new ShoppingListSummaryUIModel(dto, languageTag),
   );
   const upcomingState = toBlock(
     upcoming,
@@ -412,10 +428,12 @@ function useHomeViewModel() {
     onInvoicePress,
     onOverviewPress: () => push("/financial/overview"),
     onRefresh,
+    onShoppingListSeeAllPress: () => push("/stock/lists"),
     onStockSeeAllPress: () =>
       push({ params: { filter: "EXPIRING" }, pathname: "/stock" }),
     onUpcomingItemPress,
     onUpcomingSeeAllPress: () => push("/financial/transaction"),
+    shoppingList: shoppingListState,
     stock: stockState,
     upcoming: upcomingState,
   };

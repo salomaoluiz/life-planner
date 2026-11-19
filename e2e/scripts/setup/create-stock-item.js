@@ -1,5 +1,5 @@
 // Maestro runScript (GraalJS). Creates a stock item through the API.
-// Reads E2E_API_URL, TOKEN, DESCRIPTION, QUANTITY, UNIT, EXPIRATION_IN_DAYS (absent = no expiration,
+// Reads E2E_API_URL, TOKEN, DESCRIPTION, QUANTITY, MIN_QUANTITY, IDEAL_QUANTITY (spec 118), UNIT, EXPIRATION_IN_DAYS (absent = no expiration,
 // negative = already expired, 0 = today), OWNER, OWNER_ID from env. Never logs the token.
 function param(value, fallback) {
   return typeof value !== "undefined" && value !== "" ? value : fallback;
@@ -21,6 +21,20 @@ var body = {
   ),
   unit: param(typeof UNIT === "undefined" ? undefined : UNIT, "unit"),
 };
+var minQuantity = param(
+  typeof MIN_QUANTITY === "undefined" ? undefined : MIN_QUANTITY,
+  undefined,
+);
+var idealQuantity = param(
+  typeof IDEAL_QUANTITY === "undefined" ? undefined : IDEAL_QUANTITY,
+  undefined,
+);
+if (typeof minQuantity !== "undefined") {
+  body.minQuantity = Number(minQuantity);
+}
+if (typeof idealQuantity !== "undefined") {
+  body.idealQuantity = Number(idealQuantity);
+}
 if (typeof days !== "undefined") {
   // Same wall-clock time N days from now: the app compares local calendar days, so this is exactly N days.
   // Spec 116: lot dates are calendar days (YYYY-MM-DD).

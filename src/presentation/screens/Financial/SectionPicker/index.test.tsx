@@ -83,3 +83,29 @@ describe("on an investments path (spec 110)", () => {
     expect(spies.replace).toHaveBeenCalledWith("/investments/overview");
   });
 });
+
+describe("on a stock path (spec 118)", () => {
+  it("SHOULD list the 3 stock sections AND mark the current one as selected", () => {
+    setup("/stock/list/list-1");
+
+    expect(screen.getByText("stock.sections.pickerTitle")).toBeOnTheScreen();
+    ["items", "lists", "catalog"].forEach((section) =>
+      expect(
+        screen.getByTestId(`stock.layout.section-sheet-${section}`),
+      ).toBeOnTheScreen(),
+    );
+    expect(
+      screen.getByTestId("stock.layout.section-sheet-lists").props
+        .accessibilityState,
+    ).toMatchObject({ selected: true });
+  });
+
+  it("SHOULD close AND replace to the section WHEN another one is chosen", () => {
+    setup("/stock");
+
+    fireEvent.press(screen.getByTestId("stock.layout.section-sheet-catalog"));
+
+    expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
+    expect(spies.replace).toHaveBeenCalledWith("/stock/catalog");
+  });
+});
