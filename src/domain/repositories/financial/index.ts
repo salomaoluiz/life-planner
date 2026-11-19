@@ -5,6 +5,7 @@ export * from "./financialCreditCardRepository";
 export * from "./financialDashboardRepository";
 export * from "./financialInstallmentPlanRepository";
 export * from "./financialRecurrenceRepository";
+export * from "./financialSplitRepository";
 export * from "./financialTagRepository";
 export * from "./financialTransactionRepository";
 export * from "./financialTransferRepository";

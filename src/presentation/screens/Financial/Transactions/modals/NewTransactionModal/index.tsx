@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { AdaptiveLayout } from "@components";
 
+import SplitForm from "../SplitForm";
 import TransferForm from "../TransferForm";
 import { useNewTransactionViewModel } from "./hooks";
 import { Wide } from "./views";
@@ -12,11 +13,22 @@ interface FormProps {
   onTransferType: () => void;
 }
 
-// The transfer form is a sibling body of the same modal: new transfers start from the type control, and a transfer row
-// opens it directly (`transferId`). The transaction form (and its many queries) mounts only when it is the one shown.
+// The transfer and split forms are sibling bodies of the same modal: new transfers start from the type control, and a
+// transfer row opens it directly (`transferId`); the split form opens for a split (`splitId`), from "Dividir"
+// (`split`) or to turn a saved transaction into a split (`fromId`). The transaction form (and its many queries)
+// mounts only when it is the one shown.
 function NewTransactionModal() {
-  const params = useLocalSearchParams<{ transferId?: string }>();
+  const params = useLocalSearchParams<{
+    fromId?: string;
+    split?: string;
+    splitId?: string;
+    transferId?: string;
+  }>();
   const [isTransfer, setTransfer] = useState(!!params.transferId);
+
+  if (params.splitId || params.fromId || params.split) {
+    return <SplitForm />;
+  }
 
   return isTransfer ? (
     <TransferForm onSwitchType={() => setTransfer(false)} />

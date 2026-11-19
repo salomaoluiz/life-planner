@@ -2,6 +2,7 @@ import DailyBalanceDTO from "@application/dto/financial/DailyBalanceDTO";
 import TransactionDTO from "@application/dto/financial/TransactionDTO";
 
 import { makeInvoice } from "../mocks/invoice.mocks";
+import { defaultParts } from "../mocks/split.mocks";
 import {
   ALL_FILTER,
   buildEntries,
@@ -514,5 +515,66 @@ describe("day balances (spec 035)", () => {
         month: new Date(2026, 9, 1),
       }).filter((entry) => entry.kind === "header"),
     ).toHaveLength(1);
+  });
+});
+
+describe("split rows (spec 119)", () => {
+  it("SHOULD turn the part rows of a split into ONE entry AND leave the other rows alone", () => {
+    const parts = defaultParts();
+    const plain = new TransactionUIModel(
+      new TransactionDTO({
+        accountId: "acc-1",
+        category: "c",
+        categoryId: "c",
+        date: "2026-11-15T12:00:00.000Z",
+        description: "Padaria",
+        id: "plain",
+        owner: "USER",
+        ownerId: "owner-1",
+        type: "EXPENSE",
+        value: "18.50",
+      }),
+    );
+    const entries = buildEntries(
+      [...parts, plain],
+      new Date("2026-11-18T12:00:00.000Z"),
+    );
+    const splits = entries.filter((entry) => entry.kind === "split");
+
+    expect(splits).toHaveLength(1);
+    expect(entries.filter((entry) => entry.kind === "item")).toHaveLength(1);
+    expect(splits[0].kind === "split" && splits[0].split.parts).toHaveLength(3);
+  });
+
+  it("SHOULD count the net of the split in the net of its day", () => {
+    const entries = buildEntries(
+      defaultParts(),
+      new Date("2026-11-18T12:00:00.000Z"),
+    );
+    const header = entries.find((entry) => entry.kind === "header");
+
+    expect(header?.kind === "header" && header.netCents).toBe(-16560);
+  });
+
+  it("SHOULD keep a card part out of the day list (it stays in its invoice line)", () => {
+    const card = new TransactionUIModel(
+      new TransactionDTO({
+        category: "c",
+        categoryId: "c",
+        creditCardId: "card-1",
+        date: "2026-11-15T12:00:00.000Z",
+        description: "Mercado",
+        id: "card-part",
+        owner: "USER",
+        ownerId: "owner-1",
+        splitId: "split-9",
+        type: "EXPENSE",
+        value: "10.00",
+      }),
+    );
+    const entries = buildEntries([card], new Date("2026-11-18T12:00:00.000Z"));
+
+    expect(entries.filter((entry) => entry.kind === "split")).toHaveLength(0);
+    expect(entries.filter((entry) => entry.kind === "item")).toHaveLength(1);
   });
 });

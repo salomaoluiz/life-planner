@@ -64,6 +64,7 @@ class TransactionEntityFixture {
       currency: "BRL",
       date: new Date(2025, 5, 5).toISOString(),
       description: "Shopping at the mall",
+      descriptionInherited: false,
       excludeFromTotals: false,
       id: "d9b513b5-6a02-45b0-9144-397c97a8917f",
       owner: OwnerType.FAMILY,

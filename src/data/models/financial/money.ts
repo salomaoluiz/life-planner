@@ -2,6 +2,7 @@ import { FieldInvalid } from "@domain/entities/errors";
 
 const CENTS = 100;
 const DECIMAL_TEXT = /^\d+(\.\d{1,2})?$/;
+const SIGNED_DECIMAL_TEXT = /^-?\d+(\.\d{1,2})?$/;
 
 function centsToDecimal(cents: number): number {
   return cents / CENTS;
@@ -33,9 +34,27 @@ function decimalToCents(value: number): number {
   return Math.round(value * CENTS);
 }
 
+// Spec 119: the "Desconto/ajuste" part of a split may be negative (a discount); only zero is refused.
+function signedDecimalStringToCents(value: string): number {
+  const normalized = value.trim().replace(",", ".");
+
+  if (!SIGNED_DECIMAL_TEXT.test(normalized)) {
+    throw new FieldInvalid({ value });
+  }
+
+  const cents = Math.round(Number(normalized) * CENTS);
+
+  if (cents === 0) {
+    throw new FieldInvalid({ value });
+  }
+
+  return cents;
+}
+
 export {
   centsToDecimal,
   centsToDecimalString,
   decimalStringToCents,
   decimalToCents,
+  signedDecimalStringToCents,
 };

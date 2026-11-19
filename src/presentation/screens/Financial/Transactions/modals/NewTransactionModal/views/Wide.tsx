@@ -198,6 +198,13 @@ function Wide({ vm }: AdaptiveViewProps<NewTransactionVM>) {
                   value={vm.type}
                 />
               )}
+              {vm.recurrence.isRecurring ? null : (
+                <Button.Ghost
+                  label={t("financial.split.action")}
+                  onPress={vm.onSplit}
+                  testID={transactionFormTestIds.split}
+                />
+              )}
               <AmountInput
                 currency={vm.currency}
                 error={err(vm.amountError)}

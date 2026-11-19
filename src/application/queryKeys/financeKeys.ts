@@ -38,6 +38,7 @@ const invoice = resource("invoice");
 const invoices = resource("invoices");
 const projections = resource("projections");
 const recurrences = resource("recurrences");
+const splits = resource("splits");
 const tags = resource("tags");
 const transactions = resource("transactions");
 const transactionsFiltered = resource("transactionsFiltered");
@@ -76,6 +77,7 @@ const financeKeys = {
   invoices,
   projections,
   recurrences,
+  splits,
   summary,
   tags,
   transactions,

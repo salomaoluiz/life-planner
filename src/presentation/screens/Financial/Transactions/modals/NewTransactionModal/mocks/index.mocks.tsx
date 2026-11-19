@@ -110,6 +110,7 @@ const defaultViewModel: ReturnType<typeof useNewTransactionViewModel> = {
   onSaveAndNew: jest.fn(),
   onSavedHide: jest.fn(),
   onScopeChange: jest.fn(),
+  onSplit: jest.fn(),
   onTagsChange: jest.fn(),
   onTypeChange: jest.fn(),
   overLimitCents: 0,

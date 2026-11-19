@@ -12,6 +12,7 @@ import {
   FinancialDashboardRepository,
   FinancialInstallmentPlanRepository,
   FinancialRecurrenceRepository,
+  FinancialSplitRepository,
   FinancialTagRepository,
   FinancialTransactionRepository,
   FinancialTransferRepository,
@@ -35,6 +36,7 @@ interface Repositories {
     dashboard: FinancialDashboardRepository;
     installmentPlan: FinancialInstallmentPlanRepository;
     recurrence: FinancialRecurrenceRepository;
+    split: FinancialSplitRepository;
     tag: FinancialTagRepository;
     transaction: FinancialTransactionRepository;
     transfer: FinancialTransferRepository;

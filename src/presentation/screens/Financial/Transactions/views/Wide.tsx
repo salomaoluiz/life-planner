@@ -7,6 +7,7 @@ import {
   AmountText,
   Chip,
   ChipGroup,
+  ConfirmDialog,
   EmptyState,
   ErrorState,
   Fab,
@@ -36,6 +37,7 @@ import FilterToolbar from "../components/FilterToolbar";
 import MonthPickerSheet from "../components/MonthPickerSheet";
 import MonthSummary from "../components/MonthSummary";
 import MonthSwitcher from "../components/MonthSwitcher";
+import SplitRow from "../components/SplitRow";
 import TransactionRow from "../components/TransactionRow";
 import { TransactionsScreenVM } from "../hooks";
 import ExportModal from "../modals/ExportModal";
@@ -158,6 +160,18 @@ function Wide({ vm }: AdaptiveViewProps<TransactionsScreenVM>) {
           onPurchasePress={vm.onRowPress}
           onToggle={vm.onInvoiceToggle}
           updating={vm.isTotalsUpdating}
+        />
+      );
+    }
+
+    if (item.kind === "split") {
+      return (
+        <SplitRow
+          expanded={vm.splitRows.expandedId === item.split.id}
+          onDelete={vm.splitRows.onDelete}
+          onEdit={vm.splitRows.onEdit}
+          onToggle={vm.splitRows.onToggle}
+          split={item.split}
         />
       );
     }
@@ -721,6 +735,21 @@ function Wide({ vm }: AdaptiveViewProps<TransactionsScreenVM>) {
         onHide={vm.onToastHide}
         testID={transactionsTestIds.readOnlyToast}
         visible={vm.toastVisible}
+      />
+      <ConfirmDialog
+        cancelLabel={t("common.actions.cancel")}
+        closeLabel={t("common.actions.close")}
+        confirmLabel={t("common.actions.delete")}
+        message={
+          vm.splitRows.deleteErrorKey
+            ? t(vm.splitRows.deleteErrorKey)
+            : t("financial.split.delete.message")
+        }
+        onCancel={vm.splitRows.onDeleteCancel}
+        onConfirm={vm.splitRows.onDeleteConfirm}
+        testID={transactionsTestIds.splitDeleteDialog}
+        title={t("financial.split.delete.title")}
+        visible={vm.splitRows.isDeleteOpen}
       />
       {adjustment.item && (
         <AdjustmentSheet

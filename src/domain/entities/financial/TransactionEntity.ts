@@ -5,6 +5,7 @@ import {
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import type { RecurrenceFrequency } from "./RecurrenceEntity";
+import type { SplitRefEntity } from "./SplitEntity";
 import type { TagRefEntity } from "./TagEntity";
 import type { TransferRefEntity } from "./TransferEntity";
 
@@ -32,6 +33,8 @@ interface ITransactionEntity {
   currency?: CurrencyCode;
   date: string;
   description: string;
+  // Spec 119: true when the part stores the description of its split.
+  descriptionInherited?: boolean;
   earlyPayment?: EarlyPaymentRefEntity;
   excludeFromTotals?: boolean;
   // Spec 107: the module that managed the row (`INVESTMENT`); the row changes only through it.
@@ -52,6 +55,10 @@ interface ITransactionEntity {
   projected?: boolean;
   recurrenceFrequency?: RecurrenceFrequency;
   recurrenceId?: string;
+  // Spec 119: the row is a part of a split; `split` is its lookup (absent when the API did not send it).
+  split?: SplitRefEntity;
+  splitId?: string;
+  splitPosition?: number;
   systemKey?: string;
   tags?: TagRefEntity[];
   // Spec 098: the row belongs to a transfer; `transfer` is its lookup (absent when the API did not send it).
@@ -69,6 +76,7 @@ class TransactionEntity {
   currency: CurrencyCode;
   date: string;
   description: string;
+  descriptionInherited: boolean;
   earlyPayment?: EarlyPaymentRefEntity;
   excludeFromTotals: boolean;
   // Spec 107: the module that managed the row (`INVESTMENT`); the row changes only through it.
@@ -88,6 +96,9 @@ class TransactionEntity {
   projected: boolean;
   recurrenceFrequency?: RecurrenceFrequency;
   recurrenceId?: string;
+  split?: SplitRefEntity;
+  splitId?: string;
+  splitPosition?: number;
   systemKey?: string;
   tags: TagRefEntity[];
   transfer?: TransferRefEntity;
@@ -111,6 +122,7 @@ class TransactionEntity {
     this.occurrenceNumber = params.occurrenceNumber;
     this.owner = params.owner;
     this.description = params.description;
+    this.descriptionInherited = params.descriptionInherited ?? false;
     this.notes = params.notes;
     this.earlyPayment = params.earlyPayment;
     this.ownerId = params.ownerId;
@@ -120,6 +132,9 @@ class TransactionEntity {
     this.recurrenceId = params.recurrenceId;
     this.excludeFromTotals = params.excludeFromTotals ?? false;
     this.externalLock = params.externalLock;
+    this.split = params.split;
+    this.splitId = params.splitId;
+    this.splitPosition = params.splitPosition;
     this.systemKey = params.systemKey;
     this.tags = params.tags ?? [];
     this.transfer = params.transfer;

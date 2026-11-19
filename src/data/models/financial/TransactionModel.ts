@@ -6,7 +6,7 @@ import {
 import { RecurrenceFrequency } from "@domain/entities/financial/RecurrenceEntity";
 
 import { calendarDateToIso, isoToCalendarDate } from "./calendarDate";
-import { centsToDecimalString, decimalStringToCents } from "./money";
+import { centsToDecimalString, signedDecimalStringToCents } from "./money";
 import { TagRefModel, tagRefsFromJSON } from "./TagModel";
 
 export type { RecurrenceFrequency };
@@ -19,11 +19,27 @@ export interface EarlyPaymentRefModel {
 
 export type OwnerType = "FAMILY" | "USER";
 
+// Spec 119: the split a part row belongs to (amounts are decimal text); `matched*` follow the list filters.
+export interface SplitRefModel {
+  description: string;
+  matchedCount: number;
+  matchedTotal: string;
+  notes?: string;
+  occurrenceNumber?: number;
+  paid?: boolean;
+  partCount: number;
+  recurrenceId?: string;
+  total: string;
+  type: TransactionType;
+}
+
 export interface TransactionLookups {
   categories: Record<
     string,
     { excludeFromTotals?: boolean; name?: string; systemKey?: string }
   >;
+  // Spec 119: only present when a row of the response is a part of a split (amounts in cents).
+  splits?: Record<string, Record<string, unknown>>;
   tags: Record<string, { name: string }>;
   // Spec 098: only present when a row of the response belongs to a transfer (amounts in cents).
   transfers?: Record<string, Record<string, unknown>>;
@@ -61,6 +77,7 @@ interface ITransactionModel {
   currency?: CurrencyCode;
   date: string;
   description: string;
+  descriptionInherited?: boolean;
   earlyPayment?: EarlyPaymentRefModel;
   excludeFromTotals?: boolean;
   externalLock?: string;
@@ -78,6 +95,9 @@ interface ITransactionModel {
   projected?: boolean;
   recurrenceFrequency?: RecurrenceFrequency;
   recurrenceId?: string;
+  split?: SplitRefModel;
+  splitId?: string;
+  splitPosition?: number;
   systemKey?: string;
   tags?: TagRefModel[];
   transfer?: TransferRefModel;
@@ -94,6 +114,7 @@ class TransactionModel implements ITransactionModel {
   currency: CurrencyCode;
   date: string;
   description: string;
+  descriptionInherited: boolean;
   earlyPayment?: EarlyPaymentRefModel;
   excludeFromTotals: boolean;
   externalLock?: string;
@@ -112,6 +133,9 @@ class TransactionModel implements ITransactionModel {
   projected: boolean;
   recurrenceFrequency?: RecurrenceFrequency;
   recurrenceId?: string;
+  split?: SplitRefModel;
+  splitId?: string;
+  splitPosition?: number;
   systemKey?: string;
   tags: TagRefModel[];
   transfer?: TransferRefModel;
@@ -131,6 +155,7 @@ class TransactionModel implements ITransactionModel {
     this.installmentPlanId = params.installmentPlanId;
     this.invoiceMonth = params.invoiceMonth;
     this.description = params.description;
+    this.descriptionInherited = params.descriptionInherited ?? false;
     this.notes = params.notes;
     this.earlyPayment = params.earlyPayment;
     this.occurrenceCount = params.occurrenceCount;
@@ -144,6 +169,9 @@ class TransactionModel implements ITransactionModel {
     this.recurrenceId = params.recurrenceId;
     this.excludeFromTotals = params.excludeFromTotals ?? false;
     this.externalLock = params.externalLock;
+    this.split = params.split;
+    this.splitId = params.splitId;
+    this.splitPosition = params.splitPosition;
     this.systemKey = params.systemKey;
     this.tags = params.tags ?? [];
     this.transfer = params.transfer;
@@ -169,6 +197,7 @@ class TransactionModel implements ITransactionModel {
       currency: toCurrencyCode(data.currency),
       date: calendarDateToIso(data.date as string),
       description: data.description as string,
+      descriptionInherited: data.descriptionInherited === true,
       earlyPayment:
         (data.earlyPayment as EarlyPaymentRefModel | null) ?? undefined,
       excludeFromTotals: category?.excludeFromTotals === true,
@@ -189,6 +218,9 @@ class TransactionModel implements ITransactionModel {
       recurrenceFrequency:
         (data.recurrenceFrequency as null | RecurrenceFrequency) ?? undefined,
       recurrenceId: (data.recurrenceId as null | string) ?? undefined,
+      split: (data.split as SplitRefModel | undefined) ?? undefined,
+      splitId: (data.splitId as null | string) ?? undefined,
+      splitPosition: (data.splitPosition as null | number) ?? undefined,
       systemKey: category?.systemKey ?? undefined,
       tags: tagRefsFromJSON(data.tags),
       transfer: (data.transfer as TransferRefModel | undefined) ?? undefined,
@@ -214,6 +246,7 @@ class TransactionModel implements ITransactionModel {
         name: category.name,
         systemKey: category.systemKey,
       },
+      split: toSplitRef(lookups.splits?.[item.splitId as string]),
       tags: tagIds.map((id) => ({ id, name: lookups.tags?.[id]?.name ?? "" })),
       transfer: toTransferRef(lookups.transfers?.[item.transferId as string]),
     });
@@ -252,16 +285,45 @@ class TransactionModel implements ITransactionModel {
       tags: this.tags,
       // Spec 098: kept so a cached row still draws its transfer.
       ...(this.transfer ? { transfer: this.transfer } : {}),
+      ...(this.descriptionInherited ? { descriptionInherited: true } : {}),
       ...(this.externalLock ? { externalLock: this.externalLock } : {}),
+      // Spec 119: kept so a cached part still draws its split.
+      ...(this.split ? { split: this.split } : {}),
+      ...(this.splitId ? { splitId: this.splitId } : {}),
+      ...(this.splitPosition === undefined
+        ? {}
+        : { splitPosition: this.splitPosition }),
       ...(this.transferId ? { transferId: this.transferId } : {}),
       type: this.type,
-      value: decimalStringToCents(this.value),
+      value: signedDecimalStringToCents(this.value),
     };
   }
 }
 
 function optionalCents(value: unknown) {
   return typeof value === "number" ? centsToDecimalString(value) : undefined;
+}
+
+// A split lookup of the API (cents) as the row model keeps it (decimal text).
+function toSplitRef(
+  lookup?: Record<string, unknown>,
+): SplitRefModel | undefined {
+  if (!lookup) {
+    return undefined;
+  }
+
+  return {
+    description: lookup.description as string,
+    matchedCount: Number(lookup.matchedCount),
+    matchedTotal: centsToDecimalString(Number(lookup.matchedTotal)),
+    notes: (lookup.notes as null | string) ?? undefined,
+    occurrenceNumber: (lookup.occurrenceNumber as null | number) ?? undefined,
+    paid: (lookup.paid as boolean | undefined) ?? undefined,
+    partCount: Number(lookup.partCount),
+    recurrenceId: (lookup.recurrenceId as null | string) ?? undefined,
+    total: centsToDecimalString(Number(lookup.total)),
+    type: lookup.type as TransactionType,
+  };
 }
 
 // A transfer lookup of the API (cents, calendar days) as the row model keeps it (decimal text, ISO instants).

@@ -5,6 +5,7 @@ export { default as financialCreditCardDatasource } from "./creditCards";
 export { default as financialDashboardDatasource } from "./dashboard";
 export { default as financialInstallmentPlanDatasource } from "./installmentPlans";
 export { default as financialRecurrenceDatasource } from "./recurrences";
+export { default as financialSplitDatasource } from "./splits";
 export { default as financialTagDatasource } from "./tags";
 export { default as financialTransactionDatasource } from "./transactions";
 export { default as financialTransferDatasource } from "./transfers";

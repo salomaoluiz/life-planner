@@ -5,6 +5,7 @@ import { OwnerType } from "@domain/entities/user/OwnerEntity";
 
 import CardInvoiceUIModel from "./CardInvoiceUIModel";
 import { getDateTimeFormat } from "./formatters";
+import SplitUIModel from "./SplitUIModel";
 import TransactionUIModel from "./TransactionUIModel";
 
 export const ALL_FILTER = "ALL";
@@ -51,7 +52,9 @@ export type ListEntry =
       projected?: boolean;
     }
   | { invoice: CardInvoiceUIModel; key: string; kind: "invoice" }
-  | { item: TransactionUIModel; key: string; kind: "item" };
+  // Spec 119: the part rows of a split, grouped into one expandable line.
+  | { item: TransactionUIModel; key: string; kind: "item" }
+  | { key: string; kind: "split"; split: SplitUIModel };
 
 // Projected card purchases that would land on one invoice (spec 034 FR 14).
 export interface ProjectedInvoiceGroup {
@@ -132,13 +135,20 @@ function buildEntries(
     month?: Date;
   } = {},
 ): ListEntry[] {
+  const { plain, splits } = groupSplits(items);
   const rows: {
     date: Date;
     dateKey: string;
     entry?: ListEntry;
     signedCents: number;
   }[] = [
-    ...items.map((item) => ({
+    ...splits.map((split) => ({
+      date: split.date,
+      dateKey: split.dateKey,
+      entry: { key: `split-${split.id}`, kind: "split", split } as const,
+      signedCents: split.signedCents,
+    })),
+    ...plain.map((item) => ({
       date: item.date,
       dateKey: item.dateKey,
       entry: { item, key: `item-${item.id}`, kind: "item" } as const,
@@ -281,6 +291,28 @@ function formatMonthLabel(month: Date, languageTag: string) {
 
 function formatMonthName(month: Date, languageTag: string) {
   return getDateTimeFormat(languageTag, { month: "long" }).format(month);
+}
+
+// Spec 119: the rows that are parts of a split leave the day list as ONE split line (first-part order); the rest stay.
+function groupSplits(items: TransactionUIModel[]) {
+  const groups = new Map<string, TransactionUIModel[]>();
+  const plain: TransactionUIModel[] = [];
+
+  items.forEach((item) => {
+    // A card part stays inside its invoice line.
+    if (item.splitId && !item.isCardPurchase) {
+      groups.set(item.splitId, [...(groups.get(item.splitId) ?? []), item]);
+    } else {
+      plain.push(item);
+    }
+  });
+
+  return {
+    plain,
+    splits: [...groups.entries()].map(
+      ([id, parts]) => new SplitUIModel(id, parts),
+    ),
+  };
 }
 
 function isInMonth(date: Date, month: Date) {
