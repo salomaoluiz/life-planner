@@ -373,6 +373,8 @@ function useNewTransactionViewModel() {
     isSeriesMissing;
   // An installment is edited through its own sheet (spec 030): hand over instead of opening this form.
   const isInstallment = isEditing && !!existing?.installmentPlanId;
+  // Spec 119: a part of a split is edited through its split (the form of the whole group).
+  const splitId = isEditing ? existing?.splitId : undefined;
   // The account debit row of an early payment is edited on the card (spec 032 FR 35): hand over as well.
   const earlyPayment = isEditing ? existing?.earlyPayment : undefined;
   // A card purchase can be refunded from its own sheet (spec 032 FR 21).
@@ -388,6 +390,12 @@ function useNewTransactionViewModel() {
       replaceModal("edit_installment", { id: params.id });
     }
   }, [isInstallment]);
+
+  useEffect(() => {
+    if (splitId) {
+      replaceModal("add_new_transaction", { splitId });
+    }
+  }, [splitId]);
 
   useEffect(() => {
     if (earlyPayment) {
@@ -1065,7 +1073,8 @@ function useNewTransactionViewModel() {
     isDiscardDialogOpen,
     isEditing,
     isInvoicePaid: cardHints.isInvoicePaid,
-    isLoading: (!state && !isNotFound) || isInstallment || !!earlyPayment,
+    isLoading:
+      (!state && !isNotFound) || isInstallment || !!splitId || !!earlyPayment,
     isNotFound,
     isSaved,
     isSaveDisabled: cardHints.isInvoicePaid,
@@ -1236,6 +1245,12 @@ function useNewTransactionViewModel() {
     onSaveAndNew,
     onSavedHide: () => setSaved(false),
     onScopeChange,
+    // Spec 119: "Dividir": a saved transaction becomes the first part of a new split; a new one starts a blank split.
+    onSplit: () =>
+      replaceModal(
+        "add_new_transaction",
+        params.id ? { fromId: params.id } : { split: "1" },
+      ),
     onTagsChange: (next: string[]) => {
       if (state) {
         setEdited({ ...state, tags: next });

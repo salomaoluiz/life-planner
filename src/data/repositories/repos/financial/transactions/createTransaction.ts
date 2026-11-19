@@ -6,6 +6,8 @@ import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { FinancialTransactionRepository } from "@domain/repositories/financial";
 import cache, { CacheStringKeys } from "@infrastructure/cache";
 
+import { toSplitRefEntity } from "../splits/splitRef";
+
 export type Params = Parameters<
   FinancialTransactionRepository["createTransaction"]
 >[0];
@@ -44,6 +46,7 @@ async function createTransaction(params: Params, datasources: Datasources) {
     currency: transaction.currency,
     date: transaction.date,
     description: transaction.description,
+    descriptionInherited: transaction.descriptionInherited,
     earlyPayment: transaction.earlyPayment,
     excludeFromTotals: transaction.excludeFromTotals,
     externalLock: transaction.externalLock,
@@ -61,6 +64,9 @@ async function createTransaction(params: Params, datasources: Datasources) {
     projected: transaction.projected,
     recurrenceFrequency: transaction.recurrenceFrequency,
     recurrenceId: transaction.recurrenceId,
+    split: toSplitRefEntity(transaction.split),
+    splitId: transaction.splitId,
+    splitPosition: transaction.splitPosition,
     systemKey: transaction.systemKey,
     tags: transaction.tags,
     transfer: transaction.transfer,

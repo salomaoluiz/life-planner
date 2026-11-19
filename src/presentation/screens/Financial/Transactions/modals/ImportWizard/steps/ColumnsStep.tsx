@@ -183,6 +183,7 @@ function ColumnsStep(props: { wizard: ImportWizardState }) {
       | "notes"
       | "owner"
       | "paid"
+      | "splitGroup"
       | "tags"
       | "transferId",
     mapped: boolean,
@@ -231,6 +232,7 @@ function ColumnsStep(props: { wizard: ImportWizardState }) {
         {optionalLine("currency", vm.mapped.currency)}
         {optionalLine("tags", vm.mapped.tags)}
         {optionalLine("notes", vm.mapped.notes)}
+        {optionalLine("splitGroup", vm.mapped.splitGroup)}
         {optionalLine("transferId", vm.mapped.transferId)}
       </View>
     </View>

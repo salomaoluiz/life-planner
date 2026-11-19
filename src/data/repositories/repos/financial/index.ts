@@ -7,6 +7,7 @@ import creditCardRepository from "./creditCards/creditCardRepositoryImpl";
 import dashboardRepository from "./dashboard/dashboardRepositoryImpl";
 import installmentPlanRepository from "./installmentPlans/installmentPlanRepositoryImpl";
 import recurrenceRepository from "./recurrences/recurrenceRepositoryImpl";
+import splitRepository from "./splits/splitRepositoryImpl";
 import tagRepository from "./tags/tagRepositoryImpl";
 import transactionRepository from "./transactions/transactionRepositoryImpl";
 import transferRepository from "./transfers/transferRepositoryImpl";
@@ -21,6 +22,7 @@ export function financialRepository(datasources: Datasources) {
     dashboard: dashboardRepository(datasources),
     installmentPlan: installmentPlanRepository(datasources),
     recurrence: recurrenceRepository(datasources),
+    split: splitRepository(datasources),
     tag: tagRepository(datasources),
     transaction: transactionRepository(datasources),
     transfer: transferRepository(datasources),

@@ -43,6 +43,7 @@ const HEADER_TARGETS: [ColumnTarget, string[]][] = [
       "transfer identifier",
     ],
   ],
+  ["splitGroup", ["grupo", "split group", "grupo da divisao"]],
   ["ignore", ["parcela", "installment", "recorrente", "recurring"]],
 ];
 const AMOUNT_WORDS = ["valor", "amount", "value", "quantia"];

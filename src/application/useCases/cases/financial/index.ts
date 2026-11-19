@@ -69,6 +69,13 @@ export {
 } from "./recurrences";
 
 export {
+  createSplitUseCase as createFinancialSplitUseCase,
+  deleteSplitUseCase as deleteFinancialSplitUseCase,
+  getSplitUseCase as getFinancialSplitUseCase,
+  updateSplitUseCase as updateFinancialSplitUseCase,
+} from "./splits";
+
+export {
   createTagUseCase as createFinancialTagUseCase,
   deleteTagUseCase as deleteFinancialTagUseCase,
   getTagsUseCase as getFinancialTagsUseCase,
@@ -90,7 +97,6 @@ export {
   updateTransactionUseCase as updateFinancialTransactionUseCase,
   validateImportUseCase as validateFinancialImportUseCase,
 } from "./transactions";
-
 export {
   createTransferUseCase as createFinancialTransferUseCase,
   deleteTransferUseCase as deleteFinancialTransferUseCase,

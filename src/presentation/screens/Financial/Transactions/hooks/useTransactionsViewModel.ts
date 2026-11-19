@@ -77,6 +77,7 @@ import { hasPendingChanges } from "../pending/pendingChanges";
 import { usePendingChanges } from "../pending/usePendingChanges";
 import { consumePendingNavigation } from "./pendingNavigation";
 import usePrefetchAdjacentMonths from "./usePrefetchAdjacentMonths";
+import useSplitRows from "./useSplitRows";
 import useTransactionFilters from "./useTransactionFilters";
 
 // The projections endpoint answers at most this many months.
@@ -707,6 +708,7 @@ function useTransactionsViewModel() {
       }),
     ),
   );
+  const splitRows = useSplitRows();
   const onInvoiceToggle = useStableCallback((id: string) =>
     setExpandedInvoiceId((current) => (current === id ? undefined : id)),
   );
@@ -892,6 +894,7 @@ function useTransactionsViewModel() {
     scopeOwnerIds: summaryOwnerIds,
     selectedMonthIndex:
       pickerYear === month.getFullYear() ? String(month.getMonth()) : undefined,
+    splitRows,
     stickyIndices: stickyIndices(entries),
     summary: monthData
       ? {

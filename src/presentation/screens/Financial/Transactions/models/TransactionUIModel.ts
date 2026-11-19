@@ -213,6 +213,11 @@ class TransactionUIModel {
     return this.isExpense ? -this.amountCents : this.amountCents;
   }
 
+  // Spec 119: the row is a part of a split; the list shows the whole split as one line.
+  get splitId() {
+    return this.dto.splitId;
+  }
+
   get subtitle() {
     if (this.isAdjustment) {
       return this.accountName;

@@ -7,6 +7,8 @@ import TransferEntity from "@domain/entities/financial/TransferEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { TransferResultEntity } from "@domain/repositories/financial";
 
+import { toSplitRefEntity } from "../splits/splitRef";
+
 function toTransactionEntity(row: TransactionModel): TransactionEntity {
   return new TransactionEntity({
     accountId: row.accountId,
@@ -16,6 +18,7 @@ function toTransactionEntity(row: TransactionModel): TransactionEntity {
     currency: row.currency,
     date: row.date,
     description: row.description,
+    descriptionInherited: row.descriptionInherited,
     earlyPayment: row.earlyPayment,
     excludeFromTotals: row.excludeFromTotals,
     id: row.id,
@@ -32,6 +35,9 @@ function toTransactionEntity(row: TransactionModel): TransactionEntity {
     projected: row.projected,
     recurrenceFrequency: row.recurrenceFrequency,
     recurrenceId: row.recurrenceId,
+    split: toSplitRefEntity(row.split),
+    splitId: row.splitId,
+    splitPosition: row.splitPosition,
     systemKey: row.systemKey,
     tags: row.tags,
     transfer: row.transfer,

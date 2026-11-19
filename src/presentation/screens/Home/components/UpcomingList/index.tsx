@@ -56,6 +56,10 @@ function Row({
   const badge = row.badge;
 
   function subtitleOf() {
+    if (item.splitId) {
+      return `${row.dateText} · ${t("financial.split.chip", { count: item.partCount ?? 0 })}`;
+    }
+
     if (!row.isInvoice) {
       return row.dateText;
     }

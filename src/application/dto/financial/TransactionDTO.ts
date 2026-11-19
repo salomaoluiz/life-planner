@@ -3,6 +3,7 @@ import {
   DEFAULT_CURRENCY,
 } from "@domain/entities/financial/Currency";
 import { RecurrenceFrequency } from "@domain/entities/financial/RecurrenceEntity";
+import { SplitRefEntity } from "@domain/entities/financial/SplitEntity";
 import { TagRefEntity } from "@domain/entities/financial/TagEntity";
 import TransactionEntity, {
   EarlyPaymentRefEntity,
@@ -19,6 +20,7 @@ export interface ITransactionDTO {
   currency?: CurrencyCode;
   date: string;
   description: string;
+  descriptionInherited?: boolean;
   earlyPayment?: EarlyPaymentRefEntity;
   excludeFromTotals?: boolean;
   externalLock?: string;
@@ -40,6 +42,9 @@ export interface ITransactionDTO {
   projected?: boolean;
   recurrenceFrequency?: RecurrenceFrequency;
   recurrenceId?: string;
+  split?: SplitRefEntity;
+  splitId?: string;
+  splitPosition?: number;
   systemKey?: string;
   tags?: TagRefEntity[];
   transfer?: TransferRefEntity;
@@ -60,6 +65,7 @@ class TransactionDTO {
   currency: CurrencyCode;
   date: string;
   description: string;
+  descriptionInherited: boolean;
   earlyPayment?: EarlyPaymentRefEntity;
   excludeFromTotals: boolean;
   externalLock?: string;
@@ -80,6 +86,9 @@ class TransactionDTO {
   projected: boolean;
   recurrenceFrequency?: RecurrenceFrequency;
   recurrenceId?: string;
+  split?: SplitRefEntity;
+  splitId?: string;
+  splitPosition?: number;
   systemKey?: string;
   tags: TagRefEntity[];
   transfer?: TransferRefEntity;
@@ -107,6 +116,7 @@ class TransactionDTO {
     this.categoryName = params.categoryName;
     this.accountName = params.accountName;
     this.description = params.description;
+    this.descriptionInherited = params.descriptionInherited ?? false;
     this.notes = params.notes;
     this.earlyPayment = params.earlyPayment;
     this.id = params.id;
@@ -117,6 +127,9 @@ class TransactionDTO {
     this.excludeFromTotals = params.excludeFromTotals ?? false;
     this.externalLock = params.externalLock;
     this.investmentAssetId = params.investmentAssetId;
+    this.split = params.split;
+    this.splitId = params.splitId;
+    this.splitPosition = params.splitPosition;
     this.systemKey = params.systemKey;
     this.tags = params.tags ?? [];
     this.transfer = params.transfer;
@@ -142,6 +155,7 @@ class TransactionDTO {
       currency: entity.currency,
       date: entity.date,
       description: entity.description,
+      descriptionInherited: entity.descriptionInherited,
       earlyPayment: entity.earlyPayment,
       excludeFromTotals: entity.excludeFromTotals,
       externalLock: entity.externalLock,
@@ -159,6 +173,9 @@ class TransactionDTO {
       projected: entity.projected,
       recurrenceFrequency: entity.recurrenceFrequency,
       recurrenceId: entity.recurrenceId,
+      split: entity.split,
+      splitId: entity.splitId,
+      splitPosition: entity.splitPosition,
       systemKey: entity.systemKey,
       tags: entity.tags,
       transfer: entity.transfer,

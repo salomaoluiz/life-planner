@@ -22,6 +22,15 @@ import {
   RecurrencePaidAfterEnd,
   RecurringFollowsDate,
   RefundOverPurchase,
+  SplitAdjustmentDuplicate,
+  SplitCardExpenseOnly,
+  SplitPartValueInvalid,
+  SplitRowUseSplit,
+  SplitSourceNotAllowed,
+  SplitTooFewParts,
+  SplitTooManyParts,
+  SplitTotalMismatch,
+  SplitTotalZero,
   TagNameInUse,
   TransactionNotProjected,
   TransferAccountArchived,
@@ -101,6 +110,42 @@ function getFinancialErrorMessageKey(
 
   if (error instanceof TransferRowUseTransfer) {
     return "financial.errors.transferRowUseTransfer";
+  }
+
+  if (error instanceof SplitAdjustmentDuplicate) {
+    return "financial.errors.splitAdjustmentDuplicate";
+  }
+
+  if (error instanceof SplitCardExpenseOnly) {
+    return "financial.errors.splitCardExpenseOnly";
+  }
+
+  if (error instanceof SplitPartValueInvalid) {
+    return "financial.errors.splitPartValueInvalid";
+  }
+
+  if (error instanceof SplitRowUseSplit) {
+    return "financial.errors.splitRowUseSplit";
+  }
+
+  if (error instanceof SplitSourceNotAllowed) {
+    return "financial.errors.splitSourceNotAllowed";
+  }
+
+  if (error instanceof SplitTooFewParts) {
+    return "financial.errors.splitTooFewParts";
+  }
+
+  if (error instanceof SplitTooManyParts) {
+    return "financial.errors.splitTooManyParts";
+  }
+
+  if (error instanceof SplitTotalMismatch) {
+    return "financial.errors.splitTotalMismatch";
+  }
+
+  if (error instanceof SplitTotalZero) {
+    return "financial.errors.splitTotalZero";
   }
 
   if (error instanceof InvoiceNotAvailable) {

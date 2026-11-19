@@ -123,6 +123,17 @@ const defaultViewModel: ReturnType<typeof useTransactionsViewModel> = {
   scopeChoices: [],
   scopeOwnerIds: ["user-id"],
   selectedMonthIndex: undefined,
+  splitRows: {
+    deleteErrorKey: undefined,
+    expandedId: undefined,
+    isDeleteOpen: false,
+    isDeleting: false,
+    onDelete: jest.fn(),
+    onDeleteCancel: jest.fn(),
+    onDeleteConfirm: jest.fn(),
+    onEdit: jest.fn(),
+    onToggle: jest.fn(),
+  },
   stickyIndices: [],
   summary: {
     balanceCents: 1000,

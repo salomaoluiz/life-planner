@@ -24,9 +24,12 @@ export interface UpcomingItemEntity {
   owner: string;
   ownerId: string;
   // Spec 096: the projected part of an invoice item (cents); absent when there is none.
+  // Spec 119 FR 33: an unpaid split is ONE item (the net total); `id` is then the split id.
+  partCount?: number;
   projectedAmount?: number;
   purchaseCount: null | number;
   recurrenceId: null | string;
+  splitId?: string;
   type: "EXPENSE" | "INCOME";
   valueCents: number;
 }

@@ -6,6 +6,8 @@ import TransactionEntity, {
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { FinancialTransactionRepository } from "@domain/repositories/financial";
 
+import { toSplitRefEntity } from "../splits/splitRef";
+
 export type Options = Parameters<
   FinancialTransactionRepository["getTransactions"]
 >[2];
@@ -44,6 +46,7 @@ function toTransactionEntity(transaction: TransactionModel) {
     currency: transaction.currency,
     date: transaction.date,
     description: transaction.description,
+    descriptionInherited: transaction.descriptionInherited,
     earlyPayment: transaction.earlyPayment,
     excludeFromTotals: transaction.excludeFromTotals,
     externalLock: transaction.externalLock,
@@ -61,6 +64,9 @@ function toTransactionEntity(transaction: TransactionModel) {
     projected: transaction.projected,
     recurrenceFrequency: transaction.recurrenceFrequency,
     recurrenceId: transaction.recurrenceId,
+    split: toSplitRefEntity(transaction.split),
+    splitId: transaction.splitId,
+    splitPosition: transaction.splitPosition,
     systemKey: transaction.systemKey,
     tags: transaction.tags,
     transfer: transaction.transfer,
