@@ -3,6 +3,13 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [3.3.1] - 2026-11-21
+
+### Fixed
+
+- The open invoice's projected ("Prevista") purchases now appear inside the expanded invoice line of the transactions list, with an "Efetivar" action on the row (fix-2).
+- Tapping a stored projected purchase — in the list or in the invoice — opens its edit form.
+
 ## [3.3.0] - 2026-11-19
 
 ### Added

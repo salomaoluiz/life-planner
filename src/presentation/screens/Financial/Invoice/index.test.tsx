@@ -334,6 +334,16 @@ describe("stored projected purchases (spec 096)", () => {
     );
   });
 
+  it("SHOULD open the edit form of the pressed stored projected purchase (fix-2)", () => {
+    const vm = setup({
+      invoice: makeInvoiceWithProjected({}, "series-1"),
+    });
+
+    fireEvent.press(screen.getByTestId(invoiceTestIds.projectedPurchase));
+
+    expect(vm.onPurchasePress).toHaveBeenCalledWith("purchase-3");
+  });
+
   it("SHOULD show neither the summary nor the Efetivar button WHEN nothing is projected", () => {
     setup();
 

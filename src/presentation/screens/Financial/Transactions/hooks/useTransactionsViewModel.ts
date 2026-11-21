@@ -29,9 +29,12 @@ import {
   buildOwnerFilterChoices,
   personalOwnerId as findPersonalOwnerId,
 } from "@screens/Financial/models/ownerOptions";
+import { projectedConfirmParams } from "@screens/Financial/models/projectedConfirm";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
-import CardInvoiceUIModel from "../models/CardInvoiceUIModel";
+import CardInvoiceUIModel, {
+  InvoicePurchaseUIModel,
+} from "../models/CardInvoiceUIModel";
 import {
   favoriteMonthSummary,
   MonthSummaryColumnData,
@@ -783,6 +786,16 @@ function useTransactionsViewModel() {
   const onRowPress = useStableCallback(
     scope.guard((id: string) => openModal("add_new_transaction", { id })),
   );
+  // Spec 096 FR 5 / fix-2: the stored projected purchases of the invoice line are confirmed from the list too.
+  const onStoredProjectedConfirm = useStableCallback(
+    scope.guard(
+      (invoice: CardInvoiceUIModel, purchase: InvoicePurchaseUIModel) =>
+        openModal(
+          "confirm_projected",
+          projectedConfirmParams(invoice.cardId, purchase),
+        ),
+    ),
+  );
 
   function onMonthSelect(monthIndex: string) {
     setMonth(new Date(pickerYear, Number(monthIndex), 1));
@@ -881,6 +894,7 @@ function useTransactionsViewModel() {
     onRetry: async () => monthQuery.refetch(),
     onRowPress,
     onSearchChange: filterStore.setSearch,
+    onStoredProjectedConfirm,
     onSummaryRetry: async () => monthQuery.refetch(),
     onToastHide: scope.onToastHide,
     onTransferPress,

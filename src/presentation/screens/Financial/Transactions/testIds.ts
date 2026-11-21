@@ -16,6 +16,10 @@ const transactionsTestIds = {
   cardInvoicePurchase: "financial.transactions.cardInvoice.purchase",
   cardInvoiceRow: "financial.transactions.cardInvoice.row",
   cardInvoiceStatus: "financial.transactions.cardInvoice.status",
+  cardInvoiceStoredProjectedConfirm:
+    "financial.transactions.cardInvoice.stored-projected-confirm",
+  cardInvoiceStoredProjectedPurchase:
+    "financial.transactions.cardInvoice.stored-projected-purchase",
   cardInvoiceTitle: "financial.transactions.cardInvoice.title",
   cardInvoiceToggle: "financial.transactions.cardInvoice.toggle",
   clearFilters: "financial.transactions.clear-filters",

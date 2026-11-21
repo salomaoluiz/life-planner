@@ -404,6 +404,60 @@ it("SHOULD open the form to add and the edit sheet for a row", () => {
   );
 });
 
+describe("stored projected purchases of the invoice line (fix-2)", () => {
+  function purchase(recurrenceId?: string) {
+    return {
+      amountCents: 800,
+      categoryIcon: "x",
+      categoryName: "Subscriptions",
+      date: new Date(2026, 9, 25),
+      description: "Youtube Premium",
+      id: "purchase-3",
+      prepaid: false,
+      projected: true,
+      recurrenceId,
+    };
+  }
+
+  it("SHOULD open the confirm sheet with the shared params", () => {
+    givenData([]);
+    const { result } = setup();
+
+    act(() =>
+      result.current.onStoredProjectedConfirm(
+        makeInvoice(),
+        purchase("series-1"),
+      ),
+    );
+
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "confirm_projected",
+      {
+        creditCardId: "card-1",
+        date: "2026-10-25",
+        description: "Youtube Premium",
+        id: "purchase-3",
+        recurring: "1",
+        value: "800",
+      },
+    );
+  });
+
+  it("SHOULD not flag a purchase without a series as recurring", () => {
+    givenData([]);
+    const { result } = setup();
+
+    act(() =>
+      result.current.onStoredProjectedConfirm(makeInvoice(), purchase()),
+    );
+
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "confirm_projected",
+      expect.objectContaining({ recurring: undefined }),
+    );
+  });
+});
+
 it("SHOULD open the transfer of a transfer row AND show the read-only notice WHEN the other side is hidden (spec 098)", () => {
   givenData([]);
   const { result } = setup();
@@ -1059,6 +1113,16 @@ describe("archived family (spec 042)", () => {
     act(() => {
       result.current.onAddPress();
       result.current.onRowPress("item-fam-exp");
+      result.current.onStoredProjectedConfirm(makeInvoice(), {
+        amountCents: 800,
+        categoryIcon: "x",
+        categoryName: "Subscriptions",
+        date: new Date(2026, 9, 25),
+        description: "Youtube Premium",
+        id: "purchase-3",
+        prepaid: false,
+        projected: true,
+      });
     });
 
     expect(modalNavigation.openModal).not.toHaveBeenCalled();

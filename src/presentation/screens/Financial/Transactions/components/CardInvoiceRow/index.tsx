@@ -19,7 +19,9 @@ import { installmentTitle } from "@screens/Financial/models/installments";
 import NoteIcon from "@screens/Financial/Transactions/components/NoteIcon";
 import PendingChip from "@screens/Financial/Transactions/components/PendingChip";
 import UpdatingTotal from "@screens/Financial/Transactions/components/UpdatingTotal";
-import CardInvoiceUIModel from "@screens/Financial/Transactions/models/CardInvoiceUIModel";
+import CardInvoiceUIModel, {
+  InvoicePurchaseUIModel,
+} from "@screens/Financial/Transactions/models/CardInvoiceUIModel";
 import { getDateTimeFormat } from "@screens/Financial/Transactions/models/formatters";
 import TransactionUIModel from "@screens/Financial/Transactions/models/TransactionUIModel";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
@@ -32,6 +34,11 @@ interface Props {
   onOpen: (invoice: CardInvoiceUIModel) => void;
   onProjectedPress?: (item: TransactionUIModel) => void;
   onPurchasePress: (id: string) => void;
+  // Spec 096 FR 5 / fix-2: Efetivar a stored projected purchase right from the list.
+  onStoredProjectedConfirm?: (
+    invoice: CardInvoiceUIModel,
+    purchase: InvoicePurchaseUIModel,
+  ) => void;
   onToggle: (id: string) => void;
   // Spec 061: a change is still being saved; the invoice total is the old one.
   updating?: boolean;
@@ -173,6 +180,58 @@ function CardInvoiceRow(props: Props) {
                     strikethrough={purchase.pendingState === "deleting"}
                     type="EXPENSE"
                     value={purchase.amountCents}
+                  />
+                </View>
+              }
+            />
+          ))}
+          {invoice.projectedPurchases.map((purchase) => (
+            <ListItem
+              key={purchase.id}
+              leading={
+                <IconTile
+                  color={purchase.categoryColor}
+                  name={purchase.categoryIcon}
+                />
+              }
+              meta={
+                <Badge label={t("financial.projected.chip")} tone="accent" />
+              }
+              onPress={() => {
+                if (!purchase.pendingState) {
+                  props.onPurchasePress(purchase.id);
+                }
+              }}
+              strikethrough={purchase.pendingState === "deleting"}
+              subtitle={`${purchase.categoryName} · ${formatShortDate(purchase.date, localeTag)}`}
+              testID={transactionsTestIds.cardInvoiceStoredProjectedPurchase}
+              title={installmentTitle(
+                purchase.description,
+                purchase.installment,
+                (params) => t("financial.installment.label", params),
+              )}
+              trailing={
+                <View style={styles.storedProjectedTrailing}>
+                  <View style={styles.purchaseTrailing}>
+                    {purchase.pendingState ? (
+                      <PendingChip state={purchase.pendingState} />
+                    ) : null}
+                    {purchase.notes ? <NoteIcon note={purchase.notes} /> : null}
+                    <AmountText
+                      currency={invoice.currency}
+                      strikethrough={purchase.pendingState === "deleting"}
+                      type="EXPENSE"
+                      value={purchase.amountCents}
+                    />
+                  </View>
+                  <Button.Secondary
+                    label={t("financial.projected.confirm.action")}
+                    onPress={() =>
+                      props.onStoredProjectedConfirm?.(invoice, purchase)
+                    }
+                    testID={
+                      transactionsTestIds.cardInvoiceStoredProjectedConfirm
+                    }
                   />
                 </View>
               }

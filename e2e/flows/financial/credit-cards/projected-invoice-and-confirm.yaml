@@ -73,6 +73,47 @@ onFlowComplete:
 - tapOn:
     id: "financial.transactions.cardInvoice.toggle"
 - runFlow: ../../../subflows/financial/scroll-list-down.yaml
+# Fix-2: the stored projected purchase is listed in the expanded line itself, with the Prevista chip
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.cardInvoice.stored-projected-purchase"
+    timeout: 20000
+- assertVisible:
+    text: ".*100[.,]00.*"
+# Tapping it opens the transaction form in edit mode (labels show the projected value)
+- tapOn:
+    text: ${output.PROJECTED_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "financial.transaction-form.amount-input"
+    timeout: 20000
+- tapOn:
+    id: "financial.transaction-form.amount-input"
+- eraseText
+- inputText: "11000"
+- tapOn:
+    id: "financial.transaction-form.save-button"
+# Back on the list the purchase is still projected, now with the edited value
+- runFlow: ../../../subflows/financial/open-transactions.yaml
+- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.cardInvoice.toggle"
+    timeout: 20000
+# The screen may keep the line expanded; only toggle when the projected row is not listed yet
+- runFlow:
+    when:
+      notVisible:
+        id: "financial.transactions.cardInvoice.stored-projected-purchase"
+    commands:
+      - tapOn:
+          id: "financial.transactions.cardInvoice.toggle"
+- extendedWaitUntil:
+    visible:
+      id: "financial.transactions.cardInvoice.stored-projected-purchase"
+    timeout: 20000
+- assertVisible:
+    text: ".*110[.,]00.*"
 - tapOn:
     id: "financial.transactions.cardInvoice.open"
 - extendedWaitUntil:

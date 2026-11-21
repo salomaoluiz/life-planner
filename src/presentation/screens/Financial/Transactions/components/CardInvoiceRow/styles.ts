@@ -26,6 +26,10 @@ function useStyles() {
         flexDirection: "row",
         gap: theme.sizes.spacing.xs,
       },
+      storedProjectedTrailing: {
+        alignItems: "flex-end",
+        gap: theme.sizes.spacing.xxs,
+      },
     }),
   };
 }

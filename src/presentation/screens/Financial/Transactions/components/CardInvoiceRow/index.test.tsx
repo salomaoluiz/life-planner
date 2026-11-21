@@ -246,6 +246,94 @@ describe("projected purchases (spec 034 FR 14)", () => {
   });
 });
 
+describe("stored projected purchases of the invoice line (fix-2)", () => {
+  function stored(invoice: CardInvoiceUIModel, overrides = {}) {
+    const props = {
+      expanded: true,
+      invoice,
+      onOpen: jest.fn(),
+      onPurchasePress: jest.fn(),
+      onStoredProjectedConfirm: jest.fn(),
+      onToggle: jest.fn(),
+      ...overrides,
+    };
+
+    render(<CardInvoiceRow {...props} />);
+
+    return props;
+  }
+
+  it("SHOULD list the stored projected purchases apart from the effective ones, with the chip", () => {
+    stored(makeInvoiceWithProjected());
+
+    expect(
+      screen.getAllByTestId(
+        transactionsTestIds.cardInvoiceStoredProjectedPurchase,
+      ),
+    ).toHaveLength(1);
+    expect(screen.getByText("financial.projected.chip")).toBeOnTheScreen();
+    expect(screen.getByText("Youtube Premium")).toBeOnTheScreen();
+    expect(
+      screen.getByTestId(transactionsTestIds.cardInvoiceStoredProjectedConfirm),
+    ).toBeOnTheScreen();
+    // The effective purchases stay in their own rows.
+    expect(
+      screen.getAllByTestId(transactionsTestIds.cardInvoicePurchase),
+    ).toHaveLength(2);
+  });
+
+  it("SHOULD open the edit form of the pressed stored projected purchase", () => {
+    const props = stored(makeInvoiceWithProjected());
+
+    fireEvent.press(
+      screen.getByTestId(
+        transactionsTestIds.cardInvoiceStoredProjectedPurchase,
+      ),
+    );
+
+    expect(props.onPurchasePress).toHaveBeenCalledWith("purchase-3");
+  });
+
+  it("SHOULD confirm with the purchase WHEN its Efetivar button is pressed, without opening the form", () => {
+    const props = stored(makeInvoiceWithProjected({}, "series-1"));
+
+    fireEvent.press(
+      screen.getByTestId(transactionsTestIds.cardInvoiceStoredProjectedConfirm),
+    );
+
+    expect(props.onStoredProjectedConfirm).toHaveBeenCalledWith(
+      props.invoice,
+      expect.objectContaining({ id: "purchase-3", recurrenceId: "series-1" }),
+    );
+    expect(props.onPurchasePress).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD not list them WHILE collapsed", () => {
+    stored(makeInvoiceWithProjected(), { expanded: false });
+
+    expect(
+      screen.queryByTestId(
+        transactionsTestIds.cardInvoiceStoredProjectedPurchase,
+      ),
+    ).toBeNull();
+  });
+
+  it("SHOULD render no projected row WHEN the invoice has none", () => {
+    stored(makeInvoice());
+
+    expect(
+      screen.queryByTestId(
+        transactionsTestIds.cardInvoiceStoredProjectedPurchase,
+      ),
+    ).toBeNull();
+    expect(
+      screen.queryByTestId(
+        transactionsTestIds.cardInvoiceStoredProjectedConfirm,
+      ),
+    ).toBeNull();
+  });
+});
+
 describe("filtered invoice (spec 045)", () => {
   function filteredInvoice(matched: number, total: number, cents: number) {
     const dto = makeInvoiceDTO();
