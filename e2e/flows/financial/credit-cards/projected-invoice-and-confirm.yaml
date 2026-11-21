@@ -3,7 +3,6 @@ name: financial/credit-cards/projected-invoice-and-confirm
 tags:
   - financial
   - spec-096
-  - wip
 onFlowComplete:
   - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
 ---
@@ -101,9 +100,14 @@ onFlowComplete:
     visible:
       id: "financial.transactions.cardInvoice.toggle"
     timeout: 20000
-- tapOn:
-    id: "financial.transactions.cardInvoice.toggle"
-- runFlow: ../../../subflows/financial/scroll-list-down.yaml
+# The screen may keep the line expanded; only toggle when the projected row is not listed yet
+- runFlow:
+    when:
+      notVisible:
+        id: "financial.transactions.cardInvoice.stored-projected-purchase"
+    commands:
+      - tapOn:
+          id: "financial.transactions.cardInvoice.toggle"
 - extendedWaitUntil:
     visible:
       id: "financial.transactions.cardInvoice.stored-projected-purchase"
