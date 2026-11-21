@@ -158,6 +158,7 @@ function Wide({ vm }: AdaptiveViewProps<TransactionsScreenVM>) {
           onOpen={vm.onInvoiceOpen}
           onProjectedPress={vm.onProjectedPress}
           onPurchasePress={vm.onRowPress}
+          onStoredProjectedConfirm={vm.onStoredProjectedConfirm}
           onToggle={vm.onInvoiceToggle}
           updating={vm.isTotalsUpdating}
         />

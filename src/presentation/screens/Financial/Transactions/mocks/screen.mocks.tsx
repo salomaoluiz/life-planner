@@ -111,6 +111,7 @@ const defaultViewModel: ReturnType<typeof useTransactionsViewModel> = {
   onRetry: jest.fn(),
   onRowPress: jest.fn(),
   onSearchChange: jest.fn(),
+  onStoredProjectedConfirm: jest.fn(),
   onSummaryRetry: jest.fn(),
   onToastHide: jest.fn(),
   onTransferPress: jest.fn(),

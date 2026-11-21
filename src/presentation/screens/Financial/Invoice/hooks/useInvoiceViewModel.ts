@@ -10,6 +10,7 @@ import useOwners from "@presentation/hooks/useOwners";
 import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 import { toCalendarDate } from "@screens/Financial/models/creditSheet";
 import { addMonthsTo } from "@screens/Financial/models/invoiceMonth";
+import { projectedConfirmParams } from "@screens/Financial/models/projectedConfirm";
 import CardInvoiceUIModel, {
   InvoiceCreditUIModel,
   InvoicePurchaseUIModel,
@@ -239,14 +240,10 @@ function useInvoiceViewModel() {
     },
     onClose: () => closeModal(),
     onConfirmPress: (purchase: InvoicePurchaseUIModel) =>
-      replaceModal("confirm_projected", {
-        creditCardId: params.cardId,
-        date: toCalendarDate(purchase.date),
-        description: purchase.description,
-        id: purchase.id,
-        recurring: purchase.recurrenceId ? "1" : undefined,
-        value: String(purchase.amountCents),
-      }),
+      replaceModal(
+        "confirm_projected",
+        projectedConfirmParams(params.cardId, purchase),
+      ),
     onCreditPress: (credit: InvoiceCreditUIModel) =>
       replaceModal(
         credit.kind === "REFUND" ? "card_refund" : "card_early_payment",

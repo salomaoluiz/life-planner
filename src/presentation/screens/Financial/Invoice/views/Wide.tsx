@@ -284,6 +284,7 @@ function Wide({ vm }: AdaptiveViewProps<InvoiceVM>) {
                           tone="accent"
                         />
                       }
+                      onPress={() => vm.onPurchasePress(purchase.id)}
                       subtitle={`${purchase.categoryName} · ${formatDayMonth(toIsoDate(purchase.date))}`}
                       testID={invoiceTestIds.projectedPurchase}
                       title={
