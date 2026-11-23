@@ -124,8 +124,11 @@ async function sharedGet<T>(path: string): Promise<T> {
 }
 
 const api = {
-  delete: async <T>(path: string, body?: unknown) =>
-    request<T>("DELETE", path, body),
+  delete: async <T>(
+    path: string,
+    body?: unknown,
+    headers?: Record<string, string>,
+  ) => request<T>("DELETE", path, body, headers),
   get: async <T>(path: string) => sharedGet<T>(path),
   // A text response (the CSV export, spec 047) with the attachment filename the API chose.
   getText: async (path: string) => {
@@ -141,7 +144,11 @@ const api = {
     body?: unknown,
     headers?: Record<string, string>,
   ) => request<T>("POST", path, body, headers),
-  put: async <T>(path: string, body?: unknown) => request<T>("PUT", path, body),
+  put: async <T>(
+    path: string,
+    body?: unknown,
+    headers?: Record<string, string>,
+  ) => request<T>("PUT", path, body, headers),
 };
 
 export { api };

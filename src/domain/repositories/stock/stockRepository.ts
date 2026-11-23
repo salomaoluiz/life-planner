@@ -15,13 +15,14 @@ import {
 } from "@domain/entities/stock/StockCatalogEntity";
 import StockEntity from "@domain/entities/stock/StockEntity";
 import StockMovementEntity from "@domain/entities/stock/StockMovementEntity";
+import { PurchaseRepository } from "@domain/repositories/stock/purchaseRepository";
 
 export interface StockOwnerParams {
   owner: string;
   ownerId: string;
 }
 
-export type StockRepository = {
+export type StockRepository = PurchaseRepository & {
   addShoppingListRow(
     params: AddShoppingListRowRepositoryParams,
   ): Promise<ShoppingListRowResultEntity>;
