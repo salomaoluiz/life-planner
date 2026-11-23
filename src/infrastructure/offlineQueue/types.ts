@@ -22,4 +22,12 @@ export interface QueueEntry {
   payload: Record<string, unknown>;
 }
 
-export type QueueEntryKind = "EXPIRATION" | "MOVEMENT" | "UNDO";
+// The first three are the stock quick movements (spec 117); the rest are the shopping-mode writes (spec 120).
+export type QueueEntryKind =
+  | "EXPIRATION"
+  | "MOVEMENT"
+  | "PURCHASE_DISCARD"
+  | "PURCHASE_END"
+  | "PURCHASE_ROW"
+  | "PURCHASE_ROW_DELETE"
+  | "UNDO";
