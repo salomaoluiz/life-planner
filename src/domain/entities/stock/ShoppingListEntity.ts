@@ -41,6 +41,9 @@ export interface ShoppingListDetailEntity {
 
 export interface ShoppingListEntity {
   currency: string;
+  // Spec 120 FR 10 and 35: the market "Ir às compras" preselects and the finance category of the closing.
+  defaultFinanceCategoryId?: string;
+  defaultMarketId?: string;
   id: string;
   isDefault: boolean;
   name: string;

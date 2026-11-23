@@ -4,6 +4,7 @@ import createStockItem from "./createStockItem";
 import deleteStockItem from "./deleteStockItem";
 import getStockItem from "./getStockItem";
 import getStockItems from "./getStockItems";
+import { purchaseApiDatasource } from "./purchases";
 import {
   addShoppingListRow,
   createShoppingList,
@@ -41,6 +42,7 @@ import {
 import updateStockItem from "./updateStockItem";
 
 const stockApiDatasource: StockDatasource = {
+  ...purchaseApiDatasource,
   addShoppingListRow,
   createShoppingList,
   createStockCategory,

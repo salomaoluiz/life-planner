@@ -7,7 +7,7 @@ import {
   marketIndexes,
   marketIndexHistory,
 } from "./fixtures/investment";
-import { stockDetail } from "./fixtures/stock";
+import { purchaseView, stockDetail } from "./fixtures/stock";
 import { me } from "./fixtures/user";
 import type { Method } from "./networkHarness";
 
@@ -48,6 +48,26 @@ function respond(method: Method, path: string): unknown {
   }
   if (path.startsWith("/v1/investments/assets")) {
     return { items: [investmentAsset] };
+  }
+  // Spec 120: markets, the pending purchases, one purchase and the closing preview.
+  if (path.startsWith("/v1/stock/markets")) {
+    return { items: [] };
+  }
+  if (path.startsWith("/v1/stock/purchases/pending")) {
+    return { items: [] };
+  }
+  if (/^\/v1\/stock\/purchases\/[^/?]+\/close-preview/.test(path)) {
+    return {
+      expirations: [],
+      financeParts: null,
+      missingPrices: [],
+      needsDefaultFinanceCategory: false,
+      newItems: [],
+      unknownWeight: [],
+    };
+  }
+  if (/^\/v1\/stock\/purchases\/[^/?]+(\?|$)/.test(path)) {
+    return purchaseView;
   }
   // Spec 118: the restock summary, the lists, one list and the rows.
   if (path.startsWith("/v1/stock/shopping-lists/restock-summary")) {

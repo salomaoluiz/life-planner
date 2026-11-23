@@ -21,6 +21,7 @@ export const MODAL_NAMES = [
   "stock_catalog",
   "stock_add_to_list",
   "stock_shopping_list",
+  "stock_start_purchase",
   "investment_asset",
   "investment_conversion",
   "investment_fixed_income",

@@ -42,7 +42,9 @@ export function getStockSection(pathname: string): StockSection {
   if (
     normalized === "/stock/lists" ||
     normalized.startsWith("/stock/lists/") ||
-    normalized.startsWith("/stock/list/")
+    normalized.startsWith("/stock/list/") ||
+    normalized.startsWith("/stock/purchases/") ||
+    normalized.startsWith("/stock/purchase-close/")
   ) {
     return "lists";
   }

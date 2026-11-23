@@ -1,3 +1,5 @@
+import { router } from "expo-router";
+
 import { fireEvent, render, screen } from "@tests";
 
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
@@ -5,6 +7,8 @@ import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 import { makePart, makeSplit } from "../../mocks/split.mocks";
 import SplitUIModel from "../../models/SplitUIModel";
 import SplitRow from "./index";
+
+jest.mock("expo-router", () => ({ router: { push: jest.fn() } }));
 
 function setup(split = makeSplit(), expanded = false) {
   const props = {
@@ -81,4 +85,42 @@ it("SHOULD show the matching share, 'of the total' AND the other parts line WHEN
     screen.getByTestId(transactionsTestIds.splitOfTotal),
   ).toBeOnTheScreen();
   expect(screen.getByTestId(transactionsTestIds.splitOthers)).toBeOnTheScreen();
+});
+
+describe("a split owned by a stock purchase (spec 120 FR 40)", () => {
+  function purchaseSplit() {
+    const split = {
+      description: "Compra no Atacadão",
+      matchedCount: 2,
+      matchedTotal: "100.00",
+      partCount: 2,
+      stockPurchaseId: "purchase-1",
+      total: "100.00",
+      type: "EXPENSE" as never,
+    };
+
+    return makeSplit([
+      makePart("p1", 0, "60.00", { split }),
+      makePart("p2", 1, "40.00", { split }),
+    ]);
+  }
+
+  it("SHOULD offer 'Ver itens da compra' AND open the purchase instead of the split editor", () => {
+    const props = setup(purchaseSplit(), true);
+
+    fireEvent.press(screen.getByTestId(transactionsTestIds.splitViewPurchase));
+    fireEvent.press(screen.getAllByTestId(transactionsTestIds.splitPart)[0]);
+
+    expect(router.push).toHaveBeenCalledWith("/stock/purchases/purchase-1");
+    expect(router.push).toHaveBeenCalledTimes(2);
+    expect(props.onEdit).not.toHaveBeenCalled();
+  });
+
+  it("SHOULD not show the link for an ordinary split", () => {
+    setup();
+
+    expect(
+      screen.queryByTestId(transactionsTestIds.splitViewPurchase),
+    ).not.toBeOnTheScreen();
+  });
 });

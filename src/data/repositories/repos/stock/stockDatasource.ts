@@ -15,8 +15,9 @@ import {
   ShoppingListRowEntity,
   ShoppingListRowResultEntity,
 } from "@domain/entities/stock/ShoppingListEntity";
+import { PurchaseRepository } from "@domain/repositories/stock/purchaseRepository";
 
-export interface StockDatasource {
+export interface StockDatasource extends PurchaseRepository {
   addShoppingListRow(
     params: AddShoppingListRowParams,
   ): Promise<ShoppingListRowResultEntity>;

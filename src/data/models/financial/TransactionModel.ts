@@ -29,6 +29,8 @@ export interface SplitRefModel {
   paid?: boolean;
   partCount: number;
   recurrenceId?: string;
+  // Spec 120 FR 40: the stock purchase that owns the split (read-only in finance).
+  stockPurchaseId?: string;
   total: string;
   type: TransactionType;
 }
@@ -321,6 +323,7 @@ function toSplitRef(
     paid: (lookup.paid as boolean | undefined) ?? undefined,
     partCount: Number(lookup.partCount),
     recurrenceId: (lookup.recurrenceId as null | string) ?? undefined,
+    stockPurchaseId: (lookup.stockPurchaseId as null | string) ?? undefined,
     total: centsToDecimalString(Number(lookup.total)),
     type: lookup.type as TransactionType,
   };

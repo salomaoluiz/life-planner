@@ -3,6 +3,14 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [3.4.0] - 2026-11-23
+
+### Added
+
+- Stock shopping mode (spec 120): "Ir às compras" on a list starts or joins a purchase at a market; tick rows into the cart with a unit price or a line total and an expiration, "Não tinha", search to add items outside the list, totals for the cart, what is left and the forecast, price-change badges, and the writes wait offline and follow other people's ticks live.
+- Closing wizard: receipt total, missing prices and weights, new items, suggested expirations and payment; it puts the lots in stock, posts one split (or one transaction) in finance and keeps the price history. Purchases left open (12 h) or waiting to be closed remind you on the Home.
+- A finance split created by a purchase shows "Ver itens da compra" instead of the editor.
+
 ## [3.3.1] - 2026-11-21
 
 ### Fixed

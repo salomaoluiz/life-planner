@@ -40,4 +40,30 @@ const stockDetail = {
   warnDaysOpened: 1,
 };
 
-export { stockDetail };
+// Spec 120: one open purchase with no rows.
+const purchaseView = {
+  cart: { count: 0, totalCents: 0, unpricedCount: 0 },
+  forecastCents: 0,
+  otherCarts: [],
+  purchase: {
+    accountId: null,
+    closing: null,
+    creditCardId: null,
+    currency: "BRL",
+    id: "purchase-1",
+    invoiceMonth: null,
+    lastActivityAt: "2026-11-18T10:00:00.000Z",
+    listId: "list-1",
+    marketId: "market-1",
+    purchaseDate: "2026-11-18",
+    receiptTotalCents: null,
+    splitId: null,
+    startedBy: null,
+    status: "OPEN",
+    transactionId: null,
+  },
+  remaining: { count: 0, estimatedCents: 0, pricedCount: 0 },
+  rows: [],
+};
+
+export { purchaseView, stockDetail };

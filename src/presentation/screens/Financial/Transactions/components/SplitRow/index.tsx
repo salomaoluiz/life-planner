@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { memo } from "react";
 import { View } from "react-native";
 
@@ -100,6 +101,15 @@ function SplitRow(props: Props) {
           <Icon name={expanded ? "chevron-up" : "chevron-down"} size={20} />
         </View>
       </Touchable>
+      {split.stockPurchaseId ? (
+        <Button.Ghost
+          label={t("financial.split.fromPurchase")}
+          onPress={() =>
+            router.push(`/stock/purchases/${split.stockPurchaseId}` as never)
+          }
+          testID={transactionsTestIds.splitViewPurchase}
+        />
+      ) : null}
       {expanded ? (
         <View>
           <View style={styles.parts}>
@@ -108,7 +118,13 @@ function SplitRow(props: Props) {
                 accessibilityLabel={part.categoryName}
                 accessibilityRole="button"
                 key={part.id}
-                onPress={() => props.onEdit(split.id)}
+                onPress={() =>
+                  split.stockPurchaseId
+                    ? router.push(
+                        `/stock/purchases/${split.stockPurchaseId}` as never,
+                      )
+                    : props.onEdit(split.id)
+                }
                 testID={transactionsTestIds.splitPart}
               >
                 <View style={styles.part}>

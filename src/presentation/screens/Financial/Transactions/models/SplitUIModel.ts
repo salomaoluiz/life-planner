@@ -114,6 +114,11 @@ class SplitUIModel {
     return this.parts.reduce((sum, part) => sum + part.signedCents, 0);
   }
 
+  // Spec 120 FR 40: set when a stock purchase owns the split.
+  get stockPurchaseId() {
+    return this.ref?.stockPurchaseId;
+  }
+
   get totalCents() {
     return this.ref
       ? decimalStringToCents(this.ref.total)

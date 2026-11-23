@@ -7,6 +7,8 @@ function StockLayout() {
       <Stack.Screen name={"index"} />
       <Stack.Screen name={"lists/index"} />
       <Stack.Screen name={"list/[id]"} />
+      <Stack.Screen name={"purchases/[id]"} />
+      <Stack.Screen name={"purchase-close/[id]"} />
       <Stack.Screen name={"catalog"} />
       <Stack.Screen name={"locations/[id]"} />
     </Stack>

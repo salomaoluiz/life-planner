@@ -5,6 +5,7 @@ import createStockItem from "./createStockItem";
 import deleteStockItem from "./deleteStockItem";
 import getStockItem from "./getStockItem";
 import getStockItems from "./getStockItems";
+import { purchaseRepositoryImpl } from "./purchases";
 import {
   addShoppingListRow,
   createShoppingList,
@@ -43,6 +44,7 @@ import updateStockItem from "./updateStockItem";
 
 function stockRepositoryImpl(datasources: Datasources): StockRepository {
   return {
+    ...purchaseRepositoryImpl(datasources),
     addShoppingListRow: async (params) =>
       addShoppingListRow(params, datasources),
     createShoppingList: async (params) =>
