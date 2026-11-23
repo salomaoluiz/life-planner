@@ -98,8 +98,10 @@ function setup(overrides: Record<string, unknown> = {}) {
     onDescriptionChange: jest.fn(),
     onEditList: jest.fn(),
     onFailedHide: jest.fn(),
+    onGoShopping: jest.fn(),
     onMergedHide: jest.fn(),
     onNoticeHide: jest.fn(),
+    onOpenPurchase: jest.fn(),
     onPriceChange: jest.fn(),
     onQuantityChange: jest.fn(),
     onRemove: jest.fn(),
@@ -110,6 +112,7 @@ function setup(overrides: Record<string, unknown> = {}) {
     onSearchChange: jest.fn(),
     onSelectSuggestion: jest.fn(),
     onUndo: jest.fn(),
+    openPurchases: [{ cartCount: 3, id: "p1", status: "OPEN" }],
     ownerName: "Casa",
     priceCents: 0,
     quantity: initialInput(1, StockUnits.UNIT),
@@ -245,4 +248,14 @@ it("SHOULD show loading, not found, error and empty states", () => {
 
   setup({ model: empty });
   expect(screen.getByTestId(stockListDetailTestIds.empty)).toBeOnTheScreen();
+});
+
+it("SHOULD offer Go shopping AND list the open purchases of the list (spec 120)", () => {
+  const vm = setup();
+
+  fireEvent.press(screen.getByTestId(stockListDetailTestIds.goShopping));
+  fireEvent.press(screen.getByTestId(`${stockListDetailTestIds.purchase}-p1`));
+
+  expect(vm.onGoShopping).toHaveBeenCalled();
+  expect(vm.onOpenPurchase).toHaveBeenCalledWith("p1");
 });

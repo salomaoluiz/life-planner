@@ -6,6 +6,10 @@ import { useCases } from "@application/useCases";
 import { GenericError } from "@domain/entities/errors";
 import { toCurrencyCode } from "@domain/entities/financial/Currency";
 import {
+  ListPurchasesEntity,
+  PurchaseViewEntity,
+} from "@domain/entities/stock/PurchaseEntity";
+import {
   ShoppingListDetailEntity,
   ShoppingListRowEntity,
   ShoppingListRowOrigins,
@@ -77,9 +81,24 @@ function useStockListDetailViewModel() {
     fetch: async () => useCases.getShoppingListUseCase.execute({ id }),
   });
 
+  // Spec 120 FR 43: the open and ended purchases of this list (Entrar / Fechar).
+  const purchases = useQuery<ListPurchasesEntity>({
+    cacheKey: [useCases.getListPurchasesUseCase.uniqueName, id ?? ""],
+    enabled: !!id,
+    fetch: async () => useCases.getListPurchasesUseCase.execute({ listId: id }),
+  });
+  const openPurchases = (purchases.data?.items ?? [])
+    .filter((item): item is PurchaseViewEntity => "purchase" in item)
+    .map((view) => ({
+      cartCount: view.cart.count,
+      id: view.purchase.id,
+      status: view.purchase.status,
+    }));
+
   useEffect(() => {
     if (isFocused) {
       detail.refetch();
+      purchases.refetch();
     }
   }, [isFocused]);
 
@@ -284,8 +303,11 @@ function useStockListDetailViewModel() {
     onDescriptionChange: setDescription,
     onEditList: () => openModal("stock_shopping_list", { id }),
     onFailedHide: () => setFailed(false),
+    onGoShopping: () => openModal("stock_start_purchase", { id }),
     onMergedHide: () => setMergedMessage(undefined),
     onNoticeHide: () => setRemoved(undefined),
+    onOpenPurchase: (purchaseId: string) =>
+      router.push(`/stock/purchases/${purchaseId}` as never),
     onPriceChange: setPriceCents,
     onQuantityChange: setQuantity,
     onRemove,
@@ -303,6 +325,7 @@ function useStockListDetailViewModel() {
         ? onAddText(label)
         : onAddItem(suggestionId),
     onUndo,
+    openPurchases,
     ownerName: owner?.type === OwnerType.FAMILY ? owner.name : undefined,
     priceCents,
     quantity,

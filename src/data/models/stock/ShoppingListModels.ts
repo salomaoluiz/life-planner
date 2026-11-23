@@ -46,6 +46,10 @@ export function parseRestockSummary(data: Json): RestockSummaryEntity {
 export function parseShoppingList(data: Json): ShoppingListEntity {
   return {
     currency: data.currency as string,
+    defaultFinanceCategoryId:
+      (data.defaultFinanceCategoryId as null | string | undefined) ?? undefined,
+    defaultMarketId:
+      (data.defaultMarketId as null | string | undefined) ?? undefined,
     id: data.id as string,
     isDefault: data.isDefault === true,
     name: data.name as string,

@@ -22,7 +22,7 @@ import useStockListDetailViewModel, {
 } from "./useStockListDetailViewModel";
 
 jest.mock("expo-router", () => ({
-  router: { replace: jest.fn() },
+  router: { push: jest.fn(), replace: jest.fn() },
   useLocalSearchParams: jest.fn(),
 }));
 jest.mock("@react-navigation/native", () => ({ useIsFocused: jest.fn() }));
@@ -35,6 +35,7 @@ jest.mock("@application/useCases", () => ({
   useCases: {
     addShoppingListRowUseCase: { execute: jest.fn(), uniqueName: "add" },
     deleteShoppingListRowUseCase: { execute: jest.fn(), uniqueName: "delete" },
+    getListPurchasesUseCase: { execute: jest.fn(), uniqueName: "purchases" },
     getShoppingListUseCase: { execute: jest.fn(), uniqueName: "detail" },
     suggestStockItemsUseCase: { execute: jest.fn(), uniqueName: "suggest" },
     updateShoppingListRowUseCase: { execute: jest.fn(), uniqueName: "update" },
@@ -359,4 +360,35 @@ it("SHOULD navigate back to the lists, open the edit modal and clear notices", a
   act(() => result.current.onNoticeHide());
   await act(async () => result.current.onRetry());
   expect(refetch).toHaveBeenCalled();
+});
+
+describe("purchases (spec 120)", () => {
+  it("SHOULD list the open purchases of the list AND open the start modal or a purchase", () => {
+    queries.purchases = {
+      data: {
+        items: [
+          {
+            cart: { count: 4, totalCents: 0, unpricedCount: 0 },
+            purchase: { id: "p1", status: "OPEN" },
+          },
+          { id: "closed", status: "CLOSED" },
+        ],
+      },
+      refetch,
+    };
+
+    const { result } = setup();
+
+    expect(result.current.openPurchases).toEqual([
+      { cartCount: 4, id: "p1", status: "OPEN" },
+    ]);
+
+    result.current.onGoShopping();
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "stock_start_purchase",
+      { id: "l" },
+    );
+    result.current.onOpenPurchase("p1");
+    expect(router.push).toHaveBeenCalledWith("/stock/purchases/p1");
+  });
 });

@@ -208,6 +208,8 @@ interface SuggestStockItemsRepositoryParams {
 
 interface UpdateShoppingListRepositoryParams {
   currency?: string;
+  defaultFinanceCategoryId?: null | string;
+  defaultMarketId?: null | string;
   id: string;
   isDefault?: boolean;
   name?: string;

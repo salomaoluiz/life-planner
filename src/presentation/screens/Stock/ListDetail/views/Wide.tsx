@@ -265,11 +265,18 @@ function Wide({ vm }: AdaptiveViewProps<StockListDetailVM>) {
           <SectionHeader
             actions={
               vm.readOnly || !vm.list ? null : (
-                <Button.Secondary
-                  label={t("stock.lists.edit")}
-                  onPress={vm.onEditList}
-                  testID={stockListDetailTestIds.editButton}
-                />
+                <View style={styles.badges}>
+                  <Button.Primary
+                    label={t("stock.purchase.goShopping")}
+                    onPress={vm.onGoShopping}
+                    testID={stockListDetailTestIds.goShopping}
+                  />
+                  <Button.Secondary
+                    label={t("stock.lists.edit")}
+                    onPress={vm.onEditList}
+                    testID={stockListDetailTestIds.editButton}
+                  />
+                </View>
               )
             }
             section="lists"
@@ -297,6 +304,23 @@ function Wide({ vm }: AdaptiveViewProps<StockListDetailVM>) {
               testID={stockListDetailTestIds.readOnlyBanner}
             />
           ) : null}
+          {vm.openPurchases.map((entry) => (
+            <Card key={entry.id}>
+              <Button.Ghost
+                label={`${
+                  entry.status === "ENDED"
+                    ? t("stock.purchase.ended")
+                    : t("stock.purchase.cart", { count: entry.cartCount })
+                } · ${
+                  entry.status === "ENDED"
+                    ? t("stock.purchase.close")
+                    : t("stock.purchase.enter")
+                }`}
+                onPress={() => vm.onOpenPurchase(entry.id)}
+                testID={`${stockListDetailTestIds.purchase}-${entry.id}`}
+              />
+            </Card>
+          ))}
           {vm.mergedMessage ? (
             <StatusBanner
               dismissLabel={t("common.actions.close")}
