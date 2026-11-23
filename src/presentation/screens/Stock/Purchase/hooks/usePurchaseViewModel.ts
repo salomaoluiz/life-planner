@@ -563,7 +563,7 @@ function usePurchaseViewModel() {
         (listId ? `/stock/list/${listId}` : "/stock/lists") as never,
       ),
     onCartRowPress,
-    onClose: () => router.push(`/stock/purchases/${id}/close` as never),
+    onClose: () => router.push(`/stock/purchase-close/${id}` as never),
     onDiscard: async () => {
       setConfirmDiscard(false);
       await changeStatus("DISCARD");

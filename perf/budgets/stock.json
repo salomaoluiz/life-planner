@@ -69,13 +69,13 @@
     "maxDepth": 3,
     "maxDuplicates": 0,
     "maxRequests": 3,
-    "route": "app/(app)/(tabs)/stock/purchases/[id]/index.tsx"
+    "route": "app/(app)/(tabs)/stock/purchases/[id].tsx"
   },
   "stock.purchaseClose.mount.cold": {
     "maxDepth": 3,
     "maxDuplicates": 0,
     "maxRequests": 8,
-    "route": "app/(app)/(tabs)/stock/purchases/[id]/close.tsx"
+    "route": "app/(app)/(tabs)/stock/purchase-close/[id].tsx"
   },
   "stock.shoppingList.mount.cold": {
     "maxDepth": 3,

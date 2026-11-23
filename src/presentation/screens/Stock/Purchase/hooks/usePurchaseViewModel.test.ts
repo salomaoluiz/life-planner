@@ -464,7 +464,7 @@ describe("status", () => {
     });
 
     act(() => result.current.onClose());
-    expect(router.push).toHaveBeenCalledWith("/stock/purchases/p1/close");
+    expect(router.push).toHaveBeenCalledWith("/stock/purchase-close/p1");
   });
 
   it("SHOULD ask before discarding a purchase with items AND discard at once without", async () => {
