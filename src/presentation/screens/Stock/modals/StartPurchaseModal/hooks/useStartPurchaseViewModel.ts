@@ -13,6 +13,7 @@ import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 export type StartPurchaseVM = ReturnType<typeof useStartPurchaseViewModel>;
 
 const NEW_MARKET = "__new__";
+const OPEN_AFTER_CLOSE_MS = 250;
 
 // The local calendar day: the purchase date defaults to today (FR 32).
 export function todayIso(now = new Date()) {
@@ -103,8 +104,12 @@ function useStartPurchaseViewModel() {
   }
 
   function open_(purchase: Pick<PurchaseEntity, "id">) {
+    // From inside the `(modals)` group the href resolves to its catch-all ("Unmatched"): close the modal first and
+    // navigate from the screen behind it once the modal is gone.
     closeModal();
-    router.push(`/stock/purchases/${purchase.id}` as never);
+    setTimeout(() => {
+      router.push(`/stock/purchases/${purchase.id}` as never);
+    }, OPEN_AFTER_CLOSE_MS);
   }
 
   return {

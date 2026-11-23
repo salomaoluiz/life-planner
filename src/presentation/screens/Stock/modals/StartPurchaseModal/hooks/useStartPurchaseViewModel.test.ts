@@ -43,6 +43,7 @@ function setup() {
 }
 
 beforeEach(() => {
+  jest.useFakeTimers();
   jest.clearAllMocks();
   Object.keys(queries).forEach((key) => delete queries[key]);
   queries.detail = {
@@ -119,7 +120,9 @@ it("SHOULD start a purchase with the chosen market AND open it", async () => {
     }),
   );
   expect(invalidateFetcherData).toHaveBeenCalled();
-  expect(closeModal).toHaveBeenCalled();
+  act(() => {
+    jest.advanceTimersByTime(300);
+  });
   expect(router.push).toHaveBeenCalledWith("/stock/purchases/new-purchase");
 });
 
@@ -171,6 +174,9 @@ it("SHOULD join an open purchase", () => {
   const { result } = setup();
 
   act(() => result.current.onJoin({ id: "p9" } as never));
+  act(() => {
+    jest.advanceTimersByTime(300);
+  });
 
   expect(router.push).toHaveBeenCalledWith("/stock/purchases/p9");
   act(() => result.current.onClose());

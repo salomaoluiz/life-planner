@@ -136,7 +136,9 @@ function usePurchaseCloseViewModel() {
       .catch(() => setLockedBy(true));
 
     return () => {
-      void useCases.closingLockUseCase.execute({ id, release: true });
+      useCases.closingLockUseCase
+        .execute({ id, release: true })
+        .catch(() => undefined);
     };
   }, [id]);
 
