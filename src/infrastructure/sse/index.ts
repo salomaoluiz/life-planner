@@ -16,6 +16,11 @@ export type SseStatus = "CONNECTED" | "CONNECTING" | "DROPPED";
 // Spec 120 FR 23-25: follows the events of a list while the shopping mode is open. When the stream drops it
 // reconnects with exponential backoff and `Last-Event-ID`; there is no timer polling. Returns the stop function.
 export function subscribeToEvents(options: SseOptions): () => void {
+  // No streaming transport (a test runtime): the screens keep working from their queries.
+  if (typeof XMLHttpRequest === "undefined") {
+    return () => undefined;
+  }
+
   let stopped = false;
   let attempt = 0;
   let timer: ReturnType<typeof setTimeout> | undefined;

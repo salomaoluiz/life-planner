@@ -32,7 +32,7 @@
   "stock.listDetail.mount.cold": {
     "maxDepth": 3,
     "maxDuplicates": 0,
-    "maxRequests": 2,
+    "maxRequests": 3,
     "route": "app/(app)/(tabs)/stock/list/[id].tsx"
   },
   "stock.lists.mount.cold": {
@@ -65,11 +65,29 @@
   "stock.newItem.render.mount": {
     "maxCommits": 3
   },
+  "stock.purchase.mount.cold": {
+    "maxDepth": 3,
+    "maxDuplicates": 0,
+    "maxRequests": 3,
+    "route": "app/(app)/(tabs)/stock/purchases/[id]/index.tsx"
+  },
+  "stock.purchaseClose.mount.cold": {
+    "maxDepth": 3,
+    "maxDuplicates": 0,
+    "maxRequests": 8,
+    "route": "app/(app)/(tabs)/stock/purchases/[id]/close.tsx"
+  },
   "stock.shoppingList.mount.cold": {
     "maxDepth": 3,
     "maxDuplicates": 0,
     "maxRequests": 2,
     "modal": "stock_shopping_list"
+  },
+  "stock.startPurchase.mount.cold": {
+    "maxDepth": 3,
+    "maxDuplicates": 0,
+    "maxRequests": 4,
+    "modal": "stock_start_purchase"
   },
   "stock.write.create": {
     "maxDepth": 1,

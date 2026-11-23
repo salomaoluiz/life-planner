@@ -149,3 +149,16 @@ it("SHOULD not open a request WHEN stopped before the token arrives", async () =
 
   expect(FakeRequest.all).toHaveLength(0);
 });
+
+it("SHOULD do nothing WHEN there is no XMLHttpRequest (tests)", () => {
+  (global as unknown as { XMLHttpRequest: unknown }).XMLHttpRequest = undefined;
+
+  const stop = subscribeToEvents({
+    onMessage: jest.fn(),
+    onResync: jest.fn(),
+    path: "/p",
+  });
+
+  expect(stop()).toBeUndefined();
+  expect(FakeRequest.all).toHaveLength(0);
+});
