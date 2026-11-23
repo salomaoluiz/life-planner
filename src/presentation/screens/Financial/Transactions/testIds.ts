@@ -180,6 +180,7 @@ const transactionsTestIds = {
   splitSubtitle: "financial.transactions.split.subtitle",
   splitTitle: "financial.transactions.split.title",
   splitToggle: "financial.transactions.split.toggle",
+  splitViewPurchase: "financial.transactions.split.view-purchase",
   summaryExpense: "financial.transactions.summary-expense",
   summaryIncome: "financial.transactions.summary-income",
   summaryProjected: "financial.transactions.summary-projected",

@@ -1,0 +1,52 @@
+url: ${E2E_WEB_URL}
+name: stock/shopping-mode-empty
+tags:
+  - stock
+  - spec-120
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Spec 120: a list with nothing to buy shows the empty state in the shopping mode; discarding an empty purchase
+# needs no confirmation and goes back to the list.
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/stock/open-stock.yaml
+- tapOn:
+    id: "navigation-rail-stock-lists"
+- extendedWaitUntil:
+    visible:
+      id: "stock.lists.card-default"
+    timeout: 20000
+- tapOn:
+    id: "stock.lists.card-[0-9a-f-]{36}"
+- extendedWaitUntil:
+    visible:
+      id: "stock.list-detail.go-shopping"
+    timeout: 20000
+- tapOn:
+    id: "stock.list-detail.go-shopping"
+- extendedWaitUntil:
+    visible:
+      id: "stock.start-purchase.new-market-name"
+    timeout: 20000
+- tapOn:
+    id: "stock.start-purchase.new-market-name"
+- inputText: "Mercado Vazio"
+- tapOn:
+    id: "stock.start-purchase.submit"
+- extendedWaitUntil:
+    visible:
+      id: "stock.purchase.empty"
+    timeout: 20000
+- tapOn:
+    id: "stock.purchase.discard"
+- extendedWaitUntil:
+    visible:
+      id: "stock.list-detail.screen"
+    timeout: 20000

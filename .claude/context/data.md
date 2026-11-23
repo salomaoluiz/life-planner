@@ -154,3 +154,7 @@ Owners (personal + families) come from the `families` of one `GET /v1/user/me`: 
 ## Offline mutation queue (spec 117)
 
 `@infrastructure/offlineQueue` keeps writes that could not be sent: `enqueue`, `remove`, `list`, `subscribe`, `flush(processor)` (sequential, stops at the first `OFFLINE`, shares one run) and `useOfflineQueue()` (`useSyncExternalStore`, stable snapshot). Persistence is `asyncStorage` (MMKV, localStorage on web) under `StorageKeys.string.OFFLINE_QUEUE`. Each entry carries the `clientId` that is also sent as `Idempotency-Key` (`api.post(path, body, headers)` takes extra headers), so a retry after a lost response returns the original result. The stock quick movement is the first user; the shopping mode (spec 120) reuses it. `api.post` of a movement can throw `ConnectivityError` (queue it) or a business error (refuse it).
+
+## Purchase queue and event stream (spec 120)
+
+`createOfflineQueue(storageKey)` (`@infrastructure/offlineQueue`) builds one persistent FIFO per storage key: `offlineQueue` (117, stock movements) and `purchaseQueue` (shopping-mode writes). `@infrastructure/sse` `subscribeToEvents({ path, onMessage, onResync, onStatus })` streams `text/event-stream` over `XMLHttpRequest` (works on native and web), sends the token in `Authorization`, reconnects with backoff (1 s … 60 s, jitter) and `Last-Event-ID`, and does nothing where there is no `XMLHttpRequest` (tests). `api.put` and `api.delete` accept request headers like `post`.

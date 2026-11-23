@@ -1156,6 +1156,7 @@ const financial = {
       source: "Account or card",
       title: "Split transaction",
     },
+    fromPurchase: "See purchase items",
     matched: "{{matched}} of {{count}} parts match the filter",
     net: "Net in the account",
     ofTotal: "of {{total}}",

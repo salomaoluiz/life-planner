@@ -1180,6 +1180,7 @@ const financial = {
       source: "Conta ou cartão",
       title: "Transação dividida",
     },
+    fromPurchase: "Ver itens da compra",
     matched: "{{matched}} de {{count}} partes batem com o filtro",
     net: "Líquido na conta",
     ofTotal: "de {{total}}",

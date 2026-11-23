@@ -623,3 +623,5 @@ Projected items of `/finance/upcoming`, `/recurrences/projections` and the month
 - **Elsewhere:** Home next items show a split as one item (`splitId`, `partCount`) that opens the split form; CSV import maps the `Split group` column (`splitGroup`) and "Desconto/ajuste" (`SPLIT_ADJUSTMENT_ID`, signed amount).
 - Not built here: recurring splits (the Repeat field and series scopes), the invoice month picker of a card split, the 097 confirm modal for a split (the Paid switch of the form is used).
 - testIDs `financial.split-form.*`, `financial.transactions.split.*`. Flows `financial/splits/*` (tags `financial`, `spec-119`).
+
+Spec 120: a split whose lookup has `stockPurchaseId` is owned by a stock purchase (read-only in finance): `SplitRow` shows "Ver itens da compra" (`financial.split.fromPurchase`) and opens `/stock/purchases/:id` instead of the split editor.

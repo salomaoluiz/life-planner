@@ -17,6 +17,7 @@ export interface SplitRefEntity {
   paid?: boolean;
   partCount: number;
   recurrenceId?: string;
+  stockPurchaseId?: string;
   total: string;
   type: TransactionType;
 }

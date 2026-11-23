@@ -1,0 +1,106 @@
+url: ${E2E_WEB_URL}
+name: stock/shopping-mode-close
+tags:
+  - stock
+  - spec-120
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Spec 120: an item below its minimum is on the default list; "Ir às compras" starts a purchase at a new market, the
+# row goes into the cart, the closing posts the stock entry and the finance row, and the automatic row leaves the list.
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Compra
+      KEY: ITEM_NAME
+- runFlow:
+    file: ../../subflows/setup/create-stock-item.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      DESCRIPTION: ${output.ITEM_NAME}
+      QUANTITY: "2"
+      MIN_QUANTITY: "3"
+      IDEAL_QUANTITY: "8"
+- runFlow:
+    file: ../../subflows/setup/finance-basics.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/stock/open-stock.yaml
+- tapOn:
+    id: "navigation-rail-stock-lists"
+- extendedWaitUntil:
+    visible:
+      id: "stock.lists.card-default"
+    timeout: 20000
+- tapOn:
+    id: "stock.lists.card-[0-9a-f-]{36}"
+- extendedWaitUntil:
+    visible:
+      id: "stock.list-detail.go-shopping"
+    timeout: 20000
+- tapOn:
+    id: "stock.list-detail.go-shopping"
+- extendedWaitUntil:
+    visible:
+      id: "stock.start-purchase.new-market-name"
+    timeout: 20000
+- tapOn:
+    id: "stock.start-purchase.new-market-name"
+- inputText: "Mercado E2E"
+- tapOn:
+    id: "stock.start-purchase.submit"
+- extendedWaitUntil:
+    visible:
+      id: "stock.purchase.screen"
+    timeout: 20000
+- assertVisible:
+    text: ${output.ITEM_NAME}
+- tapOn:
+    id: "stock.purchase.tick-[0-9a-f-]{36}"
+- extendedWaitUntil:
+    visible:
+      id: "stock.purchase.sheet-save"
+    timeout: 10000
+- tapOn:
+    id: "stock.purchase.sheet-save"
+- extendedWaitUntil:
+    visible:
+      id: "stock.purchase.cart-row-[0-9a-f-]{36}"
+    timeout: 20000
+- tapOn:
+    id: "stock.purchase.close"
+- extendedWaitUntil:
+    visible:
+      id: "stock.purchase-close.receipt-total"
+    timeout: 20000
+- tapOn:
+    id: "stock.purchase-close.receipt-total"
+- inputText: "1000"
+- tapOn:
+    id: "stock.purchase-close.continue"
+- extendedWaitUntil:
+    visible:
+      id: "stock.purchase-close.date"
+    timeout: 10000
+- tapOn:
+    text: ${output.ACCOUNT_NAME}
+- tapOn:
+    text: ${output.EXPENSE_CATEGORY_NAME}
+- tapOn:
+    id: "stock.purchase-close.finish"
+- extendedWaitUntil:
+    visible:
+      id: "stock.list-detail.screen"
+    timeout: 30000
+- assertNotVisible:
+    id: "stock.list-detail.badge-auto"
