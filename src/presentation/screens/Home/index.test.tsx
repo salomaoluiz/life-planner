@@ -8,6 +8,10 @@ import { useHomeViewModel } from "./hooks";
 import homeTestIds from "./testIds";
 
 jest.mock("./hooks");
+jest.mock("./components/PendingPurchaseBanner", () => ({
+  __esModule: true,
+  default: () => null,
+}));
 jest.mock(
   "react-native-safe-area-context",
   () => jest.requireActual("react-native-safe-area-context/jest/mock").default,

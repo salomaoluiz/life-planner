@@ -14,6 +14,7 @@ import ProfileButton from "@screens/Navigation/containers/ProfileButton";
 import FinanceBalanceCard from "../components/FinanceBalanceCard";
 import InvestmentsSection from "../components/InvestmentsSection";
 import LowestBalanceTiles from "../components/LowestBalanceTiles";
+import PendingPurchaseBanner from "../components/PendingPurchaseBanner";
 import StockAttentionListCard from "../components/StockAttentionListCard";
 import StockShoppingListCard from "../components/StockShoppingListCard";
 import StockSummaryCard from "../components/StockSummaryCard";
@@ -136,6 +137,7 @@ function Wide({ vm }: AdaptiveViewProps<HomeVM>) {
         testID={homeTestIds.stockSection}
         title={t("home.stock.title")}
       >
+        <PendingPurchaseBanner />
         <View style={rowStyle}>
           <View style={columnStyle}>
             <StockSummaryCard fill={vm.isSplitLayout} state={vm.stock} />
