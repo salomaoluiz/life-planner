@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { StockBarcodeLookupDTO } from "@application/dto/stock/StockBarcodeDTO";
 import { useCases } from "@application/useCases";
 import { StockBarcodeInUse } from "@domain/entities/errors";
 import { cleanBarcode } from "@domain/entities/stock/barcode";
@@ -22,9 +23,16 @@ interface Options {
 function useBarcodeField(options: Options) {
   const [isScanning, setIsScanning] = useState(false);
   const [duplicate, setDuplicate] = useState<BarcodeInUse>();
-  const lookup = useMutation({
+  const lookup = useMutation<{ code: string }, StockBarcodeLookupDTO>({
     cacheKey: [useCases.lookupStockBarcodeUseCase.uniqueName, "form"],
-    fetch: useCases.lookupStockBarcodeUseCase.execute,
+    // A failed lookup only means "no duplicate found": the save answers 409 if there is one.
+    fetch: async (params) => {
+      try {
+        return await useCases.lookupStockBarcodeUseCase.execute(params);
+      } catch {
+        return { code: params.code, matches: [] };
+      }
+    },
   });
 
   // The lookup answers through the mutation; the duplicate is read from its result on the next render.

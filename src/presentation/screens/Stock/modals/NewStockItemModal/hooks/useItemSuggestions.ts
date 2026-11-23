@@ -39,6 +39,16 @@ interface Options {
 type SourceField = keyof ItemSuggestionFields;
 
 const MIN_NAME_CHARS = 3;
+const NO_USAGE: AiUsageEntity = {
+  light: { limit: 0, used: 0 },
+  search: { limit: 0, used: 0 },
+};
+const UNAVAILABLE: ItemSuggestionEntity = {
+  fields: {},
+  notice: "AI_UNAVAILABLE",
+  sources: {},
+  usage: NO_USAGE,
+};
 const UNIT_VALUES: string[] = Object.values(StockUnits);
 
 // Spec 121 FR 12-23: the new item form arrives filled by Open Food Facts and the AI, each field with its source,
@@ -64,7 +74,14 @@ function useItemSuggestions(options: Options) {
     ItemSuggestionEntity
   >({
     cacheKey: [useCases.suggestStockItemUseCase.uniqueName],
-    fetch: useCases.suggestStockItemUseCase.execute,
+    // The form never breaks because of the suggestions: a failed call is the same as "unavailable" (FR 19).
+    fetch: async (params) => {
+      try {
+        return await useCases.suggestStockItemUseCase.execute(params);
+      } catch {
+        return UNAVAILABLE;
+      }
+    },
   });
   // Read only once a name is typed (the button needs it): a plain form opens with no extra request.
   const todayUsage = useQuery<AiUsageEntity>({
@@ -72,9 +89,19 @@ function useItemSuggestions(options: Options) {
     enabled:
       options.enabled &&
       options.values.description.trim().length >= MIN_NAME_CHARS,
-    fetch: async () => useCases.getAiUsageUseCase.execute(),
+    fetch: async () => {
+      try {
+        return await useCases.getAiUsageUseCase.execute();
+      } catch {
+        return NO_USAGE;
+      }
+    },
   });
-  const currentUsage = usage ?? todayUsage.data;
+  // A limit of 0 is "unknown" (the read failed): nothing is shown or blocked.
+  function known(value?: AiUsageEntity) {
+    return value && value.search.limit > 0 ? value : undefined;
+  }
+  const currentUsage = known(usage) ?? known(todayUsage.data);
   const searchLeft = currentUsage
     ? currentUsage.search.limit - currentUsage.search.used
     : undefined;

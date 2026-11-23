@@ -31,18 +31,6 @@ onFlowComplete:
     visible:
       id: "stock.item-form.sheet"
     timeout: 20000
-- runFlow:
-    when:
-      notVisible:
-        id: "stock.item-form.barcode-input"
-    commands:
-      - tapOn:
-          id: "stock.item-form.more-toggle"
-- extendedWaitUntil:
-    visible:
-      id: "stock.item-form.barcode-input"
-      text: "4006381333931"
-    timeout: 10000
 - tapOn:
     id: "stock.item-form.description-input"
 - inputText: "E2E Codigo Novo"

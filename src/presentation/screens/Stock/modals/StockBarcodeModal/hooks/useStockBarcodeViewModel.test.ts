@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { modalNavigation } from "@tests/modalNavigation";
 
 import { StockBarcodeMatchDTO } from "@application/dto/stock/StockBarcodeDTO";
+import { useCases } from "@application/useCases";
 import { StockBarcodeInvalid } from "@domain/entities/errors";
 import { StockUnits } from "@domain/entities/stock/StockEntity";
 import { vibrateOnScan } from "@infrastructure/barcodeScanner";
@@ -382,5 +383,38 @@ describe("shopping mode (spec 121 FR 25)", () => {
     rerender({});
 
     expect(result.current.message).toBe("failed");
+  });
+});
+
+describe("failing calls never crash the reader", () => {
+  it("SHOULD say 'failed' WHEN the lookup answers nothing", () => {
+    const { mutation, rerender, result } = setup();
+
+    lookupState(mutation, { data: undefined, status: "success" });
+    rerender({});
+
+    expect(result.current.message).toBe("failed");
+  });
+
+  it("SHOULD turn an unexpected error into an empty answer AND keep an invalid code an answer", async () => {
+    setup();
+
+    const { fetch } = jest
+      .mocked(useMutation)
+      .mock.calls.find(
+        ([props]) => (props as { cacheKey: string[] }).cacheKey[0] === "lookup",
+      )?.[0] as { fetch: (params: unknown) => Promise<unknown> };
+
+    jest
+      .mocked(useCases.lookupStockBarcodeUseCase.execute)
+      .mockRejectedValueOnce(new Error("500"));
+    expect(await fetch({ code: "1" })).toBeUndefined();
+
+    jest
+      .mocked(useCases.lookupStockBarcodeUseCase.execute)
+      .mockRejectedValueOnce(new StockBarcodeInvalid());
+    await expect(fetch({ code: "1" })).rejects.toBeInstanceOf(
+      StockBarcodeInvalid,
+    );
   });
 });

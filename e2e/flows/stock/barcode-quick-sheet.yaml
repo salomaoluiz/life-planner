@@ -45,13 +45,22 @@ onFlowComplete:
       id: "stock.barcode.message"
     timeout: 10000
 - assertNotVisible:
-    id: "stock.barcode.sheet"
-- eraseText: 13
+    id: "stock.barcode.consume"
+- tapOn:
+    id: "stock.barcode.sheet-frame-close"
+- tapOn:
+    id: "stock.list.scan-button"
+- extendedWaitUntil:
+    visible:
+      id: "stock.barcode.code-input"
+    timeout: 20000
+- tapOn:
+    id: "stock.barcode.code-input"
 - inputText: "7891000100103"
 - pressKey: Enter
 - extendedWaitUntil:
     visible:
-      id: "stock.barcode.sheet"
+      id: "stock.barcode.consume"
     timeout: 20000
 - assertVisible:
     text: ${output.ITEM_NAME}

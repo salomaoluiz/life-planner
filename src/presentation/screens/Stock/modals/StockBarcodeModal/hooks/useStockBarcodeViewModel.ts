@@ -6,12 +6,13 @@ import {
   StockBarcodeMatchDTO,
 } from "@application/dto/stock/StockBarcodeDTO";
 import { useCases } from "@application/useCases";
-import { StockBarcodeInvalid } from "@domain/entities/errors";
+import { BusinessError, StockBarcodeInvalid } from "@domain/entities/errors";
 import {
   cleanBarcode,
   expandUpcE,
   locationIdFromLink,
 } from "@domain/entities/stock/barcode";
+import { PurchaseRowByCodeEntity } from "@domain/entities/stock/PurchaseEntity";
 import { StockUnits } from "@domain/entities/stock/StockEntity";
 import {
   initialInput,
@@ -62,13 +63,40 @@ function useStockBarcodeViewModel() {
     initialInput(DEFAULT_STEP, StockUnits.UNIT),
   );
   const locale = getLocale().languageTag;
-  const lookup = useMutation({
+  const lookup = useMutation<
+    { code: string },
+    StockBarcodeLookupDTO | undefined
+  >({
     cacheKey: [useCases.lookupStockBarcodeUseCase.uniqueName],
-    fetch: useCases.lookupStockBarcodeUseCase.execute,
+    // Only an invalid code is an answer; any other failure becomes `undefined` ("failed"), never a crash.
+    fetch: async (params) => {
+      try {
+        return await useCases.lookupStockBarcodeUseCase.execute(params);
+      } catch (error) {
+        if (error instanceof BusinessError) {
+          throw error;
+        }
+
+        return undefined;
+      }
+    },
   });
-  const addByCode = useMutation({
+  const addByCode = useMutation<
+    Parameters<typeof useCases.addPurchaseRowByCodeUseCase.execute>[0],
+    PurchaseRowByCodeEntity | undefined
+  >({
     cacheKey: [useCases.addPurchaseRowByCodeUseCase.uniqueName],
-    fetch: useCases.addPurchaseRowByCodeUseCase.execute,
+    fetch: async (params) => {
+      try {
+        return await useCases.addPurchaseRowByCodeUseCase.execute(params);
+      } catch (error) {
+        if (error instanceof BusinessError) {
+          throw error;
+        }
+
+        return undefined;
+      }
+    },
   });
   const [added, setAdded] = useState<{ name: string; suggested: boolean }>();
   const quick = useStockQuickMovement({
@@ -92,7 +120,10 @@ function useStockBarcodeViewModel() {
   }, [scanner.status]);
 
   useEffect(() => {
-    if (addByCode.status === "success" && addByCode.data) {
+    if (addByCode.status === "success" && !addByCode.data) {
+      addByCode.reset();
+      setMessage("failed");
+    } else if (addByCode.status === "success" && addByCode.data) {
       setAdded({
         name: addByCode.data.row.description,
         suggested: addByCode.data.source !== "ITEM",
@@ -107,7 +138,10 @@ function useStockBarcodeViewModel() {
   }, [addByCode.status]);
 
   useEffect(() => {
-    if (lookup.status === "success" && lookup.data && lookupCode) {
+    if (lookup.status === "success" && !lookup.data) {
+      lookup.reset();
+      setMessage("failed");
+    } else if (lookup.status === "success" && lookup.data && lookupCode) {
       lookup.reset();
       onFound(lookup.data, lookupCode);
     } else if (lookup.status === "error") {

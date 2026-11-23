@@ -1,5 +1,6 @@
 import { act, renderHook } from "@testing-library/react-native";
 
+import { useCases } from "@application/useCases";
 import { StockUnits } from "@domain/entities/stock/StockEntity";
 import { QuantityMode } from "@domain/entities/stock/stockQuantity";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
@@ -287,5 +288,33 @@ describe("skip and edit", () => {
     act(() => result.current.clearSource("description"));
 
     expect(result.current.sources.description).toBeUndefined();
+  });
+});
+
+describe("failing calls never break the form", () => {
+  it("SHOULD turn a failed suggestion call into 'unavailable'", async () => {
+    jest
+      .mocked(useCases.suggestStockItemUseCase.execute)
+      .mockRejectedValue(new Error("500"));
+    setup();
+
+    const { fetch } = jest.mocked(useMutation).mock.calls[0][0] as {
+      fetch: (params: unknown) => Promise<{ notice: string }>;
+    };
+
+    expect((await fetch({})).notice).toBe("AI_UNAVAILABLE");
+  });
+
+  it("SHOULD turn a failed usage read into 'unknown' usage", async () => {
+    jest
+      .mocked(useCases.getAiUsageUseCase.execute)
+      .mockRejectedValue(new Error("500"));
+    setup();
+
+    const { fetch } = jest.mocked(useQuery).mock.calls[0][0] as {
+      fetch: () => Promise<{ search: { limit: number } }>;
+    };
+
+    expect((await fetch()).search.limit).toBe(0);
   });
 });
