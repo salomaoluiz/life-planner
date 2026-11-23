@@ -32,12 +32,16 @@ jest.mock("@presentation/i18n/useTranslationLocale", () => ({
 jest.mock("@application/useCases", () => ({
   useCases: {
     createStockItemUseCase: { execute: jest.fn(), uniqueName: "create_stock" },
+    getAiUsageUseCase: { execute: jest.fn(), uniqueName: "ai_usage" },
     getOwnerChangePreviewUseCase: { execute: jest.fn(), uniqueName: "preview" },
     getShoppingListsUseCase: { execute: jest.fn(), uniqueName: "lists" },
     getStockCategoriesUseCase: { execute: jest.fn(), uniqueName: "categories" },
+    getStockItemsUseCase: { execute: jest.fn(), uniqueName: "stock_items" },
     getStockItemUseCase: { execute: jest.fn(), uniqueName: "get_item" },
     getStockLocationsUseCase: { execute: jest.fn(), uniqueName: "locations" },
+    lookupStockBarcodeUseCase: { execute: jest.fn(), uniqueName: "lookup" },
     suggestStockItemsUseCase: { execute: jest.fn(), uniqueName: "suggest" },
+    suggestStockItemUseCase: { execute: jest.fn(), uniqueName: "suggest_item" },
     updateStockItemUseCase: { execute: jest.fn(), uniqueName: "update_stock" },
   },
 }));
@@ -50,6 +54,7 @@ const stored = dto((f) =>
   f.withId("item-1").withDescription("Cheese").withUnit(StockUnits.KILOGRAM),
 );
 const createMutation = new UseMutationFixture<unknown, void>();
+const idleMutation = new UseMutationFixture<unknown, unknown>();
 const updateMutation = new UseMutationFixture<unknown, void>();
 let create = createMutation.reset().build();
 let update = updateMutation.reset().build();
@@ -79,14 +84,23 @@ function setup(
     data: options.noOwners ? undefined : owners,
     isFetching: !!options.fetching,
   } as never);
-  jest
-    .mocked(useMutation)
-    .mockImplementation(
-      ((props: { cacheKey: string[] }) =>
-        (props.cacheKey[0] === "update_stock"
-          ? update
-          : create) as never) as never,
-    );
+  jest.mocked(useMutation).mockImplementation(((props: {
+    cacheKey: string[];
+  }) => {
+    if (props.cacheKey[0] === "update_stock") {
+      return (
+        props.cacheKey[1] === "link-code"
+          ? idleMutation.reset().build()
+          : update
+      ) as never;
+    }
+
+    return (
+      props.cacheKey[0] === "create_stock"
+        ? create
+        : idleMutation.reset().build()
+    ) as never;
+  }) as never);
   jest.mocked(useQuery).mockImplementation(
     ((props: { cacheKey: string[]; enabled?: boolean }) =>
       ({
@@ -387,6 +401,48 @@ describe("query functions", () => {
       itemId: "item-1",
       owner: "USER",
       ownerId: "user-id",
+    });
+  });
+});
+
+describe("barcode (spec 121)", () => {
+  it("SHOULD offer to link the code WHEN the name matches an item without one", () => {
+    queries.suggest = {
+      data: [{ description: "Milk", id: "i1", quantity: 1, unit: "unit" }],
+    };
+    queries.get_item = {
+      data: {
+        ...dto((f) => f.withId("i1").withDescription("Milk")),
+        barcode: undefined,
+      },
+    };
+    jest
+      .mocked(useLocalSearchParams)
+      .mockReturnValue({ barcode: "7891000100103" } as never);
+
+    const { result } = setup();
+
+    act(() => result.current.setField("barcode", "7891000100103"));
+    act(() => jest.advanceTimersByTime(400));
+
+    expect(result.current.linkName).toBe("Milk");
+  });
+
+  it("SHOULD put the code of the reader in the field", () => {
+    const { result } = setup();
+
+    expect(result.current.values.barcode).toBe("");
+  });
+
+  it("SHOULD open the existing item in the reader", () => {
+    const { result } = setup({ ownerId: "family-id" });
+
+    act(() => result.current.setField("barcode", "7891000100103"));
+    act(() => result.current.onOpenExistingItem());
+
+    expect(modalNavigation.replaceModal).toHaveBeenCalledWith("stock_barcode", {
+      code: "7891000100103",
+      ownerId: "family-id",
     });
   });
 });

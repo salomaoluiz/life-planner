@@ -5,6 +5,15 @@
     "maxRequests": 3,
     "modal": "stock_add_to_list"
   },
+  "stock.barcode.mount.cold": {
+    "maxDepth": 1,
+    "maxDuplicates": 0,
+    "maxRequests": 0,
+    "modal": "stock_barcode"
+  },
+  "stock.barcode.render.mount": {
+    "maxCommits": 3
+  },
   "stock.catalog.mount.cold": {
     "maxDepth": 2,
     "maxDuplicates": 0,

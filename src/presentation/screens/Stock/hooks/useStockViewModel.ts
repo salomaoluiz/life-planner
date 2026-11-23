@@ -146,7 +146,11 @@ function isNotFound(error: unknown) {
 
 function useStockViewModel() {
   const isFocused = useIsFocused();
-  const params = useLocalSearchParams<{ filter?: string; id?: string }>();
+  const params = useLocalSearchParams<{
+    filter?: string;
+    id?: string;
+    item?: string;
+  }>();
   // Spec 117 FR 20: `/stock/locations/<id>` is this screen filtered by that location.
   const routeLocationId = params.id;
   const { getLocale } = useTranslationLocale();
@@ -215,6 +219,14 @@ function useStockViewModel() {
     }
   }, [params.filter]);
 
+  // Spec 121 FR 10: "Abrir detalhe" in the barcode reader opens the details of that item.
+  useEffect(() => {
+    if (params.item) {
+      setSelectedId(params.item);
+      router.setParams({ item: undefined });
+    }
+  }, [params.item]);
+
   const locale = getLocale().languageTag;
   const list = useMemo(
     () =>
@@ -246,6 +258,18 @@ function useStockViewModel() {
       isOwnerFilter ? { ownerId: activeFilter } : undefined,
     );
   });
+
+  // Spec 121 FR 4: the reader opens with the owner of the filter, so a code in two owners picks it.
+  function onScanPress() {
+    const isOwnerFilter = !(Object.values(StockFilters) as string[]).includes(
+      activeFilter,
+    );
+
+    openModal(
+      "stock_barcode",
+      isOwnerFilter ? { ownerId: activeFilter } : undefined,
+    );
+  }
 
   function onClearFilters() {
     setSearch("");
@@ -305,6 +329,7 @@ function useStockViewModel() {
     onOpenSort: () => setIsSortOpen(true),
     onRefresh: async () => refetch(),
     onRetry: async () => refetch(),
+    onScanPress,
     onSearchChange: setSearch,
     onSortChange,
     onToastHide: scope.onToastHide,

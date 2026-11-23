@@ -11,6 +11,11 @@ import { useNewStockItemViewModel } from "../hooks";
 import NewStockItemUIModel from "../models/NewStockItemUIModel";
 
 jest.mock("../hooks");
+jest.mock("@infrastructure/barcodeScanner", () => ({
+  BarcodeScannerView: "BarcodeScannerView",
+  useScannerPermission: () => ({ request: jest.fn(), status: "granted" }),
+  vibrateOnScan: jest.fn(),
+}));
 jest.mock(
   "react-native-safe-area-context",
   () => jest.requireActual("react-native-safe-area-context/jest/mock").default,
@@ -28,6 +33,26 @@ function setup(
 ) {
   jest.mocked(useBreakpoint).mockReturnValue(breakpoint);
   const vm = {
+    ai: {
+      banner: undefined,
+      canFillWithAi: false,
+      clearSource: jest.fn(),
+      isLimitReached: false,
+      onFillWithAi: jest.fn(),
+      onSkip: jest.fn(),
+      packageHint: undefined,
+      searching: false,
+      sources: {},
+      usage: undefined,
+    },
+    barcodeField: {
+      inUse: undefined,
+      isScanning: false,
+      onClose: jest.fn(),
+      onOpen: jest.fn(),
+      onScanned: jest.fn(),
+      onTyped: jest.fn(),
+    },
     catalog: {
       categories: [{ label: "Dairy", value: "cat-1" }],
       locations: [{ label: "Fridge", value: "loc-1" }],
@@ -39,11 +64,14 @@ function setup(
     isLoading: false,
     isMoreOpen: false,
     isSaving: false,
+    linkName: undefined,
     model: new NewStockItemUIModel(owners),
     onAddToSuggestion: jest.fn(),
     onClose: jest.fn(),
     onDiscard: jest.fn(),
     onKeepEditing: jest.fn(),
+    onLinkCode: jest.fn(),
+    onOpenExistingItem: jest.fn(),
     onOwnerChange: jest.fn(),
     onSave: jest.fn(),
     onToggleMore: jest.fn(),

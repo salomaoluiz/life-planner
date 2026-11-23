@@ -24,6 +24,7 @@ import { purchaseQueue, QueueEntry } from "@infrastructure/offlineQueue";
 import { subscribeToEvents } from "@infrastructure/sse";
 import { uuidv4 } from "@infrastructure/uuid";
 import { useTranslationLocale } from "@presentation/i18n";
+import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 import { classifyFailure } from "@screens/Stock/models/quickMovementErrors";
 
 import {
@@ -115,6 +116,7 @@ function toOverlayRow(entry: QueueEntry): PurchaseRowEntity {
 
 function usePurchaseViewModel() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { openModal } = useModalNavigation();
   const isFocused = useIsFocused();
   const { getLocale } = useTranslationLocale();
   const [search, setSearch] = useState("");
@@ -593,6 +595,8 @@ function usePurchaseViewModel() {
       await view.refetch();
     },
     onRetry: async () => view.refetch(),
+    // Spec 121 FR 25: the reader adds a row by code to this purchase.
+    onScanPress: () => openModal("stock_barcode", { purchaseId: id }),
     onSearchChange: setSearch,
     onSheetChange: (patch: Partial<SheetState>) =>
       setSheet((current) => (current ? { ...current, ...patch } : current)),

@@ -2,6 +2,7 @@ import { repositoriesMocks } from "@data/repositories/mocks/index.mocks";
 import { GenericError } from "@domain/entities/errors";
 import Repositories from "@domain/repositories";
 
+import addPurchaseRowByCodeUseCase from "./addPurchaseRowByCodeUseCase";
 import changePurchaseStatusUseCase from "./changePurchaseStatusUseCase";
 import closePurchaseUseCase from "./closePurchaseUseCase";
 import closingLockUseCase from "./closingLockUseCase";
@@ -106,6 +107,11 @@ const cases: Case[] = [
     factory: updateClosedPurchaseUseCase,
     method: "updateClosedPurchase",
     params: { id: "p", receiptTotalCents: 900 },
+  },
+  {
+    factory: addPurchaseRowByCodeUseCase,
+    method: "addPurchaseRowByCode",
+    params: { code: "7891000100103", purchaseId: "p" },
   },
   {
     factory: upsertPurchaseRowUseCase,

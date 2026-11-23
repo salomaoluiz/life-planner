@@ -55,6 +55,8 @@ Investments sections (spec 110, 113): like finance, `INVESTMENT_SECTIONS` (`Inve
 
 Deep links (spec 117): `app.config.ts` adds `associatedDomains` (iOS) and `intentFilters` (Android, `autoVerify`) for the host of `EXPO_PUBLIC_PROJECT_WEBSITE_URL`, path prefix `/stock/locations`; the web deploy serves `/.well-known/apple-app-site-association` and `assetlinks.json` (`public/.well-known`, placeholders `<APPLE_TEAM_ID>` and `<ANDROID_RELEASE_CERT_SHA256>` to fill at release, `nginx.web.conf` answers them as JSON, never the SPA fallback). Without them the link opens the web app, which logs in and returns to the location.
 
+Barcode reader (spec 121): modal `stock_barcode` (`StockBarcodeModal`, imported by its own folder so the camera stays in its own chunk) opens over `/`, `/stock`, `/stock/lists`, `/stock/catalog`; params `ownerId` and `code`.
+
 Stock sections (spec 118): like finance and investments, `STOCK_SECTIONS` (`Stock/Layout/models/stockSections.ts`: Itens `/stock`, Listas `/stock/lists`, Categorias e locais `/stock/catalog`; the list detail and the lists belong to Listas, the location QR route to Itens) feeds the side rail children, the shared `section_picker` modal and the bottom-bar re-press; the stock tab route is `stock` and opens `/stock`. Modals `stock_shopping_list` and `stock_add_to_list` open over the stock screens.
 
 Stock purchases (spec 120): `(app)/(tabs)/stock/purchases/[id].tsx` (shopping mode) and `purchase-close/[id].tsx` (closing wizard) are screens of the Stock stack and belong to the Lists section (`getStockSection`); modal `stock_start_purchase` opens over the list detail (`/stock/list/<id>`).

@@ -457,6 +457,46 @@ describe("onAddPress", () => {
   });
 });
 
+describe("barcode reader (spec 121)", () => {
+  it("SHOULD open the reader WITHOUT an owner on a status filter", () => {
+    const { result } = setup();
+
+    act(() => {
+      result.current.onScanPress();
+    });
+
+    expect(modalNavigation.openModal).toHaveBeenCalledWith(
+      "stock_barcode",
+      undefined,
+    );
+  });
+
+  it("SHOULD open the reader with the owner of the active filter", () => {
+    const { result } = setup();
+
+    act(() => {
+      result.current.onFilterChange("family-1");
+    });
+    act(() => {
+      result.current.onScanPress();
+    });
+
+    expect(modalNavigation.openModal).toHaveBeenCalledWith("stock_barcode", {
+      ownerId: "family-1",
+    });
+  });
+
+  it("SHOULD open the details of the item of the `item` param AND consume it", () => {
+    spies.params.mockReturnValue({ item: "item-1" });
+
+    setup();
+
+    expect(jest.mocked(router.setParams)).toHaveBeenCalledWith({
+      item: undefined,
+    });
+  });
+});
+
 describe("archived family (spec 042)", () => {
   const archivedOwners = [
     owners[0],

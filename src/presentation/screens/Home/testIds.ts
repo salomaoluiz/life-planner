@@ -52,6 +52,7 @@ const homeTestIds = {
   stockAttentionLoading: "home.stock-attention.loading",
   stockAttentionNothingExpiring: "home.stock-attention.nothing-expiring",
   stockAttentionRow: "home.stock-attention.row",
+  stockAttentionScan: "home.stock-attention.scan",
   stockSection: "home.stock.section",
   stockSummary: "home.stock.summary",
 } as const;

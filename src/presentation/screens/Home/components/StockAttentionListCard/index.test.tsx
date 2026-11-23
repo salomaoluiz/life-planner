@@ -55,7 +55,11 @@ function stock(id: string, description: string) {
   );
 }
 
-const handlers = { onAddItemPress: jest.fn(), onRowPress: jest.fn() };
+const handlers = {
+  onAddItemPress: jest.fn(),
+  onRowPress: jest.fn(),
+  onScanPress: jest.fn(),
+};
 
 function renderLoaded(data: StockAttentionUIModel) {
   render(
@@ -182,4 +186,22 @@ it("SHOULD badge a low item as restock with a cart icon", () => {
   );
 
   expect(screen.getByText("home.stock.restock")).toBeOnTheScreen();
+});
+
+it("SHOULD open the barcode reader from the scan button (spec 121)", () => {
+  render(
+    <StockAttentionListCard
+      {...handlers}
+      state={{
+        data: model(1),
+        isError: false,
+        isLoading: false,
+        onRetry: jest.fn(),
+      }}
+    />,
+  );
+
+  fireEvent.press(screen.getByTestId(homeTestIds.stockAttentionScan));
+
+  expect(handlers.onScanPress).toHaveBeenCalledTimes(1);
 });

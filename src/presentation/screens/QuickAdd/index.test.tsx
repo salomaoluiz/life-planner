@@ -40,3 +40,11 @@ it("SHOULD go back (keeping the tab the user was on) WHEN the sheet is closed", 
 
   expect(modalNavigation.closeModal).toHaveBeenCalledTimes(1);
 });
+
+it("SHOULD open the barcode reader WHEN 'Ler código' is pressed (spec 121)", () => {
+  setup();
+
+  fireEvent.press(screen.getByTestId("quickAdd.scan"));
+
+  expect(modalNavigation.replaceModal).toHaveBeenCalledWith("stock_barcode");
+});

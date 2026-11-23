@@ -435,6 +435,8 @@ function useHomeViewModel() {
     onInvoicePress,
     onOverviewPress: () => push("/financial/overview"),
     onRefresh,
+    // Spec 121 FR 4: the reader opens from the stock card of the Home.
+    onScanStockPress: () => openModal("stock_barcode"),
     onShoppingListSeeAllPress: () => push("/stock/lists"),
     onStockSeeAllPress: () =>
       push({ params: { filter: "EXPIRING" }, pathname: "/stock" }),

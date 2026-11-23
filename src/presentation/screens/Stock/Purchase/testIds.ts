@@ -17,6 +17,7 @@ const stockPurchaseTestIds = {
   notice: "stock.purchase.notice",
   offline: "stock.purchase.offline",
   remaining: "stock.purchase.remaining",
+  scan: "stock.purchase.scan",
   screen: "stock.purchase.screen",
   search: "stock.purchase.search",
   sheet: "stock.purchase.sheet",

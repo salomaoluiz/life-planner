@@ -238,6 +238,34 @@ describe("writes", () => {
   });
 });
 
+describe("addPurchaseRowByCode (spec 121)", () => {
+  it("SHOULD post the code WITH the idempotency key AND parse the row and its source", async () => {
+    spies.post.mockResolvedValue({ row, source: "OPEN_FOOD_FACTS" });
+
+    const result = await datasource.addPurchaseRowByCode({
+      clientId: "k",
+      code: "7891000100103",
+      purchaseId: "p1",
+    });
+
+    expect(spies.post).toHaveBeenCalledWith(
+      "/v1/stock/purchases/p1/rows/by-code",
+      { code: "7891000100103" },
+      { "Idempotency-Key": "k" },
+    );
+    expect(result.source).toBe("OPEN_FOOD_FACTS");
+    expect(result.row.id).toBe(row.id);
+  });
+
+  it("SHOULD wrap a failure in a GenericError", async () => {
+    spies.post.mockRejectedValue(new Error("boom"));
+
+    await expect(
+      datasource.addPurchaseRowByCode({ code: "1", purchaseId: "p1" }),
+    ).rejects.toBeInstanceOf(GenericError);
+  });
+});
+
 describe("errors", () => {
   it("SHOULD wrap an unexpected failure in a GenericError carrying ids only", async () => {
     const calls: Array<() => Promise<unknown>> = [

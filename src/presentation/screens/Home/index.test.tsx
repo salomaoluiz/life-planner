@@ -66,6 +66,7 @@ function givenViewModel(overrides: Record<string, unknown> = {}) {
     onInvoicePress: jest.fn(),
     onOverviewPress: jest.fn(),
     onRefresh: jest.fn(),
+    onScanStockPress: jest.fn(),
     onShoppingListSeeAllPress: jest.fn(),
     onStockSeeAllPress: jest.fn(),
     onUpcomingItemPress: jest.fn(),

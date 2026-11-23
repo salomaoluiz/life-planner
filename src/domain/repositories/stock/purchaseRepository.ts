@@ -7,6 +7,7 @@ import {
   PendingPurchaseEntity,
   PurchaseEntity,
   PurchasePriceInputs,
+  PurchaseRowByCodeEntity,
   PurchaseRowResultEntity,
   PurchaseRowStates,
   PurchaseViewEntity,
@@ -44,6 +45,11 @@ export interface CreateMarketParams {
 }
 
 export interface PurchaseRepository {
+  addPurchaseRowByCode(params: {
+    clientId?: string;
+    code: string;
+    purchaseId: string;
+  }): Promise<PurchaseRowByCodeEntity>;
   changePurchaseStatus(params: {
     action: "DISCARD" | "END" | "REOPEN";
     clientId?: string;

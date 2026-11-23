@@ -3,6 +3,8 @@ import { act, renderHook } from "@testing-library/react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { AppState } from "react-native";
 
+import { modalNavigation } from "@tests/modalNavigation";
+
 import { useCases } from "@application/useCases";
 import {
   ApiBusinessError,
@@ -645,5 +647,17 @@ describe("queue AND events", () => {
     listener("active");
 
     expect(refetch).toHaveBeenCalled();
+  });
+});
+
+describe("barcode reader (spec 121)", () => {
+  it("SHOULD open the reader on this purchase", () => {
+    const { result } = setup();
+
+    act(() => result.current.onScanPress());
+
+    expect(modalNavigation.openModal).toHaveBeenCalledWith("stock_barcode", {
+      purchaseId: "p1",
+    });
   });
 });

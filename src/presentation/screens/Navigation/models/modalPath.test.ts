@@ -85,9 +85,9 @@ describe("fallbackBase", () => {
   });
 });
 
-it("SHOULD have 38 unique modal names", () => {
-  expect(MODAL_NAMES).toHaveLength(38);
-  expect(new Set(MODAL_NAMES).size).toBe(38);
+it("SHOULD have 39 unique modal names", () => {
+  expect(MODAL_NAMES).toHaveLength(39);
+  expect(new Set(MODAL_NAMES).size).toBe(39);
 });
 
 describe("screenPath", () => {
@@ -114,4 +114,6 @@ it("SHOULD accept a modal opened over the investments Overview AND keep the asse
 it("SHOULD accept the detail of a shopping list as a modal base (spec 118)", () => {
   expect(isValidBase("/stock/list/abc")).toBe(true);
   expect(isValidBase("/stock/list/abc/extra")).toBe(false);
+  expect(isValidBase("/stock/purchases/abc")).toBe(true);
+  expect(isValidBase("/stock/purchases/abc/extra")).toBe(false);
 });

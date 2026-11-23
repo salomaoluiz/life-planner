@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import StockDTO from "@application/dto/stock/StockDTO";
 import { useCases } from "@application/useCases";
+import { AiUsageEntity } from "@domain/entities/stock/StockBarcodeEntity";
 import { useQuery } from "@infrastructure/fetcher";
 import useOwners from "@presentation/hooks/useOwners";
 import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
@@ -17,6 +18,7 @@ export type QuickAddVM = ReturnType<typeof useQuickAddViewModel>;
 export const SEARCH_MIN_CHARS = 2;
 export const SEARCH_DEBOUNCE_MS = 300;
 const FREQUENT_LIMIT = 5;
+const AI_MIN_CHARS = 3;
 
 export default useQuickAddViewModel;
 
@@ -65,6 +67,12 @@ function useQuickAddViewModel() {
   }
 
   const quick = useStockQuickMovement({ onSettled: refetchAll });
+  // The search left today decides whether "Criar com IA" can run (FR 22-23).
+  const usage = useQuery<AiUsageEntity>({
+    cacheKey: [useCases.getAiUsageUseCase.uniqueName],
+    enabled: searching,
+    fetch: async () => useCases.getAiUsageUseCase.execute(),
+  });
   const locale = getLocale().languageTag;
   const rows = useMemo(() => {
     const items = searching
@@ -89,13 +97,21 @@ function useQuickAddViewModel() {
     : !frequent.data && frequent.status !== "error";
 
   return {
+    // The full AI call needs a name of 3 characters and a search left today.
+    canCreateWithAi:
+      query.length >= AI_MIN_CHARS &&
+      (!usage.data || usage.data.search.used < usage.data.search.limit),
     closeLabel: t("common.actions.close"),
     isEmpty: searching && !isLoading && rows.length === 0,
     isLoading,
     // The form takes the place of the sheet in the stack: closing it returns to the screen below.
     onClose: closeModal,
+    // Spec 121 FR 18: "Criar com IA" opens the form filled from the typed name.
     onCreateFromSearch: () =>
       replaceModal("add_new_stock_item", { description: query }),
+    onCreateWithAi: () =>
+      replaceModal("add_new_stock_item", { ai: "1", description: query }),
+    onScanPress: () => replaceModal("stock_barcode"),
     onSearchChange: setSearch,
     options: [
       {
@@ -116,6 +132,12 @@ function useQuickAddViewModel() {
     rows,
     search,
     searching,
+    searchLeft: usage.data
+      ? {
+          left: usage.data.search.limit - usage.data.search.used,
+          limit: usage.data.search.limit,
+        }
+      : undefined,
     title: t("navigation.quickAdd.title"),
   };
 }
