@@ -22,6 +22,12 @@ function keyed(clientId?: string): Record<string, string> | undefined {
   return clientId ? { "Idempotency-Key": clientId } : undefined;
 }
 
+function suffix(query: URLSearchParams): string {
+  const text = query.toString();
+
+  return text ? `?${text}` : "";
+}
+
 // Spec 120 §7: markets, purchases, rows, closing and prices. Writes that can be queued carry the `Idempotency-Key`.
 export const purchaseApiDatasource: Pick<
   StockDatasource,
@@ -165,7 +171,7 @@ export const purchaseApiDatasource: Pick<
 
       return parseItemPrices(
         await api.get<Record_>(
-          `/v1/stock/items/${id_(itemId)}/prices${query.size ? `?${query}` : ""}`,
+          `/v1/stock/items/${id_(itemId)}/prices${suffix(query)}`,
         ),
       );
     } catch (error) {
