@@ -10,6 +10,7 @@ import {
   useMutation,
   useQuery,
 } from "@infrastructure/fetcher";
+import { asyncStorage, StorageKeys } from "@infrastructure/storage";
 import { useTranslationLocale } from "@presentation/i18n";
 import { useBreakpoint } from "@presentation/theme";
 import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
@@ -89,12 +90,17 @@ function useNewStockItemViewModel() {
   });
   const save = isEdit ? updateStock : addStock;
 
+  // The owner of the last item created is the default of the next ones (an owner that no longer exists is ignored).
+  const [lastOwnerId] = useState(
+    () =>
+      asyncStorage.getString(StorageKeys.string.LAST_STOCK_OWNER) ?? undefined,
+  );
   const model = useMemo(
     () =>
       owners.data?.length
-        ? new NewStockItemUIModel(owners.data, params.ownerId)
+        ? new NewStockItemUIModel(owners.data, params.ownerId ?? lastOwnerId)
         : undefined,
-    [owners.data, params.ownerId],
+    [owners.data, params.ownerId, lastOwnerId],
   );
   const stored = useMemo(
     () => (item.data ? valuesFromItem(item.data) : undefined),
@@ -271,6 +277,10 @@ function useNewStockItemViewModel() {
 
   useEffect(() => {
     if (save.status === "success") {
+      if (!isEdit && ownerId) {
+        asyncStorage.setString(StorageKeys.string.LAST_STOCK_OWNER, ownerId);
+      }
+
       void invalidateFetcherData([useCases.getStockItemUseCase.uniqueName]);
       closeModal();
     }

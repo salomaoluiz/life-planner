@@ -13,6 +13,7 @@ import {
   useQuery,
 } from "@infrastructure/fetcher";
 import UseMutationFixture from "@infrastructure/fetcher/mocks/useMutation.fixture";
+import { asyncStorage, StorageKeys } from "@infrastructure/storage";
 import { useBreakpoint } from "@presentation/theme";
 import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
 import { dto } from "@screens/Stock/models/stockUi.fixtures";
@@ -444,5 +445,52 @@ describe("barcode (spec 121)", () => {
       code: "7891000100103",
       ownerId: "family-id",
     });
+  });
+});
+
+describe("last owner (spec 121)", () => {
+  afterEach(() => jest.restoreAllMocks());
+
+  it("SHOULD default to the owner of the last item created", () => {
+    jest.spyOn(asyncStorage, "getString").mockReturnValue("family-id");
+
+    const { result } = setup();
+
+    expect(
+      result.current.values.ownerId ?? result.current.model?.defaultOwnerId,
+    ).toBe("family-id");
+    expect(asyncStorage.getString).toHaveBeenCalledWith(
+      StorageKeys.string.LAST_STOCK_OWNER,
+    );
+  });
+
+  it("SHOULD let the owner of the route win over the remembered one", () => {
+    jest.spyOn(asyncStorage, "getString").mockReturnValue("family-id");
+
+    expect(
+      setup({ ownerId: "user-id" }).result.current.model?.defaultOwnerId,
+    ).toBe("user-id");
+  });
+
+  it("SHOULD ignore a remembered owner that does not exist anymore", () => {
+    jest.spyOn(asyncStorage, "getString").mockReturnValue("gone");
+
+    expect(setup().result.current.model?.defaultOwnerId).toBe("user-id");
+  });
+
+  it("SHOULD remember the owner WHEN an item is created AND not WHEN one is edited", () => {
+    const set = jest
+      .spyOn(asyncStorage, "setString")
+      .mockImplementation(() => undefined);
+
+    setup({ ownerId: "family-id", status: "success" });
+    expect(set).toHaveBeenCalledWith(
+      StorageKeys.string.LAST_STOCK_OWNER,
+      "family-id",
+    );
+
+    set.mockClear();
+    setup({ itemId: "item-1", ownerId: "family-id", status: "success" });
+    expect(set).not.toHaveBeenCalled();
   });
 });
