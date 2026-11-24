@@ -97,25 +97,33 @@ function Wide({ vm }: AdaptiveViewProps<NewStockItemVM>) {
                 <SuggestionBanner vm={vm} />
                 <Text.Overline value={t("stock.form.itemSection")} />
                 <SourceBadge field="description" vm={vm} />
-                <TextField
-                  error={errors.description ? t(errors.description) : undefined}
-                  label={t("stock.form.description")}
-                  onChangeText={(value) => vm.setField("description", value)}
-                  placeholder={t("stock.form.descriptionPlaceholder")}
-                  testID={stockItemFormTestIds.descriptionInput}
-                  value={values.description}
-                />
-                <Button.Secondary
-                  disabled={!vm.ai.canFillWithAi}
-                  icon="auto-fix"
-                  label={t(
-                    vm.ai.isLimitReached
-                      ? "stock.suggestions.backTomorrow"
-                      : "stock.suggestions.fillWithAi",
-                  )}
-                  onPress={vm.ai.onFillWithAi}
-                  testID={stockItemFormTestIds.fillWithAi}
-                />
+                <View style={styles.descriptionRow}>
+                  <View style={styles.descriptionField}>
+                    <TextField
+                      error={
+                        errors.description ? t(errors.description) : undefined
+                      }
+                      label={t("stock.form.description")}
+                      onChangeText={(value) =>
+                        vm.setField("description", value)
+                      }
+                      placeholder={t("stock.form.descriptionPlaceholder")}
+                      testID={stockItemFormTestIds.descriptionInput}
+                      value={values.description}
+                    />
+                  </View>
+                  <Button.Secondary
+                    disabled={!vm.ai.canFillWithAi}
+                    icon="auto-fix"
+                    label={t(
+                      vm.ai.isLimitReached
+                        ? "stock.suggestions.backTomorrow"
+                        : "stock.suggestions.fillWithAi",
+                    )}
+                    onPress={vm.ai.onFillWithAi}
+                    testID={stockItemFormTestIds.fillWithAi}
+                  />
+                </View>
                 {vm.suggestion ? (
                   <Card testID={stockItemFormTestIds.suggestion}>
                     <Text.Body

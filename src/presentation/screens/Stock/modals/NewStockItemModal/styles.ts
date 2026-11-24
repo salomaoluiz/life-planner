@@ -8,6 +8,12 @@ function useStyles() {
 
   return {
     styles: StyleSheet.create({
+      descriptionField: { flex: 1 },
+      descriptionRow: {
+        alignItems: "flex-end",
+        flexDirection: "row",
+        gap: theme.sizes.spacing.sm,
+      },
       fields: { gap: theme.sizes.spacing.md },
       moreRow: {
         flexDirection: isCompact ? "column" : "row",
