@@ -4,6 +4,8 @@ import { StockUnits } from "@domain/entities/stock/StockEntity";
 export enum ShoppingListRowOrigins {
   AUTO = "AUTO",
   AUTO_EDITED = "AUTO_EDITED",
+  // Spec 123: a live row of an item that reaches its minimum before the next trip of the list.
+  FORECAST = "FORECAST",
   MANUAL = "MANUAL",
 }
 
@@ -29,6 +31,7 @@ export interface RestockSummaryEntity {
 export interface ShoppingListCardEntity extends ShoppingListEntity {
   autoCount: number;
   estimatedTotalCents: number;
+  forecastCount: number;
   pricedCount: number;
   rowCount: number;
 }
@@ -47,9 +50,13 @@ export interface ShoppingListEntity {
   id: string;
   isDefault: boolean;
   name: string;
+  // Spec 123 FR 9-11: "Compro a cada N dias", the next trip (a day) and the interval the closed purchases suggest.
+  nextTripDate?: Date;
   owner: string;
   ownerId: string;
+  purchaseIntervalDays: number;
   status: ShoppingListStatuses;
+  suggestedIntervalDays?: number;
 }
 
 export interface ShoppingListGroupEntity {
@@ -68,6 +75,8 @@ export type ShoppingListPriceSource =
 export interface ShoppingListRowEntity {
   description: string;
   estimateCents?: number;
+  // Spec 123 FR 17: only on FORECAST rows.
+  forecast?: { minDate: Date; nextTripDate: Date; projectedOnTrip: number };
   id: string;
   itemId?: string;
   origin: ShoppingListRowOrigins;
@@ -81,6 +90,8 @@ export interface ShoppingListRowEntity {
   };
   unit: StockUnits;
   unitPriceCents?: number;
+  // Spec 123 FR 34: the share (0-1) of what entered that was discarded in the last 90 days.
+  wasteRatio90d?: number;
 }
 
 export interface ShoppingListRowResultEntity {
@@ -91,6 +102,7 @@ export interface ShoppingListRowResultEntity {
 export interface ShoppingListTotals {
   autoCount: number;
   estimatedTotalCents: number;
+  forecastCount: number;
   pricedCount: number;
   rowCount: number;
 }

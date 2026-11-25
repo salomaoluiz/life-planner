@@ -68,11 +68,13 @@ const model = new ShoppingListDetailUIModel({
     name: "Mercado",
     owner: "FAMILY",
     ownerId: "f",
+    purchaseIntervalDays: 7,
     status: ShoppingListStatuses.ACTIVE,
   },
   totals: {
     autoCount: 1,
     estimatedTotalCents: 3034,
+    forecastCount: 0,
     pricedCount: 2,
     rowCount: 3,
   },
@@ -241,6 +243,7 @@ it("SHOULD show loading, not found, error and empty states", () => {
     totals: {
       autoCount: 0,
       estimatedTotalCents: 0,
+      forecastCount: 0,
       pricedCount: 0,
       rowCount: 0,
     },

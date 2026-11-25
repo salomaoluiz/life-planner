@@ -26,10 +26,44 @@ export interface StockCategoryRef {
   path: string;
 }
 
+// Spec 123 FR 8: the stored forecast of the item (rates in the item unit; dates are calendar days).
+export interface StockForecast {
+  computedOn?: Date;
+  dailyRate: number;
+  emptyDate?: Date;
+  minDate?: Date;
+  status: StockForecastStatus;
+  weeklyRate: number;
+}
+
+// Spec 123 FR 19: the FORECAST row of the item on its list.
+export interface StockForecastRow {
+  listId: string;
+  listName?: string;
+  quantity: number;
+}
+
+export type StockForecastStatus = "INSUFFICIENT_DATA" | "NO_CONSUMPTION" | "OK";
+
+// Spec 123 FR 23: the worst lot that will expire before it is used.
+export interface StockLeftover {
+  date: Date;
+  lotId: string;
+  quantity: number;
+}
+
 export interface StockLocationRef {
   archived: boolean;
   id: string;
   name: string;
+}
+
+// Spec 123 FR 32: "Descartado nos últimos 90 dias".
+export interface StockWaste90d {
+  count: number;
+  mainReason: string;
+  quantity: number;
+  totals: { currency: string; valueCents: number }[];
 }
 
 interface IStockEntity {
@@ -42,10 +76,14 @@ interface IStockEntity {
   effectiveShoppingListId?: string;
   estimatedUnitPriceCents?: number;
   expirationStatus: StockExpirationStatus;
+  forecast?: StockForecast;
+  forecastRow?: StockForecastRow;
   hasExpiredLot: boolean;
+  hasForecastRow?: boolean;
   hasOpenLot: boolean;
   id: string;
   idealQuantity?: number;
+  leftover?: StockLeftover;
   location?: StockLocationRef;
   locationId?: string;
   // The detail carries the lots; the list does not.
@@ -65,6 +103,7 @@ interface IStockEntity {
   unit: StockUnits;
   warnDaysClosed: number;
   warnDaysOpened: number;
+  waste90d?: StockWaste90d;
 }
 
 class StockEntity {
@@ -77,10 +116,14 @@ class StockEntity {
   effectiveShoppingListId?: string;
   estimatedUnitPriceCents?: number;
   expirationStatus: StockExpirationStatus;
+  forecast?: StockForecast;
+  forecastRow?: StockForecastRow;
   hasExpiredLot: boolean;
+  hasForecastRow: boolean;
   hasOpenLot: boolean;
   id: string;
   idealQuantity?: number;
+  leftover?: StockLeftover;
   location?: StockLocationRef;
   locationId?: string;
   lots: StockLotEntity[];
@@ -99,6 +142,7 @@ class StockEntity {
   unit: StockUnits;
   warnDaysClosed: number;
   warnDaysOpened: number;
+  waste90d?: StockWaste90d;
 
   constructor(params: IStockEntity) {
     this.barcode = params.barcode;
@@ -110,10 +154,14 @@ class StockEntity {
     this.effectiveShoppingListId = params.effectiveShoppingListId;
     this.estimatedUnitPriceCents = params.estimatedUnitPriceCents;
     this.expirationStatus = params.expirationStatus;
+    this.forecast = params.forecast;
+    this.forecastRow = params.forecastRow;
     this.hasExpiredLot = params.hasExpiredLot;
+    this.hasForecastRow = params.hasForecastRow ?? false;
     this.hasOpenLot = params.hasOpenLot;
     this.id = params.id;
     this.idealQuantity = params.idealQuantity;
+    this.leftover = params.leftover;
     this.location = params.location;
     this.locationId = params.locationId;
     this.lots = params.lots ?? [];
@@ -132,6 +180,7 @@ class StockEntity {
     this.unit = params.unit;
     this.warnDaysClosed = params.warnDaysClosed;
     this.warnDaysOpened = params.warnDaysOpened;
+    this.waste90d = params.waste90d;
   }
 }
 

@@ -34,6 +34,11 @@ import {
   updateStockLocation,
 } from "./stockCatalog";
 import {
+  dismissLeftover,
+  getConsumptionWeeks,
+  getWaste,
+} from "./stockForecast";
+import {
   createStockMovement,
   getOwnerChangePreview,
   getStockMovements,
@@ -72,7 +77,10 @@ function stockRepositoryImpl(datasources: Datasources): StockRepository {
     deleteStockItem: async (params) => deleteStockItem(params, datasources),
     deleteStockLocation: async (params) =>
       deleteStockLocation(params, datasources),
+    dismissLeftover: async (params) => dismissLeftover(params, datasources),
     getAiUsage: async () => getAiUsage(datasources),
+    getConsumptionWeeks: async (params) =>
+      getConsumptionWeeks(params, datasources),
     getFrequentStockItems: async (limit) =>
       getFrequentStockItems(limit, datasources),
     getOwnerChangePreview: async (params) =>
@@ -87,6 +95,7 @@ function stockRepositoryImpl(datasources: Datasources): StockRepository {
     getStockLocation: async (id) => getStockLocation(id, datasources),
     getStockLocations: async (params) => getStockLocations(params, datasources),
     getStockMovements: async (params) => getStockMovements(params, datasources),
+    getWaste: async (params) => getWaste(params, datasources),
     lookupStockBarcode: async (code) => lookupStockBarcode(code, datasources),
     setStockGestureExpiration: async (params) =>
       setStockGestureExpiration(params, datasources),

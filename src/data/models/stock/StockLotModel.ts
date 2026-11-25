@@ -9,6 +9,10 @@ class StockLotModel {
     readonly expirationDate?: Date,
     readonly openedAt?: Date,
     readonly purchaseDate?: Date,
+    readonly unitPriceCents?: number,
+    readonly currency?: string,
+    readonly leftoverQuantity?: number,
+    readonly leftoverDismissed: boolean = false,
   ) {}
 
   static fromJSON(data: Record<string, unknown>): StockLotModel {
@@ -20,6 +24,12 @@ class StockLotModel {
       optionalDay(data.expirationDate),
       optionalDay(data.openedAt),
       optionalDay(data.purchaseDate),
+      typeof data.unitPriceCents === "number" ? data.unitPriceCents : undefined,
+      typeof data.currency === "string" ? data.currency : undefined,
+      typeof data.leftoverQuantity === "number"
+        ? data.leftoverQuantity
+        : undefined,
+      data.leftoverDismissed === true,
     );
   }
 }

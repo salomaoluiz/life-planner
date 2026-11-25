@@ -20,6 +20,10 @@ import {
 } from "@domain/entities/stock/StockCatalogEntity";
 import StockEntity from "@domain/entities/stock/StockEntity";
 import StockMovementEntity from "@domain/entities/stock/StockMovementEntity";
+import {
+  ConsumptionWeekEntity,
+  WasteEntity,
+} from "@domain/entities/stock/StockWasteEntity";
 import { PurchaseRepository } from "@domain/repositories/stock/purchaseRepository";
 
 export interface StockOwnerParams {
@@ -56,7 +60,11 @@ export type StockRepository = PurchaseRepository & {
   deleteStockLocation(
     params: DeleteStockCatalogRepositoryParams,
   ): Promise<void>;
+  dismissLeftover(params: DismissLeftoverRepositoryParams): Promise<void>;
   getAiUsage(): Promise<AiUsageEntity>;
+  getConsumptionWeeks(
+    params: GetConsumptionWeeksRepositoryParams,
+  ): Promise<ConsumptionWeekEntity[]>;
   getFrequentStockItems(limit?: number): Promise<StockEntity[]>;
   getOwnerChangePreview(
     params: OwnerChangePreviewRepositoryParams,
@@ -78,6 +86,7 @@ export type StockRepository = PurchaseRepository & {
   getStockMovements(
     params: GetStockMovementsRepositoryParams,
   ): Promise<{ items: StockMovementEntity[]; nextCursor?: string }>;
+  getWaste(params: GetWasteRepositoryParams): Promise<WasteEntity>;
   lookupStockBarcode(code: string): Promise<StockBarcodeLookupEntity>;
   setStockGestureExpiration(
     params: StockGestureExpirationRepositoryParams,
@@ -181,6 +190,16 @@ interface DeleteStockItemRepositoryParams {
   ownerId: string;
 }
 
+interface DismissLeftoverRepositoryParams {
+  // false undoes the dismissal.
+  dismissed: boolean;
+  lotId: string;
+}
+
+interface GetConsumptionWeeksRepositoryParams {
+  itemId: string;
+}
+
 interface GetShoppingListsRepositoryParams {
   includeArchived?: boolean;
   ownerId?: string;
@@ -193,6 +212,12 @@ interface GetStockCatalogRepositoryParams extends StockOwnerParams {
 interface GetStockMovementsRepositoryParams {
   cursor?: string;
   itemId: string;
+}
+
+interface GetWasteRepositoryParams {
+  all?: boolean;
+  month?: string;
+  ownerId?: string;
 }
 
 interface OwnerChangePreviewRepositoryParams extends StockOwnerParams {
@@ -229,6 +254,8 @@ interface UpdateShoppingListRepositoryParams {
   id: string;
   isDefault?: boolean;
   name?: string;
+  // Spec 123 FR 9: "Compro a cada N dias" (1-90).
+  purchaseIntervalDays?: number;
   status?: string;
 }
 
@@ -287,9 +314,12 @@ export {
   CreateStockMovementRepositoryParams,
   DeleteStockCatalogRepositoryParams,
   DeleteStockItemRepositoryParams,
+  DismissLeftoverRepositoryParams,
+  GetConsumptionWeeksRepositoryParams,
   GetShoppingListsRepositoryParams,
   GetStockCatalogRepositoryParams,
   GetStockMovementsRepositoryParams,
+  GetWasteRepositoryParams,
   OwnerChangePreviewRepositoryParams,
   StockGestureExpirationRepositoryParams,
   StockGestureRepositoryParams,

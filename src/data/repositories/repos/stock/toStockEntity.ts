@@ -10,6 +10,7 @@ import StockLotEntity, {
   StockLotStatus,
 } from "@domain/entities/stock/StockLotEntity";
 import StockMovementEntity, {
+  DiscardValueSources,
   StockMovementReasons,
   StockMovementTypes,
 } from "@domain/entities/stock/StockMovementEntity";
@@ -25,10 +26,14 @@ export function toStockEntity(stock: StockModel): StockEntity {
     effectiveShoppingListId: stock.effectiveShoppingListId,
     estimatedUnitPriceCents: stock.estimatedUnitPriceCents,
     expirationStatus: stock.expirationStatus as StockExpirationStatus,
+    forecast: stock.forecast,
+    forecastRow: stock.forecastRow,
     hasExpiredLot: stock.hasExpiredLot,
+    hasForecastRow: stock.hasForecastRow,
     hasOpenLot: stock.hasOpenLot,
     id: stock.id,
     idealQuantity: stock.idealQuantity,
+    leftover: stock.leftover,
     location: stock.location,
     locationId: stock.locationId,
     lots: stock.lots?.map((lot) => toStockLotEntity(lot)),
@@ -47,18 +52,23 @@ export function toStockEntity(stock: StockModel): StockEntity {
     unit: stock.unit as StockUnits,
     warnDaysClosed: stock.warnDaysClosed,
     warnDaysOpened: stock.warnDaysOpened,
+    waste90d: stock.waste90d,
   });
 }
 
 export function toStockLotEntity(lot: StockLotModel): StockLotEntity {
   return new StockLotEntity({
+    currency: lot.currency,
     effectiveExpiration: lot.effectiveExpiration,
     expirationDate: lot.expirationDate,
     expirationStatus: lot.expirationStatus as StockLotStatus,
     id: lot.id,
+    leftoverDismissed: lot.leftoverDismissed,
+    leftoverQuantity: lot.leftoverQuantity,
     openedAt: lot.openedAt,
     purchaseDate: lot.purchaseDate,
     quantity: lot.quantity,
+    unitPriceCents: lot.unitPriceCents,
   });
 }
 
@@ -67,12 +77,16 @@ export function toStockMovementEntity(
 ): StockMovementEntity {
   return new StockMovementEntity({
     createdAt: movement.createdAt,
+    currency: movement.currency,
     id: movement.id,
     lotId: movement.lotId,
     note: movement.note,
     quantity: movement.quantity,
     reason: movement.reason as StockMovementReasons | undefined,
     type: movement.type as StockMovementTypes,
+    unitPriceCents: movement.unitPriceCents,
     user: movement.user,
+    valueCents: movement.valueCents,
+    valueSource: movement.valueSource as DiscardValueSources | undefined,
   });
 }

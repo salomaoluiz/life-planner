@@ -66,3 +66,69 @@ it("SHOULD write nulls for the absent optionals", () => {
     nearestExpiration: null,
   });
 });
+
+describe("spec 123 forecast", () => {
+  const json = {
+    ...mocks.json,
+    forecast: {
+      computedOn: "2026-11-25",
+      dailyRate: 0.571,
+      emptyDate: "2026-12-03",
+      minDate: "2026-11-28",
+      status: "OK",
+      weeklyRate: 4,
+    },
+    forecastRow: { listId: "l", listName: "Mercado", quantity: 6 },
+    hasForecastRow: true,
+    leftover: { date: "2026-11-27", lotId: "lot", quantity: 1 },
+    waste90d: {
+      count: 1,
+      mainReason: "EXPIRED",
+      quantity: 2,
+      totals: [{ currency: "BRL", valueCents: 978 }],
+    },
+  };
+
+  it("SHOULD read the forecast, the forecast row, the leftover and the 90-day waste", () => {
+    const model = StockModel.fromJSON(json);
+
+    expect(model.forecast).toMatchObject({
+      dailyRate: 0.571,
+      status: "OK",
+      weeklyRate: 4,
+    });
+    expect(model.forecast?.minDate?.getDate()).toBe(28);
+    expect(model.forecastRow).toEqual({
+      listId: "l",
+      listName: "Mercado",
+      quantity: 6,
+    });
+    expect(model.hasForecastRow).toBe(true);
+    expect(model.leftover?.lotId).toBe("lot");
+    expect(model.waste90d?.totals).toEqual([
+      { currency: "BRL", valueCents: 978 },
+    ]);
+  });
+
+  it("SHOULD round-trip the forecast through toJSON (the list cache)", () => {
+    const again = StockModel.fromJSON(
+      StockModel.fromJSON(json).toJSON() as Record<string, unknown>,
+    );
+
+    expect(again.forecast).toMatchObject({ status: "OK", weeklyRate: 4 });
+    expect(again.leftover?.quantity).toBe(1);
+    expect(again.hasForecastRow).toBe(true);
+  });
+
+  it("SHOULD have no forecast WHEN the API sends null", () => {
+    const model = StockModel.fromJSON({
+      ...mocks.json,
+      forecast: null,
+      leftover: null,
+    });
+
+    expect(model.forecast).toBeUndefined();
+    expect(model.leftover).toBeUndefined();
+    expect(model.hasForecastRow).toBe(false);
+  });
+});

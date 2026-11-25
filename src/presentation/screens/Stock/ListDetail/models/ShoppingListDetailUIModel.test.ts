@@ -52,11 +52,13 @@ const detail: ShoppingListDetailEntity = {
     name: "Mercado",
     owner: "USER",
     ownerId: "u",
+    purchaseIntervalDays: 7,
     status: ShoppingListStatuses.ACTIVE,
   },
   totals: {
     autoCount: 2,
     estimatedTotalCents: 100,
+    forecastCount: 0,
     pricedCount: 1,
     rowCount: 4,
   },
@@ -114,6 +116,7 @@ it("SHOULD be empty without rows and skip min/ideal parts that are not set", () 
     totals: {
       autoCount: 1,
       estimatedTotalCents: 0,
+      forecastCount: 0,
       pricedCount: 0,
       rowCount: 0,
     },
