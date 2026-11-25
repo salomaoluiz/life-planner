@@ -6,6 +6,7 @@ import {
   MarketEntity,
   PendingPurchaseEntity,
   PurchaseEntity,
+  PurchaseRowByCodeEntity,
   PurchaseRowEntity,
   PurchaseRowResultEntity,
   PurchaseRowStates,
@@ -141,6 +142,13 @@ export function parsePurchaseRow(data: Json): PurchaseRowEntity {
     unit: optional<StockUnits>(data.unit),
     unitPriceCents: optional(data.unitPriceCents),
     unknownPrice: data.unknownPrice === true,
+  };
+}
+
+export function parsePurchaseRowByCode(data: Json): PurchaseRowByCodeEntity {
+  return {
+    row: parsePurchaseRow(data.row as Json),
+    source: data.source as PurchaseRowByCodeEntity["source"],
   };
 }
 

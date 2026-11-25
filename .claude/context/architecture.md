@@ -65,6 +65,10 @@ Relative imports deeper than one parent (`../../`) are lint errors — use alias
 Most records belong to an **owner**: `owner: OwnerType.USER | OwnerType.FAMILY` + `ownerId` (user id or family id). DB trigger `validate_owner()` enforces it.
 `useCases.getOwnersUseCase.execute()` returns `OwnerDTO[]` (user + their families); screens pass `owners.map(o => o.id)` to list use cases.
 
+## Barcode scanner wrapper (spec 121)
+
+`@infrastructure/barcodeScanner` is the only importer of `expo-camera` and `expo-haptics`: `BarcodeScannerView`, `useScannerPermission`, `vibrateOnScan`, `isWebScanSupported`. Components never import the camera directly (lint rule); tests mock the wrapper.
+
 ## Monitoring wrapper (spec 106)
 
 `@infrastructure/monitoring` is the only importer of `@sentry/*`. Everything sent goes through its scrubber (`sentry/scrub.ts`); expected errors (`BusinessError` and subclasses) are never events. Rules and tags: `.claude/context/monitoring.md`.

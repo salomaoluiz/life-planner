@@ -367,6 +367,14 @@ describe("navigation", () => {
     });
   });
 
+  it("SHOULD open the barcode reader from the stock card (spec 121)", () => {
+    const { result } = setup(loaded);
+
+    result.current.onScanStockPress();
+
+    expect(modalNavigation.openModal).toHaveBeenCalledWith("stock_barcode");
+  });
+
   it("SHOULD open the add forms", () => {
     const { result } = setup(loaded);
 

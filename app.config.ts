@@ -52,6 +52,14 @@ export default {
       ["expo-router", { asyncRoutes: { default: false, web: true } }],
       "./plugins/withReleaseSigning",
       [
+        "expo-camera",
+        {
+          cameraPermission:
+            "Allow $(PRODUCT_NAME) to use the camera to read barcodes.",
+          recordAudioAndroid: false,
+        },
+      ],
+      [
         "expo-splash-screen",
         {
           backgroundColor: "#ffffff",

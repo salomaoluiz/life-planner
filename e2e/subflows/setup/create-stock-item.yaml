@@ -1,7 +1,7 @@
 url: ${E2E_WEB_URL}
 ---
 # Optional caller-scoped params are read by the script (Maestro ignores caller values for header defaults):
-# DESCRIPTION, QUANTITY, MIN_QUANTITY, IDEAL_QUANTITY, UNIT, EXPIRATION_IN_DAYS, OWNER.
+# DESCRIPTION, BARCODE, QUANTITY, MIN_QUANTITY, IDEAL_QUANTITY, UNIT, EXPIRATION_IN_DAYS, OWNER.
 - runScript:
     file: ../../scripts/setup/create-stock-item.js
     env:

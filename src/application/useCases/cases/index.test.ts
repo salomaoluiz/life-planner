@@ -1,6 +1,7 @@
 import { listUseCases } from "./index";
 
 const useCases = {
+  addPurchaseRowByCodeUseCase: expect.any(Function),
   addShoppingListRowUseCase: expect.any(Function),
   adjustFinancialAccountBalanceUseCase: expect.any(Function),
   approveInvestmentEventSuggestionUseCase: expect.any(Function),
@@ -69,6 +70,7 @@ const useCases = {
   deleteStockItemUseCase: expect.any(Function),
   deleteStockLocationUseCase: expect.any(Function),
   exportFinancialTransactionsUseCase: expect.any(Function),
+  getAiUsageUseCase: expect.any(Function),
   getCategoryIconsUseCase: expect.any(Function),
   getClosePreviewUseCase: expect.any(Function),
   getFamiliesUseCase: expect.any(Function),
@@ -145,6 +147,7 @@ const useCases = {
   joinFamilyMemberUseCase: expect.any(Function),
   loginWithEmailUseCase: expect.any(Function),
   logoutUseCase: expect.any(Function),
+  lookupStockBarcodeUseCase: expect.any(Function),
   materializeFinancialOccurrenceUseCase: expect.any(Function),
   mergePurchaseUseCase: expect.any(Function),
   payFinancialInvoiceUseCase: expect.any(Function),
@@ -169,6 +172,7 @@ const useCases = {
   splitFinancialRecurrenceUseCase: expect.any(Function),
   startPurchaseUseCase: expect.any(Function),
   suggestStockItemsUseCase: expect.any(Function),
+  suggestStockItemUseCase: expect.any(Function),
   undoFinancialInvoicePaymentUseCase: expect.any(Function),
   undoFinancialPrepaymentUseCase: expect.any(Function),
   undoStockGestureUseCase: expect.any(Function),

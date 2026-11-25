@@ -333,3 +333,157 @@ describe("actions", () => {
     expect(screen.getByText("stock.form.brand")).toBeOnTheScreen();
   });
 });
+
+describe("suggestions (spec 121)", () => {
+  const ai = {
+    banner: undefined,
+    canFillWithAi: true,
+    clearSource: jest.fn(),
+    isLimitReached: false,
+    onFillWithAi: jest.fn(),
+    onSkip: jest.fn(),
+    packageHint: undefined,
+    searching: false,
+    sources: {},
+    usage: undefined,
+  };
+
+  it("SHOULD show the searching banner AND let the user fill it alone", () => {
+    const { vm } = setup({
+      ai: { ...ai, banner: "searching", searching: true },
+    });
+
+    expect(screen.getByText("stock.suggestions.searching")).toBeOnTheScreen();
+
+    fireEvent.press(
+      screen.getByTestId(`${stockItemFormTestIds.suggestionBanner}-action`),
+    );
+
+    expect(vm.ai.onSkip).toHaveBeenCalled();
+  });
+
+  it.each([
+    ["suggestions", "stock.suggestions.banner"],
+    ["notSure", "stock.suggestions.notSure"],
+    ["unavailable", "stock.suggestions.unavailable"],
+    ["limit", "stock.suggestions.limitReached"],
+  ])("SHOULD show the %s banner", (banner, key) => {
+    setup({ ai: { ...ai, banner } });
+
+    expect(screen.getByText(key, { exact: false })).toBeOnTheScreen();
+  });
+
+  it("SHOULD badge the fields the suggestions filled with their source", () => {
+    setup({
+      ai: {
+        ...ai,
+        sources: { categoryId: "AI", description: "OPEN_FOOD_FACTS" },
+      },
+    });
+
+    expect(screen.getByText("stock.source.openFoodFacts")).toBeOnTheScreen();
+    expect(screen.getByText("stock.source.ai")).toBeOnTheScreen();
+  });
+
+  it("SHOULD fill with AI from the button AND disable it WHEN the limit is reached", () => {
+    const { vm } = setup({ ai });
+
+    fireEvent.press(screen.getByTestId(stockItemFormTestIds.fillWithAi));
+
+    expect(vm.ai.onFillWithAi).toHaveBeenCalled();
+  });
+
+  it("SHOULD say 'back tomorrow' on the disabled button WHEN the limit is reached", () => {
+    setup({ ai: { ...ai, canFillWithAi: false, isLimitReached: true } });
+
+    expect(
+      screen.getByText("stock.suggestions.backTomorrow"),
+    ).toBeOnTheScreen();
+  });
+
+  it("SHOULD show the package hint AND the AI usage", () => {
+    setup({
+      ai: {
+        ...ai,
+        packageHint: { text: "0.5", unitKey: "common.units.kilogram" },
+        usage: {
+          light: { limit: 50, used: 41 },
+          search: { limit: 10, used: 8 },
+        },
+      },
+    });
+
+    expect(
+      screen.getByTestId(stockItemFormTestIds.packageHint),
+    ).toBeOnTheScreen();
+    expect(screen.getByTestId(stockItemFormTestIds.usage)).toBeOnTheScreen();
+  });
+
+  it("SHOULD offer to link the code to the item with the same name", () => {
+    const { vm } = setup({ linkName: "Milk" });
+
+    expect(screen.getByTestId(stockItemFormTestIds.linkCode)).toBeOnTheScreen();
+
+    fireEvent.press(screen.getByTestId(stockItemFormTestIds.linkCodeAction));
+
+    expect(vm.onLinkCode).toHaveBeenCalled();
+  });
+});
+
+describe("barcode field (spec 121)", () => {
+  it("SHOULD open the camera from the scan button AND show it", () => {
+    const { vm } = setup({ isMoreOpen: true });
+
+    fireEvent.press(screen.getByTestId(stockItemFormTestIds.scanBarcode));
+
+    expect(vm.barcodeField.onOpen).toHaveBeenCalled();
+  });
+
+  it("SHOULD show the inline camera WHEN scanning AND close it", () => {
+    const { vm } = setup({
+      barcodeField: {
+        inUse: undefined,
+        isScanning: true,
+        onClose: jest.fn(),
+        onOpen: jest.fn(),
+        onScanned: jest.fn(),
+        onTyped: jest.fn(),
+      },
+      isMoreOpen: true,
+    });
+
+    expect(
+      screen.getByTestId(stockItemFormTestIds.inlineScanner),
+    ).toBeOnTheScreen();
+
+    fireEvent.press(
+      screen.getByTestId(stockItemFormTestIds.inlineScannerClose),
+    );
+
+    expect(vm.barcodeField.onClose).toHaveBeenCalled();
+  });
+
+  it("SHOULD say the code is in use AND open the item", () => {
+    const { vm } = setup({
+      barcodeField: {
+        inUse: { description: "Milk" },
+        isScanning: false,
+        onClose: jest.fn(),
+        onOpen: jest.fn(),
+        onScanned: jest.fn(),
+        onTyped: jest.fn(),
+      },
+      isMoreOpen: true,
+    });
+
+    expect(
+      screen.getByTestId(stockItemFormTestIds.barcodeInUse),
+    ).toBeOnTheScreen();
+
+    fireEvent.press(
+      screen.getByTestId(stockItemFormTestIds.barcodeInUseAction),
+    );
+
+    expect(vm.onOpenExistingItem).toHaveBeenCalled();
+  });
+});

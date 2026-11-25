@@ -1,5 +1,5 @@
 // Maestro runScript (GraalJS). Creates a stock item through the API.
-// Reads E2E_API_URL, TOKEN, DESCRIPTION, QUANTITY, MIN_QUANTITY, IDEAL_QUANTITY (spec 118), UNIT, EXPIRATION_IN_DAYS (absent = no expiration,
+// Reads E2E_API_URL, TOKEN, DESCRIPTION, BARCODE (spec 121), QUANTITY, MIN_QUANTITY, IDEAL_QUANTITY (spec 118), UNIT, EXPIRATION_IN_DAYS (absent = no expiration,
 // negative = already expired, 0 = today), OWNER, OWNER_ID from env. Never logs the token.
 function param(value, fallback) {
   return typeof value !== "undefined" && value !== "" ? value : fallback;
@@ -21,6 +21,13 @@ var body = {
   ),
   unit: param(typeof UNIT === "undefined" ? undefined : UNIT, "unit"),
 };
+var barcode = param(
+  typeof BARCODE === "undefined" ? undefined : BARCODE,
+  undefined,
+);
+if (typeof barcode !== "undefined") {
+  body.barcode = barcode;
+}
 var minQuantity = param(
   typeof MIN_QUANTITY === "undefined" ? undefined : MIN_QUANTITY,
   undefined,

@@ -100,6 +100,14 @@ export interface PurchaseOtherCartEntity {
 
 export type PurchasePriceInputs = "LINE" | "UNIT";
 
+export interface PurchaseRowByCodeEntity {
+  row: PurchaseRowEntity;
+  source: PurchaseRowCodeSource;
+}
+
+// Spec 121 FR 25: where the row of a scanned code came from.
+export type PurchaseRowCodeSource = "ITEM" | "NONE" | "OPEN_FOOD_FACTS";
+
 export interface PurchaseRowEntity {
   checkedAt: string;
   checkedBy?: { id: string; name: string };

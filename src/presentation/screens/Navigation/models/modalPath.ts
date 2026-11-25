@@ -20,6 +20,7 @@ export const MODAL_NAMES = [
   "stock_movement",
   "stock_catalog",
   "stock_add_to_list",
+  "stock_barcode",
   "stock_shopping_list",
   "stock_start_purchase",
   "investment_asset",
@@ -56,6 +57,8 @@ const HOME = "/";
 // A modal can open over the detail of an asset: `/investments/asset/<id>` (spec 102). The detail lives under `asset/` so that `/investments/<modal>` (a modal opened from the list) is never read as an asset id.
 // Same for the detail of a shopping list: `/stock/list/<id>` (singular), spec 118.
 const STOCK_LIST_DETAIL = /^\/stock\/list\/[^/]+$/;
+// And over the shopping mode of a purchase: `/stock/purchases/<id>` (spec 121: the reader adds rows by code).
+const STOCK_PURCHASE = /^\/stock\/purchases\/[^/]+$/;
 const INVESTMENT_DETAIL = /^\/investments\/asset\/[^/]+$/;
 
 export const VALID_BASES: readonly string[] = [
@@ -98,7 +101,8 @@ export function isValidBase(base: string): boolean {
   return (
     VALID_BASES.includes(normalized) ||
     INVESTMENT_DETAIL.test(normalized) ||
-    STOCK_LIST_DETAIL.test(normalized)
+    STOCK_LIST_DETAIL.test(normalized) ||
+    STOCK_PURCHASE.test(normalized)
   );
 }
 

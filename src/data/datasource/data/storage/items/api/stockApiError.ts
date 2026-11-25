@@ -2,6 +2,8 @@ import {
   ApiBusinessError,
   BusinessError,
   GenericError,
+  StockBarcodeInUse,
+  StockBarcodeInvalid,
   StockCategoryInUse,
   StockLocationInUse,
   StockLotAlreadyOpen,
@@ -16,6 +18,12 @@ function handleStockApiError(
   context: Record<string, unknown>,
 ): never {
   if (error instanceof ApiBusinessError) {
+    const barcode = mapBarcode(error);
+
+    if (barcode) {
+      throw barcode;
+    }
+
     const conflict = mapConflict(error);
 
     if (conflict) {
@@ -30,6 +38,25 @@ function handleStockApiError(
   const genericError = new GenericError();
   genericError.addContext({ ...context, error });
   throw genericError;
+}
+
+// Spec 121: `409 BARCODE_IN_USE { itemId, description }` and `400|422` for a code that is not valid.
+function mapBarcode(error: ApiBusinessError): BusinessError | undefined {
+  if (error.statusCode === 409 && error.body.code === "BARCODE_IN_USE") {
+    return new StockBarcodeInUse(
+      String(error.body.itemId ?? ""),
+      String(error.body.description ?? ""),
+    );
+  }
+
+  if (
+    (error.statusCode === 422 && error.body.code === "BARCODE_INVALID") ||
+    (error.statusCode === 400 && error.message.includes("barcode"))
+  ) {
+    return new StockBarcodeInvalid();
+  }
+
+  return undefined;
 }
 
 // The conflicts the screens explain (spec 116): `409` with its message or its `itemCount`.

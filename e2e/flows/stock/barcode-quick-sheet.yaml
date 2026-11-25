@@ -1,0 +1,78 @@
+url: ${E2E_WEB_URL}
+name: stock/barcode-quick-sheet
+tags:
+  - stock
+  - spec-121
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Spec 121: typing the code of an item opens the quick sheet, "Saiu −" takes one and the notice offers Desfazer.
+# A code with a wrong check digit shows "Código não reconhecido" and nothing is searched.
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Codigo
+      KEY: ITEM_NAME
+- runFlow:
+    file: ../../subflows/setup/create-stock-item.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      DESCRIPTION: ${output.ITEM_NAME}
+      BARCODE: "7891000100103"
+      QUANTITY: "3"
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/stock/open-stock.yaml
+- tapOn:
+    id: "stock.list.scan-button"
+- extendedWaitUntil:
+    visible:
+      id: "stock.barcode.code-input"
+    timeout: 20000
+- tapOn:
+    id: "stock.barcode.code-input"
+- inputText: "7891000100104"
+- pressKey: Enter
+- extendedWaitUntil:
+    visible:
+      id: "stock.barcode.message"
+    timeout: 10000
+- assertNotVisible:
+    id: "stock.barcode.consume"
+- tapOn:
+    id: "stock.barcode.sheet-frame-close"
+- tapOn:
+    id: "stock.list.scan-button"
+- extendedWaitUntil:
+    visible:
+      id: "stock.barcode.code-input"
+    timeout: 20000
+- tapOn:
+    id: "stock.barcode.code-input"
+- inputText: "7891000100103"
+- pressKey: Enter
+- extendedWaitUntil:
+    visible:
+      id: "stock.barcode.consume"
+    timeout: 20000
+- assertVisible:
+    text: ${output.ITEM_NAME}
+- tapOn:
+    id: "stock.barcode.consume"
+- extendedWaitUntil:
+    visible:
+      id: "stock.notice"
+    timeout: 10000
+- tapOn:
+    id: "stock.notice.undo"
+- extendedWaitUntil:
+    notVisible:
+      id: "stock.notice"
+    timeout: 10000

@@ -30,6 +30,7 @@ jest.mock("@screens/Stock/hooks/useStockQuickMovement", () => ({
 }));
 jest.mock("@application/useCases", () => ({
   useCases: {
+    getAiUsageUseCase: { execute: jest.fn(), uniqueName: "ai_usage" },
     getFrequentStockItemsUseCase: {
       execute: jest.fn(),
       uniqueName: "frequent",
@@ -39,6 +40,10 @@ jest.mock("@application/useCases", () => ({
   },
 }));
 
+const usage = {
+  light: { limit: 50, used: 1 },
+  search: { limit: 10, used: 8 },
+};
 const queryMock = jest.mocked(useQuery);
 const scopedMock = jest.mocked(useOwnerScopedQuery);
 const milk = dto((f) => f.withId("milk").withDescription("Leite"));
@@ -57,10 +62,13 @@ function query(data?: unknown) {
 beforeEach(() => {
   jest.useFakeTimers();
   jest.clearAllMocks();
-  queryMock.mockImplementation(((props: { cacheKey: string[] }) =>
-    props.cacheKey[0] === "frequent"
-      ? query([milk])
-      : query(["rice"])) as never);
+  queryMock.mockImplementation(((props: { cacheKey: string[] }) => {
+    if (props.cacheKey[0] === "ai_usage") {
+      return query(usage);
+    }
+
+    return props.cacheKey[0] === "frequent" ? query([milk]) : query(["rice"]);
+  }) as never);
   scopedMock.mockReturnValue(
     query({ items: [milk, rice], owners: [] }) as never,
   );
@@ -102,7 +110,7 @@ it("SHOULD search only after 2 characters and 300 ms, listing the suggested item
 
 it("SHOULD report nothing found and open the new item form with the typed name", () => {
   queryMock.mockImplementation(((props: { cacheKey: string[] }) =>
-    props.cacheKey[0] === "frequent" ? query([]) : query([])) as never);
+    props.cacheKey[0] === "ai_usage" ? query(usage) : query([])) as never);
 
   const { result } = renderHook(() => useQuickAddViewModel());
 
@@ -122,4 +130,62 @@ it("SHOULD report nothing found and open the new item form with the typed name",
     },
   );
   expect(useCases.suggestStockItemsUseCase.execute).not.toHaveBeenCalled();
+});
+
+describe("barcode and AI (spec 121)", () => {
+  function searchFor(text: string) {
+    queryMock.mockImplementation(((props: { cacheKey: string[] }) =>
+      props.cacheKey[0] === "ai_usage" ? query(usage) : query([])) as never);
+
+    const hook = renderHook(() => useQuickAddViewModel());
+
+    act(() => hook.result.current.onSearchChange(text));
+    act(() => {
+      jest.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
+    });
+
+    return hook;
+  }
+
+  it("SHOULD open the reader from the button", () => {
+    const { result } = renderHook(() => useQuickAddViewModel());
+
+    act(() => result.current.onScanPress());
+
+    expect(modalNavigation.replaceModal).toHaveBeenCalledWith("stock_barcode");
+  });
+
+  it("SHOULD create with AI from the typed name AND show the searches left", () => {
+    const { result } = searchFor("achocolatado diet");
+
+    expect(result.current.canCreateWithAi).toBe(true);
+    expect(result.current.searchLeft).toEqual({ left: 2, limit: 10 });
+
+    act(() => result.current.onCreateWithAi());
+
+    expect(modalNavigation.replaceModal).toHaveBeenCalledWith(
+      "add_new_stock_item",
+      { ai: "1", description: "achocolatado diet" },
+    );
+  });
+
+  it("SHOULD not create with AI from fewer than 3 characters", () => {
+    expect(searchFor("ab").result.current.canCreateWithAi).toBe(false);
+  });
+
+  it("SHOULD not create with AI WHEN today's searches are over", () => {
+    queryMock.mockImplementation(((props: { cacheKey: string[] }) =>
+      props.cacheKey[0] === "ai_usage"
+        ? query({ ...usage, search: { limit: 10, used: 10 } })
+        : query([])) as never);
+
+    const { result } = renderHook(() => useQuickAddViewModel());
+
+    act(() => result.current.onSearchChange("achocolatado"));
+    act(() => {
+      jest.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
+    });
+
+    expect(result.current.canCreateWithAi).toBe(false);
+  });
 });

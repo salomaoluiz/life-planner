@@ -3,6 +3,16 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [3.5.0] - 2026-11-23
+
+### Added
+
+- Stock barcode reader (spec 121): scan or type a code in the Stock tab, the quick add or the Home card; an item you already have opens a quick sheet (Entrou +, Saiu −, Abri), a code in two stocks asks which one, and a location QR opens the location.
+- A code nobody has opens the new item form filled by Open Food Facts and AI (name, brand, unit, category, location, days after opening), each field marked with its source, within a daily AI limit; "Preencher com IA" and "Criar com IA" fill the form from a typed name.
+- Shopping mode: "Ler código" adds the scanned item, a row named by Open Food Facts or a "Sugerido" placeholder to the cart.
+- The new item form opens on the owner of the last item you created (stored on the device); an owner passed by the screen still wins.
+- The item form reads a code with the camera, offers to link the code to an item with the same name and opens the item that already has it.
+
 ## [3.4.0] - 2026-11-23
 
 ### Added

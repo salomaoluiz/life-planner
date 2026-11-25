@@ -16,6 +16,11 @@ import {
   updateShoppingListRow,
 } from "./shoppingLists";
 import {
+  getAiUsage,
+  lookupStockBarcode,
+  suggestStockItem,
+} from "./stockBarcode";
+import {
   createStockCategory,
   createStockCategorySuggestions,
   createStockLocation,
@@ -55,6 +60,7 @@ const stockApiDatasource: StockDatasource = {
   deleteStockCategory,
   deleteStockItem,
   deleteStockLocation,
+  getAiUsage,
   getFrequentStockItems,
   getOwnerChangePreview,
   getRestockSummary,
@@ -66,7 +72,9 @@ const stockApiDatasource: StockDatasource = {
   getStockLocation,
   getStockLocations,
   getStockMovements,
+  lookupStockBarcode,
   setStockGestureExpiration,
+  suggestStockItem,
   suggestStockItems,
   undoStockGesture,
   updateShoppingList,

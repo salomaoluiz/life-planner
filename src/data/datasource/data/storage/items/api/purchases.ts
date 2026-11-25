@@ -6,6 +6,7 @@ import {
   parseMarket,
   parsePendingPurchases,
   parsePurchase,
+  parsePurchaseRowByCode,
   parsePurchaseRowResult,
   parsePurchaseView,
 } from "@data/models/stock/PurchaseModels";
@@ -31,6 +32,7 @@ function suffix(query: URLSearchParams): string {
 // Spec 120 §7: markets, purchases, rows, closing and prices. Writes that can be queued carry the `Idempotency-Key`.
 export const purchaseApiDatasource: Pick<
   StockDatasource,
+  | "addPurchaseRowByCode"
   | "changePurchaseStatus"
   | "closePurchase"
   | "closingLock"
@@ -48,6 +50,23 @@ export const purchaseApiDatasource: Pick<
   | "updateClosedPurchase"
   | "upsertPurchaseRow"
 > = {
+  async addPurchaseRowByCode({ clientId, code, purchaseId }) {
+    try {
+      return parsePurchaseRowByCode(
+        await api.post<Record_>(
+          `/v1/stock/purchases/${id_(purchaseId)}/rows/by-code`,
+          { code },
+          keyed(clientId),
+        ),
+      );
+    } catch (error) {
+      return handleStockApiError(error, {
+        datasource: "StockDatasource - addPurchaseRowByCode",
+        purchaseId,
+      });
+    }
+  },
+
   async changePurchaseStatus({ action, clientId, id }) {
     try {
       return parsePurchase(

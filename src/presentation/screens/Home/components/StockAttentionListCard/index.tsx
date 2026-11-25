@@ -6,6 +6,7 @@ import {
   IconTile,
   ListItem,
 } from "@components";
+import { IconButton } from "@components/Icon";
 import Skeleton from "@components/Skeleton";
 import { useTranslation } from "@presentation/i18n";
 import { BlockState } from "@screens/Home/hooks/useHomeViewModel";
@@ -16,6 +17,7 @@ interface Props {
   fill?: boolean;
   onAddItemPress: () => void;
   onRowPress: () => void;
+  onScanPress: () => void;
   state: BlockState<StockAttentionUIModel>;
 }
 
@@ -23,6 +25,7 @@ function StockAttentionListCard({
   fill,
   onAddItemPress,
   onRowPress,
+  onScanPress,
   state,
 }: Props) {
   const { t } = useTranslation();
@@ -46,6 +49,17 @@ function StockAttentionListCard({
 
   return (
     <Card fill={fill} testID={homeTestIds.stockAttentionCard}>
+      <ListItem
+        title={t("home.stock.attention")}
+        trailing={
+          <IconButton
+            accessibilityLabel={t("stock.barcode.entry")}
+            name="barcode-scan"
+            onPress={onScanPress}
+            testID={homeTestIds.stockAttentionScan}
+          />
+        }
+      />
       {data.isEmpty && (
         <ListItem
           leading={<IconTile name="package-variant-closed" tone="neutral" />}

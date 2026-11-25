@@ -1,4 +1,9 @@
 import {
+  AiUsageModel,
+  ItemSuggestionModel,
+  StockBarcodeLookupModel,
+} from "@data/models/stock/StockBarcodeModels";
+import {
   StockCategoryModel,
   StockLocationDetailModel,
   StockLocationModel,
@@ -44,6 +49,7 @@ export interface StockDatasource extends PurchaseRepository {
   deleteStockCategory(id: string): Promise<void>;
   deleteStockItem(id: string): Promise<void>;
   deleteStockLocation(id: string): Promise<void>;
+  getAiUsage(): Promise<AiUsageModel>;
   getFrequentStockItems(limit?: number): Promise<StockModel[]>;
   getOwnerChangePreview(
     params: OwnerChangePreviewDatasourceParams,
@@ -65,9 +71,13 @@ export interface StockDatasource extends PurchaseRepository {
   getStockMovements(
     params: GetStockMovementsDatasourceParams,
   ): Promise<{ items: StockMovementModel[]; nextCursor?: string }>;
+  lookupStockBarcode(code: string): Promise<StockBarcodeLookupModel>;
   setStockGestureExpiration(
     params: StockGestureExpirationDatasourceParams,
   ): Promise<StockModel>;
+  suggestStockItem(
+    params: SuggestStockItemDatasourceParams,
+  ): Promise<ItemSuggestionModel>;
   suggestStockItems(
     params: SuggestStockItemsDatasourceParams,
   ): Promise<StockSuggestionModel[]>;
@@ -186,6 +196,12 @@ interface StockOwnerDatasourceParams {
   ownerId: string;
 }
 
+// Spec 121: exactly one of `barcode` / `name`.
+interface SuggestStockItemDatasourceParams extends StockOwnerDatasourceParams {
+  barcode?: string;
+  name?: string;
+}
+
 // Without an owner the search covers every owner the user can write (quick add, spec 117).
 interface SuggestStockItemsDatasourceParams {
   owner?: string;
@@ -257,6 +273,7 @@ export {
   GetStockMovementsDatasourceParams,
   OwnerChangePreviewDatasourceParams,
   StockOwnerDatasourceParams,
+  SuggestStockItemDatasourceParams,
   SuggestStockItemsDatasourceParams,
   UpdateShoppingListParams,
   UpdateShoppingListRowParams,

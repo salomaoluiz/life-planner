@@ -17,6 +17,11 @@ import {
   updateShoppingListRow,
 } from "./shoppingLists";
 import {
+  getAiUsage,
+  lookupStockBarcode,
+  suggestStockItem,
+} from "./stockBarcode";
+import {
   createStockCategory,
   createStockCategorySuggestions,
   createStockLocation,
@@ -67,6 +72,7 @@ function stockRepositoryImpl(datasources: Datasources): StockRepository {
     deleteStockItem: async (params) => deleteStockItem(params, datasources),
     deleteStockLocation: async (params) =>
       deleteStockLocation(params, datasources),
+    getAiUsage: async () => getAiUsage(datasources),
     getFrequentStockItems: async (limit) =>
       getFrequentStockItems(limit, datasources),
     getOwnerChangePreview: async (params) =>
@@ -81,8 +87,10 @@ function stockRepositoryImpl(datasources: Datasources): StockRepository {
     getStockLocation: async (id) => getStockLocation(id, datasources),
     getStockLocations: async (params) => getStockLocations(params, datasources),
     getStockMovements: async (params) => getStockMovements(params, datasources),
+    lookupStockBarcode: async (code) => lookupStockBarcode(code, datasources),
     setStockGestureExpiration: async (params) =>
       setStockGestureExpiration(params, datasources),
+    suggestStockItem: async (params) => suggestStockItem(params, datasources),
     suggestStockItems: async (params) => suggestStockItems(params, datasources),
     undoStockGesture: async (params) => undoStockGesture(params, datasources),
     updateShoppingList: async (params) =>

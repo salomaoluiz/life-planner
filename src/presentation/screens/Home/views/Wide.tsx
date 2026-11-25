@@ -147,6 +147,7 @@ function Wide({ vm }: AdaptiveViewProps<HomeVM>) {
               fill={vm.isSplitLayout}
               onAddItemPress={vm.onAddStockItemPress}
               onRowPress={vm.onStockSeeAllPress}
+              onScanPress={vm.onScanStockPress}
               state={vm.stock}
             />
           </View>

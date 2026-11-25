@@ -74,6 +74,7 @@ function setup(overrides: Record<string, unknown> = {}) {
     onNoticeHide: jest.fn(),
     onReopen: jest.fn(),
     onRetry: jest.fn(),
+    onScanPress: jest.fn(),
     onSearchChange: jest.fn(),
     onSheetChange: jest.fn(),
     onSheetClose: jest.fn(),
@@ -138,6 +139,15 @@ it("SHOULD offer the outside-the-list add WHEN the search has text", () => {
   fireEvent.press(screen.getByTestId(testIds.addOutside));
 
   expect(vm.onAddOutside).toHaveBeenCalled();
+});
+
+it("SHOULD open the barcode reader from the scan button (spec 121)", () => {
+  const vm = setup();
+
+  render(<StockPurchase />);
+  fireEvent.press(screen.getByTestId(testIds.scan));
+
+  expect(vm.onScanPress).toHaveBeenCalled();
 });
 
 it("SHOULD lock a row in another cart AND show the ended and closing banners", () => {

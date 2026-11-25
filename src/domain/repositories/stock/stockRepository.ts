@@ -7,6 +7,11 @@ import {
   ShoppingListRowResultEntity,
 } from "@domain/entities/stock/ShoppingListEntity";
 import {
+  AiUsageEntity,
+  ItemSuggestionEntity,
+  StockBarcodeLookupEntity,
+} from "@domain/entities/stock/StockBarcodeEntity";
+import {
   StockCategoryEntity,
   StockLocationDetailEntity,
   StockLocationEntity,
@@ -51,6 +56,7 @@ export type StockRepository = PurchaseRepository & {
   deleteStockLocation(
     params: DeleteStockCatalogRepositoryParams,
   ): Promise<void>;
+  getAiUsage(): Promise<AiUsageEntity>;
   getFrequentStockItems(limit?: number): Promise<StockEntity[]>;
   getOwnerChangePreview(
     params: OwnerChangePreviewRepositoryParams,
@@ -72,9 +78,13 @@ export type StockRepository = PurchaseRepository & {
   getStockMovements(
     params: GetStockMovementsRepositoryParams,
   ): Promise<{ items: StockMovementEntity[]; nextCursor?: string }>;
+  lookupStockBarcode(code: string): Promise<StockBarcodeLookupEntity>;
   setStockGestureExpiration(
     params: StockGestureExpirationRepositoryParams,
   ): Promise<StockEntity>;
+  suggestStockItem(
+    params: SuggestStockItemRepositoryParams,
+  ): Promise<ItemSuggestionEntity>;
   suggestStockItems(
     params: SuggestStockItemsRepositoryParams,
   ): Promise<StockSuggestionEntity[]>;
@@ -200,6 +210,12 @@ interface StockGestureRepositoryParams {
   ownerId: string;
 }
 
+// Spec 121: exactly one of `barcode` / `name`.
+interface SuggestStockItemRepositoryParams extends StockOwnerParams {
+  barcode?: string;
+  name?: string;
+}
+
 interface SuggestStockItemsRepositoryParams {
   owner?: string;
   ownerId?: string;
@@ -277,6 +293,7 @@ export {
   OwnerChangePreviewRepositoryParams,
   StockGestureExpirationRepositoryParams,
   StockGestureRepositoryParams,
+  SuggestStockItemRepositoryParams,
   SuggestStockItemsRepositoryParams,
   UpdateShoppingListRepositoryParams,
   UpdateShoppingListRowRepositoryParams,

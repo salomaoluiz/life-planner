@@ -49,6 +49,10 @@ const preventInfrastructureLibsImports = {
         name: "expo-sharing",
       },
       {
+        message: "Please, use `@infrastructure/barcodeScanner` instead",
+        name: "expo-camera",
+      },
+      {
         message: "Please, use `@infrastructure/supabase` instead",
         name: "@supabase/supabase-js",
       },

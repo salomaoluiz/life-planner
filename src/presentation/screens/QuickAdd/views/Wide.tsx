@@ -29,13 +29,31 @@ function Wide({ vm }: AdaptiveViewProps<QuickAddVM>) {
     if (vm.isEmpty) {
       return (
         <View testID={quickAddTestIds.noStockResult}>
-          <Text.Body value={t("navigation.quickAdd.noStockResult")} />
-          <Button.Ghost
-            inline
-            label={t("navigation.quickAdd.stockItem")}
+          <Text.BodyStrong
+            value={t("stock.suggestions.noMatch", { name: vm.query })}
+          />
+          <Text.Caption value={t("stock.suggestions.noMatchHint")} />
+          <Button.Primary
+            disabled={!vm.canCreateWithAi}
+            icon="auto-fix"
+            label={t(
+              vm.searchLeft?.left === 0
+                ? "stock.suggestions.backTomorrow"
+                : "stock.suggestions.createWithAi",
+            )}
+            onPress={vm.onCreateWithAi}
+            testID={quickAddTestIds.createWithAi}
+          />
+          <Button.Secondary
+            label={t("stock.suggestions.createWithoutAi")}
             onPress={vm.onCreateFromSearch}
             testID={quickAddTestIds.createFromSearch}
           />
+          {vm.searchLeft ? (
+            <Text.Caption
+              value={t("stock.suggestions.usageSearchLeft", vm.searchLeft)}
+            />
+          ) : null}
         </View>
       );
     }
@@ -87,6 +105,12 @@ function Wide({ vm }: AdaptiveViewProps<QuickAddVM>) {
               placeholder={t("navigation.quickAdd.stockSearch")}
               testID={quickAddTestIds.stockSearch}
               value={vm.search}
+            />
+            <Button.Secondary
+              icon="barcode-scan"
+              label={t("stock.barcode.entry")}
+              onPress={vm.onScanPress}
+              testID={quickAddTestIds.scan}
             />
             {renderStock()}
           </>

@@ -191,6 +191,12 @@ function Wide({ vm }: AdaptiveViewProps<StockVM>) {
                   testID={stockTestIds.sortButton}
                 />
               ) : null}
+              <IconButton
+                accessibilityLabel={t("stock.barcode.entry")}
+                name="barcode-scan"
+                onPress={vm.onScanPress}
+                testID={stockTestIds.scanButton}
+              />
               <Button.Secondary
                 label={t("stock.catalog.open")}
                 onPress={vm.onCatalogPress}

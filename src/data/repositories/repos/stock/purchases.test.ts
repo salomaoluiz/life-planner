@@ -3,6 +3,7 @@ import { Datasources } from "@data/datasource";
 import { purchaseRepositoryImpl } from "./purchases";
 
 const methods = [
+  "addPurchaseRowByCode",
   "changePurchaseStatus",
   "closePurchase",
   "closingLock",

@@ -6540,6 +6540,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-camera@npm:~16.0.18":
+  version: 16.0.18
+  resolution: "expo-camera@npm:16.0.18"
+  dependencies:
+    invariant: "npm:^2.2.4"
+  peerDependencies:
+    expo: "*"
+    react: "*"
+    react-native: "*"
+    react-native-web: "*"
+  peerDependenciesMeta:
+    react-native-web:
+      optional: true
+  checksum: 10c0/19d6f27af22d6e148b0bd7dc1dc37778b155ce0454515045a07e7dcc2b0474aa3d0d0986684fcbfe16837cffa41b33128d23376454d975b09b592c3dd92fe803
+  languageName: node
+  linkType: hard
+
 "expo-clipboard@npm:~7.0.1":
   version: 7.0.1
   resolution: "expo-clipboard@npm:7.0.1"
@@ -9271,6 +9288,7 @@ __metadata:
     eslint-plugin-prettier: "npm:^5.2.3"
     expo: "npm:~52.0.35"
     expo-blur: "npm:~14.0.3"
+    expo-camera: "npm:~16.0.18"
     expo-clipboard: "npm:~7.0.1"
     expo-constants: "npm:~17.0.6"
     expo-document-picker: "npm:~13.0.3"

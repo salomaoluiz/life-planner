@@ -115,6 +115,7 @@ function givenViewModel(overrides: Record<string, unknown> = {}) {
     onOpenSort: jest.fn(),
     onRefresh: jest.fn(),
     onRetry: jest.fn(),
+    onScanPress: jest.fn(),
     onSearchChange: jest.fn(),
     onSortChange: jest.fn(),
     onToastHide: jest.fn(),

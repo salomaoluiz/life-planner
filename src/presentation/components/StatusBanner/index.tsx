@@ -12,6 +12,8 @@ export interface StatusBannerProps {
   onAction?: () => void;
   onDismiss?: () => void;
   testID?: string;
+  /** `info` = accent tint (a suggestion), default `warning` */
+  tone?: "info" | "warning";
 }
 
 const ICON = 18;
@@ -25,7 +27,8 @@ function StatusBanner(props: StatusBannerProps) {
     message: { ...typography.caption, color: colors.textPrimary, flex: 1 },
     root: {
       alignItems: "center",
-      backgroundColor: colors.warningSoft,
+      backgroundColor:
+        props.tone === "info" ? colors.accentSoft : colors.warningSoft,
       borderRadius: radius.md,
       flexDirection: "row",
       gap: spacing.sm,
@@ -42,7 +45,11 @@ function StatusBanner(props: StatusBannerProps) {
       style={styles.root}
       testID={testID}
     >
-      <Icon color={colors.warning} name={props.icon ?? "update"} size={ICON} />
+      <Icon
+        color={props.tone === "info" ? colors.accent : colors.warning}
+        name={props.icon ?? "update"}
+        size={ICON}
+      />
       <RNText style={styles.message}>{props.message}</RNText>
       <View style={styles.actions}>
         {props.onAction && props.actionLabel ? (

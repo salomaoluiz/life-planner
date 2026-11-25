@@ -20,6 +20,10 @@ export { default as BarList, BarListProps, BarListRow } from "./BarList";
 export { default as BottomSheet, BottomSheetProps } from "./BottomSheet";
 export { useSheetLayout } from "./BottomSheet/SheetLayoutContext";
 export { default as Button, ButtonProps } from "./Button";
+export {
+  default as CameraViewport,
+  CameraViewportProps,
+} from "./CameraViewport";
 export { default as Card, CardProps } from "./Card";
 export {
   default as ChartCard,

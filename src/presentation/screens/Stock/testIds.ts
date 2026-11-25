@@ -31,6 +31,7 @@ const stockTestIds = {
   rowOpen: "stock.list.row.open",
   rowPending: "stock.list.row.pending",
   rowQuantity: "stock.list.row-quantity",
+  scanButton: "stock.list.scan-button",
   screen: "stock.list.screen",
   search: "stock.list.search-input",
   skeleton: "stock.list.skeleton",

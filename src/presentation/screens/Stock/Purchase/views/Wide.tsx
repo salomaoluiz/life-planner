@@ -209,6 +209,12 @@ function Wide({ vm }: AdaptiveViewProps<PurchaseVM>) {
               testID={purchaseTestIds.search}
               value={vm.search}
             />
+            <Button.Secondary
+              icon="barcode-scan"
+              label={t("stock.barcode.entry")}
+              onPress={vm.onScanPress}
+              testID={purchaseTestIds.scan}
+            />
             {vm.search.trim().length >= 2 ? (
               <Button.Secondary
                 label={`+ ${vm.search.trim()}`}

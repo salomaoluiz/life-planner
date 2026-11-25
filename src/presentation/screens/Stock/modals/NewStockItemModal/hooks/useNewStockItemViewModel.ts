@@ -10,6 +10,7 @@ import {
   useMutation,
   useQuery,
 } from "@infrastructure/fetcher";
+import { asyncStorage, StorageKeys } from "@infrastructure/storage";
 import { useTranslationLocale } from "@presentation/i18n";
 import { useBreakpoint } from "@presentation/theme";
 import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
@@ -17,11 +18,13 @@ import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 import NewStockItemUIModel from "@screens/Stock/modals/NewStockItemModal/models/NewStockItemUIModel";
 import { formatQuantity } from "@screens/Stock/models/quantityFormat";
 
+import useBarcodeField from "./useBarcodeField";
 import useForm, {
   buildCreateParams,
   buildUpdateParams,
   valuesFromItem,
 } from "./useForm";
+import useItemSuggestions from "./useItemSuggestions";
 
 export type NewStockItemVM = ReturnType<typeof useNewStockItemViewModel>;
 
@@ -54,6 +57,9 @@ export default useNewStockItemViewModel;
 function useNewStockItemViewModel() {
   const { closeModal, replaceModal } = useModalNavigation();
   const params = useLocalSearchParams<{
+    // Spec 121: "1" asks the AI to fill the form from the typed name (quick add "Criar com IA").
+    ai?: string;
+    barcode?: string;
     description?: string;
     itemId?: string;
     ownerId?: string;
@@ -84,12 +90,17 @@ function useNewStockItemViewModel() {
   });
   const save = isEdit ? updateStock : addStock;
 
+  // The owner of the last item created is the default of the next ones (an owner that no longer exists is ignored).
+  const [lastOwnerId] = useState(
+    () =>
+      asyncStorage.getString(StorageKeys.string.LAST_STOCK_OWNER) ?? undefined,
+  );
   const model = useMemo(
     () =>
       owners.data?.length
-        ? new NewStockItemUIModel(owners.data, params.ownerId)
+        ? new NewStockItemUIModel(owners.data, params.ownerId ?? lastOwnerId)
         : undefined,
-    [owners.data, params.ownerId],
+    [owners.data, params.ownerId, lastOwnerId],
   );
   const stored = useMemo(
     () => (item.data ? valuesFromItem(item.data) : undefined),
@@ -102,8 +113,30 @@ function useNewStockItemViewModel() {
       form.setField("description", params.description);
     }
   }, [params.description]);
+  // Spec 121 FR 12: a code from the reader arrives in its field.
+  useEffect(() => {
+    if (!isEdit && params.barcode) {
+      form.setField("barcode", params.barcode);
+    }
+  }, [params.barcode]);
   const ownerId = form.values.ownerId ?? model?.defaultOwnerId;
   const ownerKind = ownerId && model ? model.ownerType(ownerId) : undefined;
+  const aiSuggestions = useItemSuggestions({
+    autoName: params.ai ? params.description : undefined,
+    barcode: isEdit ? undefined : params.barcode,
+    enabled: !isEdit && !!ownerKind,
+    locale: getLocale().languageTag,
+    owner: ownerKind,
+    ownerId,
+    setField: form.setField,
+    values: form.values,
+  });
+  const barcodeField = useBarcodeField({
+    itemId: params.itemId,
+    ownerId,
+    saveError: save.error,
+    setBarcode: (code) => form.setField("barcode", code),
+  });
 
   // Categories and locations of the owner being chosen (an item only takes its own owner's, FR "Ownership").
   const catalog = useQuery<OwnerCatalog>({
@@ -167,6 +200,64 @@ function useNewStockItemViewModel() {
   });
   const suggestion = suggestions.data?.[0];
 
+  // Spec 121 FR 16: the name matches an item that has no code yet: offer to give it this code.
+  const linkItem = useQuery<StockDTO>({
+    cacheKey: [useCases.getStockItemUseCase.uniqueName, suggestion?.id ?? ""],
+    enabled: !isEdit && !!form.values.barcode && !!suggestion,
+    fetch: async () =>
+      useCases.getStockItemUseCase.execute({ id: suggestion?.id as string }),
+  });
+  const linkMutation = useMutation({
+    cacheKey: [useCases.updateStockItemUseCase.uniqueName, "link-code"],
+    fetch: useCases.updateStockItemUseCase.execute,
+  });
+  const [isLinking, setIsLinking] = useState(false);
+  const linkable =
+    linkItem.data && !linkItem.data.barcode ? linkItem.data : undefined;
+
+  useEffect(() => {
+    if (isLinking && linkMutation.status === "success") {
+      void invalidateFetcherData([useCases.getStockItemsUseCase.uniqueName]);
+      replaceModal("stock_barcode", {
+        code: form.values.barcode,
+        ownerId: params.ownerId,
+      });
+    }
+  }, [isLinking, linkMutation.status]);
+
+  function onLinkCode() {
+    if (!linkable || !ownerId) {
+      return;
+    }
+
+    setIsLinking(true);
+    linkMutation.mutate({
+      barcode: form.values.barcode,
+      id: linkable.id,
+      previousOwnerId: ownerId,
+    });
+  }
+
+  function onOpenExistingItem() {
+    replaceModal("stock_barcode", {
+      code: form.values.barcode,
+      ownerId: params.ownerId,
+    });
+  }
+
+  // Editing a field drops its "Open Food Facts" / "IA" badge (FR 15).
+  function setField<K extends keyof typeof form.values>(
+    field: K,
+    value: (typeof form.values)[K],
+  ) {
+    form.setField(field, value);
+    aiSuggestions.clearSource(field as never);
+
+    if (field === "barcode") {
+      barcodeField.onTyped();
+    }
+  }
+
   const moved =
     isEdit && !!item.data && !!ownerId && ownerId !== item.data.ownerId;
   const preview = useQuery({
@@ -186,6 +277,10 @@ function useNewStockItemViewModel() {
 
   useEffect(() => {
     if (save.status === "success") {
+      if (!isEdit && ownerId) {
+        asyncStorage.setString(StorageKeys.string.LAST_STOCK_OWNER, ownerId);
+      }
+
       void invalidateFetcherData([useCases.getStockItemUseCase.uniqueName]);
       closeModal();
     }
@@ -237,6 +332,8 @@ function useNewStockItemViewModel() {
   const locale = getLocale().languageTag;
 
   return {
+    ai: aiSuggestions,
+    barcodeField,
     catalog: catalog.data,
     errors: form.errors,
     formErrorKey:
@@ -248,16 +345,19 @@ function useNewStockItemViewModel() {
       (isEdit && item.isFetching && !item.data),
     isMoreOpen,
     isSaving: save.isFetching,
+    linkName: linkable?.description,
     model,
     onAddToSuggestion,
     onClose,
     onDiscard: () => closeModal(),
     onKeepEditing: () => setIsDiscardOpen(false),
+    onLinkCode,
+    onOpenExistingItem,
     onOwnerChange,
     onSave,
     onToggleMore: () => setIsMoreOpen((open) => !open),
     ownerChangePreview: moved ? preview.data : undefined,
-    setField: form.setField,
+    setField,
     suggestion: suggestion
       ? {
           name: suggestion.description,

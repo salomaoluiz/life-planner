@@ -1,0 +1,43 @@
+url: ${E2E_WEB_URL}
+name: stock/barcode-new-item
+tags:
+  - stock
+  - spec-121
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Spec 121: a code nobody has opens the new item form with the code filled and the suggestion step (the API runs
+# without a provider key in E2E, so the form just arrives with the code and can be saved).
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/stock/open-stock.yaml
+- tapOn:
+    id: "stock.list.scan-button"
+- extendedWaitUntil:
+    visible:
+      id: "stock.barcode.code-input"
+    timeout: 20000
+- tapOn:
+    id: "stock.barcode.code-input"
+- inputText: "4006381333931"
+- pressKey: Enter
+- extendedWaitUntil:
+    visible:
+      id: "stock.item-form.sheet"
+    timeout: 20000
+- tapOn:
+    id: "stock.item-form.description-input"
+- inputText: "E2E Codigo Novo"
+- tapOn:
+    id: "stock.item-form.save-button"
+- extendedWaitUntil:
+    visible:
+      id: "stock.list.row-title"
+      text: "E2E Codigo Novo"
+    timeout: 20000

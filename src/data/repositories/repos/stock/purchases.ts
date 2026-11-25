@@ -9,6 +9,7 @@ export function purchaseRepositoryImpl(
   const stock = datasources.stockDatasource;
 
   return {
+    addPurchaseRowByCode: async (params) => stock.addPurchaseRowByCode(params),
     changePurchaseStatus: async (params) => stock.changePurchaseStatus(params),
     closePurchase: async (params) => stock.closePurchase(params),
     closingLock: async (params) => stock.closingLock(params),

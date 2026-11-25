@@ -22,6 +22,9 @@ import {
 import { useTranslation } from "@presentation/i18n";
 import QuantityField from "@screens/Stock/components/QuantityField";
 
+import InlineScanner from "../components/InlineScanner";
+import SourceBadge from "../components/SourceBadge";
+import SuggestionBanner from "../components/SuggestionBanner";
 import { NewStockItemVM } from "../hooks";
 import useStyles from "../styles";
 import stockItemFormTestIds from "../testIds";
@@ -91,15 +94,36 @@ function Wide({ vm }: AdaptiveViewProps<NewStockItemVM>) {
           <FormColumns
             left={
               <>
+                <SuggestionBanner vm={vm} />
                 <Text.Overline value={t("stock.form.itemSection")} />
-                <TextField
-                  error={errors.description ? t(errors.description) : undefined}
-                  label={t("stock.form.description")}
-                  onChangeText={(value) => vm.setField("description", value)}
-                  placeholder={t("stock.form.descriptionPlaceholder")}
-                  testID={stockItemFormTestIds.descriptionInput}
-                  value={values.description}
-                />
+                <SourceBadge field="description" vm={vm} />
+                <View style={styles.descriptionRow}>
+                  <View style={styles.descriptionField}>
+                    <TextField
+                      error={
+                        errors.description ? t(errors.description) : undefined
+                      }
+                      label={t("stock.form.description")}
+                      onChangeText={(value) =>
+                        vm.setField("description", value)
+                      }
+                      placeholder={t("stock.form.descriptionPlaceholder")}
+                      testID={stockItemFormTestIds.descriptionInput}
+                      value={values.description}
+                    />
+                  </View>
+                  <Button.Secondary
+                    disabled={!vm.ai.canFillWithAi}
+                    icon="auto-fix"
+                    label={t(
+                      vm.ai.isLimitReached
+                        ? "stock.suggestions.backTomorrow"
+                        : "stock.suggestions.fillWithAi",
+                    )}
+                    onPress={vm.ai.onFillWithAi}
+                    testID={stockItemFormTestIds.fillWithAi}
+                  />
+                </View>
                 {vm.suggestion ? (
                   <Card testID={stockItemFormTestIds.suggestion}>
                     <Text.Body
@@ -115,8 +139,23 @@ function Wide({ vm }: AdaptiveViewProps<NewStockItemVM>) {
                     />
                   </Card>
                 ) : null}
+                {vm.linkName ? (
+                  <Card testID={stockItemFormTestIds.linkCode}>
+                    <Text.Body
+                      value={t("stock.suggestions.linkCode", {
+                        name: vm.linkName,
+                      })}
+                    />
+                    <Button.Secondary
+                      label={t("stock.suggestions.linkCodeAction")}
+                      onPress={vm.onLinkCode}
+                      testID={stockItemFormTestIds.linkCodeAction}
+                    />
+                  </Card>
+                ) : null}
                 <View style={styles.pair}>
                   <View style={styles.pairItem}>
+                    <SourceBadge field="categoryId" vm={vm} />
                     <SelectField
                       closeLabel={t("common.actions.close")}
                       label={t("stock.form.category")}
@@ -133,6 +172,7 @@ function Wide({ vm }: AdaptiveViewProps<NewStockItemVM>) {
                     />
                   </View>
                   <View style={styles.pairItem}>
+                    <SourceBadge field="locationId" vm={vm} />
                     <SelectField
                       closeLabel={t("common.actions.close")}
                       label={t("stock.form.location")}
@@ -172,6 +212,7 @@ function Wide({ vm }: AdaptiveViewProps<NewStockItemVM>) {
                     value={values.shoppingListId ?? ""}
                   />
                 )}
+                <SourceBadge field="unit" vm={vm} />
                 <ChipGroup
                   label={t("stock.form.unit")}
                   mode="single"
@@ -225,6 +266,14 @@ function Wide({ vm }: AdaptiveViewProps<NewStockItemVM>) {
                 ) : (
                   <>
                     <Text.Overline value={t("stock.form.firstLotSection")} />
+                    {vm.ai.packageHint ? (
+                      <Text.Caption
+                        testID={stockItemFormTestIds.packageHint}
+                        value={t("stock.suggestions.packageHint", {
+                          quantity: `${vm.ai.packageHint.text} ${t(vm.ai.packageHint.unitKey as never)}`,
+                        })}
+                      />
+                    ) : null}
                     <QuantityField
                       error={errors.quantity ? t(errors.quantity) : undefined}
                       helper={t(quantityHint[values.unit])}
@@ -270,6 +319,7 @@ function Wide({ vm }: AdaptiveViewProps<NewStockItemVM>) {
                   <>
                     <View style={styles.moreRow}>
                       <View style={styles.pairItem}>
+                        <SourceBadge field="brand" vm={vm} />
                         <TextField
                           label={t("stock.form.brand")}
                           onChangeText={(value) => vm.setField("brand", value)}
@@ -278,6 +328,7 @@ function Wide({ vm }: AdaptiveViewProps<NewStockItemVM>) {
                         />
                       </View>
                       <View style={styles.pairItem}>
+                        <SourceBadge field="openedShelfLifeDays" vm={vm} />
                         <TextField
                           error={
                             errors.shelfLife ? t(errors.shelfLife) : undefined
@@ -346,6 +397,34 @@ function Wide({ vm }: AdaptiveViewProps<NewStockItemVM>) {
                       testID={stockItemFormTestIds.barcodeInput}
                       value={values.barcode}
                     />
+                    {vm.barcodeField.isScanning ? (
+                      <InlineScanner
+                        onClose={vm.barcodeField.onClose}
+                        onScanned={vm.barcodeField.onScanned}
+                      />
+                    ) : (
+                      <Button.Ghost
+                        icon="barcode-scan"
+                        inline
+                        label={t("stock.barcode.scanField")}
+                        onPress={vm.barcodeField.onOpen}
+                        testID={stockItemFormTestIds.scanBarcode}
+                      />
+                    )}
+                    {vm.barcodeField.inUse ? (
+                      <Card testID={stockItemFormTestIds.barcodeInUse}>
+                        <Text.Body
+                          value={t("stock.barcode.inUse", {
+                            name: vm.barcodeField.inUse.description,
+                          })}
+                        />
+                        <Button.Secondary
+                          label={t("stock.barcode.openItem")}
+                          onPress={vm.onOpenExistingItem}
+                          testID={stockItemFormTestIds.barcodeInUseAction}
+                        />
+                      </Card>
+                    ) : null}
                     <ChipGroup
                       label={t("stock.form.owner")}
                       mode="single"
@@ -380,6 +459,17 @@ function Wide({ vm }: AdaptiveViewProps<NewStockItemVM>) {
             }
             testID={stockItemFormTestIds.sheet}
           />
+          {vm.ai.usage && !vm.isEdit ? (
+            <Text.Caption
+              testID={stockItemFormTestIds.usage}
+              value={t("stock.suggestions.usage", {
+                light: vm.ai.usage.light.used,
+                lightLimit: vm.ai.usage.light.limit,
+                search: vm.ai.usage.search.used,
+                searchLimit: vm.ai.usage.search.limit,
+              })}
+            />
+          ) : null}
           {vm.formErrorKey ? (
             <Text.Caption tone="expense" value={t(vm.formErrorKey)} />
           ) : null}
