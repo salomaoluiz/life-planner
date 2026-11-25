@@ -1,0 +1,83 @@
+url: ${E2E_WEB_URL}
+name: stock/forecast-and-waste
+tags:
+  - stock
+  - spec-123
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Spec 123: a new item has no consumption yet (the Previsão block says so), a month without discards says "Nada
+# descartado neste mês", and the list takes its purchase interval ("Compro a cada N dias").
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../scripts/random-name.js
+    env:
+      PREFIX: E2E Forecast
+      KEY: ITEM_NAME
+- runFlow:
+    file: ../../subflows/setup/create-stock-item.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      DESCRIPTION: ${output.ITEM_NAME}
+      QUANTITY: "3"
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/stock/open-stock.yaml
+- tapOn:
+    id: "navigation-rail-stock-waste"
+- extendedWaitUntil:
+    visible:
+      id: "stock.waste.empty"
+    timeout: 20000
+- assertVisible:
+    id: "stock.waste.month"
+- tapOn:
+    id: "navigation-rail-stock-lists"
+- extendedWaitUntil:
+    visible:
+      id: "stock.lists.card-default"
+    timeout: 20000
+- tapOn:
+    id: "stock.lists.card-default"
+- extendedWaitUntil:
+    visible:
+      id: "stock.list-detail.edit-button"
+    timeout: 20000
+- tapOn:
+    id: "stock.list-detail.edit-button"
+- extendedWaitUntil:
+    visible:
+      id: "stock.list-form.interval"
+    timeout: 10000
+- tapOn:
+    id: "stock.list-form.interval"
+- eraseText: 3
+- inputText: "14"
+- tapOn:
+    id: "stock.list-form.submit"
+- extendedWaitUntil:
+    notVisible:
+      id: "stock.list-form.sheet"
+    timeout: 10000
+- tapOn:
+    id: "navigation-rail-stock-items"
+- extendedWaitUntil:
+    visible:
+      id: "stock.list.row-title"
+      text: ${output.ITEM_NAME}
+    timeout: 20000
+- tapOn:
+    id: "stock.list.row-title"
+    text: ${output.ITEM_NAME}
+- extendedWaitUntil:
+    visible:
+      id: "stock.item-details.forecast"
+    timeout: 20000
+- assertNotVisible:
+    id: "stock.item-details.leftover"

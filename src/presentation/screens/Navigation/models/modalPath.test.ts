@@ -34,8 +34,8 @@ describe("splitModalPath", () => {
 });
 
 describe("isValidBase", () => {
-  it("SHOULD accept exactly the fifteen bases (the investments Overview joined in spec 110, Settings in spec 113, the stock Lists and Catalog in spec 118)", () => {
-    expect(VALID_BASES).toHaveLength(15);
+  it("SHOULD accept exactly the sixteen bases (the investments Overview joined in spec 110, Settings in spec 113, the stock Lists and Catalog in spec 118, Waste in spec 123)", () => {
+    expect(VALID_BASES).toHaveLength(16);
     VALID_BASES.forEach((base) => expect(isValidBase(base)).toBe(true));
     expect(isValidBase("")).toBe(true);
     expect(isValidBase("/stock/")).toBe(true);

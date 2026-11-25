@@ -67,7 +67,7 @@ components:
   - LowestBalanceTiles (web: hover tooltip with the balance by account through the kit `Tooltip` and `DayBalanceLine`; mobile: chevron expands the same lines)
   - UpcomingList (overdue group header with its expense total, "Next 7 days" group, empty "All set" state, invoice row with "See transactions")
   - StockSummaryCard (attention count and items in stock)
-  - StockShoppingListCard (spec 118: `getRestockSummaryUseCase` → `ShoppingListSummaryUIModel`, AUTO/AUTO_EDITED rows of every readable list grouped by list, at most 5, total per currency, "Ver tudo (+N)" opens `/stock/lists`; hidden without rows; testIDs `home.shopping-list.*`)
+  - StockShoppingListCard (spec 118: `getRestockSummaryUseCase` → `ShoppingListSummaryUIModel`, AUTO/AUTO_EDITED/FORECAST rows (spec 123) of every readable list grouped by list, at most 5, total per currency, "Ver tudo (+N)" opens `/stock/lists`; hidden without rows; testIDs `home.shopping-list.*`)
   - StockAttentionListCard (testIDs `home.stock-attention.*` in `Home/testIds.ts`; rows open `/stock?filter=EXPIRING`; E2E `stock/home-attention-card`, spec 021)
   path: src/presentation/screens/Home/components/
 

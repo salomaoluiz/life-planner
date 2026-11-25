@@ -3,6 +3,15 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [3.6.0] - 2026-11-25
+
+### Added
+
+- Stock forecast (spec 123): the item detail shows how fast you use it and when it reaches the minimum and runs out, with a 12-week chart; items that will not last until the next trip enter the shopping list as "Previsto" and show "Acaba em ~N dias".
+- "Compro a cada N dias" on the shopping list (Editar lista), with the next trip and the interval your closed purchases suggest.
+- A warning when a lot will expire before it runs out ("Vai vencer antes de acabar", "Dispensar aviso") and the price paid per unit on each lot.
+- Descartar shows the value of the waste; the new Estoque › Desperdício section shows the month by reason, category and item, and the list hints when you discard 30% or more of an item.
+
 ## [3.5.0] - 2026-11-23
 
 ### Added
