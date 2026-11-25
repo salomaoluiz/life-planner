@@ -113,9 +113,25 @@ describe("lots", () => {
 });
 
 describe("defaults and preview", () => {
-  it("SHOULD start an OPEN at 1, a DISCARD at the whole lot and the others empty", () => {
+  it("SHOULD start an OPEN at 1, a DISCARD at 1 (the whole lot when it expired) and the others empty", () => {
+    const expired = [
+      lot("old", 3, { expirationStatus: StockLotStatus.EXPIRED }),
+    ];
+
     expect(model(StockMovementTypes.OPEN).initialQuantity()).toBe(1);
-    expect(model(StockMovementTypes.DISCARD).initialQuantity("closed")).toBe(3);
+    expect(model(StockMovementTypes.DISCARD).initialQuantity("closed")).toBe(1);
+    expect(
+      model(
+        StockMovementTypes.DISCARD,
+        StockUnits.UNIT,
+        expired,
+      ).initialQuantity("old"),
+    ).toBe(3);
+    expect(
+      model(StockMovementTypes.DISCARD, StockUnits.KILOGRAM, [
+        lot("x", 0.4),
+      ]).initialQuantity("x"),
+    ).toBe(0.4);
     expect(model(StockMovementTypes.CONSUME).initialQuantity()).toBeUndefined();
     expect(model(StockMovementTypes.ENTRY).unit).toBe(StockUnits.UNIT);
   });
@@ -138,5 +154,59 @@ describe("defaults and preview", () => {
     expect(ui.openPreview("ghost", 1)).toBeUndefined();
     expect(ui.openPreview("closed", undefined)).toBeUndefined();
     expect(ui.openPreview("closed", 0)).toBeUndefined();
+  });
+});
+
+describe("spec 123 discard", () => {
+  const priced = [
+    lot("a", 3, { currency: "BRL", unitPriceCents: 489 }),
+    lot("b", 2, { expirationStatus: StockLotStatus.EXPIRED }),
+  ];
+
+  it("SHOULD pick the first expired lot to discard, else the first one", () => {
+    expect(
+      model(
+        StockMovementTypes.DISCARD,
+        StockUnits.UNIT,
+        priced,
+      ).defaultDiscardLotId(),
+    ).toBe("b");
+    expect(
+      model(StockMovementTypes.DISCARD, StockUnits.UNIT, [
+        priced[0],
+      ]).defaultDiscardLotId(),
+    ).toBe("a");
+  });
+
+  it("SHOULD show the value of the lot price x quantity AND say when the lot has no price", () => {
+    const ui = model(StockMovementTypes.DISCARD, StockUnits.UNIT, priced);
+    const value = ui.discardValue("a", 2);
+
+    expect(value).toMatchObject({ kind: "lot" });
+    expect(value).toHaveProperty("value", expect.stringContaining("9.78"));
+    expect(value).toHaveProperty("price", expect.stringContaining("4.89"));
+    expect(ui.discardValue("b", 1)).toEqual({ kind: "unknown" });
+    expect(ui.discardValue("a", 0)).toBeUndefined();
+    expect(ui.discardValue(undefined, 1)).toBeUndefined();
+  });
+
+  it("SHOULD round the value half-up for a fractional quantity", () => {
+    const ui = model(StockMovementTypes.DISCARD, StockUnits.KILOGRAM, [
+      lot("k", 2, { currency: "BRL", unitPriceCents: 489 }),
+    ]);
+
+    expect(ui.discardValue("k", 0.5)).toHaveProperty(
+      "value",
+      expect.stringContaining("2.45"),
+    );
+  });
+
+  it("SHOULD list the price per unit on each lot option AND let only the discard pick a lot", () => {
+    const ui = model(StockMovementTypes.DISCARD, StockUnits.UNIT, priced);
+
+    expect(ui.lotOptions[0].price?.text).toContain("4.89");
+    expect(ui.lotOptions[1].price).toBeUndefined();
+    expect(ui.showsDiscardLot).toBe(true);
+    expect(model(StockMovementTypes.CONSUME).showsDiscardLot).toBe(false);
   });
 });

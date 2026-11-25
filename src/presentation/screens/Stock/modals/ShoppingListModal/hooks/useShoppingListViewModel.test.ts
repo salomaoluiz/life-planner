@@ -19,6 +19,9 @@ jest.mock("expo-router", () => ({
 }));
 jest.mock("@infrastructure/fetcher");
 jest.mock("@screens/Financial/hooks/useActiveOwners");
+jest.mock("@presentation/i18n", () => ({
+  useTranslationLocale: () => ({ getLocale: () => ({ languageTag: "en-US" }) }),
+}));
 jest.mock("@application/useCases", () => ({
   useCases: {
     createShoppingListUseCase: { execute: jest.fn(), uniqueName: "create" },
@@ -38,6 +41,7 @@ function card(id: string, extra: Record<string, unknown> = {}) {
     name: `List ${id}`,
     owner: "FAMILY",
     ownerId: "f",
+    purchaseIntervalDays: 7,
     status: ShoppingListStatuses.ACTIVE,
     ...extra,
   };
@@ -198,4 +202,64 @@ it("SHOULD read the lists with archived ones and close through the navigation he
   act(() => result.current.onOwnerChange("f"));
   expect(modalNavigation.closeModal).toHaveBeenCalled();
   expect(result.current.selectedOwnerId).toBe("f");
+});
+
+describe("spec 123 purchase interval", () => {
+  const withSuggestion = [
+    card("d", { isDefault: true, name: "Mercado" }),
+    card("p", {
+      name: "Farmácia",
+      nextTripDate: new Date(2026, 10, 29),
+      suggestedIntervalDays: 9,
+    }),
+  ];
+
+  it("SHOULD start from the interval of the list AND send it only when it changes", async () => {
+    const { result } = setup({ id: "p" }, withSuggestion);
+
+    expect(result.current.currentIntervalText).toBe("7");
+
+    act(() => result.current.onIntervalChange("14"));
+    await act(async () => result.current.onSubmit());
+
+    expect(useCases.updateShoppingListUseCase.execute).toHaveBeenCalledWith({
+      id: "p",
+      isDefault: undefined,
+      name: undefined,
+      purchaseIntervalDays: 14,
+    });
+  });
+
+  it.each(["0", "91", "", "abc", "1.5"])(
+    "SHOULD refuse %p days and not save",
+    async (text) => {
+      const { result } = setup({ id: "p" }, withSuggestion);
+
+      act(() => result.current.onIntervalChange(text));
+      await act(async () => result.current.onSubmit());
+
+      expect(result.current.intervalError).toBe("stock.lists.intervalInvalid");
+      expect(useCases.updateShoppingListUseCase.execute).not.toHaveBeenCalled();
+    },
+  );
+
+  it("SHOULD offer the suggestion only when it differs AND use it on demand", async () => {
+    const { result } = setup({ id: "p" }, withSuggestion);
+
+    expect(result.current.suggestedInterval).toBe(9);
+
+    act(() => result.current.onUseSuggested());
+
+    expect(result.current.currentIntervalText).toBe("9");
+    expect(result.current.suggestedInterval).toBeUndefined();
+  });
+
+  it("SHOULD not offer a suggestion that does not exist AND expose the next trip", () => {
+    const { result } = setup({ id: "d" }, withSuggestion);
+
+    expect(result.current.suggestedInterval).toBeUndefined();
+    expect(
+      setup({ id: "p" }, withSuggestion).result.current.nextTripDate?.getDate(),
+    ).toBe(29);
+  });
 });

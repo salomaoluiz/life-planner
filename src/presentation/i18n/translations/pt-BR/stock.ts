@@ -369,10 +369,12 @@ const stock = {
       all: "Todas",
       personal: "Pessoal",
     },
+    forecastCount_one: "1 previsto",
+    forecastCount_other: "{{count}} previstos",
     forecastLine:
       "tem {{have}} · em {{date}} terá ~{{projected}} (mínimo {{min}}) · completa o ideal {{ideal}}",
     forecastLineNoIdeal:
-      "tem {{have}} · chega no mínimo em {{date}} · sem ideal: ~{{rate}}/dia × {{interval}} dias até a ida seguinte",
+      "tem {{have}} · chega no mínimo em {{date}} · sem ideal: cobre {{interval}} dias até a ida seguinte",
     forecastLineNoMin:
       "tem {{have}} · em {{date}} terá ~{{projected}} · completa o ideal {{ideal}}",
     hasQuantity: "tem {{quantity}} {{unit}}",
@@ -408,6 +410,7 @@ const stock = {
     nextTripLine_other: "Compro a cada {{count}} dias · próxima ida {{date}}",
     nextTripSince:
       "{{date}} · {{count}} dias depois da última compra ({{last}})",
+    nextTripTitle: "Próxima ida",
     noAuto: "nenhum automático",
     noPrice: "sem preço",
     noPriceYet: "sem preço ainda · digite na linha",
@@ -485,6 +488,13 @@ const stock = {
       entry: "Dar entrada",
       open: "Abri",
     },
+    discardValue: {
+      label: "Valor do desperdício",
+      lotSource:
+        "{{quantity}} × {{price}}, preço pago neste lote. Fica gravado no descarte e não muda se o preço subir.",
+      noLotPrice:
+        'Lote sem preço usa o último preço do item. Sem nenhum preço: "sem preço", conta só a quantidade.',
+    },
     errors: {
       alreadyOpen: "Esse lote já está aberto.",
       invalid: "Confira a quantidade.",
@@ -496,6 +506,7 @@ const stock = {
     lotNoExpiration: "{{quantity}} · sem validade",
     lotOpened: "{{quantity}} · aberto · vence {{date}}",
     lotOption: "{{quantity}} · vence {{date}}",
+    lotWithPrice: "{{lot}} · {{price}}/{{unit}}",
     note: "Observação (opcional)",
     openHint: "Sugere 1 (1 un, 1 kg ou 1 L), limitado ao que o lote tem.",
     quantity: {

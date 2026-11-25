@@ -367,10 +367,12 @@ const stock = {
       all: "All",
       personal: "Personal",
     },
+    forecastCount_one: "1 forecast",
+    forecastCount_other: "{{count}} forecast",
     forecastLine:
       "has {{have}} · on {{date}} will have ~{{projected}} (minimum {{min}}) · fills the ideal {{ideal}}",
     forecastLineNoIdeal:
-      "has {{have}} · reaches the minimum on {{date}} · no ideal: ~{{rate}}/day × {{interval}} days until the following trip",
+      "has {{have}} · reaches the minimum on {{date}} · no ideal: covers {{interval}} days until the following trip",
     forecastLineNoMin:
       "has {{have}} · on {{date}} will have ~{{projected}} · fills the ideal {{ideal}}",
     hasQuantity: "has {{quantity}} {{unit}}",
@@ -406,6 +408,7 @@ const stock = {
     nextTripLine_other: "I shop every {{count}} days · next trip {{date}}",
     nextTripSince:
       "{{date}} · {{count}} days after the last purchase ({{last}})",
+    nextTripTitle: "Next trip",
     noAuto: "no automatic rows",
     noPrice: "no price",
     noPriceYet: "no price yet · type it on the row",
@@ -483,6 +486,13 @@ const stock = {
       entry: "Add stock",
       open: "Opened",
     },
+    discardValue: {
+      label: "Waste value",
+      lotSource:
+        "{{quantity}} × {{price}}, price paid for this lot. It is recorded on the discard and does not change if the price goes up.",
+      noLotPrice:
+        'This lot has no price: the item\'s last price is used. With no price at all, it counts in quantity only ("no price").',
+    },
     errors: {
       alreadyOpen: "That lot is already open.",
       invalid: "Check the quantity.",
@@ -494,6 +504,7 @@ const stock = {
     lotNoExpiration: "{{quantity}} · no expiration",
     lotOpened: "{{quantity}} · opened · expires {{date}}",
     lotOption: "{{quantity}} · expires {{date}}",
+    lotWithPrice: "{{lot}} · {{price}}/{{unit}}",
     note: "Note (optional)",
     openHint: "Suggests 1 (1 un, 1 kg or 1 L), limited to what the lot has.",
     quantity: {
