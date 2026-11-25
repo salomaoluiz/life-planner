@@ -1,10 +1,12 @@
 import { useIsFocused } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
 import StockDTO from "@application/dto/stock/StockDTO";
 import StockMovementDTO from "@application/dto/stock/StockMovementDTO";
 import { useCases } from "@application/useCases";
 import { StockMovementTypes } from "@domain/entities/stock/StockMovementEntity";
+import { ConsumptionWeekEntity } from "@domain/entities/stock/StockWasteEntity";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
 import useOwners from "@presentation/hooks/useOwners";
 import { useTranslationLocale } from "@presentation/i18n";
@@ -27,12 +29,14 @@ interface MovementsPage {
 function useStockItemDetailsViewModel(props: Props) {
   const { getLocale } = useTranslationLocale();
   const { openModal } = useModalNavigation();
+  const router = useRouter();
   // The details sheet lives in the list screen: while a modal route (edit, movement) is open on top, it is hidden.
   const isFocused = useIsFocused();
   const owners = useOwners();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [extraPages, setExtraPages] = useState<MovementsPage[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [highlightedLotId, setHighlightedLotId] = useState<string>();
   const id = props.item.id;
 
   const detail = useQuery<StockDTO>({
@@ -44,6 +48,17 @@ function useStockItemDetailsViewModel(props: Props) {
     fetch: async () =>
       useCases.getStockMovementsUseCase.execute({ itemId: id }),
   });
+  // Spec 123 FR 19: the 12-week chart (a "stock only" item has no forecast).
+  const weeks = useQuery<ConsumptionWeekEntity[]>({
+    cacheKey: [useCases.getConsumptionWeeksUseCase.uniqueName, id],
+    enabled: detail.data ? !detail.data.stockOnly : false,
+    fetch: async () =>
+      useCases.getConsumptionWeeksUseCase.execute({ itemId: id }),
+  });
+  const dismiss = useMutation({
+    cacheKey: [useCases.dismissLeftoverUseCase.uniqueName],
+    fetch: useCases.dismissLeftoverUseCase.execute,
+  });
   const deleteItem = useMutation({
     cacheKey: [useCases.deleteStockItemUseCase.uniqueName],
     fetch: useCases.deleteStockItemUseCase.execute,
@@ -53,6 +68,13 @@ function useStockItemDetailsViewModel(props: Props) {
   useEffect(() => {
     setExtraPages([]);
   }, [firstPage.data]);
+
+  // The warning is read from the item: refresh it once the dismissal is stored.
+  useEffect(() => {
+    if (dismiss.status === "success") {
+      void detail.refetch();
+    }
+  }, [dismiss.status]);
 
   useEffect(() => {
     if (deleteItem.status === "success") {
@@ -78,6 +100,7 @@ function useStockItemDetailsViewModel(props: Props) {
     ? pages[pages.length - 1].nextCursor
     : undefined;
   const history = model?.history(pages.flatMap((page) => page.items)) ?? [];
+  const chart = model && weeks.data ? model.chart(weeks.data) : undefined;
   const params = { itemId: id, ownerId: props.item.ownerId };
 
   async function onLoadMore() {
@@ -113,14 +136,17 @@ function useStockItemDetailsViewModel(props: Props) {
 
   return {
     canAddToList: detail.data ? !detail.data.stockOnly : false,
+    chart,
     errorKey:
       deleteItem.status === "error"
         ? ("common.errors.generic" as const)
         : undefined,
     hasMore: !!nextCursor,
+    highlightedLotId,
     history,
     isConfirmOpen,
     isDeleting: deleteItem.isFetching,
+    isDismissing: dismiss.isFetching,
     isFocused,
     isHistoryLoading: firstPage.isFetching && !firstPage.data,
     isLoading: detail.isFetching && !detail.data,
@@ -138,11 +164,17 @@ function useStockItemDetailsViewModel(props: Props) {
     onDeletePress: () => setIsConfirmOpen(true),
     onDiscard: (lotId: string) =>
       openMovement(StockMovementTypes.DISCARD, lotId),
+    onDismissLeftover: (lotId: string) =>
+      dismiss.mutate({ dismissed: true, lotId }),
     onEdit: () => openModal("add_new_stock_item", params),
     onEntry: () => openMovement(StockMovementTypes.ENTRY),
     onLoadMore,
     onOpen: () => openMovement(StockMovementTypes.OPEN),
+    onOpenWaste: () => router.push("/stock/waste" as never),
     onRetry: async () => detail.refetch(),
+    onViewList: () => router.push("/stock/lists" as never),
+    onViewLot: (lotId: string) =>
+      setHighlightedLotId((current) => (current === lotId ? undefined : lotId)),
   };
 }
 

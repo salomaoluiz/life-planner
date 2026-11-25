@@ -116,7 +116,7 @@ function BarcodeResult({ vm }: Props) {
               {sheet.badges.map((badge) => (
                 <Badge
                   key={badge.labelKey}
-                  label={t(badge.labelKey)}
+                  label={t(badge.labelKey, badge.params)}
                   tone={badge.tone}
                 />
               ))}

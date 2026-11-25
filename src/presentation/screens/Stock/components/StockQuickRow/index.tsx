@@ -3,9 +3,12 @@ import { View } from "react-native";
 import { Badge, IconTile, ListItem } from "@components";
 import { StockExpirationStatus } from "@domain/entities/stock/StockEntity";
 import { useTranslation } from "@presentation/i18n";
+import { TranslationKeys } from "@presentation/i18n/types";
 import StockQuickStepper from "@screens/Stock/components/StockQuickStepper";
 import { StockQuickMovementVM } from "@screens/Stock/hooks/useStockQuickMovement";
-import StockItemUIModel from "@screens/Stock/models/StockItemUIModel";
+import StockItemUIModel, {
+  StockBadge,
+} from "@screens/Stock/models/StockItemUIModel";
 import useStyles from "@screens/Stock/styles";
 import stockTestIds from "@screens/Stock/testIds";
 
@@ -21,6 +24,9 @@ function badgeTestId(labelKey: string) {
     "stock.badge.expiring": stockTestIds.statusExpiring,
     "stock.badge.opened": stockTestIds.statusOpened,
     "stock.badge.restock": stockTestIds.statusRestock,
+    "stock.forecast.badge_one": stockTestIds.statusForecast,
+    "stock.forecast.badge_other": stockTestIds.statusForecast,
+    "stock.leftover.badge": stockTestIds.statusLeftover,
   };
 
   return ids[labelKey];
@@ -45,7 +51,21 @@ function StockQuickRow({ item, onPress, quick }: Props) {
   }
 
   const quantity = `${item.quantity.text} ${t(item.quantity.unitKey)}`;
-  const badgeLabels = item.badges.map((badge) => t(badge.labelKey));
+
+  function badgeLabel(badge: StockBadge) {
+    const params = badge.params && {
+      ...badge.params,
+      quantity: [
+        badge.params.quantity,
+        badge.params.unit && t(badge.params.unit as TranslationKeys),
+      ]
+        .filter(Boolean)
+        .join(" "),
+    };
+
+    return t(badge.labelKey, params);
+  }
+  const badgeLabels = item.badges.map((badge) => badgeLabel(badge));
 
   return (
     <ListItem
@@ -62,7 +82,7 @@ function StockQuickRow({ item, onPress, quick }: Props) {
             {item.badges.map((badge) => (
               <Badge
                 key={badge.labelKey}
-                label={t(badge.labelKey)}
+                label={badgeLabel(badge)}
                 testID={badgeTestId(badge.labelKey)}
                 tone={badge.tone}
               />

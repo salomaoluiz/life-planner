@@ -157,3 +157,53 @@ describe("presentation", () => {
     expect(normalizeSearchText("  Muçarela ")).toBe("mucarela");
   });
 });
+
+describe("spec 123 badges", () => {
+  const now = new Date(2026, 10, 25);
+  const forecast = {
+    dailyRate: 0.5,
+    emptyDate: new Date(2026, 11, 5),
+    minDate: new Date(2026, 10, 28),
+    status: "OK" as const,
+    weeklyRate: 3.5,
+  };
+
+  function build(extra: object) {
+    return new StockItemUIModel(
+      Object.assign(dto(), extra),
+      owners,
+      "en-US",
+      now,
+    );
+  }
+
+  it("SHOULD show Acaba em only for an item with a forecast row, and send it to attention", () => {
+    const row = build({ forecast, hasForecastRow: true });
+    const comfortable = build({ forecast, hasForecastRow: false });
+
+    expect(row.badges.map((badge) => badge.labelKey)).toContain(
+      "stock.forecast.badge_other",
+    );
+    expect(row.badges.find((badge) => badge.params)?.params).toEqual({
+      count: 10,
+    });
+    expect(row.isAttention).toBe(true);
+    expect(comfortable.badges.map((badge) => badge.labelKey)).not.toContain(
+      "stock.forecast.badge_other",
+    );
+    expect(comfortable.isAttention).toBe(false);
+  });
+
+  it("SHOULD show Sobra with the quantity and the day for a leftover, and send it to attention", () => {
+    const item = build({
+      leftover: { date: new Date(2026, 10, 27), lotId: "a", quantity: 1 },
+    });
+    const badge = item.badges.find(
+      (candidate) => candidate.labelKey === "stock.leftover.badge",
+    );
+
+    expect(badge?.params).toMatchObject({ date: "27", quantity: "1" });
+    expect(badge?.tone).toBe("expense");
+    expect(item.isAttention).toBe(true);
+  });
+});

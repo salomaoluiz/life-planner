@@ -204,3 +204,128 @@ describe("history", () => {
     expect(rows[0].createdAt).toContain("11");
   });
 });
+
+describe("spec 123 forecast", () => {
+  const now = new Date(2026, 10, 25);
+  const forecast = {
+    dailyRate: 0.571,
+    emptyDate: new Date(2026, 11, 3),
+    minDate: new Date(2026, 10, 28),
+    status: "OK" as const,
+    weeklyRate: 4,
+  };
+
+  function forecasted(extra: object = {}) {
+    return Object.assign(dto(), { forecast, minQuantity: 3 }, extra);
+  }
+  function build(item: ReturnType<typeof dto>) {
+    return new StockItemDetailsUIModel(item, owners, "en-US", now);
+  }
+
+  it("SHOULD show the weekly use, the days to the minimum and to zero with their dates", () => {
+    const section = build(forecasted()).forecast;
+
+    expect(section).toMatchObject({
+      empty: {
+        date: "12/03",
+        days: { key: "stock.forecast.inDays_other", params: { count: 8 } },
+      },
+      kind: "ok",
+      min: {
+        date: "11/28",
+        days: { key: "stock.forecast.inDays_other", params: { count: 3 } },
+      },
+    });
+  });
+
+  it("SHOULD say now WHEN the date is today AND keep a singular for one day", () => {
+    const today = build(
+      forecasted({ forecast: { ...forecast, minDate: now } }),
+    ).forecast;
+    const tomorrow = build(
+      forecasted({
+        forecast: { ...forecast, emptyDate: new Date(2026, 10, 26) },
+      }),
+    ).forecast;
+
+    expect(today).toMatchObject({
+      min: { days: { key: "stock.forecast.now" } },
+    });
+    expect(tomorrow).toMatchObject({
+      empty: { days: { key: "stock.forecast.inDays_one" } },
+    });
+  });
+
+  it("SHOULD explain a forecast without data OR without use, and hide it for a stock-only item", () => {
+    expect(
+      build(
+        forecasted({ forecast: { ...forecast, status: "INSUFFICIENT_DATA" } }),
+      ).forecast,
+    ).toEqual({ kind: "insufficient" });
+    expect(
+      build(forecasted({ forecast: { ...forecast, status: "NO_CONSUMPTION" } }))
+        .forecast,
+    ).toEqual({ kind: "noConsumption" });
+    expect(build(forecasted({ stockOnly: true })).forecast).toBeUndefined();
+    expect(build(dto()).forecast).toBeUndefined();
+  });
+
+  it("SHOULD name the list of the forecast row AND the leftover lot with its quantities", () => {
+    const item = forecasted({
+      forecastRow: { listId: "l", listName: "Mercado", quantity: 6 },
+      leftover: { date: new Date(2026, 10, 27), lotId: "a", quantity: 1 },
+      lots: [lot("a", { quantity: 3 })],
+    });
+    const result = build(item);
+
+    expect(result.forecastRow?.list).toBe("Mercado");
+    expect(result.leftover).toMatchObject({ date: "11/27", lotId: "a" });
+    expect(result.leftover?.lotQuantity.text).toBe("3");
+    expect(result.leftover?.left.text).toBe("1");
+  });
+
+  it("SHOULD show the price per unit and tint the lot with a leftover, unless it was dismissed", () => {
+    const item = forecasted({
+      lots: [
+        lot("a", { currency: "BRL", leftoverQuantity: 1, unitPriceCents: 489 }),
+        lot("b", { leftoverDismissed: true, leftoverQuantity: 1 }),
+        lot("c"),
+      ],
+    });
+    const rows = build(item).lots;
+
+    expect(rows[0].price?.text).toContain("4.89");
+    expect(rows[0].leftover?.text).toBe("1");
+    expect(rows[1].leftover).toBeUndefined();
+    expect(rows[2].price).toBeUndefined();
+  });
+
+  it("SHOULD summarize the 90-day waste with one value per currency", () => {
+    const item = forecasted({
+      waste90d: {
+        count: 1,
+        mainReason: "EXPIRED",
+        quantity: 2,
+        totals: [{ currency: "BRL", valueCents: 978 }],
+      },
+    });
+    const waste = build(item).waste;
+
+    expect(waste?.reasonKey).toBe("stock.waste.reason.expired");
+    expect(waste?.values[0]).toContain("9.78");
+    expect(waste?.count).toBe(1);
+  });
+
+  it("SHOULD scale the weekly bars to the biggest week AND keep the excluded ones", () => {
+    const chart = build(dto()).chart([
+      { excluded: false, quantity: 4, start: new Date(2026, 8, 7) },
+      { excluded: true, quantity: 0, start: new Date(2026, 8, 14) },
+      { excluded: false, quantity: 2, start: new Date(2026, 8, 21) },
+    ]);
+
+    expect(chart.bars.map((bar) => bar.ratio)).toEqual([1, 0, 0.5]);
+    expect(chart.bars[1].excluded).toBe(true);
+    expect(chart.bars[2].weight).toBe(1);
+    expect(chart.values).toBe("4, 0, 2");
+  });
+});

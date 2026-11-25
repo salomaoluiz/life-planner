@@ -16,6 +16,9 @@ import useStockItemDetailsViewModel from "./useStockItemDetailsViewModel";
 
 jest.mock("@infrastructure/fetcher");
 jest.mock("@react-navigation/native", () => ({ useIsFocused: jest.fn() }));
+const mockPush = jest.fn();
+
+jest.mock("expo-router", () => ({ useRouter: () => ({ push: mockPush }) }));
 jest.mock("@presentation/hooks/useOwners");
 jest.mock("@presentation/i18n/useTranslationLocale", () => ({
   __esModule: true,
@@ -24,6 +27,11 @@ jest.mock("@presentation/i18n/useTranslationLocale", () => ({
 jest.mock("@application/useCases", () => ({
   useCases: {
     deleteStockItemUseCase: { execute: jest.fn(), uniqueName: "delete_stock" },
+    dismissLeftoverUseCase: {
+      execute: jest.fn(),
+      uniqueName: "dismiss_leftover",
+    },
+    getConsumptionWeeksUseCase: { execute: jest.fn(), uniqueName: "get_weeks" },
     getStockItemUseCase: { execute: jest.fn(), uniqueName: "get_stock_item" },
     getStockMovementsUseCase: {
       execute: jest.fn(),
@@ -47,6 +55,9 @@ function page(ids: string[], nextCursor?: string) {
   };
 }
 
+let weeksData:
+  | undefined
+  | { excluded: boolean; quantity: number; start: Date }[];
 const detailQuery = new UseQueryFixture<typeof detail>();
 const pageQuery = new UseQueryFixture<ReturnType<typeof page>>();
 const mutation = new UseMutationFixture<
@@ -76,14 +87,15 @@ function setup(
   const pageBuilt = pageQuery.build();
 
   jest.mocked(useMutation).mockImplementation(() => built as never);
-  jest
-    .mocked(useQuery)
-    .mockImplementation(
-      ((props: { cacheKey: string[] }) =>
-        (props.cacheKey[0] === "get_stock_item"
-          ? detailBuilt
-          : pageBuilt) as never) as never,
-    );
+  jest.mocked(useQuery).mockImplementation(((props: { cacheKey: string[] }) => {
+    if (props.cacheKey[0] === "get_weeks") {
+      return { data: weeksData, isFetching: false } as never;
+    }
+
+    return (
+      props.cacheKey[0] === "get_stock_item" ? detailBuilt : pageBuilt
+    ) as never;
+  }) as never);
   jest.mocked(useOwners).mockReturnValue({ data: owners } as never);
 
   return renderHook(() =>
@@ -93,6 +105,7 @@ function setup(
 
 beforeEach(() => {
   jest.clearAllMocks();
+  weeksData = undefined;
   jest.mocked(useIsFocused).mockReturnValue(true);
   rebuild("idle");
 });
@@ -297,5 +310,54 @@ describe("focus", () => {
     const hidden = setup();
 
     expect(hidden.result.current.isFocused).toBe(false);
+  });
+});
+
+describe("spec 123", () => {
+  it("SHOULD build the 12-week chart WHEN the weeks arrive", () => {
+    weeksData = [
+      { excluded: false, quantity: 2, start: new Date(2026, 8, 7) },
+      { excluded: true, quantity: 0, start: new Date(2026, 8, 14) },
+    ];
+
+    const { result } = setup();
+
+    expect(result.current.chart?.bars).toHaveLength(2);
+    expect(result.current.chart?.bars[1].excluded).toBe(true);
+  });
+
+  it("SHOULD have no chart WHILE the weeks are not loaded", () => {
+    expect(setup().result.current.chart).toBeUndefined();
+  });
+
+  it("SHOULD dismiss the leftover warning of a lot", () => {
+    const { result } = setup();
+
+    act(() => result.current.onDismissLeftover("lot-1"));
+
+    expect(built.mutate).toHaveBeenCalledWith({
+      dismissed: true,
+      lotId: "lot-1",
+    });
+  });
+
+  it("SHOULD highlight a lot on View lot AND clear it on the second press", () => {
+    const { result } = setup();
+
+    act(() => result.current.onViewLot("lot-1"));
+    expect(result.current.highlightedLotId).toBe("lot-1");
+
+    act(() => result.current.onViewLot("lot-1"));
+    expect(result.current.highlightedLotId).toBeUndefined();
+  });
+
+  it("SHOULD open the lists and the waste section", () => {
+    const { result } = setup();
+
+    result.current.onViewList();
+    result.current.onOpenWaste();
+
+    expect(mockPush).toHaveBeenCalledWith("/stock/lists");
+    expect(mockPush).toHaveBeenCalledWith("/stock/waste");
   });
 });

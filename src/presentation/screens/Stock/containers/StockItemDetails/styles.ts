@@ -13,6 +13,12 @@ function useStyles() {
         gap: theme.sizes.spacing.sm,
       },
       content: { gap: theme.sizes.spacing.md },
+      figure: { flex: 1, gap: theme.sizes.spacing.xxs, minWidth: 120 },
+      figures: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: theme.sizes.spacing.md,
+      },
       historyInfo: { flex: 1, gap: theme.sizes.spacing.xxs },
       historyRow: {
         alignItems: "center",
