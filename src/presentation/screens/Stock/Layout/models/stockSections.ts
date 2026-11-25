@@ -1,6 +1,6 @@
 import { TranslationKeys } from "@presentation/i18n/types";
 
-export type StockSection = "catalog" | "items" | "lists";
+export type StockSection = "catalog" | "items" | "lists" | "waste";
 
 export interface StockSectionItem {
   icon: string;
@@ -27,6 +27,13 @@ export const STOCK_SECTIONS: readonly StockSectionItem[] = [
     testID: "navigation-rail-stock-lists",
   },
   {
+    icon: "delete-outline",
+    labelKey: "stock.sections.waste",
+    path: "/stock/waste",
+    section: "waste",
+    testID: "navigation-rail-stock-waste",
+  },
+  {
     icon: "shape-outline",
     labelKey: "stock.sections.catalog",
     path: "/stock/catalog",
@@ -47,6 +54,10 @@ export function getStockSection(pathname: string): StockSection {
     normalized.startsWith("/stock/purchase-close/")
   ) {
     return "lists";
+  }
+
+  if (normalized === "/stock/waste") {
+    return "waste";
   }
 
   return normalized === "/stock/catalog" ? "catalog" : "items";
