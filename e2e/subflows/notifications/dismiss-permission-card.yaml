@@ -1,0 +1,16 @@
+url: ${E2E_WEB_URL}
+---
+# Spec 124: the permission card on Home pushes the sections down when there is something to notify. Flows that
+# scroll the Home dismiss it first ("Agora não" hides it for 30 days on this device).
+- extendedWaitUntil:
+    visible:
+      id: "notifications.permission-later"
+    timeout: 6000
+    optional: true
+- runFlow:
+    when:
+      visible:
+        id: "notifications.permission-later"
+    commands:
+      - tapOn:
+          id: "notifications.permission-later"

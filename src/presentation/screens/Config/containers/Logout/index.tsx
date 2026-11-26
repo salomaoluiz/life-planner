@@ -6,11 +6,17 @@ import { Button } from "@components";
 import { clearSessionExpiredNotice } from "@infrastructure/api";
 import { resetFetcherData, useMutation } from "@infrastructure/fetcher";
 import { useTranslation } from "@presentation/i18n";
+import unregisterThisDevice from "@screens/Notifications/hooks/unregisterThisDevice";
 
 function Logout() {
   const { isFetching, mutate, status } = useMutation<void, void>({
     cacheKey: [],
-    fetch: useCases.logoutUseCase.execute,
+    fetch: async () => {
+      // Spec 124 FR 22: this device stops receiving notices of the account that is leaving.
+      await unregisterThisDevice();
+
+      return useCases.logoutUseCase.execute();
+    },
   });
   const { t } = useTranslation();
 

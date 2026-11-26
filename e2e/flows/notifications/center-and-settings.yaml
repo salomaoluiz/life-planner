@@ -1,0 +1,38 @@
+url: ${E2E_WEB_URL}
+name: notifications/center-and-settings
+tags:
+  - notifications
+  - spec-124
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Spec 124: a new account has no notices (the center says so), the bell opens it from Home and the preferences
+# open from its gear; the types and the device section are there.
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+- tapOn:
+    id: "notifications.bell"
+- extendedWaitUntil:
+    visible:
+      id: "notifications.empty"
+    timeout: 20000
+- tapOn:
+    id: "notifications.settings-button"
+- extendedWaitUntil:
+    visible:
+      id: "notifications.settings.screen"
+    timeout: 20000
+- assertVisible:
+    id: "notifications.settings.type-switch-STOCK_EXPIRING"
+- assertVisible:
+    id: "notifications.settings.type-switch-FINANCE_BILL_DUE"

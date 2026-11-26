@@ -1,0 +1,90 @@
+const notifications = {
+  allOff: "Todos os avisos estão desligados",
+  allOffAction: "Abrir configurações",
+  bell: {
+    label_one: "Avisos, {{count}} não lido",
+    label_other: "Avisos, {{count}} não lidos",
+    none: "Avisos",
+  },
+  empty: "Nenhum aviso nos últimos 30 dias",
+  error: "Não foi possível carregar os avisos.",
+  filter: {
+    all: "Todos",
+    finance: "Finanças",
+    stock: "Estoque",
+    unread: "Não lidos · {{count}}",
+  },
+  footer: "Mostra os últimos 30 dias",
+  group: {
+    dueToday: "Vence hoje",
+    overdue: "Vencidos e atrasados",
+    upcoming: "Nos próximos dias",
+  },
+  itemCount_one: "{{count}} item",
+  itemCount_other: "{{count}} itens",
+  loadMore: "Carregar mais",
+  markAllRead: "Marcar todos como lidos",
+  openSettings: "Preferências de avisos",
+  permission: {
+    blocked: "Notificações bloqueadas. Abrir ajustes do aparelho",
+    blockedWeb:
+      "Notificações bloqueadas. Permita nas configurações do navegador para este site.",
+    body: "Você tem {{count}} coisas para acompanhar. Um resumo por dia às {{time}}, e só o urgente fora dele.",
+    enable: "Ativar",
+    iosWeb:
+      "No iPhone, adicione o Life Planner à Tela de Início para receber push",
+    later: "Agora não",
+    title: "Receba avisos de validade e contas",
+  },
+  settings: {
+    daysBefore_one: "{{count}} dia antes",
+    daysBefore_other: "{{count}} dias antes",
+    devices: "Dispositivos",
+    devicesHint:
+      "Recebem push os dispositivos ligados. Sem uso há 60 dias, saem sozinhos.",
+    deviceUnused: "Último uso {{date}}",
+    enableHere: "Ativar neste dispositivo",
+    error: "Não foi possível salvar. Tente de novo.",
+    families: "Famílias",
+    familiesHint:
+      "Avisos do que é da família. Os seus itens e contas pessoais sempre avisam.",
+    itemWindow: "Usa o aviso de cada item",
+    leadDays: "Dias de antecedência",
+    platform: {
+      ANDROID: "Android",
+      IOS: "iPhone/iPad",
+      WEB: "Web",
+    },
+    quiet: "Horário silencioso",
+    quietFrom: "Silêncio a partir de",
+    quietTo: "Até",
+    remove: "Remover",
+    summaryInQuiet: "Escolha um horário fora do silêncio",
+    summaryTime: "Resumo diário às",
+    test: "Enviar aviso de teste",
+    testSent: "Aviso de teste enviado.",
+    thisDevice: "este",
+    timeZone: "Fuso horário (deste aparelho)",
+    title: "Notificações",
+    types: "Tipos de aviso",
+    when: "Quando avisar",
+  },
+  summary: {
+    title: "Hoje: {{count}} avisos",
+    titleUrgent: "Hoje: {{urgent}} vencem, {{upcoming}} nos próximos dias",
+  },
+  title: "Avisos",
+  type: {
+    FINANCE_BILL_DUE: "Conta a pagar",
+    FINANCE_INVOICE_DUE: "Fatura vencendo",
+    STOCK_EXPIRING: "Validade chegando",
+    STOCK_OPENED_EXPIRING: "Aberto perto de vencer",
+  },
+  urgent: {
+    bill: "Conta vence hoje: {{name}}",
+    invoice: "Fatura vence hoje: {{name}}",
+    stock: "Vence hoje: {{name}}",
+  },
+};
+
+export default notifications;

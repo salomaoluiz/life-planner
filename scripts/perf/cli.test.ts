@@ -16,12 +16,12 @@ describe("selectModules", () => {
   });
 
   it("SHOULD select every module WHEN src/infrastructure changed", () => {
-    expect(selectModules(["src/infrastructure/api/client.ts"])).toHaveLength(8);
+    expect(selectModules(["src/infrastructure/api/client.ts"])).toHaveLength(9);
   });
 
   it("SHOULD select every module WHEN package.json or yarn.lock changed", () => {
-    expect(selectModules(["package.json"])).toHaveLength(8);
-    expect(selectModules(["yarn.lock"])).toHaveLength(8);
+    expect(selectModules(["package.json"])).toHaveLength(9);
+    expect(selectModules(["yarn.lock"])).toHaveLength(9);
   });
 
   it("SHOULD select investment WHEN the Investment screens or routes changed (spec 102)", () => {

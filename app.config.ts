@@ -51,6 +51,7 @@ export default {
     plugins: [
       ["expo-router", { asyncRoutes: { default: false, web: true } }],
       "./plugins/withReleaseSigning",
+      "expo-notifications",
       [
         "expo-camera",
         {

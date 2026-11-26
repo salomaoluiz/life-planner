@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 
 import { ScreenHeader } from "@components";
+import NotificationBell from "@screens/Notifications/containers/NotificationBell";
 import { StockSection } from "@screens/Stock/Layout/models/stockSections";
 
 import useSectionHeaderViewModel from "./hooks/useSectionHeaderViewModel";
@@ -21,7 +22,12 @@ function SectionHeader(props: SectionHeaderProps) {
 
   return (
     <ScreenHeader
-      actions={props.actions}
+      actions={
+        <>
+          {props.actions}
+          <NotificationBell />
+        </>
+      }
       onTitlePress={vm.onTitlePress}
       overline={vm.overline}
       subtitle={props.subtitle}

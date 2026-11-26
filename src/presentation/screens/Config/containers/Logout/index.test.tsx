@@ -6,11 +6,16 @@ import { useCases } from "@application/useCases";
 import { clearSessionExpiredNotice } from "@infrastructure/api";
 import { resetFetcherData, useMutation } from "@infrastructure/fetcher";
 import UseMutationFixture from "@infrastructure/fetcher/mocks/useMutation.fixture";
+import unregisterThisDevice from "@screens/Notifications/hooks/unregisterThisDevice";
 
 import Logout from "./";
 
 jest.mock("expo-router", () => ({ router: { replace: jest.fn() } }));
 jest.mock("@infrastructure/fetcher");
+jest.mock("@screens/Notifications/hooks/unregisterThisDevice", () => ({
+  __esModule: true,
+  default: jest.fn().mockResolvedValue(undefined),
+}));
 jest.mock("@infrastructure/api");
 jest.mock("@application/useCases", () => ({
   useCases: { logoutUseCase: { execute: jest.fn() } },
@@ -47,8 +52,23 @@ it("SHOULD configure the logout mutation with the use case", () => {
 
   expect(useMutation).toHaveBeenCalledWith({
     cacheKey: [],
-    fetch: useCases.logoutUseCase.execute,
+    fetch: expect.any(Function),
   });
+});
+
+it("SHOULD remove this device from the notifications BEFORE logging out (spec 124)", async () => {
+  setup();
+  const { fetch } = jest.mocked(useMutation).mock.calls[0][0];
+
+  await fetch(undefined as never);
+
+  expect(unregisterThisDevice).toHaveBeenCalledTimes(1);
+  expect(useCases.logoutUseCase.execute).toHaveBeenCalledTimes(1);
+  expect(
+    jest.mocked(unregisterThisDevice).mock.invocationCallOrder[0],
+  ).toBeLessThan(
+    jest.mocked(useCases.logoutUseCase.execute).mock.invocationCallOrder[0],
+  );
 });
 
 it("SHOULD render an enabled logout button", () => {

@@ -22,6 +22,8 @@ export const neverAdaptive: Record<string, string> = {
   "Navigation/containers/AppTabBar": "navigation shell, not a screen",
   "Navigation/containers/LegacyConfigRedirect": "redirect",
   "Navigation/containers/UpdateBanner": "layout host, not a screen",
+  "Notifications/containers/NotificationRuntime":
+    "layout host that renders nothing (push taps, device report), not a screen",
   "Stock/Layout":
     "navigation shell (Stack of the stock sections), not a screen",
 };

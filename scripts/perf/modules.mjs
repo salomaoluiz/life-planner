@@ -7,6 +7,7 @@ const PERF_MODULES = [
   "home",
   "auth",
   "configs",
+  "notification",
 ];
 
 // Paths whose change can move the numbers of every screen.
@@ -27,6 +28,9 @@ const SEGMENT_TO_MODULE = {
   investments: "investment",
   invite: "auth",
   login: "auth",
+  notification: "notification",
+  "notification-settings": "notification",
+  notifications: "notification",
   quickadd: "home",
   signup: "auth",
   stock: "stock",
@@ -41,6 +45,7 @@ const MODULE_SCREENS = {
   financial: "Financial",
   home: "(Home|QuickAdd|Feedback)",
   investment: "Investment",
+  notification: "Notifications",
   stock: "Stock",
 };
 

@@ -79,3 +79,19 @@ describe("selectImpact", () => {
     expect(result.tags).toEqual(["account", "auth", "smoke"]);
   });
 });
+
+describe("notifications (spec 124)", () => {
+  it("SHOULD select the notifications flows for the screens and the backend module", () => {
+    const front = selectImpact({
+      back: [],
+      front: ["src/presentation/screens/Notifications/index.tsx"],
+    });
+    const back = selectImpact({
+      back: ["src/api/notification/v1/a.ts"],
+      front: [],
+    });
+
+    expect(front.tags).toContain("notifications");
+    expect(back.tags).toContain("notifications");
+  });
+});

@@ -211,6 +211,35 @@ jest.mock("react-native-reanimated", () => {
   };
 });
 
+// Spec 124: no native push module in tests, and the bell (a query of its own) is rendered by its own tests.
+jest.mock("@infrastructure/notifications", () => ({
+  notificationsClient: {
+    clearDeviceId: jest.fn().mockResolvedValue(undefined),
+    getDeviceId: jest.fn().mockResolvedValue(null),
+    getLocale: jest.fn(() => "pt-BR"),
+    getPermission: jest.fn().mockResolvedValue("undetermined"),
+    getRegistration: jest.fn().mockResolvedValue(null),
+    getTimeZone: jest.fn(() => "America/Sao_Paulo"),
+    needsHomeScreenInstall: jest.fn(() => false),
+    onReceive: jest.fn(() => jest.fn()),
+    onTap: jest.fn(() => jest.fn()),
+    openSystemSettings: jest.fn().mockResolvedValue(undefined),
+    requestPermission: jest.fn().mockResolvedValue("granted"),
+    setDeviceId: jest.fn().mockResolvedValue(undefined),
+  },
+}));
+jest.mock("@screens/Notifications/containers/NotificationBell", () => ({
+  __esModule: true,
+  default: () => null,
+}));
+jest.mock(
+  "@screens/Notifications/containers/NotificationPermissionCard",
+  () => ({
+    __esModule: true,
+    default: () => null,
+  }),
+);
+
 jest.mock("@screens/Navigation/hooks/useModalNavigation", () => ({
   __esModule: true,
   default: () => jest.requireActual("./modalNavigation").modalNavigation,

@@ -19,6 +19,7 @@ import {
   FinancialUpcomingRepository,
 } from "./financial";
 import { InvestmentRepository } from "./investment";
+import { NotificationRepository } from "./notification";
 import { StockRepository } from "./stock";
 import { UserRepository } from "./user";
 import { VersionRepository } from "./version";
@@ -44,6 +45,7 @@ interface Repositories {
   };
   investmentRepository: InvestmentRepository;
   loginRepository: LoginRepository;
+  notificationRepository: NotificationRepository;
   stockRepository: StockRepository;
   userRepository: UserRepository;
   versionRepository: VersionRepository;

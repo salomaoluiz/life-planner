@@ -49,6 +49,38 @@ function respond(method: Method, path: string): unknown {
   if (path.startsWith("/v1/investments/assets")) {
     return { items: [investmentAsset] };
   }
+  // Spec 124: the bell, the center, the preferences and the devices.
+  if (path.startsWith("/v1/notifications/unread-count")) {
+    return { count: 3 };
+  }
+  if (path.startsWith("/v1/notifications/summary-preview")) {
+    return { count: 0, hasItems: false };
+  }
+  if (path.startsWith("/v1/notifications/preferences")) {
+    return {
+      billLeadDays: 3,
+      families: [],
+      invoiceLeadDays: 3,
+      locale: "pt-BR",
+      quietEnd: "07:00",
+      quietStart: "22:00",
+      summaryTime: "08:00",
+      tickMinutes: 15,
+      timeZone: "America/Sao_Paulo",
+      types: {
+        FINANCE_BILL_DUE: true,
+        FINANCE_INVOICE_DUE: true,
+        STOCK_EXPIRING: true,
+        STOCK_OPENED_EXPIRING: true,
+      },
+    };
+  }
+  if (path.startsWith("/v1/notifications/devices")) {
+    return { items: [] };
+  }
+  if (path.startsWith("/v1/notifications")) {
+    return { items: [], nextCursor: null };
+  }
   // Spec 120: markets, the pending purchases, one purchase and the closing preview.
   if (path.startsWith("/v1/stock/markets")) {
     return { items: [] };

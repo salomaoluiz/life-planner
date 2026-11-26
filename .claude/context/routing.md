@@ -60,3 +60,7 @@ Barcode reader (spec 121): modal `stock_barcode` (`StockBarcodeModal`, imported 
 Stock sections (spec 118, 123): like finance and investments, `STOCK_SECTIONS` (`Stock/Layout/models/stockSections.ts`: Itens `/stock`, Listas `/stock/lists`, Desperdício `/stock/waste` (spec 123, `app/(app)/(tabs)/stock/waste.tsx`), Categorias e locais `/stock/catalog`; the list detail and the lists belong to Listas, the location QR route to Itens) feeds the side rail children, the shared `section_picker` modal and the bottom-bar re-press; the stock tab route is `stock` and opens `/stock`. Modals `stock_shopping_list` and `stock_add_to_list` open over the stock screens.
 
 Stock purchases (spec 120): `(app)/(tabs)/stock/purchases/[id].tsx` (shopping mode) and `purchase-close/[id].tsx` (closing wizard) are screens of the Stock stack and belong to the Lists section (`getStockSection`); modal `stock_start_purchase` opens over the list detail (`/stock/list/<id>`).
+
+## Notifications (spec 124)
+
+Hidden tabs `notifications` (the center; `?notice=<id>` from a web push) and `notification-settings` (Configurações › Notificações), both one-line re-exports of `@screens/Notifications` and `@screens/Notifications/Settings`. A push tap opens the target through `resolveNoticeTarget` (a modal path built with `buildModalPath` over `/stock` or `/financial/...`). The web service worker is `public/sw.js`, served at the root by `nginx.web.conf` (`Cache-Control: no-cache`, `Service-Worker-Allowed: /`).

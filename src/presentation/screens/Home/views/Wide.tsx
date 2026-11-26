@@ -10,6 +10,8 @@ import {
 } from "@components";
 import { useTranslation } from "@presentation/i18n";
 import ProfileButton from "@screens/Navigation/containers/ProfileButton";
+import NotificationBell from "@screens/Notifications/containers/NotificationBell";
+import NotificationPermissionCard from "@screens/Notifications/containers/NotificationPermissionCard";
 
 import FinanceBalanceCard from "../components/FinanceBalanceCard";
 import InvestmentsSection from "../components/InvestmentsSection";
@@ -42,14 +44,18 @@ function Wide({ vm }: AdaptiveViewProps<HomeVM>) {
     >
       <ScreenHeader
         actions={
-          <ProfileButton
-            name={vm.header.avatarName}
-            photoUrl={vm.header.avatarPhotoUrl}
-          />
+          <>
+            <NotificationBell />
+            <ProfileButton
+              name={vm.header.avatarName}
+              photoUrl={vm.header.avatarPhotoUrl}
+            />
+          </>
         }
         overline={vm.header.overline}
         title={t(vm.header.greetingKey, vm.header.greetingParams)}
       />
+      <NotificationPermissionCard />
       <ChipGroup
         mode="single"
         onChange={vm.filter.onChange}

@@ -19,6 +19,7 @@ const useCases: Datasources = {
   financialUpcomingDatasource: expect.any(Function),
   investmentDatasource: expect.any(Function),
   loginDatasource: expect.any(Function),
+  notificationDatasource: expect.any(Function),
   stockDatasource: expect.any(Function),
   userDatasource: expect.any(Function),
   versionDatasource: expect.any(Function),

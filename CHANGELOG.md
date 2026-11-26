@@ -3,6 +3,14 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [3.7.0] - 2026-11-25
+
+### Added
+
+- Notifications (spec 124): a bell with the unread count in the app headers opens the notice center (the last 30 days, a daily summary and urgent notices, filters by stock and finances, "Marcar todos como lidos").
+- Push for what expires and what is due: one summary a day at the time you choose, plus a push on the day for what becomes urgent later, on iOS, Android and the web; the app asks for the permission in context, with a card that explains why first.
+- Configurações › Notificações: notice types, days before for bills and invoices, summary time, quiet hours, families and devices (turn off, remove, send a test).
+
 ## [3.6.0] - 2026-11-25
 
 ### Added

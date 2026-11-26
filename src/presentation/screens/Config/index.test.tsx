@@ -13,6 +13,7 @@ jest.mock("./containers", () => {
     DeleteAccount: () => <MockView testID="delete-account" />,
     Language: () => <MockView testID="language" />,
     Logout: () => <MockView testID="logout" />,
+    NotificationsLink: () => <MockView testID="notifications-link" />,
     Theme: () => <MockView testID="theme" />,
     Versions: () => <MockView testID="versions" />,
   };

@@ -17,6 +17,8 @@ export default {
     "metro.config.js",
     "jest.config.js",
     "plugins/*.js",
+    // The Web Push service worker runs in a worker scope, outside the app project (spec 124).
+    "public/sw.js",
     "eslint.config.mjs",
     "eslint/**/*",
     "e2e/scripts/**/*",

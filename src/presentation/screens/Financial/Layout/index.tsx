@@ -2,6 +2,7 @@ import { Stack } from "expo-router";
 import { View } from "react-native";
 
 import { Screen, ScreenHeader } from "@components";
+import NotificationBell from "@screens/Notifications/containers/NotificationBell";
 
 import {
   FinancialHeaderActionsProvider,
@@ -27,7 +28,12 @@ function FinancialLayoutContent() {
   return (
     <Screen maxWidth={vm.maxWidth} testID={"financial-layout"}>
       <ScreenHeader
-        actions={actions}
+        actions={
+          <>
+            {actions}
+            <NotificationBell />
+          </>
+        }
         onTitlePress={vm.onTitlePress}
         overline={vm.overline}
         testID={layoutTestIds.sectionPicker}
