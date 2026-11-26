@@ -18,7 +18,7 @@ onFlowComplete:
 - runFlow: ../../subflows/stock/open-catalog.yaml
 # From scratch: a category with its own color and icon, then a subcategory that takes the parent's icon and a tone.
 - tapOn:
-    id: "stock.catalog.from-scratch"
+    id: "stock.catalog.add-button"
 - tapOn:
     id: "stock.catalog.name-input"
 - inputText: "E2E Mercado"

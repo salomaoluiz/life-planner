@@ -18,7 +18,7 @@ onFlowComplete:
 - runFlow: ../../subflows/stock/open-catalog.yaml
 # Deleting a category with items moves them (or leaves them without a category) in one step.
 - tapOn:
-    id: "stock.catalog.from-scratch"
+    id: "stock.catalog.add-button"
 - tapOn:
     id: "stock.catalog.name-input"
 - inputText: "E2E Velha"

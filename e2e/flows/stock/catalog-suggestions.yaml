@@ -17,15 +17,16 @@ onFlowComplete:
 - runFlow: ../../subflows/stock/open-stock.yaml
 - runFlow: ../../subflows/stock/open-catalog.yaml
 # Empty owner: suggestions with color and icon, all checked; one is unchecked and not created.
-- assertVisible:
-    id: "stock.catalog.create-suggestions"
+- scrollUntilVisible:
+    element:
+      id: "stock.catalog.suggestion.MEAT"
 - tapOn:
     id: "stock.catalog.suggestion.MEAT"
 - tapOn:
     id: "stock.catalog.create-suggestions"
 - extendedWaitUntil:
     visible:
-      text: "Mercearia|Groceries"
+      text: "Bebidas|Drinks"
     timeout: 20000
 - assertNotVisible:
     text: "Carnes|Meat"

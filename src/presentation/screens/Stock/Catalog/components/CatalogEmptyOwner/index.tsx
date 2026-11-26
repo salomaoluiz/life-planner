@@ -41,6 +41,24 @@ function CatalogEmptyOwner(props: Props) {
     >
       <Text.BodyStrong value={title} />
       <Text.Caption tone={"secondary"} value={t("stock.catalog.empty.hint")} />
+      {props.readOnly ? null : (
+        <View style={{ gap: spacing.xs }}>
+          <Button.Primary
+            disabled={keys.length === 0 || props.busy}
+            label={t(pluralKey("stock.catalog.empty.create", keys.length), {
+              count: keys.length,
+            })}
+            loading={props.busy}
+            onPress={() => props.onCreate(keys)}
+            testID={stockCatalogTestIds.createSuggestions}
+          />
+          <Button.Ghost
+            label={t("stock.catalog.empty.fromScratch")}
+            onPress={props.onFromScratch}
+            testID={stockCatalogTestIds.fromScratch}
+          />
+        </View>
+      )}
       <View style={{ gap: spacing.xxs }}>
         {props.suggestions.map((suggestion) => (
           <View
@@ -67,24 +85,6 @@ function CatalogEmptyOwner(props: Props) {
           </View>
         ))}
       </View>
-      {props.readOnly ? null : (
-        <View style={{ gap: spacing.xs }}>
-          <Button.Primary
-            disabled={keys.length === 0 || props.busy}
-            label={t(pluralKey("stock.catalog.empty.create", keys.length), {
-              count: keys.length,
-            })}
-            loading={props.busy}
-            onPress={() => props.onCreate(keys)}
-            testID={stockCatalogTestIds.createSuggestions}
-          />
-          <Button.Ghost
-            label={t("stock.catalog.empty.fromScratch")}
-            onPress={props.onFromScratch}
-            testID={stockCatalogTestIds.fromScratch}
-          />
-        </View>
-      )}
     </View>
   );
 }

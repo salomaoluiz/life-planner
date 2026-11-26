@@ -20,7 +20,7 @@ onFlowComplete:
 - tapOn:
     text: "Locais|Locations"
 - tapOn:
-    id: "stock.catalog.from-scratch"
+    id: "stock.catalog.add-button"
 - tapOn:
     id: "stock.catalog.name-input"
 - inputText: "E2E Cozinha"
