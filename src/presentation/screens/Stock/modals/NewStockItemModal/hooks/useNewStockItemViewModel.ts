@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import StockDTO from "@application/dto/stock/StockDTO";
 import { useCases } from "@application/useCases";
+import { TreeNode } from "@components";
 import { StockMovementTypes } from "@domain/entities/stock/StockMovementEntity";
 import {
   invalidateFetcherData,
@@ -12,10 +13,13 @@ import {
 import { asyncStorage, StorageKeys } from "@infrastructure/storage";
 import { useTranslationLocale } from "@presentation/i18n";
 import { useBreakpoint } from "@presentation/theme";
+import {
+  flattenCatalogNodes,
+  mostUsedCatalogIds,
+} from "@presentation/utils/categoryTreeNodes";
 import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 import NewStockItemUIModel from "@screens/Stock/modals/NewStockItemModal/models/NewStockItemUIModel";
-import { flattenActive } from "@screens/Stock/models/catalogTree";
 import { formatQuantity } from "@screens/Stock/models/quantityFormat";
 
 import useBarcodeField from "./useBarcodeField";
@@ -32,9 +36,11 @@ const SUGGESTION_DEBOUNCE_MS = 300;
 const MIN_SUGGESTION_CHARS = 2;
 
 interface OwnerCatalog {
-  categories: Array<{ label: string; value: string }>;
+  categoryNodes: TreeNode[];
   defaultListName?: string;
-  locations: Array<{ label: string; value: string }>;
+  locationNodes: TreeNode[];
+  mostUsedCategoryIds: string[];
+  mostUsedLocationIds: string[];
   // Active lists of the owner (spec 118 FR 6) and the name of its default one.
   shoppingLists: Array<{ label: string; value: string }>;
 }
@@ -145,15 +151,11 @@ function useNewStockItemViewModel() {
       const active = lists.filter((list) => list.status === "ACTIVE");
 
       return {
-        categories: flattenActive(categories).map((category) => ({
-          label: category.label,
-          value: category.id,
-        })),
+        categoryNodes: flattenCatalogNodes(categories),
         defaultListName: active.find((list) => list.isDefault)?.name,
-        locations: flattenActive(locations).map((location) => ({
-          label: location.label,
-          value: location.id,
-        })),
+        locationNodes: flattenCatalogNodes(locations),
+        mostUsedCategoryIds: mostUsedCatalogIds(categories),
+        mostUsedLocationIds: mostUsedCatalogIds(locations),
         shoppingLists: active
           .filter((list) => !list.isDefault)
           .map((list) => ({ label: list.name, value: list.id })),

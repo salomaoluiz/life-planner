@@ -1,0 +1,73 @@
+url: ${E2E_WEB_URL}
+name: stock/category-tree-picker
+tags:
+  - stock
+  - spec-126
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/stock/open-stock.yaml
+- runFlow: ../../subflows/stock/open-catalog.yaml
+# A category with a subcategory, created from the catalog screen
+- tapOn:
+    id: "stock.catalog.add-button"
+- tapOn:
+    id: "stock.catalog.name-input"
+- inputText: "E2E Mercado"
+- tapOn:
+    id: "stock.catalog.save-button"
+- extendedWaitUntil:
+    visible:
+      text: "E2E Mercado"
+    timeout: 20000
+- tapOn:
+    text: "E2E Mercado"
+- tapOn:
+    id: "stock.catalog.add-child"
+- tapOn:
+    id: "stock.catalog.name-input"
+- inputText: "E2E Graos"
+- tapOn:
+    id: "stock.catalog.save-button"
+- extendedWaitUntil:
+    visible:
+      text: "E2E Graos"
+    timeout: 20000
+- runFlow: ../../subflows/stock/open-stock.yaml
+# The item form uses the shared tree picker: a search keeps the parent of the match
+- tapOn:
+    id: "stock.list.add-button"
+- extendedWaitUntil:
+    visible:
+      id: "stock.item-form.category-select-field"
+    timeout: 20000
+- tapOn:
+    id: "stock.item-form.category-select-field"
+- tapOn:
+    id: "stock.item-form.category-select-picker-search"
+- inputText: "Graos"
+- assertVisible:
+    text: "E2E Mercado"
+- assertVisible:
+    text: "E2E Graos"
+# Parents are selectable too; picking a node closes the picker and shows the path
+- tapOn:
+    text: "E2E Graos"
+- assertVisible:
+    id: "stock.item-form.category-select-ancestors"
+# An empty search shows the empty state (with the create button when creating is allowed)
+- tapOn:
+    id: "stock.item-form.category-select-field"
+- tapOn:
+    id: "stock.item-form.category-select-picker-search"
+- inputText: "zzzxyz"
+- assertVisible:
+    id: "stock.item-form.category-select-picker-empty"

@@ -12,6 +12,7 @@ import { invalidateFetcherData, useQuery } from "@infrastructure/fetcher";
 import { uuidv4 } from "@infrastructure/uuid";
 import useOwners from "@presentation/hooks/useOwners";
 import { useTranslationLocale } from "@presentation/i18n";
+import { toTreeNodes } from "@presentation/utils/categoryTreeNodes";
 import { todayIso } from "@screens/Stock/modals/StartPurchaseModal/hooks/useStartPurchaseViewModel";
 import { parseExpiration } from "@screens/Stock/Purchase/hooks/usePurchaseViewModel";
 
@@ -299,6 +300,7 @@ function usePurchaseCloseViewModel() {
     edits,
     errorKey,
     expenseCategories,
+    expenseCategoryNodes: toTreeNodes(expenseCategories),
     expirations,
     isLoading: view.isFetching && !view.data,
     languageTag: getLocale().languageTag,

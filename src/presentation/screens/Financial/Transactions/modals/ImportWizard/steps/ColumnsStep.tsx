@@ -1,12 +1,14 @@
 import { View } from "react-native";
 
 import {
+  CategoryTreeField,
   Divider,
   FormColumns,
   Icon,
   SelectField,
   Text,
   TruncatedText,
+  useTreePickerLabels,
 } from "@components";
 import { useTranslation } from "@presentation/i18n";
 import pluralKey from "@presentation/i18n/pluralKey";
@@ -22,6 +24,7 @@ const ids = transactionsTestIds;
 function ColumnsStep(props: { wizard: ImportWizardState }) {
   const { styles } = useStyles();
   const { t } = useTranslation();
+  const categoryLabels = useTreePickerLabels("category");
   const vm = useColumnsStepViewModel(props.wizard);
   const closeLabel = t("financial.import.close");
 
@@ -117,17 +120,18 @@ function ColumnsStep(props: { wizard: ImportWizardState }) {
     return (
       <View style={styles.stack}>
         {vm.showFixedCategory ? (
-          <SelectField
-            closeLabel={closeLabel}
+          <CategoryTreeField
+            archivedLabel={t("financial.accounts.archivedLabel")}
             label={t("financial.import.columns.fixed.category")}
-            onChange={vm.onFixedCategoryChange}
-            options={[
-              { label: t("financial.import.columns.fixed.none"), value: "" },
-              ...vm.fixedCategoryOptions,
-            ]}
-            sheetTitle={t("financial.import.columns.fixed.category")}
+            labels={{
+              ...categoryLabels,
+              noneLabel: t("financial.import.columns.fixed.none"),
+            }}
+            mode={"single"}
+            nodes={vm.fixedCategoryNodes}
+            onChange={(id) => vm.onFixedCategoryChange(id ?? "")}
             testID={`${ids.importFixed}.category`}
-            value={vm.fixedCategoryValue}
+            value={vm.fixedCategoryValue || undefined}
           />
         ) : null}
         {vm.showFixedAccountOrCard ? (

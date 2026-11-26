@@ -4,6 +4,7 @@ import { CARD_CREDIT_CATEGORIES } from "@application/csvImport/cardCredits";
 import {
   AmountInput,
   Button,
+  CategoryTreeField,
   ChipGroup,
   Divider,
   FormColumns,
@@ -15,6 +16,7 @@ import {
   TextField,
   TruncatedText,
   useSheetLayout,
+  useTreePickerLabels,
 } from "@components";
 import { IconButton } from "@components/Icon";
 import { useTranslation } from "@presentation/i18n";
@@ -36,6 +38,7 @@ const ids = transactionsTestIds;
 function ValuesStep(props: { wizard: ImportWizardState }) {
   const { styles } = useStyles();
   const { t } = useTranslation();
+  const categoryLabels = useTreePickerLabels("category");
   const vm = useValuesStepViewModel(props.wizard);
   const { fluid } = useSheetLayout();
   const closeLabel = t("financial.import.close");
@@ -276,32 +279,22 @@ function ValuesStep(props: { wizard: ImportWizardState }) {
                 />
               ) : null}
             </View>
-            <SelectField
-              closeLabel={closeLabel}
+            <CategoryTreeField
+              archivedLabel={t("financial.accounts.archivedLabel")}
               label={t("financial.import.values.createForm.category.parent")}
-              onChange={(parentId) => vm.onFormChange({ parentId })}
-              options={[
-                {
-                  label: t(
-                    "financial.import.values.createForm.category.noParent",
-                  ),
-                  value: "",
-                },
-                ...vm.parentOptions.map((option) => ({
-                  description: t(
-                    option.type === "INCOME"
-                      ? "financial.import.values.type.income"
-                      : "financial.import.values.type.expense",
-                  ),
-                  label: option.label,
-                  value: option.value,
-                })),
-              ]}
-              sheetTitle={t(
-                "financial.import.values.createForm.category.parent",
-              )}
+              labels={{
+                ...categoryLabels,
+                noneLabel: t(
+                  "financial.import.values.createForm.category.noParent",
+                ),
+              }}
+              mode={"single"}
+              nodes={vm.parentNodes}
+              onChange={(parentId) =>
+                vm.onFormChange({ parentId: parentId ?? "" })
+              }
               testID={ids.importCreateParent}
-              value={vm.form.parentId}
+              value={vm.form.parentId || undefined}
             />
             <View style={styles.row}>
               <IconTile

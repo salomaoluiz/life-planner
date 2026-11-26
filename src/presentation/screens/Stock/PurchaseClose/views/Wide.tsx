@@ -6,12 +6,14 @@ import {
   AmountText,
   Button,
   Card,
+  CategoryTreeField,
   ChipGroup,
   Screen,
   StatusBanner,
   Stepper,
   Text,
   TextField,
+  useTreePickerLabels,
 } from "@components";
 import Skeleton from "@components/Skeleton";
 import { PurchaseRowEntity } from "@domain/entities/stock/PurchaseEntity";
@@ -24,6 +26,7 @@ import testIds from "../testIds";
 function Wide({ vm }: AdaptiveViewProps<PurchaseCloseVM>) {
   const { styles } = useStyles();
   const { t } = useTranslation();
+  const categoryLabels = useTreePickerLabels("category");
 
   function priceRows() {
     const asked = vm.rows.filter(
@@ -199,14 +202,13 @@ function Wide({ vm }: AdaptiveViewProps<PurchaseCloseVM>) {
         {vm.needsDefault ? (
           <>
             <Text.Caption value={t("stock.close.defaultCategoryHint")} />
-            <ChipGroup
+            <CategoryTreeField
+              archivedLabel={t("common.treePicker.archived")}
               label={t("stock.close.defaultCategory")}
+              labels={categoryLabels}
               mode="single"
-              onChange={vm.onDefaultCategoryChange}
-              options={vm.expenseCategories.map((category) => ({
-                label: category.name,
-                value: category.id,
-              }))}
+              nodes={vm.expenseCategoryNodes}
+              onChange={(id) => id && vm.onDefaultCategoryChange(id)}
               testID={testIds.defaultCategory}
               value={vm.defaultCategoryId}
             />

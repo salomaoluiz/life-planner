@@ -16,7 +16,9 @@ const defaultViewModel: IncomeModalVM = {
   accountOptions: [{ label: "Broker", value: "acc-1" }],
   assetLabel: "PETR4",
   categoryHint: "investment.income.categoryDefaultHint",
-  categoryOptions: [{ label: "Dividends", value: "cat-1" }],
+  categoryNodes: [
+    { color: "#F59E0B", icon: "cash", id: "cat-1", name: "Dividends" },
+  ],
   currency: "BRL",
   errors: {},
   estimate: { gross: "R$ 84,00", rate: "15%", show: true },

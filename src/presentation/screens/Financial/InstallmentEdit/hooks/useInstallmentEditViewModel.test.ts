@@ -38,7 +38,7 @@ describe("loading", () => {
     );
     expect(result.current.installmentNumber).toBe(2);
     expect(result.current.installmentCount).toBe(3);
-    expect(result.current.categoryOptions.map((o) => o.value)).toEqual([
+    expect(result.current.categoryNodes.map((o) => o.id)).toEqual([
       "cat-1",
       "cat-2",
     ]);

@@ -27,6 +27,9 @@ function setup(overrides: Record<string, unknown> = {}) {
     edits: {},
     errorKey: undefined,
     expenseCategories: [{ id: "cat", name: "Food" }],
+    expenseCategoryNodes: [
+      { color: "#F59E0B", icon: "cart", id: "cat", name: "Food" },
+    ],
     expirations: [{ rowId: "r1", suggestedDate: "2026-12-10" }],
     isLoading: false,
     lockedBy: false,

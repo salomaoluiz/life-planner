@@ -3,13 +3,14 @@ import { View } from "react-native";
 import {
   BottomSheet,
   Button,
+  CategoryTreeField,
   ColorSwatchGroup,
   FormColumns,
   IconTile,
-  SelectField,
   SwitchRow,
   Text,
   TextField,
+  useTreePickerLabels,
 } from "@components";
 import { useKitTheme } from "@components/utils/useKitTheme";
 import { useTranslation } from "@presentation/i18n";
@@ -30,6 +31,10 @@ function CatalogForm(props: CatalogFormProps) {
   const { spacing } = useKitTheme();
   const vm = useCatalogFormViewModel(props);
   const isCategory = props.kind === "category";
+  const parentLabels = useTreePickerLabels(
+    isCategory ? "category" : "location",
+  );
+  const financeLabels = useTreePickerLabels("category");
   const isEditing = !!vm.existing;
 
   function title() {
@@ -88,35 +93,34 @@ function CatalogForm(props: CatalogFormProps) {
         testID={stockCatalogTestIds.nameInput}
         value={vm.name}
       />
-      <SelectField
-        closeLabel={t("common.actions.close")}
+      <CategoryTreeField
+        archivedLabel={t("common.treePicker.archived")}
         label={t("stock.catalog.form.parent")}
-        onChange={vm.onParentChange}
-        options={[{ label: noParentLabel, value: "" }, ...vm.parentChoices]}
-        sheetTitle={t("stock.catalog.form.parent")}
+        labels={{ ...parentLabels, noneLabel: noParentLabel }}
+        mode={"single"}
+        nodes={vm.parentNodes}
+        onChange={(id) => vm.onParentChange(id ?? "")}
         testID={stockCatalogTestIds.parentSelect}
-        value={vm.parentId}
+        value={vm.parentId || undefined}
       />
       {isCategory ? (
-        <SelectField
-          closeLabel={t("common.actions.close")}
+        <CategoryTreeField
+          archivedLabel={t("common.treePicker.archived")}
           helper={financeHelper}
           label={t("stock.catalog.form.finance")}
-          onChange={vm.onFinanceChange}
-          options={[
-            {
-              label: t(
-                vm.parent
-                  ? "stock.catalog.form.financeInherit"
-                  : "stock.catalog.form.financeDefault",
-              ),
-              value: "",
-            },
-            ...vm.financeOptions,
-          ]}
-          sheetTitle={t("stock.catalog.form.finance")}
+          labels={{
+            ...financeLabels,
+            noneLabel: t(
+              vm.parent
+                ? "stock.catalog.form.financeInherit"
+                : "stock.catalog.form.financeDefault",
+            ),
+          }}
+          mode={"single"}
+          nodes={vm.financeNodes}
+          onChange={(id) => vm.onFinanceChange(id ?? "")}
           testID={stockCatalogTestIds.financeSelect}
-          value={vm.financeId}
+          value={vm.financeId || undefined}
         />
       ) : null}
       {vm.canAddChild ? (

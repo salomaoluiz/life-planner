@@ -70,6 +70,7 @@ function useNewCategoryViewModel() {
   const { closeModal } = useModalNavigation();
   const params = useLocalSearchParams<{
     id?: string;
+    name?: string;
     ownerId?: string;
     type?: string;
   }>();
@@ -126,7 +127,7 @@ function useNewCategoryViewModel() {
     const ownerId =
       params.ownerId ?? personalOwnerId(owners.data) ?? owners.data[0].id;
 
-    return createInitialState({
+    const created = createInitialState({
       ownerId,
       rootColor: pickRootColor(
         rootColorsOf(categories.data, ownerId),
@@ -134,12 +135,16 @@ function useNewCategoryViewModel() {
       ),
       type: params.type,
     });
+
+    // "Create <name>" from a picker search (spec 126 FR 17) starts with that name.
+    return params.name ? { ...created, name: params.name } : created;
   }, [
     owners.data,
     categories.data,
     transactions.data,
     isEditing,
     existing,
+    params.name,
     params.ownerId,
     params.type,
   ]);
@@ -536,6 +541,7 @@ function useNewCategoryViewModel() {
       : undefined) as TranslationKeys | undefined,
     parentId: state?.parentId ?? "",
     parentName: parentCategory?.name ?? "",
+    parentNodes: uiModel && state ? uiModel.parentNodes(state, params.id) : [],
     parentOptions:
       uiModel && state ? uiModel.parentOptions(state, params.id) : [],
     pendingItems,

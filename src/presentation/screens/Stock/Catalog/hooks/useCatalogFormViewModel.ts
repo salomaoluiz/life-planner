@@ -16,6 +16,10 @@ import {
   DEFAULT_CATALOG_COLOR,
   DEFAULT_CATALOG_ICON,
 } from "@presentation/constants/stockCatalogAppearance";
+import {
+  flattenCatalogNodes,
+  toTreeNodes,
+} from "@presentation/utils/categoryTreeNodes";
 import { toneSequence } from "@screens/Financial/models/categoryColorPicker";
 
 import { CatalogNode } from "../models/catalogEntries";
@@ -131,6 +135,15 @@ function useCatalogFormViewModel(props: CatalogFormProps) {
   }, [save.status]);
 
   const parentChoices = parentOptions(nodes, props.kind, ownerId, existing);
+  const allowedParents = new Set(parentChoices.map((choice) => choice.value));
+  const parentNodes = flattenCatalogNodes(nodes).filter((node) =>
+    allowedParents.has(node.id),
+  );
+  const financeNodes = toTreeNodes(
+    (financeCategories.data ?? []).filter(
+      (category) => category.type === "EXPENSE" && category.status === "ACTIVE",
+    ),
+  );
   const colorOptions = useMemo(() => {
     const base = CATEGORY_COLORS;
     const shades = rootColor ? toneSequence(rootColor) : [];
@@ -235,6 +248,7 @@ function useCatalogFormViewModel(props: CatalogFormProps) {
     customOpen,
     existing,
     financeId,
+    financeNodes,
     financeOptions,
     hasDescendants,
     icon,
@@ -269,6 +283,7 @@ function useCatalogFormViewModel(props: CatalogFormProps) {
     parent,
     parentChoices,
     parentId,
+    parentNodes,
     ruleError: save.error instanceof StockCatalogRule,
   };
 }

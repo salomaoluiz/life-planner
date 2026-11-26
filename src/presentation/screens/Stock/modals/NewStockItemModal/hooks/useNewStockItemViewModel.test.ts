@@ -343,36 +343,60 @@ describe("query functions", () => {
         children: [
           {
             children: [],
+            color: "#14B8A6",
+            icon: "tag",
             id: "c",
             itemCount: 0,
             name: "Cheese",
             status: "ACTIVE",
           },
         ],
+        color: "#14B8A6",
+        icon: "tag",
         id: "p",
         itemCount: 0,
         name: "Dairy",
         status: "ACTIVE",
       },
-      { children: [], id: "x", itemCount: 0, name: "Old", status: "ARCHIVED" },
+      {
+        children: [],
+        color: "#14B8A6",
+        icon: "tag",
+        id: "x",
+        itemCount: 0,
+        name: "Old",
+        status: "ARCHIVED",
+      },
     ] as never);
     jest.mocked(useCases.getStockLocationsUseCase.execute).mockResolvedValue([
       {
         children: [
           {
             children: [],
+            color: "#14B8A6",
+            icon: "tag",
             id: "s",
             itemCount: 0,
             name: "Shelf",
             status: "ACTIVE",
           },
         ],
+        color: "#14B8A6",
+        icon: "tag",
         id: "l",
         itemCount: 0,
         name: "Pantry",
         status: "ACTIVE",
       },
-      { children: [], id: "z", itemCount: 0, name: "Old", status: "ARCHIVED" },
+      {
+        children: [],
+        color: "#14B8A6",
+        icon: "tag",
+        id: "z",
+        itemCount: 0,
+        name: "Old",
+        status: "ARCHIVED",
+      },
     ] as never);
     jest.mocked(useCases.getShoppingListsUseCase.execute).mockResolvedValue([
       { id: "d", isDefault: true, name: "Mercado", status: "ACTIVE" },
@@ -381,18 +405,17 @@ describe("query functions", () => {
     ] as never);
     setup();
 
-    expect(await fetcher("categories")()).toEqual({
-      categories: [
-        { label: "Dairy", value: "p" },
-        { label: "Dairy › Cheese", value: "c" },
-      ],
-      defaultListName: "Mercado",
-      locations: [
-        { label: "Pantry", value: "l" },
-        { label: "Pantry › Shelf", value: "s" },
-      ],
-      shoppingLists: [{ label: "Farmácia", value: "f" }],
-    });
+    const result = (await fetcher("categories")()) as {
+      categoryNodes: { id: string }[];
+      defaultListName: string;
+      locationNodes: { id: string }[];
+      shoppingLists: unknown[];
+    };
+
+    expect(result.categoryNodes.map((node) => node.id)).toEqual(["p", "c"]);
+    expect(result.locationNodes.map((node) => node.id)).toEqual(["l", "s"]);
+    expect(result.defaultListName).toBe("Mercado");
+    expect(result.shoppingLists).toEqual([{ label: "Farmácia", value: "f" }]);
     expect(useCases.getShoppingListsUseCase.execute).toHaveBeenCalledWith({
       ownerId: "user-id",
     });

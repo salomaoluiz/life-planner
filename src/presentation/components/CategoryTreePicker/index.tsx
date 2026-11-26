@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 
+import Badge from "@components/Badge";
 import BottomSheet from "@components/BottomSheet";
 import Button from "@components/Button";
 import EmptyState from "@components/EmptyState";
@@ -185,7 +186,17 @@ function CategoryTreePicker(props: CategoryTreePickerProps) {
         subtitle={covered ? labels.includedIn(covered) : undefined}
         testID={`${testID}-option-${node.id}`}
         title={node.name}
-        trailing={single ? selectedMark(row) : undefined}
+        trailing={
+          <>
+            {node.badge ? (
+              <Badge
+                label={node.badge}
+                testID={`${testID}-option-${node.id}-badge`}
+              />
+            ) : null}
+            {single ? selectedMark(row) : null}
+          </>
+        }
       />
     );
   }

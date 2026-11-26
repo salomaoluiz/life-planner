@@ -15,7 +15,6 @@ const stockTestIds = {
   expiredSheet: "stock.expiredPrompt.sheet",
   filter: "stock.list.filter",
   filterSheet: "stock.list.filter-sheet",
-  filterSheetOptions: "stock.list.filter-sheet-options",
   locationArchived: "stock.location.archived-banner",
   locationFilter: "stock.list.location-filter",
   locationNotFound: "stock.location.not-found",

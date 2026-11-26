@@ -87,6 +87,9 @@ function givenViewModel(overrides: Record<string, unknown> = {}) {
   const vm = {
     activeFilter: view.activeFilter,
     categoryIds: [],
+    categoryNodes: [
+      { color: "#F59E0B", icon: "cheese", id: "c1", name: "Cheese" },
+    ],
     categoryOptions: [{ id: "c1", label: "Dairy › Cheese" }],
     errorMessageKey: undefined,
     filterOptions: view.filterOptions,
@@ -97,6 +100,9 @@ function givenViewModel(overrides: Record<string, unknown> = {}) {
     isRefreshing: false,
     isSortOpen: false,
     locationIds: [],
+    locationNodes: [
+      { color: "#14B8A6", icon: "fridge", id: "l1", name: "Fridge" },
+    ],
     locationOptions: [{ id: "l1", label: "Fridge" }],
     onAddPress: jest.fn(),
     onBackToStock: jest.fn(),

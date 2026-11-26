@@ -6,7 +6,6 @@ import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { TransactionType } from "@domain/entities/financial/TransactionEntity";
 import { TranslationKeys } from "@presentation/i18n/types";
 import {
-  buildCategoryRows,
   categoriesOf,
   selectableCategories,
 } from "@screens/Financial/models/categoryTree";
@@ -118,10 +117,6 @@ class NewTransactionUIModel {
       this.props.categories.find((category) => category.id === categoryId)
         ?.name ?? ""
     );
-  }
-
-  categoryRows(ownerId: string, type: string, selectedId?: string) {
-    return buildCategoryRows(this.categoriesFor(ownerId, type, selectedId));
   }
 
   hasAccounts(ownerId: string) {

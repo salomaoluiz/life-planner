@@ -7,6 +7,7 @@ import { DEFAULT_CURRENCY } from "@domain/entities/financial/Currency";
 import { useMutation, useQuery } from "@infrastructure/fetcher";
 import useOwners from "@presentation/hooks/useOwners";
 import { TranslationKeys } from "@presentation/i18n/types";
+import { toTreeNodes } from "@presentation/utils/categoryTreeNodes";
 import invalidateFinanceData from "@screens/Financial/hooks/invalidateFinanceData";
 import {
   categoryInScope,
@@ -241,17 +242,14 @@ function useInstallmentEditViewModel() {
           : card.title,
         value: card.id,
       })),
-    categoryOptions: selectableCategories(
-      categories.data ?? [],
-      state?.categoryId,
-    )
-      .filter(
+    categoryNodes: toTreeNodes(
+      selectableCategories(categories.data ?? [], state?.categoryId).filter(
         (category) =>
           ownerId !== undefined &&
           categoryInScope(category, ownerId) &&
           category.type === "EXPENSE",
-      )
-      .map((category) => ({ label: category.name, value: category.id })),
+      ),
+    ),
     currency: plan.data?.currency ?? DEFAULT_CURRENCY,
     errors,
     fields,

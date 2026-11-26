@@ -1,18 +1,13 @@
 import { useMemo, useState } from "react";
 
+import { TreeNode } from "@components";
 import { CurrencyCode } from "@domain/entities/financial/Currency";
-import { useLocaleTag } from "@presentation/i18n";
+import { useLocaleTag, useTranslation } from "@presentation/i18n";
 import { useBreakpoint } from "@presentation/theme";
+import { toTreeNodes } from "@presentation/utils/categoryTreeNodes";
 import useFilterOptions, {
   SourceOption,
 } from "@screens/Financial/Transactions/hooks/useFilterOptions";
-import {
-  buildCategoryGroups,
-  buildCategoryIndex,
-  PickerCategory,
-  searchCategories,
-  toggleCategory,
-} from "@screens/Financial/Transactions/models/categoryPicker";
 import {
   FilterOrigin,
   FilterPeriod,
@@ -42,8 +37,6 @@ export interface FiltersModalParams {
   ownerIds: string[];
   // The ids of the scope chip on screen: pickers list what belongs to it.
   scopeOwnerIds: string[];
-  // The type of the screen: its categories are listed first in the search (spec 051 FR 3).
-  typeFirst?: "EXPENSE" | "INCOME";
 }
 export type FiltersStep = "period" | "root" | "sources";
 
@@ -97,11 +90,11 @@ function sameScope(ids: string[], scope: string[]) {
 // The draft of the Filters modal (mounted only while open, so it starts from the applied filters) (spec 045 FR 18-21): nothing reaches the list until "Apply filters".
 function useFiltersModalViewModel(params: FiltersModalParams) {
   const localeTag = useLocaleTag();
+  const { t } = useTranslation();
   const wide = useBreakpoint() !== "compact";
   const [draft, setDraft] = useState(params.filters);
   const [currencyDraft, setCurrencyDraft] = useState(params.currency?.value);
   const [step, setStep] = useState<FiltersStep>(params.initialStep ?? "root");
-  const [categoryQuery, setCategoryQuery] = useState("");
   const [periodMode, setPeriodMode] = useState<PeriodMode>(
     modeOf(params.filters.period),
   );
@@ -113,60 +106,25 @@ function useFiltersModalViewModel(params: FiltersModalParams) {
   );
   const options = useFilterOptions(params.ownerIds, true);
 
-  const pickerCategories = useMemo<PickerCategory[]>(
+  // Both types share one tree: the badge tells an expense category from an income one (spec 051 FR 3).
+  const categoryNodes = useMemo<TreeNode[]>(
     () =>
-      options.categoryDtos
-        .filter(
+      toTreeNodes(
+        options.categoryDtos.filter(
           (category) =>
             sameScope(category.scopeOwnerIds, params.scopeOwnerIds) &&
             category.scopeOwnerIds.some(
               (id) => !params.archivedOwnerIds.has(id),
             ),
-        )
-        .map((category) => ({
-          archived: category.status === "ARCHIVED",
-          iconColor: category.iconColor,
-          id: category.id,
-          name: category.name,
-          parentId: category.parentId,
-          type: category.type,
-        })),
-    [options.categoryDtos, params.scopeOwnerIds, params.archivedOwnerIds],
-  );
-  // Toggling works over the whole tree; the search index is computed once per categories load (spec 051 §11).
-  const fullGroups = useMemo(
-    () => buildCategoryGroups(pickerCategories),
-    [pickerCategories],
-  );
-  const categoryIndex = useMemo(
-    () => buildCategoryIndex(pickerCategories),
-    [pickerCategories],
-  );
-  const categoryResults = useMemo(
-    () =>
-      searchCategories(categoryIndex, categoryQuery, {
-        selected: new Set(draft.categoryIds),
-        typeFirst: params.typeFirst,
-      }),
-    [categoryIndex, categoryQuery, draft.categoryIds, params.typeFirst],
-  );
-  const selectedCategoryChips = useMemo(
-    () =>
-      draft.categoryIds.flatMap((id) => {
-        const entry = categoryIndex.find((item) => item.category.id === id);
-
-        return entry
-          ? [
-              {
-                iconColor: entry.category.iconColor,
-                id,
-                label: entry.path,
-                type: entry.category.type,
-              },
-            ]
-          : [];
-      }),
-    [draft.categoryIds, categoryIndex],
+        ),
+        (category) =>
+          t(
+            category.type === "INCOME"
+              ? "financial.transactions.filters.categories.typeIncome"
+              : "financial.transactions.filters.categories.typeExpense",
+          ),
+      ),
+    [options.categoryDtos, params.scopeOwnerIds, params.archivedOwnerIds, t],
   );
 
   // Archived accounts and cards are not offered, unless one is already in the filter applied when the modal opened (FR 13-14).
@@ -314,8 +272,7 @@ function useFiltersModalViewModel(params: FiltersModalParams) {
 
   return {
     canApply,
-    categoryQuery,
-    categoryResults,
+    categoryNodes,
     currency:
       params.currency && currencyDraft
         ? {
@@ -335,19 +292,8 @@ function useFiltersModalViewModel(params: FiltersModalParams) {
       params.onApply(applied());
       params.onClose();
     },
-    onCategoryPick: (id: string) => {
-      setDraft({
-        ...draft,
-        categoryIds: toggleCategory(fullGroups, new Set(draft.categoryIds), id),
-      });
-      setCategoryQuery("");
-    },
-    onCategoryQueryChange: setCategoryQuery,
-    onCategoryRemove: (id: string) =>
-      setDraft({
-        ...draft,
-        categoryIds: draft.categoryIds.filter((item) => item !== id),
-      }),
+    onCategoriesChange: (categoryIds: string[]) =>
+      setDraft({ ...draft, categoryIds }),
     onClearAll: () => {
       setDraft({ ...draft, ...clearedDraft() });
       setPeriodMode("NONE");
@@ -374,7 +320,6 @@ function useFiltersModalViewModel(params: FiltersModalParams) {
       }),
     periodError,
     periodMode,
-    selectedCategoryChips,
     sourceGroups,
     step,
     tagNames,

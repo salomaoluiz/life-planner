@@ -9,6 +9,7 @@ import {
   FixedValues,
   RowType,
 } from "@application/csvImport/types";
+import { toTreeNode } from "@presentation/utils/categoryTreeNodes";
 
 import { ImportWizardState } from "../useImportWizardViewModel";
 
@@ -101,10 +102,7 @@ function useColumnsStepViewModel(wizard: ImportWizardState) {
     fixedAccountOrCardValue: fixed.accountOrCard
       ? `${fixed.accountOrCard.kind}:${fixed.accountOrCard.id}`
       : FIXED_NONE,
-    fixedCategoryOptions: records.categories.map((item) => ({
-      label: item.path,
-      value: item.id,
-    })),
+    fixedCategoryNodes: records.categories.map(toTreeNode),
     fixedCategoryValue: fixed.categoryId ?? FIXED_NONE,
     fixedTypeValue: fixed.type ?? FIXED_NONE,
     mapped: {

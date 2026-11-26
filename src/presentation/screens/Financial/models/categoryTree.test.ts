@@ -5,7 +5,6 @@ import {
   categoriesOf,
   categoryInScope,
   descendantIds,
-  filterRowsByQuery,
   selectableCategories,
 } from "./categoryTree";
 
@@ -105,19 +104,6 @@ it("SHOULD keep only categories of the owner and type", () => {
   expect(categoriesOf(list, "user-id", "EXPENSE").map((c) => c.id)).toEqual([
     "a",
   ]);
-});
-
-it("SHOULD filter rows by name ignoring case and accents", () => {
-  const rows = buildCategoryRows([
-    category("a", "Educação"),
-    category("b", "Lazer"),
-  ]);
-
-  expect(
-    filterRowsByQuery(rows, "educacao").map((row) => row.category.id),
-  ).toEqual(["a"]);
-  expect(filterRowsByQuery(rows, "").length).toBe(2);
-  expect(filterRowsByQuery(rows, "zzz")).toEqual([]);
 });
 
 describe("scope ALL", () => {

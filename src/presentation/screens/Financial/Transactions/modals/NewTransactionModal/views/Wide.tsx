@@ -6,6 +6,7 @@ import {
   AutocompleteField,
   BottomSheet,
   Button,
+  CategoryTreeField,
   ChipGroup,
   ConfirmDialog,
   DateField,
@@ -22,6 +23,7 @@ import {
   TextField,
   Toast,
   ToneDot,
+  useTreePickerLabels,
 } from "@components";
 import { formatAmount } from "@components/AmountText/formatAmount";
 import Skeleton from "@components/Skeleton";
@@ -34,8 +36,6 @@ import RecurrenceBlock from "@screens/Financial/Transactions/components/Recurren
 import { toInvoiceFieldOption } from "@screens/Financial/utils/invoiceFieldOption";
 import { recurrenceLabel } from "@screens/Financial/utils/recurrenceLabel";
 
-import CategoryChips from "../components/CategoryChips";
-import CategoryPickerSheet from "../components/CategoryPickerSheet";
 import MissingRecordHint from "../components/MissingRecordHint";
 import NotesField from "../components/NotesField";
 import RecurrenceDeleteSheet from "../components/RecurrenceDeleteSheet";
@@ -68,6 +68,7 @@ function monthYearName(month: Date, localeTag: string) {
 function Wide({ vm }: AdaptiveViewProps<NewTransactionVM>) {
   const { styles } = useStyles();
   const { t } = useTranslation();
+  const categoryLabels = useTreePickerLabels("category");
   const localeTag = useLocaleTag();
   const isCard = vm.payWith === "CARD";
   const toastBottom =
@@ -258,14 +259,19 @@ function Wide({ vm }: AdaptiveViewProps<NewTransactionVM>) {
                   testID={transactionFormTestIds.missingCategoryHint}
                 />
               ) : (
-                <CategoryChips
-                  categories={vm.categoryChips}
+                <CategoryTreeField
+                  archivedLabel={t("financial.accounts.archivedLabel")}
                   error={err(vm.categoryError)}
                   label={t("financial.transactions.form.category")}
-                  moreLabel={t("financial.transactions.form.moreCategories")}
-                  onMore={vm.onCategoryPickerOpen}
-                  onSelect={vm.onCategorySelect}
-                  selected={vm.selectedCategoryId}
+                  labels={categoryLabels}
+                  mode={"single"}
+                  mostUsedIds={vm.mostUsedCategoryIds}
+                  nodes={vm.categoryNodes}
+                  onChange={vm.onCategorySelect}
+                  onCreate={vm.onCreateCategoryPress}
+                  pickerTitle={t("financial.transactions.form.chooseCategory")}
+                  testID={transactionFormTestIds.categoryChips}
+                  value={vm.selectedCategoryId}
                 />
               )}
               <AutocompleteField
@@ -751,20 +757,6 @@ function Wide({ vm }: AdaptiveViewProps<NewTransactionVM>) {
         testID={transactionFormTestIds.savedToast}
         visible={vm.isSaved}
       />
-      {vm.isCategoryPickerOpen && (
-        <CategoryPickerSheet
-          archivedLabel={t("financial.accounts.archivedLabel")}
-          closeLabel={t("common.actions.close")}
-          onClose={vm.onCategoryPickerClose}
-          onQueryChange={vm.onCategoryQueryChange}
-          onSelect={vm.onCategorySelect}
-          query={vm.categoryQuery}
-          rows={vm.categoryPickerRows}
-          searchPlaceholder={t("common.search.placeholder")}
-          selected={vm.selectedCategoryId}
-          title={t("financial.transactions.form.chooseCategory")}
-        />
-      )}
       <ConfirmDialog
         cancelLabel={t("common.form.keepEditing")}
         closeLabel={t("common.actions.close")}

@@ -139,6 +139,16 @@ async function chooseOption(testID: string, value: string) {
   fireEvent.press(screen.getByTestId(`${testID}-option-${value}`));
 }
 
+// The shared tree picker: open the field, then tap a node or the "none" row (empty value).
+async function chooseTreeOption(testID: string, value: string) {
+  fireEvent.press(screen.getByTestId(`${testID}-field`));
+  fireEvent.press(
+    screen.getByTestId(
+      value ? `${testID}-picker-option-${value}` : `${testID}-picker-none`,
+    ),
+  );
+}
+
 async function pickFile(text = CSV) {
   spies.pick.mockResolvedValueOnce(file(text));
   fireEvent.press(screen.getByTestId(ids.importPick));
@@ -188,6 +198,7 @@ export {
   act,
   category,
   chooseOption,
+  chooseTreeOption,
   CSV,
   file,
   fireEvent,

@@ -54,13 +54,12 @@ it("SHOULD start as an expense for today with the default account and the Person
   );
 });
 
-it("SHOULD expose the most used categories as chips with their color dot", () => {
+it("SHOULD expose the most used categories as ids and every category as a picker node", () => {
   givenLoaded({ top: [cat("food", "user-id", "EXPENSE", "#F59E0B")] });
   const { result } = setup();
 
-  expect(result.current.categoryChips).toEqual([
-    { colorDot: "#F59E0B", label: "food", value: "food" },
-  ]);
+  expect(result.current.mostUsedCategoryIds).toEqual(["food"]);
+  expect(result.current.categoryNodes.map((node) => node.id)).toContain("food");
 });
 
 it("SHOULD key the most-used query by owner and type", () => {
@@ -400,24 +399,6 @@ it("SHOULD NOT refetch WHEN the screen is not focused", () => {
   setup();
 
   expect(spies.refetchStale).not.toHaveBeenCalled();
-});
-
-it("SHOULD filter the category picker rows by the search text", () => {
-  givenLoaded({ categories: [cat("food"), cat("rent")] });
-  const { result } = setup();
-
-  act(() => {
-    result.current.onCategoryPickerOpen();
-  });
-  act(() => {
-    result.current.onCategoryQueryChange("re");
-  });
-
-  expect(result.current.isCategoryPickerOpen).toBe(true);
-  expect(result.current.categoryQuery).toBe("re");
-  expect(
-    result.current.categoryPickerRows.map((row) => row.category.id),
-  ).toEqual(["rent"]);
 });
 
 describe("card mode (spec 029)", () => {

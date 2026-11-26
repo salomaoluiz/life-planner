@@ -21,6 +21,7 @@ import {
 import { useMutation, useQuery } from "@infrastructure/fetcher";
 import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import { useLocaleTag } from "@presentation/i18n";
+import { toTreeNodes } from "@presentation/utils/categoryTreeNodes";
 import useDebouncedValue from "@screens/Investment/FixedIncome/hooks/useDebouncedValue";
 import invalidateInvestments from "@screens/Investment/hooks/invalidateInvestments";
 import { formatDay, formatMoney } from "@screens/Investment/models/format";
@@ -455,10 +456,7 @@ function useIncomeModalViewModel() {
       state?.categoryId && state.categoryId === defaults.data?.categoryId
         ? ("investment.income.categoryDefaultHint" as const)
         : undefined,
-    categoryOptions: incomeCategories.map((category) => ({
-      label: category.name,
-      value: category.id,
-    })),
+    categoryNodes: toTreeNodes(incomeCategories),
     currency,
     errors,
     estimate: {

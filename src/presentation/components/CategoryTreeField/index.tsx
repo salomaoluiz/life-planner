@@ -143,7 +143,7 @@ function CategoryTreeField(props: CategoryTreeFieldProps) {
       error={props.error}
       helper={props.helper}
       label={props.label}
-      testID={testID}
+      testID={`${testID}-shell`}
     >
       {single && (props.mostUsedIds?.length ?? 0) > 0 ? (
         <ChipGroup
@@ -151,7 +151,7 @@ function CategoryTreeField(props: CategoryTreeFieldProps) {
           mode={"single"}
           onChange={onChip}
           options={chipOptions()}
-          testID={`${testID}-chips`}
+          testID={testID}
           value={props.value}
         />
       ) : null}
@@ -163,7 +163,7 @@ function CategoryTreeField(props: CategoryTreeFieldProps) {
         disabled={props.disabled}
         onPress={() => setOpen(true)}
         style={styles.frame}
-        testID={testID}
+        testID={`${testID}-field`}
       >
         {selected ? (
           <IconTile

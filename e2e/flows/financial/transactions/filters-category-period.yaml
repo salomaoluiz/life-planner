@@ -105,12 +105,16 @@ onFlowComplete:
     timeout: 20000
 - tapOn:
     id: "financial.transactions.filters.period-mode-THIS_YEAR"
-# Spec 051: the category is found by search, not listed in a tree
+# Spec 051/126: the category is found by search in the shared tree picker
 - tapOn:
-    id: "financial.transactions.filters.categories-search"
+    id: "financial.transactions.filters.categories-field-field"
+- tapOn:
+    id: "financial.transactions.filters.categories-field-picker-search"
 - inputText: ${output.EXPENSE_CATEGORY_NAME}
 - tapOn:
-    id: "financial.transactions.filters.category-${output.EXPENSE_CATEGORY_ID}"
+    id: "financial.transactions.filters.categories-field-picker-option-${output.EXPENSE_CATEGORY_ID}"
+- tapOn:
+    id: "financial.transactions.filters.categories-field-picker-apply"
 - tapOn:
     id: "financial.transactions.filters.apply"
 - extendedWaitUntil:

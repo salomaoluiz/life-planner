@@ -195,10 +195,13 @@ describe("fields", () => {
   it("SHOULD pick the category and the location (or none)", () => {
     const { vm } = setup({ values: values({ categoryId: "cat-1" }) });
 
-    fireEvent.press(screen.getByTestId(stockItemFormTestIds.categorySelect));
-    fireEvent.press(screen.getByText("stock.form.noCategory"));
-    fireEvent.press(screen.getByTestId(stockItemFormTestIds.locationSelect));
-    fireEvent.press(screen.getByText("Fridge"));
+    const category = stockItemFormTestIds.categorySelect;
+    const location = stockItemFormTestIds.locationSelect;
+
+    fireEvent.press(screen.getByTestId(`${category}-field`));
+    fireEvent.press(screen.getByTestId(`${category}-picker-none`));
+    fireEvent.press(screen.getByTestId(`${location}-field`));
+    fireEvent.press(screen.getByTestId(`${location}-picker-option-loc-1`));
 
     expect(vm.setField).toHaveBeenCalledWith("categoryId", undefined);
     expect(vm.setField).toHaveBeenCalledWith("locationId", "loc-1");

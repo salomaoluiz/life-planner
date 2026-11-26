@@ -5,10 +5,12 @@ import {
   AutocompleteField,
   Button,
   Card,
+  CategoryTreeField,
   SegmentedControl,
-  SelectField,
   Text,
   TextField,
+  TreeNode,
+  useTreePickerLabels,
 } from "@components";
 import { CurrencyCode } from "@domain/entities/financial/Currency";
 import { useTranslation } from "@presentation/i18n";
@@ -26,10 +28,10 @@ const MAX_TAG_NAME = 30;
 
 interface Props {
   canAddPart: boolean;
-  categoryOptions: (
+  categoryNodes: (
     type: "EXPENSE" | "INCOME",
     selectedId?: string,
-  ) => { label: string; value: string }[];
+  ) => TreeNode[];
   currency: CurrencyCode;
   errors: SplitFormErrors;
   isCard: boolean;
@@ -49,6 +51,7 @@ interface Props {
 // part has its own Receita/Despesa toggle; the "Desconto/ajuste" part has Desconto/Acréscimo instead.
 function SplitPartsEditor(props: Props) {
   const { t } = useTranslation();
+  const categoryLabels = useTreePickerLabels("category");
   const { theme } = useTheme();
 
   function err(key?: TranslationKeys) {
@@ -121,13 +124,14 @@ function SplitPartsEditor(props: Props) {
                     value={part.type}
                   />
                 )}
-                <SelectField
-                  closeLabel={t("common.actions.close")}
+                <CategoryTreeField
+                  archivedLabel={t("financial.accounts.archivedLabel")}
                   error={err(props.errors.partCategory?.[part.key])}
                   label={t("financial.split.form.category")}
-                  onChange={(value) => props.onCategoryChange(part.key, value)}
-                  options={props.categoryOptions(part.type, part.categoryId)}
-                  sheetTitle={t("financial.split.form.category")}
+                  labels={categoryLabels}
+                  mode={"single"}
+                  nodes={props.categoryNodes(part.type, part.categoryId)}
+                  onChange={(id) => id && props.onCategoryChange(part.key, id)}
                   testID={splitFormTestIds.partCategory}
                   value={part.categoryId}
                 />

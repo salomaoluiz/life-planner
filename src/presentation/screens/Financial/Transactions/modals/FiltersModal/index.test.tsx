@@ -5,11 +5,16 @@ import { fireEvent, params, screen, setup } from "./mocks/index.mocks";
 
 const ids = transactionsTestIds;
 const K = "financial.transactions.filters.";
-const search = `${ids.filtersSection}.categories-search`;
+const field = `${ids.filtersSection}.categories-field`;
+const picker = `${field}-picker`;
 
-function pickCategory(query: string, id: string) {
-  fireEvent.changeText(screen.getByTestId(search), query);
-  fireEvent.press(screen.getByTestId(`${ids.filtersCategory}-${id}`));
+// Opens the shared tree picker, ticks the categories and applies the picker.
+function pickCategories(...categoryIds: string[]) {
+  fireEvent.press(screen.getByTestId(`${field}-field`));
+  categoryIds.forEach((id) =>
+    fireEvent.press(screen.getByTestId(`${picker}-option-${id}`)),
+  );
+  fireEvent.press(screen.getByTestId(`${picker}-apply`));
 }
 
 describe("wide layout", () => {
@@ -30,7 +35,7 @@ describe("wide layout", () => {
   it("SHOULD apply the draft and close, but discard it on Cancel", () => {
     setup();
 
-    pickCategory("mark", "market");
+    pickCategories("market");
     fireEvent.press(screen.getByTestId(`${ids.filtersCancel}`));
     expect(params.onApply).not.toHaveBeenCalled();
     expect(params.onClose).toHaveBeenCalledTimes(1);
@@ -42,69 +47,44 @@ describe("wide layout", () => {
     });
   });
 
-  it("SHOULD list no category before typing and add a chip when one is picked", () => {
+  it("SHOULD add a removable chip when a category is picked", () => {
     setup();
 
-    expect(screen.queryByTestId(`${ids.filtersCategory}-market`)).toBeNull();
-    pickCategory("mark", "market");
+    pickCategories("market");
 
-    expect(
-      screen.getByTestId(`${ids.filtersCategoryChip}-market`),
-    ).toBeOnTheScreen();
-    expect(screen.getByTestId(search).props.value).toBe("");
-    expect(screen.queryByTestId(`${ids.filtersCategory}-market`)).toBeNull();
+    expect(screen.getByTestId(`${field}-chip-market`)).toBeOnTheScreen();
+    fireEvent.press(screen.getByTestId(`${field}-chip-market-remove`));
+    fireEvent.press(screen.getByTestId(ids.filtersApply));
+    expect(params.onApply).toHaveBeenCalledWith(EMPTY_FILTERS);
   });
 
-  it("SHOULD show a child of a chosen parent as included and disabled", () => {
+  it("SHOULD show a child of a chosen parent as included and not tickable", () => {
     setup({ filters: { ...EMPTY_FILTERS, categoryIds: ["market"] } });
 
-    fireEvent.changeText(screen.getByTestId(search), "gree");
-    fireEvent.press(screen.getByTestId(`${ids.filtersCategory}-greens`));
+    fireEvent.press(screen.getByTestId(`${field}-field`));
+    expect(
+      screen.getAllByText('common.treePicker.includedIn {"name":"Market"}')
+        .length,
+    ).toBeGreaterThan(0);
+    fireEvent.press(screen.getByTestId(`${picker}-option-greens`));
+    fireEvent.press(screen.getByTestId(`${picker}-apply`));
     fireEvent.press(screen.getByTestId(ids.filtersApply));
 
-    expect(
-      screen.getByText(`${K}categories.includedIn {"name":"Market"}`),
-    ).toBeOnTheScreen();
     expect(params.onApply).toHaveBeenCalledWith({
       ...EMPTY_FILTERS,
       categoryIds: ["market"],
     });
   });
 
-  it("SHOULD swap the children for the parent when the parent is picked, and remove through the chip", () => {
-    setup({ filters: { ...EMPTY_FILTERS, categoryIds: ["greens"] } });
-
-    pickCategory("mark", "market");
-    expect(
-      screen.queryByTestId(`${ids.filtersCategoryChip}-greens`),
-    ).toBeNull();
-    fireEvent.press(
-      screen.getByTestId(`${ids.filtersCategoryChip}-market-remove`),
-    );
-    fireEvent.press(screen.getByTestId(ids.filtersApply));
-
-    expect(params.onApply).toHaveBeenCalledWith(EMPTY_FILTERS);
-  });
-
-  it("SHOULD find an archived category only by search and mark it", () => {
+  it("SHOULD never list an archived category and badge the type of each one", () => {
     setup();
 
-    expect(screen.queryByTestId(`${ids.filtersCategory}-gym`)).toBeNull();
-    fireEvent.changeText(screen.getByTestId(search), "gym");
+    fireEvent.press(screen.getByTestId(`${field}-field`));
 
-    expect(screen.getByTestId(`${ids.filtersCategory}-gym`)).toBeOnTheScreen();
-    expect(screen.getByText(`${K}categories.archivedBadge`)).toBeOnTheScreen();
-  });
-
-  it("SHOULD list the type of the screen first", () => {
-    setup({ typeFirst: "INCOME" });
-
-    fireEvent.changeText(screen.getByTestId(search), "sal");
-
+    expect(screen.queryByTestId(`${picker}-option-gym`)).toBeNull();
     expect(
-      screen.getAllByTestId(new RegExp(`^${ids.filtersCategory}-`))[0].props
-        .testID,
-    ).toBe(`${ids.filtersCategory}-salary`);
+      screen.getByTestId(`${picker}-option-salary-badge`),
+    ).toBeOnTheScreen();
   });
 
   it("SHOULD not list archived accounts, but keep one that is in the applied filter", () => {
@@ -185,14 +165,12 @@ describe("wide layout", () => {
 });
 
 describe("compact layout", () => {
-  it("SHOULD keep Categories in the root sheet with search, and no category step", () => {
+  it("SHOULD keep Categories in the root sheet, and no category step", () => {
     setup({}, "compact");
 
-    expect(screen.getByTestId(search)).toBeOnTheScreen();
-    pickCategory("mark", "market");
-    expect(
-      screen.getByTestId(`${ids.filtersCategoryChip}-market`),
-    ).toBeOnTheScreen();
+    expect(screen.getByTestId(`${field}-field`)).toBeOnTheScreen();
+    pickCategories("market");
+    expect(screen.getByTestId(`${field}-chip-market`)).toBeOnTheScreen();
     expect(screen.getByTestId(ids.filtersApply)).toBeOnTheScreen();
   });
 

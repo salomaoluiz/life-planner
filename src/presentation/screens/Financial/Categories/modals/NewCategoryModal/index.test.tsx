@@ -87,16 +87,14 @@ it("SHOULD show the type and owner helpers WHEN locked", () => {
 it("SHOULD offer the no-parent option first and report the parent", () => {
   const vm = setup();
 
-  fireEvent.press(screen.getByTestId(categoryFormTestIds.parentSelect));
-  expect(
-    screen.getByTestId(`${categoryFormTestIds.parentSelect}-option-housing`),
-  ).toBeOnTheScreen();
-  expect(
-    screen.getByTestId(`${categoryFormTestIds.parentSelect}-option-`),
-  ).toBeOnTheScreen();
+  const picker = `${categoryFormTestIds.parentSelect}-picker`;
+
   fireEvent.press(
-    screen.getByTestId(`${categoryFormTestIds.parentSelect}-option-housing`),
+    screen.getByTestId(`${categoryFormTestIds.parentSelect}-field`),
   );
+  expect(screen.getByTestId(`${picker}-option-housing`)).toBeOnTheScreen();
+  expect(screen.getByTestId(`${picker}-none`)).toBeOnTheScreen();
+  fireEvent.press(screen.getByTestId(`${picker}-option-housing`));
 
   expect(vm.onParentChange).toHaveBeenCalledWith("housing");
 });
@@ -220,7 +218,7 @@ describe("wide layout (spec 037)", () => {
     const right = within(screen.getByTestId(`${sheet}-column-right`));
     expect(left.getByTestId(categoryFormTestIds.nameInput)).toBeOnTheScreen();
     expect(
-      left.getByTestId(categoryFormTestIds.parentSelect),
+      left.getByTestId(`${categoryFormTestIds.parentSelect}-field`),
     ).toBeOnTheScreen();
     expect(right.getByTestId(categoryFormTestIds.swatches)).toBeOnTheScreen();
     expect(right.getByTestId(categoryFormTestIds.icon)).toBeOnTheScreen();

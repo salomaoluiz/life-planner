@@ -195,8 +195,9 @@ describe("catalog", () => {
     const vm = setup({ openFilter: "category" });
 
     fireEvent.press(
-      screen.getByTestId(`${stockTestIds.filterSheetOptions}-c1`),
+      screen.getByTestId(`${stockTestIds.filterSheet}-option-c1`),
     );
+    fireEvent.press(screen.getByTestId(`${stockTestIds.filterSheet}-apply`));
 
     expect(vm.onCategoriesChange).toHaveBeenCalledWith(["c1"]);
   });
@@ -205,23 +206,32 @@ describe("catalog", () => {
     const vm = setup({ openFilter: "location" });
 
     fireEvent.press(
-      screen.getByTestId(`${stockTestIds.filterSheetOptions}-l1`),
+      screen.getByTestId(`${stockTestIds.filterSheet}-option-l1`),
     );
+    fireEvent.press(screen.getByTestId(`${stockTestIds.filterSheet}-apply`));
 
     expect(vm.onLocationsChange).toHaveBeenCalledWith(["l1"]);
   });
 
   it("SHOULD explain WHEN there is nothing to choose AND show a skeleton while loading", () => {
-    setup({ categoryOptions: [], locationOptions: [], openFilter: "location" });
+    setup({
+      categoryNodes: [],
+      categoryOptions: [],
+      locationNodes: [],
+      locationOptions: [],
+      openFilter: "location",
+    });
     expect(screen.getByText("stock.list.filter.noLocations")).toBeOnTheScreen();
 
-    setup({ categoryOptions: [], openFilter: "category" });
+    setup({ categoryNodes: [], categoryOptions: [], openFilter: "category" });
     expect(
       screen.getAllByText("stock.list.filter.noCategories").length,
     ).toBeGreaterThan(0);
 
     setup({ isCatalogLoading: true, openFilter: "category" });
-    expect(screen.queryByTestId(stockTestIds.filterSheetOptions)).toBeNull();
+    expect(
+      screen.queryByTestId(`${stockTestIds.filterSheet}-search`),
+    ).toBeNull();
   });
 });
 

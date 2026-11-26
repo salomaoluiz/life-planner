@@ -91,11 +91,8 @@ it("SHOULD NOT add the selected account WHEN it belongs to another owner or is a
   expect(model.accountOptions("user-id", "a")).toHaveLength(2);
 });
 
-it("SHOULD build the category tree for the owner and type only", () => {
-  const rows = model.categoryRows("user-id", "EXPENSE");
-
-  expect(rows.map((row) => row.category.id)).toEqual(["food", "snacks"]);
-  expect(rows.map((row) => row.depth)).toEqual([0, 1]);
+it("SHOULD list the categories of the owner and type only", () => {
+  expect(model.categoryIds("user-id", "EXPENSE")).toEqual(["food", "snacks"]);
   expect(model.categoryIds("user-id", "INCOME")).toEqual(["salary"]);
 });
 
@@ -103,11 +100,6 @@ it("SHOULD hide archived categories BUT keep the selected one (spec 041)", () =>
   expect(model.categoryIds("user-id", "EXPENSE")).toEqual(["food", "snacks"]);
   expect(
     model.categoriesFor("user-id", "EXPENSE", "old").map((item) => item.id),
-  ).toContain("old");
-  expect(
-    model
-      .categoryRows("user-id", "EXPENSE", "old")
-      .map((row) => row.category.id),
   ).toContain("old");
 });
 

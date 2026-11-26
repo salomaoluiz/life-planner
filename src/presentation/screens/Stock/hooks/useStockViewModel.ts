@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import StockDTO from "@application/dto/stock/StockDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
+import { TreeNode } from "@components";
 import { GenericError } from "@domain/entities/errors";
 import {
   StockCatalogStatus,
@@ -14,6 +15,7 @@ import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { useQuery } from "@infrastructure/fetcher";
 import useOwnerScopedQuery from "@presentation/hooks/useOwnerScopedQuery";
 import { useTranslationLocale } from "@presentation/i18n";
+import { flattenCatalogNodes } from "@presentation/utils/categoryTreeNodes";
 import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 import useStockQuickMovement from "@screens/Stock/hooks/useStockQuickMovement";
@@ -34,6 +36,9 @@ export type StockVM = ReturnType<typeof useStockViewModel>;
 
 interface CatalogData {
   categories: Array<{ id: string; label: string; parentId?: string }>;
+  // Picker nodes (spec 126): the owner name is the badge when more than one owner is listed.
+  categoryNodes: TreeNode[];
+  locationNodes: TreeNode[];
   locations: Array<{ id: string; label: string; parentId?: string }>;
 }
 
@@ -89,12 +94,28 @@ export async function fetchCatalog(owners: OwnerDTO[]): Promise<CatalogData> {
     return multiple ? ` · ${owner.name}` : "";
   }
 
+  function nodesOf(
+    trees: Parameters<typeof flattenCatalogNodes>[0],
+    owner: OwnerDTO,
+  ) {
+    return flattenCatalogNodes(trees).map((node) => ({
+      ...node,
+      badge: multiple ? owner.name : undefined,
+    }));
+  }
+
   return {
     categories: rows.flatMap(({ categories, owner }) =>
       flattenActive(categories).map((category) => ({
         ...category,
         label: `${category.label}${suffix(owner)}`,
       })),
+    ),
+    categoryNodes: rows.flatMap(({ categories, owner }) =>
+      nodesOf(categories, owner),
+    ),
+    locationNodes: rows.flatMap(({ locations, owner }) =>
+      nodesOf(locations, owner),
     ),
     locations: rows.flatMap(({ locations, owner }) =>
       flattenActive(locations).map((location) => ({
@@ -279,6 +300,7 @@ function useStockViewModel() {
   return {
     activeFilter,
     categoryIds,
+    categoryNodes: catalog.data?.categoryNodes ?? [],
     categoryOptions: catalog.data?.categories ?? [],
     errorMessageKey:
       error && !data ? ("common.errors.generic" as const) : undefined,
@@ -290,6 +312,7 @@ function useStockViewModel() {
     isRefreshing: isFetching && !!data,
     isSortOpen,
     locationIds,
+    locationNodes: catalog.data?.locationNodes ?? [],
     locationOptions: catalog.data?.locations ?? [],
     locationRoute: routeLocationId
       ? {
