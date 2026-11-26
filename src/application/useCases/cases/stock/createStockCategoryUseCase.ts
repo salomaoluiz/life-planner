@@ -3,7 +3,9 @@ import { DefaultError } from "@domain/entities/errors";
 import Repositories from "@domain/repositories";
 
 export type CreateStockCategoryUseCaseParams = {
+  color: string;
   financeCategoryId?: string;
+  icon: string;
   name: string;
   owner: string;
   ownerId: string;

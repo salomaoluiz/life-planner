@@ -65,14 +65,25 @@ it("SHOULD GET the category tree and the locations of an owner, archived ones on
 });
 
 it("SHOULD POST creates and suggestions, PATCH updates without the id in the body, DELETE by id", async () => {
-  await createStockCategory({ ...owner, name: "Dairy", parentId: "p" });
-  await createStockLocation({ ...owner, name: "Pantry" });
+  await createStockCategory({
+    ...owner,
+    color: "#112233",
+    icon: "cart",
+    name: "Dairy",
+    parentId: "p",
+  });
+  await createStockLocation({
+    ...owner,
+    color: "#112233",
+    icon: "archive",
+    name: "Pantry",
+  });
   await createStockCategorySuggestions(owner);
   await createStockLocationSuggestions(owner);
   await updateStockCategory({ id: "c", name: "N", status: "ARCHIVED" });
   await updateStockLocation({ id: "l", name: "M" });
   await deleteStockCategory("c");
-  await deleteStockLocation("l");
+  await deleteStockLocation("l", "other");
 
   expect(spies.post.mock.calls.map((call) => call[0])).toEqual([
     "/v1/stock/categories",
@@ -82,6 +93,8 @@ it("SHOULD POST creates and suggestions, PATCH updates without the id in the bod
   ]);
   expect(spies.post).toHaveBeenCalledWith("/v1/stock/categories", {
     ...owner,
+    color: "#112233",
+    icon: "cart",
     name: "Dairy",
     parentId: "p",
   });
@@ -93,7 +106,9 @@ it("SHOULD POST creates and suggestions, PATCH updates without the id in the bod
     name: "M",
   });
   expect(spies.delete).toHaveBeenCalledWith("/v1/stock/categories/c");
-  expect(spies.delete).toHaveBeenCalledWith("/v1/stock/locations/l");
+  expect(spies.delete).toHaveBeenCalledWith(
+    "/v1/stock/locations/l?moveTo=other",
+  );
 });
 
 it("SHOULD map the 409 of a delete in use to its error with the item count", async () => {
@@ -118,12 +133,24 @@ it.each([
   ["getStockLocations", async () => getStockLocations(owner), "get"],
   [
     "createStockCategory",
-    async () => createStockCategory({ ...owner, name: "x" }),
+    async () =>
+      createStockCategory({
+        ...owner,
+        color: "#112233",
+        icon: "cart",
+        name: "x",
+      }),
     "post",
   ],
   [
     "createStockLocation",
-    async () => createStockLocation({ ...owner, name: "x" }),
+    async () =>
+      createStockLocation({
+        ...owner,
+        color: "#112233",
+        icon: "archive",
+        name: "x",
+      }),
     "post",
   ],
   [
@@ -156,3 +183,90 @@ it.each([
     await expect(run()).rejects.toBeInstanceOf(GenericError);
   },
 );
+
+it("SHOULD read every owner WHEN no owner is given AND send the suggestion keys", async () => {
+  spies.get.mockResolvedValue({ items: [] });
+
+  await getStockCategories({ includeArchived: true });
+  await getStockLocations({});
+  await createStockCategorySuggestions({ ...owner, keys: ["DAIRY"] });
+
+  expect(spies.get).toHaveBeenNthCalledWith(
+    1,
+    "/v1/stock/categories?includeArchived=true",
+  );
+  expect(spies.get).toHaveBeenNthCalledWith(
+    2,
+    "/v1/stock/locations?includeArchived=false",
+  );
+  expect(spies.post).toHaveBeenCalledWith("/v1/stock/categories/suggestions", {
+    ...owner,
+    keys: ["DAIRY"],
+  });
+});
+
+it("SHOULD map the trees WITH color, icon, owner and children", async () => {
+  spies.get.mockResolvedValueOnce({
+    items: [
+      {
+        children: [
+          {
+            children: [],
+            id: "c",
+            name: "Cheese",
+            parentId: "p",
+            status: "ACTIVE",
+          },
+        ],
+        color: "#60A5FA",
+        icon: "cup",
+        id: "p",
+        itemCount: 4,
+        name: "Dairy",
+        owner: "FAMILY",
+        ownerId: "f",
+        status: "ACTIVE",
+      },
+    ],
+  });
+  spies.get.mockResolvedValueOnce({
+    items: [
+      {
+        children: [
+          {
+            children: [],
+            id: "s",
+            name: "Shelf",
+            parentId: "l",
+            status: "ACTIVE",
+          },
+        ],
+        color: "#F59E0B",
+        icon: "archive",
+        id: "l",
+        itemCount: 1,
+        name: "Pantry",
+        owner: "USER",
+        ownerId: "u",
+        status: "ACTIVE",
+      },
+    ],
+  });
+
+  const [category] = await getStockCategories({ includeArchived: true });
+  const [location] = await getStockLocations({ includeArchived: true });
+
+  expect(category).toMatchObject({
+    color: "#60A5FA",
+    icon: "cup",
+    owner: "FAMILY",
+    ownerId: "f",
+  });
+  expect(category.children[0]).toMatchObject({
+    color: "#8A8F98",
+    icon: "package-variant",
+    parentId: "p",
+  });
+  expect(location.children[0]).toMatchObject({ parentId: "l" });
+  expect(location).toMatchObject({ color: "#F59E0B", icon: "archive" });
+});

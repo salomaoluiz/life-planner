@@ -24,11 +24,15 @@ export async function getStockLocation(
   const row = await datasources.stockDatasource.getStockLocation(id);
 
   return {
+    color: row.color,
+    icon: row.icon,
     id: row.id,
     itemCount: row.itemCount,
     name: row.name,
     owner: row.owner,
     ownerId: row.ownerId,
+    parentId: row.parentId,
+    path: row.path,
     status: row.status as StockCatalogStatus,
   };
 }

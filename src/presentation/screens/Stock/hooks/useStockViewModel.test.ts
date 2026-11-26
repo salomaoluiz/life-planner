@@ -643,7 +643,7 @@ describe("categories and locations (spec 116)", () => {
 
     act(() => result.current.onCatalogPress());
 
-    expect(modalNavigation.openModal).toHaveBeenCalledWith("stock_catalog");
+    expect(router.push).toHaveBeenCalledWith("/stock/catalog");
   });
 });
 
@@ -695,7 +695,22 @@ describe("fetchCatalog", () => {
       { children: [], id: "x", itemCount: 0, name: "Old", status: "ARCHIVED" },
     ] as never);
     getLocations().mockResolvedValue([
-      { id: "l", itemCount: 0, name: "Pantry", status: "ACTIVE" },
+      {
+        children: [
+          {
+            children: [],
+            id: "s",
+            itemCount: 0,
+            name: "Shelf",
+            parentId: "l",
+            status: "ACTIVE",
+          },
+        ],
+        id: "l",
+        itemCount: 0,
+        name: "Pantry",
+        status: "ACTIVE",
+      },
     ] as never);
 
     const result = await fetchCatalog([
@@ -717,13 +732,22 @@ describe("fetchCatalog", () => {
       { id: "p", label: "Dairy · Ana", parentId: undefined },
       { id: "c", label: "Dairy › Cheese · Ana", parentId: "p" },
     ]);
-    expect(result.locations[0]).toEqual({ id: "l", label: "Pantry · Ana" });
+    expect(result.locations.slice(0, 2)).toEqual([
+      { id: "l", label: "Pantry · Ana", parentId: undefined },
+      { id: "s", label: "Pantry › Shelf · Ana", parentId: "l" },
+    ]);
   });
 
   it("SHOULD not add the owner name WHEN there is only one owner", async () => {
     getCategories().mockResolvedValue([]);
     getLocations().mockResolvedValue([
-      { id: "l", itemCount: 0, name: "Pantry", status: "ACTIVE" },
+      {
+        children: [],
+        id: "l",
+        itemCount: 0,
+        name: "Pantry",
+        status: "ACTIVE",
+      },
     ] as never);
 
     expect((await fetchCatalog([owners[0]])).locations[0].label).toBe("Pantry");

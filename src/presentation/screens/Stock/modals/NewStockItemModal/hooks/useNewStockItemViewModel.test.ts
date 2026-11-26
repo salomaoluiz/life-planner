@@ -357,8 +357,22 @@ describe("query functions", () => {
       { children: [], id: "x", itemCount: 0, name: "Old", status: "ARCHIVED" },
     ] as never);
     jest.mocked(useCases.getStockLocationsUseCase.execute).mockResolvedValue([
-      { id: "l", itemCount: 0, name: "Pantry", status: "ACTIVE" },
-      { id: "z", itemCount: 0, name: "Old", status: "ARCHIVED" },
+      {
+        children: [
+          {
+            children: [],
+            id: "s",
+            itemCount: 0,
+            name: "Shelf",
+            status: "ACTIVE",
+          },
+        ],
+        id: "l",
+        itemCount: 0,
+        name: "Pantry",
+        status: "ACTIVE",
+      },
+      { children: [], id: "z", itemCount: 0, name: "Old", status: "ARCHIVED" },
     ] as never);
     jest.mocked(useCases.getShoppingListsUseCase.execute).mockResolvedValue([
       { id: "d", isDefault: true, name: "Mercado", status: "ACTIVE" },
@@ -373,7 +387,10 @@ describe("query functions", () => {
         { label: "Dairy › Cheese", value: "c" },
       ],
       defaultListName: "Mercado",
-      locations: [{ label: "Pantry", value: "l" }],
+      locations: [
+        { label: "Pantry", value: "l" },
+        { label: "Pantry › Shelf", value: "s" },
+      ],
       shoppingLists: [{ label: "Farmácia", value: "f" }],
     });
     expect(useCases.getShoppingListsUseCase.execute).toHaveBeenCalledWith({

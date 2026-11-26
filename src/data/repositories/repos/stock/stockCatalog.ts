@@ -43,7 +43,10 @@ export async function deleteStockCategory(
   params: Parameters<StockRepository["deleteStockCategory"]>[0],
   datasources: Datasources,
 ) {
-  await datasources.stockDatasource.deleteStockCategory(params.id);
+  await datasources.stockDatasource.deleteStockCategory(
+    params.id,
+    params.moveTo,
+  );
   invalidateItems();
 }
 
@@ -51,7 +54,10 @@ export async function deleteStockLocation(
   params: Parameters<StockRepository["deleteStockLocation"]>[0],
   datasources: Datasources,
 ) {
-  await datasources.stockDatasource.deleteStockLocation(params.id);
+  await datasources.stockDatasource.deleteStockLocation(
+    params.id,
+    params.moveTo,
+  );
   invalidateItems();
 }
 
@@ -97,11 +103,15 @@ function invalidateItems() {
 function toCategory(model: StockCategoryModel): StockCategoryEntity {
   return new StockCategoryEntity({
     children: model.children.map((child) => toCategory(child)),
+    color: model.color,
     effectiveFinanceCategoryId: model.effectiveFinanceCategoryId,
     financeCategoryId: model.financeCategoryId,
+    icon: model.icon,
     id: model.id,
     itemCount: model.itemCount,
     name: model.name,
+    owner: model.owner,
+    ownerId: model.ownerId,
     parentId: model.parentId,
     status: model.status as StockCatalogStatus,
   });
@@ -109,9 +119,15 @@ function toCategory(model: StockCategoryModel): StockCategoryEntity {
 
 function toLocation(model: StockLocationModel): StockLocationEntity {
   return new StockLocationEntity({
+    children: model.children.map((child) => toLocation(child)),
+    color: model.color,
+    icon: model.icon,
     id: model.id,
     itemCount: model.itemCount,
     name: model.name,
+    owner: model.owner,
+    ownerId: model.ownerId,
+    parentId: model.parentId,
     status: model.status as StockCatalogStatus,
   });
 }

@@ -26,6 +26,10 @@ export class StockCategoryDTO {
     readonly status: StockCatalogStatus,
     readonly itemCount: number,
     readonly children: StockCategoryDTO[],
+    readonly color: string,
+    readonly icon: string,
+    readonly owner: string,
+    readonly ownerId: string,
     readonly parentId?: string,
     readonly financeCategoryId?: string,
     readonly effectiveFinanceCategoryId?: string,
@@ -38,6 +42,10 @@ export class StockCategoryDTO {
       entity.status,
       entity.itemCount,
       entity.children.map((child) => StockCategoryDTO.fromEntity(child)),
+      entity.color,
+      entity.icon,
+      entity.owner,
+      entity.ownerId,
       entity.parentId,
       entity.financeCategoryId,
       entity.effectiveFinanceCategoryId,
@@ -51,6 +59,12 @@ export class StockLocationDTO {
     readonly name: string,
     readonly status: StockCatalogStatus,
     readonly itemCount: number,
+    readonly children: StockLocationDTO[],
+    readonly color: string,
+    readonly icon: string,
+    readonly owner: string,
+    readonly ownerId: string,
+    readonly parentId?: string,
   ) {}
 
   static fromEntity(entity: StockLocationEntity): StockLocationDTO {
@@ -59,6 +73,12 @@ export class StockLocationDTO {
       entity.name,
       entity.status,
       entity.itemCount,
+      entity.children.map((child) => StockLocationDTO.fromEntity(child)),
+      entity.color,
+      entity.icon,
+      entity.owner,
+      entity.ownerId,
+      entity.parentId,
     );
   }
 }

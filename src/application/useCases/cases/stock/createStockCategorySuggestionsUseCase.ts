@@ -3,6 +3,7 @@ import { DefaultError } from "@domain/entities/errors";
 import Repositories from "@domain/repositories";
 
 export type CreateStockCategorySuggestionsUseCaseParams = {
+  keys?: string[];
   owner: string;
   ownerId: string;
 };

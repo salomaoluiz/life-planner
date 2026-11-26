@@ -1,0 +1,31 @@
+url: ${E2E_WEB_URL}
+name: stock/catalog-suggestions
+tags:
+  - stock
+  - spec-125
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/stock/open-stock.yaml
+- runFlow: ../../subflows/stock/open-catalog.yaml
+# Empty owner: suggestions with color and icon, all checked; one is unchecked and not created.
+- assertVisible:
+    id: "stock.catalog.create-suggestions"
+- tapOn:
+    id: "stock.catalog.suggestion.MEAT"
+- tapOn:
+    id: "stock.catalog.create-suggestions"
+- extendedWaitUntil:
+    visible:
+      text: "Mercearia|Groceries"
+    timeout: 20000
+- assertNotVisible:
+    text: "Carnes|Meat"

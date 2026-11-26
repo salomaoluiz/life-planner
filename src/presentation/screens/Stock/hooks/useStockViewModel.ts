@@ -2,7 +2,6 @@ import { useIsFocused } from "@react-navigation/native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
-import { StockCategoryDTO } from "@application/dto/stock/StockCatalogDTO";
 import StockDTO from "@application/dto/stock/StockDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { useCases } from "@application/useCases";
@@ -18,6 +17,7 @@ import { useTranslationLocale } from "@presentation/i18n";
 import useReadOnlyScope from "@screens/Financial/hooks/useReadOnlyScope";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 import useStockQuickMovement from "@screens/Stock/hooks/useStockQuickMovement";
+import { flattenActive } from "@screens/Stock/models/catalogTree";
 import StockListUIModel, {
   StockFilters,
   StockSort,
@@ -34,7 +34,7 @@ export type StockVM = ReturnType<typeof useStockViewModel>;
 
 interface CatalogData {
   categories: Array<{ id: string; label: string; parentId?: string }>;
-  locations: Array<{ id: string; label: string }>;
+  locations: Array<{ id: string; label: string; parentId?: string }>;
 }
 
 interface StockData {
@@ -45,7 +45,7 @@ interface StockData {
 // The chosen categories and every category below them (a parent includes its children).
 export function expandCategoryIds(
   selected: string[],
-  categories: CatalogData["categories"],
+  categories: Array<{ id: string; parentId?: string }>,
 ): Set<string> {
   const ids = new Set(selected);
   let grew = true;
@@ -91,16 +91,15 @@ export async function fetchCatalog(owners: OwnerDTO[]): Promise<CatalogData> {
 
   return {
     categories: rows.flatMap(({ categories, owner }) =>
-      flattenCategories(categories).map((category) => ({
-        id: category.id,
-        label: `${category.path}${suffix(owner)}`,
-        parentId: category.parentId,
+      flattenActive(categories).map((category) => ({
+        ...category,
+        label: `${category.label}${suffix(owner)}`,
       })),
     ),
     locations: rows.flatMap(({ locations, owner }) =>
-      locations.map((location) => ({
-        id: location.id,
-        label: `${location.name}${suffix(owner)}`,
+      flattenActive(locations).map((location) => ({
+        ...location,
+        label: `${location.label}${suffix(owner)}`,
       })),
     ),
   };
@@ -112,23 +111,6 @@ export async function fetchStock(owners: OwnerDTO[]): Promise<StockData> {
   });
 
   return { items, owners };
-}
-
-// Active categories as a flat list with their "Dairy › Cheese" path.
-function flattenCategories(
-  nodes: StockCategoryDTO[],
-  prefix = "",
-): Array<{ id: string; parentId?: string; path: string }> {
-  return nodes
-    .filter((node) => node.status === "ACTIVE")
-    .flatMap((node) => {
-      const path = prefix ? `${prefix} › ${node.name}` : node.name;
-
-      return [
-        { id: node.id, parentId: node.parentId, path },
-        ...flattenCategories(node.children, path),
-      ];
-    });
 }
 
 export default useStockViewModel;
@@ -147,6 +129,8 @@ function isNotFound(error: unknown) {
 function useStockViewModel() {
   const isFocused = useIsFocused();
   const params = useLocalSearchParams<{
+    // Spec 125 FR 8: "Ver itens" of a category opens the list filtered by it.
+    categoryId?: string;
     filter?: string;
     id?: string;
     item?: string;
@@ -164,7 +148,9 @@ function useStockViewModel() {
   const [sort, setSort] = useState<StockSort>("EXPIRATION");
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | undefined>();
-  const [categoryIds, setCategoryIds] = useState<string[]>([]);
+  const [categoryIds, setCategoryIds] = useState<string[]>(
+    params.categoryId ? [params.categoryId] : [],
+  );
   const [locationIds, setLocationIds] = useState<string[]>(
     routeLocationId ? [routeLocationId] : [],
   );
@@ -237,7 +223,8 @@ function useStockViewModel() {
   const view = list?.view({
     categoryIds: expandCategoryIds(categoryIds, catalog.data?.categories ?? []),
     filter,
-    locationIds: new Set(locationIds),
+    // Spec 125 FR 16: a location includes its sub-locations.
+    locationIds: expandCategoryIds(locationIds, catalog.data?.locations ?? []),
     search: debouncedSearch,
     sort,
   });
@@ -314,7 +301,7 @@ function useStockViewModel() {
       : undefined,
     onAddPress,
     onBackToStock: () => router.replace("/stock" as never),
-    onCatalogPress: scope.guard(() => openModal("stock_catalog")),
+    onCatalogPress: () => router.push("/stock/catalog" as never),
     onCategoriesChange: setCategoryIds,
     onClearFilters,
     onCloseDetails: () => setSelectedId(undefined),

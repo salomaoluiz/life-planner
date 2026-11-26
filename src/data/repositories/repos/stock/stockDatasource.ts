@@ -37,22 +37,22 @@ export interface StockDatasource extends PurchaseRepository {
     params: CreateStockCategoryDatasourceParams,
   ): Promise<void>;
   createStockCategorySuggestions(
-    params: StockOwnerDatasourceParams,
+    params: CreateStockSuggestionsDatasourceParams,
   ): Promise<void>;
   createStockItem(params: CreateStockDatasourceParams): Promise<StockModel>;
   createStockLocation(
     params: CreateStockLocationDatasourceParams,
   ): Promise<void>;
   createStockLocationSuggestions(
-    params: StockOwnerDatasourceParams,
+    params: CreateStockSuggestionsDatasourceParams,
   ): Promise<void>;
   createStockMovement(
     params: CreateStockMovementDatasourceParams,
   ): Promise<{ item: StockModel; movements: StockMovementModel[] }>;
   deleteShoppingListRow(rowId: string): Promise<void>;
-  deleteStockCategory(id: string): Promise<void>;
+  deleteStockCategory(id: string, moveTo?: string): Promise<void>;
   deleteStockItem(id: string): Promise<void>;
-  deleteStockLocation(id: string): Promise<void>;
+  deleteStockLocation(id: string, moveTo?: string): Promise<void>;
   dismissLeftover(params: DismissLeftoverDatasourceParams): Promise<void>;
   getAiUsage(): Promise<AiUsageModel>;
   getConsumptionWeeks(
@@ -125,7 +125,9 @@ interface CreateShoppingListParams extends StockOwnerDatasourceParams {
 }
 
 interface CreateStockCategoryDatasourceParams extends StockOwnerDatasourceParams {
+  color: string;
   financeCategoryId?: string;
+  icon: string;
   name: string;
   parentId?: string;
 }
@@ -153,7 +155,10 @@ interface CreateStockDatasourceParams extends StockOwnerDatasourceParams {
 }
 
 interface CreateStockLocationDatasourceParams extends StockOwnerDatasourceParams {
+  color: string;
+  icon: string;
   name: string;
+  parentId?: string;
 }
 
 interface CreateStockMovementDatasourceParams {
@@ -173,6 +178,11 @@ interface CreateStockMovementDatasourceParams {
   type: string;
 }
 
+// Spec 125 FR 24: the chosen suggestion keys (omitted = all).
+interface CreateStockSuggestionsDatasourceParams extends StockOwnerDatasourceParams {
+  keys?: string[];
+}
+
 // Spec 123.
 interface DismissLeftoverDatasourceParams {
   dismissed: boolean;
@@ -188,8 +198,10 @@ interface GetShoppingListsParams {
   ownerId?: string;
 }
 
-interface GetStockCatalogDatasourceParams extends StockOwnerDatasourceParams {
+interface GetStockCatalogDatasourceParams {
   includeArchived?: boolean;
+  owner?: string;
+  ownerId?: string;
 }
 
 interface GetStockMovementsDatasourceParams {
@@ -254,7 +266,11 @@ interface UpdateShoppingListRowParams {
 }
 
 interface UpdateStockCategoryDatasourceParams {
+  applyToChildren?: boolean;
+  childColors?: Record<string, string>;
+  color?: string;
   financeCategoryId?: null | string;
+  icon?: string;
   id: string;
   name?: string;
   parentId?: null | string;
@@ -284,8 +300,13 @@ interface UpdateStockDatasourceParams {
 }
 
 interface UpdateStockLocationDatasourceParams {
+  applyToChildren?: boolean;
+  childColors?: Record<string, string>;
+  color?: string;
+  icon?: string;
   id: string;
   name?: string;
+  parentId?: null | string;
   status?: string;
 }
 
@@ -296,6 +317,7 @@ export {
   CreateStockDatasourceParams,
   CreateStockLocationDatasourceParams,
   CreateStockMovementDatasourceParams,
+  CreateStockSuggestionsDatasourceParams,
   DismissLeftoverDatasourceParams,
   GetConsumptionWeeksDatasourceParams,
   GetShoppingListsParams,

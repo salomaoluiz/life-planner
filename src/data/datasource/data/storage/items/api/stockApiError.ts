@@ -4,6 +4,8 @@ import {
   GenericError,
   StockBarcodeInUse,
   StockBarcodeInvalid,
+  StockCatalogNameTaken,
+  StockCatalogRule,
   StockCategoryInUse,
   StockLocationInUse,
   StockLotAlreadyOpen,
@@ -24,7 +26,7 @@ function handleStockApiError(
       throw barcode;
     }
 
-    const conflict = mapConflict(error);
+    const conflict = mapConflict(error) ?? mapCatalogRule(error);
 
     if (conflict) {
       throw conflict;
@@ -59,6 +61,23 @@ function mapBarcode(error: ApiBusinessError): BusinessError | undefined {
   return undefined;
 }
 
+// Spec 125: the 422 of the catalog writes the form explains (depth, archived parent, unknown icon, move target).
+function mapCatalogRule(error: ApiBusinessError): BusinessError | undefined {
+  const code =
+    typeof error.body.code === "string" ? error.body.code : undefined;
+
+  if (
+    error.statusCode === 422 &&
+    (code === "ICON_NOT_FOUND" ||
+      code === "INVALID_MOVE_TARGET" ||
+      /levels|archived|parent|itself|Reactivate/.test(error.message))
+  ) {
+    return new StockCatalogRule(code);
+  }
+
+  return undefined;
+}
+
 // The conflicts the screens explain (spec 116): `409` with its message or its `itemCount`.
 function mapConflict(error: ApiBusinessError): BusinessError | undefined {
   if (error.statusCode !== 409) {
@@ -75,6 +94,10 @@ function mapConflict(error: ApiBusinessError): BusinessError | undefined {
 
   if (error.message.includes("already open")) {
     return new StockLotAlreadyOpen();
+  }
+
+  if (error.message.includes("already exists")) {
+    return new StockCatalogNameTaken();
   }
 
   const itemCount = Number(error.body.itemCount);

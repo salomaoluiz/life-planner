@@ -117,3 +117,7 @@ Spec 123 (stock forecast and waste, additive, API 6.6.0): items carry `forecast 
 ## Notifications (spec 124)
 
 `/v1/notifications` (center page `{ items, nextCursor }`, `unread-count`, `read-all`, `:id/read`, `summary-preview`, `preferences` GET/PATCH, `devices` GET/POST/PATCH/DELETE, `devices/:id/seen`, `test`, `web-push-key`). Enums UPPER_CASE as in the backend. Item `route`s are backend paths the app maps itself; the push body never carries amounts, the center does. Needs backend 6.7.0; the migration must be applied and `NOTIFICATION_JOB_ENABLED` on for notices to be created. See `docs/ai/modules/notifications.md`.
+
+## Stock catalog (spec 125, breaking)
+
+`GET /stock/locations` is a tree like `/stock/categories`; both nodes carry `color`, `icon`, `owner`, `ownerId` and `itemCount` of the subtree; `owner`/`ownerId` are optional on both lists (none = every readable owner, the "Todos" chip). Writes take `color` + `icon` (create), `applyToChildren` + `childColors` (update), locations `parentId`; `DELETE …/:id?moveTo=<id>|none` moves the items in one transaction (`409 { itemCount }` without it); suggestions take `keys`. `GET /stock/locations/:id` adds `parentId` and `path`. Needs API 7.0.0.

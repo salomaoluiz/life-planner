@@ -1,0 +1,42 @@
+url: ${E2E_WEB_URL}
+name: stock/catalog-delete-with-move
+tags:
+  - stock
+  - spec-125
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/stock/open-stock.yaml
+- runFlow: ../../subflows/stock/open-catalog.yaml
+# Deleting a category with items moves them (or leaves them without a category) in one step.
+- tapOn:
+    id: "stock.catalog.from-scratch"
+- tapOn:
+    id: "stock.catalog.name-input"
+- inputText: "E2E Velha"
+- tapOn:
+    id: "stock.catalog.save-button"
+- extendedWaitUntil:
+    visible:
+      text: "E2E Velha"
+    timeout: 20000
+- tapOn:
+    text: "E2E Velha"
+- tapOn:
+    id: "stock.catalog.delete-button"
+- extendedWaitUntil:
+    visible:
+      id: "stock.catalog.delete-sheet"
+    timeout: 20000
+- tapOn:
+    text: "Excluir|Delete"
+- assertNotVisible:
+    text: "E2E Velha"

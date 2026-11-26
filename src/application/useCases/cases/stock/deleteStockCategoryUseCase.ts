@@ -2,7 +2,7 @@ import { IUseCaseFactoryWithParamResponse } from "@application/useCases/types";
 import { DefaultError } from "@domain/entities/errors";
 import Repositories from "@domain/repositories";
 
-export type DeleteStockCategoryUseCaseParams = { id: string };
+export type DeleteStockCategoryUseCaseParams = { id: string; moveTo?: string };
 
 function deleteStockCategoryUseCase(
   repositories: Repositories,

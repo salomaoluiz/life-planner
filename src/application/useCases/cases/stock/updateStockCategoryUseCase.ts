@@ -3,7 +3,11 @@ import { DefaultError } from "@domain/entities/errors";
 import Repositories from "@domain/repositories";
 
 export type UpdateStockCategoryUseCaseParams = {
+  applyToChildren?: boolean;
+  childColors?: Record<string, string>;
+  color?: string;
   financeCategoryId?: null | string;
+  icon?: string;
   id: string;
   name?: string;
   parentId?: null | string;

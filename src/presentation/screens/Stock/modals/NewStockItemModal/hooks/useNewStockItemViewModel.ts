@@ -1,7 +1,6 @@
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
-import { StockCategoryDTO } from "@application/dto/stock/StockCatalogDTO";
 import StockDTO from "@application/dto/stock/StockDTO";
 import { useCases } from "@application/useCases";
 import { StockMovementTypes } from "@domain/entities/stock/StockMovementEntity";
@@ -16,6 +15,7 @@ import { useBreakpoint } from "@presentation/theme";
 import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 import NewStockItemUIModel from "@screens/Stock/modals/NewStockItemModal/models/NewStockItemUIModel";
+import { flattenActive } from "@screens/Stock/models/catalogTree";
 import { formatQuantity } from "@screens/Stock/models/quantityFormat";
 
 import useBarcodeField from "./useBarcodeField";
@@ -37,19 +37,6 @@ interface OwnerCatalog {
   locations: Array<{ label: string; value: string }>;
   // Active lists of the owner (spec 118 FR 6) and the name of its default one.
   shoppingLists: Array<{ label: string; value: string }>;
-}
-
-function flatten(
-  nodes: StockCategoryDTO[],
-  prefix = "",
-): Array<{ label: string; value: string }> {
-  return nodes
-    .filter((node) => node.status === "ACTIVE")
-    .flatMap((node) => {
-      const label = prefix ? `${prefix} › ${node.name}` : node.name;
-
-      return [{ label, value: node.id }, ...flatten(node.children, label)];
-    });
 }
 
 export default useNewStockItemViewModel;
@@ -158,11 +145,15 @@ function useNewStockItemViewModel() {
       const active = lists.filter((list) => list.status === "ACTIVE");
 
       return {
-        categories: flatten(categories),
+        categories: flattenActive(categories).map((category) => ({
+          label: category.label,
+          value: category.id,
+        })),
         defaultListName: active.find((list) => list.isDefault)?.name,
-        locations: locations
-          .filter((location) => location.status === "ACTIVE")
-          .map((location) => ({ label: location.name, value: location.id })),
+        locations: flattenActive(locations).map((location) => ({
+          label: location.label,
+          value: location.id,
+        })),
         shoppingLists: active
           .filter((list) => !list.isDefault)
           .map((list) => ({ label: list.name, value: list.id })),

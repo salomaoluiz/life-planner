@@ -3,8 +3,13 @@ import { DefaultError } from "@domain/entities/errors";
 import Repositories from "@domain/repositories";
 
 export type UpdateStockLocationUseCaseParams = {
+  applyToChildren?: boolean;
+  childColors?: Record<string, string>;
+  color?: string;
+  icon?: string;
   id: string;
   name?: string;
+  parentId?: null | string;
   status?: string;
 };
 

@@ -41,14 +41,18 @@ export type StockRepository = PurchaseRepository & {
   createStockCategory(
     params: CreateStockCategoryRepositoryParams,
   ): Promise<void>;
-  createStockCategorySuggestions(params: StockOwnerParams): Promise<void>;
+  createStockCategorySuggestions(
+    params: CreateStockSuggestionsRepositoryParams,
+  ): Promise<void>;
   createStockItem(
     params: CreateStockItemRepositoryParams,
   ): Promise<StockEntity>;
   createStockLocation(
     params: CreateStockLocationRepositoryParams,
   ): Promise<void>;
-  createStockLocationSuggestions(params: StockOwnerParams): Promise<void>;
+  createStockLocationSuggestions(
+    params: CreateStockSuggestionsRepositoryParams,
+  ): Promise<void>;
   createStockMovement(
     params: CreateStockMovementRepositoryParams,
   ): Promise<{ item: StockEntity; movements: StockMovementEntity[] }>;
@@ -132,7 +136,9 @@ interface CreateShoppingListRepositoryParams extends StockOwnerParams {
 }
 
 interface CreateStockCategoryRepositoryParams extends StockOwnerParams {
+  color: string;
   financeCategoryId?: string;
+  icon: string;
   name: string;
   parentId?: string;
 }
@@ -161,7 +167,10 @@ interface CreateStockItemRepositoryParams extends StockOwnerParams {
 }
 
 interface CreateStockLocationRepositoryParams extends StockOwnerParams {
+  color: string;
+  icon: string;
   name: string;
+  parentId?: string;
 }
 
 interface CreateStockMovementRepositoryParams {
@@ -181,8 +190,15 @@ interface CreateStockMovementRepositoryParams {
   type: string;
 }
 
+// Spec 125 FR 24: the chosen suggestion keys (omitted = all).
+interface CreateStockSuggestionsRepositoryParams extends StockOwnerParams {
+  keys?: string[];
+}
+
 interface DeleteStockCatalogRepositoryParams {
   id: string;
+  // Spec 125 FR 21-23: a category/location id or "none" (items without one).
+  moveTo?: string;
 }
 
 interface DeleteStockItemRepositoryParams {
@@ -205,8 +221,11 @@ interface GetShoppingListsRepositoryParams {
   ownerId?: string;
 }
 
-interface GetStockCatalogRepositoryParams extends StockOwnerParams {
+// No owner = every owner the user can read ("Todos", spec 125).
+interface GetStockCatalogRepositoryParams {
   includeArchived?: boolean;
+  owner?: string;
+  ownerId?: string;
 }
 
 interface GetStockMovementsRepositoryParams {
@@ -268,7 +287,11 @@ interface UpdateShoppingListRowRepositoryParams {
 }
 
 interface UpdateStockCategoryRepositoryParams {
+  applyToChildren?: boolean;
+  childColors?: Record<string, string>;
+  color?: string;
   financeCategoryId?: null | string;
+  icon?: string;
   id: string;
   name?: string;
   parentId?: null | string;
@@ -300,8 +323,13 @@ interface UpdateStockItemRepositoryParams {
 }
 
 interface UpdateStockLocationRepositoryParams {
+  applyToChildren?: boolean;
+  childColors?: Record<string, string>;
+  color?: string;
+  icon?: string;
   id: string;
   name?: string;
+  parentId?: null | string;
   status?: string;
 }
 
@@ -312,6 +340,7 @@ export {
   CreateStockItemRepositoryParams,
   CreateStockLocationRepositoryParams,
   CreateStockMovementRepositoryParams,
+  CreateStockSuggestionsRepositoryParams,
   DeleteStockCatalogRepositoryParams,
   DeleteStockItemRepositoryParams,
   DismissLeftoverRepositoryParams,
