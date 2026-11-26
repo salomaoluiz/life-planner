@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 
 import { ScreenHeader } from "@components";
 import { InvestmentSection } from "@screens/Investment/Layout/models/investmentSections";
+import NotificationBell from "@screens/Notifications/containers/NotificationBell";
 
 import useSectionHeaderViewModel from "./hooks/useSectionHeaderViewModel";
 
@@ -18,7 +19,12 @@ function SectionHeader(props: SectionHeaderProps) {
 
   return (
     <ScreenHeader
-      actions={props.actions}
+      actions={
+        <>
+          {props.actions}
+          <NotificationBell />
+        </>
+      }
       onTitlePress={vm.onTitlePress}
       overline={vm.overline}
       testID={props.testID ?? "investment.layout.section-picker"}

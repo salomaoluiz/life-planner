@@ -14,6 +14,7 @@ const FRONT_RULES = [
   [/(^|\/)financial(\/|$)/i, ["financial"]],
   [/(^|\/)investments?(\/|$)/i, ["investment"]],
   [/(^|\/)stock(\/|$)/i, ["stock"]],
+  [/(^|\/)(notifications?|notification-settings)(\/|$|\.)/i, ["notifications"]],
   [/(^|\/)(family|familyMember|invite)(\/|$)/i, ["family"]],
 ];
 
@@ -22,6 +23,7 @@ const BACK_RULES = [
   [/^src\/(modules|api)\/finance(\/|$)/, ["financial"]],
   [/^src\/(modules|api)\/investment(\/|$)/, ["investment"]],
   [/^src\/(modules|api)\/stock(\/|$)/, ["stock"]],
+  [/^src\/(modules|api)\/notification(\/|$)/, ["notifications"]],
   [/^src\/(modules|api)\/(family|family-member)(\/|$)/, ["family"]],
 ];
 

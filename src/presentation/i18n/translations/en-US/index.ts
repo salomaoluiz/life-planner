@@ -9,6 +9,7 @@ import investment from "./investment";
 import invite from "./invite";
 import login from "./login";
 import navigation from "./navigation";
+import notifications from "./notifications";
 import signup from "./signup";
 import stock from "./stock";
 import versions from "./versions";
@@ -26,6 +27,7 @@ const enUS = {
     invite,
     login,
     navigation,
+    notifications,
     signup,
     stock,
     versions,

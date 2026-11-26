@@ -1,0 +1,17 @@
+{
+  "notification.center.mount.cold": {
+    "maxDepth": 1,
+    "maxDuplicates": 0,
+    "maxRequests": 4,
+    "route": "app/(app)/(tabs)/notifications.tsx"
+  },
+  "notification.center.render.mount": {
+    "maxCommits": 8
+  },
+  "notification.settings.mount.cold": {
+    "maxDepth": 1,
+    "maxDuplicates": 0,
+    "maxRequests": 2,
+    "route": "app/(app)/(tabs)/notification-settings.tsx"
+  }
+}

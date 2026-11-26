@@ -7,6 +7,7 @@ import {
   DeleteAccount,
   Language,
   Logout,
+  NotificationsLink,
   Theme,
   Versions,
 } from "../containers";
@@ -25,6 +26,7 @@ function Wide() {
           <Language />
         </View>
       </Card>
+      <NotificationsLink />
       <View style={styles.logout}>
         <Logout />
         <DeleteAccount />

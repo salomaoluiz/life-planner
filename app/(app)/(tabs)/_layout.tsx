@@ -27,6 +27,8 @@ export default function TabNavigator() {
       <Tabs.Screen name={"stock"} />
       <Tabs.Screen name={"family/index"} />
       <Tabs.Screen name={"settings"} options={{ href: null }} />
+      <Tabs.Screen name={"notifications"} options={{ href: null }} />
+      <Tabs.Screen name={"notification-settings"} options={{ href: null }} />
     </Tabs>
   );
 }

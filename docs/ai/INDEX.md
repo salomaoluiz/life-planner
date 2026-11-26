@@ -37,6 +37,7 @@ available_modules:
   - family
   - familyMember
   - financial
+  - notifications
   - stock
 ```
 

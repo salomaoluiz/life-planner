@@ -12,6 +12,7 @@ import Skeleton from "@components/Skeleton";
 import { useKitTheme } from "@components/utils/useKitTheme";
 import { useTranslation } from "@presentation/i18n";
 import familyTestIds from "@screens/Family/testIds";
+import NotificationBell from "@screens/Notifications/containers/NotificationBell";
 
 import * as Containers from "../containers";
 import { FamilyVM } from "../hooks";
@@ -29,12 +30,15 @@ function Wide({ vm }: AdaptiveViewProps<FamilyVM>) {
     >
       <ScreenHeader
         actions={
-          <IconButton
-            accessibilityLabel={t("family.list.newFamily")}
-            name="plus"
-            onPress={vm.onNewFamily}
-            testID={familyTestIds.newButton}
-          />
+          <>
+            <NotificationBell />
+            <IconButton
+              accessibilityLabel={t("family.list.newFamily")}
+              name="plus"
+              onPress={vm.onNewFamily}
+              testID={familyTestIds.newButton}
+            />
+          </>
         }
         subtitle={
           vm.status === "ready"

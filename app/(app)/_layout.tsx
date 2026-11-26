@@ -6,6 +6,7 @@ import { useScreenBehindModal } from "@navigation";
 import { useTheme } from "@presentation/theme";
 import ErrorToastHost from "@screens/Financial/Transactions/pending/ErrorToastHost";
 import UpdateBanner from "@screens/Navigation/containers/UpdateBanner";
+import NotificationRuntime from "@screens/Notifications/containers/NotificationRuntime";
 
 // A fresh load never builds the signed-in stack without the tabs under a modal.
 export const unstable_settings = { initialRouteName: "(tabs)" };
@@ -24,6 +25,7 @@ export default function StackNavigator() {
   return (
     <View style={{ flex: 1 }}>
       <UpdateBanner />
+      <NotificationRuntime />
       <Stack>
         <Stack.Screen name={"(tabs)"} options={{ headerShown: false }} />
         <Stack.Screen
