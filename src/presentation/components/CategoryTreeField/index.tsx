@@ -48,6 +48,7 @@ function CategoryTreeField(props: CategoryTreeFieldProps) {
   const [open, setOpen] = useState(false);
   const { labels, testID } = props;
   const single = props.mode === "single";
+  const hasChips = single && (props.mostUsedIds?.length ?? 0) > 0;
   const rows = buildTreeRows(props.nodes);
   const selected = single
     ? props.nodes.find((item) => item.id === props.value)
@@ -145,7 +146,7 @@ function CategoryTreeField(props: CategoryTreeFieldProps) {
       label={props.label}
       testID={`${testID}-shell`}
     >
-      {single && (props.mostUsedIds?.length ?? 0) > 0 ? (
+      {hasChips ? (
         <ChipGroup
           layout={"wrap"}
           mode={"single"}
@@ -155,33 +156,37 @@ function CategoryTreeField(props: CategoryTreeFieldProps) {
           value={props.value}
         />
       ) : null}
-      <Touchable
-        accessibilityLabel={
-          selected && path ? `${props.label}, ${path.join(", ")}` : props.label
-        }
-        accessibilityRole="button"
-        disabled={props.disabled}
-        onPress={() => setOpen(true)}
-        style={styles.frame}
-        testID={`${testID}-field`}
-      >
-        {selected ? (
-          <IconTile
-            color={normalizeCategoryColor(selected.color)}
-            name={selected.icon}
-            size="sm"
+      {hasChips && !selected?.archived ? null : (
+        <Touchable
+          accessibilityLabel={
+            selected && path
+              ? `${props.label}, ${path.join(", ")}`
+              : props.label
+          }
+          accessibilityRole="button"
+          disabled={props.disabled}
+          onPress={() => setOpen(true)}
+          style={styles.frame}
+          testID={`${testID}-field`}
+        >
+          {selected ? (
+            <IconTile
+              color={normalizeCategoryColor(selected.color)}
+              name={selected.icon}
+              size="sm"
+            />
+          ) : null}
+          {fieldText()}
+          {selected?.archived ? (
+            <Badge label={props.archivedLabel} testID={`${testID}-archived`} />
+          ) : null}
+          <Icon
+            color={colors.textSecondary}
+            name="chevron-down"
+            size={theme.sizes.iconMd}
           />
-        ) : null}
-        {fieldText()}
-        {selected?.archived ? (
-          <Badge label={props.archivedLabel} testID={`${testID}-archived`} />
-        ) : null}
-        <Icon
-          color={colors.textSecondary}
-          name="chevron-down"
-          size={theme.sizes.iconMd}
-        />
-      </Touchable>
+        </Touchable>
+      )}
       {!single && props.value.length > 0 ? (
         <View style={styles.chips}>
           {props.value.map((id) => {

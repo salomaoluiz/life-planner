@@ -8,26 +8,27 @@ it("SHOULD show the path of the current value with its ancestors muted", () => {
   expect(screen.getByTestId("field-ancestors").props.children).toBe("Food › ");
 });
 
-it("SHOULD always chip the current value even when it is not most used", () => {
-  setup();
+it("SHOULD always chip the current value even when it is not most used and drop the field", () => {
+  setup({ mostUsedIds: ["home"] });
+  expect(screen.queryByTestId("field-field")).toBeNull();
   expect(screen.getByTestId("field-market")).toBeTruthy();
   expect(screen.getByTestId("field-home")).toBeTruthy();
 });
 
 it("SHOULD select from a chip", () => {
-  setup();
+  setup({ mostUsedIds: ["home"] });
   fireEvent.press(screen.getByTestId("field-home"));
   expect(onChange).toHaveBeenCalledWith("home");
 });
 
 it("SHOULD open the picker from More and from the field", () => {
-  setup();
+  setup({ mostUsedIds: ["home"] });
   fireEvent.press(screen.getByTestId("field-__more__"));
   expect(screen.getByTestId("field-picker-search")).toBeTruthy();
 });
 
 it("SHOULD badge an archived current value and keep it out of the picker", () => {
-  setup({ value: "old" });
+  setup({ mostUsedIds: ["home"], value: "old" });
   expect(screen.getByTestId("field-archived")).toBeTruthy();
   fireEvent.press(screen.getByTestId("field-field"));
   expect(screen.queryByTestId("field-picker-option-old")).toBeNull();

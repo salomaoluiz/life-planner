@@ -17,7 +17,6 @@ function setup(
       label="Category"
       labels={labels}
       mode="single"
-      mostUsedIds={["home"]}
       nodes={nodes}
       onChange={onChange}
       testID="field"
