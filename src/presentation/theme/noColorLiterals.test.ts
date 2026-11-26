@@ -27,6 +27,13 @@ it("SHOULD NOT hard-code colors in src/presentation (only theme/constants and th
     .filter(
       (file) => !file.endsWith(`${path.sep}constants${path.sep}cardColors.ts`),
     )
+    // Stored stock category and location colors (spec 125), also in colorLiteralIgnores.
+    .filter(
+      (file) =>
+        !file.endsWith(
+          `${path.sep}constants${path.sep}stockCatalogAppearance.ts`,
+        ),
+    )
     .filter(
       (file) => !/\.test\.tsx?$|\.mocks\.tsx?$|\.fixture\.tsx?$/.test(file),
     )

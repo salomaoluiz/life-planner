@@ -134,10 +134,6 @@ export const MODAL_ROUTES: Record<ModalName, ComponentType> = {
   stock_barcode: lazyModal(
     async () => import("@screens/Stock/modals/StockBarcodeModal"),
   ),
-  stock_catalog: lazyModal(
-    async () => import("@screens/Stock/modals"),
-    "StockCatalogModal",
-  ),
   stock_movement: lazyModal(
     async () => import("@screens/Stock/modals"),
     "StockMovementModal",

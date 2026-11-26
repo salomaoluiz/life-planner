@@ -3,6 +3,18 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [4.0.0] - 2026-11-26
+
+### Changed
+
+- **Breaking:** Estoque › Categorias e locais is now a screen (tabs Categorias | Locais, owner chips, tap a row to edit) instead of a button that opened a sheet; it needs API 7.0.0 (spec 125).
+
+### Added
+
+- Color and icon on stock categories and locations (icon catalog with search, shades of the parent for subcategories, "Aplicar às subcategorias"); locations nest one level (Cozinha › Geladeira) and the stock filter, item pickers and owner change follow the tree (spec 125).
+- Delete with items: choose where they go (or leave them without a category/location) in one step; "Ver itens" opens the stock list filtered by the category or location (spec 125).
+- Print the QR codes of all locations on one page; suggestions of an empty owner come with color and icon and can be unchecked before creating (spec 125).
+
 ## [3.7.0] - 2026-11-25
 
 ### Added

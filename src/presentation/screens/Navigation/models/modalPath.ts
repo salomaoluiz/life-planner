@@ -18,7 +18,6 @@ export const MODAL_NAMES = [
   "section_picker",
   "add_new_stock_item",
   "stock_movement",
-  "stock_catalog",
   "stock_add_to_list",
   "stock_barcode",
   "stock_shopping_list",

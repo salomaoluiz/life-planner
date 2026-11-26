@@ -19,16 +19,23 @@ it("SHOULD map the frequent items", async () => {
 
 it("SHOULD map the location", async () => {
   spies.datasource.getStockLocation.mockResolvedValue({
+    color: "#F59E0B",
+    icon: "archive",
     id: "l",
     itemCount: 2,
     name: "Pantry",
     owner: "USER",
     ownerId: "o",
+    parentId: "k",
+    path: "Kitchen / Pantry",
     status: "ACTIVE",
   });
 
   expect(await getStockLocation("l", mocks.datasources)).toMatchObject({
+    color: "#F59E0B",
     itemCount: 2,
+    parentId: "k",
+    path: "Kitchen / Pantry",
     status: "ACTIVE",
   });
 });

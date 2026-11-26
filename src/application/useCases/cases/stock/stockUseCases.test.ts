@@ -54,15 +54,24 @@ const movement = new StockMovementEntity({
 });
 const category = new StockCategoryEntity({
   children: [],
+  color: "#60A5FA",
+  icon: "cup",
   id: "c",
   itemCount: 0,
   name: "Dairy",
+  owner: "USER",
+  ownerId: "u",
   status: StockCatalogStatus.ACTIVE,
 });
 const location = new StockLocationEntity({
+  children: [],
+  color: "#F59E0B",
+  icon: "archive",
   id: "l",
   itemCount: 0,
   name: "Pantry",
+  owner: "USER",
+  ownerId: "u",
   status: StockCatalogStatus.ACTIVE,
 });
 

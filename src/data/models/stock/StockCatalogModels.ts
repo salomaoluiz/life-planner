@@ -1,3 +1,6 @@
+const DEFAULT_COLOR = "#8A8F98";
+const DEFAULT_ICON = "package-variant";
+
 export class StockCategoryModel {
   constructor(
     readonly id: string,
@@ -5,6 +8,10 @@ export class StockCategoryModel {
     readonly status: string,
     readonly itemCount: number,
     readonly children: StockCategoryModel[],
+    readonly color: string,
+    readonly icon: string,
+    readonly owner: string,
+    readonly ownerId: string,
     readonly parentId?: string,
     readonly financeCategoryId?: string,
     readonly effectiveFinanceCategoryId?: string,
@@ -19,6 +26,10 @@ export class StockCategoryModel {
       ((data.children as Record<string, unknown>[] | undefined) ?? []).map(
         (child) => StockCategoryModel.fromJSON(child),
       ),
+      stringOr(data.color, DEFAULT_COLOR),
+      stringOr(data.icon, DEFAULT_ICON),
+      stringOr(data.owner, "USER"),
+      stringOr(data.ownerId, ""),
       optionalString(data.parentId),
       optionalString(data.financeCategoryId),
       optionalString(data.effectiveFinanceCategoryId),
@@ -35,6 +46,10 @@ export class StockLocationDetailModel {
     readonly itemCount: number,
     readonly owner: string,
     readonly ownerId: string,
+    readonly color: string,
+    readonly icon: string,
+    readonly parentId?: string,
+    readonly path?: string,
   ) {}
 
   static fromJSON(data: Record<string, unknown>): StockLocationDetailModel {
@@ -45,16 +60,27 @@ export class StockLocationDetailModel {
       (data.itemCount as number | undefined) ?? 0,
       data.owner as string,
       data.ownerId as string,
+      stringOr(data.color, DEFAULT_COLOR),
+      stringOr(data.icon, DEFAULT_ICON),
+      optionalString(data.parentId),
+      optionalString(data.path),
     );
   }
 }
 
+// A node of the location tree (spec 125).
 export class StockLocationModel {
   constructor(
     readonly id: string,
     readonly name: string,
     readonly status: string,
     readonly itemCount: number,
+    readonly children: StockLocationModel[],
+    readonly color: string,
+    readonly icon: string,
+    readonly owner: string,
+    readonly ownerId: string,
+    readonly parentId?: string,
   ) {}
 
   static fromJSON(data: Record<string, unknown>): StockLocationModel {
@@ -63,6 +89,14 @@ export class StockLocationModel {
       data.name as string,
       data.status as string,
       (data.itemCount as number | undefined) ?? 0,
+      ((data.children as Record<string, unknown>[] | undefined) ?? []).map(
+        (child) => StockLocationModel.fromJSON(child),
+      ),
+      stringOr(data.color, DEFAULT_COLOR),
+      stringOr(data.icon, DEFAULT_ICON),
+      stringOr(data.owner, "USER"),
+      stringOr(data.ownerId, ""),
+      optionalString(data.parentId),
     );
   }
 }
@@ -113,4 +147,8 @@ export class StockSuggestionModel {
 
 function optionalString(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
+}
+
+function stringOr(value: unknown, fallback: string): string {
+  return typeof value === "string" ? value : fallback;
 }

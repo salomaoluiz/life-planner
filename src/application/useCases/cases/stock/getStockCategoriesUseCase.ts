@@ -5,8 +5,8 @@ import Repositories from "@domain/repositories";
 
 export type GetStockCategoriesUseCaseParams = {
   includeArchived?: boolean;
-  owner: string;
-  ownerId: string;
+  owner?: string;
+  ownerId?: string;
 };
 
 function getStockCategoriesUseCase(

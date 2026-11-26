@@ -1,0 +1,7 @@
+url: ${E2E_WEB_URL}
+---
+- openLink: ${E2E_WEB_URL}/stock/catalog
+- extendedWaitUntil:
+    visible:
+      id: "stock.catalog.screen"
+    timeout: 20000

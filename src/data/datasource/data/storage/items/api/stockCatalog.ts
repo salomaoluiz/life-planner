@@ -61,9 +61,14 @@ export async function createStockLocationSuggestions(
   }
 }
 
-export async function deleteStockCategory(id: string): Promise<void> {
+export async function deleteStockCategory(
+  id: string,
+  moveTo?: string,
+): Promise<void> {
   try {
-    await api.delete(`/v1/stock/categories/${encodeURIComponent(id)}`);
+    await api.delete(
+      `/v1/stock/categories/${encodeURIComponent(id)}${moveQuery(moveTo)}`,
+    );
   } catch (error) {
     return handleStockApiError(error, {
       datasource: "StockDatasource - deleteStockCategory",
@@ -72,9 +77,14 @@ export async function deleteStockCategory(id: string): Promise<void> {
   }
 }
 
-export async function deleteStockLocation(id: string): Promise<void> {
+export async function deleteStockLocation(
+  id: string,
+  moveTo?: string,
+): Promise<void> {
   try {
-    await api.delete(`/v1/stock/locations/${encodeURIComponent(id)}`);
+    await api.delete(
+      `/v1/stock/locations/${encodeURIComponent(id)}${moveQuery(moveTo)}`,
+    );
   } catch (error) {
     return handleStockApiError(error, {
       datasource: "StockDatasource - deleteStockLocation",
@@ -147,8 +157,18 @@ export async function updateStockLocation(
   }
 }
 
+// No owner = every owner the user can read (spec 125 "Todos").
 function catalogQuery(
   params: Parameters<StockDatasource["getStockCategories"]>[0],
 ) {
-  return `?owner=${params.owner}&ownerId=${encodeURIComponent(params.ownerId)}&includeArchived=${params.includeArchived ? "true" : "false"}`;
+  const owner =
+    params.owner && params.ownerId
+      ? `owner=${params.owner}&ownerId=${encodeURIComponent(params.ownerId)}&`
+      : "";
+
+  return `?${owner}includeArchived=${params.includeArchived ? "true" : "false"}`;
+}
+
+function moveQuery(moveTo?: string) {
+  return moveTo ? `?moveTo=${encodeURIComponent(moveTo)}` : "";
 }

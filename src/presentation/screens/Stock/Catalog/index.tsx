@@ -3,7 +3,7 @@ import { AdaptiveLayout } from "@components";
 import { useStockCatalogScreenViewModel } from "./hooks";
 import { Wide } from "./views";
 
-// Spec 118 FR 25: the third section of the stock menu.
+// Spec 125: the "Categorias e locais" screen (tabs Categorias | Locais), like Finance > Categories.
 function StockCatalog() {
   const vm = useStockCatalogScreenViewModel();
 

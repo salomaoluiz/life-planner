@@ -44,6 +44,10 @@ onFlowComplete:
     id: "stock.item-form.description-input"
 - eraseText
 - inputText: "E2E Validation"
+# The min and ideal fields sit below the fold of the left pane: swipe inside it (the default scroll starts on the divider)
+- swipe:
+    start: 28%, 75%
+    end: 28%, 25%
 - tapOn:
     id: "stock.item-form.min-input"
 - inputText: "5"

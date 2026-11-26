@@ -3,9 +3,12 @@ import { DefaultError } from "@domain/entities/errors";
 import Repositories from "@domain/repositories";
 
 export type CreateStockLocationUseCaseParams = {
+  color: string;
+  icon: string;
   name: string;
   owner: string;
   ownerId: string;
+  parentId?: string;
 };
 
 function createStockLocationUseCase(

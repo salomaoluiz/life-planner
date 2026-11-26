@@ -79,16 +79,24 @@ it("SHOULD copy the category tree and the locations", () => {
     children: [
       new StockCategoryEntity({
         children: [],
+        color: "#60A5FA",
+        icon: "cup",
         id: "c",
         itemCount: 1,
         name: "Cheese",
+        owner: "USER",
+        ownerId: "u",
         parentId: "p",
         status: StockCatalogStatus.ACTIVE,
       }),
     ],
+    color: "#60A5FA",
+    icon: "cup",
     id: "p",
     itemCount: 2,
     name: "Dairy",
+    owner: "USER",
+    ownerId: "u",
     status: StockCatalogStatus.ARCHIVED,
   });
 
@@ -102,9 +110,14 @@ it("SHOULD copy the category tree and the locations", () => {
   expect(
     StockLocationDTO.fromEntity(
       new StockLocationEntity({
+        children: [],
+        color: "#F59E0B",
+        icon: "archive",
         id: "l",
         itemCount: 3,
         name: "Pantry",
+        owner: "USER",
+        ownerId: "u",
         status: StockCatalogStatus.ACTIVE,
       }),
     ),

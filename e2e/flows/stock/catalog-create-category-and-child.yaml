@@ -1,0 +1,43 @@
+url: ${E2E_WEB_URL}
+name: stock/catalog-create-category-and-child
+tags:
+  - stock
+  - spec-125
+onFlowComplete:
+  - runFlow: ../../subflows/cleanup/delete-e2e-users.yaml
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../subflows/signup-via-api.yaml
+- runFlow:
+    file: ../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../subflows/stock/open-stock.yaml
+- runFlow: ../../subflows/stock/open-catalog.yaml
+# From scratch: a category with its own color and icon, then a subcategory that takes the parent's icon and a tone.
+- tapOn:
+    id: "stock.catalog.add-button"
+- tapOn:
+    id: "stock.catalog.name-input"
+- inputText: "E2E Mercado"
+- tapOn:
+    id: "stock.catalog.save-button"
+- extendedWaitUntil:
+    visible:
+      text: "E2E Mercado"
+    timeout: 20000
+- tapOn:
+    text: "E2E Mercado"
+- tapOn:
+    id: "stock.catalog.add-child"
+- tapOn:
+    id: "stock.catalog.name-input"
+- inputText: "E2E Grãos"
+- tapOn:
+    id: "stock.catalog.save-button"
+- extendedWaitUntil:
+    visible:
+      text: "E2E Grãos"
+    timeout: 20000
