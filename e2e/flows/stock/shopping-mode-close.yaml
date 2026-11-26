@@ -95,6 +95,8 @@ onFlowComplete:
 - tapOn:
     text: ${output.ACCOUNT_NAME}
 - tapOn:
+    id: "stock.purchase-close.default-category-field"
+- tapOn:
     text: ${output.EXPENSE_CATEGORY_NAME}
 - tapOn:
     id: "stock.purchase-close.finish"
