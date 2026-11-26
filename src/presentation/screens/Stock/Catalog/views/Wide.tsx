@@ -13,6 +13,7 @@ import {
   IconTile,
   ListItem,
   ReadOnlyNotice,
+  Screen,
   SegmentedControl,
   Text,
   Toast,
@@ -49,7 +50,7 @@ function Wide({ vm }: AdaptiveViewProps<StockCatalogScreenVM>) {
   );
 
   const toolbar = (
-    <View style={{ gap: spacing.lg, paddingBottom: spacing.lg }}>
+    <View style={{ gap: spacing.lg }}>
       <View
         style={{ alignItems: "center", flexDirection: "row", gap: spacing.sm }}
       >
@@ -202,12 +203,15 @@ function Wide({ vm }: AdaptiveViewProps<StockCatalogScreenVM>) {
 
   if (vm.errorMessage) {
     return (
-      <ErrorState
-        message={vm.errorMessage}
-        onRetry={vm.onRetry}
-        retryLabel={t("common.actions.tryAgain")}
-        testID={stockCatalogTestIds.errorState}
-      />
+      <Screen testID={stockCatalogTestIds.screen}>
+        <SectionHeader section="catalog" />
+        <ErrorState
+          message={vm.errorMessage}
+          onRetry={vm.onRetry}
+          retryLabel={t("common.actions.tryAgain")}
+          testID={stockCatalogTestIds.errorState}
+        />
+      </Screen>
     );
   }
 
@@ -215,13 +219,13 @@ function Wide({ vm }: AdaptiveViewProps<StockCatalogScreenVM>) {
 
   if (vm.isLoading) {
     return (
-      <View style={{ flex: 1 }} testID={stockCatalogTestIds.screen}>
+      <Screen testID={stockCatalogTestIds.screen}>
         {header}
         {toolbar}
         {SKELETON_ROWS.map((row) => (
           <Skeleton.ListItem key={row} testID={"stock-catalog-skeleton"} />
         ))}
-      </View>
+      </Screen>
     );
   }
 
@@ -244,33 +248,8 @@ function Wide({ vm }: AdaptiveViewProps<StockCatalogScreenVM>) {
     />
   ));
 
-  return (
-    <View style={{ flex: 1 }} testID={stockCatalogTestIds.screen}>
-      <FlashList
-        data={vm.entries}
-        estimatedItemSize={64}
-        keyExtractor={(entry) => entry.key}
-        ListEmptyComponent={
-          vm.emptyOwners.length === 0 ? (
-            <EmptyState
-              message={t("stock.catalog.empty.hint")}
-              testID={stockCatalogTestIds.empty}
-              title={t("stock.catalog.title")}
-            />
-          ) : null
-        }
-        ListFooterComponent={<View>{empties}</View>}
-        ListHeaderComponent={
-          <View>
-            {header}
-            {toolbar}
-          </View>
-        }
-        onRefresh={vm.onRefresh}
-        refreshing={vm.isRefreshing}
-        renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
-      />
+  const overlay = (
+    <>
       {vm.editor && vm.data ? (
         <CatalogForm
           categories={vm.data.categories}
@@ -318,7 +297,38 @@ function Wide({ vm }: AdaptiveViewProps<StockCatalogScreenVM>) {
         testID={stockCatalogTestIds.readOnlyToast}
         visible={vm.toastVisible}
       />
-    </View>
+    </>
+  );
+
+  return (
+    <Screen
+      list={
+        <FlashList
+          data={vm.entries}
+          estimatedItemSize={64}
+          keyExtractor={(entry) => entry.key}
+          ListEmptyComponent={
+            vm.emptyOwners.length === 0 ? (
+              <EmptyState
+                message={t("stock.catalog.empty.hint")}
+                testID={stockCatalogTestIds.empty}
+                title={t("stock.catalog.title")}
+              />
+            ) : null
+          }
+          ListFooterComponent={<View>{empties}</View>}
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+        />
+      }
+      onRefresh={vm.onRefresh}
+      overlay={overlay}
+      refreshing={vm.isRefreshing}
+      testID={stockCatalogTestIds.screen}
+    >
+      {header}
+      {toolbar}
+    </Screen>
   );
 }
 
