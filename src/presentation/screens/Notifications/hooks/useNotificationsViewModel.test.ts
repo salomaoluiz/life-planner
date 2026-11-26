@@ -93,7 +93,9 @@ function setup(
   jest
     .mocked(useQuery)
     .mockImplementation(((options: { cacheKey: string[] }) =>
-      options.cacheKey[1] === "preferences" ? preferences : list) as never);
+      options.cacheKey[1].startsWith("preferences")
+        ? preferences
+        : list) as never);
   const byKey: Record<string, unknown> = {
     all: mutations.readAll,
     read: mutations.read,
@@ -249,4 +251,10 @@ it("SHOULD refetch the list on retry", async () => {
   await result.current.onRetry();
 
   expect(refetch).toHaveBeenCalledTimes(1);
+});
+
+it("SHOULD not report all types off WHEN the preferences could not be read", () => {
+  const { result } = setup({ preferences: { data: null } });
+
+  expect(result.current.allTypesOff).toBe(false);
 });

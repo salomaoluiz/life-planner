@@ -8,6 +8,8 @@ export const notificationKeys = {
   devices: (): Key => [ROOT, "devices"],
   list: (filter: string): Key => [ROOT, "list", filter],
   preferences: (): Key => [ROOT, "preferences"],
+  // The same data for the bell, the card and the center, which must never break a screen when it fails.
+  preferencesQuiet: (): Key => [ROOT, "preferences-quiet"],
   preview: (): Key => [ROOT, "preview"],
   unread: (): Key => [ROOT, "unread"],
 };

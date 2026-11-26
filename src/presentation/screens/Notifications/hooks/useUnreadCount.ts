@@ -7,7 +7,14 @@ import { useQuery } from "@infrastructure/fetcher";
 function useUnreadCount() {
   const query = useQuery<number>({
     cacheKey: notificationKeys.unread(),
-    fetch: async () => useCases.getUnreadNotificationCountUseCase.execute(),
+    // The bell is in every header: a failing API must never break the screen around it.
+    fetch: async () => {
+      try {
+        return await useCases.getUnreadNotificationCountUseCase.execute();
+      } catch {
+        return 0;
+      }
+    },
   });
 
   return { count: query.data ?? 0, refetch: query.refetch };

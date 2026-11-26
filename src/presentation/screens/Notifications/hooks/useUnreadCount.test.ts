@@ -33,3 +33,16 @@ it("SHOULD count 0 before the first answer", () => {
 
   expect(renderHook(() => useUnreadCount()).result.current.count).toBe(0);
 });
+
+it("SHOULD answer 0 WHEN the API fails (the bell never breaks a screen)", async () => {
+  jest
+    .mocked(useQuery)
+    .mockReturnValue({ data: 0, refetch: jest.fn() } as never);
+  jest
+    .mocked(useCases.getUnreadNotificationCountUseCase.execute)
+    .mockRejectedValue(new Error("500"));
+
+  renderHook(() => useUnreadCount());
+
+  expect(await jest.mocked(useQuery).mock.calls.at(-1)?.[0].fetch()).toBe(0);
+});

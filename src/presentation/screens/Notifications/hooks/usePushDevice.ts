@@ -22,7 +22,14 @@ function usePushDevice() {
   const [isEnabling, setIsEnabling] = useState(false);
   const devices = useQuery<NotificationDeviceEntity[]>({
     cacheKey: notificationKeys.devices(),
-    fetch: async () => useCases.getNotificationDevicesUseCase.execute(),
+    // Read by the card on the Home too: a failing API shows no devices instead of breaking the screen.
+    fetch: async () => {
+      try {
+        return await useCases.getNotificationDevicesUseCase.execute();
+      } catch {
+        return [];
+      }
+    },
   });
 
   useEffect(() => {

@@ -32,11 +32,23 @@ function useNotificationPermissionCardViewModel() {
   const [dismissed, setDismissed] = useState(true);
   const preview = useQuery<NotificationSummaryPreview>({
     cacheKey: notificationKeys.preview(),
-    fetch: async () => useCases.getNotificationSummaryPreviewUseCase.execute(),
+    fetch: async () => {
+      try {
+        return await useCases.getNotificationSummaryPreviewUseCase.execute();
+      } catch {
+        return { count: 0, hasItems: false };
+      }
+    },
   });
-  const preferences = useQuery<NotificationPreferencesEntity>({
-    cacheKey: notificationKeys.preferences(),
-    fetch: async () => useCases.getNotificationPreferencesUseCase.execute(),
+  const preferences = useQuery<NotificationPreferencesEntity | null>({
+    cacheKey: notificationKeys.preferencesQuiet(),
+    fetch: async () => {
+      try {
+        return await useCases.getNotificationPreferencesUseCase.execute();
+      } catch {
+        return null;
+      }
+    },
   });
 
   useEffect(() => {

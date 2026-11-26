@@ -56,9 +56,15 @@ function useNotificationsViewModel() {
     fetch: async () =>
       useCases.getNotificationsUseCase.execute(filtersOf(filter)),
   });
-  const preferences = useQuery<NotificationPreferencesEntity>({
-    cacheKey: notificationKeys.preferences(),
-    fetch: async () => useCases.getNotificationPreferencesUseCase.execute(),
+  const preferences = useQuery<NotificationPreferencesEntity | null>({
+    cacheKey: notificationKeys.preferencesQuiet(),
+    fetch: async () => {
+      try {
+        return await useCases.getNotificationPreferencesUseCase.execute();
+      } catch {
+        return null;
+      }
+    },
   });
   const read = useMutation<{ id: string }, void>({
     cacheKey: [useCases.markNotificationReadUseCase.uniqueName],
@@ -115,6 +121,7 @@ function useNotificationsViewModel() {
     more.items.length > 0 ? more.cursor : (list.data?.nextCursor ?? null);
   const allTypesOff =
     preferences.data !== undefined &&
+    preferences.data !== null &&
     Object.values(preferences.data.types).every((enabled) => !enabled);
 
   function onNoticePress(row: NoticeRow) {

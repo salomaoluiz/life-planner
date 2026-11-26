@@ -120,3 +120,23 @@ it('SHOULD request the permission on "Ativar" AND hide the card for 30 days on "
   );
   expect(result.current.mode).toBe("hidden");
 });
+
+it("SHOULD fall back to empty answers WHEN the API fails (the card never breaks the Home)", async () => {
+  setup();
+  const fetchers = jest.mocked(useQuery).mock.calls.map((call) => call[0]);
+  const { useCases } = jest.requireMock("@application/useCases");
+  useCases.getNotificationPreferencesUseCase.execute.mockRejectedValue(
+    new Error("500"),
+  );
+  useCases.getNotificationSummaryPreviewUseCase.execute.mockRejectedValue(
+    new Error("500"),
+  );
+
+  const answers = await Promise.all(
+    fetchers.map(async (options) => options.fetch()),
+  );
+
+  expect(answers).toEqual(
+    expect.arrayContaining([{ count: 0, hasItems: false }, null]),
+  );
+});

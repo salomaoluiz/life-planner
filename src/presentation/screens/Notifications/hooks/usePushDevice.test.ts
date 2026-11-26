@@ -125,3 +125,14 @@ it("SHOULD forward the settings shortcut AND the home screen hint", async () => 
   expect(result.current.needsHomeScreenInstall).toBe(true);
   client.needsHomeScreenInstall.mockReturnValue(false);
 });
+
+it("SHOULD show no devices WHEN the API fails", async () => {
+  setup([]);
+  jest
+    .mocked(useCases.getNotificationDevicesUseCase.execute)
+    .mockRejectedValue(new Error("500"));
+
+  expect(await jest.mocked(useQuery).mock.calls.at(-1)?.[0].fetch()).toEqual(
+    [],
+  );
+});
