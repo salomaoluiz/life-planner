@@ -1,3 +1,4 @@
+export type { TreeNode } from "./CategoryTreePicker/treeModel";
 export { default as Accordion, AccordionProps } from "./Accordion";
 export {
   default as AdaptiveLayout,
@@ -26,6 +27,18 @@ export {
   CameraViewportProps,
 } from "./CameraViewport";
 export { default as Card, CardProps } from "./Card";
+export {
+  default as CategoryTreeField,
+  CategoryTreeFieldProps,
+} from "./CategoryTreeField";
+export {
+  default as CategoryTreePicker,
+  CategoryTreePickerProps,
+} from "./CategoryTreePicker";
+export {
+  TreePickerLabels,
+  default as useTreePickerLabels,
+} from "./CategoryTreePicker/labels";
 export {
   default as ChartCard,
   ChartCardProps,
