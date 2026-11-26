@@ -41,7 +41,11 @@ onFlowComplete:
     visible:
       text: "E2E Graos"
     timeout: 20000
-- runFlow: ../../subflows/stock/open-stock.yaml
+- openLink: ${E2E_WEB_URL}/stock
+- extendedWaitUntil:
+    visible:
+      id: "stock.list.screen"
+    timeout: 20000
 # The item form uses the shared tree picker: a search keeps the parent of the match
 - tapOn:
     id: "stock.list.add-button"
