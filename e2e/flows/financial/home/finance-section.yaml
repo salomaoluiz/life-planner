@@ -59,6 +59,7 @@ onFlowComplete:
     visible:
       id: "home.home.screen"
     timeout: 20000
+- runFlow: ../../../subflows/notifications/dismiss-permission-card.yaml
 - extendedWaitUntil:
     visible:
       id: "home.finance.projectedBalance"
