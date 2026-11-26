@@ -9,12 +9,26 @@ import {
 } from "@domain/entities/stock/ShoppingListEntity";
 import { OwnerType } from "@domain/entities/user/OwnerEntity";
 import { invalidateFetcherData, useQuery } from "@infrastructure/fetcher";
+import { useTranslationLocale } from "@presentation/i18n";
 import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
 import useModalNavigation from "@screens/Navigation/hooks/useModalNavigation";
 
 const NAME_MAX = 50;
+const INTERVAL_MIN = 1;
+const INTERVAL_MAX = 90;
 
 export type ShoppingListVM = ReturnType<typeof useShoppingListViewModel>;
+
+// Spec 123 FR 9: whole days from 1 to 90.
+function parseInterval(text: string): number | undefined {
+  const value = Number(text);
+
+  return /^\d{1,3}$/.test(text.trim()) &&
+    value >= INTERVAL_MIN &&
+    value <= INTERVAL_MAX
+    ? value
+    : undefined;
+}
 
 function statusOf(error: unknown) {
   return error instanceof GenericError
@@ -27,6 +41,7 @@ export default useShoppingListViewModel;
 // Spec 118 section 8: "Nova lista" and "Editar lista" (owner only at creation; the default switch; archive).
 function useShoppingListViewModel() {
   const { closeModal } = useModalNavigation();
+  const { getLocale } = useTranslationLocale();
   const params = useLocalSearchParams<{ id?: string; ownerId?: string }>();
   const owners = useActiveOwners();
   const lists = useQuery<ShoppingListCardEntity[]>({
@@ -40,6 +55,7 @@ function useShoppingListViewModel() {
   const [name, setName] = useState<string | undefined>();
   const [ownerId, setOwnerId] = useState<string | undefined>();
   const [isDefault, setIsDefault] = useState<boolean | undefined>();
+  const [intervalText, setIntervalText] = useState<string | undefined>();
   const [submitted, setSubmitted] = useState(false);
   const [saving, setSaving] = useState(false);
   const [errorKey, setErrorKey] = useState<
@@ -57,6 +73,13 @@ function useShoppingListViewModel() {
   );
   const currentName = name ?? editing?.name ?? "";
   const currentDefault = isDefault ?? editing?.isDefault ?? false;
+  const currentIntervalText =
+    intervalText ?? String(editing?.purchaseIntervalDays ?? 7);
+  const interval = parseInterval(currentIntervalText);
+  const intervalError =
+    isEdit && interval === undefined
+      ? ("stock.lists.intervalInvalid" as const)
+      : undefined;
   const ownerDefault = useMemo(
     () =>
       lists.data?.find(
@@ -84,7 +107,12 @@ function useShoppingListViewModel() {
 
     const trimmed = currentName.trim();
 
-    if (trimmed === "" || trimmed.length > NAME_MAX || !selectedOwner) {
+    if (
+      trimmed === "" ||
+      trimmed.length > NAME_MAX ||
+      !selectedOwner ||
+      (isEdit && interval === undefined)
+    ) {
       return;
     }
 
@@ -97,6 +125,8 @@ function useShoppingListViewModel() {
           isDefault:
             currentDefault !== editing.isDefault ? currentDefault : undefined,
           name: trimmed !== editing.name ? trimmed : undefined,
+          purchaseIntervalDays:
+            interval !== editing.purchaseIntervalDays ? interval : undefined,
         });
       } else {
         await useCases.createShoppingListUseCase.execute({
@@ -147,24 +177,41 @@ function useShoppingListViewModel() {
 
   return {
     canArchive: isEdit && !!editing && !editing.isDefault,
+    currentIntervalText,
     currentName,
     defaultListName: ownerDefault?.name,
     errorKey,
+    interval,
+    intervalError,
     isDefault: currentDefault,
     isEdit,
     isLoading: lists.isFetching && !lists.data,
+    languageTag: getLocale().languageTag,
     nameError,
+    nextTripDate: editing?.nextTripDate,
     onArchive,
     onClose: closeModal,
     onDefaultChange: setIsDefault,
+    onIntervalChange: setIntervalText,
     onNameChange: setName,
     onOwnerChange: setOwnerId,
     onSubmit: submit,
+    onUseSuggested: () => {
+      if (editing?.suggestedIntervalDays !== undefined) {
+        setIntervalText(String(editing.suggestedIntervalDays));
+      }
+    },
     ownerName:
       selectedOwner?.type === OwnerType.FAMILY ? selectedOwner.name : undefined,
     ownerOptions,
     saving,
     selectedOwnerId,
+    // Spec 123 FR 11: only when it exists and differs from the value being edited.
+    suggestedInterval:
+      editing?.suggestedIntervalDays !== undefined &&
+      editing.suggestedIntervalDays !== interval
+        ? editing.suggestedIntervalDays
+        : undefined,
     wasDefault: editing?.isDefault ?? false,
   };
 }

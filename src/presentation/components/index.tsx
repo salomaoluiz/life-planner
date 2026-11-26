@@ -20,6 +20,7 @@ export { default as BarList, BarListProps, BarListRow } from "./BarList";
 export { default as BottomSheet, BottomSheetProps } from "./BottomSheet";
 export { useSheetLayout } from "./BottomSheet/SheetLayoutContext";
 export { default as Button, ButtonProps } from "./Button";
+export { default as Callout, CalloutProps } from "./Callout";
 export {
   default as CameraViewport,
   CameraViewportProps,
@@ -163,3 +164,4 @@ export { default as Tooltip, TooltipProps } from "./Tooltip";
 export { default as Touchable, TouchableProps } from "./Touchable";
 export { default as TreeItem, TreeItemProps } from "./TreeItem";
 export { default as TruncatedText, TruncatedTextProps } from "./TruncatedText";
+export { WeekBar, default as WeekBars, WeekBarsProps } from "./WeekBars";

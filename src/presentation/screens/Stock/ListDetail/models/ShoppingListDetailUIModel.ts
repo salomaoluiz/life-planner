@@ -15,13 +15,21 @@ export interface ShoppingGroupView {
 
 export interface ShoppingRowBadge {
   labelKey: TranslationKeys;
-  testID: "badgeAuto" | "badgeEdited" | "badgeText";
+  testID: "badgeAuto" | "badgeEdited" | "badgeForecast" | "badgeText";
   tone: "accent" | "neutral" | "warning";
 }
 
 export interface ShoppingRowView {
   badge?: ShoppingRowBadge;
   entity: ShoppingListRowEntity;
+  // Spec 123 FR 17: the projection line of a FORECAST row (the view formats the quantities and the date).
+  forecast?: {
+    date: Date;
+    have: number;
+    ideal?: number;
+    min?: number;
+    projected: number;
+  };
   id: string;
   isText: boolean;
   // Under the name when the row has no stock line: "added by you" / "was automatic".
@@ -31,6 +39,8 @@ export interface ShoppingRowView {
     key: TranslationKeys;
     params: Record<string, number | string>;
   }>;
+  // Spec 123 FR 34: share (0-100) of what entered that was discarded in 90 days, from 30%; the quantity never changes.
+  wastePercent?: number;
 }
 
 // Spec 118 FR 19-21 and section 8: the groups of the list screen. Group "Outros" has no category and goes last (the
@@ -92,15 +102,39 @@ class ShoppingListDetailUIModel {
     return {
       badge: badgeOf(row),
       entity: row,
+      forecast:
+        row.forecast && row.stock
+          ? {
+              date: row.forecast.nextTripDate,
+              have: row.stock.quantity,
+              ideal: row.stock.idealQuantity,
+              min: row.stock.minQuantity,
+              projected: row.forecast.projectedOnTrip,
+            }
+          : undefined,
       id: row.id,
       isText: !row.itemId,
       noteKey,
       stockParts,
+      wastePercent:
+        row.wasteRatio90d !== undefined && row.wasteRatio90d >= WASTE_HINT_RATIO
+          ? Math.round(row.wasteRatio90d * 100)
+          : undefined,
     };
   }
 }
 
+const WASTE_HINT_RATIO = 0.3;
+
 function badgeOf(row: ShoppingListRowEntity): ShoppingRowBadge | undefined {
+  if (row.origin === ShoppingListRowOrigins.FORECAST) {
+    return {
+      labelKey: "stock.lists.badge.forecast",
+      testID: "badgeForecast",
+      tone: "warning",
+    };
+  }
+
   if (row.origin === ShoppingListRowOrigins.AUTO) {
     return {
       labelKey: "stock.lists.badge.auto",

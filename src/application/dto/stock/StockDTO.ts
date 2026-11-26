@@ -1,9 +1,13 @@
 import StockEntity, {
   StockCategoryRef,
   StockExpirationStatus,
+  StockForecast,
+  StockForecastRow,
+  StockLeftover,
   StockLocationRef,
   StockOwners,
   StockUnits,
+  StockWaste90d,
 } from "@domain/entities/stock/StockEntity";
 import StockLotEntity, {
   StockLotStatus,
@@ -19,10 +23,14 @@ export interface IStockDTO {
   effectiveShoppingListId?: string;
   estimatedUnitPriceCents?: number;
   expirationStatus: StockExpirationStatus;
+  forecast?: StockForecast;
+  forecastRow?: StockForecastRow;
   hasExpiredLot: boolean;
+  hasForecastRow?: boolean;
   hasOpenLot: boolean;
   id: string;
   idealQuantity?: number;
+  leftover?: StockLeftover;
   location?: StockLocationRef;
   locationId?: string;
   lots: StockLotDTO[];
@@ -41,6 +49,7 @@ export interface IStockDTO {
   unit: StockUnits;
   warnDaysClosed: number;
   warnDaysOpened: number;
+  waste90d?: StockWaste90d;
 }
 
 class StockDTO implements IStockDTO {
@@ -53,10 +62,14 @@ class StockDTO implements IStockDTO {
   effectiveShoppingListId?: string;
   estimatedUnitPriceCents?: number;
   expirationStatus: StockExpirationStatus;
+  forecast?: StockForecast;
+  forecastRow?: StockForecastRow;
   hasExpiredLot: boolean;
+  hasForecastRow?: boolean;
   hasOpenLot: boolean;
   id: string;
   idealQuantity?: number;
+  leftover?: StockLeftover;
   location?: StockLocationRef;
   locationId?: string;
   lots: StockLotDTO[];
@@ -75,6 +88,7 @@ class StockDTO implements IStockDTO {
   unit: StockUnits;
   warnDaysClosed: number;
   warnDaysOpened: number;
+  waste90d?: StockWaste90d;
 
   constructor(params: IStockDTO) {
     this.barcode = params.barcode;
@@ -86,10 +100,14 @@ class StockDTO implements IStockDTO {
     this.effectiveShoppingListId = params.effectiveShoppingListId;
     this.estimatedUnitPriceCents = params.estimatedUnitPriceCents;
     this.expirationStatus = params.expirationStatus;
+    this.forecast = params.forecast;
+    this.forecastRow = params.forecastRow;
     this.hasExpiredLot = params.hasExpiredLot;
+    this.hasForecastRow = params.hasForecastRow ?? false;
     this.hasOpenLot = params.hasOpenLot;
     this.id = params.id;
     this.idealQuantity = params.idealQuantity;
+    this.leftover = params.leftover;
     this.location = params.location;
     this.locationId = params.locationId;
     this.lots = params.lots;
@@ -108,6 +126,7 @@ class StockDTO implements IStockDTO {
     this.unit = params.unit;
     this.warnDaysClosed = params.warnDaysClosed;
     this.warnDaysOpened = params.warnDaysOpened;
+    this.waste90d = params.waste90d;
   }
 
   static fromEntity(entity: StockEntity) {
@@ -121,10 +140,14 @@ class StockDTO implements IStockDTO {
       effectiveShoppingListId: entity.effectiveShoppingListId,
       estimatedUnitPriceCents: entity.estimatedUnitPriceCents,
       expirationStatus: entity.expirationStatus,
+      forecast: entity.forecast,
+      forecastRow: entity.forecastRow,
       hasExpiredLot: entity.hasExpiredLot,
+      hasForecastRow: entity.hasForecastRow,
       hasOpenLot: entity.hasOpenLot,
       id: entity.id,
       idealQuantity: entity.idealQuantity,
+      leftover: entity.leftover,
       location: entity.location,
       locationId: entity.locationId,
       lots: entity.lots.map((lot) => StockLotDTO.fromEntity(lot)),
@@ -143,6 +166,7 @@ class StockDTO implements IStockDTO {
       unit: entity.unit,
       warnDaysClosed: entity.warnDaysClosed,
       warnDaysOpened: entity.warnDaysOpened,
+      waste90d: entity.waste90d,
     });
   }
 }
@@ -156,6 +180,10 @@ export class StockLotDTO {
     readonly expirationDate?: Date,
     readonly openedAt?: Date,
     readonly purchaseDate?: Date,
+    readonly unitPriceCents?: number,
+    readonly currency?: string,
+    readonly leftoverQuantity?: number,
+    readonly leftoverDismissed: boolean = false,
   ) {}
 
   static fromEntity(entity: StockLotEntity) {
@@ -167,6 +195,10 @@ export class StockLotDTO {
       entity.expirationDate,
       entity.openedAt,
       entity.purchaseDate,
+      entity.unitPriceCents,
+      entity.currency,
+      entity.leftoverQuantity,
+      entity.leftoverDismissed,
     );
   }
 }

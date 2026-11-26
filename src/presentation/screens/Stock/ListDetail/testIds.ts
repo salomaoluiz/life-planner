@@ -4,10 +4,12 @@ const stockListDetailTestIds = {
   back: "stock.list-detail.back",
   badgeAuto: "stock.list-detail.badge-auto",
   badgeEdited: "stock.list-detail.badge-edited",
+  badgeForecast: "stock.list-detail.badge-forecast",
   badgeText: "stock.list-detail.badge-text",
   editButton: "stock.list-detail.edit-button",
   empty: "stock.list-detail.empty",
   error: "stock.list-detail.error",
+  forecastLine: "stock.list-detail.forecast-line",
   goShopping: "stock.list-detail.go-shopping",
   group: "stock.list-detail.group",
   loading: "stock.list-detail.loading",
@@ -26,6 +28,7 @@ const stockListDetailTestIds = {
   total: "stock.list-detail.total",
   undo: "stock.list-detail.undo",
   undoNotice: "stock.list-detail.undo-notice",
+  wasteHint: "stock.list-detail.waste-hint",
 } as const;
 
 export default stockListDetailTestIds;

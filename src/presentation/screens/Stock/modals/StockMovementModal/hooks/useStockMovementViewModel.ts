@@ -73,7 +73,8 @@ function useStockMovementViewModel() {
         return "PURCHASE";
       }
 
-      return model?.lotById(params.lotId)?.expirationStatus === "EXPIRED"
+      return model?.lotById(params.lotId ?? model.defaultDiscardLotId())
+        ?.expirationStatus === "EXPIRED"
         ? "EXPIRED"
         : "OTHER";
     }
@@ -82,13 +83,18 @@ function useStockMovementViewModel() {
       return undefined;
     }
 
-    const lot =
-      params.lotId ??
-      (type === StockMovementTypes.DISCARD ? undefined : AUTO_LOT);
+    const discardLot =
+      type === StockMovementTypes.DISCARD
+        ? (params.lotId ?? model.defaultDiscardLotId())
+        : undefined;
+    const lot = params.lotId ?? discardLot ?? AUTO_LOT;
 
     return {
       lotId: lot,
-      quantity: initialInput(model.initialQuantity(params.lotId), model.unit),
+      quantity: initialInput(
+        model.initialQuantity(discardLot ?? params.lotId),
+        model.unit,
+      ),
       reason: defaultReason(),
     };
   }, [model, params.lotId, type]);
@@ -159,6 +165,10 @@ function useStockMovementViewModel() {
   return {
     chosenLot: chosenLot ?? AUTO_LOT,
     chosenReason,
+    discardValue:
+      type === StockMovementTypes.DISCARD
+        ? model?.discardValue(lotParam, value)
+        : undefined,
     errorKey: errorKey(),
     expirationDate,
     input,

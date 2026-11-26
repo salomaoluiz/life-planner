@@ -1,4 +1,5 @@
 import StockMovementEntity, {
+  DiscardValueSources,
   StockMovementReasons,
   StockMovementTypes,
 } from "@domain/entities/stock/StockMovementEntity";
@@ -14,6 +15,11 @@ class StockMovementDTO {
     readonly note?: string,
     // `undefined` = a former member.
     readonly user?: { id: string; name: string },
+    // Spec 123: the ENTRY price and the DISCARD value recorded at the time.
+    readonly unitPriceCents?: number,
+    readonly valueCents?: number,
+    readonly currency?: string,
+    readonly valueSource?: DiscardValueSources,
   ) {}
 
   static fromEntity(entity: StockMovementEntity) {
@@ -26,6 +32,10 @@ class StockMovementDTO {
       entity.reason,
       entity.note,
       entity.user,
+      entity.unitPriceCents,
+      entity.valueCents,
+      entity.currency,
+      entity.valueSource,
     );
   }
 }

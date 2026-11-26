@@ -33,6 +33,11 @@ import {
   updateStockLocation,
 } from "./stockCatalog";
 import {
+  dismissLeftover,
+  getConsumptionWeeks,
+  getWaste,
+} from "./stockForecast";
+import {
   createStockMovement,
   getOwnerChangePreview,
   getStockMovements,
@@ -60,7 +65,9 @@ const stockApiDatasource: StockDatasource = {
   deleteStockCategory,
   deleteStockItem,
   deleteStockLocation,
+  dismissLeftover,
   getAiUsage,
+  getConsumptionWeeks,
   getFrequentStockItems,
   getOwnerChangePreview,
   getRestockSummary,
@@ -72,6 +79,7 @@ const stockApiDatasource: StockDatasource = {
   getStockLocation,
   getStockLocations,
   getStockMovements,
+  getWaste,
   lookupStockBarcode,
   setStockGestureExpiration,
   suggestStockItem,

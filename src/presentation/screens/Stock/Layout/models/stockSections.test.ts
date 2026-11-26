@@ -4,10 +4,11 @@ import {
   STOCK_SECTIONS,
 } from "./stockSections";
 
-it("SHOULD list Items, Lists and Catalog in menu order", () => {
+it("SHOULD list Items, Lists, Waste and Catalog in menu order", () => {
   expect(STOCK_SECTIONS.map((item) => item.section)).toEqual([
     "items",
     "lists",
+    "waste",
     "catalog",
   ]);
 });
@@ -17,6 +18,8 @@ it.each([
   ["/stock/", "items"],
   ["/stock/locations/abc", "items"],
   ["/stock/lists", "lists"],
+  ["/stock/waste", "waste"],
+  ["/stock/waste/", "waste"],
   ["/stock/list/abc", "lists"],
   ["/stock/lists/stock_add_to_list", "lists"],
   ["/stock/catalog", "catalog"],

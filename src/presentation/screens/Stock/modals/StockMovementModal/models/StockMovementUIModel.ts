@@ -1,4 +1,6 @@
 import StockDTO, { StockLotDTO } from "@application/dto/stock/StockDTO";
+import { formatAmount } from "@components/AmountText/formatAmount";
+import { CurrencyCode } from "@domain/entities/financial/Currency";
 import { StockUnits } from "@domain/entities/stock/StockEntity";
 import { StockMovementTypes } from "@domain/entities/stock/StockMovementEntity";
 import { TranslationKeys } from "@presentation/i18n/types";
@@ -7,6 +9,8 @@ import { formatQuantity } from "@screens/Stock/models/quantityFormat";
 export interface LotOption {
   date?: string;
   key: TranslationKeys;
+  // Spec 123 FR 28: what was paid per unit of the lot, to pick the lot to discard.
+  price?: { text: string; unitKey: TranslationKeys };
   quantity: { text: string; unitKey: TranslationKeys };
   value: string;
 }
@@ -48,6 +52,11 @@ class StockMovementUIModel {
     }));
   }
 
+  // The Descartar form picks the lot (spec 123 FR 28); the others keep the optional automatic choice.
+  get showsDiscardLot() {
+    return this.type === StockMovementTypes.DISCARD;
+  }
+
   get showsExpiration() {
     return this.type === StockMovementTypes.ENTRY;
   }
@@ -77,19 +86,59 @@ class StockMovementUIModel {
     private readonly locale?: string,
   ) {}
 
+  // The lot a discard starts on: the first expired one, else the first (the API sends the lots by use order).
+  defaultDiscardLotId(): string | undefined {
+    return (
+      this.item.lots.find((lot) => lot.expirationStatus === "EXPIRED") ??
+      this.item.lots[0]
+    )?.id;
+  }
+
   // The lot an OPEN with no choice picks: the closed lot that expires first (the API does the same).
   defaultOpenLot(): StockLotDTO | undefined {
     return this.item.lots.find((lot) => !lot.openedAt);
   }
 
-  // Defaults the form starts with: 1 to open, the whole lot to discard.
+  // Spec 123 FR 28: the value the discard will record when the lot has a price (the server also falls back to the
+  // last price of the item, which the form does not know).
+  discardValue(lotId: string | undefined, quantity: number | undefined) {
+    const lot = this.lotById(lotId);
+
+    if (!lot || !quantity || quantity <= 0) {
+      return undefined;
+    }
+
+    if (lot.unitPriceCents === undefined || !lot.currency) {
+      return { kind: "unknown" as const };
+    }
+
+    const currency = lot.currency as CurrencyCode;
+    const tag = this.locale ?? "en-US";
+
+    return {
+      kind: "lot" as const,
+      price: formatAmount(lot.unitPriceCents, tag, currency),
+      quantity: formatQuantity(quantity, this.item.unit, this.locale),
+      value: formatAmount(
+        Math.floor(lot.unitPriceCents * quantity + 0.5),
+        tag,
+        currency,
+      ),
+    };
+  }
+
+  // Defaults the form starts with: 1 to open; to discard, the whole lot when it expired, else 1 (spec 123 FR 28).
   initialQuantity(lotId?: string): number | undefined {
     if (this.type === StockMovementTypes.OPEN) {
       return 1;
     }
 
     if (this.type === StockMovementTypes.DISCARD) {
-      return this.lotById(lotId)?.quantity;
+      const lot = this.lotById(lotId);
+
+      return lot?.expirationStatus === "EXPIRED"
+        ? lot.quantity
+        : lot && Math.min(1, lot.quantity);
     }
 
     return undefined;
@@ -135,8 +184,20 @@ class StockMovementUIModel {
       month: "2-digit",
     });
 
+    const price =
+      lot.unitPriceCents !== undefined && lot.currency
+        ? {
+            text: formatAmount(
+              lot.unitPriceCents,
+              this.locale ?? "en-US",
+              lot.currency as CurrencyCode,
+            ),
+            unitKey: formatQuantity(1, this.item.unit, this.locale).unitKey,
+          }
+        : undefined;
+
     if (!date) {
-      return { key: "stock.movement.lotNoExpiration", quantity };
+      return { key: "stock.movement.lotNoExpiration", price, quantity };
     }
 
     return {
@@ -144,6 +205,7 @@ class StockMovementUIModel {
       key: lot.openedAt
         ? "stock.movement.lotOpened"
         : "stock.movement.lotOption",
+      price,
       quantity,
     };
   }

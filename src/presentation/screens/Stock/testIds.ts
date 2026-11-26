@@ -39,6 +39,8 @@ const stockTestIds = {
   sortOption: "stock.list.sort-option",
   statusExpired: "stock.list.status-expired",
   statusExpiring: "stock.list.status-expiring",
+  statusForecast: "stock.list.status-forecast",
+  statusLeftover: "stock.list.status-leftover",
   statusOpened: "stock.list.status-opened",
   statusRestock: "stock.list.status-restock",
 } as const;

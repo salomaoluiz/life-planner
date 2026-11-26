@@ -1,5 +1,6 @@
 const stockMovementTestIds = {
   alreadyOpen: "stock.movement.already-open",
+  discardValue: "stock.movement.discard-value",
   error: "stock.movement.error",
   expiration: "stock.movement.expiration",
   lotSelect: "stock.movement.lot-select",

@@ -7,6 +7,7 @@ import {
   Badge,
   BottomSheet,
   Button,
+  Callout,
   Card,
   EmptyState,
   ErrorState,
@@ -65,6 +66,45 @@ function Wide({ vm }: AdaptiveViewProps<StockListDetailVM>) {
       .join(" · ");
   }
 
+  // Spec 123 FR 17: "tem 6 · em 29/11 terá ~2,4 (mínimo 3) · completa o ideal 8".
+  function forecastLine(row: ShoppingRowView) {
+    const forecast = row.forecast;
+
+    if (!forecast) {
+      return undefined;
+    }
+
+    const { unit } = row.entity;
+    const date = forecast.date.toLocaleDateString(vm.languageTag, {
+      day: "2-digit",
+      month: "2-digit",
+    });
+    const have = quantityText(forecast.have, unit);
+
+    if (forecast.ideal === undefined) {
+      return t("stock.lists.forecastLineNoIdeal", {
+        date,
+        have,
+        interval: vm.list?.purchaseIntervalDays,
+      });
+    }
+
+    const params = {
+      date,
+      have,
+      ideal: quantityText(forecast.ideal, unit),
+      min:
+        forecast.min === undefined
+          ? undefined
+          : quantityText(forecast.min, unit),
+      projected: quantityText(forecast.projected, unit),
+    };
+
+    return forecast.min === undefined
+      ? t("stock.lists.forecastLineNoMin", params)
+      : t("stock.lists.forecastLine", params);
+  }
+
   function priceLine(row: ShoppingRowView) {
     const { entity } = row;
 
@@ -103,9 +143,22 @@ function Wide({ vm }: AdaptiveViewProps<StockListDetailVM>) {
               />
             ) : null}
           </View>
-          {subtitle || note ? (
+          {row.forecast ? (
+            <Text.Caption
+              testID={stockListDetailTestIds.forecastLine}
+              value={forecastLine(row) ?? ""}
+            />
+          ) : null}
+          {!row.forecast && (subtitle || note) ? (
             <Text.Caption value={subtitle ?? note ?? ""} />
           ) : null}
+          {row.wastePercent === undefined ? null : (
+            <Callout testID={stockListDetailTestIds.wasteHint} tone="expense">
+              <Text.Caption
+                value={t("stock.lists.wasteHint", { pct: row.wastePercent })}
+              />
+            </Callout>
+          )}
         </View>
         <View style={styles.rowAmounts}>
           <Text.BodyStrong value={quantityText(entity.quantity, entity.unit)} />
@@ -247,6 +300,24 @@ function Wide({ vm }: AdaptiveViewProps<StockListDetailVM>) {
         ? t(pluralKey("stock.lists.autoCount", totals.autoCount), {
             count: totals.autoCount,
           })
+        : undefined,
+      totals.forecastCount > 0
+        ? t(pluralKey("stock.lists.forecastCount", totals.forecastCount), {
+            count: totals.forecastCount,
+          })
+        : undefined,
+      // Spec 123 FR 9-10: "Compro a cada 7 dias · próxima ida 29/11".
+      vm.list.nextTripDate
+        ? t(
+            pluralKey("stock.lists.nextTripLine", vm.list.purchaseIntervalDays),
+            {
+              count: vm.list.purchaseIntervalDays,
+              date: vm.list.nextTripDate.toLocaleDateString(vm.languageTag, {
+                day: "2-digit",
+                month: "2-digit",
+              }),
+            },
+          )
         : undefined,
     ]
       .filter(Boolean)

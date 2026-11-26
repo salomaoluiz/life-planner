@@ -52,11 +52,13 @@ const detail: ShoppingListDetailEntity = {
     name: "Mercado",
     owner: "USER",
     ownerId: "u",
+    purchaseIntervalDays: 7,
     status: ShoppingListStatuses.ACTIVE,
   },
   totals: {
     autoCount: 2,
     estimatedTotalCents: 100,
+    forecastCount: 0,
     pricedCount: 1,
     rowCount: 4,
   },
@@ -114,6 +116,7 @@ it("SHOULD be empty without rows and skip min/ideal parts that are not set", () 
     totals: {
       autoCount: 1,
       estimatedTotalCents: 0,
+      forecastCount: 0,
       pricedCount: 0,
       rowCount: 0,
     },
@@ -121,4 +124,60 @@ it("SHOULD be empty without rows and skip min/ideal parts that are not set", () 
 
   expect(empty.isEmpty).toBe(true);
   expect(empty.rows[0].stockParts).toHaveLength(1);
+});
+
+describe("spec 123 forecast rows", () => {
+  const nextTrip = new Date(2026, 10, 29);
+
+  function build(extra: Partial<ShoppingListRowEntity>) {
+    return new ShoppingListDetailUIModel({
+      ...detail,
+      groups: [
+        {
+          rows: [
+            row("forecast", {
+              forecast: {
+                minDate: new Date(2026, 10, 28),
+                nextTripDate: nextTrip,
+                projectedOnTrip: 2.4,
+              },
+              origin: ShoppingListRowOrigins.FORECAST,
+              stock: { idealQuantity: 8, minQuantity: 3, quantity: 6 },
+              ...extra,
+            }),
+          ],
+          subtotalCents: 0,
+          unpricedCount: 0,
+        },
+      ],
+    }).rows[0];
+  }
+
+  it("SHOULD badge a FORECAST row as Previsto AND carry its projection", () => {
+    const view = build({});
+
+    expect(view.badge).toEqual({
+      labelKey: "stock.lists.badge.forecast",
+      testID: "badgeForecast",
+      tone: "warning",
+    });
+    expect(view.forecast).toEqual({
+      date: nextTrip,
+      have: 6,
+      ideal: 8,
+      min: 3,
+      projected: 2.4,
+    });
+  });
+
+  it("SHOULD show the waste hint from 30% AND round it to a whole percent", () => {
+    expect(build({ wasteRatio90d: 0.3 }).wastePercent).toBe(30);
+    expect(build({ wasteRatio90d: 0.354 }).wastePercent).toBe(35);
+    expect(build({ wasteRatio90d: 0.29 }).wastePercent).toBeUndefined();
+    expect(build({}).wastePercent).toBeUndefined();
+  });
+
+  it("SHOULD keep the quantity the API sent (the hint never changes it)", () => {
+    expect(build({ quantity: 6, wasteRatio90d: 0.5 }).entity.quantity).toBe(6);
+  });
 });

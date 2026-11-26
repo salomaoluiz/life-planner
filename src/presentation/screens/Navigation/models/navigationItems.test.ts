@@ -27,7 +27,7 @@ it("SHOULD expose the path the settings entry navigates to", () => {
   expect(SETTINGS_PATH).toBe("/settings");
 });
 
-it("SHOULD give the Finances, Investments AND Stock items their section children (specs 110 and 118)", () => {
+it("SHOULD give the Finances, Investments AND Stock items their section children (specs 110, 118 and 123)", () => {
   const withChildren = NAVIGATION_ITEMS.filter((item) => item.children);
 
   expect(withChildren.map((item) => item.routeName)).toEqual([
@@ -38,6 +38,7 @@ it("SHOULD give the Finances, Investments AND Stock items their section children
   expect(withChildren[2].children?.map((child) => child.testID)).toEqual([
     "navigation-rail-stock-items",
     "navigation-rail-stock-lists",
+    "navigation-rail-stock-waste",
     "navigation-rail-stock-catalog",
   ]);
   expect(withChildren[1].children?.map((child) => child.testID)).toEqual([

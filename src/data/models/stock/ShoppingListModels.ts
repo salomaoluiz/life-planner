@@ -10,6 +10,7 @@ import {
   ShoppingListRowResultEntity,
   ShoppingListStatuses,
 } from "@domain/entities/stock/ShoppingListEntity";
+import { optionalDay } from "@domain/entities/stock/stockDay";
 import { StockUnits } from "@domain/entities/stock/StockEntity";
 
 type Json = Record<string, unknown>;
@@ -53,9 +54,13 @@ export function parseShoppingList(data: Json): ShoppingListEntity {
     id: data.id as string,
     isDefault: data.isDefault === true,
     name: data.name as string,
+    nextTripDate: optionalDay(data.nextTripDate),
     owner: data.owner as string,
     ownerId: data.ownerId as string,
+    purchaseIntervalDays:
+      (data.purchaseIntervalDays as number | undefined) ?? 7,
     status: data.status as ShoppingListStatuses,
+    suggestedIntervalDays: optionalNumber(data.suggestedIntervalDays),
   };
 }
 
@@ -64,6 +69,7 @@ export function parseShoppingListCard(data: Json): ShoppingListCardEntity {
     ...parseShoppingList(data),
     autoCount: (data.autoCount as number | undefined) ?? 0,
     estimatedTotalCents: (data.estimatedTotalCents as number | undefined) ?? 0,
+    forecastCount: (data.forecastCount as number | undefined) ?? 0,
     pricedCount: (data.pricedCount as number | undefined) ?? 0,
     rowCount: (data.rowCount as number | undefined) ?? 0,
   };
@@ -97,6 +103,7 @@ export function parseShoppingListDetail(data: Json): ShoppingListDetailEntity {
       autoCount: (totals.autoCount as number | undefined) ?? 0,
       estimatedTotalCents:
         (totals.estimatedTotalCents as number | undefined) ?? 0,
+      forecastCount: (totals.forecastCount as number | undefined) ?? 0,
       pricedCount: (totals.pricedCount as number | undefined) ?? 0,
       rowCount: (totals.rowCount as number | undefined) ?? 0,
     },
@@ -109,9 +116,11 @@ export function parseShoppingListRow(data: Json): ShoppingListRowEntity {
   return {
     description: data.description as string,
     estimateCents: optionalNumber(data.estimateCents),
+    forecast: parseRowForecast(data.forecast),
     id: data.id as string,
     itemId: optionalString(data.itemId),
-    origin: data.origin as ShoppingListRowOrigins,
+    // An origin an older client does not know is shown as automatic.
+    origin: parseOrigin(data.origin),
     priceSource: data.priceSource as ShoppingListPriceSource,
     quantity: data.quantity as number,
     stock: stock
@@ -124,6 +133,7 @@ export function parseShoppingListRow(data: Json): ShoppingListRowEntity {
       : undefined,
     unit: data.unit as StockUnits,
     unitPriceCents: optionalNumber(data.unitPriceCents),
+    wasteRatio90d: optionalNumber(data.wasteRatio90d),
   };
 }
 
@@ -142,4 +152,26 @@ function optionalNumber(value: unknown): number | undefined {
 
 function optionalString(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
+}
+
+function parseOrigin(value: unknown): ShoppingListRowOrigins {
+  return Object.values(ShoppingListRowOrigins).includes(
+    value as ShoppingListRowOrigins,
+  )
+    ? (value as ShoppingListRowOrigins)
+    : ShoppingListRowOrigins.AUTO;
+}
+
+function parseRowForecast(value: unknown): ShoppingListRowEntity["forecast"] {
+  const data = value as Json | null | undefined;
+  const minDate = data ? optionalDay(data.minDate) : undefined;
+  const nextTripDate = data ? optionalDay(data.nextTripDate) : undefined;
+
+  return data && minDate && nextTripDate
+    ? {
+        minDate,
+        nextTripDate,
+        projectedOnTrip: data.projectedOnTrip as number,
+      }
+    : undefined;
 }

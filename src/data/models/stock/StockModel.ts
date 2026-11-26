@@ -1,5 +1,11 @@
 import StockLotModel from "@data/models/stock/StockLotModel";
 import { formatDay, optionalDay } from "@domain/entities/stock/stockDay";
+import {
+  StockForecast,
+  StockForecastRow,
+  StockLeftover,
+  StockWaste90d,
+} from "@domain/entities/stock/StockEntity";
 
 interface CategoryRef {
   archived: boolean;
@@ -18,10 +24,14 @@ interface IStockModel {
   effectiveShoppingListId?: string;
   estimatedUnitPriceCents?: number;
   expirationStatus: string;
+  forecast?: StockForecast;
+  forecastRow?: StockForecastRow;
   hasExpiredLot: boolean;
+  hasForecastRow?: boolean;
   hasOpenLot: boolean;
   id: string;
   idealQuantity?: number;
+  leftover?: StockLeftover;
   location?: LocationRef;
   locationId?: string;
   lots?: StockLotModel[];
@@ -40,6 +50,7 @@ interface IStockModel {
   unit: string;
   warnDaysClosed: number;
   warnDaysOpened: number;
+  waste90d?: StockWaste90d;
 }
 
 interface LocationRef {
@@ -58,10 +69,14 @@ class StockModel implements IStockModel {
   effectiveShoppingListId?: string;
   estimatedUnitPriceCents?: number;
   expirationStatus: string;
+  forecast?: StockForecast;
+  forecastRow?: StockForecastRow;
   hasExpiredLot: boolean;
+  hasForecastRow?: boolean;
   hasOpenLot: boolean;
   id: string;
   idealQuantity?: number;
+  leftover?: StockLeftover;
   location?: LocationRef;
   locationId?: string;
   lots?: StockLotModel[];
@@ -80,6 +95,7 @@ class StockModel implements IStockModel {
   unit: string;
   warnDaysClosed: number;
   warnDaysOpened: number;
+  waste90d?: StockWaste90d;
 
   constructor(params: IStockModel) {
     this.barcode = params.barcode;
@@ -91,10 +107,14 @@ class StockModel implements IStockModel {
     this.effectiveShoppingListId = params.effectiveShoppingListId;
     this.estimatedUnitPriceCents = params.estimatedUnitPriceCents;
     this.expirationStatus = params.expirationStatus;
+    this.forecast = params.forecast;
+    this.forecastRow = params.forecastRow;
     this.hasExpiredLot = params.hasExpiredLot;
+    this.hasForecastRow = params.hasForecastRow ?? false;
     this.hasOpenLot = params.hasOpenLot;
     this.id = params.id;
     this.idealQuantity = params.idealQuantity;
+    this.leftover = params.leftover;
     this.location = params.location;
     this.locationId = params.locationId;
     this.lots = params.lots;
@@ -113,6 +133,7 @@ class StockModel implements IStockModel {
     this.unit = params.unit;
     this.warnDaysClosed = params.warnDaysClosed;
     this.warnDaysOpened = params.warnDaysOpened;
+    this.waste90d = params.waste90d;
   }
 
   // API shape (camelCase, calendar days, `null` for absent optionals). Also what the repository cache stores.
@@ -129,10 +150,14 @@ class StockModel implements IStockModel {
       effectiveShoppingListId: optionalString(data.effectiveShoppingListId),
       estimatedUnitPriceCents: optionalNumber(data.estimatedUnitPriceCents),
       expirationStatus: data.expirationStatus as string,
+      forecast: parseForecast(data.forecast),
+      forecastRow: parseForecastRow(data.forecastRow),
       hasExpiredLot: data.hasExpiredLot === true,
+      hasForecastRow: data.hasForecastRow === true,
       hasOpenLot: data.hasOpenLot as boolean,
       id: data.id as string,
       idealQuantity: optionalNumber(data.idealQuantity),
+      leftover: parseLeftover(data.leftover),
       location: (data.location as LocationRef | null) ?? undefined,
       locationId: optionalString(data.locationId),
       lots: lots?.map((lot) => StockLotModel.fromJSON(lot)),
@@ -151,6 +176,7 @@ class StockModel implements IStockModel {
       unit: data.unit as string,
       warnDaysClosed: data.warnDaysClosed as number,
       warnDaysOpened: data.warnDaysOpened as number,
+      waste90d: parseWaste90d(data.waste90d),
     });
   }
 
@@ -166,10 +192,35 @@ class StockModel implements IStockModel {
       effectiveShoppingListId: this.effectiveShoppingListId ?? null,
       estimatedUnitPriceCents: this.estimatedUnitPriceCents ?? null,
       expirationStatus: this.expirationStatus,
+      forecast: this.forecast
+        ? {
+            computedOn: this.forecast.computedOn
+              ? formatDay(this.forecast.computedOn)
+              : null,
+            dailyRate: this.forecast.dailyRate,
+            emptyDate: this.forecast.emptyDate
+              ? formatDay(this.forecast.emptyDate)
+              : null,
+            minDate: this.forecast.minDate
+              ? formatDay(this.forecast.minDate)
+              : null,
+            status: this.forecast.status,
+            weeklyRate: this.forecast.weeklyRate,
+          }
+        : null,
+      forecastRow: this.forecastRow ?? null,
       hasExpiredLot: this.hasExpiredLot,
+      hasForecastRow: this.hasForecastRow,
       hasOpenLot: this.hasOpenLot,
       id: this.id,
       idealQuantity: this.idealQuantity ?? null,
+      leftover: this.leftover
+        ? {
+            date: formatDay(this.leftover.date),
+            lotId: this.leftover.lotId,
+            quantity: this.leftover.quantity,
+          }
+        : null,
       location: this.location ?? null,
       locationId: this.locationId ?? null,
       minQuantity: this.minQuantity ?? null,
@@ -203,6 +254,62 @@ function optionalString(value: unknown): string | undefined {
 
 function optionalTimestamp(value: unknown): Date | undefined {
   return typeof value === "string" ? new Date(value) : undefined;
+}
+
+function parseForecast(value: unknown): StockForecast | undefined {
+  const data = value as null | Record<string, unknown> | undefined;
+
+  if (!data) {
+    return undefined;
+  }
+
+  return {
+    computedOn: optionalDay(data.computedOn),
+    dailyRate: (data.dailyRate as number | undefined) ?? 0,
+    emptyDate: optionalDay(data.emptyDate),
+    minDate: optionalDay(data.minDate),
+    status: data.status as StockForecast["status"],
+    weeklyRate: (data.weeklyRate as number | undefined) ?? 0,
+  };
+}
+
+function parseForecastRow(value: unknown): StockForecastRow | undefined {
+  const data = value as null | Record<string, unknown> | undefined;
+
+  return data
+    ? {
+        listId: data.listId as string,
+        listName: optionalString(data.listName),
+        quantity: data.quantity as number,
+      }
+    : undefined;
+}
+
+function parseLeftover(value: unknown): StockLeftover | undefined {
+  const data = value as null | Record<string, unknown> | undefined;
+  const date = data ? optionalDay(data.date) : undefined;
+
+  return data && date
+    ? { date, lotId: data.lotId as string, quantity: data.quantity as number }
+    : undefined;
+}
+
+function parseWaste90d(value: unknown): StockWaste90d | undefined {
+  const data = value as null | Record<string, unknown> | undefined;
+
+  return data
+    ? {
+        count: data.count as number,
+        mainReason: data.mainReason as string,
+        quantity: data.quantity as number,
+        totals: (
+          (data.totals as Record<string, unknown>[] | undefined) ?? []
+        ).map((total) => ({
+          currency: total.currency as string,
+          valueCents: total.valueCents as number,
+        })),
+      }
+    : undefined;
 }
 
 export default StockModel;

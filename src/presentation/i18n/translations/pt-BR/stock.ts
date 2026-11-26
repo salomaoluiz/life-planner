@@ -160,6 +160,31 @@ const stock = {
     title: "{{name}} tem lote vencido",
     validOnly: "Consumir do válido",
   },
+  forecast: {
+    badge_one: "Acaba em ~1 dia",
+    badge_other: "Acaba em ~{{count}} dias",
+    chartHint:
+      "Semanas recentes pesam mais (mais escuras). A semana em cinza estava zerada e fica fora da média.",
+    chartLabel: "Consumo semanal das últimas 12 semanas: {{values}}",
+    chartTitle: "Consumo por semana · últimas 12 semanas",
+    inDays_one: "~1 dia",
+    inDays_other: "~{{count}} dias",
+    insufficient:
+      "Ainda sem dados para prever. Precisa de 2 consumos em 14 dias.",
+    noConsumption: "Sem consumo nos últimos 90 dias",
+    now: "agora",
+    onDate: "em {{date}}",
+    onList: "Entrou na lista {{list}} como previsto · {{quantity}}",
+    perDay: "{{quantity}}/dia",
+    perWeek: "~{{quantity}} por semana",
+    reachesMin: "Chega no mínimo ({{min}})",
+    reachesMinNoMin: "Chega a zero",
+    runsOut: "Acaba",
+    tileAverage: "Consumo médio",
+    title: "Previsão",
+    viewList: "Ver lista",
+    zeroWeek: "fora da média",
+  },
   form: {
     barcode: "Código de barras",
     brand: "Marca",
@@ -251,6 +276,16 @@ const stock = {
       open: "Abertura",
     },
   },
+  leftover: {
+    badge: "Sobra ~{{quantity}} dia {{date}}",
+    body: "No ritmo atual, o lote de {{quantity}} que vence em {{date}} deixa sobrar ~{{left}}. Dá tempo de usar antes, congelar ou mover para outro uso.",
+    dismiss: "Dispensar aviso",
+    dismissed: "Aviso dispensado",
+    lotLeft: "sobra ~{{quantity}}",
+    title: "Vai vencer antes de acabar",
+    undo: "Desfazer",
+    viewLot: "Ver lote",
+  },
   list: {
     add: "Adicionar item",
     clearFilters: "Limpar filtros",
@@ -316,6 +351,7 @@ const stock = {
     badge: {
       auto: "Automático",
       edited: "Editado por você",
+      forecast: "Previsto",
       text: "Só texto",
     },
     coverage: "estimado · {{priced}} de {{total}} itens com preço",
@@ -333,8 +369,21 @@ const stock = {
       all: "Todas",
       personal: "Pessoal",
     },
+    forecastCount_one: "1 previsto",
+    forecastCount_other: "{{count}} previstos",
+    forecastLine:
+      "tem {{have}} · em {{date}} terá ~{{projected}} (mínimo {{min}}) · completa o ideal {{ideal}}",
+    forecastLineNoIdeal:
+      "tem {{have}} · chega no mínimo em {{date}} · sem ideal: cobre {{interval}} dias até a ida seguinte",
+    forecastLineNoMin:
+      "tem {{have}} · em {{date}} terá ~{{projected}} · completa o ideal {{ideal}}",
     hasQuantity: "tem {{quantity}} {{unit}}",
     idealQuantity: "ideal {{quantity}}",
+    interval: "Compro a cada",
+    intervalDays: "dias",
+    intervalHelper:
+      'Itens que chegariam no mínimo antes da próxima ida entram como "Previsto".',
+    intervalInvalid: "Use de 1 a 90 dias",
     item: "Item",
     itemHas: "Tem",
     itemIdeal: "Ideal",
@@ -356,6 +405,12 @@ const stock = {
     nameTaken: "Já existe uma lista com esse nome",
     new: "Nova lista",
     newTitle: "Nova lista",
+    nextTrip: "próxima ida {{date}}",
+    nextTripLine_one: "Compro todo dia · próxima ida {{date}}",
+    nextTripLine_other: "Compro a cada {{count}} dias · próxima ida {{date}}",
+    nextTripSince:
+      "{{date}} · {{count}} dias depois da última compra ({{last}})",
+    nextTripTitle: "Próxima ida",
     noAuto: "nenhum automático",
     noPrice: "sem preço",
     noPriceYet: "sem preço ainda · digite na linha",
@@ -381,13 +436,18 @@ const stock = {
     setDefaultHint: "Recebe os itens que não escolheram lista. Hoje: {{name}}.",
     subtotal: "subtotal {{amount}}",
     subtotalUnpriced: "subtotal {{amount}} · {{count}} sem preço",
+    suggestedInterval:
+      "Pelas compras fechadas, você vai a cada ~{{count}} dias",
     summaryCount: "{{items}} · {{auto}}",
     textHint: "vira item do estoque ao fechar a compra",
     title: "Listas de compras",
     undo: "Desfazer",
     unit: "Unidade",
+    useSuggested: "Usar {{count}} dias",
     wasAuto: "era automático · não atualiza mais",
     wasAutoShort: "editado",
+    wasteHint:
+      "Você descartou {{pct}}% disso nos últimos 90 dias. Comprar menos?",
   },
   location: {
     archived: "Local arquivado",
@@ -411,6 +471,7 @@ const stock = {
     hint: "A baixa consome primeiro o aberto, depois o fechado que vence antes.",
     noExpiration: "sem validade",
     opened: "Aberto {{date}}",
+    pricePerUnit: "{{price}}/{{unit}}",
     title: "Lotes",
   },
   movement: {
@@ -427,6 +488,13 @@ const stock = {
       entry: "Dar entrada",
       open: "Abri",
     },
+    discardValue: {
+      label: "Valor do desperdício",
+      lotSource:
+        "{{quantity}} × {{price}}, preço pago neste lote. Fica gravado no descarte e não muda se o preço subir.",
+      noLotPrice:
+        'Lote sem preço usa o último preço do item. Sem nenhum preço: "sem preço", conta só a quantidade.',
+    },
     errors: {
       alreadyOpen: "Esse lote já está aberto.",
       invalid: "Confira a quantidade.",
@@ -438,6 +506,7 @@ const stock = {
     lotNoExpiration: "{{quantity}} · sem validade",
     lotOpened: "{{quantity}} · aberto · vence {{date}}",
     lotOption: "{{quantity}} · vence {{date}}",
+    lotWithPrice: "{{lot}} · {{price}}/{{unit}}",
     note: "Observação (opcional)",
     openHint: "Sugere 1 (1 un, 1 kg ou 1 L), limitado ao que o lote tem.",
     quantity: {
@@ -565,6 +634,7 @@ const stock = {
     pickerA11yLabel: "{{section}}, trocar seção do Estoque",
     pickerClose: "Fechar",
     pickerTitle: "Estoque",
+    waste: "Desperdício",
   },
   source: {
     ai: "IA",
@@ -593,6 +663,37 @@ const stock = {
     usage:
       "IA hoje: {{light}} de {{lightLimit}} leves · {{search}} de {{searchLimit}} pesquisas",
     usageSearchLeft: "Pesquisa completa · {{left}} de {{limit}} restantes hoje",
+  },
+  waste: {
+    byCategory: "Por categoria",
+    byReason: "Por motivo",
+    deltaDown: "−{{value}} que {{month}}",
+    deltaSame: "igual a {{month}}",
+    deltaUp: "+{{value}} que {{month}}",
+    discardCount_one: "1 descarte",
+    discardCount_other: "{{count}} descartes",
+    discards: "Descartes",
+    distinctItems_one: "1 item diferente",
+    distinctItems_other: "{{count}} itens diferentes",
+    empty: "Nada descartado neste mês.",
+    emptyHint: "Os descartes que você registrar aparecem aqui.",
+    error: "Não foi possível carregar o desperdício",
+    last90: "Descartado nos últimos 90 dias",
+    last90Detail: "{{count}} descartes · {{reason}}",
+    moreItems: "Ver mais {{count}} itens",
+    nextMonth: "Próximo mês",
+    noCategory: "Sem categoria",
+    owners: { all: "Todos", personal: "Pessoal" },
+    previousMonth: "Mês anterior",
+    reason: { expired: "Venceu", other: "Outro", spoiled: "Estragou" },
+    seeAll: "Ver desperdício do estoque",
+    tabs: { category: "Categoria", items: "Itens", reason: "Motivo" },
+    tabsLabel: "Agrupar por",
+    title: "Desperdício",
+    topItems: "Itens que mais foram para o lixo",
+    total: "Jogado fora no mês",
+    unpriced: "Sem preço",
+    unpricedHint: "conta só na quantidade",
   },
 };
 

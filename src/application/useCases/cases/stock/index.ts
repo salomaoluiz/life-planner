@@ -17,8 +17,10 @@ export { default as deleteShoppingListRowUseCase } from "./deleteShoppingListRow
 export { default as deleteStockCategoryUseCase } from "./deleteStockCategoryUseCase";
 export { default as deleteStockItemUseCase } from "./deleteStockItemUseCase";
 export { default as deleteStockLocationUseCase } from "./deleteStockLocationUseCase";
+export { default as dismissLeftoverUseCase } from "./dismissLeftoverUseCase";
 export { default as getAiUsageUseCase } from "./getAiUsageUseCase";
 export { default as getClosePreviewUseCase } from "./getClosePreviewUseCase";
+export { default as getConsumptionWeeksUseCase } from "./getConsumptionWeeksUseCase";
 export { default as getFrequentStockItemsUseCase } from "./getFrequentStockItemsUseCase";
 export { default as getItemPricesUseCase } from "./getItemPricesUseCase";
 export { default as getListPurchasesUseCase } from "./getListPurchasesUseCase";
@@ -35,6 +37,7 @@ export { default as getStockItemUseCase } from "./getStockItemUseCase";
 export { default as getStockLocationsUseCase } from "./getStockLocationsUseCase";
 export { default as getStockLocationUseCase } from "./getStockLocationUseCase";
 export { default as getStockMovementsUseCase } from "./getStockMovementsUseCase";
+export { default as getWasteUseCase } from "./getWasteUseCase";
 export { default as lookupStockBarcodeUseCase } from "./lookupStockBarcodeUseCase";
 export { default as mergePurchaseUseCase } from "./mergePurchaseUseCase";
 export { default as setStockGestureExpirationUseCase } from "./setStockGestureExpirationUseCase";

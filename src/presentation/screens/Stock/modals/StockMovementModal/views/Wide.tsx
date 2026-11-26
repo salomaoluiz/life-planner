@@ -37,6 +37,68 @@ function Wide({ vm }: AdaptiveViewProps<StockMovementVM>) {
     return `${quantity.text} ${t(quantity.unitKey)}`;
   }
 
+  // Spec 123 FR 28: the lot to discard (with its price per unit) and the value the discard records.
+  function renderDiscardLot() {
+    if (!model?.showsDiscardLot) {
+      return null;
+    }
+
+    return (
+      <SelectField
+        closeLabel={t("common.actions.close")}
+        label={t("stock.movement.lot")}
+        onChange={vm.onLotChange}
+        options={model.lotOptions.map((option) => {
+          const label = t(option.key, {
+            date: option.date,
+            quantity: quantityText(option.quantity),
+          });
+
+          return {
+            label: option.price
+              ? t("stock.movement.lotWithPrice", {
+                  lot: label,
+                  price: option.price.text,
+                  unit: t(option.price.unitKey),
+                })
+              : label,
+            value: option.value,
+          };
+        })}
+        sheetTitle={t("stock.movement.lot")}
+        testID={stockMovementTestIds.lotSelect}
+        value={vm.chosenLot}
+      />
+    );
+  }
+
+  function renderDiscardValue() {
+    const value = vm.discardValue;
+
+    if (!value) {
+      return null;
+    }
+
+    return (
+      <Card testID={stockMovementTestIds.discardValue}>
+        <Text.Caption value={t("stock.movement.discardValue.label")} />
+        {value.kind === "lot" ? (
+          <>
+            <Text.Heading value={value.value} />
+            <Text.Caption
+              value={t("stock.movement.discardValue.lotSource", {
+                price: value.price,
+                quantity: quantityText(value.quantity),
+              })}
+            />
+          </>
+        ) : (
+          <Text.Caption value={t("stock.movement.discardValue.noLotPrice")} />
+        )}
+      </Card>
+    );
+  }
+
   function renderLotSelect() {
     if (!model?.showsLot) {
       return null;
@@ -152,6 +214,7 @@ function Wide({ vm }: AdaptiveViewProps<StockMovementVM>) {
                   unit={model.unit}
                 />
                 {renderLotSelect()}
+                {renderDiscardLot()}
                 {model.showsReason ? (
                   <ChipGroup
                     label={t("stock.movement.reason")}
@@ -165,6 +228,7 @@ function Wide({ vm }: AdaptiveViewProps<StockMovementVM>) {
                     value={vm.chosenReason}
                   />
                 ) : null}
+                {renderDiscardValue()}
                 {model.showsExpiration ? (
                   <View>
                     <DateField

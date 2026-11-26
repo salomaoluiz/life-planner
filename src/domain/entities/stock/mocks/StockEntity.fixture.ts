@@ -36,6 +36,7 @@ class StockEntityFixture {
       description: "Product Description",
       expirationStatus: StockExpirationStatus.NONE,
       hasExpiredLot: false,
+      hasForecastRow: false,
       hasOpenLot: false,
       id: "c6d76166-e7f3-4823-bd5b-f8bbd33912ac",
       idealQuantity: undefined,
@@ -70,8 +71,23 @@ class StockEntityFixture {
     return this;
   }
 
+  withForecast(forecast: NonNullable<StockEntity["forecast"]>) {
+    this.value.forecast = forecast;
+    return this;
+  }
+
+  withForecastRow(hasForecastRow = true) {
+    this.value.hasForecastRow = hasForecastRow;
+    return this;
+  }
+
   withId(id: string) {
     this.value.id = id;
+    return this;
+  }
+
+  withLeftover(leftover: NonNullable<StockEntity["leftover"]>) {
+    this.value.leftover = leftover;
     return this;
   }
 

@@ -83,11 +83,13 @@ function detail(ownerId = "f"): ShoppingListDetailEntity {
       name: "Mercado",
       owner: "FAMILY",
       ownerId,
+      purchaseIntervalDays: 7,
       status: ShoppingListStatuses.ACTIVE,
     },
     totals: {
       autoCount: 1,
       estimatedTotalCents: 0,
+      forecastCount: 0,
       pricedCount: 0,
       rowCount: 2,
     },

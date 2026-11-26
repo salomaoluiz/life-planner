@@ -1,12 +1,14 @@
 import StockDTO from "@application/dto/stock/StockDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
 import { StockExpirationStatus } from "@domain/entities/stock/StockEntity";
+import pluralKey from "@presentation/i18n/pluralKey";
 import { TranslationKeys } from "@presentation/i18n/types";
 
 import { formatQuantity } from "./quantityFormat";
 
 export interface StockBadge {
   labelKey: TranslationKeys;
+  params?: Record<string, unknown>;
   tone: StockBadgeTone;
 }
 
@@ -30,6 +32,8 @@ class StockItemUIModel {
     if (this.dto.hasOpenLot) {
       badges.push({ labelKey: "stock.badge.opened", tone: "neutral" });
     }
+
+    badges.push(...this.forecastBadges);
 
     return badges;
   }
@@ -127,11 +131,13 @@ class StockItemUIModel {
 
   // Needs attention: a date warning or a low quantity.
   get isAttention() {
-    return (
-      this.status === StockExpirationStatus.EXPIRED ||
-      this.status === StockExpirationStatus.EXPIRING ||
-      this.dto.needsRestock
-    );
+    return [
+      this.status === StockExpirationStatus.EXPIRED,
+      this.status === StockExpirationStatus.EXPIRING,
+      this.dto.needsRestock,
+      this.dto.hasForecastRow,
+      this.dto.leftover !== undefined,
+    ].some(Boolean);
   }
 
   // Spec 117 FR 2: an archived family's items show the quantity without buttons.
@@ -192,15 +198,70 @@ class StockItemUIModel {
       .join(" · ");
   }
 
+  // Spec 123 FR 20/24: "Acaba em ~N dias" only for an item with a FORECAST row (it will not last until the next trip),
+  // and "Sobra ~N un dia DD" for a lot that will expire before it is used.
+  private get forecastBadges(): StockBadge[] {
+    const badges: StockBadge[] = [];
+    const { forecast, leftover } = this.dto;
+
+    if (
+      this.dto.hasForecastRow &&
+      forecast?.status === "OK" &&
+      forecast.emptyDate
+    ) {
+      const days = this.daysUntil(forecast.emptyDate);
+
+      badges.push({
+        labelKey: pluralKey("stock.forecast.badge", days),
+        params: { count: days },
+        tone: "warning",
+      });
+    }
+
+    if (leftover) {
+      const left = formatQuantity(
+        leftover.quantity,
+        this.dto.unit,
+        this.locale,
+      );
+
+      badges.push({
+        labelKey: "stock.leftover.badge",
+        params: {
+          date: String(leftover.date.getDate()).padStart(2, "0"),
+          quantity: left.text,
+          unit: left.unitKey,
+        },
+        tone: "expense",
+      });
+    }
+
+    return badges;
+  }
+
   constructor(
     private readonly dto: StockDTO,
     private readonly owners: OwnerDTO[],
     private readonly locale?: string,
+    private readonly now: Date = new Date(),
   ) {}
 
   // Any quantity of this item formatted in its unit (the stepper shows the optimistic one).
   quantityFor(quantity: number) {
     return formatQuantity(quantity, this.dto.unit, this.locale);
+  }
+
+  private daysUntil(date: Date): number {
+    const today = new Date(
+      this.now.getFullYear(),
+      this.now.getMonth(),
+      this.now.getDate(),
+    );
+
+    return Math.max(
+      0,
+      Math.round((date.getTime() - today.getTime()) / 86_400_000),
+    );
   }
 
   private shortDate(date: Date) {

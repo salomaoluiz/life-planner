@@ -4,6 +4,7 @@ import {
   AdaptiveViewProps,
   BottomSheet,
   Button,
+  Callout,
   Card,
   ChipGroup,
   FormColumns,
@@ -94,6 +95,18 @@ function Wide({ vm }: AdaptiveViewProps<ShoppingListVM>) {
               />
               {vm.isEdit ? (
                 <TextField
+                  error={vm.intervalError ? t(vm.intervalError) : undefined}
+                  helper={t("stock.lists.intervalHelper")}
+                  keyboardType="number-pad"
+                  label={`${t("stock.lists.interval")} (${t("stock.lists.intervalDays")})`}
+                  maxLength={2}
+                  onChangeText={vm.onIntervalChange}
+                  testID={shoppingListModalTestIds.interval}
+                  value={vm.currentIntervalText}
+                />
+              ) : null}
+              {vm.isEdit ? (
+                <TextField
                   disabled
                   helper={t("stock.lists.ownerHint")}
                   label={t("stock.lists.owner")}
@@ -134,6 +147,36 @@ function Wide({ vm }: AdaptiveViewProps<ShoppingListVM>) {
                 testID={shoppingListModalTestIds.default}
                 value={vm.isDefault}
               />
+              {vm.suggestedInterval === undefined ? null : (
+                <Callout
+                  testID={shoppingListModalTestIds.suggestion}
+                  tone="warning"
+                >
+                  <Text.BodyStrong
+                    value={t("stock.lists.suggestedInterval", {
+                      count: vm.suggestedInterval,
+                    })}
+                  />
+                  <Button.Secondary
+                    label={t("stock.lists.useSuggested", {
+                      count: vm.suggestedInterval,
+                    })}
+                    onPress={vm.onUseSuggested}
+                    testID={shoppingListModalTestIds.useSuggested}
+                  />
+                </Callout>
+              )}
+              {vm.isEdit && vm.nextTripDate ? (
+                <View testID={shoppingListModalTestIds.nextTrip}>
+                  <Text.Caption value={t("stock.lists.nextTripTitle")} />
+                  <Text.Body
+                    value={vm.nextTripDate.toLocaleDateString(vm.languageTag, {
+                      day: "2-digit",
+                      month: "2-digit",
+                    })}
+                  />
+                </View>
+              ) : null}
               <Card variant="dashed">
                 <Text.BodyStrong value={t("stock.lists.marketPlaceholder")} />
                 <Text.Caption value={t("stock.lists.marketPlaceholderHint")} />

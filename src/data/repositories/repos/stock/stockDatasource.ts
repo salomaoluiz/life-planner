@@ -20,6 +20,10 @@ import {
   ShoppingListRowEntity,
   ShoppingListRowResultEntity,
 } from "@domain/entities/stock/ShoppingListEntity";
+import {
+  ConsumptionWeekEntity,
+  WasteEntity,
+} from "@domain/entities/stock/StockWasteEntity";
 import { PurchaseRepository } from "@domain/repositories/stock/purchaseRepository";
 
 export interface StockDatasource extends PurchaseRepository {
@@ -49,7 +53,11 @@ export interface StockDatasource extends PurchaseRepository {
   deleteStockCategory(id: string): Promise<void>;
   deleteStockItem(id: string): Promise<void>;
   deleteStockLocation(id: string): Promise<void>;
+  dismissLeftover(params: DismissLeftoverDatasourceParams): Promise<void>;
   getAiUsage(): Promise<AiUsageModel>;
+  getConsumptionWeeks(
+    params: GetConsumptionWeeksDatasourceParams,
+  ): Promise<ConsumptionWeekEntity[]>;
   getFrequentStockItems(limit?: number): Promise<StockModel[]>;
   getOwnerChangePreview(
     params: OwnerChangePreviewDatasourceParams,
@@ -71,6 +79,7 @@ export interface StockDatasource extends PurchaseRepository {
   getStockMovements(
     params: GetStockMovementsDatasourceParams,
   ): Promise<{ items: StockMovementModel[]; nextCursor?: string }>;
+  getWaste(params: GetWasteDatasourceParams): Promise<WasteEntity>;
   lookupStockBarcode(code: string): Promise<StockBarcodeLookupModel>;
   setStockGestureExpiration(
     params: StockGestureExpirationDatasourceParams,
@@ -164,6 +173,16 @@ interface CreateStockMovementDatasourceParams {
   type: string;
 }
 
+// Spec 123.
+interface DismissLeftoverDatasourceParams {
+  dismissed: boolean;
+  lotId: string;
+}
+
+interface GetConsumptionWeeksDatasourceParams {
+  itemId: string;
+}
+
 interface GetShoppingListsParams {
   includeArchived?: boolean;
   ownerId?: string;
@@ -176,6 +195,15 @@ interface GetStockCatalogDatasourceParams extends StockOwnerDatasourceParams {
 interface GetStockMovementsDatasourceParams {
   cursor?: string;
   itemId: string;
+}
+
+interface GetWasteDatasourceParams {
+  // Every item of the month ("Ver mais") instead of the top 5.
+  all?: boolean;
+  // `YYYY-MM`; absent = the current month.
+  month?: string;
+  // Absent = every readable owner ("Todas").
+  ownerId?: string;
 }
 
 interface OwnerChangePreviewDatasourceParams extends StockOwnerDatasourceParams {
@@ -268,9 +296,12 @@ export {
   CreateStockDatasourceParams,
   CreateStockLocationDatasourceParams,
   CreateStockMovementDatasourceParams,
+  DismissLeftoverDatasourceParams,
+  GetConsumptionWeeksDatasourceParams,
   GetShoppingListsParams,
   GetStockCatalogDatasourceParams,
   GetStockMovementsDatasourceParams,
+  GetWasteDatasourceParams,
   OwnerChangePreviewDatasourceParams,
   StockOwnerDatasourceParams,
   SuggestStockItemDatasourceParams,
