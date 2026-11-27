@@ -42,4 +42,4 @@ onFlowComplete:
     visible: ".*${output.ACCOUNT_NAME}.*"
     timeout: 20000
 - assertVisible:
-    text: ".*Você.*"
+    text: ".*(Você|You).*"
