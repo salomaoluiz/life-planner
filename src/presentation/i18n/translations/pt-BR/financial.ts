@@ -1132,6 +1132,7 @@ const financial = {
     accounts: "Contas",
     cards: "Cartões",
     categories: "Categorias",
+    history: "Histórico",
     overview: "Visão geral",
     pickerA11yLabel: "{{section}}, trocar seção de Finanças",
     pickerClose: "Fechar",

@@ -211,3 +211,7 @@ e2e: e2e/flows/investment/income-series-create.yaml, income-without-finance.yaml
 ```
 
 Design deviations (spec 115): the modal keeps the app's two-column `form` sheet (the artboard's exact grouping is not reproduced: the repeat block sits under the account and category fields of the right column); the scope dialog is the sheet's option list, shown before the form; "Edit series" reuses the income modal on the series (no separate modal route); the projected rows come from the projections endpoint of the whole owner scope, filtered to the asset; the series total shows "n/inf" only (the count of a series with an end date is not computed).
+
+## Activity history (spec 127)
+
+The Investments menu has a "Histórico" section (`/investments/history`, between Assets and Settings) that mounts the same screen as Finance with the Investments module preselected; see `docs/ai/modules/financial.md`. Investment entries open the asset (`/investments/asset/<id>`) or the operation/income modal using `summary.extra.assetId`.

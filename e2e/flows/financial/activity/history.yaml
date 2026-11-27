@@ -1,0 +1,45 @@
+url: ${E2E_WEB_URL}
+name: financial/activity/history
+tags:
+  - financial
+  - spec-127
+onFlowComplete:
+  - runFlow: ../../../subflows/cleanup/delete-e2e-users.yaml
+---
+# Spec 127: a new account has no history (the empty state explains the 6-month window); creating an account through
+# the API leaves one entry, "Você criou a conta ...", with the way to open it; the module switch changes the list.
+- launchApp:
+    clearState: true
+- runFlow: ../../../subflows/signup-via-api.yaml
+- runScript:
+    file: ../../../scripts/random-name.js
+    env:
+      PREFIX: E2E Account
+      KEY: ACCOUNT_NAME
+- runFlow:
+    file: ../../../subflows/login-by-token.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      REFRESH_TOKEN: ${output.REFRESH_TOKEN}
+- runFlow: ../../../subflows/financial/open-history.yaml
+# Empty state
+- extendedWaitUntil:
+    visible:
+      id: "activity.empty-state"
+    timeout: 20000
+# One action by the API: the account appears, with the author as "Você" and the way to open it
+- runFlow:
+    file: ../../../subflows/setup/create-account.yaml
+    env:
+      TOKEN: ${output.TOKEN}
+      OWNER_ID: ${output.USER_ID}
+      NAME: ${output.ACCOUNT_NAME}
+- tapOn:
+    id: "activity.module-switch-INVESTMENT"
+- tapOn:
+    id: "activity.module-switch-FINANCE"
+- extendedWaitUntil:
+    visible: ".*${output.ACCOUNT_NAME}.*"
+    timeout: 20000
+- assertVisible:
+    text: ".*(Você|You).*"

@@ -3,6 +3,7 @@ import { Datasources } from "@data/datasource";
 import { listDatasources } from "./index";
 
 const useCases: Datasources = {
+  activityDatasource: expect.any(Function),
   familyDatasource: expect.any(Function),
   familyMemberDatasource: expect.any(Function),
   financialAccountDatasource: expect.any(Function),

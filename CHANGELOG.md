@@ -3,6 +3,13 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [4.2.0] - 2026-11-27
+
+### Added
+
+- **Histórico** in the Finance and Investments menus: a read-only list of everything created, edited or deleted in the last 6 months, with who did it, the amount, the booking date (warned when it is far from the action day), before → after of edits, search and filters by period, action, owner and author; open the affected item from the entry (spec 127).
+- Imports, series edits, plans, splits and conversions show as one entry with a detail modal listing the affected items (two columns on web and tablet, a bottom sheet on mobile). Needs API 7.1.0.
+
 ## [4.1.0] - 2026-11-26
 
 ### Changed

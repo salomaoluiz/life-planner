@@ -1,3 +1,4 @@
+import * as activity from "./activity";
 import * as auth from "./auth";
 import * as cache from "./cache";
 import * as configs from "./configs";
@@ -11,6 +12,7 @@ import * as user from "./user";
 import * as version from "./version";
 
 const listRepositories = {
+  ...activity,
   ...auth,
   ...cache,
   ...configs,

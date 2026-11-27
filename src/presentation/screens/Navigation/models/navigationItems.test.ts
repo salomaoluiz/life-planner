@@ -44,12 +44,14 @@ it("SHOULD give the Finances, Investments AND Stock items their section children
   expect(withChildren[1].children?.map((child) => child.testID)).toEqual([
     "navigation-rail-investment-overview",
     "navigation-rail-investment-assets",
+    "navigation-rail-investment-history",
     "navigation-rail-investment-settings",
   ]);
   expect(withChildren[0].children?.map((child) => child.testID)).toEqual([
     "navigation-rail-financial-overview",
     "navigation-rail-financial-transactions",
     "navigation-rail-financial-categories",
+    "navigation-rail-financial-history",
     "navigation-rail-financial-tags",
     "navigation-rail-financial-accounts",
     "navigation-rail-financial-cards",

@@ -121,3 +121,5 @@ Spec 123 (stock forecast and waste, additive, API 6.6.0): items carry `forecast 
 ## Stock catalog (spec 125, breaking)
 
 `GET /stock/locations` is a tree like `/stock/categories`; both nodes carry `color`, `icon`, `owner`, `ownerId` and `itemCount` of the subtree; `owner`/`ownerId` are optional on both lists (none = every readable owner, the "Todos" chip). Writes take `color` + `icon` (create), `applyToChildren` + `childColors` (update), locations `parentId`; `DELETE …/:id?moveTo=<id>|none` moves the items in one transaction (`409 { itemCount }` without it); suggestions take `keys`. `GET /stock/locations/:id` adds `parentId` and `path`. Needs API 7.0.0.
+
+`/v1/activity?module=&ownerId=&from=&to=&action=&actorId=&q=&cursor=` (spec 127: `{ items, nextCursor }`, read-only history of Finance and Investments, needs API 7.1.0) and `/v1/activity/:id/items?q=&cursor=` (`{ header, items, nextCursor }`). Mapped by `ActivityModels`; never cached.

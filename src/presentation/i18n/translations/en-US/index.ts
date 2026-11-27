@@ -1,3 +1,4 @@
+import activity from "./activity";
 import auth from "./auth";
 import common from "./common";
 import configurations from "./configurations";
@@ -16,6 +17,7 @@ import versions from "./versions";
 
 const enUS = {
   translation: {
+    activity,
     auth,
     common,
     configurations,

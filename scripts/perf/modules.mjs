@@ -1,4 +1,5 @@
 const PERF_MODULES = [
+  "activity",
   "financial",
   "investment",
   "stock",
@@ -16,6 +17,7 @@ const SHARED =
 
 // A path segment (lower case, no extension) -> module.
 const SEGMENT_TO_MODULE = {
+  activity: "activity",
   auth: "auth",
   config: "configs",
   configs: "configs",
@@ -38,6 +40,7 @@ const SEGMENT_TO_MODULE = {
 
 // Folders of `src/presentation/screens` whose `__perf__` tests belong to each module.
 const MODULE_SCREENS = {
+  activity: "Activity",
   auth: "(Login|Signup|Invite)",
   configs: "Config",
   family: "Family",

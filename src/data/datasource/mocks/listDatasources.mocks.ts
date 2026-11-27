@@ -1,6 +1,10 @@
 import { Datasources } from "@data/datasource";
 
 const datasourcesMocks: jest.MockedObjectDeep<Datasources> = {
+  activityDatasource: {
+    getActivity: jest.fn(),
+    getActivityItems: jest.fn(),
+  },
   familyDatasource: {
     createFamily: jest.fn(),
     deleteFamily: jest.fn(),

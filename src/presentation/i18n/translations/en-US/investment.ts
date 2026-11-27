@@ -889,6 +889,7 @@ const investment = {
   },
   sections: {
     assets: "Assets",
+    history: "History",
     overview: "Overview",
     pickerA11yLabel: "{{section}}, change Investments section",
     pickerClose: "Close",

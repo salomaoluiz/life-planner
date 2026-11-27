@@ -1,5 +1,6 @@
 import { CacheRepository } from "@domain/repositories/cache";
 
+import { ActivityRepository } from "./activity";
 import { LoginRepository } from "./auth";
 import { ConfigsRepository } from "./configs";
 import { FamilyRepository } from "./family";
@@ -25,6 +26,7 @@ import { UserRepository } from "./user";
 import { VersionRepository } from "./version";
 
 interface Repositories {
+  activityRepository: ActivityRepository;
   cacheRepository: CacheRepository;
   configsRepository: ConfigsRepository;
   familyMemberRepository: FamilyMemberRepository;
