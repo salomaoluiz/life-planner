@@ -11,6 +11,8 @@ it.each([
   ["/investments/", "assets"],
   ["/investments/asset/asset-1", "assets"],
   ["/investments/suggestions", "assets"],
+  ["/investments/history", "history"],
+  ["/investments/history/", "history"],
   ["/investments/settings", "settings"],
   ["/investments/settings/", "settings"],
   ["/", "overview"],
@@ -22,18 +24,21 @@ it.each([
 it("SHOULD give each section its route path", () => {
   expect(getInvestmentSectionPath("overview")).toBe("/investments/overview");
   expect(getInvestmentSectionPath("assets")).toBe("/investments");
+  expect(getInvestmentSectionPath("history")).toBe("/investments/history");
   expect(getInvestmentSectionPath("settings")).toBe("/investments/settings");
 });
 
-it("SHOULD list Overview, Assets, then Settings, with icons AND rail testIDs", () => {
+it("SHOULD list Overview, Assets, History, then Settings, with icons AND rail testIDs", () => {
   expect(INVESTMENT_SECTIONS.map((item) => item.section)).toEqual([
     "overview",
     "assets",
+    "history",
     "settings",
   ]);
   expect(INVESTMENT_SECTIONS.map((item) => item.icon)).toEqual([
     "chart-box-outline",
     "format-list-bulleted",
+    "history",
     "cog-outline",
   ]);
   INVESTMENT_SECTIONS.forEach((item) => {

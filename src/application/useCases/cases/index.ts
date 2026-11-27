@@ -1,3 +1,4 @@
+import * as activityUseCases from "./activity";
 import * as authUseCases from "./auth";
 import * as configsUseCases from "./configs";
 import * as familyUseCases from "./family";
@@ -11,6 +12,7 @@ import * as userUseCases from "./user";
 import * as versionUseCases from "./version";
 
 const listUseCases = {
+  ...activityUseCases,
   ...authUseCases,
   ...homeUseCases,
   ...configsUseCases,

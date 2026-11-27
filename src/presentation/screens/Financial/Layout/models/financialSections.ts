@@ -4,6 +4,7 @@ export type FinancialSection =
   | "accounts"
   | "cards"
   | "categories"
+  | "history"
   | "overview"
   | "tags"
   | "transactions";
@@ -40,6 +41,13 @@ export const FINANCIAL_SECTIONS: readonly FinancialSectionItem[] = [
     testID: "navigation-rail-financial-categories",
   },
   {
+    icon: "history",
+    labelKey: "financial.sections.history",
+    path: "/financial/history",
+    section: "history",
+    testID: "navigation-rail-financial-history",
+  },
+  {
     icon: "tag-outline",
     labelKey: "financial.sections.tags",
     path: "/financial/tags",
@@ -70,6 +78,9 @@ export function getFinancialSection(pathname: string): FinancialSection {
   }
   if (normalized.endsWith("/financial/overview")) {
     return "overview";
+  }
+  if (normalized.endsWith("/financial/history")) {
+    return "history";
   }
   if (normalized.endsWith("/financial/tags")) {
     return "tags";

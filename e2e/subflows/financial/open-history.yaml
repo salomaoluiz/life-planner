@@ -1,0 +1,18 @@
+url: ${E2E_WEB_URL}
+---
+- extendedWaitUntil:
+    visible:
+      id: "home.home.screen"
+    timeout: 20000
+- tapOn:
+    id: "tab-finances"
+- extendedWaitUntil:
+    visible:
+      id: "navigation-rail-financial-transactions"
+    timeout: 20000
+- tapOn:
+    id: "navigation-rail-financial-history"
+- extendedWaitUntil:
+    visible:
+      id: "activity.screen"
+    timeout: 20000

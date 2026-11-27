@@ -34,8 +34,8 @@ describe("splitModalPath", () => {
 });
 
 describe("isValidBase", () => {
-  it("SHOULD accept exactly the sixteen bases (the investments Overview joined in spec 110, Settings in spec 113, the stock Lists and Catalog in spec 118, Waste in spec 123)", () => {
-    expect(VALID_BASES).toHaveLength(16);
+  it("SHOULD accept exactly the eighteen bases (the Finance and Investments History joined in spec 127, the investments Overview joined in spec 110, Settings in spec 113, the stock Lists and Catalog in spec 118, Waste in spec 123)", () => {
+    expect(VALID_BASES).toHaveLength(18);
     VALID_BASES.forEach((base) => expect(isValidBase(base)).toBe(true));
     expect(isValidBase("")).toBe(true);
     expect(isValidBase("/stock/")).toBe(true);
@@ -85,9 +85,9 @@ describe("fallbackBase", () => {
   });
 });
 
-it("SHOULD have 38 unique modal names", () => {
-  expect(MODAL_NAMES).toHaveLength(38);
-  expect(new Set(MODAL_NAMES).size).toBe(38);
+it("SHOULD have 39 unique modal names", () => {
+  expect(MODAL_NAMES).toHaveLength(39);
+  expect(new Set(MODAL_NAMES).size).toBe(39);
 });
 
 describe("screenPath", () => {

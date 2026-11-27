@@ -12,6 +12,8 @@ it.each([
   ["/financial/overview/", "overview"],
   ["/financial/categories", "categories"],
   ["/financial/categories/", "categories"],
+  ["/financial/history", "history"],
+  ["/financial/history/", "history"],
   ["/financial/tags", "tags"],
   ["/financial/tags/", "tags"],
   ["/financial/accounts", "accounts"],
@@ -29,6 +31,7 @@ it("SHOULD give each section its route path", () => {
   );
   expect(getFinancialSectionPath("overview")).toBe("/financial/overview");
   expect(getFinancialSectionPath("categories")).toBe("/financial/categories");
+  expect(getFinancialSectionPath("history")).toBe("/financial/history");
   expect(getFinancialSectionPath("tags")).toBe("/financial/tags");
   expect(getFinancialSectionPath("accounts")).toBe("/financial/accounts");
   expect(getFinancialSectionPath("cards")).toBe("/financial/cards");
@@ -39,6 +42,7 @@ it("SHOULD list the sections in menu order with icons AND rail testIDs", () => {
     "overview",
     "transactions",
     "categories",
+    "history",
     "tags",
     "accounts",
     "cards",
@@ -47,6 +51,7 @@ it("SHOULD list the sections in menu order with icons AND rail testIDs", () => {
     "chart-box-outline",
     "swap-vertical",
     "shape-outline",
+    "history",
     "tag-outline",
     "bank-outline",
     "credit-card-outline",

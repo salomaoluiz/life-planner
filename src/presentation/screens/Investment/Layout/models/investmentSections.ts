@@ -1,6 +1,6 @@
 import { TranslationKeys } from "@presentation/i18n/types";
 
-export type InvestmentSection = "assets" | "overview" | "settings";
+export type InvestmentSection = "assets" | "history" | "overview" | "settings";
 
 export interface InvestmentSectionItem {
   icon: string;
@@ -28,6 +28,13 @@ export const INVESTMENT_SECTIONS: readonly InvestmentSectionItem[] = [
     testID: "navigation-rail-investment-assets",
   },
   {
+    icon: "history",
+    labelKey: "investment.sections.history",
+    path: "/investments/history",
+    section: "history",
+    testID: "navigation-rail-investment-history",
+  },
+  {
     icon: "cog-outline",
     labelKey: "investment.sections.settings",
     path: "/investments/settings",
@@ -42,6 +49,9 @@ export function getInvestmentSection(pathname: string): InvestmentSection {
 
   if (normalized.endsWith("/investments/overview")) {
     return "overview";
+  }
+  if (normalized.endsWith("/investments/history")) {
+    return "history";
   }
   if (normalized.endsWith("/investments/settings")) {
     return "settings";

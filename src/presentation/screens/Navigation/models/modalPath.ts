@@ -3,6 +3,7 @@ import { INVESTMENT_SECTIONS } from "@screens/Investment/Layout/models/investmen
 import { STOCK_SECTIONS } from "@screens/Stock/Layout/models/stockSections";
 
 export const MODAL_NAMES = [
+  "activity_batch",
   "add_new_transaction",
   "add_new_account",
   "add_new_credit_card",

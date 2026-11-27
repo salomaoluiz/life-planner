@@ -18,6 +18,10 @@ function lazyModal(
 
 // Add a modal here (and its name to MODAL_NAMES); the catch-all route serves `<base>/<name>`.
 export const MODAL_ROUTES: Record<ModalName, ComponentType> = {
+  activity_batch: lazyModal(
+    async () => import("@screens/Activity/modals/BatchModal"),
+    "ActivityBatchModal",
+  ),
   add_new_account: lazyModal(
     async () => import("@screens/Financial/Accounts/modals"),
     "NewAccountModal",

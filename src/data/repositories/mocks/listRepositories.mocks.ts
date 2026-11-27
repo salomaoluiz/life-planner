@@ -1,6 +1,10 @@
 import Repositories from "@domain/repositories";
 
 const repositoriesMocks: Repositories = {
+  activityRepository: {
+    getActivity: jest.fn(),
+    getActivityItems: jest.fn(),
+  },
   cacheRepository: {
     invalidate: jest.fn(),
   },

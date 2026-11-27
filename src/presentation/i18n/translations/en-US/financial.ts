@@ -1108,6 +1108,7 @@ const financial = {
     accounts: "Accounts",
     cards: "Cards",
     categories: "Categories",
+    history: "History",
     overview: "Overview",
     pickerA11yLabel: "{{section}}, change Finances section",
     pickerClose: "Close",
