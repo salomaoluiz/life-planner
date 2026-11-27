@@ -85,6 +85,9 @@ const defaultViewModel: ReturnType<typeof useNewCategoryViewModel> = {
   parentHelperKey: undefined,
   parentId: "",
   parentName: "",
+  parentNodes: [
+    { color: "#F59E0B", icon: "home", id: "housing", name: "Housing" },
+  ],
   parentOptions: [{ depth: 0, label: "Housing", value: "housing" }],
   pendingItems: undefined,
   pickerGroups: [

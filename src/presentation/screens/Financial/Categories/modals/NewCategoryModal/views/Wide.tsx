@@ -5,6 +5,7 @@ import {
   BottomSheet,
   Button,
   Card,
+  CategoryTreeField,
   ChipGroup,
   ColorSwatchGroup,
   ConfirmDialog,
@@ -14,9 +15,9 @@ import {
   IconTile,
   PendingItemsDialog,
   SegmentedControl,
-  SelectField,
   Text,
   TextField,
+  useTreePickerLabels,
 } from "@components";
 import Skeleton from "@components/Skeleton";
 import { useTranslation } from "@presentation/i18n";
@@ -37,6 +38,10 @@ const SKELETON_ROWS = [0, 1, 2];
 function Wide({ vm }: AdaptiveViewProps<NewCategoryVM>) {
   const { styles } = useStyles();
   const { t } = useTranslation();
+  const parentLabels = {
+    ...useTreePickerLabels("category"),
+    noneLabel: t("financial.categories.form.noParent"),
+  };
   const breakpoint = useBreakpoint();
 
   function err(key?: TranslationKeys) {
@@ -108,20 +113,15 @@ function Wide({ vm }: AdaptiveViewProps<NewCategoryVM>) {
                   />
                 )}
               </View>
-              <SelectField
-                closeLabel={t("common.actions.close")}
+              <CategoryTreeField
+                archivedLabel={t("financial.accounts.archivedLabel")}
                 label={t("financial.categories.form.parent")}
-                onChange={vm.onParentChange}
-                options={[
-                  { label: t("financial.categories.form.noParent"), value: "" },
-                  ...vm.parentOptions.map((option) => ({
-                    label: `${"– ".repeat(option.depth)}${option.label}`,
-                    value: option.value,
-                  })),
-                ]}
-                sheetTitle={t("financial.categories.form.parent")}
+                labels={parentLabels}
+                mode={"single"}
+                nodes={vm.parentNodes}
+                onChange={(value) => vm.onParentChange(value ?? "")}
                 testID={categoryFormTestIds.parentSelect}
-                value={vm.parentId}
+                value={vm.parentId || undefined}
               />
               {vm.parentHelperKey && (
                 <Text.Caption

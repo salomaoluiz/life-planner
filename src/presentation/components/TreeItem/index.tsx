@@ -9,6 +9,7 @@ export interface TreeItemProps {
   divider?: boolean;
   leading?: ReactNode;
   onPress?: () => void;
+  selected?: boolean;
   subtitle?: string;
   testID?: string;
   title: string;
@@ -46,6 +47,7 @@ function TreeItem(props: TreeItemProps) {
         inset
         leading={props.leading}
         onPress={props.onPress}
+        selected={props.selected}
         subtitle={props.subtitle}
         testID={props.testID}
         title={props.title}

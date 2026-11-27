@@ -203,8 +203,8 @@ it("SHOULD open a new income with the defaults of the asset (account, category, 
   expect(result.current.accountOptions).toEqual([
     { label: "Main", value: "acc-1" },
   ]);
-  expect(result.current.categoryOptions).toEqual([
-    { label: "Dividends", value: "cat-1" },
+  expect(result.current.categoryNodes.map((node) => node.id)).toEqual([
+    "cat-1",
   ]);
 });
 

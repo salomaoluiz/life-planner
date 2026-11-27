@@ -96,7 +96,7 @@ onFlowComplete:
 - runFlow: ../../../subflows/financial/scroll-form-down.yaml
 # With Belongs to on All, "Inside" lists the All categories: the one just created is there.
 - tapOn:
-    id: "financial.import.create.parent"
+    id: "financial.import.create.parent-field"
 - extendedWaitUntil:
     visible: ${output.CATEGORY_A}
     timeout: 20000

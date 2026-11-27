@@ -155,7 +155,7 @@ function SplitForm() {
             />
             <SplitPartsEditor
               canAddPart={vm.canAddPart}
-              categoryOptions={vm.categoryOptions}
+              categoryNodes={vm.categoryNodes}
               currency={vm.currency}
               errors={vm.errors}
               isCard={vm.isCard}

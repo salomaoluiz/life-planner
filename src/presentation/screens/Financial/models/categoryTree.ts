@@ -80,14 +80,6 @@ function descendantIds(categories: CategoryDTO[], id: string): Set<string> {
   return result;
 }
 
-function filterRowsByQuery(rows: CategoryTreeRow[], query: string) {
-  const needle = normalize(query.trim());
-
-  return needle
-    ? rows.filter((row) => normalize(row.category.name).includes(needle))
-    : rows;
-}
-
 function groupChildren(categories: CategoryDTO[]) {
   const ids = new Set(categories.map((category) => category.id));
   const childrenOf = new Map<string, CategoryDTO[]>();
@@ -111,10 +103,6 @@ function groupChildren(categories: CategoryDTO[]) {
   return { childrenOf, roots };
 }
 
-function normalize(text: string) {
-  return text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
-}
-
 // Archived categories (spec 041) are not offered for new records; the one already selected stays so an old
 // record can still be edited (and shows its category).
 function selectableCategories(categories: CategoryDTO[], selectedId?: string) {
@@ -129,6 +117,5 @@ export {
   categoryInActiveScope,
   categoryInScope,
   descendantIds,
-  filterRowsByQuery,
   selectableCategories,
 };

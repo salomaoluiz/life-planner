@@ -3,6 +3,12 @@
 All notable changes to this project are documented here, newest first.
 Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [4.1.0] - 2026-11-26
+
+### Changed
+
+- One tree picker for every category and location choice: colors, icons, sub-levels, most used chips and a search that keeps the parent, siblings and children of each match, in transactions, installments, splits, import, investment income, stock items, catalog, purchase closing and the filters (spec 126).
+
 ## [4.0.0] - 2026-11-26
 
 ### Changed

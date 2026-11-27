@@ -6,6 +6,7 @@ import { financeKeys } from "@application/queryKeys/financeKeys";
 import { useCases } from "@application/useCases";
 import { markFetcherDataStale, useQuery } from "@infrastructure/fetcher";
 import { TranslationKeys } from "@presentation/i18n/types";
+import { toTreeNodes } from "@presentation/utils/categoryTreeNodes";
 import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
 import { invalidateAfterWrite } from "@screens/Financial/Transactions/pending/writeCache";
 import { getFinancialErrorMessageKey } from "@screens/Financial/utils/financialErrorMessage";
@@ -202,32 +203,16 @@ function useSplitFormViewModel() {
           ?.currency) ?? "BRL";
   const isCard = !!state?.creditCardId;
 
-  // Categories of the owner of the source, by type, with the parent path ("Casa › Limpeza").
-  function categoryOptions(type: "EXPENSE" | "INCOME", selectedId?: string) {
-    const all = categories.data ?? [];
-    const byId = new Map(all.map((category) => [category.id, category]));
-
-    function pathOf(id: string): string {
-      const category = byId.get(id);
-
-      if (!category) {
-        return "";
-      }
-
-      return category.parentId && byId.has(category.parentId)
-        ? `${pathOf(category.parentId)} › ${category.name}`
-        : category.name;
-    }
-
-    return all
-      .filter(
+  // Categories of the owner of the source, by type, as nodes of the shared tree picker (spec 126).
+  function categoryNodes(type: "EXPENSE" | "INCOME", selectedId?: string) {
+    return toTreeNodes(
+      (categories.data ?? []).filter(
         (category) =>
           category.type === type &&
           (category.status !== "ARCHIVED" || category.id === selectedId) &&
           (!sourceOwnerId || category.scopeOwnerIds.includes(sourceOwnerId)),
-      )
-      .map((category) => ({ label: pathOf(category.id), value: category.id }))
-      .sort((a, b) => a.label.localeCompare(b.label));
+      ),
+    );
   }
 
   const tagSuggestions = useMemo(
@@ -368,7 +353,7 @@ function useSplitFormViewModel() {
   return {
     canAddPart: (state?.parts.length ?? 0) < MAX_PARTS,
     canUndo: isEditing && (state?.parts.length ?? 0) > 1,
-    categoryOptions,
+    categoryNodes,
     currency,
     errorKey,
     errors: submitted ? errors : {},

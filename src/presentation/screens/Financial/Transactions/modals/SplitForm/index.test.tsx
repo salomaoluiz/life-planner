@@ -69,7 +69,9 @@ it("SHOULD show the adjustment part with discount/extra instead of category AND 
     }),
   });
 
-  expect(screen.getAllByTestId(splitFormTestIds.partCategory)).toHaveLength(1);
+  expect(
+    screen.getAllByTestId(`${splitFormTestIds.partCategory}-field`),
+  ).toHaveLength(1);
   expect(
     screen.getByTestId(splitFormTestIds.partAdjustmentKind),
   ).toBeOnTheScreen();

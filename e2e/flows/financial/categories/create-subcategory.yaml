@@ -48,13 +48,13 @@ onFlowComplete:
     id: "financial.category-form.name-input"
 - inputText: ${output.CHILD_NAME}
 - tapOn:
-    id: "financial.category-form.parent"
+    id: "financial.category-form.parent-field"
 - extendedWaitUntil:
     visible:
-      id: "financial.category-form.parent-option-${output.PARENT_CATEGORY_ID}"
+      id: "financial.category-form.parent-picker-option-${output.PARENT_CATEGORY_ID}"
     timeout: 20000
 - tapOn:
-    id: "financial.category-form.parent-option-${output.PARENT_CATEGORY_ID}"
+    id: "financial.category-form.parent-picker-option-${output.PARENT_CATEGORY_ID}"
 - tapOn:
     id: "financial.category-form.save-button"
 - extendedWaitUntil:

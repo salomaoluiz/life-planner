@@ -6,6 +6,7 @@ import {
   BottomSheet,
   Button,
   Card,
+  CategoryTreeField,
   ConfirmDialog,
   DateField,
   ErrorState,
@@ -16,6 +17,7 @@ import {
   SwitchRow,
   Text,
   TextField,
+  useTreePickerLabels,
 } from "@components";
 import Skeleton from "@components/Skeleton";
 import { useKitTheme } from "@components/utils/useKitTheme";
@@ -36,6 +38,7 @@ const ids = investmentTestIds.modal.income;
 // Spec 107 section 8: two columns in the wide `form` sheet (880 px), one compact stack on mobile.
 function Wide({ vm }: AdaptiveViewProps<IncomeModalVM>) {
   const { t } = useTranslation();
+  const categoryLabels = useTreePickerLabels("category");
   const { spacing } = useKitTheme();
   const styles = StyleSheet.create({
     cell: { flex: 1 },
@@ -288,8 +291,8 @@ function Wide({ vm }: AdaptiveViewProps<IncomeModalVM>) {
                     />
                   </View>
                   <View style={styles.cell}>
-                    <SelectField
-                      closeLabel={t("investment.form.close")}
+                    <CategoryTreeField
+                      archivedLabel={t("financial.accounts.archivedLabel")}
                       error={err(vm.errors.categoryId)}
                       helper={
                         vm.categoryHint
@@ -299,9 +302,10 @@ function Wide({ vm }: AdaptiveViewProps<IncomeModalVM>) {
                           : undefined
                       }
                       label={t("investment.income.category")}
-                      onChange={vm.onCategoryChange}
-                      options={vm.categoryOptions}
-                      sheetTitle={t("investment.income.category")}
+                      labels={categoryLabels}
+                      mode={"single"}
+                      nodes={vm.categoryNodes}
+                      onChange={(id) => id && vm.onCategoryChange(id)}
                       testID={ids.category}
                       value={state.categoryId}
                     />

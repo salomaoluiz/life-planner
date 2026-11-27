@@ -14,6 +14,7 @@ import {
   BottomSheet,
   Button,
   Card,
+  CategoryTreeField,
   ChartCard,
   Chip,
   ChipGroup,
@@ -42,7 +43,9 @@ import {
   TextField,
   Toast,
   useDensity,
+  useTreePickerLabels,
 } from "@components";
+import GALLERY_TREE_NODES from "@components/CategoryTreePicker/galleryNodes";
 import { IconButton } from "@components/Icon";
 import Skeleton from "@components/Skeleton";
 import { ThemeMode } from "@domain/entities/configs/ConfigsEntity";
@@ -94,6 +97,8 @@ function ComponentGallery() {
   const [described, setDescribed] = useState("");
   const [search, setSearch] = useState("");
   const [select, setSelect] = useState<string | undefined>(undefined);
+  const [treeValue, setTreeValue] = useState<string | undefined>(undefined);
+  const treeLabels = useTreePickerLabels("category", "category");
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [cents, setCents] = useState(0);
   const [single, setSingle] = useState<string | undefined>("food");
@@ -232,6 +237,17 @@ function ComponentGallery() {
           options={SELECT_OPTIONS}
           sheetTitle="Pick one"
           value={select}
+        />
+        <CategoryTreeField
+          archivedLabel="Archived"
+          label="Category"
+          labels={treeLabels}
+          mode="single"
+          mostUsedIds={["market"]}
+          nodes={GALLERY_TREE_NODES}
+          onChange={setTreeValue}
+          testID="gallery-tree"
+          value={treeValue}
         />
         <DateField
           clearable

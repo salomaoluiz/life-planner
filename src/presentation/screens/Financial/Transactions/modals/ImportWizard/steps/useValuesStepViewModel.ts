@@ -10,6 +10,8 @@ import { useCases } from "@application/useCases";
 import { invalidateFetcherData, useMutation } from "@infrastructure/fetcher";
 import { IMPORTED_CARD_DEFAULTS } from "@presentation/constants/cardColors";
 import { IMPORTED_CATEGORY_DEFAULTS } from "@presentation/constants/categoryColors";
+import { useTranslation } from "@presentation/i18n";
+import { toTreeNode } from "@presentation/utils/categoryTreeNodes";
 import {
   childColor,
   pickRootColor,
@@ -84,6 +86,7 @@ function isCreatable(tab: ValueTab): tab is CreatableTab {
 // Step 3 (spec 047 FR 22-26): each distinct value of the mapped columns matched to a record of the app, with the
 // records created right here when they do not exist.
 function useValuesStepViewModel(wizard: ImportWizardState) {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<ValueTab>();
   const [creating, setCreating] = useState<{
     key: string;
@@ -415,6 +418,21 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
             value: item.id,
           }))
       : [];
+  const parentNodes =
+    kind === "category"
+      ? recordsOf(creating?.ownerId)
+          .categories.filter((item) =>
+            parentOptions.some((option) => option.value === item.id),
+          )
+          .map((item) => ({
+            ...toTreeNode(item),
+            badge: t(
+              item.type === "INCOME"
+                ? "financial.import.values.type.income"
+                : "financial.import.values.type.expense",
+            ),
+          }))
+      : [];
   const parent = recordsOf(creating?.ownerId).categories.find(
     (item) => item.id === form.parentId,
   );
@@ -542,6 +560,7 @@ function useValuesStepViewModel(wizard: ImportWizardState) {
     ownerNames: Object.fromEntries(
       wizard.owners.map((item) => [item.id, item.name]),
     ),
+    parentNodes,
     parentOptions,
     previewColor,
     previewLabel: parent

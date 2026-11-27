@@ -1,11 +1,13 @@
 import CategoryDTO from "@application/dto/financial/CategoryDTO";
 import OwnerDTO from "@application/dto/user/OwnerDTO";
+import { TreeNode } from "@components";
 import { CATEGORY_COLORS } from "@presentation/constants/categoryColors";
 import {
   COMMON_CATEGORY_ICONS,
   iconLabel,
 } from "@presentation/constants/categoryIcons";
 import { TranslationKeys } from "@presentation/i18n/types";
+import { toTreeNodes } from "@presentation/utils/categoryTreeNodes";
 import {
   buildCategoryRows,
   categoriesOf,
@@ -84,6 +86,20 @@ class NewCategoryUIModel {
   }
 
   // Same owner and type as the form, in tree order, without the edited category and its descendants.
+  // The same parents as `parentOptions`, as nodes of the shared tree picker (spec 126).
+  parentNodes(
+    state: Pick<CategoryFormState, "ownerId" | "type"> & { parentId?: string },
+    editingId?: string,
+  ): TreeNode[] {
+    const allowed = new Set(
+      this.parentOptions(state, editingId).map((option) => option.value),
+    );
+
+    return toTreeNodes(
+      this.params.categories.filter((category) => allowed.has(category.id)),
+    );
+  }
+
   parentOptions(
     state: Pick<CategoryFormState, "ownerId" | "type"> & { parentId?: string },
     editingId?: string,

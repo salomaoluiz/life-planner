@@ -65,6 +65,7 @@ function useImportRecords(owners: OwnerDTO[]) {
             )
             .map((item) => ({
               depthLevel: item.depthLevel ?? 0,
+              icon: item.icon,
               iconColor: item.iconColor,
               id: item.id,
               name: item.name,

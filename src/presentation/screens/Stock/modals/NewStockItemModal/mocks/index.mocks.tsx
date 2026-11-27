@@ -54,8 +54,14 @@ function setup(
       onTyped: jest.fn(),
     },
     catalog: {
-      categories: [{ label: "Dairy", value: "cat-1" }],
-      locations: [{ label: "Fridge", value: "loc-1" }],
+      categoryNodes: [
+        { color: "#14B8A6", icon: "cow", id: "cat-1", name: "Dairy" },
+      ],
+      locationNodes: [
+        { color: "#F59E0B", icon: "fridge", id: "loc-1", name: "Fridge" },
+      ],
+      mostUsedCategoryIds: [],
+      mostUsedLocationIds: [],
     },
     errors: {},
     formErrorKey: undefined,

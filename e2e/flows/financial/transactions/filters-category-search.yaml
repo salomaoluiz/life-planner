@@ -54,25 +54,25 @@ onFlowComplete:
     visible:
       id: "financial.transactions.filters.apply"
     timeout: 20000
-# No category is listed before typing; the archived account is not offered
+# The categories field shows no chip yet; the archived account is not offered
 - assertVisible:
-    id: "financial.transactions.filters.categories-search"
-- assertNotVisible:
-    id: "financial.transactions.filters.category-${output.EXPENSE_CATEGORY_ID}"
+    id: "financial.transactions.filters.categories-field-field"
 - assertVisible:
     id: "financial.transactions.filters.source-${output.ACTIVE_ACCOUNT_ID}"
 - assertNotVisible:
     id: "financial.transactions.filters.source-${output.ARCHIVED_ACCOUNT_ID}"
-# Search, pick: a chip appears and the search is cleared
+# Open the picker, search, tick, apply the picker: a chip appears in the field
 - tapOn:
-    id: "financial.transactions.filters.categories-search"
+    id: "financial.transactions.filters.categories-field-field"
+- tapOn:
+    id: "financial.transactions.filters.categories-field-picker-search"
 - inputText: ${output.EXPENSE_CATEGORY_NAME}
 - tapOn:
-    id: "financial.transactions.filters.category-${output.EXPENSE_CATEGORY_ID}"
+    id: "financial.transactions.filters.categories-field-picker-option-${output.EXPENSE_CATEGORY_ID}"
+- tapOn:
+    id: "financial.transactions.filters.categories-field-picker-apply"
 - assertVisible:
-    id: "financial.transactions.filters.category-chip-${output.EXPENSE_CATEGORY_ID}"
-- assertNotVisible:
-    id: "financial.transactions.filters.category-${output.EXPENSE_CATEGORY_ID}"
+    id: "financial.transactions.filters.categories-field-chip-${output.EXPENSE_CATEGORY_ID}"
 - tapOn:
     id: "financial.transactions.filters.apply"
 - assertVisible:
@@ -82,12 +82,12 @@ onFlowComplete:
     id: "financial.transactions.filters-button"
 - extendedWaitUntil:
     visible:
-      id: "financial.transactions.filters.category-chip-${output.EXPENSE_CATEGORY_ID}"
+      id: "financial.transactions.filters.categories-field-chip-${output.EXPENSE_CATEGORY_ID}"
     timeout: 20000
 - tapOn:
-    id: "financial.transactions.filters.category-chip-${output.EXPENSE_CATEGORY_ID}-remove"
+    id: "financial.transactions.filters.categories-field-chip-${output.EXPENSE_CATEGORY_ID}-remove"
 - assertNotVisible:
-    id: "financial.transactions.filters.category-chip-${output.EXPENSE_CATEGORY_ID}"
+    id: "financial.transactions.filters.categories-field-chip-${output.EXPENSE_CATEGORY_ID}"
 - tapOn:
     id: "financial.transactions.filters.apply"
 - assertNotVisible:

@@ -5,6 +5,7 @@ import {
   AmountInput,
   BottomSheet,
   Button,
+  CategoryTreeField,
   ConfirmDialog,
   DateField,
   ErrorState,
@@ -14,6 +15,7 @@ import {
   RadioGroup,
   SelectField,
   TextField,
+  useTreePickerLabels,
 } from "@components";
 import { formatAmount } from "@components/AmountText/formatAmount";
 import Skeleton from "@components/Skeleton";
@@ -34,6 +36,7 @@ import { installmentEditTestIds, installmentPlanTestIds } from "../testIds";
 function Wide({ vm }: AdaptiveViewProps<InstallmentEditVM>) {
   const { styles } = useStyles();
   const { t } = useTranslation();
+  const categoryLabels = useTreePickerLabels("category");
   const localeTag = useLocaleTag();
   const { state } = vm;
 
@@ -136,13 +139,14 @@ function Wide({ vm }: AdaptiveViewProps<InstallmentEditVM>) {
                 testID={installmentEditTestIds.notes}
                 value={state.notes}
               />
-              <SelectField
-                closeLabel={t("common.actions.close")}
+              <CategoryTreeField
+                archivedLabel={t("financial.accounts.archivedLabel")}
                 error={err(vm.errors.categoryId)}
                 label={t("financial.transactions.form.category")}
-                onChange={vm.onCategoryChange}
-                options={vm.categoryOptions}
-                sheetTitle={t("financial.transactions.form.category")}
+                labels={categoryLabels}
+                mode={"single"}
+                nodes={vm.categoryNodes}
+                onChange={(id) => id && vm.onCategoryChange(id)}
                 testID={installmentEditTestIds.category}
                 value={state.categoryId}
               />

@@ -27,9 +27,9 @@ function makeState(overrides: Partial<SplitFormState> = {}): SplitFormState {
 const defaultViewModel: ReturnType<typeof useSplitFormViewModel> = {
   canAddPart: true,
   canUndo: false,
-  categoryOptions: () => [
-    { label: "Mercearia", value: "cat-1" },
-    { label: "Limpeza", value: "cat-2" },
+  categoryNodes: () => [
+    { color: "#F59E0B", icon: "cart", id: "cat-1", name: "Mercearia" },
+    { color: "#14B8A6", icon: "broom", id: "cat-2", name: "Limpeza" },
   ],
   currency: "BRL",
   errorKey: undefined,

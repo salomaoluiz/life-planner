@@ -5,6 +5,7 @@ import {
   AdaptiveViewProps,
   BottomSheet,
   Button,
+  CategoryTreePicker,
   ChipGroup,
   EmptyState,
   ErrorState,
@@ -18,6 +19,7 @@ import {
   StatusBanner,
   Text,
   Toast,
+  useTreePickerLabels,
 } from "@components";
 import Skeleton from "@components/Skeleton";
 import { useTranslation } from "@presentation/i18n";
@@ -45,6 +47,9 @@ function namesOf(options: Array<{ id: string; label: string }>, ids: string[]) {
 function Wide({ vm }: AdaptiveViewProps<StockVM>) {
   const { styles } = useStyles();
   const { t } = useTranslation();
+  const filterLabels = useTreePickerLabels(
+    vm.openFilter === "location" ? "location" : "category",
+  );
 
   const hasContent = !vm.isLoading && !vm.errorMessageKey && !vm.isEmpty;
   let subtitle: string | undefined;
@@ -73,32 +78,21 @@ function Wide({ vm }: AdaptiveViewProps<StockVM>) {
     );
   }
 
+  const filterNodes =
+    vm.openFilter === "location" ? vm.locationNodes : vm.categoryNodes;
+  const filterPickerOpen =
+    vm.openFilter !== undefined &&
+    !vm.isCatalogLoading &&
+    filterNodes.length > 0;
+
   function renderFilterSheet() {
-    const isLocation = vm.openFilter === "location";
-    const options = isLocation ? vm.locationOptions : vm.categoryOptions;
-
-    if (options.length === 0) {
-      return (
-        <Text.Body
-          value={t(
-            isLocation
-              ? "stock.list.filter.noLocations"
-              : "stock.list.filter.noCategories",
-          )}
-        />
-      );
-    }
-
     return (
-      <ChipGroup
-        mode="multiple"
-        onChange={isLocation ? vm.onLocationsChange : vm.onCategoriesChange}
-        options={options.map((option) => ({
-          label: option.label,
-          value: option.id,
-        }))}
-        testID={stockTestIds.filterSheetOptions}
-        value={isLocation ? vm.locationIds : vm.categoryIds}
+      <Text.Body
+        value={t(
+          vm.openFilter === "location"
+            ? "stock.list.filter.noLocations"
+            : "stock.list.filter.noCategories",
+        )}
       />
     );
   }
@@ -289,10 +283,30 @@ function Wide({ vm }: AdaptiveViewProps<StockVM>) {
             ? t("stock.list.filter.locations")
             : t("stock.list.filter.categories")
         }
-        visible={vm.openFilter !== undefined}
+        visible={vm.openFilter !== undefined && !filterPickerOpen}
       >
         {vm.isCatalogLoading ? <Skeleton.ListItem /> : renderFilterSheet()}
       </BottomSheet>
+      {filterPickerOpen ? (
+        <CategoryTreePicker
+          labels={filterLabels}
+          mode={"multiple"}
+          nodes={filterNodes}
+          onChange={
+            vm.openFilter === "location"
+              ? vm.onLocationsChange
+              : vm.onCategoriesChange
+          }
+          onClose={vm.onCloseFilterSheet}
+          testID={stockTestIds.filterSheet}
+          title={
+            vm.openFilter === "location"
+              ? t("stock.list.filter.locations")
+              : t("stock.list.filter.categories")
+          }
+          value={vm.openFilter === "location" ? vm.locationIds : vm.categoryIds}
+        />
+      ) : null}
       <BottomSheet
         closeLabel={t("common.actions.close")}
         onClose={vm.onCloseSort}

@@ -138,20 +138,14 @@ it("SHOULD show the account hint WHEN the owner has no accounts and create from 
 });
 
 it("SHOULD open the category picker from the More chip", () => {
-  const vm = setup();
+  setup();
 
   fireEvent.press(
-    screen.getByText("financial.transactions.form.moreCategories"),
+    screen.getByTestId("financial.transaction-form.category-__more__"),
   );
 
-  expect(vm.onCategoryPickerOpen).toHaveBeenCalledTimes(1);
-});
-
-it("SHOULD render the category picker WHEN open", () => {
-  setup({ isCategoryPickerOpen: true });
-
   expect(
-    screen.getByText("financial.transactions.form.chooseCategory"),
+    screen.getByTestId("financial.transaction-form.category-picker-search"),
   ).toBeOnTheScreen();
 });
 

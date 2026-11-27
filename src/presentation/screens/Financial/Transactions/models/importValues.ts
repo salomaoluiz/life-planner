@@ -65,6 +65,7 @@ export interface ImportRecords {
   }[];
   categories: {
     depthLevel: number;
+    icon?: string;
     iconColor: string;
     id: string;
     name: string;

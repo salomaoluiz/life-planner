@@ -22,11 +22,10 @@ import {
   useMutation,
   useQuery,
 } from "@infrastructure/fetcher";
-import { normalizeCategoryColor } from "@presentation/constants/categoryColors";
 import useOwners from "@presentation/hooks/useOwners";
 import { TranslationKeys } from "@presentation/i18n/types";
+import { toTreeNodes } from "@presentation/utils/categoryTreeNodes";
 import useActiveOwners from "@screens/Financial/hooks/useActiveOwners";
-import { filterRowsByQuery } from "@screens/Financial/models/categoryTree";
 import {
   installmentInvoiceRange,
   installmentPreview,
@@ -459,8 +458,6 @@ function useNewTransactionViewModel() {
   const [submitted, setSubmitted] = useState(false);
   const [isDiscardDialogOpen, setDiscardDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [isCategoryPickerOpen, setCategoryPickerOpen] = useState(false);
-  const [categoryQuery, setCategoryQuery] = useState("");
   const [pendingCreate, setPendingCreate] = useState<"account" | "category">();
   const knownIds = useRef<string[]>([]);
 
@@ -962,10 +959,11 @@ function useNewTransactionViewModel() {
     openModal("add_new_account", { ownerId: state!.ownerId });
   }
 
-  function onCreateCategoryPress() {
+  function onCreateCategoryPress(name?: string) {
     knownIds.current = uiModel!.categoryIds(state!.ownerId, state!.type);
     setPendingCreate("category");
     openModal("add_new_category", {
+      name,
       ownerId: state!.ownerId,
       type: state!.type,
     });
@@ -979,18 +977,17 @@ function useNewTransactionViewModel() {
   );
   const ownerId = state?.ownerId ?? "";
   const type = state?.type ?? TransactionType.EXPENSE;
-  const categoryChips = uiModel
+  const categoryNodes = uiModel
+    ? toTreeNodes(uiModel.categoriesFor(ownerId, type, state?.categoryId))
+    : [];
+  const mostUsedCategoryIds = uiModel
     ? chipCategories(
         (mostUsed.data ?? []).filter(
           (category) => category.status !== "ARCHIVED",
         ),
         state?.categoryId,
         uiModel.categoriesFor(ownerId, type, state?.categoryId),
-      ).map((category) => ({
-        colorDot: normalizeCategoryColor(category.iconColor),
-        label: category.name,
-        value: category.id,
-      }))
+      ).map((category) => category.id)
     : [];
 
   let saveLabelKey: TranslationKeys = "financial.common.saveChanges";
@@ -1034,15 +1031,8 @@ function useNewTransactionViewModel() {
     canSaveAndNew: !isEditing && !isProjected,
     cardError: errors.creditCardId,
     cardOptions: uiModel?.cardOptions(ownerId, state?.creditCardId) ?? [],
-    categoryChips,
     categoryError: errors.categoryId,
-    categoryPickerRows: uiModel
-      ? filterRowsByQuery(
-          uiModel.categoryRows(ownerId, type, state?.categoryId),
-          categoryQuery,
-        )
-      : [],
-    categoryQuery,
+    categoryNodes,
     currency,
     date: state?.date ?? normalizeDate(new Date()),
     dateError: errors.date,
@@ -1064,7 +1054,6 @@ function useNewTransactionViewModel() {
     invoiceHint: cardHints.invoiceHint,
     invoiceMonthLabelDate: cardHints.monthDate,
     isBlocking,
-    isCategoryPickerOpen,
     isDeleteDialogOpen,
     isDeleting:
       deleteMutation.isFetching ||
@@ -1080,6 +1069,7 @@ function useNewTransactionViewModel() {
     isSaveDisabled: cardHints.isInvoicePaid,
     isSaving,
     isSavingNext: isSaving && saveIntent.current === "next",
+    mostUsedCategoryIds,
     notes: state?.notes ?? "",
     onAccountChange: (id: string) => {
       if (state) {
@@ -1096,17 +1086,10 @@ function useNewTransactionViewModel() {
         update(changeCard(state, id));
       }
     },
-    onCategoryPickerClose: () => setCategoryPickerOpen(false),
-    onCategoryPickerOpen: () => {
-      setCategoryQuery("");
-      setCategoryPickerOpen(true);
-    },
-    onCategoryQueryChange: setCategoryQuery,
-    onCategorySelect: (id: string) => {
+    onCategorySelect: (id?: string) => {
       if (state) {
         update({ ...state, categoryId: id });
       }
-      setCategoryPickerOpen(false);
     },
     onClose,
     onCreateAccountPress,

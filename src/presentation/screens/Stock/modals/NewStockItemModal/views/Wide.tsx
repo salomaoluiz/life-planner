@@ -5,6 +5,7 @@ import {
   BottomSheet,
   Button,
   Card,
+  CategoryTreeField,
   ChipGroup,
   ConfirmDialog,
   DateField,
@@ -12,6 +13,7 @@ import {
   SelectField,
   Text,
   TextField,
+  useTreePickerLabels,
 } from "@components";
 import Skeleton from "@components/Skeleton";
 import {
@@ -33,6 +35,8 @@ function Wide({ vm }: AdaptiveViewProps<NewStockItemVM>) {
   const { styles } = useStyles();
   const { t } = useTranslation();
   const { catalog, errors, model, values } = vm;
+  const categoryLabels = useTreePickerLabels("category", "category");
+  const locationLabels = useTreePickerLabels("location", "location");
 
   const dateLabels = {
     clearLabel: t("common.actions.clear"),
@@ -156,36 +160,30 @@ function Wide({ vm }: AdaptiveViewProps<NewStockItemVM>) {
                 <View style={styles.pair}>
                   <View style={styles.pairItem}>
                     <SourceBadge field="categoryId" vm={vm} />
-                    <SelectField
-                      closeLabel={t("common.actions.close")}
+                    <CategoryTreeField
+                      archivedLabel={t("common.treePicker.archived")}
                       label={t("stock.form.category")}
-                      onChange={(value) =>
-                        vm.setField("categoryId", value || undefined)
-                      }
-                      options={[
-                        { label: t("stock.form.noCategory"), value: "" },
-                        ...(catalog?.categories ?? []),
-                      ]}
-                      sheetTitle={t("stock.form.category")}
+                      labels={categoryLabels}
+                      mode={"single"}
+                      mostUsedIds={catalog?.mostUsedCategoryIds}
+                      nodes={catalog?.categoryNodes ?? []}
+                      onChange={(id) => vm.setField("categoryId", id)}
                       testID={stockItemFormTestIds.categorySelect}
-                      value={values.categoryId ?? ""}
+                      value={values.categoryId}
                     />
                   </View>
                   <View style={styles.pairItem}>
                     <SourceBadge field="locationId" vm={vm} />
-                    <SelectField
-                      closeLabel={t("common.actions.close")}
+                    <CategoryTreeField
+                      archivedLabel={t("common.treePicker.archived")}
                       label={t("stock.form.location")}
-                      onChange={(value) =>
-                        vm.setField("locationId", value || undefined)
-                      }
-                      options={[
-                        { label: t("stock.form.noLocation"), value: "" },
-                        ...(catalog?.locations ?? []),
-                      ]}
-                      sheetTitle={t("stock.form.location")}
+                      labels={locationLabels}
+                      mode={"single"}
+                      mostUsedIds={catalog?.mostUsedLocationIds}
+                      nodes={catalog?.locationNodes ?? []}
+                      onChange={(id) => vm.setField("locationId", id)}
                       testID={stockItemFormTestIds.locationSelect}
-                      value={values.locationId ?? ""}
+                      value={values.locationId}
                     />
                   </View>
                 </View>

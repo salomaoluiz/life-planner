@@ -56,9 +56,9 @@ onFlowComplete:
 - tapOn:
     id: "investment.income-modal.account-option-${output.ACCOUNT_ID}"
 - tapOn:
-    id: "investment.income-modal.category"
+    id: "investment.income-modal.category-field"
 - tapOn:
-    id: "investment.income-modal.category-option-${output.INCOME_CATEGORY_ID}"
+    id: "investment.income-modal.category-picker-option-${output.INCOME_CATEGORY_ID}"
 - tapOn:
     id: "investment.income-modal.status-RECEIVED"
 - tapOn:

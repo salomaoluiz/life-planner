@@ -7,6 +7,7 @@ import { lightTheme } from "@presentation/theme/provider";
 import {
   category,
   chooseOption,
+  chooseTreeOption,
   CSV,
   fireEvent,
   ids,
@@ -402,12 +403,12 @@ describe("step 3: values", () => {
       /createForm\.category\.colorAuto/,
     );
 
-    await chooseOption(ids.importCreateParent, "cat-market");
+    await chooseTreeOption(ids.importCreateParent, "cat-market");
     expect(screen.getByTestId(ids.importCreateColor)).toHaveTextContent(
       /createForm\.category\.colorToneOf/,
     );
 
-    await chooseOption(ids.importCreateParent, "");
+    await chooseTreeOption(ids.importCreateParent, "");
     expect(screen.getByTestId(ids.importCreateColor)).toHaveTextContent(
       /createForm\.category\.colorAuto/,
     );

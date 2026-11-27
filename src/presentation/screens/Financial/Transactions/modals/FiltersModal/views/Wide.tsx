@@ -5,6 +5,7 @@ import {
   AutocompleteField,
   BottomSheet,
   Button,
+  CategoryTreeField,
   Checkbox,
   ChipGroup,
   DateField,
@@ -14,6 +15,7 @@ import {
   SelectField,
   Text,
   Touchable,
+  useTreePickerLabels,
 } from "@components";
 import { CurrencyCode } from "@domain/entities/financial/Currency";
 import { useLocaleTag, useTranslation } from "@presentation/i18n";
@@ -25,7 +27,6 @@ import {
 } from "@screens/Financial/Transactions/models/filterLabels";
 import transactionsTestIds from "@screens/Financial/Transactions/testIds";
 
-import CategorySearchField from "../components/CategorySearchField";
 import useStyles from "../styles";
 import { FiltersModalVM, FiltersStep, PeriodMode } from "../vm";
 
@@ -52,6 +53,7 @@ const ids = transactionsTestIds;
 function Wide({ vm }: AdaptiveViewProps<FiltersModalVM>) {
   const { styles } = useStyles();
   const { t } = useTranslation();
+  const categoryLabels = useTreePickerLabels("category");
   const localeTag = useLocaleTag();
   const { draft } = vm;
   const inStep = !vm.wide && vm.step !== "root";
@@ -236,14 +238,16 @@ function Wide({ vm }: AdaptiveViewProps<FiltersModalVM>) {
     return (
       <View style={styles.section} testID={`${ids.filtersSection}.categories`}>
         {sectionTitle(t("financial.transactions.filters.categories.title"))}
-        <CategorySearchField
-          chips={vm.selectedCategoryChips}
-          dropdown={vm.wide}
-          onPick={vm.onCategoryPick}
-          onQueryChange={vm.onCategoryQueryChange}
-          onRemove={vm.onCategoryRemove}
-          query={vm.categoryQuery}
-          results={vm.categoryResults}
+        <CategoryTreeField
+          archivedLabel={t("financial.accounts.archivedLabel")}
+          label={t("financial.transactions.filters.categories.title")}
+          labels={categoryLabels}
+          mode={"multiple"}
+          nodes={vm.categoryNodes}
+          onChange={vm.onCategoriesChange}
+          placeholder={t("financial.transactions.filters.categories.search")}
+          testID={`${ids.filtersSection}.categories-field`}
+          value={vm.draft.categoryIds}
         />
       </View>
     );

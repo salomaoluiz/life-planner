@@ -76,6 +76,9 @@ function vmWith(overrides: Record<string, unknown> = {}) {
     customOpen: false,
     existing: undefined,
     financeId: "",
+    financeNodes: [
+      { color: "#F59E0B", icon: "cart", id: "fin", name: "Mercado" },
+    ],
     financeOptions: [{ label: "Mercado", value: "fin" }],
     hasDescendants: false,
     icon: "cup",
@@ -104,6 +107,9 @@ function vmWith(overrides: Record<string, unknown> = {}) {
     parent: undefined,
     parentChoices: [{ label: "Meat", value: "meat" }],
     parentId: "",
+    parentNodes: [
+      { color: "#EF4444", icon: "food-steak", id: "meat", name: "Meat" },
+    ],
     ruleError: false,
     ...overrides,
   };
@@ -175,6 +181,9 @@ it("SHOULD offer Reactivate for an archived row", () => {
 
 it("SHOULD explain the inherited finance category and the list default", () => {
   setup("category", {
+    financeNodes: [
+      { color: "#F59E0B", icon: "cart", id: "fin", name: "Mercado" },
+    ],
     financeOptions: [{ label: "Mercado", value: "fin" }],
     inheritedFinance: "fin",
     parent: { name: "Dairy" },
@@ -206,7 +215,9 @@ it("SHOULD ask to save a new location before showing its QR", () => {
 
   expect(screen.getByText("stock.catalog.form.qrSaveFirst")).toBeOnTheScreen();
   expect(screen.getByText("stock.catalog.form.newLocation")).toBeOnTheScreen();
-  expect(screen.queryByTestId(stockCatalogTestIds.financeSelect)).toBeNull();
+  expect(
+    screen.queryByTestId(`${stockCatalogTestIds.financeSelect}-field`),
+  ).toBeNull();
 });
 
 it("SHOULD open the icon picker and the custom color sheet", () => {
@@ -220,4 +231,18 @@ it("SHOULD render the icon picker WHEN open", () => {
   setup("category", { iconOpen: true });
 
   expect(screen.getByText("icon-picker")).toBeOnTheScreen();
+});
+
+it("SHOULD pick the parent and the finance category from the tree picker", () => {
+  const { vm } = setup("category");
+  const parent = stockCatalogTestIds.parentSelect;
+  const finance = stockCatalogTestIds.financeSelect;
+
+  fireEvent.press(screen.getByTestId(`${parent}-field`));
+  fireEvent.press(screen.getByTestId(`${parent}-picker-option-meat`));
+  fireEvent.press(screen.getByTestId(`${finance}-field`));
+  fireEvent.press(screen.getByTestId(`${finance}-picker-none`));
+
+  expect(vm.onParentChange).toHaveBeenCalledWith("meat");
+  expect(vm.onFinanceChange).toHaveBeenCalledWith("");
 });
