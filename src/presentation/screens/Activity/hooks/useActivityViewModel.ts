@@ -63,6 +63,8 @@ function useActivityViewModel() {
   const list = useQuery<ActivityPageEntity>({
     cacheKey: activityKeys.list(key),
     fetch: async () => useCases.getActivityUseCase.execute(apiFilters),
+    // The history changes with every write elsewhere: a filter served from the cache is revalidated at once.
+    staleTime: 0,
   });
   const loadMore = useMutation<string, ActivityPageEntity>({
     cacheKey: [useCases.getActivityUseCase.uniqueName, "more"],
