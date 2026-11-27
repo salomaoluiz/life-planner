@@ -72,6 +72,8 @@ const useCases = {
   deleteStockLocationUseCase: expect.any(Function),
   dismissLeftoverUseCase: expect.any(Function),
   exportFinancialTransactionsUseCase: expect.any(Function),
+  getActivityItemsUseCase: expect.any(Function),
+  getActivityUseCase: expect.any(Function),
   getAiUsageUseCase: expect.any(Function),
   getCategoryIconsUseCase: expect.any(Function),
   getClosePreviewUseCase: expect.any(Function),
